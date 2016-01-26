@@ -932,9 +932,8 @@ data.model.monitors
 % %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % - i/o converters (model: XPP, NeuroML; data: ?)
 % - visualization (single and study data sets)
-% - dnsim <-> dynasim model converter for use with dnsim() and modeler()
+% * Important: dnsim <-> dynasim model converter for use with dnsim() and modeler() (DNSim GUI)
 % - DynaSim2Odefun()
 % - phase plot function (for 1-D (y,y'), 2-D (x,y) and 3-D systems{(x,y),(x,z),(y,z),(x,y,z)})
 % - use DynaSim2Odefun w/ BENG260 nullcline functions for 2-D system analysis
-% * Important: dynasim <-> dnsim converter for modeler() GUI
 
