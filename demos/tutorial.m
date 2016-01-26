@@ -11,9 +11,9 @@
 % %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %{
 Download DynaSim toolbox from https://github.com/dynasim/dynasim.
-  or, download in a shell using git: [git command]
+  or, download in a shell using git: git clone https://github.com/dynasim/dynasim.git
 Further documentation is available at: [readthedocs link].
-Sign up for user mailing list at: [google group link], or send email [...].
+Sign up for user mailing list at: https://groups.google.com/forum/#!forum/dynasim-users.
 
 Tip: In Matlab, you can obtain more information associated with any function "FUNCTION_NAME"
 by entering "help FUNCTION_NAME" in the command window. Use the "See also" list
