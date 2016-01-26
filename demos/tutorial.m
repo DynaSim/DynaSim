@@ -11,7 +11,7 @@
 % %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %{
 Download DynaSim toolbox from https://github.com/dynasim/dynasim.
-  or, download in a shell using git: git clone https://github.com/dynasim/dynasim.git
+  or, download using git: git clone https://github.com/dynasim/dynasim.git
 Further documentation is available at: [readthedocs link].
 Sign up for user mailing list at: https://groups.google.com/forum/#!forum/dynasim-users.
 
