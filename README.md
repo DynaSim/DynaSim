@@ -10,4 +10,5 @@ git clone https://github.com/dynasim/dynasim.git
 Get started with the tutorial: demos/tutorial.m
 
 Join the user mailing list at: https://groups.google.com/forum/#!forum/dynasim-users
+
 Join the developer mailing list at: https://groups.google.com/forum/#!forum/dynasim-developers
