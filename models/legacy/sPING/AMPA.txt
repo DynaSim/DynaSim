@@ -1,0 +1,20 @@
+g_SYN = [0.1]
+E_SYN = [0]
+tauDx = [2]
+tauRx = [0.4]
+fanout = [Inf]
+IC = [0.1]
+IC_noise = [0]
+ 
+Nmax = max(Npre,Npost)
+srcpos = linspace(1,Nmax,Npre)'*ones(1,Npost)
+dstpos = (linspace(1,Nmax,Npost)'*ones(1,Npre))'
+netcon = (abs(srcpos-dstpos)<=fanout)'
+
+ISYN(V,s) = (g_SYN.*(netcon*s).*(V-E_SYN))
+ 
+s' = -s./tauDx + ((1-s)/tauRx).*(1+tanh(IN/10));
+s(0) = IC+IC_noise.*rand(Npre,1)
+ 
+current => -ISYN(OUT,s)
+ 

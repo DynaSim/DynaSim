@@ -1,0 +1,5 @@
+noise = [5.5] 
+noisefunc(t) = noise.*randn(1,Npop).*sqrt(dt)/dt
+current => noisefunc(t)
+
+

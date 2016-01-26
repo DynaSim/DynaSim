@@ -1,0 +1,11 @@
+% parameters
+gCa=.25
+ECa=120
+
+% functions
+minf(X)=1./max(.001,(1+exp(-(X+20)/9)))
+I(X)=gCa*minf(X).^2.*(X-ECa)
+
+% linkers
+@current += -I(X)
+@ica += I(X)
