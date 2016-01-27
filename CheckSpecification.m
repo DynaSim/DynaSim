@@ -24,7 +24,7 @@ function spec=CheckSpecification(specification)
 %     record on each step of numerical integration in addition to state variables.
 %   .model (default: [])   : optional DynaSim model structure
 % .connections(i) (default: []): contains info for linking population models
-%   .source (required if >1 pops): name of source population
+%   .source (required if >1 pops): name of source population (see NOTE 7)
 %   .target (required if >1 pops): name of target population
 %   .mechanism_list (required)   : list of mechanisms that link two populations
 %   .parameters (default: [])    : parameters to assign across all equations in
@@ -60,6 +60,11 @@ function spec=CheckSpecification(specification)
 % functions to population equations can be overriden by including
 % @NEWIDENTIFIER in the equations and after the mechanism name. (e.g.,
 % 'dv/dt=@M; {iNa,iK}@M'; or .mechanism_list={'iNa@M','iK@M'}).
+% 
+% NOTE 7: "direction" can be used instead of "source" and "target". The
+% syntax is "SOURCE->TARGET" or "TARGET<-SOURCE". Either will be properly
+% split into .source and .target fields. SOURCE and TARGET must be existing
+% population names.
 % 
 % Example 1: obtain empty specification structure with all fields
 % specification=CheckSpecification([]);
@@ -467,4 +472,21 @@ if isfield(spec,'connections') && size(spec.connections,1)>1
       end
     end
   end
+end
+if isfield(spec,'connections') && isfield(spec.connections,'direction')
+  for i=1:length(spec.connections)
+    if ischar(spec.connections(i).direction)
+      str=spec.connections(i).direction;
+      if any(regexp(str,'->','once'))
+        pops=regexp(str,'->','split');
+        spec.connections(i).source=pops{1};
+        spec.connections(i).target=pops{2};
+      elseif any(regexp(str,'<-','once'))
+        pops=regexp(str,'<-','split');
+        spec.connections(i).source=pops{2};
+        spec.connections(i).target=pops{1};
+      end
+    end
+  end
+  spec.connections=rmfield(spec.connections,'direction');
 end
