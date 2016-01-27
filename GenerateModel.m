@@ -544,9 +544,9 @@ model.ICs = orderfields(model.ICs,model.state_variables);
 % 4.2 convert to numeric parameters
 c = struct2cell(model.parameters);
 % get index of strings
-idx1=cellfun(@ischar,c);
+idx1=find(cellfun(@ischar,c));
 % which strings contain numeric values?
-idx2=cellfun(@isempty,regexp(c(idx1),'[a-z_A-Z]')) | ~cellfun(@isempty,regexp(c(idx1),'^\s*\[*\s*inf\s*\]*\s*$','ignorecase'));
+idx2=find(cellfun(@isempty,regexp(c(idx1),'[a-z_A-Z]')) | ~cellfun(@isempty,regexp(c(idx1),'^\s*\[*\s*inf\s*\]*\s*$','ignorecase')));
 % convert those strings which contain numeric values
 c(idx1(idx2)) = cellfun(@eval,c(idx1(idx2)),'uni',0);
 %idx=cellfun(@isempty,regexp(c,'[a-z_A-Z]')) | ~cellfun(@isempty,regexp(c,'^\s*\[*\s*inf\s*\]*\s*$','ignorecase'));
