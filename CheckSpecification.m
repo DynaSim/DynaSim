@@ -22,6 +22,7 @@ function spec=CheckSpecification(specification)
 %     .else (default: [])  : what to do if the condition is not met
 %   .monitors (default: [])      : (see NOTE 3) substructure with fields specifying what to
 %     record on each step of numerical integration in addition to state variables.
+%   .model (default: [])   : optional DynaSim model structure
 % .connections(i) (default: []): contains info for linking population models
 %   .source (required if >1 pops): name of source population
 %   .target (required if >1 pops): name of target population
@@ -102,7 +103,8 @@ else
 end
 
 spec=backward_compatibility(spec);
-pop_field_order={'name','size','equations','mechanism_list','parameters','conditionals','monitors'};
+pop_field_order={'name','size','equations','mechanism_list','parameters',...
+  'conditionals','monitors','model'};
 con_field_order={'source','target','mechanism_list','parameters'};
 
 if ~isfield(spec,'populations')
@@ -133,6 +135,9 @@ if ~isfield(spec.populations,'conditionals')
 end
 if ~isfield(spec.populations,'monitors')
   spec.populations(1).monitors=[];
+end
+if ~isfield(spec.populations,'model')
+  spec.populations(1).model=[];
 end
 % special case: split equations with '[...][...]...[...]' into multiple populations
 for i=1:length(spec.populations)

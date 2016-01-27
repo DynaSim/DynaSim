@@ -52,6 +52,7 @@ function [model,name_map]=GenerateModel(specification,varargin)
 %   .parameters (default: [])    : parameters to assign across all equations in
 %     the population. provide as cell array list of key/value pairs
 %     {'param1',value1,'param2',value2,...}
+%   .model (default: [])   : optional DynaSim model structure
 % .connections(i) (default: []): contains info for linking population models
 %   .source (required if >1 pops): name of source population
 %   .target (required if >1 pops): name of target population
@@ -176,6 +177,24 @@ linker_pops={}; % list of populations associated with mechanism linkers
 
 % 1.1 load and combine population sub-models from population equations and mechanisms
 for i=1:npops
+  % does the population model already exist?
+  if ~isempty(specification.populations(i).model)
+    tmpmodel=specification.populations(i).model; % get model structure
+    tmpname=tmpmodel.specification.populations.name; % assumes one population sub-model
+    % adjust the name if necessary
+    if ~strcmp(specification.populations(i).name,tmpname)
+      % use the name in the specification
+      tmpmodel=ApplyModifications(tmpmodel,{tmpname,'name',specification.populations(i).name});
+    elseif strcmp(tmpname,'pop1') % if default name
+      % use default name for this population index
+      tmpmodel=ApplyModifications(tmpmodel,{tmpname,'name',sprintf('pop%g',i)});
+    end
+    tmpmodel.linkers=[]; % remove old linkers from original model construction
+    model=CombineModels(model,tmpmodel);
+    name_map=cat(1,name_map,tmpmodel.namespaces);
+    continue;
+  end
+  % construct new population model
   PopScope=specification.populations(i).name;
     % note: ParseModelEquations adds a '_' suffix to the namespace; therefore,
     % a '_' suffix is added to PopScope when used below for consistency of
@@ -522,10 +541,16 @@ end
 model.ODEs = orderfields(model.ODEs,model.state_variables);
 model.ICs = orderfields(model.ICs,model.state_variables);
 
-% 4.2 convert numeric parameters
+% 4.2 convert to numeric parameters
 c = struct2cell(model.parameters);
-idx=cellfun(@isempty,regexp(c,'[a-z_A-Z]')) | ~cellfun(@isempty,regexp(c,'^\s*\[*\s*inf\s*\]*\s*$','ignorecase'));
-c(idx) = cellfun(@eval,c(idx),'uni',0);
+% get index of strings
+idx1=cellfun(@ischar,c);
+% which strings contain numeric values?
+idx2=cellfun(@isempty,regexp(c(idx1),'[a-z_A-Z]')) | ~cellfun(@isempty,regexp(c(idx1),'^\s*\[*\s*inf\s*\]*\s*$','ignorecase'));
+% convert those strings which contain numeric values
+c(idx1(idx2)) = cellfun(@eval,c(idx1(idx2)),'uni',0);
+%idx=cellfun(@isempty,regexp(c,'[a-z_A-Z]')) | ~cellfun(@isempty,regexp(c,'^\s*\[*\s*inf\s*\]*\s*$','ignorecase'));
+%c(idx) = cellfun(@eval,c(idx),'uni',0);
 f = fieldnames(model.parameters);
 model.parameters = cell2struct(c,f,1);
 
