@@ -169,7 +169,7 @@ if options.save_parameters_flag
   fprintf(fid,'%% ------------------------------------------------------------\n');
   fprintf(fid,'%% Parameters:\n');
   fprintf(fid,'%% ------------------------------------------------------------\n');
-  fprintf(fid,'p=getfield(load(''params.mat''),''p'');\n');
+  fprintf(fid,'p=load(''params.mat'',''p''); p=p.p;\n');
 end
 
 % write tspan, dt, and downsample_factor

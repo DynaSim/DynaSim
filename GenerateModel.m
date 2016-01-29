@@ -11,6 +11,7 @@ function [model,name_map]=GenerateModel(specification,varargin)
 %   options (with defaults): 'option1',value1,'option2',value2,...
 %   - 'modifications' ([]): specify modifications to apply to specification before
 %     generating the model (see ApplyModifications for more details).
+%   - 'open_link_flag'    : whether to leave linker identifiers in place (default: 0)
 % Outputs:
 %   model - DynaSim model structure (see CheckModel for more details):
 %     .parameters      : substructure with model parameters
@@ -116,6 +117,7 @@ end
 
 options=CheckOptions(varargin,{...
   'modifications',[],[],...
+  'open_link_flag',0,{0,1},...
   },false);
 % check if a model
 if isfield(specification,'state_variables')
@@ -495,19 +497,21 @@ for i=1:length(model.linkers)
   end
 end
 
-% remove target placeholders from expressions and conditionals
-for i=1:length(all_expression_inds)
-  oldstr=all_expression_targets{i};
-  newstr='';
-  name=name_map{all_expression_inds(i),2};
-  type=name_map{all_expression_inds(i),4};    
-  eqn_type=eqn_types{strcmp(type,search_types)};
-  pattern = ['\)\.?[-\+\*/]' oldstr '\)']; % pattern accounts for all possible newstr defined for linking
-  replace = [newstr '))'];
-  if isfield(model.(eqn_type),name) && ischar(model.(eqn_type).(name))
-      % note: name will not be a field of eqn_type for special monitors
-      % (e.g., monitor functions)
-    model.(eqn_type).(name)=regexprep(model.(eqn_type).(name),pattern,replace);
+if options.open_link_flag==0
+  % remove target placeholders from expressions and conditionals
+  for i=1:length(all_expression_inds)
+    oldstr=all_expression_targets{i};
+    newstr='';
+    name=name_map{all_expression_inds(i),2};
+    type=name_map{all_expression_inds(i),4};    
+    eqn_type=eqn_types{strcmp(type,search_types)};
+    pattern = ['\)\.?[-\+\*/]' oldstr '\)']; % pattern accounts for all possible newstr defined for linking
+    replace = [newstr '))'];
+    if isfield(model.(eqn_type),name) && ischar(model.(eqn_type).(name))
+        % note: name will not be a field of eqn_type for special monitors
+        % (e.g., monitor functions)
+      model.(eqn_type).(name)=regexprep(model.(eqn_type).(name),pattern,replace);
+    end
   end
 end
 if ~isempty(model.conditionals)

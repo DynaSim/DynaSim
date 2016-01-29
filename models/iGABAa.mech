@@ -17,7 +17,7 @@ ISYN(X,s) = (gSYN.*(s*netcon).*(X-ESYN))
 s' = -s./tauD + ((1-s)/tauR).*(1+tanh(X_pre/10))
 s(0) = IC+IC_noise.*rand(1,N_pre)
 
-monitor functions % always record the synaptic current
+%monitor functions % always record the synaptic current
  
 % linkers
 @current += -ISYN(X_post,s)
