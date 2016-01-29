@@ -644,7 +644,8 @@ function print_monitor_update(fid,monitors,index_nexts,state_variables,index_las
   % add indexes to state variables in monitors
   for i=1:length(monitor_name)
     for j=1:length(state_variables)
-      monitor_expression{i}=dynasim_strrep(monitor_expression{i},state_variables{j},[state_variables{j} index_lasts{j}]);
+      %monitor_expression{i}=dynasim_strrep(monitor_expression{i},state_variables{j},[state_variables{j} index_lasts{j}]);
+      monitor_expression{i}=dynasim_strrep(monitor_expression{i},state_variables{j},[state_variables{j} monitor_index]);
     end
     % write monitors to solver function
     fprintf(fid,'  %s%s=%s;\n',monitor_name{i},monitor_index,monitor_expression{i});
