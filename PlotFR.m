@@ -12,6 +12,9 @@ function PlotFR(data,varargin)
 %     'bin_size' - size of temporal window over which to calculate rate [ms or fraction of data set] (default: 5% of the data set)
 %     'bin_shift' - how much to shift the bin before calculating rate again [ms or fraction of data set] (default: 1% of the data set)
 % 
+% Examples:
+% PlotFR(data,'bin_size',30,'bin_shift',10);
+% 
 % See also: CalcFR, SimulateModel, CheckData
 
 % TODO: add rastergrams

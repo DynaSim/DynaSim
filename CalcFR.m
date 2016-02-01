@@ -37,8 +37,8 @@ function data = CalcFR(data,varargin)
 options=CheckOptions(varargin,{...
   'variable',[],[],...        
   'threshold',1e-5,[],... % slightly above zero in case variable is point process *_spikes {0,1}
-  'bin_size',.05,[],...
-  'bin_shift',.01,[],...
+  'bin_size',.05,[],...  % 30
+  'bin_shift',.01,[],... % 10
   },false);
 
 data = CheckData(data);
@@ -92,30 +92,7 @@ else
 end
 
 %% 2.0 set list of variables to process as cell array of strings
-if ischar(options.variable)
-  % is this a variable in data.labels? if not, treat as regular expression
-  if ~ismember(options.variable,data.labels)
-    % treat as regular expression and try to find variables to process
-    % add 'any character' if first character is wildcard (eg, *_v to .*_v)
-    % do this to catch a common use error made by those not familiar w/
-    % regular expressions
-    if strcmp(options.variable(1),'*')
-      options.variable=['.' options.variable];
-    end
-    % find variables in data matching the regular expression
-    idx=~cellfun(@isempty,regexp(data.labels,['^' options.variable '$']));
-    if any(idx)
-      options.variable=data.labels(idx);
-    else
-      error('no variables found matching "%s"',options.variable);
-    end
-  else
-    % convert string to cell array for iterating set
-    options.variable={options.variable};
-  end
-else
-  error('"variable" to process must be a string containing name in data.labels or a regular expression.');
-end
+options.variable=SelectVariables(data(1).labels,options.variable);
 
 %% 3.0 calculate firing rates for each variable
 if ~isfield(data,'results')
