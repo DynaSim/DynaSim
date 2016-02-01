@@ -1,6 +1,6 @@
 function PlotWaveforms(data,varargin)
 %% PlotWaveforms(data,'option',value)
-% Purpose: plot wavforms in various ways depending on what data was provided.
+% Purpose: plot waveforms in various ways depending on what data was provided.
 % Inputs:
 %   data: DynaSim data structure (see CheckData)
 %   options:
