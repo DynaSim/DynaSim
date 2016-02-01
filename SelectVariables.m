@@ -1,4 +1,5 @@
 function variables=SelectVariables(labels,var_strings)
+% variables=SelectVariables(labels,var_strings)
 % purpose: determine what variables to plot
 % inputs:
 %   labels - cell array of variable names
