@@ -8,6 +8,7 @@ function PlotWaveforms(data,varargin)
 %                  (default: all pops with state variable of variable in data.labels)
 %     'time_limits' - [beg,end] (units of data.time)
 %     'max_num_overlaid' - maximum # of waveforms to overlay per plot
+%     'max_num_rows' - maximum # of subplot rows per figure
 % 
 % Plots:
 % if Nsims>1: one sim per row
@@ -94,17 +95,14 @@ options=CheckOptions(varargin,{...
   'time_limits',[-inf inf],[],...
   'variable',[],[],...        
   'max_num_overlaid',50,[],...
-  'max_num_plots',20,[],...
+  'max_num_rows',20,[],...
   'plot_mode','trace',{'trace','image'},...
   },false);
 
 % todo: add option 'plot_mode' {'trace','image'}
 
-% todo: make GetPlotVariables an external function to retrieve variables to plot. 
-% use GetPlotVariables in all Plot* functions.
-
 % variables to plot
-var_fields=GetPlotVariables(data(1).labels,options.variable);
+var_fields=SelectVariables(data(1).labels,options.variable);
 tmp=regexp(var_fields,'_(.+)$','tokens','once');
 variables=unique([tmp{:}]);
 
@@ -137,7 +135,7 @@ num_vars=length(variables);
 num_labels=length(var_fields); % number of labels to plot
 num_times=length(time);
 
-MRPF = options.max_num_plots; % max rows per fig
+MRPF = options.max_num_rows; % max rows per fig
 MTPP = options.max_num_overlaid; % max traces per plot
 
 % how many plots:
@@ -227,9 +225,6 @@ for figset=1:num_fig_sets
           var=var_fields{row};
           dat=data(sim_index).(var);
           shared_ylims_flag=0;
-%           if size(dat,2)>1
-%             legend_string=cellfun(@(x)['cell ' num2str(x)],num2cell(1:min(size(dat,2),10)),'uni',0);
-%           end
         elseif num_sims==1 && num_pops>1 && num_vars==1
           % one population per row: dat = data(s=1).(var)(:,1:MTPP) where var=vars{v=r}
           var=var_fields{row};
@@ -287,9 +282,6 @@ for figset=1:num_fig_sets
             end
           end
           text_string{row,col}=['(' strrep(str(1:end-2),'_','\_') ')'];
-%           fld=data(sim_index).varied{1};
-%           val=data(sim_index).(data(sim_index).varied{1});
-%           text_string{row,col}=strrep(sprintf('%s = %g',fld,val),'_','\_');
           if num_pops>1
             legend_string=cellfun(@(x)[x ' (mean)'],pop_names,'uni',0);
           end
@@ -358,50 +350,6 @@ for figset=1:num_fig_sets
     end
   end % end loop over figures in this set
 end % end loop over figure sets
-
-function variables=GetPlotVariables(labels,var_strings)
-% purpose: determine what variables to plot
-% inputs:
-%   labels - cell array of variable names
-%   var_strings - string or cell array of strings specifying variables to plot
-% outputs:
-%   all labels matching specifications in var_strings
-% examples:
-%   labels={'pop1_v','pop1_iNa_m','pop1_iNa_h','pop2_v','pop2_av','time'};
-%   var_strings=[];
-%   var_strings='v';
-%   var_strings='pop1';
-%   var_strings='*_v';
-%   var_strings='pop1_v';
-%   var_strings='pop1_*';
-%   var_strings='pop2_*';
-if isempty(var_strings)
-  % set default: all pops with state variable of first element of labels
-  var=regexp(labels{1},'_.*$','match');
-  % add wildcard
-  var_strings={['*' var{1}]};
-elseif ~iscell(var_strings)
-  var_strings={var_strings};
-end
-% loop over cell array of variable indicators
-variables={};
-for i=1:length(var_strings)
-  varstr=var_strings{i};
-  % convert state variable into reg string to get variable for all pops
-  if ~any(varstr=='*') && any(~cellfun(@isempty,regexp(labels,['_' varstr '$'])))
-    varstr=['*_' varstr];
-  end
-  % convert any population name into reg string to get all variables in pop
-  if ~any(varstr=='*') && any(~cellfun(@isempty,regexp(labels,['^' varstr '_'])))
-    varstr=[varstr '_*'];
-  end
-  % add period to get all matches
-  varstr=strrep(varstr,'*','.*');
-  % find all matches
-  matches=regexp(labels,['^' varstr '$'],'match');
-  variables=cat(2,variables,matches{:});
-end
-
 
 % 1 sim, 1 pop, 1 var (X)
 % 	N=1		one fig, one row (plot var X)
