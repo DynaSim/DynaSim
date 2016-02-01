@@ -28,10 +28,10 @@ function data = CalcFR(data,varargin)
 % s.populations(2).name='I';
 % s.populations(2).equations='dv/dt=@current+10; {iNa,iK}; v(0)=-65';
 % data=SimulateModel(s);
-% data=calcFR(data,'variable','*_v');
+% data=CalcFR(data,'variable','*_v');
 % data % contains firing rates for E and I pops in .E_v_FR and .I_v_FR.
 % 
-% See also: plotFR, AnalyzeStudy, SimulateModel, CheckData
+% See also: PlotFR, AnalyzeStudy, SimulateModel, CheckData
 
 %% 1.0 Check inputs
 options=CheckOptions(varargin,{...
