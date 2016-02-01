@@ -15,6 +15,7 @@ function data = CalcFR(data,varargin)
 % "variable" can be specified as the name of a variable listed in
 % data.labels, a cell array of string listing variable names, or as a 
 % regular expression pattern for identifying variables to process.
+% See SelectVariables for more info on supported specifications.
 % 
 % note:
 % DynaSim spike monitor returns spike data in variables *_spikes.
@@ -31,7 +32,7 @@ function data = CalcFR(data,varargin)
 % data=CalcFR(data,'variable','*_v');
 % data % contains firing rates for E and I pops in .E_v_FR and .I_v_FR.
 % 
-% See also: PlotFR, AnalyzeStudy, SimulateModel, CheckData
+% See also: PlotFR, AnalyzeStudy, SimulateModel, CheckData, SelectVariables
 
 %% 1.0 Check inputs
 options=CheckOptions(varargin,{...
