@@ -630,6 +630,12 @@ end
 PlotFR(data,'bin_size',30,'bin_shift',10); % bin_size and bin_shift in [ms]
 % plot how firing rate varies over time for one data set
 PlotFR(data(2),'bin_size',30,'bin_shift',10); % bin_size and bin_shift in [ms]
+% plot waveforms
+PlotData(data,'plot_type','waveform')
+% plot power spectrum
+PlotData(data,'plot_type','power')
+% plot rastergram
+PlotData(data,'plot_type','rastergram');
 
 % note: PlotFR accepts any DynaSim data structure or array of data
 % structures and generates different plots depending on properties of the
@@ -917,6 +923,21 @@ data.model.monitors
                          {'pop1','mechanism_list','+(iCa,iCan,CaBuffer)'});
     s.populations.mechanism_list
 
+%% other
+
+% plotting state variables returned from custom matlab functions
+% 1. define custom function
+%   example: function input=get_input(type,N,T,f)
+% 2. use function in model
+%   eqns='dv/dt=-v+I(k,:); I=get_input(''rectified_sin'',Npop,T,f); f=5';
+%     % note: 'k' is an internal index to the current time step during
+%     % simulation; 'T' is an internal variable storing the full time array;
+%     % 'Npop' is an internal variable storing the size of the population.
+%   data=SimulateModel(eqns,'tspan',[0 1000]);
+% 3. plot the state variable stored in the post-simulation model structure
+%   figure; plot(data.time,data.model.fixed_variables.pop1_I)
+
+    
 % %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% WIP (near-future) features/additions (aka: things I almost got working)
 % %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
