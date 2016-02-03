@@ -926,7 +926,7 @@ data.model.monitors
 %% other
 
 % plotting state variables returned from custom matlab functions
-% 1. define custom function
+% 1. define custom function (saved to 'get_input.m' in Matlab path)
 %   example: function input=get_input(type,N,T,f)
 % 2. use function in model
 %   eqns='dv/dt=-v+I(k,:); I=get_input(''rectified_sin'',Npop,T,f); f=5';
