@@ -269,6 +269,7 @@ if num_sims>1 && isfield(data,'varied')
   row_param_values=param_cell{row_param_index};
   num_rows=length(row_param_values);
   num_cols=num_sims/num_rows;
+  num_figs=ceil(num_rows/MRPF);
   sim_indices=[];
   for row=1:num_rows
     sim_indices=[sim_indices find(param_mat(:,row_param_index)==row_param_values(row))];
