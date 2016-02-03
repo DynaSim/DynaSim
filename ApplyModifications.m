@@ -189,9 +189,12 @@ for i=1:size(mods,1)
     % process special case: cat(TARGET,EXPRESSION)
     eqns=spec.(type)(index).equations;
     args=regexp(val,'cat\((.+)\)','tokens','once');
-    args=regexp(args{1},',','split');
-    target=args{1};
-    expression=args{2};
+    ind=find(args{1}==',',1,'first');
+    target=args{1}(1:ind-1);
+    expression=args{1}(ind+1:end);
+%     args=regexp(args{1},',','split');
+%     target=args{1};
+%     expression=args{2};
     % support keywords: ODEn, ODE=ODE1, FUNCTIONn, FUNCTION=FUNCTION1
     if strncmp('ODE',target,3)
       % support target = ODEn and ODE=ODE1
