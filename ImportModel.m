@@ -74,7 +74,7 @@ if ~isempty(options.ic_pop)
 end
 
 %% 4.0 cleanup
-if ~strcmp(host,'local')
+if ~strcmp(host,'local') && exist(source,'file')
   delete(source);
 end
 
