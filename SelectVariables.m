@@ -19,7 +19,11 @@ if isempty(var_strings)
   % set default: all pops with state variable of first element of labels
   var=regexp(labels{1},'_.*$','match');
   % add wildcard
-  var_strings={['*' var{1}]};
+  if isempty(var)
+    var_strings={'*'};
+  else
+    var_strings={['*' var{1}]};
+  end
 elseif ~iscell(var_strings)
   var_strings={var_strings};
 end

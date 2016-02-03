@@ -22,13 +22,13 @@ if iscell(data) && isnumeric(data{1})
   tmp=data;
   clear data
   for i=1:numel(tmp)
-    data.(['data' num2str(i)])=tmp{i};
+    data.(['pop1_data' num2str(i)])=tmp{i};
   end
 elseif isnumeric(data)
   % assume data matrix [time x cells]
   % convert to structure
   warning off %warning('off','MATLAB:warn_r14_stucture_assignment');
-  data.data=data;
+  data.pop1_data=data;
   warning on
 end
 
@@ -65,7 +65,8 @@ end
 
 % check for time vector and set to index if not present 
 if ~isfield(data,'time')
-  data.time(:,1)=1:size(data(1).(data(1).labels{1}),1);
+  dt=.01;
+  data.time(:,1)=(1:size(data(1).(data(1).labels{1}),1))*dt;
   if ~ismember('time',data.labels)
     data.labels{end+1}='time';
   end
@@ -77,6 +78,10 @@ if ~isfield(data,'simulator_options')
 end
 if ~isfield(data,'model')
   [data(1:length(data)).model]=deal([]);
+  for i=1:length(data)
+    data(i).model.specification.populations.name='pop1';
+    data(i).model.specification.populations.size=size(data(i).(data(i).labels{1}),2);
+  end
 end
 
 % reorder fields (labels, time, ...)
