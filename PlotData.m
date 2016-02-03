@@ -249,20 +249,21 @@ if num_sims>1 && isfield(data,'varied')
   % collect info on parameters varied
   varied=data(1).varied;
   num_varied=length(varied); % number of model components varied across simulations
-  num_sims=length(data);
+  num_sims=length(data); % number of data sets (one per simulation)
   % collect info on parameters varied
-  param_mat=zeros(num_sims,num_varied);
-  param_cell=cell(1,num_varied);
+  param_mat=zeros(num_sims,num_varied); % values for each simulation
+  param_cell=cell(1,num_varied); % unique values for each parameter
+  % loop over varied components and collect values
   for j=1:num_varied
     if isnumeric(data(1).(varied{j}))
-      param_mat(:,j)=[data.(varied{j})];
-      param_cell{j}=unique([data.(varied{j})]);
+      param_mat(:,j)=[data.(varied{j})]; % values for each simulation
+      param_cell{j}=unique([data.(varied{j})]); % unique values for each parameter
     else
       % todo: handle sims varying non-numeric model components 
-      % (eg, mechanisms) (also in PlotFR)
+      % (eg, mechanisms) (also in PlotFR and SelectData)
     end
   end
-  param_size=cellfun(@length,param_cell);
+  param_size=cellfun(@length,param_cell); % number of unique values for each parameter
   % varied parameter with most elements goes along the rows (everything else goes along columns)
   row_param_index=find(param_size==max(param_size),1,'first');
   row_param_name=varied{row_param_index};
