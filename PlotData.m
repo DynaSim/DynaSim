@@ -146,6 +146,7 @@ options=CheckOptions(varargin,{...
   'xlim',[],[],...
   'yscale','linear',{'linear','log','log10','log2'},...
   },false);
+data=CheckData(data);
 
 % todo: add option 'plot_mode' {'trace','image'}
 
@@ -239,6 +240,8 @@ elseif num_sims>1 && num_pops>1 && num_vars==1
   num_fig_sets=1; num_figs=ceil(num_sims/MRPF); num_rows=min(num_sims,MRPF);
 elseif num_sims>1 && num_pops>1 && num_vars>1
   num_fig_sets=num_vars; num_figs=ceil(num_sims/MRPF); num_rows=min(num_sims,MRPF);
+else
+  error('unrecognized dimensions');
 end
 
 % make subplot adjustments for varied parameters
