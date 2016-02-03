@@ -479,6 +479,13 @@ try
       if ~isempty(model.monitors)
         output_variables=cat(2,output_variables,fieldnames(model.monitors)');
       end
+      if ~isempty(model.fixed_variables)
+        fields=fieldnames(model.fixed_variables)';
+        output_variables=cat(2,output_variables,fields);
+        num_fixed_variables=length(fields);
+      else
+        num_fixed_variables=0;
+      end
       % run simulation
       if options.verbose_flag
         fprintf('Running simulation (solver=''%s'', dt=%g, tspan=[%g %g]) ...\n',options.solver,options.dt,options.tspan);
@@ -489,9 +496,15 @@ try
       duration=toc(sim_start_time);
       % prepare DynaSim data structure
       % organize simulated data in data structure (move time to last)
-      tmpdata.labels=output_variables([2:length(output_variables) 1]);
+      tmpdata.labels=output_variables([2:length(output_variables)-num_fixed_variables 1]);
       for i=1:length(output_variables)
-        tmpdata.(output_variables{i})=outputs{i};
+        if ~isempty(model.fixed_variables) && isfield(model.fixed_variables,output_variables{i})
+          % store fixed variables in model substructure
+          model.fixed_variables.(output_variables{i})=outputs{i};
+        else
+          % store state variables and monitors as data fields
+          tmpdata.(output_variables{i})=outputs{i};
+        end
         outputs{i}=[]; % clear assigned outputs from memory
       end
     end

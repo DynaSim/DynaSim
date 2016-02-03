@@ -122,6 +122,11 @@ if ~isempty(model.monitors)
   tmp=[tmp{:}];
   output_string=[output_string ',' tmp(1:end-1)];
 end
+if ~isempty(model.fixed_variables)
+  tmp=cellfun(@(x)[x ','],fieldnames(model.fixed_variables),'uni',0);
+  tmp=[tmp{:}];
+  output_string=[output_string ',' tmp(1:end-1)];
+end  
 output_string=['[T,' output_string ']']; % state vars, monitors, time vector
 
 %% 2.0 write m-file solver
