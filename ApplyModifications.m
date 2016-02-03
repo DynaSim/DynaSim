@@ -174,7 +174,7 @@ for i=1:size(mods,1)
     % 'E'    'mechanism_list'    '+(iK)'
     % 'E'    'mechanism_list'    '+iK'
     % 'E'    'mechanism_list'    'iK'
-    elems=regexp(val,'\w+','match');
+    elems=regexp(val,'[\w@]+','match');
     if strcmp(val(1),'+')
       % add mechanisms to existing list
       spec.(type)(index).mechanism_list=unique(cat(2,spec.(type)(index).mechanism_list,elems),'stable');
