@@ -922,6 +922,30 @@ data.model.monitors
     s=ApplyModifications('dv/dt=10+current; {iNa,iK}; v(0)=-65',...
                          {'pop1','mechanism_list','+(iCa,iCan,CaBuffer)'});
     s.populations.mechanism_list
+    
+    
+    % Izhikevich study of neuro-computational properties
+    % based on: http://www.izhikevich.org/publications/izhikevich.m
+    eqns={
+      'a=.02; b=.2; c=-65; d=6; I=14';
+      'dv/dt=.04*v^2+5*v+140-u+I; v(0)=-70';
+      'du/dt=a*(b*v-u); u(0)=-20';
+      'if(v>=30)(v=c;u=u+d)';
+      };
+    P='pop1'; % name of population
+    vary={
+      {P,'a',.02; P,'b',.2 ; P,'c',-50; P,'d',2;  P,'I',15} % tonic bursting
+      {P,'a',.01; P,'b',.2 ; P,'c',-65; P,'d',8;  P,'I',30} % spike frequency adaptation
+      {P,'a',.02; P,'b',.2 ; P,'c',-65; P,'d',6;  P,'I',7}  % spike latency
+      {P,'a',.03; P,'b',.25; P,'c',-52; P,'d',0;  P,'I',0}  % rebound burst
+      {P,'a',1;   P,'b',1.5; P,'c',-60; P,'d',0;  P,'I',-65}%bistability
+      {P,'a',.02; P,'b',1  ; P,'c',-55; P,'d',4;  P,'I',1}  % accomodation
+      {P,'a',-.02;P,'b',-1 ; P,'c',-60; P,'d',8;  P,'I',80} % inhibition-induced spiking
+      {P,'a',-.026;P,'b',-1; P,'c',-45; P,'d',0;  P,'I',70} % inhibition-induced bursting
+      };
+    data=SimulateModel(eqns,'tspan',[0 250],'vary',vary);
+    PlotData(data);
+
 
 %% other
 
