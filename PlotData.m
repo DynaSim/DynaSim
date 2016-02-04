@@ -269,12 +269,24 @@ if num_sims>1 && isfield(data,'varied')
   row_param_name=varied{row_param_index};
   row_param_values=param_cell{row_param_index};
   num_rows=length(row_param_values);
-  num_cols=num_sims/num_rows;
+  %num_cols=num_sims/num_rows;
   num_figs=ceil(num_rows/MRPF);
-  sim_indices=[];
+  % collect sims for each value of the row parameter
+  indices={};
   for row=1:num_rows
-    sim_indices=[sim_indices find(param_mat(:,row_param_index)==row_param_values(row))];
+    indices{row}=find(param_mat(:,row_param_index)==row_param_values(row));
   end
+  num_per_row=cellfun(@length,indices);
+  num_cols=max(num_per_row);
+  sim_indices=nan(num_cols,num_rows);
+  % arrange sim indices for each row in a matrix
+  for row=1:num_rows
+    sim_indices(1:num_per_row(row),row)=indices{row};
+  end
+%   sim_indices=[];
+%   for row=1:num_rows
+%     sim_indices=[sim_indices find(param_mat(:,row_param_index)==row_param_values(row))];
+%   end
 else
   sim_indices=ones(1,num_rows); % index into data array
   num_cols=1;
@@ -301,6 +313,9 @@ for figset=1:num_fig_sets
         dat=[];
         sim_index=sim_indices(col,row); % index into data array for this subplot
         axis_counter=axis_counter+1; % number subplot axis we're on
+        if isnan(sim_index)
+          continue;
+        end
         % #################################################################
         % what to plot
         % -----------------------------------------------------------------
@@ -636,6 +651,9 @@ for figset=1:num_fig_sets
         axis_counter=0;
         for row=1:num_rows
           for col=1:num_cols
+            if ~ischar(text_string{row,col})
+              continue;
+            end
             axis_counter=axis_counter+1;
             axes(haxes(axis_counter));
             xmin=min(xlim); xmax=max(xlim);
