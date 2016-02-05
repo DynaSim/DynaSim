@@ -54,14 +54,21 @@ if any(~cellfun(@isempty,regexp(mechanism_list,'@','once')))
   mechanism_list=regexp(mechanism_list,'^([^@]+)@?','tokens','once');
   mechanism_list=[mechanism_list{:}];
 end
+% exclude elements with non-word characters (these are not file names)
+keep=cellfun(@isempty,regexp(mechanism_list,'[^\w]'));
+mechanism_list=mechanism_list(keep);
 
-% search in dynasim toolbox
+% search in dynasim toolbox model directory
 dynasim_path=fileparts(which(mfilename));
-search_paths=regexp(genpath(dynasim_path),':','split'); % look in all dynasim directories
+model_dir=fullfile(dynasim_path,'models');
+search_paths=regexp(genpath(model_dir),':','split'); % look in all dynasim directories
 % add current directory
 search_paths=cat(2,pwd,search_paths); % look in current directory first
 % add Matlab path
 search_paths=cat(2,search_paths,regexp(path,':','split'));
+% exclude .git directories
+keep=cellfun(@isempty,regexp(search_paths,'.git'));
+search_paths=search_paths(keep);
 num_paths=length(search_paths)+1;
 
 % locate mechanism files
