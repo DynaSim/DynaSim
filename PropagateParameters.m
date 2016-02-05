@@ -77,7 +77,7 @@ end
 
 function expression=insert_parameters(expression,parameters,prefix)
   if isnumeric(expression)
-    % convert to string and return
+    % convert to string and return string
     expression=toString(expression);
     return;
   end
