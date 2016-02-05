@@ -489,7 +489,7 @@ try
       end
       % run simulation
       if options.verbose_flag
-        fprintf('Running simulation (solver=''%s'', dt=%g, tspan=[%g %g]) ...\n',options.solver,options.dt,options.tspan);
+        fprintf('Running simulation %g/%g (solver=''%s'', dt=%g, tspan=[%g %g]) ...\n',sim,length(modifications_set),options.solver,options.dt,options.tspan);
       end
       sim_start_time=tic;
       outputs=cell(1,length(output_variables)); % preallocate for PCT compatibility
