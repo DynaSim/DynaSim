@@ -637,7 +637,7 @@ for figset=1:num_fig_sets
           end
         end
         % add legend
-        if ~isempty(legend_strings)
+        if ~isempty(legend_strings) && axis_counter==1
           legend(legend_strings);
         end
       end % end loop over subplot columns
