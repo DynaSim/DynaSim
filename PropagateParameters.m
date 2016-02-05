@@ -76,6 +76,11 @@ if ~isempty(model.conditionals)
 end
 
 function expression=insert_parameters(expression,parameters,prefix)
+  if isnumeric(expression)
+    % convert to string and return
+    expression=toString(expression);
+    return;
+  end
   allwords=regexp(expression,'[a-zA-Z]+\w*','match');
   words=unique(allwords);
   found_parameters=words(ismember(words,fieldnames(parameters)));
