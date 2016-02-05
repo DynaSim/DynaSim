@@ -22,7 +22,7 @@ if nargin<5, rpad=''; end
   % check for neighboring occurrence that wasn't substituted (e.g., (v-v^2) -> (pop1_v-v^2))
   % note: this is only a possible issue for strings "in the middle"
   test=['([^\w\.]{1})' oldstr '([^\w(' newstr ')]{1})'];
-  if ~isempty(regexp(str,test,'match'))
+  if ~isempty(regexp(str,test,'once'))%~isempty(regexp(str,test,'match'))
     % substitute remaining occurrences
     str=regexprep(str,test,rep);
   end
