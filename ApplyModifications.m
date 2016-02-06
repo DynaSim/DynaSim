@@ -130,7 +130,7 @@ if any(~cellfun(@isempty,regexp(modifications(:,1),'^\(.*\)$'))) || ...
     % expand list of modifications
     for j=1:length(namespaces)
       for k=1:length(variables)
-        modifications_{end+1,1:3}={namespaces{j},variables{k},modifications{i,3}};
+        modifications_(end+1,1:3)={namespaces{j},variables{k},modifications{i,3}};
       end
     end
   end
