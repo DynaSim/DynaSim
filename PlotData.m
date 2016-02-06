@@ -598,7 +598,7 @@ for figset=1:num_fig_sets
         % plot auxiliary data
         if ~isempty(AuxData) %strcmp(options.plot_type,'power')
           hold on
-          plot(xdata,AuxData,'--o');
+          plot(xdata,AuxData,'--.');
         end
         % format axes
         if row==num_rows
