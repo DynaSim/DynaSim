@@ -29,7 +29,7 @@ function data=SelectData(data,varargin)
 % data=SelectData(data,'time_limits',[20 80]); % return simulated data from 20-80ms
 % data=SelectData(data,'varied',{'E','gNa',[.3 .5]}); % return data sets with gNa set between .3 and .5
 % data=SelectData(data,'time_limits',[20 80],'varied',{'E','gNa',[.3 .5]});
-% 
+% data=SelectData(data,'roi',{'E_v',[1 4]});
 % See also: SimulateModel, Vary2Modifications, ImportData
 
 % todo: specify subsets to return in terms of ROIs:
@@ -44,6 +44,7 @@ data=CheckData(data);
 options=CheckOptions(varargin,{...
   'time_limits',[-inf inf],[],...
   'varied',[],[],...
+  'roi',[],[],...
   },false);
 
 % select data sets based on range of varied model components
@@ -94,11 +95,23 @@ end
 % end
 
 for s=1:length(data)
-  % select subset from state variables and monitors
+  % select time subset from state variables and monitors
   time=data(s).time;
   seltime=time>=options.time_limits(1) & time<=options.time_limits(2);
   for i=1:length(data(s).labels)
     data(s).(data(s).labels{i})=data(s).(data(s).labels{i})(seltime,:);
+    % select cell subset
+    if iscell(options.roi)
+      for i=1:size(options.roi,1)
+        if isfield(data,options.roi{i,1})
+          dat=data(s).(options.roi{i,1});
+          inds=1:size(dat,2);
+          borders=options.roi{i,2};
+          sel=inds>=borders(1)&inds<=borders(2);
+          data(s).(options.roi{i,1})=dat(:,sel);
+        end
+      end
+    end    
   end
 end
 
