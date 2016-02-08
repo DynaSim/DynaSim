@@ -100,19 +100,19 @@ for s=1:length(data)
   seltime=time>=options.time_limits(1) & time<=options.time_limits(2);
   for i=1:length(data(s).labels)
     data(s).(data(s).labels{i})=data(s).(data(s).labels{i})(seltime,:);
-    % select cell subset
-    if iscell(options.roi)
-      for i=1:size(options.roi,1)
-        if isfield(data,options.roi{i,1})
-          dat=data(s).(options.roi{i,1});
-          inds=1:size(dat,2);
-          borders=options.roi{i,2};
-          sel=inds>=borders(1)&inds<=borders(2);
-          data(s).(options.roi{i,1})=dat(:,sel);
-        end
-      end
-    end    
   end
+  % select cell subset
+  if iscell(options.roi)
+    for i=1:size(options.roi,1)
+      if isfield(data,options.roi{i,1})
+        dat=data(s).(options.roi{i,1});
+        inds=1:size(dat,2);
+        borders=options.roi{i,2};
+        sel=inds>=borders(1)&inds<=borders(2);
+        data(s).(options.roi{i,1})=dat(:,sel);
+      end
+    end
+  end    
 end
 
 % todo: select subset from time-varying post-processed results
