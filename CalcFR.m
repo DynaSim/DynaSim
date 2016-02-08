@@ -68,7 +68,7 @@ if isempty(options.variable)
     end
   else
     % use first state variable in model
-    options.variable=data.labels{1};
+    %options.variable=data.labels{1};
   end
 end
 % check bin_size
