@@ -77,8 +77,9 @@ if isstruct(file) && isfield(file,'study_dir')
   data_files=data_files(success);
   sim_info=studyinfo.simulations(success);
   % load each data set recursively
+  keyvals=Options2Keyval(options);
   for i=1:length(data_files)
-    tmp_data=ImportData(data_files{i});
+    tmp_data=ImportData(data_files{i},keyvals{:});
     if ~isfield(tmp_data,'varied')
     % add varied info 
       % this is necessary here when loading .csv data lacking metadata
@@ -109,9 +110,10 @@ if iscellstr(file)
   data_files=file;
   success=cellfun(@exist,data_files)==2;
   data_files=data_files(success);
+  keyvals=Options2Keyval(options);
   % load each data set recursively
   for i=1:length(data_files)
-    tmp_data=ImportData(data_files{i});
+    tmp_data=ImportData(data_files{i},keyvals{:});
     % store this data
     if i==1
       % preallocate full data matrix based on first data file
