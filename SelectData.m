@@ -108,7 +108,7 @@ for s=1:length(data)
         dat=data(s).(options.roi{i,1});
         inds=1:size(dat,2);
         borders=options.roi{i,2};
-        sel=inds>=borders(1)&inds<=borders(2);
+        sel=inds>=borders(1)&inds<=borders(end);
         data(s).(options.roi{i,1})=dat(:,sel);
       end
     end
