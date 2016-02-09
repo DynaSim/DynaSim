@@ -466,6 +466,7 @@ else % store every downsample_factor time point in memory or on disk
   fprintf(fid,'end\n');
 end
 fprintf(fid,'end\n');
+fprintf(fid,'T=T(1:downsample_factor:ntime);\n');
 
 % cleanup
 if options.disk_flag==1
