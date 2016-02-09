@@ -316,6 +316,7 @@ if options.cluster_flag==1
   for i=1:length(modifications_set)
     if ~strcmp(modifications_set{i}{2},'mechanism_list') && ~strcmp(modifications_set{i}{2},'equations')
       model=ApplyModifications(model,modifications_set{i});
+      break
     end
   end
   keyvals = Options2Keyval(options);
