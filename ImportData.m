@@ -145,6 +145,7 @@ if ischar(file)
         end
         simulator_options=obj.simulator_options;
         time=(simulator_options.tspan(1):simulator_options.dt:simulator_options.tspan(2))';
+        time=time(1:simulator_options.downsample_factor:length(time));
         if ~isempty(options.time_limits)
           % determine time indices to load
           time_indices=nearest(time,options.time_limits(1)):nearest(time,options.time_limits(2));
