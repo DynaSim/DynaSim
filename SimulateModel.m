@@ -37,8 +37,8 @@ function [data,studyinfo]=SimulateModel(model,varargin)
 %   options for cluster computing:
 %     'cluster_flag'  : whether to run simulations on a cluster submitted 
 %                     using qsub (see CreateBatch) {0 or 1} (default: 0)
-%     'sims_per_job'  : number of simulations to run per cluster job (default: 1)
-%     'memory_limit'  : memory to allocate per cluster job (default: '8G')
+%     'sims_per_job'  : number of simulations to run per batch job (default: 1)
+%     'memory_limit'  : memory to allocate per batch job (default: '8G')
 % 
 %   options for parallel computing: (requires Parallel Computing Toolbox)
 %     'parallel_flag' : whether to use parfor to run simulations {0 or 1} (default: 0)
@@ -70,8 +70,8 @@ function [data,studyinfo]=SimulateModel(model,varargin)
 %                           .sim_id         : unique identifier in study
 %                           .modifications  : modifications made to the base model during this simulation
 %                           .data_file      : full filename of eventual output file
-%                           .batch_dir (=[]): directory where cluster jobs were saved (if cluster_flag=1)
-%                           .job_file (=[]) : m-file cluster job that runs this simulation (if cluster_flag=1)
+%                           .batch_dir (=[]): directory where batch jobs were saved (if cluster_flag=1)
+%                           .job_file (=[]) : m-file batch job that runs this simulation (if cluster_flag=1)
 %                           .simulator_options: simulator options for this simulation
 %                           .solve_file     : full filename of m- or mex-file that numerically integrated the model
 % 
@@ -221,8 +221,8 @@ options=CheckOptions(varargin,{...
   'experiment',[],[],...          % experiment function. func(model,args)
   'optimization',[],[],...
   'cluster_flag',0,{0,1},...      % whether to run simulations on a cluster
-  'sims_per_job',1,[],... % how many sims to run per cluster job
-  'memory_limit','8G',[],... % how much memory to allocate per cluster job
+  'sims_per_job',1,[],... % how many sims to run per batch job
+  'memory_limit','8G',[],... % how much memory to allocate per batch job
   'parallel_flag',0,{0,1},...     % whether to run simulations in parallel (using parfor)
   'num_cores',4,[],... % # cores for parallel processing (SCC supports 1-12)
   'compile_flag',0,{0,1},... % exist('codegen')==6, whether to compile using coder instead of interpreting Matlab
@@ -251,7 +251,7 @@ end
 if options.cluster_flag && options.save_data_flag==0
   options.save_data_flag=1;
   if options.verbose_flag
-    fprintf('setting ''save_data_flag'' to 1 for storing results of cluster jobs for later access.\n');
+    fprintf('setting ''save_data_flag'' to 1 for storing results of batch jobs for later access.\n');
   end
 end
 
