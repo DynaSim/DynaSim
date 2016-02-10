@@ -577,8 +577,8 @@ title('sPING with E->I turned off');
 %   options for cluster computing:
 %     'cluster_flag'  : whether to run simulations on a cluster submitted 
 %                     using qsub (see CreateBatch) {0 or 1} (default: 0)
-%     'sims_per_job'  : number of simulations to run per cluster job (default: 1)
-%     'memory_limit'  : memory to allocate per cluster job (default: '8G')
+%     'sims_per_job'  : number of simulations to run per batch job (default: 1)
+%     'memory_limit'  : memory to allocate per batch job (default: '8G')
 % 
 %   options for parallel computing: (requires Parallel Computing Toolbox)
 %     'parallel_flag' : whether to use parfor to run simulations {0 or 1} (default: 0)
@@ -700,8 +700,8 @@ vary={'','I',[0 10 20]};
 %                           .sim_id         : unique identifier in study
 %                           .modifications  : modifications made to the base model during this simulation
 %                           .data_file      : full filename of eventual output file
-%                           .batch_dir (=[]): directory where cluster jobs were saved (if cluster_flag=1)
-%                           .job_file (=[]) : m-file cluster job that runs this simulation (if cluster_flag=1)
+%                           .batch_dir (=[]): directory where batch jobs were saved (if cluster_flag=1)
+%                           .job_file (=[]) : m-file batch job that runs this simulation (if cluster_flag=1)
 %                           .simulator_options: simulator options for this simulation
 %                           .solve_file     : full filename of m- or mex-file that numerically integrated the model
 
@@ -739,13 +739,19 @@ vary={'','I',[0 10 20]};
 
 [data,studyinfo]=SimulateModel(eqns,'vary',vary,...
   'study_dir',study_dir,'cluster_flag',1,'verbose_flag',1);
-
+% note: if on a cluster, jobs will be automatically submitted using "qsub"
 studyinfo.simulations(1)
 ls(studyinfo.simulations(1).batch_dir)
 edit(studyinfo.simulations(1).job_file);
 edit(studyinfo.simulations(1).solve_file);
 
-if 1 % set to 0 if on a cluster (jobs will be submitted using qsub)
+% manually run the simulation batch jobs
+if 0
+  % *** CAUTION: ONLY DO THIS IF NOT ON A CLUSTER ***
+  % reason: jobs created on a cluster (e.g., scc2.bu.edu) will end with 
+  % the 'exit' command to end the batch job. jobs created on a local
+  % machine will not end with the exit command. So, if you run this on a
+  % cluster, it will close Matlab when the job finishes.
   run(studyinfo.simulations(1).job_file);
   data=ImportData(studyinfo) % 1 data set
   run(studyinfo.simulations(2).job_file);
@@ -756,7 +762,7 @@ if 1 % set to 0 if on a cluster (jobs will be submitted using qsub)
 end
 
 % create 2 jobs to run 6 simulations
-% set sims_per_job=3 (i.e., run 3 simulations per cluster job; 2 jobs in parallel)
+% set sims_per_job=3 (i.e., run 3 simulations per batch job; 2 jobs in parallel)
 
 study_dir='study_HH_varyI_cluster2'; 
 eqns='dv/dt=@current+I; {iNa,iK}';
@@ -765,7 +771,7 @@ vary={'','I',[0:10:50]};
 [data,studyinfo]=SimulateModel(eqns,'vary',vary,...
   'study_dir',study_dir,'cluster_flag',1,'sims_per_job',3,'verbose_flag',1);
 
-if 1 % set to 0 if on a cluster (jobs will be submitted using qsub)
+if 0 % manually run the simulation jobs (see caution above)
   run(studyinfo.simulations(1).job_file);
   data=ImportData(studyinfo) % 3 data sets
   run(studyinfo.simulations(4).job_file);
