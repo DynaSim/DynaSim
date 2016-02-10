@@ -55,7 +55,7 @@ if any(~cellfun(@isempty,regexp(mechanism_list,'@','once')))
   mechanism_list=[mechanism_list{:}];
 end
 % exclude elements with non-word characters (these are not file names)
-keep=cellfun(@isempty,regexp(mechanism_list,'[^\w]'));
+keep=cellfun(@isempty,regexp(mechanism_list,'[^\w\.]'));
 mechanism_list=mechanism_list(keep);
 
 % search in dynasim toolbox model directory
