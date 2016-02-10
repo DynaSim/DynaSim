@@ -79,6 +79,7 @@ if isstruct(file) && isfield(file,'study_dir')
   % load each data set recursively
   keyvals=Options2Keyval(options);
   for i=1:length(data_files)
+    fprintf('loading file %g/%g: %s\n',i,length(data_files),data_files{i});
     tmp_data=ImportData(data_files{i},keyvals{:});
     if ~isfield(tmp_data,'varied')
     % add varied info 
