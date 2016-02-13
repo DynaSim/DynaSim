@@ -1,0 +1,22 @@
+#!/bin/csh
+
+set batchdir = ~/batchdirs/$1
+cd $batchdir
+mkdir -p pbsout
+set joblist = `cat scriptlist.txt`
+
+set h_vmem = $2
+
+foreach job ( $joblist )
+  echo $job
+  if (-e pbsout/$job.out) then
+    rm -f pbsout/$job.out
+  endif
+  if (-e pbsout/$job.err) then
+    rm -f pbsout/$job.err
+  endif
+  echo "qmatjob $batchdir $job" '|' qsub -V -hard -l 'h_vmem='$h_vmem -cwd -N $1_$job -o pbsout/$job.out -e pbsout/$job.err
+  echo "qmatjob $batchdir $job" | qsub -V -hard -l 'h_vmem='$h_vmem -cwd -N $1_$job -o pbsout/$job.out -e pbsout/$job.err
+  sleep 0.25
+end
+
