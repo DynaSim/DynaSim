@@ -38,9 +38,16 @@ end
 if numel(func)>1
   error('Too many function handles were supplied. AnalyzeData only applies a single function to a single data set.');
 end
+% save data if no output is requested
+if nargout<1
+  options.save_data_flag=1;
+end
 
 % do analysis
+fprintf('Executing post-processing function: %s\n',func2str(func));
+tstart=tic;
 result=feval(func,data,varargin{:});
+fprintf('Elapsed time: %s sec\n',toc(tstart));
 
 % determine if result is a plot handle or derived data
 if all(ishandle(result)) % analysis function returned a graphics handle
@@ -55,21 +62,33 @@ if all(ishandle(result)) % analysis function returned a graphics handle
       else
         fname=[options.result_file '_page' num2str(i) '.jpg'];
       end
+      fprintf('Saving plot: %s\n',fname);
       print(gcf,fname,'-djpeg');
     end
   end
 else % analysis function returned derived data
-  if isstruct(result) && isfield(data,'varied')
-    % add 'varied' info to result structure
+  if isstruct(result)
     for i=1:length(result)
-      result(i).varied=data.varied;
-      for j=1:length(data.varied)
-        result(i).(data.varied{j})=data.(data.varied{j});
+      if isfield(data,'varied')
+        % add 'varied' info to result structure
+        result(i).varied=data.varied;
+        for j=1:length(data.varied)
+          result(i).(data.varied{j})=data.(data.varied{j});
+        end
+      end
+      % add options to result structure
+      if length(varargin)>1
+        for j=1:2:length(varargin)
+          result(i).options.(varargin{j})=varargin{j+1};
+        end
+      else
+        result(i).options=[];
       end
     end
   end
   % save derived data
   if options.save_data_flag
+    fprintf('Saving derived data: %s\n',options.result_file);
     save(options.result_file,'result','-v7.3');
   end
 end
