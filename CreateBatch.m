@@ -311,9 +311,14 @@ end
     fprintf(fjob,'\t\t[valid,message]=CheckHostPaths(studyinfo);\n');
     fprintf(fjob,'\t\tif ~valid\n\t\t  lasterr(message);\n\t\t  for s=1:length(SimIDs), UpdateStudy(studyinfo.study_dir,''sim_id'',SimIDs(s),''status'',''failed''); end\n\t\t  continue;\n\t\tend\n');
     % simulate model with proper modifications and options
-    fprintf(fjob,'\t\toptions=rmfield(studyinfo.simulations(SimID).simulator_options,{''modifications'',''studyinfo''});\n');
+    fprintf(fjob,'\t\tsiminfo=studyinfo.simulations(SimID);\n');
+    fprintf(fjob,'\t\toptions=rmfield(siminfo.simulator_options,{''modifications'',''studyinfo'',''analysis_functions'',''plot_functions''});\n');
     fprintf(fjob,'\t\tkeyvals=Options2Keyval(options);\n');
-    fprintf(fjob,'\t\tSimulateModel(studyinfo.base_model,''modifications'',studyinfo.simulations(SimID).modifications,''studyinfo'',studyinfo,keyvals{:});\n');    
+    fprintf(fjob,'\t\tdata=SimulateModel(studyinfo.base_model,''modifications'',siminfo.modifications,''studyinfo'',studyinfo,keyvals{:});\n');    
+    fprintf(fjob,'\t\tfor i=1:length(siminfo.result_functions)\n');
+    fprintf(fjob,'\t\t\tkeyvals=Options2Keyval(siminfo.result_options{i});\n');
+    fprintf(fjob,'\t\t\tAnalyzeData(data,siminfo.result_functions{i},''result_file'',siminfo.result_files{i},''save_data_flag'',1,keyvals{:});\n');
+    fprintf(fjob,'\t\tend\n');
     % add error handling
     fprintf(fjob,'\tcatch err\n');
     %fprintf(fjob,'\t\ttry delete(fullfile(studyinfo.study_dir,[''.locked_'' num2str(SimID)])); end\n');
