@@ -1,5 +1,5 @@
-function data=PlotData(data,varargin)
-%% data=PlotData(data,'option',value)
+function handles=PlotData(data,varargin)
+%% handles=PlotData(data,'option',value)
 % Purpose: plot data in various ways depending on what data was provided
 % and what options are defined. this function is wrapped by PlotWaveforms,
 % PlotPower, ... to provide a single function for organizing and displaying
@@ -19,7 +19,7 @@ function data=PlotData(data,varargin)
 %       see see CalcFR options for plot_type 'rastergram' or 'rates'
 %       see CalcPower options for plot_type 'power'
 % Outputs:
-%   data (optional): DynaSim data structure with any new analysis results
+%   handles: graphic handles to figures
 % 
 % Plots:
 % if Nsims>1: one sim per row
@@ -147,6 +147,7 @@ options=CheckOptions(varargin,{...
   'yscale','linear',{'linear','log','log10','log2'},...
   },false);
 data=CheckData(data);
+handles=[];
 
 % todo: add option 'plot_mode' {'trace','image'}
 
@@ -297,7 +298,7 @@ for figset=1:num_fig_sets
   for fig=1:num_figs
     ylims=[nan nan];
     % create figure
-    figure('units','normalized','outerposition',[0 0 1 1])
+    handles(end+1)=figure('units','normalized','outerposition',[0 0 1 1]);
     % position axes
     haxes=tight_subplot(num_rows,num_cols,[.01 .03],[.05 .01],[.03 .01]);
     axis_counter=0;
