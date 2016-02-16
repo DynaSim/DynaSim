@@ -370,6 +370,23 @@ for i=1:length(spec.connections)
   end
 end
 
+% remove populations with size==0
+sizes=[spec.populations.size];
+if any(sizes==0)
+  % find null populations
+  null_pops=find(sizes==0);
+  null_names={spec.populations(null_pops).name};
+  % remove from .populations
+  spec.populations(null_pops)=[];
+  % remove from connections
+  if ~isempty(spec.connections)
+    sources={spec.connections.source};
+    targets={spec.connections.target};
+    null_conns=ismember(sources,null_names) | ismember(targets,null_names);
+    spec.connections(null_conns)=[];
+  end
+end    
+
 % 3.0 sort fields
 % remove extra fields
 otherfields=setdiff(fieldnames(spec.populations),pop_field_order);
