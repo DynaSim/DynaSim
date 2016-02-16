@@ -8,6 +8,7 @@ function data = CalcFR(data,varargin)
 %     'threshold' - scalar threshold value for detecting events (default: 0)
 %     'bin_size' - size of temporal window over which to calculate rate [ms or fraction of data set] (default: 5% of the data set)
 %     'bin_shift' - how much to shift the bin before calculating rate again [ms or fraction of data set] (default: 1% of the data set)
+%     'exclude_data_flag' - whether to remove simulated data from result structure (default: 0)
 % Outputs:
 %   data: data structure with firing rates [Hz] in .variable_FR
 % 
@@ -40,6 +41,7 @@ options=CheckOptions(varargin,{...
   'threshold',1e-5,[],... % slightly above zero in case variable is point process *_spikes {0,1}
   'bin_size',.05,[],...  % 30
   'bin_shift',.01,[],... % 10
+  'exclude_data_flag',0,{0,1},...
   },false);
 
 data = CheckData(data);
@@ -152,5 +154,9 @@ data.time_FR=bin_times;
 if ~ismember('time_FR',data.results)
   data.results{end+1}='time_FR';
 end
-
+if options.exclude_data_flag
+  for l=1:length(data.labels)
+    data=rmfield(data,data.labels{l});
+  end
+end
 

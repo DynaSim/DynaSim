@@ -13,6 +13,7 @@ function data = CalcPower(data,varargin)
 %     'max_peak_frequency' - Hz, max frequency for peak detection (default: 150)
 %     'peak_threshold_prctile' percentile for setting power threshold for peak detection (default: 95)
 %     'peak_area_width' - Hz, size of frequency bin (centered on peak) over which to calculate area under spectrum (default: 5)
+%     'exclude_data_flag' - whether to remove simulated data from result structure (default: 0)
 % 
 % Outputs:
 %   data: data structure with spectral power in data.VARIABLE_Power_SUA.Pxx
@@ -55,6 +56,7 @@ options=CheckOptions(varargin,{...
   'max_peak_frequency',200,[],... % Hz, max frequency for peak detection
   'peak_threshold_prctile',95,[],... % percentile for setting power threshold for peak detection
   'peak_area_width',5,[],... % Hz, size of frequency bin (centered on peak) over which to calculate area under spectrum
+  'exclude_data_flag',0,{0,1},...
   },false);
 
 data = CheckData(data);
@@ -222,7 +224,11 @@ for v=1:length(options.variable)
   if ~ismember([var '_Power_MUA'],data.results)
     data.results{end+1}=[var '_Power_MUA'];
   end
-  
+  if options.exclude_data_flag
+    for l=1:length(data.labels)
+      data=rmfield(data,data.labels{l});
+    end
+  end
 %   % alternate organization scheme:
 %   data.([var '_Pxx'])=Pxx;
 %   data.([var '_Pxx_PeakFreq'])=PeakFreq;
