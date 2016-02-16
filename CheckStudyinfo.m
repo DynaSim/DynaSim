@@ -33,6 +33,9 @@ function studyinfo=CheckStudyinfo(studyinfo,varargin)
 %            .simulations(k).modified_model_file
 %            .simulations(k).simulator_options
 %            .simulations(k).solve_file
+%            .simulations(k).result_files (={}): cell array of result files (including saved plots)
+%            .simulations(k).result_functions (={}): cell array of names of functions producing results stored in result_files (including plot functions)
+%            .simulations(k).result_options (={}): cell array of option structures for result_functions
 %   studyinfo.base_data_files{k} % these are the base data files analyses are applied to. for simulated data, this equals {simulations.datafile}
 %   studyinfo.analysis(j)(=[]): metadata for one batch (analysis applied to all files = {studyinfo.simulations.data_file})
 %            .analysis(j).analysis_id
@@ -70,7 +73,7 @@ studyinfo_field_order={'study_id','study_dir','time_created','last_modified',...
 
 sim_field_order={'sim_id','modifications','stop_time','duration','status',...
   'data_file','batch_dir','job_file','error_log','machine_info','modified_model_file',...
-  'simulator_options','solve_file'};
+  'simulator_options','solve_file','result_files','result_functions','result_options'};
 
 % todo: implement analysis standardization
 analysis_field_order={'analysis_id','function','analysis_options','stop_time','duration',...
@@ -192,6 +195,15 @@ elseif isstruct(studyinfo.simulations)
   if ~isfield(studyinfo.simulations,'solve_file')
     studyinfo.simulations.solve_file='';
   end  
+  if ~isfield(studyinfo.simulations,'result_files')
+    studyinfo.simulations.result_files={};
+  end  
+  if ~isfield(studyinfo.simulations,'result_functions')
+    studyinfo.simulations.result_functions={};
+  end  
+  if ~isfield(studyinfo.simulations,'result_options')
+    studyinfo.simulations.result_options={};
+  end    
 end
 % check substructure studyinfo.analysis:
 if ~isfield(studyinfo,'analysis')
