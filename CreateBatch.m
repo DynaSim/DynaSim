@@ -316,8 +316,7 @@ end
     fprintf(fjob,'\t\tkeyvals=Options2Keyval(options);\n');
     fprintf(fjob,'\t\tdata=SimulateModel(studyinfo.base_model,''modifications'',siminfo.modifications,''studyinfo'',studyinfo,keyvals{:});\n');    
     fprintf(fjob,'\t\tfor i=1:length(siminfo.result_functions)\n');
-    fprintf(fjob,'\t\t\tkeyvals=Options2Keyval(siminfo.result_options{i});\n');
-    fprintf(fjob,'\t\t\tAnalyzeData(data,siminfo.result_functions{i},''result_file'',siminfo.result_files{i},''save_data_flag'',1,keyvals{:});\n');
+    fprintf(fjob,'\t\t\tAnalyzeData(data,siminfo.result_functions{i},''result_file'',siminfo.result_files{i},''save_data_flag'',1,siminfo.result_options{i}{:});\n');
     fprintf(fjob,'\t\tend\n');
     % add error handling
     fprintf(fjob,'\tcatch err\n');
