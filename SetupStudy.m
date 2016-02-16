@@ -128,14 +128,14 @@ if options.save_data_flag
       for kk=1:length(options.analysis_functions)
         studyinfo.simulations(k).result_functions{end+1}=options.analysis_functions{kk};
         studyinfo.simulations(k).result_options{end+1}=options.analysis_options{kk};
-        fname=[options.prefix '_sim' num2str(k) '_data_' options.analysis_functions{kk} '.mat'];
+        fname=[options.prefix '_sim' num2str(k) '_analysis' num2str(kk) '_' options.analysis_functions{kk} '.mat'];
         studyinfo.simulations(k).result_files{end+1}=fullfile(data_dir,fname);
       end
       % set files names for saved plots (in plot_dir)
       for kk=1:length(options.plot_functions)
         studyinfo.simulations(k).result_functions{end+1}=options.plot_functions{kk};
         studyinfo.simulations(k).result_options{end+1}=options.plot_options{kk};
-        fname=[options.prefix '_sim' num2str(k) '_data_' options.plot_functions{kk}]; 
+        fname=[options.prefix '_sim' num2str(k) '_plot' num2str(kk) '_' options.plot_functions{kk}]; 
         % note: extension will depend on output format (jpg,png,eps,svg)
         % and be set in AnalyzeData().
         studyinfo.simulations(k).result_files{end+1}=fullfile(plot_dir,fname);
