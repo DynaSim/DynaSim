@@ -103,6 +103,16 @@ if options.save_data_flag
     end
     mkdir(data_dir);
   end
+  % create figure dir if it doesn't exist and is needed
+  if ~isempty(options.plot_functions)
+    plot_dir=fullfile(options.study_dir,'plots');
+    if ~isdir(plot_dir)
+      if options.verbose_flag
+        fprintf('creating plot directory: %s\n',plot_dir);
+      end
+      mkdir(plot_dir);
+    end
+  end
   % set single-simulation metadata (studyinfo.simulation(k))
   % create list of output file names (use modifications_set to loop sims)
   for k=1:length(modifications_set)
@@ -114,6 +124,21 @@ if options.save_data_flag
       fname=[options.prefix '_sim' num2str(k) '_model.mat'];
       studyinfo.simulations(k).modified_model_file=fullfile(models_dir,fname);
       studyinfo.simulations(k).status='initialized';
+      % set file names for analysis results
+      for kk=1:length(options.analysis_functions)
+        studyinfo.simulations(k).result_functions{end+1}=options.analysis_functions{kk};
+        studyinfo.simulations(k).result_options{end+1}=options.analysis_options{kk};
+        fname=[options.prefix '_sim' num2str(k) '_data_' options.analysis_functions{kk} '.mat'];
+        studyinfo.simulations(k).result_files{end+1}=fullfile(data_dir,fname);
+      end
+      % set files names for saved plots (in plot_dir)
+      for kk=1:length(options.plot_functions)
+        studyinfo.simulations(k).result_functions{end+1}=options.plot_functions{kk};
+        studyinfo.simulations(k).result_options{end+1}=options.plot_options{kk};
+        fname=[options.prefix '_sim' num2str(k) '_data_' options.plot_functions{kk}]; 
+        % note: extension will depend on output format (jpg,png,eps,svg)
+        studyinfo.simulations(k).result_files{end+1}=fullfile(plot_dir,fname);
+      end
       % todo: add options.detailed_names_flag (see AnalyzeStudy())
       % ...
     end
