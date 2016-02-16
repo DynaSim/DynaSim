@@ -45,6 +45,12 @@ function [data,studyinfo]=SimulateModel(model,varargin)
 %     'num_cores'     : number of cores to specify in the parallel pool
 %     *note: parallel computing has been disabled for debugging...
 % 
+%   options for post-processing:
+%     'analysis_functions': cell array of analysis function handles
+%     'analysis_options'  : cell array of option cell arrays {'option1',value1,...}
+%     'plot_functions'    : cell array of plot function handles
+%     'plot_options'      : cell array of option cell arrays {'option1',value1,...}
+% 
 %   other options:
 %     'verbose_flag'  : whether to display informative messages/logs (default: 0)
 %     'modifications' : how to modify DynaSim specification structure component before simulation (see ApplyModifications)
@@ -236,6 +242,10 @@ options=CheckOptions(varargin,{...
   'sim_id',[],[],... % sim id in an existing study
   'studyinfo',[],[],... 
   'email',[],[],... % email to send notification upon study completion
+  'analysis_functions',[],[],...
+  'analysis_options',[],[],...
+  'plot_functions',[],[],...
+  'plot_options',[],[],...
   },false);
 % more options: remove_solve_dir, remove_batch_dir, post_downsample_factor
 
@@ -260,6 +270,74 @@ if ischar(options.study_dir) && options.save_data_flag==0
   if options.verbose_flag
     fprintf('setting ''save_data_flag'' to 1 for storing results in study_dir: %s.\n',options.study_dir);
   end
+end
+
+% prepare analysis functions and options
+if ~isempty(options.analysis_functions)
+  if ~iscell(options.analysis_functions)
+    % convert function handle into cell array of function handles
+    options.analysis_functions={options.analysis_functions};
+  end
+  if any(~cellfun(@(x)isa(x,'function_handle'),options.analysis_functions))
+    error('at least one analysis function was not provided as a function handle.');
+  end
+  if isempty(options.analysis_options)
+    % convert to empty option cell array
+    options.analysis_options={};
+  end
+  if ~iscell(options.analysis_options)
+    error('''analysis_options'' must be a cell array of options or option cell arrays');
+  end
+  % force to be a cell array of option cell arrays
+  if isempty(options.analysis_options) || ischar(options.analysis_options{1}) % first element is an option
+    options.analysis_options={options.analysis_options};
+  end
+  % make sure there is one option cell array per analysis function
+  if length(options.analysis_options)==1 && length(options.analysis_functions)>1
+    % copy options for each analysis function
+    options.analysis_options=repmat(options.analysis_options,[1 length(options.analysis_functions)]);
+  elseif length(options.analysis_options) ~= length(options.analysis_functions)
+    error('there must be one option cell array per analysis function.');
+  end
+  if options.cluster_flag~=1
+    warning('analysis functions will not be run after simulation. currently automatic post-simulation analyses are supported only for cluster jobs.');
+    options.analysis_functions=[];
+    options.analysis_options=[];
+  end
+end
+
+% prepare plot functions and options
+if ~isempty(options.plot_functions)
+  if ~iscell(options.plot_functions)
+    % convert function handle into cell array of function handles
+    options.plot_functions={options.plot_functions};
+  end
+  if any(~cellfun(@(x)isa(x,'function_handle'),options.plot_functions))
+    error('at least one plot function was not provided as a function handle.');
+  end
+  if isempty(options.plot_options)
+    % convert to empty option cell array
+    options.plot_options={};
+  end
+  if ~iscell(options.plot_options)
+    error('''plot_options'' must be a cell array of options or option cell arrays');
+  end
+  % force to be a cell array of option cell arrays
+  if isempty(options.plot_options) || ischar(options.plot_options{1}) % first element is an option
+    options.plot_options={options.plot_options};
+  end
+  % make sure there is one option cell array per plot function
+  if length(options.plot_options)==1 && length(options.plot_functions)>1
+    % copy options for each plot function
+    options.plot_options=repmat(options.plot_options,[1 length(options.plot_functions)]);
+  elseif length(options.plot_options) ~= length(options.plot_functions)
+    error('there must be one option cell array per plot function.');
+  end
+  if options.cluster_flag~=1
+    warning('plot functions will not be run after simulation. currently automatic post-simulation plotting are supported only for cluster jobs.');
+    options.plot_functions=[];
+    options.plot_options=[];
+  end  
 end
 
 % check path
