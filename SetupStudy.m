@@ -137,6 +137,7 @@ if options.save_data_flag
         studyinfo.simulations(k).result_options{end+1}=options.plot_options{kk};
         fname=[options.prefix '_sim' num2str(k) '_data_' options.plot_functions{kk}]; 
         % note: extension will depend on output format (jpg,png,eps,svg)
+        % and be set in AnalyzeData().
         studyinfo.simulations(k).result_files{end+1}=fullfile(plot_dir,fname);
       end
       % todo: add options.detailed_names_flag (see AnalyzeStudy())
