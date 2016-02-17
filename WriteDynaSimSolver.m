@@ -229,7 +229,7 @@ else
   end
 end
 % initialize time
-fprintf(fid,'t=0;\n');
+fprintf(fid,'t=0; k=1;\n');
 
 % todo: get coder varsize working with new format:
 
