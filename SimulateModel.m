@@ -503,10 +503,6 @@ try
         varargin([tmpinds tmpinds+1])=[];
       end
       tmpdata=feval(options.experiment,model,varargin{:});
-%       prepare_varied_metadata;
-%       update_data; % concatenate data structures across simulations
-%       continue; % skip to next simulation
-%     end
     else
       %% 2.0 prepare solver function (solve_ode.m/mex)
       % - matlab solver: create @odefun with vectorized state variables
