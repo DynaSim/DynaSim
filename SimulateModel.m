@@ -498,103 +498,104 @@ try
       % todo: create external function to remove select key/value pairs
       % from varargin...
       % remove from varargin: 'experiment', 'modifications', 'vary', 'cluster_flag' (to avoid undesired recursive action in experiment function)
-      tmpinds=find(cellfun(@(x)isequal(x,'experiment'),varargin) | cellfun(@(x)isequal(x,'cluster_flag'),varargin) | cellfun(@(x)isequal(x,'vary'),varargin) | cellfun(@(x)isequal(x,'modifications'),varargin));
+      tmpinds=find(cellfun(@(x)isequal(x,'experiment'),varargin) | cellfun(@(x)isequal(x,'cluster_flag'),varargin) | cellfun(@(x)isequal(x,'vary'),varargin) | cellfun(@(x)isequal(x,'modifications'),varargin) | cellfun(@(x)isequal(x,'study_dir'),varargin) | cellfun(@(x)isequal(x,'save_data_flag'),varargin));
       if ~isempty(tmpinds)
         varargin([tmpinds tmpinds+1])=[];
       end
       tmpdata=feval(options.experiment,model,varargin{:});
-      prepare_varied_metadata;
-      update_data; % concatenate data structures across simulations
-      continue; % skip to next simulation
-    end
-    
-    %% 2.0 prepare solver function (solve_ode.m/mex)
-    % - matlab solver: create @odefun with vectorized state variables
-    % - DynaSim solver: write solve_ode.m and params.mat  (based on dnsimulator())    
-    % check if model solver needs to be created 
-    % (i.e., if is first simulation or a search space varying mechanism list)
-    if sim==1 || (~isempty(modifications_set{1}) && any(cellfun(@(x)strcmp(x{2},'mechanism_list'),modifications_set)))
-      % prepare file that solves the model system
-      if isempty(options.solve_file) || (~exist(options.solve_file,'file') && ~exist([options.solve_file '.mexa64'],'file') &&  ~exist([options.solve_file '.mexa32'],'file'))
-        options.solve_file=GetSolveFile(model,studyinfo,options); % store name of solver file in options struct
-      end
-      % todo: consider providing better support for studies that produce different m-files per sim (e.g., varying mechanism_list)
-      if options.verbose_flag
-        fprintf('SIMULATING MODEL:\n');
-        fprintf('solving system using %s\n',options.solve_file);
-      end
+%       prepare_varied_metadata;
+%       update_data; % concatenate data structures across simulations
+%       continue; % skip to next simulation
+%     end
     else
-      % use previous solve_file
-    end    
-    [fpath,fname,fext]=fileparts(options.solve_file);
-      
-    %% 3.0 integrate model with solver of choice and prepare output data
-    % - matlab solver: solve @odefun with feval and solver_options
-    % - DynaSim solver: run solve_ode.m or create/run MEX
-    % move to directory with solver file
-    if options.verbose_flag
-      fprintf('changing directory to %s\n',fpath);
-    end
-    cd(fpath);
-    % save parameters there
-    warning('off','catstruct:DuplicatesFound');
-    p=catstruct(CheckSolverOptions(options),model.parameters);
-    param_file=fullfile(fpath,'params.mat');
-    if options.verbose_flag
-      fprintf('saving model parameters: %s\n',param_file);
-    end
-    save(param_file,'p');
-    %pause(.01);
-    % solve system
-    if options.disk_flag  % ### data stored on disk during simulation ###
-      sim_start_time=tic;
-      csv_data_file=feval(fname);  % returns name of file storing the simulated data
-      duration=toc(sim_start_time);
-      if nargout>0 || options.save_data_flag
-        tmpdata=ImportData(csv_data_file,'process_id',sim_id); % eg, data.csv
-      end
-    else                  % ### data stored in memory during simulation ###
-      % create list of output variables to capture
-      output_variables=cat(2,'time',model.state_variables);
-      if ~isempty(model.monitors)
-        output_variables=cat(2,output_variables,fieldnames(model.monitors)');
-      end
-      if ~isempty(model.fixed_variables)
-        fields=fieldnames(model.fixed_variables)';
-        output_variables=cat(2,output_variables,fields);
-        num_fixed_variables=length(fields);
-      else
-        num_fixed_variables=0;
-      end
-      % run simulation
-      if options.verbose_flag
-        fprintf('Running simulation %g/%g (solver=''%s'', dt=%g, tspan=[%g %g]) ...\n',sim,length(modifications_set),options.solver,options.dt,options.tspan);
-      end
-      sim_start_time=tic;
-      outputs=cell(1,length(output_variables)); % preallocate for PCT compatibility
-      [outputs{1:length(output_variables)}]=feval(fname);
-      duration=toc(sim_start_time);
-      % prepare DynaSim data structure
-      % organize simulated data in data structure (move time to last)
-      tmpdata.labels=output_variables([2:length(output_variables)-num_fixed_variables 1]);
-      for i=1:length(output_variables)
-        if ~isempty(model.fixed_variables) && isfield(model.fixed_variables,output_variables{i})
-          % store fixed variables in model substructure
-          model.fixed_variables.(output_variables{i})=outputs{i};
-        else
-          % store state variables and monitors as data fields
-          tmpdata.(output_variables{i})=outputs{i};
+      %% 2.0 prepare solver function (solve_ode.m/mex)
+      % - matlab solver: create @odefun with vectorized state variables
+      % - DynaSim solver: write solve_ode.m and params.mat  (based on dnsimulator())    
+      % check if model solver needs to be created 
+      % (i.e., if is first simulation or a search space varying mechanism list)
+      if sim==1 || (~isempty(modifications_set{1}) && any(cellfun(@(x)strcmp(x{2},'mechanism_list'),modifications_set)))
+        % prepare file that solves the model system
+        if isempty(options.solve_file) || (~exist(options.solve_file,'file') && ~exist([options.solve_file '.mexa64'],'file') &&  ~exist([options.solve_file '.mexa32'],'file'))
+          options.solve_file=GetSolveFile(model,studyinfo,options); % store name of solver file in options struct
         end
-        outputs{i}=[]; % clear assigned outputs from memory
+        % todo: consider providing better support for studies that produce different m-files per sim (e.g., varying mechanism_list)
+        if options.verbose_flag
+          fprintf('SIMULATING MODEL:\n');
+          fprintf('solving system using %s\n',options.solve_file);
+        end
+      else
+        % use previous solve_file
+      end    
+      [fpath,fname,fext]=fileparts(options.solve_file);
+
+      %% 3.0 integrate model with solver of choice and prepare output data
+      % - matlab solver: solve @odefun with feval and solver_options
+      % - DynaSim solver: run solve_ode.m or create/run MEX
+      % move to directory with solver file
+      if options.verbose_flag
+        fprintf('changing directory to %s\n',fpath);
       end
-    end
-    if options.verbose_flag
-      fprintf('Elapsed time: %g seconds.\n',duration); 
-    end
-    % add metadata to tmpdata
-    tmpdata.simulator_options=options; % store simulator controls
-    if options.store_model_flag==1  % optionally store the simulated model
-      tmpdata.model=model;
+      cd(fpath);
+      % save parameters there
+      warning('off','catstruct:DuplicatesFound');
+      p=catstruct(CheckSolverOptions(options),model.parameters);
+      param_file=fullfile(fpath,'params.mat');
+      if options.verbose_flag
+        fprintf('saving model parameters: %s\n',param_file);
+      end
+      save(param_file,'p');
+      %pause(.01);
+      % solve system
+      if options.disk_flag  % ### data stored on disk during simulation ###
+        sim_start_time=tic;
+        csv_data_file=feval(fname);  % returns name of file storing the simulated data
+        duration=toc(sim_start_time);
+        if nargout>0 || options.save_data_flag
+          tmpdata=ImportData(csv_data_file,'process_id',sim_id); % eg, data.csv
+        end
+      else                  % ### data stored in memory during simulation ###
+        % create list of output variables to capture
+        output_variables=cat(2,'time',model.state_variables);
+        if ~isempty(model.monitors)
+          output_variables=cat(2,output_variables,fieldnames(model.monitors)');
+        end
+        if ~isempty(model.fixed_variables)
+          fields=fieldnames(model.fixed_variables)';
+          output_variables=cat(2,output_variables,fields);
+          num_fixed_variables=length(fields);
+        else
+          num_fixed_variables=0;
+        end
+        % run simulation
+        if options.verbose_flag
+          fprintf('Running simulation %g/%g (solver=''%s'', dt=%g, tspan=[%g %g]) ...\n',sim,length(modifications_set),options.solver,options.dt,options.tspan);
+        end
+        sim_start_time=tic;
+        outputs=cell(1,length(output_variables)); % preallocate for PCT compatibility
+        [outputs{1:length(output_variables)}]=feval(fname);
+        duration=toc(sim_start_time);
+        % prepare DynaSim data structure
+        % organize simulated data in data structure (move time to last)
+        tmpdata.labels=output_variables([2:length(output_variables)-num_fixed_variables 1]);
+        for i=1:length(output_variables)
+          if ~isempty(model.fixed_variables) && isfield(model.fixed_variables,output_variables{i})
+            % store fixed variables in model substructure
+            model.fixed_variables.(output_variables{i})=outputs{i};
+          else
+            % store state variables and monitors as data fields
+            tmpdata.(output_variables{i})=outputs{i};
+          end
+          outputs{i}=[]; % clear assigned outputs from memory
+        end
+      end
+      if options.verbose_flag
+        fprintf('Elapsed time: %g seconds.\n',duration); 
+      end
+      % add metadata to tmpdata
+      tmpdata.simulator_options=options; % store simulator controls
+      if options.store_model_flag==1  % optionally store the simulated model
+        tmpdata.model=model;
+      end
     end
     prepare_varied_metadata;
     % save single data set and update studyinfo
