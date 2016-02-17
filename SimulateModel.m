@@ -650,7 +650,11 @@ end
       mods=cat(1,mods,modifications_set{sim});
     end
     if ~isempty(mods)
-      varied={};
+      if isfield(tmpdata,'varied')
+        varied=tmpdata(1).varied;
+      else
+        varied={};
+      end
       for i=1:size(mods,1)
         % prepare valid field name for thing varied:
         fld=[mods{i,1} '_' mods{i,2}];
@@ -658,10 +662,14 @@ end
         fld=regexprep(fld,'(->)|(<-)|(-)|(\.)','_');
         % remove brackets and parentheses
         fld=regexprep(fld,'[\[\]\(\)\{\}]','');
-        tmpdata.(fld)=mods{i,3};
+        for j=1:length(tmpdata)
+          tmpdata(j).(fld)=mods{i,3};
+        end
         varied{end+1}=fld;
       end
-      tmpdata.varied=varied;
+      for j=1:length(tmpdata)
+        tmpdata(j).varied=varied;
+      end
     end    
   end
     
