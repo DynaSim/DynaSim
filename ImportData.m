@@ -78,9 +78,11 @@ if isstruct(file) && isfield(file,'study_dir')
   sim_info=studyinfo.simulations(success);
   % load each data set recursively
   keyvals=Options2Keyval(options);
-  for i=1:length(data_files)
-    fprintf('loading file %g/%g: %s\n',i,length(data_files),data_files{i});
+  num_files=length(data_files);
+  for i=1:num_files
+    fprintf('loading file %g/%g: %s\n',i,num_files,data_files{i});
     tmp_data=ImportData(data_files{i},keyvals{:});
+    num_sets_per_file=length(tmp_data);
     if ~isfield(tmp_data,'varied')
     % add varied info 
       % this is necessary here when loading .csv data lacking metadata
@@ -88,18 +90,24 @@ if isstruct(file) && isfield(file,'study_dir')
       modifications=sim_info(i).modifications;
       for j=1:size(modifications,1)
         varied=[modifications{j,1} '_' modifications{j,2}];
-        tmp_data.varied{end+1}=varied;
-        tmp_data.(varied)=modifications{j,3};
+        for k=1:num_sets_per_file
+          tmp_data(k).varied{end+1}=varied;
+          tmp_data(k).(varied)=modifications{j,3};
+        end
       end    
     end
     % store this data
     if i==1
+      total_num_sets=num_sets_per_file*num_files;
+      set_indices=0:num_sets_per_file:total_num_sets-1;
       % preallocate full data matrix based on first data file
-      data(1:length(data_files))=tmp_data;
-    else
-      % replace i-th data element by this data set
-      data(i)=tmp_data;
+      data(1:total_num_sets)=tmp_data(1);
+%       data(1:length(data_files))=tmp_data;
+%     else
+%       data(i)=tmp_data;
     end
+    % replace i-th set of data sets by these data sets
+    data(set_indices(i)+(1:num_sets_per_file))=tmp_data;
   end
   return;
 else
@@ -135,6 +143,10 @@ if ischar(file)
       if isempty(options.time_limits) && isempty(options.variables)
         % load full data set
         data=load(file);
+        % if file only contains a structure called 'data' then return that
+        if isfield(data,'data') && length(fieldnames(data))==1
+          data=data.data;
+        end
       else
         % load partial data set
         % use matfile() to load HDF subsets given varargin options...

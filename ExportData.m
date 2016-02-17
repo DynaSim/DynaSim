@@ -18,14 +18,17 @@ options=CheckOptions(varargin,{...
 
 switch lower(options.format)
   case 'mat'
-    % split DynaSim data structure into separate variables saved to a
-    % v7.3 mat-file for subsequent HDF-style loading with matfile()
-    vars=fieldnames(data);
-    for i=1:length(vars)
-      eval(sprintf('%s=data.%s;',vars{i},vars{i}));
+    if numel(data)==1
+      % split DynaSim data structure into separate variables saved to a
+      % v7.3 mat-file for subsequent HDF-style loading with matfile()
+      vars=fieldnames(data);
+      for i=1:length(vars)
+        eval(sprintf('%s=data.%s;',vars{i},vars{i}));
+      end
+      save(options.filename,vars{:},'-v7.3');
+    else
+      save(options.filename,'data','-v7.3');
     end
-    save(options.filename,vars{:},'-v7.3');
-    %save(options.filename,'data','-v7.3');
   case 'csv'
     % write csv file
     % ExportCSV(data,options.filename);
