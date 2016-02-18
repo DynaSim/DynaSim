@@ -24,7 +24,7 @@ options=opts.simulator_options;
 if options.verbose_flag
   fprintf('PREPARING STUDY:\n');
 end
-if options.save_data_flag
+if options.save_data_flag || options.save_results_flag
   % set default study_dir if necessary
   if isempty(options.study_dir)
     % format: <study_dir> = <project_dir>/<prefix>_<timestamp>

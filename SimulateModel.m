@@ -28,6 +28,7 @@ function [data,studyinfo]=SimulateModel(model,varargin)
 %                     components to vary across simulations (see NOTE 1 and Vary2Modifications)
 % 
 %   options to control saved data:
+%     'save_results_flag': whether to save results of analysis and plotting
 %     'save_data_flag': whether to save simulated data to disk after completion {0 or 1} (default: 0)
 %     'overwrite_flag': whether to overwrite existing data files {0 or 1} (default: 0)
 %     'study_dir'     : relative or absolute path to output directory (default: current directory)
@@ -234,6 +235,7 @@ options=CheckOptions(varargin,{...
   'compile_flag',0,{0,1},... % exist('codegen')==6, whether to compile using coder instead of interpreting Matlab
   'disk_flag',0,{0,1},...            % whether to write to disk during simulation instead of storing in memory
   'save_data_flag',0,{0,1},...  % whether to save simulated data
+  'save_results_flag',0,{0,1},...  % whether to save simulated data
   'project_dir',pwd,[],...
   'study_dir',[],[],... % study directory
   'prefix','study',[],... % prefix prepended to all output files
@@ -258,12 +260,16 @@ if options.compile_flag && options.reduce_function_calls_flag==0
   options.reduce_function_calls_flag=1;
 end
 
-% if options.cluster_flag && options.save_data_flag==0
+if options.cluster_flag && options.save_data_flag==0
 %   options.save_data_flag=1;
 %   if options.verbose_flag
 %     fprintf('setting ''save_data_flag'' to 1 for storing results of batch jobs for later access.\n');
 %   end
-% end
+  options.save_results_flag=1;
+  if options.verbose_flag
+    fprintf('setting ''save_results_flag'' to 1 for storing results of batch jobs for later access.\n');
+  end
+end
 % 
 % if ischar(options.study_dir) && options.save_data_flag==0
 %   options.save_data_flag=1;

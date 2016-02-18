@@ -9,7 +9,7 @@ function result=AnalyzeData(data,func,varargin)
 %   func: function handle pointing to analysis function
 %   options: 
 %     - key/value pairs passed on to the analysis function
-%     - 'save_data_flag' (0 or 1) (default: 0): whether to save result
+%     - 'save_results_flag' (0 or 1) (default: 0): whether to save result
 %     - 'result_file' (default: 'result.mat'): where to save result
 % 
 % outputs:
@@ -22,7 +22,7 @@ function result=AnalyzeData(data,func,varargin)
 % check inputs
 options=CheckOptions(varargin,{...
   'result_file','result.mat',[],...
-  'save_data_flag',0,{0,1},...
+  'save_results_flag',0,{0,1},...
   },false);
 
 % load data if input is not a DynaSim data structure
@@ -40,7 +40,7 @@ if numel(func)>1
 end
 % save data if no output is requested
 if nargout<1
-  options.save_data_flag=1;
+  options.save_results_flag=1;
 end
 
 % do analysis
@@ -55,7 +55,7 @@ if all(ishandle(result)) % analysis function returned a graphics handle
     % add 'varied' info to plot as annotation
     % ...
     % save plot
-    if options.save_data_flag
+    if options.save_results_flag
       % temporary default: jpg
       if length(result)==1
         fname=[options.result_file '.jpg'];
@@ -81,7 +81,7 @@ else % analysis function returned derived data
     end
   end
   % save derived data
-  if options.save_data_flag
+  if options.save_results_flag
     fprintf('Saving derived data: %s\n',options.result_file);
     save(options.result_file,'result','-v7.3');
   end
