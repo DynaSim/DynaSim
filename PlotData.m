@@ -144,6 +144,7 @@ options=CheckOptions(varargin,{...
   'plot_mode','trace',{'trace','image'},...
   'plot_type','waveform',{'waveform','rastergram','power','rates'},...
   'xlim',[],[],...
+  'ylim',[],[],...
   'yscale','linear',{'linear','log','log10','log2'},...
   },false);
 data=CheckData(data);
@@ -610,7 +611,9 @@ for figset=1:num_fig_sets
         end
         xlim(options.xlim);
         ylabel(strrep(var,'_','\_'));
-        if shared_ylims_flag
+        if ~isempty(options.ylim)
+          ylims=options.ylim;
+        elseif shared_ylims_flag
           % update max/min
           ylims(1)=min(ylims(1),min(dat(:)));
           ylims(2)=max(ylims(2),max(dat(:)));
@@ -644,7 +647,7 @@ for figset=1:num_fig_sets
       end % end loop over subplot columns
     end % end loop over subplot rows            
     % set y-limits to max/min over data in this figure
-    if shared_ylims_flag
+    if shared_ylims_flag || ~isempty(options.ylim)
       if ylims(1)~=ylims(2)
         set(haxes,'ylim',ylims);
       end
