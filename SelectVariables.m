@@ -15,6 +15,9 @@ function variables=SelectVariables(labels,var_strings)
 %   var_strings='pop1_v';
 %   var_strings='pop1_*';
 %   var_strings='pop2_*';
+if nargin<2
+  var_strings=[];
+end
 if isempty(var_strings)
   % set default: all pops with state variable of first element of labels
   var=regexp(labels{1},'_.*$','match');
