@@ -499,18 +499,11 @@ try
       if options.cluster_flag && options.compile_flag
         warning('compiled solver is not available for experiments on the cluster. Simulation will be run in Matlab.');
       end
-      % todo: create external function to remove select key/value pairs from varargin...
       % from varargin...
-      % remove 'experiment', 'modifications', 'vary', 'cluster_flag' to 
-      % avoid undesired recursive action in experiment function
-      tmpidx=cellfun(@(x)isequal(x,'experiment'),varargin) | cellfun(@(x)isequal(x,'cluster_flag'),varargin) | cellfun(@(x)isequal(x,'vary'),varargin) | cellfun(@(x)isequal(x,'modifications'),varargin);
+      % remove 'experiment', 'modifications', 'vary', 'cluster_flag' to avoid undesired recursive action in experiment function
       % remove 'save_data_flag' to prevent individual simulations from being saved during experiment
-      tmpidx= tmpidx | cellfun(@(x)isequal(x,'save_data_flag'),varargin); % | cellfun(@(x)isequal(x,'study_dir'),varargin)
-      tmpinds=find(tmpidx);
-      if ~isempty(tmpinds)
-        varargin([tmpinds tmpinds+1])=[];
-      end
-      tmpdata=feval(options.experiment,model,varargin{:});
+      keyvals=RemoveKeyval(varargin,{'experiment','cluster_flag','vary','modifications','save_data_flag'});
+      tmpdata=feval(options.experiment,model,keyvals{:});
       if ~isempty(modifications_set{sim})
         % 
       end
