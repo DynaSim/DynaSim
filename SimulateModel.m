@@ -645,6 +645,9 @@ end
     end
     if ~isempty(modifications_set{sim})
       mods=cat(1,mods,modifications_set{sim});
+      for j=1:length(tmpdata)
+        tmpdata(j).simulator_options.modifications=modifications_set{sim};
+      end
     end
     if ~isempty(mods)
       if isfield(tmpdata,'varied')
