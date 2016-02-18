@@ -57,6 +57,12 @@ num_simulations=length(modifications_set);
   end
 % end
 
+if isa(options.simulator_options.experiment,'function_handle') && options.compile_flag
+  options.compile_flag=0;
+  options.simulator_options.compile_flag=0;
+  fprintf('WARNING: solver compilation is not available for experiments run on the cluster.\n');
+end
+
 % create base solve_file (m- or MEX-file)
 solve_file=GetSolveFile(base_model,studyinfo,options.simulator_options);
 
@@ -219,9 +225,6 @@ for sim=1:num_simulations
   studyinfo.simulations(sim).simulator_options=options.simulator_options;
   % set solve_file for this simulation (will be passed to SimulateModel as an option)
   if isa(options.simulator_options.experiment,'function_handle')
-    if sim==1 %&& options.verbose_flag
-      fprintf('WARNING: solver pre-generation and compilation are not available for experiments run on the cluster.\n');
-    end
     studyinfo.simulations(sim).simulator_options.solve_file=[];
   else
     studyinfo.simulations(sim).simulator_options.solve_file=this_solve_file;
@@ -319,9 +322,9 @@ end
     fprintf(fjob,'\t\tif ~valid\n\t\t  lasterr(message);\n\t\t  for s=1:length(SimIDs), UpdateStudy(studyinfo.study_dir,''sim_id'',SimIDs(s),''status'',''failed''); end\n\t\t  continue;\n\t\tend\n');
     % simulate model with proper modifications and options
     fprintf(fjob,'\t\tsiminfo=studyinfo.simulations(SimID);\n');
-    fprintf(fjob,'\t\toptions=rmfield(siminfo.simulator_options,{''modifications'',''studyinfo'',''analysis_functions'',''plot_functions''});\n');
+    fprintf(fjob,'\t\toptions=rmfield(siminfo.simulator_options,{''modifications'',''studyinfo'',''analysis_functions'',''plot_functions'',''sim_id''});\n');
     fprintf(fjob,'\t\tkeyvals=Options2Keyval(options);\n');
-    fprintf(fjob,'\t\tdata=SimulateModel(studyinfo.base_model,''modifications'',siminfo.modifications,''studyinfo'',studyinfo,keyvals{:});\n');    
+    fprintf(fjob,'\t\tdata=SimulateModel(studyinfo.base_model,''modifications'',siminfo.modifications,''studyinfo'',studyinfo,''sim_id'',SimID,keyvals{:});\n');    
     fprintf(fjob,'\t\tfor i=1:length(siminfo.result_functions)\n');
     fprintf(fjob,'\t\t\tAnalyzeData(data,siminfo.result_functions{i},''result_file'',siminfo.result_files{i},''save_data_flag'',1,siminfo.result_options{i}{:});\n');
     fprintf(fjob,'\t\tend\n');
