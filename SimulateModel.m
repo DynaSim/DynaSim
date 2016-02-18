@@ -495,15 +495,28 @@ try
     end
     % execute experiment
     if isa(options.experiment,'function_handle')
-      % todo: create external function to remove select key/value pairs
+      % EXPERIMENT (wrapping around a set of simulations)
+      if options.cluster_flag && options.compile_flag
+        warning('compiled solver is not available for experiments on the cluster. Simulation will be run in Matlab.');
+      end
+      % todo: create external function to remove select key/value pairs from varargin...
       % from varargin...
-      % remove from varargin: 'experiment', 'modifications', 'vary', 'cluster_flag' (to avoid undesired recursive action in experiment function)
-      tmpinds=find(cellfun(@(x)isequal(x,'experiment'),varargin) | cellfun(@(x)isequal(x,'cluster_flag'),varargin) | cellfun(@(x)isequal(x,'vary'),varargin) | cellfun(@(x)isequal(x,'modifications'),varargin) | cellfun(@(x)isequal(x,'study_dir'),varargin) | cellfun(@(x)isequal(x,'save_data_flag'),varargin));
+      % remove 'experiment', 'modifications', 'vary', 'cluster_flag' to 
+      % avoid undesired recursive action in experiment function
+      tmpidx=cellfun(@(x)isequal(x,'experiment'),varargin) | cellfun(@(x)isequal(x,'cluster_flag'),varargin) | cellfun(@(x)isequal(x,'vary'),varargin) | cellfun(@(x)isequal(x,'modifications'),varargin);
+      % remove 'study_dir' and 'save_data_flag' to prevent individual 
+      % simulations from being saved during experiment
+      tmpidx=(tmpidx | cellfun(@(x)isequal(x,'study_dir'),varargin) | cellfun(@(x)isequal(x,'save_data_flag'),varargin));
+      tmpinds=find(tmpidx);
       if ~isempty(tmpinds)
         varargin([tmpinds tmpinds+1])=[];
       end
       tmpdata=feval(options.experiment,model,varargin{:});
+      if ~isempty(modifications_set{sim})
+        % 
+      end
     else
+      % NOT AN EXPERIMENT (single simulation)
       %% 2.0 prepare solver function (solve_ode.m/mex)
       % - matlab solver: create @odefun with vectorized state variables
       % - DynaSim solver: write solve_ode.m and params.mat  (based on dnsimulator())    
@@ -539,11 +552,11 @@ try
       if options.verbose_flag
         fprintf('saving model parameters: %s\n',param_file);
       end
-      save(param_file,'p');
       %pause(.01);
       % solve system
       if options.disk_flag  % ### data stored on disk during simulation ###
         sim_start_time=tic;
+        save(param_file,'p'); % save params immediately before solving
         csv_data_file=feval(fname);  % returns name of file storing the simulated data
         duration=toc(sim_start_time);
         if nargout>0 || options.save_data_flag
@@ -568,6 +581,7 @@ try
         end
         sim_start_time=tic;
         outputs=cell(1,length(output_variables)); % preallocate for PCT compatibility
+        save(param_file,'p'); % save params immediately before solving
         [outputs{1:length(output_variables)}]=feval(fname);
         duration=toc(sim_start_time);
         % prepare DynaSim data structure
