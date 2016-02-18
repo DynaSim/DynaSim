@@ -81,7 +81,6 @@ else
   % set default solve_file name
   solve_file=['solve_ode_' datestr(now,'yyyymmddHHMMSS_FFF') '.m'];
 end
-solve_file
 [fpath,fname,fext]=fileparts(solve_file);
 if isempty(fpath)
   % add path to solve_file name
@@ -91,7 +90,6 @@ if isempty(fpath)
     solve_file=fullfile(pwd,'solve',[fname fext]);
   end
 end
-solve_file
 [fpath,fname,fext]=fileparts(solve_file);
 % create directory for solve_file if it doesn't exist
 if ~isdir(fpath)
@@ -100,7 +98,6 @@ if ~isdir(fpath)
   end
   mkdir(fpath);
 end
-fpath,pwd
 cwd=pwd;
 if ~strcmp(cwd,fpath)
   if options.verbose_flag
