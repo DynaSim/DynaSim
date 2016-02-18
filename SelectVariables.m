@@ -1,4 +1,4 @@
-function variables=SelectVariables(labels,var_strings)
+function [variables,pop_names]=SelectVariables(labels,var_strings)
 % variables=SelectVariables(labels,var_strings)
 % purpose: determine what variables to plot
 % inputs:
@@ -47,4 +47,11 @@ for i=1:length(var_strings)
   % find all matches
   matches=regexp(labels,['^' varstr '$'],'match');
   variables=cat(2,variables,matches{:});
+end
+if nargout>1
+  pop_names={};
+  for i=1:length(variables)
+    name=regexp(variables{i},'^([a-zA-Z0-9]+)_','tokens','once');
+    pop_names{end+1}=name{1};
+  end
 end
