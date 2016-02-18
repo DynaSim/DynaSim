@@ -112,14 +112,14 @@ end
         end
         result(ii).varied=varied;
       end
-    elseif isfield(data,'varied')
-%       % add 'varied' info from data to result structure
-%       for ii=1:length(result)      
-%         result(ii).varied=data(1).varied;
-%         for jj=1:length(data(1).varied)
-%           result(ii).(data(1).varied{jj})=data(1).(data(1).varied{jj});
-%         end      
-%       end
+    elseif isfield(data,'varied') && length(data)==1
+      % add 'varied' info from data to result structure
+      for ii=1:length(result)      
+        result(ii).varied=data(1).varied;
+        for jj=1:length(data(1).varied)
+          result(ii).(data(1).varied{jj})=data(1).(data(1).varied{jj});
+        end      
+      end
     end
   end
 
