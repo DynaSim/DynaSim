@@ -258,19 +258,19 @@ if options.compile_flag && options.reduce_function_calls_flag==0
   options.reduce_function_calls_flag=1;
 end
 
-if options.cluster_flag && options.save_data_flag==0
-  options.save_data_flag=1;
-  if options.verbose_flag
-    fprintf('setting ''save_data_flag'' to 1 for storing results of batch jobs for later access.\n');
-  end
-end
-
-if ischar(options.study_dir) && options.save_data_flag==0
-  options.save_data_flag=1;
-  if options.verbose_flag
-    fprintf('setting ''save_data_flag'' to 1 for storing results in study_dir: %s.\n',options.study_dir);
-  end
-end
+% if options.cluster_flag && options.save_data_flag==0
+%   options.save_data_flag=1;
+%   if options.verbose_flag
+%     fprintf('setting ''save_data_flag'' to 1 for storing results of batch jobs for later access.\n');
+%   end
+% end
+% 
+% if ischar(options.study_dir) && options.save_data_flag==0
+%   options.save_data_flag=1;
+%   if options.verbose_flag
+%     fprintf('setting ''save_data_flag'' to 1 for storing results in study_dir: %s.\n',options.study_dir);
+%   end
+% end
 
 % prepare analysis functions and options
 if ~isempty(options.analysis_functions)
@@ -504,9 +504,8 @@ try
       % remove 'experiment', 'modifications', 'vary', 'cluster_flag' to 
       % avoid undesired recursive action in experiment function
       tmpidx=cellfun(@(x)isequal(x,'experiment'),varargin) | cellfun(@(x)isequal(x,'cluster_flag'),varargin) | cellfun(@(x)isequal(x,'vary'),varargin) | cellfun(@(x)isequal(x,'modifications'),varargin);
-      % remove 'study_dir' and 'save_data_flag' to prevent individual 
-      % simulations from being saved during experiment
-      tmpidx=(tmpidx | cellfun(@(x)isequal(x,'study_dir'),varargin) | cellfun(@(x)isequal(x,'save_data_flag'),varargin));
+      % remove 'save_data_flag' to prevent individual simulations from being saved during experiment
+      tmpidx= tmpidx | cellfun(@(x)isequal(x,'save_data_flag'),varargin); % | cellfun(@(x)isequal(x,'study_dir'),varargin)
       tmpinds=find(tmpidx);
       if ~isempty(tmpinds)
         varargin([tmpinds tmpinds+1])=[];
