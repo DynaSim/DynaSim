@@ -392,7 +392,7 @@ if options.cluster_flag==1
   % add to model any parameters in 'vary' not explicit in current model
   % approach: use ApplyModifications(), it does that automatically
   for i=1:length(modifications_set)
-    if ~strcmp(modifications_set{i}{2},'mechanism_list') && ~strcmp(modifications_set{i}{2},'equations')
+    if ~isempty(modifications_set{i}) && ~strcmp(modifications_set{i}{2},'mechanism_list') && ~strcmp(modifications_set{i}{2},'equations')
       model=ApplyModifications(model,modifications_set{i});
       break
     end
@@ -652,8 +652,10 @@ end
     if ~isempty(modifications_set{sim})
       tmp_mods=expand_modifications(modifications_set{sim});
       mods=cat(1,mods,tmp_mods);
-      for j=1:length(tmpdata)
-        tmpdata(j).simulator_options.modifications=tmp_mods;
+      if isa(options.experiment,'function_handle')
+        for j=1:length(tmpdata)
+          tmpdata(j).simulator_options.modifications=tmp_mods;
+        end
       end
     end
     if ~isempty(mods)
