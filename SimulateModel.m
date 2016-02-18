@@ -647,12 +647,13 @@ end
     % add things varied to tmpdata
     mods={};
     if ~isempty(options.modifications)
-      mods=cat(1,mods,options.modifications);
+      mods=cat(1,mods,expand_modifications(options.modifications));
     end
     if ~isempty(modifications_set{sim})
-      mods=cat(1,mods,modifications_set{sim});
+      tmp_mods=expand_modifications(modifications_set{sim});
+      mods=cat(1,mods,tmp_mods);
       for j=1:length(tmpdata)
-        tmpdata(j).simulator_options.modifications=modifications_set{sim};
+        tmpdata(j).simulator_options.modifications=tmp_mods;
       end
     end
     if ~isempty(mods)
@@ -715,6 +716,21 @@ end
     end    
   end
     
+end
+
+function modifications=expand_modifications(mods)
+  % purpose: expand simultaneous modifications into larger list
+  modifications={};
+  for i=1:size(mods,1)
+    % get object list without grouping symbols: ()[]{}
+    objects=regexp(mods{i,1},'[^\(\)\[\]\{\},]+','match');
+    variables=regexp(mods{i,2},'[^\(\)\[\]\{\},]+','match');
+    for j=1:length(objects)
+      for k=1:length(variables)
+        modifications(end+1,1:3)={objects{j},variables{k},mods{i,3}};
+      end
+    end
+  end
 end
 
 function [model,options]=extract_vary_statement(model,options)
