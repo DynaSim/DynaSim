@@ -673,7 +673,7 @@ set(gca,'ytick',amps,'yticklabel',amps);
 %% saving results
 % ... (introduce "study" concept and studyinfo structure) ...
 % ... (introduce output directory: study_dir/model, data) ...
-% set 'study_dir' = /path/to/outputs
+% set 'save_data_flag'=1 and optionally 'study_dir' = /path/to/outputs
 
 study_dir='study_HH_varyI'; 
   % where results will be saved (relative or absolute path)
@@ -681,7 +681,7 @@ study_dir='study_HH_varyI';
 eqns='dv/dt=@current+I; {iNa,iK}';
 vary={'','I',[0 10 20]};
 
-[data,studyinfo]=SimulateModel(eqns,'vary',vary,'study_dir',study_dir,'verbose_flag',1);
+[data,studyinfo]=SimulateModel(eqns,'vary',vary,'save_data_flag',1,'study_dir',study_dir,'verbose_flag',1);
 
 %   DynaSim studyinfo structure (only showing select fields, see CheckStudyinfo for more details)
 %     studyinfo.study_dir
@@ -717,7 +717,7 @@ data=ImportData('study_HH_varyI');
 PlotFR(data);
 
 % re-running the simulation loads data if it already exists (see log)
-[data,studyinfo]=SimulateModel(eqns,'vary',vary,'study_dir',study_dir,'verbose_flag',1);
+[data,studyinfo]=SimulateModel(eqns,'vary',vary,'save_data_flag',1,'study_dir',study_dir,'verbose_flag',1);
 
 %% cluster computing
 % ... (introduce batch directory: ~/batchdirs, pbsout) ...
@@ -730,7 +730,7 @@ eqns='dv/dt=@current+I; {iNa,iK}';
 vary={'','I',[0 10 20]};
 
 [data,studyinfo]=SimulateModel(eqns,'vary',vary,...
-  'study_dir',study_dir,'cluster_flag',1,'verbose_flag',1);
+  'study_dir',study_dir,'save_data_flag',1,'cluster_flag',1,'verbose_flag',1);
 % note: if on a cluster, jobs will be automatically submitted using "qsub"
 studyinfo.simulations(1)
 ls(studyinfo.simulations(1).batch_dir)
@@ -761,7 +761,7 @@ eqns='dv/dt=@current+I; {iNa,iK}';
 vary={'','I',[0:10:50]};
 
 [data,studyinfo]=SimulateModel(eqns,'vary',vary,...
-  'study_dir',study_dir,'cluster_flag',1,'sims_per_job',3,'verbose_flag',1);
+  'study_dir',study_dir,'cluster_flag',1,'sims_per_job',3,'save_data_flag',1,'verbose_flag',1);
 
 if 0 % manually run the simulation jobs (see caution above)
   run(studyinfo.simulations(1).job_file);
