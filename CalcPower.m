@@ -97,7 +97,7 @@ options.variable=SelectVariables(data(1).labels,options.variable);
 if ~isfield(data,'results')
   data.results={};
 end
-
+warning off
 for v=1:length(options.variable)
   % extract this data set
   var=options.variable{v};
