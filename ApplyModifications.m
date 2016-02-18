@@ -124,7 +124,7 @@ if any(~cellfun(@isempty,regexp(modifications(:,1),'^\(.*\)$'))) || ...
   modifications_={};
   for i=1:size(modifications,1)
     % check namespace for ()
-    namespaces=regexp(modifications{i,1},'[\w\.-]+','match');
+    namespaces=regexp(modifications{i,1},'[\w\.\-<>]+','match');
     % check variable for ()
     variables=regexp(modifications{i,2},'[\w\.-]+','match');
     % expand list of modifications
