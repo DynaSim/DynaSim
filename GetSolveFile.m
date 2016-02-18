@@ -84,10 +84,14 @@ end
 [fpath,fname,fext]=fileparts(solve_file);
 if isempty(fpath)
   % add path to solve_file name
-  if ~isempty(options.study_dir)
-    solve_file=fullfile(options.study_dir,'solve',[fname fext]);
+  if ~isempty(options.sim_id)
+    solve_file=fullfile(options.study_dir,'solve',['sim' num2str(options.sim_id)],[fname fext]);
   else
-    solve_file=fullfile(pwd,'solve',[fname fext]);
+    solve_file=fullfile(options.study_dir,'solve',[fname fext]);
+  end
+  % convert relative path to absolute path
+  if ~strcmp('/',solve_file(1)) && ~strcmp('\',solve_file(1))
+    solve_file=fullfile(pwd,solve_file);
   end
 end
 [fpath,fname,fext]=fileparts(solve_file);
