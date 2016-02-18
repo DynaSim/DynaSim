@@ -218,7 +218,14 @@ for sim=1:num_simulations
   studyinfo.simulations(sim).batch_dir=batch_dir;
   studyinfo.simulations(sim).simulator_options=options.simulator_options;
   % set solve_file for this simulation (will be passed to SimulateModel as an option)
-  studyinfo.simulations(sim).simulator_options.solve_file=this_solve_file;
+  if isa(options.simulator_options.experiment,'function_handle')
+    if sim==1 %&& options.verbose_flag
+      fprintf('WARNING: solver pre-generation and compilation are not available for experiments run on the cluster.\n');
+    end
+    studyinfo.simulations(sim).simulator_options.solve_file=[];
+  else
+    studyinfo.simulations(sim).simulator_options.solve_file=this_solve_file;
+  end
   % set vary to [] to avoid each sim expanding to a new set
   studyinfo.simulations(sim).simulator_options.vary=[];
   studyinfo.simulations(sim).simulator_options.sim_id=studyinfo.simulations(sim).sim_id;
