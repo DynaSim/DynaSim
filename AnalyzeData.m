@@ -1,6 +1,9 @@
 function result=AnalyzeData(data,func,varargin)
 %% result=AnalyzeData(data,func,'option1',value1,...)
-% purpose: apply a user-specified analysis function to a DynaSim data structure.
+% purpose: pass a single DynaSim data structure or an array of data
+% structures to a user-specified analysis function, add varied info to the
+% results and optionally save the output structure.
+% 
 % inputs:
 %   data: DynaSim data structure (also accepted: data file name)
 %   func: function handle pointing to analysis function
@@ -26,10 +29,7 @@ options=CheckOptions(varargin,{...
 if ~(isstruct(data) && isfield(data,'time'))
   data=ImportData(data,varargin{:}); % load data
 end
-% confirm single data set
-if numel(data)>1
-  error('this function only accepts a single DynaSim data structure.');
-end
+
 % confirm function handle
 if ~isa(func,'function_handle')
   error('post-processing function must be supplied as a function handle');
@@ -68,14 +68,8 @@ if all(ishandle(result)) % analysis function returned a graphics handle
   end
 else % analysis function returned derived data
   if isstruct(result)
+    add_modifications;
     for i=1:length(result)
-      if isfield(data,'varied')
-        % add 'varied' info to result structure
-        result(i).varied=data.varied;
-        for j=1:length(data.varied)
-          result(i).(data.varied{j})=data.(data.varied{j});
-        end
-      end
       % add options to result structure
       if length(varargin)>1
         for j=1:2:length(varargin)
@@ -92,3 +86,42 @@ else % analysis function returned derived data
     save(options.result_file,'result','-v7.3');
   end
 end
+
+  function add_modifications
+    % add modifications to result structure, excluding modifications made
+    % within experiments. note: while this nested function is similar to 
+    % prepare_varied_metadata in SimulateModel, the data structure contains
+    % all modifications (those within and across experiments; listed in 'varied'). 
+    % the result structure collapses data sets from an experiment into a single
+    % result; thus, each result corresponds to modifications across
+    % experiments but not within them; those modifications are stored in
+    % the simulator options.
+    if ~isempty(data(1).simulator_options.modifications)
+      varied={};
+      mods=data(1).simulator_options.modifications;
+      for ii=1:length(result)
+        for jj=1:size(mods,1) 
+          % prepare valid field name for thing varied:
+          fld=[mods{jj,1} '_' mods{jj,2}];
+          % convert arrows and periods to underscores
+          fld=regexprep(fld,'(->)|(<-)|(-)|(\.)','_');
+          % remove brackets and parentheses
+          fld=regexprep(fld,'[\[\]\(\)\{\}]','');
+          result(ii).(fld)=mods{jj,3};
+          varied{end+1}=fld;
+        end
+        result(ii).varied=varied;
+      end
+    elseif isfield(data,'varied')
+%       % add 'varied' info from data to result structure
+%       for ii=1:length(result)      
+%         result(ii).varied=data(1).varied;
+%         for jj=1:length(data(1).varied)
+%           result(ii).(data(1).varied{jj})=data(1).(data(1).varied{jj});
+%         end      
+%       end
+    end
+  end
+
+end
+
