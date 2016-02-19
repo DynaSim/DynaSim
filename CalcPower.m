@@ -134,8 +134,12 @@ for v=1:length(options.variable)
     sel = find(FreqRange(1)<=f & f<=FreqRange(end));
     % set threshold for peak detection
     ht=prctile(log10(tmpPxx(sel)),thresh_prctile);
-    % get index of peaks in range over threshold
-    [PeakPower,PPind]=findpeaks(log10(tmpPxx(sel)),'MinPeakHeight',ht,'NPeaks',3);
+    if ~isnan(ht)
+      % get index of peaks in range over threshold
+      [PeakPower,PPind]=findpeaks(log10(tmpPxx(sel)),'MinPeakHeight',ht,'NPeaks',3);
+    else
+      PPind=[];
+    end
     if ~isempty(PPind)
       % if multiple peaks, only consider the largest
       if numel(PPind)>1
@@ -184,8 +188,12 @@ for v=1:length(options.variable)
     sel = find(FreqRange(1)<=f & f<=FreqRange(end));
     % set threshold for peak detection
     ht=prctile(log10(tmpPxx(sel)),thresh_prctile);
-    % get index of peaks in range over threshold
-    [PeakPower,PPind]=findpeaks(log10(tmpPxx(sel)),'MinPeakHeight',ht,'NPeaks',3);
+    if ~isnan(ht)
+      % get index of peaks in range over threshold
+      [PeakPower,PPind]=findpeaks(log10(tmpPxx(sel)),'MinPeakHeight',ht,'NPeaks',3);
+    else
+      PPind=[];
+    end    
     if ~isempty(PPind)
       % if multiple peaks, only consider the largest
       if numel(PPind)>1
