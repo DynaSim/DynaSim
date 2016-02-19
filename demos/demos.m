@@ -275,4 +275,11 @@ SimulateModel(eqns,'save_data_flag',1,'study_dir','demo_cluster_3',...
                    'plot_options',{{},{'plot_type','power'}});
 % !cat ~/batchdirs/demo_cluster_3/pbsout/sim_job1.out
  
-                 
+% Post-simulation analyses can be performed similarly by passing
+% analysis function handles and options using 'analysis_functions' and
+% 'analysis_options'. 
+
+% Note: options will be passed to plot and analysis functions in the order
+% given. You can pass handles and options for any built-in, pre-packaged,
+% or custom functions.
+
