@@ -88,13 +88,13 @@ if options.save_data_flag || options.save_results_flag
     mkdir(options.study_dir);
   end
   % create models dir if it doesn't exist and saving model
-  models_dir=fullfile(options.study_dir,'models');
-  if ~isdir(models_dir)
-    if options.verbose_flag
-      fprintf('creating models directory: %s\n',models_dir);
-    end
-    mkdir(models_dir);
-  end
+%   models_dir=fullfile(options.study_dir,'models');
+%   if ~isdir(models_dir)
+%     if options.verbose_flag
+%       fprintf('creating models directory: %s\n',models_dir);
+%     end
+%     mkdir(models_dir);
+%   end
   % create data dir if it doesn't exist and saving model
   data_dir=fullfile(options.study_dir,'data');
   if ~isdir(data_dir)
@@ -122,7 +122,7 @@ if options.save_data_flag || options.save_results_flag
       fname=[options.prefix '_sim' num2str(k) '_data.mat'];
       studyinfo.simulations(k).data_file=fullfile(data_dir,fname);
       fname=[options.prefix '_sim' num2str(k) '_model.mat'];
-      studyinfo.simulations(k).modified_model_file=fullfile(models_dir,fname);
+      %studyinfo.simulations(k).modified_model_file=fullfile(models_dir,fname);
       studyinfo.simulations(k).status='initialized';
       % set file names for analysis results
       for kk=1:length(options.analysis_functions)
