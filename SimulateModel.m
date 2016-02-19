@@ -56,6 +56,7 @@ function [data,studyinfo]=SimulateModel(model,varargin)
 %     'verbose_flag'  : whether to display informative messages/logs (default: 0)
 %     'modifications' : how to modify DynaSim specification structure component before simulation (see ApplyModifications)
 %     'experiment'    : function handle of experiment function (see NOTE 2)
+%     'experiment_options' : single cell array of key/value options for experiment function
 %     'optimization'  : function handle of optimization function (see NOTE 2)
 % 
 % Outputs:
@@ -226,6 +227,7 @@ options=CheckOptions(varargin,{...
   'modifications',[],[],...       % *DynaSim modifications structure
   'vary',[],[],...                % specification of things to vary or custom modifications_set
   'experiment',[],[],...          % experiment function. func(model,args)
+  'experiment_options',[],[],...
   'optimization',[],[],...
   'cluster_flag',0,{0,1},...      % whether to run simulations on a cluster
   'sims_per_job',1,[],... % how many sims to run per batch job
@@ -509,6 +511,11 @@ try
       % remove 'experiment', 'modifications', 'vary', 'cluster_flag' to avoid undesired recursive action in experiment function
       % remove 'save_data_flag' to prevent individual simulations from being saved during experiment
       keyvals=RemoveKeyval(varargin,{'experiment','cluster_flag','vary','modifications','save_data_flag'});
+      if ~isempty(options.experiment_options)
+        % user-supplied experiment options override any found in SimulateModel options
+        keyvals=RemoveKeyval(keyvals,options.experiment_options(1:2:end));
+        keyvals=cat(2,keyvals,options.experiment_options);
+      end
       tmpdata=feval(options.experiment,model,keyvals{:});
       if ~isempty(modifications_set{sim})
         % 
@@ -658,10 +665,10 @@ end
     if ~isempty(modifications_set{sim})
       tmp_mods=expand_modifications(modifications_set{sim});
       mods=cat(1,mods,tmp_mods);
-      if isa(options.experiment,'function_handle')
-        for j=1:length(tmpdata)
-          tmpdata(j).simulator_options.modifications=tmp_mods;
-        end
+    end
+    if isa(options.experiment,'function_handle')
+      for j=1:length(tmpdata)
+        tmpdata(j).simulator_options.modifications=mods;
       end
     end
     if ~isempty(mods)
