@@ -8,7 +8,7 @@ function data=SelectData(data,varargin)
 %     'varied' -- specification of search space subset to retrieve (see NOTE 1)
 % 
 % NOTE 1: 'varied' can be specified in two ways:
-% Method 1 (not implemented yet): a way similar to 'vary' in
+% Method 1: a way similar to 'vary' in
 % SimulateModel and Vary2Modifications. However, instead of indicating
 % values for a variable to take, 'varied' involves the specification of a
 % range of values. Syntax: vary={object, variable, [low,high]; ...}, where
@@ -16,7 +16,7 @@ function data=SelectData(data,varargin)
 % for the component varied. For instance, if 'gNa' in population 'E' was
 % varied 0:.1:1 by setting 'vary' to {'E','gNa',0:.1:1}, then to select the
 % subset of gNa values between .3 and .5, set 'varied' to {'E','gNa',[.3 .5]}.
-% Method 2 (implemented): 'varied' can be specified using the resulting
+% Method 2: 'varied' can be specified using the resulting
 % component name stored in data.varied. e.g., {'E_iNa_gNa',[.3 .5]}.
 % 
 % NOTE 2: if 'varied' values are requested and not a two-element array
@@ -50,7 +50,20 @@ options=CheckOptions(varargin,{...
 % select data sets based on range of varied model components
 if ~isempty(options.varied) && isfield(data,'varied')
   if size(options.varied,2)==3
-    error('at present, only ''varied'' specification method 2 is supported (see SelectData)');
+    % convert into field name (set in SimulateModel:prepare_varied_metadata)
+    % note: this code is redundant with SimulateModel and AnalyzeData.
+    % todo: eliminate redundancy
+    varied={};
+    for i=1:size(options.varied,1)
+      % prepare valid field name for thing varied:
+      fld=[options.varied{i,1} '_' options.varied{i,2}];
+      % convert arrows and periods to underscores
+      fld=regexprep(fld,'(->)|(<-)|(-)|(\.)','_');
+      % remove brackets and parentheses
+      fld=regexprep(fld,'[\[\]\(\)\{\}]','');
+      varied{end+1,1}=fld;
+    end    
+    options.varied=cat(2,varied,options.varied(:,3));
   end
   if size(options.varied,1)>1
     error('at present, a range on only one varied parameter can be specified per call to SelectData.');
