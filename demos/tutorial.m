@@ -105,9 +105,11 @@ xlabel('time (ms)'); ylabel('V'); title('Leaky integrate-and-fire (LIF) neuron')
 
 %% Leaky integrate-and-fire with spike monitor
 
-% In addition to storing state variables, functions and spikes (i.e.,
-% upward threshold crossings) can be recorded and returned in the DynaSim 
-% data structure as well.
+% The DynaSim data structure always contains the model state variables,
+% time vector, and a copy of the DynaSim model structure that was
+% simulated. Additionally, functions and spikes (i.e., upward threshold 
+% crossings) can be recorded and returned in the DynaSim data structure
+% if indicated using the "monitor" keyword.
 
 % Syntax:
 % monitor FUNCTION
@@ -447,8 +449,6 @@ figure; plot(data.time,data.E_v,'b-',data.time,data.I_v,'r-');
 title('E/I network'); xlabel('time (ms)'); ylabel('v'); legend('E (decay)','I (LIF)'); ylim([-80 -50])
 
 %% Sparse Pyramidal-Interneuron-Network-Gamma (sPING)
-% introduce (size>1) --> real populations
-% introduce fixed_variables (derived parameters and matrices)
 
 % define equations of cell model (same for E and I populations)
 eqns={ 
@@ -457,7 +457,7 @@ eqns={
 };
 s=[];
 s.populations(1).name='E';
-s.populations(1).size=80;
+s.populations(1).size=80; % # of cells in population
 s.populations(1).equations=eqns;
 s.populations(1).mechanism_list={'iNa','iK'};
 s.populations(1).parameters={'Iapp',5,'gNa',120,'gK',36,'Cm',1,'noise',4};
@@ -586,17 +586,20 @@ title('sPING with E->I turned off');
 % %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% RUNNING SETS OF SIMULATIONS
 % %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% ... (introduce varying population parameters) ...
-% set 'vary' = {population,parameter,values} {scope,component,values}
-%   scope = population or connection
-%   component = parameter, 'mechanism_list', or 'equations'
 
-% 'vary' indicates the variable to vary, the values
-% it should take, and the object whose variable should be varied. 
-% Syntax: vary={object, variable, values; ...}. For instance, to vary
-% parameter 'gNa', taking on values 100 and 120, in population 'E', set
-% vary={'E','gNa',[100 120]}. To additionally vary 'gSYN' in the connection
-% mechanism from 'E' to 'I', set vary={'E','gNa',[100 120];'E->I','gSYN',[0 1]}.
+% 'vary' indicates the variable to vary, the values it should take, and the 
+% object (population or connection) whose variable should be varied. 
+
+% Syntax 1: vary={{object, variable, value1},{object, variable, value2},...}
+%   - this is useful for simulating an arbitrary set of parameter values
+% Syntax 2: vary={object, variable, values; ...}
+%   - this is useful for varying parameters systematically (described later)
+
+% For instance, to vary parameter 'gNa', taking on values 100 and 120, in 
+% population 'E', set vary={'E','gNa',[100 120]} (syntax 1) or 
+% vary={{'E','gNa',100},{'E','gNa',120}} (syntax 2). To additionally vary 
+% 'gSYN' in the connection mechanism from 'E' to 'I', set 
+% vary={'E','gNa',[100 120];'E->I','gSYN',[0 1]}.
 % Mechanism lists and equations can also be varied. (see Vary2Modifications 
 % for more details and examples).
 
@@ -671,9 +674,14 @@ xlabel('time (ms)'); ylabel('tonic amplitude [uA/cm2]');
 set(gca,'ytick',amps,'yticklabel',amps);
 
 %% saving results
-% ... (introduce "study" concept and studyinfo structure) ...
-% ... (introduce output directory: study_dir/model, data) ...
-% set 'save_data_flag'=1 and optionally 'study_dir' = /path/to/outputs
+% A set of simulations, analyses, and plots deriving from a common base
+% model are collectively called a DynaSim "study". All results for a given
+% study are saved in a directory called "study_dir" which contains
+% subdirectories "data" (simulated data and results derived from analyzing
+% the data), "plots", and "solve" (containing m- and mex-files that were
+% used for all simulations of the study).
+
+% How to: set 'save_data_flag'=1 and optionally 'study_dir' = /path/to/outputs
 
 study_dir='study_HH_varyI'; 
   % where results will be saved (relative or absolute path)
@@ -720,8 +728,13 @@ PlotFR(data);
 [data,studyinfo]=SimulateModel(eqns,'vary',vary,'save_data_flag',1,'study_dir',study_dir,'verbose_flag',1);
 
 %% cluster computing
-% ... (introduce batch directory: ~/batchdirs, pbsout) ...
-% set 'cluster_flag' = 1
+% How to: set 'cluster_flag' to 1
+% Requirement: you must be logged on to a cluster that recognizes 'qsub'
+
+% DynaSim creates m-files called jobs that run SimulateModel for one or
+% more simulations. Jobs are saved in ~/batchdirs/<study_dir> and are
+% submitted to the cluster queue using the command 'qsub'. Standard out and
+% error logs for each job are saved in ~/batchdirs/<study_dir>/pbsout.
 
 % create 3 jobs to run 3 simulations
 
@@ -960,24 +973,4 @@ data.model.monitors
 % 3. plot the state variable stored in the post-simulation model structure
 %   figure; plot(data.time,data.model.fixed_variables.pop1_I)
 
-    
-% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%% WIP (near-future) features/additions (aka: things I almost got working)
-% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% - Plotting: study_dir/plots with auto-annotated figures
-% - Analysis and plotting on cluster
-% - Parallel computing
-% - Upload/download
-% - Study monitoring
-% - Modularization of populations (.equations='HH.m' or 'HH.mat' or 'HH.ode')
-% - Modularization of networks (ImportModel('net.mat') + CombineModels using specifications)
-% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%% More future features
-% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% - i/o converters (model: XPP, NeuroML; data: ?)
-% - visualization (single and study data sets)
-% * Important: dnsim <-> dynasim model converter for use with dnsim() and modeler() (DNSim GUI)
-% - DynaSim2Odefun()
-% - phase plot function (for 1-D (y,y'), 2-D (x,y) and 3-D systems{(x,y),(x,z),(y,z),(x,y,z)})
-% - use DynaSim2Odefun w/ BENG260 nullcline functions for 2-D system analysis
-
+  
