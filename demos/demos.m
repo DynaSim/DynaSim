@@ -65,6 +65,12 @@ title('Lorenz equations'); xlabel('x'); ylabel('z')
 %% Izhikevich neuron with noisy drive 
 % (reference: p274 of "Dynamical Systems in Neuroscience" by Izhikevich)
 
+% The DynaSim data structure always contains the model state variables,
+% time vector, and a copy of the DynaSim model structure that was
+% simulated. Additionally, functions can be recorded and returned in the
+% DynaSim data structure if indicated using the "monitor" keyword.
+% Syntax: monitor FUNCTION
+
 eqns={
   'C=100; vr=-60; vt=-40; k=.7; Iapp=70; ton=200; toff=800';
   'a=.03; b=-2; c=-50; d=100; vpeak=35';
@@ -180,6 +186,7 @@ eqns={
   'dv/dt=Iapp+@current+noise*randn(1,N_pop)';
   'monitor iGABAa.functions, iAMPA.functions'
 };
+% Tip: monitor all functions of a mechanism using: monitor MECHANISM.functions
 
 % create DynaSim specification structure
 s=[];
