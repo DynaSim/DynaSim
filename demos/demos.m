@@ -219,12 +219,11 @@ data=SimulateModel(s,'save_data_flag',1,'study_dir','demo_sPING_1');
 vary={'E','Iapp',[0 10 20]}; % vary the amplitude of tonic input to E-cells
 data=SimulateModel(s,'save_data_flag',1,'study_dir','demo_sPING_2',...
                      'vary',vary);
-PlotData(data);
-PlotData(data,'variable','E_v');
 
 % load and plot the saved data
 data_from_disk = ImportData('demo_sPING_2');
-PlotData(data);
+PlotData(data_from_disk);
+PlotData(data_from_disk,'variable','E_v');
 
 % Vary a connection parameter
 vary={'I->E','tauD',[5 10 15]}; % inhibition decay time constant from I to E
@@ -234,6 +233,13 @@ vary={
   'E'   ,'Iapp',[0 10 20];      % amplitude of tonic input to E-cells
   'I->E','tauD',[5 10 15]       % inhibition decay time constant from I to E
   };
+SimulateModel(s,'save_data_flag',1,'study_dir','demo_sPING_3',...
+                'vary',vary,'verbose_flag',1);
+data=ImportData('demo_sPING_3');
+PlotData(data);
+PlotData(data,'plot_type','rastergram');
+PlotData(data,'plot_type','power');
+PlotFR(data); % examine how mean firing rate changes with Iapp and tauD
 
 % %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% RUNNING SIMULATIONS ON THE CLUSTER
@@ -245,7 +251,10 @@ vary={
 eqns='dv/dt=@current+I; {iNa,iK}';
 vary={'','I',[0 10 20]};
 SimulateModel(eqns,'save_data_flag',1,'study_dir','demo_cluster_1',...
-                   'vary',vary',cluster_flag',1);
+                   'vary',vary,'cluster_flag',1,'verbose_flag',1);
+% tips for checking job status:
+% !qstat -u <YOUR_USERNAME>
+% !cat ~/batchdirs/demo_cluster_1/pbsout/sim_job1.out
 data=ImportData('demo_cluster_1');
 PlotData(data);
 
@@ -253,6 +262,17 @@ PlotData(data);
 eqns='dv/dt=@current+I; {iNa,iK}';
 vary={'','I',[0 10 20]};
 SimulateModel(eqns,'save_data_flag',1,'study_dir','demo_cluster_2',...
-                   'vary',vary',cluster_flag',1,'plot_functions',@PlotData);
+                   'vary',vary,'cluster_flag',1,'verbose_flag',1,...
+                   'plot_functions',@PlotData);
+% !cat ~/batchdirs/demo_cluster_2/pbsout/sim_job1.out
 
-
+% Save multiple plots and pass custom options to each plotting function
+eqns='dv/dt=@current+I; {iNa,iK}';
+vary={'','I',[0 10 20]};
+SimulateModel(eqns,'save_data_flag',1,'study_dir','demo_cluster_3',...
+                   'vary',vary,'cluster_flag',1,'verbose_flag',1,...
+                   'plot_functions',{@PlotData,@PlotData},...
+                   'plot_options',{{},{'plot_type','power'}});
+% !cat ~/batchdirs/demo_cluster_3/pbsout/sim_job1.out
+ 
+                 
