@@ -111,6 +111,7 @@ end
           varied{end+1}=fld;
         end
         result(ii).varied=varied;
+        result(ii).modifications=mods;
       end
     elseif isfield(data,'varied') && length(data)==1
       % add 'varied' info from data to result structure
