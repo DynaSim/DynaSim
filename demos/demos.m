@@ -210,6 +210,9 @@ data=SimulateModel(s);
 PlotData(data);
 PlotData(data,'variable',{'E_v','E_I_iGABAa_ISYN'});
 
+% View the connection mechanism file:
+[~,eqnfile]=LocateModelFiles('iAMPA.mech'); edit(eqnfile{1});
+
 % %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% SAVING SIMULATED DATA
 % %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
