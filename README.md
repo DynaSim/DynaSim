@@ -7,9 +7,9 @@ DynaSim toolbox for modeling and simulating dynamical systems
 Download the DynaSim toolbox:
 git clone https://github.com/dynasim/dynasim.git
 
-Get started with the demos: demos/demos.m
+Get started with the demos: [demos/demos.m](https://github.com/DynaSim/DynaSim/blob/master/demos/demos.m)
 
-For more details and examples walk through the tutorial: demos/tutorial.m
+For more details and examples walk through the tutorial: [demos/tutorial.m](https://github.com/DynaSim/DynaSim/blob/master/demos/tutorial.m)
 
 Join the user mailing list at: https://groups.google.com/forum/#!forum/dynasim-users
 
