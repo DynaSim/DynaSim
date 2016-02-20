@@ -2,7 +2,7 @@
 
 [![Join the chat at https://gitter.im/DynaSim/DynaSim](https://badges.gitter.im/DynaSim/DynaSim.svg)](https://gitter.im/DynaSim/DynaSim?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
-DynaSim toolbox for modeling and simulating dynamical systems
+DynaSim toolbox for modeling and simulating dynamical systems in Matlab
 
 Download the DynaSim toolbox:
 `git clone https://github.com/dynasim/dynasim.git`
