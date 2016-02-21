@@ -112,14 +112,14 @@ end
 if ~success, error(msg); end
 
 % locate DynaSim toolbox
-dynasim_path=fileparts(which(mfilename));
-
+dynasim_path=fileparts(fileparts(which(mfilename))); % root is one level up from directory containing this function
+dynasim_functions=fullfile(dynasim_path,'functions');
 % locate mechanism files
 [mech_paths,mech_files]=LocateModelFiles(base_model);
 
 % collect paths to add to all jobs (benefit: adding paths to jobs supports m-files stored/associated with mechanism files)
 % add dynasim root path (where functions are located)
-addpaths={dynasim_path};
+addpaths={dynasim_path,dynasim_functions};
 % add the toolbox models directory and all subdirectories
   % note: users can store their models as subdirectories of dynasim/models
   % and incorporate them in their models without worrying about paths.
@@ -265,7 +265,7 @@ else % on cluster with qsub
     end
     % add shell script to linux path if not already there
     %if status~=0
-      setenv('PATH', [getenv('PATH') ':' dynasim_path]);
+      setenv('PATH', [getenv('PATH') ':' dynasim_functions]);
     %end
     if options.verbose_flag
       fprintf('submitting cluster jobs with shell command: "%s"\n',cmd);

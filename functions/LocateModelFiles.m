@@ -59,8 +59,8 @@ keep=cellfun(@isempty,regexp(mechanism_list,'[^\w\.]'));
 mechanism_list=mechanism_list(keep);
 
 % search in dynasim toolbox model directory
-dynasim_path=fileparts(which(mfilename));
-model_dir=fullfile(dynasim_path,'models');
+dynasim_path=fileparts(fileparts(which(mfilename))); % root is one level up from directory containing this function
+model_dir=fullfile(dynasim_path,'models'); % models dir is at root level
 search_paths=regexp(genpath(model_dir),':','split'); % look in all dynasim directories
 % add current directory
 search_paths=cat(2,pwd,search_paths); % look in current directory first

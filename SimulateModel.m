@@ -357,6 +357,14 @@ if ~onPath
   end
   addpath(dynasim_path); % necessary b/c of changing directory for simulation
 end
+dynasim_functions=fullfile(dynasim_path,'functions');
+onPath=~isempty(strfind(path,[dynasim_functions, pathsep]));
+if ~onPath
+  if options.verbose_flag
+    fprintf('adding dynasim functions directory to Matlab path: %s\n',dynasim_functions);
+  end
+  addpath(dynasim_functions); % necessary b/c of changing directory for simulation
+end
 
 %% 1.0 prepare model and study structures for simulation
 

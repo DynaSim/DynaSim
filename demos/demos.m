@@ -17,7 +17,7 @@ at the end of the help section to browse through related help documentation.
 % Set path to your copy of the DynaSim toolbox
 dynasim_path='~/code/dynasim';                    
 % add DynaSim toolbox to Matlab path
-addpath(dynasim_path); % comment this out if already in path
+addpath(genpath(dynasim_path)); % comment this out if already in path
 
 % Set where to save outputs
 output_directory=fullfile(dynasim_path,'demos','outputs'); 
