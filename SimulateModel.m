@@ -307,11 +307,11 @@ if ~isempty(options.analysis_functions)
   elseif length(options.analysis_options) ~= length(options.analysis_functions)
     error('there must be one option cell array per analysis function.');
   end
-  if options.cluster_flag~=1
-    warning('analysis functions will not be run after simulation. currently automatic post-simulation analyses are supported only for cluster jobs.');
-    options.analysis_functions=[];
-    options.analysis_options=[];
-  end
+%   if options.cluster_flag~=1
+%     warning('analysis functions will not be run after simulation. currently automatic post-simulation analyses are supported only for cluster jobs.');
+%     options.analysis_functions=[];
+%     options.analysis_options=[];
+%   end
 end
 
 % prepare plot functions and options
@@ -341,11 +341,11 @@ if ~isempty(options.plot_functions)
   elseif length(options.plot_options) ~= length(options.plot_functions)
     error('there must be one option cell array per plot function.');
   end
-  if options.cluster_flag~=1
-    warning('plot functions will not be run after simulation. currently automatic post-simulation plotting are supported only for cluster jobs.');
-    options.plot_functions=[];
-    options.plot_options=[];
-  end  
+%   if options.cluster_flag~=1
+%     warning('plot functions will not be run after simulation. currently automatic post-simulation plotting are supported only for cluster jobs.');
+%     options.plot_functions=[];
+%     options.plot_options=[];
+%   end  
 end
 
 % check path
@@ -625,6 +625,12 @@ try
     if options.save_data_flag
       ExportData(tmpdata,'filename',data_file,'format','mat','verbose_flag',options.verbose_flag);
       %studyinfo=UpdateStudy(studyinfo.study_dir,'process_id',sim_id,'status','finished','duration',duration,'solve_file',options.solve_file,'email',options.email,'verbose_flag',options.verbose_flag,'model',model,'simulator_options',options);
+      if ~isempty(options.analysis_functions) || ~isempty(options.plot_functions)
+        siminfo=studyinfo.simulations(sim_ind);
+        for f=1:length(siminfo.result_functions)
+          AnalyzeData(tmpdata,siminfo.result_functions{f},'result_file',siminfo.result_files{f},'save_data_flag',1,siminfo.result_options{f}{:});
+        end
+      end
     end
     if nargout>0
       update_data; % concatenate data structures across simulations
