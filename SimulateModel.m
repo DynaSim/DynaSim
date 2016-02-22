@@ -695,7 +695,9 @@ end
         for j=1:length(tmpdata)
           tmpdata(j).(fld)=mods{i,3};
         end
-        varied{end+1}=fld;
+        if ~ismember(fld,varied)
+          varied{end+1}=fld;
+        end
       end
       for j=1:length(tmpdata)
         tmpdata(j).varied=varied;
