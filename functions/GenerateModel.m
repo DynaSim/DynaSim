@@ -456,12 +456,14 @@ for i=1:length(model.linkers)
   if ~isempty(model.conditionals)
     conditionals_in_pop=~cellfun(@isempty,regexp({model.conditionals.namespace},['^' linker_pops{i}]));
   end
+  if ~isempty(model.linkers)
+    linkers_in_pop=~cellfun(@isempty,regexp({model.linkers.namespace},['^' linker_pops{i}]));
+  end  
   % constrain to namespace
   names_in_namespace=cellfun(@(x,y)strncmp(y,x,length(y)),name_map(:,2),name_map(:,3));
   % get list of (functions,monitors,ODEs) belonging to the linker population
-  eqn_types={'ODEs','monitors'};%{'functions','monitors','ODEs'};
-  search_types={'state_variables','monitors'};%{'functions','monitors','state_variables'};
-  %search_types={'functions','monitors','state_variables'};
+  eqn_types={'ODEs','monitors','functions'};%{'monitors','ODEs'};
+  search_types={'state_variables','monitors','functions'};%{'monitors','state_variables'};
   % indices to expressions in the linker population with the correct search_types and namespace
   inds=find(expressions_in_pop&names_in_namespace&ismember(name_map(:,4),search_types));
   % eliminate duplicates (e.g., state_variables replacing OUT and X)
@@ -493,6 +495,12 @@ for i=1:length(model.linkers)
         field=fields{field_index};
         model.conditionals(inds(j)).(field)=linker_strrep(model.conditionals(inds(j)).(field),oldstr,newstr,operator);
       end
+    end
+  end
+  if ~isempty(model.linkers)
+    inds=find(linkers_in_pop);
+    for j=1:length(inds)
+      model.linkers(inds(j)).expression=linker_strrep(model.linkers(inds(j)).expression,oldstr,newstr,operator);
     end
   end
 end
