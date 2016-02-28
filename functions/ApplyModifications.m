@@ -58,6 +58,10 @@ function [output,modifications]=ApplyModifications(model,modifications)
 %                      {'pop1','equations','cat(FUNCTION,+sin(2*pi*t))'});
 % m.populations.equations
 % 
+% 
+% if there is only one population in the model, the object name can be set
+% to '' or be omitted all together. (e.g., use {'gNa',100}).
+
 % See also: GenerateModel, SimulateModel, Vary2Modifications
 
 % check for modifications
@@ -102,6 +106,7 @@ if isstruct(modifications)
   % convert structure to cell matrix
   % ...
 end
+
 % check backward compatibility
 modifications=backward_compatibility(modifications);
 
@@ -273,6 +278,16 @@ for i=1:size(mods,1)
 end
 
 function modifications=backward_compatibility(modifications)
+% convert 2-column specification to 3-column specification with empty object name
+if size(modifications,2)==2
+  tmp={};
+  for i=1:size(modifications,1)
+    tmp{i,1}='';
+    tmp{i,2}=modifications{i,1};
+    tmp{i,3}=modifications{i,2};
+  end
+  modifications=tmp;
+end
 % convert 4-column specification to 3-column
 if size(modifications,2)==4
   for i=1:size(modifications,1)

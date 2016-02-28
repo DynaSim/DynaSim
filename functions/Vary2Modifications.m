@@ -45,6 +45,9 @@ function modifications_set = Vary2Modifications(vary,model)
 % 
 % for connection mechanisms: indicate namespace by "source->target"
 % 
+% if there is only one population in the model, the object name can be set
+% to '' or be omitted all together. (e.g., {'gNa',[100 120]}).
+% 
 % Examples:
 % vary={'[E,I]','mechanism_list','{iNa,iK}'};
 % modifications_set = Vary2Modifications(vary); 
@@ -98,6 +101,12 @@ end
 
 function list = expand_vary(specification)
 % purpose: get list of modifications for this specification of things to vary.
+% standardize specification
+if length(specification)==2
+  % convert 2-element specification to 3-element with empty object name
+  specification={'',specification{1},specification{2}};
+end
+% set default object name
 if isempty(specification{1})
   specification{1}='pop1'; % default population
 end
