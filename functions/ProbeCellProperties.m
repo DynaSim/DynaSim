@@ -10,7 +10,13 @@ function data = ProbeCellProperties(model,varargin)
 % the population.
 % 
 % Example: ...
+% model='dv/dt=(@current-.1*(v+70))/Cm; Cm=1; {iNa,iK}';
 % data=ProbeCellProperties(model,'verbose_flag',1);
+% PlotData(data(1:10));
+% PlotData(data(11:20));
+% 
+% model='dv/dt=@current-.1*(v+70)+5*randn; {iNa,iK}';
+% data=ProbeCellProperties(model,'num_repetitions',2);
 % 
 % Note: this function is based on the DNSim experiment "cell_pulses".
 % See also: CalcCellProperties
@@ -23,13 +29,26 @@ function data = ProbeCellProperties(model,varargin)
 % Check inputs
 options=CheckOptions(varargin,{...
   'target_equation','ODE1',[],...
-  'amplitudes',0:2:10,[],...
-  'tspan',[0 250],[],...
-  'onset',50,[],...
-  'offset',240,[],...
+  'amplitudes',-30:5:180,[],... % pA. typically: 0-500pA (0-.5nA)
+  'membrane_area',1500,[],...     % um^2. typically: 1000-2000 um2
+  'tspan',[0 1500],[],... % 
+  'num_repetitions',1,[],...
+  'onset',250,[],...
+  'offset',1250,[],...
+  'equivalent_cells_flag',0,[],... % if true, only simulate one cell per pop
   },false);
 
 model=CheckModel(model);
+
+% check that amplitude=0 is present (for RMP calculation)
+if ~ismember(0,options.amplitudes)
+  options.amplitudes(end+1)=0;
+end
+% convert current from pA to uA/cm^2
+CF = (1e-6)/(1e-8);   % pA/um^2 => uA/cm^2. note: 1um2=1e-8cm2, 1pA=1e-6uA
+options.effective_amplitudes=CF*options.amplitudes/options.membrane_area;
+% options.effective_amplitudes=repmat(options.effective_amplitudes,[1 options.num_repetitions]);
+% options.amplitudes=repmat(options.amplitudes,[1 options.num_repetitions]);
 
 % Remove connections from the model specification and regenerate the model
 if ~isempty(model.specification.connections)
@@ -45,9 +64,17 @@ pop_names={model.specification.populations.name};
 % Prepare list of modifications to add input pulses
 modifications={};
 for i=1:num_pops
-  modifications(end+1,:)={pop_names{i},'equations',['cat(' options.target_equation ',+pulse(t); pulse(t)=TONIC*(t>=onset&t<=offset); monitor pulse)']};
+  if isfield(model.parameters,[pop_names{i} '_Cm'])
+    modifications(end+1,:)={pop_names{i},'equations',['cat(' options.target_equation ',+pulse(t)/Cm; pulse(t)=TONIC*(t>=onset&t<=offset); monitor pulse)']};
+  else
+    modifications(end+1,:)={pop_names{i},'equations',['cat(' options.target_equation ',+pulse(t); pulse(t)=TONIC*(t>=onset&t<=offset); monitor pulse)']};
+  end
   modifications(end+1,:)={pop_names{i},'onset',options.onset};
   modifications(end+1,:)={pop_names{i},'offset',options.offset};
+  if options.equivalent_cells_flag
+    % Reduce each population to a single cell if homogeneous
+    modifications(end+1,:)={pop_names{i},'size',1};    
+  end
 end
 
 % Prepare 'vary' specification to adjust pulse amplitudes in all populations
@@ -57,7 +84,8 @@ for i=1:num_pops
   objects=[objects pop_names{i} ','];
 end
 objects=[objects(1:end-1) ')'];
-vary={objects,'TONIC',options.amplitudes};  
+vary={objects,'TONIC',options.effective_amplitudes;...
+      objects,'repetition',1:options.num_repetitions};  
 
 % apply modifications to effectively add experimental apparatus to model
 model=ApplyModifications(model,modifications);
@@ -69,7 +97,6 @@ data=SimulateModel(model,'vary',vary,'tspan',options.tspan,keyvals{:});
 
 % add options to data
 for i=1:length(data)
-  data(i).model.experiment_options=options;
+  data(i).simulator_options.experiment_options=options;
 end
- 
-  
+
