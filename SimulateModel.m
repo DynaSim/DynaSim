@@ -480,6 +480,9 @@ try
   base_model=model;
   data_index=0;
   for sim=1:length(modifications_set)
+    if ~strcmp(pwd,cwd) % move back to original directory before potentially regenerating to make sure the model files used are the same
+      cd(cwd);
+    end
     % get index for this simulation
     if ~isempty(options.sim_id)
       sim_ind=find([studyinfo.simulations.sim_id]==options.sim_id);
