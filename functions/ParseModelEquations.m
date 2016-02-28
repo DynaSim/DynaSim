@@ -169,10 +169,10 @@ for index=1:length(text) % loop over lines of text
         model.comments{end+1}=sprintf('%s (fixed_variable): %s',[namespace name],comment);
       end
     case 'function'         % f(vars)=exression
-      if any(line=='@')
-        line=strrep(line,'@','');
-        %error('model specification error: delete the ''@'' character from all function definitions and try again.');
-      end
+%       if any(line=='@')
+%         line=strrep(line,'@','');
+%         %error('model specification error: delete the ''@'' character from all function definitions and try again.');
+%       end
       name=regexp(line,'^(.+)\(.*\)\s*=','tokens','once');
       vars=regexp(line,'\((.+)\)\s*=','tokens','once');      
       rhs=regexp(line,'=(.+)$','tokens','once');
@@ -247,16 +247,39 @@ for index=1:length(text) % loop over lines of text
       end
       
     case 'conditional'      % if(conditions)(actions)
-      groups=regexp(line,'\(((\w+\([\w,@]+\))?[\w@-\+*^/\s><=,&|\.]+)\)','tokens');
-      condition=groups{1}{1};
+      groups=regexp(line,')(','split');
+      condition=regexp(groups{1},'^if\s*\((.*)','tokens','once');
+      if length(groups)==2
+        if groups{2}(end)==')'
+          groups{2}=groups{2}(1:end-1);
+        end
+        then_action=groups{2};
+        else_action=[];
+      elseif numel(groups==3)
+        if groups{3}(end)==')'
+          groups{3}=groups{3}(1:end-1);
+        end
+        then_action=groups{2};
+        else_action=groups{3};
+      end
       model.conditionals(end+1).namespace=namespace;
-      model.conditionals(end).condition=condition;
-      model.conditionals(end).action=strrep(groups{2}{1},',',';'); % restore semicolon-delimited multiple actions like if(x>1)(x=0;y=0)
+      model.conditionals(end).condition=condition{1};
+      model.conditionals(end).action=strrep(then_action,',',';'); % restore semicolon-delimited multiple actions like if(x>1)(x=0;y=0)
       if length(groups)>2
-        model.conditionals(end).else=groups{3}{1};
+        model.conditionals(end).else=else_action;
       else
         model.conditionals(end).else=[];
       end
+%       groups=regexp(line,'\(((\w+\([\w,@]+\))?[\w@-\+*^/\s><=,&|\.]+)\)','tokens');
+%       condition=groups{1}{1};
+%       model.conditionals(end+1).namespace=namespace;
+%       model.conditionals(end).condition=condition;
+%       model.conditionals(end).action=strrep(groups{2}{1},',',';'); % restore semicolon-delimited multiple actions like if(x>1)(x=0;y=0)
+%       if length(groups)>2
+%         model.conditionals(end).else=groups{3}{1};
+%       else
+%         model.conditionals(end).else=[];
+%       end
       if ~isempty(comment)
         model.comments{end+1}=sprintf('%s conditional(%s): %s',namespace,condition,comment);
       end
