@@ -226,6 +226,7 @@ for i=1:npops
       tmp=regexp(mechanism,':','split');
       MechScope=[specification.populations(i).name '_' tmp{2}];
     else      
+      % extract mechanism file name without path
       [~,MechID]=fileparts(mechanism);
       MechScope=[specification.populations(i).name '_' MechID];
     end
@@ -270,6 +271,7 @@ for i=1:ncons
     mechanism_=regexp(mechanism_,'@','split');
     mechanism=mechanism_{1};
     if numel(mechanism_)>1, new_linker=mechanism_{2}; else new_linker=[]; end  
+    % extract mechanism file name without path
     [~,MechID]=fileparts(mechanism);
     MechScope=[target '_' source '_' MechID]; 
         % note: must use target_source_mechanism for connection mechanisms
