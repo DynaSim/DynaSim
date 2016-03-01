@@ -34,7 +34,7 @@ if ~isequal(dynasim_path,studyinfo.paths.dynasim_functions)
 end
   
 % compare model paths
-if ~isequal(mech_paths,studyinfo.paths.mechanisms)
-  matched=0;
-  error_message=sprintf('%sPath changed to model files (expected: %s, found: %s). ',error_message,studyinfo.paths.mechanisms,mech_paths);
+if ~isequal(unique(mech_paths),unique(studyinfo.paths.mechanisms))
+  matched=0; mech_paths, studyinfo.paths.mechanisms
+  error_message=sprintf('%sPath changed to model files (expected: %s, found: %s). ',error_message,[studyinfo.paths.mechanisms{:}],[mech_paths{:}]);
 end  
