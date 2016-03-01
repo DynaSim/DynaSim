@@ -16,7 +16,8 @@ function stats = CalcCellProperties(data,varargin)
 %     FR_min (threshrate), FR_min2 (steprate?), FR_max (steprate?)
 %     AP morphology: AP_amp, AP_dur (spikewidth), AP_taur, AP_taud
 %                    Ih_relsag, Ih_abssag, hump, AHP_amp, AHP_dur
-%                    AHP_time2trough, ISI_median, AR23, ISI1
+%                    AHP_time2trough, ISI_median, AR23, ISI1,
+%                    min_ISI_median, ISI_step_median
 % -------------------------------------------------------------------------
 % From Iinj=0:
 % RMP = (avg over 50-100% step | Iinj=0)
@@ -44,6 +45,9 @@ function stats = CalcCellProperties(data,varargin)
 % Across suprathreshold steps >=60pA above first step with at least two spikes:
 % AR coefficient: (slope of AR/I) where per step AR=ISI(1)/ISI(end)
 % Note: AR = Adaptation ratio
+% ISI_step_median = median ISI on step 60pA above first step w/ 2 spikes
+% FR_step = mean FR on step 60pA above first step w/ 2 spikes
+% ARif = max AR across steps >=60pA above first step w/ 2 spikes
 % 
 % From first suprathreshold T sec step:
 % FRmin (threshrate) = (# spikes)/T
@@ -52,7 +56,7 @@ function stats = CalcCellProperties(data,varargin)
 % FRmin2 (steprate?) = (# spikes)/T
 % 
 % From first spike of first suprathreshold step: AP morphology
-% Vthresh = V( crossing(dV/dt,10mV/ms) )
+% Vthresh = V( crossing(dV/dt,20mV/ms) ) %10mV/ms) )
 % AP_amp = (Vpeak-Vthresh)
 % AP_taur = (time to rise from 10% to 90% between Vthresh and Vpeak)
 % AP_taud = (time to decay from 10% to 90% between Vpeak and Vthresh)
@@ -67,7 +71,8 @@ function stats = CalcCellProperties(data,varargin)
 % CV(ISIs over 30-100% step)
 % 
 % From last suprathreshold T sec step (or step at amp=max (eg, 140pA)):
-% FRmax (steprate?): (# spikes)/T
+% FR_max (steprate?): (# spikes)/T
+% min_ISI_median
 % AR24 = ISI(2)/ISI(4)
 % 
 % -------------------------------------------------------------------------
@@ -142,10 +147,10 @@ if length(unique(vars_pop))>num_pops
 end
 
 % collect pulses
-input=zeros(num_times,num_steps);
-for s=1:num_steps
-  input(:,s)=data(s).([pop_names{1} '_pulse'])(:,1);
-end
+% input=zeros(num_times,num_steps);
+% for s=1:num_steps
+%   input(:,s)=data(s).([pop_names{1} '_pulse'])(:,1);
+% end
 
 CF = (1e-6)/(1e-8);   % pA/um^2 => uA/cm^2. note: 1um2=1e-8cm2, 1pA=1e-6uA
 amplitudes_pA=amplitudes*experiment_options.membrane_area/CF;
@@ -171,6 +176,8 @@ for p=1:num_pops
   stats.(pop).FI_slope=nan(1,num_cells);
   stats.(pop).CV      =nan(1,num_cells);
   stats.(pop).ISI_median=nan(1,num_cells);
+  stats.(pop).ISI_step_median=nan(1,num_cells);
+  stats.(pop).min_ISI_median=nan(1,num_cells);
   stats.(pop).AR23    =nan(1,num_cells);
   stats.(pop).AR24    =nan(1,num_cells);
   stats.(pop).ARif    =nan(1,num_cells);
@@ -322,7 +329,8 @@ for p=1:num_pops
 %       [num_spikes(step_sel) amplitudes(step_sel)']
 %     end
 
-    % 6) calculate ARs (avg over repetitions) & AR_coefficient Across suprathreshold steps >=60pA above first step with at least two spikes
+    % 6) calculate ARs (avg over repetitions) & AR_coefficient Across 
+    %    suprathreshold steps >=60pA above first step with at least two spikes
     % AR coefficient: (slope of AR/I) where per step AR=ISI(1)/ISI(end)
     thresh_step=find(num_spikes>1,1,'first');
     if any(thresh_step)
@@ -358,6 +366,11 @@ for p=1:num_pops
         AR(a)=ar/denom;
         FR(a)=fr/length(asel); % [Hz]
       end
+      % calc ISI_median at 60pA above threshold
+      spikes=spike_times{step_sel(1),c};
+      ISI=diff(spikes);
+      stats.(pop).ISI_step_median(c)=median(ISI);
+      % store FR at 60pA above threshold
       stats.(pop).FR_step(c)=FR(1); % FR at 60pA above threshold
       stats.(pop).ARif(c)=nanmax(AR); % nanmean, nanmedian
       % calculate AR_coefficient
@@ -425,6 +438,7 @@ for p=1:num_pops
       stats.(pop).AR24(c)=finst(2)/finst(4);
       stats.(pop).AR23(c)=ISIs(2)/ISIs(3);
       stats.(pop).FR_max(c)=num_spikes(step_sel)/((offset-onset)/1000);
+      stats.(pop).min_ISI_median(c)=median(diff(spikes));
     end
 
     % 11) calculate AP morphology From first spike of first suprathreshold step with at least two spikes
@@ -449,11 +463,12 @@ for p=1:num_pops
       % Vthresh = V( crossing(dV/dt,10mV/ms) )
       dVdt=diff(V)/(t(2)-t(1));
       dVdt=smooth(dVdt,round(1/(t(2)-t(1)))); % 1ms smoothing
-      thresh_ind=find(dVdt>10,1,'first');%crossing(dVdt,t,10);
+      thresh_ind=find(dVdt>20,1,'first');%crossing(dVdt,t,10);
       Vthresh=V(thresh_ind(1));      
       % APamp = (Vpeak-Vthresh)
-      Vpeak=max(V);
-      Vpeak_i=find(V==Vpeak,1,'first');
+      [pk,loc]=findpeaks(V,'NPeaks',1);
+      Vpeak=V(loc);%max(V);
+      Vpeak_i=loc;%find(V==Vpeak,1,'first');
       APamp=Vpeak-Vthresh;
       V10=Vthresh+.1*APamp; % 10% from Vthresh to Vpeak
       V90=Vthresh+.9*APamp; % 90% from Vthresh to Vpeak
@@ -461,17 +476,34 @@ for p=1:num_pops
       V10_i_r=1+find(V(2:end)>=V10 & V(1:end-1)<V10); % first
       V90_i_r=1+find(V(2:end)>=V90 & V(1:end-1)<V90); % second
       % APtaur = (time to rise from 10% to 90% between Vthresh and Vpeak)
-      APtaur=t(V90_i_r(1))-t(V10_i_r(1));
+      if any(V10_i_r) && any(V90_i_r)
+        APtaur=t(V90_i_r(1))-t(V10_i_r(1));
+      else
+        APtaur=nan;
+      end
       % repolarizing falling phase
       V10_i_d=1+find(V(1:end-1)>=V10 & V(2:end)<V10); % second
       V90_i_d=1+find(V(1:end-1)>=V90 & V(2:end)<V90); % first
+      if isempty(V10_i_d)
+        % set to the minimum point of the repolarizing phase
+        V10=min(V(Vpeak_i:end));
+        V10_i_d=find(V(Vpeak_i:end)==V10)+Vpeak_i-1;
+      end
       % APtaud = (time to decay from 10% to 90% between Vpeak and Vthresh)
-      APtaud=t(V10_i_d(1))-t(V90_i_d(1));
+      if any(V10_i_d) && any(V90_i_d)
+        APtaud=t(V10_i_d(1))-t(V90_i_d(1));
+      else
+        APtaud=nan;
+      end
       % APdur (spikewidth) = (time between rising and falling (Vthresh+APamp/2) = (Vthresh+Vpeak)/2)
       V50=Vthresh+.5*APamp;
       V50_i_r=1+find(V(2:end)>=V50 & V(1:end-1)<V50);
       V50_i_d=1+find(V(1:end-1)>=V50 & V(2:end)<V50);
-      APdur=t(V50_i_d(1))-t(V50_i_r(1));
+      if any(V50_i_d) && any(V50_i_r)
+        APdur=t(V50_i_d(1))-t(V50_i_r(1));
+      else
+        APdur=nan;
+      end
       % AHPamp = (Vbaseline-Vmin) where Vmin taken during repolarizing phase
       %bl=X(spk_inds(1)-1); % baseline voltage
       bl=mean(V);
@@ -492,7 +524,7 @@ for p=1:num_pops
       if any(ahp_V50_i_d)
         ahp_V50_i_r(ahp_V50_i_r<ahp_V50_i_d(1))=[]; % remove crossings before start of AHP
       end
-      if any(ahp_V50_i_r)
+      if any(ahp_V50_i_r) && any(ahp_V50_i_d)
         AHPdur=t(ahp_V50_i_r(1))-t(ahp_V50_i_d(1));
       else
         AHPdur=nan;
@@ -508,7 +540,7 @@ for p=1:num_pops
           figure; plot(t,V); 
           line(xlim,[V10 V10]); line(xlim,[Vmin Vmin]);
           line([t(ahp_trough_i(1)) t(ahp_trough_i(1))],ylim);
-          line([t(V10_i_d(1)) t(V10_i_d(1))],ylim);
+          line([t(Vpeak_i) t(Vpeak_i)],ylim,'color','r');
         end
       else
         AHPtime2trough=nan;
@@ -559,8 +591,8 @@ if options.plot_flag
   xlabel('time [ms]'); ylabel(['<' strrep(vars{v},'_','\_') ', pop>']);
   legend(cellfun(@(x)['I=' num2str(x)],num2cell(amplitudes),'uni',0));
   subplot(2,2,3); % I(t)
-  plot(time,input); xlabel('time [ms]'); ylabel('I(t)');
-  legend(cellfun(@(x)['I=' num2str(x)],num2cell(amplitudes),'uni',0));
+  %plot(time,input); xlabel('time [ms]'); ylabel('I(t)');
+  %legend(cellfun(@(x)['I=' num2str(x)],num2cell(amplitudes),'uni',0));
   subplot(2,2,2); % I/V
   plot(amplitudes,stats.([vars{v} '_mean_per_amp'])); hold on
   plot(amplitudes,stats.([vars{v} '_pop_mean_per_amp']),'k-','linewidth',5);
@@ -586,7 +618,7 @@ end
 % RMP: resting membrane potential [mV] = avg V over step 150-500ms
 
 % From first spike:
-% Vthresh (spike threshold) [4]: level of voltage deflection exceeding 10mV/1ms
+% Vthresh (spike threshold) [4]: level of voltage deflection exceeding 20mV/1ms %10mV/1ms
 % Peak amplitude [4]: (peak - threshold value)
 % Spike rise time [4]: time to rise from 10% to 90% of peak amplitude
 % Spike decay time [4]: time to decay from 10% to 90% of the amplitude b/w peak and spike threshold
