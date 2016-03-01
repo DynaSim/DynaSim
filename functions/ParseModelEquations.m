@@ -74,7 +74,8 @@ end
 
 %% 1.0 convert text into cell array of strings (one string per line)
 % check for DynaSim extensions if input is single \w+ string
-if ischar(text) && ~exist(text,'file') && isempty(regexp(text,'[^\w.]','once')) % isempty(regexp(text,'[^\w]','once'))
+if ischar(text) && ~any(which(text)) && isempty(regexp(text,'[^\w.]','once')) % isempty(regexp(text,'[^\w]','once'))
+%if ischar(text) && ~exist(text,'file') && isempty(regexp(text,'[^\w.]','once')) % isempty(regexp(text,'[^\w]','once'))
   [~,text]=LocateModelFiles(text);
   if iscell(text) && ~isempty(text)
     text=text{1};
