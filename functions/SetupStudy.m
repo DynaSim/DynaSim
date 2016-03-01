@@ -46,6 +46,10 @@ if options.save_data_flag || options.save_results_flag
     % set default solve_file for this study
     [~,fname]=fileparts(options.study_dir);
     fname=['solve_ode_' fname];
+    % replace non-word characters by underscores so that matlab can execute
+    % the file as a Matlab function:
+    fname=regexprep(fname,'[^\w]','_');
+    % store the solve file
     options.solve_file=fullfile(options.study_dir,'solve',[fname '.m']);
   end
   % initialize studyinfo if not already initialized
