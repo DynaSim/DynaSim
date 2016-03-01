@@ -226,7 +226,8 @@ for i=1:npops
       tmp=regexp(mechanism,':','split');
       MechScope=[specification.populations(i).name '_' tmp{2}];
     else      
-      MechScope=[specification.populations(i).name '_' mechanism];
+      [~,MechID]=fileparts(mechanism);
+      MechScope=[specification.populations(i).name '_' MechID];
     end
     % parse mechanism equations    
     [tmpmodel,tmpmap]=ImportModel(mechanism,'namespace',MechScope,'ic_pop',specification.populations(i).name,'user_parameters',parameters);
@@ -268,8 +269,9 @@ for i=1:ncons
     % support separation of linker names in pop equations vs mechanisms
     mechanism_=regexp(mechanism_,'@','split');
     mechanism=mechanism_{1};
-    if numel(mechanism_)>1, new_linker=mechanism_{2}; else new_linker=[]; end    
-    MechScope=[target '_' source '_' mechanism]; 
+    if numel(mechanism_)>1, new_linker=mechanism_{2}; else new_linker=[]; end  
+    [~,MechID]=fileparts(mechanism);
+    MechScope=[target '_' source '_' MechID]; 
         % note: must use target_source_mechanism for connection mechanisms
         % to distinguish their parent namespaces from those of population mechanisms
         % see: GetParentNamespace
