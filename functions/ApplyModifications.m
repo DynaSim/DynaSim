@@ -169,7 +169,8 @@ for i=1:size(mods,1)
     type='connections';
     names=con_names;
   else
-    error('name of object to modify not found in populations or connections.');
+    warning('name of object to modify not found in populations or connections.');
+    continue
   end
   index=ismember(names,obj);
   if strcmp(fld,'mechanism_list')
@@ -217,7 +218,8 @@ for i=1:size(mods,1)
         ind=inds(n);
       end
       % get LHS of ODE
-      LHS=regexp(lines{ind},'^(.+)=','tokens','once');
+      %LHS=regexp(lines{ind},'^(.+)=','tokens','once');
+      LHS=regexp(lines{ind},'^([^=]+)=','tokens','once');
       target=LHS{1};
     elseif strncmp('FUNCTION',target,8)
       % support target = FUNCTIONn and FUNCTION=FUNCTION1
@@ -235,7 +237,8 @@ for i=1:size(mods,1)
         ind=inds(n);
       end
       % get LHS of ODE
-      LHS=regexp(lines{ind},'^(.+)=','tokens','once');
+      %LHS=regexp(lines{ind},'^(.+)=','tokens','once');
+      LHS=regexp(lines{ind},'^([^=]+)=','tokens','once');
       target=LHS{1};
     end
     % add escape character for using regular expression to match function statements
