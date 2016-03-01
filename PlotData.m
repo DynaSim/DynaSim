@@ -15,6 +15,7 @@ function handles=PlotData(data,varargin)
 %     'max_num_rows' - maximum # of subplot rows per figure
 %     'xlim' - [XMIN XMAX], x-axis limits (default: all data)
 %     'yscale' {'linear','log','log10'}, whether to plot linear or log scale
+%     'visible' {'on','off'}
 %     NOTE: analysis options available depending on plot_type
 %       see see CalcFR options for plot_type 'rastergram' or 'rates'
 %       see CalcPower options for plot_type 'power'
@@ -146,6 +147,7 @@ options=CheckOptions(varargin,{...
   'xlim',[],[],...
   'ylim',[],[],...
   'yscale','linear',{'linear','log','log10','log2'},...
+  'visible','on',{'on','off'},...
   },false);
 data=CheckData(data);
 handles=[];
@@ -176,7 +178,7 @@ for i=1:length(pop_names)
   if any(var_inds)
     inds=cellfun(@(x)find(~cellfun(@isempty,regexp(var_fields(var_inds),['_' x '$'],'once'))),variables,'uni',0);
     varsel=~cellfun(@isempty,inds);
-    fldind=[inds{:}];    
+    fldind=unique([inds{:}]);    
     pop_indices(end+1)=i;
     pop_var_indices{end+1}=nan(1,length(variables));
     pop_var_indices{end}(varsel)=var_inds(fldind);
@@ -306,7 +308,7 @@ for figset=1:num_fig_sets
   for fig=1:num_figs
     ylims=[nan nan];
     % create figure
-    handles(end+1)=figure('units','normalized','outerposition',[0 0 1 1]);
+    handles(end+1)=figure('units','normalized','outerposition',[0 0 1 1],'visible',options.visible);
     % position axes
     haxes=tight_subplot(num_rows,num_cols,[.01 .03],[.05 .01],[.03 .01]);
     axis_counter=0;
@@ -548,7 +550,8 @@ for figset=1:num_fig_sets
           legend_strings=cat(2,legend_strings,AuxDataName);
         end
         % plot data
-        axes(haxes(axis_counter));
+        %axes(haxes(axis_counter));
+        set(gcf,'CurrentAxes',haxes(axis_counter));
         switch options.plot_type
           case {'waveform','power'}
           % finish preparing data
@@ -666,7 +669,8 @@ for figset=1:num_fig_sets
               continue;
             end
             axis_counter=axis_counter+1;
-            axes(haxes(axis_counter));
+            %axes(haxes(axis_counter));
+            set(gcf,'CurrentAxes',haxes(axis_counter));
             xmin=min(xlim); xmax=max(xlim);
             ymin=min(ylim); ymax=max(ylim);
             text_xpos=xmin+.05*(xmax-xmin);
