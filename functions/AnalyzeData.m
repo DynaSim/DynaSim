@@ -47,23 +47,28 @@ end
 fprintf('Executing post-processing function: %s\n',func2str(func));
 tstart=tic;
 result=feval(func,data,varargin{:});
-fprintf('Elapsed time: %s sec\n',toc(tstart));
+fprintf('Elapsed time: %g sec\n',toc(tstart));
 
 % determine if result is a plot handle or derived data
 if all(ishandle(result)) % analysis function returned a graphics handle
   for i=1:length(result)
-    % add 'varied' info to plot as annotation
-    % ...
     % save plot
     if options.save_results_flag
+      extension='.svg'; % {.jpg,.svg}
       % temporary default: jpg
       if length(result)==1
-        fname=[options.result_file '.jpg'];
+        fname=[options.result_file extension];
       else
-        fname=[options.result_file '_page' num2str(i) '.jpg'];
+        fname=[options.result_file '_page' num2str(i) extension];
       end
+      set(gcf,'PaperPositionMode','auto');
       fprintf('Saving plot: %s\n',fname);
-      print(gcf,fname,'-djpeg');
+      switch extension
+        case '.svg'
+          plot2svg(fname,result(i));
+        case '.jpg'
+          print(result(i),fname,'-djpeg');
+      end
     end
   end
 else % analysis function returned derived data
