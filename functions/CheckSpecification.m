@@ -399,6 +399,32 @@ if isstruct(spec.connections)
   spec.connections=orderfields(spec.connections,con_field_order);
 end
 
+% 4.0 replace mechanism names by full file names
+% this is necessary so that regenerated models will use the same mechanism
+% files to recreate the model (e.g., when a cluster job simulates a
+% modified version of an original base model).
+[~,files]=LocateModelFiles(spec);
+if ~isempty(files)
+  fnames={};
+  for f=1:length(files)
+    [~,name]=fileparts(files{f});
+    fnames{f}=name;
+  end
+  % update population and connection mechanism lists
+  fields={'populations','connections'};
+  for f=1:length(fields)
+    object=fields{f};
+    for i=1:length(spec.(object))
+      for j=1:length(spec.(object)(i).mechanism_list)
+        mech=spec.(object)(i).mechanism_list{j};
+        if ismember(mech,fnames)
+          spec.(object)(i).mechanism_list{j}=files{find(ismember(fnames,mech),1,'first')};
+        end
+      end
+    end
+  end
+end
+
 function list=expand_list(list)
 % expand mechanism list if any element is itself a list of mechanisms (eg, {'AMPA','{GABAa,GABAb}'} or '{GABAa,GABAb}')
 if isempty(list)
