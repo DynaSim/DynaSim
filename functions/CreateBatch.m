@@ -325,6 +325,9 @@ end
     fprintf(fjob,'\t\tsiminfo=studyinfo.simulations(SimID);\n');
     fprintf(fjob,'\t\toptions=rmfield(siminfo.simulator_options,{''modifications'',''studyinfo'',''analysis_functions'',''plot_functions'',''sim_id''});\n');
     fprintf(fjob,'\t\tkeyvals=Options2Keyval(options);\n');
+    fprintf(fjob,'\t\tfprintf(''-----------------------------------------------------\\n'');\n');
+    fprintf(fjob,'\t\tfprintf(''Processing simulation %%g (%%g of %%g in this job)...\\n'',SimID,s,length(SimIDs));\n');
+    fprintf(fjob,'\t\tfprintf(''-----------------------------------------------------\\n'');\n');
     fprintf(fjob,'\t\tdata=SimulateModel(studyinfo.base_model,''modifications'',siminfo.modifications,''studyinfo'',studyinfo,''sim_id'',SimID,keyvals{:});\n');    
     fprintf(fjob,'\t\tfor i=1:length(siminfo.result_functions)\n');
     fprintf(fjob,'\t\t\tAnalyzeData(data,siminfo.result_functions{i},''result_file'',siminfo.result_files{i},''save_data_flag'',1,siminfo.result_options{i}{:});\n');
