@@ -43,6 +43,14 @@ if nargout<1
   options.save_results_flag=1;
 end
 
+% convert data to double precision before analysis
+for j=1:length(data)
+  for k=1:length(data(j).labels)
+    fld=data(j).labels{k};
+  data(j).(fld)=double(data(j).(fld));
+  end
+end
+
 % do analysis
 fprintf('Executing post-processing function: %s\n',func2str(func));
 tstart=tic;
