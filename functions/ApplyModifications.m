@@ -69,8 +69,6 @@ if isempty(modifications)
   % nothing to do
   output=model;
   return;
-else
-  modifications=standardize_modifications(modifications);
 end
 
 % check input type
@@ -87,6 +85,7 @@ else
 end
 
 % update specification with whatever is in modifications
+modifications=standardize_modifications(modifications,specification);
 specification=modify_specification(specification,modifications);
 
 % update model if input was a model structure
@@ -96,7 +95,7 @@ else
   output=specification;
 end
 
-function modifications=standardize_modifications(modifications)
+function modifications=standardize_modifications(modifications,specification)
 % convert all modifications into 3-column cell matrix format
 % (namespace,variable,value)
 
@@ -116,7 +115,7 @@ missing_objects=find(cellfun(@isempty,modifications(:,1)));
 if any(missing_objects)
   % set to default population name
   for i=1:length(missing_objects)
-    modifications{missing_objects(i),1}='pop1';
+    modifications{missing_objects(i),1}=specification.populations(1).name;%'pop1';
   end
 end
 
