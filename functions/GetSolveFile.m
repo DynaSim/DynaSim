@@ -96,8 +96,8 @@ if isempty(fpath)
 end
 [fpath,fname,fext]=fileparts(solve_file);
 % check that solve file name is less than max function name allwoed by matlab
-if length(fname)>63
-  fname=fname(1:63);
+if length(fname)>(63-4) % subtract 4 to allow suffix '_mex'
+  fname=fname(1:(63-4));
   solve_file=fullfile(fpath,[fname fext]);
 end
 % create directory for solve_file if it doesn't exist
