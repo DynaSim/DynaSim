@@ -156,7 +156,10 @@ for k=1:num_jobs
   % only run simulations if data_file does not exist (unless overwrite_flag=1)
   proc_sims=[]; % simulations to run in this job
   for j=1:length(sim_ids)
-    if ~exist(studyinfo.simulations(sim_ids(j)).data_file,'file') || options.overwrite_flag
+    %if ~exist(studyinfo.simulations(sim_ids(j)).data_file,'file') || options.overwrite_flag
+    if (options.simulator_options.save_data_flag && ~exist(studyinfo.simulations(sim_ids(j)).data_file,'file')) || ...
+       (options.simulator_options.save_results_flag && ~exist(studyinfo.simulations(sim_ids(j)).result_files{1},'file')) || ...
+       options.overwrite_flag
       proc_sims=[proc_sims sim_ids(j)];
     end
   end
@@ -205,6 +208,7 @@ if options.verbose_flag
 end
 %[solve_path,solve_name,solve_ext]=fileparts(solve_file);
 [solve_path,solve_name,solve_ext]=fileparts(full_solve_file);
+% prepare studyinfo with simulation-specific metadata
 for sim=1:num_simulations
   if ismember(sim,skip_sims)
     continue; % do nothing with this simulation
@@ -234,8 +238,20 @@ for sim=1:num_simulations
   studyinfo.simulations(sim).simulator_options.sim_id=studyinfo.simulations(sim).sim_id;
   studyinfo.simulations(sim).error_log='';
   % copy studyinfo to batch_dir for each simulation
+  %this_study_file=fullfile(batch_dir,sprintf('studyinfo_%g.mat',sim));
+  %save(this_study_file,'studyinfo');
+end
+% copy studyinfo file to batch_dir for each simulation
+for sim=1:num_simulations
   this_study_file=fullfile(batch_dir,sprintf('studyinfo_%g.mat',sim));
-  save(this_study_file,'studyinfo');
+  if sim==1
+    save(this_study_file,'studyinfo');
+    first_study_file=this_study_file;
+  else
+    % use copyfile() after saving first b/c >10x faster than save()
+    [success,msg]=copyfile(first_study_file,this_study_file);
+    if ~success, error(msg); end
+  end
 end
 
 % update studyinfo on disk
@@ -255,7 +271,8 @@ else % on cluster with qsub
   [~,s]=MonitorStudy(studyinfo.study_dir,'verbose_flag',0);
   if s~=1 % study not finished
     % submit jobs using shell script
-    [batch_dir_path,batch_dir_name]=fileparts(batch_dir);
+    [batch_dir_path,batch_dir_name,batch_suffix]=fileparts(batch_dir);
+    batch_dir_name=[batch_dir_name batch_suffix];
     if options.parallel_flag
       cmd=sprintf('qmatjobs_pct %s %s %g',batch_dir_name,options.memory_limit,options.num_cores);
       %status=system('which qmatjobs_pct');
@@ -278,7 +295,7 @@ else % on cluster with qsub
     end
     %if options.verbose_flag
       %fprintf('%g jobs successfully submitted!\ntip: use MonitorStudy(''%s'') or MonitorStudy(studyinfo) to track status of cluster jobs.\n',num_jobs,studyinfo.study_dir);
-      fprintf('%g jobs successfully submitted!\n',num_jobs);
+      fprintf('%g jobs successfully submitted!\n',length(jobs));
     %end
   elseif s==1 % study is finished
     if options.verbose_flag
