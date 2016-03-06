@@ -34,6 +34,7 @@ function [data,studyinfo]=SimulateModel(model,varargin)
 %     'study_dir'     : relative or absolute path to output directory (default: current directory)
 %     'prefix'        : string to prepend to all output file names (default: 'study')
 %     'disk_flag'     : whether to write to disk during simulation instead of storing in memory {0 or 1} (default: 0)
+%     'precision'     : {'single','double'} precision of simulated data saved to disk (default: 'single')
 %                 
 %   options for cluster computing:
 %     'cluster_flag'  : whether to run simulations on a cluster submitted 
@@ -221,6 +222,7 @@ options=CheckOptions(varargin,{...
   'save_parameters_flag',1,{0,1},...
   'random_seed','shuffle',[],...        % seed for random number generator (usage: rng(random_seed))
   'data_file','data.csv',[],... % name of data file if disk_flag=1
+  'precision','single',{'single','double'},...
   'logfid',1,[],...
   'store_model_flag',1,{0,1},...  % whether to store model structure with data
   'verbose_flag',0,{0,1},...
@@ -731,12 +733,14 @@ end
       end
     end    
     % convert tmpdata to single precision
-    for j=1:length(tmpdata)
-      for k=1:length(tmpdata(j).labels)
-        fld=tmpdata(j).labels{k};
-      tmpdata(j).(fld)=single(tmpdata(j).(fld));
-      end
-    end    
+    if strcmp(options.precision,'single')
+      for j=1:length(tmpdata)
+        for k=1:length(tmpdata(j).labels)
+          fld=tmpdata(j).labels{k};
+          tmpdata(j).(fld)=single(tmpdata(j).(fld));
+        end
+      end    
+    end
   end
     
   function cleanup(status)
