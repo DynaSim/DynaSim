@@ -528,9 +528,6 @@ try
         keyvals=cat(2,keyvals,options.experiment_options);
       end
       tmpdata=feval(options.experiment,model,keyvals{:});
-      if ~isempty(modifications_set{sim})
-        % 
-      end
     else
       % NOT AN EXPERIMENT (single simulation)
       %% 2.0 prepare solver function (solve_ode.m/mex)
@@ -683,6 +680,7 @@ end
 % NESTED FUNCTIONS
 % -------------------------
   function update_data
+    % store tmpdata
     if sim==1
       % replicate first data set as preallocation for all
       data=repmat(tmpdata,[1 length(modifications_set)]);
@@ -714,15 +712,15 @@ end
       else
         varied={};
       end
-      for i=1:size(mods,1)
+      for ii=1:size(mods,1)
         % prepare valid field name for thing varied:
-        fld=[mods{i,1} '_' mods{i,2}];
+        fld=[mods{ii,1} '_' mods{ii,2}];
         % convert arrows and periods to underscores
         fld=regexprep(fld,'(->)|(<-)|(-)|(\.)','_');
         % remove brackets and parentheses
         fld=regexprep(fld,'[\[\]\(\)\{\}]','');
         for j=1:length(tmpdata)
-          tmpdata(j).(fld)=mods{i,3};
+          tmpdata(j).(fld)=mods{ii,3};
         end
         if ~ismember(fld,varied)
           varied{end+1}=fld;
@@ -730,6 +728,13 @@ end
       end
       for j=1:length(tmpdata)
         tmpdata(j).varied=varied;
+      end
+    end    
+    % convert tmpdata to single precision
+    for j=1:length(tmpdata)
+      for k=1:length(tmpdata(j).labels)
+        fld=tmpdata(j).labels{k};
+      tmpdata(j).(fld)=single(tmpdata(j).(fld));
       end
     end    
   end
