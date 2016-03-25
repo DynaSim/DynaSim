@@ -16,7 +16,7 @@ function stats = CalcCellProperties(data,varargin)
 %     FR_min (threshrate), FR_min2 (steprate?), FR_max (steprate?)
 %     AP morphology: AP_amp, AP_dur (spikewidth), AP_taur, AP_taud
 %                    Ih_relsag, Ih_abssag, hump, AHP_amp, AHP_dur
-%                    AHP_time2trough, ISI_median, AR23, ISI1,
+%                    AHP_time2trough, ISI_median, AR23, AR13, ISI1,
 %                    min_ISI_median, ISI_step_median
 % -------------------------------------------------------------------------
 % From Iinj=0:
@@ -73,6 +73,7 @@ function stats = CalcCellProperties(data,varargin)
 % From last suprathreshold T sec step (or step at amp=max (eg, 140pA)):
 % FR_max (steprate?): (# spikes)/T
 % min_ISI_median
+% max_ISI
 % AR24 = ISI(2)/ISI(4)
 % 
 % -------------------------------------------------------------------------
@@ -178,6 +179,8 @@ for p=1:num_pops
   stats.(pop).ISI_median=nan(1,num_cells);
   stats.(pop).ISI_step_median=nan(1,num_cells);
   stats.(pop).min_ISI_median=nan(1,num_cells);
+  stats.(pop).max_ISI=nan(1,num_cells);
+  stats.(pop).AR13    =nan(1,num_cells);
   stats.(pop).AR23    =nan(1,num_cells);
   stats.(pop).AR24    =nan(1,num_cells);
   stats.(pop).ARif    =nan(1,num_cells);
@@ -425,6 +428,7 @@ for p=1:num_pops
       spikes=spike_times{step_sel,c};
       ISI=diff(spikes);
       stats.(pop).ISI_median(c)=median(ISI);
+      stats.(pop).max_ISI(c)=max(ISI);
     end
 
     % 10) calculate (FRmax,AR24) From last suprathreshold T sec step
@@ -436,15 +440,23 @@ for p=1:num_pops
       ISIs=diff(spikes)/1000;
       finst=1./(ISIs);
       stats.(pop).AR24(c)=finst(2)/finst(4);
-      stats.(pop).AR23(c)=ISIs(2)/ISIs(3);
+%       stats.(pop).AR23(c)=ISIs(2)/ISIs(3);
+%       stats.(pop).AR13(c)=ISIs(1)/ISIs(3);
       stats.(pop).FR_max(c)=num_spikes(step_sel)/((offset-onset)/1000);
       stats.(pop).min_ISI_median(c)=median(diff(spikes));
     end
+    step_sel=find(num_spikes>3,1,'first');
+    if any(step_sel)
+      spikes=spike_times{step_sel,c};
+      ISIs=diff(spikes)/1000;
+      stats.(pop).AR23(c)=ISIs(2)/ISIs(3);
+      stats.(pop).AR13(c)=ISIs(1)/ISIs(3);
+    end    
 
     % 11) calculate AP morphology From first spike of first suprathreshold step with at least two spikes
     step_sel=find(num_spikes>0,1,'first');
     if any(step_sel)
-      X=data(step_sel).(this_var)(:,c);
+      X=double(data(step_sel).(this_var)(:,c));
       spks=spike_times{step_sel,c};
       spk_1=spks(1); % time of first spike
       if length(spks)>1
@@ -484,6 +496,10 @@ for p=1:num_pops
       % repolarizing falling phase
       V10_i_d=1+find(V(1:end-1)>=V10 & V(2:end)<V10); % second
       V90_i_d=1+find(V(1:end-1)>=V90 & V(2:end)<V90); % first
+      if numel(V10_i_d)>1 && numel(V10_i_d)>1
+        V10_i_d=V10_i_d(end);
+        V90_i_d=V90_i_d(end);
+      end
       if isempty(V10_i_d)
         % set to the minimum point of the repolarizing phase
         V10=min(V(Vpeak_i:end));
