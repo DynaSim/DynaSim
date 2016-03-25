@@ -531,20 +531,29 @@ for figset=1:num_fig_sets
         if size(dat,2)>1
           legend_strings=cellfun(@(x)['cell ' num2str(x)],num2cell(1:min(size(dat,2),max_legend_entries)),'uni',0);
         end
-        if num_sims>1 && isfield(data,'varied')
-          % list the parameter varied along the rows first
-          str=[row_param_name '=' num2str(row_param_values(row)) ': '];
-          for k=1:num_varied
-            fld=data(sim_index).varied{k};
-            if ~strcmp(fld,row_param_name)
-              val=data(sim_index).(fld);
-              str=[str fld '=' num2str(val) ', '];
+        
+        if isfield(data,'varied')
+          if num_sims>1
+            % list the parameter varied along the rows first
+            str=[row_param_name '=' num2str(row_param_values(row)) ': '];
+            for k=1:num_varied
+              fld=data(sim_index).varied{k};
+              if ~strcmp(fld,row_param_name)
+                val=data(sim_index).(fld);
+                str=[str fld '=' num2str(val) ', '];
+              end
+            end
+            if num_pops>1
+              legend_strings=cellfun(@(x)[x ' (mean)'],pop_names,'uni',0);
+            end
+          else
+            str='';
+            for k=1:length(data.varied)
+              fld=data(sim_index).varied{k};
+              str=[str fld '=' num2str(data(sim_index).(fld)) ', '];
             end
           end
           text_string{row,col}=['(' strrep(str(1:end-2),'_','\_') ')'];
-          if num_pops>1
-            legend_strings=cellfun(@(x)[x ' (mean)'],pop_names,'uni',0);
-          end
         end
         if ~isempty(AuxData) && length(legend_strings)<=max_legend_entries
           legend_strings=cat(2,legend_strings,AuxDataName);
@@ -639,7 +648,9 @@ for figset=1:num_fig_sets
             ymin=min(dat(:)); ymax=max(dat(:));
             text_xpos=xmin+.05*(xmax-xmin);
             text_ypos=ymin+.9*(ymax-ymin);
-            text(text_xpos,text_ypos,text_string{row,col});
+            try
+              text(text_xpos,text_ypos,text_string{row,col});
+            end
           end  
         end
         % plot lines
