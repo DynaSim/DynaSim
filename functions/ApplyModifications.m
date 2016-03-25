@@ -67,6 +67,7 @@ function [output,modifications]=ApplyModifications(model,modifications)
 % check for modifications
 if isempty(modifications)
   % nothing to do
+  output=model;
   return;
 else
   modifications=standardize_modifications(modifications);
