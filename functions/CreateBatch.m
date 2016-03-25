@@ -92,7 +92,8 @@ timestamp=datestr(studyinfo.study_id,'yyyymmddHHMMSS');
 % get home directory of the current user
 [o,home]=system('echo $HOME');
 % create batch directory
-[study_dir_path,study_dir_name]=fileparts(studyinfo.study_dir);
+[study_dir_path,study_dir_name,study_dir_suffix]=fileparts(studyinfo.study_dir);
+study_dir_name=[study_dir_name study_dir_suffix];
 batch_dir = fullfile(strtrim(home),'batchdirs',study_dir_name);
 %batch_dir = fullfile(strtrim(home),'batchdirs',['Batch' timestamp]);
 
