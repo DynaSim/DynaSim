@@ -112,6 +112,7 @@ function [expression,functions_were_found]=insert_functions(expression,functions
         end
       end
       % string to replace in the target function
+      new_var_list=regexprep(new_var_list,'\+','\\+'); % support arguments with plus character
       oldstr=[found_function '\(' new_var_list{1} '\)'];
       % string to insert in the target function
       newstr=sprintf('(%s)',found_expression);
