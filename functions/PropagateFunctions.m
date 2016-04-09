@@ -96,8 +96,25 @@ function [expression,functions_were_found]=insert_functions(expression,functions
       orig_var_list=regexp(found_expression,'^@\(([^\)]+)\)','tokens','once');
       orig_vars=regexp(orig_var_list{1},',','split'); % variables used in original function definition        
       % variable names passed from the target function to the function found in it
-      %new_var_list=regexp(expression,[found_function '\(([^\)]+)\)'],'tokens','once');
-      new_var_list=regexp(expression,[found_function '\(*\(([^\)\(]+)\)'],'tokens','once');
+      % get arguments to function call, support function arguments      
+%       new_var_list=regexp(expression,[found_function '\(*\(([^\)\(]+)\)'],'tokens','once');
+      index=regexp(expression,[found_function '\('],'once');
+      substr=expression(index:end); % string starting with first function call
+      lb=find(substr=='('); % indices to open parentheses
+      rb=find(substr==')'); % indices to close parentheses
+      ix=ones(size(lb)); % binary vector indicating open parentheses that have not been closed
+      for i=1:length(rb)
+        pos=find(lb<rb(i)&ix==1,1,'last'); % last open parentheses before this closing parenthesis
+        if pos==1 % this closing parenthesis closes the function call
+          R=rb(i);
+          break;
+        else % this closing parenthesis closes a grouped expression within the arguments of the function call
+          ix(pos)=0; % this open parenthesis has been closed
+        end
+      end
+      % add escape character to regexp special characters
+      new_var_list{1}=regexprep(substr(lb(1)+1:R-1),'([\(\)\+\*\.\^])','\\$1');
+      % split variables on comma
       new_vars=regexp(new_var_list{1},',','split');
       % found expression without the input variable list
       found_expression=regexp(found_expression,'^@\([^\)]+\)(.+)','tokens','once');
@@ -112,7 +129,6 @@ function [expression,functions_were_found]=insert_functions(expression,functions
         end
       end
       % string to replace in the target function
-      new_var_list=regexprep(new_var_list,'\+','\\+'); % support arguments with plus character
       oldstr=[found_function '\(' new_var_list{1} '\)'];
       % string to insert in the target function
       newstr=sprintf('(%s)',found_expression);
