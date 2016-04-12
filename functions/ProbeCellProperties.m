@@ -9,6 +9,14 @@ function data = ProbeCellProperties(model,varargin)
 % electrophysiological properties characterizing each cell's response in
 % the population.
 % 
+% Options:
+%   'amplitudes' : numeric array of applied current amplitudes (default: -30:5:180)
+%                  units: if [I]=uA/cm2, then [amp]=pA (typical values: 0-500pA)
+%   'membrane_area' : um, compartment surface area
+%   'onset'      : ms, time to start the applied current
+%   'offset'     : ms, time to stop the applied current
+%   'tspan'      : [beg,end], ms, simulation interval
+% 
 % Example: ...
 % model='dv/dt=(@current-.1*(v+70))/Cm; Cm=1; {iNa,iK}';
 % data=ProbeCellProperties(model,'verbose_flag',1);
