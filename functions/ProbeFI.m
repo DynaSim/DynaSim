@@ -17,6 +17,7 @@ function data=ProbeFI(model,varargin)
 options=CheckOptions(varargin,{...
   'target','ODE1',[],...
   'amplitudes',0:2:10,[],...
+  'onset',0,[],...
   },false);
 
 model=CheckModel(model);
@@ -27,7 +28,8 @@ vary=cell(npops,3);
 for i=1:npops
   name=model.specification.populations(i).name;
   % prepare list of modifications to add tonic drive to all populations in model
-  modifications(i,:)={name,'equations',['cat(' options.target ',+TONIC)']};
+  %modifications(i,:)={name,'equations',['cat(' options.target ',+TONIC)']};
+  modifications(i,:)={name,'equations',sprintf('cat(%s,+TONIC*(t>%g))',options.target,options.onset)};
   % prepare specification to vary tonic drive across simulations
   vary(i,:)={name,'TONIC',options.amplitudes};
 end
