@@ -16,6 +16,9 @@ function data = ProbeCellProperties(model,varargin)
 %   'onset'      : ms, time to start the applied current
 %   'offset'     : ms, time to stop the applied current
 %   'tspan'      : [beg,end], ms, simulation interval
+%   'remove_connections_flag' (default: 1): whether to remove connections
+%     note: if 0, the input is applied only to the first cell/compartment,
+%     otherwise the input is applied to all cells/compartments.
 % 
 % Example: ...
 % model='dv/dt=(@current-.1*(v+70))/Cm; Cm=1; {iNa,iK}';
@@ -44,6 +47,7 @@ options=CheckOptions(varargin,{...
   'onset',250,[],...
   'offset',1250,[],...
   'equivalent_cells_flag',0,[],... % if true, only simulate one cell per pop
+  'remove_connections_flag',1,[],...
   },false);
 
 model=CheckModel(model);
@@ -59,7 +63,7 @@ options.effective_amplitudes=CF*options.amplitudes/options.membrane_area;
 % options.amplitudes=repmat(options.amplitudes,[1 options.num_repetitions]);
 
 % Remove connections from the model specification and regenerate the model
-if ~isempty(model.specification.connections)
+if ~isempty(model.specification.connections) && options.remove_connections_flag
   specification=model.specification;
   specification.connections=[];
   model=GenerateModel(specification);
@@ -83,6 +87,10 @@ for i=1:num_pops
     % Reduce each population to a single cell if homogeneous
     modifications(end+1,:)={pop_names{i},'size',1};    
   end
+  if options.remove_connections_flag==1
+    % only add input to the first population
+    break
+  end
 end
 
 % Prepare 'vary' specification to adjust pulse amplitudes in all populations
@@ -90,6 +98,10 @@ end
 objects='(';
 for i=1:num_pops
   objects=[objects pop_names{i} ','];
+  if options.remove_connections_flag==1
+    % only add input to the first population
+    break
+  end
 end
 objects=[objects(1:end-1) ')'];
 vary={objects,'TONIC',options.effective_amplitudes;...
