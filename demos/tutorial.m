@@ -834,6 +834,8 @@ return
 %   AMPA.txt  -- prepared for DNSim
 %   AMPA2.txt -- edited for DynaSim
 
+% Remove underscores from names of populations, mechanisms, and variables.
+
 % Everything else should be back-compatible.
 
 %% Linking variables across mechanisms
