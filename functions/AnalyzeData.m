@@ -11,6 +11,8 @@ function result=AnalyzeData(data,func,varargin)
 %     - key/value pairs passed on to the analysis function
 %     - 'save_results_flag' (0 or 1) (default: 0): whether to save result
 %     - 'result_file' (default: 'result.mat'): where to save result
+%     - 'format' (default: 'svg'): format for saved plots if figures are generated
+%       {'svg','jpg','eps','png'}
 % 
 % outputs:
 %   result: structure returned by the analysis function
@@ -23,6 +25,7 @@ function result=AnalyzeData(data,func,varargin)
 options=CheckOptions(varargin,{...
   'result_file','result',[],...
   'save_results_flag',0,{0,1},...
+  'format','svg',{'svg','jpg','eps','png'},...
   },false);
 
 % load data if input is not a DynaSim data structure
@@ -62,7 +65,7 @@ if all(ishandle(result)) % analysis function returned a graphics handle
   for i=1:length(result)
     % save plot
     if options.save_results_flag
-      extension='.svg'; % {.jpg,.svg}
+      extension=['.' options.format];%'.svg'; % {.jpg,.svg}
       % temporary default: jpg
       if length(result)==1
         fname=[options.result_file extension];
@@ -76,6 +79,10 @@ if all(ishandle(result)) % analysis function returned a graphics handle
           plot2svg(fname,result(i));
         case '.jpg'
           print(result(i),fname,'-djpeg');
+        case '.eps'
+          print(result(i),fname,'-depsc');
+        case '.png'
+          print(result(i),fname,'-dpng');
       end
     end
   end
