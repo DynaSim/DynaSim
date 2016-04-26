@@ -1,4 +1,4 @@
-function PlotFR(data,varargin)
+function handles=PlotFR(data,varargin)
 %% plotFR(data,'option',value)
 % Purpose: plot spike rates in various ways depending on what data was
 %          provided.
@@ -21,6 +21,7 @@ function PlotFR(data,varargin)
 
 data=CheckData(data);
 fields=fieldnames(data);
+handles=[];
 
 % calc firing rates if not already present in data
 if all(cellfun(@isempty,regexp(fields,'.*_FR$')))
@@ -51,7 +52,7 @@ end
     % purpose: plot each data set data.(FR_fields{k})
     % plots for N populations (FR data sets) from this simulation
     ht=320; % height per subplot row (=per population or FR data set)
-    figure('position',[250 max(50,600-(nsets-1)*ht) 1400 min(ht*nsets,750)]);
+    handles(end+1)=figure('position',[250 max(50,600-(nsets-1)*ht) 1400 min(ht*nsets,750)]);
     for k=1:nsets % index of firing rate data field
       dat=data(i).(FR_fields{k});
       bins=0:1.05*max(dat(:));
@@ -159,7 +160,7 @@ end
     % plot how avg firing rate for each pop varies with each parameter    
     ht=320; % height per subplot row (=per population or FR data set)
     wt=500;
-    figure('position',[250 max(50,600-(nsets-1)*ht) min(1500,500+(nvaried-1)*wt) min(ht*nsets,750)]);
+    handles(end+1)=figure('position',[250 max(50,600-(nsets-1)*ht) min(1500,500+(nvaried-1)*wt) min(ht*nsets,750)]);
     cnt=0;
     for k=1:nsets % populations
       popname=regexp(FR_fields{k},'^([a-zA-Z0-9]+)_','tokens','once');
@@ -194,7 +195,7 @@ end
     if length(varied)==2
       % plots for N populations and 2 varied elements
       % organize and imagesc FRmu(param 1, param 2)
-      figure('position',[1150 max(50,600-(nsets-1)*ht) 500 min(ht*nsets,750)]);
+      handles(end+1)=figure('position',[1150 max(50,600-(nsets-1)*ht) 500 min(ht*nsets,750)]);
       pvals1=unique(params(:,1)); nv1=length(pvals1);
       pvals2=unique(params(:,2)); nv2=length(pvals2);
       for k=1:nsets
