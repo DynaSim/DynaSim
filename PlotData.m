@@ -563,16 +563,21 @@ for figset=1:num_fig_sets
         set(gcf,'CurrentAxes',haxes(axis_counter));
         switch options.plot_type
           case {'waveform','power'}
-          % finish preparing data
-          if ~strcmp(options.yscale,'linear')
-            dat=feval(options.yscale,dat); % log or log10
-            % alternative approach: use semilogy for log10
-          end
+            % finish preparing data
+            if ~strcmp(options.yscale,'linear')
+              dat=feval(options.yscale,dat); % log or log10
+              % alternative approach: use semilogy for log10
+            end
+            if length(options.xlim)==2
+              sel=(xdata>=options.xlim(1)&xdata<=options.xlim(2));
+            else
+              sel=1:length(xdata);
+            end
             % plot traces
             if strcmp(options.plot_mode,'trace')
               % select max subset allowed
               dat=dat(:,1:min(size(dat,2),MTPP)); % select max subset to plot
-              plot(xdata,dat);
+              plot(xdata(sel),dat(sel,:));
             else
               imagesc(dat);
             end            
@@ -619,7 +624,7 @@ for figset=1:num_fig_sets
         % plot auxiliary data
         if ~isempty(AuxData) %strcmp(options.plot_type,'power')
           hold on
-          plot(xdata,AuxData,'o-','linewidth',3);%'--.');
+          plot(xdata(sel),AuxData(sel,:),'o-','linewidth',3);%,'o-','linewidth',3);%'--.');
         end
         % format axes
         if row==num_rows
