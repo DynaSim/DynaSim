@@ -436,6 +436,20 @@ all_expression_targets={};
 all_conditionals_inds=[];
 all_conditionals_targets={};
 
+% add variables to linked expression if its a function without ()
+if ~isempty(model.functions) && ~isempty(model.linkers)
+  function_names=fieldnames(model.functions);
+  expressions={model.linkers.expression};
+  [~,I,J]=intersect(function_names,expressions);
+  for i=1:length(I)
+    e=model.functions.(function_names{J(i)}); % function expression (eg,'@(x,y,z)x-(y-z)')
+    v=regexp(e,'@(\([\w,]+\))','tokens','once'); % function input list (eg, '(x,y,z)')
+    if ~isempty(v)
+      model.linkers(I(i)).expression=[model.linkers(I(i)).expression v{1}];
+    end
+  end
+end
+
 % loop over linkers
 for i=1:length(model.linkers)
   % determine how to link
