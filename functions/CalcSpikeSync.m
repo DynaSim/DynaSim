@@ -167,6 +167,20 @@ for pair=1:npairs
   end
   coactive=length(find(spiked1&spiked2))/length(find(spiked1|spiked2));
   
+  % calculate fraction of 10ms bins with spikes in both populations
+  edges=0:maxlag_time:max(t);
+  nspiked1=zeros(1,length(edges));
+  nspiked2=zeros(1,length(edges));
+  for i=1:length(edges)-1
+    if size(raster1,1)>0
+      nspiked1(i)=length(find(raster1(:,1)>edges(i)&raster1(:,1)<=edges(i+1)));
+    end
+    if size(raster2,1)>0
+      nspiked2(i)=length(find(raster2(:,1)>edges(i)&raster2(:,1)<=edges(i+1)));
+    end
+  end
+  ncoactive=sum(nspiked1.*nspiked2)/(sum(nspiked1)*sum(nspiked2));
+    
   % Calculate instantaneous firing rates for each cell
   r1=zeros(nt,n1);
   if ~isempty(raster1)
@@ -235,6 +249,7 @@ for pair=1:npairs
   stats.pairs(cnt).raster1=raster1;
   stats.pairs(cnt).raster2=raster2;
   stats.pairs(cnt).coactivity=coactive;
+  stats.pairs(cnt).ncoactivity=ncoactive;
   stats.pairs(cnt).r1=r1;
   stats.pairs(cnt).r2=r2;
   stats.pairs(cnt).Nspikes1=num_spikes1;
