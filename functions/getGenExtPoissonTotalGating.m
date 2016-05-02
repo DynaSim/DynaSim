@@ -54,20 +54,25 @@ function S = getGenExtPoissonTotalGating_jss(tOn,tOff,latency_,freq_,normFreqSig
     if freq(i)
       % freq modulation
       numFreqs = 1000;
-      step = 2*pi/numFreqs;
-      %Ph = load('sinPhases'); % from test.m in this directory
-      phase_ic = 0:step:2*pi*(1-1/numFreqs);
-      shuffle = randperm(length(phase_ic));
-      phase_ic = phase_ic(shuffle);
-      Ph.phase_ic=phase_ic;
-      % save('sinPhases','phase_ic')
-      freqSigma = normFreqSigma(i)*freq(i);
-      freqSet = -freq(i)/5:2*freq(i)/5/(numFreqs-1):freq(i)/5;
-      freqVar = exp(-freqSet.^2/(2*freqSigma^2));
-      m = sum(freqVar)/numFreqs;
-      sumCos = zeros(size(time));
-      for j = 1:numFreqs
-        sumCos = sumCos + freqVar(j)*cos(2*pi*freqSet(j)*time + Ph.phase_ic(j));
+      if 0 % turn off noisy spectral content
+        step = 2*pi/numFreqs;
+        %Ph = load('sinPhases'); % from test.m in this directory
+        phase_ic = 0:step:2*pi*(1-1/numFreqs);
+        shuffle = randperm(length(phase_ic));
+        phase_ic = phase_ic(shuffle);
+        Ph.phase_ic=phase_ic;
+        % save('sinPhases','phase_ic')
+        freqSigma = normFreqSigma(i)*freq(i);
+        freqSet = -freq(i)/5:2*freq(i)/5/(numFreqs-1):freq(i)/5;
+        freqVar = exp(-freqSet.^2/(2*freqSigma^2));
+        m = sum(freqVar)/numFreqs;
+        sumCos = zeros(size(time));
+        for j = 1:numFreqs
+          sumCos = sumCos + freqVar(j)*cos(2*pi*freqSet(j)*time + Ph.phase_ic(j));
+        end
+      else
+        m=0;
+        sumCos = zeros(size(time));
       end
       if ramp_ac_flag==0
         ratecomp(i,:) = ratecomp(i,:) + rate_ac(i)*sin(2*pi*freq(i)*time+m*sumCos+phase(i));
