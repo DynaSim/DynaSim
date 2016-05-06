@@ -293,3 +293,20 @@ SimulateModel(eqns,'save_data_flag',1,'study_dir','demo_cluster_3',...
 % given. You can pass handles and options for any built-in, pre-packaged,
 % or custom functions.
 
+% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% MORE FEATURES
+% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+% Simulating large models can be sped up significantly by compiling the
+% simulation before running it. DynaSim makes this easy to do using the
+% 'compile_flag' option in SimulateModel. Note: compiling the model can 
+% take several seconds to minutes; however, it only compiles the first time
+% it is run and is significantly faster on subsequent runs.
+
+data=SimulateModel(s,'compile_flag',1);
+PlotData(data);
+
+% Now run again:
+data=SimulateModel(s,'compile_flag',1);
+PlotData(data);
+
