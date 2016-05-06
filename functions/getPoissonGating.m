@@ -34,8 +34,8 @@ function sext=getPoissonGating(baseline,dc,ac,freq,phase,onset,offset,tau,T,N,ke
 % PlotData(data,'variable',{'V','Iampa'});
 
 % default parameters
-if nargin<1, baseline=100; end % Hz
-if nargin<2, dc=1000; end % Hz
+if nargin<1, baseline=0; end % Hz
+if nargin<2, dc=0; end % Hz
 if nargin<3, ac=0; end % Hz
 if nargin<4, freq=0; end % Hz
 if nargin<5, phase=0; end % radians
