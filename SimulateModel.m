@@ -660,6 +660,12 @@ try
   end % end loop over sims
   cleanup('success');
 catch err % error handling
+  if options.compile_flag
+    if options.verbose_flag
+      fprintf('removing failed compiled solve file: %s\n',options.solve_file);
+    end
+    delete([options.solve_file '*']);
+  end
   DisplayError(err);
   %keyboard
   % update studyinfo
