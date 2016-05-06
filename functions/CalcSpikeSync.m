@@ -179,7 +179,11 @@ for pair=1:npairs
       nspiked2(i)=length(find(raster2(:,1)>edges(i)&raster2(:,1)<=edges(i+1)));
     end
   end
-  ncoactive=sum(nspiked1.*nspiked2)/(sum(nspiked1)*sum(nspiked2));
+  th=99;
+  tmp=nspiked1.*nspiked2;
+  rm=tmp>prctile(tmp,th); 
+  tmp(rm)=0;
+  ncoactive=sum(tmp)/(sum(nspiked1(~rm))*sum(nspiked2(~rm)));
     
   % Calculate instantaneous firing rates for each cell
   r1=zeros(nt,n1);
@@ -250,6 +254,9 @@ for pair=1:npairs
   stats.pairs(cnt).raster2=raster2;
   stats.pairs(cnt).coactivity=coactive;
   stats.pairs(cnt).ncoactivity=ncoactive;
+  stats.pairs(cnt).binned_spikes1=nspiked1;
+  stats.pairs(cnt).binned_spikes2=nspiked2;
+  stats.pairs(cnt).bin_edges=edges;
   stats.pairs(cnt).r1=r1;
   stats.pairs(cnt).r2=r2;
   stats.pairs(cnt).Nspikes1=num_spikes1;
