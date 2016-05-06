@@ -10,6 +10,7 @@ Download the DynaSim toolbox:
 Documentation:
 - Get started with the demos: [demos/demos.m](https://github.com/DynaSim/DynaSim/blob/master/demos/demos.m)
 - For more details and examples walk through the tutorial: [demos/tutorial.m](https://github.com/DynaSim/DynaSim/blob/master/demos/tutorial.m)
+- Example modeling projects: [PFC networks](https://github.com/jsherfey/PFC_models)
 
 Mailing lists:
 - Join the [user mailing list](https://groups.google.com/forum/#!forum/dynasim-users) to ask questions, request features, report bugs, and discuss DynaSim related issues
