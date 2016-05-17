@@ -161,6 +161,11 @@ for i=1:size(mods,1)
   if ~ischar(fld) %|| ~ismember(fld,{'name','size','parameters','mechanism_list','equations'})
     error('modification must be applied to population ''name'',''size'',or a parameter referenced by its name');
   end
+  % standardize connection object: convert target<-source to source->target
+  if any(strfind(obj,'<-'))
+    ind=strfind(obj,'<-');
+    obj=[obj(ind(1)+2:end) '->' obj(1:ind(1)-1)];
+  end
   val=mods{i,3}; % value for population name or size, or parameter to modify
   if ismember(obj,pop_names)
     type='populations';
