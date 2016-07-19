@@ -143,7 +143,7 @@ options=CheckOptions(varargin,{...
   'max_num_overlaid',50,[],...
   'max_num_rows',20,[],...
   'plot_mode','trace',{'trace','image'},...
-  'plot_type','waveform',{'waveform','rastergram','power','rates'},...
+  'plot_type','waveform',{'waveform','rastergram','raster','power','rates'},...
   'xlim',[],[],...
   'ylim',[],[],...
   'yscale','linear',{'linear','log','log10','log2'},...
@@ -214,7 +214,7 @@ switch options.plot_type
     if isempty(options.xlim)
       options.xlim=[0 200]; % Hz
     end
-  case 'rastergram' % raster VARIABLE_spike_times
+  case {'rastergram','raster'} % raster VARIABLE_spike_times
     if any(cellfun(@isempty,regexp(var_fields,'.*_spike_times$')))
       data=CalcFR(data,varargin{:});
     end
@@ -344,7 +344,7 @@ for figset=1:num_fig_sets
               var=[var '_Power_SUA'];
               dat=data(sim_index).(var).Pxx(:,row);     
               legend_strings={'SUA','MUA'};
-            case 'rastergram'
+            case {'rastergram','raster'}
               set_name=regexp(var,'^([a-zA-Z0-9]+)_','tokens','once');
               allspikes{1}{1}=data(sim_index).([var '_spike_times']){row};
                 % one pop, cell array of spike times for each cell in population
@@ -366,7 +366,7 @@ for figset=1:num_fig_sets
               AuxDataName={'MUA Power'};
               var=[var '_Power_SUA'];
               dat=data(sim_index).(var).Pxx;
-            case 'rastergram'
+            case {'rastergram','raster'}
               set_name=regexp(var,'^([a-zA-Z0-9]+)_','tokens','once');
               allspikes{1}=data(sim_index).([var '_spike_times']);
           end
@@ -385,7 +385,7 @@ for figset=1:num_fig_sets
               AuxDataName={'MUA Power'};
               var=[var '_Power_SUA'];
               dat=data(sim_index).(var).Pxx;
-            case 'rastergram'
+            case {'rastergram','raster'}
               set_name=regexp(var,'^([a-zA-Z0-9]+)_','tokens','once');
               allspikes{1}=data(sim_index).([var '_spike_times']);
           end
@@ -406,7 +406,7 @@ for figset=1:num_fig_sets
               AuxDataName={'MUA Power'};
               var=[var '_Power_SUA'];
               dat=data(sim_index).(var).Pxx;
-            case 'rastergram'
+            case {'rastergram','raster'}
               set_name=regexp(var,'^([a-zA-Z0-9]+)_','tokens','once');
               allspikes{1}=data(sim_index).([var '_spike_times']);
           end
@@ -424,7 +424,7 @@ for figset=1:num_fig_sets
               AuxDataName={'MUA Power'};
               var=[var '_Power_SUA'];
               dat=data(sim_index).(var).Pxx;
-            case 'rastergram'
+            case {'rastergram','raster'}
               set_name=regexp(var,'^([a-zA-Z0-9]+)_','tokens','once');
               allspikes{1}=data(sim_index).([var '_spike_times']);
           end
@@ -445,7 +445,7 @@ for figset=1:num_fig_sets
               AuxDataName={'MUA Power'};
               var=[var '_Power_SUA'];
               dat=data(sim_index).(var).Pxx;
-            case 'rastergram'
+            case {'rastergram','raster'}
               set_name=regexp(var,'^([a-zA-Z0-9]+)_','tokens','once');
               allspikes{1}=data(sim_index).([var '_spike_times']);
           end
@@ -472,7 +472,7 @@ for figset=1:num_fig_sets
                 vlines(end+1)=data(sim_index).([var_fields{k} '_Power_MUA']).PeakFreq;
               end
               var=['<' variables{1} '_Power_SUA>'];
-            case 'rastergram'
+            case {'rastergram','raster'}
               set_name={};
               for k=1:num_pops
                 tmp=regexp(var_fields{k},'^([a-zA-Z0-9]+)_','tokens','once');
@@ -513,7 +513,7 @@ for figset=1:num_fig_sets
                 vlines(end+1)=data(sim_index).([var '_Power_MUA']).PeakFreq;
               end
               var=['<' variables{figset} '_Power_SUA>'];
-            case 'rastergram'
+            case {'rastergram','raster'}
               set_name={};
               for k=1:num_pops
                 if isnan(pop_var_indices{k}(figset))
@@ -581,7 +581,7 @@ for figset=1:num_fig_sets
             else
               imagesc(dat);
             end            
-          case 'rastergram'
+          case {'rastergram','raster'}
             % draw spikes
             ypos=0; % y-axis position tracker
             yticks=[]; % where to position population names
