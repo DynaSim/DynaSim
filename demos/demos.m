@@ -15,7 +15,7 @@ at the end of the help section to browse through related help documentation.
 % Get ready...
 
 % Set path to your copy of the DynaSim toolbox
-dynasim_path='/projectnb/crc-nak/brpp/DynaSim';                    
+dynasim_path='~/code/DynaSim';                    
 % add DynaSim toolbox to Matlab path
 addpath(genpath(dynasim_path)); % comment this out if already in path
 
