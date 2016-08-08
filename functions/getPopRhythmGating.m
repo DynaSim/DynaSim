@@ -70,8 +70,17 @@ if pop_freq==0 % homogeneous Poisson process
   % the entire simulation is one "cycle"
   tstart=0;
   width=inf;
+  % establish duration of spiking interval
+  if ~isinf(offset)
+    tsdur=offset-onset;
+  else
+    tsdur=t(end)-onset;
+  end
+  if tsdur<0 % account for unlikely case where onset is set to inf
+    tsdur=0;
+  end
   % # spikes across all cells and time
-  num_spikes=cell_FR*num_sources*tdur;
+  num_spikes=cell_FR*num_sources*tsdur;
   % homogeneous Poisson rate
   lambda_=(cell_FR*num_sources)*ones(size(t));
 else % rhythmic bursts of nonhomogeneous Poisson process
