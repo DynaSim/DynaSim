@@ -138,6 +138,14 @@ end
   function plotFR_SimStudy
     % calculate average firing rates across population and time
     varied=data(1).varied;
+    % eliminate parameters that had the same value in all sims or were non-numeric
+    keep=zeros(size(varied));
+    for v=1:length(varied)
+      if isnumeric(data(1).(varied{v})) && length(unique([data.(varied{v})]))>1
+        keep(v)=1;
+      end
+    end
+    varied=varied(keep==1);    
     nvaried=length(varied); % number of model components varied across simulations
     nsims=length(data);
     FRmu=zeros(nsims,nsets);
@@ -182,7 +190,7 @@ end
         subplot(nsets,nvaried,cnt);
         plot(pvals,rvals,'o-','linewidth',2);
         % todo: add confidence intervals / error bars
-        ylim([0 max(FRmu(:))]);
+        axis tight; %ylim([0 max(FRmu(:))]);
         xlabel(strrep(varied{j},'_','\_'));
         ylabel([popname ': avg firing rate (Hz)']);
         title([popname ': firing rate averaged over pop, time, sims']);
