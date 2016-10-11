@@ -510,7 +510,7 @@ if options.parallel_flag==1
   end
   
   % Delete any output_parfor* directories.
-  rmdir(fullfile(options.study_dir,'output_parfor*'),'s');
+  try rmdir(fullfile(options.study_dir,'output_parfor*'),'s'); end
   
   % Delete any core files in parent directory
   delete(fullfile(options.study_dir,'core*'));
