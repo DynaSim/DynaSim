@@ -459,8 +459,8 @@ if options.parallel_flag==1
   % study directory to each simulation.
   
   % List any core files - these should be deleted, as they are huge (debug)
-  system (['ls ' fullfile(options.study_dir,'output*')],'-echo');
-  system('find * -name "core*"','-echo');
+%   system (['ls ' fullfile(options.study_dir,'output*')],'-echo');
+%   system('find * -name "core*"','-echo');
  
   % Generate unique* ID based on date and time (*as long as they dont start on the
   % exact same second...). Using these unique identfiers will now enable
@@ -509,8 +509,12 @@ if options.parallel_flag==1
     end
   end
   
-  % Delete any output_parfor* directories.
-  rmdir(fullfile(options.study_dir,'output_parfor*'),'s');
+  % Try to force removal of parfor folders (this might produce error if
+  % lock files are present
+  try rmdir(fullfile(options.study_dir,'output_parfor*'),'s');
+  catch
+      %warning('If this is reached, it is likely because there are locked files in the folder, which cannot be deleted. The error is /.nfs00000000a617655e0000c15a: Device or resource busy. Fix for this is not obvious');
+  end
   
   % Delete any core files in parent directory
   delete(fullfile(options.study_dir,'core*'));

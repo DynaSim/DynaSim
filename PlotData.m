@@ -691,7 +691,7 @@ for figset=1:num_fig_sets
             ymin=min(ylim); ymax=max(ylim);
             text_xpos=xmin+.05*(xmax-xmin);
             text_ypos=ymin+.9*(ymax-ymin);
-            text(text_xpos,text_ypos,text_string{row,col});
+            text(double(text_xpos),text_ypos,text_string{row,col});
           end
         end
       end
