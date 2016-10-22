@@ -511,10 +511,10 @@ if options.parallel_flag==1
   
   % Try to force removal of parfor folders (this might produce error if
   % lock files are present
-  try rmdir(fullfile(options.study_dir,'output_parfor*'),'s');
-  catch
-      %warning('If this is reached, it is likely because there are locked files in the folder, which cannot be deleted. The error is /.nfs00000000a617655e0000c15a: Device or resource busy. Fix for this is not obvious');
-  end
+  % try rmdir(fullfile(options.study_dir,'output_parfor*'),'s');
+  % catch
+  %     %warning('If this is reached, it is likely because there are locked files in the folder, which cannot be deleted. The error is /.nfs00000000a617655e0000c15a: Device or resource busy. Fix for this is not obvious');
+  % end
   
   % Delete any core files in parent directory
   delete(fullfile(options.study_dir,'core*'));
