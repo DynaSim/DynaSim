@@ -2,12 +2,21 @@
 classdef xPlt
 
     properties
-        data        % Storing the actual data
-        meta        % Cell array of xPltMeta classes for each axis
-        info        % xPltMeta classes
+        data               % Storing the actual data (multi-dimensional matrix or cell array)
+        axis = xPltAxis    % 1xNdims - array of xPltAxis classes for each axis. Ndims = ndims(data)
+        meta = struct;     % Metadata about stuff that's stored in data
+        sz
     end
     
+    
     methods
+        
+        function xp = get_sz(xp)
+            for i = 1:length(xp.axis)
+                xp.sz(i) = length(xp.axis(i).values);
+            end
+        end
+        
         function [xp2, popnames] = inds(xp,xp_inds)
             % xp - Class xPlt
             % xp_inds - Class of xPltInds
