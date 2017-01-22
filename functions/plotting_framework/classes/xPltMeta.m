@@ -4,18 +4,12 @@ classdef xPltMeta
     % xPlt class
 
     properties
-                        % Notes:
-                        % Ndims is the number of embedded dimensions. Ndims = 1 for no embedding.
-                        % N is the length of the axis.
-        
-        dim_names       % 1xNdims - cell array of strings containing dimension names
-        axis_values     % (optional) NxNdims - can be numerical matrix or cell array of strings; contain axis values in question
-        axis_text       % (optional) Nx1 Cell array of text describing each axis value
-        axis_metadata   % (optional) Nx1 structure array of additional information
+        axis_name       % (optional) 1x1 - string naming the axis in question (e.g. time, voltage, cell number, etc)
+        axis_values     % (optional) 1xN - can be numerical matrix or cell array of strings describing axis in question
+        axis_struct     % (optional) 1xN structure array of additional information
     end
     
     methods
-        
         function xp_meta = inds(xp_meta,ind)
             xp_meta.axis_values = xp_meta.axis_values(ind,:);
             xp_meta.axis_text = xp_meta.axis_text(ind);

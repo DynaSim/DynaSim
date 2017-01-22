@@ -3,7 +3,8 @@ classdef xPlt
 
     properties
         data        % Storing the actual data
-        meta        % Cell array of xPltMeta classes
+        meta        % Cell array of xPltMeta classes for each axis
+        info        % xPltMeta classes
     end
     
     methods
