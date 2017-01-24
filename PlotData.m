@@ -624,7 +624,7 @@ for figset=1:num_fig_sets
         % plot auxiliary data
         if ~isempty(AuxData) %strcmp(options.plot_type,'power')
           hold on
-          plot(xdata(sel),AuxData(sel,:),'o-','linewidth',3);%,'o-','linewidth',3);%'--.');
+          plot(xdata(sel),AuxData(sel,:),'-','linewidth',3);%,'o-','linewidth',3);%'--.');
         end
         % format axes
         if row==num_rows
