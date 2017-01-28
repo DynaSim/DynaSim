@@ -5,56 +5,108 @@ classdef xPlt
         data               % Storing the actual data (multi-dimensional matrix or cell array)
         axis = xPltAxis    % 1xNdims - array of xPltAxis classes for each axis. Ndims = ndims(data)
         meta = struct;     % Metadata about stuff that's stored in data
-        sz
     end
     
     
     methods
         
-        function xp = get_sz(xp)
-            for i = 1:length(xp.axis)
-                xp.sz(i) = length(xp.axis(i).values);
+        function sz = get_sz(xp)
+            for j = 1:length(xp.axis)
+                sz(j) = length(xp.axis(j).values);
             end
         end
         
-        function [xp2, popnames] = inds(xp,xp_inds)
-            % xp - Class xPlt
-            % xp_inds - Class of xPltInds
+        
+        function xp = importLinearData(xp,X,varargin)
+            % xp = importLinearData(X,axislabels1,...,axislabelsN)
+            % xp = importLinearData(X,axislabels1,...,axislabelsN,'outputformat',Value)
+            % Imports a linear array of data, converts it into a matrix
+            % based on the supplied axislabels, and stores it in xp.data.
+            % Also populates the xp.axis.values appropriately.
+            % X - linear matrix or cell array containing input data
+            % axislabels1 - linear matrix or cell array containing data labels for dimension1
+            % ...
+            % axislabelsN - linear matrix or cell array containing data labels for dimensionN
+            % Value - Specifies storage format of the imported data, either 'cell' or 
+            %         'numeric'. Note: if input data is a cell,
+            %                output format must also be set to 'cell.'
             
-            xp2 = xp;
+            % Initialize
+            axeslinear = varargin;
             
-            all_true_flag = all(xp_inds.ind_selected == true);
+            % Set outputformat as needed based on data type of input format
+            if iscell(X)
+                outputformat = 'cell';          
+            else
+                outputformat = 'numeric';
+            end
             
-            % Pull out relevant info
-            im = xp_inds.ind_meta;
-            is = xp_inds.ind_selected;
+            % Check if final argument in varargin is a name/value pair
+            if ischar(varargin{end-1})
+                if strcmp(varargin{end-1},'format')
+                    outputformat = varargin{end};
+                    axeslinear = axeslinear(1:end-2);       % Remove the name-value pair from axeslinear
+                end
+            end
             
-            % Permute the chosen meta index to the front
-            ndims = length(xp.meta);
-            xp2 = xp2.permute([im, 1:im-1, im+1:ndims]);
             
-            % Extract chosen data from xp.data
-            sz = size(xp2.data);
-            xp2.data = reshape(xp2.data,[sz(1),sum(sz(2:end))]);    % Compress everything into a 2x2 matrix
-            xp2.data = xp2.data(is,:);
-            xp2.data = reshape(xp2.data, [size(xp2.data,1), sz(2:end)]);
+            % Error checking
+            if ~isvector(X); error('X must be linear'); end
+            N = length(X);
+            Ndims = length(axeslinear);
             
-            % Extract the chosen data from xp.meta
-            xp2.meta{1} = xp2.meta{1}.inds(is);
+            % Set up xp.axis
+            for j = 1:Ndims
+                xp.axis(j).values = unique(axeslinear{j});
+                sz(j) = length(xp.axis(j).values);
+                
+                if isnumeric(axeslinear{j}(1))
+                    if any(isnan(axeslinear{j})) || any(isinf(axeslinear{j}))
+                        error('Axis cannot contain NaNs or Infs');
+                    end
+                end
+            end
+                
+            % Set up target matrix
+            if strcmp(outputformat,'cell');
+                xp.data={};
+            else
+                xp.data = zeros(sz);
+            end
             
-            % Permute back to the original order
-            xp2 = xp2.permute([2:im, 1, im+1:ndims]);
+            % Set up xp.data -> Convert linear data into a multi dimensional matrix
+            for i = 1:N
+                % Get subscripts
+                subs = cell(1,Ndims);
+                for j = 1:Ndims
+                    if iscell(axeslinear{j})
+                        subs{j} = find(strcmp(axeslinear{j}{i},xp.axis(j).values));
+                    else
+                        subs{j} = find(axeslinear{j}(i) == xp.axis(j).values);
+                    end
+                end
+                
+                % Add data to sparse cell array based on subscripts
+                ind = sub2ind(sz,subs{:});
+                xp.data(ind) = X(i);
+            end
+            
+            
+            % Increase size of cell array if necessary, to make it "square" so
+            % that the subsequent reshape will work
+            if strcmp(outputformat,'cell') && length(xp.data) < prod(sz)
+                xp.data{prod(sz)} = [];
+            end
 
-%             if all_true_flag
-%                 % Everything is true so can remove the dimension entirely
-%                 xp2.data = xp2.data(
-%             else
-%             end
+            % Lastly convert the linear cell array to a matrix cell array
+            xp.data = reshape(xp.data,sz);
         end
+            
+        
         
         function xp = permute(xp,order)
             xp.data = permute(xp.data,order);
-            xp.meta = xp.meta(order);
+            xp.axis = xp.axis(order);
         end
     end
 end

@@ -2,7 +2,8 @@
 
 function [xp] = DynaSim2xPlt (data)
     % Converts DynaSim structure to cell array format for use in xPlt
-    % framework.
+    % framework. This function directly copies the data into the cell,
+    % rather than linearizing and using importLinearData.
     
     
     xp = xPlt;
@@ -80,7 +81,7 @@ function [xp] = DynaSim2xPlt (data)
 
     
     % Calculate sizes of each dimension
-    xp = xp.get_sz;
+    sz = xp.get_sz;
     
     % Pack in to data structure
     inds = zeros(1,length(xp.axis));
@@ -110,21 +111,27 @@ function [xp] = DynaSim2xPlt (data)
             
             % Get the linear index
             indsc = num2cell(inds);
-            linear_ind(z) = sub2ind(xp.sz,indsc{:});
+            linear_ind(z) = sub2ind(sz,indsc{:});
             
             % Store the data
             xp.data{linear_ind(z)} = data(i).(labels{k});
+            
+%             warning('Re-write this using customized import commands');
+%             warning('Write a check function to compare size of xp.axis data to size of xp.data');
+%             warning('Also write functions to generate other entries besides sz, such as list of populations, dimensions, etc - or to return these in pleasing formats');
+%             warning('Write a squeeze function');
+%             warning('Split this function up into several sub functions that return all the meta data gathered here!');
         end
     end
     
     % Increase size of data matrix if necessary, to make it "square" so
     % that the subsequent reshape will work
-    if length(xp.data) < prod(xp.sz)
-        xp.data{prod(xp.sz)} = [];
+    if length(xp.data) < prod(sz)
+        xp.data{prod(sz)} = [];
     end
 
     % Finally reshape the data matrix to the appropriate dimensions
-    xp.data = reshape(xp.data,xp.sz);
+    xp.data = reshape(xp.data,sz);
     
 end
 
