@@ -1,5 +1,5 @@
 
-function xp = recursivePlot(xp,function_handles,dimensions,selections)
+function varargout = recursivePlot(xp,function_handles,dimensions)
     
     if length(function_handles) > 1
         switch dimensions{1}
@@ -9,12 +9,12 @@ function xp = recursivePlot(xp,function_handles,dimensions,selections)
                     xp_temp = xPlt(xp.data(i,:,:,:,:,:));
                     xp2.data{i} = @() recursivePlot(squeeze(xp_temp),function_handles(2:end),dimensions(2:end));
                 end
-                function_handles{1}(xp2)
+                [varargout{1:nargout}] = function_handles{1}(xp2);
             case 2
 
         end
     else
-        function_handles{1}(xp);
+        [varargout{1:nargout}] = function_handles{1}(xp);
     end
 end
             
