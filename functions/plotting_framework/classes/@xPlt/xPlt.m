@@ -40,15 +40,25 @@ classdef xPlt
                 error('Number of inputs must match dimensionality of xPlt.data');
             end
             
-            % First update each axis with the corresponding selection
+            % Initialize
             sz = size(xp);
-            xp2 = xp;
+            xp2 = xPlt;
+            xp2.meta = xp.meta;
+            
+            % First update each axis with the corresponding selection
             for i = 1:length(selection)
+                if all(cellfun(@length,selection(i:end)) == 1)
+                    continue
+                    % Stop adding axes if all remainding dims are 1
+                    % Matlab automatically squeezes all trailing
+                    % dimensions, so we will follow suit.
+                end
                 if isempty(selection{i})
                     selection{i} = 1:sz(i);
                 end
                 
-                xp2.axis(i).values = xp.axis(i).values(selection{i});
+                xp2.axis(i) = xp.axis(i);       % Import axis information
+                xp2.axis(i).values = xp.axis(i).values(selection{i});   % Overwrite values field; leave everything else the same.
             end
 
             % Lastly update the data
@@ -117,11 +127,11 @@ classdef xPlt
             % Normally, if squeeze operates on a 1xN matrix, it will leave
             % it as 1xN. This function forces it to always return as Nx1
             
-%             checkDims(xp);
-%             
-%             % Remove axes that have dimensionality of 1
-%             sz = size(xp.data);
-%             xp.axis = xp.axis(sz~=1);
+            checkDims(xp);
+            
+            % Remove axes that have dimensionality of 1
+            sz = size(xp.data);
+            xp.axis = xp.axis(sz~=1);
             
             % Now squeeze xp.data
             xp.data = squeeze(xp.data);         % Normal squeeze command

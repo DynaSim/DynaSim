@@ -1,19 +1,21 @@
 
 
-function cdata = xp_images_subplotcols (xp)
+function cdata = xp_subplot_cdata (xp)
     % xp must be 1D
     
     N = length(xp.data);
+    h0 = gcf; ha0 = gca;
     h = figure('visible','off','Position',[ 440   659   497   139]);
-    %h = figure('Position',[ 440   659   497   139]);
     for i = 1:N
         subplot(1,N,i); xp.data{i}();
     end
-    %pause(1);
     cdata = print(h,'-RGBImage');
-    %print(h,['fig_' num2str(i) '_' num2str(randn) '.png'],'-dpng')
-    %pause(1);
     close(h);
+    
+    % Restore original axes
+    figure(h0); axes(ha0);
+    imshow(cdata);
+    
 end
 
 
