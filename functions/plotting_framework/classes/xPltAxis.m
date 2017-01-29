@@ -10,8 +10,40 @@ classdef xPltAxis
     end
     
     methods
+        function getaxisinfo(xpa)
+            temp = [xpa.name, ' -> '];
+            Nvals = length(xpa.values);
+            for i = 1:Nvals-1
+                
+                temp = [temp,xpa.getvaluestring(i),', '];
+                
+            end
+            temp = [temp,xpa.getvaluestring(Nvals),'\n'];
+            
         
+            fprintf(temp)
+        end
         
+        function out = getvalue_noncell(xpa,i)
+            % Looks at entry xpa.value(i) and returns its output as a
+            % numeric, regardless of whether it is actually cell array
+            if iscell(xpa.values)
+                out = xpa.values{i};
+            else
+                out = xpa.values(i);
+            end
+        end
+        
+        function out = getvaluestring(xpa,i)
+            % Looks at entry xpa.value(i) and returns its output as a
+            % string, regardless of what data type it actually is (string,
+            % cell, numeric, etc).
+            out = xpa.getvalue_noncell(i);
+            if isnumeric(out)
+                out = num2str(out);
+            end
+        end
+
         
     end
 end

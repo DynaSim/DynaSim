@@ -9,105 +9,131 @@ classdef xPlt
     
     
     methods
+
+        function xp = xPlt(data,axis,meta)
+            if exist('data','var')
+                xp.data = data;
+            end
+            
+            if exist('axis','var')
+                xp.axis = axis;
+            end
+            
+            if exist('meta','var')
+                xp.meta = meta;
+            end
+            
+        end
         
-        function sz = get_sz(xp)
+        
+        
+        function xp2 = subset(xp,varargin)
+            % To do: Need to make this work with ways to select the subset
+            % based on value name, rather than just by index.
+            
+            % Define variables and check that all dimensions are consistent
+            checkDims(xp);
+            selection = varargin(:);
+            Nd = ndims(xp.data);
+            N = length(selection);
+            if N ~= Nd
+                error('Number of inputs must match dimensionality of xPlt.data');
+            end
+            
+            % First update each axis with the corresponding selection
+            sz = size(xp);
+            xp2 = xp;
+            for i = 1:length(selection)
+                if isempty(selection{i})
+                    selection{i} = 1:sz(i);
+                end
+                
+                xp2.axis(i).values = xp.axis(i).values(selection{i});
+            end
+
+            % Lastly update the data
+            xp2.data = xp.data(selection{:});
+        end
+        
+        function xp = importAxisNames(xp,ax_names)
+            Nd = ndims(xp.data);
+            if nargin < 2
+                ax_names = cellfun(@num2str,num2cell(1:5),'UniformOutput',0);
+            end
+            
+            if length(ax_names) ~= Nd
+                error('Mismatch between number of axis names supplied and number of dimensions in dataset'); end
+
+            for i = 1:ndims(xp.data)
+                xp.axis(i).name = ax_names{i};
+            end
+        end
+        
+        function xp = packdims(xp,dims2pack)
+            error('incomplete');
+            % Calculate dims
+            Nd = ndims(xp.data);
+            alldims = 1:Nd;
+            ind_chosen = false(size(alldims));
+            for i = 1:length(dims2pack)
+                ind_chosen = ind_chosen | alldims == dims2pack(i);
+            end
+            ind_unchosen = ~ind_chosen;
+            dims_remaining = find(ind_unchosen);
+            
+            xp = xp.permute([dims2pack,dims_remaining]);
+            
+            sz = size(xp);
+            xp.data = reshape(xp.data,[]);
+        end
+        
+        
+        
+        function getaxisinfo(xp)
+            for i = 1:length(xp.axis)
+                fprintf(['Axis ', num2str(i), ': ']);
+                xp.axis(i).getaxisinfo;
+            end
+        end
+        
+        % % % % % % % % % % % OVERLOADED FUNCTIONS % % % % % % % % % % %
+        
+        function sz = size(xp)
+            % Overrides normal size command.
             for j = 1:length(xp.axis)
                 sz(j) = length(xp.axis(j).values);
             end
         end
         
         
-        function xp = importLinearData(xp,X,varargin)
-            % xp = importLinearData(X,axislabels1,...,axislabelsN)
-            % xp = importLinearData(X,axislabels1,...,axislabelsN,'outputformat',Value)
-            % Imports a linear array of data, converts it into a matrix
-            % based on the supplied axislabels, and stores it in xp.data.
-            % Also populates the xp.axis.values appropriately.
-            % X - linear matrix or cell array containing input data
-            % axislabels1 - linear matrix or cell array containing data labels for dimension1
-            % ...
-            % axislabelsN - linear matrix or cell array containing data labels for dimensionN
-            % Value - Specifies storage format of the imported data, either 'cell' or 
-            %         'numeric'. Note: if input data is a cell,
-            %                output format must also be set to 'cell.'
-            
-            % Initialize
-            axeslinear = varargin;
-            
-            % Set outputformat as needed based on data type of input format
-            if iscell(X)
-                outputformat = 'cell';          
-            else
-                outputformat = 'numeric';
-            end
-            
-            % Check if final argument in varargin is a name/value pair
-            if ischar(varargin{end-1})
-                if strcmp(varargin{end-1},'format')
-                    outputformat = varargin{end};
-                    axeslinear = axeslinear(1:end-2);       % Remove the name-value pair from axeslinear
-                end
-            end
-            
-            
-            % Error checking
-            if ~isvector(X); error('X must be linear'); end
-            N = length(X);
-            Ndims = length(axeslinear);
-            
-            % Set up xp.axis
-            for j = 1:Ndims
-                xp.axis(j).values = unique(axeslinear{j});
-                sz(j) = length(xp.axis(j).values);
-                
-                if isnumeric(axeslinear{j}(1))
-                    if any(isnan(axeslinear{j})) || any(isinf(axeslinear{j}))
-                        error('Axis cannot contain NaNs or Infs');
-                    end
-                end
-            end
-                
-            % Set up target matrix
-            if strcmp(outputformat,'cell');
-                xp.data={};
-            else
-                xp.data = zeros(sz);
-            end
-            
-            % Set up xp.data -> Convert linear data into a multi dimensional matrix
-            for i = 1:N
-                % Get subscripts
-                subs = cell(1,Ndims);
-                for j = 1:Ndims
-                    if iscell(axeslinear{j})
-                        subs{j} = find(strcmp(axeslinear{j}{i},xp.axis(j).values));
-                    else
-                        subs{j} = find(axeslinear{j}(i) == xp.axis(j).values);
-                    end
-                end
-                
-                % Add data to sparse cell array based on subscripts
-                ind = sub2ind(sz,subs{:});
-                xp.data(ind) = X(i);
-            end
-            
-            
-            % Increase size of cell array if necessary, to make it "square" so
-            % that the subsequent reshape will work
-            if strcmp(outputformat,'cell') && length(xp.data) < prod(sz)
-                xp.data{prod(sz)} = [];
-            end
-
-            % Lastly convert the linear cell array to a matrix cell array
-            xp.data = reshape(xp.data,sz);
-        end
-            
-        
-        
         function xp = permute(xp,order)
             xp.data = permute(xp.data,order);
             xp.axis = xp.axis(order);
         end
+        
+        function xp = squeeze(xp)
+            % This is just like MATLAB's normal squeeze command. However,
+            % there is one key difference:
+            % Normally, if squeeze operates on a 1xN matrix, it will leave
+            % it as 1xN. This function forces it to always return as Nx1
+            
+%             checkDims(xp);
+%             
+%             % Remove axes that have dimensionality of 1
+%             sz = size(xp.data);
+%             xp.axis = xp.axis(sz~=1);
+            
+            % Now squeeze xp.data
+            xp.data = squeeze(xp.data);         % Normal squeeze command
+            
+            % Lastly, if the result is a row vector, force it to be a
+            % column vector
+            if isvector(xp.data) && ~iscolumn(xp.data)
+                xp.data = xp.data';
+            end
+        end
+        
+        % % % % % % % % % % % END % % % % % % % % % % %
     end
 end
 
@@ -124,3 +150,24 @@ function output = inheritObj(output,input)
 end
 
 
+
+
+function checkDims(xp)
+    sz = size(xp.data);
+    Nd = ndims(xp.data);
+    N = length(xp.axis);
+    if Nd ~= N
+        error('checkDims: Error found! Number of dimensions in xPlt.data does not equal number of axes');
+    end
+
+    for i = 1:N
+        Nvalues_in_axis = length(xp.axis(i).values);
+        if Nvalues_in_axis ~= sz(i)
+            fprintf(['checkDims: Error found! Size of dimension ',num2str(i), ...
+                ' is ', num2str(sz(i)) , ...
+                '. But corresponding axis \"', xp.axis(i).name , ...
+                '\" has ', num2str(Nvalues_in_axis) , ' elements. Dimension mismatch. \nTry running xPlt.getaxisinfo. \n' ]);
+            error(' ');
+        end
+    end
+end
