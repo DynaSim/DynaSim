@@ -10,18 +10,19 @@ classdef xPltAxis
     end
     
     methods
-        function getaxisinfo(xpa)
+        function out = getaxisinfo(xpa)
             temp = [xpa.name, ' -> '];
             Nvals = length(xpa.values);
             for i = 1:Nvals-1
-                
                 temp = [temp,xpa.getvaluestring(i),', '];
-                
             end
-            temp = [temp,xpa.getvaluestring(Nvals),'\n'];
+            temp = [temp,xpa.getvaluestring(Nvals)];
             
-        
-            fprintf(temp)
+            if nargout > 0
+                out = temp;
+            else
+                fprintf([temp, '\n'])
+            end
         end
         
         function out = getvalue_noncell(xpa,i)

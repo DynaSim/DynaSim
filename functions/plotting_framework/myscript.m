@@ -33,9 +33,9 @@ xp3.data = xp.data(:,:,:,5:8);      % Brute force selection of the xp.data.
 
 %% Try selecting another subset for actual plotting
 clear xp2 xp3
-xp4 = squeeze(xp.subset(3,[],[],8));
-
-recursivePlot(xp4,{@xp_subplot,@xp_subplot_cdata,@xp_matrix_basicplot},{1,2});
+xp4 = squeeze(xp.subset([],[],[],8));
+%%
+recursivePlot(xp4,{@xp_subplot,@xp_subplot_cdata,@xp_matrix_basicplot},{1:2,3},{{},{1},{}});
 
 
 

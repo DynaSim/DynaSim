@@ -1,6 +1,17 @@
 
-function varargout = recursivePlot(xp,function_handles,dimensions)
+function varargout = recursivePlot(xp,function_handles,dimensions,function_handle_arguments)
+    % function_handle_arguments - cell array of argument cell arrays to pass to
+    % function_handles. Must have one cell array for each function_handle
+    % passed. Use empty cell arrays for no arguments. E.g.
+    % function_handle_arguments = { {}, {}, {1} } for nothing, nothing, and
+    % 1 as arguments.
     
+    if nargin < 4
+        function_handle_arguments = cell(size(function_handles));
+        for i = 1:length(function_handle_arguments)
+            function_handle_arguments{i} = {};
+        end
+    end
 
     sz = size(xp);
     if length(function_handles) > 1
@@ -15,7 +26,8 @@ function varargout = recursivePlot(xp,function_handles,dimensions)
                 dim1 = dimensions{1}(1);
                 for i = 1:sz(dim1)
                     selection_curr{dim1} = i;
-                    xp2.data{i} = @() recursivePlot(xp.subset(selection_curr{:}),function_handles(2:end),dimensions(2:end));
+                        % Note: need to make it a row vector!
+                    xp2.data{i,1} = @() recursivePlot(xp.subset(selection_curr{:}),function_handles(2:end),dimensions(2:end),function_handle_arguments(2:end));
                 end
                 
             case 2                          % 2D
@@ -25,7 +37,7 @@ function varargout = recursivePlot(xp,function_handles,dimensions)
                     for j = 1:sz(dim2)
                         selection_curr{dim1} = i;
                         selection_curr{dim2} = j;
-                        xp2.data{i} = @() recursivePlot(xp.subset(selection_curr{:}),function_handles(2:end),dimensions(2:end));
+                        xp2.data{i,j} = @() recursivePlot(xp.subset(selection_curr{:}),function_handles(2:end),dimensions(2:end),function_handle_arguments(2:end));
                     end
                 end
                 
@@ -39,7 +51,7 @@ function varargout = recursivePlot(xp,function_handles,dimensions)
                             selection_curr{dim1} = i;
                             selection_curr{dim2} = j;
                             selection_curr{dim3} = k;
-                            xp2.data{i} = @() recursivePlot(xp.subset(selection_curr{:}),function_handles(2:end),dimensions(2:end));
+                            xp2.data{i,j,k} = @() recursivePlot(xp.subset(selection_curr{:}),function_handles(2:end),dimensions(2:end),function_handle_arguments(2:end));
                         end
                     end
                 end
@@ -57,7 +69,7 @@ function varargout = recursivePlot(xp,function_handles,dimensions)
                                 selection_curr{dim2} = j;
                                 selection_curr{dim3} = k;
                                 selection_curr{dim4} = l;
-                                xp2.data{i} = @() recursivePlot(xp.subset(selection_curr{:}),function_handles(2:end),dimensions(2:end));
+                                xp2.data{i,j,k,l} = @() recursivePlot(xp.subset(selection_curr{:}),function_handles(2:end),dimensions(2:end),function_handle_arguments(2:end));
                             end
                         end
                     end
@@ -72,11 +84,12 @@ function varargout = recursivePlot(xp,function_handles,dimensions)
             xp2.axis(i).values = xp.axis(dim_curr).values;
             xp2.axis(i).name = xp.axis(dim_curr).name;
         end
+        xp2 = xp2.fixAxes;
         
-        [varargout{1:nargout}] = function_handles{1}(xp2);
+        [varargout{1:nargout}] = function_handles{1}(xp2,function_handle_arguments{1}{:});
         
     else
-        [varargout{1:nargout}] = function_handles{1}(xp);
+        [varargout{1:nargout}] = function_handles{1}(xp,function_handle_arguments{1}{:});
     end
 end
             
