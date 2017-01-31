@@ -40,6 +40,13 @@ classdef xPlt
                 error('Number of inputs must match dimensionality of xPlt.data');
             end
             
+            % Convert selection to index if using regular expressions
+            for i = 1:length(selection)
+                if ischar(selection{i})
+                    selection{i} = regex_lookup(xp.axis(i).values, selection{i});
+                end
+            end
+            
             % Initialize
             sz = size(xp);
             xp2 = xPlt;
@@ -125,8 +132,10 @@ classdef xPlt
             
             % Lastly output a summary of dimensionality comparing xPlt.axis
             % and xPlt.data. These should match up.
-            fprintf(['xPlt.axis dimensionality ' num2str(cellfun(@length,{xp.axis.values})) '\n']);
-            fprintf(['xPlt.data dimensionality ' num2str(size(xp.data)) '\n']);
+            if nargout == 0
+                fprintf(['xPlt.axis dimensionality ' num2str(cellfun(@length,{xp.axis.values})) '\n']);
+                fprintf(['xPlt.data dimensionality ' num2str(size(xp.data)) '\n']);
+            end
         end
         
         % % % % % % % % % % % HOUSEKEEPING FUNCTIONS % % % % % % % % % % %
@@ -321,6 +330,19 @@ function xp = setAxisDefaultNames(xp,dim)
     end
     
     xp.axis(dim) = ax_curr;
+end
+
+
+function selection_out = regex_lookup(vals, selection)
+    if ~ischar(vals{1}); error('xPlt.axis.values must be strings when using regular expressions');
+    end
+    if ~ischar(selection); error('Selection must be string when using regex');
+    end
+    
+    selection_out = regexp(vals,selection);
+    selection_out = logical(~cellfun(@isempty,selection_out));
+    selection_out = find(selection_out);
+    
 end
 
 % function varargout = size2(varargin)

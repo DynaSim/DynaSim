@@ -25,9 +25,11 @@ classdef xPltAxis
             end
         end
         
-        function out = getvalue_noncell(xpa,i)
+        function out = getvaluenoncell(xpa,i)
             % Looks at entry xpa.value(i) and returns its output as a
             % numeric, regardless of whether it is actually cell array
+            
+            if length(i) > 1; error('i must be singleton'); end
             if iscell(xpa.values)
                 out = xpa.values{i};
             else
@@ -39,10 +41,22 @@ classdef xPltAxis
             % Looks at entry xpa.value(i) and returns its output as a
             % string, regardless of what data type it actually is (string,
             % cell, numeric, etc).
-            out = xpa.getvalue_noncell(i);
+            if length(i) > 1; error('i must be singleton'); end
+            out = xpa.getvaluenoncell(i);
             if isnumeric(out)
                 out = num2str(out);
             end
+        end
+        
+        function out = getvaluescellstring(xpa)
+            % Looks at entry xpa.value(i) and returns its output as a
+            % cell array of strings
+            out = cell(1,length(xpa.values));
+            for i = 1:length(xpa.values)
+                out{i} = num2str(xpa.getvaluenoncell(i));
+            end
+            
+            
         end
 
         

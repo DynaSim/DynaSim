@@ -35,7 +35,12 @@ xp3.data = xp.data(:,:,:,5:8);      % Brute force selection of the xp.data.
 clear xp2 xp3
 xp4 = squeeze(xp.subset([],[],[],8));
 %%
-recursivePlot(xp4,{@xp_subplot,@xp_subplot_cdata,@xp_matrix_basicplot},{1:2,3},{{},{1},{}});
+% recursivePlot(xp4,{@xp_subplot,@xp_subplot,@xp_matrix_basicplot},{1:2,3},{{[],1},{1,1},{}});
+recursivePlot(xp4,{@xp_subplot_grid3D,@xp_subplot,@xp_matrix_basicplot},{1:2,3},{{},{0,1},{}});
+% recursivePlot(xp4,{@xp_subplot_grid3D,@xp_matrix_basicplot},{[3,1,2]},{{},{}});
 
 
+
+%% Test subset with regular expressions
+xp5 = xp.subset([],[],[1],'v*');
 
