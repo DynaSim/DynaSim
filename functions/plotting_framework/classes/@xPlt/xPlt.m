@@ -34,14 +34,14 @@ classdef xPlt
             % Define variables and check that all dimensions are consistent
             checkDims(xp);
             selection = varargin(:);
-            Nd = ndims(xp.data);
-            N = length(selection);
-            if N ~= Nd
+            Nd = ndims(xp);
+            Na = length(selection);
+            if Na ~= Nd
                 error('Number of inputs must match dimensionality of xPlt.data');
             end
             
             % Convert selection to index if using regular expressions
-            for i = 1:length(selection)
+            for i = 1:Na
                 if ischar(selection{i})
                     selection{i} = regex_lookup(xp.axis(i).values, selection{i});
                 end
@@ -54,7 +54,7 @@ classdef xPlt
             
             % First update each axis with the corresponding selection and
             % convert empty cells to code for full range.
-            for i = 1:length(selection)
+            for i = 1:Na
 
                 if isempty(selection{i})
                     selection{i} = 1:sz(i);
@@ -91,7 +91,7 @@ classdef xPlt
         function xp = packdims(xp,dims2pack)
             error('this is incomplete');
             % Calculate dims
-            Nd = ndims(xp.data);
+            Nd = ndims(xp);
             alldims = 1:Nd;
             ind_chosen = false(size(alldims));
             for i = 1:length(dims2pack)
@@ -165,7 +165,7 @@ classdef xPlt
             % without need for a squeeze. This command forces xPlt.axis to
             % follow these conventions.
 
-            Nd = ndims(xp.data);    
+            Nd = ndims(xp);
             Na = length(xp.axis);
 
             % Sweep through all axes and make sure dimensions are correct.
@@ -180,6 +180,36 @@ classdef xPlt
             end
             
         end
+        
+        
+        function checkDims(xp)
+
+            % Note, fixAxes fixes everything automatically.
+            % Only call checkDims if you want to
+            % be alerted to mismatches, but not to correct them. Use fixAxes to
+            % automatically correct everything.
+            
+            sz = size(xp);
+            Nd = length(sz);
+            Na = length(xp.axis);
+
+
+
+            if Nd ~= Na
+                error('checkDims: Error found! Number of dimensions in xPlt.data does not equal number of axes');
+            end
+
+            for i = 1:Na
+                Nvalues_in_axis = length(xp.axis(i).values);
+                if Nvalues_in_axis ~= sz(i)
+                    fprintf(['checkDims: Error found! Size of dimension ',num2str(i), ...
+                        ' is ', num2str(sz(i)) , ...
+                        '. But corresponding axis \"', xp.axis(i).name , ...
+                        '\" has ', num2str(Nvalues_in_axis) , ' elements. Dimension mismatch. \nTry running xPlt.getaxisinfo and then xPlt.fixAxes. \n' ]);
+                    error(' ');
+                end
+            end
+        end
 
         
         % % % % % % % % % % % OVERLOADED FUNCTIONS % % % % % % % % % % %
@@ -192,6 +222,34 @@ classdef xPlt
 
             [varargout{1:nargout}] = size(xp.data,varargin{:});
             
+            % Add singleton dimensions as needed
+            if nargout == 1
+                sz = varargout{1};
+                Nd = ndims(xp.data);
+                N = length(xp.axis);
+                if Nd < N
+                    sz_axis = cellfun(@length,{xp.axis.values});
+                    if any(sz_axis(Nd+1:N) > 1); error('Non-singleton dimensions present in excess of ndims(xPlt.data).'); end
+                    sz(Nd+1:N) = 1;
+                end
+                varargout{1} = sz;
+            end
+            
+        end
+        
+        function Nd = ndims(xp)
+            Nd = ndims(xp.data);
+            
+            % If there are more axes than Nd, this could be because there
+            % are a bunch of singleton axes. If there are, then we can
+            % update this returned value.
+            N = length(xp.axis);
+            if Nd < N
+                sz_axis = cellfun(@length,{xp.axis.values});
+                if any(sz_axis(Nd+1:N) > 1); error('Non-singleton dimensions present in excess of ndims(xPlt.data). Run checkDims or fixAxes'); end
+                Nd = N;
+            end
+
         end
         
         function xp = permute(xp,order)
@@ -219,8 +277,8 @@ classdef xPlt
             
             checkDims(xp);
             
-            % If it's bigger than a matrix, squeeze out dimensions that are
-            % of size 1.
+            % If data is bigger than a matrix, squeeze out dimensions that
+            % are of size 1.
             sz = size(xp.data);
             if length(sz) > 2
                 ind = sz~=1;
@@ -234,9 +292,18 @@ classdef xPlt
 %                 if isvector(xp.data) && ~iscolumn(xp.data)
 %                     xp.data = xp.data';
 %                 end
+            else
+                % Otherwise, if data is a matrix, remove all axis beyond
+                % the first two. These should only be size 1 (e.g. "name"
+                % axes anyways)
+%                 szA = cellfun(@length,{xp.axis.values});
+%                 ind = szA~=1;
+%                 ind(1:2) = true;
+                xp.axis = xp.axis(1:2);
             end
             
             % Make sure everything is good before returning.
+            xp = xp.fixAxes;
             checkDims(xp);
         end
         
@@ -259,41 +326,11 @@ end
 
 
 
-function xp = checkDims(xp)
-
-    % Note, fixAxes fixes everything automatically now, thus rendering the
-    % rest of this function pointless. Only call checkDims if you want to
-    % be alerted to mismatches, but not to correct them. Use fixAxes to
-    % automatically correct everything in the background.
-    %xp = fixAxes(xp);
-
-    sz = size(xp.data);
-    Nd = length(sz);
-    N = length(xp.axis);
-    
-    
-    
-    if Nd ~= N
-        error('checkDims: Error found! Number of dimensions in xPlt.data does not equal number of axes');
-    end
-
-    for i = 1:N
-        Nvalues_in_axis = length(xp.axis(i).values);
-        if Nvalues_in_axis ~= sz(i)
-            fprintf(['checkDims: Error found! Size of dimension ',num2str(i), ...
-                ' is ', num2str(sz(i)) , ...
-                '. But corresponding axis \"', xp.axis(i).name , ...
-                '\" has ', num2str(Nvalues_in_axis) , ' elements. Dimension mismatch. \nTry running xPlt.getaxisinfo and then xPlt.fixAxes. \n' ]);
-            error(' ');
-        end
-    end
-end
-
 function xp = setAxisDefaultNames(xp,dim)
     % Sets xp.axis(i) to default values
     
     % Get desired size of dataset
-    sz = size(xp.data);
+    sz = size(xp);
     
     % If axis doesn't already exist, create it. Otherwise, copy existing.
     if length(xp.axis) < dim
