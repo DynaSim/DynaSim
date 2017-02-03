@@ -85,7 +85,6 @@ if iscellstr(mechanism_list)
     end
     if ~isempty(file)
       files{end+1}=file;
-      break;
     end
   end
 end
