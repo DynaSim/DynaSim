@@ -218,13 +218,6 @@ options=CheckOptions(varargin,{...
 data=CheckData(data);
 handles=[];
 
-% Check Matlab path to make sure analysis functions can be called
-dynasim_functions=fullfile(fileparts(which(mfilename)),'functions');
-onPath=~isempty(strfind(path,[dynasim_functions, pathsep]));
-if ~onPath
-  addpath(dynasim_functions); % necessary b/c of changing directory for simulation
-end
-
 % todo: add option 'plot_mode' {'trace','image'}
 
 % variables to plot
