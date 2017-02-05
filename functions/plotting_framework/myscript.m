@@ -85,10 +85,17 @@ xp4 = (xp.subset([],[],[],8));
 % recursivePlot(xp4,{@xp_subplot,@xp_subplot,@xp_matrix_basicplot},{1:2,3},{{[],1},{1,1},{}});
 % recursivePlot(xp4,{@xp_subplot_grid3D,@xp_subplot,@xp_matrix_basicplot},{1:2,3},{{},{0,1},{}});
 % recursivePlot(xp4,{@xp_subplot_grid3D,@xp_matrix_basicplot},{[3,1,2]},{{},{}});
-recursivePlot(xp4,{@xp_subplot_grid3D,@xp_subplot,@xp_matrix_basicplot},{[4,1,2],3},{{},{0,1},{}});
+recursivePlot(xp4,{@xp_subplot_grid3D,@xp_subplot,@xp_matrix_basicplot},{[1,2,4],3},{{},{0,1},{}});
 
 
 
 %% Test subset with regular expressions
-xp5 = xp.subset([],[],[1],'v*');
+xp5 = xp.subset([],[],[1],'iNa*');
+
+%% Test packDims
+clear xp2 xp3 xp4 xp5
+xp2 = xp.subset(2,2,[],[1,3,5:8]);
+xp2 = xp2.squeeze;
+%%
+xp2 = xp2.packDim(2,3);
 

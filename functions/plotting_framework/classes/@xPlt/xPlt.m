@@ -27,11 +27,10 @@ classdef xPlt
         
         
         
-        function xp2 = subset(xp,varargin)
-            % To do: Need to make this work with ways to select the subset
-            % based on value name, rather than just by index.
-            
+        function [xp2, ro] = subset(xp,varargin)
             % Define variables and check that all dimensions are consistent
+            % ro - if regular expressions are used, returns the index
+            % values discovered by the regular expression.
             checkDims(xp);
             selection = varargin(:);
             Nd = ndims(xp);
@@ -41,9 +40,12 @@ classdef xPlt
             end
             
             % Convert selection to index if using regular expressions
+            ro = {};
             for i = 1:Na
                 if ischar(selection{i})
-                    selection{i} = regex_lookup(xp.axis(i).values, selection{i});
+                    ro{i}(1,:) = xp.axis(i).values;
+                    [selection{i} ro{i}(2,:)] = regex_lookup(xp.axis(i).values, selection{i});
+                    
                 end
             end
             
@@ -88,7 +90,7 @@ classdef xPlt
             end
         end
         
-        function xp = packdims(xp,dims2pack)
+        function xp = mergedims(xp,dims2pack)
             error('this is incomplete');
             % Calculate dims
             Nd = ndims(xp);
@@ -106,7 +108,104 @@ classdef xPlt
             xp.data = reshape(xp.data,[]);
         end
         
+        function xp = packDim(xp,dim_src,dim_target)
+            
+            if nargin < 3; dim_target = dim_src; end
+            checkDims(xp);
+            
+            % Make sure target dimension in xPlt.data is a singleton
+            sz_targets = cellfun(@(x) size(x,dim_target),xp.data);
+            if any(sz_targets(:) ~= 1); error('Target dimension in xPlt.data needs to be size 1. Try reshaping contents of xPlt.data or choosing a different target dimension.'); end
+            clear sz_targets
+            
+            % Bring chosen dimension to the front. Thus, we will be
+            % merging along rows.
+            Nd = ndims(xp.data);
+            xp.data = permute(xp.data,[dim_src, 1:dim_src-1, dim_src+1:Nd]);
+            
+            % Temporarily linearize all other dimensions.
+            sz = size(xp.data);
+            xp.data = reshape(xp.data,sz(1),prod(sz(2:end)));
+            
+            % Add NaNs where needed
+                % Note: to understand what this is doing, it really helps
+                % to draw a diagram!
+            sz2 = size(xp.data);
+            empties = cellfun(@isempty,xp.data);    % 2D matrix with 1's marking empty cells
+            se = sum(empties,1);                    % Number of empties per column in this matrix
+            bad_inds = se ~= 0 & se ~= sz2(2);     % Good columns must be either all empty or all non-empty
+            
+            if any(bad_inds)
+                fprintf('Note: Empty entries found along collapsing dim. Using NaNs as placeholders to fill out the matrix. \n');
+                bi = find(bad_inds);
+                for j = 1:length(bi)                    % Sweep through bad columns
+                    curr_bad = find(empties(:,j));      % Empties along this particular column
+                    curr_good = find(~empties(:,j));    % Non-empties along this particular column.
+                    for i = 1:length(curr_bad)
+                        % Populate the empty cells with matrices of NaNs
+                        % that are the same dimensionality as the first
+                        % good entry.
+                        xp.data{curr_bad(i),bi(j)} = NaN*ones(size(xp.data{curr_good(1),bi(j)}));
+                    end
+                end
+            end
+            
+            % Check that sizes and dimensionalities are compatible
+            data_ndims = cellfun(@ndims,xp.data,'UniformOutput',true);
+            if any(any(data_ndims ~= repmat(data_ndims(1,:),sz(1),1),1),2)
+                error('Dimensions of xPlt.data not uniform along packing dimensions.');
+            end
+           
+            
+            data_sz = cellfun(@size,xp.data,'UniformOutput',false);
+            data_sz_firsts = repmat(data_sz(1,:),sz(1),1);
+            myfunc = @(x,y) any(x(:) ~= y(:));
+            bool_size_mismatch = cellfun(myfunc,data_sz,data_sz_firsts);
+            if any(bool_size_mismatch(:))
+                error('Sizes of xPlt.data are not uniform along packing dimension. (This usually results form trying to combine populations with different numbers of cells.');
+            end
+            
+            % Now, pack the data.
+%             for j = 1:sz(2)
+%                 % permute so that contents of each cell has the selected
+%                 % dimenison along dimension 1
+%                 for i = 1:sz(1)
+%                     dat_curr = xp.data{i,j};
+%                     Ndimdat = ndims(dat_curr);
+%                     dat_curr = permute(dat_curr,[dim, 1:dim-1, dim+1:Ndimdat]); %whos dat_curr
+%                     % dat_curr = permute(dat_curr,[2:dim, 1, dim+1:Ndimdat]);    %whos dat_curr       % Uncomment this stuff to make sure it permutes back
+%                     xp.data{i,j} = dat_curr;
+%                 end
+%                 
+%                 % Concatenate the data along dimension 1
+%                 data_new{j} = cat(1,xp.data{j,:});
+%                 
+%                 % Permute the contents of each cell back to original
+%                 for i = 1:sz(1)
+%                     dat_curr = data_new{j};
+%                     dat_curr = permute(dat_curr,[2:dim, 1, dim+1:Ndimdat]);     %whos dat_curr
+%                     data_new{j} = dat_curr;
+%                 end
+%                 
+%             end
         
+            for j = 1:sz(2)
+                xp.data{1,j} = cat(dim_target,xp.data{:,j});
+                xp.data(2:end,j) = cell(sz(1)-1,1);     % Set remainder to empty
+            end
+            
+            xp.data = xp.data(1,:);         % Keep only 1st dimension;
+            sz(1) = 1;
+
+            % Lastly, restore original dimensions
+            % of xPlt.data
+            xp.data = reshape(xp.data,sz);
+            xp.data = permute(xp.data,[2:dim_src, 1, dim_src+1:Nd]);
+            
+            % Also, update xp.axis
+            xp.axis(dim_src).values = 1;
+            
+        end
         
         function out = getaxisinfo(xp)
             % If no output arguments, prints axis info to the screen. If
@@ -370,14 +469,14 @@ function xp = setAxisDefaultNames(xp,dim)
 end
 
 
-function selection_out = regex_lookup(vals, selection)
+function [selection_out, startIndex] = regex_lookup(vals, selection)
     if ~ischar(vals{1}); error('xPlt.axis.values must be strings when using regular expressions');
     end
     if ~ischar(selection); error('Selection must be string when using regex');
     end
     
-    selection_out = regexp(vals,selection);
-    selection_out = logical(~cellfun(@isempty,selection_out));
+    startIndex = regexp(vals,selection);
+    selection_out = logical(~cellfun(@isempty,startIndex));
     selection_out = find(selection_out);
     
 end
