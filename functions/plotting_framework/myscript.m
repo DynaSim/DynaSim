@@ -96,6 +96,5 @@ xp5 = xp.subset([],[],[1],'iNa*');
 clear xp2 xp3 xp4 xp5
 xp2 = xp.subset(2,2,[],[1,3,5:8]);
 xp2 = xp2.squeeze;
-%%
 xp2 = xp2.packDim(2,3);
 

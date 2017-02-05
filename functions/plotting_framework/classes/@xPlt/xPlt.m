@@ -113,9 +113,16 @@ classdef xPlt
             if nargin < 3; dim_target = dim_src; end
             checkDims(xp);
             
+            % Make sure that xp.data is a cell array
+            if ~iscell(xp.data); error('xPlt.data must be a cell array.'); end
+            
+            % Make sure that xp.data is a matrix
+%             temp = cellfun(@ismatrix,xp.data);
+%             if any(temp(:) ~= 1); error('xPlt.data must contain only matrices'); end
+            
             % Make sure target dimension in xPlt.data is a singleton
-            sz_targets = cellfun(@(x) size(x,dim_target),xp.data);
-            if any(sz_targets(:) ~= 1); error('Target dimension in xPlt.data needs to be size 1. Try reshaping contents of xPlt.data or choosing a different target dimension.'); end
+            temp = cellfun(@(x) size(x,dim_target),xp.data);
+            if any(temp(:) ~= 1); error('Target dimension in xPlt.data needs to be size 1. Try reshaping contents of xPlt.data or choosing a different target dimension.'); end
             clear sz_targets
             
             % Bring chosen dimension to the front. Thus, we will be
