@@ -4,11 +4,50 @@
 % titled "%% Save data from a set of simulations"
 % Then, I load demo_sPING_3:
 % data=ImportData('demo_sPING_3');
+%% Run simulation - Sparse Pyramidal-Interneuron-Network-Gamma (sPING)
 
+cd outputs
+
+% define equations of cell model (same for E and I populations)
+eqns={ 
+  'dv/dt=Iapp+@current+noise*randn(1,N_pop)';
+  'monitor iGABAa.functions, iAMPA.functions'
+};
+% Tip: monitor all functions of a mechanism using: monitor MECHANISM.functions
+
+% create DynaSim specification structure
+s=[];
+s.populations(1).name='E';
+s.populations(1).size=80;
+s.populations(1).equations=eqns;
+s.populations(1).mechanism_list={'iNa','iK'};
+s.populations(1).parameters={'Iapp',5,'gNa',120,'gK',36,'noise',40};
+s.populations(2).name='I';
+s.populations(2).size=20;
+s.populations(2).equations=eqns;
+s.populations(2).mechanism_list={'iNa','iK'};
+s.populations(2).parameters={'Iapp',0,'gNa',120,'gK',36,'noise',40};
+s.connections(1).direction='I->E';
+s.connections(1).mechanism_list={'iGABAa'};
+s.connections(1).parameters={'tauD',10,'gSYN',.1,'netcon','ones(N_pre,N_post)'};
+s.connections(2).direction='E->I';
+s.connections(2).mechanism_list={'iAMPA'};
+s.connections(2).parameters={'tauD',2,'gSYN',.1,'netcon',ones(80,20)};
+
+% Vary two parameters (run a simulation for all combinations of values)
+vary={
+  'E'   ,'Iapp',[0 10 20];      % amplitude of tonic input to E-cells
+  'I->E','tauD',[5 10 15]       % inhibition decay time constant from I to E
+  };
+SimulateModel(s,'save_data_flag',1,'study_dir','demo_sPING_3b',...
+                'vary',vary,'verbose_flag',1, ...
+                'save_results_flag',1,'plot_functions',@PlotData,'plot_options',{'format','png'} );
+
+cd ..
 
 %% Load the data and import into xPlt class
 % ...Assumes we have some DynaSim data already loaded...
-% data=ImportData('demo_sPING_3');
+data=ImportData('demo_sPING_3b');
 % cd ../../functions/plotting_framework
 
 % Load the data linearly
@@ -97,4 +136,7 @@ clear xp2 xp3 xp4 xp5
 xp2 = xp.subset(2,2,[],[1,3,5:8]);
 xp2 = xp2.squeeze;
 xp2 = xp2.packDim(2,3);
+
+
+%% 
 

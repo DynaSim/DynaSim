@@ -117,8 +117,10 @@ classdef xPlt
             if ~iscell(xp.data); error('xPlt.data must be a cell array.'); end
             
             % Make sure that xp.data is a matrix
-%             temp = cellfun(@ismatrix,xp.data);
-%             if any(temp(:) ~= 1); error('xPlt.data must contain only matrices'); end
+            temp = cellfun(@ismatrix,xp.data);
+            if any(temp(:) ~= 1); error('xPlt.data must contain only matrices'); end
+            % % To do: implement this so it works with cell arrays and xPlt
+            % classes in the future too
             
             % Make sure target dimension in xPlt.data is a singleton
             temp = cellfun(@(x) size(x,dim_target),xp.data);
