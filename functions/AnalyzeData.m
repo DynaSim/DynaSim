@@ -13,6 +13,8 @@ function result=AnalyzeData(data,func,varargin)
 %     - 'result_file' (default: 'result.mat'): where to save result
 %     - 'format' (default: 'svg'): format for saved plots if figures are generated
 %       {'svg','jpg','eps','png'}
+%     - 'varied_filename_flag' (0 or 1) (default: 0): whether to make filename
+%       based on the varied parameters and type of plot
 % 
 % outputs:
 %   result: structure returned by the analysis function
@@ -26,7 +28,14 @@ options=CheckOptions(varargin,{...
   'result_file','result',[],...
   'save_results_flag',0,{0,1},...
   'format','svg',{'svg','jpg','eps','png'},...
+  'varied_filename_flag',0,{0,1},...
+  'plot_type','waveform',{'waveform','rastergram','raster','power','rates'},...
   },false);
+
+% change result_file
+if options.varied_filename_flag && isfield(data, 'varied')
+  options.result_file = nameFromVaried(data, options.plot_type, options.result_file);
+end
 
 % load data if input is not a DynaSim data structure
 if ~(isstruct(data) && isfield(data,'time'))
