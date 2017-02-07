@@ -4,8 +4,16 @@
 
 DynaSim toolbox for modeling and simulating dynamical systems in Matlab or Octave
 
-Download the DynaSim toolbox:
-`git clone https://github.com/dynasim/dynasim.git`
+Installation:
+
+1. Download the DynaSim toolbox: `git clone
+   https://github.com/dynasim/dynasim.git`
+2. Create a file named `startup.m` located in
+    - If Mac/Linux `<home folder>/Documents/MATLAB`
+    - If Windows `<home folder>\Documents\MATLAB`
+3. Put the below in the file:
+    - If Mac/Linux `addpath(genpath('/path/to/dynasim'))`
+    - If Windows `addpath(genpath('\path\to\dynasim'))`
 
 Documentation:
 - Get started with the demos: [demos/demos.m](https://github.com/DynaSim/DynaSim/blob/master/demos/demos.m)
