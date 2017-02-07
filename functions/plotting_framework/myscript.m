@@ -5,6 +5,7 @@
 % Then, I load demo_sPING_3:
 % data=ImportData('demo_sPING_3');
 %% Run simulation - Sparse Pyramidal-Interneuron-Network-Gamma (sPING)
+% Save both figures and data.
 
 cd outputs
 
@@ -47,8 +48,9 @@ cd ..
 
 %% Load the data and import into xPlt class
 % ...Assumes we have some DynaSim data already loaded...
+cd outputs
 data=ImportData('demo_sPING_3b');
-% cd ../../functions/plotting_framework
+cd ..
 
 % Load the data linearly
 [data_linear,ax,ax_names,time] = DynaSimExtract (data);
@@ -118,13 +120,40 @@ xp3.getaxisinfo;
 xp6 = xp.subset(1,[],2,1);
 
 %% Try selecting another subset for actual plotting
+
+%% Run a recursive plot
+
 clear xp2 xp3
 xp4 = (xp.subset([],[],[],8));
-%%
+xp4.getaxisinfo
+
 % recursivePlot(xp4,{@xp_subplot,@xp_subplot,@xp_matrix_basicplot},{1:2,3},{{[],1},{1,1},{}});
 % recursivePlot(xp4,{@xp_subplot_grid3D,@xp_subplot,@xp_matrix_basicplot},{1:2,3},{{},{0,1},{}});
 % recursivePlot(xp4,{@xp_subplot_grid3D,@xp_matrix_basicplot},{[3,1,2]},{{},{}});
-recursivePlot(xp4,{@xp_subplot_grid3D,@xp_subplot,@xp_matrix_basicplot},{[1,2,4],3},{{},{0,1},{}});
+recursivePlot(xp4,{@xp_subplot_grid3D,@xp_subplot_grid3D,@xp_matrix_basicplot},{[1,2,4],3},{{},{0,1},{}});
+
+
+%% Run another recursive plot
+clear xp2 xp3
+xp4 = (xp.subset([],[],[],8));
+xp4.getaxisinfo
+
+% recursivePlot(xp4,{@xp_subplot,@xp_subplot,@xp_matrix_basicplot},{1:2,3},{{[],1},{1,1},{}});
+% recursivePlot(xp4,{@xp_subplot_grid3D,@xp_subplot,@xp_matrix_basicplot},{1:2,3},{{},{0,1},{}});
+% recursivePlot(xp4,{@xp_subplot_grid3D,@xp_matrix_basicplot},{[3,1,2]},{{},{}});
+recursivePlot(xp4,{@xp_subplot_grid3D,@xp_matrix_basicplot},{[3,1,2]},{{},{}});
+
+
+%% Run another recursive plot
+clear xp2 xp3
+xp4 = (xp.subset([],[],1,8));
+xp4.getaxisinfo
+
+% recursivePlot(xp4,{@xp_subplot,@xp_subplot,@xp_matrix_basicplot},{1:2,3},{{[],1},{1,1},{}});
+% recursivePlot(xp4,{@xp_subplot_grid3D,@xp_subplot,@xp_matrix_basicplot},{1:2,3},{{},{0,1},{}});
+% recursivePlot(xp4,{@xp_subplot_grid3D,@xp_matrix_basicplot},{[3,1,2]},{{},{}});
+recursivePlot(xp4,{@xp_subplot,@xp_matrix_basicplot},{[1,2]},{{0,0},{}});
+
 
 
 
@@ -138,5 +167,25 @@ xp2 = xp2.squeeze;
 xp2 = xp2.packDim(2,3);
 
 
-%% 
+
+%% Load xPlt structure of images
+
+cd outputs
+file = 'demo_sPING_3b';
+data = ImportPlots(file);
+cd ..
+
+[data_linear,ax,ax_names] = DynaSimPlotExtract (data);
+
+xp = xPlt;
+xp = xp.importLinearData(data_linear,ax{:});
+xp = xp.importAxisNames(ax_names);
+
+
+% to do: rename DynaSimExtrat to DynaSimDataExtract
+
+%% Run recursive plot of images
+recursivePlot(xp,{@xp_subplot_grid3D,@xp_plotimage},{[1,2]},{{},{.25}});
+
+
 

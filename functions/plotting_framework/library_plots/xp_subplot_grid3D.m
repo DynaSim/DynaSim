@@ -1,6 +1,6 @@
 
 
-function hsg = xp_subplot_grid3D (xp,transpose_on)
+function hsg = xp_subplot_grid3D (xp,transpose_on, display_mode)
 	% xp must be 1D, 2D, or 3D
     
     if nargin < 2
@@ -12,10 +12,18 @@ function hsg = xp_subplot_grid3D (xp,transpose_on)
     end
     
     if isempty(transpose_on); transpose_on = 0; end
+    if isempty(display_mode); display_mode = 0; end
+            % Display_mode: 0-Just plot directly
+                          % 1-Plot as an image (cdata)
+                          % 2-Save to a figure file 
     
     if transpose_on && ismatrix(xp)
         xp = xp.transpose;
     end
+    
+    % Parameters
+    %subplot_grid_options = {'no_zoom'};
+    subplot_grid_options = {};
     
     sz = size(xp);
     
@@ -24,8 +32,14 @@ function hsg = xp_subplot_grid3D (xp,transpose_on)
         N2 = sz(2);
         
         
-            figure;
-            hsg = subplot_grid(N1,N2,'no_zoom');
+            if display_mode == 1 
+                h0 = gcf; ha0 = gca;
+                h = figure('visible','off');
+            else
+                figure;
+            end
+            
+            hsg = subplot_grid(N1,N2,subplot_grid_options{:});
             c=0;
             for i = 1:N1
                 for j = 1:N2
@@ -44,6 +58,17 @@ function hsg = xp_subplot_grid3D (xp,transpose_on)
             % Do labels for columns
             colstr = setup_axis_labels(xp.axis(2));
             hsg.coltitles(colstr);
+            
+            if display_mode == 1
+                
+                cdata = print(h,'-RGBImage');
+                close(h);
+
+                % Restore original axes and display image
+                figure(h0); axes(ha0);
+                imshow(cdata);
+                
+            end
         
         
     elseif ndims(xp.data) == 3
@@ -53,7 +78,7 @@ function hsg = xp_subplot_grid3D (xp,transpose_on)
         
         for i = 1:N1
             figure;
-            hsg(i) = subplot_grid(N2,N3,'no_zoom');
+            hsg(i) = subplot_grid(N2,N3,subplot_grid_options{:});
             hsg(i).figplace(N1,i);
             hsg(i).figtitle([xp.axis(1).name ': ' xp.axis(1).getvaluestring(i)]);
             c=0;
