@@ -88,6 +88,7 @@ if isstruct(file) && isfield(file,'study_dir')
       % this is necessary here when loading .csv data lacking metadata
       tmp_data.varied={};
       modifications=sim_info(i).modifications;
+      modifications(:,1:2) = cellfun( @(x) strrep(x,'->','_'),modifications(:,1:2),'UniformOutput',0);
       for j=1:size(modifications,1)
         varied=[modifications{j,1} '_' modifications{j,2}];
         for k=1:num_sets_per_file
