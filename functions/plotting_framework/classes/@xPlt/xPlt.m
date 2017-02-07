@@ -90,10 +90,71 @@ classdef xPlt
             end
         end
         
-        function xp = mergedims(xp,dims2pack)
-            error('this is incomplete');
-            % Calculate dims
-            Nd = ndims(xp);
+        function xp = importMeta(xp,meta_struct)
+            xp.meta = meta_struct;
+        end
+        
+        function xp = mergeDims(xp,dims2pack)
+            
+            xp.checkDims;
+            Nd2p = length(dims2pack);
+            sz = size(xp.data);
+            Nmerged = prod(sz(dims2pack));       % Final number entries in the merged dimension
+            
+            
+            % % First, do axis names
+            
+            % Get cell array of all linearized axis values.
+            inds = 1:Nmerged;
+            [subs{1:Nd2p}] = ind2sub(sz(dims2pack),inds);
+            temp = cell(1,Nd2p);
+            for i = 1:Nd2p
+                for j = 1:Nmerged
+                    ax = xp.axis(dims2pack(i));
+                    currval = ax.values(subs{i}(j));
+                    temp{i}(j) = currval;
+                end
+            end
+            
+            % Compress these into a single string to be used as new value name
+            tempstr = {};
+            for i = 1:Nd2p
+                for j = 1:Nmerged
+                    if iscell(temp{i}); currval = temp{i}{j};
+                    else
+                        currval = num2str(temp{i}(j));  % If it's not a string, convert it to one.
+                    end
+                    if i == 1; tempstr{j} = currval;
+                    else tempstr{j} = [tempstr{j} '_' currval];
+                    end
+                end
+            end
+            
+            % Finally drop this into the values entry for the new "merged"
+            % axis
+            xp.axis(dims2pack(1)).values = tempstr;
+            xp.axis(dims2pack(1)).astruct.premerged_values = temp;
+            
+            
+            % Give it a new axis name, reflecting the merger of all the
+            % others
+            allnames = {xp.axis(dims2pack).name};
+            allnames = cat(1,allnames(:)',repmat({'_'},1,length(allnames)));
+            xp.axis(dims2pack(1)).name = strcat(allnames{1:end-1});
+            
+            % Clear the remaining axes names
+            for i = 2:Nd2p
+                xp.axis(dims2pack(i)).name = ['Dim ' num2str(dims2pack(i))];
+                xp.axis(dims2pack(i)).values = 1;
+            end
+
+
+            % % Now, work on xp.data
+            dat = xp.data;
+            xp.data = [];       % Clear xp.data for now, to save memory.
+            
+            % Figure out which dimensions were *NOT* Targeted for the merge
+            Nd = ndims(dat);
             alldims = 1:Nd;
             ind_chosen = false(size(alldims));
             for i = 1:length(dims2pack)
@@ -102,10 +163,16 @@ classdef xPlt
             ind_unchosen = ~ind_chosen;
             dims_remaining = find(ind_unchosen);
             
-            xp = xp.permute([dims2pack,dims_remaining]);
+            % Bring the dims to be merged to the front
+            dat = permute(dat,[dims2pack,dims_remaining]);
             
-            sz = size(xp);
-            xp.data = reshape(xp.data,[]);
+            % REshape these into a single dim
+            sz = size(dat);
+            dat = reshape(dat,[ prod(sz(1:Nd2p)), ones(1,Nd2p-1), sz(Nd2p+1:end) ]);
+            
+            % Undo the earlier permute, and put back into xp.data
+            dat = ipermute(dat,[dims2pack,dims_remaining]);
+            xp.data = dat;
         end
         
         function xp = packDim(xp,dim_src,dim_target)
@@ -212,7 +279,9 @@ classdef xPlt
             xp.data = permute(xp.data,[2:dim_src, 1, dim_src+1:Nd]);
             
             % Also, update xp.axis
-            xp.axis(dim_src).values = 1;
+%             xp.axis(dim_src).values = 1;
+            xp = setAxisDefaultNames(xp,dim_src);
+            xp.axis(dim_src).name = ['Dim ' num2str(dim_src)];
             
         end
         

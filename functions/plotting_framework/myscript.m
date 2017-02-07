@@ -61,7 +61,13 @@ cd ..
 xp = xPlt;
 xp = xp.importLinearData(data_linear,ax{:});
 xp = xp.importAxisNames(ax_names);
-
+meta = struct;
+meta.datainfo(1:2) = xPltAxis;      % Use xPltAxis here, because why not?
+meta.datainfo(1).name = 'time(ms)';
+meta.datainfo(1).values = time;
+meta.datainfo(2).name = 'cells';
+meta.datainfo(2).values = [];
+xp = xp.importMeta(meta);
 
 %% Try selecting a bunch of different subsets, squeezing, and testing for errors
 % This should catch most bugs that crop up.
@@ -119,7 +125,6 @@ xp3.getaxisinfo;
                                     
 xp6 = xp.subset(1,[],2,1);
 
-%% Try selecting another subset for actual plotting
 
 %% Run a recursive plot
 
@@ -157,15 +162,25 @@ recursivePlot(xp4,{@xp_subplot,@xp_matrix_basicplot},{[1,2]},{{0,0},{}});
 
 
 
-%% Test subset with regular expressions
+%% Test subset selection using regular expressions
 xp5 = xp.subset([],[],[1],'iNa*');
+xp5.getaxisinfo
+
+    %%
+    xp5 = xp.subset([],[],[1],'_s');
+    xp5.getaxisinfo
 
 %% Test packDims
 clear xp2 xp3 xp4 xp5
-xp2 = xp.subset(2,2,[],[1,3,5:8]);
+% xp2 = xp.subset(2,2,[],[1,3,5:8]);      % Selection based on index locations
+xp2 = xp.subset(2,2,[],'(v|^i||ISYN$)');  % Same thing as above using regular expression. Selects everything except the _s terms. "^" - beginning with; "$" - ending with
 xp2 = xp2.squeeze;
+xp2.getaxisinfo;
 xp2 = xp2.packDim(2,3);
+xp2.getaxisinfo;
 
+%% Test mergeDims
+xp2 = xp.mergeDims([3,4]);
 
 
 %% Load xPlt structure of images
@@ -186,6 +201,20 @@ xp = xp.importAxisNames(ax_names);
 
 %% Run recursive plot of images
 recursivePlot(xp,{@xp_subplot_grid3D,@xp_plotimage},{[1,2]},{{},{.25}});
+
+
+
+%% Run PlotData2
+% ...Assumes we have some DynaSim data already loaded...
+cd outputs
+data=ImportData('demo_sPING_3b');
+cd ..
+
+
+PlotData2(data);
+
+% Load the data linearly
+[data_linear,ax,ax_names,time] = DynaSimExtract (data);
 
 
 

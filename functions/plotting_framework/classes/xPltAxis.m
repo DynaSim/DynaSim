@@ -11,12 +11,20 @@ classdef xPltAxis
     
     methods
         function out = getaxisinfo(xpa)
+            max_values_to_display = 10;
+            
             temp = [xpa.name, ' -> '];
             Nvals = length(xpa.values);
+            Nvals = min(Nvals,max_values_to_display);          % Limit to displaying 10 values
             for i = 1:Nvals-1
                 temp = [temp,xpa.getvaluestring(i),', '];
             end
-            temp = [temp,xpa.getvaluestring(Nvals)];
+            
+            if length(xpa.values) > max_values_to_display
+                temp = [temp,xpa.getvaluestring(Nvals),', ...'];
+            else
+                temp = [temp,xpa.getvaluestring(Nvals)];
+            end
             
             if nargout > 0
                 out = temp;
