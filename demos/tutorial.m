@@ -14,8 +14,16 @@ at the end of the help section to browse through related help documentation.
 
 % Get ready...
 
+demos_path = findDemosPath;
+
+% Set path to your copy of the DynaSim toolbox
+dynasim_path = fullefile(demos_path, '..');
+
+% add DynaSim toolbox to Matlab path
+addpath(genpath(dynasim_path)); % comment this out if already in path
+
 % Save outputs in "<DynaSim directory>/demos/outputs"
-output_directory=fullfile(fileparts(fileparts(which(mfilename))),'demos','outputs');
+output_directory = fullfile(demos_path, 'outputs');
 % move to root directory where outputs will be saved
 cd(output_directory);
 
