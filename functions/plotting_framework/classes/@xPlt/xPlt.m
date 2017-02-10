@@ -25,8 +25,7 @@ classdef xPlt
             
         end
         
-        
-        
+
         function [xp2, ro] = subset(xp,varargin)
             % Define variables and check that all dimensions are consistent
             % ro - if regular expressions are used, returns the index
@@ -92,6 +91,12 @@ classdef xPlt
         
         function xp = importMeta(xp,meta_struct)
             xp.meta = meta_struct;
+        end
+        
+        function [selection_out, startIndex] = findaxis(xp,str)
+            % Returns the index of the axis with name matching str
+            allnames = {xp.axis.name};
+            [selection_out, startIndex] = regex_lookup(allnames, str);
         end
         
         function xp = mergeDims(xp,dims2pack)
@@ -200,16 +205,16 @@ classdef xPlt
             xp.data = permute(xp.data,[dim_src, 1:dim_src-1, dim_src+1:Nd]);
             
             % Temporarily linearize all other dimensions.
-            sz = size(xp.data);
-            xp.data = reshape(xp.data,sz(1),prod(sz(2:end)));
+            sz0 = size(xp.data);
+            xp.data = reshape(xp.data,sz0(1),prod(sz0(2:end)));
             
             % Add NaNs where needed
                 % Note: to understand what this is doing, it really helps
                 % to draw a diagram!
-            sz2 = size(xp.data);
+            sz = size(xp.data);
             empties = cellfun(@isempty,xp.data);    % 2D matrix with 1's marking empty cells
             se = sum(empties,1);                    % Number of empties per column in this matrix
-            bad_inds = se ~= 0 & se ~= sz2(2);     % Good columns must be either all empty or all non-empty
+            bad_inds = se ~= 0 & se ~= sz(2);     % Good columns must be either all empty or all non-empty
             
             if any(bad_inds)
                 fprintf('Note: Empty entries found along collapsing dim. Using NaNs as placeholders to fill out the matrix. \n');
@@ -272,10 +277,11 @@ classdef xPlt
             
             xp.data = xp.data(1,:);         % Keep only 1st dimension;
             sz(1) = 1;
+            sz0(1) = 1;
 
             % Lastly, restore original dimensions
             % of xPlt.data
-            xp.data = reshape(xp.data,sz);
+            xp.data = reshape(xp.data,sz0);
             xp.data = permute(xp.data,[2:dim_src, 1, dim_src+1:Nd]);
             
             % Also, update xp.axis
@@ -342,7 +348,7 @@ classdef xPlt
             % without need for a squeeze. This command forces xPlt.axis to
             % follow these conventions.
 
-            Nd = ndims(xp);
+            Nd = ndims(xp.data);
             Na = length(xp.axis);
 
             % Sweep through all axes and make sure dimensions are correct.
@@ -351,9 +357,15 @@ classdef xPlt
                 xp = setAxisDefaultNames(xp,i);  % Sets axis #i to the default name
             end
 
-            % Trim away excess axes
+            % Trim away excess values in axes
             if Na > Nd
-                xp.axis = xp.axis(1:Nd);
+                for i = Nd+1:Na
+                    if length(xp.axis(i).values) > 1
+                        xp.axis(i).values = xp.axis(i).values(1);
+                        fprintf(['Extra values found in axis #' num2str(i) ' ' xp.axis(i).name '. Trimming \n']);
+                    end
+                end
+                
             end
             
         end
@@ -400,14 +412,14 @@ classdef xPlt
             [varargout{1:nargout}] = size(xp.data,varargin{:});
             
             % Add singleton dimensions as needed
-            if nargout == 1
+            if nargout == 1 && nargin == 1
                 sz = varargout{1};
                 Nd = ndims(xp.data);
-                N = length(xp.axis);
-                if Nd < N
+                Na = length(xp.axis);
+                if Nd < Na
                     sz_axis = cellfun(@length,{xp.axis.values});
-                    if any(sz_axis(Nd+1:N) > 1); error('Non-singleton dimensions present in excess of ndims(xPlt.data).'); end
-                    sz(Nd+1:N) = 1;
+                    if any(sz_axis(Nd+1:Na) > 1); error('Dimension mismatch between size(xp.data) and length(xp.axis.values). Run getaxisinfo or fixAxes.'); end
+                    sz(Nd+1:Na) = 1;
                 end
                 varargout{1} = sz;
             end
@@ -420,11 +432,11 @@ classdef xPlt
             % If there are more axes than Nd, this could be because there
             % are a bunch of singleton axes. If there are, then we can
             % update this returned value.
-            N = length(xp.axis);
-            if Nd < N
+            Na = length(xp.axis);
+            if Nd < Na
                 sz_axis = cellfun(@length,{xp.axis.values});
-                if any(sz_axis(Nd+1:N) > 1); error('Non-singleton dimensions present in excess of ndims(xPlt.data). Run checkDims or fixAxes'); end
-                Nd = N;
+                if any(sz_axis(Nd+1:Na) > 1); error('Dimension mismatch between size(xp.data) and length(xp.axis.values). Run getaxisinfo or fixAxes.'); end
+                Nd = Na;
             end
 
         end
@@ -507,7 +519,7 @@ function xp = setAxisDefaultNames(xp,dim)
     % Sets xp.axis(i) to default values
     
     % Get desired size of dataset
-    sz = size(xp);
+    sz_dim = size(xp.data,dim);
     
     % If axis doesn't already exist, create it. Otherwise, copy existing.
     if length(xp.axis) < dim
@@ -524,22 +536,22 @@ function xp = setAxisDefaultNames(xp,dim)
     % If values is empty, add default values.
     if isempty(ax_curr.values)
         %ax_curr.values = cellfun(@num2str,num2cell(1:sz(i)),'UniformOutput',0);     % Populate with strings
-        ax_curr.values = 1:sz(dim);                                                   % Populate with numerics
+        ax_curr.values = 1:sz_dim;                                                   % Populate with numerics
     else
         % Otherwise, make sure dimensionality is correct. If not, update it
         % missing entries with default names.
         N = length(ax_curr.values);
-        if N < sz(dim)
+        if N < sz_dim
             if isnumeric(ax_curr.values)
-                for j = N:sz(dim); ax_curr.values(j) = j; end
+                for j = N:sz_dim; ax_curr.values(j) = j; end
             else
-                for j = N:sz(dim); ax_curr.values{j} = num2str(j); end
+                for j = N:sz_dim; ax_curr.values{j} = num2str(j); end
             end
         end
         
-        if N > sz(dim)
+        if N > sz_dim
             %ax_curr.values = ax_curr.values(1:sz(dim));
-            ax_curr.values = 1:sz(dim);                                                   % Populate with genetic numerics
+            ax_curr.values = 1:sz_dim;                                                   % Populate with genetic numerics
         end
     end
     
