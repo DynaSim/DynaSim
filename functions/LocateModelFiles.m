@@ -59,51 +59,32 @@ keep=cellfun(@isempty,regexp(mechanism_list,'[^\w\.\-/]'));
 %keep=cellfun(@isempty,regexp(mechanism_list,'[^\w\.]'));
 mechanism_list=mechanism_list(keep);
 
-% search in dynasim toolbox model directory
-dynasim_path=fileparts(fileparts(which(mfilename))); % root is one level up from directory containing this function
-model_dir=fullfile(dynasim_path,'models'); % models dir is at root level
-search_paths=regexp(genpath(model_dir),':','split'); % look in all dynasim directories
-% add current directory
-search_paths=cat(2,pwd,search_paths); % look in current directory first
-% add Matlab path
-search_paths=cat(2,search_paths,regexp(path,':','split'));
-% exclude .git directories
-keep=cellfun(@isempty,regexp(search_paths,'.git'));
-search_paths=search_paths(keep);
-num_paths=length(search_paths)+1;
-
 % locate mechanism files
 files={};
 if iscellstr(mechanism_list)
   for f=1:length(mechanism_list) % loop over mechanisms
-    for s=1:num_paths
-      % determine name of mechanism file (assuming recommended extensions)
-      if s==num_paths
-        mech=mechanism_list{f};
-      else
-        mech=fullfile(search_paths{s},mechanism_list{f});
-      end
-      if exist(mech,'file')
-        file=mech;
-      elseif exist([mech '.eqns'],'file')
-        file=[mech '.eqns'];
-      elseif exist([mech '.mech'],'file')
-        file=[mech '.mech'];
-      elseif exist([mech '.txt'],'file')
-        file=[mech '.txt'];
-      elseif exist([mech '.m'],'file')
-        file=[mech '.m'];
-      else
-        file='';
-      end
-      % use 'which' to get full filename of file in Matlab path
-      if isempty(fileparts(file)) % file is a name without a path
-        file=which(file);
-      end
-      if ~isempty(file)
-        files{end+1}=file;
-        break;
-      end
+    % determine name of mechanism file (assuming recommended extensions)
+    mech=mechanism_list{f};
+    if exist(mech,'file')
+      file=mech;
+    elseif exist([mech '.eqns'],'file')
+      file=[mech '.eqns'];
+    elseif exist([mech '.mech'],'file')
+      file=[mech '.mech'];
+    elseif exist([mech '.txt'],'file')
+      file=[mech '.txt'];
+    elseif exist([mech '.m'],'file')
+      file=[mech '.m'];
+    else
+      % TODO: Add error catching here!
+      file='';
+    end
+    % use 'which' to get full filename of file in Matlab path
+    if isempty(fileparts(file)) % file is a name without a path
+      file=which(file);
+    end
+    if ~isempty(file)
+      files{end+1}=file;
     end
   end
 end

@@ -126,7 +126,7 @@ if exist('OCTAVE_VERSION','builtin')
     PLOT2SVG_globals.octave = true;
     disp('   Info: PLOT2SVG runs in Octave mode.')
 else
-    if str2num(matversion(1))<6 % Check for matlab version and print warning if matlab version lower than version 6.0 (R.12)
+    if str2double(matversion(1))<6 % Check for matlab version and print warning if matlab version lower than version 6.0 (R.12)
         disp('   Warning: Future versions may no more support older versions than MATLAB R12.')
     end
 end
@@ -2423,10 +2423,10 @@ if strcmp(get(ax,'XTickLabelMode'),'auto') && strcmp(get(ax,'XScale'),'linear')
         axlabelx = get(ax, 'XTickLabel');
         numlabels = zeros(length(axlabelx), 1);
         for ix = 1:length (axlabelx)
-            numlabels(ix) = str2num(axlabelx{ix});
+            numlabels(ix) = str2double(axlabelx{ix});
         end
     else
-        numlabels = str2num(get(ax,'XTickLabel'));
+        numlabels = str2double(get(ax,'XTickLabel'));
     end
     labelpos = axxtick;%get(ax,'XTick');
     numlabels = numlabels(:);
@@ -2448,10 +2448,10 @@ if strcmp(get(ax,'YTickLabelMode'),'auto') && strcmp(get(ax,'YScale'),'linear')
         axlabely = get(ax, 'YTickLabel');
         numlabels = zeros(length(axlabely), 1);
         for ix = 1:length(axlabely)
-            numlabels(ix) = str2num(axlabely{ix});
+            numlabels(ix) = str2double(axlabely{ix});
         end        
     else
-        numlabels = str2num(get(ax,'YTickLabel'));
+        numlabels = str2double(get(ax,'YTickLabel'));
     end
     labelpos = axytick;%get(ax,'YTick');
     numlabels = numlabels(:);
@@ -2473,16 +2473,16 @@ if strcmp(get(ax,'ZTickLabelMode'),'auto') && strcmp(get(ax,'ZScale'),'linear')
         axlabelz = get (ax, 'ZTickLabel');
         numlabels = zeros(length(axlabelz), 1);
         for ix = 1:length(axlabelz)
-            numlabels(ix) = str2num(axlabelz{ix});
+            numlabels(ix) = str2double(axlabelz{ix});
         end
     else
-        numlabels = str2num(get(ax,'ZTickLabel'));
+        numlabels = str2double(get(ax,'ZTickLabel'));
     end
     labelpos = axztick;%get(ax,'ZTick');
     numlabels = numlabels(:);
     labelpos = labelpos(:);
     indexnz = find(labelpos ~= 0);
-    if (~isempty(indexnz) && ~isempty(numlabels))
+    if (~isempty(indexnz) && ~isempty(numlabels) && ~isnan(numlabels))
         ratio = numlabels(indexnz)./labelpos(indexnz);
         if round(log10(ratio(1))) ~= 0 && ratio(1) ~= 0
             exptext = sprintf('&#215; 10<tspan font-size="%0.1fpt" dy="%0.1fpt">%g</tspan>',0.7*fontsize,-0.7*fontsize,-log10(ratio(1)));

@@ -112,7 +112,7 @@ for v=1:length(options.variable)
     % select data
     X=detrend(dat(t1:t2,i)); % detrend the data
     % calculate spectral estimate
-    [tmpPxx,f] = pwelch(X,NFFT,[],NFFT,Fs); % calculate power
+    [tmpPxx,f] = pmtm(X, [], NFFT, Fs); % pwelch(X,NFFT,[],NFFT,Fs); % calculate power
     if i==1
       % get size of spectrum and preallocate result matrix
       nfreq=length(f);

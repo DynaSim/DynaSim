@@ -14,15 +14,18 @@ at the end of the help section to browse through related help documentation.
 
 % Get ready...
 
+demos_path = findDemosPath;
+
 % Set path to your copy of the DynaSim toolbox
-dynasim_path='~/code/dynasim';                    
+dynasim_path = fullefile(demos_path, '..');
+
 % add DynaSim toolbox to Matlab path
 addpath(genpath(dynasim_path)); % comment this out if already in path
 
 % Set where to save outputs
-output_directory=fullfile(dynasim_path,'demos','outputs'); 
+output_directory = fullfile(demos_path, 'outputs');
 % move to root directory where outputs will be saved
-cd(output_directory);   
+cd(output_directory);
 
 % Here we go!
 
@@ -261,7 +264,7 @@ PlotFR(data); % examine how mean firing rate changes with Iapp and tauD
 eqns='dv/dt=@current+I; {iNa,iK}';
 vary={'','I',[0 10 20]};
 SimulateModel(eqns,'save_data_flag',1,'study_dir','demo_cluster_1',...
-                   'vary',vary,'cluster_flag',1,'verbose_flag',1);
+                   'vary',vary,'cluster_flag',1,'overwrite_flag',1,'verbose_flag',1);
 % tips for checking job status:
 % !qstat -u <YOUR_USERNAME>
 % !cat ~/batchdirs/demo_cluster_1/pbsout/sim_job1.out
@@ -272,7 +275,7 @@ PlotData(data);
 eqns='dv/dt=@current+I; {iNa,iK}';
 vary={'','I',[0 10 20]};
 SimulateModel(eqns,'save_data_flag',1,'study_dir','demo_cluster_2',...
-                   'vary',vary,'cluster_flag',1,'verbose_flag',1,...
+                   'vary',vary,'cluster_flag',1,'overwrite_flag',1,'verbose_flag',1,...
                    'plot_functions',@PlotData);
 % !cat ~/batchdirs/demo_cluster_2/pbsout/sim_job1.out
 
@@ -280,7 +283,7 @@ SimulateModel(eqns,'save_data_flag',1,'study_dir','demo_cluster_2',...
 eqns='dv/dt=@current+I; {iNa,iK}';
 vary={'','I',[0 10 20]};
 SimulateModel(eqns,'save_data_flag',1,'study_dir','demo_cluster_3',...
-                   'vary',vary,'cluster_flag',1,'verbose_flag',1,...
+                   'vary',vary,'cluster_flag',1,'overwrite_flag',1,'verbose_flag',1,...
                    'plot_functions',{@PlotData,@PlotData},...
                    'plot_options',{{},{'plot_type','power'}});
 % !cat ~/batchdirs/demo_cluster_3/pbsout/sim_job1.out

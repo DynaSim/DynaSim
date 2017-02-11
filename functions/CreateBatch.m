@@ -118,19 +118,6 @@ dynasim_functions=fullfile(dynasim_path,'functions');
 % locate mechanism files
 [mech_paths,mech_files]=LocateModelFiles(base_model);
 
-% collect paths to add to all jobs (benefit: adding paths to jobs supports m-files stored/associated with mechanism files)
-% add dynasim root path (where functions are located)
-addpaths={dynasim_path,dynasim_functions};
-% add the toolbox models directory and all subdirectories
-  % note: users can store their models as subdirectories of dynasim/models
-  % and incorporate them in their models without worrying about paths.
-addpaths=cat(2,addpaths,fullfile(dynasim_path,'models'));
-%addpaths=regexp(genpath(dynasim_path),':','split');
-if ~isempty(mech_paths)
-  addpaths=cat(2,addpaths,mech_paths); 
-  addpaths=unique(addpaths);
-end
-
 % add paths to studyinfo structure
 studyinfo.paths.dynasim_functions=dynasim_path;
 studyinfo.paths.mechanisms=mech_paths;
@@ -310,10 +297,6 @@ end
     % purpose: write m-file to job_file to run simulations of sim_ids
     % create job file
     fjob=fopen(job_file,'wt');
-    % add paths
-    for p=1:length(addpaths)
-      fprintf(fjob,'addpath %s\n',addpaths{p});
-    end
     % load studyinfo using helper function to avoid busy file errors
     %fprintf(fjob,'studyinfo=CheckStudyinfo(''%s'',''process_id'',%g);\n',study_file,sim_ids(1));
     %fprintf(fjob,'load(''%s'',''studyinfo'');\n',study_file);
