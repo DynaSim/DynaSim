@@ -36,7 +36,7 @@ function varargout = recursivePlot(xp,function_handles,dimensions,function_handl
         
         output_indices = num2cell(cat(1, output_indices{:})');
          
-        input_indices = cell(1, current_no_dims);
+        input_indices = cell(1, length(xp.axis));
         
         for call = 1:total_calls
             
