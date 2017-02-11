@@ -451,7 +451,7 @@ if options.parallel_flag==1
   
   
   for sim = 1:length(modifications_set)
-      mystudydirs{sim} = fullfile(options.study_dir,['output_parfor_' uniqueID '_' num2str(sim)]);                           
+      mystudydirs{sim} = fullfile(options.study_dir,['solve/output_parfor_' uniqueID '_' num2str(sim)]);                           
       
       % Create solve folders as needed
       if ~exist(mystudydirs{sim},'dir')                
