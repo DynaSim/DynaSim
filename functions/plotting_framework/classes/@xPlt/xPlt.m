@@ -562,7 +562,7 @@ end
 function [selection_out, startIndex] = regex_lookup(vals, selection)
     if ~ischar(vals{1}); error('xPlt.axis.values must be strings when using regular expressions');
     end
-    if ~ischar(selection); error('Selection must be string when using regex');
+    if ~ischar(selection); error('Selection must be string when using regexp');
     end
     
     startIndex = regexp(vals,selection);
