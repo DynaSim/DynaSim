@@ -142,7 +142,7 @@ if any(~cellfun(@isempty,regexp(modifications(:,1),'^\(.*\)$'))) || ...
             modifications{i,3} = repmat(modifications{i,3},1,length(namespaces));
         % in case values is 1 x number of namespaces
         elseif size(modifications{i,3},2) == length(namespaces) && size(modifications{i,3},1) == 1
-            modifications{i,e} = repmat(modifications{i,3},length(variables),1);
+            modifications{i,3} = repmat(modifications{i,3},length(variables),1);
         else
             error(['Numerical values varied over must be in array format,',...
                 'where dimensions 1, 2, and 3 correspond to mechanisms, values, and populations varied over.'])
