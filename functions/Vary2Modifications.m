@@ -127,7 +127,15 @@ end
 function list = expand_elem(item)
 % return cell array of elements
 if isnumeric(item)
-  list=num2cell(item);
+    % checking serves to remove warnings if third condition is always executed
+    if size(item, 1) == 1 && size(item, 3) == 1
+        list = num2cell(item);
+    elseif size(item, 1) > 1 && size(item, 3) == 1
+        list=mat2cell(item, size(item, 1), ones(1, size(item, 2)));
+    elseif size(item, 3) > 1
+        list=mat2cell(item, size(item, 1), ones(1, size(item, 2)), size(item, 3));
+        list=cellfun(@(x) permute(x, [1 3 2]), list, 'UniformOutput', 0);
+    end
 elseif ischar(item)
   elems=regexp(item,'[\w\.]+','match');
   operator=regexp(item,'^([\+\-\*/^])','tokens','once');
