@@ -86,7 +86,6 @@ end
 
 % update specification with whatever is in modifications
 modifications=standardize_modifications(modifications,specification);
-modifications{:}
 specification=modify_specification(specification,modifications);
 
 % update model if input was a model structure
