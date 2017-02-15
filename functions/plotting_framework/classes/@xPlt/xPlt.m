@@ -412,7 +412,7 @@ classdef xPlt
             [varargout{1:nargout}] = size(xp.data,varargin{:});
             
             % Add singleton dimensions as needed
-            if nargout == 1 && nargin == 1
+            if nargout <= 1 && nargin == 1
                 sz = varargout{1};
                 Nd = ndims(xp.data);
                 Na = length(xp.axis);

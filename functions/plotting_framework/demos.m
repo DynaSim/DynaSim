@@ -75,10 +75,13 @@ meta.datainfo(2).values = [];
 xp = xp.importMeta(meta);
 
 
+warning('Let subset ignore singleton dimensions');
+warning('Make sure xp.size is working properly for all instances; maybe consider adding some more feedback text telling users to run fixaxes and being more specific about what fixaxes returns.');
+warning('In general, we want to be more explicit about dimension conventions.');
 
 %% Run another recursive plot
 clear xp2 xp3
-xp4 = (xp.subset([],[],1,8));
+xp4 = xp.subset([],[],1,8);
 xp4.getaxisinfo
 
 % recursivePlot(xp4,{@xp_subplot,@xp_subplot,@xp_matrix_basicplot},{1:2,3},{{[],1},{1,1},{}});
@@ -86,11 +89,27 @@ xp4.getaxisinfo
 % recursivePlot(xp4,{@xp_subplot_grid3D,@xp_matrix_basicplot},{[3,1,2]},{{},{}});
 recursivePlot_2(xp4,{@xp_subplot,@xp_matrix_basicplot},{[1,2]},{{0,0},{}});
 
+recursivePlot(xp4,{@xp_subplot,@xp_matrix_basicplot},{[1,2]},{{0,0},{}});
+
 
 
 %% Run another recursive plot
 clear xp2 xp3
 xp4 = xp.subset([],[],[],8);
+xp4.getaxisinfo
+
+% recursivePlot(xp4,{@xp_subplot,@xp_subplot,@xp_matrix_basicplot},{1:2,3},{{[],1},{1,1},{}});
+% recursivePlot(xp4,{@xp_subplot_grid3D,@xp_subplot,@xp_matrix_basicplot},{1:2,3},{{},{0,1},{}});
+% recursivePlot(xp4,{@xp_subplot_grid3D,@xp_matrix_basicplot},{[3,1,2]},{{},{}});
+recursivePlot(xp4,{@xp_subplot_grid3D,@xp_matrix_basicplot},{[3,1,2]},{{},{}});
+
+
+
+
+%% Run another recursive plot
+clear xp2 xp3
+xp4 = xp.subset([],[],1,[]);
+xp4 = xp4.squeeze;
 xp4.getaxisinfo
 
 % recursivePlot(xp4,{@xp_subplot,@xp_subplot,@xp_matrix_basicplot},{1:2,3},{{[],1},{1,1},{}});
@@ -126,10 +145,14 @@ clear xp2 xp3 xp4 xp5
 xp2 = xp.subset(2,2,[],'(v|^i||ISYN$)');  % Same thing as above using regular expression. Selects everything except the _s terms. "^" - beginning with; "$" - ending with
 xp2 = xp2.squeeze;
 xp2.getaxisinfo;
-xp2 = xp2.packDim(2,3);
+src = 2;
+dest = 3;
+xp2 = xp2.packDim(src,dest);
 xp2.getaxisinfo;
 
 %% Average over membrane voltages
+% Analogous to cell2mat
+
 xp2 = xp;
 xp2 = xp.subset([],[],[],'v');  % Same thing as above using regular expression. Selects everything except the _s terms. "^" - beginning with; "$" - ending with
 xp2 = xp2.squeeze;
@@ -148,6 +171,8 @@ recursivePlot(xp3,{@xp_subplot_grid3D,@xp_matrix_basicplot},{[1,2]},{{},{}});
 
 
 %% Average over synaptic currents
+% Analogous to cell2mat
+warning('Hadley Wickham');
 
 xp2 = xp.subset([],[],[],'(ISYN$)');  % Same thing as above using regular expression. Selects everything except the _s terms. "^" - beginning with; "$" - ending with
 xp2.getaxisinfo;
@@ -163,8 +188,16 @@ xp3.data = cellfun(@(x) nanmean(x,3), xp3.data,'UniformOutput',0);
 recursivePlot(xp3,{@xp_subplot_grid3D,@xp_matrix_basicplot},{[3,1,2]},{{},{}});
 
 %% Test mergeDims
+% Analogous to Reshape
 xp2 = xp.mergeDims([3,4]);
 xp2.getaxisinfo;
+
+%% Convert to Jason's format
+% Analogous to Reshape
+xp2 = xp.mergeDims([1,2]);
+xp2 = xp2.mergeDims([3,4]);
+xp2.getaxisinfo;
+
 
 
 %% Load xPlt structure of images
@@ -181,7 +214,6 @@ xp = xp.importLinearData(data_linear,ax{:});
 xp = xp.importAxisNames(ax_names);
 
 
-% to do: rename DynaSimExtrat to DynaSimDataExtract
 recursivePlot(xp,{@xp_subplot_grid3D,@xp_plotimage},{[1,2]},{{},{.25}});
 
 
