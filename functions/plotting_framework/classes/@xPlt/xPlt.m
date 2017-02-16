@@ -30,17 +30,36 @@ classdef xPlt
             % Define variables and check that all dimensions are consistent
             % ro - if regular expressions are used, returns the index
             % values discovered by the regular expression.
+            
+            % Verify that size of xp is correct
             checkDims(xp);
+            
+            % Validate that "selection" is the right size
             selection = varargin(:);
-            Nd = ndims(xp);
-            Na = length(selection);
-            if Na ~= Nd
+            Na = length(xp.axis);
+            Nd = ndims(xp.data);
+            
+            % Fill out selection with empties if too short. For example, say
+            % size(xp.data) is MxNx1x1. The user might enter a selection with
+            % length(selection) = 2, such as selection = {[A],[B]}. In this
+            % case, we convert it from to selection = {[A],[B],[],[]}.
+            Ns = length(selection);
+            if Ns < Na && Ns >= Nd
+                selection2 = repmat({[]},1,Na);
+                selection2(1:Ns) = selection;
+                selection = selection2;
+                clear selection2
+            end
+            
+            % If Ns is still wrong dimensions, return error
+            Ns = length(selection);
+            if Ns ~= Na
                 error('Number of inputs must match dimensionality of xPlt.data');
             end
             
             % Convert selection to index if using regular expressions
             ro = {};
-            for i = 1:Na
+            for i = 1:Ns
                 if ischar(selection{i})
                     ro{i}(1,:) = xp.axis(i).values;
                     [selection{i} ro{i}(2,:)] = regex_lookup(xp.axis(i).values, selection{i});
@@ -55,7 +74,7 @@ classdef xPlt
             
             % First update each axis with the corresponding selection and
             % convert empty cells to code for full range.
-            for i = 1:Na
+            for i = 1:Ns
 
                 if isempty(selection{i})
                     selection{i} = 1:sz(i);
@@ -71,7 +90,8 @@ classdef xPlt
             % Corrects number of axes. The above code automatically
             % converts xp.data from MxNx1x1 to MxN, whereas axis will stay
             % as MxNx1x1 (e.g. length of 4). Thus, fixAxes corrects this.
-            xp2 = fixAxes(xp2);
+            % This should no longer be necessary!!!
+            % xp2 = fixAxes(xp2);
             
         end
         
@@ -108,7 +128,6 @@ classdef xPlt
             
             
             % % First, do axis names
-            
             % Get cell array of all linearized axis values.
             inds = 1:Nmerged;
             [subs{1:Nd2p}] = ind2sub(sz(dims2pack),inds);
@@ -331,22 +350,10 @@ classdef xPlt
             % axis is adjusted to match, adding or removing dimensions as
             % needed. If you are getting errors when running checkDims, you
             % should run this command.
-            % 
-            % Since xPlt.data and xPlt.axis can be manually edited by the
-            % user, they can become mismatched in terms of their
-            % dimensionality, this command can be used after making such
-            % manual edits.
             %
-            % Additionally, through ordinary useage of certain xPlt
-            % functions, such as subset and squeeze, dimensions can get
-            % mismatched. This happens because of certain conventions
-            % MATLAB follows for treating matrices and cell arrays. For
-            % example, MATLAB adds a trailing dimension onto column vectors
-            % (e.g. the dimensionality is 2x1 instead of just 2).
-            % Additionally, it concatenates off additional dimensions
-            % beyond two, so a 2x1x1 is reduced to 2x1 automatically,
-            % without need for a squeeze. This command forces xPlt.axis to
-            % follow these conventions.
+            % The one exception to MATLAB conventions is that there are
+            % allowed to be more axes than there are dimensions in xp.data
+            % as long as the number of entries in each of these axes is 1.
 
             Nd = ndims(xp.data);
             Na = length(xp.axis);
@@ -372,76 +379,81 @@ classdef xPlt
         
         
         function checkDims(xp)
-
+            % We enforce that size(xp.data) must always match up to 
+            % length(xp.axis(i).values) for all i. We allow there to be
+            % more axis than ndims(xp.data), but only if these axes have
+            % lengths of 1.
+            
             % Note, fixAxes fixes everything automatically.
             % Only call checkDims if you want to
             % be alerted to mismatches, but not to correct them. Use fixAxes to
             % automatically correct everything.
             
-            sz = size(xp);
-            Nd = length(sz);
+            sza = arrayfun(@(x) length(x.values),xp.axis);
+            szd = size(xp.data);
+            
+            Nd = ndims(xp.data);
             Na = length(xp.axis);
 
-
-
-            if Nd ~= Na
+            if Nd > Na
                 error('checkDims: Error found! Number of dimensions in xPlt.data does not equal number of axes');
             end
 
-            for i = 1:Na
-                Nvalues_in_axis = length(xp.axis(i).values);
-                if Nvalues_in_axis ~= sz(i)
-                    fprintf(['checkDims: Error found! Size of dimension ',num2str(i), ...
-                        ' is ', num2str(sz(i)) , ...
+            % For all dimensions in xp.data
+            for i = 1:Nd
+                if sza(i) ~= szd(i)
+                    fprintf(['checkDims: Error found! xp.data dimension ',num2str(i), ...
+                        ' is ', num2str(szd(i)) , ...
                         '. But corresponding axis \"', xp.axis(i).name , ...
-                        '\" has ', num2str(Nvalues_in_axis) , ' elements. Dimension mismatch. \nTry running xPlt.getaxisinfo and then xPlt.fixAxes. \n' ]);
+                        '\" has ', num2str(sza(i)) , ' values. Dimension mismatch. \nTry running xPlt.getaxisinfo and then xPlt.fixAxes. \n' ]);
                     error(' ');
                 end
             end
+            
+            % For additional axes beyond ndims(xp.data)
+            ind = sza > 1;
+            if any(ind(Nd+1:Na))
+                ind2 = find(ind);
+                ind2 = ind2(ind2 > Nd);
+                fprintf(['checkDims: Error found! ndims(xp.data)=' num2str(Nd) ' but axis xp.axis(' num2str(ind2) ').values has ' num2str(sza(ind2)) ' entries.\n']);
+                error(' ');
+            end
+            
+            % All good if make it to here
         end
 
         
         % % % % % % % % % % % OVERLOADED FUNCTIONS % % % % % % % % % % %
         
         function varargout = size(xp,varargin)
-            % Overrides normal size command.
-%             for j = 1:length(xp.axis)
-%                 sz(j) = length(xp.axis(j).values);
-%             end
-
+            % Returns size of xp. This function is basically the same as
+            % running size(xp.data) except we base it off of the dimensions
+            % of xp.axis rather than xp.data. This has the effect of
+            % returning 1's if length(xp.axis) > ndims(xp.data)
+            
+            checkDims(xp);
+            
             [varargout{1:nargout}] = size(xp.data,varargin{:});
             
-            % Add singleton dimensions as needed
+            % If function is called in the form sz = size(xp) OR size(xp),
+            % return the length of each axis.
             if nargout <= 1 && nargin == 1
-                sz = varargout{1};
-                Nd = ndims(xp.data);
                 Na = length(xp.axis);
-                if Nd < Na
-                    sz_axis = cellfun(@length,{xp.axis.values});
-                    if any(sz_axis(Nd+1:Na) > 1); error('Dimension mismatch between size(xp.data) and length(xp.axis.values). Run getaxisinfo or fixAxes.'); end
-                    sz(Nd+1:Na) = 1;
+                sz = zeros(1,Na);
+                for i = 1:Na
+                    sz(i) = length(xp.axis(i).values);
                 end
-                varargout{1} = sz;
+                if nargout == 1; varargout{1} = sz; end
             end
-            
         end
         
         function Nd = ndims(xp)
-            Nd = ndims(xp.data);
-            
-            % If there are more axes than Nd, this could be because there
-            % are a bunch of singleton axes. If there are, then we can
-            % update this returned value.
-            Na = length(xp.axis);
-            if Nd < Na
-                sz_axis = cellfun(@length,{xp.axis.values});
-                if any(sz_axis(Nd+1:Na) > 1); error('Dimension mismatch between size(xp.data) and length(xp.axis.values). Run getaxisinfo or fixAxes.'); end
-                Nd = Na;
-            end
-
+            checkDims(xp);
+            Nd = length(xp.axis);
         end
         
         function xp = permute(xp,order)
+            checkDims(xp);
             xp.data = permute(xp.data,order);
             xp.axis = xp.axis(order);
         end
