@@ -27,6 +27,28 @@ function modifications_set = Vary2Modifications(vary,model)
 % vary={'E','mechanism_list','-{iNa,iK}'};
 % vary={'(E,I)','gNa',[100 120]};
 % vary={'(E,I)','(EK1,EK2)',[-80 -60]};
+% vary={'(E,I)','(EK1,EK2)',[-80 -60; -85 -65]};
+% vary={'(E,I)','(EK1,EK2)',vary_values}, 
+%       with vary_values(:, :, 1) = [-80 -60]; vary_values(:, :, 2) = [-85 -65];
+% vary={'(E,I)','(EK1,EK2)',vary_values},
+%       with vary_values(:, :, 1) = [-75 -55; -80 -60]; vary_values(:, :, 2) = [-85 -65; -90 -70];
+%
+% vary={'(E,I)','(EK1,EK2)',[-80 -60]};
+%       This sets modifications:
+%           * E_EK1, E_EK2, I_EK1, I_EK2 = -80
+%           * E_EK1, E_EK2, I_EK1, I_EK2 = -60
+% vary={'(E,I)','(EK1,EK2)',[-80 -60; -85 -65]};
+%       This sets modifications:
+%           * E_EK1, I_EK1 = -80 and E_EK2, I_EK2 = -85
+%           * E_EK1, I_EK1 = -60 and E_EK2, I_EK2 = -65
+% vary={'(E,I)','(EK1,EK2)',vary_values}, with vary_values(:, :, 1) = [-80 -60]; vary_values(:, :, 2) = [-85 -65];
+%       This sets modifications:
+%           * E_EK1, E_EK2 = -80 and I_EK1, I_EK2 = -85
+%           * E_EK1, E_EK2 = -60 and I_EK1, I_EK2 = -65
+% vary={'(E,I)','(EK1,EK2)',vary_values}, with vary_values(:, :, 1) = [-75 -55; -80 -60]; vary_values(:, :, 2) = [-85 -65; -90 -70];
+%       This sets modifications:
+%           * E_EK1 = -75, E_EK2 = -80, I_EK1 = -85, I_EK2 = -90.
+%           * E_EK1 = -55, E_EK2 = -60, I_EK1 = -65, I_EK2 = -70.
 % 
 % NOTES:
 % valid groupings:
@@ -34,13 +56,17 @@ function modifications_set = Vary2Modifications(vary,model)
 % for values: [],{}
 % 
 % groupings:
-% [] - iterate over set
+% [] - iterate over set; numerical row vectors allow iteration over a
+%      single set of values; 2-D arrays allow iteration over different sets
+%      of values for a set of simultaneously varied parameters; 3-D arrays
+%      allow iteration over different sets of values for a set of
+%      simultaneously varied populations.
 % () - modify objects the same way simultaneously
 % {} - use all combinations of one or more elements (e.g., varying mechanism_list)
 %      note: can be prepended by '+' or '-' to indicate how to vary mechanism_list
 % 
 % valid value types:
-% for parameters: numeric ([1 2 3], linspace(0,1,10))
+% for parameters: numeric ([1 2 3], linspace(0,1,10), rand(1,10,3))
 % for mechanisms: strings ('+[M1,M2]', '-[M1,M2]', '+{M1,M2}', '-{M1,M2}')
 % 
 % for connection mechanisms: indicate namespace by "source->target"
@@ -59,6 +85,15 @@ function modifications_set = Vary2Modifications(vary,model)
 % modifications_set = Vary2Modifications(vary); 
 % modifications_set{:}
 % vary={'[E,I]','gNa',linspace(100,130,3); 'E->I','gSYN',[0 1]};
+% modifications_set = Vary2Modifications(vary); 
+% modifications_set{:}
+% vary={'(E,I)','(gNa,gK)',rand(2,5); 'E->I','gSYN',[0 1]};
+% modifications_set = Vary2Modifications(vary); 
+% modifications_set{:}
+% vary={'(E,I)','(gNa,gK)',rand(1,5,2); 'E->I','gSYN',[0 1]};
+% modifications_set = Vary2Modifications(vary); 
+% modifications_set{:}
+% vary={'(E,I)','(gNa,gK)',rand(2,5,2); 'E->I','gSYN',[0 1]};
 % modifications_set = Vary2Modifications(vary); 
 % modifications_set{:}
 % 
@@ -127,7 +162,15 @@ end
 function list = expand_elem(item)
 % return cell array of elements
 if isnumeric(item)
-  list=num2cell(item);
+    % checking serves to remove warnings if third condition is always executed
+    if size(item, 1) == 1 && size(item, 3) == 1
+        list = num2cell(item);
+    elseif size(item, 1) > 1 && size(item, 3) == 1
+        list=mat2cell(item, size(item, 1), ones(1, size(item, 2)));
+    elseif size(item, 3) > 1
+        list=mat2cell(item, size(item, 1), ones(1, size(item, 2)), size(item, 3));
+        list=cellfun(@(x) permute(x, [1 3 2]), list, 'UniformOutput', 0);
+    end
 elseif ischar(item)
   elems=regexp(item,'[\w\.]+','match');
   operator=regexp(item,'^([\+\-\*/^])','tokens','once');

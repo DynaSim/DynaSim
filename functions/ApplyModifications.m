@@ -132,10 +132,25 @@ if any(~cellfun(@isempty,regexp(modifications(:,1),'^\(.*\)$'))) || ...
     namespaces=regexp(modifications{i,1},'[\w\.\-<>]+','match');
     % check variable for ()
     variables=regexp(modifications{i,2},'[\w\.-]+','match');
+    % check size of values matches number of namespaces, variables
+    if isscalar(modifications{i,3}) % in case number of values is one
+        modifications{i,3} = repmat(modifications{i,3},length(variables),length(namespaces));
+    elseif size(modifications{i,3},1) ~= length(variables) || size(modifications{i,3},2) ~= length(namespaces) 
+        % in case values is number of variables x 1
+        if size(modifications{i,3},1) == length(variables) && size(modifications{i,3},2) == 1
+            modifications{i,3} = repmat(modifications{i,3},1,length(namespaces));
+        % in case values is 1 x number of namespaces
+        elseif size(modifications{i,3},2) == length(namespaces) && size(modifications{i,3},1) == 1
+            modifications{i,3} = repmat(modifications{i,3},length(variables),1);
+        else
+            error(['Numerical values varied over must be in array format,',...
+                'where dimensions 1, 2, and 3 correspond to mechanisms, values, and populations varied over.'])
+        end
+    end
     % expand list of modifications
     for j=1:length(namespaces)
       for k=1:length(variables)
-        modifications_(end+1,1:3)={namespaces{j},variables{k},modifications{i,3}};
+        modifications_(end+1,1:3)={namespaces{j},variables{k},modifications{i,3}(k,j)};
       end
     end
   end
