@@ -6,7 +6,7 @@ diff_vary_lengths = diff(non_singleton_vary_lengths);
 
 equal_vary_length_indices = diff_vary_lengths == 0;
 
-equal_vary_length_blocks = index_to_blocks(equal_vary_length_indices);
+equal_vary_length_blocks = IndexToBlocks(equal_vary_length_indices);
 
 if ~isempty(equal_vary_length_blocks)
 
