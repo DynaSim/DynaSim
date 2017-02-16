@@ -135,6 +135,7 @@ function handles=PlotData(data,varargin)
 data=CheckData(data);
   % note: calling CheckData() at beginning enables analysis/plotting functions to
   % accept data matrix [time x cells] in addition to DynaSim data structure.
+
 fields=fieldnames(data);
 
 vary_labels = data(1).varied; % data(1).simulator_options.vary;
@@ -157,13 +158,15 @@ for v = 1:no_vary_labels
     
 end
 
-no_varied = sum(vary_lengths > 1);
+[effective_vary_lengths, ~] = CheckCovary(vary_lengths, vary_params);
 
-if no_varied > 2
+dimensions_varied = sum(effective_vary_lengths > 1);
+
+if dimensions_varied > 2
     
-    no_figures = prod(vary_lengths(3:end));
+    no_figures = prod(effective_vary_lengths(3:end));
     
-    data = reshape(data, prod(vary_lengths(3:end)), prod(vary_lengths([1 2])));
+    data = reshape(data, prod(effective_vary_lengths(3:end)), prod(effective_vary_lengths([1 2])));
     
     figure_params = nan(no_vary_labels - 2, 1);
     
