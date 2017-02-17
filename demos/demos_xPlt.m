@@ -11,6 +11,7 @@ dynasim_path='~/src/DynaSim';
 % add DynaSim toolbox to Matlab path
 addpath(genpath(dynasim_path)); % comment this out if already in path
 %%
+mkdir('outputs')
 cd outputs
 
 % define equations of cell model (same for E and I populations)
@@ -50,7 +51,7 @@ SimulateModel(s,'save_data_flag',1,'study_dir','demo_sPING_3b',...
 
 cd ..
 
-%% Load the data and import into xPlt class
+%% Load the data and import into nDDict class
 % ...Assumes we have some DynaSim data already loaded...
 cd outputs
 data=ImportData('demo_sPING_3b');
@@ -62,12 +63,12 @@ cd ..
 
 
 
-% Import into an xPlt class
-xp = xPlt;
+% Import into an nDDict class
+xp = nDDict;
 xp = xp.importLinearData(data_linear,ax{:});
 xp = xp.importAxisNames(ax_names);
 meta = struct;
-meta.datainfo(1:2) = xPltAxis;      % Use xPltAxis here, because why not?
+meta.datainfo(1:2) = nDDictAxis;      % Use nDDictAxis here, because why not?
 meta.datainfo(1).name = 'time(ms)';
 meta.datainfo(1).values = time;
 meta.datainfo(2).name = 'cells';
@@ -200,7 +201,7 @@ xp2.getaxisinfo;
 
 
 
-%% Load xPlt structure of images
+%% Load nDDict structure of images
 
 cd outputs
 file = 'demo_sPING_3b';
@@ -209,7 +210,7 @@ cd ..
 
 [data_linear,ax,ax_names] = DynaSimPlotExtract (data);
 
-xp = xPlt;
+xp = nDDict;
 xp = xp.importLinearData(data_linear,ax{:});
 xp = xp.importAxisNames(ax_names);
 
