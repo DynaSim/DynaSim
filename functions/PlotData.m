@@ -138,71 +138,75 @@ data=CheckData(data);
 
 fields=fieldnames(data);
 
-vary_labels = data(1).varied; % data(1).simulator_options.vary;
-
-no_vary_labels = length(vary_labels);
-
-vary_params = nan(length(data), no_vary_labels);
-
-vary_vectors = cell(no_vary_labels, 1);
-
-vary_lengths = nan(no_vary_labels, 1);
-
-for v = 1:no_vary_labels
-   
-    vary_params(:, v) = [data.(vary_labels{v})];
+if any(strcmp(fields, 'varied'))
     
-    vary_vectors{v} = unique(vary_params(:, v));
+    vary_labels = data(1).varied; % data(1).simulator_options.vary;
     
-    vary_lengths(v) = length(vary_vectors{v});
+    no_vary_labels = length(vary_labels);
     
-end
-
-[effective_vary_lengths, ~] = CheckCovary(vary_lengths, vary_params);
-
-dimensions_varied = sum(effective_vary_lengths > 1);
-
-if dimensions_varied > 2
+    vary_params = nan(length(data), no_vary_labels);
     
-    no_figures = prod(effective_vary_lengths(3:end));
+    vary_vectors = cell(no_vary_labels, 1);
     
-    data = reshape(data, prod(effective_vary_lengths(3:end)), prod(effective_vary_lengths([1 2])));
+    vary_lengths = nan(no_vary_labels, 1);
     
-    figure_params = nan(no_vary_labels - 2, 1);
-    
-    vary_lengths_cp = cumprod(vary_lengths);
-    
-    for f = 1:no_figures
+    for v = 1:no_vary_labels
         
-        figure_params(1) = vary_vectors{3}(mod(f - 1, vary_lengths(3)) + 1);
+        vary_params(:, v) = [data.(vary_labels{v})];
         
-        for v = 4:no_vary_labels
-            
-            figure_params(v - 2) = vary_vectors{v}(ceil(f/vary_lengths_cp(v - 3)));
-            
-        end
+        vary_vectors{v} = unique(vary_params(:, v));
         
-        vary_title = '';
-        
-        for v = 1:(no_vary_labels - 2)
-            
-            vary_title = [vary_title, sprintf('%s = %f ', vary_labels{v + 2}, figure_params(v))];
-            
-        end
-    
-        handles = PlotData(data(f, :), varargin{:});
-        
-        for h = 1:length(handles)
-        
-            % figure(handles(h))
-    
-            mtit(handles(h), vary_title, 'FontSize', 14, 'yoff', .2)
-       
-        end
+        vary_lengths(v) = length(vary_vectors{v});
         
     end
     
-    return
+    [effective_vary_lengths, ~] = CheckCovary(vary_lengths, vary_params);
+    
+    dimensions_varied = sum(effective_vary_lengths > 1);
+    
+    if dimensions_varied > 2
+        
+        no_figures = prod(effective_vary_lengths(3:end));
+        
+        data = reshape(data, prod(effective_vary_lengths(3:end)), prod(effective_vary_lengths([1 2])));
+        
+        figure_params = nan(no_vary_labels - 2, 1);
+        
+        vary_lengths_cp = cumprod(vary_lengths);
+        
+        for f = 1:no_figures
+            
+            figure_params(1) = vary_vectors{3}(mod(f - 1, vary_lengths(3)) + 1);
+            
+            for v = 4:no_vary_labels
+                
+                figure_params(v - 2) = vary_vectors{v}(ceil(f/vary_lengths_cp(v - 3)));
+                
+            end
+            
+            vary_title = '';
+            
+            for v = 1:(no_vary_labels - 2)
+                
+                vary_title = [vary_title, sprintf('%s = %f ', vary_labels{v + 2}, figure_params(v))];
+                
+            end
+            
+            handles = PlotData(data(f, :), varargin{:});
+            
+            for h = 1:length(handles)
+                
+                % figure(handles(h))
+                
+                mtit(handles(h), vary_title, 'FontSize', 14, 'yoff', .2)
+                
+            end
+            
+        end
+        
+        return
+        
+    end
     
 end
 
