@@ -21,7 +21,9 @@ function S = getGenExtPoissonTotalGating_jss(tOn,tOff,latency_,freq_,normFreqSig
   if nargin<13, N = 100;                end
   if nargin<14, interval = 1000;        end
   if nargin<15, dt = 0.05;              end
-  if nargin<16 || isempty(conn), conn=ones(N,1); end
+  if nargin<16 || isempty(conn), 
+      conn=ones(N,1); 
+  end
   if nargin<17, ramp_dc_flag=0; end
   if nargin<18, ramp_ac_flag=0; end
     
