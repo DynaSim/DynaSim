@@ -48,6 +48,7 @@ end
 run_comparison(nd);
 pop_diff = return_comparison(nd);
 
+fprintf('\n\n');
 
 % % % % % % % % % % % % % % % % % % % %
 % % % % % % DO CONNECTIONS % % % % % % 
@@ -212,10 +213,10 @@ function run_comparison(nd)
         ind2(i) = any(strcmp(allpops{i},spec2_pops));
     end
 
-
-    fprintf('~~~~~~~~~~~~~~~~~~~~~~~~~\n');
-    fprintf('Comparison of populations\n');
-    fprintf('~~~~~~~~~~~~~~~~~~~~~~~~~\n');
+    name = lower(nd.axis(1).name);
+    fprintf('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n');
+    fprintf(['~~~~~~~~~~~~~~~~~~~~~~~~Comparison of ' name ' ~~~~~~~~~~~~~~~~~~~~~~~~~\n']);
+    fprintf('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n');
     fprintf_cells('Populations only in spec1:', allpops(ind1 & ~ind2));
     fprintf_cells('Populations only in spec2:', allpops(~ind1 & ind2));
     fprintf_cells('Populations in both:', allpops(ind1 & ind2));
@@ -238,12 +239,15 @@ function run_comparison(nd)
     % mechanisms
     for i = inds_both
         
-        inds_curr = inds2(i,:);         % Comparison indices for current population
+        inds_curr = inds2(i,:);                     % Comparison indices for current population
+        inds_different = inds_curr ~= 1;            % Tracks whether there are differences of some sort...
+        inds_different(inds_curr == -3) = 0;        % If these differences are due to the mechanism being missing from both specs, ignore.
         
-        if any(inds_curr ~= 1)          % If there are differences of some sort, show comparison
-            fprintf('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n');
-            fprintf(['Comparing mechs in population ' nd.axis(1).values{i} ' \n']);
-            fprintf('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n');
+        if any(inds_different)          % If there are differences of some sort, show comparison
+                                                                % 
+            fprintf('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n');
+            fprintf(['Comparing mechs in ' name ' ' nd.axis(1).values{i} ' \n']);
+            
 
             % List mechanisms common to both populations, or those missing from one
             % but present in the other
@@ -275,6 +279,8 @@ function run_comparison(nd)
                     fprintf(['Mechanism ' nd.axis(2).values{j} ' is ' val1 ' for spec1 and ' val2 ' for spec2 \n']);
                 end
             end
+            
+            fprintf('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n');
         end
 
     end
