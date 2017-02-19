@@ -1,9 +1,25 @@
-
-
 function [pop_diff,conn_diff] = specdiff(spec1,spec2)
-% Uses nDDict class
+%% function [pop_diff,conn_diff] = specdiff(spec1,spec2)
+% Purpose: Scans two DynaSim specs for differences
+% NOTE1: Requires nDDict class dependency
+% Inputs:
+%     spec1, spec2        : DynaSim model specifications to be compared
+% Outputs:
+%     pop_diff            : Structure summarizing differences between populations
+%     conn_diff           : Structure summarizing differences between connections
+
 
 debug_mode = 0;
+
+
+
+if ~exist('nDDict','class')
+    fprintf('This function requires the class nDDict. Make sure this is in your MATLAB path.\n');
+    fprintf('It can be downloaded from the following links: \n.');
+    fprintf('1. https://github.com/davestanley/nDDims \n');
+    fprintf('2. https://www.mathworks.com/matlabcentral/fileexchange/61656-multidimensional-dictionaries\n');
+    error('Missing dependency');
+end
 
 % % % % % % % % % % % % % % % % % % % %
 % % % % % % DO POPULATIONS % % % % % % 
@@ -46,7 +62,7 @@ if debug_mode
 end
 
 run_comparison(nd);
-pop_diff = return_comparison(nd);
+if nargout > 0; pop_diff = return_comparison(nd); end
 
 fprintf('\n\n');
 
@@ -78,7 +94,7 @@ if debug_mode
 end
 
 run_comparison(nd)
-conn_diff = return_comparison(nd);
+if nargout > 1; conn_diff = return_comparison(nd); end
 
 
 end
