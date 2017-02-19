@@ -325,6 +325,13 @@ classdef nDDict
                 out = '';
             end
             
+            if isempty(obj.data)
+                if nargout > 0; out = 'Object is empty';
+                else fprintf('Object is empty \n');
+                end
+                return;
+            end
+            
             for i = 1:length(obj.axis)
                 
                 out1 = obj.axis(i).getaxisinfo;
