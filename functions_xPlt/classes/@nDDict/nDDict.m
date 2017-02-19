@@ -402,6 +402,8 @@ classdef nDDict
             % be alerted to mismatches, but not to correct them. Use fixAxes to
             % automatically correct everything.
             
+            if isempty(obj); error('Object is empty. Input some data first!'); return; end
+            
             sza = arrayfun(@(x) length(x.values),obj.axis);
             szd = size(obj.data);
             
@@ -437,6 +439,10 @@ classdef nDDict
 
         
         % % % % % % % % % % % OVERLOADED FUNCTIONS % % % % % % % % % % %
+        
+        function A = isempty(obj)
+            A = isempty(obj.data);
+        end
         
         function varargout = size(obj,varargin)
             % Returns size of obj. This function is basically the same as
