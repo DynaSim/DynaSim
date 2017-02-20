@@ -13,6 +13,13 @@ function new_result_file = nameFromVaried(data, plot_type, old_result_file)
 pathstr = fileparts(old_result_file);
 
 fileName = plot_type;
+
+%check for simID# from batch sims
+token = regexp(old_result_file, '(sim\d+)', 'tokens');
+if ~isempty(token)
+  fileName = [fileName '_' token{1}{1}];
+end
+  
 for param = data.varied(:)'
   fileName = [fileName '__' param{1} '_' num2str(data.(param{1}))];
 end
