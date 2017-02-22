@@ -13,6 +13,8 @@ dynasim_path = fullfile(demos_path, '..');
 
 % add DynaSim toolbox to Matlab path
 addpath(genpath(dynasim_path)); % comment this out if already in path
+
+cd(demos_path)
 %%
 mkdir('outputs')
 cd outputs
