@@ -1,4 +1,3 @@
-
 % This is a script that I run through every time I want to test the code.
 % Assumes I've just run one of the scripts in demos.m, namely the section
 % titled "%% Save data from a set of simulations"
@@ -7,7 +6,11 @@
 %% Run simulation - Sparse Pyramidal-Interneuron-Network-Gamma (sPING)
 % Save both figures and data.
 
-dynasim_path='~/src/DynaSim';                    
+demos_path = findDemosPath;
+
+% Set path to your copy of the DynaSim toolbox
+dynasim_path = fullfile(demos_path, '..');
+
 % add DynaSim toolbox to Matlab path
 addpath(genpath(dynasim_path)); % comment this out if already in path
 %%

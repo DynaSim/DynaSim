@@ -17,7 +17,7 @@ at the end of the help section to browse through related help documentation.
 demos_path = findDemosPath;
 
 % Set path to your copy of the DynaSim toolbox
-dynasim_path = fullefile(demos_path, '..');
+dynasim_path = fullfile(demos_path, '..');
 
 % add DynaSim toolbox to Matlab path
 addpath(genpath(dynasim_path)); % comment this out if already in path
