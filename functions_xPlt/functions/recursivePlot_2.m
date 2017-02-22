@@ -13,14 +13,14 @@ function varargout = recursivePlot_2(xp,function_handles,dimensions,function_han
 %     Inputs:
 %       xp                          : xPlt structure with Nd dimensions
 % 
-%       function_handles            : Cell array of function handles. See below
+%       function_handles            : 1xNd+1 cell array of function handles. See below
 %                                     for function handle specifications.
 % 
-%       dimensions                  : Cell array of vectors. Each vector corresponds
+%       dimensions                  : 1xNd cell array of vectors. Each vector corresponds
 %                                     to a function handle. Specifies which dimensions
 %                                     in xp to assign to each function handle.
 % 
-%       function_handle_arguments   : (optional) cell array of cell arrays, each containing
+%       function_handle_arguments   : (optional) 1xNd cell array of cell arrays, each containing
 %                                     additional arguments to pass to each function
 %                                     handle. There should be one cell array for
 %                                     each function handle.
@@ -28,13 +28,45 @@ function varargout = recursivePlot_2(xp,function_handles,dimensions,function_han
 %     Details:
 %       The function_handles cell array should point to functions of the form:
 %             varargout = function func (xp,varargin)
-%       where xp is an xPlt object.
+%       where xp is an xPlt object. Each function handle
+warning('finish this');
 % 
-% recursivePlot does the following
-%     1. Works with the first 
+%     Algorithm:
+%     recursivePlot plots the data in a recursive manner. It does the following
+%         1. Creates a new xPlt structure called xp2, which is a low-dimensional
+%            version of xp. The dimensions of xp2 are given by dimensions{1}.
 % 
-%     Examples:
-%         See demos file.
+%         2. recusrivePlot then passes xp2 to the first function handle,
+%            function_handles{1}.
+%            
+%            Each entry in xp2.data contains a function handle that recursively
+%            calls back recursivePlot. This serves as simply an instruction
+%            to handle plotting the remainder of the dimensions in xp (e.g.
+%            dimensions(2:end)).
+%            
+%            function_handles{1} loops through xp2.data and executes these
+%            function handles, thus producing plots of xp's remaining dimensions.
+%            
+%         3. The stopping conditions for the recursion are reached when xp runs
+%            out of dimensions. In this case, the final function handle receives
+%            a xp object with size(xp) = 1. Thus, the final function handle should
+%            actually plot the data.
+%            
+%     Example
+%         See demos_xPlt.m
+           
+           for plotting the 
+               function_handles{1} cycles through all the entries in xp2
+           The dimensions of xp2 are sz(dimensions{1}), where
+           sz = size(xp). xp2.data contains a function handle. This function
+           handle is a recursive call to 
+        2. Calls function_handles{1} and passes it xp2.
+        3. 
+        
+        Takes dimensions{1} from xp and creates a new 
+
+        Examples:
+            See demos file.
 
 
 %     function_handle_arguments - cell array of argument cell arrays to pass to
