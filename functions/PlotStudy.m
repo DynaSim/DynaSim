@@ -1,4 +1,4 @@
-function [handles, hsp, h2]=PlotStudy(data,myplot_handle)
+function [handles, hsp, h2]=PlotStudy(data,myplot_handle,varargin)
 %% [handles, h2, hsp] = PlotStudy(data,myplot_handle)
 % Purpose: Applies a user-specified plotting function to each element of
 %     data structure. Arrays the output plots in a grid, similar to
@@ -11,6 +11,8 @@ function [handles, hsp, h2]=PlotStudy(data,myplot_handle)
 %         **IMPORTANT**: This function should just produce a plot. It should
 %         not open any new figures or subplots. It can return an axis
 %         handle, but this is not necessary.
+%     options:
+%         'textfontsize' - default text font size of 10
 % 
 % Outputs:
 %     handles: handle of the figure
@@ -29,6 +31,12 @@ function [handles, hsp, h2]=PlotStudy(data,myplot_handle)
 % data=CheckData(data);
 handles=[];
 
+options=CheckOptions(varargin,{...
+  'textfontsize',10,[],...
+  },false);
+
+
+textfontsize = options.textfontsize;
 
 
     
@@ -143,8 +151,9 @@ handles=[];
                         myplot_handle(data(i));
                         h2{i} = [];
                     end
-                    title(text_string{row,col});
+                    title(text_string{row,col},'FontSize',textfontsize);
                     
+                    set(gca,'FontSize',textfontsize);
                     
                     
                 
