@@ -35,7 +35,7 @@ function [data,studyinfo]=SimulateModel(model,varargin)
 %     'prefix'        : string to prepend to all output file names (default: 'study')
 %     'disk_flag'     : whether to write to disk during simulation instead of storing in memory {0 or 1} (default: 0)
 %     'precision'     : {'single','double'} precision of simulated data saved to disk (default: 'single')
-%                 
+%
 %   options for cluster computing:
 %     'cluster_flag'  : whether to run simulations on a cluster submitted 
 %                     using qsub (see CreateBatch) {0 or 1} (default: 0)
@@ -365,7 +365,7 @@ end
 
 % 1.2 incorporate user-supplied initial conditions
 if ~isempty(options.ic)
-  if isstruct(options.ic) 
+  if isstruct(options.ic)
   % todo: create subfunc that converts numeric ICs to strings for
   % consistency (call here and in ProcessNumericICs <-- use code already there)
     % user provided structure with ICs
@@ -373,7 +373,7 @@ if ~isempty(options.ic)
     model.ICs=catstruct(model.ICs,options.ic);
   elseif isnumeric(options.ic)
     % user provided numeric array with one value per state variable per
-    % cell with state variables ordered according to model.state_variables.    
+    % cell with state variables ordered according to model.state_variables.
     model.ICs=ProcessNumericICs;
   end
 end
@@ -408,13 +408,13 @@ if options.cluster_flag==1
 %       end
 %       studyinfo=CheckStudyinfo(studyinfo.study_dir,'process_id',options.sim_id);
 %       data=ImportData(studyinfo,'process_id',options.sim_id);
-%     end  
+%     end
   %end
   return;
 end
 
-% 1.3.2 manage parallel computing on local machine 
-    % TODO: debug local parallel sims, doesn't seem to be working right... 
+% 1.3.2 manage parallel computing on local machine
+    % TODO: debug local parallel sims, doesn't seem to be working right...
     % (however SCC cluster+parallel works)
 if options.parallel_flag==1
   % prepare solve_file
@@ -451,13 +451,13 @@ if options.parallel_flag==1
   
   
   for sim = 1:length(modifications_set)
-      mystudydirs{sim} = fullfile(options.study_dir,['solve/output_parfor_' uniqueID '_' num2str(sim)]);                           
+      mystudydirs{sim} = fullfile(options.study_dir,['solve/output_parfor_' uniqueID '_' num2str(sim)]);
       
       % Create solve folders as needed
-      if ~exist(mystudydirs{sim},'dir')                
-          mkdir(fullfile(mystudydirs{sim}));           
-          if ~exist(fullfile(mystudydirs{sim},'solve'),'dir') 
-              mkdir(fullfile(mystudydirs{sim},'solve'));           
+      if ~exist(mystudydirs{sim},'dir')
+          mkdir(fullfile(mystudydirs{sim}));
+          if ~exist(fullfile(mystudydirs{sim},'solve'),'dir')
+              mkdir(fullfile(mystudydirs{sim},'solve'));
           end
       end
       
@@ -584,7 +584,7 @@ try
       % NOT AN EXPERIMENT (single simulation)
       %% 2.0 prepare solver function (solve_ode.m/mex)
       % - matlab solver: create @odefun with vectorized state variables
-      % - DynaSim solver: write solve_ode.m and params.mat  (based on dnsimulator())    
+      % - DynaSim solver: write solve_ode.m and params.mat  (based on dnsimulator())
       % check if model solver needs to be created 
       % (i.e., if is first simulation or a search space varying mechanism list)
       if sim==1 || (~isempty(modifications_set{1}) && any(cellfun(@(x)strcmp(x{2},'mechanism_list'),modifications_set)))
@@ -599,7 +599,7 @@ try
         end
       else
         % use previous solve_file
-      end    
+      end
       [fpath,fname,fext]=fileparts(options.solve_file);
 
       %% 3.0 integrate model with solver of choice and prepare output data
@@ -672,7 +672,7 @@ try
         tmpdata.model=model;
       end
     end
-    prepare_varied_metadata;
+    tmpdata = prepare_varied_metadata(tmpdata);
     % save single data set and update studyinfo
     if options.save_data_flag
       ExportData(tmpdata,'filename',data_file,'format','mat','verbose_flag',options.verbose_flag);
@@ -717,7 +717,6 @@ catch err % error handling
     delete([options.solve_file '*']);
   end
   DisplayError(err);
-  %keyboard
   % update studyinfo
   if options.save_data_flag
     studyinfo=UpdateStudy(studyinfo.study_dir,'process_id',sim_id,'status','failed','verbose_flag',options.verbose_flag);
@@ -749,7 +748,8 @@ end
       data_index=inds(end);
     end
   end
-  function prepare_varied_metadata
+
+  function tmpdata = prepare_varied_metadata(tmpdata)
     % add things varied to tmpdata
     mods={};
     if ~isempty(options.modifications)
@@ -787,7 +787,7 @@ end
       for j=1:length(tmpdata)
         tmpdata(j).varied=varied;
       end
-    end    
+    end
     % convert tmpdata to single precision
     if strcmp(options.precision,'single')
       for j=1:length(tmpdata)
@@ -795,7 +795,7 @@ end
           fld=tmpdata(j).labels{k};
           tmpdata(j).(fld)=single(tmpdata(j).(fld));
         end
-      end    
+      end
     end
   end
     
@@ -817,7 +817,7 @@ end
 
   function all_ICs=ProcessNumericICs
     % first, figure out how many IC values we need (i.e., how many state
-    % variables we need across all cells).    
+    % variables we need across all cells).
     var_names=model.state_variables;
     [nvals_per_var,monitor_counts]=GetOutputCounts(model);
     num_state_variables=sum(nvals_per_var);
@@ -832,7 +832,7 @@ end
       % store ICs as string for writing solve_ode and consistent evaluation
       all_ICs.(var_names{i})=sprintf('[%s]',num2str(ICs));
       cnt=cnt+nvals_per_var(i);
-    end    
+    end
   end
     
 end
@@ -846,11 +846,22 @@ function modifications=expand_modifications(mods)
     variables=regexp(mods{i,2},'[^\(\)\[\]\{\},]+','match');
     for j=1:length(objects)
       for k=1:length(variables)
-        modifications(end+1,1:3)={objects{j},variables{k},mods{i,3}};
-      end
-    end
-  end
-end
+        thisMod = mods{i,3};
+        if all(size(thisMod) == [1,1]) %same val for each obj and var
+          modifications(end+1,1:3)={objects{j},variables{k},thisMod};
+        elseif (size(thisMod,1) > 1) && (size(thisMod,2) == 1) %same val for each obj, diff for each var 
+          modifications(end+1,1:3)={objects{j},variables{k},thisMod(k)};
+        elseif (size(thisMod,1) == 1) && (size(thisMod,2) > 1) %same val for each var, diff for each obj
+          modifications(end+1,1:3)={objects{j},variables{k},thisMod(j)};
+        elseif (size(thisMod,1) > 1) && (size(thisMod,2) > 1) %diff val for each var and obj
+          modifications(end+1,1:3)={objects{j},variables{k},thisMod(k,j)};
+        else
+          error('Unknown modification type (likely due to excess dims)')
+        end %if
+      end %k
+    end %j
+  end %i
+end  %fun
 
 function [model,options]=extract_vary_statement(model,options)
   % purpose: extract vary statement, remove from model, and set options.vary
@@ -889,4 +900,3 @@ if any(ismember(option_names(:,1),options(1:2:end)))
   end
 end
 end
-
