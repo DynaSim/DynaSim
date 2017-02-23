@@ -74,6 +74,14 @@ if isstruct(file) && isfield(file,'study_dir')
   % get list of data_files from studyinfo
   data_files={studyinfo.simulations.data_file};
   success=cellfun(@exist,data_files)==2;
+  if ~all(success)
+    % convert original absolute paths to paths relative to study_dir
+    for i=1:length(data_files)
+      [~,fname,fext]=fileparts(data_files{i});
+      data_files{i}=fullfile(file.study_dir,'data',[fname fext]);
+    end
+    success=cellfun(@exist,data_files)==2;
+  end
   data_files=data_files(success);
   sim_info=studyinfo.simulations(success);
   % load each data set recursively
@@ -84,7 +92,7 @@ if isstruct(file) && isfield(file,'study_dir')
     tmp_data=ImportData(data_files{i},keyvals{:});
     num_sets_per_file=length(tmp_data);
     if ~isfield(tmp_data,'varied')
-    % add varied info 
+    % add varied info
       % this is necessary here when loading .csv data lacking metadata
       tmp_data.varied={};
       modifications=sim_info(i).modifications;
@@ -95,7 +103,7 @@ if isstruct(file) && isfield(file,'study_dir')
           tmp_data(k).varied{end+1}=varied;
           tmp_data(k).(varied)=modifications{j,3};
         end
-      end    
+      end
     end
     % store this data
     if i==1
@@ -133,7 +141,7 @@ if iscellstr(file)
       data(i)=tmp_data;
     end
   end
-  return;  
+  return;
 end
 
 if ischar(file)
