@@ -1,21 +1,7 @@
-% This is a script that I run through every time I want to test the code.
-% Assumes I've just run one of the scripts in demos.m, namely the section
-% titled "%% Save data from a set of simulations"
-% Then, I load demo_sPING_3:
-% data=ImportData('demo_sPING_3');
+
+
 %% Run simulation - Sparse Pyramidal-Interneuron-Network-Gamma (sPING)
 % Save both figures and data.
-
-demos_path = findDemosPath;
-
-% Set path to your copy of the DynaSim toolbox
-dynasim_path = fullfile(demos_path, '..');
-
-% add DynaSim toolbox to Matlab path
-addpath(genpath(dynasim_path)); % comment this out if already in path
-
-cd(demos_path)
-%%
 mkdir('outputs')
 cd outputs
 
@@ -62,14 +48,12 @@ cd outputs
 data=ImportData('demo_sPING_3b');
 cd ..
 
-
 % Load the data linearly
 [data_linear,ax,ax_names,time] = DynaSimExtract (data);
 
 
-
-% Import into an nDDict class
-xp = nDDict;
+% Import into an xPlt class
+xp = xPlt;
 xp = xp.importLinearData(data_linear,ax{:});
 xp = xp.importAxisNames(ax_names);
 meta = struct;
@@ -80,10 +64,6 @@ meta.datainfo(2).name = 'cells';
 meta.datainfo(2).values = [];
 xp = xp.importMeta(meta);
 
-
-warning('Let subset ignore singleton dimensions');
-warning('Make sure xp.size is working properly for all instances; maybe consider adding some more feedback text telling users to run fixaxes and being more specific about what fixaxes returns.');
-warning('In general, we want to be more explicit about dimension conventions.');
 
 %% Run another recursive plot
 clear xp2 xp3

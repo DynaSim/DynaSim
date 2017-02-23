@@ -13,6 +13,8 @@ classdef nDDictAxis
         function out = getaxisinfo(obj)
             max_values_to_display = 10;
             
+            if isempty(obj.values); out = 'Empty axis'; return; end
+            
             temp = [obj.name, ' -> '];
             Nvals = length(obj.values);
             Nvals = min(Nvals,max_values_to_display);          % Limit to displaying 10 values
