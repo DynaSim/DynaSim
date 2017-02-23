@@ -13,6 +13,7 @@ function [handles, hsp, h2]=PlotStudy(data,myplot_handle,varargin)
 %         handle, but this is not necessary.
 %     options:
 %         'textfontsize' - default text font size of 10
+%         'use_subplot_grid' - turns on or off subplot grid. Default is on. Off might be faster.
 % 
 % Outputs:
 %     handles: handle of the figure
@@ -33,11 +34,12 @@ handles=[];
 
 options=CheckOptions(varargin,{...
   'textfontsize',10,[],...
+  'use_subplot_grid',1,{0,1},...
   },false);
 
 
 textfontsize = options.textfontsize;
-
+use_subplot_grid = options.use_subplot_grid;
 
     
         
@@ -96,7 +98,10 @@ textfontsize = options.textfontsize;
         
         ht=320; % height per subplot row (=per population or FR data set)
         handles(1) = figure('units','normalized','position',[0,1-min(.33*num_rows,1),min(.25*num_cols,1) min(.33*num_rows,1)]);
-        hsp = subplot_grid(num_rows,num_cols);
+        if use_subplot_grid; hsp = subplot_grid(num_rows,num_cols); else
+            hsp=tight_subplot(num_rows,num_cols,[.01 .03],[.05 .01],[.03 .01]);
+        end
+        
         
         axis_counter = 0;
         for row=1:num_rows
@@ -108,7 +113,10 @@ textfontsize = options.textfontsize;
                   continue;
                 end
                 
-                hsp.set_gca(axis_counter);
+                if use_subplot_grid; hsp.set_gca(axis_counter); else
+                    set(gcf,'CurrentAxes',hsp(axis_counter));
+                end
+                    
                 
                 num_pops = 1;
                 if isfield(data,'varied')
