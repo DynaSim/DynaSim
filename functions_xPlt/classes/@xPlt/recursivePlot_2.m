@@ -1,10 +1,79 @@
 
 function varargout = recursivePlot_2(xp,function_handles,dimensions,function_handle_arguments)
-    % function_handle_arguments - cell array of argument cell arrays to pass to
-    % function_handles. Must have one cell array for each function_handle
-    % passed. Use empty cell arrays for no arguments. E.g.
-    % function_handle_arguments = { {}, {}, {1} } for nothing, nothing, and
-    % 1 as arguments.
+%% varargout = recursivePlot(xp,function_handles,dimensions,function_handle_arguments)
+%     Purpose: Takes in multidimensional data and a set of function handles for
+%     plotting. Function handles operate on low-dimensional subspaces. 
+%     recursivePlot assigns the high dimensional data in xp to the plotting
+%     functions until all dimensions have been used up.
+% 
+%     Forms:
+%         varargout = recursivePlot_2(xp,function_handles,dimensions)
+%         varargout = recursivePlot_2(xp,function_handles,dimensions,function_handle_arguments)
+% 
+%     Inputs:
+%       xp                          : xPlt structure with Nd dimensions
+% 
+%       function_handles            : 1xNd+1 cell array of function handles. See below
+%                                     for function handle specifications.
+% 
+%       dimensions                  : 1xNd cell array of vectors. Each vector corresponds
+%                                     to a function handle. Specifies which dimensions
+%                                     in xp to assign to each function handle.
+% 
+%       function_handle_arguments   : (optional) 1xNd cell array of cell arrays, each containing
+%                                     additional arguments to pass to each function
+%                                     handle. There should be one cell array for
+%                                     each function handle.
+% 
+%     Details:
+%       The function_handles cell array should point to functions of the form:
+%             varargout = function func (xp,varargin)
+%       where xp is an xPlt object. Each function handle
+warning('finish this');
+% 
+%     Algorithm:
+%     recursivePlot plots the data in a recursive manner. It does the following
+%         1. Creates a new xPlt structure called xp2, which is a low-dimensional
+%            version of xp. The dimensions of xp2 are given by dimensions{1}.
+% 
+%         2. recusrivePlot then passes xp2 to the first function handle,
+%            function_handles{1}.
+%            
+%            Each entry in xp2.data contains a function handle that recursively
+%            calls back recursivePlot. This serves as simply an instruction
+%            to handle plotting the remainder of the dimensions in xp (e.g.
+%            dimensions(2:end)).
+%            
+%            function_handles{1} loops through xp2.data and executes these
+%            function handles, thus producing plots of xp's remaining dimensions.
+%            
+%         3. The stopping conditions for the recursion are reached when xp runs
+%            out of dimensions. In this case, the final function handle receives
+%            a xp object with size(xp) = 1. Thus, the final function handle should
+%            actually plot the data.
+%            
+%     Example
+%         See demos_xPlt.m
+           
+           for plotting the 
+               function_handles{1} cycles through all the entries in xp2
+           The dimensions of xp2 are sz(dimensions{1}), where
+           sz = size(xp). xp2.data contains a function handle. This function
+           handle is a recursive call to 
+        2. Calls function_handles{1} and passes it xp2.
+        3. 
+        
+        Takes dimensions{1} from xp and creates a new 
+
+        Examples:
+            See demos file.
+
+
+%     function_handle_arguments - cell array of argument cell arrays to pass to
+%     function_handles. Must have one cell array for each function_handle
+%     passed. Use empty cell arrays for no arguments. E.g.
+%     function_handle_arguments = { {}, {}, {1} } for nothing, nothing, and
+%     1 as arguments.
     
     if nargin < 4
         function_handle_arguments = cell(size(function_handles));
@@ -18,91 +87,30 @@ function varargout = recursivePlot_2(xp,function_handles,dimensions,function_han
         
         % xp_temp = permute(xp, [dimensions{1}, cell2mat(dimensions{2:end})]);
         
-        xp2 = xPlt;
+        % Set up a new xPlt object with dimensions matching current
+        % function handle
+        xp2 = xp.reset;                         % Create a new xPlt object        
+        sz2 = sz(dimensions{1});
+        ndims2 = length(dimensions{1});
+        total_calls = prod(sz2);
+        
         selection_curr = cell(1,length(sz));
-        % Just cardcode in the various cases for dimensionality. It's
-        % unlikely they will ever want to go above showing 4D in a single
-        % plot.
         
-        temp = size(xp);
+        clear output_indices
+        [xp2_indices{1:ndims2}] = ind2sub(sz2, 1:total_calls);      % xp2 will loop through chosen dimensions
         
-        current_size = temp(dimensions{1});
+        xp2_indices = num2cell(cat(1, xp2_indices{:})');
         
-        current_no_dims = length(dimensions{1});
-        
-        total_calls = prod(current_size);
-        
-        [output_indices{1:current_no_dims}] = ind2sub(current_size, 1:total_calls);
-        
-        output_indices = num2cell(cat(1, output_indices{:})');
-         
-        input_indices = cell(1, length(xp.axis));
+        xp_indices = cell(1, length(xp.axis));                      % Initialize xp_indices
         
         for call = 1:total_calls
             
-            input_indices(dimensions{1}) = output_indices(call, :);
+            xp_indices(dimensions{1}) = xp2_indices(call, :);
             
-            xp2.data{output_indices{call, :}} = @() recursivePlot(xp.subset(input_indices{:}),...
+            xp2.data{xp2_indices{call, :}} = @() recursivePlot_2(xp.subset(xp_indices{:}),...
                 function_handles(2:end),dimensions(2:end),function_handle_arguments(2:end));
             
         end
-        
-%         switch length(dimensions{1})        
-%             case 1                          % 1D
-%                 dim1 = dimensions{1}(1);
-%                 for i = 1:sz(dim1)
-%                     selection_curr{dim1} = i;
-%                         % Note: need to make it a row vector!
-%                     xp2.data{i,1} = @() recursivePlot(xp.subset(selection_curr{:}),function_handles(2:end),dimensions(2:end),function_handle_arguments(2:end));
-%                 end
-%                 
-%             case 2                          % 2D
-%                 dim1 = dimensions{1}(1);
-%                 dim2 = dimensions{1}(2);
-%                 for i = 1:sz(dim1)
-%                     for j = 1:sz(dim2)
-%                         selection_curr{dim1} = i;
-%                         selection_curr{dim2} = j;
-%                         xp2.data{i,j} = @() recursivePlot(xp.subset(selection_curr{:}),function_handles(2:end),dimensions(2:end),function_handle_arguments(2:end));
-%                     end
-%                 end
-%                 
-%             case 3                          % 3D
-%                 dim1 = dimensions{1}(1);
-%                 dim2 = dimensions{1}(2);
-%                 dim3 = dimensions{1}(3);
-%                 for i = 1:sz(dim1)
-%                     for j = 1:sz(dim2)
-%                         for k = 1:sz(dim3)
-%                             selection_curr{dim1} = i;
-%                             selection_curr{dim2} = j;
-%                             selection_curr{dim3} = k;
-%                             xp2.data{i,j,k} = @() recursivePlot(xp.subset(selection_curr{:}),function_handles(2:end),dimensions(2:end),function_handle_arguments(2:end));
-%                         end
-%                     end
-%                 end
-%                 
-%             case 4                          % 4D
-%                 dim1 = dimensions{1}(1);
-%                 dim2 = dimensions{1}(2);
-%                 dim3 = dimensions{1}(3);
-%                 dim4 = dimensions{1}(4);
-%                 for i = 1:sz(dim1)
-%                     for j = 1:sz(dim2)
-%                         for k = 1:sz(dim3)
-%                             for l = 1:sz(dim4)
-%                                 selection_curr{dim1} = i;
-%                                 selection_curr{dim2} = j;
-%                                 selection_curr{dim3} = k;
-%                                 selection_curr{dim4} = l;
-%                                 xp2.data{i,j,k,l} = @() recursivePlot(xp.subset(selection_curr{:}),function_handles(2:end),dimensions(2:end),function_handle_arguments(2:end));
-%                             end
-%                         end
-%                     end
-%                 end
-%                 
-%                 
-%         end
         
         % Update axes
         for i = 1:length(dimensions{1})
