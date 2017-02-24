@@ -77,8 +77,17 @@ if verbose; fprintf('\n\n'); end
 % % % % % % % % % % % % % % % % % % % %
 % % % % % % DO CONNECTIONS % % % % % % 
 % % % % % % % % % % % % % % % % % % % %
-[val1,pop_name1,property1] = extract_conn_lists(spec1.connections);
-[val2,pop_name2,property2] = extract_conn_lists(spec2.connections);
+if isfield(spec1, 'connections')
+    [val1,pop_name1,property1] = extract_conn_lists(spec1.connections);
+else
+    val1 = {}; pop_name1 = {}; property1 = {};
+end
+   
+if isfield(spec2, 'connections')
+    [val2,pop_name2,property2] = extract_conn_lists(spec2.connections);
+else
+    val2 = {}; pop_name2 = {}; property2 = {};
+end
 
 % Merge spec1 and spec2 tables together into one huge table. Create a new
 % column to identify spec1 vs spec2 entries
@@ -91,18 +100,26 @@ clear val1 val2 pop_name1 pop_name2 propert1 property2
 
 % Build specs structure. 
 % Connection name x entry x spec1 or spec2
-nd = nDDict;
-nd = nd.importLinearData(val,pop_names,properties,specID);
-nd.axis(1).name = 'Connections';
-nd.axis(2).name = 'Properties';
-nd.axis(3).name = 'SpecID';
-
-if debug_mode
-    nd.getaxisinfo
+if ~isempty(val)
+    
+    nd = nDDict;
+    nd = nd.importLinearData(val,pop_names,properties,specID);
+    nd.axis(1).name = 'Connections';
+    nd.axis(2).name = 'Properties';
+    nd.axis(3).name = 'SpecID';
+    
+    if debug_mode
+        nd.getaxisinfo
+    end
+    
+    if verbose; run_comparison(nd); end
+    if nargout > 1; conn_diff = return_comparison(nd); end
+    
+else
+    
+    conn_diff = struct();
+    
 end
-
-if verbose; run_comparison(nd); end
-if nargout > 1; conn_diff = return_comparison(nd); end
 
 
 end
