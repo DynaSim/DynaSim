@@ -19,10 +19,10 @@ token = regexp(old_result_file, '(sim\d+)', 'tokens');
 if ~isempty(token)
   fileName = [fileName '_' token{1}{1}];
 end
-  
-for param = data.varied(:)'
-  fileName = [fileName '__' param{1} '_' num2str(data.(param{1}))];
-end
+
+  for param = data.varied(:)'
+    fileName = [fileName '__' param{1} '_' sprintf('%g',data.(param{1}))];
+  end
 
 new_result_file = fullfile(pathstr, fileName);
 
