@@ -3,7 +3,8 @@ function parms = CheckOptions(options, options_schema, strict)
 % Purpose: organize key/value pairs in structure with default or 
 % user-supplied values according to a schema.
 % Inputs: 
-%   keyvals: list of key/value pairs ('option1',value1,'option2',value2,...)
+%   options: list of key/value pairs ('option1',value1,'option2',value2,...), or
+%     a structure with fields equal to keys
 %   options_schema: cell array containing 3 values per known 'option':
 %                     - option name
 %                     - default value
@@ -22,44 +23,72 @@ function parms = CheckOptions(options, options_schema, strict)
 
 % note: this function was adapted from one developed "in-house" years ago...
 
-if (0 ~= mod(length(options),2))     %   Validate that the # of args is even
+%convert cell argument to struct if contains struct
+if length(options) == 1 && isstruct(options{1})
+  options = options{1};
+end
+
+if ~isstruct(options) && (0 ~= mod(length(options),2))     %   Validate that the # of args is even
   error('List of arguments must be even (must have name/value pair)');
-end;
+end
 if (0 ~= mod(length(options_schema),3))    %   Validate the options_schema info is right
   error('Programming error: list of default arguments must be even (must have name/value pair)');
-end;
+end
 if (~exist('strict', 'var'))
   strict = true;
-end;
+end
 
 parms = [];
 
-%   Rip all cell arguments into non-cell arguments.
-for index = 1:length(options)
-  if iscell(options{index})
-    if isempty(options{index})
-      options{index}=[];
-    elseif ~iscell(options{index}{1})
-      %options{index} = { options{index} }; 
+%   Rip all cell arguments into non-cell arguments?
+%     NOTE: currently just converts empty cells into empty arrays
+if ~isstruct(options)
+  for ind = 1:length(options)
+    if iscell(options{ind})
+      if isempty(options{ind})
+        options{ind}=[];
+      elseif ~iscell(options{ind}{1})
+        %options{index} = { options{index} }; 
+      end
     end
-  end;
-end;
+  end
+else
+  flds = fieldnames(options);
+  for ind = 1:length(flds)
+    fld = flds{ind};
+    if iscell(options.(fld))
+      if isempty(options.(fld))
+        options.(fld)=[];
+      elseif ~iscell(options.(fld){1})
+        %options{index} = { options{index} }; 
+      end
+    end
+  end
+end
 
+if ~isstruct(options) % if arguments given as list
+  input_fields  = options(1:2:end);
+else
+  input_fields  = fieldnames(options);
+end
 valid_fields    = options_schema(1:3:end);
-input_fields    = options(1:2:end);
 unknown_fields  = setdiff(input_fields, valid_fields);
 
 %   Validate that there are no extraneous params sent in
 if (strict && ~isempty(unknown_fields))
   error('The following unrecogized options were passed in: %s', sprintf('%s ',unknown_fields{:}));
-end;
+end
 
-if (~isempty( options ))
-  for f=1:length(options)/2
-    parms.(options{2*f-1})=options{2*f};
+if ~isstruct(options) %convert to struct if arguments given as list
+  if (~isempty( options ))
+    for f=1:length(options)/2
+      parms.(options{2*f-1})=options{2*f};
+    end
+    %parms=struct(options{:});
   end
-  %parms=struct(options{:});
-end;
+else
+  parms = options;
+end
 
 %   This allows 'pass-through' of parameters; 
 %   remove any fields that are unknown
@@ -67,7 +96,7 @@ end;
 
 if (~strict && ~isempty(parms) && ~isempty(options_schema))
   parms = rmfield(parms,unknown_fields);
-end;
+end
 
 %   Check arg values and set defaults
 for f=1:3:length(options_schema)
@@ -88,10 +117,12 @@ for f=1:3:length(options_schema)
     elseif iscell(param_range)
       num_flag = 0;
       char_flag = 0;
+      
       for i=1:length(param_range)
-        if isnumeric(param_range{i}), num_flag=1; end;
-        if ischar(param_range{i}), char_flag=1; end;
-      end;
+        if isnumeric(param_range{i}), num_flag=1; end
+        if ischar(param_range{i}), char_flag=1; end
+      end
+      
       if num_flag && char_flag
         error('type of parameter range (cell array of numbers and strings) specified for parameter ''%s'' is currently unsupported', options_schema{f});
       elseif char_flag
@@ -99,34 +130,37 @@ for f=1:3:length(options_schema)
           for i=1:length(param_value)
             if ~ischar(param_value{i})
               error('parameter ''%s'' must be string or cell array of strings', options_schema{f});
-            end;
-          end;
+            end
+          end
         elseif ~ischar(param_value)
           error('parameter ''%s'' must be string or cell array of strings', options_schema{f});
         else
           param_value = {param_value};
-        end;
+        end
+        
         if length(find(ismember(param_value,param_range))) ~= length(param_value)
           error('parameter ''%s'' value must be one of the following: { %s}', ...
   			    param_name, sprintf('''%s'' ',param_range{:}));
-        end;
+        end
       elseif num_flag
         param_range = cell2mat(param_range);
+        
         if ~isnumeric(param_value)
           error('parameter ''%s'' must be numeric', options_schema{f});
-        end;
+        end
+        
         if length(find(ismember(param_value,param_range))) ~= length(param_value)
           error('parameter ''%s'' value must be one of the following: { %s}', ...
   			    param_name,sprintf('%d ',param_range));
-        end;
+        end
       else
         error('type of parameter range specified for parameter ''%s'' is currently unsupported', options_schema{f});
-      end;
+      end
     %  param range is logical and has two elements (i.e. true/false)
     elseif islogical(param_range) && length(param_range)==2
       if ~ismember(param_value,param_range)
         error('parameter %s value must be true (1) or false (0)', options_schema{f});
-      end;
+      end
     %  param range is numeric and has two elements (i.e. min and max)
     elseif isnumeric(param_range) && length(param_range)==2
       %  param range is numeric or logical, and within a specified range,
@@ -138,24 +172,25 @@ for f=1:3:length(options_schema)
         else
           error('parameter %s value must be between %0.4f and %0.4f',...
             options_schema{f},param_range(1),param_range(2));
-        end;
-      end;
+        end
+      end
     %  param range is numeric and has more than two elements (allowed values)
     elseif isnumeric(param_range)
       if ~isnumeric(param_value)
         error('parameter ''%s'' must be numeric', options_schema{f});
-      end;
+      end
+      
       if length(find(ismember(param_value,param_range))) ~= length(param_value)
         error('parameter ''%s'' value must be one of the following: [ %s]', ...
   			  param_name,sprintf('%d ',param_range));
-      end;
+      end
     %  param range is of a type we currently don't support.
     else
       error('type of parameter range specified for parameter ''%s'' is currently unsupported', options_schema{f});
-    end;
+    end
   % field not found, so set the default value.
   else
     %parms = setfield(parms, options_schema{f}, options_schema{f+1});
     parms.(options_schema{f})=options_schema{f+1};
-  end;
-end;
+  end
+end
