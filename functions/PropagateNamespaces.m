@@ -34,7 +34,8 @@ allowed_insert_types.monitors=...
 allowed_insert_types.ODEs=...
   {'parameters','fixed_variables','functions','state_variables','reserved'}; % into ODEs
 allowed_insert_types.ICs=...
-  {'parameters','fixed_variables','functions','reserved'}; % into ICs
+  {'parameters','fixed_variables','functions','state_variables','reserved'}; % into ICs
+%   {'parameters','fixed_variables','functions','reserved'}; % into ICs %EAR
 allowed_insert_types.linkers=...
   {'parameters','fixed_variables','functions','state_variables','reserved'};
 allowed_insert_types.conditionals=...
@@ -66,12 +67,12 @@ target_types={'fixed_variables','functions','monitors','ODEs','ICs'};
 for type_index=1:length(target_types)
   type=target_types{type_index};%'fixed_variables';
   % info for this type
-  s=model.(type); 
+  s=model.(type);
   if isstruct(s)
     fields=fieldnames(s); % namespaced-names of this type (ie, [namespace_name])
     expressions=struct2cell(s); % raw-expressions of this type (ie, without namespace prefixes)
     namespaces={};
-    for i=1:length(expressions)      
+    for i=1:length(expressions)
       idx=strcmp(fields{i},map(:,2));
       if numel(find(idx))>1
         % constrain to namespace-conserving entries
@@ -95,7 +96,7 @@ end
 % function expressions=propagate_namespaces(expressions,names_full,map,insert_types)
 function expressions=propagate_namespaces(expressions,namespaces,map,insert_types)
   % loop over and update expressions for names of this type
-  for i=1:length(expressions)    
+  for i=1:length(expressions)
     if isempty(expressions{i})
       continue;
     end
@@ -103,7 +104,7 @@ function expressions=propagate_namespaces(expressions,namespaces,map,insert_type
     this_namespace=namespaces{i};
     % find parent namespaces
     parent_namespace = GetParentNamespace(this_namespace);
-    % find where this and parent namespaces are in map array    
+    % find where this and parent namespaces are in map array
     insert_type_constraint = ismember(map(:,4),insert_types);
     this_namespace_map_inds = find(strcmp(this_namespace,map(:,3)) & insert_type_constraint);
     parent_namespace_map_inds = find(strcmp(parent_namespace,map(:,3)) & insert_type_constraint);
@@ -114,15 +115,19 @@ function expressions=propagate_namespaces(expressions,namespaces,map,insert_type
       % search for words in parent namespace of map.names
       if any(strcmp(words{j},map(parent_namespace_map_inds,1))) % search parent namespace
         % word found in parent namespace of map
-        ind=parent_namespace_map_inds(strcmp(words{j},map(parent_namespace_map_inds,1)));      
+        ind=parent_namespace_map_inds(strcmp(words{j},map(parent_namespace_map_inds,1)));
         new_word=map{ind,2};
+        %if IC, need to take just first time index
+        if exist('type','var') && strcmp(type, 'ICs') && strcmp(words{j}, 'X')
+          new_word = [new_word '_last']; %EAR
+        end
         % replace found word in expression by map(names_bar|parent_namespace)
         expressions{i}=dynasim_strrep(expressions{i},words{j},new_word);
         % check whether new word is defined in model
         % note: this is necessary to account for namespace differences between
         % user-supplied population parameters that should replace default mechanism-level parameters
         new_word_type=map{ind,4};
-% %{        
+% %{
         if ~isfield(model.(new_word_type),new_word)
           % if not, define it from (word without namespace/namespace)
           if isfield(model.(new_word_type),words{j})
@@ -133,7 +138,7 @@ function expressions=propagate_namespaces(expressions,namespaces,map,insert_type
             if ~isempty(tmpi)
               old_field = map{tmpi,2};
               if ~isempty(tmpi) && isfield(model.(new_word_type),old_field)
-                model.(new_word_type).(new_word)=model.(new_word_type).(old_field);              
+                model.(new_word_type).(new_word)=model.(new_word_type).(old_field);
                 %model.(new_word_type) = rmfield(model.(new_word_type),old_field);
               end
             end
@@ -142,7 +147,7 @@ function expressions=propagate_namespaces(expressions,namespaces,map,insert_type
 % %}
       elseif any(strcmp(words{j},map(this_namespace_map_inds,1))) % search this namespace
         % word found in this namespace of map
-        ind=this_namespace_map_inds(strcmp(words{j},map(this_namespace_map_inds,1)));      
+        ind=this_namespace_map_inds(strcmp(words{j},map(this_namespace_map_inds,1)));
         new_word=map{ind,2};
         % replace found word in expression by map(names_bar|this_namespace)
         expressions{i}=dynasim_strrep(expressions{i},words{j},new_word);

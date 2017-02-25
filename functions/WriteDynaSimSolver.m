@@ -129,6 +129,13 @@ if ~isempty(model.fixed_variables)
 end  
 output_string=['[T,' output_string ']']; % state vars, monitors, time vector
 
+% HACK to get IC to work
+if options.downsample_factor == 1
+  for fieldNameC = fieldnames(model.ICs)'
+    model.ICs.(fieldNameC{1}) = regexprep(model.ICs.(fieldNameC{1}), '_last', '(1,:)');
+  end
+end
+
 %% 2.0 write m-file solver
 % 2.1 create mfile
 if ~isempty(options.filename)
@@ -246,7 +253,7 @@ if options.disk_flag==1
   % add time zero to output data file
   fprintf(fid,'fprintf(fileID,''0%s'');\n',separator);
 end
-fprintf(fid,'%% STATE_VARIABLES:\n');
+fprintf(fid,'\n%% STATE_VARIABLES:\n');
 % STATE_VARIABLES
 nvals_per_var=zeros(1,length(state_variables));
 IC_expressions=struct2cell(model.ICs);
@@ -281,7 +288,7 @@ for i=1:length(state_variables)
     % initialize state variables
     if options.downsample_factor==1
       % set var(1,:)=IC;
-      fprintf(fid,'  %s(1,:) = %s;\n',state_variables{i},IC_expressions{i});      
+      fprintf(fid,'  %s(1,:) = %s;\n',state_variables{i},IC_expressions{i});
     else
       % set var(1,:)=var_last;
       fprintf(fid,'  %s(1,:) = %s_last;\n',state_variables{i},state_variables{i});      
@@ -289,8 +296,8 @@ for i=1:length(state_variables)
   end
 end
 if ~isempty(model.monitors)
-  fprintf(fid,'%% MONITORS:\n');
-  % MONITORS    
+  fprintf(fid,'\n%% MONITORS:\n');
+  % MONITORS
   monitor_names=fieldnames(model.monitors);
   monitor_expression=struct2cell(model.monitors);
   for i=1:length(monitor_names)
