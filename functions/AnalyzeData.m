@@ -30,11 +30,21 @@ options=CheckOptions(varargin,{...
   'format','svg',{'svg','jpg','eps','png'},...
   'varied_filename_flag',0,{0,1},...
   'plot_type','waveform',{'waveform','rastergram','raster','power','rates'},...
+  'save_prefix',[],[],...
   },false);
 
 % change result_file
 if options.varied_filename_flag && isfield(data, 'varied')
-  options.result_file = nameFromVaried(data, options.plot_type, options.result_file);
+  if isfield(options, 'save_prefix') && ~isempty(options.save_prefix)
+    prefix = options.save_prefix;
+  else
+    if regexpi(func2str(func), 'plot')
+      prefix = options.plot_type;
+    else
+      prefix = func2str(func);
+    end
+  end
+  options.result_file = nameFromVaried(data, prefix, options.result_file);
 end
 
 % load data if input is not a DynaSim data structure
@@ -64,10 +74,10 @@ for j=1:length(data)
 end
 
 % do analysis
-fprintf('Executing post-processing function: %s\n',func2str(func));
+fprintf('\tExecuting post-processing function: %s\n',func2str(func));
 tstart=tic;
 result=feval(func,data,varargin{:});
-fprintf('Elapsed time: %g sec\n',toc(tstart));
+fprintf('\t\tElapsed time: %g sec\n',toc(tstart));
 
 % determine if result is a plot handle or derived data
 if all(ishandle(result)) % analysis function returned a graphics handle
@@ -82,7 +92,8 @@ if all(ishandle(result)) % analysis function returned a graphics handle
         fname=[options.result_file '_page' num2str(i) extension];
       end
       set(gcf,'PaperPositionMode','auto');
-      fprintf('Saving plot: %s\n',fname);
+      fprintf('\t\tSaving plot: %s\n',fname);
+      
       switch extension
         case '.svg'
           plot2svg(fname,result(i));
@@ -97,7 +108,8 @@ if all(ishandle(result)) % analysis function returned a graphics handle
   end
 else % analysis function returned derived data
   if isstruct(result)
-    add_modifications;
+    result = add_modifications(result);
+    
     for i=1:length(result)
       % add options to result structure
       if length(varargin)>1
@@ -111,12 +123,17 @@ else % analysis function returned derived data
   end
   % save derived data
   if options.save_results_flag
-    fprintf('Saving derived data: %s\n',options.result_file);
-    save(options.result_file,'result','-v7.3');
+    fname=options.result_file;
+    extension = '.mat';
+    if ~strcmp(fname(end-3:end), extension) %check for .mat extension
+      fname=[fname extension];
+    end
+    fprintf('\t\tSaving derived data: %s\n', fname);
+    save(fname,'result','-v7.3');
   end
 end
 
-  function add_modifications
+  function result = add_modifications(result)
     % add modifications to result structure, excluding modifications made
     % within experiments. note: while this nested function is similar to 
     % prepare_varied_metadata in SimulateModel, the data structure contains
@@ -144,14 +161,13 @@ end
       end
     elseif isfield(data,'varied') && length(data)==1
       % add 'varied' info from data to result structure
-      for ii=1:length(result)      
+      for ii=1:length(result)
         result(ii).varied=data(1).varied;
         for jj=1:length(data(1).varied)
           result(ii).(data(1).varied{jj})=data(1).(data(1).varied{jj});
-        end      
+        end
       end
     end
   end
 
 end
-
