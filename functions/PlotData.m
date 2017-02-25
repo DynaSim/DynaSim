@@ -1,4 +1,4 @@
-function handles=PlotData(data,varargin)
+function [handles, data] = PlotData(data,varargin)
 %% handles=PlotData(data,'option',value)
 % Purpose: plot data in various ways depending on what data was provided
 % and what options are defined. this function is wrapped by PlotWaveforms,
@@ -21,13 +21,13 @@ function handles=PlotData(data,varargin)
 %       see CalcPower options for plot_type 'power'
 % Outputs:
 %   handles: graphic handles to figures
-% 
+%
 % Plots:
 % if Nsims>1: one sim per row
 % elseif Npops>1: one pop per row
 % else: one cell per row
-% 
-% Examples for specifying 'variable' option: 
+%
+% Examples for specifying 'variable' option:
 % []      : plot all data.labels with same variable name as first element of data.labels (eg, 'pop1_v' and 'pop2_v')
 % '*'     : plot all data.labels
 % '*_v'   : plot all data.labels ending in _v (i.e., all state variables 'v' for all populations)
@@ -36,7 +36,7 @@ function handles=PlotData(data,varargin)
 % 'v'     : look for all data.labels ending in _v then starting with v_ (eg, all populations with variable 'v')
 % 'pop1'  : look for all data.labels ending in _pop1 then starting with pop1_ (eg, all variables for population 'pop1')
 % '*_iNa_*': plot all data.labels for the 'iNa' mechanism (for all populations)
-%   
+%
 % Examples:
 % One cell:
 % data=SimulateModel('dv/dt=@current+10; {iNa,iK}','tspan',[0 500]);
@@ -46,7 +46,7 @@ function handles=PlotData(data,varargin)
 % % plot power spectrum
 % PlotData(data,'variable','v','plot_type','power');
 % PlotData(data,'variable','*','plot_type','power');
-% 
+%
 % One population: with noisy input
 % data=SimulateModel('dv[5]/dt=@current+10*(1+randn(1,Npop)); {iNa,iK}','tspan',[0 250]);
 % PlotData(data);
@@ -59,7 +59,7 @@ function handles=PlotData(data,varargin)
 % % plot rastergram
 % PlotData(data,'variable','v','plot_type','rastergram');
 % PlotData(data,'variable','*','plot_type','rastergram');
-% 
+%
 % One population varying one parameter (input amplitude):
 % eqns='dv[5]/dt=@current+amp*(1+randn(1,Npop)); {iNa,iK}';
 % vary={'','amp',[0 10 20]};
@@ -71,7 +71,7 @@ function handles=PlotData(data,varargin)
 % PlotData(data,'variable','v','plot_type','power');
 % % plot rastergram
 % PlotData(data,'variable','v','plot_type','rastergram');
-% 
+%
 % One population varying two parameters (input amplitude and membrane capacitance):
 % eqns='dv[5]/dt=@current/Cm+amp*(1+randn(1,Npop)); {iNa,iK}';
 % vary={'','Cm',[1 2]; '','amp',[0 10 20]};
@@ -82,7 +82,7 @@ function handles=PlotData(data,varargin)
 % PlotData(data,'variable','v','plot_type','power');
 % % plot rastergram
 % PlotData(data,'variable','v','plot_type','rastergram');
-% 
+%
 % Two populations: noisy input to E and excitatory connection from E to I
 % spec=[];
 % spec.populations(1).name='E1';
@@ -93,17 +93,17 @@ function handles=PlotData(data,varargin)
 % spec.connections(1).mechanism_list='iAMPA';
 % data=SimulateModel(spec,'tspan',[0 200]);
 % PlotData(data); % plot first state variable
-% PlotData(data,'variable','*'); 
+% PlotData(data,'variable','*');
 % % plot monitored synaptic current with post-synaptic voltages:
-% PlotData(data,'variable',{'E2_v','ISYN'}); 
+% PlotData(data,'variable',{'E2_v','ISYN'});
 % % plot monitored synaptic current with pre- and post-synaptic voltages:
-% PlotData(data,'variable',{'v','ISYN'}); 
+% PlotData(data,'variable',{'v','ISYN'});
 % % plot power spectrum
 % PlotData(data,'variable','v','plot_type','power');
 % PlotData(data,'variable',{'E2_v','ISYN'},'plot_type','power');
 % % plot rastergram
 % PlotData(data,'variable','v','plot_type','rastergram');
-% 
+%
 % Two populations varying one parameter (input amplitude):
 % vary={'E1','amp',[0 10 20]};
 % data=SimulateModel(spec,'vary',vary,'tspan',[0 200]);
@@ -114,7 +114,7 @@ function handles=PlotData(data,varargin)
 % PlotData(data,'variable','v','plot_type','power');
 % % plot rastergram
 % PlotData(data,'variable','v','plot_type','rastergram');
-% 
+%
 % Two populations varying two parameters (input amplitude and synaptic conductance):
 % vary={'E1','amp',[0 10 20]; 'E1->E2','gSYN',[0 .05 .1]};
 % data=SimulateModel(spec,'vary',vary,'tspan',[0 200]);
@@ -128,7 +128,7 @@ function handles=PlotData(data,varargin)
 % PlotData(data,'variable','ISYN');
 % PlotData(data,'variable','E1_v');
 % PlotData(data,'variable','*');
-% 
+%
 % See also: CalcFR, CalcPower, PlotWaveforms, CheckData
 
 % Check inputs
@@ -212,7 +212,7 @@ end
 
 options=CheckOptions(varargin,{...
   'time_limits',[-inf inf],[],...
-  'variable',[],[],...        
+  'variable',[],[],...
   'max_num_overlaid',50,[],...
   'max_num_rows',20,[],...
   'plot_mode','trace',{'trace','image'},...
@@ -244,7 +244,7 @@ for i=1:length(pop_names)
   if any(var_inds)
     inds=cellfun(@(x)find(~cellfun(@isempty,regexp(var_fields(var_inds),['_' x '$'],'once'))),variables,'uni',0);
     varsel=~cellfun(@isempty,inds);
-    fldind=unique([inds{:}]);    
+    fldind=unique([inds{:}]);
     pop_indices(end+1)=i;
     pop_var_indices{end+1}=nan(1,length(variables));
     pop_var_indices{end}(varsel)=var_inds(fldind);
@@ -408,7 +408,7 @@ for figset=1:num_fig_sets
               vlines=data(sim_index).([var '_Power_MUA']).PeakFreq;
               AuxDataName={'MUA Power'};
               var=[var '_Power_SUA'];
-              dat=data(sim_index).(var).Pxx(:,row);     
+              dat=data(sim_index).(var).Pxx(:,row);
               legend_strings={'SUA','MUA'};
             case {'rastergram','raster'}
               set_name=regexp(var,'^([a-zA-Z0-9]+)_','tokens','once');
@@ -465,7 +465,7 @@ for figset=1:num_fig_sets
           var=var_fields{pop_var_indices{row}(figset)};
           switch options.plot_type
             case 'waveform'
-              dat=data(sim_index).(var);         
+              dat=data(sim_index).(var);
             case 'power'
               AuxData=data(sim_index).([var '_Power_MUA']).Pxx;
               vlines=data(sim_index).([var '_Power_MUA']).PeakFreq;
@@ -504,7 +504,7 @@ for figset=1:num_fig_sets
           var=var_fields{pop_var_indices{1}(figset)};
           switch options.plot_type
             case 'waveform'
-              dat=data(sim_index).(var);              
+              dat=data(sim_index).(var);
             case 'power'
               AuxData=data(sim_index).([var '_Power_MUA']).Pxx;
               vlines=data(sim_index).([var '_Power_MUA']).PeakFreq;
@@ -563,7 +563,7 @@ for figset=1:num_fig_sets
                 var=var_fields{pop_var_indices{k}(figset)};
                 dat(:,k)=nanmean(data(sim_index).(var),2);
               end
-              var=['<' variables{figset} '>'];              
+              var=['<' variables{figset} '>'];
             case 'power'
               dat=nan(length(xdata),num_pops);
               AuxData=nan(length(xdata),num_pops);
@@ -644,9 +644,10 @@ for figset=1:num_fig_sets
               % select max subset allowed
               dat=dat(:,1:min(size(dat,2),MTPP)); % select max subset to plot
               plot(xdata(sel),dat(sel,:));
+              set(gca,'ticklength',get(gca,'ticklength')/2) %make ticks shorter
             else
               imagesc(dat);
-            end            
+            end
           case {'rastergram','raster'}
             % draw spikes
             ypos=0; % y-axis position tracker
@@ -662,7 +663,7 @@ for figset=1:num_fig_sets
                 end
               end
               % record position for population tick name
-              yticks(end+1)=ypos+c/2+.5; 
+              yticks(end+1)=ypos+c/2+.5;
               yticklabels{end+1}=set_name{p};
               % draw line separating populations
               if length(allspikes)>1
@@ -686,7 +687,8 @@ for figset=1:num_fig_sets
             xticks=linspace(options.xlim(1),options.xlim(2),nticks);
             set(gca,'xtick',xticks,'xticklabel',xticks);
             %set(gca,'xticklabel',get(gca,'ytick'));
-        end
+            set(gca,'ticklength',get(gca,'ticklength')/2) %make ticks shorter
+        end % end switch options.plot_type
         % plot auxiliary data
         if ~isempty(AuxData) %strcmp(options.plot_type,'power')
           hold on
@@ -696,7 +698,7 @@ for figset=1:num_fig_sets
         if row==num_rows
           xlabel(xlab);
         else
-          set(haxes(axis_counter),'XTickLabel',''); 
+          set(haxes(axis_counter),'XTickLabel','');
           %set(haxes(row),'YTickLabel','');
         end
         xlim(options.xlim);
@@ -720,15 +722,23 @@ for figset=1:num_fig_sets
             text_xpos=xmin+.05*(xmax-xmin);
             text_ypos=ymin+.9*(ymax-ymin);
             try
-              text(text_xpos,text_ypos,text_string{row,col});
+              if any(strcmp(options.plot_type, {'rastergram','raster'}))
+                xlims = double(get(gca,'xlim'));
+                ylims = double(get(gca,'ylim'));
+                text(0.05*xlims(end),0.9*ylims(end),text_string{row,col});
+              else
+                text(text_xpos,text_ypos,text_string{row,col});
+              end
             end
-          end  
+          end
         end
-        % plot lines
+        % plot lines and text (used for power)
         if ~isempty(vlines)
           for k=1:length(vlines)
             if ~isnan(vlines(k))
               line([vlines(k) vlines(k)],ylim,'color','k','linestyle','--');
+              ymax=max(ylim);
+              text(double(vlines(k) + 0.1*range(xlim)), 0.9*ymax, sprintf('MUA Sxx Peak F: %.f', vlines(k)))
             end
           end
         end
@@ -737,7 +747,7 @@ for figset=1:num_fig_sets
           legend(legend_strings);
         end
       end % end loop over subplot columns
-    end % end loop over subplot rows            
+    end % end loop over subplot rows
     % set y-limits to max/min over data in this figure
     if shared_ylims_flag || ~isempty(options.ylim)
       if ylims(1)~=ylims(2)
@@ -755,13 +765,17 @@ for figset=1:num_fig_sets
             set(gcf,'CurrentAxes',haxes(axis_counter));
             xmin=min(xlim); xmax=max(xlim);
             ymin=min(ylim); ymax=max(ylim);
-            text_xpos=xmin+.05*(xmax-xmin);
+            text_xpos=double(xmin+.05*(xmax-xmin));
             text_ypos=ymin+.9*(ymax-ymin);
             text(double(text_xpos),text_ypos,text_string{row,col});
           end
         end
       end
     end
+    
+    %link x axes
+    linkaxes(haxes, 'x')
+    
   end % end loop over figures in this set
 end % end loop over figure sets
 
@@ -769,37 +783,37 @@ end % end loop over figure sets
 % 	N=1		one fig, one row (plot var X)
 % 	N>1		one row per cell (plot var X), 			enough figs for all cells
 % 	(nsims=1, num_pops=1, num_vars=1, pop_sizes>=1): num_fig_sets=1, num_figs=ceil(pop_sizes/MRPF), num_rows=min(pop_sizes,MRPF): row r: dat = data(s=1).(var)(:,c=r) where var=vars{v=1}
-% 
+%
 % 1 sim, 1 pop, >1 vars (X,Y,...)
 % 	N=1		one row per var (plot cell 1), 			enough figs for all vars
 % 	N>1		one row per var (overlay cells), 		enough figs for all vars
 % 	(nsims=1, num_pops=1, num_vars>=1, pop_sizes>=1): num_fig_sets=1, num_figs=ceil(num_vars/MRPF), num_rows=min(num_vars,MRPF): row r: dat = data(s=1).(var)(:,1:MTPP) where var=vars{v=r}
-% 
+%
 % 1 sim, >1 pops, 1 var (X)
 % 	all N=1		one row per pop (plot var X, cell 1),		enough figs for all pops
 % 	any N>1		one row per pop (plot var X, overlay cells), 	enough figs for all pops
 % 	(nsims=1, num_pops>=1, num_vars=1, pop_sizes>=1): num_fig_sets=1, num_figs=ceil(num_pops/MRPF), num_rows=min(num_pops,MRPF): row r: dat = data(s=1).(var)(:,1:MTPP) where var=vars{v=r}
-% 
+%
 % 1 sim, >1 pops, >1 vars (X,Y,...)
 % 	all N=1		one row per pop (plot var X, cell 1), 		enough figs for all pops, separate figs for each var
 % 	any N>1		one row per pop (plot var X, overlay cells), 	enough figs for all pops, separate figs for each var
 % 	(nsims=1, num_pops>=1, num_vars>=1, pop_sizes>=1): num_fig_sets=num_vars, num_figs=ceil(num_pops/MRPF), num_rows=min(num_pops,MRPF): row r: dat = data(s=1).(var)(:,1:MTPP) where var=vars{these(p=r)}
-% 
+%
 % >1 sim, 1 pop, 1 var (X)
 % 	N=1		one row per sim (plot var X, cell 1), 		enough figs for all sims
 % 	N>1		one row per sim (plot var X, overlay cells), 	enough figs for all sims
 % 	(nsims>1, num_pops=1, num_vars=1, pop_sizes>=1): num_fig_sets=1, num_figs=ceil(nsims/MRPF), num_rows=min(nsims,MRPF): row r: dat = data(s=r).(var)(:,1:MTPP) where var=vars{v=1}
-% 
+%
 % >1 sim, 1 pop, >1 vars (X,Y,...)
 % 	N=1		one row per sim (plot var X, cell 1), 		enough figs for all sims, separate figs for each var
 % 	N>1		one row per sim (plot var X, overlay cells), 	enough figs for all sims, separate figs for each var
 % 	(nsims>1, num_pops=1, num_vars=1, pop_sizes>=1): num_fig_sets=num_vars, num_figs=ceil(nsims/MRPF), num_rows=min(nsims,MRPF): row r: dat = data(s=r).(var)(:,1:MTPP) where var=vars{v++}
-% 
+%
 % >1 sim, >1 pops, 1 var (X)
 % 	all N=1		one row per sim (plot var X, overlay pops),	enough figs for all sims
 % 	any N>1		one row per sim (plot var <X>, overlay pops),	enough figs for all sims
 % 	(nsims>1, num_pops=1, num_vars=1, pop_sizes>=1): num_fig_sets=1, num_figs=ceil(nsims/MRPF), num_rows=min(nsims,MRPF): row r: dat = <data(s=r).(var)(:,1:MTPP),2|vars>
-% 
+%
 % >1 sim, >1 pops, >1 vars (X,Y,...)
 % 	all N=1		one row per sim (plot var X, overlay pops),	enough figs for all sims, separate figs for each var
 % 	any N>1		one row per sim (plot var <X>, overlay pops),	enough figs for all sims, separate figs for each var
