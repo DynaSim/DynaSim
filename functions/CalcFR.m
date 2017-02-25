@@ -5,6 +5,7 @@ function data = CalcFR(data,varargin)
 %   options:
 %     'variable' - name of field containing data on which to calculate firing
 %                rates (default: *_spikes or first variable in data.labels)
+%     'time_limits' - [beg,end] (units of data.time)
 %     'threshold' - scalar threshold value for detecting events (default: 0)
 %     'bin_size' - size of temporal window over which to calculate rate [ms or fraction of data set] (default: 5% of the data set)
 %     'bin_shift' - how much to shift the bin before calculating rate again [ms or fraction of data set] (default: 1% of the data set)
@@ -39,9 +40,10 @@ function data = CalcFR(data,varargin)
 %% 1.0 Check inputs
 options=CheckOptions(varargin,{...
   'variable',[],[],...
+  'time_limits',[-inf inf],[],...
   'threshold',1e-5,[],... % slightly above zero in case variable is point process *_spikes {0,1}
-  'bin_size',.05,[],...  % 30
-  'bin_shift',.01,[],... % 10
+  'bin_size',.05,[],... 
+  'bin_shift',.01,[],...
   'exclude_data_flag',0,{0,1},...
   'output_suffix','',[],...
   },false);
@@ -59,7 +61,9 @@ end
 % time info
 time = data.time;
 dt = time(2)-time(1);
-ntime=length(time);
+t1=nearest(time,options.time_limits(1)); % index to first sample
+t2=nearest(time,options.time_limits(2)); % index to last sample
+ntime=t2-t1+1;
 
 % set defaults
 % default variable to process
@@ -75,6 +79,7 @@ if isempty(options.variable)
     %options.variable=data.labels{1};
   end
 end
+
 % check bin_size
 if options.bin_size>1
   % convert from ms to time points
@@ -83,10 +88,12 @@ else
   % convert from fraction to time points
   options.bin_size=ceil(options.bin_size*ntime);
 end
+
 % constrain bin_size to entire data set
 if options.bin_size>ntime
   options.bin_size=ntime;
 end
+
 % check bin_shift
 if options.bin_shift>1
   % convert from ms to time points
@@ -103,19 +110,20 @@ options.variable=SelectVariables(data(1).labels,options.variable);
 if ~isfield(data,'results')
   data.results={};
 end
+
 % 3.1 calc bin info
 % samples at which bins begin
-bin_index_begs=1:options.bin_shift:ntime;
+bin_index_begs=t1:options.bin_shift:t2;
 % samples at which bins end
 bin_index_ends=bin_index_begs+options.bin_size;
 
-if bin_index_ends(end)>ntime
+if bin_index_ends(end)>t2
   if length(bin_index_ends) > 1 %multiple bins
     % remove final bin if extends beyond data
-    bin_index_begs=bin_index_begs(bin_index_ends<=ntime);
-    bin_index_ends=bin_index_ends(bin_index_ends<=ntime);
+    bin_index_begs=bin_index_begs(bin_index_ends<=t2);
+    bin_index_ends=bin_index_ends(bin_index_ends<=t2);
   else %1 bin
-    bin_index_ends = ntime;
+    bin_index_ends = t2;
   end
 end
 
@@ -125,6 +133,7 @@ bin_times=time(bin_index_begs);
 nbins=length(bin_index_begs);
 % time width of a single bin in seconds
 bin_width=(dt/1000)*options.bin_size;
+
 % 3.2 loop over variables to process
 for v=1:length(options.variable)
   % extract this data set
