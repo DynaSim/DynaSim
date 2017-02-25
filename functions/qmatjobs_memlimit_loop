@@ -15,8 +15,8 @@ foreach job ( $joblist )
   if (-e pbsout/$job.err) then
     rm -f pbsout/$job.err
   endif
-  echo "qmatjob $batchdir $job" '|' qsub -V -hard -l 'h_vmem='$h_vmem -cwd -N $1_$job -o pbsout/$job.out -e pbsout/$job.err
-  echo "qmatjob $batchdir $job" | qsub -V -hard -l 'h_vmem='$h_vmem -cwd -N $1_$job -o pbsout/$job.out -e pbsout/$job.err
-  sleep 0.25
+  echo "qmatjob_loop $batchdir $job" '|' qsub -V -hard -l 'h_vmem='$h_vmem -cwd -N $1_$job -o pbsout/$job.out -e pbsout/$job.err
+  echo "qmatjob_loop $batchdir $job" | qsub -V -hard -l 'h_vmem='$h_vmem -cwd -N $1_$job -o pbsout/$job.out -e pbsout/$job.err
+  sleep 0.25 #is this the lower limit?
 end
 
