@@ -13,7 +13,7 @@ options=CheckOptions(keyvals,{...
   'disk_flag',0,[],...            % whether to write to disk during simulation instead of storing in memory
   'dt',.01,[],...                 % time step used for fixed step DynaSim solvers
   'datafile','data.csv',[],... % name of data file if disk_flag=1
-  'compile_flag',exist('codegen')==6,[],... % whether to prepare script for being compiled using coder instead of interpreting Matlab
+  'compile_flag',exist('codegen','file')==6,[],... % whether to prepare script for being compiled using coder instead of interpreting Matlab
   'verbose_flag',1,[],...
   },false);
 
