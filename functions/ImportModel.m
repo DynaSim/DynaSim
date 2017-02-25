@@ -48,7 +48,7 @@ end
 % if DynaSim .mech, .eqns, .txt:
   % parse model equations
   [model,map]=ParseModelEquations(source,'namespace',options.namespace);
-
+  
 % if DynaSim .mat: load MAT-file
 % ... load(source) ...
 
@@ -87,17 +87,30 @@ function modl=set_user_parameters(modl,params,namespace)
   % prepend namespace to user-supplied params
   user_keys=cellfun(@(x)[namespace '_' x],params(1:2:end),'uni',0);
   user_vals=params(2:2:end);
+  
+  % HACK
+  % remove duplicate namespace from user-supplied params
+  for iKey = 1:length(user_keys)
+    locs = regexp(user_keys{iKey}, namespace, 'end');
+    if length(locs) > 1 %then duplicated namespace
+      user_keys{iKey}(1:locs(1)+1) = []; %remove duplicate and trailing _
+    end
+  end
+  
   % get list of parameters in modl
   param_names=fieldnames(modl.parameters);
+  
   % find adjusted user-supplied param names in this sub-model
   ind=find(ismember(user_keys,param_names));
   for p=1:length(ind)
     modl.parameters.(user_keys{ind(p)})=toString(user_vals{ind(p)},precision);
   end
+  
   % repeat for fixed_variables (e.g., connection matrix)
   if ~isempty(modl.fixed_variables)
     % get list of fixed_variables in modl
     fixvars_names=fieldnames(modl.fixed_variables);
+    
     % find adjusted user-supplied param names in this sub-model
     ind=find(ismember(user_keys,fixvars_names));
     for p=1:length(ind)
@@ -107,7 +120,7 @@ function modl=set_user_parameters(modl,params,namespace)
         modl.fixed_variables.(user_keys{ind(p)})=user_vals{ind(p)};
       end
     end
-  end  
+  end
 % ----------------------------------
 function modl=add_missing_ICs(modl,popname)
   if isempty(modl.state_variables)
@@ -120,10 +133,12 @@ function modl=add_missing_ICs(modl,popname)
   else
     missing_ICs=modl.state_variables;
   end
+  
   % add default ICs
   for ic=1:length(missing_ICs)
     modl.ICs.(missing_ICs{ic})=sprintf('zeros(1,%s)',Npopstr);
-  end    
+  end
+  
   % convert scalar ICs to vectors of population size
   ICfields=fieldnames(modl.ICs);
   for ic=1:length(ICfields)
@@ -147,13 +162,14 @@ cfg.dbpassword = 'publicaccess'; % 'publicaccess'
 cfg.xfruser = 'publicuser';
 cfg.xfrpassword = 'publicaccess';
 cfg.ftp_port=21;
-cfg.MEDIA_PATH = '/project/infinitebrain/media';  
+cfg.MEDIA_PATH = '/project/infinitebrain/media';
 target = pwd; % local directory for temporary files
 
 % Create the database connection object
 jdbcString = sprintf('jdbc:mysql://%s/%s',cfg.webhost,cfg.dbname);
 jdbcDriver = 'com.mysql.jdbc.Driver';
 dbConn = database(cfg.dbname,cfg.dbuser,cfg.dbpassword,jdbcDriver,jdbcString);
+
 % list all mechanism metadata from DB
 %query='select id,name,level,notes,ispublished,project_id from modeldb_model where level=''mechanism'''; %  and privacy='public'
 %data = get(fetch(exec(dbConn,query)), 'Data');
@@ -169,7 +185,7 @@ modelfile=[modelfile ext];%'.json'];
 f=ftp([cfg.webhost ':' num2str(cfg.ftp_port)],cfg.xfruser,cfg.xfrpassword);
 pasv(f);
 cd(f,usermedia);
-mget(f,modelfile,target); 
+mget(f,modelfile,target);
 
 % parse mechanism file
 tempfile = fullfile(target,modelfile);
@@ -186,4 +202,3 @@ source=tempfile;
 % delete(tempfile);
 %close ftp connection
 close(f);
-
