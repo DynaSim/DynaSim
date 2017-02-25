@@ -61,7 +61,7 @@ end
 %   % todo: add annotations if necessary
 % end
 
-% todo: save results of analysis and/or plots
+% TODO: save results of analysis and/or plots
 if options.save_data_flag
   % possibly: get filename from studyinfo.analysis(k).data_file ...
   if options.detailed_names_flag % create filename with parameter info

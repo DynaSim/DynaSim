@@ -220,17 +220,18 @@ for i=1:npops
     mechanism_=regexp(mechanism_,'@','split');
     mechanism=mechanism_{1};
     if numel(mechanism_)>1, new_linker=mechanism_{2}; else new_linker=[]; end
-    % set mechanism namespace 
+    % set mechanism namespace
     if any(mechanism==':')
       % exclude host name from namespace
       tmp=regexp(mechanism,':','split');
       MechScope=[specification.populations(i).name '_' tmp{2}];
-    else      
+    else
       % extract mechanism file name without path
       [~,MechID]=fileparts(mechanism);
       MechScope=[specification.populations(i).name '_' MechID];
     end
-    % parse mechanism equations    
+
+    % parse mechanism equations
     [tmpmodel,tmpmap]=ImportModel(mechanism,'namespace',MechScope,'ic_pop',specification.populations(i).name,'user_parameters',parameters);
     % replace 1st linker name by the one in specification
     if ~isempty(new_linker) && ~isempty(tmpmodel.linkers)
@@ -270,10 +271,10 @@ for i=1:ncons
     % support separation of linker names in pop equations vs mechanisms
     mechanism_=regexp(mechanism_,'@','split');
     mechanism=mechanism_{1};
-    if numel(mechanism_)>1, new_linker=mechanism_{2}; else new_linker=[]; end  
+    if numel(mechanism_)>1, new_linker=mechanism_{2}; else new_linker=[]; end
     % extract mechanism file name without path
     [~,MechID]=fileparts(mechanism);
-    MechScope=[target '_' source '_' MechID]; 
+    MechScope=[target '_' source '_' MechID];
         % note: must use target_source_mechanism for connection mechanisms
         % to distinguish their parent namespaces from those of population mechanisms
         % see: GetParentNamespace
@@ -313,6 +314,7 @@ for i=1:ncons
   % add reserved keywords (parameters and state variables) to name_map
   add_keywords(source,target,ConScope);
 end
+
 % check for monitoring functions (e.g., 'monitor functions' or 'monitor Na.functions')
 if ~isempty(model.monitors)
   % get list of functions
@@ -476,7 +478,7 @@ for i=1:length(model.linkers)
   end
   if ~isempty(model.linkers)
     linkers_in_pop=~cellfun(@isempty,regexp({model.linkers.namespace},['^' linker_pops{i}]));
-  end  
+  end
   % constrain to namespace
   names_in_namespace=cellfun(@(x,y)strncmp(y,x,length(y)),name_map(:,2),name_map(:,3));
   % get list of (functions,monitors,ODEs) belonging to the linker population
@@ -500,7 +502,7 @@ for i=1:length(model.linkers)
       % (e.g., monitor functions)
       model.(eqn_type).(name)=linker_strrep(model.(eqn_type).(name),oldstr,newstr,operator);
     end
-  end  
+  end
   if ~isempty(model.conditionals)
     fields={'condition','action','else'};
     % get list of conditionals belonging to the linker population
@@ -508,7 +510,7 @@ for i=1:length(model.linkers)
     all_conditionals_inds=[all_conditionals_inds inds];
     all_conditionals_targets=cat(2,all_conditionals_targets,repmat({oldstr},[1 length(inds)]));
     % substitute link
-    for j=1:length(inds)          
+    for j=1:length(inds)
       for field_index=1:length(fields)
         field=fields{field_index};
         model.conditionals(inds(j)).(field)=linker_strrep(model.conditionals(inds(j)).(field),oldstr,newstr,operator);
@@ -529,7 +531,7 @@ if options.open_link_flag==0
     oldstr=all_expression_targets{i};
     newstr='';
     name=name_map{all_expression_inds(i),2};
-    type=name_map{all_expression_inds(i),4};    
+    type=name_map{all_expression_inds(i),4};
     eqn_type=eqn_types{strcmp(type,search_types)};
     pattern = ['\)\.?[-\+\*/]' oldstr '\)']; % pattern accounts for all possible newstr defined for linking
     replace = [newstr '))'];
@@ -622,4 +624,3 @@ function str=linker_strrep(str,oldstr,newstr,operator)
     str=regexprep(str,pat,rep);
   end
 end
-

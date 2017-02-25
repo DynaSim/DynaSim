@@ -48,7 +48,7 @@ for type_index=1:length(target_types)
     update_these=fieldnames(s);
     expressions=struct2cell(s);
     % loop over target expressions from which to eliminate internal function calls
-    for i=1:length(expressions)    
+    for i=1:length(expressions)
       if isempty(expressions{i})
         continue;
       end
@@ -69,7 +69,7 @@ if ~isempty(model.conditionals)
     % loop over conditional expressions from which to eliminate internal function calls
     for i=1:length(expressions)
       if isempty(expressions{i})
-        continue; 
+        continue;
       end
       % update expressions
       expressions{i}=insert_functions(expressions{i},functions);
@@ -94,9 +94,9 @@ function [expression,functions_were_found]=insert_functions(expression,functions
       found_expression=functions.(found_function);
       % variable names used in the original found function definition
       orig_var_list=regexp(found_expression,'^@\(([^\)]+)\)','tokens','once');
-      orig_vars=regexp(orig_var_list{1},',','split'); % variables used in original function definition        
+      orig_vars=regexp(orig_var_list{1},',','split'); % variables used in original function definition
       % variable names passed from the target function to the function found in it
-      % get arguments to function call, support function arguments      
+      % get arguments to function call, support function arguments
 %       new_var_list=regexp(expression,[found_function '\(*\(([^\)\(]+)\)'],'tokens','once');
       index=regexp(expression,[found_function '\('],'once');
       substr=expression(index:end); % string starting with first function call
@@ -118,7 +118,7 @@ function [expression,functions_were_found]=insert_functions(expression,functions
       new_vars=regexp(new_var_list{1},',','split');
       % found expression without the input variable list
       found_expression=regexp(found_expression,'^@\([^\)]+\)(.+)','tokens','once');
-      found_expression=found_expression{1};       
+      found_expression=found_expression{1};
       if length(orig_vars)~=length(new_vars)
         error('failed to match variables for function %s',found_function);
       end

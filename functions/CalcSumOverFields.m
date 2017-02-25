@@ -1,6 +1,3 @@
-
-
-
 function data = CalcSumOverFields(data, fields, output_field_name)
     % Purpose: Creates a new field in data that is the sum of a bunch of
     % other fields (specified by the "fields" cell array). Stores the output

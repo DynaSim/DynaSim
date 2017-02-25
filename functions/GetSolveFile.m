@@ -32,6 +32,7 @@ elseif isstruct(varargin{1}) % user provided an options structure
   fields=fieldnames(opts);
   varargin={};
 end
+
 options=CheckOptions(varargin,{...
   'solver','rk4',{'euler','rk1','rk2','rk4','modified_euler','rungekutta','rk','ode23','ode45'},... % DynaSim and built-in Matlab solvers
   'matlab_solver_options',[],[],... % options from odeset for use with built-in Matlab solvers
@@ -42,6 +43,7 @@ options=CheckOptions(varargin,{...
   'parallel_flag',0,{0,1},...     % whether to run simulations in parallel (using parfor)
   'compile_flag',0,{0,1},... % exist('codegen')==6, whether to compile using coder instead of interpreting Matlab  
   },false);
+  
 if ~isempty(opts)
   % combine default options and user-supplied options w/ the latter
   % overriding the former
@@ -51,7 +53,7 @@ if ~isempty(opts)
 end
 
 if options.verbose_flag
-  fprintf('PREPARING SOLVER:\n');
+  fprintf('\nPREPARING SOLVER:\n');
 end
 
 % check solver options
@@ -81,6 +83,7 @@ else
   % set default solve_file name
   solve_file=['solve_ode_' datestr(now,'yyyymmddHHMMSS_FFF') '.m'];
 end
+
 [fpath,fname,fext]=fileparts(solve_file);
 if isempty(fpath)
   % add path to solve_file name
@@ -95,25 +98,29 @@ if isempty(fpath)
   end
 end
 [fpath,fname,fext]=fileparts(solve_file);
+
 % check that solve file name is less than max function name allwoed by matlab
 if length(fname)>(63-4) % subtract 4 to allow suffix '_mex'
   fname=fname(1:(63-4));
   solve_file=fullfile(fpath,[fname fext]);
 end
+
 % create directory for solve_file if it doesn't exist
 if ~isdir(fpath)
   if options.verbose_flag
-    fprintf('creating solver directory %s\n',fpath);
+    fprintf('Creating solver directory %s\n',fpath);
   end
   mkdir(fpath);
 end
 cwd=pwd;
+
 if ~strcmp(cwd,fpath)
   if options.verbose_flag
-    fprintf('changing directory to %s\n',fpath);
+    fprintf('Changing directory to %s\n',fpath);
   end
   cd(fpath);
 end
+
 % create solve_file if it doesn't exist
 if ~exist(solve_file,'file')
   keyvals = Options2Keyval(options);
@@ -134,16 +141,16 @@ if ~exist(solve_file,'file')
   solve_file=CompareSolveFiles(solve_file_m);
 else
   if options.verbose_flag
-    fprintf('using previous solver file: %s\n',solve_file);
-  end      
+    fprintf('Using previous solver file: %s\n',solve_file);
+  end
 end
 % create MEX file if desired and doesn't exist
 [fpath,fname,fext]=fileparts(solve_file);
 solve_file_mex=fullfile(fpath,[fname '_mex']);
-if options.compile_flag % compile solver function        
+if options.compile_flag % compile solver function
   if ~exist(solve_file_mex,'file')
     if options.verbose_flag
-      fprintf('compiling solver file: %s\n',solve_file_mex);
+      fprintf('Compiling solver file: %s\n',solve_file_mex);
     end
     compile_start_time=tic;
     PrepareMEX(solve_file); % mex-file solver
@@ -154,20 +161,21 @@ if options.compile_flag % compile solver function
     codemex_dir=fullfile(fileparts(solve_file_mex),'codemex');
     if exist(codemex_dir,'dir')
       if options.verbose_flag
-        fprintf('\tremoving temporary codemex directory: %s\n',codemex_dir);
+        fprintf('\tRemoving temporary codemex directory: %s\n',codemex_dir);
       end
       rmdir(codemex_dir,'s');
     end
   else
     if options.verbose_flag
-      fprintf('using previous compiled solver file: %s\n',solve_file_mex);
+      fprintf('Using previous compiled solver file: %s\n',solve_file_mex);
     end
   end
   solve_file=solve_file_mex;
 end
+
 if ~strcmp(cwd,fpath)
   if options.verbose_flag
-    fprintf('changing directory back to %s\n',cwd);
+    fprintf('Changing directory back to %s\n',cwd);
   end
   cd(cwd);
 end

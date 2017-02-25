@@ -1,4 +1,4 @@
-function [handles, data] = PlotData(data,varargin)
+function handles = PlotData(data,varargin)
 %% handles=PlotData(data,'option',value)
 % Purpose: plot data in various ways depending on what data was provided
 % and what options are defined. this function is wrapped by PlotWaveforms,
@@ -767,7 +767,7 @@ for figset=1:num_fig_sets
             ymin=min(ylim); ymax=max(ylim);
             text_xpos=double(xmin+.05*(xmax-xmin));
             text_ypos=ymin+.9*(ymax-ymin);
-            text(double(text_xpos),text_ypos,text_string{row,col});
+            text(text_xpos,text_ypos,text_string{row,col});
           end
         end
       end

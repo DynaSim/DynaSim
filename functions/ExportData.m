@@ -39,5 +39,5 @@ switch lower(options.format)
 end
 
 if options.verbose_flag
-  fprintf('data saved to %s\n',options.filename);
+  fprintf('\tData saved to %s\n',options.filename);
 end

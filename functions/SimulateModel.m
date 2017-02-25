@@ -594,8 +594,8 @@ try
         end
         % todo: consider providing better support for studies that produce different m-files per sim (e.g., varying mechanism_list)
         if options.verbose_flag
-          fprintf('SIMULATING MODEL:\n');
-          fprintf('solving system using %s\n',options.solve_file);
+          fprintf('\nSIMULATING MODEL:\n');
+          fprintf('Solving system using %s\n',options.solve_file);
         end
       else
         % use previous solve_file
@@ -607,7 +607,7 @@ try
       % - DynaSim solver: run solve_ode.m or create/run MEX
       % move to directory with solver file
       if options.verbose_flag
-        fprintf('changing directory to %s\n',fpath);
+        fprintf('Changing directory to %s\n',fpath);
       end
       cd(fpath);
       % save parameters there
@@ -615,7 +615,7 @@ try
       p=catstruct(CheckSolverOptions(options),model.parameters);
       param_file=fullfile(fpath,'params.mat');
       if options.verbose_flag
-        fprintf('saving model parameters: %s\n',param_file);
+        fprintf('Saving model parameters: %s\n',param_file);
       end
       %pause(.01);
       % solve system
@@ -664,7 +664,7 @@ try
         end
       end
       if options.verbose_flag
-        fprintf('Elapsed time: %g seconds.\n',duration); 
+        fprintf('\tElapsed time: %g seconds.\n',duration);
       end
       % add metadata to tmpdata
       tmpdata.simulator_options=options; % store simulator controls
@@ -804,7 +804,7 @@ end
       % ...
       % return to original directory
       if options.verbose_flag
-        fprintf('changing directory to %s\n',cwd);
+        fprintf('Changing directory to %s\n',cwd);
       end
       cd(cwd);
     switch status
