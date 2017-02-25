@@ -9,6 +9,7 @@ function data = CalcFR(data,varargin)
 %     'bin_size' - size of temporal window over which to calculate rate [ms or fraction of data set] (default: 5% of the data set)
 %     'bin_shift' - how much to shift the bin before calculating rate again [ms or fraction of data set] (default: 1% of the data set)
 %     'exclude_data_flag' - whether to remove simulated data from result structure (default: 0)
+%     'output_suffix' - suffix to attach to output variable names (default: '')
 % Outputs:
 %   data: data structure with firing rates [Hz] in .variable_FR
 % 
@@ -37,11 +38,12 @@ function data = CalcFR(data,varargin)
 
 %% 1.0 Check inputs
 options=CheckOptions(varargin,{...
-  'variable',[],[],...        
+  'variable',[],[],...
   'threshold',1e-5,[],... % slightly above zero in case variable is point process *_spikes {0,1}
   'bin_size',.05,[],...  % 30
   'bin_shift',.01,[],... % 10
   'exclude_data_flag',0,{0,1},...
+  'output_suffix','',[],...
   },false);
 
 data = CheckData(data);
@@ -106,11 +108,17 @@ end
 bin_index_begs=1:options.bin_shift:ntime;
 % samples at which bins end
 bin_index_ends=bin_index_begs+options.bin_size;
-% remove final bin if extends beyond data
+
 if bin_index_ends(end)>ntime
-  bin_index_begs=bin_index_begs(bin_index_ends<=ntime);
-  bin_index_ends=bin_index_ends(bin_index_ends<=ntime);
+  if length(bin_index_ends) > 1 %multiple bins
+    % remove final bin if extends beyond data
+    bin_index_begs=bin_index_begs(bin_index_ends<=ntime);
+    bin_index_ends=bin_index_ends(bin_index_ends<=ntime);
+  else %1 bin
+    bin_index_ends = ntime;
+  end
 end
+
 % times at which bins begin
 bin_times=time(bin_index_begs);
 % number of bins
@@ -142,21 +150,20 @@ for v=1:length(options.variable)
     end
   end
   % add firing rates to data structure
-  data.([var '_FR'])=FR;
-  data.([var '_spike_times'])=spike_times;
+  data.([var '_FR' options.output_suffix])=FR;
+  data.([var '_spike_times' options.output_suffix])=spike_times;
   if ~ismember([var '_FR'],data.results)  
-    data.results{end+1}=[var '_FR'];
-    data.results{end+1}=[var '_spike_times'];
+    data.results{end+1}=[var '_FR' options.output_suffix];
+    data.results{end+1}=[var '_spike_times' options.output_suffix];
   end
 end
 % add bin times to data
-data.time_FR=bin_times;
-if ~ismember('time_FR',data.results)
-  data.results{end+1}='time_FR';
+data.(['time_FR' options.output_suffix])=bin_times;
+if ~ismember(['time_FR' options.output_suffix],data.results)
+  data.results{end+1}=['time_FR' options.output_suffix];
 end
 if options.exclude_data_flag
   for l=1:length(data.labels)
     data=rmfield(data,data.labels{l});
   end
 end
-
