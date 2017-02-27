@@ -1,0 +1,396 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of StudyinfoIO</title>
+  <meta name="keywords" content="StudyinfoIO">
+  <meta name="description" content="Usage:">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html &copy; 2005 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="../m2html.css">
+  <script type="text/javascript">
+    if (top.frames.length == 0) { top.location = "../index.html"; };
+  </script>
+</head>
+<body>
+<a name="_top"></a>
+<!-- menu.html functions -->
+<h1>StudyinfoIO
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>Usage:</strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>function studyinfo=StudyinfoIO(studyinfo,study_file,id,verbose_flag) </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre class="comment"> Usage: 
+   loading: studyinfo=StudyinfoIO([],study_file,[id,verbose_flag])
+   saving:  StudyinfoIO(studyinfo,[study_file,id,verbose_flag]);
+ Purpose: use lock files to manage concurrent access to a shared studyinfo 
+ i.e., this is an internal helper function called by CheckStudyinfo, 
+ SetupStudy, TrackStudy, and CreateBatch to prevent busy-file conflicts.
+ file. i.e., serialize read/writes for parallel processes in study batch. 
+ Inputs:
+   studyinfo: (empty [] for loading) or (DynaSim studyinfo structure to save)
+   study_file: name of file to load or save
+   id: process identifier for lock file name [optional]</pre></div>
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+This function calls:
+<ul style="list-style-image:url(../matlabicon.gif)">
+<li><a href="DisplayError.html" class="code" title="function DisplayError(err)">DisplayError</a>	</li><li><a href="cell2num.html" class="code" title="function m = cell2num(c)">cell2num</a>	CELL2NUM - Takes a cell matrix of strings and converts each cell into a number.</li></ul>
+This function is called by:
+<ul style="list-style-image:url(../matlabicon.gif)">
+<li><a href="CheckStudyinfo.html" class="code" title="function studyinfo=CheckStudyinfo(studyinfo,varargin)">CheckStudyinfo</a>	CHECKSTUDYINFO - Standardize studyinfo structure and auto-populate missing fields</li><li><a href="CreateBatch.html" class="code" title="function studyinfo=CreateBatch(base_model,modifications_set,varargin)">CreateBatch</a>	% studyinfo=CreateBatch(model,varargin)</li><li><a href="SetupStudy.html" class="code" title="function [studyinfo,options]=SetupStudy(base_model,varargin)">SetupStudy</a>	Purpose:</li><li><a href="UpdateStudy.html" class="code" title="function studyinfo=UpdateStudy(study_dir,varargin)">UpdateStudy</a>	% studyinfo=UpdateStudy(study_dir,varargin)</li></ul>
+<!-- crossreference -->
+
+<h2><a name="_subfunctions"></a>SUBFUNCTIONS <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<ul style="list-style-image:url(../matlabicon.gif)">
+<li><a href="#_sub1" class="code">function id=NextStudyinfoID(study_dir,OS)</a></li></ul>
+
+<h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function studyinfo=StudyinfoIO(studyinfo,study_file,id,verbose_flag)</a>
+0002 <span class="comment">% Usage:</span>
+0003 <span class="comment">%   loading: studyinfo=StudyinfoIO([],study_file,[id,verbose_flag])</span>
+0004 <span class="comment">%   saving:  StudyinfoIO(studyinfo,[study_file,id,verbose_flag]);</span>
+0005 <span class="comment">% Purpose: use lock files to manage concurrent access to a shared studyinfo</span>
+0006 <span class="comment">% i.e., this is an internal helper function called by CheckStudyinfo,</span>
+0007 <span class="comment">% SetupStudy, TrackStudy, and CreateBatch to prevent busy-file conflicts.</span>
+0008 <span class="comment">% file. i.e., serialize read/writes for parallel processes in study batch.</span>
+0009 <span class="comment">% Inputs:</span>
+0010 <span class="comment">%   studyinfo: (empty [] for loading) or (DynaSim studyinfo structure to save)</span>
+0011 <span class="comment">%   study_file: name of file to load or save</span>
+0012 <span class="comment">%   id: process identifier for lock file name [optional]</span>
+0013 
+0014 <span class="comment">% check inputs</span>
+0015 <span class="keyword">if</span> nargin&lt;4, verbose_flag=0; <span class="keyword">end</span>
+0016 <span class="keyword">if</span> nargin&lt;3, id=[]; <span class="keyword">end</span>
+0017 <span class="keyword">if</span> nargin&lt;2 || isempty(study_file)
+0018   study_file=<span class="string">'studyinfo.mat'</span>; 
+0019 <span class="keyword">elseif</span> isdir(study_file)
+0020   study_file=fullfile(study_file,<span class="string">'studyinfo.mat'</span>);
+0021 <span class="keyword">end</span>
+0022 study_dir=fileparts(study_file);
+0023 <span class="keyword">if</span> nargin&lt;1, studyinfo=[]; <span class="keyword">end</span>
+0024 
+0025 <span class="comment">% determine operating system</span>
+0026 [~,OS]=system(<span class="string">'uname'</span>);
+0027 OS=lower(strtrim(OS)); <span class="comment">% operating system (uname: 'Linux', 'Darwin' (Mac), error (Windows))</span>
+0028 <span class="keyword">if</span> length(OS)&gt;7
+0029   <span class="comment">% remove dump (occurs randomly for some reason, with low frequency)</span>
+0030   OS=strtrim(OS(end-6:end));
+0031 <span class="keyword">end</span>
+0032 
+0033 <span class="comment">%% prepare action-specific parameters for accessing studyinfo</span>
+0034 
+0035 <span class="keyword">if</span> isempty(id)
+0036   <span class="comment">% extract process IDs from names of all current lock files</span>
+0037   curr_ids=[];
+0038   <span class="keyword">switch</span> OS
+0039     <span class="keyword">case</span> {<span class="string">'linux'</span>,<span class="string">'darwin'</span>} <span class="comment">% Linux or Mac</span>
+0040       <span class="comment">% lock_file format: .lock_&lt;timestamp&gt;_&lt;id&gt;</span>
+0041       [status,result]=system([<span class="string">'ls '</span> study_dir <span class="string">'/.lock_*'</span>]);
+0042       <span class="keyword">if</span> status==0
+0043         ids=regexp(result,<span class="string">'.lock_\d+_(\d+)'</span>,<span class="string">'tokens'</span>);
+0044         <span class="keyword">if</span> ~isempty(ids), curr_ids=<a href="cell2num.html" class="code" title="function m = cell2num(c)">cell2num</a>([ids{:}]); <span class="keyword">end</span>
+0045       <span class="keyword">end</span>
+0046     <span class="keyword">otherwise</span> <span class="comment">% Windows</span>
+0047       <span class="comment">% lock_file format: lock_&lt;timestamp&gt;_&lt;id&gt;</span>
+0048       D=dir(study_dir);
+0049       status=~any(find(~cellfun(@isempty,regexp({D.name},<span class="string">'^lock_'</span>))));
+0050       <span class="keyword">if</span> status==0
+0051         ids=regexp({D.name},<span class="string">'lock_\d+_(\d+)'</span>,<span class="string">'tokens'</span>,<span class="string">'once'</span>); 
+0052         <span class="keyword">if</span> ~isempty(ids), curr_ids=<a href="cell2num.html" class="code" title="function m = cell2num(c)">cell2num</a>([ids{:}]); <span class="keyword">end</span>
+0053       <span class="keyword">end</span>
+0054   <span class="keyword">end</span>
+0055 <span class="keyword">end</span>
+0056 
+0057 MIN_LOAD_ID=1e7; <span class="comment">% 10M</span>
+0058   <span class="comment">% should be set to a number larger than the max number of sims or analyses expected in a batch</span>
+0059   <span class="comment">% note: this gives priority to loading over saving</span>
+0060   <span class="comment">% (since NextStudyinfoID = max existing lock id with min timestamp)</span>
+0061 
+0062 <span class="comment">% determine proper settings based on inputs (whether studyinfo struct was</span>
+0063 <span class="comment">% provided to be saved or not)</span>
+0064 <span class="keyword">if</span> isempty(studyinfo)
+0065   <span class="comment">% &quot;Load Study&quot; settings</span>
+0066   action=<span class="string">'load'</span>;
+0067   <span class="keyword">if</span> isempty(id)
+0068     <span class="comment">% get id from max id of existing locks with id&gt;=MIN_LOAD_ID else id=MIN_LOAD_ID</span>
+0069     <span class="keyword">if</span> ~isempty(curr_ids) &amp;&amp; any(curr_ids&gt;=MIN_LOAD_ID)
+0070       id=max(curr_ids)+1;
+0071     <span class="keyword">else</span>
+0072       id=MIN_LOAD_ID; <span class="comment">% value greater than the max # of batch processes (i.e., greater than the max process ID)</span>
+0073     <span class="keyword">end</span>
+0074   <span class="keyword">end</span>
+0075   <span class="keyword">if</span> ~exist(study_file,<span class="string">'file'</span>)
+0076     error(<span class="string">'studyinfo.mat file not found: %s'</span>,study_file);
+0077   <span class="keyword">end</span>
+0078 <span class="keyword">else</span>
+0079   <span class="comment">% &quot;Save Study&quot; settings</span>
+0080   action=<span class="string">'save'</span>;
+0081   <span class="keyword">if</span> isempty(id)
+0082     <span class="comment">% get id from max id of existing locks else 0</span>
+0083     <span class="keyword">if</span> ~isempty(curr_ids) &amp;&amp; any(curr_ids&lt;MIN_LOAD_ID) &amp;&amp; ismember(0,curr_ids)
+0084       id=max(curr_ids)+1;
+0085     <span class="keyword">else</span>
+0086       id=0; <span class="comment">% note: batch process IDs start at id=1</span>
+0087     <span class="keyword">end</span>
+0088   <span class="keyword">end</span>
+0089 <span class="keyword">end</span>
+0090 
+0091 <span class="comment">%% create lock file for this process (id): lock_&lt;timestamp&gt;_&lt;id&gt;</span>
+0092 timestamp=datestr(now,<span class="string">'yyyymmddHHMMSSFFF'</span>); <span class="comment">% millisecond precision</span>
+0093 <span class="comment">% --------------------------------------------</span>
+0094 <span class="keyword">switch</span> OS
+0095   <span class="keyword">case</span> {<span class="string">'linux'</span>,<span class="string">'darwin'</span>} <span class="comment">% Linux or Mac</span>
+0096     lock_file=fullfile(study_dir,sprintf(<span class="string">'.lock_%s_%i'</span>,timestamp,id));
+0097     [s,r]=system([<span class="string">'touch '</span> lock_file]);
+0098     <span class="keyword">if</span> s, error(r); <span class="keyword">end</span>
+0099     common_lock_file=fullfile(study_dir,<span class="string">'.locked'</span>);
+0100   <span class="keyword">otherwise</span> <span class="comment">% Windows</span>
+0101     lock_file=fullfile(study_dir,sprintf(<span class="string">'lock_%s_%i'</span>,timestamp,id));
+0102     fid=fopen(lock_file,<span class="string">'w'</span>);
+0103     fclose(fid);
+0104     common_lock_file=fullfile(study_dir,<span class="string">'locked'</span>);
+0105 <span class="keyword">end</span>
+0106 <span class="comment">% --------------------------------------------</span>
+0107 <span class="keyword">if</span> verbose_flag
+0108   fprintf(<span class="string">'created temporary lock file for this process: %s\n'</span>,lock_file);
+0109 <span class="keyword">end</span>
+0110 
+0111 <span class="comment">% pause to allow lock files of simultaneous processes to appear</span>
+0112 <span class="comment">% pause(.01); % wait 10ms</span>
+0113 
+0114 <span class="keyword">try</span>
+0115   
+0116 <span class="comment">%% perform action (load or save) for this process when it's ID is the Next ID</span>
+0117 timeout=30; <span class="comment">% seconds, total time to wait before failing to access studyinfo</span>
+0118 delay=0.001; <span class="comment">% seconds, time to pause between attempts to access studyinfo</span>
+0119 max_num_timeouts=50; <span class="comment">% # timeouts before giving up</span>
+0120   <span class="comment">% note: each failed attempt may remove &lt;=1 stale lock file blocking this process</span>
+0121 cnt=1; <span class="comment">% attempt counter</span>
+0122 done=0; <span class="comment">% {0,1} whether the action has completed successfully</span>
+0123 <span class="keyword">while</span> ~done
+0124   <span class="comment">% try accessing studyinfo file and remove stale lock file if necessary after timeout</span>
+0125   <span class="keyword">for</span> idx=1:(timeout/delay)
+0126     next_id=<a href="#_sub1" class="code" title="subfunction id=NextStudyinfoID(study_dir,OS)">NextStudyinfoID</a>(study_dir,OS);
+0127     <span class="comment">% check if it's time for this process to perform its action</span>
+0128     <span class="keyword">if</span> (id==next_id) &amp;&amp; ~exist(common_lock_file,<span class="string">'file'</span>)
+0129       <span class="comment">% create common lock</span>
+0130       <span class="keyword">switch</span> OS
+0131         <span class="keyword">case</span> {<span class="string">'linux'</span>,<span class="string">'darwin'</span>} <span class="comment">% Linux or Mac</span>
+0132           [s,r]=system([<span class="string">'touch '</span> common_lock_file]);
+0133           <span class="keyword">if</span> s, error(r); <span class="keyword">end</span>
+0134         <span class="keyword">otherwise</span>
+0135           fid=fopen(common_lock_file,<span class="string">'w'</span>);
+0136           fclose(fid);          
+0137       <span class="keyword">end</span>      
+0138       <span class="keyword">try</span>
+0139         <span class="keyword">switch</span> action
+0140           <span class="keyword">case</span> <span class="string">'load'</span>
+0141             <span class="comment">% load study_file</span>
+0142             <span class="keyword">if</span> verbose_flag
+0143               fprintf(<span class="string">'loading study file: %s\n'</span>,study_file);
+0144             <span class="keyword">end</span>
+0145             studyinfo=getfield(load(study_file,<span class="string">'studyinfo'</span>),<span class="string">'studyinfo'</span>);
+0146           <span class="keyword">case</span> <span class="string">'save'</span>
+0147             <span class="keyword">if</span> isfield(studyinfo,<span class="string">'sim_id'</span>)
+0148               <span class="comment">% input is actually an updated simulation metadata substructure</span>
+0149               simulations=studyinfo;
+0150               <span class="comment">% load studyinfo from disk</span>
+0151               studyinfo=getfield(load(study_file,<span class="string">'studyinfo'</span>),<span class="string">'studyinfo'</span>);
+0152               <span class="comment">% update simulation metadata</span>
+0153               <span class="keyword">for</span> sim=1:length(simulations)
+0154                 ix=[studyinfo.simulations.sim_id]==simulations(sim).sim_id;
+0155                 studyinfo.simulations(ix)=simulations(sim);
+0156               <span class="keyword">end</span>
+0157               <span class="keyword">if</span> verbose_flag
+0158                 fprintf(<span class="string">'updating simulation metadata in study file: %s\n'</span>,study_file);
+0159               <span class="keyword">end</span>              
+0160             <span class="keyword">else</span>
+0161               <span class="keyword">if</span> verbose_flag
+0162                 fprintf(<span class="string">'saving study file: %s\n'</span>,study_file);
+0163               <span class="keyword">end</span>              
+0164             <span class="keyword">end</span>
+0165             <span class="comment">% save study_file</span>
+0166             save(study_file,<span class="string">'studyinfo'</span>);
+0167             <span class="comment">%save(study_file,'studyinfo','-v7.3');</span>
+0168         <span class="keyword">end</span>
+0169         done=1; <span class="keyword">break</span>;
+0170       <span class="keyword">catch</span>
+0171         <span class="keyword">if</span> verbose_flag
+0172           fprintf(<span class="string">'failed to %s study file: %s\n'</span>,action,study_file);
+0173         <span class="keyword">end</span>
+0174         pause(delay); <span class="comment">% wait</span>
+0175       <span class="keyword">end</span>
+0176     <span class="keyword">else</span>
+0177       pause(delay); <span class="comment">% wait</span>
+0178     <span class="keyword">end</span>
+0179     <span class="comment">% check if next_id is unchanged (i.e., the same lock file continues</span>
+0180     <span class="comment">% to block this process)</span>
+0181     <span class="keyword">if</span> idx==1
+0182       is_unchanged=1;
+0183     <span class="keyword">else</span>
+0184       is_unchanged = is_unchanged &amp;&amp; (next_id==last_next_id);
+0185     <span class="keyword">end</span>
+0186     last_next_id=next_id;
+0187   <span class="keyword">end</span>
+0188   <span class="comment">% if timed out and next_id has stayed the same: remove next_id lock</span>
+0189   <span class="keyword">if</span> idx==(timeout/delay) &amp;&amp; is_unchanged
+0190     <span class="comment">% remove lock on next_id (that process may have failed before removing</span>
+0191     <span class="comment">% its lock file)</span>
+0192     D=dir(study_dir); <span class="comment">% contents of study_dir directory</span>
+0193     pat=sprintf(<span class="string">'^.?lock_\\d+_%i$'</span>,last_next_id);
+0194     ind=find(~cellfun(@isempty,regexp({D.name},pat)));
+0195     <span class="keyword">if</span> ~isempty(ind)    
+0196       next_lock_file=D(ind).name; <span class="comment">% file with next_id (^.?lock_*_&lt;next_id&gt;$)</span>
+0197       <span class="keyword">if</span> verbose_flag
+0198         fprintf(<span class="string">'deleting stale temporary lock file: %s\n'</span>,next_lock_file);
+0199       <span class="keyword">end</span>
+0200       delete(next_lock_file);
+0201       delete(common_lock_file);
+0202     <span class="keyword">end</span>
+0203   <span class="keyword">end</span>
+0204   <span class="keyword">if</span> ~done
+0205     <span class="keyword">if</span> verbose_flag
+0206       fprintf(<span class="string">'TIMEOUT #%g while waiting to %s study file for process %g (next_id=%g).\n'</span>,cnt,action,id,next_id);
+0207     <span class="keyword">end</span>    
+0208     cnt=cnt+1;
+0209   <span class="keyword">end</span>
+0210   <span class="comment">% check if max attempts has been exceeded</span>
+0211   <span class="keyword">if</span> cnt&gt;max_num_timeouts
+0212     <span class="comment">% delete this process's lock file and give up on action</span>
+0213     <span class="keyword">if</span> verbose_flag
+0214       fprintf(<span class="string">'deleting temporary lock file for this process: %s\n'</span>,lock_file);
+0215     <span class="keyword">end</span>
+0216     delete(lock_file);
+0217     delete(common_lock_file);
+0218     error(<span class="string">'failed to access studyinfo file after %g timeouts.'</span>,max_num_timeouts);
+0219   <span class="keyword">end</span>
+0220 <span class="keyword">end</span>
+0221 <span class="comment">% remove temporary lock for this process</span>
+0222 <span class="keyword">if</span> verbose_flag
+0223   fprintf(<span class="string">'deleting temporary lock file for this process: %s\n'</span>,lock_file);
+0224 <span class="keyword">end</span>
+0225 delete(lock_file);
+0226 delete(common_lock_file);
+0227 
+0228 <span class="keyword">catch</span> err
+0229   <span class="keyword">if</span> verbose_flag
+0230     fprintf(<span class="string">'deleting temporary lock file for this process: %s\n'</span>,lock_file);
+0231   <span class="keyword">end</span>
+0232   delete(lock_file);
+0233   delete(common_lock_file);
+0234   <a href="DisplayError.html" class="code" title="function DisplayError(err)">DisplayError</a>(err);
+0235 <span class="keyword">end</span>  
+0236 
+0237 <span class="comment">%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%</span>
+0238 <span class="comment">%% SUBFUNCTIONS</span>
+0239 <span class="comment">%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%</span>
+0240 <a name="_sub1" href="#_subfunctions" class="code">function id=NextStudyinfoID(study_dir,OS)</a>
+0241 <span class="comment">% purpose: determine the max existing lock id with min timestamp</span>
+0242 <span class="comment">% i.e., get the max sim_id for all processes waiting to write to/read from</span>
+0243 <span class="comment">% studyinfo.mat, as determined by the existence of .?lock_* files.</span>
+0244 <span class="comment">% lock_file format: .lock_&lt;timestamp&gt;_&lt;id&gt; or lock_&lt;timestamp&gt;_&lt;id&gt;</span>
+0245 id=0; <span class="comment">% next process id</span>
+0246 <span class="keyword">switch</span> OS
+0247   <span class="keyword">case</span> {<span class="string">'linux'</span>,<span class="string">'darwin'</span>} <span class="comment">% Linux or Mac</span>
+0248     <span class="comment">% check if there are any lock files</span>
+0249     [status,result]=system([<span class="string">'ls '</span> fullfile(study_dir,<span class="string">'.lock_*'</span>)]);
+0250     <span class="keyword">if</span> status==0 <span class="comment">% there exist lock files</span>
+0251       <span class="comment">% get list of locked ids</span>
+0252       ids=regexp(result,<span class="string">'.lock_\d+_(\d+)'</span>,<span class="string">'tokens'</span>);
+0253       <span class="keyword">if</span> ~isempty(ids)
+0254         <span class="comment">% identify the max id</span>
+0255         ids=[ids{:}];
+0256         id=max(<a href="cell2num.html" class="code" title="function m = cell2num(c)">cell2num</a>(ids));
+0257       <span class="keyword">end</span>
+0258 <span class="comment">%       % get list of timestamps in lock file names</span>
+0259 <span class="comment">%       timestamps=regexp(result,'.lock_(\d+)_\d+','tokens');</span>
+0260 <span class="comment">%       if ~isempty(timestamps)</span>
+0261 <span class="comment">%         % identify the next timestamp to process</span>
+0262 <span class="comment">%         timestamps=[timestamps{:}];</span>
+0263 <span class="comment">%         x=cell2num(timestamps);</span>
+0264 <span class="comment">%         timestamp=timestamps{x==min(x)};</span>
+0265 <span class="comment">%         % get list of locked ids with that timestamp</span>
+0266 <span class="comment">%         ids=regexp(result,sprintf('.lock_%s_(\\d+)',timestamp),'tokens');</span>
+0267 <span class="comment">%         % get max id from lock with min timestamp</span>
+0268 <span class="comment">%         id=max(cell2num([ids{:}]));</span>
+0269 <span class="comment">%       end</span>
+0270     <span class="keyword">end</span>
+0271   <span class="keyword">otherwise</span> <span class="comment">% Windows</span>
+0272     D=dir(study_dir);
+0273     status=~any(find(~cellfun(@isempty,regexp({D.name},<span class="string">'^lock_'</span>))));
+0274     <span class="keyword">if</span> status==0 <span class="comment">% there exist lock files</span>
+0275       <span class="comment">% get list of timestamps in lock file names</span>
+0276       timestamps=regexp({D.name},<span class="string">'lock_(\d+)_\d+'</span>,<span class="string">'tokens'</span>,<span class="string">'once'</span>);
+0277       <span class="keyword">if</span> ~isempty(timestamps)
+0278         <span class="comment">% identify the next timestamp to process</span>
+0279         timestamps=[timestamps{:}];
+0280         <span class="keyword">if</span> isempty(timestamps), <span class="keyword">return</span>; <span class="keyword">end</span>
+0281         x=<a href="cell2num.html" class="code" title="function m = cell2num(c)">cell2num</a>(timestamps);
+0282         timestamp=timestamps{x==min(x)};
+0283         <span class="comment">% get list of locked ids with that timestamp</span>
+0284         ids=regexp({D.name},sprintf(<span class="string">'lock_%s_(\\d+)'</span>,timestamp),<span class="string">'tokens'</span>,<span class="string">'once'</span>);
+0285         <span class="comment">% get max id from lock with min timestamp</span>
+0286         id=max(<a href="cell2num.html" class="code" title="function m = cell2num(c)">cell2num</a>([ids{:}]));
+0287       <span class="keyword">end</span>
+0288     <span class="keyword">end</span>
+0289 <span class="keyword">end</span>
+0290 
+0291 <span class="comment">%% wait until there are no lock files from other processes (or timeout)</span>
+0292 <span class="comment">% NOTE: no longer necessary since adding timestamp to lock file name...</span>
+0293 <span class="comment">% todo: remove this section after extensive testing (do under version</span>
+0294 <span class="comment">% control so that the code remains on record)</span>
+0295 <span class="comment">%{</span>
+0296 timeout=30*5; <span class="comment">% seconds</span>
+0297 delay=0.01; <span class="comment">% seconds</span>
+0298 <span class="keyword">for</span> idx=1:(5*timeout/delay) <span class="comment">% timeout after 5*timeout sec (then clear all lock files if timed out)</span>
+0299     <span class="comment">% note: time-out at this step should be longer than below to allow for</span>
+0300     <span class="comment">% removal of stale lock files by other processes currently attempting access.</span>
+0301   <span class="comment">% check if there exist any files named .lock_*</span>
+0302   <span class="comment">% --------------------------------------------</span>
+0303   <span class="keyword">switch</span> OS
+0304     <span class="keyword">case</span> {<span class="string">'linux'</span>,<span class="string">'darwin'</span>} <span class="comment">% Linux or Mac</span>
+0305       <span class="comment">% lock_file format: .lock_&lt;timestamp&gt;_&lt;id&gt;</span>
+0306       [status,~]=system([<span class="string">'ls '</span> study_dir <span class="string">'/.lock_*'</span>]); <span class="comment">% note: ls is faster than dir</span>
+0307     <span class="keyword">otherwise</span> <span class="comment">% Windows</span>
+0308       <span class="comment">% lock_file format: lock_&lt;timestamp&gt;_&lt;id&gt;</span>
+0309       D=dir(study_dir);
+0310       status=~any(find(~cellfun(@isempty,regexp({D.name},<span class="string">'^lock_'</span>))));
+0311   <span class="keyword">end</span>
+0312   <span class="comment">% --------------------------------------------</span>
+0313   <span class="keyword">if</span> status==0 <span class="comment">% there exists a file .lock_*</span>
+0314     <span class="comment">% note: {.lock_*} are temporary files created to indicate periods during</span>
+0315     <span class="comment">% which studyinfo.mat is being accessed. studyinfo.mat should not be</span>
+0316     <span class="comment">% loaded until all .lock_* files have been removed.</span>
+0317     pause(delay); <span class="comment">% wait</span>
+0318   <span class="keyword">else</span>
+0319     <span class="keyword">break</span>;
+0320   <span class="keyword">end</span>
+0321 <span class="keyword">end</span>
+0322 <span class="comment">% if timed out: delete all lock files blocking this process</span>
+0323 <span class="keyword">if</span> idx==(timeout/delay)
+0324   <span class="keyword">if</span> verbose_flag
+0325     fprintf(<span class="string">'deleting all temporary lock files blocking this process...\n'</span>);
+0326   <span class="keyword">end</span>
+0327   D=dir(study_dir); <span class="comment">% contents of study_dir directory</span>
+0328   inds=find(~cellfun(@isempty,regexp({D.name},<span class="string">'^.?lock_'</span>)));
+0329   <span class="comment">% delete all lock files</span>
+0330   <span class="keyword">for</span> i=1:length(inds)
+0331     file=fullfile(study_dir,D(inds(i)).name);
+0332     <span class="keyword">if</span> verbose_flag
+0333       fprintf(<span class="string">'\t%s\n'</span>,file);
+0334     <span class="keyword">end</span>
+0335     delete(file);
+0336   <span class="keyword">end</span>
+0337 <span class="keyword">end</span>
+0338 <span class="comment">%}</span></pre></div>
+<hr><address>Generated on Fri 24-Feb-2017 14:46:35 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" target="_parent">m2html</a></strong> &copy; 2005</address>
+</body>
+</html>

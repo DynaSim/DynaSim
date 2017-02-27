@@ -1,0 +1,185 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of PropagateParameters</title>
+  <meta name="keywords" content="PropagateParameters">
+  <meta name="description" content="% model = SubstituteParameters(model)">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html &copy; 2005 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="../m2html.css">
+  <script type="text/javascript">
+    if (top.frames.length == 0) { top.location = "../index.html"; };
+  </script>
+</head>
+<body>
+<a name="_top"></a>
+<!-- menu.html functions -->
+<h1>PropagateParameters
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>% model = SubstituteParameters(model)</strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>function model=PropagateParameters(model,varargin) </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre class="comment">% model = SubstituteParameters(model)
+ purpose: substitute parameter values or prepend parameter names with 
+          prefix across all model equations.
+ input: DynaSim model structure
+ options:
+   action: {'substitute','prepend'} (default: substitute)
+   prefix: string prepended to all parameter names if action is 'prepend'
+ output: DynaSim model structure with updated parameter in all equations
+ 
+ see also: <a href="PropagateFunctions.html" class="code" title="function model=PropagateFunctions(model)">PropagateFunctions</a>, <a href="WriteDynaSimSolver.html" class="code" title="function [outfile,options]=WriteDynaSimSolver(model,varargin)">WriteDynaSimSolver</a></pre></div>
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+This function calls:
+<ul style="list-style-image:url(../matlabicon.gif)">
+<li><a href="CheckModel.html" class="code" title="function model=CheckModel(model)">CheckModel</a>	CHECKMODEL - Standardize model structure and auto-populate missing fields</li><li><a href="CheckOptions.html" class="code" title="function parms = CheckOptions(options, options_schema, strict)">CheckOptions</a>	CHECKOPTIONS - organize key/value pairs in structure with default or user-supplied values according to a schema</li><li><a href="dynasim_strrep.html" class="code" title="function str=dynasim_strrep(str,oldstr,newstr,lpad,rpad)">dynasim_strrep</a>	Purpose: replace full words by new character strings, ignoring matches</li></ul>
+This function is called by:
+<ul style="list-style-image:url(../matlabicon.gif)">
+<li><a href="WriteDynaSimSolver.html" class="code" title="function [outfile,options]=WriteDynaSimSolver(model,varargin)">WriteDynaSimSolver</a>	% solver_file=WriteDynaSimSolver(model,varargin)</li></ul>
+<!-- crossreference -->
+
+<h2><a name="_subfunctions"></a>SUBFUNCTIONS <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<ul style="list-style-image:url(../matlabicon.gif)">
+<li><a href="#_sub1" class="code">function expression=insert_parameters(expression,parameters,prefix)</a></li></ul>
+
+<h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function model=PropagateParameters(model,varargin)</a>
+0002 <span class="comment">%% model = SubstituteParameters(model)</span>
+0003 <span class="comment">% purpose: substitute parameter values or prepend parameter names with</span>
+0004 <span class="comment">%          prefix across all model equations.</span>
+0005 <span class="comment">% input: DynaSim model structure</span>
+0006 <span class="comment">% options:</span>
+0007 <span class="comment">%   action: {'substitute','prepend'} (default: substitute)</span>
+0008 <span class="comment">%   prefix: string prepended to all parameter names if action is 'prepend'</span>
+0009 <span class="comment">% output: DynaSim model structure with updated parameter in all equations</span>
+0010 <span class="comment">%</span>
+0011 <span class="comment">% see also: PropagateFunctions, WriteDynaSimSolver</span>
+0012 
+0013 <span class="comment">% Check inputs</span>
+0014 model=<a href="CheckModel.html" class="code" title="function model=CheckModel(model)">CheckModel</a>(model);
+0015 <span class="keyword">if</span> ~isstruct(model.parameters)
+0016   <span class="comment">% nothing to do</span>
+0017   <span class="keyword">return</span>;
+0018 <span class="keyword">end</span>
+0019 <span class="comment">% Check inputs</span>
+0020 options=<a href="CheckOptions.html" class="code" title="function parms = CheckOptions(options, options_schema, strict)">CheckOptions</a>(varargin,{<span class="keyword">...</span>
+0021   <span class="string">'action'</span>,<span class="string">'substitute'</span>,{<span class="string">'substitute'</span>,<span class="string">'prepend'</span>},<span class="keyword">...</span>
+0022   <span class="string">'prefix'</span>,<span class="string">'pset.p.'</span>,[],<span class="keyword">...</span>
+0023   },false);
+0024 
+0025 parameters=model.parameters;
+0026 
+0027 <span class="comment">%% 1.0 Propagate through sub-structures</span>
+0028 target_types={<span class="string">'fixed_variables'</span>,<span class="string">'functions'</span>,<span class="string">'monitors'</span>,<span class="string">'ODEs'</span>,<span class="string">'ICs'</span>};
+0029 <span class="comment">% loop over types of model data</span>
+0030 <span class="keyword">for</span> type_index=1:length(target_types)
+0031   type=target_types{type_index};
+0032   <span class="comment">% info for this type</span>
+0033   s=model.(type);
+0034   <span class="keyword">if</span> isstruct(s)
+0035     update_these=fieldnames(s);
+0036     expressions=struct2cell(s);
+0037     <span class="comment">% loop over target expressions from which to eliminate internal function calls</span>
+0038     <span class="keyword">for</span> i=1:length(expressions)    
+0039       <span class="keyword">if</span> isempty(expressions{i})
+0040         <span class="keyword">continue</span>;
+0041       <span class="keyword">end</span>
+0042       <span class="comment">% update expressions of this type</span>
+0043       <span class="keyword">switch</span> options.action
+0044         <span class="keyword">case</span> <span class="string">'substitute'</span>
+0045           expressions{i}=<a href="#_sub1" class="code" title="subfunction expression=insert_parameters(expression,parameters,prefix)">insert_parameters</a>(expressions{i},parameters,[]);
+0046         <span class="keyword">case</span> <span class="string">'prepend'</span>
+0047           expressions{i}=<a href="#_sub1" class="code" title="subfunction expression=insert_parameters(expression,parameters,prefix)">insert_parameters</a>(expressions{i},parameters,options.prefix);
+0048       <span class="keyword">end</span>
+0049     <span class="keyword">end</span>
+0050     <span class="comment">% update model with expressions that have parameter values in them</span>
+0051     model.(type)=cell2struct(expressions,update_these,1);
+0052   <span class="keyword">end</span>
+0053 <span class="keyword">end</span>
+0054 
+0055 <span class="comment">%% 2.0 Propagate parameters through structure arrays (conditionals)</span>
+0056 <span class="keyword">if</span> ~isempty(model.conditionals)
+0057   target_types={<span class="string">'condition'</span>,<span class="string">'action'</span>,<span class="string">'else'</span>};
+0058   <span class="keyword">for</span> type_index=1:length(target_types)
+0059     type=target_types{type_index};
+0060     expressions={model.conditionals.(type)};
+0061     <span class="comment">% loop over conditional expressions from which to eliminate internal function calls</span>
+0062     <span class="keyword">for</span> i=1:length(expressions)
+0063       <span class="keyword">if</span> isempty(expressions{i})
+0064         <span class="keyword">continue</span>; 
+0065       <span class="keyword">end</span>
+0066       <span class="comment">% update expressions of this type</span>
+0067       <span class="keyword">switch</span> options.action
+0068         <span class="keyword">case</span> <span class="string">'substitute'</span>
+0069           expressions{i}=<a href="#_sub1" class="code" title="subfunction expression=insert_parameters(expression,parameters,prefix)">insert_parameters</a>(expressions{i},parameters,[]);
+0070         <span class="keyword">case</span> <span class="string">'prepend'</span>
+0071           expressions{i}=<a href="#_sub1" class="code" title="subfunction expression=insert_parameters(expression,parameters,prefix)">insert_parameters</a>(expressions{i},parameters,options.prefix);
+0072        <span class="keyword">end</span>     
+0073     <span class="keyword">end</span>
+0074     [model.conditionals(1:length(model.conditionals)).(type)]=deal(expressions{:});
+0075   <span class="keyword">end</span>
+0076 <span class="keyword">end</span>
+0077 
+0078 <a name="_sub1" href="#_subfunctions" class="code">function expression=insert_parameters(expression,parameters,prefix)</a>
+0079   <span class="keyword">if</span> isnumeric(expression)
+0080     <span class="comment">% convert to string and return string</span>
+0081     expression=toString(expression);
+0082     <span class="keyword">return</span>;
+0083   <span class="keyword">end</span>
+0084   allwords=regexp(expression,<span class="string">'[a-zA-Z]+\w*'</span>,<span class="string">'match'</span>);
+0085   words=unique(allwords);
+0086   found_parameters=words(ismember(words,fieldnames(parameters)));
+0087   <span class="keyword">if</span> ~isempty(found_parameters)
+0088     <span class="comment">% substitute those found into this target expression</span>
+0089     <span class="keyword">for</span> ff=1:length(found_parameters)
+0090       <span class="comment">% name of found parameter</span>
+0091       found_parameter=found_parameters{ff};
+0092       <span class="keyword">if</span> isempty(prefix) <span class="comment">% no prefix given, substitute value instead</span>
+0093         <span class="comment">% found value to replace found parameter name in target</span>
+0094         found_value=parameters.(found_parameter);
+0095         <span class="comment">% convert found value into string</span>
+0096         <span class="keyword">if</span> isnumeric(found_value)
+0097           <span class="keyword">if</span> length(found_value)&gt;1
+0098             found_value=sprintf(<span class="string">'[%s]'</span>,num2str(found_value));
+0099           <span class="keyword">else</span>
+0100             found_value=num2str(found_value);
+0101           <span class="keyword">end</span>
+0102         <span class="keyword">elseif</span> iscell(found_value)
+0103           <span class="keyword">if</span> iscellstr(found_value)
+0104             tmp=cellfun(@(x)[<span class="string">''''</span> x <span class="string">''''</span> <span class="string">','</span>] ,found_value,<span class="string">'uni'</span>,0);
+0105           <span class="keyword">else</span>
+0106             tmp=cellfun(@(x)[num2str(x) <span class="string">','</span>] ,found_value,<span class="string">'uni'</span>,0);
+0107           <span class="keyword">end</span>
+0108           tmp=[tmp{:}];
+0109           found_value=sprintf(<span class="string">'{%s}'</span>,tmp(1:end-1));
+0110         <span class="keyword">elseif</span> isa(found_value,<span class="string">'function_handle'</span>)
+0111           found_value=func2str(found_value);
+0112         <span class="keyword">end</span>
+0113       <span class="keyword">else</span> <span class="comment">% prefix provided, substitute prefix_name</span>
+0114         found_value=[prefix found_parameter];
+0115       <span class="keyword">end</span>
+0116       <span class="keyword">if</span> ~ischar(found_value)
+0117         warning(<span class="string">'failed to convert parameter ''%s'' to string and substitute into model equations:'</span>,found_parameter);
+0118         found_value
+0119       <span class="keyword">else</span>
+0120         <span class="comment">% update expression</span>
+0121         num_found = length(find(ismember(allwords,found_parameter)));
+0122         <span class="keyword">for</span> iter=1:num_found
+0123           expression=<a href="dynasim_strrep.html" class="code" title="function str=dynasim_strrep(str,oldstr,newstr,lpad,rpad)">dynasim_strrep</a>(expression,found_parameter,found_value);
+0124         <span class="keyword">end</span>
+0125       <span class="keyword">end</span>
+0126     <span class="keyword">end</span>
+0127   <span class="keyword">end</span>
+0128</pre></div>
+<hr><address>Generated on Fri 24-Feb-2017 14:46:35 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" target="_parent">m2html</a></strong> &copy; 2005</address>
+</body>
+</html>

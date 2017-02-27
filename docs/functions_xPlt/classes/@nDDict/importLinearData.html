@@ -1,0 +1,141 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of importLinearData</title>
+  <meta name="keywords" content="importLinearData">
+  <meta name="description" content="xp = importLinearData(X,axislabels1,...,axislabelsN)">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html &copy; 2005 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="../../../m2html.css">
+  <script type="text/javascript">
+    if (top.frames.length == 0) { top.location = "../../../index.html"; };
+  </script>
+</head>
+<body>
+<a name="_top"></a>
+<!-- ../../menu.html functions_xPlt --><!-- ../menu.html classes --><!-- menu.html @nDDict -->
+<h1>importLinearData
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../../../up.png"></a></h2>
+<div class="box"><strong>xp = importLinearData(X,axislabels1,...,axislabelsN)</strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../../../up.png"></a></h2>
+<div class="box"><strong>function xp = importLinearData(xp,X,varargin) </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../../../up.png"></a></h2>
+<div class="fragment"><pre class="comment"> xp = importLinearData(X,axislabels1,...,axislabelsN)
+ xp = importLinearData(X,axislabels1,...,axislabelsN,'outputformat',Value)
+ Imports a linear array of data, converts it into a matrix
+ based on the supplied axislabels, and stores it in xp.data.
+ Also populates the xp.axis.values appropriately.
+ X - linear matrix or cell array containing input data
+ axislabels1 - linear matrix or cell array containing data labels for dimension1
+ ...
+ axislabelsN - linear matrix or cell array containing data labels for dimensionN
+ Value - Specifies storage format of the imported data, either 'cell' or 
+         'numeric'. Note: if input data is a cell,
+                output format must also be set to 'cell.'</pre></div>
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../../../up.png"></a></h2>
+This function calls:
+<ul style="list-style-image:url(../../../matlabicon.gif)">
+</ul>
+This function is called by:
+<ul style="list-style-image:url(../../../matlabicon.gif)">
+</ul>
+<!-- crossreference -->
+
+
+
+<h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../../../up.png"></a></h2>
+<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function xp = importLinearData(xp,X,varargin)</a>
+0002     <span class="comment">% xp = importLinearData(X,axislabels1,...,axislabelsN)</span>
+0003     <span class="comment">% xp = importLinearData(X,axislabels1,...,axislabelsN,'outputformat',Value)</span>
+0004     <span class="comment">% Imports a linear array of data, converts it into a matrix</span>
+0005     <span class="comment">% based on the supplied axislabels, and stores it in xp.data.</span>
+0006     <span class="comment">% Also populates the xp.axis.values appropriately.</span>
+0007     <span class="comment">% X - linear matrix or cell array containing input data</span>
+0008     <span class="comment">% axislabels1 - linear matrix or cell array containing data labels for dimension1</span>
+0009     <span class="comment">% ...</span>
+0010     <span class="comment">% axislabelsN - linear matrix or cell array containing data labels for dimensionN</span>
+0011     <span class="comment">% Value - Specifies storage format of the imported data, either 'cell' or</span>
+0012     <span class="comment">%         'numeric'. Note: if input data is a cell,</span>
+0013     <span class="comment">%                output format must also be set to 'cell.'</span>
+0014 
+0015     <span class="comment">% Initialize</span>
+0016     axeslinear = varargin;
+0017 
+0018     <span class="comment">% Set outputformat as needed based on data type of input format</span>
+0019     <span class="keyword">if</span> iscell(X)
+0020         outputformat = <span class="string">'cell'</span>;          
+0021     <span class="keyword">else</span>
+0022         outputformat = <span class="string">'numeric'</span>;
+0023     <span class="keyword">end</span>
+0024 
+0025     <span class="comment">% Check if final argument in varargin is a name/value pair</span>
+0026     <span class="keyword">if</span> ischar(varargin{end-1})
+0027         <span class="keyword">if</span> strcmp(varargin{end-1},<span class="string">'format'</span>)
+0028             outputformat = varargin{end};
+0029             axeslinear = axeslinear(1:end-2);       <span class="comment">% Remove the name-value pair from axeslinear</span>
+0030         <span class="keyword">end</span>
+0031     <span class="keyword">end</span>
+0032 
+0033 
+0034     <span class="comment">% Error checking</span>
+0035     <span class="keyword">if</span> ~isvector(X); error(<span class="string">'X must be linear'</span>); <span class="keyword">end</span>
+0036     N = length(X);
+0037     Ndims = length(axeslinear);
+0038 
+0039     <span class="comment">% Set up xp.axis</span>
+0040     <span class="keyword">for</span> j = 1:Ndims
+0041         xp.axis(j).values = unique(axeslinear{j});
+0042         sz(j) = length(xp.axis(j).values);
+0043 
+0044         <span class="keyword">if</span> isnumeric(axeslinear{j}(1))
+0045             <span class="keyword">if</span> any(isnan(axeslinear{j})) || any(isinf(axeslinear{j}))
+0046                 error(<span class="string">'Axis cannot contain NaNs or Infs'</span>);
+0047             <span class="keyword">end</span>
+0048         <span class="keyword">end</span>
+0049     <span class="keyword">end</span>
+0050 
+0051     <span class="comment">% Set up target matrix</span>
+0052     <span class="keyword">if</span> strcmp(outputformat,<span class="string">'cell'</span>)
+0053         xp.data={};
+0054     <span class="keyword">else</span>
+0055         xp.data = zeros(sz);
+0056     <span class="keyword">end</span>
+0057 
+0058     <span class="comment">% Set up xp.data -&gt; Convert linear data into a multi dimensional matrix</span>
+0059     <span class="keyword">for</span> i = 1:N
+0060         <span class="comment">% Get subscripts</span>
+0061         subs = cell(1,Ndims);
+0062         <span class="keyword">for</span> j = 1:Ndims
+0063             <span class="keyword">if</span> iscell(axeslinear{j})
+0064                 subs{j} = find(strcmp(axeslinear{j}{i},xp.axis(j).values));
+0065             <span class="keyword">else</span>
+0066                 subs{j} = find(axeslinear{j}(i) == xp.axis(j).values);
+0067             <span class="keyword">end</span>
+0068         <span class="keyword">end</span>
+0069 
+0070         <span class="comment">% Add data to sparse cell array based on subscripts</span>
+0071         ind = sub2ind(sz,subs{:});
+0072         xp.data(ind) = X(i);
+0073     <span class="keyword">end</span>
+0074 
+0075 
+0076     <span class="comment">% Increase size of cell array if necessary, to make it &quot;square&quot; so</span>
+0077     <span class="comment">% that the subsequent reshape will work</span>
+0078     <span class="keyword">if</span> strcmp(outputformat,<span class="string">'cell'</span>) &amp;&amp; length(xp.data) &lt; prod(sz)
+0079         xp.data{prod(sz)} = [];
+0080     <span class="keyword">end</span>
+0081 
+0082     <span class="comment">% Lastly convert the linear cell array to a matrix cell array</span>
+0083     xp.data = reshape(xp.data,sz);
+0084 <span class="keyword">end</span></pre></div>
+<hr><address>Generated on Fri 24-Feb-2017 14:46:35 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" target="_parent">m2html</a></strong> &copy; 2005</address>
+</body>
+</html>

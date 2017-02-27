@@ -1,0 +1,109 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of GetParentNamespace</title>
+  <meta name="keywords" content="GetParentNamespace">
+  <meta name="description" content="% parent = GetParentNamespace(namespace)">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html &copy; 2005 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="../m2html.css">
+  <script type="text/javascript">
+    if (top.frames.length == 0) { top.location = "../index.html"; };
+  </script>
+</head>
+<body>
+<a name="_top"></a>
+<!-- menu.html functions -->
+<h1>GetParentNamespace
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>% parent = GetParentNamespace(namespace)</strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>function parent = GetParentNamespace(namespace) </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre class="comment">% parent = GetParentNamespace(namespace)
+ purpose: determine parent namespace from namespace specified in namespace
+ input:
+   namespace: current namespace of object
+ output:
+   parent: parent namespace containing the current namespace
+
+ examples:
+ parent=GetParentNamespace('pop')
+ parent=GetParentNamespace('pop_mech')
+ parent=GetParentNamespace('pop_pop')
+ parent=GetParentNamespace('pop_pop_mech')
+ parent=GetParentNamespace('mech')
+ parent=GetParentNamespace('')
+ 
+ see also: <a href="PropagateNamespaces.html" class="code" title="function model = PropagateNamespaces(model,map)">PropagateNamespaces</a></pre></div>
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+This function calls:
+<ul style="list-style-image:url(../matlabicon.gif)">
+</ul>
+This function is called by:
+<ul style="list-style-image:url(../matlabicon.gif)">
+<li><a href="PropagateNamespaces.html" class="code" title="function model = PropagateNamespaces(model,map)">PropagateNamespaces</a>	% model = PropagateNamespaces(model,name_map)</li></ul>
+<!-- crossreference -->
+
+
+
+<h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function parent = GetParentNamespace(namespace)</a>
+0002 <span class="comment">%% parent = GetParentNamespace(namespace)</span>
+0003 <span class="comment">% purpose: determine parent namespace from namespace specified in namespace</span>
+0004 <span class="comment">% input:</span>
+0005 <span class="comment">%   namespace: current namespace of object</span>
+0006 <span class="comment">% output:</span>
+0007 <span class="comment">%   parent: parent namespace containing the current namespace</span>
+0008 <span class="comment">%</span>
+0009 <span class="comment">% examples:</span>
+0010 <span class="comment">% parent=GetParentNamespace('pop')</span>
+0011 <span class="comment">% parent=GetParentNamespace('pop_mech')</span>
+0012 <span class="comment">% parent=GetParentNamespace('pop_pop')</span>
+0013 <span class="comment">% parent=GetParentNamespace('pop_pop_mech')</span>
+0014 <span class="comment">% parent=GetParentNamespace('mech')</span>
+0015 <span class="comment">% parent=GetParentNamespace('')</span>
+0016 <span class="comment">%</span>
+0017 <span class="comment">% see also: PropagateNamespaces</span>
+0018 
+0019 <span class="keyword">if</span> isempty(namespace) &amp;&amp; isnumeric(namespace)
+0020   namespace=<span class="string">''</span>;
+0021 <span class="keyword">end</span>
+0022 <span class="keyword">if</span> ~isempty(namespace) &amp;&amp; namespace(end)==<span class="string">'_'</span>
+0023   namespace=namespace(1:end-1);
+0024 <span class="keyword">end</span>
+0025 <span class="keyword">if</span> ~isempty(namespace)
+0026   parts=regexp(namespace,<span class="string">'_'</span>,<span class="string">'split'</span>);
+0027 <span class="keyword">else</span>
+0028   parts=[];
+0029 <span class="keyword">end</span>
+0030 <span class="keyword">switch</span> length(parts)
+0031   <span class="keyword">case</span> 0                          <span class="comment">% ''</span>
+0032     parent=<span class="string">'global'</span>;
+0033   <span class="keyword">case</span> 1                          <span class="comment">% pop or mech</span>
+0034     parent=<span class="string">''</span>;
+0035   <span class="keyword">case</span> 2
+0036     <span class="keyword">if</span> isequal(parts{1},parts{2}) <span class="comment">% pop_pop</span>
+0037       parent=<span class="string">'global'</span>;
+0038     <span class="keyword">else</span>                          <span class="comment">% pop_mech</span>
+0039       parent=[parts{1} <span class="string">'_'</span>];
+0040     <span class="keyword">end</span>
+0041   <span class="keyword">case</span> 3                          <span class="comment">% pop_pop_mech</span>
+0042     parent=[parts{1} <span class="string">'_'</span> parts{2} <span class="string">'_'</span>];
+0043   <span class="keyword">otherwise</span>                       <span class="comment">% a_b_c_d_...</span>
+0044     parent=<span class="string">''</span>;
+0045     <span class="keyword">for</span> i=1:length(parts)-1
+0046       parent=[parent parts{i} <span class="string">'_'</span>];
+0047     <span class="keyword">end</span>
+0048 <span class="keyword">end</span></pre></div>
+<hr><address>Generated on Fri 24-Feb-2017 14:46:35 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" target="_parent">m2html</a></strong> &copy; 2005</address>
+</body>
+</html>

@@ -1,0 +1,1128 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of SimulateModel</title>
+  <meta name="keywords" content="SimulateModel">
+  <meta name="description" content="% data=SimulateModel(model,'option',value,...)">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html &copy; 2005 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="../m2html.css">
+  <script type="text/javascript">
+    if (top.frames.length == 0) { top.location = "../index.html"; };
+  </script>
+</head>
+<body>
+<a name="_top"></a>
+<!-- menu.html functions -->
+<h1>SimulateModel
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>% data=SimulateModel(model,'option',value,...)</strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>function [data,studyinfo]=SimulateModel(model,varargin) </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre class="comment">% data=SimulateModel(model,'option',value,...)
+ Purpose: manage simulation of a DynaSim model. This high-level function 
+ offers many options to control the number of simulations, how the model is 
+ optionally varied across simulations, and how the numerical integration
+ is performed. It can optionally save the simulated data and create/submit
+ simulation jobs to a compute cluster.
+ Inputs:
+   model: DynaSim model structure or equations (see GenerateModel and 
+          CheckModel for more details)
+ 
+   solver options (provided as key/value pairs: 'option1',value1,'option2',value2,...):
+     'solver'      : solver for numerical integration (see GetSolveFile)
+                     {'euler','rk2','rk4'} (default: 'rk4')
+     'tspan'       : time limits of simulation [begin,end] (default: [0 100]) [ms]
+                     note: units must be consistent with dt and model equations
+     'dt'          : time step used for DynaSim solvers (default: .01) [ms]
+     'downsample_factor': downsampling applied during simulation (default: 1, no downsampling) 
+                     (only every downsample_factor-time point is stored in memory and/or written to disk)
+     'ic'          : numeric array of initial conditions, one value per state 
+                     variable (default: all zeros). overrides definition in model structure
+     'random_seed' : seed for random number generator (default: 'shuffle', set randomly) (usage: rng(options.random_seed))
+     'compile_flag': whether to compile simulation using coder instead of 
+                     interpreting Matlab {0 or 1} (default: 0)
+ 
+   options for running sets of simulations:
+     'vary'        : (default: [], vary nothing): cell matrix specifying model
+                     components to vary across simulations (see NOTE 1 and Vary2Modifications)
+ 
+   options to control saved data:
+     'save_results_flag': whether to save results of analysis and plotting
+     'save_data_flag': whether to save simulated data to disk after completion {0 or 1} (default: 0)
+     'overwrite_flag': whether to overwrite existing data files {0 or 1} (default: 0)
+     'study_dir'     : relative or absolute path to output directory (default: current directory)
+     'prefix'        : string to prepend to all output file names (default: 'study')
+     'disk_flag'     : whether to write to disk during simulation instead of storing in memory {0 or 1} (default: 0)
+     'precision'     : {'single','double'} precision of simulated data saved to disk (default: 'single')
+
+   options for cluster computing:
+     'cluster_flag'  : whether to run simulations on a cluster submitted 
+                     using qsub (see CreateBatch) {0 or 1} (default: 0)
+     'sims_per_job'  : number of simulations to run per batch job (default: 1)
+     'memory_limit'  : memory to allocate per batch job (default: '8G')
+ 
+   options for parallel computing: (requires Parallel Computing Toolbox)
+     'parallel_flag' : whether to use parfor to run simulations {0 or 1} (default: 0)
+     'num_cores'     : number of cores to specify in the parallel pool
+     *note: parallel computing has been disabled for debugging...
+ 
+   options for post-processing:
+     'analysis_functions': cell array of analysis function handles
+     'analysis_options'  : cell array of option cell arrays {'option1',value1,...}
+     'plot_functions'    : cell array of plot function handles
+     'plot_options'      : cell array of option cell arrays {'option1',value1,...}
+ 
+   other options:
+     'verbose_flag'  : whether to display informative messages/logs (default: 0)
+     'modifications' : how to modify DynaSim specification structure component before simulation (see ApplyModifications)
+     'experiment'    : function handle of experiment function (see NOTE 2)
+     'experiment_options' : single cell array of key/value options for experiment function
+     'optimization'  : function handle of optimization function (see NOTE 2)
+ 
+ Outputs:
+   DynaSim data structure:
+     data.labels           : list of state variables and monitors recorded
+     data.(state_variables): state variable data matrix [time x cells]
+     data.(monitors)       : monitor data matrix [time x cells]
+     data.time             : time vector [time x 1]
+     data.simulator_options: simulator options used to generate simulated data
+     data.model            : model used to generate simulated data
+     [data.varied]         : list of varied model components (present only if anything was varied)
+ 
+   DynaSim studyinfo structure (only showing select fields, see CheckStudyinfo for more details)
+     studyinfo.study_dir
+     studyinfo.base_model (=[]): original model from which a set of simulations was derived
+     studyinfo.base_simulator_options (=[])
+     studyinfo.base_solve_file (='')
+     studyinfo.simulations(k): metadata for each simulation in a set of simulations
+                           .sim_id         : unique identifier in study
+                           .modifications  : modifications made to the base model during this simulation
+                           .data_file      : full filename of eventual output file
+                           .batch_dir (=[]): directory where batch jobs were saved (if cluster_flag=1)
+                           .job_file (=[]) : m-file batch job that runs this simulation (if cluster_flag=1)
+                           .simulator_options: simulator options for this simulation
+                           .solve_file     : full filename of m- or mex-file that numerically integrated the model
+ 
+ NOTE 1: 'vary' indicates the variable to vary, the values
+ it should take, and the object whose variable should be varied. 
+ Syntax: vary={object, variable, values; ...}. For instance, to vary
+ parameter 'gNa', taking on values 100 and 120, in population 'E', set
+ vary={'E','gNa',[100 120]}. To additionally vary 'gSYN' in the connection
+ mechanism from 'E' to 'I', set vary={'E','gNa',[100 120];'E-&gt;I','gSYN',[0 1]}.
+ Mechanism lists and equations can also be varied. (see Vary2Modifications 
+ for more details and examples).
+ 
+ EXAMPLES:
+ Example 1: Lorenz equations with phase plot
+   eqns={
+     's=10; r=27; b=2.666';
+     'dx/dt=s*(y-x)';
+     'dy/dt=r*x-y-x*z';
+     'dz/dt=-b*z+x*y';
+   };
+   data=SimulateModel(eqns,'tspan',[0 100],'ic',[1 2 .5]);
+   plot(data.pop1_x,data.pop1_z); title('Lorenz equations'); xlabel('x'); ylabel('z')
+ 
+ Example 2: Leaky integrate-and-fire with spike monitor
+   eqns={
+     'tau=10; R=10; E=-70; I=1.55; thresh=-55; reset=-75';
+     'dV/dt=(E-V+R*I)/tau; if(V&gt;thresh)(V=reset)';
+     'monitor V.spikes(thresh)';
+   };
+   data=SimulateModel(eqns,'tspan',[0 200],'ic',-75);
+   data.pop1_V(data.pop1_V_spikes==1)=20; % insert spike
+   plot(data.time,data.pop1_V); xlabel('time (ms)'); ylabel('V'); title('LIF with spikes')
+ 
+ Example 3: Hodgkin-Huxley-type Intrinsically Bursting neuron
+   eqns='dv/dt=5+@current; {iNaF,iKDR,iM}; gNaF=100; gKDR=5; gM=1.5; v(0)=-70';
+   data=SimulateModel(eqns,'tspan',[0 200]);
+   figure; plot(data.time,data.(data.labels{1}))
+   xlabel('time (ms)'); ylabel('membrane potential (mV)'); title('Intrinsically Bursting neuron')
+ 
+ Example 4: varying max Na+ conductance in Hodgkin-Huxley neuron
+   eqns='dv/dt=@current+10; {iNa,iK}; v(0)=-60';
+   data=SimulateModel(eqns,'vary',{'','gNa',[50 100 200]});
+   % plot how mean firing rate varies with parameter
+   PlotFR(data,'bin_size',30,'bin_shift',10); % bin_size and bin_shift in [ms]
+ 
+ Example 5: Sparse Pyramidal-Interneuron-Network-Gamma rhythm with rastergram
+   % define equations of cell model (same for E and I populations)
+   eqns={ 
+     'dv/dt=Iapp+@current/Cm+noise*randn(1,N_pop)*sqrt(dt)/dt';
+     'monitor v.spikes, iGABAa.functions, iAMPA.functions'
+   };
+   % define specification for two-population network model
+   s=[];
+   s.populations(1).name='E';
+   s.populations(1).size=80;
+   s.populations(1).equations=eqns;
+   s.populations(1).mechanism_list={'iNa','iK'};
+   s.populations(1).parameters={'Iapp',5,'gNa',120,'gK',36,'Cm',1,'noise',4};
+   s.populations(2).name='I';
+   s.populations(2).size=20;
+   s.populations(2).equations=eqns;
+   s.populations(2).mechanism_list={'iNa','iK'};
+   s.populations(2).parameters={'Iapp',0,'gNa',120,'gK',36,'Cm',1,'noise',4};
+   s.connections(1).source='I';
+   s.connections(1).target='E';
+   s.connections(1).mechanism_list={'iGABAa'};
+   s.connections(1).parameters={'tauD',10,'gSYN',.1,'netcon','ones(N_pre,N_post)'};
+   s.connections(2).source='E';
+   s.connections(2).target='I';
+   s.connections(2).mechanism_list={'iAMPA'};
+   s.connections(2).parameters={'tauD',2,'gSYN',.1,'netcon',ones(80,20)};
+   % simulate model
+   data=SimulateModel(s);
+   % plot voltages and rastergram
+   figure;
+   subplot(2,1,1); % voltage traces
+   plot(data.time,data.E_v,'b-',data.time,data.I_v,'r-')
+   title('Sparse Pyramidal-Interneuron-Network-Gamma (sPING)'); ylabel('membrane potential (mV)');
+   subplot(2,1,2); % rastergram
+   E_spikes=nan(size(data.E_v_spikes)); E_spikes(data.E_v_spikes==1)=1;
+   I_spikes=nan(size(data.I_v_spikes)); I_spikes(data.I_v_spikes==1)=1;
+   plot(data.time,E_spikes+repmat(1:80,[length(data.time) 1]),'bo'); hold on
+   plot(data.time,I_spikes+repmat(80+(1:20),[length(data.time) 1]),'ro'); axis([0 100 0 100]);
+   title('rastergram'); xlabel('time (ms)'); ylabel('cell index');
+   % simulate model varying two parameters (Iapp and tauD in sPING)
+   % warning: this may take up to a minute to complete:
+   vary={
+     'E'   ,'Iapp',[0 10 20];     % amplitude of tonic input to E-cells
+     'I-&gt;E','tauD',[5 10 15]      % inhibition decay time constant from I to E
+     };
+   data=SimulateModel(s,'vary',vary);
+   % plot firing rates calculated from spike monitor in both populations
+   PlotFR(data,'variable','*_spikes','bin_size',30,'bin_shift',10);
+ 
+ 
+ See also: <a href="GenerateModel.html" class="code" title="function [model,name_map]=GenerateModel(specification,varargin)">GenerateModel</a>, <a href="CheckModel.html" class="code" title="function model=CheckModel(model)">CheckModel</a>, <a href="GetSolveFile.html" class="code" title="function solve_file = GetSolveFile(model,studyinfo,varargin)">GetSolveFile</a>, <a href="CheckData.html" class="code" title="function data=CheckData(data)">CheckData</a>,
+           <a href="Vary2Modifications.html" class="code" title="function modifications_set = Vary2Modifications(vary,model)">Vary2Modifications</a>, <a href="CheckStudyinfo.html" class="code" title="function studyinfo=CheckStudyinfo(studyinfo,varargin)">CheckStudyinfo</a>, <a href="CreateBatch.html" class="code" title="function studyinfo=CreateBatch(base_model,modifications_set,varargin)">CreateBatch</a></pre></div>
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+This function calls:
+<ul style="list-style-image:url(../matlabicon.gif)">
+<li><a href="AnalyzeData.html" class="code" title="function result=AnalyzeData(data,func,varargin)">AnalyzeData</a>	ANALYZEDATA - Apply an analysis function to DynaSim data, optionally saving data</li><li><a href="ApplyModifications.html" class="code" title="function [output,modifications]=ApplyModifications(model,modifications)">ApplyModifications</a>	APPLYMODIFICATIONS - Apply modifications to DynaSim specification or model structure</li><li><a href="CheckModel.html" class="code" title="function model=CheckModel(model)">CheckModel</a>	CHECKMODEL - Standardize model structure and auto-populate missing fields</li><li><a href="CheckOptions.html" class="code" title="function parms = CheckOptions(options, options_schema, strict)">CheckOptions</a>	CHECKOPTIONS - organize key/value pairs in structure with default or user-supplied values according to a schema</li><li><a href="CheckSolverOptions.html" class="code" title="function options=CheckSolverOptions(options)">CheckSolverOptions</a>	CHECKSOLVEROPTIONS - standardize simulation options appended to params.mat</li><li><a href="CreateBatch.html" class="code" title="function studyinfo=CreateBatch(base_model,modifications_set,varargin)">CreateBatch</a>	% studyinfo=CreateBatch(model,varargin)</li><li><a href="DisplayError.html" class="code" title="function DisplayError(err)">DisplayError</a>	</li><li><a href="ExportData.html" class="code" title="function ExportData(data,varargin)">ExportData</a>	% ExportData(data,varargin)</li><li><a href="GetOutputCounts.html" class="code" title="function [state_var_counts,monitor_counts]=GetOutputCounts(model)">GetOutputCounts</a>	% [state_var_counts,monitor_counts]=GetOutputCounts(model)</li><li><a href="GetSolveFile.html" class="code" title="function solve_file = GetSolveFile(model,studyinfo,varargin)">GetSolveFile</a>	% solve_file = GetSolveFile(model,studyinfo,options)</li><li><a href="ImportData.html" class="code" title="function [data,studyinfo] = ImportData(file,varargin)">ImportData</a>	% [data,studyinfo]=ImportData(data_file)</li><li><a href="Options2Keyval.html" class="code" title="function keyval = Options2Keyval(options)">Options2Keyval</a>	keyvals = Options2Keyval(options)</li><li><a href="RemoveKeyval.html" class="code" title="function keyvals_out = RemoveKeyval(keyvals,keys)">RemoveKeyval</a>	keyvals_out = RemoveKeyval(keyvals_in,keys)</li><li><a href="SetupStudy.html" class="code" title="function [studyinfo,options]=SetupStudy(base_model,varargin)">SetupStudy</a>	Purpose:</li><li><a href="SimulateModel.html" class="code" title="function [data,studyinfo]=SimulateModel(model,varargin)">SimulateModel</a>	% data=SimulateModel(model,'option',value,...)</li><li><a href="UpdateStudy.html" class="code" title="function studyinfo=UpdateStudy(study_dir,varargin)">UpdateStudy</a>	% studyinfo=UpdateStudy(study_dir,varargin)</li><li><a href="Vary2Modifications.html" class="code" title="function modifications_set = Vary2Modifications(vary,model)">Vary2Modifications</a>	% modifications_set=Vary2Modifications(vary)</li></ul>
+This function is called by:
+<ul style="list-style-image:url(../matlabicon.gif)">
+<li><a href="ProbeCellProperties.html" class="code" title="function data = ProbeCellProperties(model,varargin)">ProbeCellProperties</a>	data = ProbeCellProperties(model,'option1',option1,...)</li><li><a href="ProbeFI.html" class="code" title="function data=ProbeFI(model,varargin)">ProbeFI</a>	% data=ProbeFI(model,varargin)</li><li><a href="SimulateModel.html" class="code" title="function [data,studyinfo]=SimulateModel(model,varargin)">SimulateModel</a>	% data=SimulateModel(model,'option',value,...)</li><li><a href="../functions_xPlt/debug_testing_script.html" class="code" title="">debug_testing_script</a>	This is a script that I run through every time I want to test the code.</li></ul>
+<!-- crossreference -->
+
+<h2><a name="_subfunctions"></a>SUBFUNCTIONS <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<ul style="list-style-image:url(../matlabicon.gif)">
+<li><a href="#_sub1" class="code">function update_data</a></li><li><a href="#_sub2" class="code">function tmpdata = prepare_varied_metadata(tmpdata)</a></li><li><a href="#_sub3" class="code">function cleanup(status)</a></li><li><a href="#_sub4" class="code">function all_ICs=ProcessNumericICs</a></li><li><a href="#_sub5" class="code">function modifications=expand_modifications(mods)</a></li><li><a href="#_sub6" class="code">function [model,options]=extract_vary_statement(model,options)</a></li><li><a href="#_sub7" class="code">function options = backward_compatibility(options)</a></li></ul>
+
+<h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function [data,studyinfo]=SimulateModel(model,varargin)</a>
+0002 <span class="comment">%% data=SimulateModel(model,'option',value,...)</span>
+0003 <span class="comment">% Purpose: manage simulation of a DynaSim model. This high-level function</span>
+0004 <span class="comment">% offers many options to control the number of simulations, how the model is</span>
+0005 <span class="comment">% optionally varied across simulations, and how the numerical integration</span>
+0006 <span class="comment">% is performed. It can optionally save the simulated data and create/submit</span>
+0007 <span class="comment">% simulation jobs to a compute cluster.</span>
+0008 <span class="comment">% Inputs:</span>
+0009 <span class="comment">%   model: DynaSim model structure or equations (see GenerateModel and</span>
+0010 <span class="comment">%          CheckModel for more details)</span>
+0011 <span class="comment">%</span>
+0012 <span class="comment">%   solver options (provided as key/value pairs: 'option1',value1,'option2',value2,...):</span>
+0013 <span class="comment">%     'solver'      : solver for numerical integration (see GetSolveFile)</span>
+0014 <span class="comment">%                     {'euler','rk2','rk4'} (default: 'rk4')</span>
+0015 <span class="comment">%     'tspan'       : time limits of simulation [begin,end] (default: [0 100]) [ms]</span>
+0016 <span class="comment">%                     note: units must be consistent with dt and model equations</span>
+0017 <span class="comment">%     'dt'          : time step used for DynaSim solvers (default: .01) [ms]</span>
+0018 <span class="comment">%     'downsample_factor': downsampling applied during simulation (default: 1, no downsampling)</span>
+0019 <span class="comment">%                     (only every downsample_factor-time point is stored in memory and/or written to disk)</span>
+0020 <span class="comment">%     'ic'          : numeric array of initial conditions, one value per state</span>
+0021 <span class="comment">%                     variable (default: all zeros). overrides definition in model structure</span>
+0022 <span class="comment">%     'random_seed' : seed for random number generator (default: 'shuffle', set randomly) (usage: rng(options.random_seed))</span>
+0023 <span class="comment">%     'compile_flag': whether to compile simulation using coder instead of</span>
+0024 <span class="comment">%                     interpreting Matlab {0 or 1} (default: 0)</span>
+0025 <span class="comment">%</span>
+0026 <span class="comment">%   options for running sets of simulations:</span>
+0027 <span class="comment">%     'vary'        : (default: [], vary nothing): cell matrix specifying model</span>
+0028 <span class="comment">%                     components to vary across simulations (see NOTE 1 and Vary2Modifications)</span>
+0029 <span class="comment">%</span>
+0030 <span class="comment">%   options to control saved data:</span>
+0031 <span class="comment">%     'save_results_flag': whether to save results of analysis and plotting</span>
+0032 <span class="comment">%     'save_data_flag': whether to save simulated data to disk after completion {0 or 1} (default: 0)</span>
+0033 <span class="comment">%     'overwrite_flag': whether to overwrite existing data files {0 or 1} (default: 0)</span>
+0034 <span class="comment">%     'study_dir'     : relative or absolute path to output directory (default: current directory)</span>
+0035 <span class="comment">%     'prefix'        : string to prepend to all output file names (default: 'study')</span>
+0036 <span class="comment">%     'disk_flag'     : whether to write to disk during simulation instead of storing in memory {0 or 1} (default: 0)</span>
+0037 <span class="comment">%     'precision'     : {'single','double'} precision of simulated data saved to disk (default: 'single')</span>
+0038 <span class="comment">%</span>
+0039 <span class="comment">%   options for cluster computing:</span>
+0040 <span class="comment">%     'cluster_flag'  : whether to run simulations on a cluster submitted</span>
+0041 <span class="comment">%                     using qsub (see CreateBatch) {0 or 1} (default: 0)</span>
+0042 <span class="comment">%     'sims_per_job'  : number of simulations to run per batch job (default: 1)</span>
+0043 <span class="comment">%     'memory_limit'  : memory to allocate per batch job (default: '8G')</span>
+0044 <span class="comment">%</span>
+0045 <span class="comment">%   options for parallel computing: (requires Parallel Computing Toolbox)</span>
+0046 <span class="comment">%     'parallel_flag' : whether to use parfor to run simulations {0 or 1} (default: 0)</span>
+0047 <span class="comment">%     'num_cores'     : number of cores to specify in the parallel pool</span>
+0048 <span class="comment">%     *note: parallel computing has been disabled for debugging...</span>
+0049 <span class="comment">%</span>
+0050 <span class="comment">%   options for post-processing:</span>
+0051 <span class="comment">%     'analysis_functions': cell array of analysis function handles</span>
+0052 <span class="comment">%     'analysis_options'  : cell array of option cell arrays {'option1',value1,...}</span>
+0053 <span class="comment">%     'plot_functions'    : cell array of plot function handles</span>
+0054 <span class="comment">%     'plot_options'      : cell array of option cell arrays {'option1',value1,...}</span>
+0055 <span class="comment">%</span>
+0056 <span class="comment">%   other options:</span>
+0057 <span class="comment">%     'verbose_flag'  : whether to display informative messages/logs (default: 0)</span>
+0058 <span class="comment">%     'modifications' : how to modify DynaSim specification structure component before simulation (see ApplyModifications)</span>
+0059 <span class="comment">%     'experiment'    : function handle of experiment function (see NOTE 2)</span>
+0060 <span class="comment">%     'experiment_options' : single cell array of key/value options for experiment function</span>
+0061 <span class="comment">%     'optimization'  : function handle of optimization function (see NOTE 2)</span>
+0062 <span class="comment">%</span>
+0063 <span class="comment">% Outputs:</span>
+0064 <span class="comment">%   DynaSim data structure:</span>
+0065 <span class="comment">%     data.labels           : list of state variables and monitors recorded</span>
+0066 <span class="comment">%     data.(state_variables): state variable data matrix [time x cells]</span>
+0067 <span class="comment">%     data.(monitors)       : monitor data matrix [time x cells]</span>
+0068 <span class="comment">%     data.time             : time vector [time x 1]</span>
+0069 <span class="comment">%     data.simulator_options: simulator options used to generate simulated data</span>
+0070 <span class="comment">%     data.model            : model used to generate simulated data</span>
+0071 <span class="comment">%     [data.varied]         : list of varied model components (present only if anything was varied)</span>
+0072 <span class="comment">%</span>
+0073 <span class="comment">%   DynaSim studyinfo structure (only showing select fields, see CheckStudyinfo for more details)</span>
+0074 <span class="comment">%     studyinfo.study_dir</span>
+0075 <span class="comment">%     studyinfo.base_model (=[]): original model from which a set of simulations was derived</span>
+0076 <span class="comment">%     studyinfo.base_simulator_options (=[])</span>
+0077 <span class="comment">%     studyinfo.base_solve_file (='')</span>
+0078 <span class="comment">%     studyinfo.simulations(k): metadata for each simulation in a set of simulations</span>
+0079 <span class="comment">%                           .sim_id         : unique identifier in study</span>
+0080 <span class="comment">%                           .modifications  : modifications made to the base model during this simulation</span>
+0081 <span class="comment">%                           .data_file      : full filename of eventual output file</span>
+0082 <span class="comment">%                           .batch_dir (=[]): directory where batch jobs were saved (if cluster_flag=1)</span>
+0083 <span class="comment">%                           .job_file (=[]) : m-file batch job that runs this simulation (if cluster_flag=1)</span>
+0084 <span class="comment">%                           .simulator_options: simulator options for this simulation</span>
+0085 <span class="comment">%                           .solve_file     : full filename of m- or mex-file that numerically integrated the model</span>
+0086 <span class="comment">%</span>
+0087 <span class="comment">% NOTE 1: 'vary' indicates the variable to vary, the values</span>
+0088 <span class="comment">% it should take, and the object whose variable should be varied.</span>
+0089 <span class="comment">% Syntax: vary={object, variable, values; ...}. For instance, to vary</span>
+0090 <span class="comment">% parameter 'gNa', taking on values 100 and 120, in population 'E', set</span>
+0091 <span class="comment">% vary={'E','gNa',[100 120]}. To additionally vary 'gSYN' in the connection</span>
+0092 <span class="comment">% mechanism from 'E' to 'I', set vary={'E','gNa',[100 120];'E-&gt;I','gSYN',[0 1]}.</span>
+0093 <span class="comment">% Mechanism lists and equations can also be varied. (see Vary2Modifications</span>
+0094 <span class="comment">% for more details and examples).</span>
+0095 <span class="comment">%</span>
+0096 <span class="comment">% EXAMPLES:</span>
+0097 <span class="comment">% Example 1: Lorenz equations with phase plot</span>
+0098 <span class="comment">%   eqns={</span>
+0099 <span class="comment">%     's=10; r=27; b=2.666';</span>
+0100 <span class="comment">%     'dx/dt=s*(y-x)';</span>
+0101 <span class="comment">%     'dy/dt=r*x-y-x*z';</span>
+0102 <span class="comment">%     'dz/dt=-b*z+x*y';</span>
+0103 <span class="comment">%   };</span>
+0104 <span class="comment">%   data=SimulateModel(eqns,'tspan',[0 100],'ic',[1 2 .5]);</span>
+0105 <span class="comment">%   plot(data.pop1_x,data.pop1_z); title('Lorenz equations'); xlabel('x'); ylabel('z')</span>
+0106 <span class="comment">%</span>
+0107 <span class="comment">% Example 2: Leaky integrate-and-fire with spike monitor</span>
+0108 <span class="comment">%   eqns={</span>
+0109 <span class="comment">%     'tau=10; R=10; E=-70; I=1.55; thresh=-55; reset=-75';</span>
+0110 <span class="comment">%     'dV/dt=(E-V+R*I)/tau; if(V&gt;thresh)(V=reset)';</span>
+0111 <span class="comment">%     'monitor V.spikes(thresh)';</span>
+0112 <span class="comment">%   };</span>
+0113 <span class="comment">%   data=SimulateModel(eqns,'tspan',[0 200],'ic',-75);</span>
+0114 <span class="comment">%   data.pop1_V(data.pop1_V_spikes==1)=20; % insert spike</span>
+0115 <span class="comment">%   plot(data.time,data.pop1_V); xlabel('time (ms)'); ylabel('V'); title('LIF with spikes')</span>
+0116 <span class="comment">%</span>
+0117 <span class="comment">% Example 3: Hodgkin-Huxley-type Intrinsically Bursting neuron</span>
+0118 <span class="comment">%   eqns='dv/dt=5+@current; {iNaF,iKDR,iM}; gNaF=100; gKDR=5; gM=1.5; v(0)=-70';</span>
+0119 <span class="comment">%   data=SimulateModel(eqns,'tspan',[0 200]);</span>
+0120 <span class="comment">%   figure; plot(data.time,data.(data.labels{1}))</span>
+0121 <span class="comment">%   xlabel('time (ms)'); ylabel('membrane potential (mV)'); title('Intrinsically Bursting neuron')</span>
+0122 <span class="comment">%</span>
+0123 <span class="comment">% Example 4: varying max Na+ conductance in Hodgkin-Huxley neuron</span>
+0124 <span class="comment">%   eqns='dv/dt=@current+10; {iNa,iK}; v(0)=-60';</span>
+0125 <span class="comment">%   data=SimulateModel(eqns,'vary',{'','gNa',[50 100 200]});</span>
+0126 <span class="comment">%   % plot how mean firing rate varies with parameter</span>
+0127 <span class="comment">%   PlotFR(data,'bin_size',30,'bin_shift',10); % bin_size and bin_shift in [ms]</span>
+0128 <span class="comment">%</span>
+0129 <span class="comment">% Example 5: Sparse Pyramidal-Interneuron-Network-Gamma rhythm with rastergram</span>
+0130 <span class="comment">%   % define equations of cell model (same for E and I populations)</span>
+0131 <span class="comment">%   eqns={</span>
+0132 <span class="comment">%     'dv/dt=Iapp+@current/Cm+noise*randn(1,N_pop)*sqrt(dt)/dt';</span>
+0133 <span class="comment">%     'monitor v.spikes, iGABAa.functions, iAMPA.functions'</span>
+0134 <span class="comment">%   };</span>
+0135 <span class="comment">%   % define specification for two-population network model</span>
+0136 <span class="comment">%   s=[];</span>
+0137 <span class="comment">%   s.populations(1).name='E';</span>
+0138 <span class="comment">%   s.populations(1).size=80;</span>
+0139 <span class="comment">%   s.populations(1).equations=eqns;</span>
+0140 <span class="comment">%   s.populations(1).mechanism_list={'iNa','iK'};</span>
+0141 <span class="comment">%   s.populations(1).parameters={'Iapp',5,'gNa',120,'gK',36,'Cm',1,'noise',4};</span>
+0142 <span class="comment">%   s.populations(2).name='I';</span>
+0143 <span class="comment">%   s.populations(2).size=20;</span>
+0144 <span class="comment">%   s.populations(2).equations=eqns;</span>
+0145 <span class="comment">%   s.populations(2).mechanism_list={'iNa','iK'};</span>
+0146 <span class="comment">%   s.populations(2).parameters={'Iapp',0,'gNa',120,'gK',36,'Cm',1,'noise',4};</span>
+0147 <span class="comment">%   s.connections(1).source='I';</span>
+0148 <span class="comment">%   s.connections(1).target='E';</span>
+0149 <span class="comment">%   s.connections(1).mechanism_list={'iGABAa'};</span>
+0150 <span class="comment">%   s.connections(1).parameters={'tauD',10,'gSYN',.1,'netcon','ones(N_pre,N_post)'};</span>
+0151 <span class="comment">%   s.connections(2).source='E';</span>
+0152 <span class="comment">%   s.connections(2).target='I';</span>
+0153 <span class="comment">%   s.connections(2).mechanism_list={'iAMPA'};</span>
+0154 <span class="comment">%   s.connections(2).parameters={'tauD',2,'gSYN',.1,'netcon',ones(80,20)};</span>
+0155 <span class="comment">%   % simulate model</span>
+0156 <span class="comment">%   data=SimulateModel(s);</span>
+0157 <span class="comment">%   % plot voltages and rastergram</span>
+0158 <span class="comment">%   figure;</span>
+0159 <span class="comment">%   subplot(2,1,1); % voltage traces</span>
+0160 <span class="comment">%   plot(data.time,data.E_v,'b-',data.time,data.I_v,'r-')</span>
+0161 <span class="comment">%   title('Sparse Pyramidal-Interneuron-Network-Gamma (sPING)'); ylabel('membrane potential (mV)');</span>
+0162 <span class="comment">%   subplot(2,1,2); % rastergram</span>
+0163 <span class="comment">%   E_spikes=nan(size(data.E_v_spikes)); E_spikes(data.E_v_spikes==1)=1;</span>
+0164 <span class="comment">%   I_spikes=nan(size(data.I_v_spikes)); I_spikes(data.I_v_spikes==1)=1;</span>
+0165 <span class="comment">%   plot(data.time,E_spikes+repmat(1:80,[length(data.time) 1]),'bo'); hold on</span>
+0166 <span class="comment">%   plot(data.time,I_spikes+repmat(80+(1:20),[length(data.time) 1]),'ro'); axis([0 100 0 100]);</span>
+0167 <span class="comment">%   title('rastergram'); xlabel('time (ms)'); ylabel('cell index');</span>
+0168 <span class="comment">%   % simulate model varying two parameters (Iapp and tauD in sPING)</span>
+0169 <span class="comment">%   % warning: this may take up to a minute to complete:</span>
+0170 <span class="comment">%   vary={</span>
+0171 <span class="comment">%     'E'   ,'Iapp',[0 10 20];     % amplitude of tonic input to E-cells</span>
+0172 <span class="comment">%     'I-&gt;E','tauD',[5 10 15]      % inhibition decay time constant from I to E</span>
+0173 <span class="comment">%     };</span>
+0174 <span class="comment">%   data=SimulateModel(s,'vary',vary);</span>
+0175 <span class="comment">%   % plot firing rates calculated from spike monitor in both populations</span>
+0176 <span class="comment">%   PlotFR(data,'variable','*_spikes','bin_size',30,'bin_shift',10);</span>
+0177 <span class="comment">%</span>
+0178 <span class="comment">%</span>
+0179 <span class="comment">% See also: GenerateModel, CheckModel, GetSolveFile, CheckData,</span>
+0180 <span class="comment">%           Vary2Modifications, CheckStudyinfo, CreateBatch</span>
+0181 
+0182 <span class="comment">% todo: rename 'disk_flag' to something more descriptive</span>
+0183 
+0184 <span class="comment">% dependencies: WriteDynaSimSolver, WriteMatlabSolver, PropagateFunctions, CheckModel,</span>
+0185 <span class="comment">% CheckOptions, Options2Keyval, DisplayError, DynaSim2Odefun</span>
+0186 
+0187 <span class="comment">% &lt;-- temporarily removed from help section --&gt;</span>
+0188 <span class="comment">% NOTE 2: special functions that recursively call SimulateModel:</span>
+0189 <span class="comment">% - &quot;Experiments&quot; are ways of hacking the ODE system to incorporate additional</span>
+0190 <span class="comment">% models (e.g., controlled inputs) and use them to simulate experimental</span>
+0191 <span class="comment">% protocols by systematically varying Model Components across simulations in</span>
+0192 <span class="comment">% prescribed ways. Technically, an Experiment could be any function that takes</span>
+0193 <span class="comment">% a DynaSim model structure as its first input followed by key/value options.</span>
+0194 <span class="comment">% Ideally, Experiments represent standardized procedural methods (experimental</span>
+0195 <span class="comment">% protocols) for studying the modeled system. Experiment functions typically</span>
+0196 <span class="comment">% involve applying a set of Modifications to a Base Model and varying the</span>
+0197 <span class="comment">% modified model in prescribed ways.</span>
+0198 <span class="comment">% - during &quot;Optimization&quot;, each iteration involves a single Study producing</span>
+0199 <span class="comment">% modified models, their simulated data sets and analysis results (e.g.,</span>
+0200 <span class="comment">% cost functions) that shape the Base Model for a subsequent iteration and</span>
+0201 <span class="comment">% its Study. Hence, a closed-loop optimization protocol produces a set of</span>
+0202 <span class="comment">% evolving Studies. Technically, an Optimization could be any function</span>
+0203 <span class="comment">% that takes a DynaSim model structure as its first input followed by</span>
+0204 <span class="comment">% key/value options. Optimization functions will typically involve</span>
+0205 <span class="comment">% while-looping through multiple Studies and analyzing data sets to update</span>
+0206 <span class="comment">% Model Components on each iteration until some stop condition is reached.</span>
+0207 
+0208 <span class="comment">% Initialize outputs</span>
+0209 data=[];
+0210 studyinfo=[];
+0211 
+0212 <span class="comment">% Check inputs</span>
+0213 varargin = <a href="#_sub7" class="code" title="subfunction options = backward_compatibility(options)">backward_compatibility</a>(varargin);
+0214 options=<a href="CheckOptions.html" class="code" title="function parms = CheckOptions(options, options_schema, strict)">CheckOptions</a>(varargin,{<span class="keyword">...</span>
+0215   <span class="string">'tspan'</span>,[0 100],[],<span class="keyword">...</span><span class="comment">          % [beg,end] (units must be consistent with dt and equations)</span>
+0216   <span class="string">'ic'</span>,[],[],<span class="keyword">...</span><span class="comment">                  % initial conditions (overrides definition in model structure; can input as IC structure or numeric array)</span>
+0217   <span class="string">'solver'</span>,<span class="string">'rk4'</span>,{<span class="string">'euler'</span>,<span class="string">'rk1'</span>,<span class="string">'rk2'</span>,<span class="string">'rk4'</span>,<span class="string">'modified_euler'</span>,<span class="string">'rungekutta'</span>,<span class="string">'rk'</span>,<span class="string">'ode23'</span>,<span class="string">'ode45'</span>},<span class="keyword">...</span><span class="comment"> % DynaSim and built-in Matlab solvers</span>
+0218   <span class="string">'matlab_solver_options'</span>,[],[],<span class="keyword">...</span><span class="comment"> % options from odeset for use with built-in Matlab solvers</span>
+0219   <span class="string">'dt'</span>,.01,[],<span class="keyword">...</span><span class="comment">                 % time step used for fixed step DynaSim solvers</span>
+0220   <span class="string">'downsample_factor'</span>,1,[],<span class="keyword">...</span><span class="comment">    % downsampling applied during simulation (only every downsample_factor-time point is stored in memory or written to disk)</span>
+0221   <span class="string">'reduce_function_calls_flag'</span>,1,{0,1},<span class="keyword">...</span><span class="comment">   % whether to eliminate internal (anonymous) function calls</span>
+0222   <span class="string">'save_parameters_flag'</span>,1,{0,1},<span class="keyword">...</span>
+0223   <span class="string">'random_seed'</span>,<span class="string">'shuffle'</span>,[],<span class="keyword">...</span><span class="comment">        % seed for random number generator (usage: rng(random_seed))</span>
+0224   <span class="string">'data_file'</span>,<span class="string">'data.csv'</span>,[],<span class="keyword">...</span><span class="comment"> % name of data file if disk_flag=1</span>
+0225   <span class="string">'precision'</span>,<span class="string">'single'</span>,{<span class="string">'single'</span>,<span class="string">'double'</span>},<span class="keyword">...</span>
+0226   <span class="string">'logfid'</span>,1,[],<span class="keyword">...</span>
+0227   <span class="string">'store_model_flag'</span>,1,{0,1},<span class="keyword">...</span><span class="comment">  % whether to store model structure with data</span>
+0228   <span class="string">'verbose_flag'</span>,0,{0,1},<span class="keyword">...</span>
+0229   <span class="string">'modifications'</span>,[],[],<span class="keyword">...</span><span class="comment">       % *DynaSim modifications structure</span>
+0230   <span class="string">'vary'</span>,[],[],<span class="keyword">...</span><span class="comment">                % specification of things to vary or custom modifications_set</span>
+0231   <span class="string">'experiment'</span>,[],[],<span class="keyword">...</span><span class="comment">          % experiment function. func(model,args)</span>
+0232   <span class="string">'experiment_options'</span>,[],[],<span class="keyword">...</span>
+0233   <span class="string">'optimization'</span>,[],[],<span class="keyword">...</span>
+0234   <span class="string">'cluster_flag'</span>,0,{0,1},<span class="keyword">...</span><span class="comment">      % whether to run simulations on a cluster</span>
+0235   <span class="string">'sims_per_job'</span>,1,[],<span class="keyword">...</span><span class="comment"> % how many sims to run per batch job</span>
+0236   <span class="string">'memory_limit'</span>,<span class="string">'8G'</span>,[],<span class="keyword">...</span><span class="comment"> % how much memory to allocate per batch job</span>
+0237   <span class="string">'parallel_flag'</span>,0,{0,1},<span class="keyword">...</span><span class="comment">     % whether to run simulations in parallel (using parfor)</span>
+0238   <span class="string">'num_cores'</span>,4,[],<span class="keyword">...</span><span class="comment"> % # cores for parallel processing (SCC supports 1-12)</span>
+0239   <span class="string">'compile_flag'</span>,0,{0,1},<span class="keyword">...</span><span class="comment"> % exist('codegen')==6, whether to compile using coder instead of interpreting Matlab</span>
+0240   <span class="string">'disk_flag'</span>,0,{0,1},<span class="keyword">...</span><span class="comment">            % whether to write to disk during simulation instead of storing in memory</span>
+0241   <span class="string">'save_data_flag'</span>,0,{0,1},<span class="keyword">...</span><span class="comment">  % whether to save simulated data</span>
+0242   <span class="string">'save_results_flag'</span>,0,{0,1},<span class="keyword">...</span><span class="comment">  % whether to save simulated data</span>
+0243   <span class="string">'project_dir'</span>,pwd,[],<span class="keyword">...</span>
+0244   <span class="string">'study_dir'</span>,[],[],<span class="keyword">...</span><span class="comment"> % study directory</span>
+0245   <span class="string">'prefix'</span>,<span class="string">'study'</span>,[],<span class="keyword">...</span><span class="comment"> % prefix prepended to all output files</span>
+0246   <span class="string">'overwrite_flag'</span>,0,{0,1},<span class="keyword">...</span><span class="comment"> % whether to overwrite existing data</span>
+0247   <span class="string">'solve_file'</span>,[],[],<span class="keyword">...</span><span class="comment"> % m- or mex-file solving the system</span>
+0248   <span class="string">'sim_id'</span>,[],[],<span class="keyword">...</span><span class="comment"> % sim id in an existing study</span>
+0249   <span class="string">'studyinfo'</span>,[],[],<span class="keyword">...</span><span class="comment"> </span>
+0250   <span class="string">'email'</span>,[],[],<span class="keyword">...</span><span class="comment"> % email to send notification upon study completion</span>
+0251   <span class="string">'analysis_functions'</span>,[],[],<span class="keyword">...</span>
+0252   <span class="string">'analysis_options'</span>,[],[],<span class="keyword">...</span>
+0253   <span class="string">'plot_functions'</span>,[],[],<span class="keyword">...</span>
+0254   <span class="string">'plot_options'</span>,[],[],<span class="keyword">...</span>
+0255   },false);
+0256 <span class="comment">% more options: remove_solve_dir, remove_batch_dir, post_downsample_factor</span>
+0257 
+0258 <span class="keyword">if</span> options.parallel_flag
+0259   <span class="comment">%error('parallel computing has been disabled for debugging. ''set parallel_flag'' to 0');</span>
+0260 <span class="keyword">end</span>
+0261 
+0262 <span class="keyword">if</span> options.compile_flag &amp;&amp; options.reduce_function_calls_flag==0
+0263   fprintf(<span class="string">'setting ''reduce_function_calls_flag'' to 1 for compatibility with ''compile_flag''=1 (coder does not support anonymous functions).\n'</span>);
+0264   options.reduce_function_calls_flag=1;
+0265 <span class="keyword">end</span>
+0266 
+0267 <span class="keyword">if</span> options.cluster_flag &amp;&amp; options.save_data_flag==0
+0268 <span class="comment">%   options.save_data_flag=1;</span>
+0269 <span class="comment">%   if options.verbose_flag</span>
+0270 <span class="comment">%     fprintf('setting ''save_data_flag'' to 1 for storing results of batch jobs for later access.\n');</span>
+0271 <span class="comment">%   end</span>
+0272   options.save_results_flag=1;
+0273   <span class="keyword">if</span> options.verbose_flag
+0274     fprintf(<span class="string">'setting ''save_results_flag'' to 1 for storing results of batch jobs for later access.\n'</span>);
+0275   <span class="keyword">end</span>
+0276 <span class="keyword">end</span>
+0277 <span class="comment">%</span>
+0278 <span class="comment">% if ischar(options.study_dir) &amp;&amp; options.save_data_flag==0</span>
+0279 <span class="comment">%   options.save_data_flag=1;</span>
+0280 <span class="comment">%   if options.verbose_flag</span>
+0281 <span class="comment">%     fprintf('setting ''save_data_flag'' to 1 for storing results in study_dir: %s.\n',options.study_dir);</span>
+0282 <span class="comment">%   end</span>
+0283 <span class="comment">% end</span>
+0284 
+0285 <span class="comment">% prepare analysis functions and options</span>
+0286 <span class="keyword">if</span> ~isempty(options.analysis_functions)
+0287   <span class="keyword">if</span> ~iscell(options.analysis_functions)
+0288     <span class="comment">% convert function handle into cell array of function handles</span>
+0289     options.analysis_functions={options.analysis_functions};
+0290   <span class="keyword">end</span>
+0291   <span class="keyword">if</span> any(~cellfun(@(x)isa(x,<span class="string">'function_handle'</span>),options.analysis_functions))
+0292     error(<span class="string">'at least one analysis function was not provided as a function handle.'</span>);
+0293   <span class="keyword">end</span>
+0294   <span class="keyword">if</span> isempty(options.analysis_options)
+0295     <span class="comment">% convert to empty option cell array</span>
+0296     options.analysis_options={};
+0297   <span class="keyword">end</span>
+0298   <span class="keyword">if</span> ~iscell(options.analysis_options)
+0299     error(<span class="string">'''analysis_options'' must be a cell array of options or option cell arrays'</span>);
+0300   <span class="keyword">end</span>
+0301   <span class="comment">% force to be a cell array of option cell arrays</span>
+0302   <span class="keyword">if</span> isempty(options.analysis_options) || ischar(options.analysis_options{1}) <span class="comment">% first element is an option</span>
+0303     options.analysis_options={options.analysis_options};
+0304   <span class="keyword">end</span>
+0305   <span class="comment">% make sure there is one option cell array per analysis function</span>
+0306   <span class="keyword">if</span> length(options.analysis_options)==1 &amp;&amp; length(options.analysis_functions)&gt;1
+0307     <span class="comment">% copy options for each analysis function</span>
+0308     options.analysis_options=repmat(options.analysis_options,[1 length(options.analysis_functions)]);
+0309   <span class="keyword">elseif</span> length(options.analysis_options) ~= length(options.analysis_functions)
+0310     error(<span class="string">'there must be one option cell array per analysis function.'</span>);
+0311   <span class="keyword">end</span>
+0312 <span class="comment">%   if options.cluster_flag~=1</span>
+0313 <span class="comment">%     warning('analysis functions will not be run after simulation. currently automatic post-simulation analyses are supported only for cluster jobs.');</span>
+0314 <span class="comment">%     options.analysis_functions=[];</span>
+0315 <span class="comment">%     options.analysis_options=[];</span>
+0316 <span class="comment">%   end</span>
+0317 <span class="keyword">end</span>
+0318 
+0319 <span class="comment">% prepare plot functions and options</span>
+0320 <span class="keyword">if</span> ~isempty(options.plot_functions)
+0321   <span class="keyword">if</span> ~iscell(options.plot_functions)
+0322     <span class="comment">% convert function handle into cell array of function handles</span>
+0323     options.plot_functions={options.plot_functions};
+0324   <span class="keyword">end</span>
+0325   <span class="keyword">if</span> any(~cellfun(@(x)isa(x,<span class="string">'function_handle'</span>),options.plot_functions))
+0326     error(<span class="string">'at least one plot function was not provided as a function handle.'</span>);
+0327   <span class="keyword">end</span>
+0328   <span class="keyword">if</span> isempty(options.plot_options)
+0329     <span class="comment">% convert to empty option cell array</span>
+0330     options.plot_options={};
+0331   <span class="keyword">end</span>
+0332   <span class="keyword">if</span> ~iscell(options.plot_options)
+0333     error(<span class="string">'''plot_options'' must be a cell array of options or option cell arrays'</span>);
+0334   <span class="keyword">end</span>
+0335   <span class="comment">% force to be a cell array of option cell arrays</span>
+0336   <span class="keyword">if</span> isempty(options.plot_options) || ischar(options.plot_options{1}) <span class="comment">% first element is an option</span>
+0337     options.plot_options={options.plot_options};
+0338   <span class="keyword">end</span>
+0339   <span class="comment">% make sure there is one option cell array per plot function</span>
+0340   <span class="keyword">if</span> length(options.plot_options)==1 &amp;&amp; length(options.plot_functions)&gt;1
+0341     <span class="comment">% copy options for each plot function</span>
+0342     options.plot_options=repmat(options.plot_options,[1 length(options.plot_functions)]);
+0343   <span class="keyword">elseif</span> length(options.plot_options) ~= length(options.plot_functions)
+0344     error(<span class="string">'there must be one option cell array per plot function.'</span>);
+0345   <span class="keyword">end</span>
+0346 <span class="comment">%   if options.cluster_flag~=1</span>
+0347 <span class="comment">%     warning('plot functions will not be run after simulation. currently automatic post-simulation plotting are supported only for cluster jobs.');</span>
+0348 <span class="comment">%     options.plot_functions=[];</span>
+0349 <span class="comment">%     options.plot_options=[];</span>
+0350 <span class="comment">%   end</span>
+0351 <span class="keyword">end</span>
+0352 
+0353 <span class="comment">%% 1.0 prepare model and study structures for simulation</span>
+0354 
+0355 <span class="comment">% handle special case of input equations with vary() statement</span>
+0356 [model,options]=<a href="#_sub6" class="code" title="subfunction [model,options]=extract_vary_statement(model,options)">extract_vary_statement</a>(model,options);
+0357 
+0358 <span class="comment">% check/standardize model</span>
+0359 model=<a href="CheckModel.html" class="code" title="function model=CheckModel(model)">CheckModel</a>(model); <span class="comment">% handles conversion when input is a string w/ equations or a DynaSim specification structure</span>
+0360 
+0361 <span class="comment">% 1.1 apply modifications before simulation and optional further variation across simulations</span>
+0362 <span class="keyword">if</span> ~isempty(options.modifications)
+0363   [model,options.modifications]=<a href="ApplyModifications.html" class="code" title="function [output,modifications]=ApplyModifications(model,modifications)">ApplyModifications</a>(model,options.modifications);
+0364 <span class="keyword">end</span>
+0365 
+0366 <span class="comment">% 1.2 incorporate user-supplied initial conditions</span>
+0367 <span class="keyword">if</span> ~isempty(options.ic)
+0368   <span class="keyword">if</span> isstruct(options.ic)
+0369   <span class="comment">% todo: create subfunc that converts numeric ICs to strings for</span>
+0370   <span class="comment">% consistency (call here and in ProcessNumericICs &lt;-- use code already there)</span>
+0371     <span class="comment">% user provided structure with ICs</span>
+0372     warning(<span class="string">'off'</span>,<span class="string">'catstruct:DuplicatesFound'</span>);
+0373     model.ICs=catstruct(model.ICs,options.ic);
+0374   <span class="keyword">elseif</span> isnumeric(options.ic)
+0375     <span class="comment">% user provided numeric array with one value per state variable per</span>
+0376     <span class="comment">% cell with state variables ordered according to model.state_variables.</span>
+0377     model.ICs=<a href="#_sub4" class="code" title="subfunction all_ICs=ProcessNumericICs">ProcessNumericICs</a>;
+0378   <span class="keyword">end</span>
+0379 <span class="keyword">end</span>
+0380 
+0381 <span class="comment">% expand set of things to vary across simulations</span>
+0382 <span class="keyword">if</span> ~isempty(options.vary)
+0383   modifications_set=<a href="Vary2Modifications.html" class="code" title="function modifications_set = Vary2Modifications(vary,model)">Vary2Modifications</a>(options.vary,model);
+0384 <span class="keyword">else</span>
+0385   modifications_set={[]};
+0386 <span class="keyword">end</span>
+0387 
+0388 <span class="comment">% 1.3 check for parallel simulations</span>
+0389 <span class="comment">% 1.3.1 manage cluster computing</span>
+0390 <span class="comment">% whether to write jobs for distributed processing on cluster</span>
+0391 <span class="keyword">if</span> options.cluster_flag==1
+0392   <span class="comment">% add to model any parameters in 'vary' not explicit in current model</span>
+0393   <span class="comment">% approach: use ApplyModifications(), it does that automatically</span>
+0394   <span class="keyword">for</span> i=1:length(modifications_set)
+0395     <span class="keyword">if</span> ~isempty(modifications_set{i}) &amp;&amp; ~strcmp(modifications_set{i}{2},<span class="string">'mechanism_list'</span>) &amp;&amp; ~strcmp(modifications_set{i}{2},<span class="string">'equations'</span>)
+0396       model=<a href="ApplyModifications.html" class="code" title="function [output,modifications]=ApplyModifications(model,modifications)">ApplyModifications</a>(model,modifications_set{i});
+0397       <span class="keyword">break</span>
+0398     <span class="keyword">end</span>
+0399   <span class="keyword">end</span>
+0400   keyvals = <a href="Options2Keyval.html" class="code" title="function keyval = Options2Keyval(options)">Options2Keyval</a>(options);
+0401   studyinfo=<a href="CreateBatch.html" class="code" title="function studyinfo=CreateBatch(base_model,modifications_set,varargin)">CreateBatch</a>(model,modifications_set,<span class="string">'simulator_options'</span>,options,<span class="string">'process_id'</span>,options.sim_id,keyvals{:});
+0402   <span class="comment">%if options.overwrite_flag==0</span>
+0403     <span class="comment">% check status of study</span>
+0404 <span class="comment">%     [~,s]=MonitorStudy(studyinfo.study_dir,'verbose_flag',0,'process_id',options.sim_id);</span>
+0405 <span class="comment">%     if s==1 % study finished</span>
+0406 <span class="comment">%       if options.verbose_flag</span>
+0407 <span class="comment">%         fprintf('Study already finished. Importing data...\n');</span>
+0408 <span class="comment">%       end</span>
+0409 <span class="comment">%       studyinfo=CheckStudyinfo(studyinfo.study_dir,'process_id',options.sim_id);</span>
+0410 <span class="comment">%       data=ImportData(studyinfo,'process_id',options.sim_id);</span>
+0411 <span class="comment">%     end</span>
+0412   <span class="comment">%end</span>
+0413   <span class="keyword">return</span>;
+0414 <span class="keyword">end</span>
+0415 
+0416 <span class="comment">% 1.3.2 manage parallel computing on local machine</span>
+0417     <span class="comment">% TODO: debug local parallel sims, doesn't seem to be working right...</span>
+0418     <span class="comment">% (however SCC cluster+parallel works)</span>
+0419 <span class="keyword">if</span> options.parallel_flag==1
+0420   <span class="comment">% prepare solve_file</span>
+0421   tmp_options=options;
+0422   <span class="keyword">if</span> isempty(options.study_dir)
+0423     tmp_options.study_dir=pwd;
+0424   <span class="keyword">end</span>
+0425   <span class="keyword">if</span> isempty(options.solve_file) || ~exist(options.solve_file,<span class="string">'file'</span>)
+0426     solve_file=<a href="GetSolveFile.html" class="code" title="function solve_file = GetSolveFile(model,studyinfo,varargin)">GetSolveFile</a>(model,[],tmp_options);
+0427   <span class="keyword">else</span>
+0428     solve_file=options.solve_file;
+0429   <span class="keyword">end</span>
+0430   <span class="comment">% prepare options</span>
+0431   keyvals=<a href="Options2Keyval.html" class="code" title="function keyval = Options2Keyval(options)">Options2Keyval</a>(rmfield(options,{<span class="string">'vary'</span>,<span class="string">'modifications'</span>,<span class="string">'solve_file'</span>,<span class="string">'parallel_flag'</span>}));
+0432   <span class="comment">% open pool for distributed processing</span>
+0433   <span class="comment">% or instead: require user to open pool before calling SimulateModel...</span>
+0434 <span class="comment">%   parpool(options.num_cores)</span>
+0435   <span class="comment">% run embarrassingly-parallel simulations</span>
+0436   
+0437   
+0438   <span class="comment">% Previous parallel code would overwrite the same params.mat file on each</span>
+0439   <span class="comment">% parallel iteration, resulting in the same parameters being used for all</span>
+0440   <span class="comment">% simulations. This code circumvents this issue by assigning a different</span>
+0441   <span class="comment">% study directory to each simulation.</span>
+0442   
+0443 <span class="comment">%   % List any core files - these should be deleted, as they are huge (debug)</span>
+0444 <span class="comment">%   system (['ls ' fullfile(options.study_dir,'output*')],'-echo');</span>
+0445 <span class="comment">%   system('find * -name &quot;core*&quot;','-echo');</span>
+0446  
+0447   <span class="comment">% Generate unique* ID based on date and time (*as long as they dont start on the</span>
+0448   <span class="comment">% exact same second...). Using these unique identfiers will now enable</span>
+0449   <span class="comment">% you to run multiple sims in the same folder.</span>
+0450   uniqueID = datestr(now,30);
+0451   
+0452   
+0453   <span class="keyword">for</span> sim = 1:length(modifications_set)
+0454       mystudydirs{sim} = fullfile(options.study_dir,[<span class="string">'solve/output_parfor_'</span> uniqueID <span class="string">'_'</span> num2str(sim)]);
+0455       
+0456       <span class="comment">% Create solve folders as needed</span>
+0457       <span class="keyword">if</span> ~exist(mystudydirs{sim},<span class="string">'dir'</span>)
+0458           mkdir(fullfile(mystudydirs{sim}));
+0459           <span class="keyword">if</span> ~exist(fullfile(mystudydirs{sim},<span class="string">'solve'</span>),<span class="string">'dir'</span>)
+0460               mkdir(fullfile(mystudydirs{sim},<span class="string">'solve'</span>));
+0461           <span class="keyword">end</span>
+0462       <span class="keyword">end</span>
+0463       
+0464       
+0465       [success,msg]=copyfile([strrep(solve_file,<span class="string">'_mex'</span>,<span class="string">''</span>) <span class="string">'*'</span>],fullfile(mystudydirs{sim},<span class="string">'solve'</span>));    <span class="comment">% Copy the mex file into each study directory, to avoid re-compiling</span>
+0466       <span class="keyword">if</span> ~success, error(msg); <span class="keyword">end</span>
+0467       
+0468   <span class="keyword">end</span>
+0469  
+0470   clear data
+0471   parfor sim=1:length(modifications_set)
+0472     <span class="comment">%data(sim)=SimulateModel(model,'modifications',modifications_set{sim},'solve_file',solve_file,keyvals{:});       % Original parfor code</span>
+0473     data(sim)=<a href="SimulateModel.html" class="code" title="function [data,studyinfo]=SimulateModel(model,varargin)">SimulateModel</a>(model,<span class="string">'modifications'</span>,modifications_set{sim},keyvals{:},<span class="string">'study_dir'</span>,mystudydirs{sim});  <span class="comment">% My modification; now specifies a separate study directory for each sim</span>
+0474     disp(sim);
+0475   <span class="keyword">end</span>
+0476 
+0477   
+0478 <span class="comment">% Clean up files leftover from sim</span>
+0479 <span class="comment">% Unfortunately we can't remove the folders due to locked .nfs files.</span>
+0480 <span class="comment">% Need to do this manually later...</span>
+0481   <span class="keyword">for</span> sim = 1:length(mystudydirs)
+0482       
+0483     <span class="comment">% Remove any &quot;core&quot; files that might be present and taking up space</span>
+0484     <span class="keyword">if</span> exist(fullfile(mystudydirs{sim},<span class="string">'solve'</span>),<span class="string">'dir'</span>)
+0485       delete(fullfile(mystudydirs{sim},<span class="string">'solve'</span>,<span class="string">'core*'</span>));
+0486       delete(fullfile(mystudydirs{sim},<span class="string">'solve'</span>,<span class="string">'params.mat'</span>));
+0487       delete(fullfile(mystudydirs{sim},<span class="string">'solve'</span>,<span class="string">'solve_ode*'</span>));
+0488       <span class="comment">%delete(fullfile(mystudydirs{sim},'solve','*'))</span>
+0489       <span class="comment">%rmdir(fullfile(mystudydirs{sim},'solve'));</span>
+0490       <span class="comment">%rmdir(fullfile(mystudydirs{sim}));</span>
+0491     <span class="keyword">end</span>
+0492   <span class="keyword">end</span>
+0493   
+0494   <span class="comment">% Try to force removal of parfor folders (this might produce error if</span>
+0495   <span class="comment">% lock files are present</span>
+0496   <span class="comment">% try rmdir(fullfile(options.study_dir,'output_parfor*'),'s');</span>
+0497   <span class="comment">% catch</span>
+0498   <span class="comment">%     %warning('If this is reached, it is likely because there are locked files in the folder, which cannot be deleted. The error is /.nfs00000000a617655e0000c15a: Device or resource busy. Fix for this is not obvious');</span>
+0499   <span class="comment">% end</span>
+0500   
+0501   <span class="comment">% Delete any core files in parent directory</span>
+0502   delete(fullfile(options.study_dir,<span class="string">'core*'</span>));
+0503   
+0504   <span class="comment">% Verify all core files are deleted</span>
+0505   [~,result] = system(<span class="string">'find * -name &quot;core*&quot;'</span>,<span class="string">'-echo'</span>);
+0506   <span class="keyword">if</span> ~isempty(result); fprintf(strcat(result,<span class="string">'\n'</span>)); warning(<span class="string">'Core files found. Consider deleting to free up space'</span>); <span class="keyword">end</span>
+0507   
+0508   <span class="comment">% close pool</span>
+0509 <span class="comment">%   delete(gcp)</span>
+0510 <span class="comment">% todo: sort data sets by things varied in modifications_set</span>
+0511 <span class="comment">% todo: Figure out how to delete locked .nfs files</span>
+0512   <span class="keyword">return</span>
+0513 <span class="keyword">end</span>
+0514 
+0515 <span class="comment">% 1.4 prepare study_dir and studyinfo if saving data</span>
+0516 <span class="keyword">if</span> isempty(options.studyinfo)
+0517   [studyinfo,options]=<a href="SetupStudy.html" class="code" title="function [studyinfo,options]=SetupStudy(base_model,varargin)">SetupStudy</a>(model,<span class="string">'modifications_set'</span>,modifications_set,<span class="string">'simulator_options'</span>,options,<span class="string">'process_id'</span>,options.sim_id);
+0518 <span class="keyword">else</span>
+0519   studyinfo=options.studyinfo;
+0520 <span class="keyword">end</span>
+0521 
+0522 <span class="comment">% put solver blocks in try statement to catch and handle errors/cleanup</span>
+0523 cwd=pwd; <span class="comment">% record current directory</span>
+0524 <span class="keyword">try</span>
+0525   
+0526   <span class="comment">% functions:          outputs:</span>
+0527   <span class="comment">% WriteDynaSimSolver    m-file for DynaSim solver</span>
+0528   <span class="comment">% WriteMatlabSolver   m-file for Matlab solver (including @odefun)</span>
+0529   <span class="comment">% PrepareMEX          mex-file for m-file</span>
+0530 
+0531   <span class="comment">% 1.5 loop over simulations, possibly varying things</span>
+0532   base_model=model;
+0533   data_index=0;
+0534   <span class="keyword">for</span> sim=1:length(modifications_set)
+0535     <span class="keyword">if</span> ~strcmp(pwd,cwd) <span class="comment">% move back to original directory before potentially regenerating to make sure the model files used are the same</span>
+0536       cd(cwd);
+0537     <span class="keyword">end</span>
+0538     <span class="comment">% get index for this simulation</span>
+0539     <span class="keyword">if</span> ~isempty(options.sim_id)
+0540       sim_ind=find([studyinfo.simulations.sim_id]==options.sim_id);
+0541       sim_id=options.sim_id;
+0542     <span class="keyword">else</span>
+0543       sim_ind=sim;
+0544       sim_id=sim;
+0545     <span class="keyword">end</span>
+0546     <span class="keyword">if</span> options.save_data_flag
+0547       <span class="comment">% check if output data already exists. load if so and skip simulation</span>
+0548       data_file=studyinfo.simulations(sim_ind).data_file;
+0549       <span class="keyword">if</span> exist(data_file,<span class="string">'file'</span>) &amp;&amp; options.overwrite_flag==0
+0550         <span class="keyword">if</span> 1<span class="comment">%options.verbose_flag</span>
+0551           <span class="comment">% note: this is important, should always display</span>
+0552           fprintf(<span class="string">'loading data from %s\n'</span>,data_file);
+0553         <span class="keyword">end</span>
+0554         tmpdata=<a href="ImportData.html" class="code" title="function [data,studyinfo] = ImportData(file,varargin)">ImportData</a>(data_file,<span class="string">'process_id'</span>,sim_id);
+0555         <a href="#_sub1" class="code" title="subfunction update_data">update_data</a>; <span class="comment">% concatenate data structures across simulations</span>
+0556         <span class="keyword">continue</span>; <span class="comment">% skip to next simulation</span>
+0557       <span class="keyword">end</span>
+0558     <span class="keyword">end</span>
+0559     <span class="comment">% apply modifications for this point in search space</span>
+0560     <span class="keyword">if</span> ~isempty(modifications_set{sim})
+0561       model=<a href="ApplyModifications.html" class="code" title="function [output,modifications]=ApplyModifications(model,modifications)">ApplyModifications</a>(base_model,modifications_set{sim});
+0562     <span class="keyword">end</span>
+0563     <span class="comment">% update studyinfo</span>
+0564     <span class="keyword">if</span> options.save_data_flag
+0565       <span class="comment">%studyinfo=UpdateStudy(studyinfo.study_dir,'process_id',sim_id,'status','started','model',model,'simulator_options',options,'verbose_flag',options.verbose_flag);</span>
+0566     <span class="keyword">end</span>
+0567     <span class="comment">% execute experiment</span>
+0568     <span class="keyword">if</span> isa(options.experiment,<span class="string">'function_handle'</span>)
+0569       <span class="comment">% EXPERIMENT (wrapping around a set of simulations)</span>
+0570       <span class="keyword">if</span> options.cluster_flag &amp;&amp; options.compile_flag
+0571         warning(<span class="string">'compiled solver is not available for experiments on the cluster. Simulation will be run in Matlab.'</span>);
+0572       <span class="keyword">end</span>
+0573       <span class="comment">% from varargin...</span>
+0574       <span class="comment">% remove 'experiment', 'modifications', 'vary', 'cluster_flag' to avoid undesired recursive action in experiment function</span>
+0575       <span class="comment">% remove 'save_data_flag' to prevent individual simulations from being saved during experiment</span>
+0576       keyvals=<a href="RemoveKeyval.html" class="code" title="function keyvals_out = RemoveKeyval(keyvals,keys)">RemoveKeyval</a>(varargin,{<span class="string">'experiment'</span>,<span class="string">'cluster_flag'</span>,<span class="string">'vary'</span>,<span class="string">'modifications'</span>,<span class="string">'save_data_flag'</span>});
+0577       <span class="keyword">if</span> ~isempty(options.experiment_options)
+0578         <span class="comment">% user-supplied experiment options override any found in SimulateModel options</span>
+0579         keyvals=<a href="RemoveKeyval.html" class="code" title="function keyvals_out = RemoveKeyval(keyvals,keys)">RemoveKeyval</a>(keyvals,options.experiment_options(1:2:end));
+0580         keyvals=cat(2,keyvals,options.experiment_options);
+0581       <span class="keyword">end</span>
+0582       tmpdata=feval(options.experiment,model,keyvals{:});
+0583     <span class="keyword">else</span>
+0584       <span class="comment">% NOT AN EXPERIMENT (single simulation)</span>
+0585       <span class="comment">%% 2.0 prepare solver function (solve_ode.m/mex)</span>
+0586       <span class="comment">% - matlab solver: create @odefun with vectorized state variables</span>
+0587       <span class="comment">% - DynaSim solver: write solve_ode.m and params.mat  (based on dnsimulator())</span>
+0588       <span class="comment">% check if model solver needs to be created</span>
+0589       <span class="comment">% (i.e., if is first simulation or a search space varying mechanism list)</span>
+0590       <span class="keyword">if</span> sim==1 || (~isempty(modifications_set{1}) &amp;&amp; any(cellfun(@(x)strcmp(x{2},<span class="string">'mechanism_list'</span>),modifications_set)))
+0591         <span class="comment">% prepare file that solves the model system</span>
+0592         <span class="keyword">if</span> isempty(options.solve_file) || (~exist(options.solve_file,<span class="string">'file'</span>) &amp;&amp; ~exist([options.solve_file <span class="string">'.mexa64'</span>],<span class="string">'file'</span>) &amp;&amp;  ~exist([options.solve_file <span class="string">'.mexa32'</span>],<span class="string">'file'</span>) &amp;&amp; ~exist([options.solve_file <span class="string">'.mexmaci64'</span>],<span class="string">'file'</span>))
+0593           options.solve_file=<a href="GetSolveFile.html" class="code" title="function solve_file = GetSolveFile(model,studyinfo,varargin)">GetSolveFile</a>(model,studyinfo,options); <span class="comment">% store name of solver file in options struct</span>
+0594         <span class="keyword">end</span>
+0595         <span class="comment">% todo: consider providing better support for studies that produce different m-files per sim (e.g., varying mechanism_list)</span>
+0596         <span class="keyword">if</span> options.verbose_flag
+0597           fprintf(<span class="string">'SIMULATING MODEL:\n'</span>);
+0598           fprintf(<span class="string">'solving system using %s\n'</span>,options.solve_file);
+0599         <span class="keyword">end</span>
+0600       <span class="keyword">else</span>
+0601         <span class="comment">% use previous solve_file</span>
+0602       <span class="keyword">end</span>
+0603       [fpath,fname,fext]=fileparts(options.solve_file);
+0604 
+0605       <span class="comment">%% 3.0 integrate model with solver of choice and prepare output data</span>
+0606       <span class="comment">% - matlab solver: solve @odefun with feval and solver_options</span>
+0607       <span class="comment">% - DynaSim solver: run solve_ode.m or create/run MEX</span>
+0608       <span class="comment">% move to directory with solver file</span>
+0609       <span class="keyword">if</span> options.verbose_flag
+0610         fprintf(<span class="string">'changing directory to %s\n'</span>,fpath);
+0611       <span class="keyword">end</span>
+0612       cd(fpath);
+0613       <span class="comment">% save parameters there</span>
+0614       warning(<span class="string">'off'</span>,<span class="string">'catstruct:DuplicatesFound'</span>);
+0615       p=catstruct(<a href="CheckSolverOptions.html" class="code" title="function options=CheckSolverOptions(options)">CheckSolverOptions</a>(options),model.parameters);
+0616       param_file=fullfile(fpath,<span class="string">'params.mat'</span>);
+0617       <span class="keyword">if</span> options.verbose_flag
+0618         fprintf(<span class="string">'saving model parameters: %s\n'</span>,param_file);
+0619       <span class="keyword">end</span>
+0620       <span class="comment">%pause(.01);</span>
+0621       <span class="comment">% solve system</span>
+0622       <span class="keyword">if</span> options.disk_flag  <span class="comment">% ### data stored on disk during simulation ###</span>
+0623         sim_start_time=tic;
+0624         save(param_file,<span class="string">'p'</span>); <span class="comment">% save params immediately before solving</span>
+0625         csv_data_file=feval(fname);  <span class="comment">% returns name of file storing the simulated data</span>
+0626         duration=toc(sim_start_time);
+0627         <span class="keyword">if</span> nargout&gt;0 || options.save_data_flag
+0628           tmpdata=<a href="ImportData.html" class="code" title="function [data,studyinfo] = ImportData(file,varargin)">ImportData</a>(csv_data_file,<span class="string">'process_id'</span>,sim_id); <span class="comment">% eg, data.csv</span>
+0629         <span class="keyword">end</span>
+0630       <span class="keyword">else</span>                  <span class="comment">% ### data stored in memory during simulation ###</span>
+0631         <span class="comment">% create list of output variables to capture</span>
+0632         output_variables=cat(2,<span class="string">'time'</span>,model.state_variables);
+0633         <span class="keyword">if</span> ~isempty(model.monitors)
+0634           output_variables=cat(2,output_variables,fieldnames(model.monitors)');
+0635         <span class="keyword">end</span>
+0636         <span class="keyword">if</span> ~isempty(model.fixed_variables)
+0637           fields=fieldnames(model.fixed_variables)';
+0638           output_variables=cat(2,output_variables,fields);
+0639           num_fixed_variables=length(fields);
+0640         <span class="keyword">else</span>
+0641           num_fixed_variables=0;
+0642         <span class="keyword">end</span>
+0643         <span class="comment">% run simulation</span>
+0644         <span class="keyword">if</span> options.verbose_flag
+0645           fprintf(<span class="string">'Running simulation %g/%g (solver=''%s'', dt=%g, tspan=[%g %g]) ...\n'</span>,sim,length(modifications_set),options.solver,options.dt,options.tspan);
+0646         <span class="keyword">end</span>
+0647         sim_start_time=tic;
+0648         outputs=cell(1,length(output_variables)); <span class="comment">% preallocate for PCT compatibility</span>
+0649         save(param_file,<span class="string">'p'</span>); <span class="comment">% save params immediately before solving</span>
+0650         [outputs{1:length(output_variables)}]=feval(fname);
+0651         duration=toc(sim_start_time);
+0652         <span class="comment">% prepare DynaSim data structure</span>
+0653         <span class="comment">% organize simulated data in data structure (move time to last)</span>
+0654         tmpdata.labels=output_variables([2:length(output_variables)-num_fixed_variables 1]);
+0655         <span class="keyword">for</span> i=1:length(output_variables)
+0656           <span class="keyword">if</span> ~isempty(model.fixed_variables) &amp;&amp; isfield(model.fixed_variables,output_variables{i})
+0657             <span class="comment">% store fixed variables in model substructure</span>
+0658             model.fixed_variables.(output_variables{i})=outputs{i};
+0659           <span class="keyword">else</span>
+0660             <span class="comment">% store state variables and monitors as data fields</span>
+0661             tmpdata.(output_variables{i})=outputs{i};
+0662           <span class="keyword">end</span>
+0663           outputs{i}=[]; <span class="comment">% clear assigned outputs from memory</span>
+0664         <span class="keyword">end</span>
+0665       <span class="keyword">end</span>
+0666       <span class="keyword">if</span> options.verbose_flag
+0667         fprintf(<span class="string">'Elapsed time: %g seconds.\n'</span>,duration); 
+0668       <span class="keyword">end</span>
+0669       <span class="comment">% add metadata to tmpdata</span>
+0670       tmpdata.simulator_options=options; <span class="comment">% store simulator controls</span>
+0671       <span class="keyword">if</span> options.store_model_flag==1  <span class="comment">% optionally store the simulated model</span>
+0672         tmpdata.model=model;
+0673       <span class="keyword">end</span>
+0674     <span class="keyword">end</span>
+0675     tmpdata = <a href="#_sub2" class="code" title="subfunction tmpdata = prepare_varied_metadata(tmpdata)">prepare_varied_metadata</a>(tmpdata);
+0676     <span class="comment">% save single data set and update studyinfo</span>
+0677     <span class="keyword">if</span> options.save_data_flag
+0678       <a href="ExportData.html" class="code" title="function ExportData(data,varargin)">ExportData</a>(tmpdata,<span class="string">'filename'</span>,data_file,<span class="string">'format'</span>,<span class="string">'mat'</span>,<span class="string">'verbose_flag'</span>,options.verbose_flag);
+0679       <span class="comment">%studyinfo=UpdateStudy(studyinfo.study_dir,'process_id',sim_id,'status','finished','duration',duration,'solve_file',options.solve_file,'email',options.email,'verbose_flag',options.verbose_flag,'model',model,'simulator_options',options);</span>
+0680     <span class="keyword">end</span>
+0681     <span class="comment">% do post-simulation analysis and plotting</span>
+0682     <span class="keyword">if</span> ~isempty(options.analysis_functions) || ~isempty(options.plot_functions)
+0683       <span class="keyword">if</span> options.save_data_flag || options.save_results_flag
+0684         <span class="comment">% do analysis and plotting while saving results</span>
+0685         siminfo=studyinfo.simulations(sim_ind);
+0686         <span class="keyword">for</span> f=1:length(siminfo.result_functions)
+0687           result=<a href="AnalyzeData.html" class="code" title="function result=AnalyzeData(data,func,varargin)">AnalyzeData</a>(tmpdata,siminfo.result_functions{f},<span class="string">'result_file'</span>,siminfo.result_files{f},<span class="string">'save_data_flag'</span>,1,<span class="string">'save_results_flag'</span>,1,siminfo.result_options{f}{:});
+0688           <span class="comment">% since the plots are saved, close all generated figures</span>
+0689           <span class="keyword">if</span> all(ishandle(result))
+0690             close(result);
+0691           <span class="keyword">end</span>
+0692         <span class="keyword">end</span>
+0693       <span class="keyword">else</span>
+0694         <span class="comment">% do analysis and plotting without saving results</span>
+0695         <span class="keyword">if</span> ~isempty(options.analysis_functions)
+0696           <span class="keyword">for</span> f=1:length(options.analysis_functions)
+0697             tmpdata=<a href="AnalyzeData.html" class="code" title="function result=AnalyzeData(data,func,varargin)">AnalyzeData</a>(tmpdata,options.analysis_functions{f},<span class="string">'result_file'</span>,[],<span class="string">'save_data_flag'</span>,0,<span class="string">'save_results_flag'</span>,options.save_results_flag,options.analysis_options{f}{:});
+0698           <span class="keyword">end</span>
+0699         <span class="keyword">end</span>
+0700         <span class="keyword">if</span> ~isempty(options.plot_functions)
+0701           <span class="keyword">for</span> f=1:length(options.plot_functions)
+0702             <a href="AnalyzeData.html" class="code" title="function result=AnalyzeData(data,func,varargin)">AnalyzeData</a>(tmpdata,options.plot_functions{f},<span class="string">'result_file'</span>,[],<span class="string">'save_data_flag'</span>,0,<span class="string">'save_results_flag'</span>,options.save_results_flag,options.plot_options{f}{:});
+0703           <span class="keyword">end</span>
+0704         <span class="keyword">end</span>
+0705       <span class="keyword">end</span>
+0706     <span class="keyword">end</span>
+0707     <span class="keyword">if</span> nargout&gt;0
+0708       <a href="#_sub1" class="code" title="subfunction update_data">update_data</a>; <span class="comment">% concatenate data structures across simulations</span>
+0709     <span class="keyword">end</span>
+0710   <span class="keyword">end</span> <span class="comment">% end loop over sims</span>
+0711   <a href="#_sub3" class="code" title="subfunction cleanup(status)">cleanup</a>(<span class="string">'success'</span>);
+0712 <span class="keyword">catch</span> err <span class="comment">% error handling</span>
+0713   <span class="keyword">if</span> options.compile_flag &amp;&amp; ~isempty(options.solve_file)
+0714     <span class="keyword">if</span> options.verbose_flag
+0715       fprintf(<span class="string">'removing failed compiled solve file: %s\n'</span>,options.solve_file);
+0716     <span class="keyword">end</span>
+0717     delete([options.solve_file <span class="string">'*'</span>]);
+0718   <span class="keyword">end</span>
+0719   <a href="DisplayError.html" class="code" title="function DisplayError(err)">DisplayError</a>(err);
+0720   <span class="comment">% update studyinfo</span>
+0721   <span class="keyword">if</span> options.save_data_flag
+0722     studyinfo=<a href="UpdateStudy.html" class="code" title="function studyinfo=UpdateStudy(study_dir,varargin)">UpdateStudy</a>(studyinfo.study_dir,<span class="string">'process_id'</span>,sim_id,<span class="string">'status'</span>,<span class="string">'failed'</span>,<span class="string">'verbose_flag'</span>,options.verbose_flag);
+0723     data=studyinfo;
+0724   <span class="keyword">end</span>
+0725   <a href="#_sub3" class="code" title="subfunction cleanup(status)">cleanup</a>(<span class="string">'error'</span>);
+0726   <span class="keyword">return</span>  
+0727 <span class="keyword">end</span>
+0728 
+0729 <span class="comment">% ---------------------------------------------</span>
+0730 <span class="comment">% todo:</span>
+0731 <span class="comment">% - create function that constructs @odefun</span>
+0732 <span class="comment">% - add support for built-in matlab solvers</span>
+0733 <span class="comment">% - create helper function that handles log files (creation, standardized format,...)</span>
+0734 <span class="comment">% ---------------------------------------------</span>
+0735 
+0736 <span class="comment">% -------------------------</span>
+0737 <span class="comment">% NESTED FUNCTIONS</span>
+0738 <span class="comment">% -------------------------</span>
+0739   <a name="_sub1" href="#_subfunctions" class="code">function update_data</a>
+0740     <span class="comment">% store tmpdata</span>
+0741     <span class="keyword">if</span> sim==1
+0742       <span class="comment">% replicate first data set as preallocation for all</span>
+0743       data=repmat(tmpdata,[1 length(modifications_set)]);
+0744       data_index=length(tmpdata);
+0745     <span class="keyword">else</span>
+0746       inds=data_index+(1:length(tmpdata)); <span class="comment">% support multiple data sets returned by experiments</span>
+0747       data(inds)=tmpdata;
+0748       data_index=inds(end);
+0749     <span class="keyword">end</span>
+0750   <span class="keyword">end</span>
+0751 
+0752   <a name="_sub2" href="#_subfunctions" class="code">function tmpdata = prepare_varied_metadata(tmpdata)</a>
+0753     <span class="comment">% add things varied to tmpdata</span>
+0754     mods={};
+0755     <span class="keyword">if</span> ~isempty(options.modifications)
+0756       mods=cat(1,mods,<a href="#_sub5" class="code" title="subfunction modifications=expand_modifications(mods)">expand_modifications</a>(options.modifications));
+0757     <span class="keyword">end</span>
+0758     <span class="keyword">if</span> ~isempty(modifications_set{sim})
+0759       tmp_mods=<a href="#_sub5" class="code" title="subfunction modifications=expand_modifications(mods)">expand_modifications</a>(modifications_set{sim});
+0760       mods=cat(1,mods,tmp_mods);
+0761     <span class="keyword">end</span>
+0762     <span class="keyword">if</span> isa(options.experiment,<span class="string">'function_handle'</span>)
+0763       <span class="keyword">for</span> j=1:length(tmpdata)
+0764         tmpdata(j).simulator_options.modifications=mods;
+0765       <span class="keyword">end</span>
+0766     <span class="keyword">end</span>
+0767     <span class="keyword">if</span> ~isempty(mods)
+0768       <span class="keyword">if</span> isfield(tmpdata,<span class="string">'varied'</span>)
+0769         varied=tmpdata(1).varied;
+0770       <span class="keyword">else</span>
+0771         varied={};
+0772       <span class="keyword">end</span>
+0773       <span class="keyword">for</span> ii=1:size(mods,1)
+0774         <span class="comment">% prepare valid field name for thing varied:</span>
+0775         fld=[mods{ii,1} <span class="string">'_'</span> mods{ii,2}];
+0776         <span class="comment">% convert arrows and periods to underscores</span>
+0777         fld=regexprep(fld,<span class="string">'(-&gt;)|(&lt;-)|(-)|(\.)'</span>,<span class="string">'_'</span>);
+0778         <span class="comment">% remove brackets and parentheses</span>
+0779         fld=regexprep(fld,<span class="string">'[\[\]\(\)\{\}]'</span>,<span class="string">''</span>);
+0780         <span class="keyword">for</span> j=1:length(tmpdata)
+0781           tmpdata(j).(fld)=mods{ii,3};
+0782         <span class="keyword">end</span>
+0783         <span class="keyword">if</span> ~ismember(fld,varied)
+0784           varied{end+1}=fld;
+0785         <span class="keyword">end</span>
+0786       <span class="keyword">end</span>
+0787       <span class="keyword">for</span> j=1:length(tmpdata)
+0788         tmpdata(j).varied=varied;
+0789       <span class="keyword">end</span>
+0790     <span class="keyword">end</span>
+0791     <span class="comment">% convert tmpdata to single precision</span>
+0792     <span class="keyword">if</span> strcmp(options.precision,<span class="string">'single'</span>)
+0793       <span class="keyword">for</span> j=1:length(tmpdata)
+0794         <span class="keyword">for</span> k=1:length(tmpdata(j).labels)
+0795           fld=tmpdata(j).labels{k};
+0796           tmpdata(j).(fld)=single(tmpdata(j).(fld));
+0797         <span class="keyword">end</span>
+0798       <span class="keyword">end</span>
+0799     <span class="keyword">end</span>
+0800   <span class="keyword">end</span>
+0801     
+0802   <a name="_sub3" href="#_subfunctions" class="code">function cleanup(status)</a>
+0803       <span class="comment">% remove temporary files and optionally store info for debugging</span>
+0804       <span class="comment">% ...</span>
+0805       <span class="comment">% return to original directory</span>
+0806       <span class="keyword">if</span> options.verbose_flag
+0807         fprintf(<span class="string">'changing directory to %s\n'</span>,cwd);
+0808       <span class="keyword">end</span>
+0809       cd(cwd);
+0810     <span class="keyword">switch</span> status
+0811       <span class="keyword">case</span> <span class="string">'success'</span>
+0812         <span class="comment">% ...</span>
+0813       <span class="keyword">case</span> <span class="string">'error'</span>
+0814         <span class="comment">% ... error logs</span>
+0815     <span class="keyword">end</span>
+0816   <span class="keyword">end</span>
+0817 
+0818   <a name="_sub4" href="#_subfunctions" class="code">function all_ICs=ProcessNumericICs</a>
+0819     <span class="comment">% first, figure out how many IC values we need (i.e., how many state</span>
+0820     <span class="comment">% variables we need across all cells).</span>
+0821     var_names=model.state_variables;
+0822     [nvals_per_var,monitor_counts]=<a href="GetOutputCounts.html" class="code" title="function [state_var_counts,monitor_counts]=GetOutputCounts(model)">GetOutputCounts</a>(model);
+0823     num_state_variables=sum(nvals_per_var);
+0824     <span class="comment">% check that the correct number of IC values was provided</span>
+0825     <span class="keyword">if</span> length(options.ic)~=num_state_variables
+0826       error(<span class="string">'incorrect number of initial conditions. %g values are needed for %g state variables across %g cells'</span>,num_state_variables,length(model.state_variables),sum(pop_sizes));
+0827     <span class="keyword">end</span>
+0828     <span class="comment">% organize user-supplied ICs into array for each state variable (assume</span>
+0829     cnt=0; all_ICs=[];
+0830     <span class="keyword">for</span> i=1:length(var_names)
+0831       ICs=options.ic(cnt+(1:nvals_per_var(i)));
+0832       <span class="comment">% store ICs as string for writing solve_ode and consistent evaluation</span>
+0833       all_ICs.(var_names{i})=sprintf(<span class="string">'[%s]'</span>,num2str(ICs));
+0834       cnt=cnt+nvals_per_var(i);
+0835     <span class="keyword">end</span>
+0836   <span class="keyword">end</span>
+0837     
+0838 <span class="keyword">end</span>
+0839 
+0840 <a name="_sub5" href="#_subfunctions" class="code">function modifications=expand_modifications(mods)</a>
+0841   <span class="comment">% purpose: expand simultaneous modifications into larger list</span>
+0842   modifications={};
+0843   <span class="keyword">for</span> i=1:size(mods,1)
+0844     <span class="comment">% get object list without grouping symbols: ()[]{}</span>
+0845     objects=regexp(mods{i,1},<span class="string">'[^\(\)\[\]\{\},]+'</span>,<span class="string">'match'</span>);
+0846     variables=regexp(mods{i,2},<span class="string">'[^\(\)\[\]\{\},]+'</span>,<span class="string">'match'</span>);
+0847     <span class="keyword">for</span> j=1:length(objects)
+0848       <span class="keyword">for</span> k=1:length(variables)
+0849         thisMod = mods{i,3};
+0850         <span class="keyword">if</span> all(size(thisMod) == [1,1]) <span class="comment">%same val for each obj and var</span>
+0851           modifications(end+1,1:3)={objects{j},variables{k},thisMod};
+0852         <span class="keyword">elseif</span> (size(thisMod,1) &gt; 1) &amp;&amp; (size(thisMod,2) == 1) <span class="comment">%same val for each obj, diff for each var</span>
+0853           modifications(end+1,1:3)={objects{j},variables{k},thisMod(k)};
+0854         <span class="keyword">elseif</span> (size(thisMod,1) == 1) &amp;&amp; (size(thisMod,2) &gt; 1) <span class="comment">%same val for each var, diff for each obj</span>
+0855           modifications(end+1,1:3)={objects{j},variables{k},thisMod(j)};
+0856         <span class="keyword">elseif</span> (size(thisMod,1) &gt; 1) &amp;&amp; (size(thisMod,2) &gt; 1) <span class="comment">%diff val for each var and obj</span>
+0857           modifications(end+1,1:3)={objects{j},variables{k},thisMod(k,j)};
+0858         <span class="keyword">else</span>
+0859           error(<span class="string">'Unknown modification type (likely due to excess dims)'</span>)
+0860         <span class="keyword">end</span> <span class="comment">%if</span>
+0861       <span class="keyword">end</span> <span class="comment">%k</span>
+0862     <span class="keyword">end</span> <span class="comment">%j</span>
+0863   <span class="keyword">end</span> <span class="comment">%i</span>
+0864 <span class="keyword">end</span>  <span class="comment">%fun</span>
+0865 
+0866 <a name="_sub6" href="#_subfunctions" class="code">function [model,options]=extract_vary_statement(model,options)</a>
+0867   <span class="comment">% purpose: extract vary statement, remove from model, and set options.vary</span>
+0868   <span class="keyword">if</span> ischar(model) &amp;&amp; any(regexp(model,<span class="string">';\s*vary\(.*\)'</span>,<span class="string">'once'</span>))
+0869     <span class="comment">% extract vary statement</span>
+0870     str=regexp(model,<span class="string">';\s*(vary\(.*\);?)'</span>,<span class="string">'tokens'</span>,<span class="string">'once'</span>);
+0871     <span class="comment">% remove from model</span>
+0872     model=strrep(model,str{1},<span class="string">''</span>);
+0873     <span class="comment">% set options</span>
+0874     var=regexp(str{1},<span class="string">'\((.*)='</span>,<span class="string">'tokens'</span>,<span class="string">'once'</span>); <span class="comment">% variable</span>
+0875     val=regexp(str{1},<span class="string">'=(.*)\)'</span>,<span class="string">'tokens'</span>,<span class="string">'once'</span>); <span class="comment">% values</span>
+0876     options.vary={<span class="string">'pop1'</span>,var{1},eval(val{1})};
+0877   <span class="keyword">end</span>
+0878 <span class="keyword">end</span>
+0879 
+0880 <a name="_sub7" href="#_subfunctions" class="code">function options = backward_compatibility(options)</a>
+0881 <span class="comment">% option_names: (old_name, new_name; ...}</span>
+0882 option_names = {<span class="keyword">...</span>
+0883   <span class="string">'override'</span>,<span class="string">'modifications'</span>;
+0884   <span class="string">'timelimits'</span>,<span class="string">'tspan'</span>;
+0885   <span class="string">'IC'</span>,<span class="string">'ic'</span>;
+0886   <span class="string">'verbose'</span>,<span class="string">'verbose_flag'</span>;
+0887   <span class="string">'SOLVER'</span>,<span class="string">'solver'</span>;
+0888   <span class="string">'nofunctions'</span>,<span class="string">'reduce_function_calls_flag'</span>;
+0889   <span class="string">'dsfact'</span>,<span class="string">'downsample_factor'</span>;
+0890   <span class="string">'memlimit'</span>,<span class="string">'memory_limit'</span>;
+0891   };
+0892 <span class="keyword">if</span> any(ismember(option_names(:,1),options(1:2:end)))
+0893   <span class="keyword">for</span> i=1:size(option_names,1)
+0894     <span class="comment">% check if any options have this old name</span>
+0895     <span class="keyword">if</span> ismember(option_names{i,1},options(1:2:end))
+0896       ind=find(ismember(options(1:2:end),option_names{i,1}));
+0897       <span class="comment">% replace old option name by new option name</span>
+0898       options{2*ind-1}=option_names{i,2};
+0899     <span class="keyword">end</span>
+0900   <span class="keyword">end</span>
+0901 <span class="keyword">end</span>
+0902 <span class="keyword">end</span></pre></div>
+<hr><address>Generated on Fri 24-Feb-2017 14:46:35 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" target="_parent">m2html</a></strong> &copy; 2005</address>
+</body>
+</html>

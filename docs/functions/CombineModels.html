@@ -1,0 +1,104 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of CombineModels</title>
+  <meta name="keywords" content="CombineModels">
+  <meta name="description" content="% model=CombineModels(model1,model2)">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html &copy; 2005 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="../m2html.css">
+  <script type="text/javascript">
+    if (top.frames.length == 0) { top.location = "../index.html"; };
+  </script>
+</head>
+<body>
+<a name="_top"></a>
+<!-- menu.html functions -->
+<h1>CombineModels
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>% model=CombineModels(model1,model2)</strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>function model=CombineModels(model1,model2) </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre class="comment">% model=CombineModels(model1,model2)
+ Purpose: combine subfields in two DynaSim model structures
+ Inputs: two models to be combined
+ Output: DynaSim model with fields combined from both models
+ 
+ See also: <a href="CheckModel.html" class="code" title="function model=CheckModel(model)">CheckModel</a>, <a href="GenerateModel.html" class="code" title="function [model,name_map]=GenerateModel(specification,varargin)">GenerateModel</a></pre></div>
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+This function calls:
+<ul style="list-style-image:url(../matlabicon.gif)">
+<li><a href="CheckModel.html" class="code" title="function model=CheckModel(model)">CheckModel</a>	CHECKMODEL - Standardize model structure and auto-populate missing fields</li></ul>
+This function is called by:
+<ul style="list-style-image:url(../matlabicon.gif)">
+<li><a href="GenerateModel.html" class="code" title="function [model,name_map]=GenerateModel(specification,varargin)">GenerateModel</a>	% [model,name_map]=GenerateModel(specification,'option',value,...)</li></ul>
+<!-- crossreference -->
+
+<h2><a name="_subfunctions"></a>SUBFUNCTIONS <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<ul style="list-style-image:url(../matlabicon.gif)">
+<li><a href="#_sub1" class="code">function out=concatenate_structures(a,b)</a></li></ul>
+
+<h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function model=CombineModels(model1,model2)</a>
+0002 <span class="comment">%% model=CombineModels(model1,model2)</span>
+0003 <span class="comment">% Purpose: combine subfields in two DynaSim model structures</span>
+0004 <span class="comment">% Inputs: two models to be combined</span>
+0005 <span class="comment">% Output: DynaSim model with fields combined from both models</span>
+0006 <span class="comment">%</span>
+0007 <span class="comment">% See also: CheckModel, GenerateModel</span>
+0008 
+0009 <span class="comment">% standardize model structures</span>
+0010 model1=<a href="CheckModel.html" class="code" title="function model=CheckModel(model)">CheckModel</a>(model1);
+0011 model2=<a href="CheckModel.html" class="code" title="function model=CheckModel(model)">CheckModel</a>(model2);
+0012 
+0013 <span class="comment">% combine fields from sub-structures</span>
+0014 model.parameters=<a href="#_sub1" class="code" title="subfunction out=concatenate_structures(a,b)">concatenate_structures</a>(model1.parameters,model2.parameters);
+0015 model.fixed_variables=<a href="#_sub1" class="code" title="subfunction out=concatenate_structures(a,b)">concatenate_structures</a>(model1.fixed_variables,model2.fixed_variables);
+0016 model.functions=<a href="#_sub1" class="code" title="subfunction out=concatenate_structures(a,b)">concatenate_structures</a>(model1.functions,model2.functions);
+0017 model.monitors=<a href="#_sub1" class="code" title="subfunction out=concatenate_structures(a,b)">concatenate_structures</a>(model1.monitors,model2.monitors);
+0018 model.ODEs=<a href="#_sub1" class="code" title="subfunction out=concatenate_structures(a,b)">concatenate_structures</a>(model1.ODEs,model2.ODEs);
+0019 model.ICs=<a href="#_sub1" class="code" title="subfunction out=concatenate_structures(a,b)">concatenate_structures</a>(model1.ICs,model2.ICs);
+0020 
+0021 <span class="comment">% concatenate cell and structure arrays</span>
+0022 model.state_variables=cat(2,model1.state_variables,model2.state_variables);
+0023 model.conditionals=cat(2,model1.conditionals,model2.conditionals);
+0024 model.linkers=cat(2,model1.linkers,model2.linkers);
+0025 model.comments=cat(2,model1.comments,model2.comments);
+0026 
+0027 <span class="comment">% combine .specification from model1 and model2 (this is necessary for</span>
+0028 <span class="comment">% building a new model from two indepedent models to which connection</span>
+0029 <span class="comment">% mechanisms are added...)</span>
+0030 <span class="comment">% todo: call something like old combine_models() function from old DynaSim</span>
+0031 <span class="comment">% ...</span>
+0032 
+0033 <span class="comment">% standardize resulting model</span>
+0034 <span class="comment">% model=CheckModel(model);</span>
+0035   <span class="comment">% note: if this call to CheckModel() is uncommented-out, the changes noted</span>
+0036   <span class="comment">% in CheckModel() should also be made...</span>
+0037 
+0038 <span class="comment">% reorder fields according to first input</span>
+0039 model=orderfields(model,model1);
+0040 
+0041 <span class="comment">% SUBFUNCTIONS</span>
+0042 <a name="_sub1" href="#_subfunctions" class="code">function out=concatenate_structures(a,b)</a>
+0043 <span class="keyword">if</span> isempty(a) &amp;&amp; ~isempty(b)
+0044   out=b;
+0045 <span class="keyword">elseif</span> ~isempty(a) &amp;&amp; isempty(b)
+0046   out=a;
+0047 <span class="keyword">elseif</span> isempty(a) &amp;&amp; isempty(b)
+0048   out=a;
+0049 <span class="keyword">elseif</span> ~isempty(a) &amp;&amp; ~isempty(b)
+0050   out=catstruct(a,b);
+0051 <span class="keyword">end</span></pre></div>
+<hr><address>Generated on Fri 24-Feb-2017 14:46:35 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" target="_parent">m2html</a></strong> &copy; 2005</address>
+</body>
+</html>

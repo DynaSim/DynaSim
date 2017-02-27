@@ -1,0 +1,364 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of CalcPower</title>
+  <meta name="keywords" content="CalcPower">
+  <meta name="description" content="CALCPOWER - Compute spectral analysis of DynaSim data">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html &copy; 2005 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="../m2html.css">
+  <script type="text/javascript">
+    if (top.frames.length == 0) { top.location = "../index.html"; };
+  </script>
+</head>
+<body>
+<a name="_top"></a>
+<!-- menu.html functions -->
+<h1>CalcPower
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>CALCPOWER - Compute spectral analysis of DynaSim data</strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>function data = CalcPower(data,varargin) </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre class="comment">CALCPOWER - Compute spectral analysis of DynaSim data
+
+ Usage:
+   data = CalcPower(data,'option',value)
+
+ Inputs:
+   - data: DynaSim data structure (see CheckData)
+   - options:
+     - 'variable' (default: *_spikes or first variable in data.labels): name
+         of field containing data on which to calculate firing rates 
+     - 'time_limits': [beg,end] (units of data.time)
+     - 'smooth_factor' (default: 5): number of samples for smoothing the spectrum
+       - tip: set to 1 to avoid smoothing
+   - options for peak detection:
+     - 'min_peak_frequency' (default: 2): Hz, min frequency for peak detection
+     - 'max_peak_frequency' (default: 150): Hz, max frequency for peak detection
+     - 'peak_threshold_prctile' (default: 95): percentile for setting power
+         threshold for peak detection
+     - 'peak_area_width' (default: 5): Hz, size of frequency bin (centered on
+         peak) over which to calculate area under spectrum
+     - 'exclude_data_flag' (default: 0): whether to remove simulated data from
+         result structure
+
+ Outputs:
+   - data structure organization:
+     data.VARIABLE_Power_SUA.frequency: TODO
+     data.VARIABLE_Power_SUA.PeakArea: area under spectrum around peak (one value per cell)
+     data.VARIABLE_Power_SUA.PeakFreq: frequency of spectral power (one value per cell)
+     data.VARIABLE_Power_SUA.Pxx: spectral power
+   - if populations present, data also includes:
+     data.VARIABLE_Power_MUA.frequency: TODO
+     data.VARIABLE_Power_MUA.PeakArea: TODO
+     data.VARIABLE_Power_MUA.PeakFreq: TODO
+     data.VARIABLE_Power_MUA.Pxx: spectrum of the mean waveform
+       - population mean spectrum of the individual waveforms can be
+           calculated using &quot;mean(data.VARIABLE_Power_MUA.Pxx,2)&quot;.
+   - Note:
+     - &quot;VARIABLE&quot; can be specified as the name of a variable listed in
+         data.labels, a cell array of string listing variable names, or as a
+         regular expression pattern for identifying variables to process. See
+         SelectVariables for more info on supported specifications.
+
+ Examples:
+   s=[];
+   s.populations(1).name='E';
+   s.populations(1).equations='dv[2]/dt=@current+10; {iNa,iK}; v(0)=-65';
+   s.populations(2).name='I';
+   s.populations(2).equations='dv/dt=@current+10; {iNa,iK}; v(0)=-65';
+   data=SimulateModel(s,'tspan',[0 1000]);
+   data=CalcPower(data,'variable','v');
+   % Plot the spectrum of the E-cell average population voltage
+   figure; plot(data.E_v_Power_MUA.frequency,data.E_v_Power_MUA.Pxx);
+   xlabel('frequency (Hz)'); ylabel('power'); xlim([0 200]);
+
+ See also: PlotPower, <a href="AnalyzeStudy.html" class="code" title="function [results,studyinfo]=AnalyzeStudy(data,func,varargin)">AnalyzeStudy</a>, <a href="SimulateModel.html" class="code" title="function [data,studyinfo]=SimulateModel(model,varargin)">SimulateModel</a>, <a href="CheckData.html" class="code" title="function data=CheckData(data)">CheckData</a>, <a href="SelectVariables.html" class="code" title="function [variables,pop_names]=SelectVariables(labels,var_strings)">SelectVariables</a></pre></div>
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+This function calls:
+<ul style="list-style-image:url(../matlabicon.gif)">
+<li><a href="AnalyzeStudy.html" class="code" title="function [results,studyinfo]=AnalyzeStudy(data,func,varargin)">AnalyzeStudy</a>	ANALYZESTUDY - Apply an analysis function to DynaSim data, optionally saving data</li><li><a href="CalcPower.html" class="code" title="function data = CalcPower(data,varargin)">CalcPower</a>	CALCPOWER - Compute spectral analysis of DynaSim data</li><li><a href="CheckData.html" class="code" title="function data=CheckData(data)">CheckData</a>	CHECKDATA - Standardize data structure and auto-populate missing fields</li><li><a href="CheckOptions.html" class="code" title="function parms = CheckOptions(options, options_schema, strict)">CheckOptions</a>	CHECKOPTIONS - organize key/value pairs in structure with default or user-supplied values according to a schema</li><li><a href="SelectVariables.html" class="code" title="function [variables,pop_names]=SelectVariables(labels,var_strings)">SelectVariables</a>	variables=SelectVariables(labels,var_strings)</li></ul>
+This function is called by:
+<ul style="list-style-image:url(../matlabicon.gif)">
+<li><a href="CalcPower.html" class="code" title="function data = CalcPower(data,varargin)">CalcPower</a>	CALCPOWER - Compute spectral analysis of DynaSim data</li><li><a href="CalcSpikeSync.html" class="code" title="function stats = CalcSpikeSync(data,varargin)">CalcSpikeSync</a>	CALCSPIKESYNC - Compute spike synchronization between spiketrains</li><li><a href="PlotData.html" class="code" title="function handles=PlotData(data,varargin)">PlotData</a>	% handles=PlotData(data,'option',value)</li><li><a href="../functions_xPlt/PlotData2.html" class="code" title="function handles=PlotData2(data,varargin)">PlotData2</a>	% handles=PlotData(data,'option',value)</li></ul>
+<!-- crossreference -->
+
+
+
+<h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function data = CalcPower(data,varargin)</a>
+0002 <span class="comment">%CALCPOWER - Compute spectral analysis of DynaSim data</span>
+0003 <span class="comment">%</span>
+0004 <span class="comment">% Usage:</span>
+0005 <span class="comment">%   data = CalcPower(data,'option',value)</span>
+0006 <span class="comment">%</span>
+0007 <span class="comment">% Inputs:</span>
+0008 <span class="comment">%   - data: DynaSim data structure (see CheckData)</span>
+0009 <span class="comment">%   - options:</span>
+0010 <span class="comment">%     - 'variable' (default: *_spikes or first variable in data.labels): name</span>
+0011 <span class="comment">%         of field containing data on which to calculate firing rates</span>
+0012 <span class="comment">%     - 'time_limits': [beg,end] (units of data.time)</span>
+0013 <span class="comment">%     - 'smooth_factor' (default: 5): number of samples for smoothing the spectrum</span>
+0014 <span class="comment">%       - tip: set to 1 to avoid smoothing</span>
+0015 <span class="comment">%   - options for peak detection:</span>
+0016 <span class="comment">%     - 'min_peak_frequency' (default: 2): Hz, min frequency for peak detection</span>
+0017 <span class="comment">%     - 'max_peak_frequency' (default: 150): Hz, max frequency for peak detection</span>
+0018 <span class="comment">%     - 'peak_threshold_prctile' (default: 95): percentile for setting power</span>
+0019 <span class="comment">%         threshold for peak detection</span>
+0020 <span class="comment">%     - 'peak_area_width' (default: 5): Hz, size of frequency bin (centered on</span>
+0021 <span class="comment">%         peak) over which to calculate area under spectrum</span>
+0022 <span class="comment">%     - 'exclude_data_flag' (default: 0): whether to remove simulated data from</span>
+0023 <span class="comment">%         result structure</span>
+0024 <span class="comment">%</span>
+0025 <span class="comment">% Outputs:</span>
+0026 <span class="comment">%   - data structure organization:</span>
+0027 <span class="comment">%     data.VARIABLE_Power_SUA.frequency: TODO</span>
+0028 <span class="comment">%     data.VARIABLE_Power_SUA.PeakArea: area under spectrum around peak (one value per cell)</span>
+0029 <span class="comment">%     data.VARIABLE_Power_SUA.PeakFreq: frequency of spectral power (one value per cell)</span>
+0030 <span class="comment">%     data.VARIABLE_Power_SUA.Pxx: spectral power</span>
+0031 <span class="comment">%   - if populations present, data also includes:</span>
+0032 <span class="comment">%     data.VARIABLE_Power_MUA.frequency: TODO</span>
+0033 <span class="comment">%     data.VARIABLE_Power_MUA.PeakArea: TODO</span>
+0034 <span class="comment">%     data.VARIABLE_Power_MUA.PeakFreq: TODO</span>
+0035 <span class="comment">%     data.VARIABLE_Power_MUA.Pxx: spectrum of the mean waveform</span>
+0036 <span class="comment">%       - population mean spectrum of the individual waveforms can be</span>
+0037 <span class="comment">%           calculated using &quot;mean(data.VARIABLE_Power_MUA.Pxx,2)&quot;.</span>
+0038 <span class="comment">%   - Note:</span>
+0039 <span class="comment">%     - &quot;VARIABLE&quot; can be specified as the name of a variable listed in</span>
+0040 <span class="comment">%         data.labels, a cell array of string listing variable names, or as a</span>
+0041 <span class="comment">%         regular expression pattern for identifying variables to process. See</span>
+0042 <span class="comment">%         SelectVariables for more info on supported specifications.</span>
+0043 <span class="comment">%</span>
+0044 <span class="comment">% Examples:</span>
+0045 <span class="comment">%   s=[];</span>
+0046 <span class="comment">%   s.populations(1).name='E';</span>
+0047 <span class="comment">%   s.populations(1).equations='dv[2]/dt=@current+10; {iNa,iK}; v(0)=-65';</span>
+0048 <span class="comment">%   s.populations(2).name='I';</span>
+0049 <span class="comment">%   s.populations(2).equations='dv/dt=@current+10; {iNa,iK}; v(0)=-65';</span>
+0050 <span class="comment">%   data=SimulateModel(s,'tspan',[0 1000]);</span>
+0051 <span class="comment">%   data=CalcPower(data,'variable','v');</span>
+0052 <span class="comment">%   % Plot the spectrum of the E-cell average population voltage</span>
+0053 <span class="comment">%   figure; plot(data.E_v_Power_MUA.frequency,data.E_v_Power_MUA.Pxx);</span>
+0054 <span class="comment">%   xlabel('frequency (Hz)'); ylabel('power'); xlim([0 200]);</span>
+0055 <span class="comment">%</span>
+0056 <span class="comment">% See also: PlotPower, AnalyzeStudy, SimulateModel, CheckData, SelectVariables</span>
+0057 
+0058 <span class="comment">%% 1.0 Check inputs</span>
+0059 options=<a href="CheckOptions.html" class="code" title="function parms = CheckOptions(options, options_schema, strict)">CheckOptions</a>(varargin,{<span class="keyword">...</span>
+0060   <span class="string">'variable'</span>,[],[],<span class="keyword">...</span><span class="comment">        </span>
+0061   <span class="string">'time_limits'</span>,[-inf inf],[],<span class="keyword">...</span>
+0062   <span class="string">'smooth_factor'</span>,5,[],<span class="keyword">...</span><span class="comment"> % number of samples for smoothing the spectrum</span>
+0063   <span class="string">'min_peak_frequency'</span>,2,[],<span class="keyword">...</span><span class="comment"> % Hz, min frequency for peak detection</span>
+0064   <span class="string">'max_peak_frequency'</span>,200,[],<span class="keyword">...</span><span class="comment"> % Hz, max frequency for peak detection</span>
+0065   <span class="string">'peak_threshold_prctile'</span>,95,[],<span class="keyword">...</span><span class="comment"> % percentile for setting power threshold for peak detection</span>
+0066   <span class="string">'peak_area_width'</span>,5,[],<span class="keyword">...</span><span class="comment"> % Hz, size of frequency bin (centered on peak) over which to calculate area under spectrum</span>
+0067   <span class="string">'exclude_data_flag'</span>,0,{0,1},<span class="keyword">...</span>
+0068   },false);
+0069 
+0070 data = <a href="CheckData.html" class="code" title="function data=CheckData(data)">CheckData</a>(data);
+0071 <span class="comment">% note: calling CheckData() at beginning enables analysis function to</span>
+0072 <span class="comment">% accept data matrix [time x cells] in addition to DynaSim data structure.</span>
+0073 
+0074 <span class="keyword">if</span> numel(data)&gt;1
+0075   <span class="comment">% use AnalyzeStudy to recursively call CalcPower on each data set</span>
+0076   data=<a href="AnalyzeStudy.html" class="code" title="function [results,studyinfo]=AnalyzeStudy(data,func,varargin)">AnalyzeStudy</a>(data,@<a href="CalcPower.html" class="code" title="function data = CalcPower(data,varargin)">CalcPower</a>,varargin{:});
+0077   <span class="keyword">return</span>;
+0078 <span class="keyword">end</span>
+0079 
+0080 <span class="comment">% time parameters</span>
+0081 time = data.time; <span class="comment">% time vector</span>
+0082 dt = time(2)-time(1); <span class="comment">% time step</span>
+0083 ntime=length(time); <span class="comment">% number of time points in full data set</span>
+0084 t1=nearest(time,options.time_limits(1)); <span class="comment">% index to first sample</span>
+0085 t2=nearest(time,options.time_limits(2)); <span class="comment">% index to last sample</span>
+0086 nsamp=t2-t1+1; <span class="comment">% number of samples for spectral estimate</span>
+0087 
+0088 <span class="comment">% frequency parameters</span>
+0089 Fs = fix(1/(dt/1000)); <span class="comment">% effective sampling frequency</span>
+0090 Fmin=options.min_peak_frequency; <span class="comment">% min frequency for peak detection</span>
+0091 Fmax=options.max_peak_frequency; <span class="comment">% max frequency for peak detection</span>
+0092 Fwin=options.peak_area_width; <span class="comment">% size of frequency bin around peak for calculating area under spectrum</span>
+0093 thresh_prctile=options.peak_threshold_prctile; <span class="comment">% percentile for setting power threshold for peak detection</span>
+0094 smooth_factor=options.smooth_factor; <span class="comment">% number of samples to smooth spectrum</span>
+0095 Fwin=options.peak_area_width; <span class="comment">% size of frequency bin (centered on peak) over which to calculate area under spectrum</span>
+0096 FreqRange=[max(Fmin,2/time(end)) Fmax]; <span class="comment">% range to look for spectral peaks</span>
+0097 NFFT=2^(nextpow2(nsamp-1)-1);<span class="comment">%2); % &lt;-- use higher resolution to capture STO freq variation</span>
+0098 WINDOW=2^(nextpow2(NFFT-1)-3);
+0099 NOVERLAP=[]; <span class="comment">% spectral parameters</span>
+0100 
+0101 <span class="comment">%% 2.0 set list of variables to process as cell array of strings</span>
+0102 options.variable=<a href="SelectVariables.html" class="code" title="function [variables,pop_names]=SelectVariables(labels,var_strings)">SelectVariables</a>(data(1).labels,options.variable);
+0103 
+0104 <span class="comment">%% 3.0 calculate power spectrum for each variable</span>
+0105 <span class="keyword">if</span> ~isfield(data,<span class="string">'results'</span>)
+0106   data.results={};
+0107 <span class="keyword">end</span>
+0108 warning off
+0109 <span class="keyword">for</span> v=1:length(options.variable)
+0110   <span class="comment">% extract this data set</span>
+0111   var=options.variable{v};
+0112   dat=data.(var);
+0113   <span class="comment">% determine how many cells are in this data set</span>
+0114   ncells=size(dat,2);
+0115   <span class="comment">% preallocation</span>
+0116   PeakFreq=nan(1,ncells);
+0117   PeakArea=nan(1,ncells);   
+0118   <span class="comment">% SUA spectra: loop over cells</span>
+0119   <span class="keyword">for</span> i=1:ncells
+0120     <span class="comment">% select data</span>
+0121     X=detrend(dat(t1:t2,i)); <span class="comment">% detrend the data</span>
+0122     <span class="comment">% calculate spectral estimate</span>
+0123     [tmpPxx,f] = pmtm(X, [], NFFT, Fs); <span class="comment">% pwelch(X,NFFT,[],NFFT,Fs); % calculate power</span>
+0124     <span class="keyword">if</span> i==1
+0125       <span class="comment">% get size of spectrum and preallocate result matrix</span>
+0126       nfreq=length(f);
+0127       Pxx=nan(nfreq,ncells);
+0128     <span class="keyword">end</span>
+0129     <span class="keyword">if</span> all(isnan(tmpPxx(:)))
+0130       tmpPxx=zeros(size(tmpPxx));
+0131     <span class="keyword">end</span>
+0132     <span class="keyword">if</span> ~isa(tmpPxx,<span class="string">'double'</span>)
+0133       <span class="comment">% convert to double precision</span>
+0134       tmpPxx=double(tmpPxx);
+0135     <span class="keyword">end</span>
+0136     <span class="keyword">if</span> smooth_factor&gt;1
+0137       <span class="comment">% smooth the spectrum</span>
+0138       tmpPxx=smooth(tmpPxx,smooth_factor);
+0139     <span class="keyword">end</span>
+0140     <span class="comment">% Peak Detection:</span>
+0141     <span class="comment">% select range of frequencies over which to look for peaks</span>
+0142     sel = find(FreqRange(1)&lt;=f &amp; f&lt;=FreqRange(end));
+0143     <span class="comment">% set threshold for peak detection</span>
+0144     ht=prctile(log10(tmpPxx(sel)),thresh_prctile);
+0145     <span class="keyword">if</span> ~isnan(ht)
+0146       <span class="comment">% get index of peaks in range over threshold</span>
+0147       [PeakPower,PPind]=findpeaks(log10(tmpPxx(sel)),<span class="string">'MinPeakHeight'</span>,ht,<span class="string">'NPeaks'</span>,3);
+0148     <span class="keyword">else</span>
+0149       PPind=[];
+0150     <span class="keyword">end</span>
+0151     <span class="keyword">if</span> ~isempty(PPind)
+0152       <span class="comment">% if multiple peaks, only consider the largest</span>
+0153       <span class="keyword">if</span> numel(PPind)&gt;1
+0154         PPind=PPind(max(PeakPower)==PeakPower); <span class="comment">%PPind=PPind(1);</span>
+0155       <span class="keyword">end</span>
+0156       <span class="comment">% get frequency at that index</span>
+0157       PeakFreq(i) = f(sel(PPind));
+0158       <span class="comment">% set limits for calculating area under spectrum around peak</span>
+0159       flo=PeakFreq(i)-Fwin/2;
+0160       fhi=PeakFreq(i)+Fwin/2;
+0161       sel2=(flo&lt;=f &amp; f&lt;=fhi);
+0162       <span class="comment">% calculate area under spectrum around peak</span>
+0163       PeakArea(i) = sum(tmpPxx(sel2))*(f(2)-f(1));
+0164     <span class="keyword">else</span>
+0165       PeakFreq(i)=nan;
+0166       PeakArea(i)=nan;
+0167     <span class="keyword">end</span>
+0168     <span class="comment">% Store results</span>
+0169     Pxx(:,i)=tmpPxx;
+0170   <span class="keyword">end</span>
+0171   <span class="comment">% -----------------------------------------------------</span>
+0172   <span class="comment">% Repeat spectral estimate for MUA:</span>
+0173   <span class="keyword">if</span> ncells==1
+0174     <span class="comment">% same as SUA</span>
+0175     Pxx_mean=Pxx;
+0176     Pxx_mean_PeakFreq=PeakFreq;
+0177     Pxx_mean_PeakArea=PeakArea;
+0178   <span class="keyword">else</span>
+0179     <span class="comment">% calculate MUA</span>
+0180     X=detrend(nanmean(dat(t1:t2,:),2)); <span class="comment">% detrend the data</span>
+0181     <span class="comment">% calculate spectral estimate</span>
+0182     [tmpPxx,f] = pwelch(X,NFFT,[],NFFT,Fs); <span class="comment">% calculate power</span>
+0183     <span class="keyword">if</span> all(isnan(tmpPxx(:)))
+0184       tmpPxx=zeros(size(tmpPxx));
+0185     <span class="keyword">end</span>
+0186     <span class="keyword">if</span> ~isa(tmpPxx,<span class="string">'double'</span>)
+0187       <span class="comment">% convert to double precision</span>
+0188       tmpPxx=double(tmpPxx);
+0189     <span class="keyword">end</span>
+0190     <span class="keyword">if</span> smooth_factor&gt;1
+0191       <span class="comment">% smooth the spectrum</span>
+0192       tmpPxx=smooth(tmpPxx,smooth_factor);
+0193     <span class="keyword">end</span>
+0194     <span class="comment">% Peak Detection:</span>
+0195     <span class="comment">% select range of frequencies over which to look for peaks</span>
+0196     sel = find(FreqRange(1)&lt;=f &amp; f&lt;=FreqRange(end));
+0197     <span class="comment">% set threshold for peak detection</span>
+0198     ht=prctile(log10(tmpPxx(sel)),thresh_prctile);
+0199     <span class="keyword">if</span> ~isnan(ht)
+0200       <span class="comment">% get index of peaks in range over threshold</span>
+0201       [PeakPower,PPind]=findpeaks(log10(tmpPxx(sel)),<span class="string">'MinPeakHeight'</span>,ht,<span class="string">'NPeaks'</span>,3);
+0202     <span class="keyword">else</span>
+0203       PPind=[];
+0204     <span class="keyword">end</span>    
+0205     <span class="keyword">if</span> ~isempty(PPind)
+0206       <span class="comment">% if multiple peaks, only consider the largest</span>
+0207       <span class="keyword">if</span> numel(PPind)&gt;1
+0208         PPind=PPind(max(PeakPower)==PeakPower); <span class="comment">%PPind=PPind(1);</span>
+0209       <span class="keyword">end</span>
+0210       <span class="comment">% get frequency at that index</span>
+0211       Pxx_mean_PeakFreq = f(sel(PPind));
+0212       <span class="comment">% set limits for calculating area under spectrum around peak</span>
+0213       flo=Pxx_mean_PeakFreq-Fwin/2;
+0214       fhi=Pxx_mean_PeakFreq+Fwin/2;
+0215       sel2=(flo&lt;=f &amp; f&lt;=fhi);
+0216       <span class="comment">% calculate area under spectrum around peak</span>
+0217       Pxx_mean_PeakArea = sum(tmpPxx(sel2))*(f(2)-f(1));
+0218     <span class="keyword">else</span>
+0219       Pxx_mean_PeakFreq=nan;
+0220       Pxx_mean_PeakArea=nan;
+0221     <span class="keyword">end</span>    
+0222     Pxx_mean=tmpPxx;
+0223   <span class="keyword">end</span>
+0224   
+0225   <span class="comment">% Add resulting power spectra to data structure</span>
+0226   <span class="comment">% organization scheme:</span>
+0227   <span class="comment">% data.VARIABLE_Power_SUA.(Pxx,PeakFreq,PeakArea,frequency)</span>
+0228   <span class="comment">% data.VARIABLE_Power_MUA.(Pxx,PeakFreq,PeakArea,frequency)</span>
+0229   data.([var <span class="string">'_Power_SUA'</span>]).Pxx=Pxx;
+0230   data.([var <span class="string">'_Power_SUA'</span>]).PeakFreq=PeakFreq;
+0231   data.([var <span class="string">'_Power_SUA'</span>]).PeakArea=PeakArea;
+0232   data.([var <span class="string">'_Power_SUA'</span>]).frequency=f;
+0233   data.([var <span class="string">'_Power_MUA'</span>]).Pxx=Pxx_mean;
+0234   data.([var <span class="string">'_Power_MUA'</span>]).PeakFreq=Pxx_mean_PeakFreq;
+0235   data.([var <span class="string">'_Power_MUA'</span>]).PeakArea=Pxx_mean_PeakArea;
+0236   data.([var <span class="string">'_Power_MUA'</span>]).frequency=f;
+0237   <span class="keyword">if</span> ~ismember([var <span class="string">'_Power_SUA'</span>],data.results)
+0238     data.results{end+1}=[var <span class="string">'_Power_SUA'</span>];
+0239   <span class="keyword">end</span>
+0240   <span class="keyword">if</span> ~ismember([var <span class="string">'_Power_MUA'</span>],data.results)
+0241     data.results{end+1}=[var <span class="string">'_Power_MUA'</span>];
+0242   <span class="keyword">end</span>
+0243   <span class="keyword">if</span> options.exclude_data_flag
+0244     <span class="keyword">for</span> l=1:length(data.labels)
+0245       data=rmfield(data,data.labels{l});
+0246     <span class="keyword">end</span>
+0247   <span class="keyword">end</span>
+0248 <span class="comment">%   % alternate organization scheme:</span>
+0249 <span class="comment">%   data.([var '_Pxx'])=Pxx;</span>
+0250 <span class="comment">%   data.([var '_Pxx_PeakFreq'])=PeakFreq;</span>
+0251 <span class="comment">%   data.([var '_Pxx_PeakArea'])=PeakArea;</span>
+0252 <span class="comment">%   data.([var '_Pxx_mean'])=Pxx_mean;</span>
+0253 <span class="comment">%   data.([var '_Pxx_mean_PeakFreq'])=Pxx_mean_PeakFreq;</span>
+0254 <span class="comment">%   data.([var '_Pxx_mean_PeakArea'])=Pxx_mean_PeakArea;</span>
+0255 <span class="comment">%   if ~ismember([var '_Pxx'],data.results)</span>
+0256 <span class="comment">%     data.results{end+1}=[var '_Pxx'];</span>
+0257 <span class="comment">%     data.results{end+1}=[var '_Pxx_PeakFreq'];</span>
+0258 <span class="comment">%     data.results{end+1}=[var '_Pxx_PeakArea'];</span>
+0259 <span class="comment">%     data.results{end+1}=[var '_Pxx_mean'];</span>
+0260 <span class="comment">%     data.results{end+1}=[var '_Pxx_mean_Pxx_PeakFreq'];</span>
+0261 <span class="comment">%     data.results{end+1}=[var '_Pxx_mean_Pxx_PeakArea'];</span>
+0262 <span class="comment">%   end</span>
+0263   
+0264 <span class="keyword">end</span></pre></div>
+<hr><address>Generated on Fri 24-Feb-2017 14:46:35 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" target="_parent">m2html</a></strong> &copy; 2005</address>
+</body>
+</html>

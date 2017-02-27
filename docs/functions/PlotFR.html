@@ -1,0 +1,292 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of PlotFR</title>
+  <meta name="keywords" content="PlotFR">
+  <meta name="description" content="% plotFR(data,'option',value)">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html &copy; 2005 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="../m2html.css">
+  <script type="text/javascript">
+    if (top.frames.length == 0) { top.location = "../index.html"; };
+  </script>
+</head>
+<body>
+<a name="_top"></a>
+<!-- menu.html functions -->
+<h1>PlotFR
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>% plotFR(data,'option',value)</strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>function handles=PlotFR(data,varargin) </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre class="comment">% plotFR(data,'option',value)
+ Purpose: plot spike rates in various ways depending on what data was
+          provided.
+ Inputs:
+   data: DynaSim data structure (see CheckData)
+   options: (same as CalcFR)
+     CalcFR options:
+     'variable' - name of field containing data on which to calculate firing
+                rates (default: *_spikes or first variable in data.labels)
+     'threshold' - scalar threshold value for detecting events (default: 0)
+     'bin_size' - size of temporal window over which to calculate rate [ms or fraction of data set] (default: 5% of the data set)
+     'bin_shift' - how much to shift the bin before calculating rate again [ms or fraction of data set] (default: 1% of the data set)
+ 
+ Examples:
+ PlotFR(data,'bin_size',30,'bin_shift',10);
+ 
+ See also: <a href="CalcFR.html" class="code" title="function data = CalcFR(data,varargin)">CalcFR</a>, <a href="SimulateModel.html" class="code" title="function [data,studyinfo]=SimulateModel(model,varargin)">SimulateModel</a>, <a href="CheckData.html" class="code" title="function data=CheckData(data)">CheckData</a></pre></div>
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+This function calls:
+<ul style="list-style-image:url(../matlabicon.gif)">
+<li><a href="CalcFR.html" class="code" title="function data = CalcFR(data,varargin)">CalcFR</a>	CALCFR - Calculate firing rage for DynaSim data</li><li><a href="CheckData.html" class="code" title="function data=CheckData(data)">CheckData</a>	CHECKDATA - Standardize data structure and auto-populate missing fields</li></ul>
+This function is called by:
+<ul style="list-style-image:url(../matlabicon.gif)">
+</ul>
+<!-- crossreference -->
+
+<h2><a name="_subfunctions"></a>SUBFUNCTIONS <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<ul style="list-style-image:url(../matlabicon.gif)">
+<li><a href="#_sub1" class="code">function plotFR_SingleSim(i)</a></li><li><a href="#_sub2" class="code">function plotFR_SimStudy</a></li></ul>
+
+<h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function handles=PlotFR(data,varargin)</a>
+0002 <span class="comment">%% plotFR(data,'option',value)</span>
+0003 <span class="comment">% Purpose: plot spike rates in various ways depending on what data was</span>
+0004 <span class="comment">%          provided.</span>
+0005 <span class="comment">% Inputs:</span>
+0006 <span class="comment">%   data: DynaSim data structure (see CheckData)</span>
+0007 <span class="comment">%   options: (same as CalcFR)</span>
+0008 <span class="comment">%     CalcFR options:</span>
+0009 <span class="comment">%     'variable' - name of field containing data on which to calculate firing</span>
+0010 <span class="comment">%                rates (default: *_spikes or first variable in data.labels)</span>
+0011 <span class="comment">%     'threshold' - scalar threshold value for detecting events (default: 0)</span>
+0012 <span class="comment">%     'bin_size' - size of temporal window over which to calculate rate [ms or fraction of data set] (default: 5% of the data set)</span>
+0013 <span class="comment">%     'bin_shift' - how much to shift the bin before calculating rate again [ms or fraction of data set] (default: 1% of the data set)</span>
+0014 <span class="comment">%</span>
+0015 <span class="comment">% Examples:</span>
+0016 <span class="comment">% PlotFR(data,'bin_size',30,'bin_shift',10);</span>
+0017 <span class="comment">%</span>
+0018 <span class="comment">% See also: CalcFR, SimulateModel, CheckData</span>
+0019 
+0020 <span class="comment">% TODO: add rastergrams</span>
+0021 
+0022 data=<a href="CheckData.html" class="code" title="function data=CheckData(data)">CheckData</a>(data);
+0023 fields=fieldnames(data);
+0024 handles=[];
+0025 
+0026 <span class="comment">% calc firing rates if not already present in data</span>
+0027 <span class="keyword">if</span> all(cellfun(@isempty,regexp(fields,<span class="string">'.*_FR$'</span>)))
+0028   data=<a href="CalcFR.html" class="code" title="function data = CalcFR(data,varargin)">CalcFR</a>(data,varargin{:}); <span class="comment">% equivalent: data=AnalyzeStudy(data,@CalcFR,varargin{:});</span>
+0029   fields=fieldnames(data);
+0030 <span class="keyword">end</span>
+0031 <span class="comment">% get list of fields with firing rate data</span>
+0032 FR_fields=fields(~cellfun(@isempty,regexp(fields,<span class="string">'.*_FR$'</span>)));
+0033 FR_fields=setdiff(FR_fields,<span class="string">'time_FR'</span>);
+0034 <span class="comment">% store time bins for firing rate data</span>
+0035 time=data.time_FR;
+0036 nsets=length(FR_fields);
+0037 
+0038 <span class="comment">% plot firing rates</span>
+0039 <span class="keyword">if</span> numel(data)==1 || ~isfield(data,<span class="string">'varied'</span>)
+0040   <span class="comment">% plot separate firing rates vs time (one figure per element of data)</span>
+0041   <span class="keyword">for</span> i=1:length(data)
+0042     <a href="#_sub1" class="code" title="subfunction plotFR_SingleSim(i)">plotFR_SingleSim</a>(i);
+0043   <span class="keyword">end</span>  
+0044 <span class="keyword">else</span>
+0045   <span class="comment">% data contains results from a set of simulations varying something</span>
+0046   <span class="comment">% plot average firing rates vs whatever was varied</span>
+0047   <a href="#_sub2" class="code" title="subfunction plotFR_SimStudy">plotFR_SimStudy</a>;
+0048 <span class="keyword">end</span>
+0049 
+0050   <span class="comment">% NESTED FUNCTIONS</span>
+0051   <a name="_sub1" href="#_subfunctions" class="code">function plotFR_SingleSim(i)</a>
+0052     <span class="comment">% purpose: plot each data set data.(FR_fields{k})</span>
+0053     <span class="comment">% plots for N populations (FR data sets) from this simulation</span>
+0054     ht=320; <span class="comment">% height per subplot row (=per population or FR data set)</span>
+0055     handles(end+1)=figure(<span class="string">'position'</span>,[250 max(50,600-(nsets-1)*ht) 1400 min(ht*nsets,750)]);
+0056     <span class="keyword">for</span> k=1:nsets <span class="comment">% index of firing rate data field</span>
+0057       dat=data(i).(FR_fields{k});
+0058       bins=0:1.05*max(dat(:));
+0059       rlims=[min(bins) max(bins)];
+0060       <span class="keyword">if</span> rlims(1)==rlims(2), rlims=rlims(1)+[0 1e-5]; <span class="keyword">end</span>
+0061       tlims=[min(time) max(time)];
+0062       <span class="comment">% get population name from field (assumes: pop_*)</span>
+0063       popname=regexp(FR_fields{k},<span class="string">'^([a-zA-Z0-9]+)_'</span>,<span class="string">'tokens'</span>,<span class="string">'once'</span>);
+0064       popname=popname{1};
+0065       ncells=size(dat,2);
+0066       <span class="keyword">if</span> ncells==1
+0067         nc=4; <span class="comment">% number of plots for this FR data set</span>
+0068         <span class="comment">% 1.0 plot firing rate trace</span>
+0069         subplot(nsets,nc,(1:nc-1)+(k-1)*nc); <span class="comment">% plot(t,FR)</span>
+0070         plot(time,dat(:,1),<span class="string">'o-'</span>,<span class="string">'linewidth'</span>,2); ylim(rlims); xlim(tlims);
+0071         title([popname <span class="string">': firing rate over time'</span>]);
+0072         xlabel(<span class="string">'time (ms)'</span>); ylabel([popname <span class="string">': firing rate (Hz)'</span>]);
+0073         <span class="comment">% 2.0 plot firing rate density</span>
+0074         subplot(nsets,nc,nc+(k-1)*nc); <span class="comment">% hist(FR)</span>
+0075         <span class="keyword">if</span> numel(bins)&gt;1
+0076           H=hist(dat(:,1),bins)/length(dat(:,1));
+0077           h=bar(bins,H); hold on
+0078           set(get(h,<span class="string">'children'</span>),<span class="string">'FaceAlpha'</span>,0,<span class="string">'EdgeAlpha'</span>,.4,<span class="string">'linewidth'</span>,2);
+0079           rn=ksr(bins,H,.75,length(bins));
+0080           plot(bins,rn.f,<span class="string">'linewidth'</span>,2); title([popname <span class="string">': firing rate density'</span>]);
+0081           xlabel([popname <span class="string">': firing rate (Hz)'</span>]); ylabel(<span class="string">'fraction'</span>);
+0082           xlim(rlims); ylim([0 1]);
+0083         <span class="keyword">end</span>
+0084       <span class="keyword">else</span>
+0085         nc=4; <span class="comment">% number of plots for this FR data set</span>
+0086         <span class="comment">% 1.0 plot firing rate heat map</span>
+0087         subplot(nsets,nc,1+(k-1)*nc); <span class="comment">% imagesc(t,cells,FR)</span>
+0088         imagesc(time,1:ncells,dat'); axis xy
+0089         title([popname <span class="string">': firing rates (Hz)'</span>]);
+0090         xlabel(<span class="string">'time (ms)'</span>); ylabel([popname <span class="string">' cell index'</span>]);
+0091         caxis(rlims); xlim(tlims);
+0092         <span class="keyword">if</span> ncells&lt;=10
+0093           ytick=1:ncells;
+0094         <span class="keyword">else</span>
+0095           ytick=round(linspace(1,ncells,5));
+0096           <span class="keyword">if</span> ~ismember(ncells,ytick)
+0097             ytick=[ytick ncells];
+0098           <span class="keyword">end</span>
+0099         <span class="keyword">end</span>
+0100         set(gca,<span class="string">'ytick'</span>,ytick,<span class="string">'yticklabel'</span>,ytick);       
+0101         <span class="comment">% 2.0 plot sorted firing rate heat map</span>
+0102         subplot(nsets,nc,2+(k-1)*nc); <span class="comment">% imagesc(t,cells_sorted,FR)</span>
+0103         tmp=sum(dat,1);
+0104         [tmp,inds]=sort(tmp);
+0105         imagesc(time,1:ncells,dat(:,inds)'); axis xy
+0106         caxis(rlims); xlim(tlims);
+0107         title([popname <span class="string">': firing rates (Hz)'</span>]);
+0108         xlabel(<span class="string">'time (ms)'</span>); ylabel([popname <span class="string">' cell index (sorted by FR)'</span>]);
+0109         <span class="keyword">if</span> ncells&lt;=10
+0110           ytick=1:ncells;
+0111           yticklabel=ytick(inds);
+0112         <span class="keyword">else</span>
+0113           ytick=[];
+0114           yticklabel=[];
+0115         <span class="keyword">end</span>
+0116         set(gca,<span class="string">'ytick'</span>,ytick,<span class="string">'yticklabel'</span>,yticklabel);   
+0117         <span class="comment">% 3.0 plot population-average firing rate trace</span>
+0118         subplot(nsets,nc,3+(k-1)*nc); <span class="comment">% plot(t,&lt;FR|pop&gt;)</span>
+0119         plot(time,mean(dat,2),<span class="string">'o-'</span>,<span class="string">'linewidth'</span>,2);
+0120         title([popname <span class="string">': population average firing rate'</span>]);
+0121         xlabel(<span class="string">'time (ms)'</span>); ylabel([popname <span class="string">': avg firing rate (Hz)'</span>]);
+0122         ylim(rlims); xlim(tlims);
+0123         <span class="comment">% 4.0 plot firing rate density</span>
+0124         <span class="keyword">if</span> numel(bins)&gt;1
+0125           subplot(nsets,nc,4+(k-1)*nc); <span class="comment">% hist(FR)</span>
+0126           H=hist(dat(:),bins)/numel(dat);
+0127           h=bar(bins,H); hold on
+0128           set(get(h,<span class="string">'children'</span>),<span class="string">'FaceAlpha'</span>,0,<span class="string">'EdgeAlpha'</span>,.4,<span class="string">'linewidth'</span>,2);
+0129           rn=ksr(bins,H,.75,length(bins));
+0130           plot(bins,rn.f,<span class="string">'linewidth'</span>,2); title([popname <span class="string">': firing rate density'</span>]);
+0131           xlabel([popname <span class="string">': firing rate (Hz)'</span>]); ylabel(<span class="string">'fraction'</span>);
+0132           xlim(rlims); ylim([0 1]);
+0133         <span class="keyword">end</span>
+0134       <span class="keyword">end</span>
+0135     <span class="keyword">end</span>
+0136   <span class="keyword">end</span>
+0137 
+0138   <a name="_sub2" href="#_subfunctions" class="code">function plotFR_SimStudy</a>
+0139     <span class="comment">% calculate average firing rates across population and time</span>
+0140     varied=data(1).varied;
+0141     <span class="comment">% eliminate parameters that had the same value in all sims or were non-numeric</span>
+0142     keep=zeros(size(varied));
+0143     <span class="keyword">for</span> v=1:length(varied)
+0144       <span class="keyword">if</span> isnumeric(data(1).(varied{v})) &amp;&amp; length(unique([data.(varied{v})]))&gt;1
+0145         keep(v)=1;
+0146       <span class="keyword">end</span>
+0147     <span class="keyword">end</span>
+0148     varied=varied(keep==1);    
+0149     nvaried=length(varied); <span class="comment">% number of model components varied across simulations</span>
+0150     nsims=length(data);
+0151     FRmu=zeros(nsims,nsets);
+0152     <span class="keyword">for</span> i=1:nsims <span class="comment">% simulations</span>
+0153       <span class="keyword">for</span> k=1:nsets <span class="comment">% populations</span>
+0154         FRmu(i,k)=mean(data(i).(FR_fields{k})(:));
+0155       <span class="keyword">end</span>
+0156     <span class="keyword">end</span>
+0157     <span class="comment">% collect info on parameters varied</span>
+0158     params=zeros(nsims,nvaried);
+0159     <span class="keyword">for</span> j=1:nvaried
+0160       <span class="keyword">if</span> isnumeric(data(1).(varied{j}))
+0161         params(:,j)=[data.(varied{j})];
+0162       <span class="keyword">else</span>
+0163         <span class="comment">% todo: handle sims varying non-numeric model components</span>
+0164         <span class="comment">% (eg, mechanisms)</span>
+0165       <span class="keyword">end</span>
+0166     <span class="keyword">end</span>
+0167     <span class="comment">% plots for N populations and M varied elements</span>
+0168     <span class="comment">% plot how avg firing rate for each pop varies with each parameter</span>
+0169     ht=320; <span class="comment">% height per subplot row (=per population or FR data set)</span>
+0170     wt=500;
+0171     handles(end+1)=figure(<span class="string">'position'</span>,[250 max(50,600-(nsets-1)*ht) min(1500,500+(nvaried-1)*wt) min(ht*nsets,750)]);
+0172     cnt=0;
+0173     <span class="keyword">for</span> k=1:nsets <span class="comment">% populations</span>
+0174       popname=regexp(FR_fields{k},<span class="string">'^([a-zA-Z0-9]+)_'</span>,<span class="string">'tokens'</span>,<span class="string">'once'</span>);
+0175       popname=popname{1};
+0176       ncells=size(data(1).(FR_fields{k}),2);
+0177       <span class="keyword">for</span> j=1:nvaried <span class="comment">% varied parameters</span>
+0178         <span class="comment">% calculate mean avg FRs for each value of this varied parameter</span>
+0179         pvals=unique(params(:,j)); <span class="comment">% unique values for this parameter j</span>
+0180         nv=length(pvals); <span class="comment">% number of values used for this parameter j</span>
+0181         rvals=zeros(nv,1);
+0182         <span class="keyword">for</span> v=1:nv
+0183           idx=(params(:,j)==pvals(v)); <span class="comment">% sims with param j = value v</span>
+0184           <span class="comment">% average across all sims with param j set to value v</span>
+0185           rvals(v)=mean(FRmu(idx,k)); <span class="comment">% avg pop k FR given this value</span>
+0186         <span class="keyword">end</span>
+0187         npoints=length(find(idx)); <span class="comment">% number of points in this average</span>
+0188         <span class="comment">% plot avg FRs</span>
+0189         cnt=cnt+1; <span class="comment">% subplot index</span>
+0190         subplot(nsets,nvaried,cnt);
+0191         plot(pvals,rvals,<span class="string">'o-'</span>,<span class="string">'linewidth'</span>,2);
+0192         <span class="comment">% todo: add confidence intervals / error bars</span>
+0193         axis tight; <span class="comment">%ylim([0 max(FRmu(:))]);</span>
+0194         xlabel(strrep(varied{j},<span class="string">'_'</span>,<span class="string">'\_'</span>));
+0195         ylabel([popname <span class="string">': avg firing rate (Hz)'</span>]);
+0196         title([popname <span class="string">': firing rate averaged over pop, time, sims'</span>]);
+0197         <span class="comment">% add text: ncells, length(time), npoints</span>
+0198         xpos=min(xlim)+.7*diff(xlim);<span class="comment">%.05*diff(xlim);</span>
+0199         ypos=min(ylim)+.2*diff(ylim);<span class="comment">%.85*diff(ylim);</span>
+0200         text(xpos,ypos,sprintf(<span class="string">'per point:\n #cells=%g\n #bins=%g\n #sims=%g'</span>,ncells,length(time),npoints));        
+0201       <span class="keyword">end</span>
+0202     <span class="keyword">end</span>
+0203     <span class="keyword">if</span> length(varied)==2
+0204       <span class="comment">% plots for N populations and 2 varied elements</span>
+0205       <span class="comment">% organize and imagesc FRmu(param 1, param 2)</span>
+0206       handles(end+1)=figure(<span class="string">'position'</span>,[1150 max(50,600-(nsets-1)*ht) 500 min(ht*nsets,750)]);
+0207       pvals1=unique(params(:,1)); nv1=length(pvals1);
+0208       pvals2=unique(params(:,2)); nv2=length(pvals2);
+0209       <span class="keyword">for</span> k=1:nsets
+0210         popname=regexp(FR_fields{k},<span class="string">'^([a-zA-Z0-9]+)_'</span>,<span class="string">'tokens'</span>,<span class="string">'once'</span>);
+0211         popname=popname{1};
+0212         FRmu2=zeros(nv1,nv2);
+0213         <span class="keyword">for</span> i=1:nv1
+0214           <span class="keyword">for</span> j=1:nv2
+0215             idx=(params(:,1)==pvals1(i))&amp;(params(:,2)==pvals2(j));
+0216             FRmu2(i,j)=mean(FRmu(idx,k));
+0217           <span class="keyword">end</span>
+0218         <span class="keyword">end</span>
+0219         <span class="comment">% plot imagesc(param1,param2,FRmu)</span>
+0220         subplot(nsets,1,k);
+0221         imagesc(pvals1,pvals2,FRmu2'); axis xy
+0222         xlabel(strrep(varied{1},<span class="string">'_'</span>,<span class="string">'\_'</span>)); ylabel(strrep(varied{2},<span class="string">'_'</span>,<span class="string">'\_'</span>));
+0223         title([popname <span class="string">': avg firing rate (Hz)'</span>]);
+0224         caxis([0 max(FRmu(:))]); colorbar
+0225       <span class="keyword">end</span>
+0226     <span class="keyword">end</span>
+0227   <span class="keyword">end</span>
+0228 <span class="keyword">end</span></pre></div>
+<hr><address>Generated on Fri 24-Feb-2017 14:46:35 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" target="_parent">m2html</a></strong> &copy; 2005</address>
+</body>
+</html>

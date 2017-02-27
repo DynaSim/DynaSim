@@ -1,0 +1,88 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of CollectVariedParams</title>
+  <meta name="keywords" content="CollectVariedParams">
+  <meta name="description" content="[all_values,param_names,unique_values]=CollectVariedParams(data)">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html &copy; 2005 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="../m2html.css">
+  <script type="text/javascript">
+    if (top.frames.length == 0) { top.location = "../index.html"; };
+  </script>
+</head>
+<body>
+<a name="_top"></a>
+<!-- menu.html functions -->
+<h1>CollectVariedParams
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>[all_values,param_names,unique_values]=CollectVariedParams(data)</strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>function [param_mat,varied,param_cell]=CollectVariedParams(data) </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre class="comment"> [all_values,param_names,unique_values]=CollectVariedParams(data)
+ inputs:
+   data: 
+ outputs:
+   all_values: [num_sets x num_params_varied], values used for each data set
+   param_names: list of names of varied parameters
+   unique_values: cell array of unique values used for each varied  parameter</pre></div>
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+This function calls:
+<ul style="list-style-image:url(../matlabicon.gif)">
+</ul>
+This function is called by:
+<ul style="list-style-image:url(../matlabicon.gif)">
+</ul>
+<!-- crossreference -->
+
+
+
+<h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function [param_mat,varied,param_cell]=CollectVariedParams(data)</a>
+0002 <span class="comment">% [all_values,param_names,unique_values]=CollectVariedParams(data)</span>
+0003 <span class="comment">% inputs:</span>
+0004 <span class="comment">%   data:</span>
+0005 <span class="comment">% outputs:</span>
+0006 <span class="comment">%   all_values: [num_sets x num_params_varied], values used for each data set</span>
+0007 <span class="comment">%   param_names: list of names of varied parameters</span>
+0008 <span class="comment">%   unique_values: cell array of unique values used for each varied  parameter</span>
+0009 
+0010 <span class="comment">% Check inputs</span>
+0011 <span class="keyword">if</span> ~isstruct(data)
+0012   fprintf(<span class="string">'input must be a structure...exiting CollectVariedParams.\n'</span>);
+0013   <span class="keyword">return</span>;
+0014 <span class="keyword">end</span>
+0015 <span class="keyword">if</span> ~isfield(data,<span class="string">'varied'</span>)
+0016   fprintf(<span class="string">'no varied info in data.\n'</span>);
+0017   <span class="keyword">return</span>;
+0018 <span class="keyword">end</span>
+0019 
+0020 <span class="comment">% collect info on parameters varied</span>
+0021 varied=data(1).varied;
+0022 num_varied=length(varied); <span class="comment">% number of model components varied across simulations</span>
+0023 num_sims=length(data); <span class="comment">% number of data sets (one per simulation)</span>
+0024 <span class="comment">% collect info on parameters varied</span>
+0025 param_mat=zeros(num_sims,num_varied); <span class="comment">% values for each simulation</span>
+0026 param_cell=cell(1,num_varied); <span class="comment">% unique values for each parameter</span>
+0027 <span class="comment">% loop over varied components and collect values</span>
+0028 <span class="keyword">for</span> j=1:num_varied
+0029   <span class="keyword">if</span> isnumeric(data(1).(varied{j}))
+0030     param_mat(:,j)=[data.(varied{j})]; <span class="comment">% values for each simulation</span>
+0031     param_cell{j}=unique([data.(varied{j})]); <span class="comment">% unique values for each parameter</span>
+0032   <span class="keyword">else</span>
+0033     <span class="comment">% todo: handle sims varying non-numeric model components</span>
+0034     <span class="comment">% (eg, mechanisms) (also in PlotFR and SelectData)</span>
+0035   <span class="keyword">end</span>
+0036 <span class="keyword">end</span></pre></div>
+<hr><address>Generated on Fri 24-Feb-2017 14:46:35 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" target="_parent">m2html</a></strong> &copy; 2005</address>
+</body>
+</html>

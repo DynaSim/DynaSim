@@ -1,0 +1,73 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of Options2Keyval</title>
+  <meta name="keywords" content="Options2Keyval">
+  <meta name="description" content="keyvals = Options2Keyval(options)">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html &copy; 2005 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="../m2html.css">
+  <script type="text/javascript">
+    if (top.frames.length == 0) { top.location = "../index.html"; };
+  </script>
+</head>
+<body>
+<a name="_top"></a>
+<!-- menu.html functions -->
+<h1>Options2Keyval
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>keyvals = Options2Keyval(options)</strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>function keyval = Options2Keyval(options) </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre class="comment"> keyvals = Options2Keyval(options)
+ Purpose:
+   Convert from options structure to a list of key/value pairs.
+
+ Parameters:
+   parms - options structure to convert
+
+ See also: <a href="CheckOptions.html" class="code" title="function parms = CheckOptions(options, options_schema, strict)">CheckOptions</a></pre></div>
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+This function calls:
+<ul style="list-style-image:url(../matlabicon.gif)">
+</ul>
+This function is called by:
+<ul style="list-style-image:url(../matlabicon.gif)">
+<li><a href="CheckSolverOptions.html" class="code" title="function options=CheckSolverOptions(options)">CheckSolverOptions</a>	CHECKSOLVEROPTIONS - standardize simulation options appended to params.mat</li><li><a href="GetSolveFile.html" class="code" title="function solve_file = GetSolveFile(model,studyinfo,varargin)">GetSolveFile</a>	% solve_file = GetSolveFile(model,studyinfo,options)</li><li><a href="ImportData.html" class="code" title="function [data,studyinfo] = ImportData(file,varargin)">ImportData</a>	% [data,studyinfo]=ImportData(data_file)</li><li><a href="PlotFR2.html" class="code" title="function handles=PlotFR2(data,varargin)">PlotFR2</a>	% plotFR(data,'option',value)</li><li><a href="SimulateModel.html" class="code" title="function [data,studyinfo]=SimulateModel(model,varargin)">SimulateModel</a>	% data=SimulateModel(model,'option',value,...)</li></ul>
+<!-- crossreference -->
+
+
+
+<h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function keyval = Options2Keyval(options)</a>
+0002 <span class="comment">% keyvals = Options2Keyval(options)</span>
+0003 <span class="comment">% Purpose:</span>
+0004 <span class="comment">%   Convert from options structure to a list of key/value pairs.</span>
+0005 <span class="comment">%</span>
+0006 <span class="comment">% Parameters:</span>
+0007 <span class="comment">%   parms - options structure to convert</span>
+0008 <span class="comment">%</span>
+0009 <span class="comment">% See also: CheckOptions</span>
+0010 
+0011 <span class="comment">% Grab the field names</span>
+0012 fields = fieldnames(options);
+0013 keyval   = {};
+0014 
+0015 <span class="comment">% Loop over the field names, grab the value, and append both to the output</span>
+0016 <span class="comment">% list of key/value pairs</span>
+0017 <span class="keyword">for</span> i=1:length(fields)
+0018   keyval{end+1} = fields{i};
+0019   keyval{end+1} = options.(fields{i});
+0020 <span class="keyword">end</span>;</pre></div>
+<hr><address>Generated on Fri 24-Feb-2017 14:46:35 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" target="_parent">m2html</a></strong> &copy; 2005</address>
+</body>
+</html>

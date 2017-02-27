@@ -1,0 +1,192 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of PropagateFunctions</title>
+  <meta name="keywords" content="PropagateFunctions">
+  <meta name="description" content="% model = SubstituteFunctions(model)">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html &copy; 2005 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="../m2html.css">
+  <script type="text/javascript">
+    if (top.frames.length == 0) { top.location = "../index.html"; };
+  </script>
+</head>
+<body>
+<a name="_top"></a>
+<!-- menu.html functions -->
+<h1>PropagateFunctions
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>% model = SubstituteFunctions(model)</strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>function model=PropagateFunctions(model) </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre class="comment">% model = SubstituteFunctions(model)
+ purpose: eliminate internal function calls from model ODEs, ICs, monitors, 
+          and conditionals.
+ input: DynaSim model structure
+ output: DynaSim model structure without internal function calls
+ 
+ see also: <a href="SimulateModel.html" class="code" title="function [data,studyinfo]=SimulateModel(model,varargin)">SimulateModel</a>, <a href="GenerateModel.html" class="code" title="function [model,name_map]=GenerateModel(specification,varargin)">GenerateModel</a>, <a href="PropagateNamespaces.html" class="code" title="function model = PropagateNamespaces(model,map)">PropagateNamespaces</a></pre></div>
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+This function calls:
+<ul style="list-style-image:url(../matlabicon.gif)">
+<li><a href="CheckModel.html" class="code" title="function model=CheckModel(model)">CheckModel</a>	CHECKMODEL - Standardize model structure and auto-populate missing fields</li><li><a href="dynasim_strrep.html" class="code" title="function str=dynasim_strrep(str,oldstr,newstr,lpad,rpad)">dynasim_strrep</a>	Purpose: replace full words by new character strings, ignoring matches</li></ul>
+This function is called by:
+<ul style="list-style-image:url(../matlabicon.gif)">
+<li><a href="WriteDynaSimSolver.html" class="code" title="function [outfile,options]=WriteDynaSimSolver(model,varargin)">WriteDynaSimSolver</a>	% solver_file=WriteDynaSimSolver(model,varargin)</li></ul>
+<!-- crossreference -->
+
+<h2><a name="_subfunctions"></a>SUBFUNCTIONS <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<ul style="list-style-image:url(../matlabicon.gif)">
+<li><a href="#_sub1" class="code">functions=model.functions;</a></li><li><a href="#_sub2" class="code">functions=model.functions;</a></li><li><a href="#_sub3" class="code">function [expression,functions_were_found]=insert_functions(expression,functions)</a></li><li><a href="#_sub4" class="code">functions_were_found=0;</a></li><li><a href="#_sub5" class="code">functions_were_found=1;</a></li></ul>
+
+<h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function model=PropagateFunctions(model)</a>
+0002 <span class="comment">%% model = SubstituteFunctions(model)</span>
+0003 <span class="comment">% purpose: eliminate internal function calls from model ODEs, ICs, monitors,</span>
+0004 <span class="comment">%          and conditionals.</span>
+0005 <span class="comment">% input: DynaSim model structure</span>
+0006 <span class="comment">% output: DynaSim model structure without internal function calls</span>
+0007 <span class="comment">%</span>
+0008 <span class="comment">% see also: SimulateModel, GenerateModel, PropagateNamespaces</span>
+0009 
+0010 <span class="comment">% Check inputs</span>
+0011 model=<a href="CheckModel.html" class="code" title="function model=CheckModel(model)">CheckModel</a>(model);
+0012 <span class="keyword">if</span> ~isstruct(model.functions)
+0013   <span class="comment">% nothing to do</span>
+0014   <span class="keyword">return</span>;
+0015 <span class="keyword">end</span>
+0016 
+0017 <span class="comment">%% 1.0 Substitute functions into functions</span>
+0018 <span class="comment">% note: sequence of function-substitutions-into-functions forms a directed</span>
+0019 <span class="comment">% acyclic graph (DAG); eg, (3,4)-&gt;2-&gt;(1,5). may be able to use that fact to</span>
+0020 <span class="comment">% determine the optimal finite sequence of substitutions without need for a</span>
+0021 <span class="comment">% while statement. try improving in the future...</span>
+0022 
+0023 <span class="comment">% approach for now: loop through function list, substitute functions into</span>
+0024 <span class="comment">% functions; repeat until no functions have additional substitutions to do.</span>
+0025 keep_going=1;
+0026 <span class="keyword">while</span> keep_going
+0027   keep_going=0;
+0028   update_these=fieldnames(model.functions);
+0029   expressions=struct2cell(model.functions);
+0030   <span class="comment">% loop over target functions from which to eliminate internal function calls</span>
+0031   <span class="keyword">for</span> i=1:length(expressions)
+0032     <a name="_sub1" href="#_subfunctions" class="code">functions=model.functions; </a><span class="comment">% update functions on each iteration</span>
+0033     [expressions{i},keep_going]=<a href="#_sub3" class="code" title="subfunction [expression,functions_were_found]=insert_functions(expression,functions)">insert_functions</a>(expressions{i},functions);
+0034     model.functions.(update_these{i})=expressions{i};
+0035   <span class="keyword">end</span>
+0036 <span class="keyword">end</span>
+0037 <span class="comment">% substitute these updated functions into everything else:</span>
+0038 <a name="_sub2" href="#_subfunctions" class="code">functions=model.functions;</a>
+0039 
+0040 <span class="comment">%% 2.0 Substitute functions into ODEs, ICs, and monitors (sub-structures)</span>
+0041 target_types={<span class="string">'monitors'</span>,<span class="string">'ODEs'</span>,<span class="string">'ICs'</span>};
+0042 <span class="comment">% loop over types of model data</span>
+0043 <span class="keyword">for</span> type_index=1:length(target_types)
+0044   type=target_types{type_index};
+0045   <span class="comment">% info for this type</span>
+0046   s=model.(type);
+0047   <span class="keyword">if</span> isstruct(s)
+0048     update_these=fieldnames(s);
+0049     expressions=struct2cell(s);
+0050     <span class="comment">% loop over target expressions from which to eliminate internal function calls</span>
+0051     <span class="keyword">for</span> i=1:length(expressions)    
+0052       <span class="keyword">if</span> isempty(expressions{i})
+0053         <span class="keyword">continue</span>;
+0054       <span class="keyword">end</span>
+0055       <span class="comment">% update expressions of this type</span>
+0056       expressions{i}=<a href="#_sub3" class="code" title="subfunction [expression,functions_were_found]=insert_functions(expression,functions)">insert_functions</a>(expressions{i},functions);
+0057     <span class="keyword">end</span>
+0058     <span class="comment">% update model with expressions that do not require internal function calls</span>
+0059     model.(type)=cell2struct(expressions,update_these,1);
+0060   <span class="keyword">end</span>
+0061 <span class="keyword">end</span>
+0062 
+0063 <span class="comment">%% 3.0 Substitute functions into conditionals (structure array)</span>
+0064 <span class="keyword">if</span> ~isempty(model.conditionals)
+0065   target_types={<span class="string">'condition'</span>,<span class="string">'action'</span>,<span class="string">'else'</span>};
+0066   <span class="keyword">for</span> type_index=1:length(target_types)
+0067     type=target_types{type_index};
+0068     expressions={model.conditionals.(type)};
+0069     <span class="comment">% loop over conditional expressions from which to eliminate internal function calls</span>
+0070     <span class="keyword">for</span> i=1:length(expressions)
+0071       <span class="keyword">if</span> isempty(expressions{i})
+0072         <span class="keyword">continue</span>; 
+0073       <span class="keyword">end</span>
+0074       <span class="comment">% update expressions</span>
+0075       expressions{i}=<a href="#_sub3" class="code" title="subfunction [expression,functions_were_found]=insert_functions(expression,functions)">insert_functions</a>(expressions{i},functions);
+0076     <span class="keyword">end</span>
+0077     [model.conditionals(1:length(model.conditionals)).(type)]=deal(expressions{:});
+0078   <span class="keyword">end</span>
+0079 <span class="keyword">end</span>
+0080 
+0081 <span class="comment">%% SUBFUNCTIONS</span>
+0082 <a name="_sub3" href="#_subfunctions" class="code">function [expression,functions_were_found]=insert_functions(expression,functions)</a>
+0083   <a name="_sub4" href="#_subfunctions" class="code">functions_were_found=0;</a>
+0084   <span class="comment">% get list of functions called by this target function</span>
+0085   words=unique(regexp(expression,<span class="string">'[a-zA-Z]+\w*'</span>,<span class="string">'match'</span>));
+0086   found_functions=words(ismember(words,fieldnames(functions)));
+0087   <span class="keyword">if</span> ~isempty(found_functions)
+0088     <a name="_sub5" href="#_subfunctions" class="code">functions_were_found=1;</a>
+0089     <span class="comment">% substitute those found into this target functions</span>
+0090     <span class="keyword">for</span> ff=1:length(found_functions)
+0091       <span class="comment">% name of found function</span>
+0092       found_function=found_functions{ff};
+0093       <span class="comment">% found expression to replace found function name in target</span>
+0094       found_expression=functions.(found_function);
+0095       <span class="comment">% variable names used in the original found function definition</span>
+0096       orig_var_list=regexp(found_expression,<span class="string">'^@\(([^\)]+)\)'</span>,<span class="string">'tokens'</span>,<span class="string">'once'</span>);
+0097       orig_vars=regexp(orig_var_list{1},<span class="string">','</span>,<span class="string">'split'</span>); <span class="comment">% variables used in original function definition</span>
+0098       <span class="comment">% variable names passed from the target function to the function found in it</span>
+0099       <span class="comment">% get arguments to function call, support function arguments</span>
+0100 <span class="comment">%       new_var_list=regexp(expression,[found_function '\(*\(([^\)\(]+)\)'],'tokens','once');</span>
+0101       index=regexp(expression,[found_function <span class="string">'\('</span>],<span class="string">'once'</span>);
+0102       substr=expression(index:end); <span class="comment">% string starting with first function call</span>
+0103       lb=find(substr==<span class="string">'('</span>); <span class="comment">% indices to open parentheses</span>
+0104       rb=find(substr==<span class="string">')'</span>); <span class="comment">% indices to close parentheses</span>
+0105       ix=ones(size(lb)); <span class="comment">% binary vector indicating open parentheses that have not been closed</span>
+0106       <span class="keyword">for</span> i=1:length(rb)
+0107         pos=find(lb&lt;rb(i)&amp;ix==1,1,<span class="string">'last'</span>); <span class="comment">% last open parentheses before this closing parenthesis</span>
+0108         <span class="keyword">if</span> pos==1 <span class="comment">% this closing parenthesis closes the function call</span>
+0109           R=rb(i);
+0110           <span class="keyword">break</span>;
+0111         <span class="keyword">else</span> <span class="comment">% this closing parenthesis closes a grouped expression within the arguments of the function call</span>
+0112           ix(pos)=0; <span class="comment">% this open parenthesis has been closed</span>
+0113         <span class="keyword">end</span>
+0114       <span class="keyword">end</span>
+0115       <span class="comment">% add escape character to regexp special characters</span>
+0116       new_var_list{1}=regexprep(substr(lb(1)+1:R-1),<span class="string">'([\(\)\+\*\.\^])'</span>,<span class="string">'\\$1'</span>);
+0117       <span class="comment">% split variables on comma</span>
+0118       new_vars=regexp(new_var_list{1},<span class="string">','</span>,<span class="string">'split'</span>);
+0119       <span class="comment">% found expression without the input variable list</span>
+0120       found_expression=regexp(found_expression,<span class="string">'^@\([^\)]+\)(.+)'</span>,<span class="string">'tokens'</span>,<span class="string">'once'</span>);
+0121       found_expression=found_expression{1};       
+0122       <span class="keyword">if</span> length(orig_vars)~=length(new_vars)
+0123         error(<span class="string">'failed to match variables for function %s'</span>,found_function);
+0124       <span class="keyword">end</span>
+0125       <span class="comment">% prepare found expression with variable names from the target function</span>
+0126       <span class="keyword">if</span> ~isequal(orig_vars,new_vars)
+0127         <span class="keyword">for</span> v=1:length(orig_vars)
+0128           found_expression=<a href="dynasim_strrep.html" class="code" title="function str=dynasim_strrep(str,oldstr,newstr,lpad,rpad)">dynasim_strrep</a>(found_expression,orig_vars{v},new_vars{v});
+0129         <span class="keyword">end</span>
+0130       <span class="keyword">end</span>
+0131       <span class="comment">% string to replace in the target function</span>
+0132       oldstr=[found_function <span class="string">'\('</span> new_var_list{1} <span class="string">'\)'</span>];
+0133       <span class="comment">% string to insert in the target function</span>
+0134       newstr=sprintf(<span class="string">'(%s)'</span>,found_expression);
+0135       <span class="comment">% update the target function</span>
+0136       expression=<a href="dynasim_strrep.html" class="code" title="function str=dynasim_strrep(str,oldstr,newstr,lpad,rpad)">dynasim_strrep</a>(expression,oldstr,newstr,<span class="string">'('</span>,<span class="string">')'</span>);
+0137     <span class="keyword">end</span>
+0138   <span class="keyword">end</span></pre></div>
+<hr><address>Generated on Fri 24-Feb-2017 14:46:35 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" target="_parent">m2html</a></strong> &copy; 2005</address>
+</body>
+</html>

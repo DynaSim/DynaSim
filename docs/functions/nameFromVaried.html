@@ -1,0 +1,84 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of nameFromVaried</title>
+  <meta name="keywords" content="nameFromVaried">
+  <meta name="description" content="% new_result_file = nameFromVaried(data, file_type, old_result_file)">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html &copy; 2005 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="../m2html.css">
+  <script type="text/javascript">
+    if (top.frames.length == 0) { top.location = "../index.html"; };
+  </script>
+</head>
+<body>
+<a name="_top"></a>
+<!-- menu.html functions -->
+<h1>nameFromVaried
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>% new_result_file = nameFromVaried(data, file_type, old_result_file)</strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>function new_result_file = nameFromVaried(data, file_type, old_result_file) </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre class="comment">% new_result_file = nameFromVaried(data, file_type, old_result_file)
+ purpose: makes a filename based on the parameters in data.varied.
+
+ inputs:
+   data: DynaSim data structure (also accepted: data file name)
+   file_type: file prefix for type of file
+   result_file: previous result_file, only uses this for the path.
+
+ outputs:
+   new_result_file: where to save result, based on file_type and data.varied</pre></div>
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+This function calls:
+<ul style="list-style-image:url(../matlabicon.gif)">
+</ul>
+This function is called by:
+<ul style="list-style-image:url(../matlabicon.gif)">
+<li><a href="AnalyzeData.html" class="code" title="function result=AnalyzeData(data,func,varargin)">AnalyzeData</a>	ANALYZEDATA - Apply an analysis function to DynaSim data, optionally saving data</li></ul>
+<!-- crossreference -->
+
+
+
+<h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function new_result_file = nameFromVaried(data, file_type, old_result_file)</a>
+0002 <span class="comment">%% new_result_file = nameFromVaried(data, file_type, old_result_file)</span>
+0003 <span class="comment">% purpose: makes a filename based on the parameters in data.varied.</span>
+0004 <span class="comment">%</span>
+0005 <span class="comment">% inputs:</span>
+0006 <span class="comment">%   data: DynaSim data structure (also accepted: data file name)</span>
+0007 <span class="comment">%   file_type: file prefix for type of file</span>
+0008 <span class="comment">%   result_file: previous result_file, only uses this for the path.</span>
+0009 <span class="comment">%</span>
+0010 <span class="comment">% outputs:</span>
+0011 <span class="comment">%   new_result_file: where to save result, based on file_type and data.varied</span>
+0012 
+0013 pathstr = fileparts(old_result_file);
+0014 
+0015 fileName = file_type;
+0016 
+0017 <span class="comment">%check for simID# from batch sims</span>
+0018 token = regexp(old_result_file, <span class="string">'(sim\d+)'</span>, <span class="string">'tokens'</span>);
+0019 <span class="keyword">if</span> ~isempty(token)
+0020   fileName = [fileName <span class="string">'_'</span> token{1}{1}];
+0021 <span class="keyword">end</span>
+0022   
+0023 <span class="keyword">for</span> param = data.varied(:)'
+0024   fileName = [fileName <span class="string">'__'</span> param{1} <span class="string">'_'</span> num2str(data.(param{1}))];
+0025 <span class="keyword">end</span>
+0026 
+0027 new_result_file = fullfile(pathstr, fileName);
+0028 
+0029 <span class="keyword">end</span></pre></div>
+<hr><address>Generated on Fri 24-Feb-2017 14:46:35 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" target="_parent">m2html</a></strong> &copy; 2005</address>
+</body>
+</html>

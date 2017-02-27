@@ -1,0 +1,224 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of SetupStudy</title>
+  <meta name="keywords" content="SetupStudy">
+  <meta name="description" content="Purpose:">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html &copy; 2005 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="../m2html.css">
+  <script type="text/javascript">
+    if (top.frames.length == 0) { top.location = "../index.html"; };
+  </script>
+</head>
+<body>
+<a name="_top"></a>
+<!-- menu.html functions -->
+<h1>SetupStudy
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>Purpose:</strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>function [studyinfo,options]=SetupStudy(base_model,varargin) </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre class="comment"> Purpose:
+   - Initialize DynaSim studyinfo structure
+   - Prepare list of output file names (data_file, modified_model_file)
+   - Create output directories (study: data, models)
+ 
+ See also: <a href="SimulateModel.html" class="code" title="function [data,studyinfo]=SimulateModel(model,varargin)">SimulateModel</a>, <a href="UpdateStudy.html" class="code" title="function studyinfo=UpdateStudy(study_dir,varargin)">UpdateStudy</a></pre></div>
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+This function calls:
+<ul style="list-style-image:url(../matlabicon.gif)">
+<li><a href="CheckOptions.html" class="code" title="function parms = CheckOptions(options, options_schema, strict)">CheckOptions</a>	CHECKOPTIONS - organize key/value pairs in structure with default or user-supplied values according to a schema</li><li><a href="CheckStudyinfo.html" class="code" title="function studyinfo=CheckStudyinfo(studyinfo,varargin)">CheckStudyinfo</a>	CHECKSTUDYINFO - Standardize studyinfo structure and auto-populate missing fields</li><li><a href="StudyinfoIO.html" class="code" title="function studyinfo=StudyinfoIO(studyinfo,study_file,id,verbose_flag)">StudyinfoIO</a>	Usage:</li></ul>
+This function is called by:
+<ul style="list-style-image:url(../matlabicon.gif)">
+<li><a href="CreateBatch.html" class="code" title="function studyinfo=CreateBatch(base_model,modifications_set,varargin)">CreateBatch</a>	% studyinfo=CreateBatch(model,varargin)</li><li><a href="SimulateModel.html" class="code" title="function [data,studyinfo]=SimulateModel(model,varargin)">SimulateModel</a>	% data=SimulateModel(model,'option',value,...)</li></ul>
+<!-- crossreference -->
+
+
+
+<h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function [studyinfo,options]=SetupStudy(base_model,varargin)</a>
+0002 <span class="comment">% Purpose:</span>
+0003 <span class="comment">%   - Initialize DynaSim studyinfo structure</span>
+0004 <span class="comment">%   - Prepare list of output file names (data_file, modified_model_file)</span>
+0005 <span class="comment">%   - Create output directories (study: data, models)</span>
+0006 <span class="comment">%</span>
+0007 <span class="comment">% See also: SimulateModel, UpdateStudy</span>
+0008 
+0009 <span class="comment">% Check inputs</span>
+0010 opts=<a href="CheckOptions.html" class="code" title="function parms = CheckOptions(options, options_schema, strict)">CheckOptions</a>(varargin,{<span class="keyword">...</span>
+0011   <span class="string">'modifications_set'</span>,[],[],<span class="keyword">...</span><span class="comment"> % search space</span>
+0012   <span class="string">'simulator_options'</span>,[],[],<span class="keyword">...</span><span class="comment"> % options from SimulateModel</span>
+0013   <span class="string">'process_id'</span>,[],[],<span class="keyword">...</span><span class="comment"> % process identifier for loading studyinfo if necessary</span>
+0014   },false);
+0015 
+0016 <span class="keyword">if</span> isempty(opts.simulator_options)
+0017   error(<span class="string">'SetupStudy must be given a simulator_options structure from SimulateModel'</span>);
+0018 <span class="keyword">end</span>
+0019 modifications_set=opts.modifications_set;
+0020 process_id=opts.process_id;
+0021 options=opts.simulator_options;
+0022 
+0023 <span class="comment">% Setup Study</span>
+0024 <span class="keyword">if</span> options.verbose_flag
+0025   fprintf(<span class="string">'PREPARING STUDY:\n'</span>);
+0026 <span class="keyword">end</span>
+0027 <span class="keyword">if</span> options.save_data_flag || options.save_results_flag
+0028   <span class="comment">% set default study_dir if necessary</span>
+0029   <span class="keyword">if</span> isempty(options.study_dir)
+0030     <span class="comment">% format: &lt;study_dir&gt; = &lt;project_dir&gt;/&lt;prefix&gt;_&lt;timestamp&gt;</span>
+0031     options.study_dir=fullfile(options.project_dir,[options.prefix <span class="string">'_'</span> datestr(now,<span class="string">'yyyymmddHHMMSS'</span>)]);
+0032   <span class="keyword">end</span>
+0033   <span class="comment">% create study_dir if it doesn't exist</span>
+0034   <span class="keyword">if</span> ~isdir(options.study_dir)
+0035     fprintf(<span class="string">'creating study directory: %s\n'</span>,options.study_dir);
+0036     mkdir(options.study_dir);
+0037   <span class="keyword">end</span>
+0038   <span class="comment">% make sure we have the full path and access rights</span>
+0039   <span class="comment">% todo: find a way to achieve this without changing directories...</span>
+0040   cwd=pwd;
+0041   cd(options.study_dir);
+0042   options.study_dir=pwd;
+0043   cd(cwd);
+0044   <span class="comment">% set solve_file name for this study</span>
+0045   <span class="keyword">if</span> isempty(options.solve_file)
+0046     <span class="comment">% set default solve_file for this study</span>
+0047     [~,fname]=fileparts(options.study_dir);
+0048     fname=[<span class="string">'solve_ode_'</span> fname];
+0049     <span class="comment">% replace non-word characters by underscores so that matlab can execute</span>
+0050     <span class="comment">% the file as a Matlab function:</span>
+0051     fname=regexprep(fname,<span class="string">'[^\w]'</span>,<span class="string">'_'</span>);
+0052     <span class="comment">% store the solve file</span>
+0053     options.solve_file=fullfile(options.study_dir,<span class="string">'solve'</span>,[fname <span class="string">'.m'</span>]);
+0054   <span class="keyword">end</span>
+0055   <span class="comment">% initialize studyinfo if not already initialized</span>
+0056   <span class="keyword">if</span> ischar(options.study_dir) &amp;&amp; isdir(options.study_dir) &amp;&amp; exist(fullfile(options.study_dir,<span class="string">'studyinfo.mat'</span>),<span class="string">'file'</span>)
+0057     <span class="comment">% studyinfo file already exists</span>
+0058     studyinfo=<a href="CheckStudyinfo.html" class="code" title="function studyinfo=CheckStudyinfo(studyinfo,varargin)">CheckStudyinfo</a>(options.study_dir,<span class="string">'process_id'</span>,process_id);
+0059     orig_studyinfo=studyinfo;
+0060   <span class="keyword">else</span>
+0061     orig_studyinfo=[];
+0062     <span class="comment">% studyinfo file does not exist; initialize new studyinfo structure</span>
+0063     <span class="keyword">if</span> ~isempty(base_model)
+0064       warning off; <span class="comment">%warning('off','MATLAB:warn_r14_stucture_assignment')</span>
+0065       studyinfo.simulations.sim_id=1; <span class="comment">% set up dummy simulations sub-structure</span>
+0066       warning on;
+0067     <span class="keyword">else</span>
+0068       studyinfo=[];
+0069     <span class="keyword">end</span>
+0070     studyinfo=<a href="CheckStudyinfo.html" class="code" title="function studyinfo=CheckStudyinfo(studyinfo,varargin)">CheckStudyinfo</a>(studyinfo,<span class="string">'process_id'</span>,process_id); <span class="comment">% auto-fill all fields</span>
+0071   <span class="keyword">end</span>
+0072   <span class="comment">% set basic metadata for this study</span>
+0073   studyinfo.study_dir=options.study_dir;
+0074   studyinfo.project_id=[];<span class="comment">%options.project_id; % &lt;-- placeholder for future feature</span>
+0075   <span class="keyword">if</span> isempty(studyinfo.base_model)
+0076     studyinfo.base_model=base_model;
+0077   <span class="keyword">end</span>
+0078   <span class="keyword">if</span> isempty(studyinfo.base_simulator_options)
+0079     studyinfo.base_simulator_options=options;
+0080   <span class="keyword">end</span>
+0081   <span class="keyword">if</span> isempty(studyinfo.base_solve_file)
+0082     studyinfo.base_solve_file=options.solve_file;
+0083   <span class="keyword">end</span>
+0084   <span class="keyword">if</span> isempty(studyinfo.base_data_files)
+0085     studyinfo.base_data_files={};<span class="comment">%options.base_data_files; % &lt;-- placeholder for future feature (analysis stream)</span>
+0086   <span class="keyword">end</span>
+0087   <span class="comment">% create study_dir if it doesn't exist</span>
+0088   <span class="keyword">if</span> ~isdir(options.study_dir)
+0089     <span class="keyword">if</span> options.verbose_flag
+0090       fprintf(<span class="string">'creating study directory: %s\n'</span>,options.study_dir);
+0091     <span class="keyword">end</span>
+0092     mkdir(options.study_dir);
+0093   <span class="keyword">end</span>
+0094   <span class="comment">% create models dir if it doesn't exist and saving model</span>
+0095 <span class="comment">%   models_dir=fullfile(options.study_dir,'models');</span>
+0096 <span class="comment">%   if ~isdir(models_dir)</span>
+0097 <span class="comment">%     if options.verbose_flag</span>
+0098 <span class="comment">%       fprintf('creating models directory: %s\n',models_dir);</span>
+0099 <span class="comment">%     end</span>
+0100 <span class="comment">%     mkdir(models_dir);</span>
+0101 <span class="comment">%   end</span>
+0102   <span class="comment">% create data dir if it doesn't exist and saving model</span>
+0103   data_dir=fullfile(options.study_dir,<span class="string">'data'</span>);
+0104   <span class="keyword">if</span> ~isdir(data_dir)
+0105     <span class="keyword">if</span> options.verbose_flag
+0106       fprintf(<span class="string">'creating data directory: %s\n'</span>,data_dir);
+0107     <span class="keyword">end</span>
+0108     mkdir(data_dir);
+0109   <span class="keyword">end</span>
+0110   <span class="comment">% create figure dir if it doesn't exist and is needed</span>
+0111   <span class="keyword">if</span> ~isempty(options.plot_functions)
+0112     plot_dir=fullfile(options.study_dir,<span class="string">'plots'</span>);
+0113     <span class="keyword">if</span> ~isdir(plot_dir)
+0114       <span class="keyword">if</span> options.verbose_flag
+0115         fprintf(<span class="string">'creating plot directory: %s\n'</span>,plot_dir);
+0116       <span class="keyword">end</span>
+0117       mkdir(plot_dir);
+0118     <span class="keyword">end</span>
+0119   <span class="keyword">end</span>
+0120   <span class="comment">% set single-simulation metadata (studyinfo.simulation(k))</span>
+0121   <span class="comment">% create list of output file names (use modifications_set to loop sims)</span>
+0122   <span class="keyword">for</span> k=1:length(modifications_set)
+0123     <span class="keyword">if</span> length(studyinfo.simulations)&lt;k || isempty(studyinfo.simulations(k).status)
+0124       studyinfo.simulations(k).sim_id=k;
+0125       studyinfo.simulations(k).modifications=modifications_set{k};
+0126       fname=[options.prefix <span class="string">'_sim'</span> num2str(k) <span class="string">'_data.mat'</span>];
+0127       studyinfo.simulations(k).data_file=fullfile(data_dir,fname);
+0128       fname=[options.prefix <span class="string">'_sim'</span> num2str(k) <span class="string">'_model.mat'</span>];
+0129       <span class="comment">%studyinfo.simulations(k).modified_model_file=fullfile(models_dir,fname);</span>
+0130       studyinfo.simulations(k).status=<span class="string">'initialized'</span>;
+0131       <span class="comment">% set file names for analysis results</span>
+0132       <span class="keyword">for</span> kk=1:length(options.analysis_functions)
+0133         studyinfo.simulations(k).result_functions{end+1}=options.analysis_functions{kk};
+0134         studyinfo.simulations(k).result_options{end+1}=options.analysis_options{kk};
+0135         fname=[options.prefix <span class="string">'_sim'</span> num2str(k) <span class="string">'_analysis'</span> num2str(kk) <span class="string">'_'</span> func2str(options.analysis_functions{kk}) <span class="string">'.mat'</span>];
+0136         studyinfo.simulations(k).result_files{end+1}=fullfile(data_dir,fname);
+0137       <span class="keyword">end</span>
+0138       <span class="comment">% set files names for saved plots (in plot_dir)</span>
+0139       <span class="keyword">for</span> kk=1:length(options.plot_functions)
+0140         studyinfo.simulations(k).result_functions{end+1}=options.plot_functions{kk};
+0141         studyinfo.simulations(k).result_options{end+1}=options.plot_options{kk};
+0142         fname=[options.prefix <span class="string">'_sim'</span> num2str(k) <span class="string">'_plot'</span> num2str(kk) <span class="string">'_'</span> func2str(options.plot_functions{kk})]; 
+0143         <span class="comment">% note: extension will depend on output format (jpg,png,eps,svg)</span>
+0144         <span class="comment">% and be set in AnalyzeData().</span>
+0145         studyinfo.simulations(k).result_files{end+1}=fullfile(plot_dir,fname);
+0146       <span class="keyword">end</span>
+0147       <span class="comment">% todo: add options.detailed_names_flag (see AnalyzeStudy())</span>
+0148       <span class="comment">% ...</span>
+0149     <span class="keyword">end</span>
+0150   <span class="keyword">end</span>
+0151   <span class="comment">% todo: set single-analysis metadata (studyinfo.analysis(k))</span>
+0152   <span class="comment">% ...</span>
+0153 
+0154   <span class="comment">% save studyinfo if it has changed</span>
+0155   <span class="keyword">if</span> ~isequal(orig_studyinfo,studyinfo)
+0156     <span class="comment">% save studyinfo structure to disk</span>
+0157     study_file=fullfile(options.study_dir,<span class="string">'studyinfo.mat'</span>);
+0158     <a href="StudyinfoIO.html" class="code" title="function studyinfo=StudyinfoIO(studyinfo,study_file,id,verbose_flag)">StudyinfoIO</a>(studyinfo,study_file,process_id,options.verbose_flag);
+0159   <span class="keyword">end</span>
+0160 <span class="keyword">else</span>
+0161   <span class="comment">% set defaults for not saving anything</span>
+0162   <span class="keyword">if</span> isempty(options.study_dir)
+0163     <span class="comment">% if not saving data, store solvers in current directory</span>
+0164     options.study_dir=pwd; <span class="comment">% this is where /solve/solve_ode.m will be created</span>
+0165   <span class="keyword">end</span>
+0166   <span class="keyword">if</span> ~isdir(options.study_dir) <span class="comment">% in case user provides different location to save solvers</span>
+0167     <span class="keyword">if</span> options.verbose_flag
+0168       fprintf(<span class="string">'creating study directory: %s\n'</span>,options.study_dir);
+0169     <span class="keyword">end</span>
+0170     mkdir(options.study_dir);
+0171   <span class="keyword">end</span>
+0172   studyinfo=[];
+0173 <span class="keyword">end</span></pre></div>
+<hr><address>Generated on Fri 24-Feb-2017 14:46:35 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" target="_parent">m2html</a></strong> &copy; 2005</address>
+</body>
+</html>

@@ -1,0 +1,390 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of specdiff</title>
+  <meta name="keywords" content="specdiff">
+  <meta name="description" content="% function [pop_diff,conn_diff] = specdiff(spec1,spec2)">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html &copy; 2005 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="../m2html.css">
+  <script type="text/javascript">
+    if (top.frames.length == 0) { top.location = "../index.html"; };
+  </script>
+</head>
+<body>
+<a name="_top"></a>
+<!-- menu.html functions -->
+<h1>specdiff
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>% function [pop_diff,conn_diff] = specdiff(spec1,spec2)</strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>function [pop_diff,conn_diff] = specdiff(spec1,spec2,verbose) </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre class="comment">% function [pop_diff,conn_diff] = specdiff(spec1,spec2)
+ Purpose: Scans two DynaSim specs for differences
+ NOTE1: Requires nDDict class dependency
+ Inputs:
+     spec1, spec2        : DynaSim model specifications to be compared
+ Outputs:
+     pop_diff            : Structure summarizing differences between populations
+     conn_diff           : Structure summarizing differences between connections
+     verbose             : Bool - show or hide text output
+ Dependencies:
+   Requires the nDDims class, which should be party of DynaSim. If not,
+   get it here https://github.com/davestanley/nDDims</pre></div>
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+This function calls:
+<ul style="list-style-image:url(../matlabicon.gif)">
+<li><a href="cellfunu.html" class="code" title="function varargout = cellfunu (varargin)">cellfunu</a>	CELLFUNU - Wraps cellfun, with uniform output set to zero</li><li><a href="../functions_xPlt/classes/@nDDict/nDDict.html" class="code" title="">nDDict</a>	</li></ul>
+This function is called by:
+<ul style="list-style-image:url(../matlabicon.gif)">
+</ul>
+<!-- crossreference -->
+
+<h2><a name="_subfunctions"></a>SUBFUNCTIONS <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<ul style="list-style-image:url(../matlabicon.gif)">
+<li><a href="#_sub1" class="code">function [val,pop_name,properties] = extract_pop_lists(s)</a></li><li><a href="#_sub2" class="code">function [val,pop_name,properties] = extract_conn_lists(s)</a></li><li><a href="#_sub3" class="code">function out = mycompare(x,y)</a></li><li><a href="#_sub4" class="code">function fprintf_cells(string,cells2print)</a></li><li><a href="#_sub5" class="code">function [str_merged,ind1,ind2] = compare_string_cells(string1,string2)</a></li><li><a href="#_sub6" class="code">function run_comparison(nd)</a></li><li><a href="#_sub7" class="code">function s = return_comparison(nd)</a></li></ul>
+
+<h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function [pop_diff,conn_diff] = specdiff(spec1,spec2,verbose)</a>
+0002 <span class="comment">%% function [pop_diff,conn_diff] = specdiff(spec1,spec2)</span>
+0003 <span class="comment">% Purpose: Scans two DynaSim specs for differences</span>
+0004 <span class="comment">% NOTE1: Requires nDDict class dependency</span>
+0005 <span class="comment">% Inputs:</span>
+0006 <span class="comment">%     spec1, spec2        : DynaSim model specifications to be compared</span>
+0007 <span class="comment">% Outputs:</span>
+0008 <span class="comment">%     pop_diff            : Structure summarizing differences between populations</span>
+0009 <span class="comment">%     conn_diff           : Structure summarizing differences between connections</span>
+0010 <span class="comment">%     verbose             : Bool - show or hide text output</span>
+0011 <span class="comment">% Dependencies:</span>
+0012 <span class="comment">%   Requires the nDDims class, which should be party of DynaSim. If not,</span>
+0013 <span class="comment">%   get it here https://github.com/davestanley/nDDims</span>
+0014 <span class="comment">%</span>
+0015 <span class="comment">%</span>
+0016 
+0017 debug_mode = 0;
+0018 
+0019 <span class="keyword">if</span> nargin &lt; 3
+0020     verbose = true;
+0021 <span class="keyword">end</span>
+0022 
+0023 
+0024 <span class="keyword">if</span> ~exist(<span class="string">'nDDict'</span>,<span class="string">'class'</span>)
+0025     fprintf(<span class="string">'This function requires the class nDDict. Make sure this is in your MATLAB path.\n'</span>);
+0026     fprintf(<span class="string">'It can be downloaded from the following links: \n.'</span>);
+0027     fprintf(<span class="string">'1. https://github.com/davestanley/nDDims \n'</span>);
+0028     fprintf(<span class="string">'2. https://www.mathworks.com/matlabcentral/fileexchange/61656-multidimensional-dictionaries\n'</span>);
+0029     error(<span class="string">'Missing dependency'</span>);
+0030 <span class="keyword">end</span>
+0031 
+0032 <span class="comment">% % % % % % % % % % % % % % % % % % % %</span>
+0033 <span class="comment">% % % % % % DO POPULATIONS % % % % % %</span>
+0034 <span class="comment">% % % % % % % % % % % % % % % % % % % %</span>
+0035 <span class="comment">% Build tables summarizing all information for both models</span>
+0036 [val1,pop_name1,property1] = <a href="#_sub1" class="code" title="subfunction [val,pop_name,properties] = extract_pop_lists(s)">extract_pop_lists</a>(spec1.populations);
+0037 [val2,pop_name2,property2] = <a href="#_sub1" class="code" title="subfunction [val,pop_name,properties] = extract_pop_lists(s)">extract_pop_lists</a>(spec2.populations);
+0038 
+0039 <span class="comment">% For example, this is how the table for spec1 should look</span>
+0040 <span class="keyword">if</span> debug_mode 
+0041     <span class="comment">% Arrange and view one of the tables</span>
+0042     table = horzcat(pop_name1,property1,val1);
+0043     table
+0044 <span class="keyword">end</span>
+0045 
+0046 <span class="comment">% Merge spec1 and spec2 tables together into one huge table. Create a new</span>
+0047 <span class="comment">% column to identify spec1 vs spec2 entries</span>
+0048 val = vertcat(val1,val2);
+0049 pop_names = vertcat(pop_name1,pop_name2);
+0050 properties = vertcat(property1,property2);
+0051 specID = vertcat(1*ones(length(val1),1), 2*ones(length(val2),1));       <span class="comment">% Identifier saying whether entry is from spec1 or spec2.</span>
+0052 
+0053 <span class="keyword">if</span> debug_mode 
+0054     <span class="comment">% Arrange and view the huge table</span>
+0055     table = horzcat(pop_name1,property1,specID,val1);
+0056     table
+0057 <span class="keyword">end</span>
+0058 clear val1 val2 pop_name1 pop_name2 propert1 property2
+0059 
+0060 <span class="comment">% Build specs structure.</span>
+0061 <span class="comment">% population name x entry x spec1 or spec2</span>
+0062 nd = <a href="../functions_xPlt/classes/@nDDict/nDDict.html" class="code" title="">nDDict</a>;
+0063 nd = nd.importLinearData(val,pop_names,properties,specID);
+0064 nd.axis(1).name = <span class="string">'Populations'</span>;
+0065 nd.axis(2).name = <span class="string">'Properties'</span>;
+0066 nd.axis(3).name = <span class="string">'SpecID'</span>;
+0067 
+0068 <span class="keyword">if</span> debug_mode
+0069     nd.getaxisinfo
+0070 <span class="keyword">end</span>
+0071 
+0072 <span class="keyword">if</span> verbose; <a href="#_sub6" class="code" title="subfunction run_comparison(nd)">run_comparison</a>(nd); <span class="keyword">end</span>
+0073 <span class="keyword">if</span> nargout &gt; 0; pop_diff = <a href="#_sub7" class="code" title="subfunction s = return_comparison(nd)">return_comparison</a>(nd); <span class="keyword">end</span>
+0074 
+0075 <span class="keyword">if</span> verbose; fprintf(<span class="string">'\n\n'</span>); <span class="keyword">end</span>
+0076 
+0077 <span class="comment">% % % % % % % % % % % % % % % % % % % %</span>
+0078 <span class="comment">% % % % % % DO CONNECTIONS % % % % % %</span>
+0079 <span class="comment">% % % % % % % % % % % % % % % % % % % %</span>
+0080 [val1,pop_name1,property1] = <a href="#_sub2" class="code" title="subfunction [val,pop_name,properties] = extract_conn_lists(s)">extract_conn_lists</a>(spec1.connections);
+0081 [val2,pop_name2,property2] = <a href="#_sub2" class="code" title="subfunction [val,pop_name,properties] = extract_conn_lists(s)">extract_conn_lists</a>(spec2.connections);
+0082 
+0083 <span class="comment">% Merge spec1 and spec2 tables together into one huge table. Create a new</span>
+0084 <span class="comment">% column to identify spec1 vs spec2 entries</span>
+0085 val = vertcat(val1,val2);
+0086 pop_names = vertcat(pop_name1,pop_name2);
+0087 properties = vertcat(property1,property2);
+0088 specID = vertcat(1*ones(length(val1),1), 2*ones(length(val2),1));       <span class="comment">% Identifier saying whether entry is from spec1 or spec2.</span>
+0089 
+0090 clear val1 val2 pop_name1 pop_name2 propert1 property2
+0091 
+0092 <span class="comment">% Build specs structure.</span>
+0093 <span class="comment">% Connection name x entry x spec1 or spec2</span>
+0094 nd = <a href="../functions_xPlt/classes/@nDDict/nDDict.html" class="code" title="">nDDict</a>;
+0095 nd = nd.importLinearData(val,pop_names,properties,specID);
+0096 nd.axis(1).name = <span class="string">'Connections'</span>;
+0097 nd.axis(2).name = <span class="string">'Properties'</span>;
+0098 nd.axis(3).name = <span class="string">'SpecID'</span>;
+0099 
+0100 <span class="keyword">if</span> debug_mode
+0101     nd.getaxisinfo
+0102 <span class="keyword">end</span>
+0103 
+0104 <span class="keyword">if</span> verbose; <a href="#_sub6" class="code" title="subfunction run_comparison(nd)">run_comparison</a>(nd); <span class="keyword">end</span>
+0105 <span class="keyword">if</span> nargout &gt; 1; conn_diff = <a href="#_sub7" class="code" title="subfunction s = return_comparison(nd)">return_comparison</a>(nd); <span class="keyword">end</span>
+0106 
+0107 
+0108 <span class="keyword">end</span>
+0109 
+0110 
+0111 <a name="_sub1" href="#_subfunctions" class="code">function [val,pop_name,properties] = extract_pop_lists(s)</a>
+0112     <span class="comment">% This function builds a huge table describing the properties of all of</span>
+0113     <span class="comment">% the mechanisms in each population</span>
+0114     
+0115     <span class="comment">% Initialize output variables to empty cells</span>
+0116     Nparams = arrayfun(@(x) length(x.parameters),s) / 2;
+0117     Nproperties = Nparams + 3;      <span class="comment">% Add 3 for: size, equations, mechanism_list</span>
+0118     val = cell(sum(Nproperties),1);
+0119     pop_name = val;
+0120     properties = val;
+0121     
+0122     N = length(s);
+0123     
+0124     k=0;
+0125     <span class="keyword">for</span> i = 1:N     <span class="comment">% Loop over populations</span>
+0126         k=k+1; field = <span class="string">'size'</span>; pop_name{k} = s(i).name; properties{k} = [<span class="string">'spec_'</span> field]; val{k} = s(i).(field);
+0127         k=k+1; field = <span class="string">'equations'</span>; pop_name{k} = s(i).name; properties{k} = [<span class="string">'spec_'</span> field]; val{k} = s(i).(field);
+0128         k=k+1; field = <span class="string">'mechanism_list'</span>; pop_name{k} = s(i).name; properties{k} = [<span class="string">'spec_'</span> field]; val{k} = s(i).(field);
+0129         param_names = s(i).parameters(1:2:end);
+0130         param_vals = s(i).parameters(2:2:end);
+0131         <span class="keyword">for</span> j = 1:length(param_names)
+0132             k=k+1; pop_name{k} = s(i).name; properties{k} = param_names{j}; val{k} = param_vals{j};
+0133         <span class="keyword">end</span>
+0134     <span class="keyword">end</span>
+0135 <span class="keyword">end</span>
+0136 
+0137 
+0138 <a name="_sub2" href="#_subfunctions" class="code">function [val,pop_name,properties] = extract_conn_lists(s)</a>
+0139     <span class="comment">% This function builds a huge table describing the properties of all of</span>
+0140     <span class="comment">% the mechanisms in each connection</span>
+0141     
+0142     <span class="comment">% Initialize output variables to empty cells</span>
+0143     Nparams = arrayfun(@(x) length(x.parameters),s) / 2;
+0144     Nproperties = Nparams + 1;      <span class="comment">% Add 1 for: mechanism_list</span>
+0145     val = cell(sum(Nproperties),1);
+0146     pop_name = val;
+0147     properties = val;
+0148     
+0149     N = length(s);
+0150     
+0151     k=0;
+0152     <span class="keyword">for</span> i = 1:N     <span class="comment">% Loop over connections</span>
+0153         k=k+1; field = <span class="string">'mechanism_list'</span>; pop_name{k} = s(i).direction; properties{k} = [<span class="string">'spec_'</span> field]; val{k} = s(i).(field);
+0154         param_names = s(i).parameters(1:2:end);
+0155         param_vals = s(i).parameters(2:2:end);
+0156         <span class="keyword">for</span> j = 1:length(param_names)
+0157             k=k+1; pop_name{k} = s(i).direction; properties{k} = param_names{j}; val{k} = param_vals{j};
+0158         <span class="keyword">end</span>
+0159     <span class="keyword">end</span>
+0160 <span class="keyword">end</span>
+0161 
+0162 
+0163 
+0164 <a name="_sub3" href="#_subfunctions" class="code">function out = mycompare(x,y)</a>
+0165 
+0166     <span class="keyword">if</span> isempty(x) &amp;&amp; isempty(y)
+0167         out = -3;                   <span class="comment">% Missing from both</span>
+0168     <span class="keyword">elseif</span> isempty(x) &amp;&amp; ~isempty(y)
+0169         out = -1;                   <span class="comment">% Missing from spec1</span>
+0170     <span class="keyword">elseif</span> ~isempty(x) &amp;&amp; isempty(y)
+0171         out = -2;                   <span class="comment">% Missing from spec2</span>
+0172     <span class="keyword">else</span>
+0173         <span class="comment">% Parameter is present in both spec1 and spec2!!</span>
+0174         <span class="keyword">if</span> isnumeric(x) &amp;&amp; isnumeric(y)
+0175             out = x == y;       <span class="comment">% 1 codes for same, 0 codes for different</span>
+0176         <span class="keyword">elseif</span> ischar(x) &amp;&amp; ischar(y)
+0177             out = strcmp(x,y);
+0178         <span class="keyword">elseif</span> iscell(x) &amp;&amp; iscell(y)
+0179             <span class="keyword">if</span> length(x) == length(y)
+0180                 temp = cellfun(@(x2,y2) <a href="#_sub3" class="code" title="subfunction out = mycompare(x,y)">mycompare</a>(x2,y2),x,y);
+0181                 out = any(temp == 1);
+0182             <span class="keyword">else</span>
+0183                 out = -4;               <span class="comment">% Both cells but different lengths!</span>
+0184             <span class="keyword">end</span>
+0185         <span class="keyword">else</span>
+0186             out = -5;                   <span class="comment">% If we reach this, spec1 and spec2 both have an entry, but the variable types are different.</span>
+0187         <span class="keyword">end</span>
+0188     <span class="keyword">end</span>
+0189 
+0190     out = double(out);
+0191 <span class="keyword">end</span>
+0192 
+0193 
+0194 <a name="_sub4" href="#_subfunctions" class="code">function fprintf_cells(string,cells2print)</a>
+0195 
+0196     <span class="keyword">if</span> ~isempty(cells2print)
+0197         cells2print = <a href="cellfunu.html" class="code" title="function varargout = cellfunu (varargin)">cellfunu</a>(@(x) [x <span class="string">' '</span>], cells2print);
+0198         fprintf([string <span class="string">' '</span> cells2print{:} <span class="string">'\n'</span>]);
+0199     <span class="keyword">end</span>
+0200 
+0201 <span class="keyword">end</span>
+0202 
+0203 
+0204 <a name="_sub5" href="#_subfunctions" class="code">function [str_merged,ind1,ind2] = compare_string_cells(string1,string2)</a>
+0205     str_merged = vertcat(string1(:),string2(:));
+0206     str_merged = unique(str_merged);
+0207     
+0208     Nstr = length(str_merged);
+0209     
+0210     ind1 = false(1,Nstr);
+0211     ind2 = false(1,Nstr);
+0212     <span class="keyword">for</span> i = 1:length(str_merged)
+0213         ind1(i) = any(strcmp(str_merged{i},string1));
+0214         ind2(i) = any(strcmp(str_merged{i},string2));
+0215     <span class="keyword">end</span>
+0216     
+0217 <span class="keyword">end</span>
+0218 
+0219 
+0220 <a name="_sub6" href="#_subfunctions" class="code">function run_comparison(nd)</a>
+0221 
+0222     <span class="comment">% Now, we start doing the actual comparison between the two specs. This</span>
+0223     <span class="comment">% first section looks at the populations in both spec1 and spec2, and</span>
+0224     <span class="comment">% identifies those that mutually present.</span>
+0225     allpops = nd.axis(1).values';
+0226     Npops = length(allpops);
+0227     spec1_pops = nd.axis(1).values(any(~cellfun(@isempty,nd.data(:,:,1)),2))';
+0228     spec2_pops = nd.axis(1).values(any(~cellfun(@isempty,nd.data(:,:,2)),2))';
+0229 <span class="comment">%     spec1_pops = {spec1.populations.name};</span>
+0230 <span class="comment">%     spec2_pops = {spec2.populations.name};</span>
+0231 
+0232     ind1 = false(1,Npops);
+0233     ind2 = false(1,Npops);
+0234 
+0235     <span class="keyword">for</span> i = 1:length(allpops)
+0236         ind1(i) = any(strcmp(allpops{i},spec1_pops));
+0237         ind2(i) = any(strcmp(allpops{i},spec2_pops));
+0238     <span class="keyword">end</span>
+0239 
+0240     name = lower(nd.axis(1).name);
+0241     fprintf(<span class="string">'~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n'</span>);
+0242     fprintf([<span class="string">'~~~~~~~~~~~~~~~~~~~~~~~~Comparison of '</span> name <span class="string">' ~~~~~~~~~~~~~~~~~~~~~~~~~\n'</span>]);
+0243     fprintf(<span class="string">'~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n'</span>);
+0244     <a href="#_sub4" class="code" title="subfunction fprintf_cells(string,cells2print)">fprintf_cells</a>(<span class="string">'Populations only in spec1:'</span>, allpops(ind1 &amp; ~ind2));
+0245     <a href="#_sub4" class="code" title="subfunction fprintf_cells(string,cells2print)">fprintf_cells</a>(<span class="string">'Populations only in spec2:'</span>, allpops(~ind1 &amp; ind2));
+0246     <a href="#_sub4" class="code" title="subfunction fprintf_cells(string,cells2print)">fprintf_cells</a>(<span class="string">'Populations in both:'</span>, allpops(ind1 &amp; ind2));
+0247     fprintf(<span class="string">'\n'</span>);
+0248 
+0249     <span class="comment">% Now that we know the populations mutually present in both models, we will</span>
+0250     <span class="comment">% proceed to compare the parameters for these populations.</span>
+0251 
+0252     inds_both = find(ind1 &amp; ind2);        <span class="comment">% Indices of populations present in both spec1 and spec2</span>
+0253 
+0254     <span class="comment">% First, build matrix summarizing differences between all populations in</span>
+0255     <span class="comment">% both models</span>
+0256     params1 = nd.data(:,:,1);
+0257     params2 = nd.data(:,:,2);
+0258 
+0259     inds = <a href="cellfunu.html" class="code" title="function varargout = cellfunu (varargin)">cellfunu</a>(@(x,y) <a href="#_sub3" class="code" title="subfunction out = mycompare(x,y)">mycompare</a>(x,y), params1,params2);
+0260     inds2 = cell2mat(inds);
+0261 
+0262     <span class="comment">% Loop through each population present in both models and compare</span>
+0263     <span class="comment">% mechanisms</span>
+0264     <span class="keyword">for</span> i = inds_both
+0265         
+0266         inds_curr = inds2(i,:);                     <span class="comment">% Comparison indices for current population</span>
+0267         inds_different = inds_curr ~= 1;            <span class="comment">% Tracks whether there are differences of some sort...</span>
+0268         inds_different(inds_curr == -3) = 0;        <span class="comment">% If these differences are due to the mechanism being missing from both specs, ignore.</span>
+0269         
+0270         <span class="keyword">if</span> any(inds_different)          <span class="comment">% If there are differences of some sort, show comparison</span>
+0271                                                                 <span class="comment">%</span>
+0272             fprintf(<span class="string">'~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n'</span>);
+0273             fprintf([<span class="string">'Comparing mechs in '</span> name <span class="string">' '</span> nd.axis(1).values{i} <span class="string">' \n'</span>]);
+0274             
+0275 
+0276             <span class="comment">% List mechanisms common to both populations, or those missing from one</span>
+0277             <span class="comment">% but present in the other</span>
+0278             nd1 = nd.subset(i,<span class="string">'spec_mechanism_list'</span>,1);  <span class="comment">% Mechanisms in spec1</span>
+0279             nd2 = nd.subset(i,<span class="string">'spec_mechanism_list'</span>,2);  <span class="comment">% Mechanisms in spec2</span>
+0280             [str_merged,ind1,ind2] = <a href="#_sub5" class="code" title="subfunction [str_merged,ind1,ind2] = compare_string_cells(string1,string2)">compare_string_cells</a>(nd1.data{:},nd2.data{:});
+0281             <a href="#_sub4" class="code" title="subfunction fprintf_cells(string,cells2print)">fprintf_cells</a>(<span class="string">'Mechs only in spec1:'</span>, str_merged(ind1 &amp; ~ind2));
+0282             <a href="#_sub4" class="code" title="subfunction fprintf_cells(string,cells2print)">fprintf_cells</a>(<span class="string">'Mechs only in spec2:'</span>, str_merged(~ind1 &amp; ind2));
+0283             <span class="comment">% fprintf_cells('Mechs in both:', str_merged(ind1 &amp; ind2));</span>
+0284 
+0285 
+0286             <span class="comment">% Print parameters common to both population, or those missing from one</span>
+0287             <span class="comment">% but present in the other</span>
+0288             temp = inds_curr == -1; <a href="#_sub4" class="code" title="subfunction fprintf_cells(string,cells2print)">fprintf_cells</a>([<span class="string">'Parameters present in spec1 but missing in spec2:'</span> ], nd.axis(2).values(temp)); 
+0289             temp = inds_curr == -2; <a href="#_sub4" class="code" title="subfunction fprintf_cells(string,cells2print)">fprintf_cells</a>([<span class="string">'Parameters present in spec2 but missing in spec1:'</span> ], nd.axis(2).values(temp)); 
+0290             temp = inds_curr == -4; <a href="#_sub4" class="code" title="subfunction fprintf_cells(string,cells2print)">fprintf_cells</a>([<span class="string">'Parameters are incomparable because they are cell arrays of different lengths:'</span> ], nd.axis(2).values(temp)); 
+0291             temp = inds_curr == -5; <a href="#_sub4" class="code" title="subfunction fprintf_cells(string,cells2print)">fprintf_cells</a>([<span class="string">'Parameters are incomparable because they are different data types (e.g. one is string, one is numeric):'</span> ], nd.axis(2).values(temp)); 
+0292             <span class="comment">%temp = inds_curr == 1; fprintf_cells(['Parameters are identical in spec1 and spec2:' ], nd.axis(2).values(temp));</span>
+0293             temp = inds_curr == 0; <a href="#_sub4" class="code" title="subfunction fprintf_cells(string,cells2print)">fprintf_cells</a>([<span class="string">'Parameters differing between '</span> nd.axis(1).values{i} <span class="string">':'</span> ], nd.axis(2).values(temp)); 
+0294 
+0295             <span class="comment">% For the mutual parameters, list ones that have different values</span>
+0296             ind_diff = find(inds_curr == 0);
+0297             <span class="keyword">for</span> j = ind_diff
+0298                 val1 = nd.data{i,j,1};
+0299                 val2 = nd.data{i,j,2};
+0300                 <span class="keyword">if</span> isnumeric(val1); val1 = num2str(val1); <span class="keyword">end</span>
+0301                 <span class="keyword">if</span> isnumeric(val2); val2 = num2str(val2); <span class="keyword">end</span>
+0302                 <span class="keyword">if</span> ischar(val1) &amp;&amp; ischar(val2)
+0303                     fprintf([<span class="string">'Mechanism '</span> nd.axis(2).values{j} <span class="string">' is '</span> val1 <span class="string">' for spec1 and '</span> val2 <span class="string">' for spec2 \n'</span>]);
+0304                 <span class="keyword">end</span>
+0305             <span class="keyword">end</span>
+0306             
+0307             fprintf(<span class="string">'~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n'</span>);
+0308         <span class="keyword">end</span>
+0309 
+0310     <span class="keyword">end</span>
+0311 <span class="keyword">end</span>
+0312 
+0313 <a name="_sub7" href="#_subfunctions" class="code">function s = return_comparison(nd)</a>
+0314 
+0315     sz = size(nd.data);
+0316     Npop = sz(1);
+0317     
+0318     <span class="keyword">for</span> i = 1:Npop
+0319         s(i).name = nd.axis(1).values(i);
+0320         temp = horzcat(nd.axis(2).values, nd.data(i,:,1)', nd.data(i,:,2)');
+0321         inds = cellfun(@(x,y) isempty(x) &amp;&amp; isempty(y),temp(:,2), temp(:,3));      <span class="comment">% Parameters that are abscent from both pops</span>
+0322         temp = temp(~inds,:);                                                      <span class="comment">% Remove these parameters</span>
+0323         s(i).parameter_names_values = temp;
+0324         
+0325         str = <span class="string">'spec_size'</span>; ind = strcmp(nd.axis(2).values,str); <span class="keyword">if</span> any(ind); s(i).([str <span class="string">'1'</span>]) = nd.data{i,ind,1}; s(i).([str <span class="string">'2'</span>]) = nd.data{i,ind,2}; <span class="keyword">end</span>
+0326         str = <span class="string">'spec_equations'</span>; ind = strcmp(nd.axis(2).values,str); <span class="keyword">if</span> any(ind); s(i).([str <span class="string">'1'</span>]) = nd.data{i,ind,1}; s(i).([str <span class="string">'2'</span>]) = nd.data{i,ind,2}; <span class="keyword">end</span>
+0327         str = <span class="string">'spec_mechanism_list'</span>; ind = strcmp(nd.axis(2).values,str); <span class="keyword">if</span> any(ind); s(i).([str <span class="string">'1'</span>]) = nd.data{i,ind,1}; s(i).([str <span class="string">'2'</span>]) = nd.data{i,ind,2}; <span class="keyword">end</span>
+0328     <span class="keyword">end</span>
+0329     
+0330 
+0331 <span class="keyword">end</span></pre></div>
+<hr><address>Generated on Fri 24-Feb-2017 14:46:35 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" target="_parent">m2html</a></strong> &copy; 2005</address>
+</body>
+</html>

@@ -1,0 +1,147 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of LocateModelFiles</title>
+  <meta name="keywords" content="LocateModelFiles">
+  <meta name="description" content="% [paths,files]=LocateModelFiles(input)">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html &copy; 2005 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="../m2html.css">
+  <script type="text/javascript">
+    if (top.frames.length == 0) { top.location = "../index.html"; };
+  </script>
+</head>
+<body>
+<a name="_top"></a>
+<!-- menu.html functions -->
+<h1>LocateModelFiles
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>% [paths,files]=LocateModelFiles(input)</strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>function [paths,files]=LocateModelFiles(input) </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre class="comment">% [paths,files]=LocateModelFiles(input)
+ Purpose: locate mechanism files associated with DynaSim specifications.
+ Input: DynaSim specification or model structure or string or cell array of
+        strings listing mechanism names or files.
+ Outputs: 
+   paths - unique paths to mechanism files
+   files - full names of files containing mechanism sub-models
+ 
+ See also (used by): <a href="ParseModelEquations.html" class="code" title="function [model,name_map] = ParseModelEquations(text,varargin)">ParseModelEquations</a>, <a href="CheckHostPaths.html" class="code" title="function [matched,error_message]=CheckHostPaths(studyinfo)">CheckHostPaths</a>, <a href="CreateBatch.html" class="code" title="function studyinfo=CreateBatch(base_model,modifications_set,varargin)">CreateBatch</a></pre></div>
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+This function calls:
+<ul style="list-style-image:url(../matlabicon.gif)">
+</ul>
+This function is called by:
+<ul style="list-style-image:url(../matlabicon.gif)">
+<li><a href="CheckHostPaths.html" class="code" title="function [matched,error_message]=CheckHostPaths(studyinfo)">CheckHostPaths</a>	CHECKHOSTPATHS - Compare paths on host to those set in studyinfo when batch was created</li><li><a href="CheckSpecification.html" class="code" title="function spec=CheckSpecification(specification)">CheckSpecification</a>	CHECKSPECIFICATION - standardize specification structure and auto-populate missing fields</li><li><a href="CreateBatch.html" class="code" title="function studyinfo=CreateBatch(base_model,modifications_set,varargin)">CreateBatch</a>	% studyinfo=CreateBatch(model,varargin)</li><li><a href="ParseModelEquations.html" class="code" title="function [model,name_map] = ParseModelEquations(text,varargin)">ParseModelEquations</a>	% model = ParseModelEquations(STRING,'param',value,...)</li></ul>
+<!-- crossreference -->
+
+
+
+<h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function [paths,files]=LocateModelFiles(input)</a>
+0002 <span class="comment">%% [paths,files]=LocateModelFiles(input)</span>
+0003 <span class="comment">% Purpose: locate mechanism files associated with DynaSim specifications.</span>
+0004 <span class="comment">% Input: DynaSim specification or model structure or string or cell array of</span>
+0005 <span class="comment">%        strings listing mechanism names or files.</span>
+0006 <span class="comment">% Outputs:</span>
+0007 <span class="comment">%   paths - unique paths to mechanism files</span>
+0008 <span class="comment">%   files - full names of files containing mechanism sub-models</span>
+0009 <span class="comment">%</span>
+0010 <span class="comment">% See also (used by): ParseModelEquations, CheckHostPaths, CreateBatch</span>
+0011 
+0012 <span class="comment">% extract list of mechanisms from input</span>
+0013 <span class="keyword">if</span> ischar(input)
+0014   <span class="comment">% convert to cell array of strings</span>
+0015   mechanism_list={input};
+0016 <span class="keyword">elseif</span> iscellstr(input)
+0017   mechanism_list=input;
+0018 <span class="keyword">elseif</span> isstruct(input)
+0019   <span class="keyword">if</span> isfield(input,<span class="string">'specification'</span>)
+0020     <span class="comment">% extract specification from DynaSim model structure</span>
+0021     input=input.specification;
+0022   <span class="keyword">elseif</span> isfield(input,<span class="string">'model'</span>) &amp;&amp; isfield(input.model,<span class="string">'specification'</span>) 
+0023     <span class="comment">% extract specification from DynaSim data structure</span>
+0024     input=input.model.specification;
+0025   <span class="keyword">elseif</span> isfield(input,<span class="string">'base_model'</span>) &amp;&amp; isfield(input.base_model,<span class="string">'specification'</span>) 
+0026     <span class="comment">% extract specification from DynaSim studyinfo structure</span>
+0027     input=input.base_model.specification;
+0028   <span class="keyword">else</span>
+0029     <span class="comment">% this is probably a specification structure</span>
+0030   <span class="keyword">end</span>
+0031   mechanism_list={};
+0032   <span class="keyword">if</span> isfield(input,<span class="string">'populations'</span>) &amp;&amp; isstruct(input.populations)
+0033     <span class="comment">% extract mechanism_list from populations in DynaSim specification structure</span>
+0034     m={input.populations.mechanism_list};
+0035     m=unique([m{:}],<span class="string">'stable'</span>);
+0036     mechanism_list=cat(2,mechanism_list,m);
+0037     <span class="comment">% add equations to mechanism_list in case it contains a .eqns file</span>
+0038     <span class="keyword">for</span> i=1:length(input.populations)
+0039       <span class="keyword">if</span> ~isempty(input.populations(i).equations)
+0040         mechanism_list{end+1}=input.populations(i).equations;
+0041       <span class="keyword">end</span>
+0042     <span class="keyword">end</span>
+0043   <span class="keyword">end</span>
+0044   <span class="keyword">if</span> isfield(input,<span class="string">'connections'</span>) &amp;&amp; isstruct(input.connections)
+0045     <span class="comment">% extract mechanism_list connections in DynaSim specification structure</span>
+0046     m={input.connections.mechanism_list};
+0047     m=unique([m{:}],<span class="string">'stable'</span>);
+0048     mechanism_list=cat(2,mechanism_list,m);
+0049   <span class="keyword">end</span>  
+0050 <span class="keyword">end</span>
+0051 
+0052 <span class="comment">% remove @ pointers from mechanism identifiers</span>
+0053 <span class="keyword">if</span> any(~cellfun(@isempty,regexp(mechanism_list,<span class="string">'@'</span>,<span class="string">'once'</span>)))
+0054   mechanism_list=regexp(mechanism_list,<span class="string">'^([^@]+)@?'</span>,<span class="string">'tokens'</span>,<span class="string">'once'</span>);
+0055   mechanism_list=[mechanism_list{:}];
+0056 <span class="keyword">end</span>
+0057 <span class="comment">% exclude elements with non-word characters (these are not file names)</span>
+0058 keep=cellfun(@isempty,regexp(mechanism_list,<span class="string">'[^\w\.\-/]'</span>));
+0059 <span class="comment">%keep=cellfun(@isempty,regexp(mechanism_list,'[^\w\.]'));</span>
+0060 mechanism_list=mechanism_list(keep);
+0061 
+0062 <span class="comment">% locate mechanism files</span>
+0063 files={};
+0064 <span class="keyword">if</span> iscellstr(mechanism_list)
+0065   <span class="keyword">for</span> f=1:length(mechanism_list) <span class="comment">% loop over mechanisms</span>
+0066     <span class="comment">% determine name of mechanism file (assuming recommended extensions)</span>
+0067     mech=mechanism_list{f};
+0068     <span class="keyword">if</span> exist(mech,<span class="string">'file'</span>)
+0069       file=mech;
+0070     <span class="keyword">elseif</span> exist([mech <span class="string">'.eqns'</span>],<span class="string">'file'</span>)
+0071       file=[mech <span class="string">'.eqns'</span>];
+0072     <span class="keyword">elseif</span> exist([mech <span class="string">'.mech'</span>],<span class="string">'file'</span>)
+0073       file=[mech <span class="string">'.mech'</span>];
+0074     <span class="keyword">elseif</span> exist([mech <span class="string">'.txt'</span>],<span class="string">'file'</span>)
+0075       file=[mech <span class="string">'.txt'</span>];
+0076     <span class="keyword">elseif</span> exist([mech <span class="string">'.m'</span>],<span class="string">'file'</span>)
+0077       file=[mech <span class="string">'.m'</span>];
+0078     <span class="keyword">else</span>
+0079       <span class="comment">% TODO: Add error catching here!</span>
+0080       file=<span class="string">''</span>;
+0081     <span class="keyword">end</span>
+0082     <span class="comment">% use 'which' to get full filename of file in Matlab path</span>
+0083     <span class="keyword">if</span> isempty(fileparts(file)) <span class="comment">% file is a name without a path</span>
+0084       file=which(file);
+0085     <span class="keyword">end</span>
+0086     <span class="keyword">if</span> ~isempty(file)
+0087       files{end+1}=file;
+0088     <span class="keyword">end</span>
+0089   <span class="keyword">end</span>
+0090 <span class="keyword">end</span>
+0091 
+0092 <span class="comment">% extract unique paths to mechanism files</span>
+0093 paths=unique(cellfun(@fileparts,files,<span class="string">'uni'</span>,0),<span class="string">'stable'</span>);</pre></div>
+<hr><address>Generated on Fri 24-Feb-2017 14:46:35 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" target="_parent">m2html</a></strong> &copy; 2005</address>
+</body>
+</html>

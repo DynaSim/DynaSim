@@ -1,0 +1,526 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of PlotWaveforms</title>
+  <meta name="keywords" content="PlotWaveforms">
+  <meta name="description" content="% PlotWaveforms(data,'option',value)">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html &copy; 2005 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="../m2html.css">
+  <script type="text/javascript">
+    if (top.frames.length == 0) { top.location = "../index.html"; };
+  </script>
+</head>
+<body>
+<a name="_top"></a>
+<!-- menu.html functions -->
+<h1>PlotWaveforms
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>% PlotWaveforms(data,'option',value)</strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>function PlotWaveforms(data,varargin) </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre class="comment">% PlotWaveforms(data,'option',value)
+ Purpose: plot waveforms in various ways depending on what data was provided.
+ Inputs:
+   data: DynaSim data structure (see CheckData)
+   options:
+     'variable' - name of field containing data to plot
+                  (default: all pops with state variable of variable in data.labels)
+     'time_limits' - [beg,end] (units of data.time)
+     'max_num_overlaid' - maximum # of waveforms to overlay per plot
+     'max_num_rows' - maximum # of subplot rows per figure
+ 
+ Plots:
+ if Nsims&gt;1: one sim per row
+ elseif Npops&gt;1: one pop per row
+ else: one cell per row
+ 
+ Examples for specifying 'variable' option: 
+ []      : plot all data.labels with same variable name as first element of data.labels (eg, 'pop1_v' and 'pop2_v')
+ '*'     : plot all data.labels
+ '*_v'   : plot all data.labels ending in _v (i.e., all state variables 'v' for all populations)
+ 'pop1_*': plot all data.labels starting with pop1_ (i.e., all variables for population 'pop1')
+ 'pop1_v': plot only variable 'pop1_v'
+ 'v'     : look for all data.labels ending in _v then starting with v_ (eg, all populations with variable 'v')
+ 'pop1'  : look for all data.labels ending in _pop1 then starting with pop1_ (eg, all variables for population 'pop1')
+ '*_iNa_*': plot all data.labels for the 'iNa' mechanism (for all populations)
+   
+ Examples:
+ One cell:
+ data=SimulateModel('dv/dt=@current+10; {iNa,iK}');
+ PlotWaveforms(data); % plot first state variable ('v')
+ PlotWaveforms(data,'variable','*'); % plot all state variables
+ PlotWaveforms(data,'variable','*','time_limits',[30 60]); % plot all variables and time 30-60ms
+ 
+ One population: with noisy input
+ data=SimulateModel('dv[5]/dt=@current+10*(1+randn(1,Npop)); {iNa,iK}');
+ PlotWaveforms(data);
+ PlotWaveforms(data,'variable','*'); % plot all state variables (all cells)
+ PlotWaveforms(data,'variable','m'); % plot state variable 'm' (all cells)
+ PlotWaveforms(data,'variable','*','time_limits',[30 60]); % plot all variables and time 30-60ms
+ 
+ One population varying one parameter (input amplitude):
+ eqns='dv[5]/dt=@current+amp*(1+randn(1,Npop)); {iNa,iK}';
+ vary={'','amp',[0 10 20]};
+ data=SimulateModel(eqns,'vary',vary);
+ PlotWaveforms(data);
+ PlotWaveforms(data,'variable','m');
+ PlotWaveforms(data,'variable','*');
+ 
+ One population varying two parameters (input amplitude and membrane capacitance):
+ eqns='dv[5]/dt=@current/Cm+amp*(1+randn(1,Npop)); {iNa,iK}';
+ vary={'','Cm',[1 2]; '','amp',[0 10 20]};
+ data=SimulateModel(eqns,'vary',vary);
+ PlotWaveforms(data);
+ PlotWaveforms(data,'variable','*');
+ 
+ Two populations: noisy input to E and excitatory connection from E to I
+ spec=[];
+ spec.populations(1).name='E1';
+ spec.populations(1).equations='dv[5]/dt=@current+amp*(1+randn(1,Npop)); amp=10; {iNa,iK}';
+ spec.populations(2).name='E2';
+ spec.populations(2).equations='dv[2]/dt=@current; {iNa,iK}';
+ spec.connections(1).direction='E1-&gt;E2';
+ spec.connections(1).mechanism_list='iAMPA';
+ data=SimulateModel(spec);
+ PlotWaveforms(data); % plot first state variable
+ PlotWaveforms(data,'variable','*'); 
+ % plot monitored synaptic current with post-synaptic voltages:
+ PlotWaveforms(data,'variable',{'E2_v','ISYN'}); 
+ % plot monitored synaptic current with pre- and post-synaptic voltages:
+ PlotWaveforms(data,'variable',{'v','ISYN'}); 
+ 
+ Two populations varying one parameter (input amplitude):
+ vary={'E1','amp',[0 10 20]};
+ data=SimulateModel(spec,'vary',vary);
+ PlotWaveforms(data);
+ PlotWaveforms(data,'variable','*');
+ PlotWaveforms(data,'variable','*_iNa_*');
+ 
+ Two populations varying two parameters (input amplitude and synaptic conductance):
+ vary={'E1','amp',[0 10 20]; 'E1-&gt;E2','gSYN',[0 .05 .1]};
+ data=SimulateModel(spec,'vary',vary);
+ PlotWaveforms(data,'variable','v');
+ PlotWaveforms(data,'variable','ISYN');
+ PlotWaveforms(data,'variable','E1_v');
+ PlotWaveforms(data,'variable','*');
+ 
+ See also: <a href="PlotFR.html" class="code" title="function handles=PlotFR(data,varargin)">PlotFR</a>, <a href="CheckData.html" class="code" title="function data=CheckData(data)">CheckData</a></pre></div>
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+This function calls:
+<ul style="list-style-image:url(../matlabicon.gif)">
+<li><a href="CheckData.html" class="code" title="function data=CheckData(data)">CheckData</a>	CHECKDATA - Standardize data structure and auto-populate missing fields</li><li><a href="CheckOptions.html" class="code" title="function parms = CheckOptions(options, options_schema, strict)">CheckOptions</a>	CHECKOPTIONS - organize key/value pairs in structure with default or user-supplied values according to a schema</li><li><a href="SelectVariables.html" class="code" title="function [variables,pop_names]=SelectVariables(labels,var_strings)">SelectVariables</a>	variables=SelectVariables(labels,var_strings)</li></ul>
+This function is called by:
+<ul style="list-style-image:url(../matlabicon.gif)">
+</ul>
+<!-- crossreference -->
+
+
+
+<h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function PlotWaveforms(data,varargin)</a>
+0002 <span class="comment">%% PlotWaveforms(data,'option',value)</span>
+0003 <span class="comment">% Purpose: plot waveforms in various ways depending on what data was provided.</span>
+0004 <span class="comment">% Inputs:</span>
+0005 <span class="comment">%   data: DynaSim data structure (see CheckData)</span>
+0006 <span class="comment">%   options:</span>
+0007 <span class="comment">%     'variable' - name of field containing data to plot</span>
+0008 <span class="comment">%                  (default: all pops with state variable of variable in data.labels)</span>
+0009 <span class="comment">%     'time_limits' - [beg,end] (units of data.time)</span>
+0010 <span class="comment">%     'max_num_overlaid' - maximum # of waveforms to overlay per plot</span>
+0011 <span class="comment">%     'max_num_rows' - maximum # of subplot rows per figure</span>
+0012 <span class="comment">%</span>
+0013 <span class="comment">% Plots:</span>
+0014 <span class="comment">% if Nsims&gt;1: one sim per row</span>
+0015 <span class="comment">% elseif Npops&gt;1: one pop per row</span>
+0016 <span class="comment">% else: one cell per row</span>
+0017 <span class="comment">%</span>
+0018 <span class="comment">% Examples for specifying 'variable' option:</span>
+0019 <span class="comment">% []      : plot all data.labels with same variable name as first element of data.labels (eg, 'pop1_v' and 'pop2_v')</span>
+0020 <span class="comment">% '*'     : plot all data.labels</span>
+0021 <span class="comment">% '*_v'   : plot all data.labels ending in _v (i.e., all state variables 'v' for all populations)</span>
+0022 <span class="comment">% 'pop1_*': plot all data.labels starting with pop1_ (i.e., all variables for population 'pop1')</span>
+0023 <span class="comment">% 'pop1_v': plot only variable 'pop1_v'</span>
+0024 <span class="comment">% 'v'     : look for all data.labels ending in _v then starting with v_ (eg, all populations with variable 'v')</span>
+0025 <span class="comment">% 'pop1'  : look for all data.labels ending in _pop1 then starting with pop1_ (eg, all variables for population 'pop1')</span>
+0026 <span class="comment">% '*_iNa_*': plot all data.labels for the 'iNa' mechanism (for all populations)</span>
+0027 <span class="comment">%</span>
+0028 <span class="comment">% Examples:</span>
+0029 <span class="comment">% One cell:</span>
+0030 <span class="comment">% data=SimulateModel('dv/dt=@current+10; {iNa,iK}');</span>
+0031 <span class="comment">% PlotWaveforms(data); % plot first state variable ('v')</span>
+0032 <span class="comment">% PlotWaveforms(data,'variable','*'); % plot all state variables</span>
+0033 <span class="comment">% PlotWaveforms(data,'variable','*','time_limits',[30 60]); % plot all variables and time 30-60ms</span>
+0034 <span class="comment">%</span>
+0035 <span class="comment">% One population: with noisy input</span>
+0036 <span class="comment">% data=SimulateModel('dv[5]/dt=@current+10*(1+randn(1,Npop)); {iNa,iK}');</span>
+0037 <span class="comment">% PlotWaveforms(data);</span>
+0038 <span class="comment">% PlotWaveforms(data,'variable','*'); % plot all state variables (all cells)</span>
+0039 <span class="comment">% PlotWaveforms(data,'variable','m'); % plot state variable 'm' (all cells)</span>
+0040 <span class="comment">% PlotWaveforms(data,'variable','*','time_limits',[30 60]); % plot all variables and time 30-60ms</span>
+0041 <span class="comment">%</span>
+0042 <span class="comment">% One population varying one parameter (input amplitude):</span>
+0043 <span class="comment">% eqns='dv[5]/dt=@current+amp*(1+randn(1,Npop)); {iNa,iK}';</span>
+0044 <span class="comment">% vary={'','amp',[0 10 20]};</span>
+0045 <span class="comment">% data=SimulateModel(eqns,'vary',vary);</span>
+0046 <span class="comment">% PlotWaveforms(data);</span>
+0047 <span class="comment">% PlotWaveforms(data,'variable','m');</span>
+0048 <span class="comment">% PlotWaveforms(data,'variable','*');</span>
+0049 <span class="comment">%</span>
+0050 <span class="comment">% One population varying two parameters (input amplitude and membrane capacitance):</span>
+0051 <span class="comment">% eqns='dv[5]/dt=@current/Cm+amp*(1+randn(1,Npop)); {iNa,iK}';</span>
+0052 <span class="comment">% vary={'','Cm',[1 2]; '','amp',[0 10 20]};</span>
+0053 <span class="comment">% data=SimulateModel(eqns,'vary',vary);</span>
+0054 <span class="comment">% PlotWaveforms(data);</span>
+0055 <span class="comment">% PlotWaveforms(data,'variable','*');</span>
+0056 <span class="comment">%</span>
+0057 <span class="comment">% Two populations: noisy input to E and excitatory connection from E to I</span>
+0058 <span class="comment">% spec=[];</span>
+0059 <span class="comment">% spec.populations(1).name='E1';</span>
+0060 <span class="comment">% spec.populations(1).equations='dv[5]/dt=@current+amp*(1+randn(1,Npop)); amp=10; {iNa,iK}';</span>
+0061 <span class="comment">% spec.populations(2).name='E2';</span>
+0062 <span class="comment">% spec.populations(2).equations='dv[2]/dt=@current; {iNa,iK}';</span>
+0063 <span class="comment">% spec.connections(1).direction='E1-&gt;E2';</span>
+0064 <span class="comment">% spec.connections(1).mechanism_list='iAMPA';</span>
+0065 <span class="comment">% data=SimulateModel(spec);</span>
+0066 <span class="comment">% PlotWaveforms(data); % plot first state variable</span>
+0067 <span class="comment">% PlotWaveforms(data,'variable','*');</span>
+0068 <span class="comment">% % plot monitored synaptic current with post-synaptic voltages:</span>
+0069 <span class="comment">% PlotWaveforms(data,'variable',{'E2_v','ISYN'});</span>
+0070 <span class="comment">% % plot monitored synaptic current with pre- and post-synaptic voltages:</span>
+0071 <span class="comment">% PlotWaveforms(data,'variable',{'v','ISYN'});</span>
+0072 <span class="comment">%</span>
+0073 <span class="comment">% Two populations varying one parameter (input amplitude):</span>
+0074 <span class="comment">% vary={'E1','amp',[0 10 20]};</span>
+0075 <span class="comment">% data=SimulateModel(spec,'vary',vary);</span>
+0076 <span class="comment">% PlotWaveforms(data);</span>
+0077 <span class="comment">% PlotWaveforms(data,'variable','*');</span>
+0078 <span class="comment">% PlotWaveforms(data,'variable','*_iNa_*');</span>
+0079 <span class="comment">%</span>
+0080 <span class="comment">% Two populations varying two parameters (input amplitude and synaptic conductance):</span>
+0081 <span class="comment">% vary={'E1','amp',[0 10 20]; 'E1-&gt;E2','gSYN',[0 .05 .1]};</span>
+0082 <span class="comment">% data=SimulateModel(spec,'vary',vary);</span>
+0083 <span class="comment">% PlotWaveforms(data,'variable','v');</span>
+0084 <span class="comment">% PlotWaveforms(data,'variable','ISYN');</span>
+0085 <span class="comment">% PlotWaveforms(data,'variable','E1_v');</span>
+0086 <span class="comment">% PlotWaveforms(data,'variable','*');</span>
+0087 <span class="comment">%</span>
+0088 <span class="comment">% See also: PlotFR, CheckData</span>
+0089 
+0090 <span class="comment">% Check inputs</span>
+0091 data=<a href="CheckData.html" class="code" title="function data=CheckData(data)">CheckData</a>(data);
+0092 fields=fieldnames(data);
+0093 
+0094 options=<a href="CheckOptions.html" class="code" title="function parms = CheckOptions(options, options_schema, strict)">CheckOptions</a>(varargin,{<span class="keyword">...</span>
+0095   <span class="string">'time_limits'</span>,[-inf inf],[],<span class="keyword">...</span>
+0096   <span class="string">'variable'</span>,[],[],<span class="keyword">...</span><span class="comment">        </span>
+0097   <span class="string">'max_num_overlaid'</span>,50,[],<span class="keyword">...</span>
+0098   <span class="string">'max_num_rows'</span>,20,[],<span class="keyword">...</span>
+0099   <span class="string">'plot_mode'</span>,<span class="string">'trace'</span>,{<span class="string">'trace'</span>,<span class="string">'image'</span>},<span class="keyword">...</span>
+0100   },false);
+0101 
+0102 <span class="comment">% todo: add option 'plot_mode' {'trace','image'}</span>
+0103 
+0104 <span class="comment">% variables to plot</span>
+0105 var_fields=<a href="SelectVariables.html" class="code" title="function [variables,pop_names]=SelectVariables(labels,var_strings)">SelectVariables</a>(data(1).labels,options.variable);
+0106 tmp=regexp(var_fields,<span class="string">'_(.+)$'</span>,<span class="string">'tokens'</span>,<span class="string">'once'</span>);
+0107 variables=unique([tmp{:}]);
+0108 
+0109 <span class="comment">% populations to plot</span>
+0110 pop_names={data(1).model.specification.populations.name}; <span class="comment">% list of populations</span>
+0111 <span class="comment">% restrict to populations with variables to plot</span>
+0112 pop_indices=[];     <span class="comment">% indices of populations to plot</span>
+0113 pop_var_indices={}; <span class="comment">% indices of var_fields to plot per population</span>
+0114   <span class="comment">% pop_var_indices{pop}(variable): index into var_fields</span>
+0115 <span class="keyword">for</span> i=1:length(pop_names)
+0116   <span class="comment">% do any variables start with this population name?</span>
+0117   var_inds=find(~cellfun(@isempty,regexp(var_fields,[<span class="string">'^'</span> pop_names{i}])));
+0118   <span class="keyword">if</span> any(var_inds)
+0119     inds=cellfun(@(x)find(~cellfun(@isempty,regexp(var_fields(var_inds),[<span class="string">'_'</span> x <span class="string">'$'</span>],<span class="string">'once'</span>))),variables,<span class="string">'uni'</span>,0);
+0120     varsel=~cellfun(@isempty,inds);
+0121     fldind=[inds{:}];    
+0122     pop_indices(end+1)=i;
+0123     pop_var_indices{end+1}=nan(1,length(variables));
+0124     pop_var_indices{end}(varsel)=var_inds(fldind);
+0125   <span class="keyword">end</span>
+0126 <span class="keyword">end</span>
+0127 pop_names=pop_names(pop_indices);
+0128 
+0129 <span class="comment">% data set info</span>
+0130 time=data(1).time; <span class="comment">% time vector</span>
+0131 pop_sizes=[data(1).model.specification.populations(pop_indices).size];
+0132 num_pops=length(pop_names); <span class="comment">% number of populations to plot</span>
+0133 num_sims=length(data); <span class="comment">% number of simulations</span>
+0134 num_vars=length(variables);
+0135 num_labels=length(var_fields); <span class="comment">% number of labels to plot</span>
+0136 num_times=length(time);
+0137 
+0138 MRPF = options.max_num_rows; <span class="comment">% max rows per fig</span>
+0139 MTPP = options.max_num_overlaid; <span class="comment">% max traces per plot</span>
+0140 
+0141 <span class="comment">% how many plots:</span>
+0142 <span class="keyword">if</span> num_sims==1 &amp;&amp; num_pops==1 &amp;&amp; num_vars==1
+0143   num_fig_sets=1; num_figs=ceil(pop_sizes/MRPF); num_rows=min(pop_sizes,MRPF);
+0144 <span class="keyword">elseif</span> num_sims==1 &amp;&amp; num_pops==1 &amp;&amp; num_vars&gt;1
+0145   num_fig_sets=1; num_figs=ceil(num_vars/MRPF); num_rows=min(num_vars,MRPF);
+0146 <span class="keyword">elseif</span> num_sims==1 &amp;&amp; num_pops&gt;1 &amp;&amp; num_vars==1
+0147   num_fig_sets=1; num_figs=ceil(num_pops/MRPF); num_rows=min(num_pops,MRPF);
+0148 <span class="keyword">elseif</span> num_sims==1 &amp;&amp; num_pops&gt;1 &amp;&amp; num_vars&gt;1
+0149   num_fig_sets=num_vars; num_figs=ceil(num_pops/MRPF); num_rows=min(num_pops,MRPF);
+0150 <span class="keyword">elseif</span> num_sims&gt;1 &amp;&amp; num_pops==1 &amp;&amp; num_vars==1
+0151   num_fig_sets=1; num_figs=ceil(num_sims/MRPF); num_rows=min(num_sims,MRPF);
+0152 <span class="keyword">elseif</span> num_sims&gt;1 &amp;&amp; num_pops==1 &amp;&amp; num_vars&gt;1
+0153   num_fig_sets=num_vars; num_figs=ceil(num_sims/MRPF); num_rows=min(num_sims,MRPF);
+0154 <span class="keyword">elseif</span> num_sims&gt;1 &amp;&amp; num_pops&gt;1 &amp;&amp; num_vars==1
+0155   num_fig_sets=1; num_figs=ceil(num_sims/MRPF); num_rows=min(num_sims,MRPF);
+0156 <span class="keyword">elseif</span> num_sims&gt;1 &amp;&amp; num_pops&gt;1 &amp;&amp; num_vars&gt;1
+0157   num_fig_sets=num_vars; num_figs=ceil(num_sims/MRPF); num_rows=min(num_sims,MRPF);
+0158 <span class="keyword">end</span>
+0159 
+0160 <span class="comment">% make subplot adjustments for varied parameters</span>
+0161 <span class="keyword">if</span> num_sims&gt;1 &amp;&amp; isfield(data,<span class="string">'varied'</span>)
+0162   <span class="comment">% collect info on parameters varied</span>
+0163   varied=data(1).varied;
+0164   num_varied=length(varied); <span class="comment">% number of model components varied across simulations</span>
+0165   num_sims=length(data);
+0166   <span class="comment">% collect info on parameters varied</span>
+0167   param_mat=zeros(num_sims,num_varied);
+0168   param_cell=cell(1,num_varied);
+0169   <span class="keyword">for</span> j=1:num_varied
+0170     <span class="keyword">if</span> isnumeric(data(1).(varied{j}))
+0171       param_mat(:,j)=[data.(varied{j})];
+0172       param_cell{j}=unique([data.(varied{j})]);
+0173     <span class="keyword">else</span>
+0174       <span class="comment">% todo: handle sims varying non-numeric model components</span>
+0175       <span class="comment">% (eg, mechanisms) (also in PlotFR)</span>
+0176     <span class="keyword">end</span>
+0177   <span class="keyword">end</span>
+0178   param_size=cellfun(@length,param_cell);
+0179   <span class="comment">% varied parameter with most elements goes along the rows (everything else goes along columns)</span>
+0180   row_param_index=find(param_size==max(param_size),1,<span class="string">'first'</span>);
+0181   row_param_name=varied{row_param_index};
+0182   row_param_values=param_cell{row_param_index};
+0183   num_rows=length(row_param_values);
+0184   num_cols=num_sims/num_rows;
+0185   sim_indices=[];
+0186   <span class="keyword">for</span> row=1:num_rows
+0187     sim_indices=[sim_indices find(param_mat(:,row_param_index)==row_param_values(row))];
+0188   <span class="keyword">end</span>
+0189 <span class="keyword">else</span>
+0190   sim_indices=ones(1,num_rows); <span class="comment">% index into data array</span>
+0191   num_cols=1;
+0192 <span class="keyword">end</span>
+0193 
+0194 <span class="comment">% set x-axis limits</span>
+0195 <span class="keyword">if</span> isempty(options.time_limits)
+0196   options.time_limits=[min(time) max(time)];
+0197 <span class="keyword">end</span>
+0198 
+0199 <span class="keyword">for</span> figset=1:num_fig_sets
+0200   <span class="keyword">for</span> fig=1:num_figs
+0201     ylims=[nan nan];
+0202     <span class="comment">% create figure</span>
+0203     figure(<span class="string">'units'</span>,<span class="string">'normalized'</span>,<span class="string">'outerposition'</span>,[0 0 1 1])
+0204     <span class="comment">% position axes</span>
+0205     haxes=tight_subplot(num_rows,num_cols,[.01 .03],[.05 .01],[.03 .01]);
+0206     axis_counter=0;
+0207     <span class="comment">% draw plots</span>
+0208     text_string=<span class="string">''</span>; <span class="comment">% string to add to subplot (set below)</span>
+0209     legend_string=<span class="string">''</span>; <span class="comment">% legend for subplot (set below)</span>
+0210     shared_ylims_flag=1;
+0211     <span class="keyword">for</span> row=1:num_rows
+0212       <span class="keyword">for</span> col=1:num_cols
+0213         sim_index=sim_indices(col,row); <span class="comment">% index into data array for this subplot</span>
+0214         axis_counter=axis_counter+1; <span class="comment">% number subplot axis we're on</span>
+0215         <span class="comment">% what to plot</span>
+0216         <span class="keyword">if</span> num_sims==1 &amp;&amp; num_pops==1 &amp;&amp; num_vars==1
+0217           <span class="comment">% one cell per row: dat = data(s=1).(var)(:,c=r) where var=vars{v=1}</span>
+0218           var=var_fields{1};
+0219           dat=data(sim_index).(var)(:,row);
+0220           <span class="keyword">if</span> num_rows&gt;1
+0221             text_string{row,col}=sprintf(<span class="string">'cell %g'</span>,row);
+0222           <span class="keyword">end</span>
+0223         <span class="keyword">elseif</span> num_sims==1 &amp;&amp; num_pops==1 &amp;&amp; num_vars&gt;1
+0224           <span class="comment">% one variable per row: dat = data(s=1).(var)(:,1:MTPP) where var=vars{v=r}</span>
+0225           var=var_fields{row};
+0226           dat=data(sim_index).(var);
+0227           shared_ylims_flag=0;
+0228         <span class="keyword">elseif</span> num_sims==1 &amp;&amp; num_pops&gt;1 &amp;&amp; num_vars==1
+0229           <span class="comment">% one population per row: dat = data(s=1).(var)(:,1:MTPP) where var=vars{v=r}</span>
+0230           var=var_fields{row};
+0231           dat=data(sim_index).(var);
+0232         <span class="keyword">elseif</span> num_sims==1 &amp;&amp; num_pops&gt;1 &amp;&amp; num_vars&gt;1
+0233           <span class="comment">% one population per row: dat = data(s=1).(var)(:,1:MTPP) where var=vars{these(p=r)}</span>
+0234           <span class="keyword">if</span> isnan(pop_var_indices{row}(figset))
+0235             <span class="keyword">continue</span>;
+0236           <span class="keyword">end</span>
+0237           var=var_fields{pop_var_indices{row}(figset)};
+0238           dat=data(sim_index).(var);
+0239         <span class="keyword">elseif</span> num_sims&gt;1 &amp;&amp; num_pops==1 &amp;&amp; num_vars==1
+0240           <span class="comment">% one simulation per row: dat = data(s=r).(var)(:,1:MTPP) where var=vars{v=1}</span>
+0241           var=var_fields{1};
+0242           dat=data(sim_index).(var);
+0243         <span class="keyword">elseif</span> num_sims&gt;1 &amp;&amp; num_pops==1 &amp;&amp; num_vars&gt;1
+0244           <span class="comment">% one simulation per row: dat = data(s=r).(var)(:,1:MTPP) where var=vars{v++}</span>
+0245           <span class="keyword">if</span> isnan(pop_var_indices{1}(figset))
+0246             <span class="keyword">continue</span>;
+0247           <span class="keyword">end</span>
+0248           var=var_fields{pop_var_indices{1}(figset)};
+0249           dat=data(sim_index).(var);
+0250         <span class="keyword">elseif</span> num_sims&gt;1 &amp;&amp; num_pops&gt;1 &amp;&amp; num_vars==1
+0251           <span class="comment">% one simulation per row, overlay pops: dat = &lt;data(s=r).(var)(:,1:MTPP),2|vars&gt;</span>
+0252           <span class="comment">% calculate averages across populations</span>
+0253           dat=nan(num_times,num_pops);
+0254           <span class="keyword">for</span> k=1:num_pops
+0255             dat(:,k)=nanmean(data(sim_index).(var_fields{k}),2);
+0256           <span class="keyword">end</span>
+0257           var=[<span class="string">'&lt;'</span> variables{1} <span class="string">'&gt;'</span>];
+0258         <span class="keyword">elseif</span> num_sims&gt;1 &amp;&amp; num_pops&gt;1 &amp;&amp; num_vars&gt;1
+0259           <span class="comment">% one simulation per row, overlay pops: dat = &lt;data(s=r).(var)(:,1:MTPP),2|vars(these)&gt;</span>
+0260           <span class="comment">% calculate averages across populations</span>
+0261           dat=nan(num_times,num_pops);
+0262           <span class="keyword">for</span> k=1:num_pops
+0263             <span class="keyword">if</span> isnan(pop_var_indices{k}(figset))
+0264               <span class="keyword">continue</span>;
+0265             <span class="keyword">end</span>
+0266             var=var_fields{pop_var_indices{k}(figset)};
+0267             dat(:,k)=nanmean(data(sim_index).(var),2);
+0268           <span class="keyword">end</span>
+0269           var=[<span class="string">'&lt;'</span> variables{figset} <span class="string">'&gt;'</span>];
+0270         <span class="keyword">end</span>
+0271         <span class="keyword">if</span> size(dat,2)&gt;1
+0272           legend_string=cellfun(@(x)[<span class="string">'cell '</span> num2str(x)],num2cell(1:min(size(dat,2),10)),<span class="string">'uni'</span>,0);
+0273         <span class="keyword">end</span>        
+0274         <span class="keyword">if</span> num_sims&gt;1 &amp;&amp; isfield(data,<span class="string">'varied'</span>)
+0275           <span class="comment">% list the parameter varied along the rows first</span>
+0276           str=[row_param_name <span class="string">'='</span> num2str(row_param_values(row)) <span class="string">': '</span>];
+0277           <span class="keyword">for</span> k=1:num_varied
+0278             fld=data(sim_index).varied{k};
+0279             <span class="keyword">if</span> ~strcmp(fld,row_param_name)
+0280               val=data(sim_index).(fld);
+0281               str=[str fld <span class="string">'='</span> num2str(val) <span class="string">', '</span>];
+0282             <span class="keyword">end</span>
+0283           <span class="keyword">end</span>
+0284           text_string{row,col}=[<span class="string">'('</span> strrep(str(1:end-2),<span class="string">'_'</span>,<span class="string">'\_'</span>) <span class="string">')'</span>];
+0285           <span class="keyword">if</span> num_pops&gt;1
+0286             legend_string=cellfun(@(x)[x <span class="string">' (mean)'</span>],pop_names,<span class="string">'uni'</span>,0);
+0287           <span class="keyword">end</span>
+0288         <span class="keyword">end</span>
+0289         <span class="comment">% plot data</span>
+0290         axes(haxes(axis_counter));
+0291         <span class="keyword">if</span> strcmp(options.plot_mode,<span class="string">'trace'</span>)
+0292           <span class="comment">% select max subset allowed</span>
+0293           dat=dat(:,1:min(size(dat,2),MTPP)); <span class="comment">% select max subset to plot</span>
+0294           plot(time,dat);
+0295         <span class="keyword">else</span>
+0296           imagesc(dat);
+0297         <span class="keyword">end</span>
+0298         <span class="comment">% format axes</span>
+0299         <span class="keyword">if</span> row==num_rows
+0300           xlabel(<span class="string">'time (ms)'</span>);
+0301         <span class="keyword">else</span>
+0302           set(haxes(axis_counter),<span class="string">'XTickLabel'</span>,<span class="string">''</span>); 
+0303           <span class="comment">%set(haxes(row),'YTickLabel','');</span>
+0304         <span class="keyword">end</span>
+0305         xlim(options.time_limits);
+0306         ylabel(strrep(var,<span class="string">'_'</span>,<span class="string">'\_'</span>));
+0307         <span class="keyword">if</span> shared_ylims_flag
+0308           <span class="comment">% update max/min</span>
+0309           ylims(1)=min(ylims(1),min(dat(:)));
+0310           ylims(2)=max(ylims(2),max(dat(:)));
+0311         <span class="keyword">else</span>
+0312           <span class="comment">% set ylim to max/min of this data set</span>
+0313           ylims=[min(dat(:)) max(dat(:))];
+0314           <span class="keyword">if</span> ylims(1)~=ylims(2)
+0315             ylim(ylims);
+0316           <span class="keyword">end</span>
+0317           <span class="comment">% add text</span>
+0318           <span class="keyword">if</span> ~isempty(text_string)
+0319             xmin=min(time); xmax=max(time);
+0320             ymin=min(dat(:)); ymax=max(dat(:));
+0321             text_xpos=xmin+.05*(xmax-xmin);
+0322             text_ypos=ymin+.9*(ymax-ymin);
+0323             text(text_xpos,text_ypos,text_string{row,col});
+0324           <span class="keyword">end</span>  
+0325         <span class="keyword">end</span>
+0326         <span class="keyword">if</span> ~isempty(legend_string)
+0327           legend(legend_string);
+0328         <span class="keyword">end</span>
+0329       <span class="keyword">end</span> <span class="comment">% end loop over subplot columns</span>
+0330     <span class="keyword">end</span> <span class="comment">% end loop over subplot rows</span>
+0331     <span class="comment">% set y-limits to max/min over data in this figure</span>
+0332     <span class="keyword">if</span> shared_ylims_flag
+0333       <span class="keyword">if</span> ylims(1)~=ylims(2)
+0334         set(haxes,<span class="string">'ylim'</span>,ylims);
+0335       <span class="keyword">end</span>
+0336       <span class="keyword">if</span> ~isempty(text_string)
+0337         axis_counter=0;
+0338         <span class="keyword">for</span> row=1:num_rows
+0339           <span class="keyword">for</span> col=1:num_cols
+0340             axis_counter=axis_counter+1;
+0341             axes(haxes(axis_counter));
+0342             xmin=min(time); xmax=max(time);
+0343             ymin=min(ylim); ymax=max(ylim);
+0344             text_xpos=xmin+.05*(xmax-xmin);
+0345             text_ypos=ymin+.9*(ymax-ymin);
+0346             text(text_xpos,text_ypos,text_string{row,col});
+0347           <span class="keyword">end</span>
+0348         <span class="keyword">end</span>
+0349       <span class="keyword">end</span>
+0350     <span class="keyword">end</span>
+0351   <span class="keyword">end</span> <span class="comment">% end loop over figures in this set</span>
+0352 <span class="keyword">end</span> <span class="comment">% end loop over figure sets</span>
+0353 
+0354 <span class="comment">% 1 sim, 1 pop, 1 var (X)</span>
+0355 <span class="comment">%     N=1        one fig, one row (plot var X)</span>
+0356 <span class="comment">%     N&gt;1        one row per cell (plot var X),             enough figs for all cells</span>
+0357 <span class="comment">%     (nsims=1, num_pops=1, num_vars=1, pop_sizes&gt;=1): num_fig_sets=1, num_figs=ceil(pop_sizes/MRPF), num_rows=min(pop_sizes,MRPF): row r: dat = data(s=1).(var)(:,c=r) where var=vars{v=1}</span>
+0358 <span class="comment">%</span>
+0359 <span class="comment">% 1 sim, 1 pop, &gt;1 vars (X,Y,...)</span>
+0360 <span class="comment">%     N=1        one row per var (plot cell 1),             enough figs for all vars</span>
+0361 <span class="comment">%     N&gt;1        one row per var (overlay cells),         enough figs for all vars</span>
+0362 <span class="comment">%     (nsims=1, num_pops=1, num_vars&gt;=1, pop_sizes&gt;=1): num_fig_sets=1, num_figs=ceil(num_vars/MRPF), num_rows=min(num_vars,MRPF): row r: dat = data(s=1).(var)(:,1:MTPP) where var=vars{v=r}</span>
+0363 <span class="comment">%</span>
+0364 <span class="comment">% 1 sim, &gt;1 pops, 1 var (X)</span>
+0365 <span class="comment">%     all N=1        one row per pop (plot var X, cell 1),        enough figs for all pops</span>
+0366 <span class="comment">%     any N&gt;1        one row per pop (plot var X, overlay cells),     enough figs for all pops</span>
+0367 <span class="comment">%     (nsims=1, num_pops&gt;=1, num_vars=1, pop_sizes&gt;=1): num_fig_sets=1, num_figs=ceil(num_pops/MRPF), num_rows=min(num_pops,MRPF): row r: dat = data(s=1).(var)(:,1:MTPP) where var=vars{v=r}</span>
+0368 <span class="comment">%</span>
+0369 <span class="comment">% 1 sim, &gt;1 pops, &gt;1 vars (X,Y,...)</span>
+0370 <span class="comment">%     all N=1        one row per pop (plot var X, cell 1),         enough figs for all pops, separate figs for each var</span>
+0371 <span class="comment">%     any N&gt;1        one row per pop (plot var X, overlay cells),     enough figs for all pops, separate figs for each var</span>
+0372 <span class="comment">%     (nsims=1, num_pops&gt;=1, num_vars&gt;=1, pop_sizes&gt;=1): num_fig_sets=num_vars, num_figs=ceil(num_pops/MRPF), num_rows=min(num_pops,MRPF): row r: dat = data(s=1).(var)(:,1:MTPP) where var=vars{these(p=r)}</span>
+0373 <span class="comment">%</span>
+0374 <span class="comment">% &gt;1 sim, 1 pop, 1 var (X)</span>
+0375 <span class="comment">%     N=1        one row per sim (plot var X, cell 1),         enough figs for all sims</span>
+0376 <span class="comment">%     N&gt;1        one row per sim (plot var X, overlay cells),     enough figs for all sims</span>
+0377 <span class="comment">%     (nsims&gt;1, num_pops=1, num_vars=1, pop_sizes&gt;=1): num_fig_sets=1, num_figs=ceil(nsims/MRPF), num_rows=min(nsims,MRPF): row r: dat = data(s=r).(var)(:,1:MTPP) where var=vars{v=1}</span>
+0378 <span class="comment">%</span>
+0379 <span class="comment">% &gt;1 sim, 1 pop, &gt;1 vars (X,Y,...)</span>
+0380 <span class="comment">%     N=1        one row per sim (plot var X, cell 1),         enough figs for all sims, separate figs for each var</span>
+0381 <span class="comment">%     N&gt;1        one row per sim (plot var X, overlay cells),     enough figs for all sims, separate figs for each var</span>
+0382 <span class="comment">%     (nsims&gt;1, num_pops=1, num_vars=1, pop_sizes&gt;=1): num_fig_sets=num_vars, num_figs=ceil(nsims/MRPF), num_rows=min(nsims,MRPF): row r: dat = data(s=r).(var)(:,1:MTPP) where var=vars{v++}</span>
+0383 <span class="comment">%</span>
+0384 <span class="comment">% &gt;1 sim, &gt;1 pops, 1 var (X)</span>
+0385 <span class="comment">%     all N=1        one row per sim (plot var X, overlay pops),    enough figs for all sims</span>
+0386 <span class="comment">%     any N&gt;1        one row per sim (plot var &lt;X&gt;, overlay pops),    enough figs for all sims</span>
+0387 <span class="comment">%     (nsims&gt;1, num_pops=1, num_vars=1, pop_sizes&gt;=1): num_fig_sets=1, num_figs=ceil(nsims/MRPF), num_rows=min(nsims,MRPF): row r: dat = &lt;data(s=r).(var)(:,1:MTPP),2|vars&gt;</span>
+0388 <span class="comment">%</span>
+0389 <span class="comment">% &gt;1 sim, &gt;1 pops, &gt;1 vars (X,Y,...)</span>
+0390 <span class="comment">%     all N=1        one row per sim (plot var X, overlay pops),    enough figs for all sims, separate figs for each var</span>
+0391 <span class="comment">%     any N&gt;1        one row per sim (plot var &lt;X&gt;, overlay pops),    enough figs for all sims, separate figs for each var</span>
+0392 <span class="comment">%     (nsims&gt;1, num_pops=1, num_vars=1, pop_sizes&gt;=1): num_fig_sets=num_vars, num_figs=ceil(nsims/MRPF), num_rows=min(nsims,MRPF): row r: dat = &lt;data(s=r).(var)(:,1:MTPP),2|vars(these)&gt;</span>
+0393 
+0394 <span class="comment">%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%5</span></pre></div>
+<hr><address>Generated on Fri 24-Feb-2017 14:46:35 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" target="_parent">m2html</a></strong> &copy; 2005</address>
+</body>
+</html>

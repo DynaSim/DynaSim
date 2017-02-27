@@ -1,0 +1,169 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of xp_subplot_grid3D</title>
+  <meta name="keywords" content="xp_subplot_grid3D">
+  <meta name="description" content="xp must be 1D, 2D, or 3D">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html &copy; 2005 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="../../m2html.css">
+  <script type="text/javascript">
+    if (top.frames.length == 0) { top.location = "../../index.html"; };
+  </script>
+</head>
+<body>
+<a name="_top"></a>
+<!-- ../menu.html functions_xPlt --><!-- menu.html library_plots -->
+<h1>xp_subplot_grid3D
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+<div class="box"><strong>xp must be 1D, 2D, or 3D</strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+<div class="box"><strong>function hsg = xp_subplot_grid3D (xp,transpose_on, display_mode) </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+<div class="fragment"><pre class="comment"> xp must be 1D, 2D, or 3D</pre></div>
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+This function calls:
+<ul style="list-style-image:url(../../matlabicon.gif)">
+</ul>
+This function is called by:
+<ul style="list-style-image:url(../../matlabicon.gif)">
+<li><a href="../../functions_xPlt/debug_testing_script.html" class="code" title="">debug_testing_script</a>	This is a script that I run through every time I want to test the code.</li></ul>
+<!-- crossreference -->
+
+<h2><a name="_subfunctions"></a>SUBFUNCTIONS <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+<ul style="list-style-image:url(../../matlabicon.gif)">
+<li><a href="#_sub1" class="code">function outstr = setup_axis_labels(xpa)</a></li></ul>
+
+<h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+<div class="fragment"><pre>0001 
+0002 
+0003 <a name="_sub0" href="#_subfunctions" class="code">function hsg = xp_subplot_grid3D (xp,transpose_on, display_mode)</a>
+0004     <span class="comment">% xp must be 1D, 2D, or 3D</span>
+0005     
+0006     <span class="keyword">if</span> nargin &lt; 2
+0007         transpose_on = [];
+0008     <span class="keyword">end</span>
+0009     
+0010     <span class="keyword">if</span> nargin &lt; 3
+0011         display_mode = [];
+0012     <span class="keyword">end</span>
+0013     
+0014     <span class="keyword">if</span> isempty(transpose_on); transpose_on = 0; <span class="keyword">end</span>
+0015     <span class="keyword">if</span> isempty(display_mode); display_mode = 0; <span class="keyword">end</span>
+0016             <span class="comment">% Display_mode: 0-Just plot directly</span>
+0017                           <span class="comment">% 1-Plot as an image (cdata)</span>
+0018                           <span class="comment">% 2-Save to a figure file</span>
+0019     
+0020     <span class="keyword">if</span> transpose_on &amp;&amp; ismatrix(xp)
+0021         xp = xp.transpose;
+0022     <span class="keyword">end</span>
+0023     
+0024     <span class="comment">% Parameters</span>
+0025     <span class="comment">%subplot_grid_options = {'no_zoom'};</span>
+0026     subplot_grid_options = {};
+0027     
+0028     sz = size(xp);
+0029     
+0030     <span class="keyword">if</span> ndims(xp.data) &lt;= 2
+0031         N1 = sz(1);
+0032         N2 = sz(2);
+0033         
+0034         
+0035             <span class="keyword">if</span> display_mode == 1 
+0036                 h0 = gcf; ha0 = gca;
+0037                 h = figure(<span class="string">'visible'</span>,<span class="string">'off'</span>);
+0038             <span class="keyword">else</span>
+0039                 figure;
+0040             <span class="keyword">end</span>
+0041             
+0042             hsg = subplot_grid(N1,N2,subplot_grid_options{:});
+0043             c=0;
+0044             <span class="keyword">for</span> i = 1:N1
+0045                 <span class="keyword">for</span> j = 1:N2
+0046                     c=c+1;
+0047                     hsg.set_gca(c);
+0048                     xp.data{i,j}(); 
+0049 <span class="comment">%                     xp2 = xp.subset(i,j);</span>
+0050 <span class="comment">%                     title(strrep(xp2.getaxisinfo,'_',' '));</span>
+0051                 <span class="keyword">end</span>
+0052             <span class="keyword">end</span>
+0053             
+0054             <span class="comment">% Do labels for rows</span>
+0055             rowstr = <a href="#_sub1" class="code" title="subfunction outstr = setup_axis_labels(xpa)">setup_axis_labels</a>(xp.axis(1));
+0056             hsg.rowtitles(rowstr);
+0057             
+0058             <span class="comment">% Do labels for columns</span>
+0059             colstr = <a href="#_sub1" class="code" title="subfunction outstr = setup_axis_labels(xpa)">setup_axis_labels</a>(xp.axis(2));
+0060             hsg.coltitles(colstr);
+0061             
+0062             <span class="keyword">if</span> display_mode == 1
+0063                 
+0064                 cdata = print(h,<span class="string">'-RGBImage'</span>);
+0065                 close(h);
+0066 
+0067                 <span class="comment">% Restore original axes and display image</span>
+0068                 figure(h0); axes(ha0);
+0069                 imshow(cdata);
+0070                 
+0071             <span class="keyword">end</span>
+0072         
+0073         
+0074     <span class="keyword">elseif</span> ndims(xp.data) == 3
+0075         N1 = sz(1);
+0076         N2 = sz(2);
+0077         N3 = sz(3);
+0078         
+0079         <span class="keyword">for</span> i = 1:N1
+0080             figure;
+0081             hsg(i) = subplot_grid(N2,N3,subplot_grid_options{:});
+0082             hsg(i).figplace(N1,i);
+0083             hsg(i).figtitle([xp.axis(1).name <span class="string">': '</span> xp.axis(1).getvaluestring(i)]);
+0084             c=0;
+0085             <span class="keyword">for</span> j = 1:N2
+0086                 <span class="keyword">for</span> k = 1:N3
+0087                     c=c+1;
+0088                     hsg(i).set_gca(c);
+0089                     xp.data{i,j,k}(); 
+0090 <span class="comment">%                     xp2 = xp.subset(i,j);</span>
+0091 <span class="comment">%                     title(strrep(xp2.getaxisinfo,'_',' '));</span>
+0092                 <span class="keyword">end</span>
+0093             <span class="keyword">end</span>
+0094             
+0095             <span class="comment">% Do labels for rows</span>
+0096             rowstr = <a href="#_sub1" class="code" title="subfunction outstr = setup_axis_labels(xpa)">setup_axis_labels</a>(xp.axis(2));
+0097             hsg(i).rowtitles(rowstr);
+0098             
+0099             <span class="comment">% Do labels for columns</span>
+0100             colstr = <a href="#_sub1" class="code" title="subfunction outstr = setup_axis_labels(xpa)">setup_axis_labels</a>(xp.axis(3));
+0101             hsg(i).coltitles(colstr);
+0102             
+0103             
+0104         <span class="keyword">end</span>
+0105         
+0106     <span class="keyword">end</span>
+0107     
+0108     
+0109     
+0110     
+0111 <span class="keyword">end</span>
+0112 
+0113 <a name="_sub1" href="#_subfunctions" class="code">function outstr = setup_axis_labels(xpa)</a>
+0114     vals = xpa.getvaluescellstring;
+0115     vals = strrep(vals,<span class="string">'_'</span>,<span class="string">' '</span>);
+0116     outstr = cell(size(vals));
+0117     <span class="keyword">for</span> j = 1:length(outstr)
+0118         outstr{j} = {<span class="string">''</span>,vals{j}};
+0119     <span class="keyword">end</span>
+0120     outstr{round(end/2)}{1} = strrep(xpa.name,<span class="string">'_'</span>,<span class="string">' '</span>);
+0121 <span class="keyword">end</span></pre></div>
+<hr><address>Generated on Fri 24-Feb-2017 14:46:35 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" target="_parent">m2html</a></strong> &copy; 2005</address>
+</body>
+</html>
