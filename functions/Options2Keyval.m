@@ -1,10 +1,11 @@
 function keyval = Options2Keyval(options)
-% keyvals = Options2Keyval(options)
-% Purpose:
-%   Convert from options structure to a list of key/value pairs.
+%OPTIONS2KEYVAL - Convert from options structure to a list of key/value pairs.
 %
-% Parameters:
-%   parms - options structure to convert
+% Usage:
+%   keyvals = Options2Keyval(options)
+%
+% Inputs:
+%   - options: options structure to convert
 %
 % See also: CheckOptions
 

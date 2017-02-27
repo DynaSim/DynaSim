@@ -1,9 +1,13 @@
 function model=CombineModels(model1,model2)
-%% model=CombineModels(model1,model2)
-% Purpose: combine subfields in two DynaSim model structures
+%COMBINEMODELS - combine subfields in two DynaSim model structures
+%
+% Usage:
+%   model=CombineModels(model1,model2)
+%
 % Inputs: two models to be combined
+%
 % Output: DynaSim model with fields combined from both models
-% 
+%
 % See also: CheckModel, GenerateModel
 
 % standardize model structures

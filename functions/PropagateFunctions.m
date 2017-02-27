@@ -1,11 +1,14 @@
 function model=PropagateFunctions(model)
-%% model = SubstituteFunctions(model)
-% purpose: eliminate internal function calls from model ODEs, ICs, monitors, 
-%          and conditionals.
-% input: DynaSim model structure
-% output: DynaSim model structure without internal function calls
-% 
-% see also: SimulateModel, GenerateModel, PropagateNamespaces
+%PROPAGATEFUNCTIONS - eliminate internal function calls from model ODEs, ICs, monitors, and conditionals.
+%
+% Usage:
+%   model = SubstituteFunctions(model)
+%
+% Input: DynaSim model structure
+%
+% Output: DynaSim model structure without internal function calls
+%
+% See also: SimulateModel, GenerateModel, PropagateNamespaces
 
 % Check inputs
 model=CheckModel(model);

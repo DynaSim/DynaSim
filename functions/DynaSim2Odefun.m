@@ -1,9 +1,10 @@
-function odefun=DNSim2Odefun(model)
-% purpose: create function handle with DynaSim model for use with built-in
-% matlab solvers.
-% input: DynaSim model structure
-% output: Matlab function handle for use with built-in solvers
+function odefun=DynaSim2Odefun(model)
+%DYNASIM2ODEFUN - TODO create function handle with DynaSim model for use with built-in MATLAB solvers.
 %
-% see also: SimulateModel, odeexamples
-
-% todo: implement this function ...
+% Input: DynaSim model structure
+%
+% Output: Matlab function handle for use with built-in solvers
+%
+% TODO: implement this function ...
+%
+% See also: SimulateModel, odeexamples

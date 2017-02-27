@@ -1,12 +1,16 @@
 function [paths,files]=LocateModelFiles(input)
-%% [paths,files]=LocateModelFiles(input)
-% Purpose: locate mechanism files associated with DynaSim specifications.
+%LOCATEMODELFILES - locate mechanism files associated with DynaSim specifications.
+%
+% Usage:
+%   [paths,files]=LocateModelFiles(input)
+%
 % Input: DynaSim specification or model structure or string or cell array of
 %        strings listing mechanism names or files.
-% Outputs: 
-%   paths - unique paths to mechanism files
-%   files - full names of files containing mechanism sub-models
-% 
+%
+% Outputs:
+%   - paths: unique paths to mechanism files
+%   - files: full names of files containing mechanism sub-models
+%
 % See also (used by): ParseModelEquations, CheckHostPaths, CreateBatch
 
 % extract list of mechanisms from input

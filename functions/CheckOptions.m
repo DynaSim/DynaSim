@@ -1,27 +1,29 @@
 function parms = CheckOptions(options, options_schema, strict)
-%% options = CheckOptions(keyvals, options_schema, [strict])
-% Purpose: organize key/value pairs in structure with default or 
-% user-supplied values according to a schema.
-% Inputs: 
-%   options: list of key/value pairs ('option1',value1,'option2',value2,...), or
-%     a structure with fields equal to keys
-%   options_schema: cell array containing 3 values per known 'option':
-%                     - option name
-%                     - default value
-%                     - allowed values
-%                         vector of true/false values
-%                         vector of min/max values
-%                         vector of allowed values (more than 2 elements)
-%                         cell array of allowed values
-%                         empty to specify no limitations.
-%   strict: whether to fail if options not specified in the options_schema 
-%          are found. (default: true)
-% Outputs: 
-%   options: structure with options (using default values if not supplied)
-% 
+%CHECKOPTIONS - organize key/value pairs in structure with default or user-supplied values according to a schema
+%
+% Usage:
+%   options = CheckOptions(keyvals, options_schema, [strict])
+%
+% Inputs:
+%   - keyvals: list of key/value pairs ('option1',value1,'option2',value2,...)
+%   - options_schema: cell array containing 3 values per known 'option':
+%     - option name
+%     - default value
+%     - allowed values:
+%         - vector of true/false values
+%         - vector of min/max values
+%         - vector of allowed values (more than 2 elements)
+%         - cell array of allowed values
+%         - empty to specify no limitations.
+%   - strict (default: true): whether to fail if options not specified in the
+%       options_schema are found.
+%
+% Note: this function was adapted from one developed "in-house" years ago...
+%
+% Outputs:
+%   - options: structure with options (using default values if not supplied)
+%
 % See also: Options2Keyval, CheckSpecification, CheckModel, CheckData
-
-% note: this function was adapted from one developed "in-house" years ago...
 
 %convert cell argument to struct if contains struct
 if length(options) == 1 && isstruct(options{1})

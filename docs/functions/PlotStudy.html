@@ -1,0 +1,243 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of PlotStudy</title>
+  <meta name="keywords" content="PlotStudy">
+  <meta name="description" content="PLOTSTUDY - Applies a user-specified plotting function to each element of data structure.">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html &copy; 2005 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="../m2html.css">
+  <script type="text/javascript">
+    if (top.frames.length == 0) { top.location = "../index.html"; };
+  </script>
+</head>
+<body>
+<a name="_top"></a>
+<!-- menu.html functions -->
+<h1>PlotStudy
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>PLOTSTUDY - Applies a user-specified plotting function to each element of data structure.</strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>function [handles, hsp, h2]=PlotStudy(data,myplot_handle,varargin) </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre class="comment">PLOTSTUDY - Applies a user-specified plotting function to each element of data structure.
+
+ **IMPORTANT**: This function should just produce a plot. It should not open
+ any new figures or subplots. It can return an axis handle, but this is not
+ necessary.
+
+ Arrays the output plots in a grid, similar to PlotData. Intended for use with
+ results from simulation studies varying some aspect of the model or inputs.
+
+ Usage:
+   [handles, h2, hsp] = PlotStudy(data,myplot_handle)
+
+ Inputs:
+     - data: DynaSim data structure (see CheckData)
+     - myplot_handle: Handle for plotting function.
+     - options:
+       'textfontsize': default text font size of 10
+       'use_subplot_grid': turns on or off subplot grid. Default is on. Off might be faster.
+
+ Outputs:
+     - handles: handle of the figure
+     - hsp: handle of subplot_grid object
+     - h2: return values of myplot_handle (usually will be Line handles)
+
+ Example:
+     myfunc = @(x) plot(x.RS_V)
+     figure; myunc(data(1));   % Single plot
+     PlotFunc(data,@myfunc)    % Grid of all plots
+
+ Dependencies:
+     Uses subplot_grid.</pre></div>
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+This function calls:
+<ul style="list-style-image:url(../matlabicon.gif)">
+<li><a href="CheckOptions.html" class="code" title="function parms = CheckOptions(options, options_schema, strict)">CheckOptions</a>	CHECKOPTIONS - organize key/value pairs in structure with default or user-supplied values according to a schema</li></ul>
+This function is called by:
+<ul style="list-style-image:url(../matlabicon.gif)">
+</ul>
+<!-- crossreference -->
+
+
+
+<h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function [handles, hsp, h2]=PlotStudy(data,myplot_handle,varargin)</a>
+0002 <span class="comment">%PLOTSTUDY - Applies a user-specified plotting function to each element of data structure.</span>
+0003 <span class="comment">%</span>
+0004 <span class="comment">% **IMPORTANT**: This function should just produce a plot. It should not open</span>
+0005 <span class="comment">% any new figures or subplots. It can return an axis handle, but this is not</span>
+0006 <span class="comment">% necessary.</span>
+0007 <span class="comment">%</span>
+0008 <span class="comment">% Arrays the output plots in a grid, similar to PlotData. Intended for use with</span>
+0009 <span class="comment">% results from simulation studies varying some aspect of the model or inputs.</span>
+0010 <span class="comment">%</span>
+0011 <span class="comment">% Usage:</span>
+0012 <span class="comment">%   [handles, h2, hsp] = PlotStudy(data,myplot_handle)</span>
+0013 <span class="comment">%</span>
+0014 <span class="comment">% Inputs:</span>
+0015 <span class="comment">%     - data: DynaSim data structure (see CheckData)</span>
+0016 <span class="comment">%     - myplot_handle: Handle for plotting function.</span>
+0017 <span class="comment">%     - options:</span>
+0018 <span class="comment">%       'textfontsize': default text font size of 10</span>
+0019 <span class="comment">%       'use_subplot_grid': turns on or off subplot grid. Default is on. Off might be faster.</span>
+0020 <span class="comment">%</span>
+0021 <span class="comment">% Outputs:</span>
+0022 <span class="comment">%     - handles: handle of the figure</span>
+0023 <span class="comment">%     - hsp: handle of subplot_grid object</span>
+0024 <span class="comment">%     - h2: return values of myplot_handle (usually will be Line handles)</span>
+0025 <span class="comment">%</span>
+0026 <span class="comment">% Example:</span>
+0027 <span class="comment">%     myfunc = @(x) plot(x.RS_V)</span>
+0028 <span class="comment">%     figure; myunc(data(1));   % Single plot</span>
+0029 <span class="comment">%     PlotFunc(data,@myfunc)    % Grid of all plots</span>
+0030 <span class="comment">%</span>
+0031 <span class="comment">% Dependencies:</span>
+0032 <span class="comment">%     Uses subplot_grid.</span>
+0033 
+0034 <span class="comment">% data=CheckData(data);</span>
+0035 handles=[];
+0036 
+0037 options=<a href="CheckOptions.html" class="code" title="function parms = CheckOptions(options, options_schema, strict)">CheckOptions</a>(varargin,{<span class="keyword">...</span>
+0038   <span class="string">'textfontsize'</span>,10,[],<span class="keyword">...</span>
+0039   <span class="string">'use_subplot_grid'</span>,1,{0,1},<span class="keyword">...</span>
+0040   },false);
+0041 
+0042 textfontsize = options.textfontsize;
+0043 use_subplot_grid = options.use_subplot_grid;
+0044 
+0045 <span class="comment">% New code (imported from PlotData)</span>
+0046 num_sims=length(data); <span class="comment">% number of simulations</span>
+0047 
+0048 <span class="comment">% make subplot adjustments for varied parameters</span>
+0049 <span class="keyword">if</span> num_sims&gt;1 &amp;&amp; isfield(data,<span class="string">'varied'</span>)
+0050   
+0051   <span class="comment">% collect info on parameters varied</span>
+0052   varied=data(1).varied;
+0053   num_varied=length(varied); <span class="comment">% number of model components varied across simulations</span>
+0054   num_sims=length(data); <span class="comment">% number of data sets (one per simulation)</span>
+0055   
+0056   <span class="comment">% collect info on parameters varied</span>
+0057   param_mat=zeros(num_sims,num_varied); <span class="comment">% values for each simulation</span>
+0058   param_cell=cell(1,num_varied); <span class="comment">% unique values for each parameter</span>
+0059   
+0060   <span class="comment">% loop over varied components and collect values</span>
+0061   <span class="keyword">for</span> j=1:num_varied
+0062     <span class="keyword">if</span> isnumeric(data(1).(varied{j}))
+0063       param_mat(:,j)=[data.(varied{j})]; <span class="comment">% values for each simulation</span>
+0064       param_cell{j}=unique([data.(varied{j})]); <span class="comment">% unique values for each parameter</span>
+0065     <span class="keyword">else</span>
+0066       <span class="comment">% todo: handle sims varying non-numeric model components</span>
+0067       <span class="comment">% (eg, mechanisms) (also in PlotFR and SelectData)</span>
+0068     <span class="keyword">end</span>
+0069   <span class="keyword">end</span>
+0070   
+0071   param_size=cellfun(@length,param_cell); <span class="comment">% number of unique values for each parameter</span>
+0072   <span class="comment">% varied parameter with most elements goes along the rows (everything else goes along columns)</span>
+0073   row_param_index=find(param_size==max(param_size),1,<span class="string">'first'</span>);
+0074   row_param_name=varied{row_param_index};
+0075   row_param_values=param_cell{row_param_index};
+0076   num_rows=length(row_param_values);
+0077   
+0078   <span class="comment">%num_cols=num_sims/num_rows;</span>
+0079   num_figs=1;
+0080   
+0081   <span class="comment">% collect sims for each value of the row parameter</span>
+0082   indices={};
+0083   <span class="keyword">for</span> row=1:num_rows
+0084     indices{row}=find(param_mat(:,row_param_index)==row_param_values(row));
+0085   <span class="keyword">end</span>
+0086   num_per_row=cellfun(@length,indices);
+0087   num_cols=max(num_per_row);
+0088   sim_indices=nan(num_cols,num_rows);
+0089   
+0090   <span class="comment">% arrange sim indices for each row in a matrix</span>
+0091   <span class="keyword">for</span> row=1:num_rows
+0092     sim_indices(1:num_per_row(row),row)=indices{row};
+0093   <span class="keyword">end</span>
+0094   <span class="comment">%   sim_indices=[];</span>
+0095   <span class="comment">%   for row=1:num_rows</span>
+0096   <span class="comment">%     sim_indices=[sim_indices find(param_mat(:,row_param_index)==row_param_values(row))];</span>
+0097   <span class="comment">%   end</span>
+0098 <span class="keyword">else</span>
+0099   sim_indices=ones(1,num_rows); <span class="comment">% index into data array</span>
+0100   num_cols=1;
+0101 <span class="keyword">end</span>
+0102 
+0103 ht=320; <span class="comment">% height per subplot row (=per population or FR data set)</span>
+0104 handles(1) = figure(<span class="string">'units'</span>,<span class="string">'normalized'</span>,<span class="string">'position'</span>,[0,1-min(.33*num_rows,1),min(.25*num_cols,1) min(.33*num_rows,1)]);
+0105 <span class="keyword">if</span> use_subplot_grid; hsp = subplot_grid(num_rows,num_cols); <span class="keyword">else</span>
+0106   hsp=tight_subplot(num_rows,num_cols,[.01 .03],[.05 .01],[.03 .01]);
+0107 <span class="keyword">end</span>
+0108 
+0109 axis_counter = 0;
+0110 <span class="keyword">for</span> row=1:num_rows
+0111   <span class="keyword">for</span> col=1:num_cols
+0112     sim_index=sim_indices(col,row); <span class="comment">% index into data array for this subplot</span>
+0113     axis_counter=axis_counter+1; <span class="comment">% number subplot axis we're on</span>
+0114     <span class="keyword">if</span> isnan(sim_index)
+0115       <span class="keyword">continue</span>;
+0116     <span class="keyword">end</span>
+0117     
+0118     <span class="keyword">if</span> use_subplot_grid; hsp.set_gca(axis_counter); <span class="keyword">else</span>
+0119       set(gcf,<span class="string">'CurrentAxes'</span>,hsp(axis_counter));
+0120     <span class="keyword">end</span>
+0121     
+0122     num_pops = 1;
+0123     <span class="keyword">if</span> isfield(data,<span class="string">'varied'</span>)
+0124       <span class="keyword">if</span> num_sims&gt;1
+0125         <span class="comment">% list the parameter varied along the rows first</span>
+0126         str=[row_param_name <span class="string">'='</span> num2str(row_param_values(row)) <span class="string">': '</span>];
+0127         <span class="keyword">for</span> k=1:num_varied
+0128           fld=data(sim_index).varied{k};
+0129           <span class="keyword">if</span> ~strcmp(fld,row_param_name)
+0130             val=data(sim_index).(fld);
+0131             str=[str fld <span class="string">'='</span> num2str(val) <span class="string">', '</span>];
+0132           <span class="keyword">end</span>
+0133         <span class="keyword">end</span>
+0134         
+0135         <span class="keyword">if</span> num_pops&gt;1
+0136           legend_strings=cellfun(@(x)[x <span class="string">' (mean)'</span>],pop_names,<span class="string">'uni'</span>,0);
+0137         <span class="keyword">end</span>
+0138       <span class="keyword">else</span>
+0139         str=<span class="string">''</span>;
+0140         
+0141         <span class="keyword">for</span> k=1:length(data.varied)
+0142           fld=data(sim_index).varied{k};
+0143           str=[str fld <span class="string">'='</span> num2str(data(sim_index).(fld)) <span class="string">', '</span>];
+0144         <span class="keyword">end</span>
+0145       <span class="keyword">end</span>
+0146       text_string{row,col}=[<span class="string">'('</span> strrep(str(1:end-2),<span class="string">'_'</span>,<span class="string">'\_'</span>) <span class="string">')'</span>];
+0147     <span class="keyword">end</span>
+0148     
+0149     k=1;
+0150     i=sim_index;
+0151     <span class="comment">% get population name from field (assumes: pop_*)</span>
+0152     
+0153     <span class="comment">% 1.0 plot firing rate heat map</span>
+0154     <span class="comment">%hsp.figtitle([ text_string{row,col}]);</span>
+0155     <span class="keyword">try</span>
+0156       h2{i} = myplot_handle(data(i));
+0157     <span class="keyword">catch</span>       <span class="comment">% If myplot_handle doesn't return an output</span>
+0158       myplot_handle(data(i));
+0159       h2{i} = [];
+0160     <span class="keyword">end</span>
+0161     title(text_string{row,col},<span class="string">'FontSize'</span>,textfontsize);
+0162     
+0163     set(gca,<span class="string">'FontSize'</span>,textfontsize);
+0164   <span class="keyword">end</span>
+0165 <span class="keyword">end</span>
+0166 
+0167 <span class="keyword">end</span></pre></div>
+<hr><address>Generated on Mon 27-Feb-2017 14:58:50 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" target="_parent">m2html</a></strong> &copy; 2005</address>
+</body>
+</html>

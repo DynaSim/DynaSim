@@ -1,0 +1,174 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of recursivePlot_2</title>
+  <meta name="keywords" content="recursivePlot_2">
+  <meta name="description" content="function_handle_arguments - cell array of argument cell arrays to pass to">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html &copy; 2005 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="../../../m2html.css">
+  <script type="text/javascript">
+    if (top.frames.length == 0) { top.location = "../../../index.html"; };
+  </script>
+</head>
+<body>
+<a name="_top"></a>
+<!-- ../../menu.html functions_xPlt --><!-- ../menu.html classes --><!-- menu.html @xPlt -->
+<h1>recursivePlot_2
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../../../up.png"></a></h2>
+<div class="box"><strong>function_handle_arguments - cell array of argument cell arrays to pass to</strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../../../up.png"></a></h2>
+<div class="box"><strong>function varargout = recursivePlot_2(xp,function_handles,dimensions,function_handle_arguments) </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../../../up.png"></a></h2>
+<div class="fragment"><pre class="comment"> function_handle_arguments - cell array of argument cell arrays to pass to
+ function_handles. Must have one cell array for each function_handle
+ passed. Use empty cell arrays for no arguments. E.g.
+ function_handle_arguments = { {}, {}, {1} } for nothing, nothing, and
+ 1 as arguments.</pre></div>
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../../../up.png"></a></h2>
+This function calls:
+<ul style="list-style-image:url(../../../matlabicon.gif)">
+<li><a href="recursivePlot.html" class="code" title="function varargout = recursivePlot(xp,function_handles,dimensions,function_handle_arguments)">recursivePlot</a>	function_handle_arguments - cell array of argument cell arrays to pass to</li><li><a href="xPlt.html" class="code" title="">xPlt</a>	</li></ul>
+This function is called by:
+<ul style="list-style-image:url(../../../matlabicon.gif)">
+<li><a href="../../../functions_xPlt/functions/recursivePlot_2.html" class="code" title="function varargout = recursivePlot_2(xp,function_handles,dimensions,function_handle_arguments)">recursivePlot_2</a>	% varargout = recursivePlot(xp,function_handles,dimensions,function_handle_arguments)</li></ul>
+<!-- crossreference -->
+
+<h2><a name="_subfunctions"></a>SUBFUNCTIONS <a href="#_top"><img alt="^" border="0" src="../../../up.png"></a></h2>
+<ul style="list-style-image:url(../../../matlabicon.gif)">
+<li><a href="#_sub1" class="code">function_handle_arguments = cell(size(function_handles));</a></li><li><a href="#_sub2" class="code">function_handle_arguments{i} = {};</a></li><li><a href="#_sub3" class="code">function_handles(2:end),dimensions(2:end),function_handle_arguments(2:end));</a></li></ul>
+
+<h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../../../up.png"></a></h2>
+<div class="fragment"><pre>0001 
+0002 <a name="_sub0" href="#_subfunctions" class="code">function varargout = recursivePlot_2(xp,function_handles,dimensions,function_handle_arguments)</a>
+0003     <span class="comment">% function_handle_arguments - cell array of argument cell arrays to pass to</span>
+0004     <span class="comment">% function_handles. Must have one cell array for each function_handle</span>
+0005     <span class="comment">% passed. Use empty cell arrays for no arguments. E.g.</span>
+0006     <span class="comment">% function_handle_arguments = { {}, {}, {1} } for nothing, nothing, and</span>
+0007     <span class="comment">% 1 as arguments.</span>
+0008     
+0009     <span class="keyword">if</span> nargin &lt; 4
+0010         <a name="_sub1" href="#_subfunctions" class="code">function_handle_arguments = cell(size(function_handles));</a>
+0011         <span class="keyword">for</span> i = 1:length(function_handle_arguments)
+0012             <a name="_sub2" href="#_subfunctions" class="code">function_handle_arguments{i} = {};</a>
+0013         <span class="keyword">end</span>
+0014     <span class="keyword">end</span>
+0015 
+0016     sz = size(xp);
+0017     <span class="keyword">if</span> length(function_handles) &gt; 1
+0018         
+0019         <span class="comment">% xp_temp = permute(xp, [dimensions{1}, cell2mat(dimensions{2:end})]);</span>
+0020         
+0021         xp2 = <a href="xPlt.html" class="code" title="">xPlt</a>;
+0022         selection_curr = <a href="#_sub1" class="code" title="subfunction_handle_arguments = cell(size(function_handles));">cell</a>(1,length(sz));
+0023         <span class="comment">% Just cardcode in the various cases for dimensionality. It's</span>
+0024         <span class="comment">% unlikely they will ever want to go above showing 4D in a single</span>
+0025         <span class="comment">% plot.</span>
+0026         
+0027         temp = size(xp);
+0028         
+0029         current_size = temp(dimensions{1});
+0030         
+0031         current_no_dims = length(dimensions{1});
+0032         
+0033         total_calls = prod(current_size);
+0034         
+0035         [output_indices{1:current_no_dims}] = ind2sub(current_size, 1:total_calls);
+0036         
+0037         output_indices = num2cell(cat(1, output_indices{:})');
+0038          
+0039         input_indices = <a href="#_sub1" class="code" title="subfunction_handle_arguments = cell(size(function_handles));">cell</a>(1, length(xp.axis));
+0040         
+0041         <span class="keyword">for</span> call = 1:total_calls
+0042             
+0043             input_indices(dimensions{1}) = output_indices(call, :);
+0044             
+0045             xp2.data{output_indices{call, :}} = @() <a href="recursivePlot.html" class="code" title="function varargout = recursivePlot(xp,function_handles,dimensions,function_handle_arguments)">recursivePlot</a>(xp.subset(input_indices{:}),<span class="keyword">...</span>
+0046                 <a name="_sub3" href="#_subfunctions" class="code">function_handles(2:end),dimensions(2:end),function_handle_arguments(2:end));</a>
+0047             
+0048         <span class="keyword">end</span>
+0049         
+0050 <span class="comment">%         switch length(dimensions{1})</span>
+0051 <span class="comment">%             case 1                          % 1D</span>
+0052 <span class="comment">%                 dim1 = dimensions{1}(1);</span>
+0053 <span class="comment">%                 for i = 1:sz(dim1)</span>
+0054 <span class="comment">%                     selection_curr{dim1} = i;</span>
+0055 <span class="comment">%                         % Note: need to make it a row vector!</span>
+0056 <span class="comment">%                     xp2.data{i,1} = @() recursivePlot(xp.subset(selection_curr{:}),function_handles(2:end),dimensions(2:end),function_handle_arguments(2:end));</span>
+0057 <span class="comment">%                 end</span>
+0058 <span class="comment">%</span>
+0059 <span class="comment">%             case 2                          % 2D</span>
+0060 <span class="comment">%                 dim1 = dimensions{1}(1);</span>
+0061 <span class="comment">%                 dim2 = dimensions{1}(2);</span>
+0062 <span class="comment">%                 for i = 1:sz(dim1)</span>
+0063 <span class="comment">%                     for j = 1:sz(dim2)</span>
+0064 <span class="comment">%                         selection_curr{dim1} = i;</span>
+0065 <span class="comment">%                         selection_curr{dim2} = j;</span>
+0066 <span class="comment">%                         xp2.data{i,j} = @() recursivePlot(xp.subset(selection_curr{:}),function_handles(2:end),dimensions(2:end),function_handle_arguments(2:end));</span>
+0067 <span class="comment">%                     end</span>
+0068 <span class="comment">%                 end</span>
+0069 <span class="comment">%</span>
+0070 <span class="comment">%             case 3                          % 3D</span>
+0071 <span class="comment">%                 dim1 = dimensions{1}(1);</span>
+0072 <span class="comment">%                 dim2 = dimensions{1}(2);</span>
+0073 <span class="comment">%                 dim3 = dimensions{1}(3);</span>
+0074 <span class="comment">%                 for i = 1:sz(dim1)</span>
+0075 <span class="comment">%                     for j = 1:sz(dim2)</span>
+0076 <span class="comment">%                         for k = 1:sz(dim3)</span>
+0077 <span class="comment">%                             selection_curr{dim1} = i;</span>
+0078 <span class="comment">%                             selection_curr{dim2} = j;</span>
+0079 <span class="comment">%                             selection_curr{dim3} = k;</span>
+0080 <span class="comment">%                             xp2.data{i,j,k} = @() recursivePlot(xp.subset(selection_curr{:}),function_handles(2:end),dimensions(2:end),function_handle_arguments(2:end));</span>
+0081 <span class="comment">%                         end</span>
+0082 <span class="comment">%                     end</span>
+0083 <span class="comment">%                 end</span>
+0084 <span class="comment">%</span>
+0085 <span class="comment">%             case 4                          % 4D</span>
+0086 <span class="comment">%                 dim1 = dimensions{1}(1);</span>
+0087 <span class="comment">%                 dim2 = dimensions{1}(2);</span>
+0088 <span class="comment">%                 dim3 = dimensions{1}(3);</span>
+0089 <span class="comment">%                 dim4 = dimensions{1}(4);</span>
+0090 <span class="comment">%                 for i = 1:sz(dim1)</span>
+0091 <span class="comment">%                     for j = 1:sz(dim2)</span>
+0092 <span class="comment">%                         for k = 1:sz(dim3)</span>
+0093 <span class="comment">%                             for l = 1:sz(dim4)</span>
+0094 <span class="comment">%                                 selection_curr{dim1} = i;</span>
+0095 <span class="comment">%                                 selection_curr{dim2} = j;</span>
+0096 <span class="comment">%                                 selection_curr{dim3} = k;</span>
+0097 <span class="comment">%                                 selection_curr{dim4} = l;</span>
+0098 <span class="comment">%                                 xp2.data{i,j,k,l} = @() recursivePlot(xp.subset(selection_curr{:}),function_handles(2:end),dimensions(2:end),function_handle_arguments(2:end));</span>
+0099 <span class="comment">%                             end</span>
+0100 <span class="comment">%                         end</span>
+0101 <span class="comment">%                     end</span>
+0102 <span class="comment">%                 end</span>
+0103 <span class="comment">%</span>
+0104 <span class="comment">%</span>
+0105 <span class="comment">%         end</span>
+0106         
+0107         <span class="comment">% Update axes</span>
+0108         <span class="keyword">for</span> i = 1:length(dimensions{1})
+0109             dim_curr = dimensions{1}(i);
+0110             xp2.axis(i).values = xp.axis(dim_curr).values;
+0111             xp2.axis(i).name = xp.axis(dim_curr).name;
+0112         <span class="keyword">end</span>
+0113         xp2 = xp2.fixAxes;
+0114         
+0115         [varargout{1:nargout}] = function_handles{1}(xp2,function_handle_arguments{1}{:});
+0116         
+0117     <span class="keyword">else</span>
+0118         [varargout{1:nargout}] = function_handles{1}(xp,function_handle_arguments{1}{:});
+0119     <span class="keyword">end</span>
+0120 <span class="keyword">end</span>
+0121             
+0122</pre></div>
+<hr><address>Generated on Mon 27-Feb-2017 14:58:50 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" target="_parent">m2html</a></strong> &copy; 2005</address>
+</body>
+</html>

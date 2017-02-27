@@ -1,90 +1,102 @@
 function PlotWaveforms(data,varargin)
-%% PlotWaveforms(data,'option',value)
-% Purpose: plot waveforms in various ways depending on what data was provided.
+%PLOTWAVEFORMS - plot waveforms in various ways depending on what data was provided.
+%
+% Usage:
+%   PlotWaveforms(data,'option',value)
+%
 % Inputs:
-%   data: DynaSim data structure (see CheckData)
-%   options:
-%     'variable' - name of field containing data to plot
-%                  (default: all pops with state variable of variable in data.labels)
-%     'time_limits' - [beg,end] (units of data.time)
-%     'max_num_overlaid' - maximum # of waveforms to overlay per plot
-%     'max_num_rows' - maximum # of subplot rows per figure
-% 
-% Plots:
-% if Nsims>1: one sim per row
-% elseif Npops>1: one pop per row
-% else: one cell per row
-% 
-% Examples for specifying 'variable' option: 
-% []      : plot all data.labels with same variable name as first element of data.labels (eg, 'pop1_v' and 'pop2_v')
-% '*'     : plot all data.labels
-% '*_v'   : plot all data.labels ending in _v (i.e., all state variables 'v' for all populations)
-% 'pop1_*': plot all data.labels starting with pop1_ (i.e., all variables for population 'pop1')
-% 'pop1_v': plot only variable 'pop1_v'
-% 'v'     : look for all data.labels ending in _v then starting with v_ (eg, all populations with variable 'v')
-% 'pop1'  : look for all data.labels ending in _pop1 then starting with pop1_ (eg, all variables for population 'pop1')
-% '*_iNa_*': plot all data.labels for the 'iNa' mechanism (for all populations)
-%   
+%   - data: DynaSim data structure (see CheckData)
+%   - options:
+%     'variable': name of field containing data to plot (default: all pops with
+%                 state variable of variable in data.labels)
+%     'time_limits': in units of data.time {[beg,end]}
+%     'max_num_overlaid': maximum # of waveforms to overlay per plot
+%     'max_num_rows': maximum # of subplot rows per figure
+%
+% Notes:
+%  if Nsims>1: one sim per row
+%  elseif Npops>1: one pop per row
+%  else: one cell per row
+%
+% Examples for specifying 'variable' option:
+%   []      : plot all data.labels with same variable name as first element of
+%             data.labels (eg, 'pop1_v' and 'pop2_v')
+%   '*'     : plot all data.labels
+%   '*_v'   : plot all data.labels ending in _v (i.e., all state variables 'v'
+%             for all populations)
+%   'pop1_*': plot all data.labels starting with pop1_ (i.e., all variables for
+%             population 'pop1')
+%   'pop1_v': plot only variable 'pop1_v'
+%   'v'     : look for all data.labels ending in _v then starting with v_ (eg,
+%             all populations with variable 'v')
+%   'pop1'  : look for all data.labels ending in _pop1 then starting with pop1_
+%             (eg, all variables for population 'pop1')
+%   '*_iNa_*': plot all data.labels for the 'iNa' mechanism (for all populations)
+%
 % Examples:
-% One cell:
-% data=SimulateModel('dv/dt=@current+10; {iNa,iK}');
-% PlotWaveforms(data); % plot first state variable ('v')
-% PlotWaveforms(data,'variable','*'); % plot all state variables
-% PlotWaveforms(data,'variable','*','time_limits',[30 60]); % plot all variables and time 30-60ms
-% 
-% One population: with noisy input
-% data=SimulateModel('dv[5]/dt=@current+10*(1+randn(1,Npop)); {iNa,iK}');
-% PlotWaveforms(data);
-% PlotWaveforms(data,'variable','*'); % plot all state variables (all cells)
-% PlotWaveforms(data,'variable','m'); % plot state variable 'm' (all cells)
-% PlotWaveforms(data,'variable','*','time_limits',[30 60]); % plot all variables and time 30-60ms
-% 
-% One population varying one parameter (input amplitude):
-% eqns='dv[5]/dt=@current+amp*(1+randn(1,Npop)); {iNa,iK}';
-% vary={'','amp',[0 10 20]};
-% data=SimulateModel(eqns,'vary',vary);
-% PlotWaveforms(data);
-% PlotWaveforms(data,'variable','m');
-% PlotWaveforms(data,'variable','*');
-% 
-% One population varying two parameters (input amplitude and membrane capacitance):
-% eqns='dv[5]/dt=@current/Cm+amp*(1+randn(1,Npop)); {iNa,iK}';
-% vary={'','Cm',[1 2]; '','amp',[0 10 20]};
-% data=SimulateModel(eqns,'vary',vary);
-% PlotWaveforms(data);
-% PlotWaveforms(data,'variable','*');
-% 
-% Two populations: noisy input to E and excitatory connection from E to I
-% spec=[];
-% spec.populations(1).name='E1';
-% spec.populations(1).equations='dv[5]/dt=@current+amp*(1+randn(1,Npop)); amp=10; {iNa,iK}';
-% spec.populations(2).name='E2';
-% spec.populations(2).equations='dv[2]/dt=@current; {iNa,iK}';
-% spec.connections(1).direction='E1->E2';
-% spec.connections(1).mechanism_list='iAMPA';
-% data=SimulateModel(spec);
-% PlotWaveforms(data); % plot first state variable
-% PlotWaveforms(data,'variable','*'); 
-% % plot monitored synaptic current with post-synaptic voltages:
-% PlotWaveforms(data,'variable',{'E2_v','ISYN'}); 
-% % plot monitored synaptic current with pre- and post-synaptic voltages:
-% PlotWaveforms(data,'variable',{'v','ISYN'}); 
-% 
-% Two populations varying one parameter (input amplitude):
-% vary={'E1','amp',[0 10 20]};
-% data=SimulateModel(spec,'vary',vary);
-% PlotWaveforms(data);
-% PlotWaveforms(data,'variable','*');
-% PlotWaveforms(data,'variable','*_iNa_*');
-% 
-% Two populations varying two parameters (input amplitude and synaptic conductance):
-% vary={'E1','amp',[0 10 20]; 'E1->E2','gSYN',[0 .05 .1]};
-% data=SimulateModel(spec,'vary',vary);
-% PlotWaveforms(data,'variable','v');
-% PlotWaveforms(data,'variable','ISYN');
-% PlotWaveforms(data,'variable','E1_v');
-% PlotWaveforms(data,'variable','*');
-% 
+% - Example 1: One cell:
+%     data=SimulateModel('dv/dt=@current+10; {iNa,iK}');
+%     PlotWaveforms(data); % plot first state variable ('v')
+%     PlotWaveforms(data,'variable','*'); % plot all state variables
+%     % plot all variables and time 30-60ms
+%     PlotWaveforms(data,'variable','*','time_limits',[30 60]);
+%
+% - Example 2: One population: with noisy input
+%     data=SimulateModel('dv[5]/dt=@current+10*(1+randn(1,Npop)); {iNa,iK}');
+%     PlotWaveforms(data);
+%     PlotWaveforms(data,'variable','*'); % plot all state variables (all cells)
+%     PlotWaveforms(data,'variable','m'); % plot state variable 'm' (all cells)
+%     % plot all variables and time 30-60ms
+%     PlotWaveforms(data,'variable','*','time_limits',[30 60]);
+%
+% - Example 3: One population varying one parameter (input amplitude):
+%     eqns='dv[5]/dt=@current+amp*(1+randn(1,Npop)); {iNa,iK}';
+%     vary={'','amp',[0 10 20]};
+%     data=SimulateModel(eqns,'vary',vary);
+%     PlotWaveforms(data);
+%     PlotWaveforms(data,'variable','m');
+%     PlotWaveforms(data,'variable','*');
+%
+% - Example 4: One population varying two parameters (input amplitude and
+%              membrane capacitance):
+%     eqns='dv[5]/dt=@current/Cm+amp*(1+randn(1,Npop)); {iNa,iK}';
+%     vary={'','Cm',[1 2]; '','amp',[0 10 20]};
+%     data=SimulateModel(eqns,'vary',vary);
+%     PlotWaveforms(data);
+%     PlotWaveforms(data,'variable','*');
+%
+% - Example 5: Two populations: noisy input to E and excitatory connection from E to I
+%     spec=[];
+%     spec.populations(1).name='E1';
+%     spec.populations(1).equations='dv[5]/dt=@current+amp*(1+randn(1,Npop)); amp=10; {iNa,iK}';
+%     spec.populations(2).name='E2';
+%     spec.populations(2).equations='dv[2]/dt=@current; {iNa,iK}';
+%     spec.connections(1).direction='E1->E2';
+%     spec.connections(1).mechanism_list='iAMPA';
+%     data=SimulateModel(spec);
+%     PlotWaveforms(data); % plot first state variable
+%     PlotWaveforms(data,'variable','*'); 
+%     % plot monitored synaptic current with post-synaptic voltages:
+%     PlotWaveforms(data,'variable',{'E2_v','ISYN'}); 
+%     % plot monitored synaptic current with pre- and post-synaptic voltages:
+%     PlotWaveforms(data,'variable',{'v','ISYN'}); 
+%
+% - Example 6: Two populations varying one parameter (input amplitude):
+%     vary={'E1','amp',[0 10 20]};
+%     data=SimulateModel(spec,'vary',vary);
+%     PlotWaveforms(data);
+%     PlotWaveforms(data,'variable','*');
+%     PlotWaveforms(data,'variable','*_iNa_*');
+%
+% - Example 7: Two populations varying two parameters (input amplitude and
+%              synaptic conductance):
+%     vary={'E1','amp',[0 10 20]; 'E1->E2','gSYN',[0 .05 .1]};
+%     data=SimulateModel(spec,'vary',vary);
+%     PlotWaveforms(data,'variable','v');
+%     PlotWaveforms(data,'variable','ISYN');
+%     PlotWaveforms(data,'variable','E1_v');
+%     PlotWaveforms(data,'variable','*');
+%
 % See also: PlotFR, CheckData
 
 % Check inputs

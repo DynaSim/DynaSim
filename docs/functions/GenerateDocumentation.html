@@ -1,0 +1,88 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of GenerateDocumentation</title>
+  <meta name="keywords" content="GenerateDocumentation">
+  <meta name="description" content="GENERATEDOCUMENTATION - Build DynaSim function documentation">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html &copy; 2005 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="../m2html.css">
+  <script type="text/javascript">
+    if (top.frames.length == 0) { top.location = "../index.html"; };
+  </script>
+</head>
+<body>
+<a name="_top"></a>
+<!-- menu.html functions -->
+<h1>GenerateDocumentation
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>GENERATEDOCUMENTATION - Build DynaSim function documentation</strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>function GenerateDocumentation </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre class="comment">GENERATEDOCUMENTATION - Build DynaSim function documentation
+
+  This is a simple call to `m2html()` to make it easy for anyone with DynaSim
+  on their path to build the documentation.
+
+  HOWEVER, there are caveats:
+  1. This MUST be run from the root DynaSim directory, meaning the current
+     directory of your MATLAB instance must be in your &quot;/path/to/dynasim&quot;.
+    - This is because `m2html` must be clear on what &quot;functions&quot; folder you are
+      referring to, and because `function` and `functions` are reserved words in
+      MATLAB, you can't just simply locate the folder globally using
+      `which(functions)`. There may be a way around this, but you'll have to
+      step very carefully around the reserved words.
+  2. This is a custom version of m2html, in that I replaced all deprecated
+     'error(nargin(...' uses, which were giving warnings that slowed down the
+     program, into modern 'narginchk' uses, so this is NOT identical to the
+     downloadable m2html.</pre></div>
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+This function calls:
+<ul style="list-style-image:url(../matlabicon.gif)">
+</ul>
+This function is called by:
+<ul style="list-style-image:url(../matlabicon.gif)">
+</ul>
+<!-- crossreference -->
+
+
+
+<h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function GenerateDocumentation</a>
+0002 <span class="comment">%GENERATEDOCUMENTATION - Build DynaSim function documentation</span>
+0003 <span class="comment">%</span>
+0004 <span class="comment">%  This is a simple call to `m2html()` to make it easy for anyone with DynaSim</span>
+0005 <span class="comment">%  on their path to build the documentation.</span>
+0006 <span class="comment">%</span>
+0007 <span class="comment">%  HOWEVER, there are caveats:</span>
+0008 <span class="comment">%  1. This MUST be run from the root DynaSim directory, meaning the current</span>
+0009 <span class="comment">%     directory of your MATLAB instance must be in your &quot;/path/to/dynasim&quot;.</span>
+0010 <span class="comment">%    - This is because `m2html` must be clear on what &quot;functions&quot; folder you are</span>
+0011 <span class="comment">%      referring to, and because `function` and `functions` are reserved words in</span>
+0012 <span class="comment">%      MATLAB, you can't just simply locate the folder globally using</span>
+0013 <span class="comment">%      `which(functions)`. There may be a way around this, but you'll have to</span>
+0014 <span class="comment">%      step very carefully around the reserved words.</span>
+0015 <span class="comment">%  2. This is a custom version of m2html, in that I replaced all deprecated</span>
+0016 <span class="comment">%     'error(nargin(...' uses, which were giving warnings that slowed down the</span>
+0017 <span class="comment">%     program, into modern 'narginchk' uses, so this is NOT identical to the</span>
+0018 <span class="comment">%     downloadable m2html.</span>
+0019 
+0020 m2html(<span class="string">'mfiles'</span>,{<span class="string">'functions'</span>,<span class="string">'functions_xPlt'</span>},<span class="keyword">...</span>
+0021        <span class="string">'htmldir'</span>,<span class="string">'docs'</span>,<span class="keyword">...</span>
+0022        <span class="string">'recursive'</span>,<span class="string">'on'</span>,<span class="keyword">...</span>
+0023        <span class="string">'global'</span>,<span class="string">'on'</span>,<span class="keyword">...</span>
+0024        <span class="string">'template'</span>,<span class="string">'frame'</span>,<span class="keyword">...</span>
+0025        <span class="string">'index'</span>,<span class="string">'menu'</span>,<span class="keyword">...</span>
+0026        <span class="string">'graph'</span>,<span class="string">'on'</span>);</pre></div>
+<hr><address>Generated on Mon 27-Feb-2017 14:58:50 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" target="_parent">m2html</a></strong> &copy; 2005</address>
+</body>
+</html>

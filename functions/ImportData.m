@@ -1,18 +1,23 @@
 function [data,studyinfo] = ImportData(file,varargin)
-%% [data,studyinfo]=ImportData(data_file)
-% data=ImportData(data_file)
-% Purpose: load data into DynaSim formatted data structure.
+%IMPORTDATA - load data into DynaSim formatted data structure.
+%
+% Usage:
+%   [data,studyinfo]=ImportData(data_file)
+%   data=ImportData(data_file)
+%
 % Inputs:
-%   data_file - data file name in accepted format (csv, mat, ...), or
-%     also accepted: list of data files, studyinfo structure, study_dir, or studyinfo file
-%   studyinfo - DynaSim studyinfo structure (see CheckStudyinfo)
-%   options -
-%     'verbose_flag',1,{0,1},...
-%     'process_id',[],[],... % process identifier for loading studyinfo if necessary
-%     'time_limits',[],[],... % [beg,end] ms (see NOTE 2)
-%     'variables',[],[],... % cell array of matrix names (see NOTE 2)
+%   - data_file data file name in accepted format (csv, mat, ...), or also
+%     accepted: list of data files, studyinfo structure, study_dir, or studyinfo
+%     file
+%   - studyinfo: DynaSim studyinfo structure (see CheckStudyinfo)
+%   - options:
+%     'verbose_flag': {0,1} (default: 1)
+%     'process_id'  : process identifier for loading studyinfo if necessary
+%     'time_limits' : [beg,end] ms (see NOTE 2)
+%     'variables'   : cell array of matrix names (see NOTE 2)
+%
 % Outputs:
-%   DynaSim data structure:
+%   - DynaSim data structure:
 %     data.labels           : list of state variables and monitors recorded
 %     data.(state_variables): state variable data matrix [time x cells]
 %     data.(monitors)       : monitor data matrix [time x cells]
@@ -21,34 +26,36 @@ function [data,studyinfo] = ImportData(file,varargin)
 %     data.model            : model used to generate simulated data
 %     [data.varied]         : list of varied model components
 %     [data.results]        : list of derived data sets created by post-processing
-% 
-% NOTE 1: CSV file structure
-%   assumes CSV file contains data organized according to output from
-%   WriteDynaSimSolver: time points along rows; state variables and 
-%   monitors are columns; first column is time vector; next columns are
-%   state variables; final columns are monitors. first row has headers
-%   for each column. if a population has more than one cell, different
+%
+% Notes:
+%   - NOTE 1: CSV file structure assumes CSV file contains data organized
+%   according to output from WriteDynaSimSolver: time points along rows; state
+%   variables and monitors are columns; first column is time vector; next
+%   columns are state variables; final columns are monitors. first row has
+%   headers for each column. if a population has more than one cell, different
 %   cells are sequential columns with same header repeated for each cell.
-% 
-% NOTE 2: DynaSim data exported to MAT-files are HDF-compatible. To obtain
-% partial data sets without having to load the entire file, use ImportData
-% with options 'time_limits' and/or 'variables'. Alternatively, the entire
-% data set can be loaded using ImportData with default options, then
-% subsets extracted using SelectData with appropriate options.
-% 
+%
+%   - NOTE 2: DynaSim data exported to MAT-files are HDF-compatible. To obtain
+%   partial data sets without having to load the entire file, use ImportData
+%   with options 'time_limits' and/or 'variables'. Alternatively, the entire
+%   data set can be loaded using ImportData with default options, then subsets
+%   extracted using SelectData with appropriate options.
+%
 % Examples:
-% 1) full data set
-% data=ImportData('data.mat'); % load single data set
-% data=ImportData(studyinfo); % load all data sets in studyinfo.study_dir
-% 2) partial data set with HDF-style loading
-% data=ImportData('data.mat','variables','pop1_v','time_limits',[1000 4000])
-% 
+%   - Example 1: full data set
+%       data=ImportData('data.mat'); % load single data set
+%       data=ImportData(studyinfo); % load all data sets in studyinfo.study_dir
+%   - Example 2: partial data set with HDF-style loading
+%       data=ImportData('data.mat','variables','pop1_v','time_limits',[1000 4000])
+%
+% TODO:
+% - specify subsets to return in terms of varied parameters, time_limits, ROIs,
+%   etc possible format for specifying range_varied: {'E','gNa',[.1 .3];
+%   'I->E','tauI',[15 25]; 'I','mechanism_list','+iM'}
+% - achieve by calling function SelectData() at end of this function.
+
 % See also: SimulateModel, ExportData, CheckData, SelectData
 
-% todo: specify subsets to return in terms of varied parameters, time_limits, ROIs, etc
-% possible format for specifying range_varied:
-% {'E','gNa',[.1 .3]; 'I->E','tauI',[15 25]; 'I','mechanism_list','+iM'}
-% idea: achieve by calling function SelectData() at end of this function.
 
 % Check inputs
 options=CheckOptions(varargin,{...

@@ -1,18 +1,20 @@
 function [pop_diff,conn_diff] = specdiff(spec1,spec2,verbose)
-%% function [pop_diff,conn_diff] = specdiff(spec1,spec2)
-% Purpose: Scans two DynaSim specs for differences
-% NOTE1: Requires nDDict class dependency
+%SPECDIFF - Scans two DynaSim specs for differences
+%
+% Usage:
+%   [pop_diff,conn_diff] = specdiff(spec1,spec2)
+%
 % Inputs:
-%     spec1, spec2        : DynaSim model specifications to be compared
+%    - spec1, spec2        : DynaSim model specifications to be compared
+%
 % Outputs:
-%     pop_diff            : Structure summarizing differences between populations
-%     conn_diff           : Structure summarizing differences between connections
-%     verbose             : Bool - show or hide text output
+%    - pop_diff            : Structure summarizing differences between populations
+%    - conn_diff           : Structure summarizing differences between connections
+%    - verbose             : Bool - show or hide text output
+%
 % Dependencies:
 %   Requires the nDDims class, which should be party of DynaSim. If not,
 %   get it here https://github.com/davestanley/nDDims
-% 
-% 
 
 debug_mode = 0;
 

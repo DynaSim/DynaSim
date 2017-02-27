@@ -1,0 +1,150 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of getGenExtPoissonTotalGating</title>
+  <meta name="keywords" content="getGenExtPoissonTotalGating">
+  <meta name="description" content="16-Feb-2016: JSS">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html &copy; 2005 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="../m2html.css">
+  <script type="text/javascript">
+    if (top.frames.length == 0) { top.location = "../index.html"; };
+  </script>
+</head>
+<body>
+<a name="_top"></a>
+<!-- menu.html functions -->
+<h1>getGenExtPoissonTotalGating
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>16-Feb-2016: JSS</strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>function S = getGenExtPoissonTotalGating_jss(tOn,tOff,latency_,freq_,normFreqSigma_,phase_,widthSigma,rate_baseline,rate_dc_,rate_ac_,tau,kick,N,interval,dt,conn,ramp_dc_flag,ramp_ac_flag) </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre class="comment"> 16-Feb-2016: JSS 
+  - added conn as connectivity input argument [num_cells x 1]
+  - commented out load('sinPhases') and defined shuffled phase_ic instead
+ 27-Mar-2016: JSS
+  - added ramp_dc_flag to indicate smooth transition from 0 to rate_dc over tOn to tOff
+  - added ramp_ac_flag to indicate smooth transition from 0 to rate_ac over tOn to tOff</pre></div>
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+This function calls:
+<ul style="list-style-image:url(../matlabicon.gif)">
+<li><a href="nonhomPoissonGeneratorSpikeTimes.html" class="code" title="function S = nonhomPoissonGeneratorSpikeTimes(S_ini,rate,tau,kick,N,interval,dt)">nonhomPoissonGeneratorSpikeTimes</a>	</li></ul>
+This function is called by:
+<ul style="list-style-image:url(../matlabicon.gif)">
+<li><a href="getPoissonGating.html" class="code" title="function sext=getPoissonGating(baseline,dc,ac,freq,phase,onset,offset,tau,Total_time,N,kernel,kick,ramp_dc_flag,ramp_ac_flag)">getPoissonGating</a>	s=getPoissonGating(baseline,dc,ac,freq,phase,onset,offset,tau,T,N,kernel)</li><li><a href="getPoissonGating_old.html" class="code" title="function sext=getPoissonGating(baseline,dc,ac,freq,phase,onset,offset,tau,T,N,kernel,kick,ramp_dc_flag,ramp_ac_flag)">getPoissonGating_old</a>	s=getPoissonGating(baseline,dc,ac,freq,phase,onset,offset,tau,T,N,kernel)</li></ul>
+<!-- crossreference -->
+
+
+
+<h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function S = getGenExtPoissonTotalGating_jss(tOn,tOff,latency_,freq_,normFreqSigma_,phase_,widthSigma,rate_baseline,rate_dc_,rate_ac_,tau,kick,N,interval,dt,conn,ramp_dc_flag,ramp_ac_flag)</a>
+0002 <span class="comment">% 16-Feb-2016: JSS</span>
+0003 <span class="comment">%  - added conn as connectivity input argument [num_cells x 1]</span>
+0004 <span class="comment">%  - commented out load('sinPhases') and defined shuffled phase_ic instead</span>
+0005 <span class="comment">% 27-Mar-2016: JSS</span>
+0006 <span class="comment">%  - added ramp_dc_flag to indicate smooth transition from 0 to rate_dc over tOn to tOff</span>
+0007 <span class="comment">%  - added ramp_ac_flag to indicate smooth transition from 0 to rate_ac over tOn to tOff</span>
+0008 
+0009   <span class="keyword">if</span> nargin&lt;1,  tOn = 0;                <span class="keyword">end</span>
+0010   <span class="keyword">if</span> nargin&lt;2,  tOff = 0;               <span class="keyword">end</span>
+0011   <span class="keyword">if</span> nargin&lt;3,  latency_ = 0;           <span class="keyword">end</span>
+0012   <span class="keyword">if</span> nargin&lt;4,  freq_ = 0;              <span class="keyword">end</span>
+0013   <span class="keyword">if</span> nargin&lt;5,  normFreqSigma_ = 0.03;  <span class="keyword">end</span>
+0014   <span class="keyword">if</span> nargin&lt;6,  phase_ = 0;             <span class="keyword">end</span>
+0015   <span class="keyword">if</span> nargin&lt;7,  widthSigma = 0.001;     <span class="keyword">end</span> <span class="comment">% 0.001 represents an abrupt connectivity transition (in contrast to 0.1; it only applies to dc+ac not the baseline)</span>
+0016   <span class="keyword">if</span> nargin&lt;8,  rate_baseline = 0;      <span class="keyword">end</span>
+0017   <span class="keyword">if</span> nargin&lt;9,  rate_dc_ = 0;           <span class="keyword">end</span>
+0018   <span class="keyword">if</span> nargin&lt;10, rate_ac_ = 0;           <span class="keyword">end</span>
+0019   <span class="keyword">if</span> nargin&lt;11, tau = 2;                <span class="keyword">end</span>
+0020   <span class="keyword">if</span> nargin&lt;12, kick = 1;               <span class="keyword">end</span>
+0021   <span class="keyword">if</span> nargin&lt;13, N = 100;                <span class="keyword">end</span>
+0022   <span class="keyword">if</span> nargin&lt;14, interval = 1000;        <span class="keyword">end</span>
+0023   <span class="keyword">if</span> nargin&lt;15, dt = 0.05;              <span class="keyword">end</span>
+0024   <span class="keyword">if</span> nargin&lt;16 || isempty(conn), 
+0025       conn=ones(N,1); 
+0026   <span class="keyword">end</span>
+0027   <span class="keyword">if</span> nargin&lt;17, ramp_dc_flag=0; <span class="keyword">end</span>
+0028   <span class="keyword">if</span> nargin&lt;18, ramp_ac_flag=0; <span class="keyword">end</span>
+0029     
+0030   <span class="comment">% broadcasting sizes with respect to number of stimuli</span>
+0031   numStim = length(tOn);
+0032   <span class="keyword">if</span> numStim &gt; size(freq_,1), freq = ones(numStim,1)*freq_; <span class="keyword">else</span>, freq = freq_; <span class="keyword">end</span>
+0033   <span class="keyword">if</span> numStim &gt; size(normFreqSigma_,1), normFreqSigma = ones(numStim,1)*normFreqSigma_; <span class="keyword">else</span>, normFreqSigma = normFreqSigma_; <span class="keyword">end</span>
+0034   <span class="keyword">if</span> numStim &gt; size(phase_,1), phase = ones(numStim,1)*phase_; <span class="keyword">else</span>, phase = phase_; <span class="keyword">end</span>
+0035   <span class="keyword">if</span> numStim &gt; size(rate_dc_,1), rate_dc = ones(numStim,1)*rate_dc_; <span class="keyword">else</span>, rate_dc = rate_dc_; <span class="keyword">end</span>
+0036   <span class="keyword">if</span> numStim &gt; size(rate_ac_,1), rate_ac = ones(numStim,1)*rate_ac_; <span class="keyword">else</span>, rate_ac = rate_ac_; <span class="keyword">end</span>
+0037   <span class="keyword">if</span> numStim &gt; size(latency_,1), latency = ones(numStim,1)*latency_; <span class="keyword">else</span>, latency = latency_; <span class="keyword">end</span>
+0038 
+0039   time = 0:dt:interval;
+0040   S_ini = zeros(N,1);
+0041   S = zeros(N,length(time));
+0042   dynrate = rate_baseline*ones(N,length(time));
+0043   ratecomp = zeros(numStim,length(time));
+0044   <span class="keyword">for</span> i = 1:numStim
+0045     timeWindow = zeros(1,length(time));
+0046     <span class="keyword">if</span> latency(i) ~= 0
+0047       timeWindow(time &gt;= tOn(i)) = 1;
+0048     <span class="keyword">else</span>
+0049       timeWindow(time &gt;= tOn(i) &amp; time &lt;= tOff(i)) = 1;
+0050     <span class="keyword">end</span>
+0051     <span class="keyword">if</span> ramp_dc_flag==0
+0052       ratecomp(i,:) = rate_dc(i);
+0053     <span class="keyword">else</span>
+0054       ratecomp(i,timeWindow==1)=linspace(0,rate_dc(i),length(find(timeWindow==1)));
+0055     <span class="keyword">end</span>
+0056     <span class="keyword">if</span> freq(i)
+0057       <span class="comment">% freq modulation</span>
+0058       numFreqs = 1000;
+0059       <span class="keyword">if</span> 0 <span class="comment">% turn off noisy spectral content</span>
+0060         step = 2*pi/numFreqs;
+0061         <span class="comment">%Ph = load('sinPhases'); % from test.m in this directory</span>
+0062         phase_ic = 0:step:2*pi*(1-1/numFreqs);
+0063         shuffle = randperm(length(phase_ic));
+0064         phase_ic = phase_ic(shuffle);
+0065         Ph.phase_ic=phase_ic;
+0066         <span class="comment">% save('sinPhases','phase_ic')</span>
+0067         freqSigma = normFreqSigma(i)*freq(i);
+0068         freqSet = -freq(i)/5:2*freq(i)/5/(numFreqs-1):freq(i)/5;
+0069         freqVar = exp(-freqSet.^2/(2*freqSigma^2));
+0070         m = sum(freqVar)/numFreqs;
+0071         sumCos = zeros(size(time));
+0072         <span class="keyword">for</span> j = 1:numFreqs
+0073           sumCos = sumCos + freqVar(j)*cos(2*pi*freqSet(j)*time + Ph.phase_ic(j));
+0074         <span class="keyword">end</span>
+0075       <span class="keyword">else</span>
+0076         m=0;
+0077         sumCos = zeros(size(time));
+0078       <span class="keyword">end</span>
+0079       <span class="keyword">if</span> ramp_ac_flag==0
+0080         ratecomp(i,:) = ratecomp(i,:) + rate_ac(i)*sin(2*pi*freq(i)*time+m*sumCos+phase(i));
+0081       <span class="keyword">else</span>
+0082         tmp_ac=zeros(size(time));
+0083         tmp_ac(timeWindow==1)=linspace(0,rate_ac(i),length(find(timeWindow==1)));
+0084         ratecomp(i,:) = ratecomp(i,:) + tmp_ac.*sin(2*pi*freq(i)*time+m*sumCos+phase(i));
+0085       <span class="keyword">end</span>
+0086     <span class="keyword">end</span>
+0087     ratecomp(i,:) = ratecomp(i,:).*timeWindow;
+0088     <span class="keyword">if</span> latency(i) ~= 0
+0089       ratecomp(i,time&gt;=tOn(i)) = ratecomp(i,time&gt;=tOn(i)).*(1-exp(-(time(time&gt;=tOn(i))-tOn(i))/latency(i)));
+0090       ratecomp(i,time&gt;=tOff(i)) = ratecomp(i,time&gt;=tOff(i)).*exp(-(time(time&gt;=tOff(i))-tOff(i))/latency(i));
+0091     <span class="keyword">end</span>
+0092   <span class="keyword">end</span>
+0093   <span class="comment">% x_N = ((1:N)-0.5)/N;</span>
+0094   <span class="comment">% x_c = 0.25; % center of first category</span>
+0095   <span class="comment">% conn = 1./(1+exp(-cos(2*pi*(x_N-x_c))/widthSigma));</span>
+0096   <span class="comment">% dynrate = dynrate + conn'*sum(ratecomp,1);</span>
+0097   dynrate = dynrate + conn*sum(ratecomp,1);
+0098   S = <a href="nonhomPoissonGeneratorSpikeTimes.html" class="code" title="function S = nonhomPoissonGeneratorSpikeTimes(S_ini,rate,tau,kick,N,interval,dt)">nonhomPoissonGeneratorSpikeTimes</a>(S_ini,dynrate,tau,kick,N,interval,dt);
+0099 <span class="keyword">end</span></pre></div>
+<hr><address>Generated on Mon 27-Feb-2017 14:58:50 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" target="_parent">m2html</a></strong> &copy; 2005</address>
+</body>
+</html>

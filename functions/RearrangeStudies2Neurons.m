@@ -1,28 +1,31 @@
 function data_out = RearrangeStudies2Neurons(data)
-%% data_out = RearrangeStudies2Cells(data,'option',value)
-% Takes a DynaSim data structure that is the result of a parameter sweep and
-% rearranges it into a single (1D) data structure. Each "neuron" in this new
-% data structure corresponds to a simulation in the original sim study.
+%REARRANGESTUDIES2NEURONS - Takes a DynaSim data structure that is the result of a parameter sweep and rearranges it into a single (1D) data structure.
+%
+% Each "neuron" in this new data structure corresponds to a simulation in the
+% original sim study.
 %
 % If there is more than one cell in a population, each trace will represent the 
 % averaged activity across neurons.
-% 
+%
 % This is useful when you want to run multiple simulations and see how 
 % the averaged responses of populations vary. It is also useful when running
 % the same simulation multiple times (with different) seed values and then
 % observing the variance across these sims.
-% 
-% Inputs:
-%   data - DynaSim data structure array (see CheckData). Length(data)
-%   should be greater than 1.
-% Outputs:
-%   data_out: data structure of length 1. 
-% 
-% Example:
-% data = RearrangeStudies2Cells(data)
-% PlotData(data)
 %
-
+% Usage:
+%   data_out = RearrangeStudies2Cells(data,'option',value)
+%
+% Inputs:
+%   - data: DynaSim data structure array (see CheckData). Length(data) should
+%           be greater than 1.
+%
+% Outputs:
+%   - data_out: data structure of length 1.
+%
+% Example:
+%   data = RearrangeStudies2Cells(data)
+%   PlotData(data)
+%
 % See also: CalcAverages, AnalyzeStudy, SimulateModel, CheckData, SelectVariables
 
 %% 1.0 Check inputs

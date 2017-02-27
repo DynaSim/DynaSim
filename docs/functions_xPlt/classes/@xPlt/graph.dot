@@ -1,0 +1,12 @@
+/* Created by mdot for Matlab */
+digraph m2html {
+  recursivePlot -> recursivePlot;
+  recursivePlot -> xPlt;
+  recursivePlot_2 -> recursivePlot;
+  recursivePlot_2 -> xPlt;
+  xPlt -> xPlt;
+
+  recursivePlot [URL="recursivePlot.html"];
+  recursivePlot_2 [URL="recursivePlot_2.html"];
+  xPlt [URL="xPlt.html"];
+}

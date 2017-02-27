@@ -1,14 +1,19 @@
 function data_out = CalcAverages(data,opts)
-%% data_out = CalcAverages(data,'option',value)
+%CALCAVERAGES - Average fields in a DynaSim data struct across neurons
+%
+% Usage:
+%   data_out = CalcAverages(data,'option',value)
+%
 % Inputs:
-%   data - DynaSim data structure (see CheckData)
-%   opts - Options structure
-%          opts.save_std - Also creates new fields storing standard deviations (boolean; true/false)
-
+%   - data: DynaSim data structure (see CheckData)
+%   - opts: Options structure
+%     'opts.save_std': Also creates new fields storing standard deviations
+%                      (true or false)
+%
 % Outputs:
-%   data_out: data structure all fields replaced by their average vales
-%             (averaged across neurons).
-
+%   - data_out: data structure, all fields replaced by their average values
+%       (averaged across neurons).
+%
 % See also: PlotFR, AnalyzeStudy, SimulateModel, CheckData, SelectVariables
 
 %% 1.0 Check inputs

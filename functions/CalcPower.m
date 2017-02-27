@@ -1,53 +1,60 @@
 function data = CalcPower(data,varargin)
-%% data = CalcPower(data,'option',value)
+%CALCPOWER - Compute spectral analysis of DynaSim data
+%
+% Usage:
+%   data = CalcPower(data,'option',value)
+%
 % Inputs:
-%   data - DynaSim data structure (see CheckData)
-%   options:
-%     'variable' - name of field containing data on which to calculate Power
-%                  (default: *_spikes or first variable in data.labels)
-%     'time_limits' - [beg,end] (units of data.time)
-%     'smooth_factor' - number of samples for smoothing the spectrum (default: 5)
-%                       tip: set to 1 to avoid smoothing.
-%   options for peak detection:
-%     'min_peak_frequency' - Hz, min frequency for peak detection (default: 2)
-%     'max_peak_frequency' - Hz, max frequency for peak detection (default: 150)
-%     'peak_threshold_prctile' percentile for setting power threshold for peak detection (default: 95)
-%     'peak_area_width' - Hz, size of frequency bin (centered on peak) over which to calculate area under spectrum (default: 5)
-%     'exclude_data_flag' - whether to remove simulated data from result structure (default: 0)
-%     'timeBandwidthProduct' - time-bandwidth product for multi-taper method (default: use pmtm NW default)
-%     'output_suffix' - suffix to attach to output variable names (default: '')
+%   - data: DynaSim data structure (see CheckData)
+%   - options:
+%     'variable'              : name of field containing data on which to
+%                               calculate firing rates (default: *_spikes or
+%                               first variable in data.labels)
+%     'time_limits'           : [beg,end] (units of data.time)
+%     'smooth_factor'         : number of samples for smoothing the spectrum (default: 5)
+%                               - tip: set to 1 to avoid smoothing
+%   - options for peak detection:
+%     'min_peak_frequency'    : Hz, min frequency for peak detection (default: 2)
+%     'max_peak_frequency'    : Hz, max frequency for peak detection (default: 150)
+%     'peak_threshold_prctile': percentile for setting power threshold for peak
+%                               detection (default: 95)
+%     'peak_area_width'       : Hz, size of frequency bin (centered on peak)
+%                               over which to calculate area under spectrum (default: 5)
+%     'exclude_data_flag'     : whether to remove simulated data from result
+%                               structure (default: 0)
+%
 % Outputs:
-%   data: data structure with spectral power in data.VARIABLE_Power_SUA.Pxx
-%         data.VARIABLE_Power_SUA.PeakFreq: frequency of spectral power (one value per cell)
-%         data.VARIABLE_Power_SUA.PeakArea: area under spectrum around peak (one value per cell)
-%   NOTE: for populations: spectrum of the mean waveform is stored in 
-%         data.VARIABLE_Power_MUA.Pxx. population mean spectrum of the individual
-%         waveforms can be calculated as mean(data.VARIABLE_Power_MUA.Pxx,2).
-% 
-% organization scheme for spectral results:
-% data.VARIABLE_Power_SUA.(Pxx,PeakFreq,PeakArea,frequency)
-% data.VARIABLE_Power_MUA.(Pxx,PeakFreq,PeakArea,frequency)
-% 
-% note:
-% "variable" can be specified as the name of a variable listed in
-% data.labels, a cell array of string listing variable names, or as a 
-% regular expression pattern for identifying variables to process.
-% See SelectVariables for more info on supported specifications.
-% 
+%   - data structure organization:
+%     data.VARIABLE_Power_SUA.frequency: TODO
+%     data.VARIABLE_Power_SUA.PeakArea: area under spectrum around peak (one value per cell)
+%     data.VARIABLE_Power_SUA.PeakFreq: frequency of spectral power (one value per cell)
+%     data.VARIABLE_Power_SUA.Pxx: spectral power
+%   - if populations present, data also includes:
+%     data.VARIABLE_Power_MUA.frequency: TODO
+%     data.VARIABLE_Power_MUA.PeakArea: TODO
+%     data.VARIABLE_Power_MUA.PeakFreq: TODO
+%     data.VARIABLE_Power_MUA.Pxx: spectrum of the mean waveform
+%       - population mean spectrum of the individual waveforms can be
+%           calculated using "mean(data.VARIABLE_Power_MUA.Pxx,2)".
+%   - Note:
+%     - "VARIABLE" can be specified as the name of a variable listed in
+%         data.labels, a cell array of string listing variable names, or as a
+%         regular expression pattern for identifying variables to process. See
+%         SelectVariables for more info on supported specifications.
+%
 % Examples:
-% s=[];
-% s.populations(1).name='E';
-% s.populations(1).equations='dv[2]/dt=@current+10; {iNa,iK}; v(0)=-65';
-% s.populations(2).name='I';
-% s.populations(2).equations='dv/dt=@current+10; {iNa,iK}; v(0)=-65';
-% data=SimulateModel(s,'tspan',[0 1000]);
-% data=CalcPower(data,'variable','v');
-% % Plot the spectrum of the E-cell average population voltage
-% figure; plot(data.E_v_Power_MUA.frequency,data.E_v_Power_MUA.Pxx); 
-% xlabel('frequency (Hz)'); ylabel('power'); xlim([0 200]);
-% 
+%   s=[];
+%   s.populations(1).name='E';
+%   s.populations(1).equations='dv[2]/dt=@current+10; {iNa,iK}; v(0)=-65';
+%   s.populations(2).name='I';
+%   s.populations(2).equations='dv/dt=@current+10; {iNa,iK}; v(0)=-65';
+%   data=SimulateModel(s,'tspan',[0 1000]);
+%   data=CalcPower(data,'variable','v');
+%   % Plot the spectrum of the E-cell average population voltage
+%   figure; plot(data.E_v_Power_MUA.frequency,data.E_v_Power_MUA.Pxx);
+%   xlabel('frequency (Hz)'); ylabel('power'); xlim([0 200]);
+%
 % See also: PlotPower, AnalyzeStudy, SimulateModel, CheckData, SelectVariables
-
 %% 1.0 Check inputs
 options=CheckOptions(varargin,{...
   'variable',[],[],...

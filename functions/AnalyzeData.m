@@ -1,27 +1,30 @@
 function result=AnalyzeData(data,func,varargin)
-%% result=AnalyzeData(data,func,'option1',value1,...)
-% purpose: pass a single DynaSim data structure or an array of data
-% structures to a user-specified analysis function, add varied info to the
-% results and optionally save the output structure.
-% 
-% inputs:
-%   data: DynaSim data structure (also accepted: data file name)
-%   func: function handle pointing to analysis function
-%   options: 
-%     - key/value pairs passed on to the analysis function
-%     - 'save_results_flag' (0 or 1) (default: 0): whether to save result
-%     - 'result_file' (default: 'result.mat'): where to save result
-%     - 'format' (default: 'svg'): format for saved plots if figures are generated
-%       {'svg','jpg','eps','png'}
-%     - 'varied_filename_flag' (0 or 1) (default: 0): whether to make filename
-%       based on the varied parameters and type of plot
-% 
-% outputs:
-%   result: structure returned by the analysis function
-% 
-% see also: SimulateModel
-
-% todo: annotate figures with data set-specific modifications
+%ANALYZEDATA - Apply an analysis function to DynaSim data, optionally saving data
+%
+% Pass a single DynaSim data structure or an array of data structures to a
+% user-specified analysis function, add varied info to the results and
+% optionally save the output structure.
+%
+% Usage:
+%   result = AnalyzeData(data,func,'option1',value1,...)
+%
+% Inputs:
+%   - data: DynaSim data structure (also accepted: data file name)
+%   - func: function handle pointing to analysis function
+%   - options: (key/value pairs are passed on to the analysis function)
+%     'save_results_flag'   : whether to save result {0 or 1} (default: 0)
+%     'result_file'         : where to save result (default: 'result.mat')
+%     'format'              : format for saved plots if figures are generated
+%                             {'svg','jpg','eps','png'} (default: 'svg')
+%     'varied_filename_flag': whether to make filename based on the varied
+%                             parameters and type of plot {0 or 1} (default: 0)
+%
+% Outputs:
+%   - result: structure returned by the analysis function
+%
+% TODO: annotate figures with data set-specific modifications
+%
+% See also: SimulateModel
 
 % check inputs
 options=CheckOptions(varargin,{...

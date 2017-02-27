@@ -1,0 +1,107 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of CalcSumOverFields</title>
+  <meta name="keywords" content="CalcSumOverFields">
+  <meta name="description" content="CALCSUMOVERFIELDS - Creates a new field in data that is the sum of a bunch of other fields">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html &copy; 2005 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="../m2html.css">
+  <script type="text/javascript">
+    if (top.frames.length == 0) { top.location = "../index.html"; };
+  </script>
+</head>
+<body>
+<a name="_top"></a>
+<!-- menu.html functions -->
+<h1>CalcSumOverFields
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>CALCSUMOVERFIELDS - Creates a new field in data that is the sum of a bunch of other fields</strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>function data = CalcSumOverFields(data, fields, output_field_name) </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre class="comment">CALCSUMOVERFIELDS - Creates a new field in data that is the sum of a bunch of other fields
+
+ These fields are specified by the &quot;fields&quot; cell array. Stores the output in
+ &quot;output_field_name.&quot; Useful for adding multiple ionic currents together.
+
+ Inputs:
+   - data: DynaSim data structure (see CheckData)
+   - fields: cell array of field names. These will be summed and stored in the
+       field called output_field_name.
+   - output_field_name: string containing the desired output field name.
+
+ Outputs:
+   - data: data structure containing summed data</pre></div>
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+This function calls:
+<ul style="list-style-image:url(../matlabicon.gif)">
+<li><a href="CheckData.html" class="code" title="function data=CheckData(data)">CheckData</a>	CHECKDATA - Standardize data structure and auto-populate missing fields</li></ul>
+This function is called by:
+<ul style="list-style-image:url(../matlabicon.gif)">
+</ul>
+<!-- crossreference -->
+
+
+
+<h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function data = CalcSumOverFields(data, fields, output_field_name)</a>
+0002 <span class="comment">%CALCSUMOVERFIELDS - Creates a new field in data that is the sum of a bunch of other fields</span>
+0003 <span class="comment">%</span>
+0004 <span class="comment">% These fields are specified by the &quot;fields&quot; cell array. Stores the output in</span>
+0005 <span class="comment">% &quot;output_field_name.&quot; Useful for adding multiple ionic currents together.</span>
+0006 <span class="comment">%</span>
+0007 <span class="comment">% Inputs:</span>
+0008 <span class="comment">%   - data: DynaSim data structure (see CheckData)</span>
+0009 <span class="comment">%   - fields: cell array of field names. These will be summed and stored in the</span>
+0010 <span class="comment">%       field called output_field_name.</span>
+0011 <span class="comment">%   - output_field_name: string containing the desired output field name.</span>
+0012 <span class="comment">%</span>
+0013 <span class="comment">% Outputs:</span>
+0014 <span class="comment">%   - data: data structure containing summed data</span>
+0015 
+0016 <span class="keyword">if</span> nargin &lt; 3
+0017     <span class="comment">% Default field name</span>
+0018     output_field_name = <span class="string">'summed'</span>;
+0019 
+0020     <span class="comment">% Add default prefix</span>
+0021     ind = strfind(fields{1},<span class="string">'_'</span>);
+0022     prefix = fields{1}(1:ind);
+0023     output_field_name = strcat(prefix,output_field_name);
+0024 <span class="keyword">end</span>
+0025 
+0026 <span class="comment">% Add prefix if necessary</span>
+0027 <span class="keyword">if</span> isempty(strfind(output_field_name,<span class="string">'_'</span>))
+0028     warning(<span class="string">'No population prefix specified (see documentation). Adding a default prefix.'</span>);
+0029     ind = strfind(fields{1},<span class="string">'_'</span>);
+0030     prefix = fields{1}(1:ind);
+0031     output_field_name = strcat(prefix,output_field_name);
+0032 
+0033 <span class="keyword">end</span>
+0034 
+0035 data = <a href="CheckData.html" class="code" title="function data=CheckData(data)">CheckData</a>(data);
+0036 <span class="comment">% note: calling CheckData() at beginning enables analysis function to</span>
+0037 <span class="comment">% accept data matrix [time x cells] in addition to DynaSim data structure.</span>
+0038 
+0039 <span class="keyword">for</span> i = 1:length(data)
+0040     dat = data(i);
+0041     sumfields = zeros(size(dat.(fields{1})));
+0042     <span class="keyword">for</span> j = 1:length(fields)
+0043         sumfields = sumfields + dat.(fields{j});
+0044     <span class="keyword">end</span>
+0045     data(i).(output_field_name) = sumfields;
+0046     data(i).labels(end:end+1) = {output_field_name, data(i).labels{end}};   <span class="comment">% Store new label as 2nd last entry (so time is always last; not sure if this is important...</span>
+0047 <span class="keyword">end</span>
+0048 
+0049 <span class="keyword">end</span></pre></div>
+<hr><address>Generated on Mon 27-Feb-2017 14:58:50 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" target="_parent">m2html</a></strong> &copy; 2005</address>
+</body>
+</html>

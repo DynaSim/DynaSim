@@ -1,0 +1,827 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of CalcCellProperties</title>
+  <meta name="keywords" content="CalcCellProperties">
+  <meta name="description" content="CALCCELLPROPERTIES - calculates the intrinsic electrophysiological properties of all cells in one or more populations">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html &copy; 2005 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="../m2html.css">
+  <script type="text/javascript">
+    if (top.frames.length == 0) { top.location = "../index.html"; };
+  </script>
+</head>
+<body>
+<a name="_top"></a>
+<!-- menu.html functions -->
+<h1>CalcCellProperties
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>CALCCELLPROPERTIES - calculates the intrinsic electrophysiological properties of all cells in one or more populations</strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>function stats = CalcCellProperties(data,varargin) </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre class="comment">CALCCELLPROPERTIES - calculates the intrinsic electrophysiological properties of all cells in one or more populations
+
+ This is designed to be used in conjunction with the experiment
+ ProbeCellProperties which removes all connections from a model and produces
+ a data array of simulated data in response to a series of hyperpolarizing and
+ depolarizing pulses. This function is based on the DNSim experiment
+ &quot;cell_pulses&quot;.
+
+ Usage:
+   stats = CalcCellProperties(data,'option1',option1,...)
+
+ Inputs:
+   - data: array of DynaSim data structures returned by ProbeCellProperties
+
+ Outputs:
+   - stats.(pop).(measure) [1 x num_cells] (averaged over repetitions)
+   - measures (intrinsic properties):
+       RMP, V_thresh, R_in, tau_m, FI_slope, CV, AR24, AR_coefficient
+       FR_min (threshrate), FR_min2 (steprate?), FR_max (steprate?)
+     - AP morphology: AP_amp, AP_dur (spikewidth), AP_taur, AP_taud
+                      Ih_relsag, Ih_abssag, hump, AHP_amp, AHP_dur
+                      AHP_time2trough, ISI_median, AR23, AR13, ISI1,
+                      min_ISI_median, ISI_step_median
+
+ Algorithm walkthrough:
+   From Iinj=0:
+   RMP = (avg over 50-100% step | Iinj=0)
+
+   From largest hyperpolarizing step:
+   Ih Sag = (Vend-Vmin)/|RMP-Vend|
+       where Vmin=(min voltage during T sec hyperpolarizing step)
+             Vend=(V at end of hyperpolarizing step)
+   Ih abs sag = (Vend-Vmin)
+
+   From last subthreshold step:
+   Hump = (Vmax-Vend)/|RMP-Vend|
+       where Vmax=(max voltage during depolarizing step preceding spike)
+             Vend=(V at end of step)
+
+   Across hyperpolarizing subthreshold steps:
+   Rin = Input resistence (I/V slope) [4]
+   taum = Membrane time constant: time for voltage relaxation to (1/e)Vmax
+     where Vmax=max deflection from baseline on hyperpolarizing steps
+     note: avg taum's over small drives that keep active currents silent (eg, 5-15pA)
+
+   Across suprathreshold steps with at least two spikes:
+   FI slope [Hz/nA]: slope of f/I curve (firing freq vs injected current 0-140pA) (see [2])
+
+   Across suprathreshold steps &gt;=60pA above first step with at least two spikes:
+   AR coefficient: (slope of AR/I) where per step AR=ISI(1)/ISI(end)
+   Note: AR = Adaptation ratio
+   ISI_step_median = median ISI on step 60pA above first step w/ 2 spikes
+   FR_step = mean FR on step 60pA above first step w/ 2 spikes
+   ARif = max AR across steps &gt;=60pA above first step w/ 2 spikes
+
+   From first suprathreshold T sec step:
+   FRmin (threshrate) = (# spikes)/T
+
+   From first suprathreshold T sec step with at least two spikes:
+   FRmin2 (steprate?) = (# spikes)/T
+
+   From first spike of first suprathreshold step: AP morphology
+   Vthresh = V( crossing(dV/dt,20mV/ms) ) %10mV/ms) )
+   AP_amp = (Vpeak-Vthresh)
+   AP_taur = (time to rise from 10% to 90% between Vthresh and Vpeak)
+   AP_taud = (time to decay from 10% to 90% between Vpeak and Vthresh)
+   AP_dur (spikewidth) = (time between rising and falling (Vthresh+APamp/2) = (Vthresh+Vpeak)/2)
+   AHP_amp = (Vbaseline-Vmin) where Vmin taken during repolarizing phase
+   AHP_dur (AHP duration, half-width) = time between half-peak amplitude of AHP 
+                                     = (time between falling and rising (Vbaseline+AHPamp/2))
+   AHP_time2trough = (time between falling Vbaseline and AHPamp)
+   ADPamp? ADPdur?
+
+   From suprathreshold step 20pA above first step with at least two spikes:
+   CV(ISIs over 30-100% step)
+
+   From last suprathreshold T sec step (or step at amp=max (eg, 140pA)):
+   FR_max (steprate?): (# spikes)/T
+   min_ISI_median
+   max_ISI
+   AR24 = ISI(2)/ISI(4)
+
+ References for methods used:
+   [1] Steffensen, Scott C., et al. &quot;Electrophysiological characterization of
+     GABAergic neurons in the ventral tegmental area.&quot; The Journal of
+     neuroscience 18.19 (1998): 8003-8015.
+   [2] Van Aerde, Karlijn I., et al. &quot;Flexible spike timing of layer 5 neurons
+     during dynamic beta oscillation shifts in rat prefrontal cortex.&quot; The
+     Journal of physiology 587.21 (2009): 5177-5196.
+   [3] Connors, BW, MJ Gutnick, DA Prince. &quot;Electrophysiological properties of
+     neocortical neurons in vitro.&quot; Journal of Neurophysiology 48.6 (1982):
+     1302-1320.
+   [4] Povysheva, Nadezhda V., et al. &quot;Parvalbumin-positive basket
+     interneurons in monkey and rat prefrontal cortex.&quot; Journal of
+     neurophysiology 100.4 (2008): 2348-2360.
+   [5] Gonz?lez-Burgos, Guillermo, et al. &quot;Functional properties of fast
+     spiking interneurons and their synaptic connections with pyramidal cells in
+     primate dorsolateral prefrontal cortex.&quot; Journal of Neurophysiology 93.2
+     (2005): 942-953.
+   [6] Gorelova, Natalia, Jeremy K. Seamans, and Charles R. Yang. &quot;Mechanisms
+     of dopamine activation of fast-spiking interneurons that exert inhibition
+     in rat prefrontal cortex.&quot; Journal of neurophysiology 88.6 (2002):
+     3150-3166.
+
+ Example:
+   data = ProbeCellProperties(model)
+   stats = CalcCellProperties(data)
+
+ See also: <a href="ProbeCellProperties.html" class="code" title="function data = ProbeCellProperties(model,varargin)">ProbeCellProperties</a></pre></div>
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+This function calls:
+<ul style="list-style-image:url(../matlabicon.gif)">
+<li><a href="CheckData.html" class="code" title="function data=CheckData(data)">CheckData</a>	CHECKDATA - Standardize data structure and auto-populate missing fields</li><li><a href="CheckOptions.html" class="code" title="function parms = CheckOptions(options, options_schema, strict)">CheckOptions</a>	CHECKOPTIONS - organize key/value pairs in structure with default or user-supplied values according to a schema</li><li><a href="SelectVariables.html" class="code" title="function [variables,pop_names]=SelectVariables(labels,var_strings)">SelectVariables</a>	SELECTVARIABLES - determine what variables to plot</li></ul>
+This function is called by:
+<ul style="list-style-image:url(../matlabicon.gif)">
+</ul>
+<!-- crossreference -->
+
+
+
+<h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function stats = CalcCellProperties(data,varargin)</a>
+0002 <span class="comment">%CALCCELLPROPERTIES - calculates the intrinsic electrophysiological properties of all cells in one or more populations</span>
+0003 <span class="comment">%</span>
+0004 <span class="comment">% This is designed to be used in conjunction with the experiment</span>
+0005 <span class="comment">% ProbeCellProperties which removes all connections from a model and produces</span>
+0006 <span class="comment">% a data array of simulated data in response to a series of hyperpolarizing and</span>
+0007 <span class="comment">% depolarizing pulses. This function is based on the DNSim experiment</span>
+0008 <span class="comment">% &quot;cell_pulses&quot;.</span>
+0009 <span class="comment">%</span>
+0010 <span class="comment">% Usage:</span>
+0011 <span class="comment">%   stats = CalcCellProperties(data,'option1',option1,...)</span>
+0012 <span class="comment">%</span>
+0013 <span class="comment">% Inputs:</span>
+0014 <span class="comment">%   - data: array of DynaSim data structures returned by ProbeCellProperties</span>
+0015 <span class="comment">%</span>
+0016 <span class="comment">% Outputs:</span>
+0017 <span class="comment">%   - stats.(pop).(measure) [1 x num_cells] (averaged over repetitions)</span>
+0018 <span class="comment">%   - measures (intrinsic properties):</span>
+0019 <span class="comment">%       RMP, V_thresh, R_in, tau_m, FI_slope, CV, AR24, AR_coefficient</span>
+0020 <span class="comment">%       FR_min (threshrate), FR_min2 (steprate?), FR_max (steprate?)</span>
+0021 <span class="comment">%     - AP morphology: AP_amp, AP_dur (spikewidth), AP_taur, AP_taud</span>
+0022 <span class="comment">%                      Ih_relsag, Ih_abssag, hump, AHP_amp, AHP_dur</span>
+0023 <span class="comment">%                      AHP_time2trough, ISI_median, AR23, AR13, ISI1,</span>
+0024 <span class="comment">%                      min_ISI_median, ISI_step_median</span>
+0025 <span class="comment">%</span>
+0026 <span class="comment">% Algorithm walkthrough:</span>
+0027 <span class="comment">%   From Iinj=0:</span>
+0028 <span class="comment">%   RMP = (avg over 50-100% step | Iinj=0)</span>
+0029 <span class="comment">%</span>
+0030 <span class="comment">%   From largest hyperpolarizing step:</span>
+0031 <span class="comment">%   Ih Sag = (Vend-Vmin)/|RMP-Vend|</span>
+0032 <span class="comment">%       where Vmin=(min voltage during T sec hyperpolarizing step)</span>
+0033 <span class="comment">%             Vend=(V at end of hyperpolarizing step)</span>
+0034 <span class="comment">%   Ih abs sag = (Vend-Vmin)</span>
+0035 <span class="comment">%</span>
+0036 <span class="comment">%   From last subthreshold step:</span>
+0037 <span class="comment">%   Hump = (Vmax-Vend)/|RMP-Vend|</span>
+0038 <span class="comment">%       where Vmax=(max voltage during depolarizing step preceding spike)</span>
+0039 <span class="comment">%             Vend=(V at end of step)</span>
+0040 <span class="comment">%</span>
+0041 <span class="comment">%   Across hyperpolarizing subthreshold steps:</span>
+0042 <span class="comment">%   Rin = Input resistence (I/V slope) [4]</span>
+0043 <span class="comment">%   taum = Membrane time constant: time for voltage relaxation to (1/e)Vmax</span>
+0044 <span class="comment">%     where Vmax=max deflection from baseline on hyperpolarizing steps</span>
+0045 <span class="comment">%     note: avg taum's over small drives that keep active currents silent (eg, 5-15pA)</span>
+0046 <span class="comment">%</span>
+0047 <span class="comment">%   Across suprathreshold steps with at least two spikes:</span>
+0048 <span class="comment">%   FI slope [Hz/nA]: slope of f/I curve (firing freq vs injected current 0-140pA) (see [2])</span>
+0049 <span class="comment">%</span>
+0050 <span class="comment">%   Across suprathreshold steps &gt;=60pA above first step with at least two spikes:</span>
+0051 <span class="comment">%   AR coefficient: (slope of AR/I) where per step AR=ISI(1)/ISI(end)</span>
+0052 <span class="comment">%   Note: AR = Adaptation ratio</span>
+0053 <span class="comment">%   ISI_step_median = median ISI on step 60pA above first step w/ 2 spikes</span>
+0054 <span class="comment">%   FR_step = mean FR on step 60pA above first step w/ 2 spikes</span>
+0055 <span class="comment">%   ARif = max AR across steps &gt;=60pA above first step w/ 2 spikes</span>
+0056 <span class="comment">%</span>
+0057 <span class="comment">%   From first suprathreshold T sec step:</span>
+0058 <span class="comment">%   FRmin (threshrate) = (# spikes)/T</span>
+0059 <span class="comment">%</span>
+0060 <span class="comment">%   From first suprathreshold T sec step with at least two spikes:</span>
+0061 <span class="comment">%   FRmin2 (steprate?) = (# spikes)/T</span>
+0062 <span class="comment">%</span>
+0063 <span class="comment">%   From first spike of first suprathreshold step: AP morphology</span>
+0064 <span class="comment">%   Vthresh = V( crossing(dV/dt,20mV/ms) ) %10mV/ms) )</span>
+0065 <span class="comment">%   AP_amp = (Vpeak-Vthresh)</span>
+0066 <span class="comment">%   AP_taur = (time to rise from 10% to 90% between Vthresh and Vpeak)</span>
+0067 <span class="comment">%   AP_taud = (time to decay from 10% to 90% between Vpeak and Vthresh)</span>
+0068 <span class="comment">%   AP_dur (spikewidth) = (time between rising and falling (Vthresh+APamp/2) = (Vthresh+Vpeak)/2)</span>
+0069 <span class="comment">%   AHP_amp = (Vbaseline-Vmin) where Vmin taken during repolarizing phase</span>
+0070 <span class="comment">%   AHP_dur (AHP duration, half-width) = time between half-peak amplitude of AHP</span>
+0071 <span class="comment">%                                     = (time between falling and rising (Vbaseline+AHPamp/2))</span>
+0072 <span class="comment">%   AHP_time2trough = (time between falling Vbaseline and AHPamp)</span>
+0073 <span class="comment">%   ADPamp? ADPdur?</span>
+0074 <span class="comment">%</span>
+0075 <span class="comment">%   From suprathreshold step 20pA above first step with at least two spikes:</span>
+0076 <span class="comment">%   CV(ISIs over 30-100% step)</span>
+0077 <span class="comment">%</span>
+0078 <span class="comment">%   From last suprathreshold T sec step (or step at amp=max (eg, 140pA)):</span>
+0079 <span class="comment">%   FR_max (steprate?): (# spikes)/T</span>
+0080 <span class="comment">%   min_ISI_median</span>
+0081 <span class="comment">%   max_ISI</span>
+0082 <span class="comment">%   AR24 = ISI(2)/ISI(4)</span>
+0083 <span class="comment">%</span>
+0084 <span class="comment">% References for methods used:</span>
+0085 <span class="comment">%   [1] Steffensen, Scott C., et al. &quot;Electrophysiological characterization of</span>
+0086 <span class="comment">%     GABAergic neurons in the ventral tegmental area.&quot; The Journal of</span>
+0087 <span class="comment">%     neuroscience 18.19 (1998): 8003-8015.</span>
+0088 <span class="comment">%   [2] Van Aerde, Karlijn I., et al. &quot;Flexible spike timing of layer 5 neurons</span>
+0089 <span class="comment">%     during dynamic beta oscillation shifts in rat prefrontal cortex.&quot; The</span>
+0090 <span class="comment">%     Journal of physiology 587.21 (2009): 5177-5196.</span>
+0091 <span class="comment">%   [3] Connors, BW, MJ Gutnick, DA Prince. &quot;Electrophysiological properties of</span>
+0092 <span class="comment">%     neocortical neurons in vitro.&quot; Journal of Neurophysiology 48.6 (1982):</span>
+0093 <span class="comment">%     1302-1320.</span>
+0094 <span class="comment">%   [4] Povysheva, Nadezhda V., et al. &quot;Parvalbumin-positive basket</span>
+0095 <span class="comment">%     interneurons in monkey and rat prefrontal cortex.&quot; Journal of</span>
+0096 <span class="comment">%     neurophysiology 100.4 (2008): 2348-2360.</span>
+0097 <span class="comment">%   [5] Gonz?lez-Burgos, Guillermo, et al. &quot;Functional properties of fast</span>
+0098 <span class="comment">%     spiking interneurons and their synaptic connections with pyramidal cells in</span>
+0099 <span class="comment">%     primate dorsolateral prefrontal cortex.&quot; Journal of Neurophysiology 93.2</span>
+0100 <span class="comment">%     (2005): 942-953.</span>
+0101 <span class="comment">%   [6] Gorelova, Natalia, Jeremy K. Seamans, and Charles R. Yang. &quot;Mechanisms</span>
+0102 <span class="comment">%     of dopamine activation of fast-spiking interneurons that exert inhibition</span>
+0103 <span class="comment">%     in rat prefrontal cortex.&quot; Journal of neurophysiology 88.6 (2002):</span>
+0104 <span class="comment">%     3150-3166.</span>
+0105 <span class="comment">%</span>
+0106 <span class="comment">% Example:</span>
+0107 <span class="comment">%   data = ProbeCellProperties(model)</span>
+0108 <span class="comment">%   stats = CalcCellProperties(data)</span>
+0109 <span class="comment">%</span>
+0110 <span class="comment">% See also: ProbeCellProperties</span>
+0111 
+0112 <span class="comment">% Check inputs</span>
+0113 options=<a href="CheckOptions.html" class="code" title="function parms = CheckOptions(options, options_schema, strict)">CheckOptions</a>(varargin,{<span class="keyword">...</span>
+0114   <span class="string">'spike_threshold'</span>,1e-5,[],<span class="keyword">...</span>
+0115   <span class="string">'skip_time'</span>,10,[],<span class="keyword">...</span><span class="comment"> % time [ms] to exclude from detection</span>
+0116   <span class="string">'plot_flag'</span>,0,{0,1},<span class="keyword">...</span>
+0117   <span class="string">'equivalent_cells_flag'</span>,0,[],<span class="keyword">...</span><span class="comment"> % if true, only process one cell per pop</span>
+0118   },false);
+0119 
+0120 data=<a href="CheckData.html" class="code" title="function data=CheckData(data)">CheckData</a>(data);
+0121 model=data(1).model;
+0122 time=data(1).time;
+0123 num_times=length(time);
+0124 
+0125 <span class="comment">% extract experiment parameters</span>
+0126 experiment_options=data(1).simulator_options.experiment_options;
+0127 
+0128 <span class="comment">% stimulus timing</span>
+0129 onset=experiment_options.onset; <span class="comment">%model.parameters.([pop_names{1} '_onset']);</span>
+0130 offset=experiment_options.offset; <span class="comment">%model.parameters.([pop_names{1} '_offset']);</span>
+0131 tsel=find(time&gt;=onset&amp;time&lt;=offset);
+0132 
+0133 <span class="comment">% assume exactly one simulation per amplitude</span>
+0134 <span class="comment">% if num_steps ~= length(data)</span>
+0135 <span class="comment">%   error('there can only be one simulation per stimulus amplitude');</span>
+0136 <span class="comment">% end</span>
+0137 
+0138 <span class="comment">% extract population info</span>
+0139 pop_names={model.specification.populations.name};
+0140 num_pops=length(pop_names);
+0141 
+0142 <span class="comment">% set num_cells=1 if equivalent_cells_flag</span>
+0143 <span class="keyword">if</span> experiment_options.equivalent_cells_flag==1
+0144   pop_sizes=ones(1,num_pops);
+0145 <span class="keyword">else</span>
+0146   pop_sizes=[model.specification.populations.size];
+0147 <span class="keyword">end</span>
+0148 
+0149 <span class="comment">% sort data by [data.(pop1)_TONIC] and sort amplitudes</span>
+0150 [amplitudes,I]=sort([data.([pop_names{1} <span class="string">'_TONIC'</span>])]);
+0151 data=data(I);
+0152 num_steps=length(amplitudes);
+0153 
+0154 <span class="comment">% get list of variables to analyze</span>
+0155 [vars,vars_pop]=<a href="SelectVariables.html" class="code" title="function [variables,pop_names]=SelectVariables(labels,var_strings)">SelectVariables</a>(data(1).labels);
+0156 
+0157 <span class="comment">% assume only one variable per population</span>
+0158 <span class="keyword">if</span> length(unique(vars_pop))&gt;num_pops
+0159   [vars;vars_pop]
+0160   error(<span class="string">'there can only be one variable per population.'</span>);
+0161 <span class="keyword">end</span>
+0162 
+0163 <span class="comment">% collect pulses</span>
+0164 <span class="comment">% input=zeros(num_times,num_steps);</span>
+0165 <span class="comment">% for s=1:num_steps</span>
+0166 <span class="comment">%   input(:,s)=data(s).([pop_names{1} '_pulse'])(:,1);</span>
+0167 <span class="comment">% end</span>
+0168 
+0169 CF = (1e-6)/(1e-8);   <span class="comment">% pA/um^2 =&gt; uA/cm^2. note: 1um2=1e-8cm2, 1pA=1e-6uA</span>
+0170 amplitudes_pA=amplitudes*experiment_options.membrane_area/CF;
+0171 
+0172 <span class="comment">% initialize stats structure</span>
+0173 stats.experiment_options=experiment_options;
+0174 stats.amplitudes=amplitudes;
+0175 stats.time=time;
+0176 stats.cell_results={}; <span class="comment">% list of field names storing results for each cell</span>
+0177 stats.pop_results={};  <span class="comment">% list of field names storing results for each population</span>
+0178 
+0179 <span class="comment">% analyze each population</span>
+0180 <span class="keyword">for</span> p=1:num_pops
+0181   <span class="comment">% extract info for this population</span>
+0182   pop=pop_names{p};
+0183   this_var=vars{strcmp(vars_pop,pop)};
+0184   num_cells=pop_sizes(p);
+0185   <span class="comment">% preallocate intrinsic property measures (each will be an average over repetitions)</span>
+0186   stats.(pop).RMP     =nan(1,num_cells);
+0187   stats.(pop).V_thresh=nan(1,num_cells);
+0188   stats.(pop).R_in    =nan(1,num_cells);
+0189   stats.(pop).tau_m   =nan(1,num_cells);
+0190   stats.(pop).FI_slope=nan(1,num_cells);
+0191   stats.(pop).CV      =nan(1,num_cells);
+0192   stats.(pop).ISI_median=nan(1,num_cells);
+0193   stats.(pop).ISI_step_median=nan(1,num_cells);
+0194   stats.(pop).min_ISI_median=nan(1,num_cells);
+0195   stats.(pop).max_ISI=nan(1,num_cells);
+0196   stats.(pop).AR13    =nan(1,num_cells);
+0197   stats.(pop).AR23    =nan(1,num_cells);
+0198   stats.(pop).AR24    =nan(1,num_cells);
+0199   stats.(pop).ARif    =nan(1,num_cells);
+0200   stats.(pop).AR_coeff=nan(1,num_cells);
+0201   stats.(pop).ISI1    =nan(1,num_cells);
+0202   stats.(pop).FR_min  =nan(1,num_cells);
+0203   stats.(pop).FR_min2 =nan(1,num_cells);
+0204   stats.(pop).FR_step =nan(1,num_cells);
+0205   stats.(pop).FR_max  =nan(1,num_cells);
+0206   stats.(pop).AP_amp  =nan(1,num_cells);
+0207   stats.(pop).AP_dur  =nan(1,num_cells);
+0208   stats.(pop).AP_taur =nan(1,num_cells);
+0209   stats.(pop).AP_taud =nan(1,num_cells);
+0210   stats.(pop).Ih_relsag  =nan(1,num_cells);
+0211   stats.(pop).Ih_abssag=nan(1,num_cells);
+0212   stats.(pop).hump    =nan(1,num_cells);
+0213   stats.(pop).AHP_amp =nan(1,num_cells);
+0214   stats.(pop).AHP_dur =nan(1,num_cells);  
+0215   stats.(pop).AHP_time2trough=nan(1,num_cells);
+0216   <span class="comment">% determine whether cells are spiking or not on each step</span>
+0217   spike_times=cell(num_steps,num_cells);
+0218   <span class="keyword">for</span> c=1:num_cells
+0219     <span class="keyword">for</span> s=1:num_steps
+0220       <span class="comment">% select trace for this (pop,cell,step)</span>
+0221       X=data(s).(this_var)(tsel,c);
+0222       <span class="comment">% get spikes in this cell during step</span>
+0223       spike_inds=1+find((X(2:end)&gt;=options.spike_threshold &amp; X(1:end-1)&lt;options.spike_threshold));
+0224       spike_times{s,c}=time(tsel(spike_inds));
+0225     <span class="keyword">end</span>
+0226     num_spikes=cellfun(@numel,spike_times(:,c));
+0227     is_spiking=(num_spikes&gt;0); <span class="comment">% {0:subthreshold,1:suprathreshold}</span>
+0228 
+0229     <span class="comment">% Calculate measures of cell intrinsic properties</span>
+0230     <span class="comment">% 1) calculate RMP (avg over repetitions) From steps with amp=0</span>
+0231     <span class="comment">% RMP = (avg over 50-100% step | Iinj=0)</span>
+0232     step_sel=find(amplitudes==0); <span class="comment">% select all simulations with amp=0</span>
+0233     time_sel=tsel(round(.5*numel(tsel)):end); <span class="comment">% select 50-100% of step</span>
+0234     rmp=0;
+0235     <span class="keyword">for</span> s=1:length(step_sel)
+0236       rmp=rmp+nanmean(data(step_sel(s)).(this_var)(time_sel,c));
+0237     <span class="keyword">end</span>
+0238     stats.(pop).RMP(c)=rmp/length(step_sel);
+0239 
+0240     <span class="comment">% 2) calculate Ih_relsag (avg over repetitions) From largest hyperpolarizing step</span>
+0241     <span class="comment">% Ih Sag = (Vend-Vmin)/|RMP-Vend|</span>
+0242     <span class="comment">%     where Vmin=(min voltage during T sec hyperpolarizing step)</span>
+0243     <span class="comment">%           Vend=(V at end of hyperpolarizing step)</span>
+0244     step_sel=find(amplitudes==min(amplitudes) &amp; amplitudes&lt;0);
+0245     sag=0; abssag=0;
+0246     <span class="keyword">for</span> s=1:length(step_sel)
+0247       V=data(step_sel(s)).(this_var)(:,c);
+0248       bl=V(tsel(1)-1);   <span class="comment">% baseline value is point immediately before stim onset</span>
+0249       Vend=V(tsel(end)); <span class="comment">% final point</span>
+0250       Vmin=min(V(tsel)); <span class="comment">% minimum point of sag</span>
+0251       sag=sag+((Vend-Vmin)/abs(bl-Vend));
+0252       abssag=abssag+(Vend-Vmin);
+0253       <span class="comment">%figure; plot(time,V); line(xlim,[Vmin Vmin]); line(xlim,[Vend Vend]); line(xlim,[bl bl]);</span>
+0254     <span class="keyword">end</span>
+0255     stats.(pop).Ih_relsag(c)=sag/length(step_sel);      
+0256     stats.(pop).Ih_abssag(c)=abssag/length(step_sel);
+0257 
+0258     <span class="comment">% 3) calculate hump (avg over repetitions) From last subthreshold step</span>
+0259     <span class="comment">% Hump = (Vmax-Vend)/|RMP-Vend|</span>
+0260     <span class="comment">%     where Vmax=(max voltage during depolarizing step preceding spike)</span>
+0261     <span class="comment">%           Vend=(V at end of step)</span>
+0262     step_sel=max(1,find(num_spikes&gt;0,1,<span class="string">'first'</span>)-1);
+0263     <span class="keyword">if</span> ~isempty(step_sel)
+0264       V=data(step_sel).(this_var)(:,c);
+0265       bl=V(tsel(1)-1);   <span class="comment">% baseline value is point immediately before stim onset</span>
+0266       Vend=V(tsel(end)); <span class="comment">% final point</span>
+0267       Vmax=max(V(tsel)); <span class="comment">% maximum point of hump</span>
+0268       stats.(pop).hump(c)=((Vmax-Vend)/abs(bl-Vend));
+0269     <span class="keyword">end</span>
+0270     
+0271     <span class="comment">% 4) calculate (R_in,tau_m) (from avg over repetitions) Across hyperpolarizing subthreshold steps</span>
+0272     <span class="comment">% Rin = Input resistence (I/V slope) [4]</span>
+0273     <span class="comment">% taum = Membrane time constant: time for voltage relaxation to (1/e)Vmax</span>
+0274     <span class="comment">%   where Vmax=max deflection from baseline on hyperpolarizing steps</span>
+0275     <span class="comment">%   note: avg taum's over small drives that keep active currents silent (eg, 5-15pA)</span>
+0276     step_sel=find(num_spikes==0 &amp; amplitudes'&lt;0);
+0277     amps=amplitudes(step_sel);
+0278     uamps=unique(amps);
+0279     nuamps=length(uamps);
+0280     Veq=nan(1,nuamps);
+0281     taum=nan(1,nuamps);
+0282     time_sel=tsel(round(.5*numel(tsel)):end); <span class="comment">% select 50-100% of step</span>
+0283     <span class="comment">% loop over unique amplitudes</span>
+0284     <span class="keyword">for</span> a=1:nuamps
+0285       asel=find(amps==uamps(a)); <span class="comment">% indices to subthreshold amps with this value</span>
+0286       <span class="comment">% loop over repetitions of the same amplitude</span>
+0287       veq=0; tau=0;
+0288       <span class="keyword">for</span> l=1:length(asel)
+0289         step=step_sel(asel(l)); <span class="comment">% index to this simulation</span>
+0290         X=data(step).(this_var)(:,c);
+0291         <span class="comment">% store mean voltage over 50-100% step</span>
+0292         veq=veq+nanmean(X(time_sel));
+0293         <span class="comment">% calc membrane time constant based on this step (time to Vmax(1/e))</span>
+0294         bl=X(tsel(1)-1); <span class="comment">% baseline value is point immediately before stim onset</span>
+0295         V=X-bl; <span class="comment">% shift baseline to V=0</span>
+0296         <span class="keyword">if</span> uamps(a)&lt;0
+0297           V=abs(V); <span class="comment">% invert values so that deflection is positive</span>
+0298         <span class="keyword">end</span>
+0299         Vmax=V(tsel(end)); <span class="comment">% max is final point during stim period before offset</span>
+0300         Vthresh=Vmax*(1/exp(1)); <span class="comment">% voltage at 1/e</span>
+0301         Vdecay=V(tsel(end):end); <span class="comment">% voltage decay after stim offset</span>
+0302         tthresh=time(tsel(end)+find(Vdecay&lt;Vthresh,1,<span class="string">'first'</span>)-1); <span class="comment">% time at which decay crosses 1/e</span>
+0303         tau=tau+(tthresh-offset); <span class="comment">% time to drop to 1/e after stim offset</span>
+0304       <span class="keyword">end</span>
+0305       Veq(a)=veq/length(asel);
+0306       <span class="keyword">if</span> any(tau)
+0307         taum(a)=tau/length(asel);
+0308       <span class="keyword">end</span>
+0309     <span class="keyword">end</span>
+0310     <span class="comment">% calc R_in (from slope of amp/Veq)</span>
+0311     <span class="keyword">if</span> any(~isnan(Veq))
+0312       sel=~isnan(Veq);
+0313       P=polyfit(uamps(sel),Veq(sel),1);
+0314       stats.(pop).R_in(c)=P(1);
+0315     <span class="keyword">end</span>
+0316     <span class="keyword">if</span> any(~isnan(taum))
+0317       stats.(pop).tau_m(c)=taum(find(~isnan(taum),1,<span class="string">'first'</span>));<span class="comment">%1);%nanmedian(taum);</span>
+0318     <span class="keyword">end</span>
+0319 
+0320     <span class="comment">% 5) calculate FI_slope (from avg over repetitions) Across suprathreshold steps with at least two spikes</span>
+0321     <span class="comment">% FI slope: slope of f/I curve (firing freq vs injected current 0-140pA) (see [2])</span>
+0322 <span class="comment">%     step_sel=find(num_spikes&gt;1 &amp; amplitudes'&gt;0);</span>
+0323 <span class="comment">%     amps=amplitudes(step_sel);</span>
+0324 <span class="comment">%     uamps=unique(amps);</span>
+0325 <span class="comment">%     nuamps=length(uamps);</span>
+0326 <span class="comment">%     FR=nan(1,nuamps);</span>
+0327 <span class="comment">%     % loop over unique amplitudes</span>
+0328 <span class="comment">%     for a=1:nuamps</span>
+0329 <span class="comment">%       asel=find(amps==uamps(a)); % indices to subthreshold amps with this value</span>
+0330 <span class="comment">%       % loop over repetitions of the same amplitude</span>
+0331 <span class="comment">%       fr=0;</span>
+0332 <span class="comment">%       for l=1:length(asel)</span>
+0333 <span class="comment">%         step=step_sel(asel(l)); % index to this simulation</span>
+0334 <span class="comment">%         fr=fr+(num_spikes(step)/((offset-onset)/1000));</span>
+0335 <span class="comment">%       end</span>
+0336 <span class="comment">%       FR(a)=fr/length(asel); % [Hz]</span>
+0337 <span class="comment">%     end</span>
+0338 <span class="comment">%     % calc FI_slope</span>
+0339 <span class="comment">%     if any(~isnan(FR))</span>
+0340 <span class="comment">%       sel=~isnan(FR);</span>
+0341 <span class="comment">%       amps_nA=uamps(sel)*experiment_options.membrane_area/CF/1000;</span>
+0342 <span class="comment">%       P=polyfit(amps_nA,FR(sel),1);</span>
+0343 <span class="comment">%       stats.(pop).FI_slope(c)=P(1); % [Hz/nA]</span>
+0344 <span class="comment">%       figure; plot(amps_nA,FR(sel)); xlabel('amps [nA]'); ylabel('FR [Hz]');</span>
+0345 <span class="comment">%       [num_spikes(step_sel) amplitudes(step_sel)']</span>
+0346 <span class="comment">%     end</span>
+0347 
+0348     <span class="comment">% 6) calculate ARs (avg over repetitions) &amp; AR_coefficient Across</span>
+0349     <span class="comment">%    suprathreshold steps &gt;=60pA above first step with at least two spikes</span>
+0350     <span class="comment">% AR coefficient: (slope of AR/I) where per step AR=ISI(1)/ISI(end)</span>
+0351     thresh_step=find(num_spikes&gt;1,1,<span class="string">'first'</span>);
+0352     <span class="keyword">if</span> any(thresh_step)
+0353       step_sel=find(amplitudes_pA&gt;(amplitudes_pA(thresh_step)+60));
+0354     <span class="keyword">else</span>
+0355       step_sel=[];
+0356     <span class="keyword">end</span>
+0357     <span class="keyword">if</span> any(step_sel)
+0358       amps=amplitudes(step_sel);
+0359       uamps=unique(amps);
+0360       nuamps=length(uamps);
+0361       AR=nan(1,nuamps);
+0362       FR=nan(1,nuamps);
+0363       <span class="comment">% loop over unique amplitudes</span>
+0364       <span class="keyword">for</span> a=1:nuamps
+0365         asel=find(amps==uamps(a)); <span class="comment">% indices to subthreshold amps with this value</span>
+0366         <span class="comment">% loop over repetitions of the same amplitude</span>
+0367         ar=0; denom=0;
+0368         fr=0;
+0369         <span class="keyword">for</span> l=1:length(asel)
+0370           step=step_sel(asel(l)); <span class="comment">% index to this simulation</span>
+0371           fr=fr+(num_spikes(step)/((offset-onset)/1000));
+0372           ISI=diff(spike_times{step,c});
+0373           <span class="keyword">if</span> length(ISI)&gt;1
+0374             denom=denom+1;
+0375   <span class="comment">%           if length(ISI)&gt;2</span>
+0376   <span class="comment">%             ar=ar+(ISI(2)/ISI(end));</span>
+0377   <span class="comment">%           else</span>
+0378               ar=ar+(ISI(1)/ISI(end));
+0379   <span class="comment">%           end</span>
+0380           <span class="keyword">end</span>
+0381         <span class="keyword">end</span>
+0382         AR(a)=ar/denom;
+0383         FR(a)=fr/length(asel); <span class="comment">% [Hz]</span>
+0384       <span class="keyword">end</span>
+0385       <span class="comment">% calc ISI_median at 60pA above threshold</span>
+0386       spikes=spike_times{step_sel(1),c};
+0387       ISI=diff(spikes);
+0388       stats.(pop).ISI_step_median(c)=median(ISI);
+0389       <span class="comment">% store FR at 60pA above threshold</span>
+0390       stats.(pop).FR_step(c)=FR(1); <span class="comment">% FR at 60pA above threshold</span>
+0391       stats.(pop).ARif(c)=nanmax(AR); <span class="comment">% nanmean, nanmedian</span>
+0392       <span class="comment">% calculate AR_coefficient</span>
+0393       <span class="keyword">if</span> any(~isnan(AR))
+0394         sel=~isnan(AR);
+0395         P=polyfit(uamps(sel),AR(sel),1);
+0396         stats.(pop).AR_coeff(c)=P(1);
+0397         <span class="comment">%figure; plot(uamps(sel),AR(sel)); xlabel('amps'); ylabel('AR');</span>
+0398       <span class="keyword">end</span>
+0399       <span class="comment">% calc FI_slope</span>
+0400       <span class="keyword">if</span> any(~isnan(FR))
+0401         sel=~isnan(FR);
+0402         amps_nA=uamps(sel)*experiment_options.membrane_area/CF/1000;
+0403         P=polyfit(amps_nA,FR(sel),1);
+0404         stats.(pop).FI_slope(c)=P(1); <span class="comment">% [Hz/nA]</span>
+0405         <span class="comment">%figure; plot(amps_nA,FR(sel)); xlabel('amps [nA]'); ylabel('FR [Hz]');</span>
+0406         <span class="comment">%[num_spikes(step_sel) amplitudes(step_sel)']</span>
+0407       <span class="keyword">end</span>
+0408     <span class="keyword">end</span>
+0409     
+0410     <span class="comment">% 7) calculate FR_min From first suprathreshold T sec step</span>
+0411     <span class="comment">% FRmin (threshrate) = (# spikes)/T</span>
+0412     step_sel=find(num_spikes&gt;0,1,<span class="string">'first'</span>);
+0413     <span class="keyword">if</span> any(step_sel)
+0414       stats.(pop).FR_min(c)=num_spikes(step_sel)/((offset-onset)/1000);
+0415     <span class="keyword">end</span>
+0416     
+0417     <span class="comment">% 8) calculate FR_min2 From first suprathreshold T sec step with at least two spikes</span>
+0418     <span class="comment">% FRmin2 (steprate?) = (# spikes)/T</span>
+0419     step_sel=find(num_spikes&gt;1,1,<span class="string">'first'</span>);
+0420     <span class="keyword">if</span> any(step_sel)
+0421       stats.(pop).FR_min2(c)=num_spikes(step_sel)/((offset-onset)/1000);
+0422       stats.(pop).ISI1(c)=(spike_times{step_sel,c}(2)-spike_times{step_sel,c}(1));
+0423     <span class="keyword">end</span>
+0424 
+0425     <span class="comment">% 9) calculate CV (avg over repetitions) From suprathreshold step 20pA above first step with at least two spikes</span>
+0426     <span class="comment">% CV(ISIs over 30-100% step)</span>
+0427     tmin=time(tsel(round(.3*numel(tsel)))); <span class="comment">% time at 30% through step</span>
+0428     thresh_step=find(num_spikes&gt;1,1,<span class="string">'first'</span>);
+0429     <span class="keyword">if</span> any(thresh_step)
+0430       step_sel=find(amplitudes_pA&gt;(amplitudes_pA(thresh_step)+20));
+0431     <span class="keyword">else</span>
+0432       step_sel=[];
+0433     <span class="keyword">end</span>
+0434     <span class="keyword">if</span> any(step_sel)
+0435       spikes=spike_times{step_sel,c};
+0436       spikes=spikes(spikes&gt;tmin);
+0437       ISI=diff(spikes);
+0438       <span class="keyword">if</span> any(ISI)
+0439         stats.(pop).CV(c)=std(ISI)/mean(ISI);
+0440       <span class="keyword">end</span>
+0441       spikes=spike_times{step_sel,c};
+0442       ISI=diff(spikes);
+0443       stats.(pop).ISI_median(c)=median(ISI);
+0444       stats.(pop).max_ISI(c)=max(ISI);
+0445     <span class="keyword">end</span>
+0446 
+0447     <span class="comment">% 10) calculate (FRmax,AR24) From last suprathreshold T sec step</span>
+0448     <span class="comment">% FRmax (steprate?): (# spikes)/T</span>
+0449     <span class="comment">% AR24 = ISI(2)/ISI(4)</span>
+0450     step_sel=find(num_spikes&gt;4,1,<span class="string">'last'</span>);
+0451     <span class="keyword">if</span> any(step_sel)
+0452       spikes=spike_times{step_sel,c};
+0453       ISIs=diff(spikes)/1000;
+0454       finst=1./(ISIs);
+0455       stats.(pop).AR24(c)=finst(2)/finst(4);
+0456 <span class="comment">%       stats.(pop).AR23(c)=ISIs(2)/ISIs(3);</span>
+0457 <span class="comment">%       stats.(pop).AR13(c)=ISIs(1)/ISIs(3);</span>
+0458       stats.(pop).FR_max(c)=num_spikes(step_sel)/((offset-onset)/1000);
+0459       stats.(pop).min_ISI_median(c)=median(diff(spikes));
+0460     <span class="keyword">end</span>
+0461     step_sel=find(num_spikes&gt;3,1,<span class="string">'first'</span>);
+0462     <span class="keyword">if</span> any(step_sel)
+0463       spikes=spike_times{step_sel,c};
+0464       ISIs=diff(spikes)/1000;
+0465       stats.(pop).AR23(c)=ISIs(2)/ISIs(3);
+0466       stats.(pop).AR13(c)=ISIs(1)/ISIs(3);
+0467     <span class="keyword">end</span>    
+0468 
+0469     <span class="comment">% 11) calculate AP morphology From first spike of first suprathreshold step with at least two spikes</span>
+0470     step_sel=find(num_spikes&gt;0,1,<span class="string">'first'</span>);
+0471     <span class="keyword">if</span> any(step_sel)
+0472       X=double(data(step_sel).(this_var)(:,c));
+0473       spks=spike_times{step_sel,c};
+0474       spk_1=spks(1); <span class="comment">% time of first spike</span>
+0475       <span class="keyword">if</span> length(spks)&gt;1
+0476         spk_2=spks(2); <span class="comment">% time of second spike</span>
+0477       <span class="keyword">else</span>
+0478         spk_2=inf;
+0479       <span class="keyword">end</span>
+0480       pad=100; <span class="comment">% ms, time before and after spike detection (make longer than expected AHP)</span>
+0481       spk_beg=max(spk_1-pad,onset);
+0482       spk_end=min(spk_1+pad,spk_2); <span class="comment">% make sure spike interval excludes the following spike</span>
+0483       spk_beg_i=nearest(time,spk_beg);
+0484       spk_end_i=nearest(time,spk_end);
+0485       spk_inds=spk_beg_i:spk_end_i; <span class="comment">% indices for this spike</span>
+0486       t=time(spk_inds); <span class="comment">% times around spike</span>
+0487       V=X(spk_inds);  <span class="comment">% trace around spike</span>
+0488       <span class="comment">% Vthresh = V( crossing(dV/dt,10mV/ms) )</span>
+0489       dVdt=diff(V)/(t(2)-t(1));
+0490       dVdt=smooth(dVdt,round(1/(t(2)-t(1)))); <span class="comment">% 1ms smoothing</span>
+0491       thresh_ind=find(dVdt&gt;20,1,<span class="string">'first'</span>);<span class="comment">%crossing(dVdt,t,10);</span>
+0492       Vthresh=V(thresh_ind(1));      
+0493       <span class="comment">% APamp = (Vpeak-Vthresh)</span>
+0494       [pk,loc]=findpeaks(V,<span class="string">'NPeaks'</span>,1);
+0495       Vpeak=V(loc);<span class="comment">%max(V);</span>
+0496       Vpeak_i=loc;<span class="comment">%find(V==Vpeak,1,'first');</span>
+0497       APamp=Vpeak-Vthresh;
+0498       V10=Vthresh+.1*APamp; <span class="comment">% 10% from Vthresh to Vpeak</span>
+0499       V90=Vthresh+.9*APamp; <span class="comment">% 90% from Vthresh to Vpeak</span>
+0500       <span class="comment">% depolarizing rising phase</span>
+0501       V10_i_r=1+find(V(2:end)&gt;=V10 &amp; V(1:end-1)&lt;V10); <span class="comment">% first</span>
+0502       V90_i_r=1+find(V(2:end)&gt;=V90 &amp; V(1:end-1)&lt;V90); <span class="comment">% second</span>
+0503       <span class="comment">% APtaur = (time to rise from 10% to 90% between Vthresh and Vpeak)</span>
+0504       <span class="keyword">if</span> any(V10_i_r) &amp;&amp; any(V90_i_r)
+0505         APtaur=t(V90_i_r(1))-t(V10_i_r(1));
+0506       <span class="keyword">else</span>
+0507         APtaur=nan;
+0508       <span class="keyword">end</span>
+0509       <span class="comment">% repolarizing falling phase</span>
+0510       V10_i_d=1+find(V(1:end-1)&gt;=V10 &amp; V(2:end)&lt;V10); <span class="comment">% second</span>
+0511       V90_i_d=1+find(V(1:end-1)&gt;=V90 &amp; V(2:end)&lt;V90); <span class="comment">% first</span>
+0512       <span class="keyword">if</span> numel(V10_i_d)&gt;1 &amp;&amp; numel(V10_i_d)&gt;1
+0513         V10_i_d=V10_i_d(end);
+0514         V90_i_d=V90_i_d(end);
+0515       <span class="keyword">end</span>
+0516       <span class="keyword">if</span> isempty(V10_i_d)
+0517         <span class="comment">% set to the minimum point of the repolarizing phase</span>
+0518         V10=min(V(Vpeak_i:end));
+0519         V10_i_d=find(V(Vpeak_i:end)==V10)+Vpeak_i-1;
+0520       <span class="keyword">end</span>
+0521       <span class="comment">% APtaud = (time to decay from 10% to 90% between Vpeak and Vthresh)</span>
+0522       <span class="keyword">if</span> any(V10_i_d) &amp;&amp; any(V90_i_d)
+0523         APtaud=t(V10_i_d(1))-t(V90_i_d(1));
+0524       <span class="keyword">else</span>
+0525         APtaud=nan;
+0526       <span class="keyword">end</span>
+0527       <span class="comment">% APdur (spikewidth) = (time between rising and falling (Vthresh+APamp/2) = (Vthresh+Vpeak)/2)</span>
+0528       V50=Vthresh+.5*APamp;
+0529       V50_i_r=1+find(V(2:end)&gt;=V50 &amp; V(1:end-1)&lt;V50);
+0530       V50_i_d=1+find(V(1:end-1)&gt;=V50 &amp; V(2:end)&lt;V50);
+0531       <span class="keyword">if</span> any(V50_i_d) &amp;&amp; any(V50_i_r)
+0532         APdur=t(V50_i_d(1))-t(V50_i_r(1));
+0533       <span class="keyword">else</span>
+0534         APdur=nan;
+0535       <span class="keyword">end</span>
+0536       <span class="comment">% AHPamp = (Vbaseline-Vmin) where Vmin taken during repolarizing phase</span>
+0537       <span class="comment">%bl=X(spk_inds(1)-1); % baseline voltage</span>
+0538       bl=mean(V);
+0539       <span class="comment">% find trough: look for first peak in the inverted post-spike trace</span>
+0540       [pk,loc]=findpeaks(-smooth(V(V10_i_d:end),100),<span class="string">'NPeaks'</span>,1);
+0541       ahp_trough_i=V10_i_d+loc-1;
+0542       Vmin=V(ahp_trough_i);
+0543       <span class="comment">%Vmin=-findpeaks(-V(V10_i_d:end),'NPeaks',1);</span>
+0544       <span class="comment">%Vmin=max(findpeaks(-V(V10_i_d:end)));</span>
+0545       <span class="comment">%Vmin=min(V(V10_i_d:end));</span>
+0546       AHPamp=abs(bl-Vmin);
+0547       <span class="comment">% AHPdur (AHP duration, half-width) = time between half-peak amplitude of AHP</span>
+0548       <span class="comment">%                                   = (time between falling and rising (Vbaseline+AHPamp/2))</span>
+0549       ahp_V50=bl+.5*AHPamp;
+0550       ahp_V50_i_d=1+find(V(1:end-1)&gt;=ahp_V50 &amp; V(2:end)&lt;ahp_V50); <span class="comment">% first</span>
+0551       ahp_V50_i_d(ahp_V50_i_d&lt;V10_i_d)=[]; <span class="comment">% remove crossings before repolarization</span>
+0552       ahp_V50_i_r=1+find(V(2:end)&gt;=ahp_V50 &amp; V(1:end-1)&lt;ahp_V50); <span class="comment">% second</span>
+0553       <span class="keyword">if</span> any(ahp_V50_i_d)
+0554         ahp_V50_i_r(ahp_V50_i_r&lt;ahp_V50_i_d(1))=[]; <span class="comment">% remove crossings before start of AHP</span>
+0555       <span class="keyword">end</span>
+0556       <span class="keyword">if</span> any(ahp_V50_i_r) &amp;&amp; any(ahp_V50_i_d)
+0557         AHPdur=t(ahp_V50_i_r(1))-t(ahp_V50_i_d(1));
+0558       <span class="keyword">else</span>
+0559         AHPdur=nan;
+0560       <span class="keyword">end</span>
+0561       <span class="comment">% AHP_time2trough = (time between falling Vbaseline and Vmin)</span>
+0562 <span class="comment">%       ahp_bl_i_d=1+find(V(1:end-1)&gt;=ahp_V50 &amp; V(2:end)&lt;ahp_V50); % first</span>
+0563 <span class="comment">%       ahp_bl_i_d(ahp_bl_i_d&lt;V10_i_d)=[]; % remove crossings before repolarization</span>
+0564       <span class="comment">%ahp_trough_i=find(V==Vmin);</span>
+0565       <span class="comment">%ahp_trough_i(ahp_trough_i&lt;V10_i_d)=[]; % remove crossings before start</span>
+0566       <span class="keyword">if</span> any(V10_i_d)
+0567         AHPtime2trough=t(ahp_trough_i(1))-t(Vpeak_i);<span class="comment">%t(V10_i_d(1));</span>
+0568         <span class="keyword">if</span> options.plot_flag
+0569           figure; plot(t,V); 
+0570           line(xlim,[V10 V10]); line(xlim,[Vmin Vmin]);
+0571           line([t(ahp_trough_i(1)) t(ahp_trough_i(1))],ylim);
+0572           line([t(Vpeak_i) t(Vpeak_i)],ylim,<span class="string">'color'</span>,<span class="string">'r'</span>);
+0573         <span class="keyword">end</span>
+0574       <span class="keyword">else</span>
+0575         AHPtime2trough=nan;
+0576       <span class="keyword">end</span>
+0577       <span class="keyword">if</span> options.plot_flag
+0578         figure; plot(t,V); 
+0579         line(xlim,[bl bl]); 
+0580         line(xlim,[Vthresh Vthresh]);
+0581         line(xlim,[Vpeak Vpeak]);
+0582         line(xlim,[V10 V10]); 
+0583         line([t(V10_i_r(1)) t(V10_i_r(1))],ylim);
+0584         line([t(V10_i_d(1)) t(V10_i_d(1))],ylim);
+0585         line(xlim,[V50 V50]);
+0586         line(xlim,[V90 V90]);
+0587         line(xlim,[ahp_V50 ahp_V50],<span class="string">'color'</span>,<span class="string">'r'</span>); 
+0588         line([t(ahp_V50_i_r(1)) t(ahp_V50_i_r(1))],ylim,<span class="string">'color'</span>,<span class="string">'r'</span>);
+0589         line([t(ahp_V50_i_d(1)) t(ahp_V50_i_d(1))],ylim,<span class="string">'color'</span>,<span class="string">'r'</span>);
+0590       <span class="keyword">end</span>
+0591       stats.(pop).V_thresh(c)=Vthresh;
+0592       stats.(pop).AP_amp(c)=APamp;
+0593       stats.(pop).AP_taur(c)=APtaur;
+0594       stats.(pop).AP_taud(c)=APtaud;
+0595       stats.(pop).AP_dur(c)=APdur;
+0596       stats.(pop).AHP_amp(c)=AHPamp;
+0597       stats.(pop).AHP_dur(c)=AHPdur;
+0598       stats.(pop).AHP_time2trough(c)=AHPtime2trough;
+0599     <span class="keyword">end</span>
+0600   <span class="keyword">end</span>
+0601   <span class="comment">% collect data for this population across simulations</span>
+0602   <span class="comment">% note: each simulation has a different input amplitude</span>
+0603   X=zeros(num_steps,num_times,num_cells);
+0604   <span class="keyword">for</span> s=1:num_steps
+0605     X(s,:,:)=data(s).(this_var);
+0606   <span class="keyword">end</span>
+0607   <span class="comment">% calculate simple means</span>
+0608   means=nanmean(X(:,tsel,:),2); <span class="comment">% average over select times</span>
+0609   <span class="comment">% store means in stats structure</span>
+0610   stats.([this_var <span class="string">'_mean_per_amp'</span>])=squeeze(means);
+0611   stats.([this_var <span class="string">'_pop_mean_per_amp'</span>])=nanmean(means,3);
+0612   stats.([this_var <span class="string">'_pop_mean_per_time'</span>])=nanmean(X,3);  
+0613 <span class="keyword">end</span>
+0614 
+0615 <span class="keyword">if</span> options.plot_flag
+0616   v=1;
+0617   figure(<span class="string">'position'</span>,[180 330 1450 530])
+0618   subplot(2,2,1); <span class="comment">% V(t)</span>
+0619   plot(time,stats.([vars{v} <span class="string">'_pop_mean_per_time'</span>]));
+0620   xlabel(<span class="string">'time [ms]'</span>); ylabel([<span class="string">'&lt;'</span> strrep(vars{v},<span class="string">'_'</span>,<span class="string">'\_'</span>) <span class="string">', pop&gt;'</span>]);
+0621   legend(cellfun(@(x)[<span class="string">'I='</span> num2str(x)],num2cell(amplitudes),<span class="string">'uni'</span>,0));
+0622   subplot(2,2,3); <span class="comment">% I(t)</span>
+0623   <span class="comment">%plot(time,input); xlabel('time [ms]'); ylabel('I(t)');</span>
+0624   <span class="comment">%legend(cellfun(@(x)['I=' num2str(x)],num2cell(amplitudes),'uni',0));</span>
+0625   subplot(2,2,2); <span class="comment">% I/V</span>
+0626   plot(amplitudes,stats.([vars{v} <span class="string">'_mean_per_amp'</span>])); hold on
+0627   plot(amplitudes,stats.([vars{v} <span class="string">'_pop_mean_per_amp'</span>]),<span class="string">'k-'</span>,<span class="string">'linewidth'</span>,5);
+0628   xlabel(<span class="string">'amplitude'</span>); ylabel([<span class="string">'&lt;'</span> strrep(vars{v},<span class="string">'_'</span>,<span class="string">'\_'</span>) <span class="string">', time&gt;'</span>]);
+0629 <span class="keyword">end</span>
+0630 
+0631 
+0632   
+0633   
+0634   
+0635   
+0636 <span class="comment">% check how Tallie calculated:</span>
+0637 <span class="comment">% - threshrate (mean spike rate on tonic depol just above threshold)</span>
+0638 <span class="comment">% - steprate (mean spike rate on final? step depol)</span>
+0639 <span class="comment">% - AHP 5-20ms (Q: mean post-spike AHP amplitude over 5-20ms after trough?)</span>
+0640 <span class="comment">% - SpikeAmp (same as [4])</span>
+0641 <span class="comment">% - SpikeWidth (Spike width at half height) (same as [4])</span>
+0642 <span class="comment">% - RMP</span>
+0643 
+0644 <span class="comment">% AHPtau (AHP duration, half-width) = time between half-peak amplitude of AHP</span>
+0645 
+0646 <span class="comment">% From Iinj=0:</span>
+0647 <span class="comment">% RMP: resting membrane potential [mV] = avg V over step 150-500ms</span>
+0648 
+0649 <span class="comment">% From first spike:</span>
+0650 <span class="comment">% Vthresh (spike threshold) [4]: level of voltage deflection exceeding 20mV/1ms %10mV/1ms</span>
+0651 <span class="comment">% Peak amplitude [4]: (peak - threshold value)</span>
+0652 <span class="comment">% Spike rise time [4]: time to rise from 10% to 90% of peak amplitude</span>
+0653 <span class="comment">% Spike decay time [4]: time to decay from 10% to 90% of the amplitude b/w peak and spike threshold</span>
+0654 <span class="comment">% Spike duration (half-width) [1,4]: &quot;time between half-peak amplitude for the falling and rising edges&quot;</span>
+0655 
+0656 <span class="comment">% Other measures from [4]:</span>
+0657 <span class="comment">% Sag (Ih?) = (Vmin-Vend)/|RMP-Vend|</span>
+0658 <span class="comment">%     where Vmin=(min voltage during 500ms hyperpolarizing step)</span>
+0659 <span class="comment">%           Vend=(V at end of hyperpolarizing step)</span>
+0660 <span class="comment">% Hump = (Vmax-Vend)/|RMP-Vend|</span>
+0661 <span class="comment">%     where Vmax=(max voltage during depolarizing step preceding spike)</span>
+0662 <span class="comment">%           Vend=(V at end of step)</span>
+0663 <span class="comment">% Adaptation ratio AR = ISI1/ISIend = f(step amplitude)</span>
+0664 <span class="comment">% AR coefficient = slope of (step amp, AR) for amp &gt; 60pA above spike threshold</span>
+0665 <span class="comment">% Coefficient of variation CV of ISIs was measured from spikes during</span>
+0666 <span class="comment">%   150-500ms at depolarizing pulse 20pA above spike threshold</span>
+0667 
+0668 <span class="comment">% Measures from [2]:</span>
+0669 <span class="comment">% FR: calculate from total spikes elicited by 1sec current injection at 140pA (see [2])</span>
+0670 <span class="comment">% AR24: Adaptation ratio: ratio of inst. freq of 2nd and 4th spike intervals in train (see [2])</span>
+0671 
+0672   
+0673</pre></div>
+<hr><address>Generated on Mon 27-Feb-2017 14:58:50 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" target="_parent">m2html</a></strong> &copy; 2005</address>
+</body>
+</html>

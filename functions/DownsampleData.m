@@ -1,13 +1,17 @@
 function data_out = DownsampleData(data,ds)
-%% data_out = CalcFR(data,'option',value)
-% Purpose: Downsamples DynaSim data structre
+%DOWNSAMPLEDATA - Downsamples DynaSim data structre data
+%
+% Usage:
+%   data_out = CalcFR(data,'option',value)
+%
 % Inputs:
-%   data - DynaSim data structure (see CheckData)
-%   ds - number of datapoints to downsample
+%   - data: DynaSim data structure (see CheckData)
+%   - ds: number of datapoints to downsample
+%
 % Outputs:
-%   data_out: data structure all fields replaced by their average valeus
-%             (averaged across neurons).
-
+%   - data_out: data structure all fields replaced by their average valeus
+%               (averaged across neurons).
+%
 % See also: PlotFR, AnalyzeStudy, SimulateModel, CheckData, SelectVariables
 
 %% 1.0 Check inputs

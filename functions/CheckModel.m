@@ -1,69 +1,70 @@
 function model=CheckModel(model)
-%% model=CheckModel(model)
-% Purpose: standardize model structure and auto-populate missing fields
+%CHECKMODEL - Standardize model structure and auto-populate missing fields
+%
+% Usage:
+%   model=CheckModel(model)
+%
 % Input: DynaSim model structure or equations
-% Output: DynaSim model structure (standardized)
-% 
-% DynaSim model structure:
-%   model.parameters      : substructure with model parameters
-%   model.fixed_variables : substructure with fixed variable definitions
-%   model.functions       : substructure with function definitions
-%   model.monitors        : substructure with monitor definitions
-%   model.state_variables : cell array listing state variables
-%   model.ODEs            : substructure with one ordinary differential 
-%                           equation (ODE) per state variable
-%   model.ICs             : substructure with initial conditions (ICs) for 
-%                           each state variable
-%   model.conditionals(i) : structure array with each element indicating
-%                           conditional actions specified in subfields 
-%                           "condition","action","else" (see NOTE 1)
-%   model.linkers(i)      : structure array with each element indicating
-%                           an "expression" that should be inserted 
-%                           (according to "operation") into any equations 
-%                           where the "target" appears. (see NOTE 2)
-%     .target    : string giving the target where expression should be inserted
-%     .expression: string giving the expression to insert
-%     .operation : string giving the operation to use to insert expression
-%   model.comments{i}     : cell array of comments found in model files
-%   model.specification   : specification used to generate the model (see CheckSpecification)
-%   model.namespaces      : (see NOTE 3)
-% 
-% NOTE 1: "action" may include multiple statements separated by semicolons.
-% "condition" must be an expression that evaluates to true or false.
-% 
-% NOTE 2: "linkers" are used only when a model contains external model
-% files. Equations and state variables defined in external files can be
-% combined with equations in other model files (associated with the same
-% population) or population equations in the specification. Recommended
-% practice is to begin targets with the '@' character. 
-%   Example: linking mechanism to equations in specification:
-%     ...
-%   Example: linking mechanism to equations in a different mechanism:
-%     ...
-% 
-% NOTE 3: all variables and functions have prefixes added to them that
-% indicate their namespace; a mapping from original names found in
-% equations to the names appearing in the model structure is available in 
-% model.namespaces. 
-% Namespaces in the model structure:
-%   model.parameters      .([namespace param_name])=expression
-%   model.fixed_variables .([namespace var_name])=expression
-%   model.functions       .([namespace func_name])=@(variables)expression
-%   model.monitors        .([namespace monitor_name])=expression
-%   model.state_variables = {namespace_var1,namespace_var2,...}
-%   model.ODEs            .([namespace state_variable])=expression
-%   model.ICs             .([namespace state_variable])=expression
-%   model.conditionals(i) .namespace,condition,action,else
-%   model.linkers(i)      .namespace,target,expression,operation
-%   model.comments{i}     string
-%   .specification,.namespaces
-% 
-% Example 1: obtain empty model structure with all fields
-% model=CheckModel([])
-% 
-% Example 2: standardize existing model
-% model=CheckModel(model)
-% 
+%
+% Output:
+%   - DynaSim model structure (standardized)
+%     model.parameters      : substructure with model parameters
+%     model.fixed_variables : substructure with fixed variable definitions
+%     model.functions       : substructure with function definitions
+%     model.monitors        : substructure with monitor definitions
+%     model.state_variables : cell array listing state variables
+%     model.ODEs            : substructure with one ordinary differential 
+%                             equation (ODE) per state variable
+%     model.ICs             : substructure with initial conditions (ICs) for 
+%                             each state variable
+%     model.conditionals(i) : structure array with each element indicating
+%                             conditional actions specified in subfields 
+%                             "condition","action","else" (see NOTE 1)
+%     model.linkers(i)      : structure array with each element indicating
+%                             an "expression" that should be inserted 
+%                             (according to "operation") into any equations 
+%                             where the "target" appears. (see NOTE 2)
+%       .target    : string giving the target where expression should be inserted
+%       .expression: string giving the expression to insert
+%       .operation : string giving the operation to use to insert expression
+%     model.comments{i}     : cell array of comments found in model files
+%     model.specification   : specification used to generate the model (see CheckSpecification)
+%     model.namespaces      : (see NOTE 3)
+%
+%   - NOTE 1: "action" may include multiple statements separated by semicolons.
+%       "condition" must be an expression that evaluates to true or false.
+%
+%   - NOTE 2: "linkers" are used only when a model contains external model files.
+%       Equations and state variables defined in external files can be combined with
+%       equations in other model files (associated with the same population) or
+%       population equations in the specification. Recommended practice is to begin
+%       targets with the '@' character.
+%     - Example: linking mechanism to equations in specification: TODO
+%     - Example: linking mechanism to equations in a different mechanism: TODO
+%
+%   - NOTE 3: all variables and functions have prefixes added to them that
+%     indicate their namespace; a mapping from original names found in equations to
+%     the names appearing in the model structure is available in model.namespaces.
+%     - Namespaces in the model structure:
+%       model.parameters      .([namespace param_name])=expression
+%       model.fixed_variables .([namespace var_name])=expression
+%       model.functions       .([namespace func_name])=@(variables)expression
+%       model.monitors        .([namespace monitor_name])=expression
+%       model.state_variables = {namespace_var1,namespace_var2,...}
+%       model.ODEs            .([namespace state_variable])=expression
+%       model.ICs             .([namespace state_variable])=expression
+%       model.conditionals(i) .namespace,condition,action,else
+%       model.linkers(i)      .namespace,target,expression,operation
+%       model.comments{i}     string
+%       .specification,.namespaces
+%
+% Examples:
+% - Example 1: obtain empty model structure with all fields
+%     model=CheckModel([])
+%
+% - Example 2: standardize existing model
+%     model=CheckModel(model)
+%
 % see also: GenerateModel, CheckSpecification, CheckData
 
 field_order={'parameters','fixed_variables','functions','monitors',...

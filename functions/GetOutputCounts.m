@@ -1,7 +1,8 @@
 function [state_var_counts,monitor_counts]=GetOutputCounts(model)
-%% [state_var_counts,monitor_counts]=GetOutputCounts(model)
-% purpose: determine how many copies of each state variable and monitor
-% will be produced by simulating the model.
+%GETOUTPUTCOUNTS - determine how many copies of each state variable and monitor will be produced by simulating the model.
+%
+% Usage:
+%   [state_var_counts,monitor_counts]=GetOutputCounts(model)
 
 state_var_counts=0;
 if ~isempty(model.state_variables)

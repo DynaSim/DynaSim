@@ -1,67 +1,79 @@
 function [data,studyinfo]=SimulateModel(model,varargin)
-%% data=SimulateModel(model,'option',value,...)
-% Purpose: manage simulation of a DynaSim model. This high-level function 
-% offers many options to control the number of simulations, how the model is 
-% optionally varied across simulations, and how the numerical integration
-% is performed. It can optionally save the simulated data and create/submit
-% simulation jobs to a compute cluster.
+%SIMULATEMODEL -  manage simulation of a DynaSim model.
+%
+% This high-level function offers many options to control the number of
+% simulations, how the model is optionally varied across simulations, and how
+% the numerical integration is performed. It can optionally save the simulated
+% data and create/submit simulation jobs to a compute cluster.
+%
+% Usage:
+%   data=SimulateModel(model,'option',value,...)
+%
 % Inputs:
-%   model: DynaSim model structure or equations (see GenerateModel and 
+%   - model: DynaSim model structure or equations (see GenerateModel and 
 %          CheckModel for more details)
-% 
-%   solver options (provided as key/value pairs: 'option1',value1,'option2',value2,...):
+%
+%   - solver options (provided as key/value pairs: 'option1',value1,'option2',value2,...):
 %     'solver'      : solver for numerical integration (see GetSolveFile)
 %                     {'euler','rk2','rk4'} (default: 'rk4')
 %     'tspan'       : time limits of simulation [begin,end] (default: [0 100]) [ms]
 %                     note: units must be consistent with dt and model equations
 %     'dt'          : time step used for DynaSim solvers (default: .01) [ms]
-%     'downsample_factor': downsampling applied during simulation (default: 1, no downsampling) 
-%                     (only every downsample_factor-time point is stored in memory and/or written to disk)
-%     'ic'          : numeric array of initial conditions, one value per state 
-%                     variable (default: all zeros). overrides definition in model structure
-%     'random_seed' : seed for random number generator (default: 'shuffle', set randomly) (usage: rng(options.random_seed))
-%     'compile_flag': whether to compile simulation using coder instead of 
+%     'downsample_factor': downsampling applied during simulation (default: 1,
+%                          no downsampling) (only every downsample_factor-time
+%                          point is stored in memory and/or written to disk)
+%     'ic'          : numeric array of initial conditions, one value per state
+%                     variable, overrides definition in model structure (default: all zeros)
+%     'random_seed' : seed for random number generator (default: 'shuffle', set
+%                     randomly) (usage: rng(options.random_seed))
+%     'compile_flag': whether to compile simulation using coder instead of
 %                     interpreting Matlab {0 or 1} (default: 0)
-% 
-%   options for running sets of simulations:
-%     'vary'        : (default: [], vary nothing): cell matrix specifying model
-%                     components to vary across simulations (see NOTE 1 and Vary2Modifications)
-% 
-%   options to control saved data:
-%     'save_results_flag': whether to save results of analysis and plotting
-%     'save_data_flag': whether to save simulated data to disk after completion {0 or 1} (default: 0)
-%     'overwrite_flag': whether to overwrite existing data files {0 or 1} (default: 0)
-%     'study_dir'     : relative or absolute path to output directory (default: current directory)
-%     'prefix'        : string to prepend to all output file names (default: 'study')
-%     'disk_flag'     : whether to write to disk during simulation instead of storing in memory {0 or 1} (default: 0)
-%     'precision'     : {'single','double'} precision of simulated data saved to disk (default: 'single')
 %
-%   options for cluster computing:
-%     'cluster_flag'  : whether to run simulations on a cluster submitted 
-%                     using qsub (see CreateBatch) {0 or 1} (default: 0)
+%   - options for running sets of simulations:
+%     'vary'        : cell matrix specifying model components to vary across
+%                     simulations (see NOTE 1 and Vary2Modifications) (default: [],
+%                     vary nothing)
+%
+%   - options to control saved data:
+%     'save_results_flag': whether to save results of analysis and plotting
+%     'save_data_flag': whether to save simulated data to disk after completion
+%                       {0 or 1} (default: 0)
+%     'overwrite_flag': whether to overwrite existing data files {0 or 1} (default: 0)
+%     'study_dir'     : relative or absolute path to output directory (default:
+%                       current directory)
+%     'prefix'        : string to prepend to all output file names (default: 'study')
+%     'disk_flag'     : whether to write to disk during simulation instead of
+%                       storing in memory {0 or 1} (default: 0)
+%     'precision'     : {'single','double'} precision of simulated data saved
+%                       to disk (default: 'single')
+%
+%   - options for cluster computing:
+%     'cluster_flag'  : whether to run simulations on a cluster submitted
+%                       using qsub (see CreateBatch) {0 or 1} (default: 0)
 %     'sims_per_job'  : number of simulations to run per batch job (default: 1)
 %     'memory_limit'  : memory to allocate per batch job (default: '8G')
-% 
-%   options for parallel computing: (requires Parallel Computing Toolbox)
+%
+%   - options for parallel computing: (requires Parallel Computing Toolbox)
+%     - Note: parallel computing has been DISABLED for debugging...
 %     'parallel_flag' : whether to use parfor to run simulations {0 or 1} (default: 0)
 %     'num_cores'     : number of cores to specify in the parallel pool
-%     *note: parallel computing has been disabled for debugging...
-% 
-%   options for post-processing:
+%
+%   - options for post-processing:
 %     'analysis_functions': cell array of analysis function handles
 %     'analysis_options'  : cell array of option cell arrays {'option1',value1,...}
 %     'plot_functions'    : cell array of plot function handles
 %     'plot_options'      : cell array of option cell arrays {'option1',value1,...}
-% 
-%   other options:
+%
+%   - other options:
 %     'verbose_flag'  : whether to display informative messages/logs (default: 0)
-%     'modifications' : how to modify DynaSim specification structure component before simulation (see ApplyModifications)
+%     'modifications' : how to modify DynaSim specification structure component
+%                       before simulation (see ApplyModifications)
 %     'experiment'    : function handle of experiment function (see NOTE 2)
 %     'experiment_options' : single cell array of key/value options for experiment function
 %     'optimization'  : function handle of optimization function (see NOTE 2)
-% 
+%
 % Outputs:
-%   DynaSim data structure:
+%   - DynaSim data structure:
 %     data.labels           : list of state variables and monitors recorded
 %     data.(state_variables): state variable data matrix [time x cells]
 %     data.(monitors)       : monitor data matrix [time x cells]
@@ -69,121 +81,124 @@ function [data,studyinfo]=SimulateModel(model,varargin)
 %     data.simulator_options: simulator options used to generate simulated data
 %     data.model            : model used to generate simulated data
 %     [data.varied]         : list of varied model components (present only if anything was varied)
-% 
-%   DynaSim studyinfo structure (only showing select fields, see CheckStudyinfo for more details)
+%
+%   - DynaSim studyinfo structure (only showing select fields, see CheckStudyinfo for more details)
 %     studyinfo.study_dir
 %     studyinfo.base_model (=[]): original model from which a set of simulations was derived
 %     studyinfo.base_simulator_options (=[])
 %     studyinfo.base_solve_file (='')
 %     studyinfo.simulations(k): metadata for each simulation in a set of simulations
 %                           .sim_id         : unique identifier in study
-%                           .modifications  : modifications made to the base model during this simulation
+%                           .modifications  : modifications made to the base
+%                                             model during this simulation
 %                           .data_file      : full filename of eventual output file
-%                           .batch_dir (=[]): directory where batch jobs were saved (if cluster_flag=1)
-%                           .job_file (=[]) : m-file batch job that runs this simulation (if cluster_flag=1)
+%                           .batch_dir (=[]): directory where batch jobs were
+%                                             saved (if cluster_flag=1)
+%                           .job_file (=[]) : m-file batch job that runs this
+%                                             simulation (if cluster_flag=1)
 %                           .simulator_options: simulator options for this simulation
-%                           .solve_file     : full filename of m- or mex-file that numerically integrated the model
-% 
-% NOTE 1: 'vary' indicates the variable to vary, the values
-% it should take, and the object whose variable should be varied. 
-% Syntax: vary={object, variable, values; ...}. For instance, to vary
-% parameter 'gNa', taking on values 100 and 120, in population 'E', set
-% vary={'E','gNa',[100 120]}. To additionally vary 'gSYN' in the connection
-% mechanism from 'E' to 'I', set vary={'E','gNa',[100 120];'E->I','gSYN',[0 1]}.
-% Mechanism lists and equations can also be varied. (see Vary2Modifications 
-% for more details and examples).
-% 
-% EXAMPLES:
-% Example 1: Lorenz equations with phase plot
-%   eqns={
-%     's=10; r=27; b=2.666';
-%     'dx/dt=s*(y-x)';
-%     'dy/dt=r*x-y-x*z';
-%     'dz/dt=-b*z+x*y';
-%   };
-%   data=SimulateModel(eqns,'tspan',[0 100],'ic',[1 2 .5]);
-%   plot(data.pop1_x,data.pop1_z); title('Lorenz equations'); xlabel('x'); ylabel('z')
-% 
-% Example 2: Leaky integrate-and-fire with spike monitor
-%   eqns={
-%     'tau=10; R=10; E=-70; I=1.55; thresh=-55; reset=-75';
-%     'dV/dt=(E-V+R*I)/tau; if(V>thresh)(V=reset)';
-%     'monitor V.spikes(thresh)';
-%   };
-%   data=SimulateModel(eqns,'tspan',[0 200],'ic',-75);
-%   data.pop1_V(data.pop1_V_spikes==1)=20; % insert spike
-%   plot(data.time,data.pop1_V); xlabel('time (ms)'); ylabel('V'); title('LIF with spikes')
-% 
-% Example 3: Hodgkin-Huxley-type Intrinsically Bursting neuron
-%   eqns='dv/dt=5+@current; {iNaF,iKDR,iM}; gNaF=100; gKDR=5; gM=1.5; v(0)=-70';
-%   data=SimulateModel(eqns,'tspan',[0 200]);
-%   figure; plot(data.time,data.(data.labels{1}))
-%   xlabel('time (ms)'); ylabel('membrane potential (mV)'); title('Intrinsically Bursting neuron')
-% 
-% Example 4: varying max Na+ conductance in Hodgkin-Huxley neuron
-%   eqns='dv/dt=@current+10; {iNa,iK}; v(0)=-60';
-%   data=SimulateModel(eqns,'vary',{'','gNa',[50 100 200]});
-%   % plot how mean firing rate varies with parameter
-%   PlotFR(data,'bin_size',30,'bin_shift',10); % bin_size and bin_shift in [ms]
-% 
-% Example 5: Sparse Pyramidal-Interneuron-Network-Gamma rhythm with rastergram
-%   % define equations of cell model (same for E and I populations)
-%   eqns={ 
-%     'dv/dt=Iapp+@current/Cm+noise*randn(1,N_pop)*sqrt(dt)/dt';
-%     'monitor v.spikes, iGABAa.functions, iAMPA.functions'
-%   };
-%   % define specification for two-population network model
-%   s=[];
-%   s.populations(1).name='E';
-%   s.populations(1).size=80;
-%   s.populations(1).equations=eqns;
-%   s.populations(1).mechanism_list={'iNa','iK'};
-%   s.populations(1).parameters={'Iapp',5,'gNa',120,'gK',36,'Cm',1,'noise',4};
-%   s.populations(2).name='I';
-%   s.populations(2).size=20;
-%   s.populations(2).equations=eqns;
-%   s.populations(2).mechanism_list={'iNa','iK'};
-%   s.populations(2).parameters={'Iapp',0,'gNa',120,'gK',36,'Cm',1,'noise',4};
-%   s.connections(1).source='I';
-%   s.connections(1).target='E';
-%   s.connections(1).mechanism_list={'iGABAa'};
-%   s.connections(1).parameters={'tauD',10,'gSYN',.1,'netcon','ones(N_pre,N_post)'};
-%   s.connections(2).source='E';
-%   s.connections(2).target='I';
-%   s.connections(2).mechanism_list={'iAMPA'};
-%   s.connections(2).parameters={'tauD',2,'gSYN',.1,'netcon',ones(80,20)};
-%   % simulate model
-%   data=SimulateModel(s);
-%   % plot voltages and rastergram
-%   figure;
-%   subplot(2,1,1); % voltage traces
-%   plot(data.time,data.E_v,'b-',data.time,data.I_v,'r-')
-%   title('Sparse Pyramidal-Interneuron-Network-Gamma (sPING)'); ylabel('membrane potential (mV)');
-%   subplot(2,1,2); % rastergram
-%   E_spikes=nan(size(data.E_v_spikes)); E_spikes(data.E_v_spikes==1)=1;
-%   I_spikes=nan(size(data.I_v_spikes)); I_spikes(data.I_v_spikes==1)=1;
-%   plot(data.time,E_spikes+repmat(1:80,[length(data.time) 1]),'bo'); hold on
-%   plot(data.time,I_spikes+repmat(80+(1:20),[length(data.time) 1]),'ro'); axis([0 100 0 100]);
-%   title('rastergram'); xlabel('time (ms)'); ylabel('cell index');
-%   % simulate model varying two parameters (Iapp and tauD in sPING)
-%   % warning: this may take up to a minute to complete:
-%   vary={
-%     'E'   ,'Iapp',[0 10 20];     % amplitude of tonic input to E-cells
-%     'I->E','tauD',[5 10 15]      % inhibition decay time constant from I to E
-%     };
-%   data=SimulateModel(s,'vary',vary);
-%   % plot firing rates calculated from spike monitor in both populations
-%   PlotFR(data,'variable','*_spikes','bin_size',30,'bin_shift',10);
-% 
-% 
+%                           .solve_file     : full filename of m- or mex-file
+%                                             that numerically integrated the model
+%
+% Notes:
+%   - NOTE 1: 'vary' indicates the variable to vary, the values it should take,
+%     and the object whose variable should be varied. Syntax: vary={object,
+%     variable, values; ...}. For instance, to vary parameter 'gNa', taking on
+%     values 100 and 120, in population 'E', set vary={'E','gNa',[100 120]}. To
+%     additionally vary 'gSYN' in the connection mechanism from 'E' to 'I', set
+%     vary={'E','gNa',[100 120];'E->I','gSYN',[0 1]}. Mechanism lists and equations
+%     can also be varied. (see Vary2Modifications for more details and examples).
+%
+% Examples:
+%   - Example 1: Lorenz equations with phase plot
+%       eqns={
+%         's=10; r=27; b=2.666';
+%         'dx/dt=s*(y-x)';
+%         'dy/dt=r*x-y-x*z';
+%         'dz/dt=-b*z+x*y';
+%       };
+%       data=SimulateModel(eqns,'tspan',[0 100],'ic',[1 2 .5]);
+%       plot(data.pop1_x,data.pop1_z); title('Lorenz equations'); xlabel('x'); ylabel('z')
+%
+%   - Example 2: Leaky integrate-and-fire with spike monitor
+%       eqns={
+%         'tau=10; R=10; E=-70; I=1.55; thresh=-55; reset=-75';
+%         'dV/dt=(E-V+R*I)/tau; if(V>thresh)(V=reset)';
+%         'monitor V.spikes(thresh)';
+%       };
+%       data=SimulateModel(eqns,'tspan',[0 200],'ic',-75);
+%       data.pop1_V(data.pop1_V_spikes==1)=20; % insert spike
+%       plot(data.time,data.pop1_V); xlabel('time (ms)'); ylabel('V'); title('LIF with spikes')
+%
+%   - Example 3: Hodgkin-Huxley-type Intrinsically Bursting neuron
+%       eqns='dv/dt=5+@current; {iNaF,iKDR,iM}; gNaF=100; gKDR=5; gM=1.5; v(0)=-70';
+%       data=SimulateModel(eqns,'tspan',[0 200]);
+%       figure; plot(data.time,data.(data.labels{1}))
+%       xlabel('time (ms)'); ylabel('membrane potential (mV)'); title('Intrinsically Bursting neuron')
+%
+%   - Example 4: varying max Na+ conductance in Hodgkin-Huxley neuron
+%       eqns='dv/dt=@current+10; {iNa,iK}; v(0)=-60';
+%       data=SimulateModel(eqns,'vary',{'','gNa',[50 100 200]});
+%       % plot how mean firing rate varies with parameter
+%       PlotFR(data,'bin_size',30,'bin_shift',10); % bin_size and bin_shift in [ms]
+%
+%   - Example 5: Sparse Pyramidal-Interneuron-Network-Gamma rhythm with rastergram
+%       % define equations of cell model (same for E and I populations)
+%       eqns={ 
+%         'dv/dt=Iapp+@current/Cm+noise*randn(1,N_pop)*sqrt(dt)/dt';
+%         'monitor v.spikes, iGABAa.functions, iAMPA.functions'
+%       };
+%       % define specification for two-population network model
+%       s=[];
+%       s.populations(1).name='E';
+%       s.populations(1).size=80;
+%       s.populations(1).equations=eqns;
+%       s.populations(1).mechanism_list={'iNa','iK'};
+%       s.populations(1).parameters={'Iapp',5,'gNa',120,'gK',36,'Cm',1,'noise',4};
+%       s.populations(2).name='I';
+%       s.populations(2).size=20;
+%       s.populations(2).equations=eqns;
+%       s.populations(2).mechanism_list={'iNa','iK'};
+%       s.populations(2).parameters={'Iapp',0,'gNa',120,'gK',36,'Cm',1,'noise',4};
+%       s.connections(1).source='I';
+%       s.connections(1).target='E';
+%       s.connections(1).mechanism_list={'iGABAa'};
+%       s.connections(1).parameters={'tauD',10,'gSYN',.1,'netcon','ones(N_pre,N_post)'};
+%       s.connections(2).source='E';
+%       s.connections(2).target='I';
+%       s.connections(2).mechanism_list={'iAMPA'};
+%       s.connections(2).parameters={'tauD',2,'gSYN',.1,'netcon',ones(80,20)};
+%       % simulate model
+%       data=SimulateModel(s);
+%       % plot voltages and rastergram
+%       figure;
+%       subplot(2,1,1); % voltage traces
+%       plot(data.time,data.E_v,'b-',data.time,data.I_v,'r-')
+%       title('Sparse Pyramidal-Interneuron-Network-Gamma (sPING)'); ylabel('membrane potential (mV)');
+%       subplot(2,1,2); % rastergram
+%       E_spikes=nan(size(data.E_v_spikes)); E_spikes(data.E_v_spikes==1)=1;
+%       I_spikes=nan(size(data.I_v_spikes)); I_spikes(data.I_v_spikes==1)=1;
+%       plot(data.time,E_spikes+repmat(1:80,[length(data.time) 1]),'bo'); hold on
+%       plot(data.time,I_spikes+repmat(80+(1:20),[length(data.time) 1]),'ro'); axis([0 100 0 100]);
+%       title('rastergram'); xlabel('time (ms)'); ylabel('cell index');
+%       % simulate model varying two parameters (Iapp and tauD in sPING)
+%       % warning: this may take up to a minute to complete:
+%       vary={
+%         'E'   ,'Iapp',[0 10 20];     % amplitude of tonic input to E-cells
+%         'I->E','tauD',[5 10 15]      % inhibition decay time constant from I to E
+%         };
+%       data=SimulateModel(s,'vary',vary);
+%       % plot firing rates calculated from spike monitor in both populations
+%       PlotFR(data,'variable','*_spikes','bin_size',30,'bin_shift',10);
+%
+% TODO: rename 'disk_flag' to something more descriptive
+%
 % See also: GenerateModel, CheckModel, GetSolveFile, CheckData, 
 %           Vary2Modifications, CheckStudyinfo, CreateBatch
-
-% todo: rename 'disk_flag' to something more descriptive
-
-% dependencies: WriteDynaSimSolver, WriteMatlabSolver, PropagateFunctions, CheckModel,
-% CheckOptions, Options2Keyval, DisplayError, DynaSim2Odefun
-
+%
+% Dependencies: WriteDynaSimSolver, WriteMatlabSolver, PropagateFunctions,
+%               CheckModel, CheckOptions, Options2Keyval, DisplayError, DynaSim2Odefun
+%
 % <-- temporarily removed from help section -->
 % NOTE 2: special functions that recursively call SimulateModel:
 % - "Experiments" are ways of hacking the ODE system to incorporate additional 

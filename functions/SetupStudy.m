@@ -1,9 +1,8 @@
 function [studyinfo,options]=SetupStudy(base_model,varargin)
-% Purpose:
-%   - Initialize DynaSim studyinfo structure
-%   - Prepare list of output file names (data_file, modified_model_file)
-%   - Create output directories (study: data, models)
-% 
+%SETUPSTUDY - Initialize DynaSim studyinfo structure, prepare list of output file names, and create output directories
+%
+% TODO: break up this function into smaller functions
+%
 % See also: SimulateModel, UpdateStudy
 
 % Check inputs

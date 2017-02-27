@@ -1,99 +1,112 @@
 function stats = CalcCellProperties(data,varargin)
-% stats = CalcCellProperties(data,'option1',option1,...)
-% This analysis function calculates the intrinsic electrophysiological 
-% properties of all cells in one or more populations. It is designed to be 
-% used in conjunction with the experiment "ProbeCellProperties" which 
-% removes all connections from a model and produces a data array of 
-% simulated data in response to a series of hyperpolarizing and 
-% depolarizing pulses.
-% 
-% Inputs:
-% - data -- array of DynaSim data structures returned by ProbeCellProperties
-% Outputs:
-%   stats.(pop).(measure) [1 x num_cells] (averaged over repetitions)
-%   measures (intrinsic properties):
-%     RMP, V_thresh, R_in, tau_m, FI_slope, CV, AR24, AR_coefficient
-%     FR_min (threshrate), FR_min2 (steprate?), FR_max (steprate?)
-%     AP morphology: AP_amp, AP_dur (spikewidth), AP_taur, AP_taud
-%                    Ih_relsag, Ih_abssag, hump, AHP_amp, AHP_dur
-%                    AHP_time2trough, ISI_median, AR23, AR13, ISI1,
-%                    min_ISI_median, ISI_step_median
-% -------------------------------------------------------------------------
-% From Iinj=0:
-% RMP = (avg over 50-100% step | Iinj=0)
-% 
-% From largest hyperpolarizing step:
-% Ih Sag = (Vend-Vmin)/|RMP-Vend|
-%     where Vmin=(min voltage during T sec hyperpolarizing step)
-%           Vend=(V at end of hyperpolarizing step)
-% Ih abs sag = (Vend-Vmin)
-% 
-% From last subthreshold step:
-% Hump = (Vmax-Vend)/|RMP-Vend|
-%     where Vmax=(max voltage during depolarizing step preceding spike)
-%           Vend=(V at end of step)
-% 
-% Across hyperpolarizing subthreshold steps:
-% Rin = Input resistence (I/V slope) [4]
-% taum = Membrane time constant: time for voltage relaxation to (1/e)Vmax
-%   where Vmax=max deflection from baseline on hyperpolarizing steps
-%   note: avg taum's over small drives that keep active currents silent (eg, 5-15pA)
-% 
-% Across suprathreshold steps with at least two spikes:
-% FI slope [Hz/nA]: slope of f/I curve (firing freq vs injected current 0-140pA) (see [2])
-% 
-% Across suprathreshold steps >=60pA above first step with at least two spikes:
-% AR coefficient: (slope of AR/I) where per step AR=ISI(1)/ISI(end)
-% Note: AR = Adaptation ratio
-% ISI_step_median = median ISI on step 60pA above first step w/ 2 spikes
-% FR_step = mean FR on step 60pA above first step w/ 2 spikes
-% ARif = max AR across steps >=60pA above first step w/ 2 spikes
-% 
-% From first suprathreshold T sec step:
-% FRmin (threshrate) = (# spikes)/T
-% 
-% From first suprathreshold T sec step with at least two spikes:
-% FRmin2 (steprate?) = (# spikes)/T
-% 
-% From first spike of first suprathreshold step: AP morphology
-% Vthresh = V( crossing(dV/dt,20mV/ms) ) %10mV/ms) )
-% AP_amp = (Vpeak-Vthresh)
-% AP_taur = (time to rise from 10% to 90% between Vthresh and Vpeak)
-% AP_taud = (time to decay from 10% to 90% between Vpeak and Vthresh)
-% AP_dur (spikewidth) = (time between rising and falling (Vthresh+APamp/2) = (Vthresh+Vpeak)/2)
-% AHP_amp = (Vbaseline-Vmin) where Vmin taken during repolarizing phase
-% AHP_dur (AHP duration, half-width) = time between half-peak amplitude of AHP 
-%                                   = (time between falling and rising (Vbaseline+AHPamp/2))
-% AHP_time2trough = (time between falling Vbaseline and AHPamp)
-% ADPamp? ADPdur?
-% 
-% From suprathreshold step 20pA above first step with at least two spikes:
-% CV(ISIs over 30-100% step)
-% 
-% From last suprathreshold T sec step (or step at amp=max (eg, 140pA)):
-% FR_max (steprate?): (# spikes)/T
-% min_ISI_median
-% max_ISI
-% AR24 = ISI(2)/ISI(4)
-% 
-% -------------------------------------------------------------------------
-% References for methods used:
-% [1] Steffensen, Scott C., et al. "Electrophysiological characterization 
-%     of GABAergic neurons in the ventral tegmental area." The Journal of neuroscience 18.19 (1998): 8003-8015.
-% [2] Van Aerde, Karlijn I., et al. "Flexible spike timing of layer 5 neurons 
-%     during dynamic beta oscillation shifts in rat prefrontal cortex." The Journal of physiology 587.21 (2009): 5177-5196.
-% [3] Connors, BW, MJ Gutnick, DA Prince. "Electrophysiological 
-%     properties of neocortical neurons in vitro." Journal of Neurophysiology 48.6 (1982): 1302-1320.
-% [4] Povysheva, Nadezhda V., et al. "Parvalbumin-positive basket interneurons in monkey and rat prefrontal cortex." Journal of neurophysiology 100.4 (2008): 2348-2360.
-% - Gonz?lez-Burgos, Guillermo, et al. "Functional properties of fast spiking interneurons and their synaptic connections with pyramidal cells in primate dorsolateral prefrontal cortex." Journal of Neurophysiology 93.2 (2005): 942-953.
-% - Gorelova, Natalia, Jeremy K. Seamans, and Charles R. Yang. "Mechanisms of dopamine activation of fast-spiking interneurons that exert inhibition in rat prefrontal cortex." Journal of neurophysiology 88.6 (2002): 3150-3166.
-% -------------------------------------------------------------------------
-% 
-% Example: ...
-% data = ProbeCellProperties(model)
-% stats = CalcCellProperties(data)
+%CALCCELLPROPERTIES - calculates the intrinsic electrophysiological properties of all cells in one or more populations
 %
-% Note: this function is based on the DNSim experiment "cell_pulses".
+% This is designed to be used in conjunction with the experiment
+% ProbeCellProperties which removes all connections from a model and produces
+% a data array of simulated data in response to a series of hyperpolarizing and
+% depolarizing pulses. This function is based on the DNSim experiment
+% "cell_pulses".
+%
+% Usage:
+%   stats = CalcCellProperties(data,'option1',option1,...)
+%
+% Inputs:
+%   - data: array of DynaSim data structures returned by ProbeCellProperties
+%
+% Outputs:
+%   - stats.(pop).(measure) [1 x num_cells] (averaged over repetitions)
+%   - measures (intrinsic properties):
+%       RMP, V_thresh, R_in, tau_m, FI_slope, CV, AR24, AR_coefficient
+%       FR_min (threshrate), FR_min2 (steprate?), FR_max (steprate?)
+%     - AP morphology: AP_amp, AP_dur (spikewidth), AP_taur, AP_taud
+%                      Ih_relsag, Ih_abssag, hump, AHP_amp, AHP_dur
+%                      AHP_time2trough, ISI_median, AR23, AR13, ISI1,
+%                      min_ISI_median, ISI_step_median
+%
+% Algorithm walkthrough:
+%   From Iinj=0:
+%   RMP = (avg over 50-100% step | Iinj=0)
+%
+%   From largest hyperpolarizing step:
+%   Ih Sag = (Vend-Vmin)/|RMP-Vend|
+%       where Vmin=(min voltage during T sec hyperpolarizing step)
+%             Vend=(V at end of hyperpolarizing step)
+%   Ih abs sag = (Vend-Vmin)
+%
+%   From last subthreshold step:
+%   Hump = (Vmax-Vend)/|RMP-Vend|
+%       where Vmax=(max voltage during depolarizing step preceding spike)
+%             Vend=(V at end of step)
+%
+%   Across hyperpolarizing subthreshold steps:
+%   Rin = Input resistence (I/V slope) [4]
+%   taum = Membrane time constant: time for voltage relaxation to (1/e)Vmax
+%     where Vmax=max deflection from baseline on hyperpolarizing steps
+%     note: avg taum's over small drives that keep active currents silent (eg, 5-15pA)
+%
+%   Across suprathreshold steps with at least two spikes:
+%   FI slope [Hz/nA]: slope of f/I curve (firing freq vs injected current 0-140pA) (see [2])
+%
+%   Across suprathreshold steps >=60pA above first step with at least two spikes:
+%   AR coefficient: (slope of AR/I) where per step AR=ISI(1)/ISI(end)
+%   Note: AR = Adaptation ratio
+%   ISI_step_median = median ISI on step 60pA above first step w/ 2 spikes
+%   FR_step = mean FR on step 60pA above first step w/ 2 spikes
+%   ARif = max AR across steps >=60pA above first step w/ 2 spikes
+%
+%   From first suprathreshold T sec step:
+%   FRmin (threshrate) = (# spikes)/T
+%
+%   From first suprathreshold T sec step with at least two spikes:
+%   FRmin2 (steprate?) = (# spikes)/T
+%
+%   From first spike of first suprathreshold step: AP morphology
+%   Vthresh = V( crossing(dV/dt,20mV/ms) ) %10mV/ms) )
+%   AP_amp = (Vpeak-Vthresh)
+%   AP_taur = (time to rise from 10% to 90% between Vthresh and Vpeak)
+%   AP_taud = (time to decay from 10% to 90% between Vpeak and Vthresh)
+%   AP_dur (spikewidth) = (time between rising and falling (Vthresh+APamp/2) = (Vthresh+Vpeak)/2)
+%   AHP_amp = (Vbaseline-Vmin) where Vmin taken during repolarizing phase
+%   AHP_dur (AHP duration, half-width) = time between half-peak amplitude of AHP 
+%                                     = (time between falling and rising (Vbaseline+AHPamp/2))
+%   AHP_time2trough = (time between falling Vbaseline and AHPamp)
+%   ADPamp? ADPdur?
+%
+%   From suprathreshold step 20pA above first step with at least two spikes:
+%   CV(ISIs over 30-100% step)
+%
+%   From last suprathreshold T sec step (or step at amp=max (eg, 140pA)):
+%   FR_max (steprate?): (# spikes)/T
+%   min_ISI_median
+%   max_ISI
+%   AR24 = ISI(2)/ISI(4)
+%
+% References for methods used:
+%   [1] Steffensen, Scott C., et al. "Electrophysiological characterization of
+%     GABAergic neurons in the ventral tegmental area." The Journal of
+%     neuroscience 18.19 (1998): 8003-8015.
+%   [2] Van Aerde, Karlijn I., et al. "Flexible spike timing of layer 5 neurons
+%     during dynamic beta oscillation shifts in rat prefrontal cortex." The
+%     Journal of physiology 587.21 (2009): 5177-5196.
+%   [3] Connors, BW, MJ Gutnick, DA Prince. "Electrophysiological properties of
+%     neocortical neurons in vitro." Journal of Neurophysiology 48.6 (1982):
+%     1302-1320.
+%   [4] Povysheva, Nadezhda V., et al. "Parvalbumin-positive basket
+%     interneurons in monkey and rat prefrontal cortex." Journal of
+%     neurophysiology 100.4 (2008): 2348-2360.
+%   [5] Gonz?lez-Burgos, Guillermo, et al. "Functional properties of fast
+%     spiking interneurons and their synaptic connections with pyramidal cells in
+%     primate dorsolateral prefrontal cortex." Journal of Neurophysiology 93.2
+%     (2005): 942-953.
+%   [6] Gorelova, Natalia, Jeremy K. Seamans, and Charles R. Yang. "Mechanisms
+%     of dopamine activation of fast-spiking interneurons that exert inhibition
+%     in rat prefrontal cortex." Journal of neurophysiology 88.6 (2002):
+%     3150-3166.
+%
+% Example:
+%   data = ProbeCellProperties(model)
+%   stats = CalcCellProperties(data)
+%
 % See also: ProbeCellProperties
 
 % Check inputs

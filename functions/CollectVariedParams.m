@@ -1,11 +1,16 @@
 function [param_mat,varied,param_cell]=CollectVariedParams(data)
-% [all_values,param_names,unique_values]=CollectVariedParams(data)
-% inputs:
-%   data: 
-% outputs:
-%   all_values: [num_sets x num_params_varied], values used for each data set
-%   param_names: list of names of varied parameters
-%   unique_values: cell array of unique values used for each varied  parameter
+%COLLECTVARIEDPARAMS - Gathers info on parameters that have been varied in a batch
+%
+% Usage: [deprecated?]
+%   [all_values,param_names,unique_values]=CollectVariedParams(data)
+%
+% Inputs:
+%   - data: DynaSim data structure
+%
+% Outputs:
+%   - all_values: [num_sets x num_params_varied], values used for each data set
+%   - param_names: list of names of varied parameters
+%   - unique_values: cell array of unique values used for each varied  parameter
 
 % Check inputs
 if ~isstruct(data)

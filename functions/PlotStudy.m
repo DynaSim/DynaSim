@@ -1,33 +1,35 @@
 function [handles, hsp, h2]=PlotStudy(data,myplot_handle,varargin)
-%% [handles, h2, hsp] = PlotStudy(data,myplot_handle)
-% Purpose: Applies a user-specified plotting function to each element of
-%     data structure. Arrays the output plots in a grid, similar to
-%     PlotData. Intended for use with results from simulation
-%     studies varying some aspect of the model or inputs.
+%PLOTSTUDY - Applies a user-specified plotting function to each element of data structure.
+%
+% **IMPORTANT**: This function should just produce a plot. It should not open
+% any new figures or subplots. It can return an axis handle, but this is not
+% necessary.
+%
+% Arrays the output plots in a grid, similar to PlotData. Intended for use with
+% results from simulation studies varying some aspect of the model or inputs.
+%
+% Usage:
+%   [handles, h2, hsp] = PlotStudy(data,myplot_handle)
 %
 % Inputs:
-%     data: DynaSim data structure (see CheckData)
-%     myplot_handle: Handle for plotting function.
-%         **IMPORTANT**: This function should just produce a plot. It should
-%         not open any new figures or subplots. It can return an axis
-%         handle, but this is not necessary.
-%     options:
-%         'textfontsize' - default text font size of 10
-%         'use_subplot_grid' - turns on or off subplot grid. Default is on. Off might be faster.
+%     - data: DynaSim data structure (see CheckData)
+%     - myplot_handle: Handle for plotting function.
+%     - options:
+%       'textfontsize': default text font size of 10
+%       'use_subplot_grid': turns on or off subplot grid. Default is on. Off might be faster.
 %
 % Outputs:
-%     handles: handle of the figure
-%     hsp: handle of subplot_grid object
-%     h2: return values of myplot_handle (usually will be Line handles)
+%     - handles: handle of the figure
+%     - hsp: handle of subplot_grid object
+%     - h2: return values of myplot_handle (usually will be Line handles)
 %
-% Examples:
+% Example:
 %     myfunc = @(x) plot(x.RS_V)
 %     figure; myunc(data(1));   % Single plot
 %     PlotFunc(data,@myfunc)    % Grid of all plots
 %
-% Dependencies
+% Dependencies:
 %     Uses subplot_grid.
-
 
 % data=CheckData(data);
 handles=[];

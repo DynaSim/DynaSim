@@ -1,42 +1,49 @@
 function data=SelectData(data,varargin)
-%% data=SelectData(data,'option',value)
-% Purpose: select subset of data
-% Inputs:
-%   data -- DNSim data structure (see SimulateModel)
-%   options:
-%     'time_limits' -- [beg,end] (units of data.time) [ms]
-%     'varied' -- specification of search space subset to retrieve (see NOTE 1)
-% 
-% NOTE 1: 'varied' can be specified in two ways:
-% Method 1: a way similar to 'vary' in
-% SimulateModel and Vary2Modifications. However, instead of indicating
-% values for a variable to take, 'varied' involves the specification of a
-% range of values. Syntax: vary={object, variable, [low,high]; ...}, where
-% low is the lower bound on the range varied and high is the upper bound
-% for the component varied. For instance, if 'gNa' in population 'E' was
-% varied 0:.1:1 by setting 'vary' to {'E','gNa',0:.1:1}, then to select the
-% subset of gNa values between .3 and .5, set 'varied' to {'E','gNa',[.3 .5]}.
-% Method 2: 'varied' can be specified using the resulting
-% component name stored in data.varied. e.g., {'E_iNa_gNa',[.3 .5]}.
-% 
-% NOTE 2: if 'varied' values are requested and not a two-element array
-% (e.g., [.3 .5]), then return all matching values.
-% 
-% limitation: SelectData currently supports returning value ranges but not 
+%SELECTDATA -  select subset of data
+%
+% Limitation: SelectData currently supports returning value ranges but not
 % non-numeric model components (e.g., mechanism_list modifications).
-% 
+%
+% Usage:
+%   data=SelectData(data,'option',value)
+%
+% Inputs:
+%   - data: DNSim data structure (see SimulateModel)
+%   - options:
+%     'time_limits': in units of data.time {[beg,end]}
+%     'varied': specification of search space subset to retrieve (see NOTE 1)
+%
+% Notes:
+% - NOTE 1: 'varied' can be specified in two ways:
+%   - Method 1: a way similar to 'vary' in SimulateModel and
+%     Vary2Modifications. However, instead of indicating values for a variable to
+%     take, 'varied' involves the specification of a range of values. Syntax:
+%     vary={object, variable, [low,high]; ...}, where low is the lower bound on
+%     the range varied and high is the upper bound for the component varied. For
+%     instance, if 'gNa' in population 'E' was varied 0:.1:1 by setting 'vary' to
+%     {'E','gNa',0:.1:1}, then to select the subset of gNa values between .3 and
+%     .5, set 'varied' to {'E','gNa',[.3 .5]}.
+%   - Method 2: 'varied' can be specified using the resulting component name
+%     stored in data.varied. e.g., {'E_iNa_gNa',[.3 .5]}.
+%
+% - NOTE 2: if 'varied' values are requested and not a two-element array (e.g.,
+%   [.3 .5]), then return all matching values.
+%
 % Examples:
-% data=SelectData(data,'time_limits',[20 80]); % return simulated data from 20-80ms
-% data=SelectData(data,'varied',{'E','gNa',[.3 .5]}); % return data sets with gNa set between .3 and .5
-% data=SelectData(data,'time_limits',[20 80],'varied',{'E','gNa',[.3 .5]});
-% data=SelectData(data,'roi',{'E_v',[1 4]});
+%   % return simulated data from 20-80ms
+%   data=SelectData(data,'time_limits',[20 80]);
+%   % return data sets with gNa set between .3 and .5
+%   data=SelectData(data,'varied',{'E','gNa',[.3 .5]});
+%   data=SelectData(data,'time_limits',[20 80],'varied',{'E','gNa',[.3 .5]});
+%   data=SelectData(data,'roi',{'E_v',[1 4]});
+%
+% TODO:
+%   - Specify subsets to return in terms of ROIs: {'E',1:50;'I',1:10,'F',[]}
+%     (exclude F) (default all cells for any pops not specified in ROIs).
+%   - Possible format for specifying range_varied:
+%     {'E','gNa',[.1 .3]; 'I->E','tauI',[15 25]; 'I','mechanism_list','+iM'}
+%
 % See also: SimulateModel, Vary2Modifications, ImportData
-
-% todo: specify subsets to return in terms of ROIs:
-% {'E',1:50;'I',1:10,'F',[]} (exclude F) (default all cells for any pops not specified in ROIs).
-
-% possible format for specifying range_varied:
-% {'E','gNa',[.1 .3]; 'I->E','tauI',[15 25]; 'I','mechanism_list','+iM'}
 
 % check inputs
 data=CheckData(data);

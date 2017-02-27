@@ -1,28 +1,31 @@
 function handles=PlotFR2(data,varargin)
-%% plotFR(data,'option',value)
-% Purpose: plot spike rates in various ways depending on what data was
-%          provided. As with PlotFR, but has additional options for
-%          controlling output of SimStudy mode. 
-%          
+%PLOTFR2 - plot spike rates in various ways depending on what data was provided.
+%
+% As with PlotFR, but has additional options for controlling output of SimStudy mode.
+%
+% Usage:
+%   PlotFR2(data,'option',value)
+%
 % Inputs:
-%   data: DynaSim data structure (see CheckData)
-%   options: (same as CalcFR)
-%     CalcFR options:
-%     'variable' - name of field containing data on which to calculate firing
-%                rates (default: *_spikes or first variable in data.labels)
-%     'threshold' - scalar threshold value for detecting events (default: 0)
-%     'bin_size' - size of temporal window over which to calculate rate [ms or fraction of data set] (default: 5% of the data set)
-%     'bin_shift' - how much to shift the bin before calculating rate again [ms or fraction of data set] (default: 1% of the data set)
-%     'plot_type' - options for sim study mode. Options include 'heatmap',
-%                   'heatmap_sorted' (default), 'meanFR,' 'meanFRdens', and
-%                   'summary'.
-% 
+%   - data: DynaSim data structure (see CheckData)
+%   - options: (same as CalcFR)
+%     'variable' : name of field containing data on which to calculate firing
+%                  rates (default: *_spikes or first variable in data.labels)
+%     'threshold': scalar threshold value for detecting events (default: 0)
+%     'bin_size' : size of temporal window over which to calculate rate [ms or
+%                  fraction of data set] (default: 5% of the data set)
+%     'bin_shift': how much to shift the bin before calculating rate again [ms
+%                  or fraction of data set] (default: 1% of the data set)
+%     'plot_type': options for sim study mode. Options include 'heatmap',
+%                  'heatmap_sorted' (default), 'meanFR,' 'meanFRdens', and
+%                  'summary'.
+%
 % Examples:
 % PlotFR(data,'bin_size',30,'bin_shift',10);
-% 
-% See also: CalcFR, SimulateModel, CheckData
-
+%
 % TODO: add rastergrams
+%
+% See also: CalcFR, SimulateModel, CheckData
 
 data=CheckData(data);
 fields=fieldnames(data);

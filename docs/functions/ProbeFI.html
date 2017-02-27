@@ -1,0 +1,112 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of ProbeFI</title>
+  <meta name="keywords" content="ProbeFI">
+  <meta name="description" content="% data=ProbeFI(model,varargin)">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html &copy; 2005 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="../m2html.css">
+  <script type="text/javascript">
+    if (top.frames.length == 0) { top.location = "../index.html"; };
+  </script>
+</head>
+<body>
+<a name="_top"></a>
+<!-- menu.html functions -->
+<h1>ProbeFI
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>% data=ProbeFI(model,varargin)</strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>function data=ProbeFI(model,varargin) </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre class="comment">% data=ProbeFI(model,varargin)
+ purpose: run experiment delivering varying levels of tonic input to each 
+ population across multiple simulations.
+ inputs:
+   model - DynaSim model structure
+   options:
+     target - ...
+     amplitudes - ...
+     (any options for SimulateModel)
+     (any options for CalcFR)
+ outputs:
+   array of DynaSim data structures for simulations varying inputs
+ 
+ see also: <a href="SimulateModel.html" class="code" title="function [data,studyinfo]=SimulateModel(model,varargin)">SimulateModel</a>, <a href="CalcFR.html" class="code" title="function data = CalcFR(data,varargin)">CalcFR</a></pre></div>
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+This function calls:
+<ul style="list-style-image:url(../matlabicon.gif)">
+<li><a href="ApplyModifications.html" class="code" title="function [output,modifications]=ApplyModifications(model,modifications)">ApplyModifications</a>	APPLYMODIFICATIONS - Apply modifications to DynaSim specification or model structure</li><li><a href="CalcFR.html" class="code" title="function data = CalcFR(data,varargin)">CalcFR</a>	CALCFR - Calculate firing rage for DynaSim data</li><li><a href="CheckModel.html" class="code" title="function model=CheckModel(model)">CheckModel</a>	CHECKMODEL - Standardize model structure and auto-populate missing fields</li><li><a href="CheckOptions.html" class="code" title="function parms = CheckOptions(options, options_schema, strict)">CheckOptions</a>	CHECKOPTIONS - organize key/value pairs in structure with default or user-supplied values according to a schema</li><li><a href="SimulateModel.html" class="code" title="function [data,studyinfo]=SimulateModel(model,varargin)">SimulateModel</a>	SIMULATEMODEL -  manage simulation of a DynaSim model.</li></ul>
+This function is called by:
+<ul style="list-style-image:url(../matlabicon.gif)">
+</ul>
+<!-- crossreference -->
+
+
+
+<h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function data=ProbeFI(model,varargin)</a>
+0002 <span class="comment">%% data=ProbeFI(model,varargin)</span>
+0003 <span class="comment">% purpose: run experiment delivering varying levels of tonic input to each</span>
+0004 <span class="comment">% population across multiple simulations.</span>
+0005 <span class="comment">% inputs:</span>
+0006 <span class="comment">%   model - DynaSim model structure</span>
+0007 <span class="comment">%   options:</span>
+0008 <span class="comment">%     target - ...</span>
+0009 <span class="comment">%     amplitudes - ...</span>
+0010 <span class="comment">%     (any options for SimulateModel)</span>
+0011 <span class="comment">%     (any options for CalcFR)</span>
+0012 <span class="comment">% outputs:</span>
+0013 <span class="comment">%   array of DynaSim data structures for simulations varying inputs</span>
+0014 <span class="comment">%</span>
+0015 <span class="comment">% see also: SimulateModel, CalcFR</span>
+0016 
+0017 options=<a href="CheckOptions.html" class="code" title="function parms = CheckOptions(options, options_schema, strict)">CheckOptions</a>(varargin,{<span class="keyword">...</span>
+0018   <span class="string">'target'</span>,<span class="string">'ODE1'</span>,[],<span class="keyword">...</span>
+0019   <span class="string">'amplitudes'</span>,0:2:10,[],<span class="keyword">...</span>
+0020   <span class="string">'onset'</span>,0,[],<span class="keyword">...</span>
+0021   },false);
+0022 
+0023 model=<a href="CheckModel.html" class="code" title="function model=CheckModel(model)">CheckModel</a>(model);
+0024 
+0025 npops=length(model.specification.populations);
+0026 modifications=cell(npops,3);
+0027 vary=cell(npops,3);
+0028 <span class="keyword">for</span> i=1:npops
+0029   name=model.specification.populations(i).name;
+0030   <span class="comment">% prepare list of modifications to add tonic drive to all populations in model</span>
+0031   <span class="comment">%modifications(i,:)={name,'equations',['cat(' options.target ',+TONIC)']};</span>
+0032   modifications(i,:)={name,<span class="string">'equations'</span>,sprintf(<span class="string">'cat(%s,+TONIC*(t&gt;%g))'</span>,options.target,options.onset)};
+0033   <span class="comment">% prepare specification to vary tonic drive across simulations</span>
+0034   vary(i,:)={name,<span class="string">'TONIC'</span>,options.amplitudes};
+0035 <span class="keyword">end</span>
+0036 
+0037 <span class="comment">% apply modifications</span>
+0038 model=<a href="ApplyModifications.html" class="code" title="function [output,modifications]=ApplyModifications(model,modifications)">ApplyModifications</a>(model,modifications);
+0039 
+0040 <span class="comment">% run simulations varying tonic drives</span>
+0041 data=<a href="SimulateModel.html" class="code" title="function [data,studyinfo]=SimulateModel(model,varargin)">SimulateModel</a>(model,<span class="string">'vary'</span>,vary,varargin{:});
+0042 
+0043 <span class="comment">% prepare CalcFR options:</span>
+0044 <span class="keyword">if</span> ~any(cellfun(@(x)isequal(x,<span class="string">'variable'</span>),varargin))
+0045   <span class="comment">% default to extract spike events from the first state variable</span>
+0046   var=regexp(model.state_variables{1},<span class="string">'_(\w+)$'</span>,<span class="string">'tokens'</span>,<span class="string">'once'</span>);
+0047   <span class="keyword">if</span> ~isempty(var)
+0048     varargin{end+1}=<span class="string">'variable'</span>;
+0049     varargin{end+1}=[<span class="string">'*_'</span> var{1}];
+0050   <span class="keyword">end</span>
+0051 <span class="keyword">end</span>
+0052 <span class="comment">% calculate resulting firing rates for each population</span>
+0053 data=<a href="CalcFR.html" class="code" title="function data = CalcFR(data,varargin)">CalcFR</a>(data,varargin{:});</pre></div>
+<hr><address>Generated on Mon 27-Feb-2017 14:58:50 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" target="_parent">m2html</a></strong> &copy; 2005</address>
+</body>
+</html>

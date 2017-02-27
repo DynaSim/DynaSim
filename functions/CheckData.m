@@ -1,9 +1,13 @@
 function data=CheckData(data)
-%% data=CheckData(data)
-% Purpose: standardize data structure and auto-populate missing fields
+%CHECKDATA - Standardize data structure and auto-populate missing fields
+%
+% Usage:
+%   data=CheckData(data)
+%
 % Input: DynaSim data structure, data matrix [time x cells], or cell array of data matrices
-% Output: DynaSim data structure (standardized)
-%   DynaSim data structure:
+%
+% Output:
+%   - DynaSim data structure organization (standardized):
 %     data.labels           : list of state variables and monitors recorded
 %     data.(state_variables): state variable data matrix [time x cells]
 %     data.(monitors)       : monitor data matrix [time x cells]
@@ -12,7 +16,7 @@ function data=CheckData(data)
 %     data.model            : model used to generate simulated data
 %     [data.varied]         : list of varied model components
 %     [data.results]        : list of derived data sets created by post-processing
-% 
+%
 % See also: SimulateModel, ImportData, ExportData
 
 % check data type

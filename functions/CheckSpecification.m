@@ -1,100 +1,108 @@
 function spec=CheckSpecification(specification)
-%% specification=CheckSpecification(specification)
-% Purpose: standardize specification structure and auto-populate missing fields
+%CHECKSPECIFICATION - standardize specification structure and auto-populate missing fields
+%
+% Usage:
+%   specification=CheckSpecification(specification)
+%
 % Input: DynaSim specification structure or equations
-% Output: DynaSim specification structure (standardized)
-% 
-% DynaSim specification structure
-% .populations(i) (required): contains info for defining independent
-%     population models
-%   .name (default: 'pop1')      : name of population
-%   .size (default: 1)           : number of elements in population (i.e., # cells)
-%   .equations (required)        : string listing equations (see NOTE 1)
-%   .mechanism_list (default: []): cell array listing mechanisms (see NOTE 2)
-%   .parameters (default: [])    : parameters to assign across all equations in
-%     the population. provide as cell array list of key/value pairs
-%     {'param1',value1,'param2',value2,...}
-%   .conditionals (default: [])  : (see NOTE 3) if-then conditional actions
-%     .namespace (auto)    : string giving the namespace of the condition 
-%                            (pop_ or pop_mech_)
-%     .condition (required): string giving the condition to check
-%     .action (required)   : what to do if the condition is met
-%     .else (default: [])  : what to do if the condition is not met
-%   .monitors (default: [])      : (see NOTE 3) substructure with fields specifying what to
-%     record on each step of numerical integration in addition to state variables.
-%   .model (default: [])   : optional DynaSim model structure
-% .connections(i) (default: []): contains info for linking population models
-%   .source (required if >1 pops): name of source population (see NOTE 7)
-%   .target (required if >1 pops): name of target population
-%   .mechanism_list (required)   : list of mechanisms that link two populations
-%   .parameters (default: [])    : parameters to assign across all equations in
-%     mechanisms in this connection's mechanism_list.
-% 
-% NOTE 1: .equations can be an equation string, cell array listing
-% equation strings, or a file name pointing to a model / equations stored
-% on disk (accepted file types: .eqns (equations of population), 
-% .m (function defining a model structure), ...)
-% 
-% NOTE 2: .mechanism_list is a cell array listing names of mechanisms to be
-% included in the population or used to connect two populations. each
-% mechanism name must have a mechanism file with the same name somewhere in
-% the search path (the file should have extension .mech). The search path
-% starts with the current directory, then the subdirectories of
-% [dynasim]/models, and lastly the full matlab search path.
-% 
-% NOTE 3: conditionals and monitors are most easily specified by including
-% them in .equations.
-% e.g.) spec.populations.equations='dv/dt=-v; if(v<eps)(v=10); monitor o=v^2'
-%       data=SimulateModel(spec); figure; plot(data.time,data.pop1_o);
-% 
-% NOTE 4: "pops" can be used instead of "populations". "cons" can be used
-% instead of "connections".
-% 
-% NOTE 5: all population info can be embedded in the equation string.
-% Specify name by starting the string with 'NAME: *' (e.g., 'E: dv/dt=-v').
-% Specify size by including [SIZE] after the state variable (e.g., 'dv[5]/dt=-v').
-% Specify mechanism_list by including cell array listing mechanism names
-% without single quotes (e.g., 'dv/dt=@current; {iNa,iK}').
-% 
-% NOTE 6: the mechanism linker target IDENTIFIER used to link mechanism variables and
-% functions to population equations can be overriden by including
-% @NEWIDENTIFIER in the equations and after the mechanism name. (e.g.,
-% 'dv/dt=@M; {iNa,iK}@M'; or .mechanism_list={'iNa@M','iK@M'}).
-% 
-% NOTE 7: "direction" can be used instead of "source" and "target". The
-% syntax is "SOURCE->TARGET" or "TARGET<-SOURCE". Either will be properly
-% split into .source and .target fields. SOURCE and TARGET must be existing
-% population names.
-% 
-% Example 1: obtain empty specification structure with all fields
-% specification=CheckSpecification([]);
-% 
-% Example 2: standardize existing specification
-% specification=CheckSpecification(specification)
-% 
-% Example 3: standardize equations in cell array
-% eqns={
-%   's=10; r=27; b=2.666';
-%   'dx/dt=s*(y-x)';
-%   'dy/dt=r*x-y-x*z';
-%   'dz/dt=-b*z+x*y';
-% specification=CheckSpecification(eqns);
-% 
-% Example 4: standardize equations in character array
-% eqns='tau=10; R=10; E=-70; dV/dt=(E-V+R*1.55)/tau; if(V>-55)(V=-75)';
-% specification=CheckSpecification(eqns);
-% 
-% Example 5: standardize specification with compact field names
-% s.pops.size=10;
-% s.pops.equations='dv/dt=-v';
-% s.cons.mechanism_list='iGABAa';
-% s=CheckSpecification(s)
-% 
-% Example 6: standardize specification with everything in equation string
-% s.pops.equations='E:dv[10]/dt=@M+I; {iNa,iK}@M; I=10';
-% s=CheckSpecification(s)
-% 
-% see also: GenerateModel, CheckModel
+%
+% Output:
+%   - DynaSim specification structure (standardized)
+%     .populations(i) (required): contains info for defining independent population models
+%       .name (default: 'pop1')      : name of population
+%       .size (default: 1)           : number of elements in population (i.e., # cells)
+%       .equations (required)        : string listing equations (see NOTE 1)
+%       .mechanism_list (default: []): cell array listing mechanisms (see NOTE 2)
+%       .parameters (default: [])    : parameters to assign across all equations in
+%                                      the population. provide as cell array list of
+%                                      key/value pairs, like
+%                                      {'param1',value1,'param2',value2,...}
+%       .conditionals (default: [])  : (see NOTE 3) if-then conditional actions
+%         .namespace (auto)    : string giving the namespace of the condition 
+%                                (pop_ or pop_mech_)
+%         .condition (required): string giving the condition to check
+%         .action (required)   : what to do if the condition is met
+%         .else (default: [])  : what to do if the condition is not met
+%       .monitors (default: [])      : (see NOTE 3) substructure with fields specifying
+%                                      what to record on each step of numerical
+%                                      integration in addition to state
+%                                      variables.
+%       .model (default: [])   : optional DynaSim model structure
+%     .connections(i) (default: []): contains info for linking population models
+%       .source (required if >1 pops): name of source population (see NOTE 7)
+%       .target (required if >1 pops): name of target population
+%       .mechanism_list (required)   : list of mechanisms that link two populations
+%       .parameters (default: [])    : parameters to assign across all equations in
+%                                      mechanisms in this connection's mechanism_list.
+%
+% Notes:
+%   - NOTE 1: .equations can be an equation string, cell array listing equation
+%       strings, or a file name pointing to a model / equations stored on disk
+%       (accepted file types: .eqns (equations of population), .m (function defining
+%       a model structure), ...)
+%
+%   - NOTE 2: .mechanism_list is a cell array listing names of mechanisms to be
+%       included in the population or used to connect two populations. each mechanism
+%       name must have a mechanism file with the same name somewhere in the search
+%       path (the file should have extension .mech). The search path starts with the
+%       current directory, then the subdirectories of [dynasim]/models, and lastly
+%       the full matlab search path.
+%
+%   - NOTE 3: conditionals and monitors are most easily specified by including
+%       them in .equations.
+%     - Example:
+%         spec.populations.equations='dv/dt=-v; if(v<eps)(v=10); monitor o=v^2'
+%         data=SimulateModel(spec); figure; plot(data.time,data.pop1_o);
+%
+%   - NOTE 4: "pops" can be used instead of "populations". "cons" can be used
+%       instead of "connections".
+%
+%   - NOTE 5: all population info can be embedded in the equation string.
+%       Specify name by starting the string with 'NAME: *' (e.g., 'E: dv/dt=-v').
+%       Specify size by including [SIZE] after the state variable (e.g., 'dv[5]/dt=-v').
+%       Specify mechanism_list by including cell array listing mechanism names
+%       without single quotes (e.g., 'dv/dt=@current; {iNa,iK}').
+%
+%   - NOTE 6: the mechanism linker target IDENTIFIER used to link mechanism
+%       variables and functions to population equations can be overriden by including
+%       @NEWIDENTIFIER in the equations and after the mechanism name. (e.g.,
+%       'dv/dt=@M; {iNa,iK}@M'; or .mechanism_list={'iNa@M','iK@M'}).
+%
+%   - NOTE 7: "direction" can be used instead of "source" and "target". The
+%       syntax is "SOURCE->TARGET" or "TARGET<-SOURCE". Either will be properly split
+%       into .source and .target fields. SOURCE and TARGET must be existing
+%       population names.
+%
+% Examples:
+%   - Example 1: obtain empty specification structure with all fields
+%       specification=CheckSpecification([]);
+%
+%   - Example 2: standardize existing specification
+%       specification=CheckSpecification(specification)
+%
+%   - Example 3: standardize equations in cell array
+%       eqns={
+%         's=10; r=27; b=2.666';
+%         'dx/dt=s*(y-x)';
+%         'dy/dt=r*x-y-x*z';
+%         'dz/dt=-b*z+x*y';
+%       specification=CheckSpecification(eqns);
+%
+%   - Example 4: standardize equations in character array
+%       eqns='tau=10; R=10; E=-70; dV/dt=(E-V+R*1.55)/tau; if(V>-55)(V=-75)';
+%       specification=CheckSpecification(eqns);
+%
+%   - Example 5: standardize specification with compact field names
+%       s.pops.size=10;
+%       s.pops.equations='dv/dt=-v';
+%       s.cons.mechanism_list='iGABAa';
+%       s=CheckSpecification(s)
+%
+%   - Example 6: standardize specification with everything in equation string
+%       s.pops.equations='E:dv[10]/dt=@M+I; {iNa,iK}@M; I=10';
+%       s=CheckSpecification(s)
+%
+% See also: GenerateModel, CheckModel
 
 % check if input is a string or cell with equations and package in spec structure
 if ischar(specification) || iscell(specification)

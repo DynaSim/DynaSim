@@ -1,6 +1,7 @@
 function options=CheckSolverOptions(options)
-% purpose: standardize simulation options appended to params.mat
-% - use to achieve consistent params.mat whether created by SimulateModel(),
+%CHECKSOLVEROPTIONS - standardize simulation options appended to params.mat
+%
+% Use this to achieve consistent params.mat whether created by SimulateModel(),
 % WriteDynaSimSolver(), or WriteMatlabSolver().
 
 % standardize and set defaults

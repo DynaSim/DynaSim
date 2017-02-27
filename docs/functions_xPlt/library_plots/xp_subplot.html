@@ -1,0 +1,134 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of xp_subplot</title>
+  <meta name="keywords" content="xp_subplot">
+  <meta name="description" content="xp must be 1D or 2D">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html &copy; 2005 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="../../m2html.css">
+  <script type="text/javascript">
+    if (top.frames.length == 0) { top.location = "../../index.html"; };
+  </script>
+</head>
+<body>
+<a name="_top"></a>
+<!-- ../menu.html functions_xPlt --><!-- menu.html library_plots -->
+<h1>xp_subplot
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+<div class="box"><strong>xp must be 1D or 2D</strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+<div class="box"><strong>function h=xp_subplot (xp,transpose_on,display_mode) </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+<div class="fragment"><pre class="comment"> xp must be 1D or 2D</pre></div>
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+This function calls:
+<ul style="list-style-image:url(../../matlabicon.gif)">
+</ul>
+This function is called by:
+<ul style="list-style-image:url(../../matlabicon.gif)">
+<li><a href="../../functions_xPlt/debug_testing_script.html" class="code" title="">debug_testing_script</a>	This is a script that I run through every time I want to test the code.</li></ul>
+<!-- crossreference -->
+
+<h2><a name="_subfunctions"></a>SUBFUNCTIONS <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+<ul style="list-style-image:url(../../matlabicon.gif)">
+<li><a href="#_sub1" class="code">function h=xp_subplot1_noimage(xp)</a></li><li><a href="#_sub2" class="code">function h0 = xp_subplot2_asimage(xp)</a></li></ul>
+
+<h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+<div class="fragment"><pre>0001 
+0002 
+0003 <a name="_sub0" href="#_subfunctions" class="code">function h=xp_subplot (xp,transpose_on,display_mode)</a>
+0004     <span class="comment">% xp must be 1D or 2D</span>
+0005     
+0006     <span class="keyword">if</span> nargin &lt; 2
+0007         transpose_on = [];
+0008     <span class="keyword">end</span>
+0009     
+0010     <span class="keyword">if</span> nargin &lt; 3
+0011         display_mode = [];
+0012     <span class="keyword">end</span>
+0013     
+0014     <span class="keyword">if</span> isempty(transpose_on); transpose_on = 0; <span class="keyword">end</span>
+0015     <span class="keyword">if</span> isempty(display_mode); display_mode = 0; <span class="keyword">end</span>
+0016             <span class="comment">% Display_mode: 0-Just plot directly</span>
+0017                           <span class="comment">% 1-Plot as an image (cdata)</span>
+0018                           <span class="comment">% 2-Save to a figure file</span>
+0019     
+0020     <span class="keyword">if</span> transpose_on
+0021         xp = xp.transpose;
+0022     <span class="keyword">end</span>
+0023     
+0024     
+0025     
+0026     <span class="keyword">if</span> display_mode == 0
+0027         
+0028         h=<a href="#_sub1" class="code" title="subfunction h=xp_subplot1_noimage(xp)">xp_subplot1_noimage</a>(xp);
+0029         
+0030     <span class="keyword">elseif</span> display_mode == 1
+0031         
+0032         h=<a href="#_sub2" class="code" title="subfunction h0 = xp_subplot2_asimage(xp)">xp_subplot2_asimage</a>(xp);
+0033 
+0034     <span class="keyword">end</span>
+0035 <span class="keyword">end</span>
+0036 
+0037 
+0038 
+0039 <a name="_sub1" href="#_subfunctions" class="code">function h=xp_subplot1_noimage(xp)</a>
+0040         
+0041         sz = size(xp);
+0042         N1 = sz(1);
+0043         N2 = sz(2);
+0044         
+0045         <span class="comment">% Creates a new figure with a bunch of subplots</span>
+0046         h = figure(<span class="string">'Units'</span>,<span class="string">'normalized'</span>,<span class="string">'Position'</span>,[0,0,1,1]);
+0047         c=0;
+0048         <span class="keyword">for</span> i = 1:N1
+0049             <span class="keyword">for</span> j = 1:N2
+0050                 c=c+1;
+0051                 figure(h);
+0052                 subplot(N1,N2,c); 
+0053                 xp.data{i,j}(); 
+0054                 xp2 = xp.subset(i,j);
+0055                 title(strrep(xp2.getaxisinfo,<span class="string">'_'</span>,<span class="string">' '</span>));
+0056             <span class="keyword">end</span>
+0057         <span class="keyword">end</span>
+0058 <span class="keyword">end</span>
+0059 
+0060 <a name="_sub2" href="#_subfunctions" class="code">function h0 = xp_subplot2_asimage(xp)</a>
+0061 
+0062     sz = size(xp);
+0063     N1 = sz(1);
+0064     N2 = sz(2);
+0065 
+0066     <span class="comment">% Creates an existing figure as an image</span>
+0067     h0 = gcf; ha0 = gca;
+0068     <span class="comment">%h = figure('visible','off','Position',[ 440   659   497   139]);</span>
+0069     h = figure(<span class="string">'visible'</span>,<span class="string">'off'</span>);
+0070     c=0;
+0071     <span class="keyword">for</span> i = 1:N1
+0072         <span class="keyword">for</span> j = 1:N2
+0073             c=c+1;
+0074             subplot(N1,N2,c); 
+0075             xp.data{i,j}(); 
+0076             xp2 = xp.subset(i,j);
+0077             title(strrep(xp2.getaxisinfo,<span class="string">'_'</span>,<span class="string">' '</span>));
+0078         <span class="keyword">end</span>
+0079     <span class="keyword">end</span>
+0080     cdata = print(h,<span class="string">'-RGBImage'</span>);
+0081     close(h);
+0082 
+0083     <span class="comment">% Restore original axes and display image</span>
+0084     figure(h0); axes(ha0);
+0085     imshow(cdata);
+0086 <span class="keyword">end</span></pre></div>
+<hr><address>Generated on Mon 27-Feb-2017 14:58:50 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" target="_parent">m2html</a></strong> &copy; 2005</address>
+</body>
+</html>

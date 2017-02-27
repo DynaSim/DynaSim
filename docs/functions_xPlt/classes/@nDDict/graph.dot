@@ -1,0 +1,7 @@
+/* Created by mdot for Matlab */
+digraph m2html {
+  nDDict -> nDDict;
+
+  importLinearData [URL="importLinearData.html"];
+  nDDict [URL="nDDict.html"];
+}

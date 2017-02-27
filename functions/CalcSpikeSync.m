@@ -1,25 +1,29 @@
 function stats = CalcSpikeSync(data,varargin)
-%% stats = CalcSpikeSync(data,'option',value)
+%CALCSPIKESYNC - Compute spike synchronization between spiketrains
+%
+% Usage:
+%   stats = CalcSpikeSync(data,'option',value)
+%
 % Inputs:
-%   data - DynaSim data structure (see CheckData)
-%   options:
-%     'ROI_pairs': {'var1',roi1,'var2',roi2; ...}
-%     'kernel_width' (default: 1): ms, width of gaussian for kernel regression
-%     'Ts' (default: 1): ms, set to this effective time step for rate process before regression
-%     'maxlag_time' (default: 10): ms, max lag time for cross correlation
-%     'spike_threshold',0,[],... % threshold for spike detection
-% 
-% fractional roi=[a b] selects the interval (a,b]
-% ex) N=10: [0 .5] -> [1:5], [.5 1]->[6:10]
-% 
-% Example:
-% ROI_pairs={'E_v',[0 1],'E_v',[0 1]; 'E_v',[0 1],'I_v',[0 1]};
-% ROI_pairs={'E_v',[0 .49],'E_v',[.5 1]};
-% ROI_pairs={'E_v',1:4,'E_v',4:8};
-% 
-% spike_threshold=0; % same for all ROIs
-% spike_threshold=[0 .5]; % use 0 for all ROI1s and .5 for all ROI2s
-% spike_threshold=[0 .5; 0 .25];
+%   - data: DynaSim data structure (see CheckData)
+%   - options:
+%     'ROI_pairs'   : {'var1',roi1,'var2',roi2; ...}
+%     'kernel_width': ms, width of gaussian for kernel regression (default: 1)
+%     'Ts'          : ms, set to this effective time step for rate process
+%                     before regression (default: 1)
+%     'maxlag_time' : ms, max lag time for cross correlation (default: 10)
+%     'spike_threshold',0,[],...:  threshold for spike detection
+%       - Note: Fractional roi=[a b] selects the interval (a,b]
+%         - Example: N=10: [0 .5] -> [1:5], [.5 1]->[6:10]
+%
+% Examples:
+%   ROI_pairs={'E_v',[0 1],'E_v',[0 1]; 'E_v',[0 1],'I_v',[0 1]};
+%   ROI_pairs={'E_v',[0 .49],'E_v',[.5 1]};
+%   ROI_pairs={'E_v',1:4,'E_v',4:8};
+%
+%   spike_threshold=0; % same for all ROIs
+%   spike_threshold=[0 .5]; % use 0 for all ROI1s and .5 for all ROI2s
+%   spike_threshold=[0 .5; 0 .25];
 
 %% 1.0 Check inputs
 options=CheckOptions(varargin,{...

@@ -1,0 +1,94 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of DynaSimPlotExtract</title>
+  <meta name="keywords" content="DynaSimPlotExtract">
+  <meta name="description" content="Converts DynaSim structure to 1D cell array format. Later can use to">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html &copy; 2005 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="../../m2html.css">
+  <script type="text/javascript">
+    if (top.frames.length == 0) { top.location = "../../index.html"; };
+  </script>
+</head>
+<body>
+<a name="_top"></a>
+<!-- ../menu.html functions_xPlt --><!-- menu.html functions -->
+<h1>DynaSimPlotExtract
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+<div class="box"><strong>Converts DynaSim structure to 1D cell array format. Later can use to</strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+<div class="box"><strong>function [data_linear,ax,ax_names,time] = DynaSimPlotExtract (data) </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+<div class="fragment"><pre class="comment"> Converts DynaSim structure to 1D cell array format. Later can use to
+ import to xPlt</pre></div>
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+This function calls:
+<ul style="list-style-image:url(../../matlabicon.gif)">
+</ul>
+This function is called by:
+<ul style="list-style-image:url(../../matlabicon.gif)">
+<li><a href="../../functions_xPlt/debug_testing_script.html" class="code" title="">debug_testing_script</a>	This is a script that I run through every time I want to test the code.</li></ul>
+<!-- crossreference -->
+
+
+
+<h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+<div class="fragment"><pre>0001 
+0002 
+0003 <a name="_sub0" href="#_subfunctions" class="code">function [data_linear,ax,ax_names,time] = DynaSimPlotExtract (data)</a>
+0004     <span class="comment">% Converts DynaSim structure to 1D cell array format. Later can use to</span>
+0005     <span class="comment">% import to xPlt</span>
+0006 
+0007     
+0008     <span class="comment">% ## VARIED parameter sweeps ##</span>
+0009     varied=data(1).varied;
+0010     num_varied=length(varied); <span class="comment">% number of model components varied across simulations</span>
+0011     num_sims=length(data); <span class="comment">% number of data sets (one per simulation)</span>
+0012     <span class="comment">%param_mat=zeros(num_sims,num_varied); % values for each simulation</span>
+0013     
+0014     <span class="keyword">for</span> j=1:num_varied
+0015         <span class="keyword">if</span> isnumeric(data(1).(varied{j}))
+0016             params{j} = [data.(varied{j})]; <span class="comment">% values for each simulation</span>
+0017         <span class="keyword">else</span>
+0018             <span class="keyword">for</span> i = 1:length(data)
+0019                 params{j}{i} = data(i).(varied{j});    <span class="comment">%vals for each sim</span>
+0020             <span class="keyword">end</span>
+0021         <span class="keyword">end</span>
+0022     <span class="keyword">end</span>
+0023     
+0024     <span class="comment">% ## Build a large linear list ##</span>
+0025     z=0;
+0026     num_alllabels = 1;
+0027     <span class="keyword">for</span> i = 1:num_sims
+0028         <span class="keyword">for</span> k = 1:num_alllabels
+0029             
+0030             z=z+1;
+0031             data_linear{z} = data(i).plot_files{1};
+0032             
+0033             <span class="comment">% Number of parameter sweeps, plus populations, plus variables (Vm, state variables, functions, etc.)</span>
+0034             <span class="keyword">for</span> j = 1:num_varied
+0035                 <span class="keyword">if</span> isnumeric(data(1).(varied{j})); ax{j}(z) = params{j}(i);
+0036                 <span class="keyword">else</span>
+0037                     ax{j}{z} = params{j}{i};
+0038                 <span class="keyword">end</span>
+0039             <span class="keyword">end</span>
+0040         <span class="keyword">end</span>
+0041     <span class="keyword">end</span>
+0042     
+0043     ax_names = varied;
+0044     
+0045 <span class="keyword">end</span>
+0046 
+0047</pre></div>
+<hr><address>Generated on Mon 27-Feb-2017 14:58:50 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" target="_parent">m2html</a></strong> &copy; 2005</address>
+</body>
+</html>

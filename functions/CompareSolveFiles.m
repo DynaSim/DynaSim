@@ -1,7 +1,9 @@
 function solve_file_m=CompareSolveFiles(solve_file_m)
-% Purpose: look for an equivalent file in same directory
-%  - compare to other *.m in /solve/
-%  - if match: remove(solve_file); solve_file=match;  
+%COMPARESOLVEFILES - look for an equivalent file in same directory
+%
+%  - Step 1: compare to other *.m in /solve/
+%  - Step 2: if match: remove(solve_file); solve_file=match;
+%
 % See also: GetSolveFile, SimulateModel, CreateBatch
 
 [fpath,fname,fext]=fileparts(solve_file_m);

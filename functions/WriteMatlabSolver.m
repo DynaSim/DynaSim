@@ -1,25 +1,40 @@
 function data=WriteMatlabSolver(model,varargin)
-%% outfile=WriteMatlabSolver(model,varargin)
-% Purpose: write m-file that numerically inteegrates the model
-% inputs:
-%   model: DSSim model structure (see GenerateModel)
-%   options:
-%     'tspan',[0 100],[],...          % [beg,end] (units must be consistent with dt and equations)
-%     'ic',[],[],...                  % initial conditions (overrides definition in model structure)
-%     'solver','euler',{'euler','rk2','rk4','modifiedeuler','ode23','ode45','ode15s','ode23s'},... % DSSim and built-in Matlab solvers
-%     'solver_options',[],[],...      % options from odeset for use with built-in Matlab solvers
-%     'dt',.01,[],...                 % time step used for fixed step DSSim solvers
-%     'modifications',[],[],...       % *DSSim modifications structure
-%     'reduce_function_calls_flag',1,[],...   % whether to eliminate internal function calls
-%     'coder_flag',exist('codegen')==6,[],... % whether to compile using coder instead of interpreting Matlab
-%     'disk_flag',0,[],...            % whether to write to disk during simulation instead of storing in memory
-%     'downsample_factor',1,[],...    % downsampling applied during simulation (only every downsample_factor-time point is stored in memory or written to disk)
-%     'random_seed',now,[],...        % seed for random number generator (usage: rng(random_seed))
-% outputs:
-%   outfile (solve_ode.m)
-% 
-% see also: SimulateModel, DSSimToOdefun
-% dependencies: CheckOptions, CheckModel
+%WRITEMATLABSOLVER - write m-file that numerically inteegrates the model
+%
+% Usage:
+%   outfile=WriteMatlabSolver(model,varargin)
+%
+% Inputs:
+%   - model: DynaSim model structure (see GenerateModel)
+%   - options:
+%     'tspan'         : units must be consistent with dt and equations
+%                       {[beg,end]} (default: [0 100])
+%     'ic'            : initial conditions; this overrides definition in model structure
+%     'solver'        : DynaSim and built-in Matlab solvers
+%                       {'euler','rk2','rk4','modifiedeuler',
+%                       'ode23','ode45','ode15s','ode23s'}
+%     'solver_options': options from odeset for use with built-in Matlab solvers
+%     'dt'            :  time step used for fixed step DSSim solvers (default: 0.01)
+%     'modifications' : DynaSim modifications structure
+%     'reduce_function_calls_flag': whether to eliminate internal function
+%                                   calls {0 or 1} (default: 1)
+%     'coder_flag'    : whether to compile using coder instead of interpreting
+%                       Matlab (default: exist('codegen')==6 TODO is this correct?
+%                       what does this mean?)
+%     'disk_flag'     : whether to write to disk during simulation instead of
+%                       storing in memory {0 or 1} (default: 0)
+%     'downsample_factor': downsampling applied during simulation. Only every
+%                          downsample_factor-time point is stored in memory or
+%                          written to disk (default: 1)
+%     'random_seed'   : seed for random number generator (usage:
+%                       rng(random_seed)) (default: now)
+%
+% Outputs:
+%   - outfile (solve_ode.m)
+%
+% Dependencies: CheckOptions, CheckModel
+%
+% See also: SimulateModel, DynaSim2Odefun
 
 % Check inputs
 options=CheckOptions(varargin,{...
