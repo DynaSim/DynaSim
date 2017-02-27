@@ -4,7 +4,7 @@
 <head>
   <title>Description of dynasim_strrep</title>
   <meta name="keywords" content="dynasim_strrep">
-  <meta name="description" content="Purpose: replace full words by new character strings, ignoring matches">
+  <meta name="description" content="DYNASIM_STRREP - replace full words by new character strings, ignoring matches that appear as sub-strings.">
   <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
   <meta name="generator" content="m2html &copy; 2005 Guillaume Flandin">
   <meta name="robots" content="index, follow">
@@ -20,22 +20,24 @@
 </h1>
 
 <h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
-<div class="box"><strong>Purpose: replace full words by new character strings, ignoring matches</strong></div>
+<div class="box"><strong>DYNASIM_STRREP - replace full words by new character strings, ignoring matches that appear as sub-strings.</strong></div>
 
 <h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
 <div class="box"><strong>function str=dynasim_strrep(str,oldstr,newstr,lpad,rpad) </strong></div>
 
 <h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
-<div class="fragment"><pre class="comment"> Purpose: replace full words by new character strings, ignoring matches
- that appear as sub-strings. note: built-in strrep replaces all matches.
+<div class="fragment"><pre class="comment">DYNASIM_STRREP - replace full words by new character strings, ignoring matches that appear as sub-strings.
+
+ Note: built-in strrep replaces ALL matches.
+
  Examples:
- dynasim_strrep('(v)*(-av)','v','pop1_v')
- dynasim_strrep('v-v^2+vav','v','pop1_v')
- dynasim_strrep('v-v-v','v','pop1_v')
- dynasim_strrep('v-v-v^2','v','pop1_v')
- dynasim_strrep('(v-v-v^2)','v','pop1_v')
- dynasim_strrep('E-pop1_V+1','pop1_V','pop1_V(n-1)')
- dynasim_strrep('v=1; u=u+d','u','u(n,test)')</pre></div>
+   dynasim_strrep('(v)*(-av)','v','pop1_v')
+   dynasim_strrep('v-v^2+vav','v','pop1_v')
+   dynasim_strrep('v-v-v','v','pop1_v')
+   dynasim_strrep('v-v-v^2','v','pop1_v')
+   dynasim_strrep('(v-v-v^2)','v','pop1_v')
+   dynasim_strrep('E-pop1_V+1','pop1_V','pop1_V(n-1)')
+   dynasim_strrep('v=1; u=u+d','u','u(n,test)')</pre></div>
 
 <!-- crossreference -->
 <h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
@@ -44,49 +46,51 @@ This function calls:
 </ul>
 This function is called by:
 <ul style="list-style-image:url(../matlabicon.gif)">
-<li><a href="GenerateModel.html" class="code" title="function [model,name_map]=GenerateModel(specification,varargin)">GenerateModel</a>	% [model,name_map]=GenerateModel(specification,'option',value,...)</li><li><a href="PropagateFunctions.html" class="code" title="function model=PropagateFunctions(model)">PropagateFunctions</a>	% model = SubstituteFunctions(model)</li><li><a href="PropagateNamespaces.html" class="code" title="function model = PropagateNamespaces(model,map)">PropagateNamespaces</a>	% model = PropagateNamespaces(model,name_map)</li><li><a href="PropagateParameters.html" class="code" title="function model=PropagateParameters(model,varargin)">PropagateParameters</a>	% model = SubstituteParameters(model)</li><li><a href="WriteDynaSimSolver.html" class="code" title="function [outfile,options]=WriteDynaSimSolver(model,varargin)">WriteDynaSimSolver</a>	% solver_file=WriteDynaSimSolver(model,varargin)</li></ul>
+<li><a href="GenerateModel.html" class="code" title="function [model,name_map]=GenerateModel(specification,varargin)">GenerateModel</a>	GENERATEMODEL - Parse DynaSim specification and organize model data in DynaSim model structure</li><li><a href="PropagateFunctions.html" class="code" title="function model=PropagateFunctions(model)">PropagateFunctions</a>	PROPAGATEFUNCTIONS - eliminate internal function calls from model ODEs, ICs, monitors, and conditionals.</li><li><a href="PropagateNamespaces.html" class="code" title="function model = PropagateNamespaces(model,map)">PropagateNamespaces</a>	PROPAGATENAMESPACES - namespace-establishing namespace substitutions.</li><li><a href="PropagateParameters.html" class="code" title="function model=PropagateParameters(model,varargin)">PropagateParameters</a>	PROPAGATEPARAMETERS - substitute parameter values or prepend parameter names with prefix across all model equations.</li><li><a href="WriteDynaSimSolver.html" class="code" title="function [outfile,options]=WriteDynaSimSolver(model,varargin)">WriteDynaSimSolver</a>	WRITEDYNASIMSOLVER - write m-file that numerically inteegrates the model</li></ul>
 <!-- crossreference -->
 
 
 
 <h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
 <div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function str=dynasim_strrep(str,oldstr,newstr,lpad,rpad)</a>
-0002 <span class="comment">% Purpose: replace full words by new character strings, ignoring matches</span>
-0003 <span class="comment">% that appear as sub-strings. note: built-in strrep replaces all matches.</span>
-0004 <span class="comment">% Examples:</span>
-0005 <span class="comment">% dynasim_strrep('(v)*(-av)','v','pop1_v')</span>
-0006 <span class="comment">% dynasim_strrep('v-v^2+vav','v','pop1_v')</span>
-0007 <span class="comment">% dynasim_strrep('v-v-v','v','pop1_v')</span>
-0008 <span class="comment">% dynasim_strrep('v-v-v^2','v','pop1_v')</span>
-0009 <span class="comment">% dynasim_strrep('(v-v-v^2)','v','pop1_v')</span>
-0010 <span class="comment">% dynasim_strrep('E-pop1_V+1','pop1_V','pop1_V(n-1)')</span>
-0011 <span class="comment">% dynasim_strrep('v=1; u=u+d','u','u(n,test)')</span>
-0012 
-0013 <span class="keyword">if</span> nargin&lt;4, lpad=<span class="string">''</span>; <span class="keyword">end</span>
-0014 <span class="keyword">if</span> nargin&lt;5, rpad=<span class="string">''</span>; <span class="keyword">end</span>
-0015   <span class="keyword">if</span> isempty(str)
-0016     <span class="keyword">return</span>;
-0017   <span class="keyword">end</span>
-0018   pat=[<span class="string">'([^\w\.]{1})'</span> oldstr <span class="string">'([^\w]{1})'</span>]; <span class="comment">% in the middle</span>
-0019     <span class="comment">% note: exclude .oldstr for case where prefix has already been prepended and oldstr appears &gt;1x in str</span>
-0020   rep=[<span class="string">'$1'</span> lpad newstr rpad <span class="string">'$2'</span>];
-0021   str=regexprep(str,pat,rep);
-0022   <span class="comment">% check for neighboring occurrence that wasn't substituted (e.g., (v-v^2) -&gt; (pop1_v-v^2))</span>
-0023   <span class="comment">% note: this is only a possible issue for strings &quot;in the middle&quot;</span>
-0024   test=[<span class="string">'([^\w\.]{1})'</span> oldstr <span class="string">'([^\w('</span> newstr <span class="string">')]{1})'</span>];
-0025   <span class="keyword">if</span> ~isempty(regexp(str,test,<span class="string">'once'</span>))<span class="comment">%~isempty(regexp(str,test,'match'))</span>
-0026     <span class="comment">% substitute remaining occurrences</span>
-0027     str=regexprep(str,test,rep);
-0028   <span class="keyword">end</span>
-0029   pat=[<span class="string">'([^\w\.]{1})'</span> oldstr <span class="string">'$'</span>];    <span class="comment">% at the end</span>
-0030   rep=[<span class="string">'$1'</span> lpad newstr rpad];
-0031   str=regexprep(str,pat,rep);
-0032   pat=[<span class="string">'^'</span> oldstr <span class="string">'([^\w]{1})'</span>];      <span class="comment">% at the beginning</span>
-0033   rep=[lpad newstr rpad <span class="string">'$1'</span>];
-0034   str=regexprep(str,pat,rep);
-0035   pat=[<span class="string">'^'</span> oldstr <span class="string">'$'</span>];               <span class="comment">% all there is</span>
-0036   rep=[lpad newstr rpad];
-0037   str=regexprep(str,pat,rep);</pre></div>
-<hr><address>Generated on Fri 24-Feb-2017 14:46:35 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" target="_parent">m2html</a></strong> &copy; 2005</address>
+0002 <span class="comment">%DYNASIM_STRREP - replace full words by new character strings, ignoring matches that appear as sub-strings.</span>
+0003 <span class="comment">%</span>
+0004 <span class="comment">% Note: built-in strrep replaces ALL matches.</span>
+0005 <span class="comment">%</span>
+0006 <span class="comment">% Examples:</span>
+0007 <span class="comment">%   dynasim_strrep('(v)*(-av)','v','pop1_v')</span>
+0008 <span class="comment">%   dynasim_strrep('v-v^2+vav','v','pop1_v')</span>
+0009 <span class="comment">%   dynasim_strrep('v-v-v','v','pop1_v')</span>
+0010 <span class="comment">%   dynasim_strrep('v-v-v^2','v','pop1_v')</span>
+0011 <span class="comment">%   dynasim_strrep('(v-v-v^2)','v','pop1_v')</span>
+0012 <span class="comment">%   dynasim_strrep('E-pop1_V+1','pop1_V','pop1_V(n-1)')</span>
+0013 <span class="comment">%   dynasim_strrep('v=1; u=u+d','u','u(n,test)')</span>
+0014 
+0015 <span class="keyword">if</span> nargin&lt;4, lpad=<span class="string">''</span>; <span class="keyword">end</span>
+0016 <span class="keyword">if</span> nargin&lt;5, rpad=<span class="string">''</span>; <span class="keyword">end</span>
+0017   <span class="keyword">if</span> isempty(str)
+0018     <span class="keyword">return</span>;
+0019   <span class="keyword">end</span>
+0020   pat=[<span class="string">'([^\w\.]{1})'</span> oldstr <span class="string">'([^\w]{1})'</span>]; <span class="comment">% in the middle</span>
+0021     <span class="comment">% note: exclude .oldstr for case where prefix has already been prepended and oldstr appears &gt;1x in str</span>
+0022   rep=[<span class="string">'$1'</span> lpad newstr rpad <span class="string">'$2'</span>];
+0023   str=regexprep(str,pat,rep);
+0024   <span class="comment">% check for neighboring occurrence that wasn't substituted (e.g., (v-v^2) -&gt; (pop1_v-v^2))</span>
+0025   <span class="comment">% note: this is only a possible issue for strings &quot;in the middle&quot;</span>
+0026   test=[<span class="string">'([^\w\.]{1})'</span> oldstr <span class="string">'([^\w('</span> newstr <span class="string">')]{1})'</span>];
+0027   <span class="keyword">if</span> ~isempty(regexp(str,test,<span class="string">'once'</span>))<span class="comment">%~isempty(regexp(str,test,'match'))</span>
+0028     <span class="comment">% substitute remaining occurrences</span>
+0029     str=regexprep(str,test,rep);
+0030   <span class="keyword">end</span>
+0031   pat=[<span class="string">'([^\w\.]{1})'</span> oldstr <span class="string">'$'</span>];    <span class="comment">% at the end</span>
+0032   rep=[<span class="string">'$1'</span> lpad newstr rpad];
+0033   str=regexprep(str,pat,rep);
+0034   pat=[<span class="string">'^'</span> oldstr <span class="string">'([^\w]{1})'</span>];      <span class="comment">% at the beginning</span>
+0035   rep=[lpad newstr rpad <span class="string">'$1'</span>];
+0036   str=regexprep(str,pat,rep);
+0037   pat=[<span class="string">'^'</span> oldstr <span class="string">'$'</span>];               <span class="comment">% all there is</span>
+0038   rep=[lpad newstr rpad];
+0039   str=regexprep(str,pat,rep);</pre></div>
+<hr><address>Generated on Mon 27-Feb-2017 14:58:50 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" target="_parent">m2html</a></strong> &copy; 2005</address>
 </body>
 </html>

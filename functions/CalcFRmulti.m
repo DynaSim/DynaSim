@@ -1,42 +1,45 @@
 function data = CalcFRmulti(data,varargin)
-%% data = CalcFRmulti(data,'option',value)
+%CALCFRMULTI - extends CalcFR to get SUA and MUA firing rates
 %
-% Purpose: extends CalcFR to get SUA and MUA firing rates
+% Usage:
+%   data = CalcFRmulti(data,'option',value)
 %
 % Inputs:
-%   data - DynaSim data structure (see CheckData)
-%   options:
-%     'variable' - name of field containing data on which to calculate firing
-%                rates (default: *_spikes or first variable in data.labels)
-%     'time_limits' - [beg,end] (units of data.time)
-%     'threshold' - scalar threshold value for detecting events (default: 0)
-%     'bin_size' - size of temporal window over which to calculate rate [ms or fraction of data set] (default: 5% of the data set)
-%     'bin_shift' - how much to shift the bin before calculating rate again [ms or fraction of data set] (default: 1% of the data set)
-%     'exclude_data_flag' - whether to remove simulated data from result structure (default: 0)
-%     'output_suffix' - suffix to attach to output variable names (default: '')
+%   - data: DynaSim data structure (see CheckData)
+%   - options:
+%     'variable'         : name of field containing data on which to calculate
+%                          firing rates (default: *_spikes or first variable in data.labels)
+%     'time_limits'      : [beg,end] (units of data.time)
+%     'threshold'        : scalar threshold value for detecting events (default: 0)
+%     'bin_size'         : size of temporal window over which to calculate rate
+%                          [ms or fraction of data set] (default: 5% of the data set)
+%     'bin_shift'        : how much to shift the bin before calculating rate again [ms
+%                          or fraction of data set] (default: 1% of the data set)
+%     'exclude_data_flag': whether to remove simulated data from result
+%                          structure (default: 0)
+%     'output_suffix'    : suffix to attach to output variable names (default: '')
+%
 % Outputs:
-%   data: data structure with firing rates [Hz] in .variable_FR
+%   - data: data structure with firing rates [Hz] in .variable_FR
 %
-% note:
-% "variable" can be specified as the name of a variable listed in
-% data.labels, a cell array of string listing variable names, or as a
-% regular expression pattern for identifying variables to process.
-% See SelectVariables for more info on supported specifications.
-%
-% note:
-% DynaSim spike monitor returns spike data in variables *_spikes.
-% eg, data=SimulateModel('dv/dt=@current+10; {iNa,iK}; monitor v.spikes');
+% Notes:
+% - "variable" can be specified as the name of a variable listed in
+%     data.labels, a cell array of string listing variable names, or as a
+%     regular expression pattern for identifying variables to process.
+%     See SelectVariables for more info on supported specifications.
+% - DynaSim spike monitor returns spike data in variables *_spikes.
+%   - e.g., `data=SimulateModel('dv/dt=@current+10; {iNa,iK}; monitor v.spikes');`
 %     returns spikes in data.pop1_v_spikes (where 'pop1' is the default
 %     population name if not specified by the user).
 %
 % Examples:
-% s.populations(1).name='E';
-% s.populations(1).equations='dv/dt=@current+10; {iNa,iK}; v(0)=-65';
-% s.populations(2).name='I';
-% s.populations(2).equations='dv/dt=@current+10; {iNa,iK}; v(0)=-65';
-% data=SimulateModel(s);
-% data=CalcFR(data,'variable','*_v');
-% data % contains firing rates for E and I pops in .E_v_FR_SUA/MUA and .I_v_FR_SUA/MUA.
+%   s.populations(1).name='E';
+%   s.populations(1).equations='dv/dt=@current+10; {iNa,iK}; v(0)=-65';
+%   s.populations(2).name='I';
+%   s.populations(2).equations='dv/dt=@current+10; {iNa,iK}; v(0)=-65';
+%   data=SimulateModel(s);
+%   data=CalcFR(data,'variable','*_v');
+%   data % contains firing rates for E and I pops in .E_v_FR_SUA/MUA and .I_v_FR_SUA/MUA.
 %
 % See also: PlotFR, AnalyzeStudy, SimulateModel, CheckData, SelectVariables
 

@@ -1,38 +1,44 @@
 function [model,name_map] = ParseModelEquations(text,varargin)
-%% model = ParseModelEquations(STRING,'param',value,...)
-% Purpose: parse equations and organize model data in DynaSim model structure
-% Inputs: 
-%   STRING (required): one of --
-%   - string with equations
-%   - string with name of file containing equations (.eqns or .mech)
-%   options (using key/value pairs: 'option1',value1,...):
-%   - 'namespace': (default: '') added as prefix to beginning of parameter/etc names
-%   - 'delimiter': (default: ';') separates expressions on same line of model text
-%   user-supplied parameter values: ('key',value): name (key) of parameters to be set and associated user-supplied values
+%PARSEMODELEQUATIONS - parse equations and organize model data in DynaSim model structure
+%
+% Usage:
+%   model = ParseModelEquations(STRING,'param',value,...)
+%
+% Inputs:
+%   - STRING (required): one of:
+%     - string with equations
+%     - string with name of file containing equations (.eqns or .mech)
+%   - options (using key/value pairs: 'option1',value1,...):
+%     - 'namespace': added as prefix to beginning of parameter/etc names (default: '')
+%     - 'delimiter': separates expressions on same line of model text (default: ';')
+%   - user-supplied parameter values: ('key',value): name (key) of parameters to
+%                                     be set and associated user-supplied values
 % Outputs:
-%   model: DynaSim model structure (see CheckModel for details)
-%   name_map: {name, namespace_name, namespace, type}, useful for namespace-specific substitutions across multiple sub-models
-%             (see description in GenerateModel for more information)
-% 
-% NOTE 1: .eqns files contain fully self contained model equations; 
-% .mech files define (sub)models that depend on variables linked from 
-% elsewhere. However, this function does not distinguish between the two.
-% 
+%   - model: DynaSim model structure (see CheckModel for details)
+%   - name_map: useful for namespace-specific substitutions across multiple
+%     sub-models, see description in GenerateModel for more information {name,
+%     namespace_name, namespace, type}
+%
+% Notes:
+%   - NOTE 1: .eqns files contain fully self contained model equations; .mech
+%     files define (sub)models that depend on variables linked from elsewhere.
+%     However, this function does not distinguish between the two.
+%
 % Examples:
-% model = ParseModelEquations('dx/dt=3*a*x; x(0)=0','a',0);
-% model = ParseModelEquations('dx/dt=3*a*x, x(0)=0','a',0,'delimiter',',');
-% model = ParseModelEquations('CalciumPump.mech','namespace','HH');
-% model = ParseModelEquations('LIFneuron.eqns');
-% model = ParseModelEquations('a=2; b=2*a; f(x)=b; dx/dt=f(x); x(0)=0; if(x>1)(x=0); current->f(x); monitor f(x); % comments')
-% 
-% parsing individual sub-models from specification:
-% equations=specification.populations(1).equations;
-% [model,map] = ParseModelEquations(equations,'namespace','pop')
-% population_mechanism=specification.populations(1).mechanism_list{1};
-% [model,map] = ParseModelEquations(population_mechanism,'namespace','pop_mech')
-% connection_mechanism=specification.connections(1).mechanism_list{1};
-% [model,map] = ParseModelEquations(connection_mechanism,'namespace','pop_pop_mech')
-% 
+%     model = ParseModelEquations('dx/dt=3*a*x; x(0)=0','a',0);
+%     model = ParseModelEquations('dx/dt=3*a*x, x(0)=0','a',0,'delimiter',',');
+%     model = ParseModelEquations('CalciumPump.mech','namespace','HH');
+%     model = ParseModelEquations('LIFneuron.eqns');
+%     model = ParseModelEquations('a=2; b=2*a; f(x)=b; dx/dt=f(x); x(0)=0; if(x>1)(x=0); current->f(x); monitor f(x); % comments')
+%
+%   - parsing individual sub-models from specification:
+%     equations=specification.populations(1).equations;
+%     [model,map] = ParseModelEquations(equations,'namespace','pop')
+%     population_mechanism=specification.populations(1).mechanism_list{1};
+%     [model,map] = ParseModelEquations(population_mechanism,'namespace','pop_mech')
+%     connection_mechanism=specification.connections(1).mechanism_list{1};
+%     [model,map] = ParseModelEquations(connection_mechanism,'namespace','pop_pop_mech')
+%
 % See also: ClassifyEquation, GenerateModel, LocateModelFiles
 
 model=[];

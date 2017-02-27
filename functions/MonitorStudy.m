@@ -1,18 +1,22 @@
 function [studyinfo,study_status]=MonitorStudy(studyinfo,varargin)
-% [studyinfo,status]=MonitorStudy(studyinfo,key/value options)
-% Purpose: display information on study progress.
-% inputs:
+%MONITORSTUDY - display information on study progress.
+%
+% Usage:
+%   [studyinfo,status]=MonitorStudy(studyinfo,key/value options)
+%
+% Inputs:
 %   - studyinfo: DynaSim studyinfo structure, study directory, or studyinfo MAT filename
-%   - options: ...
-% outputs:
+%   - options: TODO
+%
+% Outputs:
 %   - studyinfo: DynaSim studyinfo structure
 %   - status: numeric code
 %       0 (study in progress)
 %       1 (study finished)
 %       2 (error in study)
 %       -1 (function failed)
-% 
-% see also: SimulateModel, CreateBatch, CheckStudyinfo
+%
+% See also: SimulateModel, CreateBatch, CheckStudyinfo
 
 % Check inputs
 options=CheckOptions(varargin,{...

@@ -4,7 +4,7 @@
 <head>
   <title>Description of SelectData</title>
   <meta name="keywords" content="SelectData">
-  <meta name="description" content="% data=SelectData(data,'option',value)">
+  <meta name="description" content="SELECTDATA -  select subset of data">
   <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
   <meta name="generator" content="m2html &copy; 2005 Guillaume Flandin">
   <meta name="robots" content="index, follow">
@@ -20,43 +20,56 @@
 </h1>
 
 <h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
-<div class="box"><strong>% data=SelectData(data,'option',value)</strong></div>
+<div class="box"><strong>SELECTDATA -  select subset of data</strong></div>
 
 <h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
 <div class="box"><strong>function data=SelectData(data,varargin) </strong></div>
 
 <h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
-<div class="fragment"><pre class="comment">% data=SelectData(data,'option',value)
- Purpose: select subset of data
- Inputs:
-   data -- DNSim data structure (see SimulateModel)
-   options:
-     'time_limits' -- [beg,end] (units of data.time) [ms]
-     'varied' -- specification of search space subset to retrieve (see NOTE 1)
- 
- NOTE 1: 'varied' can be specified in two ways:
- Method 1: a way similar to 'vary' in
- SimulateModel and Vary2Modifications. However, instead of indicating
- values for a variable to take, 'varied' involves the specification of a
- range of values. Syntax: vary={object, variable, [low,high]; ...}, where
- low is the lower bound on the range varied and high is the upper bound
- for the component varied. For instance, if 'gNa' in population 'E' was
- varied 0:.1:1 by setting 'vary' to {'E','gNa',0:.1:1}, then to select the
- subset of gNa values between .3 and .5, set 'varied' to {'E','gNa',[.3 .5]}.
- Method 2: 'varied' can be specified using the resulting
- component name stored in data.varied. e.g., {'E_iNa_gNa',[.3 .5]}.
- 
- NOTE 2: if 'varied' values are requested and not a two-element array
- (e.g., [.3 .5]), then return all matching values.
- 
- limitation: SelectData currently supports returning value ranges but not 
+<div class="fragment"><pre class="comment">SELECTDATA -  select subset of data
+
+ Limitation: SelectData currently supports returning value ranges but not
  non-numeric model components (e.g., mechanism_list modifications).
- 
+
+ Usage:
+   data=SelectData(data,'option',value)
+
+ Inputs:
+   - data: DNSim data structure (see SimulateModel)
+   - options:
+     'time_limits': in units of data.time {[beg,end]}
+     'varied': specification of search space subset to retrieve (see NOTE 1)
+
+ Notes:
+ - NOTE 1: 'varied' can be specified in two ways:
+   - Method 1: a way similar to 'vary' in SimulateModel and
+     Vary2Modifications. However, instead of indicating values for a variable to
+     take, 'varied' involves the specification of a range of values. Syntax:
+     vary={object, variable, [low,high]; ...}, where low is the lower bound on
+     the range varied and high is the upper bound for the component varied. For
+     instance, if 'gNa' in population 'E' was varied 0:.1:1 by setting 'vary' to
+     {'E','gNa',0:.1:1}, then to select the subset of gNa values between .3 and
+     .5, set 'varied' to {'E','gNa',[.3 .5]}.
+   - Method 2: 'varied' can be specified using the resulting component name
+     stored in data.varied. e.g., {'E_iNa_gNa',[.3 .5]}.
+
+ - NOTE 2: if 'varied' values are requested and not a two-element array (e.g.,
+   [.3 .5]), then return all matching values.
+
  Examples:
- data=SelectData(data,'time_limits',[20 80]); % return simulated data from 20-80ms
- data=SelectData(data,'varied',{'E','gNa',[.3 .5]}); % return data sets with gNa set between .3 and .5
- data=SelectData(data,'time_limits',[20 80],'varied',{'E','gNa',[.3 .5]});
- data=SelectData(data,'roi',{'E_v',[1 4]});
+   % return simulated data from 20-80ms
+   data=SelectData(data,'time_limits',[20 80]);
+   % return data sets with gNa set between .3 and .5
+   data=SelectData(data,'varied',{'E','gNa',[.3 .5]});
+   data=SelectData(data,'time_limits',[20 80],'varied',{'E','gNa',[.3 .5]});
+   data=SelectData(data,'roi',{'E_v',[1 4]});
+
+ TODO:
+   - Specify subsets to return in terms of ROIs: {'E',1:50;'I',1:10,'F',[]}
+     (exclude F) (default all cells for any pops not specified in ROIs).
+   - Possible format for specifying range_varied:
+     {'E','gNa',[.1 .3]; 'I-&gt;E','tauI',[15 25]; 'I','mechanism_list','+iM'}
+
  See also: <a href="SimulateModel.html" class="code" title="function [data,studyinfo]=SimulateModel(model,varargin)">SimulateModel</a>, <a href="Vary2Modifications.html" class="code" title="function modifications_set = Vary2Modifications(vary,model)">Vary2Modifications</a>, <a href="ImportData.html" class="code" title="function [data,studyinfo] = ImportData(file,varargin)">ImportData</a></pre></div>
 
 <!-- crossreference -->
@@ -66,149 +79,156 @@ This function calls:
 <li><a href="CheckData.html" class="code" title="function data=CheckData(data)">CheckData</a>	CHECKDATA - Standardize data structure and auto-populate missing fields</li><li><a href="CheckOptions.html" class="code" title="function parms = CheckOptions(options, options_schema, strict)">CheckOptions</a>	CHECKOPTIONS - organize key/value pairs in structure with default or user-supplied values according to a schema</li></ul>
 This function is called by:
 <ul style="list-style-image:url(../matlabicon.gif)">
-<li><a href="CalcSpikeSync.html" class="code" title="function stats = CalcSpikeSync(data,varargin)">CalcSpikeSync</a>	CALCSPIKESYNC - Compute spike synchronization between spiketrains</li><li><a href="ImportData.html" class="code" title="function [data,studyinfo] = ImportData(file,varargin)">ImportData</a>	% [data,studyinfo]=ImportData(data_file)</li></ul>
+<li><a href="CalcSpikeSync.html" class="code" title="function stats = CalcSpikeSync(data,varargin)">CalcSpikeSync</a>	CALCSPIKESYNC - Compute spike synchronization between spiketrains</li><li><a href="ImportData.html" class="code" title="function [data,studyinfo] = ImportData(file,varargin)">ImportData</a>	IMPORTDATA - load data into DynaSim formatted data structure.</li></ul>
 <!-- crossreference -->
 
 
 
 <h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
 <div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function data=SelectData(data,varargin)</a>
-0002 <span class="comment">%% data=SelectData(data,'option',value)</span>
-0003 <span class="comment">% Purpose: select subset of data</span>
-0004 <span class="comment">% Inputs:</span>
-0005 <span class="comment">%   data -- DNSim data structure (see SimulateModel)</span>
-0006 <span class="comment">%   options:</span>
-0007 <span class="comment">%     'time_limits' -- [beg,end] (units of data.time) [ms]</span>
-0008 <span class="comment">%     'varied' -- specification of search space subset to retrieve (see NOTE 1)</span>
+0002 <span class="comment">%SELECTDATA -  select subset of data</span>
+0003 <span class="comment">%</span>
+0004 <span class="comment">% Limitation: SelectData currently supports returning value ranges but not</span>
+0005 <span class="comment">% non-numeric model components (e.g., mechanism_list modifications).</span>
+0006 <span class="comment">%</span>
+0007 <span class="comment">% Usage:</span>
+0008 <span class="comment">%   data=SelectData(data,'option',value)</span>
 0009 <span class="comment">%</span>
-0010 <span class="comment">% NOTE 1: 'varied' can be specified in two ways:</span>
-0011 <span class="comment">% Method 1: a way similar to 'vary' in</span>
-0012 <span class="comment">% SimulateModel and Vary2Modifications. However, instead of indicating</span>
-0013 <span class="comment">% values for a variable to take, 'varied' involves the specification of a</span>
-0014 <span class="comment">% range of values. Syntax: vary={object, variable, [low,high]; ...}, where</span>
-0015 <span class="comment">% low is the lower bound on the range varied and high is the upper bound</span>
-0016 <span class="comment">% for the component varied. For instance, if 'gNa' in population 'E' was</span>
-0017 <span class="comment">% varied 0:.1:1 by setting 'vary' to {'E','gNa',0:.1:1}, then to select the</span>
-0018 <span class="comment">% subset of gNa values between .3 and .5, set 'varied' to {'E','gNa',[.3 .5]}.</span>
-0019 <span class="comment">% Method 2: 'varied' can be specified using the resulting</span>
-0020 <span class="comment">% component name stored in data.varied. e.g., {'E_iNa_gNa',[.3 .5]}.</span>
-0021 <span class="comment">%</span>
-0022 <span class="comment">% NOTE 2: if 'varied' values are requested and not a two-element array</span>
-0023 <span class="comment">% (e.g., [.3 .5]), then return all matching values.</span>
-0024 <span class="comment">%</span>
-0025 <span class="comment">% limitation: SelectData currently supports returning value ranges but not</span>
-0026 <span class="comment">% non-numeric model components (e.g., mechanism_list modifications).</span>
-0027 <span class="comment">%</span>
-0028 <span class="comment">% Examples:</span>
-0029 <span class="comment">% data=SelectData(data,'time_limits',[20 80]); % return simulated data from 20-80ms</span>
-0030 <span class="comment">% data=SelectData(data,'varied',{'E','gNa',[.3 .5]}); % return data sets with gNa set between .3 and .5</span>
-0031 <span class="comment">% data=SelectData(data,'time_limits',[20 80],'varied',{'E','gNa',[.3 .5]});</span>
-0032 <span class="comment">% data=SelectData(data,'roi',{'E_v',[1 4]});</span>
-0033 <span class="comment">% See also: SimulateModel, Vary2Modifications, ImportData</span>
-0034 
-0035 <span class="comment">% todo: specify subsets to return in terms of ROIs:</span>
-0036 <span class="comment">% {'E',1:50;'I',1:10,'F',[]} (exclude F) (default all cells for any pops not specified in ROIs).</span>
-0037 
-0038 <span class="comment">% possible format for specifying range_varied:</span>
-0039 <span class="comment">% {'E','gNa',[.1 .3]; 'I-&gt;E','tauI',[15 25]; 'I','mechanism_list','+iM'}</span>
-0040 
-0041 <span class="comment">% check inputs</span>
-0042 data=<a href="CheckData.html" class="code" title="function data=CheckData(data)">CheckData</a>(data);
-0043 
-0044 options=<a href="CheckOptions.html" class="code" title="function parms = CheckOptions(options, options_schema, strict)">CheckOptions</a>(varargin,{<span class="keyword">...</span>
-0045   <span class="string">'time_limits'</span>,[-inf inf],[],<span class="keyword">...</span>
-0046   <span class="string">'varied'</span>,[],[],<span class="keyword">...</span>
-0047   <span class="string">'roi'</span>,[],[],<span class="keyword">...</span>
-0048   },false);
-0049 
-0050 <span class="comment">% select data sets based on range of varied model components</span>
-0051 <span class="keyword">if</span> ~isempty(options.varied) &amp;&amp; isfield(data,<span class="string">'varied'</span>)
-0052   <span class="keyword">if</span> size(options.varied,2)==3
-0053     <span class="comment">% convert into field name (set in SimulateModel:prepare_varied_metadata)</span>
-0054     <span class="comment">% note: this code is redundant with SimulateModel and AnalyzeData.</span>
-0055     <span class="comment">% todo: eliminate redundancy</span>
-0056     varied={};
-0057     <span class="keyword">for</span> i=1:size(options.varied,1)
-0058       <span class="comment">% prepare valid field name for thing varied:</span>
-0059       fld=[options.varied{i,1} <span class="string">'_'</span> options.varied{i,2}];
-0060       <span class="comment">% convert arrows and periods to underscores</span>
-0061       fld=regexprep(fld,<span class="string">'(-&gt;)|(&lt;-)|(-)|(\.)'</span>,<span class="string">'_'</span>);
-0062       <span class="comment">% remove brackets and parentheses</span>
-0063       fld=regexprep(fld,<span class="string">'[\[\]\(\)\{\}]'</span>,<span class="string">''</span>);
-0064       varied{end+1,1}=fld;
-0065     <span class="keyword">end</span>    
-0066     options.varied=cat(2,varied,options.varied(:,3));
-0067   <span class="keyword">end</span>
-0068   <span class="keyword">if</span> size(options.varied,1)&gt;1
-0069     error(<span class="string">'at present, a range on only one varied parameter can be specified per call to SelectData.'</span>);
-0070   <span class="keyword">end</span>
-0071   <span class="keyword">if</span> ~ismember(options.varied{1,1},data(1).varied)
-0072     error(<span class="string">'varied parameter not found in data.varied'</span>);
-0073   <span class="keyword">end</span>
-0074   <span class="comment">% collect info on parameters varied in data</span>
-0075   varied=data(1).varied;
-0076   num_varied=length(varied); <span class="comment">% number of model components varied across simulations</span>
-0077   num_sims=length(data);
-0078   <span class="comment">% collect info on parameters varied</span>
-0079   param_mat=zeros(num_sims,num_varied); <span class="comment">% values for each simulation</span>
-0080   <span class="keyword">for</span> j=1:num_varied
-0081     <span class="keyword">if</span> isnumeric(data(1).(varied{j}))
-0082       param_mat(:,j)=[data.(varied{j})]; <span class="comment">% sims x varied</span>
-0083     <span class="keyword">else</span>
-0084       <span class="comment">% todo: handle sims varying non-numeric model components</span>
-0085       <span class="comment">% (eg, mechanisms) (also in PlotData)</span>
-0086     <span class="keyword">end</span>
-0087   <span class="keyword">end</span>
-0088   <span class="comment">% find element of 'varied' whose range has been requested</span>
-0089   desired_param=options.varied{1,1};
-0090   desired_range=options.varied{1,2};  
-0091   index=find(ismember(data(1).varied,desired_param));
-0092   <span class="comment">% find simulations with varied values in desired range</span>
-0093   <span class="keyword">if</span> length(desired_range)==2
-0094     sel=find(param_mat(:,index)&gt;=desired_range(1)&amp;param_mat(:,index)&lt;=desired_range(2));
-0095   <span class="keyword">else</span>
-0096     sel=find(ismember(param_mat(:,index),desired_range));
-0097   <span class="keyword">end</span>
-0098   <span class="comment">% select the desired subset of data sets</span>
-0099   data=data(sel);
-0100 <span class="keyword">end</span>
-0101 
-0102 <span class="comment">% % recursively call SelectData if more than one data set</span>
-0103 <span class="comment">% if length(data)&gt;1</span>
-0104 <span class="comment">%   for i=1:length(data)</span>
-0105 <span class="comment">%     data(i)=SelectData(data(i),varargin{:});</span>
-0106 <span class="comment">%   end</span>
-0107 <span class="comment">%   return;</span>
-0108 <span class="comment">% end</span>
-0109 
-0110 <span class="keyword">for</span> s=1:length(data)
-0111   <span class="comment">% select time subset from state variables and monitors</span>
-0112   time=data(s).time;
-0113   seltime=time&gt;=options.time_limits(1) &amp; time&lt;=options.time_limits(2);
-0114   <span class="keyword">for</span> i=1:length(data(s).labels)
-0115     data(s).(data(s).labels{i})=data(s).(data(s).labels{i})(seltime,:);
-0116   <span class="keyword">end</span>
-0117   <span class="comment">% select cell subset</span>
-0118   <span class="keyword">if</span> iscell(options.roi)
-0119     <span class="keyword">for</span> i=1:size(options.roi,1)
-0120       <span class="keyword">if</span> isfield(data,options.roi{i,1})
-0121         dat=data(s).(options.roi{i,1});
-0122         inds=1:size(dat,2);
-0123         borders=options.roi{i,2};
-0124         sel=inds&gt;=borders(1)&amp;inds&lt;=borders(end);
-0125         data(s).(options.roi{i,1})=dat(:,sel);
-0126       <span class="keyword">end</span>
-0127     <span class="keyword">end</span>
-0128   <span class="keyword">end</span>    
-0129 <span class="keyword">end</span>
-0130 
-0131 <span class="comment">% todo: select subset from time-varying post-processed results</span>
-0132 <span class="keyword">if</span> isfield(data,<span class="string">'results'</span>)
-0133   <span class="comment">% get time vectors: time_(*) with * matching matching names in data.results</span>
-0134   <span class="comment">% ...</span>
-0135   
+0010 <span class="comment">% Inputs:</span>
+0011 <span class="comment">%   - data: DNSim data structure (see SimulateModel)</span>
+0012 <span class="comment">%   - options:</span>
+0013 <span class="comment">%     'time_limits': in units of data.time {[beg,end]}</span>
+0014 <span class="comment">%     'varied': specification of search space subset to retrieve (see NOTE 1)</span>
+0015 <span class="comment">%</span>
+0016 <span class="comment">% Notes:</span>
+0017 <span class="comment">% - NOTE 1: 'varied' can be specified in two ways:</span>
+0018 <span class="comment">%   - Method 1: a way similar to 'vary' in SimulateModel and</span>
+0019 <span class="comment">%     Vary2Modifications. However, instead of indicating values for a variable to</span>
+0020 <span class="comment">%     take, 'varied' involves the specification of a range of values. Syntax:</span>
+0021 <span class="comment">%     vary={object, variable, [low,high]; ...}, where low is the lower bound on</span>
+0022 <span class="comment">%     the range varied and high is the upper bound for the component varied. For</span>
+0023 <span class="comment">%     instance, if 'gNa' in population 'E' was varied 0:.1:1 by setting 'vary' to</span>
+0024 <span class="comment">%     {'E','gNa',0:.1:1}, then to select the subset of gNa values between .3 and</span>
+0025 <span class="comment">%     .5, set 'varied' to {'E','gNa',[.3 .5]}.</span>
+0026 <span class="comment">%   - Method 2: 'varied' can be specified using the resulting component name</span>
+0027 <span class="comment">%     stored in data.varied. e.g., {'E_iNa_gNa',[.3 .5]}.</span>
+0028 <span class="comment">%</span>
+0029 <span class="comment">% - NOTE 2: if 'varied' values are requested and not a two-element array (e.g.,</span>
+0030 <span class="comment">%   [.3 .5]), then return all matching values.</span>
+0031 <span class="comment">%</span>
+0032 <span class="comment">% Examples:</span>
+0033 <span class="comment">%   % return simulated data from 20-80ms</span>
+0034 <span class="comment">%   data=SelectData(data,'time_limits',[20 80]);</span>
+0035 <span class="comment">%   % return data sets with gNa set between .3 and .5</span>
+0036 <span class="comment">%   data=SelectData(data,'varied',{'E','gNa',[.3 .5]});</span>
+0037 <span class="comment">%   data=SelectData(data,'time_limits',[20 80],'varied',{'E','gNa',[.3 .5]});</span>
+0038 <span class="comment">%   data=SelectData(data,'roi',{'E_v',[1 4]});</span>
+0039 <span class="comment">%</span>
+0040 <span class="comment">% TODO:</span>
+0041 <span class="comment">%   - Specify subsets to return in terms of ROIs: {'E',1:50;'I',1:10,'F',[]}</span>
+0042 <span class="comment">%     (exclude F) (default all cells for any pops not specified in ROIs).</span>
+0043 <span class="comment">%   - Possible format for specifying range_varied:</span>
+0044 <span class="comment">%     {'E','gNa',[.1 .3]; 'I-&gt;E','tauI',[15 25]; 'I','mechanism_list','+iM'}</span>
+0045 <span class="comment">%</span>
+0046 <span class="comment">% See also: SimulateModel, Vary2Modifications, ImportData</span>
+0047 
+0048 <span class="comment">% check inputs</span>
+0049 data=<a href="CheckData.html" class="code" title="function data=CheckData(data)">CheckData</a>(data);
+0050 
+0051 options=<a href="CheckOptions.html" class="code" title="function parms = CheckOptions(options, options_schema, strict)">CheckOptions</a>(varargin,{<span class="keyword">...</span>
+0052   <span class="string">'time_limits'</span>,[-inf inf],[],<span class="keyword">...</span>
+0053   <span class="string">'varied'</span>,[],[],<span class="keyword">...</span>
+0054   <span class="string">'roi'</span>,[],[],<span class="keyword">...</span>
+0055   },false);
+0056 
+0057 <span class="comment">% select data sets based on range of varied model components</span>
+0058 <span class="keyword">if</span> ~isempty(options.varied) &amp;&amp; isfield(data,<span class="string">'varied'</span>)
+0059   <span class="keyword">if</span> size(options.varied,2)==3
+0060     <span class="comment">% convert into field name (set in SimulateModel:prepare_varied_metadata)</span>
+0061     <span class="comment">% note: this code is redundant with SimulateModel and AnalyzeData.</span>
+0062     <span class="comment">% todo: eliminate redundancy</span>
+0063     varied={};
+0064     <span class="keyword">for</span> i=1:size(options.varied,1)
+0065       <span class="comment">% prepare valid field name for thing varied:</span>
+0066       fld=[options.varied{i,1} <span class="string">'_'</span> options.varied{i,2}];
+0067       <span class="comment">% convert arrows and periods to underscores</span>
+0068       fld=regexprep(fld,<span class="string">'(-&gt;)|(&lt;-)|(-)|(\.)'</span>,<span class="string">'_'</span>);
+0069       <span class="comment">% remove brackets and parentheses</span>
+0070       fld=regexprep(fld,<span class="string">'[\[\]\(\)\{\}]'</span>,<span class="string">''</span>);
+0071       varied{end+1,1}=fld;
+0072     <span class="keyword">end</span>    
+0073     options.varied=cat(2,varied,options.varied(:,3));
+0074   <span class="keyword">end</span>
+0075   <span class="keyword">if</span> size(options.varied,1)&gt;1
+0076     error(<span class="string">'at present, a range on only one varied parameter can be specified per call to SelectData.'</span>);
+0077   <span class="keyword">end</span>
+0078   <span class="keyword">if</span> ~ismember(options.varied{1,1},data(1).varied)
+0079     error(<span class="string">'varied parameter not found in data.varied'</span>);
+0080   <span class="keyword">end</span>
+0081   <span class="comment">% collect info on parameters varied in data</span>
+0082   varied=data(1).varied;
+0083   num_varied=length(varied); <span class="comment">% number of model components varied across simulations</span>
+0084   num_sims=length(data);
+0085   <span class="comment">% collect info on parameters varied</span>
+0086   param_mat=zeros(num_sims,num_varied); <span class="comment">% values for each simulation</span>
+0087   <span class="keyword">for</span> j=1:num_varied
+0088     <span class="keyword">if</span> isnumeric(data(1).(varied{j}))
+0089       param_mat(:,j)=[data.(varied{j})]; <span class="comment">% sims x varied</span>
+0090     <span class="keyword">else</span>
+0091       <span class="comment">% todo: handle sims varying non-numeric model components</span>
+0092       <span class="comment">% (eg, mechanisms) (also in PlotData)</span>
+0093     <span class="keyword">end</span>
+0094   <span class="keyword">end</span>
+0095   <span class="comment">% find element of 'varied' whose range has been requested</span>
+0096   desired_param=options.varied{1,1};
+0097   desired_range=options.varied{1,2};  
+0098   index=find(ismember(data(1).varied,desired_param));
+0099   <span class="comment">% find simulations with varied values in desired range</span>
+0100   <span class="keyword">if</span> length(desired_range)==2
+0101     sel=find(param_mat(:,index)&gt;=desired_range(1)&amp;param_mat(:,index)&lt;=desired_range(2));
+0102   <span class="keyword">else</span>
+0103     sel=find(ismember(param_mat(:,index),desired_range));
+0104   <span class="keyword">end</span>
+0105   <span class="comment">% select the desired subset of data sets</span>
+0106   data=data(sel);
+0107 <span class="keyword">end</span>
+0108 
+0109 <span class="comment">% % recursively call SelectData if more than one data set</span>
+0110 <span class="comment">% if length(data)&gt;1</span>
+0111 <span class="comment">%   for i=1:length(data)</span>
+0112 <span class="comment">%     data(i)=SelectData(data(i),varargin{:});</span>
+0113 <span class="comment">%   end</span>
+0114 <span class="comment">%   return;</span>
+0115 <span class="comment">% end</span>
+0116 
+0117 <span class="keyword">for</span> s=1:length(data)
+0118   <span class="comment">% select time subset from state variables and monitors</span>
+0119   time=data(s).time;
+0120   seltime=time&gt;=options.time_limits(1) &amp; time&lt;=options.time_limits(2);
+0121   <span class="keyword">for</span> i=1:length(data(s).labels)
+0122     data(s).(data(s).labels{i})=data(s).(data(s).labels{i})(seltime,:);
+0123   <span class="keyword">end</span>
+0124   <span class="comment">% select cell subset</span>
+0125   <span class="keyword">if</span> iscell(options.roi)
+0126     <span class="keyword">for</span> i=1:size(options.roi,1)
+0127       <span class="keyword">if</span> isfield(data,options.roi{i,1})
+0128         dat=data(s).(options.roi{i,1});
+0129         inds=1:size(dat,2);
+0130         borders=options.roi{i,2};
+0131         sel=inds&gt;=borders(1)&amp;inds&lt;=borders(end);
+0132         data(s).(options.roi{i,1})=dat(:,sel);
+0133       <span class="keyword">end</span>
+0134     <span class="keyword">end</span>
+0135   <span class="keyword">end</span>    
 0136 <span class="keyword">end</span>
-0137</pre></div>
-<hr><address>Generated on Fri 24-Feb-2017 14:46:35 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" target="_parent">m2html</a></strong> &copy; 2005</address>
+0137 
+0138 <span class="comment">% todo: select subset from time-varying post-processed results</span>
+0139 <span class="keyword">if</span> isfield(data,<span class="string">'results'</span>)
+0140   <span class="comment">% get time vectors: time_(*) with * matching matching names in data.results</span>
+0141   <span class="comment">% ...</span>
+0142   
+0143 <span class="keyword">end</span>
+0144</pre></div>
+<hr><address>Generated on Mon 27-Feb-2017 14:58:50 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" target="_parent">m2html</a></strong> &copy; 2005</address>
 </body>
 </html>

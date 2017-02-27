@@ -1,24 +1,30 @@
 function studyinfo=UpdateStudy(study_dir,varargin)
-%% studyinfo=UpdateStudy(study_dir,varargin)
-% purpose: helper function to keep track of study metadata when anything is
-% saved. only updates simulation-specific info.
-%   - Update DynaSim studyinfo structure
-%   - Tracks status of simulations [and analyses]
-%   - Manage queue for simultaneous processes updating studyinfo structure
-% inputs:
+%UPDATESTUDY - helper function to keep track of study metadata when anything is saved
+%
+% This only updates simulation-specific info in the DynaSim studyinfo
+% structure, tracks status of simulations and analyses, and manages the queue
+% for simultaneous processes updating studyinfo structure.
+%
+% Usage:
+%   studyinfo=UpdateStudy(study_dir,varargin)
+%
+% Inputs:
 %   - study_dir
-%   - options:
-%     - ...
-% outputs:
+%   - options: TODO
+%
+% Outputs:
 %   - studyinfo
-% 
-% NOTE: this function is not intended for users. it is an internal function
-% called by functions like SimulateModel, AnalyzeStudy, and CreateBatch.
-% 
+%
+% Notes:
+% - Note: this function is not intended for users. it is an internal function
+%   called by functions like SimulateModel, AnalyzeStudy, and CreateBatch.
+% - Note: this function should only update metadata stored in the
+%   studyinfo.simulations substructure.
+%
+% TODO: this multiple things in this function should be split up into individual functions
+%
 % See also: CheckStudyinfo, SetupStudy, SimulateModel, CreateBatch, AnalyzeStudy
 
-% note: this function should only update metadata stored in the
-% studyinfo.simulations substructure.
 
 % check inputs
 options=CheckOptions(varargin,{...

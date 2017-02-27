@@ -4,7 +4,7 @@
 <head>
   <title>Description of GenerateModel</title>
   <meta name="keywords" content="GenerateModel">
-  <meta name="description" content="% [model,name_map]=GenerateModel(specification,'option',value,...)">
+  <meta name="description" content="GENERATEMODEL - Parse DynaSim specification and organize model data in DynaSim model structure">
   <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
   <meta name="generator" content="m2html &copy; 2005 Guillaume Flandin">
   <meta name="robots" content="index, follow">
@@ -20,42 +20,47 @@
 </h1>
 
 <h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
-<div class="box"><strong>% [model,name_map]=GenerateModel(specification,'option',value,...)</strong></div>
+<div class="box"><strong>GENERATEMODEL - Parse DynaSim specification and organize model data in DynaSim model structure</strong></div>
 
 <h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
 <div class="box"><strong>function [model,name_map]=GenerateModel(specification,varargin) </strong></div>
 
 <h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
-<div class="fragment"><pre class="comment">% [model,name_map]=GenerateModel(specification,'option',value,...)
- Purpose: parse DynaSim specification and organize model data in DynaSim model structure
- Inputs: 
-   specification: one of --
-   - DynaSim specification structure (see below and CheckSpecification for more details)
-   - string with name of MAT-file containing DynaSim specification structure
-   - string with equations
-   - string with name of file containing equations (.eqns)
-     note: .eqns files can also be converted into model structure using LoadModel()
-   options (with defaults): 'option1',value1,'option2',value2,...
-   - 'modifications' ([]): specify modifications to apply to specification before
-     generating the model (see ApplyModifications for more details).
-   - 'open_link_flag'    : whether to leave linker identifiers in place (default: 0)
+<div class="fragment"><pre class="comment">GENERATEMODEL - Parse DynaSim specification and organize model data in DynaSim model structure
+
+ Usage:
+   [model,name_map]=GenerateModel(specification,'option',value,...)
+
+ Inputs:
+   - specification: one of:
+     - DynaSim specification structure (see below and CheckSpecification for more details)
+     - string with name of MAT-file containing DynaSim specification structure
+     - string with equations
+     - string with name of file containing equations (.eqns)
+       note: .eqns files can also be converted into model structure using LoadModel()
+   - options (with defaults): 'option1',value1,'option2',value2,...
+     'modifications'  : specify modifications to apply to specification
+                        before generating the model, see ApplyModifications
+                        for more details (default?: []).
+     'open_link_flag' : whether to leave linker identifiers in place (default: 0)
+
  Outputs:
-   model - DynaSim model structure (see CheckModel for more details):
+   - model: DynaSim model structure (see CheckModel for more details):
      .parameters      : substructure with model parameters
      .fixed_variables : substructure with fixed variable definitions
      .functions       : substructure with function definitions
      .monitors        : substructure with monitor definitions
      .state_variables : cell array listing state variables
-     .ODEs            : substructure with one ordinary differential 
+     .ODEs            : substructure with one ordinary differential
                              equation (ODE) per state variable
-     .ICs             : substructure with initial conditions (ICs) for 
+     .ICs             : substructure with initial conditions (ICs) for
                              each state variable
      .conditionals(i) : structure array with each element indicating
-                             conditional actions specified in subfields 
+                             conditional actions specified in subfields
                              &quot;condition&quot;,&quot;action&quot;,&quot;else&quot; (see NOTE 1 in CheckModel)
      .linkers(i)      : structure array with each element indicating
-                             an &quot;expression&quot; that should be inserted 
-                             (according to &quot;operation&quot;) into any equations 
+                             an &quot;expression&quot; that should be inserted
+                             (according to &quot;operation&quot;) into any equations
                              where the &quot;target&quot; appears. (see NOTE 2 in CheckModel)
        .target    : string giving the target where expression should be inserted
        .expression: string giving the expression to insert
@@ -63,77 +68,83 @@
      .comments{i}     : cell array of comments found in model files
      .specification   : specification used to generate the model
      .namespaces      : (see NOTE 3 in CheckModel)
-   name_map - cell matrix mapping parameter, variable, and function names
-     between the user-created specification (population equations and mechanism
-     files) and the full model with automatically generated namespaces. It 
-     has four columns with: user-specified name, name with namespace prefix, 
-     namespace, and type ('parameters', 'fixed_variables', 'state_variables', 
-     'functions', or 'monitors') indicating the category to which the named
-     element belongs.
- 
- DynaSim specification structure (see CheckSpecification for more details)
- .populations(i) (required): contains info for defining independent population models
-   .name (default: 'pop1')      : name of population
-   .size (default: 1)           : number of elements in population (i.e., # cells)
-   .equations (required)        : string listing equations (see NOTE 1 in CheckSpecification)
-   .mechanism_list (default: []): cell array listing mechanisms (see NOTE 2 in CheckSpecification)
-   .parameters (default: [])    : parameters to assign across all equations in
-     the population. provide as cell array list of key/value pairs
-     {'param1',value1,'param2',value2,...}
-   .model (default: [])   : optional DynaSim model structure
- .connections(i) (default: []): contains info for linking population models
-   .source (required if &gt;1 pops): name of source population
-   .target (required if &gt;1 pops): name of target population
-   .mechanism_list (required)   : list of mechanisms that link two populations
-   .parameters (default: [])    : parameters to assign across all equations in
-     mechanisms of this connection's mechanism_list.
- 
- Example 0:
- model=GenerateModel('db/dt=3')
- 
- Example 1: Lorenz equations
- eqns={
-   's=10; r=27; b=2.666';
-   'dx/dt=s*(y-x)';
-   'dy/dt=r*x-y-x*z';
-   'dz/dt=-b*z+x*y';
- };
- model=GenerateModel(eqns)
- 
- Example 2: Leaky integrate-and-fire neuron
- model=GenerateModel('tau=10; R=10; E=-70; dV/dt=(E-V+R*1.55)/tau; if(V&gt;-55)(V=-75)')
+   - name_map: cell matrix mapping parameter, variable, and function names
+       between the user-created specification (population equations and mechanism
+       files) and the full model with automatically generated namespaces. It
+       has four columns with: user-specified name, name with namespace prefix,
+       namespace, and type ('parameters', 'fixed_variables', 'state_variables',
+       'functions', or 'monitors') indicating the category to which the named
+       element belongs.
 
- Example 3: Hodgkin-Huxley neuron with sinusoidal drive
- model=GenerateModel('dv/dt=current+sin(2*pi*t); {iNa,iK}')
- 
- Example 4: HH with self inhibition and sinusoidal drive
- specification.populations(1).equations='dv/dt=current+sin(2*pi); v(0)=-65';
- specification.populations(1).mechanism_list={'iNa','iK'};
- specification.connections(1).mechanism_list={'iGABAa'};
- specification.connections(1).parameters={'tauDx',15};
- model=GenerateModel(specification)
- 
- Example 5: using custom mechanism alias in equations (for modularization)
- specification.populations(1).equations='dv/dt=@M+sin(2*pi); v(0)=-65';
- specification.populations(1).mechanism_list={'iNa@M','iK@M'};
- model=GenerateModel(specification)
- or:
- specification.populations(1).equations='dv/dt=@M+sin(2*pi); {iNa,iK}@M; v(0)=-65';
- model=GenerateModel(specification)
- 
- Example 6: directly incorporating mechanism models from online repositories:
- model=GenerateModel('dv/dt=@M; {ib:57,iK}@M')
-   where &quot;ib&quot; is a known alias for the infinitebrain.org repository,
-   and &quot;57&quot; is the Na+ current at http://infinitebrain.org/models/57.
-   note: currently not supported on *most* machines...
- 
+ - DynaSim specification structure (see CheckSpecification for more details)
+   .populations(i) (required): contains info for defining independent population models
+       .name (default: 'pop1')      : name of population
+       .size (default: 1)           : number of elements in population (i.e., # cells)
+       .equations (required)        : string listing equations (see NOTE 1 in CheckSpecification)
+       .mechanism_list (default: []): cell array listing mechanisms (see NOTE 2
+                                      in CheckSpecification)
+       .parameters (default: [])    : parameters to assign across all equations in
+         the population. provide as cell array list of key/value pairs
+         {'param1',value1,'param2',value2,...}
+       .model (default: [])   : optional DynaSim model structure
+   .connections(i) (default: []): contains info for linking population models
+       .source (required if &gt;1 pops): name of source population
+       .target (required if &gt;1 pops): name of target population
+       .mechanism_list (required)   : list of mechanisms that link two populations
+       .parameters (default: [])    : parameters to assign across all equations in
+         mechanisms of this connection's mechanism_list.
+
+ Examples:
+   - Example 0:
+     model=GenerateModel('db/dt=3')
+
+   - Example 1: Lorenz equations
+     eqns={
+       's=10; r=27; b=2.666';
+       'dx/dt=s*(y-x)';
+       'dy/dt=r*x-y-x*z';
+       'dz/dt=-b*z+x*y';
+     };
+     model=GenerateModel(eqns)
+
+   - Example 2: Leaky integrate-and-fire neuron
+     model=GenerateModel('tau=10; R=10; E=-70; dV/dt=(E-V+R*1.55)/tau; if(V&gt;-55)(V=-75)')
+
+   - Example 3: Hodgkin-Huxley neuron with sinusoidal drive
+     model=GenerateModel('dv/dt=current+sin(2*pi*t); {iNa,iK}')
+
+   - Example 4: HH with self inhibition and sinusoidal drive
+     specification.populations(1).equations='dv/dt=current+sin(2*pi); v(0)=-65';
+     specification.populations(1).mechanism_list={'iNa','iK'};
+     specification.connections(1).mechanism_list={'iGABAa'};
+     specification.connections(1).parameters={'tauDx',15};
+     model=GenerateModel(specification)
+
+   - Example 5: using custom mechanism alias in equations (for modularization)
+     specification.populations(1).equations='dv/dt=@M+sin(2*pi); v(0)=-65';
+     specification.populations(1).mechanism_list={'iNa@M','iK@M'};
+     model=GenerateModel(specification)
+
+     or:
+
+     specification.populations(1).equations='dv/dt=@M+sin(2*pi); {iNa,iK}@M; v(0)=-65';
+     model=GenerateModel(specification)
+
+   - Example 6: directly incorporating mechanism models from online repositories:
+
+     model=GenerateModel('dv/dt=@M; {ib:57,iK}@M')
+
+     where &quot;ib&quot; is a known alias for the infinitebrain.org repository,
+     and &quot;57&quot; is the Na+ current at http://infinitebrain.org/models/57.
+     note: currently not supported on *most* machines...
+
  See also: <a href="CheckSpecification.html" class="code" title="function spec=CheckSpecification(specification)">CheckSpecification</a>, <a href="CheckModel.html" class="code" title="function model=CheckModel(model)">CheckModel</a>, <a href="ParseModelEquations.html" class="code" title="function [model,name_map] = ParseModelEquations(text,varargin)">ParseModelEquations</a>, <a href="SimulateModel.html" class="code" title="function [data,studyinfo]=SimulateModel(model,varargin)">SimulateModel</a></pre></div>
 
 <!-- crossreference -->
 <h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
 This function calls:
 <ul style="list-style-image:url(../matlabicon.gif)">
-<li><a href="ApplyModifications.html" class="code" title="function [output,modifications]=ApplyModifications(model,modifications)">ApplyModifications</a>	APPLYMODIFICATIONS - Apply modifications to DynaSim specification or model structure</li><li><a href="CheckModel.html" class="code" title="function model=CheckModel(model)">CheckModel</a>	CHECKMODEL - Standardize model structure and auto-populate missing fields</li><li><a href="CheckOptions.html" class="code" title="function parms = CheckOptions(options, options_schema, strict)">CheckOptions</a>	CHECKOPTIONS - organize key/value pairs in structure with default or user-supplied values according to a schema</li><li><a href="CheckSpecification.html" class="code" title="function spec=CheckSpecification(specification)">CheckSpecification</a>	CHECKSPECIFICATION - standardize specification structure and auto-populate missing fields</li><li><a href="CombineModels.html" class="code" title="function model=CombineModels(model1,model2)">CombineModels</a>	% model=CombineModels(model1,model2)</li><li><a href="ImportModel.html" class="code" title="function [model,map] = ImportModel(source,varargin)">ImportModel</a>	[model,map] = ImportModel(source,'option',value,...)</li><li><a href="PropagateNamespaces.html" class="code" title="function model = PropagateNamespaces(model,map)">PropagateNamespaces</a>	% model = PropagateNamespaces(model,name_map)</li><li><a href="dynasim_strrep.html" class="code" title="function str=dynasim_strrep(str,oldstr,newstr,lpad,rpad)">dynasim_strrep</a>	Purpose: replace full words by new character strings, ignoring matches</li></ul>
+<li><a href="ApplyModifications.html" class="code" title="function [output,modifications]=ApplyModifications(model,modifications)">ApplyModifications</a>	APPLYMODIFICATIONS - Apply modifications to DynaSim specification or model structure</li><li><a href="CheckModel.html" class="code" title="function model=CheckModel(model)">CheckModel</a>	CHECKMODEL - Standardize model structure and auto-populate missing fields</li><li><a href="CheckOptions.html" class="code" title="function parms = CheckOptions(options, options_schema, strict)">CheckOptions</a>	CHECKOPTIONS - organize key/value pairs in structure with default or user-supplied values according to a schema</li><li><a href="CheckSpecification.html" class="code" title="function spec=CheckSpecification(specification)">CheckSpecification</a>	CHECKSPECIFICATION - standardize specification structure and auto-populate missing fields</li><li><a href="CombineModels.html" class="code" title="function model=CombineModels(model1,model2)">CombineModels</a>	COMBINEMODELS - combine subfields in two DynaSim model structures</li><li><a href="ImportModel.html" class="code" title="function [model,map] = ImportModel(source,varargin)">ImportModel</a>	IMPORTMODEL - import model from raw equations, other program source, etc.</li><li><a href="PropagateNamespaces.html" class="code" title="function model = PropagateNamespaces(model,map)">PropagateNamespaces</a>	PROPAGATENAMESPACES - namespace-establishing namespace substitutions.</li><li><a href="dynasim_strrep.html" class="code" title="function str=dynasim_strrep(str,oldstr,newstr,lpad,rpad)">dynasim_strrep</a>	DYNASIM_STRREP - replace full words by new character strings, ignoring matches that appear as sub-strings.</li></ul>
 This function is called by:
 <ul style="list-style-image:url(../matlabicon.gif)">
 <li><a href="ApplyModifications.html" class="code" title="function [output,modifications]=ApplyModifications(model,modifications)">ApplyModifications</a>	APPLYMODIFICATIONS - Apply modifications to DynaSim specification or model structure</li><li><a href="CheckModel.html" class="code" title="function model=CheckModel(model)">CheckModel</a>	CHECKMODEL - Standardize model structure and auto-populate missing fields</li><li><a href="ProbeCellProperties.html" class="code" title="function data = ProbeCellProperties(model,varargin)">ProbeCellProperties</a>	data = ProbeCellProperties(model,'option1',option1,...)</li></ul>
@@ -145,630 +156,642 @@ This function is called by:
 
 <h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
 <div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function [model,name_map]=GenerateModel(specification,varargin)</a>
-0002 <span class="comment">%% [model,name_map]=GenerateModel(specification,'option',value,...)</span>
-0003 <span class="comment">% Purpose: parse DynaSim specification and organize model data in DynaSim model structure</span>
-0004 <span class="comment">% Inputs:</span>
-0005 <span class="comment">%   specification: one of --</span>
-0006 <span class="comment">%   - DynaSim specification structure (see below and CheckSpecification for more details)</span>
-0007 <span class="comment">%   - string with name of MAT-file containing DynaSim specification structure</span>
-0008 <span class="comment">%   - string with equations</span>
-0009 <span class="comment">%   - string with name of file containing equations (.eqns)</span>
-0010 <span class="comment">%     note: .eqns files can also be converted into model structure using LoadModel()</span>
-0011 <span class="comment">%   options (with defaults): 'option1',value1,'option2',value2,...</span>
-0012 <span class="comment">%   - 'modifications' ([]): specify modifications to apply to specification before</span>
-0013 <span class="comment">%     generating the model (see ApplyModifications for more details).</span>
-0014 <span class="comment">%   - 'open_link_flag'    : whether to leave linker identifiers in place (default: 0)</span>
-0015 <span class="comment">% Outputs:</span>
-0016 <span class="comment">%   model - DynaSim model structure (see CheckModel for more details):</span>
-0017 <span class="comment">%     .parameters      : substructure with model parameters</span>
-0018 <span class="comment">%     .fixed_variables : substructure with fixed variable definitions</span>
-0019 <span class="comment">%     .functions       : substructure with function definitions</span>
-0020 <span class="comment">%     .monitors        : substructure with monitor definitions</span>
-0021 <span class="comment">%     .state_variables : cell array listing state variables</span>
-0022 <span class="comment">%     .ODEs            : substructure with one ordinary differential</span>
-0023 <span class="comment">%                             equation (ODE) per state variable</span>
-0024 <span class="comment">%     .ICs             : substructure with initial conditions (ICs) for</span>
-0025 <span class="comment">%                             each state variable</span>
-0026 <span class="comment">%     .conditionals(i) : structure array with each element indicating</span>
-0027 <span class="comment">%                             conditional actions specified in subfields</span>
-0028 <span class="comment">%                             &quot;condition&quot;,&quot;action&quot;,&quot;else&quot; (see NOTE 1 in CheckModel)</span>
-0029 <span class="comment">%     .linkers(i)      : structure array with each element indicating</span>
-0030 <span class="comment">%                             an &quot;expression&quot; that should be inserted</span>
-0031 <span class="comment">%                             (according to &quot;operation&quot;) into any equations</span>
-0032 <span class="comment">%                             where the &quot;target&quot; appears. (see NOTE 2 in CheckModel)</span>
-0033 <span class="comment">%       .target    : string giving the target where expression should be inserted</span>
-0034 <span class="comment">%       .expression: string giving the expression to insert</span>
-0035 <span class="comment">%       .operation : string giving the operation to use to insert expression</span>
-0036 <span class="comment">%     .comments{i}     : cell array of comments found in model files</span>
-0037 <span class="comment">%     .specification   : specification used to generate the model</span>
-0038 <span class="comment">%     .namespaces      : (see NOTE 3 in CheckModel)</span>
-0039 <span class="comment">%   name_map - cell matrix mapping parameter, variable, and function names</span>
-0040 <span class="comment">%     between the user-created specification (population equations and mechanism</span>
-0041 <span class="comment">%     files) and the full model with automatically generated namespaces. It</span>
-0042 <span class="comment">%     has four columns with: user-specified name, name with namespace prefix,</span>
-0043 <span class="comment">%     namespace, and type ('parameters', 'fixed_variables', 'state_variables',</span>
-0044 <span class="comment">%     'functions', or 'monitors') indicating the category to which the named</span>
-0045 <span class="comment">%     element belongs.</span>
-0046 <span class="comment">%</span>
-0047 <span class="comment">% DynaSim specification structure (see CheckSpecification for more details)</span>
-0048 <span class="comment">% .populations(i) (required): contains info for defining independent population models</span>
-0049 <span class="comment">%   .name (default: 'pop1')      : name of population</span>
-0050 <span class="comment">%   .size (default: 1)           : number of elements in population (i.e., # cells)</span>
-0051 <span class="comment">%   .equations (required)        : string listing equations (see NOTE 1 in CheckSpecification)</span>
-0052 <span class="comment">%   .mechanism_list (default: []): cell array listing mechanisms (see NOTE 2 in CheckSpecification)</span>
-0053 <span class="comment">%   .parameters (default: [])    : parameters to assign across all equations in</span>
-0054 <span class="comment">%     the population. provide as cell array list of key/value pairs</span>
-0055 <span class="comment">%     {'param1',value1,'param2',value2,...}</span>
-0056 <span class="comment">%   .model (default: [])   : optional DynaSim model structure</span>
-0057 <span class="comment">% .connections(i) (default: []): contains info for linking population models</span>
-0058 <span class="comment">%   .source (required if &gt;1 pops): name of source population</span>
-0059 <span class="comment">%   .target (required if &gt;1 pops): name of target population</span>
-0060 <span class="comment">%   .mechanism_list (required)   : list of mechanisms that link two populations</span>
-0061 <span class="comment">%   .parameters (default: [])    : parameters to assign across all equations in</span>
-0062 <span class="comment">%     mechanisms of this connection's mechanism_list.</span>
-0063 <span class="comment">%</span>
-0064 <span class="comment">% Example 0:</span>
-0065 <span class="comment">% model=GenerateModel('db/dt=3')</span>
-0066 <span class="comment">%</span>
-0067 <span class="comment">% Example 1: Lorenz equations</span>
-0068 <span class="comment">% eqns={</span>
-0069 <span class="comment">%   's=10; r=27; b=2.666';</span>
-0070 <span class="comment">%   'dx/dt=s*(y-x)';</span>
-0071 <span class="comment">%   'dy/dt=r*x-y-x*z';</span>
-0072 <span class="comment">%   'dz/dt=-b*z+x*y';</span>
-0073 <span class="comment">% };</span>
-0074 <span class="comment">% model=GenerateModel(eqns)</span>
-0075 <span class="comment">%</span>
-0076 <span class="comment">% Example 2: Leaky integrate-and-fire neuron</span>
-0077 <span class="comment">% model=GenerateModel('tau=10; R=10; E=-70; dV/dt=(E-V+R*1.55)/tau; if(V&gt;-55)(V=-75)')</span>
-0078 <span class="comment">%</span>
-0079 <span class="comment">% Example 3: Hodgkin-Huxley neuron with sinusoidal drive</span>
-0080 <span class="comment">% model=GenerateModel('dv/dt=current+sin(2*pi*t); {iNa,iK}')</span>
-0081 <span class="comment">%</span>
-0082 <span class="comment">% Example 4: HH with self inhibition and sinusoidal drive</span>
-0083 <span class="comment">% specification.populations(1).equations='dv/dt=current+sin(2*pi); v(0)=-65';</span>
-0084 <span class="comment">% specification.populations(1).mechanism_list={'iNa','iK'};</span>
-0085 <span class="comment">% specification.connections(1).mechanism_list={'iGABAa'};</span>
-0086 <span class="comment">% specification.connections(1).parameters={'tauDx',15};</span>
-0087 <span class="comment">% model=GenerateModel(specification)</span>
+0002 <span class="comment">%GENERATEMODEL - Parse DynaSim specification and organize model data in DynaSim model structure</span>
+0003 <span class="comment">%</span>
+0004 <span class="comment">% Usage:</span>
+0005 <span class="comment">%   [model,name_map]=GenerateModel(specification,'option',value,...)</span>
+0006 <span class="comment">%</span>
+0007 <span class="comment">% Inputs:</span>
+0008 <span class="comment">%   - specification: one of:</span>
+0009 <span class="comment">%     - DynaSim specification structure (see below and CheckSpecification for more details)</span>
+0010 <span class="comment">%     - string with name of MAT-file containing DynaSim specification structure</span>
+0011 <span class="comment">%     - string with equations</span>
+0012 <span class="comment">%     - string with name of file containing equations (.eqns)</span>
+0013 <span class="comment">%       note: .eqns files can also be converted into model structure using LoadModel()</span>
+0014 <span class="comment">%   - options (with defaults): 'option1',value1,'option2',value2,...</span>
+0015 <span class="comment">%     'modifications'  : specify modifications to apply to specification</span>
+0016 <span class="comment">%                        before generating the model, see ApplyModifications</span>
+0017 <span class="comment">%                        for more details (default?: []).</span>
+0018 <span class="comment">%     'open_link_flag' : whether to leave linker identifiers in place (default: 0)</span>
+0019 <span class="comment">%</span>
+0020 <span class="comment">% Outputs:</span>
+0021 <span class="comment">%   - model: DynaSim model structure (see CheckModel for more details):</span>
+0022 <span class="comment">%     .parameters      : substructure with model parameters</span>
+0023 <span class="comment">%     .fixed_variables : substructure with fixed variable definitions</span>
+0024 <span class="comment">%     .functions       : substructure with function definitions</span>
+0025 <span class="comment">%     .monitors        : substructure with monitor definitions</span>
+0026 <span class="comment">%     .state_variables : cell array listing state variables</span>
+0027 <span class="comment">%     .ODEs            : substructure with one ordinary differential</span>
+0028 <span class="comment">%                             equation (ODE) per state variable</span>
+0029 <span class="comment">%     .ICs             : substructure with initial conditions (ICs) for</span>
+0030 <span class="comment">%                             each state variable</span>
+0031 <span class="comment">%     .conditionals(i) : structure array with each element indicating</span>
+0032 <span class="comment">%                             conditional actions specified in subfields</span>
+0033 <span class="comment">%                             &quot;condition&quot;,&quot;action&quot;,&quot;else&quot; (see NOTE 1 in CheckModel)</span>
+0034 <span class="comment">%     .linkers(i)      : structure array with each element indicating</span>
+0035 <span class="comment">%                             an &quot;expression&quot; that should be inserted</span>
+0036 <span class="comment">%                             (according to &quot;operation&quot;) into any equations</span>
+0037 <span class="comment">%                             where the &quot;target&quot; appears. (see NOTE 2 in CheckModel)</span>
+0038 <span class="comment">%       .target    : string giving the target where expression should be inserted</span>
+0039 <span class="comment">%       .expression: string giving the expression to insert</span>
+0040 <span class="comment">%       .operation : string giving the operation to use to insert expression</span>
+0041 <span class="comment">%     .comments{i}     : cell array of comments found in model files</span>
+0042 <span class="comment">%     .specification   : specification used to generate the model</span>
+0043 <span class="comment">%     .namespaces      : (see NOTE 3 in CheckModel)</span>
+0044 <span class="comment">%   - name_map: cell matrix mapping parameter, variable, and function names</span>
+0045 <span class="comment">%       between the user-created specification (population equations and mechanism</span>
+0046 <span class="comment">%       files) and the full model with automatically generated namespaces. It</span>
+0047 <span class="comment">%       has four columns with: user-specified name, name with namespace prefix,</span>
+0048 <span class="comment">%       namespace, and type ('parameters', 'fixed_variables', 'state_variables',</span>
+0049 <span class="comment">%       'functions', or 'monitors') indicating the category to which the named</span>
+0050 <span class="comment">%       element belongs.</span>
+0051 <span class="comment">%</span>
+0052 <span class="comment">% - DynaSim specification structure (see CheckSpecification for more details)</span>
+0053 <span class="comment">%   .populations(i) (required): contains info for defining independent population models</span>
+0054 <span class="comment">%       .name (default: 'pop1')      : name of population</span>
+0055 <span class="comment">%       .size (default: 1)           : number of elements in population (i.e., # cells)</span>
+0056 <span class="comment">%       .equations (required)        : string listing equations (see NOTE 1 in CheckSpecification)</span>
+0057 <span class="comment">%       .mechanism_list (default: []): cell array listing mechanisms (see NOTE 2</span>
+0058 <span class="comment">%                                      in CheckSpecification)</span>
+0059 <span class="comment">%       .parameters (default: [])    : parameters to assign across all equations in</span>
+0060 <span class="comment">%         the population. provide as cell array list of key/value pairs</span>
+0061 <span class="comment">%         {'param1',value1,'param2',value2,...}</span>
+0062 <span class="comment">%       .model (default: [])   : optional DynaSim model structure</span>
+0063 <span class="comment">%   .connections(i) (default: []): contains info for linking population models</span>
+0064 <span class="comment">%       .source (required if &gt;1 pops): name of source population</span>
+0065 <span class="comment">%       .target (required if &gt;1 pops): name of target population</span>
+0066 <span class="comment">%       .mechanism_list (required)   : list of mechanisms that link two populations</span>
+0067 <span class="comment">%       .parameters (default: [])    : parameters to assign across all equations in</span>
+0068 <span class="comment">%         mechanisms of this connection's mechanism_list.</span>
+0069 <span class="comment">%</span>
+0070 <span class="comment">% Examples:</span>
+0071 <span class="comment">%   - Example 0:</span>
+0072 <span class="comment">%     model=GenerateModel('db/dt=3')</span>
+0073 <span class="comment">%</span>
+0074 <span class="comment">%   - Example 1: Lorenz equations</span>
+0075 <span class="comment">%     eqns={</span>
+0076 <span class="comment">%       's=10; r=27; b=2.666';</span>
+0077 <span class="comment">%       'dx/dt=s*(y-x)';</span>
+0078 <span class="comment">%       'dy/dt=r*x-y-x*z';</span>
+0079 <span class="comment">%       'dz/dt=-b*z+x*y';</span>
+0080 <span class="comment">%     };</span>
+0081 <span class="comment">%     model=GenerateModel(eqns)</span>
+0082 <span class="comment">%</span>
+0083 <span class="comment">%   - Example 2: Leaky integrate-and-fire neuron</span>
+0084 <span class="comment">%     model=GenerateModel('tau=10; R=10; E=-70; dV/dt=(E-V+R*1.55)/tau; if(V&gt;-55)(V=-75)')</span>
+0085 <span class="comment">%</span>
+0086 <span class="comment">%   - Example 3: Hodgkin-Huxley neuron with sinusoidal drive</span>
+0087 <span class="comment">%     model=GenerateModel('dv/dt=current+sin(2*pi*t); {iNa,iK}')</span>
 0088 <span class="comment">%</span>
-0089 <span class="comment">% Example 5: using custom mechanism alias in equations (for modularization)</span>
-0090 <span class="comment">% specification.populations(1).equations='dv/dt=@M+sin(2*pi); v(0)=-65';</span>
-0091 <span class="comment">% specification.populations(1).mechanism_list={'iNa@M','iK@M'};</span>
-0092 <span class="comment">% model=GenerateModel(specification)</span>
-0093 <span class="comment">% or:</span>
-0094 <span class="comment">% specification.populations(1).equations='dv/dt=@M+sin(2*pi); {iNa,iK}@M; v(0)=-65';</span>
-0095 <span class="comment">% model=GenerateModel(specification)</span>
-0096 <span class="comment">%</span>
-0097 <span class="comment">% Example 6: directly incorporating mechanism models from online repositories:</span>
-0098 <span class="comment">% model=GenerateModel('dv/dt=@M; {ib:57,iK}@M')</span>
-0099 <span class="comment">%   where &quot;ib&quot; is a known alias for the infinitebrain.org repository,</span>
-0100 <span class="comment">%   and &quot;57&quot; is the Na+ current at http://infinitebrain.org/models/57.</span>
-0101 <span class="comment">%   note: currently not supported on *most* machines...</span>
+0089 <span class="comment">%   - Example 4: HH with self inhibition and sinusoidal drive</span>
+0090 <span class="comment">%     specification.populations(1).equations='dv/dt=current+sin(2*pi); v(0)=-65';</span>
+0091 <span class="comment">%     specification.populations(1).mechanism_list={'iNa','iK'};</span>
+0092 <span class="comment">%     specification.connections(1).mechanism_list={'iGABAa'};</span>
+0093 <span class="comment">%     specification.connections(1).parameters={'tauDx',15};</span>
+0094 <span class="comment">%     model=GenerateModel(specification)</span>
+0095 <span class="comment">%</span>
+0096 <span class="comment">%   - Example 5: using custom mechanism alias in equations (for modularization)</span>
+0097 <span class="comment">%     specification.populations(1).equations='dv/dt=@M+sin(2*pi); v(0)=-65';</span>
+0098 <span class="comment">%     specification.populations(1).mechanism_list={'iNa@M','iK@M'};</span>
+0099 <span class="comment">%     model=GenerateModel(specification)</span>
+0100 <span class="comment">%</span>
+0101 <span class="comment">%     or:</span>
 0102 <span class="comment">%</span>
-0103 <span class="comment">% See also: CheckSpecification, CheckModel, ParseModelEquations, SimulateModel</span>
-0104 
-0105 <span class="comment">% Check inputs</span>
-0106 <span class="comment">% ------------------------------------------------------</span>
-0107 <span class="keyword">if</span> nargin==0
-0108   <span class="comment">% use default model</span>
-0109   specification=[];
-0110   specification.populations(1).equations=<span class="string">'dv/dt=10+@current/Cm; Cm=1; v(0)=-65'</span>;
-0111   specification.populations(1).mechanism_list={<span class="string">'iNa'</span>,<span class="string">'iK'</span>};
-0112   specification.populations(1).parameters={<span class="string">'Cm'</span>,1};
-0113   specification.connections(1).mechanism_list={<span class="string">'iGABAa'</span>};
-0114   varargin={<span class="string">'modifications'</span>,[]};
-0115 <span class="keyword">end</span>
-0116 <span class="comment">% ------------------------------------------------------</span>
-0117 
-0118 options=<a href="CheckOptions.html" class="code" title="function parms = CheckOptions(options, options_schema, strict)">CheckOptions</a>(varargin,{<span class="keyword">...</span>
-0119   <span class="string">'modifications'</span>,[],[],<span class="keyword">...</span>
-0120   <span class="string">'open_link_flag'</span>,0,{0,1},<span class="keyword">...</span>
-0121   },false);
-0122 <span class="comment">% check if a model</span>
-0123 <span class="keyword">if</span> isfield(specification,<span class="string">'state_variables'</span>)
-0124   <span class="comment">% do nothing</span>
-0125   model=specification;
-0126   <span class="keyword">return</span>;
-0127 <span class="comment">%   todo: consider the following --</span>
-0128 <span class="comment">%   if isfield(specification,'specification')</span>
-0129 <span class="comment">%     % regenerate from specification</span>
-0130 <span class="comment">%     specification=specification.specification;</span>
-0131 <span class="comment">%   end</span>
-0132 <span class="keyword">end</span>
-0133 <span class="comment">% standardize specification</span>
-0134 specification=<a href="CheckSpecification.html" class="code" title="function spec=CheckSpecification(specification)">CheckSpecification</a>(specification); <span class="comment">% standardize &amp; auto-populate as needed</span>
-0135 
-0136 <span class="comment">% Apply modifications to specification before generating model</span>
-0137 <span class="keyword">if</span> ~isempty(options.modifications)
-0138   specification=<a href="ApplyModifications.html" class="code" title="function [output,modifications]=ApplyModifications(model,modifications)">ApplyModifications</a>(specification,options.modifications);
-0139 <span class="keyword">end</span>
-0140 
-0141 <span class="comment">% specification metadata:</span>
-0142 npops=length(specification.populations); <span class="comment">% number of populations</span>
-0143 ncons=length(specification.connections); <span class="comment">% number of connections</span>
-0144 
-0145 <span class="comment">%{</span>
-0146 <span class="comment">% Dev notes on improving implementation:</span>
-0147 <span class="comment">% Ideally (1.0)-(3.0) could be packaged into external functions and run as:</span>
-0148 <span class="comment">% -------------------------------------------------------------------------</span>
-0149 <span class="comment">%% 1.0 load sub-models, assign namespaces, and combine across all equations and mechanisms in specification</span>
-0150 <span class="comment">% [model,name_map]=LoadModelSet(specification) % bug: disrupted subsequent namespace propagation (without raising an error)</span>
-0151 <span class="comment">%% 2.0 propagate namespaces through variable and function names</span>
-0152 <span class="comment">% model = PropagateNamespaces(model,name_map); % this works</span>
-0153 <span class="comment">%% 3.0 expand population equations according to mechanism linkers</span>
-0154 <span class="comment">% model = LinkMechanisms(model,name_map);      % problem: unable to identify linker population from model.linkers; see notes below (3.0) for more details</span>
-0155 <span class="comment">% -------------------------------------------------------------------------</span>
-0156 <span class="comment">%}</span>
-0157 
-0158 <span class="comment">% support full modularization of mechanisms</span>
-0159 <span class="comment">% (eg, dv/dt=@M; {Na,K}@M w/ Na.mech: @current += I(IN,m,h)).</span>
-0160 <span class="comment">%     approach taken below:</span>
-0161 <span class="comment">%     - add support for dv/dt=@M; {Na@M,K@M}</span>
-0162 <span class="comment">%       have GenerateModel split mech_name on '@' and replace first</span>
-0163 <span class="comment">%       linker in mech (e.g., @current) by what follows '@' (e.g., @M)</span>
-0164 <span class="comment">%     - then have CheckSpecification convert {Na,K}@M into {Na@M,K@M}</span>
-0165 
-0166 <span class="comment">%% 1.0 load sub-models, assign namespaces, and combine across all equations and mechanisms in specification</span>
-0167 model.parameters={};
-0168 model.fixed_variables=[];
-0169 model.functions=[];
-0170 model.monitors=[];
-0171 model.state_variables={};
-0172 model.ODEs=[];
-0173 model.ICs=[];
-0174 model.conditionals=[];
-0175 model.linkers=[];
-0176 model.comments={};
-0177 name_map={}; <span class="comment">% {name, namespace_name, namespace, type}, used for namespacing</span>
-0178 linker_pops={}; <span class="comment">% list of populations associated with mechanism linkers</span>
-0179 
-0180 <span class="comment">% 1.1 load and combine population sub-models from population equations and mechanisms</span>
-0181 <span class="keyword">for</span> i=1:npops
-0182   <span class="comment">% does the population model already exist?</span>
-0183   <span class="keyword">if</span> ~isempty(specification.populations(i).model)
-0184     tmpmodel=specification.populations(i).model; <span class="comment">% get model structure</span>
-0185     tmpname=tmpmodel.specification.populations.name; <span class="comment">% assumes one population sub-model</span>
-0186     <span class="comment">% adjust the name if necessary</span>
-0187     <span class="keyword">if</span> ~strcmp(specification.populations(i).name,tmpname)
-0188       <span class="comment">% use the name in the specification</span>
-0189       tmpmodel=<a href="ApplyModifications.html" class="code" title="function [output,modifications]=ApplyModifications(model,modifications)">ApplyModifications</a>(tmpmodel,{tmpname,<span class="string">'name'</span>,specification.populations(i).name});
-0190     <span class="keyword">elseif</span> strcmp(tmpname,<span class="string">'pop1'</span>) <span class="comment">% if default name</span>
-0191       <span class="comment">% use default name for this population index</span>
-0192       tmpmodel=<a href="ApplyModifications.html" class="code" title="function [output,modifications]=ApplyModifications(model,modifications)">ApplyModifications</a>(tmpmodel,{tmpname,<span class="string">'name'</span>,sprintf(<span class="string">'pop%g'</span>,i)});
-0193     <span class="keyword">end</span>
-0194     tmpmodel.linkers=[]; <span class="comment">% remove old linkers from original model construction</span>
-0195     model=<a href="CombineModels.html" class="code" title="function model=CombineModels(model1,model2)">CombineModels</a>(model,tmpmodel);
-0196     name_map=<a href="#_sub6" class="code" title="subfunctions_to_monitor=cat(1,functions_to_monitor,function_names(function_index));">cat</a>(1,name_map,tmpmodel.namespaces);
-0197     <span class="keyword">continue</span>;
-0198   <span class="keyword">end</span>
-0199   <span class="comment">% construct new population model</span>
-0200   PopScope=specification.populations(i).name;
-0201     <span class="comment">% note: ParseModelEquations adds a '_' suffix to the namespace; therefore,</span>
-0202     <span class="comment">% a '_' suffix is added to PopScope when used below for consistency of</span>
-0203     <span class="comment">% namespaces/namespaces. (this could be cleaned up by adding '_' to PopScope</span>
-0204     <span class="comment">% here, removing it below, and removing the additional '_' from</span>
-0205     <span class="comment">% ParseModelEquations).</span>
-0206   <span class="comment">% 1.1.1 parse population equations</span>
-0207   equations=specification.populations(i).equations;
-0208   parameters=specification.populations(i).parameters;
-0209   nmechs=length(specification.populations(i).mechanism_list);
-0210   <span class="comment">% parse population equations</span>
-0211   <span class="keyword">if</span> ~isempty(equations)
-0212     [tmpmodel,tmpmap]=<a href="ImportModel.html" class="code" title="function [model,map] = ImportModel(source,varargin)">ImportModel</a>(equations,<span class="string">'namespace'</span>,PopScope,<span class="string">'ic_pop'</span>,specification.populations(i).name,<span class="string">'user_parameters'</span>,parameters);
-0213     model=<a href="CombineModels.html" class="code" title="function model=CombineModels(model1,model2)">CombineModels</a>(model,tmpmodel);
-0214     name_map=<a href="#_sub6" class="code" title="subfunctions_to_monitor=cat(1,functions_to_monitor,function_names(function_index));">cat</a>(1,name_map,tmpmap);
-0215   <span class="keyword">end</span>
-0216   <span class="comment">% 1.1.2 parse population mechanisms</span>
-0217   <span class="keyword">for</span> j=1:nmechs
-0218     mechanism_=specification.populations(i).mechanism_list{j};
-0219     <span class="comment">% support separation of linker names in pop equations vs mechanisms</span>
-0220     mechanism_=regexp(mechanism_,<span class="string">'@'</span>,<span class="string">'split'</span>);
-0221     mechanism=mechanism_{1};
-0222     <span class="keyword">if</span> numel(mechanism_)&gt;1, new_linker=mechanism_{2}; <span class="keyword">else</span> new_linker=[]; <span class="keyword">end</span>
-0223     <span class="comment">% set mechanism namespace</span>
-0224     <span class="keyword">if</span> any(mechanism==<span class="string">':'</span>)
-0225       <span class="comment">% exclude host name from namespace</span>
-0226       tmp=regexp(mechanism,<span class="string">':'</span>,<span class="string">'split'</span>);
-0227       MechScope=[specification.populations(i).name <span class="string">'_'</span> tmp{2}];
-0228     <span class="keyword">else</span>      
-0229       <span class="comment">% extract mechanism file name without path</span>
-0230       [~,MechID]=fileparts(mechanism);
-0231       MechScope=[specification.populations(i).name <span class="string">'_'</span> MechID];
-0232     <span class="keyword">end</span>
-0233     <span class="comment">% parse mechanism equations</span>
-0234     [tmpmodel,tmpmap]=<a href="ImportModel.html" class="code" title="function [model,map] = ImportModel(source,varargin)">ImportModel</a>(mechanism,<span class="string">'namespace'</span>,MechScope,<span class="string">'ic_pop'</span>,specification.populations(i).name,<span class="string">'user_parameters'</span>,parameters);
-0235     <span class="comment">% replace 1st linker name by the one in specification</span>
-0236     <span class="keyword">if</span> ~isempty(new_linker) &amp;&amp; ~isempty(tmpmodel.linkers)
-0237       <span class="comment">% first try to find 1st linker target starting with @</span>
-0238       links_at=<a href="#_sub3  5" class="code" title="subfunction_monitor_index=find(~cellfun(@isempty,regexp(monitor_names,function_index=find(~cellfun(@isempty,regexp(function_names,[">find</a>(~cellfun(@isempty,regexp({tmpmodel.linkers.target},<span class="string">'^@'</span>,<span class="string">'once'</span>)));
-0239       <span class="keyword">if</span> ~isempty(links_at)
-0240         <span class="comment">% use first link with target prepended by '@'</span>
-0241         link_ind=links_at(1);
-0242       <span class="keyword">else</span>
-0243         <span class="comment">% use first link</span>
-0244         link_ind=1;
-0245       <span class="keyword">end</span>
-0246       tmpmodel.linkers(link_ind).target=[<span class="string">'@'</span> new_linker];
-0247     <span class="keyword">end</span>
-0248     <span class="comment">% combine sub-model with other sub-models</span>
-0249     model=<a href="CombineModels.html" class="code" title="function model=CombineModels(model1,model2)">CombineModels</a>(model,tmpmodel);
-0250     name_map=<a href="#_sub6" class="code" title="subfunctions_to_monitor=cat(1,functions_to_monitor,function_names(function_index));">cat</a>(1,name_map,tmpmap);
-0251     linker_pops=<a href="#_sub6" class="code" title="subfunctions_to_monitor=cat(1,functions_to_monitor,function_names(function_index));">cat</a>(2,linker_pops,repmat({specification.populations(i).name},[1 length(tmpmodel.linkers)]));
-0252   <span class="keyword">end</span>
-0253   pop=specification.populations(i).name;
-0254   <span class="comment">% add reserved keywords (parameters and state variables) to name_map</span>
-0255   <a href="#_sub8" class="code" title="subfunction add_keywords(src,dst,namespace)">add_keywords</a>(pop,pop,[PopScope <span class="string">'_'</span>]);
-0256   model.parameters.([pop <span class="string">'_Npop'</span>])=num2str(specification.populations(i).size);
-0257 <span class="keyword">end</span>
-0258 <span class="comment">% 1.2 load and combine sub-models from connection mechanisms</span>
-0259 <span class="keyword">for</span> i=1:ncons
-0260   <span class="comment">% parse connection mechanisms</span>
-0261   source=specification.connections(i).source;
-0262   target=specification.connections(i).target;
-0263   parameters=specification.connections(i).parameters;
-0264   ConScope=[target <span class="string">'_'</span> source <span class="string">'_'</span>];
-0265     <span class="comment">% note: in contrast to PopScope above, ConScope is never passed to</span>
-0266     <span class="comment">% ParseModelEquations; thus the '_' should be added here for consistency</span>
-0267     <span class="comment">% with mechanism namespaces (which are modified by ParseModelEquations).</span>
-0268   <span class="keyword">for</span> j=1:length(specification.connections(i).mechanism_list)
-0269     mechanism_=specification.connections(i).mechanism_list{j};
-0270     <span class="comment">% support separation of linker names in pop equations vs mechanisms</span>
-0271     mechanism_=regexp(mechanism_,<span class="string">'@'</span>,<span class="string">'split'</span>);
-0272     mechanism=mechanism_{1};
-0273     <span class="keyword">if</span> numel(mechanism_)&gt;1, new_linker=mechanism_{2}; <span class="keyword">else</span> new_linker=[]; <span class="keyword">end</span>  
-0274     <span class="comment">% extract mechanism file name without path</span>
-0275     [~,MechID]=fileparts(mechanism);
-0276     MechScope=[target <span class="string">'_'</span> source <span class="string">'_'</span> MechID]; 
-0277         <span class="comment">% note: must use target_source_mechanism for connection mechanisms</span>
-0278         <span class="comment">% to distinguish their parent namespaces from those of population mechanisms</span>
-0279         <span class="comment">% see: GetParentNamespace</span>
-0280     <span class="comment">% parse model equations</span>
-0281     [tmpmodel,tmpmap]=<a href="ImportModel.html" class="code" title="function [model,map] = ImportModel(source,varargin)">ImportModel</a>(mechanism,<span class="string">'namespace'</span>,MechScope,<span class="string">'ic_pop'</span>,source,<span class="string">'user_parameters'</span>,parameters);
-0282     <span class="comment">% replace 1st linker name by the one in specification</span>
-0283     <span class="keyword">if</span> ~isempty(new_linker) &amp;&amp; ~isempty(tmpmodel.linkers)
-0284       tmpmodel.linkers(1).target=[<span class="string">'@'</span> new_linker];
-0285     <span class="keyword">end</span>
-0286     model=<a href="CombineModels.html" class="code" title="function model=CombineModels(model1,model2)">CombineModels</a>(model,tmpmodel);
-0287     name_map=<a href="#_sub6" class="code" title="subfunctions_to_monitor=cat(1,functions_to_monitor,function_names(function_index));">cat</a>(1,name_map,tmpmap);
-0288     <span class="comment">% link this mechanism to the target population</span>
-0289     linker_pops=<a href="#_sub6" class="code" title="subfunctions_to_monitor=cat(1,functions_to_monitor,function_names(function_index));">cat</a>(2,linker_pops,repmat(target,[1 length(tmpmodel.linkers)]));
-0290     <span class="comment">% edit names of connection monitors specified in population equations</span>
-0291     <span class="comment">% todo: consider design changes to avoid specifying connection monitors</span>
-0292     <span class="comment">% in population equations; this is an undesirable hack:</span>
-0293     <span class="comment">% eg, convert E_iGABAa_functions -&gt; I_E_iGABAa_functions</span>
-0294     <span class="keyword">if</span> ~isempty(model.monitors)
-0295       <span class="comment">% get indices to all model.monitors that have incorrect connection namespace</span>
-0296       con_mon_to_update=<a href="#_sub3  5" class="code" title="subfunction_monitor_index=find(~cellfun(@isempty,regexp(monitor_names,function_index=find(~cellfun(@isempty,regexp(function_names,[">find</a>(~cellfun(@isempty,regexp(<a href="#_sub1  9" class="code" title="subfunction_names=fieldnames(model.functions);function_names=fieldnames(model.functions);">fieldnames</a>(model.monitors),[<span class="string">'^'</span> target <span class="string">'_'</span> mechanism])));
-0297       <span class="keyword">if</span> any(con_mon_to_update)
-0298         <span class="comment">% get list of current model.monitors</span>
-0299         monitor_names=<a href="#_sub1  9" class="code" title="subfunction_names=fieldnames(model.functions);function_names=fieldnames(model.functions);">fieldnames</a>(model.monitors);
-0300         <span class="keyword">for</span> m=1:length(con_mon_to_update)
-0301           <span class="comment">% get name of monitor with incorrect connection namespace</span>
-0302           old=monitor_names{con_mon_to_update(m)};
-0303           <span class="comment">% get name of monitor with correct connection namespace</span>
-0304           new=strrep(old,[target <span class="string">'_'</span> mechanism <span class="string">'_'</span>],[MechScope <span class="string">'_'</span>]);
-0305           <span class="comment">% add new monitor with correct namespace</span>
-0306           model.monitors.(new)=model.monitors.(old);
-0307           <span class="comment">% remove old monitor with incorrect namespace</span>
-0308           model.monitors=rmfield(model.monitors,old);
-0309         <span class="keyword">end</span>
-0310       <span class="keyword">end</span>
-0311     <span class="keyword">end</span>
-0312   <span class="keyword">end</span>
-0313   <span class="comment">% add reserved keywords (parameters and state variables) to name_map</span>
-0314   <a href="#_sub8" class="code" title="subfunction add_keywords(src,dst,namespace)">add_keywords</a>(source,target,ConScope);
-0315 <span class="keyword">end</span>
-0316 <span class="comment">% check for monitoring functions (e.g., 'monitor functions' or 'monitor Na.functions')</span>
-0317 <span class="keyword">if</span> ~isempty(model.monitors)
-0318   <span class="comment">% get list of functions</span>
-0319   <span class="keyword">if</span> ~isempty(model.functions)
-0320     <a name="_sub1" href="#_subfunctions" class="code">function_names=fieldnames(model.functions);</a>
-0321   <span class="keyword">else</span>
-0322     <a name="_sub2" href="#_subfunctions" class="code">function_names={};</a>
-0323   <span class="keyword">end</span>
-0324   <span class="comment">% get list of monitor names</span>
-0325   monitor_names=<a href="#_sub1  9" class="code" title="subfunction_names=fieldnames(model.functions);function_names=fieldnames(model.functions);">fieldnames</a>(model.monitors);
-0326   <span class="comment">% get indices to monitors with names ending in _functions</span>
-0327   <a name="_sub3" href="#_subfunctions" class="code">function_monitor_index=find(~cellfun(@isempty,regexp(monitor_names,</a><span class="string">'_functions$'</span>,<span class="string">'once'</span>)));
-0328   <span class="comment">% create list of functions with namespaces matching monitors ending in _functions</span>
-0329   <a name="_sub4" href="#_subfunctions" class="code">functions_to_monitor={};</a>
-0330   <span class="keyword">for</span> i=1:length(function_monitor_index)
-0331     <span class="comment">% get namespace of functions to monitor</span>
-0332     monitor_name=monitor_names{function_monitor_index(i)};
-0333     monitor_namespace=regexp(monitor_name,<span class="string">'(.*)_functions$'</span>,<span class="string">'tokens'</span>,<span class="string">'once'</span>);
-0334     monitor_namespace=monitor_namespace{1};
-0335     <span class="comment">% get list of functions with matching namespace</span>
-0336     <a name="_sub5" href="#_subfunctions" class="code">function_index=find(~cellfun(@isempty,regexp(function_names,[</a><span class="string">'^'</span> monitor_namespace],<span class="string">'once'</span>)));
-0337     <span class="comment">% add functions to list</span>
-0338     <a name="_sub6" href="#_subfunctions" class="code">functions_to_monitor=cat(1,functions_to_monitor,function_names(function_index));</a>
-0339     <span class="comment">% remove &quot;function&quot; monitor name</span>
-0340     model.monitors=rmfield(model.monitors,monitor_name);
-0341   <span class="keyword">end</span>
-0342   <span class="comment">% eliminate duplicate function names</span>
-0343   <a name="_sub7" href="#_subfunctions" class="code">functions_to_monitor=unique(functions_to_monitor);</a>
-0344   <span class="comment">% add functions to monitor list</span>
-0345   <span class="keyword">for</span> i=1:length(functions_to_monitor)
-0346     model.monitors.(functions_to_monitor{i})=[];
-0347   <span class="keyword">end</span>
-0348 <span class="keyword">end</span>
-0349 
-0350   <span class="comment">% ----------------------------------</span>
-0351   <span class="comment">% NESTED FUNCTIONS</span>
-0352   <span class="comment">% ----------------------------------</span>
-0353   <a name="_sub8" href="#_subfunctions" class="code">function add_keywords(src,dst,namespace)</a>
-0354     <span class="comment">% note: this needs to be coordinated with update_keywords() in SimulateModel()</span>
-0355     <span class="comment">% for parameters</span>
-0356     Nsrc=[src <span class="string">'_Npop'</span>];
-0357     Ndst=[dst <span class="string">'_Npop'</span>];
-0358     old={<span class="string">'Npre'</span>,<span class="string">'N[1]'</span>,<span class="string">'N_pre'</span>,<span class="string">'Npost'</span>,<span class="string">'N_post'</span>,<span class="string">'N[0]'</span>,<span class="string">'Npop'</span>,<span class="string">'N_pop'</span>};
-0359     new={Nsrc,Nsrc,Nsrc,Ndst,Ndst,Ndst,Ndst,Ndst};
-0360     <span class="keyword">for</span> p=1:length(old)
-0361       name_map(end+1,:)={old{p},new{p},namespace,<span class="string">'parameters'</span>};
-0362     <span class="keyword">end</span>
-0363     <span class="comment">% for state variables</span>
-0364     new={};
-0365     old={};
-0366     src_excluded=~cellfun(@isempty,regexp(name_map(:,1),[<span class="string">'pre'</span> <span class="string">'$'</span>]));
-0367     dst_excluded=~cellfun(@isempty,regexp(name_map(:,1),[<span class="string">'post'</span> <span class="string">'$'</span>]));
-0368     excluded=src_excluded|dst_excluded;
-0369     PopScope=[src <span class="string">'_'</span>];
-0370     var_idx=strcmp(PopScope,name_map(:,3)) &amp; strcmp(<span class="string">'state_variables'</span>,name_map(:,4)) &amp; ~excluded;
-0371     <span class="keyword">if</span> any(var_idx)
-0372       Xsrc_old_vars=name_map(var_idx,1);
-0373       Xsrc_new_vars=name_map(var_idx,2);
-0374       <span class="comment">% default for IN is first Xsrc state var</span>
-0375       Xsrc=Xsrc_new_vars{1};
-0376       old=<a href="#_sub6" class="code" title="subfunctions_to_monitor=cat(1,functions_to_monitor,function_names(function_index));">cat</a>(2,old,{<span class="string">'IN'</span>,<span class="string">'Xpre'</span>,<span class="string">'X_pre'</span>});
-0377       new=<a href="#_sub6" class="code" title="subfunctions_to_monitor=cat(1,functions_to_monitor,function_names(function_index));">cat</a>(2,new,{Xsrc,Xsrc,Xsrc});
-0378     <span class="keyword">else</span>
-0379       Xsrc_old_vars=[];
-0380       Xsrc_new_vars=[];
-0381       Xsrc=[];
-0382     <span class="keyword">end</span>
-0383     PopScope=[dst <span class="string">'_'</span>];
-0384     var_idx=strcmp(PopScope,name_map(:,3)) &amp; strcmp(<span class="string">'state_variables'</span>,name_map(:,4)) &amp; ~excluded;
-0385     <span class="keyword">if</span> any(var_idx)
-0386       Xdst_old_vars=name_map(var_idx,1);
-0387       Xdst_new_vars=name_map(var_idx,2);
-0388       <span class="comment">% default for OUT and X is first Xdst state var</span>
-0389       Xdst=Xdst_new_vars{1};
-0390       old=<a href="#_sub6" class="code" title="subfunctions_to_monitor=cat(1,functions_to_monitor,function_names(function_index));">cat</a>(2,old,{<span class="string">'OUT'</span>,<span class="string">'X'</span>,<span class="string">'Xpost'</span>,<span class="string">'X_post'</span>});
-0391       new=<a href="#_sub6" class="code" title="subfunctions_to_monitor=cat(1,functions_to_monitor,function_names(function_index));">cat</a>(2,new,{Xdst,Xdst,Xdst,Xdst});
-0392     <span class="keyword">else</span>
-0393       Xdst_old_vars=[];
-0394       Xdst_new_vars=[];
-0395       Xdst=[];
-0396     <span class="keyword">end</span>
-0397     <span class="comment">% add variants [var_pre,var_post,varpre,varpost]</span>
-0398     <span class="keyword">if</span> ~isempty(Xsrc_old_vars)
-0399       [Xsrc_old_vars,IA]=setdiff(Xsrc_old_vars,old);
-0400       Xsrc_new_vars=Xsrc_new_vars(IA);
-0401     <span class="keyword">end</span>
-0402     <span class="keyword">if</span> ~isempty(Xdst_old_vars)
-0403       [Xdst_old_vars,IA]=setdiff(Xdst_old_vars,old);
-0404       Xdst_new_vars=Xdst_new_vars(IA);
-0405     <span class="keyword">end</span>
-0406     <span class="keyword">for</span> p=1:length(Xsrc_old_vars)
-0407       old{end+1}=[Xsrc_old_vars{p} <span class="string">'_pre'</span>];
-0408       new{end+1}=Xsrc_new_vars{p};
-0409       old{end+1}=[Xsrc_old_vars{p} <span class="string">'pre'</span>];
-0410       new{end+1}=Xsrc_new_vars{p};
-0411     <span class="keyword">end</span>
-0412     <span class="keyword">for</span> p=1:length(Xdst_old_vars)
-0413       old{end+1}=[Xdst_old_vars{p} <span class="string">'_post'</span>];
-0414       new{end+1}=Xdst_new_vars{p};
-0415       old{end+1}=[Xdst_old_vars{p} <span class="string">'post'</span>];
-0416       new{end+1}=Xdst_new_vars{p};
-0417     <span class="keyword">end</span>
-0418     <span class="keyword">for</span> p=1:length(old)
-0419       name_map(end+1,:)={old{p},new{p},namespace,<span class="string">'state_variables'</span>};
-0420     <span class="keyword">end</span>
-0421   <span class="keyword">end</span>
-0422 
-0423 <span class="comment">%% 2.0 propagate namespaces through variable and function names</span>
-0424 <span class="comment">%      i.e., to establish uniqueness of names by adding namespace/namespace prefixes)</span>
-0425 model = <a href="PropagateNamespaces.html" class="code" title="function model = PropagateNamespaces(model,map)">PropagateNamespaces</a>(model,name_map);
-0426 
-0427 <span class="comment">%% 3.0 expand population equations according to mechanism linkers</span>
-0428 <span class="comment">% purpose: expand population equations according to linkers</span>
-0429 <span class="comment">% - link populations.equations to mechanism sub-models</span>
-0430 <span class="comment">% - link mechanism functions and state variables across mechanisms in a given population</span>
-0431 
-0432 <span class="comment">% store indices to all expressions and conditionals that are linked (this</span>
-0433 <span class="comment">% is necessary for efficiently removing linker targets from expressions after linking)</span>
-0434 all_expression_inds=[];
-0435 all_expression_targets={};
-0436 all_conditionals_inds=[];
-0437 all_conditionals_targets={};
-0438 
-0439 <span class="comment">% add variables to linked expression if its a function without ()</span>
-0440 <span class="keyword">if</span> ~isempty(model.functions) &amp;&amp; ~isempty(model.linkers)
-0441   <a name="_sub9" href="#_subfunctions" class="code">function_names=fieldnames(model.functions);</a>
-0442   expressions={model.linkers.expression};
-0443   [~,I,J]=intersect(function_names,expressions);
-0444   <span class="keyword">for</span> i=1:length(I)
-0445     e=model.functions.(function_names{J(i)}); <span class="comment">% function expression (eg,'@(x,y,z)x-(y-z)')</span>
-0446     v=regexp(e,<span class="string">'@(\([\w,]+\))'</span>,<span class="string">'tokens'</span>,<span class="string">'once'</span>); <span class="comment">% function input list (eg, '(x,y,z)')</span>
-0447     <span class="keyword">if</span> ~isempty(v)
-0448       model.linkers(I(i)).expression=[model.linkers(I(i)).expression v{1}];
-0449     <span class="keyword">end</span>
-0450   <span class="keyword">end</span>
-0451 <span class="keyword">end</span>
-0452 
-0453 <span class="comment">% loop over linkers</span>
-0454 <span class="keyword">for</span> i=1:length(model.linkers)
-0455   <span class="comment">% determine how to link</span>
-0456   operation=model.linkers(i).operation;
-0457   oldstr=model.linkers(i).target;
-0458   newstr=model.linkers(i).expression;
-0459   <span class="keyword">switch</span> operation <span class="comment">% see ClassifyEquation and ParseModelEquations   % ('((\+=)|(-=)|(\*=)|(/=)|(=&gt;))')</span>
-0460     <span class="keyword">case</span> <span class="string">'+='</span>
-0461       operator=<span class="string">'+'</span>;
-0462     <span class="keyword">case</span> <span class="string">'-='</span>
-0463       operator=<span class="string">'-'</span>;
-0464     <span class="keyword">case</span> <span class="string">'*='</span>
-0465       operator=<span class="string">'.*'</span>;
-0466     <span class="keyword">case</span> <span class="string">'/='</span>
-0467       operator=<span class="string">'./'</span>;
-0468     <span class="keyword">otherwise</span>
-0469       operator=<span class="string">'+'</span>;
-0470   <span class="keyword">end</span>
-0471   <span class="comment">% determine what to link (ie, link across everything belonging to the linker population)</span>
-0472   <span class="comment">% explicitly constrain to linker population</span>
-0473   expressions_in_pop=~cellfun(@isempty,regexp(name_map(:,3),[<span class="string">'^'</span> linker_pops{i}]));
-0474   <span class="keyword">if</span> ~isempty(model.conditionals)
-0475     conditionals_in_pop=~cellfun(@isempty,regexp({model.conditionals.namespace},[<span class="string">'^'</span> linker_pops{i}]));
-0476   <span class="keyword">end</span>
-0477   <span class="keyword">if</span> ~isempty(model.linkers)
-0478     linkers_in_pop=~cellfun(@isempty,regexp({model.linkers.namespace},[<span class="string">'^'</span> linker_pops{i}]));
-0479   <span class="keyword">end</span>  
-0480   <span class="comment">% constrain to namespace</span>
-0481   names_in_namespace=cellfun(@(x,y)strncmp(y,x,length(y)),name_map(:,2),name_map(:,3));
-0482   <span class="comment">% get list of (functions,monitors,ODEs) belonging to the linker population</span>
-0483   eqn_types={<span class="string">'ODEs'</span>,<span class="string">'monitors'</span>,<span class="string">'functions'</span>};<span class="comment">%{'monitors','ODEs'};</span>
-0484   search_types={<span class="string">'state_variables'</span>,<span class="string">'monitors'</span>,<span class="string">'functions'</span>};<span class="comment">%{'monitors','state_variables'};</span>
-0485   <span class="comment">% indices to expressions in the linker population with the correct search_types and namespace</span>
-0486   inds=<a href="#_sub3  5" class="code" title="subfunction_monitor_index=find(~cellfun(@isempty,regexp(monitor_names,function_index=find(~cellfun(@isempty,regexp(function_names,[">find</a>(expressions_in_pop&amp;names_in_namespace&amp;ismember(name_map(:,4),search_types));
-0487   <span class="comment">% eliminate duplicates (e.g., state_variables replacing OUT and X)</span>
-0488   [jnk,ia,ib]=<a href="#_sub7" class="code" title="subfunctions_to_monitor=unique(functions_to_monitor);">unique</a>(name_map(inds,2),<span class="string">'stable'</span>);
-0489   inds=inds(ia);
-0490   all_expression_inds=[all_expression_inds inds'];
-0491   all_expression_targets=<a href="#_sub6" class="code" title="subfunctions_to_monitor=cat(1,functions_to_monitor,function_names(function_index));">cat</a>(2,all_expression_targets,repmat({oldstr},[1 length(inds)]));
-0492   <span class="comment">% substitute link</span>
-0493   <span class="keyword">for</span> j=1:length(inds)
-0494     name=name_map{inds(j),2}; <span class="comment">% name of variable as stored in model structure</span>
-0495     type=name_map{inds(j),4}; <span class="comment">% search_types</span>
-0496     eqn_type=eqn_types{strcmp(type,search_types)}; <span class="comment">% corresponding equation type</span>
-0497     <span class="comment">% update expression with the current link</span>
-0498     <span class="keyword">if</span> isfield(model.(eqn_type),name)
-0499       <span class="comment">% note: name will not be a field of eqn_type for special monitors</span>
-0500       <span class="comment">% (e.g., monitor functions)</span>
-0501       model.(eqn_type).(name)=<a href="#_sub10" class="code" title="subfunction str=linker_strrep(str,oldstr,newstr,operator)">linker_strrep</a>(model.(eqn_type).(name),oldstr,newstr,operator);
-0502     <span class="keyword">end</span>
-0503   <span class="keyword">end</span>  
-0504   <span class="keyword">if</span> ~isempty(model.conditionals)
-0505     fields={<span class="string">'condition'</span>,<span class="string">'action'</span>,<span class="string">'else'</span>};
-0506     <span class="comment">% get list of conditionals belonging to the linker population</span>
-0507     inds=<a href="#_sub3  5" class="code" title="subfunction_monitor_index=find(~cellfun(@isempty,regexp(monitor_names,function_index=find(~cellfun(@isempty,regexp(function_names,[">find</a>(conditionals_in_pop);
-0508     all_conditionals_inds=[all_conditionals_inds inds];
-0509     all_conditionals_targets=<a href="#_sub6" class="code" title="subfunctions_to_monitor=cat(1,functions_to_monitor,function_names(function_index));">cat</a>(2,all_conditionals_targets,repmat({oldstr},[1 length(inds)]));
-0510     <span class="comment">% substitute link</span>
-0511     <span class="keyword">for</span> j=1:length(inds)          
-0512       <span class="keyword">for</span> field_index=1:length(fields)
-0513         field=fields{field_index};
-0514         model.conditionals(inds(j)).(field)=<a href="#_sub10" class="code" title="subfunction str=linker_strrep(str,oldstr,newstr,operator)">linker_strrep</a>(model.conditionals(inds(j)).(field),oldstr,newstr,operator);
-0515       <span class="keyword">end</span>
-0516     <span class="keyword">end</span>
-0517   <span class="keyword">end</span>
-0518   <span class="keyword">if</span> ~isempty(model.linkers)
-0519     inds=<a href="#_sub3  5" class="code" title="subfunction_monitor_index=find(~cellfun(@isempty,regexp(monitor_names,function_index=find(~cellfun(@isempty,regexp(function_names,[">find</a>(linkers_in_pop);
-0520     <span class="keyword">for</span> j=1:length(inds)
-0521       model.linkers(inds(j)).expression=<a href="#_sub10" class="code" title="subfunction str=linker_strrep(str,oldstr,newstr,operator)">linker_strrep</a>(model.linkers(inds(j)).expression,oldstr,newstr,operator);
-0522     <span class="keyword">end</span>
-0523   <span class="keyword">end</span>
-0524 <span class="keyword">end</span>
-0525 
-0526 <span class="keyword">if</span> options.open_link_flag==0
-0527   <span class="comment">% remove target placeholders from expressions and conditionals</span>
-0528   <span class="keyword">for</span> i=1:length(all_expression_inds)
-0529     oldstr=all_expression_targets{i};
-0530     newstr=<span class="string">''</span>;
-0531     name=name_map{all_expression_inds(i),2};
-0532     type=name_map{all_expression_inds(i),4};    
-0533     eqn_type=eqn_types{strcmp(type,search_types)};
-0534     pattern = [<span class="string">'\)\.?[-\+\*/]'</span> oldstr <span class="string">'\)'</span>]; <span class="comment">% pattern accounts for all possible newstr defined for linking</span>
-0535     replace = [newstr <span class="string">'))'</span>];
-0536     <span class="keyword">if</span> isfield(model.(eqn_type),name) &amp;&amp; ischar(model.(eqn_type).(name))
-0537         <span class="comment">% note: name will not be a field of eqn_type for special monitors</span>
-0538         <span class="comment">% (e.g., monitor functions)</span>
-0539       model.(eqn_type).(name)=regexprep(model.(eqn_type).(name),pattern,replace);
-0540     <span class="keyword">end</span>
-0541   <span class="keyword">end</span>
-0542 <span class="keyword">end</span>
-0543 <span class="keyword">if</span> ~isempty(model.conditionals)
-0544   <span class="keyword">for</span> i=1:length(all_conditionals_inds)
-0545     oldstr=all_conditionals_targets{i};
-0546     newstr=<span class="string">''</span>;
+0103 <span class="comment">%     specification.populations(1).equations='dv/dt=@M+sin(2*pi); {iNa,iK}@M; v(0)=-65';</span>
+0104 <span class="comment">%     model=GenerateModel(specification)</span>
+0105 <span class="comment">%</span>
+0106 <span class="comment">%   - Example 6: directly incorporating mechanism models from online repositories:</span>
+0107 <span class="comment">%</span>
+0108 <span class="comment">%     model=GenerateModel('dv/dt=@M; {ib:57,iK}@M')</span>
+0109 <span class="comment">%</span>
+0110 <span class="comment">%     where &quot;ib&quot; is a known alias for the infinitebrain.org repository,</span>
+0111 <span class="comment">%     and &quot;57&quot; is the Na+ current at http://infinitebrain.org/models/57.</span>
+0112 <span class="comment">%     note: currently not supported on *most* machines...</span>
+0113 <span class="comment">%</span>
+0114 <span class="comment">% See also: CheckSpecification, CheckModel, ParseModelEquations, SimulateModel</span>
+0115 
+0116 <span class="comment">% Check inputs</span>
+0117 <span class="comment">% ------------------------------------------------------</span>
+0118 <span class="keyword">if</span> nargin==0
+0119   <span class="comment">% use default model</span>
+0120   specification=[];
+0121   specification.populations(1).equations=<span class="string">'dv/dt=10+@current/Cm; Cm=1; v(0)=-65'</span>;
+0122   specification.populations(1).mechanism_list={<span class="string">'iNa'</span>,<span class="string">'iK'</span>};
+0123   specification.populations(1).parameters={<span class="string">'Cm'</span>,1};
+0124   specification.connections(1).mechanism_list={<span class="string">'iGABAa'</span>};
+0125   varargin={<span class="string">'modifications'</span>,[]};
+0126 <span class="keyword">end</span>
+0127 <span class="comment">% ------------------------------------------------------</span>
+0128 
+0129 options=<a href="CheckOptions.html" class="code" title="function parms = CheckOptions(options, options_schema, strict)">CheckOptions</a>(varargin,{<span class="keyword">...</span>
+0130   <span class="string">'modifications'</span>,[],[],<span class="keyword">...</span>
+0131   <span class="string">'open_link_flag'</span>,0,{0,1},<span class="keyword">...</span>
+0132   },false);
+0133 <span class="comment">% check if a model</span>
+0134 <span class="keyword">if</span> isfield(specification,<span class="string">'state_variables'</span>)
+0135   <span class="comment">% do nothing</span>
+0136   model=specification;
+0137   <span class="keyword">return</span>;
+0138 <span class="comment">%   todo: consider the following --</span>
+0139 <span class="comment">%   if isfield(specification,'specification')</span>
+0140 <span class="comment">%     % regenerate from specification</span>
+0141 <span class="comment">%     specification=specification.specification;</span>
+0142 <span class="comment">%   end</span>
+0143 <span class="keyword">end</span>
+0144 <span class="comment">% standardize specification</span>
+0145 specification=<a href="CheckSpecification.html" class="code" title="function spec=CheckSpecification(specification)">CheckSpecification</a>(specification); <span class="comment">% standardize &amp; auto-populate as needed</span>
+0146 
+0147 <span class="comment">% Apply modifications to specification before generating model</span>
+0148 <span class="keyword">if</span> ~isempty(options.modifications)
+0149   specification=<a href="ApplyModifications.html" class="code" title="function [output,modifications]=ApplyModifications(model,modifications)">ApplyModifications</a>(specification,options.modifications);
+0150 <span class="keyword">end</span>
+0151 
+0152 <span class="comment">% specification metadata:</span>
+0153 npops=length(specification.populations); <span class="comment">% number of populations</span>
+0154 ncons=length(specification.connections); <span class="comment">% number of connections</span>
+0155 
+0156 <span class="comment">%{</span>
+0157 <span class="comment">% Dev notes on improving implementation:</span>
+0158 <span class="comment">% Ideally (1.0)-(3.0) could be packaged into external functions and run as:</span>
+0159 <span class="comment">% -------------------------------------------------------------------------</span>
+0160 <span class="comment">%% 1.0 load sub-models, assign namespaces, and combine across all equations and mechanisms in specification</span>
+0161 <span class="comment">% [model,name_map]=LoadModelSet(specification) % bug: disrupted subsequent namespace propagation (without raising an error)</span>
+0162 <span class="comment">%% 2.0 propagate namespaces through variable and function names</span>
+0163 <span class="comment">% model = PropagateNamespaces(model,name_map); % this works</span>
+0164 <span class="comment">%% 3.0 expand population equations according to mechanism linkers</span>
+0165 <span class="comment">% model = LinkMechanisms(model,name_map);      % problem: unable to identify linker population from model.linkers; see notes below (3.0) for more details</span>
+0166 <span class="comment">% -------------------------------------------------------------------------</span>
+0167 <span class="comment">%}</span>
+0168 
+0169 <span class="comment">% support full modularization of mechanisms</span>
+0170 <span class="comment">% (eg, dv/dt=@M; {Na,K}@M w/ Na.mech: @current += I(IN,m,h)).</span>
+0171 <span class="comment">%     approach taken below:</span>
+0172 <span class="comment">%     - add support for dv/dt=@M; {Na@M,K@M}</span>
+0173 <span class="comment">%       have GenerateModel split mech_name on '@' and replace first</span>
+0174 <span class="comment">%       linker in mech (e.g., @current) by what follows '@' (e.g., @M)</span>
+0175 <span class="comment">%     - then have CheckSpecification convert {Na,K}@M into {Na@M,K@M}</span>
+0176 
+0177 <span class="comment">%% 1.0 load sub-models, assign namespaces, and combine across all equations and mechanisms in specification</span>
+0178 model.parameters={};
+0179 model.fixed_variables=[];
+0180 model.functions=[];
+0181 model.monitors=[];
+0182 model.state_variables={};
+0183 model.ODEs=[];
+0184 model.ICs=[];
+0185 model.conditionals=[];
+0186 model.linkers=[];
+0187 model.comments={};
+0188 name_map={}; <span class="comment">% {name, namespace_name, namespace, type}, used for namespacing</span>
+0189 linker_pops={}; <span class="comment">% list of populations associated with mechanism linkers</span>
+0190 
+0191 <span class="comment">% 1.1 load and combine population sub-models from population equations and mechanisms</span>
+0192 <span class="keyword">for</span> i=1:npops
+0193   <span class="comment">% does the population model already exist?</span>
+0194   <span class="keyword">if</span> ~isempty(specification.populations(i).model)
+0195     tmpmodel=specification.populations(i).model; <span class="comment">% get model structure</span>
+0196     tmpname=tmpmodel.specification.populations.name; <span class="comment">% assumes one population sub-model</span>
+0197     <span class="comment">% adjust the name if necessary</span>
+0198     <span class="keyword">if</span> ~strcmp(specification.populations(i).name,tmpname)
+0199       <span class="comment">% use the name in the specification</span>
+0200       tmpmodel=<a href="ApplyModifications.html" class="code" title="function [output,modifications]=ApplyModifications(model,modifications)">ApplyModifications</a>(tmpmodel,{tmpname,<span class="string">'name'</span>,specification.populations(i).name});
+0201     <span class="keyword">elseif</span> strcmp(tmpname,<span class="string">'pop1'</span>) <span class="comment">% if default name</span>
+0202       <span class="comment">% use default name for this population index</span>
+0203       tmpmodel=<a href="ApplyModifications.html" class="code" title="function [output,modifications]=ApplyModifications(model,modifications)">ApplyModifications</a>(tmpmodel,{tmpname,<span class="string">'name'</span>,sprintf(<span class="string">'pop%g'</span>,i)});
+0204     <span class="keyword">end</span>
+0205     tmpmodel.linkers=[]; <span class="comment">% remove old linkers from original model construction</span>
+0206     model=<a href="CombineModels.html" class="code" title="function model=CombineModels(model1,model2)">CombineModels</a>(model,tmpmodel);
+0207     name_map=<a href="#_sub6" class="code" title="subfunctions_to_monitor=cat(1,functions_to_monitor,function_names(function_index));">cat</a>(1,name_map,tmpmodel.namespaces);
+0208     <span class="keyword">continue</span>;
+0209   <span class="keyword">end</span>
+0210   <span class="comment">% construct new population model</span>
+0211   PopScope=specification.populations(i).name;
+0212     <span class="comment">% note: ParseModelEquations adds a '_' suffix to the namespace; therefore,</span>
+0213     <span class="comment">% a '_' suffix is added to PopScope when used below for consistency of</span>
+0214     <span class="comment">% namespaces/namespaces. (this could be cleaned up by adding '_' to PopScope</span>
+0215     <span class="comment">% here, removing it below, and removing the additional '_' from</span>
+0216     <span class="comment">% ParseModelEquations).</span>
+0217   <span class="comment">% 1.1.1 parse population equations</span>
+0218   equations=specification.populations(i).equations;
+0219   parameters=specification.populations(i).parameters;
+0220   nmechs=length(specification.populations(i).mechanism_list);
+0221   <span class="comment">% parse population equations</span>
+0222   <span class="keyword">if</span> ~isempty(equations)
+0223     [tmpmodel,tmpmap]=<a href="ImportModel.html" class="code" title="function [model,map] = ImportModel(source,varargin)">ImportModel</a>(equations,<span class="string">'namespace'</span>,PopScope,<span class="string">'ic_pop'</span>,specification.populations(i).name,<span class="string">'user_parameters'</span>,parameters);
+0224     model=<a href="CombineModels.html" class="code" title="function model=CombineModels(model1,model2)">CombineModels</a>(model,tmpmodel);
+0225     name_map=<a href="#_sub6" class="code" title="subfunctions_to_monitor=cat(1,functions_to_monitor,function_names(function_index));">cat</a>(1,name_map,tmpmap);
+0226   <span class="keyword">end</span>
+0227   <span class="comment">% 1.1.2 parse population mechanisms</span>
+0228   <span class="keyword">for</span> j=1:nmechs
+0229     mechanism_=specification.populations(i).mechanism_list{j};
+0230     <span class="comment">% support separation of linker names in pop equations vs mechanisms</span>
+0231     mechanism_=regexp(mechanism_,<span class="string">'@'</span>,<span class="string">'split'</span>);
+0232     mechanism=mechanism_{1};
+0233     <span class="keyword">if</span> numel(mechanism_)&gt;1, new_linker=mechanism_{2}; <span class="keyword">else</span> new_linker=[]; <span class="keyword">end</span>
+0234     <span class="comment">% set mechanism namespace</span>
+0235     <span class="keyword">if</span> any(mechanism==<span class="string">':'</span>)
+0236       <span class="comment">% exclude host name from namespace</span>
+0237       tmp=regexp(mechanism,<span class="string">':'</span>,<span class="string">'split'</span>);
+0238       MechScope=[specification.populations(i).name <span class="string">'_'</span> tmp{2}];
+0239     <span class="keyword">else</span>
+0240       <span class="comment">% extract mechanism file name without path</span>
+0241       [~,MechID]=fileparts(mechanism);
+0242       MechScope=[specification.populations(i).name <span class="string">'_'</span> MechID];
+0243     <span class="keyword">end</span>
+0244 
+0245     <span class="comment">% parse mechanism equations</span>
+0246     [tmpmodel,tmpmap]=<a href="ImportModel.html" class="code" title="function [model,map] = ImportModel(source,varargin)">ImportModel</a>(mechanism,<span class="string">'namespace'</span>,MechScope,<span class="string">'ic_pop'</span>,specification.populations(i).name,<span class="string">'user_parameters'</span>,parameters);
+0247     <span class="comment">% replace 1st linker name by the one in specification</span>
+0248     <span class="keyword">if</span> ~isempty(new_linker) &amp;&amp; ~isempty(tmpmodel.linkers)
+0249       <span class="comment">% first try to find 1st linker target starting with @</span>
+0250       links_at=<a href="#_sub3  5" class="code" title="subfunction_monitor_index=find(~cellfun(@isempty,regexp(monitor_names,function_index=find(~cellfun(@isempty,regexp(function_names,[">find</a>(~cellfun(@isempty,regexp({tmpmodel.linkers.target},<span class="string">'^@'</span>,<span class="string">'once'</span>)));
+0251       <span class="keyword">if</span> ~isempty(links_at)
+0252         <span class="comment">% use first link with target prepended by '@'</span>
+0253         link_ind=links_at(1);
+0254       <span class="keyword">else</span>
+0255         <span class="comment">% use first link</span>
+0256         link_ind=1;
+0257       <span class="keyword">end</span>
+0258       tmpmodel.linkers(link_ind).target=[<span class="string">'@'</span> new_linker];
+0259     <span class="keyword">end</span>
+0260     <span class="comment">% combine sub-model with other sub-models</span>
+0261     model=<a href="CombineModels.html" class="code" title="function model=CombineModels(model1,model2)">CombineModels</a>(model,tmpmodel);
+0262     name_map=<a href="#_sub6" class="code" title="subfunctions_to_monitor=cat(1,functions_to_monitor,function_names(function_index));">cat</a>(1,name_map,tmpmap);
+0263     linker_pops=<a href="#_sub6" class="code" title="subfunctions_to_monitor=cat(1,functions_to_monitor,function_names(function_index));">cat</a>(2,linker_pops,repmat({specification.populations(i).name},[1 length(tmpmodel.linkers)]));
+0264   <span class="keyword">end</span>
+0265   pop=specification.populations(i).name;
+0266   <span class="comment">% add reserved keywords (parameters and state variables) to name_map</span>
+0267   <a href="#_sub8" class="code" title="subfunction add_keywords(src,dst,namespace)">add_keywords</a>(pop,pop,[PopScope <span class="string">'_'</span>]);
+0268   model.parameters.([pop <span class="string">'_Npop'</span>])=num2str(specification.populations(i).size);
+0269 <span class="keyword">end</span>
+0270 <span class="comment">% 1.2 load and combine sub-models from connection mechanisms</span>
+0271 <span class="keyword">for</span> i=1:ncons
+0272   <span class="comment">% parse connection mechanisms</span>
+0273   source=specification.connections(i).source;
+0274   target=specification.connections(i).target;
+0275   parameters=specification.connections(i).parameters;
+0276   ConScope=[target <span class="string">'_'</span> source <span class="string">'_'</span>];
+0277     <span class="comment">% note: in contrast to PopScope above, ConScope is never passed to</span>
+0278     <span class="comment">% ParseModelEquations; thus the '_' should be added here for consistency</span>
+0279     <span class="comment">% with mechanism namespaces (which are modified by ParseModelEquations).</span>
+0280   <span class="keyword">for</span> j=1:length(specification.connections(i).mechanism_list)
+0281     mechanism_=specification.connections(i).mechanism_list{j};
+0282     <span class="comment">% support separation of linker names in pop equations vs mechanisms</span>
+0283     mechanism_=regexp(mechanism_,<span class="string">'@'</span>,<span class="string">'split'</span>);
+0284     mechanism=mechanism_{1};
+0285     <span class="keyword">if</span> numel(mechanism_)&gt;1, new_linker=mechanism_{2}; <span class="keyword">else</span> new_linker=[]; <span class="keyword">end</span>
+0286     <span class="comment">% extract mechanism file name without path</span>
+0287     [~,MechID]=fileparts(mechanism);
+0288     MechScope=[target <span class="string">'_'</span> source <span class="string">'_'</span> MechID];
+0289         <span class="comment">% note: must use target_source_mechanism for connection mechanisms</span>
+0290         <span class="comment">% to distinguish their parent namespaces from those of population mechanisms</span>
+0291         <span class="comment">% see: GetParentNamespace</span>
+0292     <span class="comment">% parse model equations</span>
+0293     [tmpmodel,tmpmap]=<a href="ImportModel.html" class="code" title="function [model,map] = ImportModel(source,varargin)">ImportModel</a>(mechanism,<span class="string">'namespace'</span>,MechScope,<span class="string">'ic_pop'</span>,source,<span class="string">'user_parameters'</span>,parameters);
+0294     <span class="comment">% replace 1st linker name by the one in specification</span>
+0295     <span class="keyword">if</span> ~isempty(new_linker) &amp;&amp; ~isempty(tmpmodel.linkers)
+0296       tmpmodel.linkers(1).target=[<span class="string">'@'</span> new_linker];
+0297     <span class="keyword">end</span>
+0298     model=<a href="CombineModels.html" class="code" title="function model=CombineModels(model1,model2)">CombineModels</a>(model,tmpmodel);
+0299     name_map=<a href="#_sub6" class="code" title="subfunctions_to_monitor=cat(1,functions_to_monitor,function_names(function_index));">cat</a>(1,name_map,tmpmap);
+0300     <span class="comment">% link this mechanism to the target population</span>
+0301     linker_pops=<a href="#_sub6" class="code" title="subfunctions_to_monitor=cat(1,functions_to_monitor,function_names(function_index));">cat</a>(2,linker_pops,repmat(target,[1 length(tmpmodel.linkers)]));
+0302     <span class="comment">% edit names of connection monitors specified in population equations</span>
+0303     <span class="comment">% todo: consider design changes to avoid specifying connection monitors</span>
+0304     <span class="comment">% in population equations; this is an undesirable hack:</span>
+0305     <span class="comment">% eg, convert E_iGABAa_functions -&gt; I_E_iGABAa_functions</span>
+0306     <span class="keyword">if</span> ~isempty(model.monitors)
+0307       <span class="comment">% get indices to all model.monitors that have incorrect connection namespace</span>
+0308       con_mon_to_update=<a href="#_sub3  5" class="code" title="subfunction_monitor_index=find(~cellfun(@isempty,regexp(monitor_names,function_index=find(~cellfun(@isempty,regexp(function_names,[">find</a>(~cellfun(@isempty,regexp(<a href="#_sub1  9" class="code" title="subfunction_names=fieldnames(model.functions);function_names=fieldnames(model.functions);">fieldnames</a>(model.monitors),[<span class="string">'^'</span> target <span class="string">'_'</span> mechanism])));
+0309       <span class="keyword">if</span> any(con_mon_to_update)
+0310         <span class="comment">% get list of current model.monitors</span>
+0311         monitor_names=<a href="#_sub1  9" class="code" title="subfunction_names=fieldnames(model.functions);function_names=fieldnames(model.functions);">fieldnames</a>(model.monitors);
+0312         <span class="keyword">for</span> m=1:length(con_mon_to_update)
+0313           <span class="comment">% get name of monitor with incorrect connection namespace</span>
+0314           old=monitor_names{con_mon_to_update(m)};
+0315           <span class="comment">% get name of monitor with correct connection namespace</span>
+0316           new=strrep(old,[target <span class="string">'_'</span> mechanism <span class="string">'_'</span>],[MechScope <span class="string">'_'</span>]);
+0317           <span class="comment">% add new monitor with correct namespace</span>
+0318           model.monitors.(new)=model.monitors.(old);
+0319           <span class="comment">% remove old monitor with incorrect namespace</span>
+0320           model.monitors=rmfield(model.monitors,old);
+0321         <span class="keyword">end</span>
+0322       <span class="keyword">end</span>
+0323     <span class="keyword">end</span>
+0324   <span class="keyword">end</span>
+0325   <span class="comment">% add reserved keywords (parameters and state variables) to name_map</span>
+0326   <a href="#_sub8" class="code" title="subfunction add_keywords(src,dst,namespace)">add_keywords</a>(source,target,ConScope);
+0327 <span class="keyword">end</span>
+0328 
+0329 <span class="comment">% check for monitoring functions (e.g., 'monitor functions' or 'monitor Na.functions')</span>
+0330 <span class="keyword">if</span> ~isempty(model.monitors)
+0331   <span class="comment">% get list of functions</span>
+0332   <span class="keyword">if</span> ~isempty(model.functions)
+0333     <a name="_sub1" href="#_subfunctions" class="code">function_names=fieldnames(model.functions);</a>
+0334   <span class="keyword">else</span>
+0335     <a name="_sub2" href="#_subfunctions" class="code">function_names={};</a>
+0336   <span class="keyword">end</span>
+0337   <span class="comment">% get list of monitor names</span>
+0338   monitor_names=<a href="#_sub1  9" class="code" title="subfunction_names=fieldnames(model.functions);function_names=fieldnames(model.functions);">fieldnames</a>(model.monitors);
+0339   <span class="comment">% get indices to monitors with names ending in _functions</span>
+0340   <a name="_sub3" href="#_subfunctions" class="code">function_monitor_index=find(~cellfun(@isempty,regexp(monitor_names,</a><span class="string">'_functions$'</span>,<span class="string">'once'</span>)));
+0341   <span class="comment">% create list of functions with namespaces matching monitors ending in _functions</span>
+0342   <a name="_sub4" href="#_subfunctions" class="code">functions_to_monitor={};</a>
+0343   <span class="keyword">for</span> i=1:length(function_monitor_index)
+0344     <span class="comment">% get namespace of functions to monitor</span>
+0345     monitor_name=monitor_names{function_monitor_index(i)};
+0346     monitor_namespace=regexp(monitor_name,<span class="string">'(.*)_functions$'</span>,<span class="string">'tokens'</span>,<span class="string">'once'</span>);
+0347     monitor_namespace=monitor_namespace{1};
+0348     <span class="comment">% get list of functions with matching namespace</span>
+0349     <a name="_sub5" href="#_subfunctions" class="code">function_index=find(~cellfun(@isempty,regexp(function_names,[</a><span class="string">'^'</span> monitor_namespace],<span class="string">'once'</span>)));
+0350     <span class="comment">% add functions to list</span>
+0351     <a name="_sub6" href="#_subfunctions" class="code">functions_to_monitor=cat(1,functions_to_monitor,function_names(function_index));</a>
+0352     <span class="comment">% remove &quot;function&quot; monitor name</span>
+0353     model.monitors=rmfield(model.monitors,monitor_name);
+0354   <span class="keyword">end</span>
+0355   <span class="comment">% eliminate duplicate function names</span>
+0356   <a name="_sub7" href="#_subfunctions" class="code">functions_to_monitor=unique(functions_to_monitor);</a>
+0357   <span class="comment">% add functions to monitor list</span>
+0358   <span class="keyword">for</span> i=1:length(functions_to_monitor)
+0359     model.monitors.(functions_to_monitor{i})=[];
+0360   <span class="keyword">end</span>
+0361 <span class="keyword">end</span>
+0362 
+0363   <span class="comment">% ----------------------------------</span>
+0364   <span class="comment">% NESTED FUNCTIONS</span>
+0365   <span class="comment">% ----------------------------------</span>
+0366   <a name="_sub8" href="#_subfunctions" class="code">function add_keywords(src,dst,namespace)</a>
+0367     <span class="comment">% note: this needs to be coordinated with update_keywords() in SimulateModel()</span>
+0368     <span class="comment">% for parameters</span>
+0369     Nsrc=[src <span class="string">'_Npop'</span>];
+0370     Ndst=[dst <span class="string">'_Npop'</span>];
+0371     old={<span class="string">'Npre'</span>,<span class="string">'N[1]'</span>,<span class="string">'N_pre'</span>,<span class="string">'Npost'</span>,<span class="string">'N_post'</span>,<span class="string">'N[0]'</span>,<span class="string">'Npop'</span>,<span class="string">'N_pop'</span>};
+0372     new={Nsrc,Nsrc,Nsrc,Ndst,Ndst,Ndst,Ndst,Ndst};
+0373     <span class="keyword">for</span> p=1:length(old)
+0374       name_map(end+1,:)={old{p},new{p},namespace,<span class="string">'parameters'</span>};
+0375     <span class="keyword">end</span>
+0376     <span class="comment">% for state variables</span>
+0377     new={};
+0378     old={};
+0379     src_excluded=~cellfun(@isempty,regexp(name_map(:,1),[<span class="string">'pre'</span> <span class="string">'$'</span>]));
+0380     dst_excluded=~cellfun(@isempty,regexp(name_map(:,1),[<span class="string">'post'</span> <span class="string">'$'</span>]));
+0381     excluded=src_excluded|dst_excluded;
+0382     PopScope=[src <span class="string">'_'</span>];
+0383     var_idx=strcmp(PopScope,name_map(:,3)) &amp; strcmp(<span class="string">'state_variables'</span>,name_map(:,4)) &amp; ~excluded;
+0384     <span class="keyword">if</span> any(var_idx)
+0385       Xsrc_old_vars=name_map(var_idx,1);
+0386       Xsrc_new_vars=name_map(var_idx,2);
+0387       <span class="comment">% default for IN is first Xsrc state var</span>
+0388       Xsrc=Xsrc_new_vars{1};
+0389       old=<a href="#_sub6" class="code" title="subfunctions_to_monitor=cat(1,functions_to_monitor,function_names(function_index));">cat</a>(2,old,{<span class="string">'IN'</span>,<span class="string">'Xpre'</span>,<span class="string">'X_pre'</span>});
+0390       new=<a href="#_sub6" class="code" title="subfunctions_to_monitor=cat(1,functions_to_monitor,function_names(function_index));">cat</a>(2,new,{Xsrc,Xsrc,Xsrc});
+0391     <span class="keyword">else</span>
+0392       Xsrc_old_vars=[];
+0393       Xsrc_new_vars=[];
+0394       Xsrc=[];
+0395     <span class="keyword">end</span>
+0396     PopScope=[dst <span class="string">'_'</span>];
+0397     var_idx=strcmp(PopScope,name_map(:,3)) &amp; strcmp(<span class="string">'state_variables'</span>,name_map(:,4)) &amp; ~excluded;
+0398     <span class="keyword">if</span> any(var_idx)
+0399       Xdst_old_vars=name_map(var_idx,1);
+0400       Xdst_new_vars=name_map(var_idx,2);
+0401       <span class="comment">% default for OUT and X is first Xdst state var</span>
+0402       Xdst=Xdst_new_vars{1};
+0403       old=<a href="#_sub6" class="code" title="subfunctions_to_monitor=cat(1,functions_to_monitor,function_names(function_index));">cat</a>(2,old,{<span class="string">'OUT'</span>,<span class="string">'X'</span>,<span class="string">'Xpost'</span>,<span class="string">'X_post'</span>});
+0404       new=<a href="#_sub6" class="code" title="subfunctions_to_monitor=cat(1,functions_to_monitor,function_names(function_index));">cat</a>(2,new,{Xdst,Xdst,Xdst,Xdst});
+0405     <span class="keyword">else</span>
+0406       Xdst_old_vars=[];
+0407       Xdst_new_vars=[];
+0408       Xdst=[];
+0409     <span class="keyword">end</span>
+0410     <span class="comment">% add variants [var_pre,var_post,varpre,varpost]</span>
+0411     <span class="keyword">if</span> ~isempty(Xsrc_old_vars)
+0412       [Xsrc_old_vars,IA]=setdiff(Xsrc_old_vars,old);
+0413       Xsrc_new_vars=Xsrc_new_vars(IA);
+0414     <span class="keyword">end</span>
+0415     <span class="keyword">if</span> ~isempty(Xdst_old_vars)
+0416       [Xdst_old_vars,IA]=setdiff(Xdst_old_vars,old);
+0417       Xdst_new_vars=Xdst_new_vars(IA);
+0418     <span class="keyword">end</span>
+0419     <span class="keyword">for</span> p=1:length(Xsrc_old_vars)
+0420       old{end+1}=[Xsrc_old_vars{p} <span class="string">'_pre'</span>];
+0421       new{end+1}=Xsrc_new_vars{p};
+0422       old{end+1}=[Xsrc_old_vars{p} <span class="string">'pre'</span>];
+0423       new{end+1}=Xsrc_new_vars{p};
+0424     <span class="keyword">end</span>
+0425     <span class="keyword">for</span> p=1:length(Xdst_old_vars)
+0426       old{end+1}=[Xdst_old_vars{p} <span class="string">'_post'</span>];
+0427       new{end+1}=Xdst_new_vars{p};
+0428       old{end+1}=[Xdst_old_vars{p} <span class="string">'post'</span>];
+0429       new{end+1}=Xdst_new_vars{p};
+0430     <span class="keyword">end</span>
+0431     <span class="keyword">for</span> p=1:length(old)
+0432       name_map(end+1,:)={old{p},new{p},namespace,<span class="string">'state_variables'</span>};
+0433     <span class="keyword">end</span>
+0434   <span class="keyword">end</span>
+0435 
+0436 <span class="comment">%% 2.0 propagate namespaces through variable and function names</span>
+0437 <span class="comment">%      i.e., to establish uniqueness of names by adding namespace/namespace prefixes)</span>
+0438 model = <a href="PropagateNamespaces.html" class="code" title="function model = PropagateNamespaces(model,map)">PropagateNamespaces</a>(model,name_map);
+0439 
+0440 <span class="comment">%% 3.0 expand population equations according to mechanism linkers</span>
+0441 <span class="comment">% purpose: expand population equations according to linkers</span>
+0442 <span class="comment">% - link populations.equations to mechanism sub-models</span>
+0443 <span class="comment">% - link mechanism functions and state variables across mechanisms in a given population</span>
+0444 
+0445 <span class="comment">% store indices to all expressions and conditionals that are linked (this</span>
+0446 <span class="comment">% is necessary for efficiently removing linker targets from expressions after linking)</span>
+0447 all_expression_inds=[];
+0448 all_expression_targets={};
+0449 all_conditionals_inds=[];
+0450 all_conditionals_targets={};
+0451 
+0452 <span class="comment">% add variables to linked expression if its a function without ()</span>
+0453 <span class="keyword">if</span> ~isempty(model.functions) &amp;&amp; ~isempty(model.linkers)
+0454   <a name="_sub9" href="#_subfunctions" class="code">function_names=fieldnames(model.functions);</a>
+0455   expressions={model.linkers.expression};
+0456   [~,I,J]=intersect(function_names,expressions);
+0457   <span class="keyword">for</span> i=1:length(I)
+0458     e=model.functions.(function_names{J(i)}); <span class="comment">% function expression (eg,'@(x,y,z)x-(y-z)')</span>
+0459     v=regexp(e,<span class="string">'@(\([\w,]+\))'</span>,<span class="string">'tokens'</span>,<span class="string">'once'</span>); <span class="comment">% function input list (eg, '(x,y,z)')</span>
+0460     <span class="keyword">if</span> ~isempty(v)
+0461       model.linkers(I(i)).expression=[model.linkers(I(i)).expression v{1}];
+0462     <span class="keyword">end</span>
+0463   <span class="keyword">end</span>
+0464 <span class="keyword">end</span>
+0465 
+0466 <span class="comment">% loop over linkers</span>
+0467 <span class="keyword">for</span> i=1:length(model.linkers)
+0468   <span class="comment">% determine how to link</span>
+0469   operation=model.linkers(i).operation;
+0470   oldstr=model.linkers(i).target;
+0471   newstr=model.linkers(i).expression;
+0472   <span class="keyword">switch</span> operation <span class="comment">% see ClassifyEquation and ParseModelEquations   % ('((\+=)|(-=)|(\*=)|(/=)|(=&gt;))')</span>
+0473     <span class="keyword">case</span> <span class="string">'+='</span>
+0474       operator=<span class="string">'+'</span>;
+0475     <span class="keyword">case</span> <span class="string">'-='</span>
+0476       operator=<span class="string">'-'</span>;
+0477     <span class="keyword">case</span> <span class="string">'*='</span>
+0478       operator=<span class="string">'.*'</span>;
+0479     <span class="keyword">case</span> <span class="string">'/='</span>
+0480       operator=<span class="string">'./'</span>;
+0481     <span class="keyword">otherwise</span>
+0482       operator=<span class="string">'+'</span>;
+0483   <span class="keyword">end</span>
+0484   <span class="comment">% determine what to link (ie, link across everything belonging to the linker population)</span>
+0485   <span class="comment">% explicitly constrain to linker population</span>
+0486   expressions_in_pop=~cellfun(@isempty,regexp(name_map(:,3),[<span class="string">'^'</span> linker_pops{i}]));
+0487   <span class="keyword">if</span> ~isempty(model.conditionals)
+0488     conditionals_in_pop=~cellfun(@isempty,regexp({model.conditionals.namespace},[<span class="string">'^'</span> linker_pops{i}]));
+0489   <span class="keyword">end</span>
+0490   <span class="keyword">if</span> ~isempty(model.linkers)
+0491     linkers_in_pop=~cellfun(@isempty,regexp({model.linkers.namespace},[<span class="string">'^'</span> linker_pops{i}]));
+0492   <span class="keyword">end</span>
+0493   <span class="comment">% constrain to namespace</span>
+0494   names_in_namespace=cellfun(@(x,y)strncmp(y,x,length(y)),name_map(:,2),name_map(:,3));
+0495   <span class="comment">% get list of (functions,monitors,ODEs) belonging to the linker population</span>
+0496   eqn_types={<span class="string">'ODEs'</span>,<span class="string">'monitors'</span>,<span class="string">'functions'</span>};<span class="comment">%{'monitors','ODEs'};</span>
+0497   search_types={<span class="string">'state_variables'</span>,<span class="string">'monitors'</span>,<span class="string">'functions'</span>};<span class="comment">%{'monitors','state_variables'};</span>
+0498   <span class="comment">% indices to expressions in the linker population with the correct search_types and namespace</span>
+0499   inds=<a href="#_sub3  5" class="code" title="subfunction_monitor_index=find(~cellfun(@isempty,regexp(monitor_names,function_index=find(~cellfun(@isempty,regexp(function_names,[">find</a>(expressions_in_pop&amp;names_in_namespace&amp;ismember(name_map(:,4),search_types));
+0500   <span class="comment">% eliminate duplicates (e.g., state_variables replacing OUT and X)</span>
+0501   [jnk,ia,ib]=<a href="#_sub7" class="code" title="subfunctions_to_monitor=unique(functions_to_monitor);">unique</a>(name_map(inds,2),<span class="string">'stable'</span>);
+0502   inds=inds(ia);
+0503   all_expression_inds=[all_expression_inds inds'];
+0504   all_expression_targets=<a href="#_sub6" class="code" title="subfunctions_to_monitor=cat(1,functions_to_monitor,function_names(function_index));">cat</a>(2,all_expression_targets,repmat({oldstr},[1 length(inds)]));
+0505   <span class="comment">% substitute link</span>
+0506   <span class="keyword">for</span> j=1:length(inds)
+0507     name=name_map{inds(j),2}; <span class="comment">% name of variable as stored in model structure</span>
+0508     type=name_map{inds(j),4}; <span class="comment">% search_types</span>
+0509     eqn_type=eqn_types{strcmp(type,search_types)}; <span class="comment">% corresponding equation type</span>
+0510     <span class="comment">% update expression with the current link</span>
+0511     <span class="keyword">if</span> isfield(model.(eqn_type),name)
+0512       <span class="comment">% note: name will not be a field of eqn_type for special monitors</span>
+0513       <span class="comment">% (e.g., monitor functions)</span>
+0514       model.(eqn_type).(name)=<a href="#_sub10" class="code" title="subfunction str=linker_strrep(str,oldstr,newstr,operator)">linker_strrep</a>(model.(eqn_type).(name),oldstr,newstr,operator);
+0515     <span class="keyword">end</span>
+0516   <span class="keyword">end</span>
+0517   <span class="keyword">if</span> ~isempty(model.conditionals)
+0518     fields={<span class="string">'condition'</span>,<span class="string">'action'</span>,<span class="string">'else'</span>};
+0519     <span class="comment">% get list of conditionals belonging to the linker population</span>
+0520     inds=<a href="#_sub3  5" class="code" title="subfunction_monitor_index=find(~cellfun(@isempty,regexp(monitor_names,function_index=find(~cellfun(@isempty,regexp(function_names,[">find</a>(conditionals_in_pop);
+0521     all_conditionals_inds=[all_conditionals_inds inds];
+0522     all_conditionals_targets=<a href="#_sub6" class="code" title="subfunctions_to_monitor=cat(1,functions_to_monitor,function_names(function_index));">cat</a>(2,all_conditionals_targets,repmat({oldstr},[1 length(inds)]));
+0523     <span class="comment">% substitute link</span>
+0524     <span class="keyword">for</span> j=1:length(inds)
+0525       <span class="keyword">for</span> field_index=1:length(fields)
+0526         field=fields{field_index};
+0527         model.conditionals(inds(j)).(field)=<a href="#_sub10" class="code" title="subfunction str=linker_strrep(str,oldstr,newstr,operator)">linker_strrep</a>(model.conditionals(inds(j)).(field),oldstr,newstr,operator);
+0528       <span class="keyword">end</span>
+0529     <span class="keyword">end</span>
+0530   <span class="keyword">end</span>
+0531   <span class="keyword">if</span> ~isempty(model.linkers)
+0532     inds=<a href="#_sub3  5" class="code" title="subfunction_monitor_index=find(~cellfun(@isempty,regexp(monitor_names,function_index=find(~cellfun(@isempty,regexp(function_names,[">find</a>(linkers_in_pop);
+0533     <span class="keyword">for</span> j=1:length(inds)
+0534       model.linkers(inds(j)).expression=<a href="#_sub10" class="code" title="subfunction str=linker_strrep(str,oldstr,newstr,operator)">linker_strrep</a>(model.linkers(inds(j)).expression,oldstr,newstr,operator);
+0535     <span class="keyword">end</span>
+0536   <span class="keyword">end</span>
+0537 <span class="keyword">end</span>
+0538 
+0539 <span class="keyword">if</span> options.open_link_flag==0
+0540   <span class="comment">% remove target placeholders from expressions and conditionals</span>
+0541   <span class="keyword">for</span> i=1:length(all_expression_inds)
+0542     oldstr=all_expression_targets{i};
+0543     newstr=<span class="string">''</span>;
+0544     name=name_map{all_expression_inds(i),2};
+0545     type=name_map{all_expression_inds(i),4};
+0546     eqn_type=eqn_types{strcmp(type,search_types)};
 0547     pattern = [<span class="string">'\)\.?[-\+\*/]'</span> oldstr <span class="string">'\)'</span>]; <span class="comment">% pattern accounts for all possible newstr defined for linking</span>
 0548     replace = [newstr <span class="string">'))'</span>];
-0549     <span class="keyword">for</span> field_index=1:length(fields)
-0550       field=fields{field_index};
-0551       <span class="keyword">if</span> model.conditionals(all_conditionals_inds(i)).(field)
-0552         model.conditionals(all_conditionals_inds(i)).(field)=regexprep(model.conditionals(all_conditionals_inds(i)).(field),pattern,replace);
-0553       <span class="keyword">end</span>
-0554     <span class="keyword">end</span>
-0555   <span class="keyword">end</span>
-0556 <span class="keyword">end</span>
-0557 
-0558 <span class="comment">% ------------------------------------------</span>
-0559 <span class="comment">% note on non-ideal implementation of 3.0: model.linkers does not contain enough</span>
-0560 <span class="comment">% information to determine the population to which it belongs in all cases</span>
-0561 <span class="comment">% (due to namespace format differences for population vs connection mechanisms &amp; models</span>
-0562 <span class="comment">% with one vs more populations). consequently, had to perform linking in this</span>
-0563 <span class="comment">% function using info stored above while parsing the model; ideally, the</span>
-0564 <span class="comment">% linking could occur independently of this function, informed by info in</span>
-0565 <span class="comment">% model.linkers, and be packaged in its own external function LinkMechanisms().</span>
-0566 <span class="comment">% ------------------------------------------</span>
-0567 
-0568 <span class="comment">%% 4.0 finalize</span>
-0569 
-0570 <span class="comment">% 4.1 sort .ODEs and .ICs wrt .state_variables</span>
-0571 model.ODEs = orderfields(model.ODEs,model.state_variables);
-0572 model.ICs = orderfields(model.ICs,model.state_variables);
-0573 
-0574 <span class="comment">% 4.2 convert to numeric parameters</span>
-0575 c = struct2cell(model.parameters);
-0576 <span class="comment">% get index of strings</span>
-0577 idx1=<a href="#_sub3  5" class="code" title="subfunction_monitor_index=find(~cellfun(@isempty,regexp(monitor_names,function_index=find(~cellfun(@isempty,regexp(function_names,[">find</a>(cellfun(@ischar,c));
-0578 <span class="comment">% which strings contain numeric values?</span>
-0579 idx2=<a href="#_sub3  5" class="code" title="subfunction_monitor_index=find(~cellfun(@isempty,regexp(monitor_names,function_index=find(~cellfun(@isempty,regexp(function_names,[">find</a>(cellfun(@isempty,regexp(c(idx1),<span class="string">'[a-z_A-Z]'</span>)) | ~cellfun(@isempty,regexp(c(idx1),<span class="string">'^\s*\[*\s*\+?inf\s*\]*\s*$'</span>,<span class="string">'ignorecase'</span>)));
-0580 <span class="comment">% convert those strings which contain numeric values</span>
-0581 c(idx1(idx2)) = cellfun(@eval,c(idx1(idx2)),<span class="string">'uni'</span>,0);
-0582 <span class="comment">%idx=cellfun(@isempty,regexp(c,'[a-z_A-Z]')) | ~cellfun(@isempty,regexp(c,'^\s*\[*\s*inf\s*\]*\s*$','ignorecase'));</span>
-0583 <span class="comment">%c(idx) = cellfun(@eval,c(idx),'uni',0);</span>
-0584 f = <a href="#_sub1  9" class="code" title="subfunction_names=fieldnames(model.functions);function_names=fieldnames(model.functions);">fieldnames</a>(model.parameters);
-0585 model.parameters = cell2struct(c,f,1);
+0549     <span class="keyword">if</span> isfield(model.(eqn_type),name) &amp;&amp; ischar(model.(eqn_type).(name))
+0550         <span class="comment">% note: name will not be a field of eqn_type for special monitors</span>
+0551         <span class="comment">% (e.g., monitor functions)</span>
+0552       model.(eqn_type).(name)=regexprep(model.(eqn_type).(name),pattern,replace);
+0553     <span class="keyword">end</span>
+0554   <span class="keyword">end</span>
+0555 <span class="keyword">end</span>
+0556 <span class="keyword">if</span> ~isempty(model.conditionals)
+0557   <span class="keyword">for</span> i=1:length(all_conditionals_inds)
+0558     oldstr=all_conditionals_targets{i};
+0559     newstr=<span class="string">''</span>;
+0560     pattern = [<span class="string">'\)\.?[-\+\*/]'</span> oldstr <span class="string">'\)'</span>]; <span class="comment">% pattern accounts for all possible newstr defined for linking</span>
+0561     replace = [newstr <span class="string">'))'</span>];
+0562     <span class="keyword">for</span> field_index=1:length(fields)
+0563       field=fields{field_index};
+0564       <span class="keyword">if</span> model.conditionals(all_conditionals_inds(i)).(field)
+0565         model.conditionals(all_conditionals_inds(i)).(field)=regexprep(model.conditionals(all_conditionals_inds(i)).(field),pattern,replace);
+0566       <span class="keyword">end</span>
+0567     <span class="keyword">end</span>
+0568   <span class="keyword">end</span>
+0569 <span class="keyword">end</span>
+0570 
+0571 <span class="comment">% ------------------------------------------</span>
+0572 <span class="comment">% note on non-ideal implementation of 3.0: model.linkers does not contain enough</span>
+0573 <span class="comment">% information to determine the population to which it belongs in all cases</span>
+0574 <span class="comment">% (due to namespace format differences for population vs connection mechanisms &amp; models</span>
+0575 <span class="comment">% with one vs more populations). consequently, had to perform linking in this</span>
+0576 <span class="comment">% function using info stored above while parsing the model; ideally, the</span>
+0577 <span class="comment">% linking could occur independently of this function, informed by info in</span>
+0578 <span class="comment">% model.linkers, and be packaged in its own external function LinkMechanisms().</span>
+0579 <span class="comment">% ------------------------------------------</span>
+0580 
+0581 <span class="comment">%% 4.0 finalize</span>
+0582 
+0583 <span class="comment">% 4.1 sort .ODEs and .ICs wrt .state_variables</span>
+0584 model.ODEs = orderfields(model.ODEs,model.state_variables);
+0585 model.ICs = orderfields(model.ICs,model.state_variables);
 0586 
-0587 <span class="comment">% 4.3 store original specification</span>
-0588 model.specification = specification; <span class="comment">% store specification to enable modifications to be applied later</span>
-0589 model.namespaces = name_map; <span class="comment">% store name_map for transparency</span>
-0590 
-0591 model=<a href="CheckModel.html" class="code" title="function model=CheckModel(model)">CheckModel</a>(model);
-0592 
-0593 <span class="keyword">end</span>
-0594 
-0595 <span class="comment">% SUBFUNCTIONS</span>
-0596 <a name="_sub10" href="#_subfunctions" class="code">function str=linker_strrep(str,oldstr,newstr,operator)</a>
-0597   <span class="keyword">if</span> isempty(str)
-0598     <span class="keyword">return</span>;
-0599   <span class="keyword">end</span>
-0600   <span class="comment">% if inserting one word (e.g., a state variable), just replace it</span>
-0601   <span class="comment">% warning: could cause problems in future if there is an additive</span>
-0602   <span class="comment">% substitution of different state variables into the same place followed</span>
-0603   <span class="comment">% by non-additive operations (e.g., @cai+=cai1 and @cai+=cai2 into</span>
-0604   <span class="comment">% v'=f(v)*cai where cai1 &amp; cai2 are defined in mechanisms for the same v;</span>
-0605   <span class="comment">% workaround: insert into v'=f(v)*(cai)).</span>
-0606   <span class="comment">% check if anything besides a single variable:</span>
-0607   <span class="keyword">if</span> isempty(regexp(newstr,<span class="string">'[^a-z_A-Z\d]+'</span>,<span class="string">'once'</span>))
-0608     str=<a href="dynasim_strrep.html" class="code" title="function str=dynasim_strrep(str,oldstr,newstr,lpad,rpad)">dynasim_strrep</a>(str,oldstr,newstr);
-0609   <span class="keyword">else</span>
-0610     <span class="comment">% otherwise do substitution with operator and parenthesis</span>
-0611     pat=[<span class="string">'([^\w]+)'</span> oldstr <span class="string">'([^\w]+)'</span>]; <span class="comment">% in the middle</span>
-0612     rep=[<span class="string">'$1(('</span> newstr <span class="string">')'</span> operator oldstr <span class="string">')$2'</span>];
-0613     str=regexprep(str,pat,rep);
-0614     pat=[<span class="string">'([^\w]+)'</span> oldstr <span class="string">'$'</span>];        <span class="comment">% at the end</span>
-0615     rep=[<span class="string">'$1(('</span> newstr <span class="string">')'</span> operator oldstr <span class="string">')'</span>];
-0616     str=regexprep(str,pat,rep);
-0617     pat=[<span class="string">'^'</span> oldstr <span class="string">'([^\w]+)'</span>];        <span class="comment">% at the beginning</span>
-0618     rep=[<span class="string">'(('</span> newstr <span class="string">')'</span> operator oldstr <span class="string">')$1'</span>];
-0619     str=regexprep(str,pat,rep);
-0620     pat=[<span class="string">'^'</span> oldstr <span class="string">'$'</span>];               <span class="comment">% all there is</span>
-0621     rep=[<span class="string">'(('</span> newstr <span class="string">')'</span> operator oldstr <span class="string">')'</span>];
-0622     str=regexprep(str,pat,rep);
-0623   <span class="keyword">end</span>
-0624 <span class="keyword">end</span>
-0625</pre></div>
-<hr><address>Generated on Fri 24-Feb-2017 14:46:35 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" target="_parent">m2html</a></strong> &copy; 2005</address>
+0587 <span class="comment">% 4.2 convert to numeric parameters</span>
+0588 c = struct2cell(model.parameters);
+0589 <span class="comment">% get index of strings</span>
+0590 idx1=<a href="#_sub3  5" class="code" title="subfunction_monitor_index=find(~cellfun(@isempty,regexp(monitor_names,function_index=find(~cellfun(@isempty,regexp(function_names,[">find</a>(cellfun(@ischar,c));
+0591 <span class="comment">% which strings contain numeric values?</span>
+0592 idx2=<a href="#_sub3  5" class="code" title="subfunction_monitor_index=find(~cellfun(@isempty,regexp(monitor_names,function_index=find(~cellfun(@isempty,regexp(function_names,[">find</a>(cellfun(@isempty,regexp(c(idx1),<span class="string">'[a-z_A-Z]'</span>)) | ~cellfun(@isempty,regexp(c(idx1),<span class="string">'^\s*\[*\s*\+?inf\s*\]*\s*$'</span>,<span class="string">'ignorecase'</span>)));
+0593 <span class="comment">% convert those strings which contain numeric values</span>
+0594 c(idx1(idx2)) = cellfun(@eval,c(idx1(idx2)),<span class="string">'uni'</span>,0);
+0595 <span class="comment">%idx=cellfun(@isempty,regexp(c,'[a-z_A-Z]')) | ~cellfun(@isempty,regexp(c,'^\s*\[*\s*inf\s*\]*\s*$','ignorecase'));</span>
+0596 <span class="comment">%c(idx) = cellfun(@eval,c(idx),'uni',0);</span>
+0597 f = <a href="#_sub1  9" class="code" title="subfunction_names=fieldnames(model.functions);function_names=fieldnames(model.functions);">fieldnames</a>(model.parameters);
+0598 model.parameters = cell2struct(c,f,1);
+0599 
+0600 <span class="comment">% 4.3 store original specification</span>
+0601 model.specification = specification; <span class="comment">% store specification to enable modifications to be applied later</span>
+0602 model.namespaces = name_map; <span class="comment">% store name_map for transparency</span>
+0603 
+0604 model=<a href="CheckModel.html" class="code" title="function model=CheckModel(model)">CheckModel</a>(model);
+0605 
+0606 <span class="keyword">end</span>
+0607 
+0608 <span class="comment">% SUBFUNCTIONS</span>
+0609 <a name="_sub10" href="#_subfunctions" class="code">function str=linker_strrep(str,oldstr,newstr,operator)</a>
+0610   <span class="keyword">if</span> isempty(str)
+0611     <span class="keyword">return</span>;
+0612   <span class="keyword">end</span>
+0613   <span class="comment">% if inserting one word (e.g., a state variable), just replace it</span>
+0614   <span class="comment">% warning: could cause problems in future if there is an additive</span>
+0615   <span class="comment">% substitution of different state variables into the same place followed</span>
+0616   <span class="comment">% by non-additive operations (e.g., @cai+=cai1 and @cai+=cai2 into</span>
+0617   <span class="comment">% v'=f(v)*cai where cai1 &amp; cai2 are defined in mechanisms for the same v;</span>
+0618   <span class="comment">% workaround: insert into v'=f(v)*(cai)).</span>
+0619   <span class="comment">% check if anything besides a single variable:</span>
+0620   <span class="keyword">if</span> isempty(regexp(newstr,<span class="string">'[^a-z_A-Z\d]+'</span>,<span class="string">'once'</span>))
+0621     str=<a href="dynasim_strrep.html" class="code" title="function str=dynasim_strrep(str,oldstr,newstr,lpad,rpad)">dynasim_strrep</a>(str,oldstr,newstr);
+0622   <span class="keyword">else</span>
+0623     <span class="comment">% otherwise do substitution with operator and parenthesis</span>
+0624     pat=[<span class="string">'([^\w]+)'</span> oldstr <span class="string">'([^\w]+)'</span>]; <span class="comment">% in the middle</span>
+0625     rep=[<span class="string">'$1(('</span> newstr <span class="string">')'</span> operator oldstr <span class="string">')$2'</span>];
+0626     str=regexprep(str,pat,rep);
+0627     pat=[<span class="string">'([^\w]+)'</span> oldstr <span class="string">'$'</span>];        <span class="comment">% at the end</span>
+0628     rep=[<span class="string">'$1(('</span> newstr <span class="string">')'</span> operator oldstr <span class="string">')'</span>];
+0629     str=regexprep(str,pat,rep);
+0630     pat=[<span class="string">'^'</span> oldstr <span class="string">'([^\w]+)'</span>];        <span class="comment">% at the beginning</span>
+0631     rep=[<span class="string">'(('</span> newstr <span class="string">')'</span> operator oldstr <span class="string">')$1'</span>];
+0632     str=regexprep(str,pat,rep);
+0633     pat=[<span class="string">'^'</span> oldstr <span class="string">'$'</span>];               <span class="comment">% all there is</span>
+0634     rep=[<span class="string">'(('</span> newstr <span class="string">')'</span> operator oldstr <span class="string">')'</span>];
+0635     str=regexprep(str,pat,rep);
+0636   <span class="keyword">end</span>
+0637 <span class="keyword">end</span></pre></div>
+<hr><address>Generated on Mon 27-Feb-2017 14:58:50 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" target="_parent">m2html</a></strong> &copy; 2005</address>
 </body>
 </html>

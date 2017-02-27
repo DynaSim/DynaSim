@@ -1,19 +1,27 @@
 function [results,studyinfo]=AnalyzeStudy(data,func,varargin)
-%% [results,studyinfo]=AnalyzeStudy(data,func,varargin)
-% purpose: apply the same user-specified analysis function to each element
-% of data structure. intended for use with results from simulation studies
-% varying some aspect of the model or inputs.
-% inputs:
-%   data: DynaSim data structure with one or more elements
-%     also accepted: data file name, list of data files, studyinfo structure, study_dir, or studyinfo file
-%   func: function handle pointing to analysis function (or cell array of function handles)
-%   options: key/value pairs passed on to the analysis function.
-% outputs:
-%   results: array of structures returned by the analysis function
-% 
-% todo: annotate figures with data set-specific modifications
-% 
-% see also: SimulateModel, CalcFR
+%ANALYZESTUDY - Apply an analysis function to DynaSim data, optionally saving data
+%
+% Apply the same user-specified analysis function to each element of data
+% structure. intended for use with results from simulation studies varying some
+% aspect of the model or inputs.
+%
+% Usage:
+%   [results,studyinfo]=AnalyzeStudy(data,func,'option1',value1)
+%
+% Inputs:
+%   - data: DynaSim data structure with one or more elements
+%     - also accepted: data file name, list of data files, studyinfo structure,
+%         study_dir, or studyinfo file
+%   - func: function handle pointing to analysis function (or cell array of
+%       function handles)
+%   - options: key/value pairs passed on to the analysis function
+%
+% Outputs:
+%   - results: array of structures returned by the analysis function
+%
+% TODO: annotate figures with data set-specific modifications
+%
+% See also: SimulateModel, CalcFR
 
 % check inputs
 options=CheckOptions(varargin,{...

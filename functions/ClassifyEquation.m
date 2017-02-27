@@ -1,34 +1,39 @@
 function classes=ClassifyEquation(string,delimiter)
-%% CLASS=ClassifyEquation(STRING,DELIMITER)
-% Purpose: use regular expressions to classify model expressions in STRING
-% Inputs: 
-%   STRING
-%   DELIMITER (optional character, default=';'): delimit expressions in STRING
-% Output: CLASS (string or cell array of strings for each delimited expression)
-% class:            format:
-%   parameter         name=value
-%   fixed_variable    name=expression/data
-%   function          name(inputs)=expression
-%   ODE               dx/dt or x' = expression
-%   IC                x(0)=values
-%   conditional       if(condition)(action) or if(condition)(action)else(action)
-%   monitor           monitor *   (previously: monitor name=expression)
-%   linker            {'+=','-=','*=','/='} ('=>'for backwards compatibility) {'>-','>+','>*',or '>\'}
-%   comment           % or #
+%CLASSIFYEQUATION - use regular expressions to classify model expressions in STRING
 %
-% NOTE 1: output "class" will be a cell array of strings if STRING contains
+% Usage:
+% CLASS=ClassifyEquation(STRING,DELIMITER)
+%
+% Inputs:
+%   - STRING
+%   - DELIMITER (optional character, default=';'): delimit expressions in STRING
+%
+% Output:
+%  -  CLASS (string or cell array of strings for each delimited expression):
+%     class:            format:
+%     parameter         name=value
+%     fixed_variable    name=expression/data
+%     function          name(inputs)=expression
+%     ODE               dx/dt or x' = expression
+%     IC                x(0)=values
+%     conditional       if(condition)(action) or if(condition)(action)else(action)
+%     monitor           monitor *   (previously: monitor name=expression)
+%     linker            {'+=','-=','*=','/='} ('=>'for backwards compatibility) {'>-','>+','>*',or '>\'}
+%     comment           % or #
+%
+% Notes:
+% - Output "class" will be a cell array of strings if STRING contains
 %   multiple expressions; otherwise it will be a string.
-% 
-% NOTE 2: this function is designed to be an internal helper function 
+% - This function is designed to be an internal helper function
 %   called by user-level functions in DynaSim.
-% 
+%
 % Examples:
-% class  =ClassifyEquation('dx/dt=3*a*x')
-% classes=ClassifyEquation('dx/dt=3*a*x; x(0)=0')
-% classes=ClassifyEquation('dx/dt=3*a*x, x(0)=0',',')
-% classes=ClassifyEquation('a=2; b=2*a; f(x)=b; dx/dt=f(x); x(0)=0; if(x>1)(x=0); current=>f(x); monitor f(x); % comments')
-% classes=ClassifyEquation('model.eqns');
-% 
+%   class  =ClassifyEquation('dx/dt=3*a*x')
+%   classes=ClassifyEquation('dx/dt=3*a*x; x(0)=0')
+%   classes=ClassifyEquation('dx/dt=3*a*x, x(0)=0',',')
+%   classes=ClassifyEquation('a=2; b=2*a; f(x)=b; dx/dt=f(x); x(0)=0; if(x>1)(x=0); current=>f(x); monitor f(x); % comments')
+%   classes=ClassifyEquation('model.eqns');
+%
 % See also: ParseModelEquations
 
 % check inputs

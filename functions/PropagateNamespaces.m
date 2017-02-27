@@ -1,20 +1,24 @@
 function model = PropagateNamespaces(model,map)
-%% model = PropagateNamespaces(model,name_map)
-% purpose: namespace-establishing namespace substitutions.
-% inputs:
-%   model - DynaSim model structure (see GenerateModel)
-%   name_map - cell matrix mapping parameter, variable, and function names
-%   between the user-created specification (population equations and mechanism
-%   files) and the full model with automatically generated namespaces. It 
-%   has four columns with: user-specified name, name with namespace prefix, 
-%   namespace, and type ('parameters', 'fixed_variables', 'state_variables', 
-%   'functions', or 'monitors').
-% outputs:
-%   model - DynaSim model structure with namespace added as namespace-delineating prefix
+%PROPAGATENAMESPACES - namespace-establishing namespace substitutions.
 %
-% Example 1: ...
-% 
-% see also: GenerateModel, PropagateFunctions, ParseModelEquations, GetParentNamespace
+% Usage:
+%   model = PropagateNamespaces(model,name_map)
+%
+% Inputs:
+%   - model: DynaSim model structure (see GenerateModel)
+%   - name_map: cell matrix mapping parameter, variable, and function names
+%     between the user-created specification (population equations and mechanism
+%     files) and the full model with automatically generated namespaces. It has
+%     four columns with: user-specified name, name with namespace prefix,
+%     namespace, and type ('parameters', 'fixed_variables', 'state_variables',
+%     'functions', or 'monitors').
+%
+% Outputs:
+%   - model: DynaSim model structure with namespace added as namespace-delineating prefix
+%
+% Example 1: TODO
+%
+% See also: GenerateModel, PropagateFunctions, ParseModelEquations, GetParentNamespace
 
 % Check model
 model=CheckModel(model);

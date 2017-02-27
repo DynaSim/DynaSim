@@ -45,6 +45,8 @@
    - strict (default: true): whether to fail if options not specified in the
        options_schema are found.
 
+ Note: this function was adapted from one developed &quot;in-house&quot; years ago...
+
  Outputs:
    - options: structure with options (using default values if not supplied)
 
@@ -57,7 +59,7 @@ This function calls:
 </ul>
 This function is called by:
 <ul style="list-style-image:url(../matlabicon.gif)">
-<li><a href="AnalyzeData.html" class="code" title="function result=AnalyzeData(data,func,varargin)">AnalyzeData</a>	ANALYZEDATA - Apply an analysis function to DynaSim data, optionally saving data</li><li><a href="AnalyzeStudy.html" class="code" title="function [results,studyinfo]=AnalyzeStudy(data,func,varargin)">AnalyzeStudy</a>	ANALYZESTUDY - Apply an analysis function to DynaSim data, optionally saving data</li><li><a href="CalcCellProperties.html" class="code" title="function stats = CalcCellProperties(data,varargin)">CalcCellProperties</a>	CALCCELLPROPERTIES - calculates the intrinsic electrophysiological properties of all cells in one or more populations</li><li><a href="CalcFR.html" class="code" title="function data = CalcFR(data,varargin)">CalcFR</a>	CALCFR - Calculate firing rage for DynaSim data</li><li><a href="CalcPower.html" class="code" title="function data = CalcPower(data,varargin)">CalcPower</a>	CALCPOWER - Compute spectral analysis of DynaSim data</li><li><a href="CalcSpikeSync.html" class="code" title="function stats = CalcSpikeSync(data,varargin)">CalcSpikeSync</a>	CALCSPIKESYNC - Compute spike synchronization between spiketrains</li><li><a href="CheckSolverOptions.html" class="code" title="function options=CheckSolverOptions(options)">CheckSolverOptions</a>	CHECKSOLVEROPTIONS - standardize simulation options appended to params.mat</li><li><a href="CheckStudyinfo.html" class="code" title="function studyinfo=CheckStudyinfo(studyinfo,varargin)">CheckStudyinfo</a>	CHECKSTUDYINFO - Standardize studyinfo structure and auto-populate missing fields</li><li><a href="CreateBatch.html" class="code" title="function studyinfo=CreateBatch(base_model,modifications_set,varargin)">CreateBatch</a>	% studyinfo=CreateBatch(model,varargin)</li><li><a href="ExportData.html" class="code" title="function ExportData(data,varargin)">ExportData</a>	% ExportData(data,varargin)</li><li><a href="GenerateModel.html" class="code" title="function [model,name_map]=GenerateModel(specification,varargin)">GenerateModel</a>	% [model,name_map]=GenerateModel(specification,'option',value,...)</li><li><a href="GetSolveFile.html" class="code" title="function solve_file = GetSolveFile(model,studyinfo,varargin)">GetSolveFile</a>	% solve_file = GetSolveFile(model,studyinfo,options)</li><li><a href="ImportData.html" class="code" title="function [data,studyinfo] = ImportData(file,varargin)">ImportData</a>	% [data,studyinfo]=ImportData(data_file)</li><li><a href="ImportModel.html" class="code" title="function [model,map] = ImportModel(source,varargin)">ImportModel</a>	[model,map] = ImportModel(source,'option',value,...)</li><li><a href="ImportPlots.html" class="code" title="function [data,studyinfo] = ImportPlots(file,varargin)">ImportPlots</a>	% [data,studyinfo]=ImportData(data_file)</li><li><a href="MonitorStudy.html" class="code" title="function [studyinfo,study_status]=MonitorStudy(studyinfo,varargin)">MonitorStudy</a>	[studyinfo,status]=MonitorStudy(studyinfo,key/value options)</li><li><a href="PlotData.html" class="code" title="function handles=PlotData(data,varargin)">PlotData</a>	% handles=PlotData(data,'option',value)</li><li><a href="PlotFR2.html" class="code" title="function handles=PlotFR2(data,varargin)">PlotFR2</a>	% plotFR(data,'option',value)</li><li><a href="PlotStudy.html" class="code" title="function [handles, hsp, h2]=PlotStudy(data,myplot_handle,varargin)">PlotStudy</a>	% [handles, h2, hsp] = PlotStudy(data,myplot_handle)</li><li><a href="PlotWaveforms.html" class="code" title="function PlotWaveforms(data,varargin)">PlotWaveforms</a>	% PlotWaveforms(data,'option',value)</li><li><a href="ProbeCellProperties.html" class="code" title="function data = ProbeCellProperties(model,varargin)">ProbeCellProperties</a>	data = ProbeCellProperties(model,'option1',option1,...)</li><li><a href="ProbeFI.html" class="code" title="function data=ProbeFI(model,varargin)">ProbeFI</a>	% data=ProbeFI(model,varargin)</li><li><a href="PropagateParameters.html" class="code" title="function model=PropagateParameters(model,varargin)">PropagateParameters</a>	% model = SubstituteParameters(model)</li><li><a href="SelectData.html" class="code" title="function data=SelectData(data,varargin)">SelectData</a>	% data=SelectData(data,'option',value)</li><li><a href="SetupStudy.html" class="code" title="function [studyinfo,options]=SetupStudy(base_model,varargin)">SetupStudy</a>	Purpose:</li><li><a href="SimulateModel.html" class="code" title="function [data,studyinfo]=SimulateModel(model,varargin)">SimulateModel</a>	% data=SimulateModel(model,'option',value,...)</li><li><a href="UpdateStudy.html" class="code" title="function studyinfo=UpdateStudy(study_dir,varargin)">UpdateStudy</a>	% studyinfo=UpdateStudy(study_dir,varargin)</li><li><a href="WriteDynaSimSolver.html" class="code" title="function [outfile,options]=WriteDynaSimSolver(model,varargin)">WriteDynaSimSolver</a>	% solver_file=WriteDynaSimSolver(model,varargin)</li><li><a href="WriteMatlabSolver.html" class="code" title="function data=WriteMatlabSolver(model,varargin)">WriteMatlabSolver</a>	% outfile=WriteMatlabSolver(model,varargin)</li><li><a href="../functions_xPlt/PlotData2.html" class="code" title="function handles=PlotData2(data,varargin)">PlotData2</a>	% handles=PlotData(data,'option',value)</li></ul>
+<li><a href="AnalyzeData.html" class="code" title="function result=AnalyzeData(data,func,varargin)">AnalyzeData</a>	ANALYZEDATA - Apply an analysis function to DynaSim data, optionally saving data</li><li><a href="AnalyzeStudy.html" class="code" title="function [results,studyinfo]=AnalyzeStudy(data,func,varargin)">AnalyzeStudy</a>	ANALYZESTUDY - Apply an analysis function to DynaSim data, optionally saving data</li><li><a href="CalcACF.html" class="code" title="function data = CalcACF(data,varargin)">CalcACF</a>	CALCACF - Calculate the autocorrelation function.</li><li><a href="CalcCellProperties.html" class="code" title="function stats = CalcCellProperties(data,varargin)">CalcCellProperties</a>	CALCCELLPROPERTIES - calculates the intrinsic electrophysiological properties of all cells in one or more populations</li><li><a href="CalcFR.html" class="code" title="function data = CalcFR(data,varargin)">CalcFR</a>	CALCFR - Calculate firing rage for DynaSim data</li><li><a href="CalcFRmulti.html" class="code" title="function data = CalcFRmulti(data,varargin)">CalcFRmulti</a>	CALCFRMULTI - extends CalcFR to get SUA and MUA firing rates</li><li><a href="CalcISI.html" class="code" title="function data = CalcISI(data,varargin)">CalcISI</a>	CALCISI - Calculate the interspike interval.</li><li><a href="CalcPower.html" class="code" title="function data = CalcPower(data,varargin)">CalcPower</a>	CALCPOWER - Compute spectral analysis of DynaSim data</li><li><a href="CalcSpikeSync.html" class="code" title="function stats = CalcSpikeSync(data,varargin)">CalcSpikeSync</a>	CALCSPIKESYNC - Compute spike synchronization between spiketrains</li><li><a href="CheckSolverOptions.html" class="code" title="function options=CheckSolverOptions(options)">CheckSolverOptions</a>	CHECKSOLVEROPTIONS - standardize simulation options appended to params.mat</li><li><a href="CheckStudyinfo.html" class="code" title="function studyinfo=CheckStudyinfo(studyinfo,varargin)">CheckStudyinfo</a>	CHECKSTUDYINFO - Standardize studyinfo structure and auto-populate missing fields</li><li><a href="CreateBatch.html" class="code" title="function studyinfo=CreateBatch(base_model,modifications_set,varargin)">CreateBatch</a>	CREATEBATCH - create and submit jobs to run sets of simulations or analyses.</li><li><a href="ExportData.html" class="code" title="function ExportData(data,varargin)">ExportData</a>	EXPORTDATA - export DynaSim data structure in various formats.</li><li><a href="GenerateModel.html" class="code" title="function [model,name_map]=GenerateModel(specification,varargin)">GenerateModel</a>	GENERATEMODEL - Parse DynaSim specification and organize model data in DynaSim model structure</li><li><a href="GetSolveFile.html" class="code" title="function solve_file = GetSolveFile(model,studyinfo,varargin)">GetSolveFile</a>	GETSOLVEFILE - helper function that creates or retrieves the desired solver file.</li><li><a href="ImportData.html" class="code" title="function [data,studyinfo] = ImportData(file,varargin)">ImportData</a>	IMPORTDATA - load data into DynaSim formatted data structure.</li><li><a href="ImportModel.html" class="code" title="function [model,map] = ImportModel(source,varargin)">ImportModel</a>	IMPORTMODEL - import model from raw equations, other program source, etc.</li><li><a href="ImportPlots.html" class="code" title="function [data,studyinfo] = ImportPlots(file,varargin)">ImportPlots</a>	IMPORTPLOTS - load info about saved images (generated by SimulateMode or AnalyzeData) alongwith corresponding varied model components.</li><li><a href="MonitorStudy.html" class="code" title="function [studyinfo,study_status]=MonitorStudy(studyinfo,varargin)">MonitorStudy</a>	MONITORSTUDY - display information on study progress.</li><li><a href="PlotData.html" class="code" title="function handles = PlotData(data,varargin)">PlotData</a>	PLOTDATA - plot data in various ways depending on what data was provided and what options are defined.</li><li><a href="PlotFR2.html" class="code" title="function handles=PlotFR2(data,varargin)">PlotFR2</a>	PLOTFR2 - plot spike rates in various ways depending on what data was provided.</li><li><a href="PlotStudy.html" class="code" title="function [handles, hsp, h2]=PlotStudy(data,myplot_handle,varargin)">PlotStudy</a>	PLOTSTUDY - Applies a user-specified plotting function to each element of data structure.</li><li><a href="PlotWaveforms.html" class="code" title="function PlotWaveforms(data,varargin)">PlotWaveforms</a>	PLOTWAVEFORMS - plot waveforms in various ways depending on what data was provided.</li><li><a href="ProbeCellProperties.html" class="code" title="function data = ProbeCellProperties(model,varargin)">ProbeCellProperties</a>	data = ProbeCellProperties(model,'option1',option1,...)</li><li><a href="ProbeFI.html" class="code" title="function data=ProbeFI(model,varargin)">ProbeFI</a>	% data=ProbeFI(model,varargin)</li><li><a href="PropagateParameters.html" class="code" title="function model=PropagateParameters(model,varargin)">PropagateParameters</a>	PROPAGATEPARAMETERS - substitute parameter values or prepend parameter names with prefix across all model equations.</li><li><a href="SelectData.html" class="code" title="function data=SelectData(data,varargin)">SelectData</a>	SELECTDATA -  select subset of data</li><li><a href="SetupStudy.html" class="code" title="function [studyinfo,options]=SetupStudy(base_model,varargin)">SetupStudy</a>	SETUPSTUDY - Initialize DynaSim studyinfo structure, prepare list of output file names, and create output directories</li><li><a href="SimulateModel.html" class="code" title="function [data,studyinfo]=SimulateModel(model,varargin)">SimulateModel</a>	SIMULATEMODEL -  manage simulation of a DynaSim model.</li><li><a href="UpdateStudy.html" class="code" title="function studyinfo=UpdateStudy(study_dir,varargin)">UpdateStudy</a>	UPDATESTUDY - helper function to keep track of study metadata when anything is saved</li><li><a href="WriteDynaSimSolver.html" class="code" title="function [outfile,options]=WriteDynaSimSolver(model,varargin)">WriteDynaSimSolver</a>	WRITEDYNASIMSOLVER - write m-file that numerically inteegrates the model</li><li><a href="WriteMatlabSolver.html" class="code" title="function data=WriteMatlabSolver(model,varargin)">WriteMatlabSolver</a>	WRITEMATLABSOLVER - write m-file that numerically inteegrates the model</li><li><a href="../functions_xPlt/PlotData2.html" class="code" title="function handles=PlotData2(data,varargin)">PlotData2</a>	% handles=PlotData(data,'option',value)</li></ul>
 <!-- crossreference -->
 
 
@@ -83,150 +85,184 @@ This function is called by:
 0018 <span class="comment">%   - strict (default: true): whether to fail if options not specified in the</span>
 0019 <span class="comment">%       options_schema are found.</span>
 0020 <span class="comment">%</span>
-0021 <span class="comment">% Outputs:</span>
-0022 <span class="comment">%   - options: structure with options (using default values if not supplied)</span>
-0023 <span class="comment">%</span>
-0024 <span class="comment">% See also: Options2Keyval, CheckSpecification, CheckModel, CheckData</span>
-0025 
-0026 <span class="comment">% note: this function was adapted from one developed &quot;in-house&quot; years ago...</span>
+0021 <span class="comment">% Note: this function was adapted from one developed &quot;in-house&quot; years ago...</span>
+0022 <span class="comment">%</span>
+0023 <span class="comment">% Outputs:</span>
+0024 <span class="comment">%   - options: structure with options (using default values if not supplied)</span>
+0025 <span class="comment">%</span>
+0026 <span class="comment">% See also: Options2Keyval, CheckSpecification, CheckModel, CheckData</span>
 0027 
-0028 <span class="keyword">if</span> (0 ~= mod(length(options),2))     <span class="comment">%   Validate that the # of args is even</span>
-0029   error(<span class="string">'List of arguments must be even (must have name/value pair)'</span>);
-0030 <span class="keyword">end</span>;
-0031 <span class="keyword">if</span> (0 ~= mod(length(options_schema),3))    <span class="comment">%   Validate the options_schema info is right</span>
-0032   error(<span class="string">'Programming error: list of default arguments must be even (must have name/value pair)'</span>);
-0033 <span class="keyword">end</span>;
-0034 <span class="keyword">if</span> (~exist(<span class="string">'strict'</span>, <span class="string">'var'</span>))
-0035   strict = true;
-0036 <span class="keyword">end</span>;
-0037 
-0038 parms = [];
-0039 
-0040 <span class="comment">%   Rip all cell arguments into non-cell arguments.</span>
-0041 <span class="keyword">for</span> index = 1:length(options)
-0042   <span class="keyword">if</span> iscell(options{index})
-0043     <span class="keyword">if</span> isempty(options{index})
-0044       options{index}=[];
-0045     <span class="keyword">elseif</span> ~iscell(options{index}{1})
-0046       <span class="comment">%options{index} = { options{index} };</span>
-0047     <span class="keyword">end</span>
-0048   <span class="keyword">end</span>;
-0049 <span class="keyword">end</span>;
-0050 
-0051 valid_fields    = options_schema(1:3:end);
-0052 input_fields    = options(1:2:end);
-0053 unknown_fields  = setdiff(input_fields, valid_fields);
-0054 
-0055 <span class="comment">%   Validate that there are no extraneous params sent in</span>
-0056 <span class="keyword">if</span> (strict &amp;&amp; ~isempty(unknown_fields))
-0057   error(<span class="string">'The following unrecogized options were passed in: %s'</span>, sprintf(<span class="string">'%s '</span>,unknown_fields{:}));
-0058 <span class="keyword">end</span>;
-0059 
-0060 <span class="keyword">if</span> (~isempty( options ))
-0061   <span class="keyword">for</span> f=1:length(options)/2
-0062     parms.(options{2*f-1})=options{2*f};
-0063   <span class="keyword">end</span>
-0064   <span class="comment">%parms=struct(options{:});</span>
-0065 <span class="keyword">end</span>;
-0066 
-0067 <span class="comment">%   This allows 'pass-through' of parameters;</span>
-0068 <span class="comment">%   remove any fields that are unknown</span>
-0069 <span class="comment">%   unless no schema is defined.</span>
+0028 <span class="comment">%convert cell argument to struct if contains struct</span>
+0029 <span class="keyword">if</span> length(options) == 1 &amp;&amp; isstruct(options{1})
+0030   options = options{1};
+0031 <span class="keyword">end</span>
+0032 
+0033 <span class="keyword">if</span> ~isstruct(options) &amp;&amp; (0 ~= mod(length(options),2))     <span class="comment">%   Validate that the # of args is even</span>
+0034   error(<span class="string">'List of arguments must be even (must have name/value pair)'</span>);
+0035 <span class="keyword">end</span>
+0036 <span class="keyword">if</span> (0 ~= mod(length(options_schema),3))    <span class="comment">%   Validate the options_schema info is right</span>
+0037   error(<span class="string">'Programming error: list of default arguments must be even (must have name/value pair)'</span>);
+0038 <span class="keyword">end</span>
+0039 <span class="keyword">if</span> (~exist(<span class="string">'strict'</span>, <span class="string">'var'</span>))
+0040   strict = true;
+0041 <span class="keyword">end</span>
+0042 
+0043 parms = [];
+0044 
+0045 <span class="comment">%   Rip all cell arguments into non-cell arguments?</span>
+0046 <span class="comment">%     NOTE: currently just converts empty cells into empty arrays</span>
+0047 <span class="keyword">if</span> ~isstruct(options)
+0048   <span class="keyword">for</span> ind = 1:length(options)
+0049     <span class="keyword">if</span> iscell(options{ind})
+0050       <span class="keyword">if</span> isempty(options{ind})
+0051         options{ind}=[];
+0052       <span class="keyword">elseif</span> ~iscell(options{ind}{1})
+0053         <span class="comment">%options{index} = { options{index} };</span>
+0054       <span class="keyword">end</span>
+0055     <span class="keyword">end</span>
+0056   <span class="keyword">end</span>
+0057 <span class="keyword">else</span>
+0058   flds = fieldnames(options);
+0059   <span class="keyword">for</span> ind = 1:length(flds)
+0060     fld = flds{ind};
+0061     <span class="keyword">if</span> iscell(options.(fld))
+0062       <span class="keyword">if</span> isempty(options.(fld))
+0063         options.(fld)=[];
+0064       <span class="keyword">elseif</span> ~iscell(options.(fld){1})
+0065         <span class="comment">%options{index} = { options{index} };</span>
+0066       <span class="keyword">end</span>
+0067     <span class="keyword">end</span>
+0068   <span class="keyword">end</span>
+0069 <span class="keyword">end</span>
 0070 
-0071 <span class="keyword">if</span> (~strict &amp;&amp; ~isempty(parms) &amp;&amp; ~isempty(options_schema))
-0072   parms = rmfield(parms,unknown_fields);
-0073 <span class="keyword">end</span>;
-0074 
-0075 <span class="comment">%   Check arg values and set defaults</span>
-0076 <span class="keyword">for</span> f=1:3:length(options_schema)
-0077   <span class="comment">%   The value has been set explicitly by the caller;</span>
-0078   <span class="comment">%   Validate the input parameters by the 'range' field</span>
-0079   <span class="keyword">if</span>  (isfield(parms,options_schema{f}))
-0080     param_name        = options_schema{f};
-0081       param_value        = getfield(parms,param_name);
-0082     param_range   = options_schema{f+2};
+0071 <span class="keyword">if</span> ~isstruct(options) <span class="comment">% if arguments given as list</span>
+0072   input_fields  = options(1:2:end);
+0073 <span class="keyword">else</span>
+0074   input_fields  = fieldnames(options);
+0075 <span class="keyword">end</span>
+0076 valid_fields    = options_schema(1:3:end);
+0077 unknown_fields  = setdiff(input_fields, valid_fields);
+0078 
+0079 <span class="comment">%   Validate that there are no extraneous params sent in</span>
+0080 <span class="keyword">if</span> (strict &amp;&amp; ~isempty(unknown_fields))
+0081   error(<span class="string">'The following unrecogized options were passed in: %s'</span>, sprintf(<span class="string">'%s '</span>,unknown_fields{:}));
+0082 <span class="keyword">end</span>
 0083 
-0084     <span class="comment">% no value was specified,</span>
-0085     <span class="keyword">if</span> isempty(param_value)
-0086       parms = setfield(parms, options_schema{f}, options_schema{f+1});
-0087     <span class="comment">% no range was specified,</span>
-0088     <span class="keyword">elseif</span> isempty(param_range)
-0089       <span class="keyword">continue</span>;
-0090        <span class="comment">%    param range is a cell array of strings; make sure the current value is within that range.</span>
-0091     <span class="keyword">elseif</span> iscell(param_range)
-0092       num_flag = 0;
-0093       char_flag = 0;
-0094       <span class="keyword">for</span> i=1:length(param_range)
-0095         <span class="keyword">if</span> isnumeric(param_range{i}), num_flag=1; <span class="keyword">end</span>;
-0096         <span class="keyword">if</span> ischar(param_range{i}), char_flag=1; <span class="keyword">end</span>;
-0097       <span class="keyword">end</span>;
-0098       <span class="keyword">if</span> num_flag &amp;&amp; char_flag
-0099         error(<span class="string">'type of parameter range (cell array of numbers and strings) specified for parameter ''%s'' is currently unsupported'</span>, options_schema{f});
-0100       <span class="keyword">elseif</span> char_flag
-0101         <span class="keyword">if</span> iscell(param_value)
-0102           <span class="keyword">for</span> i=1:length(param_value)
-0103             <span class="keyword">if</span> ~ischar(param_value{i})
-0104               error(<span class="string">'parameter ''%s'' must be string or cell array of strings'</span>, options_schema{f});
-0105             <span class="keyword">end</span>;
-0106           <span class="keyword">end</span>;
-0107         <span class="keyword">elseif</span> ~ischar(param_value)
-0108           error(<span class="string">'parameter ''%s'' must be string or cell array of strings'</span>, options_schema{f});
-0109         <span class="keyword">else</span>
-0110           param_value = {param_value};
-0111         <span class="keyword">end</span>;
-0112         <span class="keyword">if</span> length(find(ismember(param_value,param_range))) ~= length(param_value)
-0113           error(<span class="string">'parameter ''%s'' value must be one of the following: { %s}'</span>, <span class="keyword">...</span>
-0114                   param_name, sprintf(<span class="string">'''%s'' '</span>,param_range{:}));
-0115         <span class="keyword">end</span>;
-0116       <span class="keyword">elseif</span> num_flag
-0117         param_range = cell2mat(param_range);
-0118         <span class="keyword">if</span> ~isnumeric(param_value)
-0119           error(<span class="string">'parameter ''%s'' must be numeric'</span>, options_schema{f});
-0120         <span class="keyword">end</span>;
-0121         <span class="keyword">if</span> length(find(ismember(param_value,param_range))) ~= length(param_value)
-0122           error(<span class="string">'parameter ''%s'' value must be one of the following: { %s}'</span>, <span class="keyword">...</span>
-0123                   param_name,sprintf(<span class="string">'%d '</span>,param_range));
-0124         <span class="keyword">end</span>;
-0125       <span class="keyword">else</span>
-0126         error(<span class="string">'type of parameter range specified for parameter ''%s'' is currently unsupported'</span>, options_schema{f});
-0127       <span class="keyword">end</span>;
-0128     <span class="comment">%  param range is logical and has two elements (i.e. true/false)</span>
-0129     <span class="keyword">elseif</span> islogical(param_range) &amp;&amp; length(param_range)==2
-0130       <span class="keyword">if</span> ~ismember(param_value,param_range)
-0131         error(<span class="string">'parameter %s value must be true (1) or false (0)'</span>, options_schema{f});
-0132       <span class="keyword">end</span>;
-0133     <span class="comment">%  param range is numeric and has two elements (i.e. min and max)</span>
-0134     <span class="keyword">elseif</span> isnumeric(param_range) &amp;&amp; length(param_range)==2
-0135       <span class="comment">%  param range is numeric or logical, and within a specified range,</span>
-0136       <span class="keyword">if</span> ~isempty(find(param_value &lt; param_range(1))) || <span class="keyword">...</span>
-0137          ~isempty(find(param_value &gt; param_range(2)))
-0138         <span class="keyword">if</span> int64(param_range(1))==param_range(1) &amp;&amp; int64(param_range(2))==param_range(2)
-0139           error(<span class="string">'parameter %s value must be between %d and %d'</span>,<span class="keyword">...</span>
-0140             options_schema{f},param_range(1),param_range(2));
-0141         <span class="keyword">else</span>
-0142           error(<span class="string">'parameter %s value must be between %0.4f and %0.4f'</span>,<span class="keyword">...</span>
-0143             options_schema{f},param_range(1),param_range(2));
-0144         <span class="keyword">end</span>;
-0145       <span class="keyword">end</span>;
-0146     <span class="comment">%  param range is numeric and has more than two elements (allowed values)</span>
-0147     <span class="keyword">elseif</span> isnumeric(param_range)
-0148       <span class="keyword">if</span> ~isnumeric(param_value)
-0149         error(<span class="string">'parameter ''%s'' must be numeric'</span>, options_schema{f});
-0150       <span class="keyword">end</span>;
-0151       <span class="keyword">if</span> length(find(ismember(param_value,param_range))) ~= length(param_value)
-0152         error(<span class="string">'parameter ''%s'' value must be one of the following: [ %s]'</span>, <span class="keyword">...</span>
-0153                 param_name,sprintf(<span class="string">'%d '</span>,param_range));
-0154       <span class="keyword">end</span>;
-0155     <span class="comment">%  param range is of a type we currently don't support.</span>
-0156     <span class="keyword">else</span>
-0157       error(<span class="string">'type of parameter range specified for parameter ''%s'' is currently unsupported'</span>, options_schema{f});
-0158     <span class="keyword">end</span>;
-0159   <span class="comment">% field not found, so set the default value.</span>
-0160   <span class="keyword">else</span>
-0161     <span class="comment">%parms = setfield(parms, options_schema{f}, options_schema{f+1});</span>
-0162     parms.(options_schema{f})=options_schema{f+1};
-0163   <span class="keyword">end</span>;
-0164 <span class="keyword">end</span>;</pre></div>
-<hr><address>Generated on Fri 24-Feb-2017 14:46:35 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" target="_parent">m2html</a></strong> &copy; 2005</address>
+0084 <span class="keyword">if</span> ~isstruct(options) <span class="comment">%convert to struct if arguments given as list</span>
+0085   <span class="keyword">if</span> (~isempty( options ))
+0086     <span class="keyword">for</span> f=1:length(options)/2
+0087       parms.(options{2*f-1})=options{2*f};
+0088     <span class="keyword">end</span>
+0089     <span class="comment">%parms=struct(options{:});</span>
+0090   <span class="keyword">end</span>
+0091 <span class="keyword">else</span>
+0092   parms = options;
+0093 <span class="keyword">end</span>
+0094 
+0095 <span class="comment">%   This allows 'pass-through' of parameters;</span>
+0096 <span class="comment">%   remove any fields that are unknown</span>
+0097 <span class="comment">%   unless no schema is defined.</span>
+0098 
+0099 <span class="keyword">if</span> (~strict &amp;&amp; ~isempty(parms) &amp;&amp; ~isempty(options_schema))
+0100   parms = rmfield(parms,unknown_fields);
+0101 <span class="keyword">end</span>
+0102 
+0103 <span class="comment">%   Check arg values and set defaults</span>
+0104 <span class="keyword">for</span> f=1:3:length(options_schema)
+0105   <span class="comment">%   The value has been set explicitly by the caller;</span>
+0106   <span class="comment">%   Validate the input parameters by the 'range' field</span>
+0107   <span class="keyword">if</span>  (isfield(parms,options_schema{f}))
+0108     param_name        = options_schema{f};
+0109       param_value        = getfield(parms,param_name);
+0110     param_range   = options_schema{f+2};
+0111 
+0112     <span class="comment">% no value was specified,</span>
+0113     <span class="keyword">if</span> isempty(param_value)
+0114       parms = setfield(parms, options_schema{f}, options_schema{f+1});
+0115     <span class="comment">% no range was specified,</span>
+0116     <span class="keyword">elseif</span> isempty(param_range)
+0117       <span class="keyword">continue</span>;
+0118        <span class="comment">%    param range is a cell array of strings; make sure the current value is within that range.</span>
+0119     <span class="keyword">elseif</span> iscell(param_range)
+0120       num_flag = 0;
+0121       char_flag = 0;
+0122       
+0123       <span class="keyword">for</span> i=1:length(param_range)
+0124         <span class="keyword">if</span> isnumeric(param_range{i}), num_flag=1; <span class="keyword">end</span>
+0125         <span class="keyword">if</span> ischar(param_range{i}), char_flag=1; <span class="keyword">end</span>
+0126       <span class="keyword">end</span>
+0127       
+0128       <span class="keyword">if</span> num_flag &amp;&amp; char_flag
+0129         error(<span class="string">'type of parameter range (cell array of numbers and strings) specified for parameter ''%s'' is currently unsupported'</span>, options_schema{f});
+0130       <span class="keyword">elseif</span> char_flag
+0131         <span class="keyword">if</span> iscell(param_value)
+0132           <span class="keyword">for</span> i=1:length(param_value)
+0133             <span class="keyword">if</span> ~ischar(param_value{i})
+0134               error(<span class="string">'parameter ''%s'' must be string or cell array of strings'</span>, options_schema{f});
+0135             <span class="keyword">end</span>
+0136           <span class="keyword">end</span>
+0137         <span class="keyword">elseif</span> ~ischar(param_value)
+0138           error(<span class="string">'parameter ''%s'' must be string or cell array of strings'</span>, options_schema{f});
+0139         <span class="keyword">else</span>
+0140           param_value = {param_value};
+0141         <span class="keyword">end</span>
+0142         
+0143         <span class="keyword">if</span> length(find(ismember(param_value,param_range))) ~= length(param_value)
+0144           error(<span class="string">'parameter ''%s'' value must be one of the following: { %s}'</span>, <span class="keyword">...</span>
+0145                   param_name, sprintf(<span class="string">'''%s'' '</span>,param_range{:}));
+0146         <span class="keyword">end</span>
+0147       <span class="keyword">elseif</span> num_flag
+0148         param_range = cell2mat(param_range);
+0149         
+0150         <span class="keyword">if</span> ~isnumeric(param_value)
+0151           error(<span class="string">'parameter ''%s'' must be numeric'</span>, options_schema{f});
+0152         <span class="keyword">end</span>
+0153         
+0154         <span class="keyword">if</span> length(find(ismember(param_value,param_range))) ~= length(param_value)
+0155           error(<span class="string">'parameter ''%s'' value must be one of the following: { %s}'</span>, <span class="keyword">...</span>
+0156                   param_name,sprintf(<span class="string">'%d '</span>,param_range));
+0157         <span class="keyword">end</span>
+0158       <span class="keyword">else</span>
+0159         error(<span class="string">'type of parameter range specified for parameter ''%s'' is currently unsupported'</span>, options_schema{f});
+0160       <span class="keyword">end</span>
+0161     <span class="comment">%  param range is logical and has two elements (i.e. true/false)</span>
+0162     <span class="keyword">elseif</span> islogical(param_range) &amp;&amp; length(param_range)==2
+0163       <span class="keyword">if</span> ~ismember(param_value,param_range)
+0164         error(<span class="string">'parameter %s value must be true (1) or false (0)'</span>, options_schema{f});
+0165       <span class="keyword">end</span>
+0166     <span class="comment">%  param range is numeric and has two elements (i.e. min and max)</span>
+0167     <span class="keyword">elseif</span> isnumeric(param_range) &amp;&amp; length(param_range)==2
+0168       <span class="comment">%  param range is numeric or logical, and within a specified range,</span>
+0169       <span class="keyword">if</span> ~isempty(find(param_value &lt; param_range(1))) || <span class="keyword">...</span>
+0170          ~isempty(find(param_value &gt; param_range(2)))
+0171         <span class="keyword">if</span> int64(param_range(1))==param_range(1) &amp;&amp; int64(param_range(2))==param_range(2)
+0172           error(<span class="string">'parameter %s value must be between %d and %d'</span>,<span class="keyword">...</span>
+0173             options_schema{f},param_range(1),param_range(2));
+0174         <span class="keyword">else</span>
+0175           error(<span class="string">'parameter %s value must be between %0.4f and %0.4f'</span>,<span class="keyword">...</span>
+0176             options_schema{f},param_range(1),param_range(2));
+0177         <span class="keyword">end</span>
+0178       <span class="keyword">end</span>
+0179     <span class="comment">%  param range is numeric and has more than two elements (allowed values)</span>
+0180     <span class="keyword">elseif</span> isnumeric(param_range)
+0181       <span class="keyword">if</span> ~isnumeric(param_value)
+0182         error(<span class="string">'parameter ''%s'' must be numeric'</span>, options_schema{f});
+0183       <span class="keyword">end</span>
+0184       
+0185       <span class="keyword">if</span> length(find(ismember(param_value,param_range))) ~= length(param_value)
+0186         error(<span class="string">'parameter ''%s'' value must be one of the following: [ %s]'</span>, <span class="keyword">...</span>
+0187                 param_name,sprintf(<span class="string">'%d '</span>,param_range));
+0188       <span class="keyword">end</span>
+0189     <span class="comment">%  param range is of a type we currently don't support.</span>
+0190     <span class="keyword">else</span>
+0191       error(<span class="string">'type of parameter range specified for parameter ''%s'' is currently unsupported'</span>, options_schema{f});
+0192     <span class="keyword">end</span>
+0193   <span class="comment">% field not found, so set the default value.</span>
+0194   <span class="keyword">else</span>
+0195     <span class="comment">%parms = setfield(parms, options_schema{f}, options_schema{f+1});</span>
+0196     parms.(options_schema{f})=options_schema{f+1};
+0197   <span class="keyword">end</span>
+0198 <span class="keyword">end</span></pre></div>
+<hr><address>Generated on Mon 27-Feb-2017 14:58:50 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" target="_parent">m2html</a></strong> &copy; 2005</address>
 </body>
 </html>

@@ -4,7 +4,7 @@
 <head>
   <title>Description of computeRaster</title>
   <meta name="keywords" content="computeRaster">
-  <meta name="description" content="">
+  <meta name="description" content="COMPUTERASTER - Use a threshold to find spiketrain for a voltage trace">
   <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
   <meta name="generator" content="m2html &copy; 2005 Guillaume Flandin">
   <meta name="robots" content="index, follow">
@@ -20,13 +20,13 @@
 </h1>
 
 <h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
-<div class="box"><strong></strong></div>
+<div class="box"><strong>COMPUTERASTER - Use a threshold to find spiketrain for a voltage trace</strong></div>
 
 <h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
 <div class="box"><strong>function raster  = computeRaster(t,V,threshold) </strong></div>
 
 <h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
-<div class="fragment"><pre class="comment"></pre></div>
+<div class="fragment"><pre class="comment">COMPUTERASTER - Use a threshold to find spiketrain for a voltage trace</pre></div>
 
 <!-- crossreference -->
 <h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
@@ -42,18 +42,19 @@ This function is called by:
 
 <h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
 <div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function raster  = computeRaster(t,V,threshold)</a>
-0002   <span class="keyword">if</span> nargin&lt;3, threshold=0; <span class="keyword">end</span>
-0003   dt = t(2)-t(1);
-0004   raster = [];
-0005   [indTimes,neuronSpikes] = find (V &gt; threshold);
-0006   <span class="keyword">if</span> ~isempty(neuronSpikes)
-0007     tSpikes = t(indTimes); <span class="comment">% in s</span>
-0008     raster(:,1) = tSpikes;
-0009     raster(:,2) = neuronSpikes;
-0010     raster(diff(raster(:,2))==0 &amp; diff(raster(:,1))&lt;=1.05*dt,:) = []; <span class="comment">% removing artificial spikes that come from two consecutive voltages above 0 mV</span>
-0011     [~,indSort] = sort(raster(:,1));
-0012     raster = raster(indSort,:);
-0013   <span class="keyword">end</span></pre></div>
-<hr><address>Generated on Fri 24-Feb-2017 14:46:35 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" target="_parent">m2html</a></strong> &copy; 2005</address>
+0002 <span class="comment">%COMPUTERASTER - Use a threshold to find spiketrain for a voltage trace</span>
+0003   <span class="keyword">if</span> nargin&lt;3, threshold=0; <span class="keyword">end</span>
+0004   dt = t(2)-t(1);
+0005   raster = [];
+0006   [indTimes,neuronSpikes] = find (V &gt; threshold);
+0007   <span class="keyword">if</span> ~isempty(neuronSpikes)
+0008     tSpikes = t(indTimes); <span class="comment">% in s</span>
+0009     raster(:,1) = tSpikes;
+0010     raster(:,2) = neuronSpikes;
+0011     raster(diff(raster(:,2))==0 &amp; diff(raster(:,1))&lt;=1.05*dt,:) = []; <span class="comment">% removing artificial spikes that come from two consecutive voltages above 0 mV</span>
+0012     [~,indSort] = sort(raster(:,1));
+0013     raster = raster(indSort,:);
+0014   <span class="keyword">end</span></pre></div>
+<hr><address>Generated on Mon 27-Feb-2017 14:58:50 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" target="_parent">m2html</a></strong> &copy; 2005</address>
 </body>
 </html>

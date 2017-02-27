@@ -1,4 +1,5 @@
 function [effective_vary_lengths, linked_indices] = CheckCovary(vary_lengths, vary_params)
+%CHECKCOVARY - TODO I assume this checks if any varied parameters are covaried?
 
 non_singleton_vary_lengths = vary_lengths(vary_lengths > 1);
 

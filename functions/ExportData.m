@@ -1,12 +1,15 @@
 function ExportData(data,varargin)
-%% ExportData(data,varargin)
-% Purpose: export DynaSim data structure in various formats.
+%EXPORTDATA - export DynaSim data structure in various formats.
+%
+% Usage:
+%   ExportData(data,varargin)
+%
 % Inputs:
-%   DynaSim data structure (see CheckData)
-% Options:
-%   - 'filename'    : name of output data file (default: 'data.mat')
-%   - 'format'      : mat. todo: csv, HDF. (default: 'mat')
-%   - 'verbose_flag': whether to print log info (default: 0)
+%   - data: DynaSim data structure (see CheckData)
+%   - options:
+%     'filename'    : name of output data file (default: 'data.mat')
+%     'format'      : mat. todo: csv, HDF. (default: 'mat')
+%     'verbose_flag': whether to print log info (default: 0)
 % 
 % See also: ImportData, CheckData, SimulateModel
 

@@ -35,10 +35,10 @@
 <h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
 This function calls:
 <ul style="list-style-image:url(../matlabicon.gif)">
-<li><a href="CheckOptions.html" class="code" title="function parms = CheckOptions(options, options_schema, strict)">CheckOptions</a>	CHECKOPTIONS - organize key/value pairs in structure with default or user-supplied values according to a schema</li><li><a href="Options2Keyval.html" class="code" title="function keyval = Options2Keyval(options)">Options2Keyval</a>	keyvals = Options2Keyval(options)</li></ul>
+<li><a href="CheckOptions.html" class="code" title="function parms = CheckOptions(options, options_schema, strict)">CheckOptions</a>	CHECKOPTIONS - organize key/value pairs in structure with default or user-supplied values according to a schema</li><li><a href="Options2Keyval.html" class="code" title="function keyval = Options2Keyval(options)">Options2Keyval</a>	OPTIONS2KEYVAL - Convert from options structure to a list of key/value pairs.</li></ul>
 This function is called by:
 <ul style="list-style-image:url(../matlabicon.gif)">
-<li><a href="SimulateModel.html" class="code" title="function [data,studyinfo]=SimulateModel(model,varargin)">SimulateModel</a>	% data=SimulateModel(model,'option',value,...)</li><li><a href="WriteDynaSimSolver.html" class="code" title="function [outfile,options]=WriteDynaSimSolver(model,varargin)">WriteDynaSimSolver</a>	% solver_file=WriteDynaSimSolver(model,varargin)</li></ul>
+<li><a href="SimulateModel.html" class="code" title="function [data,studyinfo]=SimulateModel(model,varargin)">SimulateModel</a>	SIMULATEMODEL -  manage simulation of a DynaSim model.</li><li><a href="WriteDynaSimSolver.html" class="code" title="function [outfile,options]=WriteDynaSimSolver(model,varargin)">WriteDynaSimSolver</a>	WRITEDYNASIMSOLVER - write m-file that numerically inteegrates the model</li></ul>
 <!-- crossreference -->
 
 
@@ -60,7 +60,7 @@ This function is called by:
 0014   <span class="string">'disk_flag'</span>,0,[],<span class="keyword">...</span><span class="comment">            % whether to write to disk during simulation instead of storing in memory</span>
 0015   <span class="string">'dt'</span>,.01,[],<span class="keyword">...</span><span class="comment">                 % time step used for fixed step DynaSim solvers</span>
 0016   <span class="string">'datafile'</span>,<span class="string">'data.csv'</span>,[],<span class="keyword">...</span><span class="comment"> % name of data file if disk_flag=1</span>
-0017   <span class="string">'compile_flag'</span>,exist(<span class="string">'codegen'</span>)==6,[],<span class="keyword">...</span><span class="comment"> % whether to prepare script for being compiled using coder instead of interpreting Matlab</span>
+0017   <span class="string">'compile_flag'</span>,exist(<span class="string">'codegen'</span>,<span class="string">'file'</span>)==6,[],<span class="keyword">...</span><span class="comment"> % whether to prepare script for being compiled using coder instead of interpreting Matlab</span>
 0018   <span class="string">'verbose_flag'</span>,1,[],<span class="keyword">...</span>
 0019   },false);
 0020 
@@ -78,6 +78,6 @@ This function is called by:
 0032 
 0033 <span class="comment">% standardize field order</span>
 0034 options=orderfields(options,field_order);</pre></div>
-<hr><address>Generated on Fri 24-Feb-2017 14:46:35 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" target="_parent">m2html</a></strong> &copy; 2005</address>
+<hr><address>Generated on Mon 27-Feb-2017 14:58:50 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" target="_parent">m2html</a></strong> &copy; 2005</address>
 </body>
 </html>

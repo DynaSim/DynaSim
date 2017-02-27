@@ -1,31 +1,34 @@
 function studyinfo=CreateBatch(base_model,modifications_set,varargin)
-%% studyinfo=CreateBatch(model,varargin)
-% Purpose: create and submit jobs to run sets of simulations or analyses.
+%CREATEBATCH - create and submit jobs to run sets of simulations or analyses.
+%
+% Usage:
+%   studyinfo=CreateBatch(model,varargin)
+%
 % Inputs:
 %   - DynaSim model (see GenerateModel)
 %   - modifications_set (as returned by Vary2Modifications())
-%   options:
-%     'compile_flag'  : whether to compile simulation using coder instead of 
-%                       interpreting Matlab {0 or 1} (default: 0)
-%     'verbose_flag'  : whether to display informative messages/logs (default: 0)
-%     'overwrite_flag': whether to overwrite existing data files {0 or 1} (default: 0)
-%   options for cluster computing:
-%     'sims_per_job'  : number of simulations to run per cluster job (default: 1)
-%     'memory_limit'  : memory to allocate per cluster job (default: '8G')
-%     'batch_dir'     : where to save job scripts
-%     'qsub_mode'     : whether to use SGE -t array for 1 qsub, mode: 'array'; or
-%                       qsub in csh for loop, mode: 'loop'. (default: 'array').
-%   options for parallel computing: (requires Parallel Computing Toolbox)
-%     'parallel_flag' : whether to use parfor to run simulations {0 or 1} (default: 0)
-%     'num_cores'     : number of cores to specify in the parallel pool
-%     *note: parallel computing has been disabled for debugging...
+%     - options:
+%       'compile_flag'  : whether to compile simulation using coder instead of
+%                         interpreting Matlab {0 or 1} (default: 0)
+%       'verbose_flag'  : whether to display informative messages/logs (default: 0)
+%       'overwrite_flag': whether to overwrite existing data files {0 or 1} (default: 0)
+%     - options for cluster computing:
+%       'sims_per_job'  : number of simulations to run per cluster job (default: 1)
+%       'memory_limit'  : memory to allocate per cluster job (default: '8G')
+%       'batch_dir'     : where to save job scripts
+%       'qsub_mode'     : whether to use SGE -t array for 1 qsub, mode: 'array'; or
+%                         qsub in csh for loop, mode: 'loop'. (default: 'array').
+%     - options for parallel computing: (requires Parallel Computing Toolbox)
+%       - Note: parallel computing has been DISABLED for debugging...
+%       'parallel_flag' : whether to use parfor to run simulations {0 or 1} (default: 0)
+%       'num_cores'     : number of cores to specify in the parallel pool
 %
 % Outputs:
 %   - DynaSim studyinfo (see CheckStudyinfo for schema info)
-% 
+%
+% Dependencies: SetupStudy, UpdateStudy
+%
 % See also: GenerateModel, SimulateModel, CheckStudyinfo, Vary2Modifications
-
-% dependencies: SetupStudy, UpdateStudy
 
 % check inputs
 options=CheckOptions(varargin,{...

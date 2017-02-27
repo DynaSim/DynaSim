@@ -1,10 +1,12 @@
 function keyvals_out = RemoveKeyval(keyvals,keys)
-% keyvals_out = RemoveKeyval(keyvals_in,keys)
-% Purpose: remove keys from keyvals_in.
-% 
-% Example:
-% keyvals=RemoveKeyval({'opt1',1,'opt2',2,'opt3',3},'opt2')
-% keyvals=RemoveKeyval({'opt1',1,'opt2',2,'opt3',3},{'opt2','opt1'})
+%REMOVEKEYVAL - remove keys from keyvals_in.
+%
+% Usage:
+%   keyvals_out = RemoveKeyval(keyvals_in,keys)
+%
+% Examples:
+%   keyvals=RemoveKeyval({'opt1',1,'opt2',2,'opt3',3},'opt2')
+%   keyvals=RemoveKeyval({'opt1',1,'opt2',2,'opt3',3},{'opt2','opt1'})
 
 keyvals_out=keyvals;
 

@@ -1,21 +1,24 @@
 function [model,map] = ImportModel(source,varargin)
-% [model,map] = ImportModel(source,'option',value,...)
-% Purpose: import model
+%IMPORTMODEL - import model from raw equations, other program source, etc.
+%
+% Usage:
+%   [model,map] = ImportModel(source,'option',value,...)
+%
 % Inputs:
-%   source: [string]
+%   - source: [string]
 %     1. file with model equations (DynaSim .mech or .eqns, XPP, ...)
 %     2. string with equations
 %     3. reference to DB model with equations
-%   options (optional):
-%     'namespace': namespace to prepend to all parameter, variable, and function names
-%     'ic_pop': name of population with state variables defined in this model
-%         note: connection mechanisms in target pop can have ic_pop=source
-%     'host': name of database hosting the model to import
+%   - options (optional):
+%     'namespace'      : namespace to prepend to all parameter, variable, and function names
+%     'ic_pop'         : name of population with state variables defined in this model
+%         - note: connection mechanisms in target pop can have ic_pop=source
+%     'host'           : name of database hosting the model to import
 %     'user_parameters': cell array of key/value pairs to override model parameters
-% 
+%
 % Output:
 %   DynaSim model structure (see GenerateModel)
-% 
+%
 % See also: GenerateModel, CheckModel
 
 % Check inputs

@@ -4,7 +4,7 @@
 <head>
   <title>Description of RemoveKeyval</title>
   <meta name="keywords" content="RemoveKeyval">
-  <meta name="description" content="keyvals_out = RemoveKeyval(keyvals_in,keys)">
+  <meta name="description" content="REMOVEKEYVAL - remove keys from keyvals_in.">
   <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
   <meta name="generator" content="m2html &copy; 2005 Guillaume Flandin">
   <meta name="robots" content="index, follow">
@@ -20,18 +20,20 @@
 </h1>
 
 <h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
-<div class="box"><strong>keyvals_out = RemoveKeyval(keyvals_in,keys)</strong></div>
+<div class="box"><strong>REMOVEKEYVAL - remove keys from keyvals_in.</strong></div>
 
 <h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
 <div class="box"><strong>function keyvals_out = RemoveKeyval(keyvals,keys) </strong></div>
 
 <h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
-<div class="fragment"><pre class="comment"> keyvals_out = RemoveKeyval(keyvals_in,keys)
- Purpose: remove keys from keyvals_in.
- 
- Example:
- keyvals=RemoveKeyval({'opt1',1,'opt2',2,'opt3',3},'opt2')
- keyvals=RemoveKeyval({'opt1',1,'opt2',2,'opt3',3},{'opt2','opt1'})</pre></div>
+<div class="fragment"><pre class="comment">REMOVEKEYVAL - remove keys from keyvals_in.
+
+ Usage:
+   keyvals_out = RemoveKeyval(keyvals_in,keys)
+
+ Examples:
+   keyvals=RemoveKeyval({'opt1',1,'opt2',2,'opt3',3},'opt2')
+   keyvals=RemoveKeyval({'opt1',1,'opt2',2,'opt3',3},{'opt2','opt1'})</pre></div>
 
 <!-- crossreference -->
 <h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
@@ -40,42 +42,44 @@ This function calls:
 </ul>
 This function is called by:
 <ul style="list-style-image:url(../matlabicon.gif)">
-<li><a href="ProbeCellProperties.html" class="code" title="function data = ProbeCellProperties(model,varargin)">ProbeCellProperties</a>	data = ProbeCellProperties(model,'option1',option1,...)</li><li><a href="SimulateModel.html" class="code" title="function [data,studyinfo]=SimulateModel(model,varargin)">SimulateModel</a>	% data=SimulateModel(model,'option',value,...)</li></ul>
+<li><a href="ProbeCellProperties.html" class="code" title="function data = ProbeCellProperties(model,varargin)">ProbeCellProperties</a>	data = ProbeCellProperties(model,'option1',option1,...)</li><li><a href="SimulateModel.html" class="code" title="function [data,studyinfo]=SimulateModel(model,varargin)">SimulateModel</a>	SIMULATEMODEL -  manage simulation of a DynaSim model.</li></ul>
 <!-- crossreference -->
 
 
 
 <h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
 <div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function keyvals_out = RemoveKeyval(keyvals,keys)</a>
-0002 <span class="comment">% keyvals_out = RemoveKeyval(keyvals_in,keys)</span>
-0003 <span class="comment">% Purpose: remove keys from keyvals_in.</span>
-0004 <span class="comment">%</span>
-0005 <span class="comment">% Example:</span>
-0006 <span class="comment">% keyvals=RemoveKeyval({'opt1',1,'opt2',2,'opt3',3},'opt2')</span>
-0007 <span class="comment">% keyvals=RemoveKeyval({'opt1',1,'opt2',2,'opt3',3},{'opt2','opt1'})</span>
-0008 
-0009 keyvals_out=keyvals;
+0002 <span class="comment">%REMOVEKEYVAL - remove keys from keyvals_in.</span>
+0003 <span class="comment">%</span>
+0004 <span class="comment">% Usage:</span>
+0005 <span class="comment">%   keyvals_out = RemoveKeyval(keyvals_in,keys)</span>
+0006 <span class="comment">%</span>
+0007 <span class="comment">% Examples:</span>
+0008 <span class="comment">%   keyvals=RemoveKeyval({'opt1',1,'opt2',2,'opt3',3},'opt2')</span>
+0009 <span class="comment">%   keyvals=RemoveKeyval({'opt1',1,'opt2',2,'opt3',3},{'opt2','opt1'})</span>
 0010 
-0011 <span class="keyword">if</span> isempty(keys) || isempty(keyvals)
-0012   <span class="keyword">return</span>
-0013 <span class="keyword">end</span>
-0014 
-0015 <span class="comment">% make sure keys is a cell array of keys to remove</span>
-0016 <span class="keyword">if</span> ~iscell(keys)
-0017   keys={keys};
-0018 <span class="keyword">end</span>
-0019 
-0020 <span class="comment">% find keys in keyvals</span>
-0021 idx=0;
-0022 <span class="keyword">for</span> k=1:length(keys)
-0023   idx=idx|cellfun(@(x)isequal(x,keys{k}),keyvals);
-0024 <span class="keyword">end</span>
-0025 <span class="comment">% convert to indices of keys in keyvals</span>
-0026 ind=find(idx);
-0027 <span class="keyword">if</span> ~isempty(ind)
-0028   <span class="comment">% remove keys and associated values</span>
-0029   keyvals_out([ind ind+1])=[];
-0030 <span class="keyword">end</span></pre></div>
-<hr><address>Generated on Fri 24-Feb-2017 14:46:35 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" target="_parent">m2html</a></strong> &copy; 2005</address>
+0011 keyvals_out=keyvals;
+0012 
+0013 <span class="keyword">if</span> isempty(keys) || isempty(keyvals)
+0014   <span class="keyword">return</span>
+0015 <span class="keyword">end</span>
+0016 
+0017 <span class="comment">% make sure keys is a cell array of keys to remove</span>
+0018 <span class="keyword">if</span> ~iscell(keys)
+0019   keys={keys};
+0020 <span class="keyword">end</span>
+0021 
+0022 <span class="comment">% find keys in keyvals</span>
+0023 idx=0;
+0024 <span class="keyword">for</span> k=1:length(keys)
+0025   idx=idx|cellfun(@(x)isequal(x,keys{k}),keyvals);
+0026 <span class="keyword">end</span>
+0027 <span class="comment">% convert to indices of keys in keyvals</span>
+0028 ind=find(idx);
+0029 <span class="keyword">if</span> ~isempty(ind)
+0030   <span class="comment">% remove keys and associated values</span>
+0031   keyvals_out([ind ind+1])=[];
+0032 <span class="keyword">end</span></pre></div>
+<hr><address>Generated on Mon 27-Feb-2017 14:58:50 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" target="_parent">m2html</a></strong> &copy; 2005</address>
 </body>
 </html>

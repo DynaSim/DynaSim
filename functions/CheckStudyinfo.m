@@ -1,10 +1,15 @@
 function studyinfo=CheckStudyinfo(studyinfo,varargin)
-%% studyinfo=CheckStudyinfo(studyinfo)
-% Purpose: standardize studyinfo structure and auto-populate missing fields
+%CHECKSTUDYINFO - Standardize studyinfo structure and auto-populate missing fields
+%
+% Usage:
+%   studyinfo=CheckStudyinfo(studyinfo)
+%
 % Input: DynaSim studyinfo structure
-% Output: DynaSim studyinfo structure (standardized)
-% studyinfo schema:
-%   studyinfo.study_id   (unique identifier, cannot be set by user; may be useful in future for recovering results that are moved)
+%
+% Output:
+% - DynaSim studyinfo structure (standardized)
+%   studyinfo.study_id   (unique identifier, cannot be set by user; may be
+%                         useful in future for recovering results that are moved)
 %   studyinfo.study_dir
 %   studyinfo.time_created
 %   studyinfo.last_modified
@@ -13,13 +18,16 @@ function studyinfo=CheckStudyinfo(studyinfo,varargin)
 %   studyinfo.base_solve_file (='')
 %   studyinfo.simulations(k) (=[])
 %            .simulations(k).sim_id: unique identifier in study
-%            .simulations(k).modifications: modifications made to the base model during this simulation
+%            .simulations(k).modifications: modifications made to the base
+%                                           model during this simulation
 %            .simulations(k).stop_time
 %            .simulations(k).duration
 %            .simulations(k).status: {'started', 'failed', 'finished'}
 %            .simulations(k).data_file: full filename of eventual output file
-%            .simulations(k).batch_dir (=[]): directory where cluster jobs were saved (if cluster_flag=1)
-%            .simulations(k).job_file (=[]): m-file cluster job that runs this simulation (if cluster_flag=1)
+%            .simulations(k).batch_dir (=[]): directory where cluster jobs were
+%                                             saved (if cluster_flag=1)
+%            .simulations(k).job_file (=[]): m-file cluster job that runs this
+%                                            simulation (if cluster_flag=1)
 %            .simulations(k).error_log (='')
 %            .simulations(k).machine_info
 %                           .machine_info.host_name
@@ -33,11 +41,19 @@ function studyinfo=CheckStudyinfo(studyinfo,varargin)
 %            .simulations(k).modified_model_file
 %            .simulations(k).simulator_options
 %            .simulations(k).solve_file
-%            .simulations(k).result_files (={}): cell array of result files (including saved plots)
-%            .simulations(k).result_functions (={}): cell array of names of functions producing results stored in result_files (including plot functions)
-%            .simulations(k).result_options (={}): cell array of option structures for result_functions
-%   studyinfo.base_data_files{k} % these are the base data files analyses are applied to. for simulated data, this equals {simulations.datafile}
-%   studyinfo.analysis(j)(=[]): metadata for one batch (analysis applied to all files = {studyinfo.simulations.data_file})
+%            .simulations(k).result_files (={}): cell array of result files
+%                                                (including saved plots)
+%            .simulations(k).result_functions (={}): cell array of names of
+%                                                    functions producing results
+%                                                    stored in result_files
+%                                                    (including plot functions)
+%            .simulations(k).result_options (={}): cell array of option
+%                                                  structures for result_functions
+%   studyinfo.base_data_files{k}: these are the base data files analyses are
+%                                 applied to. for simulated data, this equals
+%                                 {simulations.datafile}
+%   studyinfo.analysis(j)(=[]): metadata for one batch (analysis applied to all
+%                               files = {studyinfo.simulations.data_file})
 %            .analysis(j).analysis_id
 %            .analysis(j).function
 %            .analysis(j).analysis_options
@@ -53,13 +69,14 @@ function studyinfo=CheckStudyinfo(studyinfo,varargin)
 %   studyinfo.dynasim_hash
 %   studyinfo.paths (=[])
 %   studyinfo.project_id (=[])
-% 
-% Example 1: obtain empty studyinfo structure with all fields
-% studyinfo=CheckStudyinfo([])
-% 
-% Example 2: standardize existing studyinfo
-% studyinfo=CheckStudyinfo(studyinfo)
-% 
+%
+% Examples:
+% - Example 1: obtain empty studyinfo structure with all fields
+%     studyinfo=CheckStudyinfo([])
+%
+% - Example 2: standardize existing studyinfo
+%     studyinfo=CheckStudyinfo(studyinfo)
+%
 % See also: SetupStudy, SimulateModel, CreateBatch, ImportData, AnalyzeStudy
 
 options=CheckOptions(varargin,{...

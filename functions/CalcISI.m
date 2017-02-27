@@ -1,38 +1,40 @@
 function data = CalcISI(data,varargin)
-%% data = CalcISI(data,'option',value)
-% Calculate the interspike interval.
+%CALCISI - Calculate the interspike interval.
+%
+% Usage:
+%   data = CalcISI(data,'option',value)
 %
 % Inputs:
-%   data - DynaSim data structure (see CheckData)
-%   options:
-%     'variable' - name of field containing data on which to calculate ISIs
-%                (default: *_spikes or first variable in data.labels)
-%     'threshold' - scalar threshold value for detecting events (default: 0)
-%     'exclude_data_flag' - whether to remove simulated data from result structure (default: 0)
-%     'output_suffix' - suffix to attach to output variable names (default: '')
+%   - data: DynaSim data structure (see CheckData)
+%   - options:
+%     'variable'         : name of field containing data on which to calculate
+%                          ISIs (default: *_spikes or first variable in data.labels)
+%     'threshold'        : scalar threshold value for detecting events (default: 0)
+%     'exclude_data_flag': whether to remove simulated data from result
+%                          structure (default: 0)
+%     'output_suffix'    : suffix to attach to output variable names (default: '')
+%
 % Outputs:
-%   data: data structure with ISIs [ms] in .variable_ISI_SUA and .variable_ISI_MUA
+%   - data: data structure with ISIs [ms] in .variable_ISI_SUA and .variable_ISI_MUA
 %
-% note:
-% "variable" can be specified as the name of a variable listed in
-% data.labels, a cell array of string listing variable names, or as a
-% regular expression pattern for identifying variables to process.
-% See SelectVariables for more info on supported specifications.
-%
-% note:
-% DynaSim spike monitor returns spike data in variables *_spikes.
-% eg, data=SimulateModel('dv/dt=@current+10; {iNa,iK}; monitor v.spikes');
+% Notes:
+% - "variable" can be specified as the name of a variable listed in
+%     data.labels, a cell array of string listing variable names, or as a regular
+%     expression pattern for identifying variables to process. See SelectVariables
+%     for more info on supported specifications.
+% - DynaSim spike monitor returns spike data in variables *_spikes.
+%   - e.g., `data=SimulateModel('dv/dt=@current+10; {iNa,iK}; monitor v.spikes');`
 %     returns spikes in data.pop1_v_spikes (where 'pop1' is the default
 %     population name if not specified by the user).
 %
 % Examples:
-% s.populations(1).name='E';
-% s.populations(1).equations='dv/dt=@current+10; {iNa,iK}; v(0)=-65';
-% s.populations(2).name='I';
-% s.populations(2).equations='dv/dt=@current+10; {iNa,iK}; v(0)=-65';
-% data=SimulateModel(s);
-% data=CalcISI(data,'variable','*_v');
-% data % contains ISIs for E and I pops in .E_v_ISI_SUA/MUA and .I_v_ISI_SUA/MUA
+%   s.populations(1).name='E';
+%   s.populations(1).equations='dv/dt=@current+10; {iNa,iK}; v(0)=-65';
+%   s.populations(2).name='I';
+%   s.populations(2).equations='dv/dt=@current+10; {iNa,iK}; v(0)=-65';
+%   data=SimulateModel(s);
+%   data=CalcISI(data,'variable','*_v');
+%   data % contains ISIs for E and I pops in .E_v_ISI_SUA/MUA and .I_v_ISI_SUA/MUA
 %
 % See also: PlotFR, AnalyzeStudy, SimulateModel, CheckData, SelectVariables
 

@@ -46,7 +46,7 @@
  Outputs:
    - results: array of structures returned by the analysis function
 
- Todo: annotate figures with data set-specific modifications
+ TODO: annotate figures with data set-specific modifications
 
  See also: <a href="SimulateModel.html" class="code" title="function [data,studyinfo]=SimulateModel(model,varargin)">SimulateModel</a>, <a href="CalcFR.html" class="code" title="function data = CalcFR(data,varargin)">CalcFR</a></pre></div>
 
@@ -54,10 +54,10 @@
 <h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
 This function calls:
 <ul style="list-style-image:url(../matlabicon.gif)">
-<li><a href="CheckData.html" class="code" title="function data=CheckData(data)">CheckData</a>	CHECKDATA - Standardize data structure and auto-populate missing fields</li><li><a href="CheckOptions.html" class="code" title="function parms = CheckOptions(options, options_schema, strict)">CheckOptions</a>	CHECKOPTIONS - organize key/value pairs in structure with default or user-supplied values according to a schema</li><li><a href="CheckStudyinfo.html" class="code" title="function studyinfo=CheckStudyinfo(studyinfo,varargin)">CheckStudyinfo</a>	CHECKSTUDYINFO - Standardize studyinfo structure and auto-populate missing fields</li><li><a href="ImportData.html" class="code" title="function [data,studyinfo] = ImportData(file,varargin)">ImportData</a>	% [data,studyinfo]=ImportData(data_file)</li></ul>
+<li><a href="CheckData.html" class="code" title="function data=CheckData(data)">CheckData</a>	CHECKDATA - Standardize data structure and auto-populate missing fields</li><li><a href="CheckOptions.html" class="code" title="function parms = CheckOptions(options, options_schema, strict)">CheckOptions</a>	CHECKOPTIONS - organize key/value pairs in structure with default or user-supplied values according to a schema</li><li><a href="CheckStudyinfo.html" class="code" title="function studyinfo=CheckStudyinfo(studyinfo,varargin)">CheckStudyinfo</a>	CHECKSTUDYINFO - Standardize studyinfo structure and auto-populate missing fields</li><li><a href="ImportData.html" class="code" title="function [data,studyinfo] = ImportData(file,varargin)">ImportData</a>	IMPORTDATA - load data into DynaSim formatted data structure.</li></ul>
 This function is called by:
 <ul style="list-style-image:url(../matlabicon.gif)">
-<li><a href="CalcFR.html" class="code" title="function data = CalcFR(data,varargin)">CalcFR</a>	CALCFR - Calculate firing rage for DynaSim data</li><li><a href="CalcPower.html" class="code" title="function data = CalcPower(data,varargin)">CalcPower</a>	CALCPOWER - Compute spectral analysis of DynaSim data</li></ul>
+<li><a href="CalcACF.html" class="code" title="function data = CalcACF(data,varargin)">CalcACF</a>	CALCACF - Calculate the autocorrelation function.</li><li><a href="CalcFR.html" class="code" title="function data = CalcFR(data,varargin)">CalcFR</a>	CALCFR - Calculate firing rage for DynaSim data</li><li><a href="CalcFRmulti.html" class="code" title="function data = CalcFRmulti(data,varargin)">CalcFRmulti</a>	CALCFRMULTI - extends CalcFR to get SUA and MUA firing rates</li><li><a href="CalcISI.html" class="code" title="function data = CalcISI(data,varargin)">CalcISI</a>	CALCISI - Calculate the interspike interval.</li><li><a href="CalcPower.html" class="code" title="function data = CalcPower(data,varargin)">CalcPower</a>	CALCPOWER - Compute spectral analysis of DynaSim data</li></ul>
 <!-- crossreference -->
 
 
@@ -84,7 +84,7 @@ This function is called by:
 0019 <span class="comment">% Outputs:</span>
 0020 <span class="comment">%   - results: array of structures returned by the analysis function</span>
 0021 <span class="comment">%</span>
-0022 <span class="comment">% Todo: annotate figures with data set-specific modifications</span>
+0022 <span class="comment">% TODO: annotate figures with data set-specific modifications</span>
 0023 <span class="comment">%</span>
 0024 <span class="comment">% See also: SimulateModel, CalcFR</span>
 0025 
@@ -134,7 +134,7 @@ This function is called by:
 0069 <span class="comment">%   % todo: add annotations if necessary</span>
 0070 <span class="comment">% end</span>
 0071 
-0072 <span class="comment">% todo: save results of analysis and/or plots</span>
+0072 <span class="comment">% TODO: save results of analysis and/or plots</span>
 0073 <span class="keyword">if</span> options.save_data_flag
 0074   <span class="comment">% possibly: get filename from studyinfo.analysis(k).data_file ...</span>
 0075   <span class="keyword">if</span> options.detailed_names_flag <span class="comment">% create filename with parameter info</span>
@@ -144,6 +144,6 @@ This function is called by:
 0079   <span class="keyword">end</span>
 0080   <span class="comment">% save(outfile,'results','-v7.3');</span>
 0081 <span class="keyword">end</span></pre></div>
-<hr><address>Generated on Fri 24-Feb-2017 14:46:35 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" target="_parent">m2html</a></strong> &copy; 2005</address>
+<hr><address>Generated on Mon 27-Feb-2017 14:58:50 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" target="_parent">m2html</a></strong> &copy; 2005</address>
 </body>
 </html>

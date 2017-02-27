@@ -1,5 +1,6 @@
 function mexfile=PrepareMEX(file)
-% Purpose: take a solver m-file and compile it using the Matlab coder.
+%PREPAREMEX - take a solver m-file and compile it using the Matlab coder.
+%
 % See also: GetSolveFile
 
 % Create a MEX configuration object

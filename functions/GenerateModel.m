@@ -1,34 +1,39 @@
 function [model,name_map]=GenerateModel(specification,varargin)
-%% [model,name_map]=GenerateModel(specification,'option',value,...)
-% Purpose: parse DynaSim specification and organize model data in DynaSim model structure
-% Inputs: 
-%   specification: one of --
-%   - DynaSim specification structure (see below and CheckSpecification for more details)
-%   - string with name of MAT-file containing DynaSim specification structure
-%   - string with equations
-%   - string with name of file containing equations (.eqns)
-%     note: .eqns files can also be converted into model structure using LoadModel()
-%   options (with defaults): 'option1',value1,'option2',value2,...
-%   - 'modifications' ([]): specify modifications to apply to specification before
-%     generating the model (see ApplyModifications for more details).
-%   - 'open_link_flag'    : whether to leave linker identifiers in place (default: 0)
+%GENERATEMODEL - Parse DynaSim specification and organize model data in DynaSim model structure
+%
+% Usage:
+%   [model,name_map]=GenerateModel(specification,'option',value,...)
+%
+% Inputs:
+%   - specification: one of:
+%     - DynaSim specification structure (see below and CheckSpecification for more details)
+%     - string with name of MAT-file containing DynaSim specification structure
+%     - string with equations
+%     - string with name of file containing equations (.eqns)
+%       note: .eqns files can also be converted into model structure using LoadModel()
+%   - options (with defaults): 'option1',value1,'option2',value2,...
+%     'modifications'  : specify modifications to apply to specification
+%                        before generating the model, see ApplyModifications
+%                        for more details (default?: []).
+%     'open_link_flag' : whether to leave linker identifiers in place (default: 0)
+%
 % Outputs:
-%   model - DynaSim model structure (see CheckModel for more details):
+%   - model: DynaSim model structure (see CheckModel for more details):
 %     .parameters      : substructure with model parameters
 %     .fixed_variables : substructure with fixed variable definitions
 %     .functions       : substructure with function definitions
 %     .monitors        : substructure with monitor definitions
 %     .state_variables : cell array listing state variables
-%     .ODEs            : substructure with one ordinary differential 
+%     .ODEs            : substructure with one ordinary differential
 %                             equation (ODE) per state variable
-%     .ICs             : substructure with initial conditions (ICs) for 
+%     .ICs             : substructure with initial conditions (ICs) for
 %                             each state variable
 %     .conditionals(i) : structure array with each element indicating
-%                             conditional actions specified in subfields 
+%                             conditional actions specified in subfields
 %                             "condition","action","else" (see NOTE 1 in CheckModel)
 %     .linkers(i)      : structure array with each element indicating
-%                             an "expression" that should be inserted 
-%                             (according to "operation") into any equations 
+%                             an "expression" that should be inserted
+%                             (according to "operation") into any equations
 %                             where the "target" appears. (see NOTE 2 in CheckModel)
 %       .target    : string giving the target where expression should be inserted
 %       .expression: string giving the expression to insert
@@ -36,70 +41,76 @@ function [model,name_map]=GenerateModel(specification,varargin)
 %     .comments{i}     : cell array of comments found in model files
 %     .specification   : specification used to generate the model
 %     .namespaces      : (see NOTE 3 in CheckModel)
-%   name_map - cell matrix mapping parameter, variable, and function names
-%     between the user-created specification (population equations and mechanism
-%     files) and the full model with automatically generated namespaces. It 
-%     has four columns with: user-specified name, name with namespace prefix, 
-%     namespace, and type ('parameters', 'fixed_variables', 'state_variables', 
-%     'functions', or 'monitors') indicating the category to which the named
-%     element belongs.
-% 
-% DynaSim specification structure (see CheckSpecification for more details)
-% .populations(i) (required): contains info for defining independent population models
-%   .name (default: 'pop1')      : name of population
-%   .size (default: 1)           : number of elements in population (i.e., # cells)
-%   .equations (required)        : string listing equations (see NOTE 1 in CheckSpecification)
-%   .mechanism_list (default: []): cell array listing mechanisms (see NOTE 2 in CheckSpecification)
-%   .parameters (default: [])    : parameters to assign across all equations in
-%     the population. provide as cell array list of key/value pairs
-%     {'param1',value1,'param2',value2,...}
-%   .model (default: [])   : optional DynaSim model structure
-% .connections(i) (default: []): contains info for linking population models
-%   .source (required if >1 pops): name of source population
-%   .target (required if >1 pops): name of target population
-%   .mechanism_list (required)   : list of mechanisms that link two populations
-%   .parameters (default: [])    : parameters to assign across all equations in
-%     mechanisms of this connection's mechanism_list.
-% 
-% Example 0:
-% model=GenerateModel('db/dt=3')
-% 
-% Example 1: Lorenz equations
-% eqns={
-%   's=10; r=27; b=2.666';
-%   'dx/dt=s*(y-x)';
-%   'dy/dt=r*x-y-x*z';
-%   'dz/dt=-b*z+x*y';
-% };
-% model=GenerateModel(eqns)
-% 
-% Example 2: Leaky integrate-and-fire neuron
-% model=GenerateModel('tau=10; R=10; E=-70; dV/dt=(E-V+R*1.55)/tau; if(V>-55)(V=-75)')
+%   - name_map: cell matrix mapping parameter, variable, and function names
+%       between the user-created specification (population equations and mechanism
+%       files) and the full model with automatically generated namespaces. It
+%       has four columns with: user-specified name, name with namespace prefix,
+%       namespace, and type ('parameters', 'fixed_variables', 'state_variables',
+%       'functions', or 'monitors') indicating the category to which the named
+%       element belongs.
 %
-% Example 3: Hodgkin-Huxley neuron with sinusoidal drive
-% model=GenerateModel('dv/dt=current+sin(2*pi*t); {iNa,iK}')
-% 
-% Example 4: HH with self inhibition and sinusoidal drive
-% specification.populations(1).equations='dv/dt=current+sin(2*pi); v(0)=-65';
-% specification.populations(1).mechanism_list={'iNa','iK'};
-% specification.connections(1).mechanism_list={'iGABAa'};
-% specification.connections(1).parameters={'tauDx',15};
-% model=GenerateModel(specification)
-% 
-% Example 5: using custom mechanism alias in equations (for modularization)
-% specification.populations(1).equations='dv/dt=@M+sin(2*pi); v(0)=-65';
-% specification.populations(1).mechanism_list={'iNa@M','iK@M'};
-% model=GenerateModel(specification)
-% or:
-% specification.populations(1).equations='dv/dt=@M+sin(2*pi); {iNa,iK}@M; v(0)=-65';
-% model=GenerateModel(specification)
-% 
-% Example 6: directly incorporating mechanism models from online repositories:
-% model=GenerateModel('dv/dt=@M; {ib:57,iK}@M')
-%   where "ib" is a known alias for the infinitebrain.org repository,
-%   and "57" is the Na+ current at http://infinitebrain.org/models/57.
-%   note: currently not supported on *most* machines...
-% 
+% - DynaSim specification structure (see CheckSpecification for more details)
+%   .populations(i) (required): contains info for defining independent population models
+%       .name (default: 'pop1')      : name of population
+%       .size (default: 1)           : number of elements in population (i.e., # cells)
+%       .equations (required)        : string listing equations (see NOTE 1 in CheckSpecification)
+%       .mechanism_list (default: []): cell array listing mechanisms (see NOTE 2
+%                                      in CheckSpecification)
+%       .parameters (default: [])    : parameters to assign across all equations in
+%         the population. provide as cell array list of key/value pairs
+%         {'param1',value1,'param2',value2,...}
+%       .model (default: [])   : optional DynaSim model structure
+%   .connections(i) (default: []): contains info for linking population models
+%       .source (required if >1 pops): name of source population
+%       .target (required if >1 pops): name of target population
+%       .mechanism_list (required)   : list of mechanisms that link two populations
+%       .parameters (default: [])    : parameters to assign across all equations in
+%         mechanisms of this connection's mechanism_list.
+%
+% Examples:
+%   - Example 0:
+%     model=GenerateModel('db/dt=3')
+%
+%   - Example 1: Lorenz equations
+%     eqns={
+%       's=10; r=27; b=2.666';
+%       'dx/dt=s*(y-x)';
+%       'dy/dt=r*x-y-x*z';
+%       'dz/dt=-b*z+x*y';
+%     };
+%     model=GenerateModel(eqns)
+%
+%   - Example 2: Leaky integrate-and-fire neuron
+%     model=GenerateModel('tau=10; R=10; E=-70; dV/dt=(E-V+R*1.55)/tau; if(V>-55)(V=-75)')
+%
+%   - Example 3: Hodgkin-Huxley neuron with sinusoidal drive
+%     model=GenerateModel('dv/dt=current+sin(2*pi*t); {iNa,iK}')
+%
+%   - Example 4: HH with self inhibition and sinusoidal drive
+%     specification.populations(1).equations='dv/dt=current+sin(2*pi); v(0)=-65';
+%     specification.populations(1).mechanism_list={'iNa','iK'};
+%     specification.connections(1).mechanism_list={'iGABAa'};
+%     specification.connections(1).parameters={'tauDx',15};
+%     model=GenerateModel(specification)
+%
+%   - Example 5: using custom mechanism alias in equations (for modularization)
+%     specification.populations(1).equations='dv/dt=@M+sin(2*pi); v(0)=-65';
+%     specification.populations(1).mechanism_list={'iNa@M','iK@M'};
+%     model=GenerateModel(specification)
+%
+%     or:
+%
+%     specification.populations(1).equations='dv/dt=@M+sin(2*pi); {iNa,iK}@M; v(0)=-65';
+%     model=GenerateModel(specification)
+%
+%   - Example 6: directly incorporating mechanism models from online repositories:
+%
+%     model=GenerateModel('dv/dt=@M; {ib:57,iK}@M')
+%
+%     where "ib" is a known alias for the infinitebrain.org repository,
+%     and "57" is the Na+ current at http://infinitebrain.org/models/57.
+%     note: currently not supported on *most* machines...
+%
 % See also: CheckSpecification, CheckModel, ParseModelEquations, SimulateModel
 
 % Check inputs

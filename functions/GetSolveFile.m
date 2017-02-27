@@ -1,20 +1,25 @@
 function solve_file = GetSolveFile(model,studyinfo,varargin)
-%% solve_file = GetSolveFile(model,studyinfo,options)
-% Purpose: helper function that creates or retrieves the desired solver file.
+%GETSOLVEFILE - helper function that creates or retrieves the desired solver file.
+%
+% Usage:
+%   solve_file = GetSolveFile(model,studyinfo,options)
+%
 % Inputs:
-%   model - DynaSim model structure (see GenerateModel)
-%   studyinfo (optional) - DynaSim studyinfo structure (see CheckStudyinfo)
-%   options (optional) - cell array of key/value pairs or Matlab structure with options
+%   - model: DynaSim model structure (see GenerateModel)
+%   - studyinfo (optional): DynaSim studyinfo structure (see CheckStudyinfo)
+%   - options (optional): cell array of key/value pairs or Matlab structure with options
 %     'solver'      : solver for numerical integration (see GetSolveFile)
 %                     {'euler','rk2','rk4'} (default: 'rk4')
-%     'disk_flag'     : whether to write to disk during simulation instead of storing in memory {0 or 1} (default: 0)
-%     'study_dir'     : relative or absolute path to output directory (default: current directory)
-%     'verbose_flag'  : whether to display informative messages/logs (default: 0)
-% 
+%     'disk_flag'   : whether to write to disk during simulation instead of
+%                     storing in memory {0 or 1} (default: 0)
+%     'study_dir'   : relative or absolute path to output directory (default:
+%                     current directory)
+%     'verbose_flag': whether to display informative messages/logs (default: 0)
+%
 % Output:
-%   solver_file - full file name of file solving the system in model
-% 
-% See also: WriteDynaSimSolver, CompareSolveFiles, PrepareMEX, 
+%   - solver_file: full file name of file solving the system in model
+%
+% See also: WriteDynaSimSolver, CompareSolveFiles, PrepareMEX,
 %           SimulateModel, CreateBatch
 
 % Check inputs

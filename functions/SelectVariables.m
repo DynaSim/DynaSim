@@ -1,12 +1,17 @@
 function [variables,pop_names]=SelectVariables(labels,var_strings)
-% variables=SelectVariables(labels,var_strings)
-% purpose: determine what variables to plot
-% inputs:
-%   labels - cell array of variable names
-%   var_strings - string or cell array of strings specifying variables to plot
-% outputs:
-%   all labels matching specifications in var_strings
-% examples:
+%SELECTVARIABLES - determine what variables to plot
+%
+% Usage:
+%   variables=SelectVariables(labels,var_strings)
+%
+% Inputs:
+%   - labels: cell array of variable names
+%   - var_strings: string or cell array of strings specifying variables to plot
+%
+% Outputs:
+%   - all labels matching specifications in var_strings
+%
+% Examples:
 %   labels={'pop1_v','pop1_iNa_m','pop1_iNa_h','pop2_v','pop2_av','time'};
 %   var_strings=[];
 %   var_strings='v';
@@ -15,6 +20,7 @@ function [variables,pop_names]=SelectVariables(labels,var_strings)
 %   var_strings='pop1_v';
 %   var_strings='pop1_*';
 %   var_strings='pop2_*';
+
 if nargin<2
   var_strings=[];
 end

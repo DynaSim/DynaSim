@@ -4,7 +4,7 @@
 <head>
   <title>Description of ExportData</title>
   <meta name="keywords" content="ExportData">
-  <meta name="description" content="% ExportData(data,varargin)">
+  <meta name="description" content="EXPORTDATA - export DynaSim data structure in various formats.">
   <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
   <meta name="generator" content="m2html &copy; 2005 Guillaume Flandin">
   <meta name="robots" content="index, follow">
@@ -20,20 +20,23 @@
 </h1>
 
 <h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
-<div class="box"><strong>% ExportData(data,varargin)</strong></div>
+<div class="box"><strong>EXPORTDATA - export DynaSim data structure in various formats.</strong></div>
 
 <h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
 <div class="box"><strong>function ExportData(data,varargin) </strong></div>
 
 <h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
-<div class="fragment"><pre class="comment">% ExportData(data,varargin)
- Purpose: export DynaSim data structure in various formats.
+<div class="fragment"><pre class="comment">EXPORTDATA - export DynaSim data structure in various formats.
+
+ Usage:
+   ExportData(data,varargin)
+
  Inputs:
-   DynaSim data structure (see CheckData)
- Options:
-   - 'filename'    : name of output data file (default: 'data.mat')
-   - 'format'      : mat. todo: csv, HDF. (default: 'mat')
-   - 'verbose_flag': whether to print log info (default: 0)
+   - data: DynaSim data structure (see CheckData)
+   - options:
+     'filename'    : name of output data file (default: 'data.mat')
+     'format'      : mat. todo: csv, HDF. (default: 'mat')
+     'verbose_flag': whether to print log info (default: 0)
  
  See also: <a href="ImportData.html" class="code" title="function [data,studyinfo] = ImportData(file,varargin)">ImportData</a>, <a href="CheckData.html" class="code" title="function data=CheckData(data)">CheckData</a>, <a href="SimulateModel.html" class="code" title="function [data,studyinfo]=SimulateModel(model,varargin)">SimulateModel</a></pre></div>
 
@@ -44,55 +47,58 @@ This function calls:
 <li><a href="CheckOptions.html" class="code" title="function parms = CheckOptions(options, options_schema, strict)">CheckOptions</a>	CHECKOPTIONS - organize key/value pairs in structure with default or user-supplied values according to a schema</li></ul>
 This function is called by:
 <ul style="list-style-image:url(../matlabicon.gif)">
-<li><a href="SimulateModel.html" class="code" title="function [data,studyinfo]=SimulateModel(model,varargin)">SimulateModel</a>	% data=SimulateModel(model,'option',value,...)</li></ul>
+<li><a href="SimulateModel.html" class="code" title="function [data,studyinfo]=SimulateModel(model,varargin)">SimulateModel</a>	SIMULATEMODEL -  manage simulation of a DynaSim model.</li></ul>
 <!-- crossreference -->
 
 
 
 <h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
 <div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function ExportData(data,varargin)</a>
-0002 <span class="comment">%% ExportData(data,varargin)</span>
-0003 <span class="comment">% Purpose: export DynaSim data structure in various formats.</span>
-0004 <span class="comment">% Inputs:</span>
-0005 <span class="comment">%   DynaSim data structure (see CheckData)</span>
-0006 <span class="comment">% Options:</span>
-0007 <span class="comment">%   - 'filename'    : name of output data file (default: 'data.mat')</span>
-0008 <span class="comment">%   - 'format'      : mat. todo: csv, HDF. (default: 'mat')</span>
-0009 <span class="comment">%   - 'verbose_flag': whether to print log info (default: 0)</span>
-0010 <span class="comment">%</span>
-0011 <span class="comment">% See also: ImportData, CheckData, SimulateModel</span>
-0012 
-0013 options=<a href="CheckOptions.html" class="code" title="function parms = CheckOptions(options, options_schema, strict)">CheckOptions</a>(varargin,{<span class="keyword">...</span>
-0014   <span class="string">'filename'</span>,<span class="string">'data.mat'</span>,[],<span class="keyword">...</span><span class="comment"> % name of output data file</span>
-0015   <span class="string">'format'</span>,<span class="string">'mat'</span>,[],<span class="keyword">...</span><span class="comment"> % mat. todo: csv, HDF</span>
-0016   <span class="string">'verbose_flag'</span>,0,{0,1},<span class="keyword">...</span><span class="comment"> % whether to print log info</span>
-0017   },false);
-0018 
-0019 <span class="keyword">switch</span> lower(options.format)
-0020   <span class="keyword">case</span> <span class="string">'mat'</span>
-0021     <span class="keyword">if</span> numel(data)==1
-0022       <span class="comment">% split DynaSim data structure into separate variables saved to a</span>
-0023       <span class="comment">% v7.3 mat-file for subsequent HDF-style loading with matfile()</span>
-0024       vars=fieldnames(data);
-0025       <span class="keyword">for</span> i=1:length(vars)
-0026         eval(sprintf(<span class="string">'%s=data.%s;'</span>,vars{i},vars{i}));
-0027       <span class="keyword">end</span>
-0028       save(options.filename,vars{:},<span class="string">'-v7.3'</span>);
-0029     <span class="keyword">else</span>
-0030       save(options.filename,<span class="string">'data'</span>,<span class="string">'-v7.3'</span>);
-0031     <span class="keyword">end</span>
-0032   <span class="keyword">case</span> <span class="string">'csv'</span>
-0033     <span class="comment">% write csv file</span>
-0034     <span class="comment">% ExportCSV(data,options.filename);</span>
-0035   <span class="keyword">case</span> <span class="string">'hdf'</span>
-0036     <span class="comment">% ExportHDF(data,options.filename);</span>
-0037   <span class="keyword">otherwise</span>
-0038     <span class="comment">% not recognized</span>
-0039 <span class="keyword">end</span>
-0040 
-0041 <span class="keyword">if</span> options.verbose_flag
-0042   fprintf(<span class="string">'data saved to %s\n'</span>,options.filename);
-0043 <span class="keyword">end</span></pre></div>
-<hr><address>Generated on Fri 24-Feb-2017 14:46:35 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" target="_parent">m2html</a></strong> &copy; 2005</address>
+0002 <span class="comment">%EXPORTDATA - export DynaSim data structure in various formats.</span>
+0003 <span class="comment">%</span>
+0004 <span class="comment">% Usage:</span>
+0005 <span class="comment">%   ExportData(data,varargin)</span>
+0006 <span class="comment">%</span>
+0007 <span class="comment">% Inputs:</span>
+0008 <span class="comment">%   - data: DynaSim data structure (see CheckData)</span>
+0009 <span class="comment">%   - options:</span>
+0010 <span class="comment">%     'filename'    : name of output data file (default: 'data.mat')</span>
+0011 <span class="comment">%     'format'      : mat. todo: csv, HDF. (default: 'mat')</span>
+0012 <span class="comment">%     'verbose_flag': whether to print log info (default: 0)</span>
+0013 <span class="comment">%</span>
+0014 <span class="comment">% See also: ImportData, CheckData, SimulateModel</span>
+0015 
+0016 options=<a href="CheckOptions.html" class="code" title="function parms = CheckOptions(options, options_schema, strict)">CheckOptions</a>(varargin,{<span class="keyword">...</span>
+0017   <span class="string">'filename'</span>,<span class="string">'data.mat'</span>,[],<span class="keyword">...</span><span class="comment"> % name of output data file</span>
+0018   <span class="string">'format'</span>,<span class="string">'mat'</span>,[],<span class="keyword">...</span><span class="comment"> % mat. todo: csv, HDF</span>
+0019   <span class="string">'verbose_flag'</span>,0,{0,1},<span class="keyword">...</span><span class="comment"> % whether to print log info</span>
+0020   },false);
+0021 
+0022 <span class="keyword">switch</span> lower(options.format)
+0023   <span class="keyword">case</span> <span class="string">'mat'</span>
+0024     <span class="keyword">if</span> numel(data)==1
+0025       <span class="comment">% split DynaSim data structure into separate variables saved to a</span>
+0026       <span class="comment">% v7.3 mat-file for subsequent HDF-style loading with matfile()</span>
+0027       vars=fieldnames(data);
+0028       <span class="keyword">for</span> i=1:length(vars)
+0029         eval(sprintf(<span class="string">'%s=data.%s;'</span>,vars{i},vars{i}));
+0030       <span class="keyword">end</span>
+0031       save(options.filename,vars{:},<span class="string">'-v7.3'</span>);
+0032     <span class="keyword">else</span>
+0033       save(options.filename,<span class="string">'data'</span>,<span class="string">'-v7.3'</span>);
+0034     <span class="keyword">end</span>
+0035   <span class="keyword">case</span> <span class="string">'csv'</span>
+0036     <span class="comment">% write csv file</span>
+0037     <span class="comment">% ExportCSV(data,options.filename);</span>
+0038   <span class="keyword">case</span> <span class="string">'hdf'</span>
+0039     <span class="comment">% ExportHDF(data,options.filename);</span>
+0040   <span class="keyword">otherwise</span>
+0041     <span class="comment">% not recognized</span>
+0042 <span class="keyword">end</span>
+0043 
+0044 <span class="keyword">if</span> options.verbose_flag
+0045   fprintf(<span class="string">'\tData saved to %s\n'</span>,options.filename);
+0046 <span class="keyword">end</span></pre></div>
+<hr><address>Generated on Mon 27-Feb-2017 14:58:50 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" target="_parent">m2html</a></strong> &copy; 2005</address>
 </body>
 </html>

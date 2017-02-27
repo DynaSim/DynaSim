@@ -48,48 +48,48 @@
    - TODO
 
  Examples:
- - modifying population size and parameters:
-     modifications={'E','size',5; 'E','gNa',120};
-     model=ApplyModifications(model,modifications);
+   - modifying population size and parameters:
+       modifications={'E','size',5; 'E','gNa',120};
+       model=ApplyModifications(model,modifications);
 
- - modifying mechanism_list:
-     m=ApplyModifications('dv/dt=10+@current; {iNa,iK}',...
-                          {'pop1','mechanism_list','-iNa'});
-     m.populations.mechanism_list
-     m=ApplyModifications('dv/dt=10+@current; {iNa,iK}',...
-                          {'pop1','mechanism_list','+iCa'});
-     m.populations.mechanism_list
-     m=ApplyModifications('dv/dt=10+@current; {iNa,iK}',...
-                          {'pop1','mechanism_list','+(iCa,iCan,CaBuffer)'});
-     m.populations.mechanism_list
+   - modifying mechanism_list:
+       m=ApplyModifications('dv/dt=10+@current; {iNa,iK}',...
+                            {'pop1','mechanism_list','-iNa'});
+       m.populations.mechanism_list
+       m=ApplyModifications('dv/dt=10+@current; {iNa,iK}',...
+                            {'pop1','mechanism_list','+iCa'});
+       m.populations.mechanism_list
+       m=ApplyModifications('dv/dt=10+@current; {iNa,iK}',...
+                            {'pop1','mechanism_list','+(iCa,iCan,CaBuffer)'});
+       m.populations.mechanism_list
 
- - modifying equations (using special &quot;cat()&quot; operator or direct substitution)
-     m=ApplyModifications('dv/dt=10+@current; {iNa,iK}',...
-                          {'pop1','equations','cat(dv/dt,+I)'});
-     m.populations.equations
-     m=ApplyModifications('dv/dt=I(t)+@current; I(t)=10; {iNa,iK}',...
-                          {'pop1','equations','cat(I(t),+sin(2*pi*t))'});
-     m.populations.equations
-     m=ApplyModifications('dv/dt=I(t)+@current; I(t)=10; {iNa,iK}',...
-                          {'pop1','equations','dv/dt=10+@current'});
-     m.populations.equations
-     m.populations.mechanism_list
+   - modifying equations (using special &quot;cat()&quot; operator or direct substitution)
+       m=ApplyModifications('dv/dt=10+@current; {iNa,iK}',...
+                            {'pop1','equations','cat(dv/dt,+I)'});
+       m.populations.equations
+       m=ApplyModifications('dv/dt=I(t)+@current; I(t)=10; {iNa,iK}',...
+                            {'pop1','equations','cat(I(t),+sin(2*pi*t))'});
+       m.populations.equations
+       m=ApplyModifications('dv/dt=I(t)+@current; I(t)=10; {iNa,iK}',...
+                            {'pop1','equations','dv/dt=10+@current'});
+       m.populations.equations
+       m.populations.mechanism_list
 
- - modifying equations with reserved keywords &quot;ODEn&quot; and &quot;FUNCTIONn&quot;
-   - Note:
-     'ODEn' = reserved keyword referencing the n-th ODE in equations
-     'ODE' = aliases ODE1
-     similarly: 'FUNCTIONn' and 'FUNCTION'
+   - modifying equations with reserved keywords &quot;ODEn&quot; and &quot;FUNCTIONn&quot;
+     - Note:
+       'ODEn' = reserved keyword referencing the n-th ODE in equations
+       'ODE' = aliases ODE1
+       similarly: 'FUNCTIONn' and 'FUNCTION'
 
-     m=ApplyModifications('dv/dt=10+@current; {iNa,iK}',...
-                          {'pop1','equations','cat(ODE,+I)'});
-     m.populations.equations
-     m=ApplyModifications('dv/dt=10+@current; du/dt=-u; {iNa,iK}',...
-                          {'pop1','equations','cat(ODE2,+I)'});
-     m.populations.equations
-     m=ApplyModifications('dv/dt=I(t)+@current; I(t)=10; {iNa,iK}',...
-                          {'pop1','equations','cat(FUNCTION,+sin(2*pi*t))'});
-     m.populations.equations
+       m=ApplyModifications('dv/dt=10+@current; {iNa,iK}',...
+                            {'pop1','equations','cat(ODE,+I)'});
+       m.populations.equations
+       m=ApplyModifications('dv/dt=10+@current; du/dt=-u; {iNa,iK}',...
+                            {'pop1','equations','cat(ODE2,+I)'});
+       m.populations.equations
+       m=ApplyModifications('dv/dt=I(t)+@current; I(t)=10; {iNa,iK}',...
+                            {'pop1','equations','cat(FUNCTION,+sin(2*pi*t))'});
+       m.populations.equations
 
  See also: <a href="GenerateModel.html" class="code" title="function [model,name_map]=GenerateModel(specification,varargin)">GenerateModel</a>, <a href="SimulateModel.html" class="code" title="function [data,studyinfo]=SimulateModel(model,varargin)">SimulateModel</a>, <a href="Vary2Modifications.html" class="code" title="function modifications_set = Vary2Modifications(vary,model)">Vary2Modifications</a></pre></div>
 
@@ -97,10 +97,10 @@
 <h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
 This function calls:
 <ul style="list-style-image:url(../matlabicon.gif)">
-<li><a href="CheckSpecification.html" class="code" title="function spec=CheckSpecification(specification)">CheckSpecification</a>	CHECKSPECIFICATION - standardize specification structure and auto-populate missing fields</li><li><a href="GenerateModel.html" class="code" title="function [model,name_map]=GenerateModel(specification,varargin)">GenerateModel</a>	% [model,name_map]=GenerateModel(specification,'option',value,...)</li></ul>
+<li><a href="CheckSpecification.html" class="code" title="function spec=CheckSpecification(specification)">CheckSpecification</a>	CHECKSPECIFICATION - standardize specification structure and auto-populate missing fields</li><li><a href="GenerateModel.html" class="code" title="function [model,name_map]=GenerateModel(specification,varargin)">GenerateModel</a>	GENERATEMODEL - Parse DynaSim specification and organize model data in DynaSim model structure</li></ul>
 This function is called by:
 <ul style="list-style-image:url(../matlabicon.gif)">
-<li><a href="GenerateModel.html" class="code" title="function [model,name_map]=GenerateModel(specification,varargin)">GenerateModel</a>	% [model,name_map]=GenerateModel(specification,'option',value,...)</li><li><a href="ProbeCellProperties.html" class="code" title="function data = ProbeCellProperties(model,varargin)">ProbeCellProperties</a>	data = ProbeCellProperties(model,'option1',option1,...)</li><li><a href="ProbeFI.html" class="code" title="function data=ProbeFI(model,varargin)">ProbeFI</a>	% data=ProbeFI(model,varargin)</li><li><a href="SimulateModel.html" class="code" title="function [data,studyinfo]=SimulateModel(model,varargin)">SimulateModel</a>	% data=SimulateModel(model,'option',value,...)</li></ul>
+<li><a href="GenerateModel.html" class="code" title="function [model,name_map]=GenerateModel(specification,varargin)">GenerateModel</a>	GENERATEMODEL - Parse DynaSim specification and organize model data in DynaSim model structure</li><li><a href="ProbeCellProperties.html" class="code" title="function data = ProbeCellProperties(model,varargin)">ProbeCellProperties</a>	data = ProbeCellProperties(model,'option1',option1,...)</li><li><a href="ProbeFI.html" class="code" title="function data=ProbeFI(model,varargin)">ProbeFI</a>	% data=ProbeFI(model,varargin)</li><li><a href="SimulateModel.html" class="code" title="function [data,studyinfo]=SimulateModel(model,varargin)">SimulateModel</a>	SIMULATEMODEL -  manage simulation of a DynaSim model.</li></ul>
 <!-- crossreference -->
 
 <h2><a name="_subfunctions"></a>SUBFUNCTIONS <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
@@ -131,48 +131,48 @@ This function is called by:
 0021 <span class="comment">%   - TODO</span>
 0022 <span class="comment">%</span>
 0023 <span class="comment">% Examples:</span>
-0024 <span class="comment">% - modifying population size and parameters:</span>
-0025 <span class="comment">%     modifications={'E','size',5; 'E','gNa',120};</span>
-0026 <span class="comment">%     model=ApplyModifications(model,modifications);</span>
+0024 <span class="comment">%   - modifying population size and parameters:</span>
+0025 <span class="comment">%       modifications={'E','size',5; 'E','gNa',120};</span>
+0026 <span class="comment">%       model=ApplyModifications(model,modifications);</span>
 0027 <span class="comment">%</span>
-0028 <span class="comment">% - modifying mechanism_list:</span>
-0029 <span class="comment">%     m=ApplyModifications('dv/dt=10+@current; {iNa,iK}',...</span>
-0030 <span class="comment">%                          {'pop1','mechanism_list','-iNa'});</span>
-0031 <span class="comment">%     m.populations.mechanism_list</span>
-0032 <span class="comment">%     m=ApplyModifications('dv/dt=10+@current; {iNa,iK}',...</span>
-0033 <span class="comment">%                          {'pop1','mechanism_list','+iCa'});</span>
-0034 <span class="comment">%     m.populations.mechanism_list</span>
-0035 <span class="comment">%     m=ApplyModifications('dv/dt=10+@current; {iNa,iK}',...</span>
-0036 <span class="comment">%                          {'pop1','mechanism_list','+(iCa,iCan,CaBuffer)'});</span>
-0037 <span class="comment">%     m.populations.mechanism_list</span>
+0028 <span class="comment">%   - modifying mechanism_list:</span>
+0029 <span class="comment">%       m=ApplyModifications('dv/dt=10+@current; {iNa,iK}',...</span>
+0030 <span class="comment">%                            {'pop1','mechanism_list','-iNa'});</span>
+0031 <span class="comment">%       m.populations.mechanism_list</span>
+0032 <span class="comment">%       m=ApplyModifications('dv/dt=10+@current; {iNa,iK}',...</span>
+0033 <span class="comment">%                            {'pop1','mechanism_list','+iCa'});</span>
+0034 <span class="comment">%       m.populations.mechanism_list</span>
+0035 <span class="comment">%       m=ApplyModifications('dv/dt=10+@current; {iNa,iK}',...</span>
+0036 <span class="comment">%                            {'pop1','mechanism_list','+(iCa,iCan,CaBuffer)'});</span>
+0037 <span class="comment">%       m.populations.mechanism_list</span>
 0038 <span class="comment">%</span>
-0039 <span class="comment">% - modifying equations (using special &quot;cat()&quot; operator or direct substitution)</span>
-0040 <span class="comment">%     m=ApplyModifications('dv/dt=10+@current; {iNa,iK}',...</span>
-0041 <span class="comment">%                          {'pop1','equations','cat(dv/dt,+I)'});</span>
-0042 <span class="comment">%     m.populations.equations</span>
-0043 <span class="comment">%     m=ApplyModifications('dv/dt=I(t)+@current; I(t)=10; {iNa,iK}',...</span>
-0044 <span class="comment">%                          {'pop1','equations','cat(I(t),+sin(2*pi*t))'});</span>
-0045 <span class="comment">%     m.populations.equations</span>
-0046 <span class="comment">%     m=ApplyModifications('dv/dt=I(t)+@current; I(t)=10; {iNa,iK}',...</span>
-0047 <span class="comment">%                          {'pop1','equations','dv/dt=10+@current'});</span>
-0048 <span class="comment">%     m.populations.equations</span>
-0049 <span class="comment">%     m.populations.mechanism_list</span>
+0039 <span class="comment">%   - modifying equations (using special &quot;cat()&quot; operator or direct substitution)</span>
+0040 <span class="comment">%       m=ApplyModifications('dv/dt=10+@current; {iNa,iK}',...</span>
+0041 <span class="comment">%                            {'pop1','equations','cat(dv/dt,+I)'});</span>
+0042 <span class="comment">%       m.populations.equations</span>
+0043 <span class="comment">%       m=ApplyModifications('dv/dt=I(t)+@current; I(t)=10; {iNa,iK}',...</span>
+0044 <span class="comment">%                            {'pop1','equations','cat(I(t),+sin(2*pi*t))'});</span>
+0045 <span class="comment">%       m.populations.equations</span>
+0046 <span class="comment">%       m=ApplyModifications('dv/dt=I(t)+@current; I(t)=10; {iNa,iK}',...</span>
+0047 <span class="comment">%                            {'pop1','equations','dv/dt=10+@current'});</span>
+0048 <span class="comment">%       m.populations.equations</span>
+0049 <span class="comment">%       m.populations.mechanism_list</span>
 0050 <span class="comment">%</span>
-0051 <span class="comment">% - modifying equations with reserved keywords &quot;ODEn&quot; and &quot;FUNCTIONn&quot;</span>
-0052 <span class="comment">%   - Note:</span>
-0053 <span class="comment">%     'ODEn' = reserved keyword referencing the n-th ODE in equations</span>
-0054 <span class="comment">%     'ODE' = aliases ODE1</span>
-0055 <span class="comment">%     similarly: 'FUNCTIONn' and 'FUNCTION'</span>
+0051 <span class="comment">%   - modifying equations with reserved keywords &quot;ODEn&quot; and &quot;FUNCTIONn&quot;</span>
+0052 <span class="comment">%     - Note:</span>
+0053 <span class="comment">%       'ODEn' = reserved keyword referencing the n-th ODE in equations</span>
+0054 <span class="comment">%       'ODE' = aliases ODE1</span>
+0055 <span class="comment">%       similarly: 'FUNCTIONn' and 'FUNCTION'</span>
 0056 <span class="comment">%</span>
-0057 <span class="comment">%     m=ApplyModifications('dv/dt=10+@current; {iNa,iK}',...</span>
-0058 <span class="comment">%                          {'pop1','equations','cat(ODE,+I)'});</span>
-0059 <span class="comment">%     m.populations.equations</span>
-0060 <span class="comment">%     m=ApplyModifications('dv/dt=10+@current; du/dt=-u; {iNa,iK}',...</span>
-0061 <span class="comment">%                          {'pop1','equations','cat(ODE2,+I)'});</span>
-0062 <span class="comment">%     m.populations.equations</span>
-0063 <span class="comment">%     m=ApplyModifications('dv/dt=I(t)+@current; I(t)=10; {iNa,iK}',...</span>
-0064 <span class="comment">%                          {'pop1','equations','cat(FUNCTION,+sin(2*pi*t))'});</span>
-0065 <span class="comment">%     m.populations.equations</span>
+0057 <span class="comment">%       m=ApplyModifications('dv/dt=10+@current; {iNa,iK}',...</span>
+0058 <span class="comment">%                            {'pop1','equations','cat(ODE,+I)'});</span>
+0059 <span class="comment">%       m.populations.equations</span>
+0060 <span class="comment">%       m=ApplyModifications('dv/dt=10+@current; du/dt=-u; {iNa,iK}',...</span>
+0061 <span class="comment">%                            {'pop1','equations','cat(ODE2,+I)'});</span>
+0062 <span class="comment">%       m.populations.equations</span>
+0063 <span class="comment">%       m=ApplyModifications('dv/dt=I(t)+@current; I(t)=10; {iNa,iK}',...</span>
+0064 <span class="comment">%                            {'pop1','equations','cat(FUNCTION,+sin(2*pi*t))'});</span>
+0065 <span class="comment">%       m.populations.equations</span>
 0066 <span class="comment">%</span>
 0067 <span class="comment">% See also: GenerateModel, SimulateModel, Vary2Modifications</span>
 0068 
@@ -444,6 +444,6 @@ This function is called by:
 0334     modifications{inds(i),1}=strrep(modifications{inds(i),1},<span class="string">'-'</span>,<span class="string">'-&gt;'</span>);
 0335   <span class="keyword">end</span>
 0336 <span class="keyword">end</span></pre></div>
-<hr><address>Generated on Fri 24-Feb-2017 14:46:35 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" target="_parent">m2html</a></strong> &copy; 2005</address>
+<hr><address>Generated on Mon 27-Feb-2017 14:58:50 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" target="_parent">m2html</a></strong> &copy; 2005</address>
 </body>
 </html>

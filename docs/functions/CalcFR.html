@@ -28,6 +28,25 @@
 <h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
 <div class="fragment"><pre class="comment">CALCFR - Calculate firing rage for DynaSim data
 
+ Usage:
+   data = CalcFR(data,'option',value)
+
+ Inputs:
+   - data: DynaSim data structure (see CheckData)
+   - options:
+     'variable'         : name of field containing data on which to calculate
+                          firing rates (default: *_spikes or first variable in data.labels)
+     'threshold'        : scalar threshold value for detecting events (default: 0)
+     'bin_size'         : size of temporal window over which to calculate rate
+                          [ms or fraction of data set] (default: 5% of the data set)
+     'bin_shift'        : how much to shift the bin before calculating rate
+                          again [ms or fraction of data set] (default: 1% of the data set)
+     'exclude_data_flag': whether to remove simulated data from result
+                          structure (default: 0)
+
+ Outputs:
+   - data: data structure with firing rates [Hz] in .variable_FR
+
  Notes:
  - &quot;variable&quot; can be specified as the name of a variable listed in
      data.labels, a cell array of string listing variable names, or as a regular
@@ -37,25 +56,6 @@
    - e.g., `data=SimulateModel('dv/dt=@current+10; {iNa,iK}; monitor v.spikes');`
      returns spikes in data.pop1_v_spikes (where 'pop1' is the default
      population name if not specified by the user).
-
- Usage:
-   data = CalcFR(data,'option',value)
-
- Inputs:
-   - data: DynaSim data structure (see CheckData)
-   - options:
-     - 'variable (default: *_spikes or first variable in data.labels)': name of
-         field containing data on which to calculate firing rates
-     - 'threshold' (default: 0): scalar threshold value for detecting events
-     - 'bin_size' (default: 5% of the data set): size of temporal window over
-         which to calculate rate [ms or fraction of data set]
-     - 'bin_shift' (default: 1% of the data set): how much to shift the bin
-         before calculating rate again [ms or fraction of data set]
-     - 'exclude_data_flag' (default: 0): whether to remove simulated data from
-         result structure
-
- Outputs:
-   data: data structure with firing rates [Hz] in .variable_FR
 
  Examples:
    s.populations(1).name='E';
@@ -72,10 +72,10 @@
 <h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
 This function calls:
 <ul style="list-style-image:url(../matlabicon.gif)">
-<li><a href="AnalyzeStudy.html" class="code" title="function [results,studyinfo]=AnalyzeStudy(data,func,varargin)">AnalyzeStudy</a>	ANALYZESTUDY - Apply an analysis function to DynaSim data, optionally saving data</li><li><a href="CalcFR.html" class="code" title="function data = CalcFR(data,varargin)">CalcFR</a>	CALCFR - Calculate firing rage for DynaSim data</li><li><a href="CheckData.html" class="code" title="function data=CheckData(data)">CheckData</a>	CHECKDATA - Standardize data structure and auto-populate missing fields</li><li><a href="CheckOptions.html" class="code" title="function parms = CheckOptions(options, options_schema, strict)">CheckOptions</a>	CHECKOPTIONS - organize key/value pairs in structure with default or user-supplied values according to a schema</li><li><a href="SelectVariables.html" class="code" title="function [variables,pop_names]=SelectVariables(labels,var_strings)">SelectVariables</a>	variables=SelectVariables(labels,var_strings)</li></ul>
+<li><a href="AnalyzeStudy.html" class="code" title="function [results,studyinfo]=AnalyzeStudy(data,func,varargin)">AnalyzeStudy</a>	ANALYZESTUDY - Apply an analysis function to DynaSim data, optionally saving data</li><li><a href="CalcFR.html" class="code" title="function data = CalcFR(data,varargin)">CalcFR</a>	CALCFR - Calculate firing rage for DynaSim data</li><li><a href="CheckData.html" class="code" title="function data=CheckData(data)">CheckData</a>	CHECKDATA - Standardize data structure and auto-populate missing fields</li><li><a href="CheckOptions.html" class="code" title="function parms = CheckOptions(options, options_schema, strict)">CheckOptions</a>	CHECKOPTIONS - organize key/value pairs in structure with default or user-supplied values according to a schema</li><li><a href="SelectVariables.html" class="code" title="function [variables,pop_names]=SelectVariables(labels,var_strings)">SelectVariables</a>	SELECTVARIABLES - determine what variables to plot</li></ul>
 This function is called by:
 <ul style="list-style-image:url(../matlabicon.gif)">
-<li><a href="CalcFR.html" class="code" title="function data = CalcFR(data,varargin)">CalcFR</a>	CALCFR - Calculate firing rage for DynaSim data</li><li><a href="PlotData.html" class="code" title="function handles=PlotData(data,varargin)">PlotData</a>	% handles=PlotData(data,'option',value)</li><li><a href="PlotFR.html" class="code" title="function handles=PlotFR(data,varargin)">PlotFR</a>	% plotFR(data,'option',value)</li><li><a href="PlotFR2.html" class="code" title="function handles=PlotFR2(data,varargin)">PlotFR2</a>	% plotFR(data,'option',value)</li><li><a href="ProbeFI.html" class="code" title="function data=ProbeFI(model,varargin)">ProbeFI</a>	% data=ProbeFI(model,varargin)</li><li><a href="../functions_xPlt/PlotData2.html" class="code" title="function handles=PlotData2(data,varargin)">PlotData2</a>	% handles=PlotData(data,'option',value)</li></ul>
+<li><a href="CalcFR.html" class="code" title="function data = CalcFR(data,varargin)">CalcFR</a>	CALCFR - Calculate firing rage for DynaSim data</li><li><a href="PlotData.html" class="code" title="function handles = PlotData(data,varargin)">PlotData</a>	PLOTDATA - plot data in various ways depending on what data was provided and what options are defined.</li><li><a href="PlotFR.html" class="code" title="function handles=PlotFR(data,varargin)">PlotFR</a>	PLOTFR - plot spike rates in various ways depending on what data was provided.</li><li><a href="PlotFR2.html" class="code" title="function handles=PlotFR2(data,varargin)">PlotFR2</a>	PLOTFR2 - plot spike rates in various ways depending on what data was provided.</li><li><a href="ProbeFI.html" class="code" title="function data=ProbeFI(model,varargin)">ProbeFI</a>	% data=ProbeFI(model,varargin)</li><li><a href="../functions_xPlt/PlotData2.html" class="code" title="function handles=PlotData2(data,varargin)">PlotData2</a>	% handles=PlotData(data,'option',value)</li></ul>
 <!-- crossreference -->
 
 
@@ -84,34 +84,34 @@ This function is called by:
 <div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function data = CalcFR(data,varargin)</a>
 0002 <span class="comment">%CALCFR - Calculate firing rage for DynaSim data</span>
 0003 <span class="comment">%</span>
-0004 <span class="comment">% Notes:</span>
-0005 <span class="comment">% - &quot;variable&quot; can be specified as the name of a variable listed in</span>
-0006 <span class="comment">%     data.labels, a cell array of string listing variable names, or as a regular</span>
-0007 <span class="comment">%     expression pattern for identifying variables to process. See SelectVariables</span>
-0008 <span class="comment">%     for more info on supported specifications.</span>
-0009 <span class="comment">% - DynaSim spike monitor returns spike data in variables *_spikes.</span>
-0010 <span class="comment">%   - e.g., `data=SimulateModel('dv/dt=@current+10; {iNa,iK}; monitor v.spikes');`</span>
-0011 <span class="comment">%     returns spikes in data.pop1_v_spikes (where 'pop1' is the default</span>
-0012 <span class="comment">%     population name if not specified by the user).</span>
-0013 <span class="comment">%</span>
-0014 <span class="comment">% Usage:</span>
-0015 <span class="comment">%   data = CalcFR(data,'option',value)</span>
-0016 <span class="comment">%</span>
-0017 <span class="comment">% Inputs:</span>
-0018 <span class="comment">%   - data: DynaSim data structure (see CheckData)</span>
-0019 <span class="comment">%   - options:</span>
-0020 <span class="comment">%     - 'variable (default: *_spikes or first variable in data.labels)': name of</span>
-0021 <span class="comment">%         field containing data on which to calculate firing rates</span>
-0022 <span class="comment">%     - 'threshold' (default: 0): scalar threshold value for detecting events</span>
-0023 <span class="comment">%     - 'bin_size' (default: 5% of the data set): size of temporal window over</span>
-0024 <span class="comment">%         which to calculate rate [ms or fraction of data set]</span>
-0025 <span class="comment">%     - 'bin_shift' (default: 1% of the data set): how much to shift the bin</span>
-0026 <span class="comment">%         before calculating rate again [ms or fraction of data set]</span>
-0027 <span class="comment">%     - 'exclude_data_flag' (default: 0): whether to remove simulated data from</span>
-0028 <span class="comment">%         result structure</span>
-0029 <span class="comment">%</span>
-0030 <span class="comment">% Outputs:</span>
-0031 <span class="comment">%   data: data structure with firing rates [Hz] in .variable_FR</span>
+0004 <span class="comment">% Usage:</span>
+0005 <span class="comment">%   data = CalcFR(data,'option',value)</span>
+0006 <span class="comment">%</span>
+0007 <span class="comment">% Inputs:</span>
+0008 <span class="comment">%   - data: DynaSim data structure (see CheckData)</span>
+0009 <span class="comment">%   - options:</span>
+0010 <span class="comment">%     'variable'         : name of field containing data on which to calculate</span>
+0011 <span class="comment">%                          firing rates (default: *_spikes or first variable in data.labels)</span>
+0012 <span class="comment">%     'threshold'        : scalar threshold value for detecting events (default: 0)</span>
+0013 <span class="comment">%     'bin_size'         : size of temporal window over which to calculate rate</span>
+0014 <span class="comment">%                          [ms or fraction of data set] (default: 5% of the data set)</span>
+0015 <span class="comment">%     'bin_shift'        : how much to shift the bin before calculating rate</span>
+0016 <span class="comment">%                          again [ms or fraction of data set] (default: 1% of the data set)</span>
+0017 <span class="comment">%     'exclude_data_flag': whether to remove simulated data from result</span>
+0018 <span class="comment">%                          structure (default: 0)</span>
+0019 <span class="comment">%</span>
+0020 <span class="comment">% Outputs:</span>
+0021 <span class="comment">%   - data: data structure with firing rates [Hz] in .variable_FR</span>
+0022 <span class="comment">%</span>
+0023 <span class="comment">% Notes:</span>
+0024 <span class="comment">% - &quot;variable&quot; can be specified as the name of a variable listed in</span>
+0025 <span class="comment">%     data.labels, a cell array of string listing variable names, or as a regular</span>
+0026 <span class="comment">%     expression pattern for identifying variables to process. See SelectVariables</span>
+0027 <span class="comment">%     for more info on supported specifications.</span>
+0028 <span class="comment">% - DynaSim spike monitor returns spike data in variables *_spikes.</span>
+0029 <span class="comment">%   - e.g., `data=SimulateModel('dv/dt=@current+10; {iNa,iK}; monitor v.spikes');`</span>
+0030 <span class="comment">%     returns spikes in data.pop1_v_spikes (where 'pop1' is the default</span>
+0031 <span class="comment">%     population name if not specified by the user).</span>
 0032 <span class="comment">%</span>
 0033 <span class="comment">% Examples:</span>
 0034 <span class="comment">%   s.populations(1).name='E';</span>
@@ -126,129 +126,143 @@ This function is called by:
 0043 
 0044 <span class="comment">%% 1.0 Check inputs</span>
 0045 options=<a href="CheckOptions.html" class="code" title="function parms = CheckOptions(options, options_schema, strict)">CheckOptions</a>(varargin,{<span class="keyword">...</span>
-0046   <span class="string">'variable'</span>,[],[],<span class="keyword">...</span><span class="comment">        </span>
-0047   <span class="string">'threshold'</span>,1e-5,[],<span class="keyword">...</span><span class="comment"> % slightly above zero in case variable is point process *_spikes {0,1}</span>
-0048   <span class="string">'bin_size'</span>,.05,[],<span class="keyword">...</span><span class="comment">  % 30</span>
-0049   <span class="string">'bin_shift'</span>,.01,[],<span class="keyword">...</span><span class="comment"> % 10</span>
-0050   <span class="string">'exclude_data_flag'</span>,0,{0,1},<span class="keyword">...</span>
-0051   },false);
-0052 
-0053 data = <a href="CheckData.html" class="code" title="function data=CheckData(data)">CheckData</a>(data);
-0054 <span class="comment">% note: calling CheckData() at beginning enables analysis function to</span>
-0055 <span class="comment">% accept data matrix [time x cells] in addition to DynaSim data structure.</span>
-0056 
-0057 <span class="keyword">if</span> numel(data)&gt;1
-0058   <span class="comment">% use AnalyzeStudy to recursively call CalcFR on each data set</span>
-0059   data=<a href="AnalyzeStudy.html" class="code" title="function [results,studyinfo]=AnalyzeStudy(data,func,varargin)">AnalyzeStudy</a>(data,@<a href="CalcFR.html" class="code" title="function data = CalcFR(data,varargin)">CalcFR</a>,varargin{:});
-0060   <span class="keyword">return</span>;
-0061 <span class="keyword">end</span>
-0062 
-0063 <span class="comment">% time info</span>
-0064 time = data.time;
-0065 dt = time(2)-time(1);
-0066 ntime=length(time);
-0067 
-0068 <span class="comment">% set defaults</span>
-0069 <span class="comment">% default variable to process</span>
-0070 <span class="keyword">if</span> isempty(options.variable)
-0071   <span class="keyword">if</span> any(~cellfun(@isempty,regexp(data.labels,<span class="string">'_spikes$'</span>)))
-0072     <span class="comment">% use results from DynaSim spike monitor</span>
-0073     options.variable=data.labels(~cellfun(@isempty,regexp(data.labels,<span class="string">'_spikes$'</span>)));
-0074     <span class="keyword">if</span> length(options.variable)==1 <span class="comment">% store in string</span>
-0075       options.variable=options.variable{1};
-0076     <span class="keyword">end</span>
-0077   <span class="keyword">else</span>
-0078     <span class="comment">% use first state variable in model</span>
-0079     <span class="comment">%options.variable=data.labels{1};</span>
-0080   <span class="keyword">end</span>
-0081 <span class="keyword">end</span>
-0082 <span class="comment">% check bin_size</span>
-0083 <span class="keyword">if</span> options.bin_size&gt;1
-0084   <span class="comment">% convert from ms to time points</span>
-0085   options.bin_size=ceil(options.bin_size/dt);
-0086 <span class="keyword">else</span>
-0087   <span class="comment">% convert from fraction to time points</span>
-0088   options.bin_size=ceil(options.bin_size*ntime);
-0089 <span class="keyword">end</span>
-0090 <span class="comment">% constrain bin_size to entire data set</span>
-0091 <span class="keyword">if</span> options.bin_size&gt;ntime
-0092   options.bin_size=ntime;
-0093 <span class="keyword">end</span>
-0094 <span class="comment">% check bin_shift</span>
-0095 <span class="keyword">if</span> options.bin_shift&gt;1
-0096   <span class="comment">% convert from ms to time points</span>
-0097   options.bin_shift=ceil(options.bin_shift/dt);
-0098 <span class="keyword">else</span>
-0099   <span class="comment">% convert from fraction to time points</span>
-0100   options.bin_shift=ceil(options.bin_shift*ntime);
-0101 <span class="keyword">end</span>
-0102 
-0103 <span class="comment">%% 2.0 set list of variables to process as cell array of strings</span>
-0104 options.variable=<a href="SelectVariables.html" class="code" title="function [variables,pop_names]=SelectVariables(labels,var_strings)">SelectVariables</a>(data(1).labels,options.variable);
-0105 
-0106 <span class="comment">%% 3.0 calculate firing rates for each variable</span>
-0107 <span class="keyword">if</span> ~isfield(data,<span class="string">'results'</span>)
-0108   data.results={};
-0109 <span class="keyword">end</span>
-0110 <span class="comment">% 3.1 calc bin info</span>
-0111 <span class="comment">% samples at which bins begin</span>
-0112 bin_index_begs=1:options.bin_shift:ntime;
-0113 <span class="comment">% samples at which bins end</span>
-0114 bin_index_ends=bin_index_begs+options.bin_size;
-0115 <span class="comment">% remove final bin if extends beyond data</span>
-0116 <span class="keyword">if</span> bin_index_ends(end)&gt;ntime
-0117   bin_index_begs=bin_index_begs(bin_index_ends&lt;=ntime);
-0118   bin_index_ends=bin_index_ends(bin_index_ends&lt;=ntime);
-0119 <span class="keyword">end</span>
-0120 <span class="comment">% times at which bins begin</span>
-0121 bin_times=time(bin_index_begs);
-0122 <span class="comment">% number of bins</span>
-0123 nbins=length(bin_index_begs);
-0124 <span class="comment">% time width of a single bin in seconds</span>
-0125 bin_width=(dt/1000)*options.bin_size;
-0126 <span class="comment">% 3.2 loop over variables to process</span>
-0127 <span class="keyword">for</span> v=1:length(options.variable)
-0128   <span class="comment">% extract this data set</span>
-0129   var=options.variable{v};
-0130   dat=data.(var);
-0131   <span class="comment">% determine how many cells are in this data set</span>
-0132   ncells=size(dat,2);
-0133   <span class="comment">% loop over cells</span>
-0134   FR=zeros(nbins,ncells);
-0135   spike_times=cell(1,ncells);
-0136   <span class="keyword">for</span> i=1:ncells
-0137     <span class="comment">% get spikes in this cell</span>
-0138     spike_inds=1+find((dat(2:<span class="keyword">end</span>,i)&gt;=options.threshold &amp; dat(1:end-1,i)&lt;options.threshold));
-0139     spikes=zeros(ntime,1);
-0140     spike_times{i}=time(spike_inds);
-0141     <span class="keyword">if</span> any(spike_inds)
-0142       spikes(spike_inds)=1;
-0143       <span class="comment">% calculate firing rates</span>
-0144       <span class="keyword">for</span> bin=1:nbins
-0145         <span class="comment">% (# spikes in bin) / (duration of bin in seconds)</span>
-0146         FR(bin,i)=sum(spikes(bin_index_begs(bin):bin_index_ends(bin)))/bin_width;
-0147       <span class="keyword">end</span>
-0148     <span class="keyword">end</span>
-0149   <span class="keyword">end</span>
-0150   <span class="comment">% add firing rates to data structure</span>
-0151   data.([var <span class="string">'_FR'</span>])=FR;
-0152   data.([var <span class="string">'_spike_times'</span>])=spike_times;
-0153   <span class="keyword">if</span> ~ismember([var <span class="string">'_FR'</span>],data.results)  
-0154     data.results{end+1}=[var <span class="string">'_FR'</span>];
-0155     data.results{end+1}=[var <span class="string">'_spike_times'</span>];
-0156   <span class="keyword">end</span>
-0157 <span class="keyword">end</span>
-0158 <span class="comment">% add bin times to data</span>
-0159 data.time_FR=bin_times;
-0160 <span class="keyword">if</span> ~ismember(<span class="string">'time_FR'</span>,data.results)
-0161   data.results{end+1}=<span class="string">'time_FR'</span>;
-0162 <span class="keyword">end</span>
-0163 <span class="keyword">if</span> options.exclude_data_flag
-0164   <span class="keyword">for</span> l=1:length(data.labels)
-0165     data=rmfield(data,data.labels{l});
-0166   <span class="keyword">end</span>
-0167 <span class="keyword">end</span>
-0168</pre></div>
-<hr><address>Generated on Fri 24-Feb-2017 14:46:35 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" target="_parent">m2html</a></strong> &copy; 2005</address>
+0046   <span class="string">'variable'</span>,[],[],<span class="keyword">...</span>
+0047   <span class="string">'time_limits'</span>,[-inf inf],[],<span class="keyword">...</span>
+0048   <span class="string">'threshold'</span>,1e-5,[],<span class="keyword">...</span><span class="comment"> % slightly above zero in case variable is point process *_spikes {0,1}</span>
+0049   <span class="string">'bin_size'</span>,.05,[],<span class="keyword">...</span><span class="comment"> </span>
+0050   <span class="string">'bin_shift'</span>,.01,[],<span class="keyword">...</span>
+0051   <span class="string">'exclude_data_flag'</span>,0,{0,1},<span class="keyword">...</span>
+0052   <span class="string">'output_suffix'</span>,<span class="string">''</span>,[],<span class="keyword">...</span>
+0053   },false);
+0054 
+0055 data = <a href="CheckData.html" class="code" title="function data=CheckData(data)">CheckData</a>(data);
+0056 <span class="comment">% note: calling CheckData() at beginning enables analysis function to</span>
+0057 <span class="comment">% accept data matrix [time x cells] in addition to DynaSim data structure.</span>
+0058 
+0059 <span class="keyword">if</span> numel(data)&gt;1
+0060   <span class="comment">% use AnalyzeStudy to recursively call CalcFR on each data set</span>
+0061   data=<a href="AnalyzeStudy.html" class="code" title="function [results,studyinfo]=AnalyzeStudy(data,func,varargin)">AnalyzeStudy</a>(data,@<a href="CalcFR.html" class="code" title="function data = CalcFR(data,varargin)">CalcFR</a>,varargin{:});
+0062   <span class="keyword">return</span>;
+0063 <span class="keyword">end</span>
+0064 
+0065 <span class="comment">% time info</span>
+0066 time = data.time;
+0067 dt = time(2)-time(1);
+0068 t1=nearest(time,options.time_limits(1)); <span class="comment">% index to first sample</span>
+0069 t2=nearest(time,options.time_limits(2)); <span class="comment">% index to last sample</span>
+0070 ntime=t2-t1+1;
+0071 
+0072 <span class="comment">% set defaults</span>
+0073 <span class="comment">% default variable to process</span>
+0074 <span class="keyword">if</span> isempty(options.variable)
+0075   <span class="keyword">if</span> any(~cellfun(@isempty,regexp(data.labels,<span class="string">'_spikes$'</span>)))
+0076     <span class="comment">% use results from DynaSim spike monitor</span>
+0077     options.variable=data.labels(~cellfun(@isempty,regexp(data.labels,<span class="string">'_spikes$'</span>)));
+0078     <span class="keyword">if</span> length(options.variable)==1 <span class="comment">% store in string</span>
+0079       options.variable=options.variable{1};
+0080     <span class="keyword">end</span>
+0081   <span class="keyword">else</span>
+0082     <span class="comment">% use first state variable in model</span>
+0083     <span class="comment">%options.variable=data.labels{1};</span>
+0084   <span class="keyword">end</span>
+0085 <span class="keyword">end</span>
+0086 
+0087 <span class="comment">% check bin_size</span>
+0088 <span class="keyword">if</span> options.bin_size&gt;1
+0089   <span class="comment">% convert from ms to time points</span>
+0090   options.bin_size=ceil(options.bin_size/dt);
+0091 <span class="keyword">else</span>
+0092   <span class="comment">% convert from fraction to time points</span>
+0093   options.bin_size=ceil(options.bin_size*ntime);
+0094 <span class="keyword">end</span>
+0095 
+0096 <span class="comment">% constrain bin_size to entire data set</span>
+0097 <span class="keyword">if</span> options.bin_size&gt;ntime
+0098   options.bin_size=ntime;
+0099 <span class="keyword">end</span>
+0100 
+0101 <span class="comment">% check bin_shift</span>
+0102 <span class="keyword">if</span> options.bin_shift&gt;1
+0103   <span class="comment">% convert from ms to time points</span>
+0104   options.bin_shift=ceil(options.bin_shift/dt);
+0105 <span class="keyword">else</span>
+0106   <span class="comment">% convert from fraction to time points</span>
+0107   options.bin_shift=ceil(options.bin_shift*ntime);
+0108 <span class="keyword">end</span>
+0109 
+0110 <span class="comment">%% 2.0 set list of variables to process as cell array of strings</span>
+0111 options.variable=<a href="SelectVariables.html" class="code" title="function [variables,pop_names]=SelectVariables(labels,var_strings)">SelectVariables</a>(data(1).labels,options.variable);
+0112 
+0113 <span class="comment">%% 3.0 calculate firing rates for each variable</span>
+0114 <span class="keyword">if</span> ~isfield(data,<span class="string">'results'</span>)
+0115   data.results={};
+0116 <span class="keyword">end</span>
+0117 
+0118 <span class="comment">% 3.1 calc bin info</span>
+0119 <span class="comment">% samples at which bins begin</span>
+0120 bin_index_begs=t1:options.bin_shift:t2;
+0121 <span class="comment">% samples at which bins end</span>
+0122 bin_index_ends=bin_index_begs+options.bin_size;
+0123 
+0124 <span class="keyword">if</span> bin_index_ends(end)&gt;t2
+0125   <span class="keyword">if</span> length(bin_index_ends) &gt; 1 <span class="comment">%multiple bins</span>
+0126     <span class="comment">% remove final bin if extends beyond data</span>
+0127     bin_index_begs=bin_index_begs(bin_index_ends&lt;=t2);
+0128     bin_index_ends=bin_index_ends(bin_index_ends&lt;=t2);
+0129   <span class="keyword">else</span> <span class="comment">%1 bin</span>
+0130     bin_index_ends = t2;
+0131   <span class="keyword">end</span>
+0132 <span class="keyword">end</span>
+0133 
+0134 <span class="comment">% times at which bins begin</span>
+0135 bin_times=time(bin_index_begs);
+0136 <span class="comment">% number of bins</span>
+0137 nbins=length(bin_index_begs);
+0138 <span class="comment">% time width of a single bin in seconds</span>
+0139 bin_width=(dt/1000)*options.bin_size;
+0140 
+0141 <span class="comment">% 3.2 loop over variables to process</span>
+0142 <span class="keyword">for</span> v=1:length(options.variable)
+0143   <span class="comment">% extract this data set</span>
+0144   var=options.variable{v};
+0145   dat=data.(var);
+0146   <span class="comment">% determine how many cells are in this data set</span>
+0147   ncells=size(dat,2);
+0148   <span class="comment">% loop over cells</span>
+0149   FR=zeros(nbins,ncells);
+0150   spike_times=cell(1,ncells);
+0151   <span class="keyword">for</span> i=1:ncells
+0152     <span class="comment">% get spikes in this cell</span>
+0153     spike_inds=1+find((dat(2:<span class="keyword">end</span>,i)&gt;=options.threshold &amp; dat(1:end-1,i)&lt;options.threshold));
+0154     spikes=zeros(ntime,1);
+0155     spike_times{i}=time(spike_inds);
+0156     <span class="keyword">if</span> any(spike_inds)
+0157       spikes(spike_inds)=1;
+0158       <span class="comment">% calculate firing rates</span>
+0159       <span class="keyword">for</span> bin=1:nbins
+0160         <span class="comment">% (# spikes in bin) / (duration of bin in seconds)</span>
+0161         FR(bin,i)=sum(spikes(bin_index_begs(bin):bin_index_ends(bin)))/bin_width;
+0162       <span class="keyword">end</span>
+0163     <span class="keyword">end</span>
+0164   <span class="keyword">end</span>
+0165   <span class="comment">% add firing rates to data structure</span>
+0166   data.([var <span class="string">'_FR'</span> options.output_suffix])=FR;
+0167   data.([var <span class="string">'_spike_times'</span> options.output_suffix])=spike_times;
+0168   <span class="keyword">if</span> ~ismember([var <span class="string">'_FR'</span>],data.results)  
+0169     data.results{end+1}=[var <span class="string">'_FR'</span> options.output_suffix];
+0170     data.results{end+1}=[var <span class="string">'_spike_times'</span> options.output_suffix];
+0171   <span class="keyword">end</span>
+0172 <span class="keyword">end</span>
+0173 <span class="comment">% add bin times to data</span>
+0174 data.([<span class="string">'time_FR'</span> options.output_suffix])=bin_times;
+0175 <span class="keyword">if</span> ~ismember([<span class="string">'time_FR'</span> options.output_suffix],data.results)
+0176   data.results{end+1}=[<span class="string">'time_FR'</span> options.output_suffix];
+0177 <span class="keyword">end</span>
+0178 <span class="keyword">if</span> options.exclude_data_flag
+0179   <span class="keyword">for</span> l=1:length(data.labels)
+0180     data=rmfield(data,data.labels{l});
+0181   <span class="keyword">end</span>
+0182 <span class="keyword">end</span></pre></div>
+<hr><address>Generated on Mon 27-Feb-2017 14:58:50 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" target="_parent">m2html</a></strong> &copy; 2005</address>
 </body>
 </html>

@@ -1,102 +1,108 @@
 function modifications_set = Vary2Modifications(vary,model)
-%% modifications_set=Vary2Modifications(vary)
-% Purpose: convert specification of things to vary into a set of
-% modifications indicating how to vary the desired things. the returned set
-% of modifications has one element per point in search space; each element
-% can be passed along with DynaSim model or specification to
-% ApplyModifications to produce the modified object.
-% Inputs:
-%   vary: {object, variable, values; ...}
-% Outputs:
-%   modifications_set: 
-%     {{object,variable,value1;...},{object,variable,value2;...},...}
-% 
-% example:
-% vary={'pop1','gNa',[100 120]};
-% mod_set=Vary2Modifications(vary); % {{'pop1','gNa',100},{'pop1','gNa',120}}
-% for i=1:length(mod_set)
-%   data(i)=SimulateModel('dv/dt=@current+10; {iNa,iK}','modifications',mod_set{i});
-%   figure; plot(data(i).time,data(i).(data(i).labels{1}))
-% end
-% note: the same data set can be obtained directly from SimulateModel by:
-% data=SimulateModel('dv/dt=@current+10; {iNa,iK}','vary',vary);
-% 
-% vary={'E','gNa',[100 120]};
-% vary={'E','gNa',[100 120];'E->I','gSYN',[0 1]};
-% vary={'E','mechanism_list','+[iNa,iK]'};
-% vary={'E','mechanism_list','-{iNa,iK}'};
-% vary={'(E,I)','gNa',[100 120]};
-% vary={'(E,I)','(EK1,EK2)',[-80 -60]};
-% vary={'(E,I)','(EK1,EK2)',[-80 -60; -85 -65]};
-% vary={'(E,I)','(EK1,EK2)',vary_values}, 
-%       with vary_values(:, :, 1) = [-80 -60]; vary_values(:, :, 2) = [-85 -65];
-% vary={'(E,I)','(EK1,EK2)',vary_values},
-%       with vary_values(:, :, 1) = [-75 -55; -80 -60]; vary_values(:, :, 2) = [-85 -65; -90 -70];
+%VARY2MODIFICATIONS - convert specification of things to vary into a set of modifications indicating how to vary the desired things.
 %
-% vary={'(E,I)','(EK1,EK2)',[-80 -60]};
-%       This sets modifications:
-%           * E_EK1, E_EK2, I_EK1, I_EK2 = -80
-%           * E_EK1, E_EK2, I_EK1, I_EK2 = -60
-% vary={'(E,I)','(EK1,EK2)',[-80 -60; -85 -65]};
-%       This sets modifications:
-%           * E_EK1, I_EK1 = -80 and E_EK2, I_EK2 = -85
-%           * E_EK1, I_EK1 = -60 and E_EK2, I_EK2 = -65
-% vary={'(E,I)','(EK1,EK2)',vary_values}, with vary_values(:, :, 1) = [-80 -60]; vary_values(:, :, 2) = [-85 -65];
-%       This sets modifications:
-%           * E_EK1, E_EK2 = -80 and I_EK1, I_EK2 = -85
-%           * E_EK1, E_EK2 = -60 and I_EK1, I_EK2 = -65
-% vary={'(E,I)','(EK1,EK2)',vary_values}, with vary_values(:, :, 1) = [-75 -55; -80 -60]; vary_values(:, :, 2) = [-85 -65; -90 -70];
-%       This sets modifications:
-%           * E_EK1 = -75, E_EK2 = -80, I_EK1 = -85, I_EK2 = -90.
-%           * E_EK1 = -55, E_EK2 = -60, I_EK1 = -65, I_EK2 = -70.
-% 
-% NOTES:
-% valid groupings:
-% for namespace, variable: (), []
-% for values: [],{}
-% 
-% groupings:
-% [] - iterate over set; numerical row vectors allow iteration over a
-%      single set of values; 2-D arrays allow iteration over different sets
-%      of values for a set of simultaneously varied parameters; 3-D arrays
-%      allow iteration over different sets of values for a set of
-%      simultaneously varied populations.
-% () - modify objects the same way simultaneously
-% {} - use all combinations of one or more elements (e.g., varying mechanism_list)
-%      note: can be prepended by '+' or '-' to indicate how to vary mechanism_list
-% 
-% valid value types:
-% for parameters: numeric ([1 2 3], linspace(0,1,10), rand(1,10,3))
-% for mechanisms: strings ('+[M1,M2]', '-[M1,M2]', '+{M1,M2}', '-{M1,M2}')
-% 
-% for connection mechanisms: indicate namespace by "source->target"
-% 
-% if there is only one population in the model, the object name can be set
-% to '' or be omitted all together. (e.g., {'gNa',[100 120]}).
-% 
+% The returned set of modifications has one element per point in search space;
+% each element can be passed along with DynaSim model or specification to
+% ApplyModifications to produce the modified object.
+%
+% Usage:
+%   modifications_set=Vary2Modifications(vary)
+%
+% Inputs:
+%   - vary: {object, variable, values; ...}
+%
+% Outputs:
+%   - modifications_set:
+%     {{object,variable,value1;...},{object,variable,value2;...},...}
+%
 % Examples:
-% vary={'[E,I]','mechanism_list','{iNa,iK}'};
-% modifications_set = Vary2Modifications(vary); 
-% modifications_set{:}
-% vary={'{E,I}','mechanism_list','{iNa,iK}'};
-% modifications_set = Vary2Modifications(vary); 
-% modifications_set{:}
-% vary={'{E,I}','mechanism_list','+[iNa,iK]'; 'E','gNa',[100 120]};
-% modifications_set = Vary2Modifications(vary); 
-% modifications_set{:}
-% vary={'[E,I]','gNa',linspace(100,130,3); 'E->I','gSYN',[0 1]};
-% modifications_set = Vary2Modifications(vary); 
-% modifications_set{:}
-% vary={'(E,I)','(gNa,gK)',rand(2,5); 'E->I','gSYN',[0 1]};
-% modifications_set = Vary2Modifications(vary); 
-% modifications_set{:}
-% vary={'(E,I)','(gNa,gK)',rand(1,5,2); 'E->I','gSYN',[0 1]};
-% modifications_set = Vary2Modifications(vary); 
-% modifications_set{:}
-% vary={'(E,I)','(gNa,gK)',rand(2,5,2); 'E->I','gSYN',[0 1]};
-% modifications_set = Vary2Modifications(vary); 
-% modifications_set{:}
-% 
+%   vary={'pop1','gNa',[100 120]};
+%   mod_set=Vary2Modifications(vary); % {{'pop1','gNa',100},{'pop1','gNa',120}}
+%   for i=1:length(mod_set)
+%     data(i)=SimulateModel('dv/dt=@current+10; {iNa,iK}','modifications',mod_set{i});
+%     figure; plot(data(i).time,data(i).(data(i).labels{1}))
+%   end
+%   % note: the same data set can be obtained directly from SimulateModel by:
+%   data=SimulateModel('dv/dt=@current+10; {iNa,iK}','vary',vary);
+%
+%   vary={'E','gNa',[100 120]};
+%   vary={'E','gNa',[100 120];'E->I','gSYN',[0 1]};
+%   vary={'E','mechanism_list','+[iNa,iK]'};
+%   vary={'E','mechanism_list','-{iNa,iK}'};
+%   vary={'(E,I)','gNa',[100 120]};
+%   vary={'(E,I)','(EK1,EK2)',[-80 -60]};
+%   vary={'(E,I)','(EK1,EK2)',[-80 -60; -85 -65]};
+%   vary={'(E,I)','(EK1,EK2)',vary_values},
+%         with vary_values(:, :, 1) = [-80 -60]; vary_values(:, :, 2) = [-85 -65];
+%   vary={'(E,I)','(EK1,EK2)',vary_values},
+%         with vary_values(:, :, 1) = [-75 -55; -80 -60]; vary_values(:, :, 2) = [-85 -65; -90 -70];
+%
+%   % This sets modifications:
+%   %     * E_EK1, E_EK2, I_EK1, I_EK2 = -80
+%   %     * E_EK1, E_EK2, I_EK1, I_EK2 = -60
+%   vary={'(E,I)','(EK1,EK2)',[-80 -60]};
+%
+%   % This sets modifications:
+%   %     * E_EK1, I_EK1 = -80 and E_EK2, I_EK2 = -85
+%   %     * E_EK1, I_EK1 = -60 and E_EK2, I_EK2 = -65
+%   vary={'(E,I)','(EK1,EK2)',[-80 -60; -85 -65]};
+%
+%   % This sets modifications:
+%   %     * E_EK1, E_EK2 = -80 and I_EK1, I_EK2 = -85
+%   %     * E_EK1, E_EK2 = -60 and I_EK1, I_EK2 = -65
+%   vary={'(E,I)','(EK1,EK2)',vary_values}, with vary_values(:, :, 1) = [-80 -60]; vary_values(:, :, 2) = [-85 -65];
+%
+%   % This sets modifications:
+%   %     * E_EK1 = -75, E_EK2 = -80, I_EK1 = -85, I_EK2 = -90.
+%   %     * E_EK1 = -55, E_EK2 = -60, I_EK1 = -65, I_EK2 = -70.
+%   vary={'(E,I)','(EK1,EK2)',vary_values}, with vary_values(:, :, 1) = [-75 -55; -80 -60]; vary_values(:, :, 2) = [-85 -65; -90 -70];
+%
+% Notes:
+%   - valid groupings:
+%     - for namespace, variable: (), []
+%     - for values: [],{}
+%
+%   - groupings:
+%     [] - iterate over set; numerical row vectors allow iteration over a
+%          single set of values; 2-D arrays allow iteration over different sets
+%          of values for a set of simultaneously varied parameters; 3-D arrays
+%          allow iteration over different sets of values for a set of
+%          simultaneously varied populations.
+%     () - modify objects the same way simultaneously
+%     {} - use all combinations of one or more elements (e.g., varying mechanism_list)
+%          note: can be prepended by '+' or '-' to indicate how to vary mechanism_list
+%
+%   - valid value types:
+%     - for parameters: numeric ([1 2 3], linspace(0,1,10), rand(1,10,3))
+%     - for mechanisms: strings ('+[M1,M2]', '-[M1,M2]', '+{M1,M2}', '-{M1,M2}')
+%     - for connection mechanisms: indicate namespace by "source->target"
+%
+%   - if there is only one population in the model, the object name can be set
+%     to '' or be omitted all together. (e.g., {'gNa',[100 120]}).
+%
+% More Examples:
+%   vary={'[E,I]','mechanism_list','{iNa,iK}'};
+%   modifications_set = Vary2Modifications(vary); 
+%   modifications_set{:}
+%   vary={'{E,I}','mechanism_list','{iNa,iK}'};
+%   modifications_set = Vary2Modifications(vary); 
+%   modifications_set{:}
+%   vary={'{E,I}','mechanism_list','+[iNa,iK]'; 'E','gNa',[100 120]};
+%   modifications_set = Vary2Modifications(vary); 
+%   modifications_set{:}
+%   vary={'[E,I]','gNa',linspace(100,130,3); 'E->I','gSYN',[0 1]};
+%   modifications_set = Vary2Modifications(vary); 
+%   modifications_set{:}
+%   vary={'(E,I)','(gNa,gK)',rand(2,5); 'E->I','gSYN',[0 1]};
+%   modifications_set = Vary2Modifications(vary); 
+%   modifications_set{:}
+%   vary={'(E,I)','(gNa,gK)',rand(1,5,2); 'E->I','gSYN',[0 1]};
+%   modifications_set = Vary2Modifications(vary); 
+%   modifications_set{:}
+%   vary={'(E,I)','(gNa,gK)',rand(2,5,2); 'E->I','gSYN',[0 1]};
+%   modifications_set = Vary2Modifications(vary); 
+%   modifications_set{:}
+%
 % See also: ApplyModifications, SimulateModel, GenerateModel
 
 % check inputs

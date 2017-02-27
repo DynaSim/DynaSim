@@ -4,7 +4,7 @@
 <head>
   <title>Description of DisplayError</title>
   <meta name="keywords" content="DisplayError">
-  <meta name="description" content="">
+  <meta name="description" content="DISPLAYERROR - Wrapper to print MATLAB error">
   <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
   <meta name="generator" content="m2html &copy; 2005 Guillaume Flandin">
   <meta name="robots" content="index, follow">
@@ -20,13 +20,13 @@
 </h1>
 
 <h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
-<div class="box"><strong></strong></div>
+<div class="box"><strong>DISPLAYERROR - Wrapper to print MATLAB error</strong></div>
 
 <h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
 <div class="box"><strong>function DisplayError(err) </strong></div>
 
 <h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
-<div class="fragment"><pre class="comment"></pre></div>
+<div class="fragment"><pre class="comment">DISPLAYERROR - Wrapper to print MATLAB error</pre></div>
 
 <!-- crossreference -->
 <h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
@@ -35,17 +35,18 @@ This function calls:
 </ul>
 This function is called by:
 <ul style="list-style-image:url(../matlabicon.gif)">
-<li><a href="SimulateModel.html" class="code" title="function [data,studyinfo]=SimulateModel(model,varargin)">SimulateModel</a>	% data=SimulateModel(model,'option',value,...)</li><li><a href="StudyinfoIO.html" class="code" title="function studyinfo=StudyinfoIO(studyinfo,study_file,id,verbose_flag)">StudyinfoIO</a>	Usage:</li><li><a href="UpdateStudy.html" class="code" title="function studyinfo=UpdateStudy(study_dir,varargin)">UpdateStudy</a>	% studyinfo=UpdateStudy(study_dir,varargin)</li></ul>
+<li><a href="SimulateModel.html" class="code" title="function [data,studyinfo]=SimulateModel(model,varargin)">SimulateModel</a>	SIMULATEMODEL -  manage simulation of a DynaSim model.</li><li><a href="StudyinfoIO.html" class="code" title="function studyinfo=StudyinfoIO(studyinfo,study_file,id,verbose_flag)">StudyinfoIO</a>	STUDYINFOIO - use lock files to manage concurrent access to a shared studyinfo</li><li><a href="UpdateStudy.html" class="code" title="function studyinfo=UpdateStudy(study_dir,varargin)">UpdateStudy</a>	UPDATESTUDY - helper function to keep track of study metadata when anything is saved</li></ul>
 <!-- crossreference -->
 
 
 
 <h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
 <div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function DisplayError(err)</a>
-0002   fprintf(<span class="string">'Error: %s\n'</span>,err.message);
-0003   <span class="keyword">for</span> i=1:length(err.stack)
-0004     fprintf(<span class="string">'\t in %s (line %g)\n'</span>,err.stack(i).name,err.stack(i).line);
-0005   <span class="keyword">end</span></pre></div>
-<hr><address>Generated on Fri 24-Feb-2017 14:46:35 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" target="_parent">m2html</a></strong> &copy; 2005</address>
+0002 <span class="comment">%DISPLAYERROR - Wrapper to print MATLAB error</span>
+0003   fprintf(<span class="string">'Error: %s\n'</span>,err.message);
+0004   <span class="keyword">for</span> i=1:length(err.stack)
+0005     fprintf(<span class="string">'\t in %s (line %g)\n'</span>,err.stack(i).name,err.stack(i).line);
+0006   <span class="keyword">end</span></pre></div>
+<hr><address>Generated on Mon 27-Feb-2017 14:58:50 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" target="_parent">m2html</a></strong> &copy; 2005</address>
 </body>
 </html>

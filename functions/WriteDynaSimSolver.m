@@ -1,62 +1,70 @@
 function [outfile,options]=WriteDynaSimSolver(model,varargin)
-%% solver_file=WriteDynaSimSolver(model,varargin)
-% Purpose: write m-file that numerically inteegrates the model
+%WRITEDYNASIMSOLVER - write m-file that numerically inteegrates the model
+%
+% Usage:
+%   solver_file=WriteDynaSimSolver(model,varargin)
+%
 % Inputs:
-%   model: DynaSim model structure (see GenerateModel)
-%   options:
-%     'solver'      : solver for numerical integration (see GetSolveFile)
-%                     {'euler','rk2','rk4'} (default: 'rk4')
-%     'tspan'       : time limits of simulation [begin,end] (default: [0 100]) [ms]
-%                     note: units must be consistent with dt and model equations
-%     'dt'          : time step used for DynaSim solvers (default: .01) [ms]
+%   - model: DynaSim model structure (see GenerateModel)
+%   - options:
+%     'solver'     : solver for numerical integration (see GetSolveFile)
+%                    {'euler','rk2','rk4'} (default: 'rk4')
+%     'tspan'      : time limits of simulation [begin,end] (default: [0 100]) [ms]
+%                    - Note: units must be consistent with dt and model equations
+%     'dt'         : time step used for DynaSim solvers (default: .01) [ms]
 %     'downsample_factor': downsampling applied during simulation (default: 1, no downsampling) 
-%                     (only every downsample_factor-time point is stored in memory and/or written to disk)
-%     'ic'          : numeric array of initial conditions, one value per state 
-%                     variable (default: all zeros). overrides definition in model structure
-%     'random_seed' : seed for random number generator (default: 'shuffle', set randomly) (usage: rng(options.random_seed))
-%     'disk_flag'     : whether to write to disk during simulation instead of storing in memory {0 or 1} (default: 0)
-% 
+%                          - Note: only every downsample_factor-time point is
+%                                  stored in memory and/or written to disk
+%     'ic'         : numeric array of initial conditions, one value per state
+%                    variable. This overrides definition in model structure (default:
+%                    all zeros)
+%     'random_seed': seed for random number generator (default: 'shuffle', set
+%                    randomly) (usage: rng(options.random_seed))
+%     'disk_flag'  : whether to write to disk during simulation instead of
+%                    storing in memory {0 or 1} (default: 0)
+%
 % Outputs:
-%   solver_file (e.g., solve_ode.m): function that numerically integrates the model
-% 
-% Example 1: test solver production, display function in standard output 
-% model=GenerateModel; % test model
-% without writing anything to disk:
-% WriteDynaSimSolver(model,'fileID',1,'save_parameters_flag',0,'solver','rk4');
-% WriteDynaSimSolver(model,'fileID',1,'save_parameters_flag',1,'solver','rk4');
-% model=PropagateFunctions(model);
-% WriteDynaSimSolver(model,'fileID',1,'save_parameters_flag',0,'solver','rk4');
-% WriteDynaSimSolver(model,'fileID',1,'save_parameters_flag',1,'solver','rk4');
-% 
-% Example 2: real-time downsampling
-% WriteDynaSimSolver(model,'downsample_factor',10,'fileID',1,'solver','rk4');
-% 
-% Example 3: real-time writing data to disk (reduce memory demand)
-% WriteDynaSimSolver(model,'disk_flag',1,'fileID',1,'solver','rk4');
-% 
-% Example 4: maximally conserve memory: downsample and write to disk
-% WriteDynaSimSolver(model,'disk_flag',1,'downsample_factor',10,'fileID',1,'solver','rk4');
-% 
+%   - solver_file (e.g., solve_ode.m): function that numerically integrates the model
+%
 % Examples:
-% WriteDynaSimSolver(model,'solver','euler');
-% WriteDynaSimSolver(model,'solver','rk2');
-% WriteDynaSimSolver(model,'solver','rk4');
-% 
-% model=GenerateModel; % test model
-% tic; WriteDynaSimSolver(model,'save_parameters_flag',0,'reduce_function_calls_flag',0,'solver','rk4','filename','solve_ode.m'); v=solve_ode; plot(v); toc
-% tic; WriteDynaSimSolver(model,'save_parameters_flag',1,'reduce_function_calls_flag',0,'solver','rk4','filename','solve_ode.m'); v=solve_ode; plot(v); toc
-% tic; WriteDynaSimSolver(model,'save_parameters_flag',0,'reduce_function_calls_flag',1,'solver','rk4','filename','solve_ode.m'); v=solve_ode; plot(v); toc
-% tic; WriteDynaSimSolver(model,'save_parameters_flag',1,'reduce_function_calls_flag',1,'solver','rk4','filename','solve_ode.m'); v=solve_ode; plot(v); toc
-% tic; WriteDynaSimSolver(model,'save_parameters_flag',1,'reduce_function_calls_flag',1,'solver','rk2','filename','solve_ode.m'); v=solve_ode; plot(v); toc
-% tic; WriteDynaSimSolver(model,'save_parameters_flag',1,'reduce_function_calls_flag',1,'solver','rk1','filename','solve_ode.m'); v=solve_ode; plot(v); toc
-% tic; WriteDynaSimSolver(model,'save_parameters_flag',1,'reduce_function_calls_flag',1,'solver','rk1','filename','solve_ode.m','downsample_factor',10); v=solve_ode; plot(v); toc
-% tic; WriteDynaSimSolver(model,'save_parameters_flag',1,'reduce_function_calls_flag',1,'solver','rk2','filename','solve_ode.m','dt',.001,'downsample_factor',10); v=solve_ode; plot(v); toc
-% tic; WriteDynaSimSolver(model,'save_parameters_flag',1,'reduce_function_calls_flag',1,'solver','rk1','filename','solve_ode.m','dt',.001,'downsample_factor',10); v=solve_ode; plot(v); toc
-% tic; WriteDynaSimSolver(model,'save_parameters_flag',1,'reduce_function_calls_flag',1,'solver','rk1','filename','solve_ode.m','dt',.005,'tspan',[0 200],'downsample_factor',10); v=solve_ode; plot(v); toc
-% 
+%   - Example 1: test solver production, display function in standard output
+%       model=GenerateModel; % test model
+%       without writing anything to disk:
+%       WriteDynaSimSolver(model,'fileID',1,'save_parameters_flag',0,'solver','rk4');
+%       WriteDynaSimSolver(model,'fileID',1,'save_parameters_flag',1,'solver','rk4');
+%       model=PropagateFunctions(model);
+%       WriteDynaSimSolver(model,'fileID',1,'save_parameters_flag',0,'solver','rk4');
+%       WriteDynaSimSolver(model,'fileID',1,'save_parameters_flag',1,'solver','rk4');
+%
+%   - Example 2: real-time downsampling
+%       WriteDynaSimSolver(model,'downsample_factor',10,'fileID',1,'solver','rk4');
+%
+%   - Example 3: real-time writing data to disk (reduce memory demand)
+%       WriteDynaSimSolver(model,'disk_flag',1,'fileID',1,'solver','rk4');
+%
+%   - Example 4: maximally conserve memory: downsample and write to disk
+%       WriteDynaSimSolver(model,'disk_flag',1,'downsample_factor',10,'fileID',1,'solver','rk4');
+%
+% More Examples:
+%     WriteDynaSimSolver(model,'solver','euler');
+%     WriteDynaSimSolver(model,'solver','rk2');
+%     WriteDynaSimSolver(model,'solver','rk4');
+%
+%     model=GenerateModel; % test model
+%     tic; WriteDynaSimSolver(model,'save_parameters_flag',0,'reduce_function_calls_flag',0,'solver','rk4','filename','solve_ode.m'); v=solve_ode; plot(v); toc
+%     tic; WriteDynaSimSolver(model,'save_parameters_flag',1,'reduce_function_calls_flag',0,'solver','rk4','filename','solve_ode.m'); v=solve_ode; plot(v); toc
+%     tic; WriteDynaSimSolver(model,'save_parameters_flag',0,'reduce_function_calls_flag',1,'solver','rk4','filename','solve_ode.m'); v=solve_ode; plot(v); toc
+%     tic; WriteDynaSimSolver(model,'save_parameters_flag',1,'reduce_function_calls_flag',1,'solver','rk4','filename','solve_ode.m'); v=solve_ode; plot(v); toc
+%     tic; WriteDynaSimSolver(model,'save_parameters_flag',1,'reduce_function_calls_flag',1,'solver','rk2','filename','solve_ode.m'); v=solve_ode; plot(v); toc
+%     tic; WriteDynaSimSolver(model,'save_parameters_flag',1,'reduce_function_calls_flag',1,'solver','rk1','filename','solve_ode.m'); v=solve_ode; plot(v); toc
+%     tic; WriteDynaSimSolver(model,'save_parameters_flag',1,'reduce_function_calls_flag',1,'solver','rk1','filename','solve_ode.m','downsample_factor',10); v=solve_ode; plot(v); toc
+%     tic; WriteDynaSimSolver(model,'save_parameters_flag',1,'reduce_function_calls_flag',1,'solver','rk2','filename','solve_ode.m','dt',.001,'downsample_factor',10); v=solve_ode; plot(v); toc
+%     tic; WriteDynaSimSolver(model,'save_parameters_flag',1,'reduce_function_calls_flag',1,'solver','rk1','filename','solve_ode.m','dt',.001,'downsample_factor',10); v=solve_ode; plot(v); toc
+%     tic; WriteDynaSimSolver(model,'save_parameters_flag',1,'reduce_function_calls_flag',1,'solver','rk1','filename','solve_ode.m','dt',.005,'tspan',[0 200],'downsample_factor',10); v=solve_ode; plot(v); toc
+%
+% Dependencies: CheckOptions, CheckModel
+%
 % See also: GetSolveFile, SimulateModel, WriteMatlabSolver
-
-% dependencies: CheckOptions, CheckModel
 
 % Check inputs
 options=CheckOptions(varargin,{...

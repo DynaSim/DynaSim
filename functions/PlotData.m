@@ -1,133 +1,146 @@
 function handles = PlotData(data,varargin)
-%% handles=PlotData(data,'option',value)
-% Purpose: plot data in various ways depending on what data was provided
-% and what options are defined. this function is wrapped by PlotWaveforms,
-% PlotPower, ... to provide a single function for organizing and displaying
-% data.
-% Inputs:
-%   data: DynaSim data structure (see CheckData)
-%   options:
-%     'plot_type' {'waveform' (default),'rastergram','rates','power'} - what to plot
-%     'variable' - name of field containing data to plot
-%                  (default: all pops with state variable of variable in data.labels)
-%     'time_limits' - [beg,end] (units of data.time)
-%     'max_num_overlaid' - maximum # of waveforms to overlay per plot
-%     'max_num_rows' - maximum # of subplot rows per figure
-%     'xlim' - [XMIN XMAX], x-axis limits (default: all data)
-%     'yscale' {'linear','log','log10'}, whether to plot linear or log scale
-%     'visible' {'on','off'}
-%     NOTE: analysis options available depending on plot_type
-%       see see CalcFR options for plot_type 'rastergram' or 'rates'
-%       see CalcPower options for plot_type 'power'
-% Outputs:
-%   handles: graphic handles to figures
+%PLOTDATA - plot data in various ways depending on what data was provided and what options are defined.
 %
-% Plots:
-% if Nsims>1: one sim per row
-% elseif Npops>1: one pop per row
-% else: one cell per row
+% This function is wrapped by PlotWaveforms, PlotPower, etc. to provide a single
+% function for organizing and displaying data.
+%
+% Usage:
+%   handles=PlotData(data,'option',value)
+%
+% Inputs:
+%   - data: DynaSim data structure (see CheckData)
+%   - options:
+%     'plot_type'       : what to plot {'waveform' (default),'rastergram','rates','power'}
+%     'variable'        : name of field containing data to plot (default: all
+%                         pops with state variable of variable in data.labels)
+%     'time_limits'     : in units of data.time {[beg,end]}
+%     'max_num_overlaid': maximum # of waveforms to overlay per plot
+%     'max_num_rows'    : maximum # of subplot rows per figure
+%     'xlim'            : x-axis limits {[XMIN XMAX]} (default: all data)
+%     'yscale'          : whether to plot linear or log scale {'linear','log','log10'}
+%     'visible'         : {'on','off'}
+%     - NOTE: analysis options are available depending on plot_type
+%       - see see CalcFR options for plot_type 'rastergram' or 'rates'
+%       - see CalcPower options for plot_type 'power'
+%
+% Outputs:
+%   - handles: graphic handles to figures
+%
+% Notes:
+%   if Nsims>1: one sim per row
+%   elseif Npops>1: one pop per row
+%   else: one cell per row
 %
 % Examples for specifying 'variable' option:
-% []      : plot all data.labels with same variable name as first element of data.labels (eg, 'pop1_v' and 'pop2_v')
-% '*'     : plot all data.labels
-% '*_v'   : plot all data.labels ending in _v (i.e., all state variables 'v' for all populations)
-% 'pop1_*': plot all data.labels starting with pop1_ (i.e., all variables for population 'pop1')
-% 'pop1_v': plot only variable 'pop1_v'
-% 'v'     : look for all data.labels ending in _v then starting with v_ (eg, all populations with variable 'v')
-% 'pop1'  : look for all data.labels ending in _pop1 then starting with pop1_ (eg, all variables for population 'pop1')
-% '*_iNa_*': plot all data.labels for the 'iNa' mechanism (for all populations)
+%   []      : plot all data.labels with same variable name as first element of
+%             data.labels (eg, 'pop1_v' and 'pop2_v')
+%   '*'     : plot all data.labels
+%   '*_v'   : plot all data.labels ending in _v (i.e., all state variables 'v'
+%             for all populations)
+%   'pop1_*': plot all data.labels starting with pop1_ (i.e., all variables for
+%             population 'pop1')
+%   'pop1_v': plot only variable 'pop1_v'
+%   'v'     : look for all data.labels ending in _v then starting with v_ (eg,
+%             all populations with variable 'v')
+%   'pop1'  : look for all data.labels ending in _pop1 then starting with pop1_
+%             (eg, all variables for population 'pop1')
+%   '*_iNa_*': plot all data.labels for the 'iNa' mechanism (for all populations)
 %
 % Examples:
-% One cell:
-% data=SimulateModel('dv/dt=@current+10; {iNa,iK}','tspan',[0 500]);
-% PlotData(data); % plot first state variable ('v')
-% PlotData(data,'variable','*'); % plot all state variables
-% PlotData(data,'variable','*','time_limits',[30 60]); % plot all variables and time 30-60ms
-% % plot power spectrum
-% PlotData(data,'variable','v','plot_type','power');
-% PlotData(data,'variable','*','plot_type','power');
+%   - Example 1: One cell:
+%       data=SimulateModel('dv/dt=@current+10; {iNa,iK}','tspan',[0 500]);
+%       PlotData(data); % plot first state variable ('v')
+%       PlotData(data,'variable','*'); % plot all state variables
+%       % plot all variables and time 30-60ms
+%       PlotData(data,'variable','*','time_limits',[30 60]);
+%       % plot power spectrum
+%       PlotData(data,'variable','v','plot_type','power');
+%       PlotData(data,'variable','*','plot_type','power');
 %
-% One population: with noisy input
-% data=SimulateModel('dv[5]/dt=@current+10*(1+randn(1,Npop)); {iNa,iK}','tspan',[0 250]);
-% PlotData(data);
-% PlotData(data,'variable','*'); % plot all state variables (all cells)
-% PlotData(data,'variable','m'); % plot state variable 'm' (all cells)
-% PlotData(data,'variable','*','time_limits',[30 60]); % plot all variables and time 30-60ms
-% % plot power spectrum
-% PlotData(data,'variable','v','plot_type','power');
-% PlotData(data,'variable','*','plot_type','power');
-% % plot rastergram
-% PlotData(data,'variable','v','plot_type','rastergram');
-% PlotData(data,'variable','*','plot_type','rastergram');
+%   - Example 2: One population with noisy input:
+%       data=SimulateModel('dv[5]/dt=@current+10*(1+randn(1,Npop)); {iNa,iK}','tspan',[0 250]);
+%       PlotData(data);
+%       PlotData(data,'variable','*'); % plot all state variables (all cells)
+%       PlotData(data,'variable','m'); % plot state variable 'm' (all cells)
+%       % plot all variables and time 30-60ms
+%       PlotData(data,'variable','*','time_limits',[30 60]);
+%       % plot power spectrum
+%       PlotData(data,'variable','v','plot_type','power');
+%       PlotData(data,'variable','*','plot_type','power');
+%       % plot rastergram
+%       PlotData(data,'variable','v','plot_type','rastergram');
+%       PlotData(data,'variable','*','plot_type','rastergram');
 %
-% One population varying one parameter (input amplitude):
-% eqns='dv[5]/dt=@current+amp*(1+randn(1,Npop)); {iNa,iK}';
-% vary={'','amp',[0 10 20]};
-% data=SimulateModel(eqns,'vary',vary,'tspan',[0 200]);
-% PlotData(data);
-% PlotData(data,'variable','m');
-% PlotData(data,'variable','*');
-% % plot power spectrum
-% PlotData(data,'variable','v','plot_type','power');
-% % plot rastergram
-% PlotData(data,'variable','v','plot_type','rastergram');
+%   - Example 3: One population varying one parameter (input amplitude):
+%       eqns='dv[5]/dt=@current+amp*(1+randn(1,Npop)); {iNa,iK}';
+%       vary={'','amp',[0 10 20]};
+%       data=SimulateModel(eqns,'vary',vary,'tspan',[0 200]);
+%       PlotData(data);
+%       PlotData(data,'variable','m');
+%       PlotData(data,'variable','*');
+%       % plot power spectrum
+%       PlotData(data,'variable','v','plot_type','power');
+%       % plot rastergram
+%       PlotData(data,'variable','v','plot_type','rastergram');
 %
-% One population varying two parameters (input amplitude and membrane capacitance):
-% eqns='dv[5]/dt=@current/Cm+amp*(1+randn(1,Npop)); {iNa,iK}';
-% vary={'','Cm',[1 2]; '','amp',[0 10 20]};
-% data=SimulateModel(eqns,'vary',vary,'tspan',[0 200]);
-% PlotData(data);
-% PlotData(data,'variable','*');
-% % plot power spectrum
-% PlotData(data,'variable','v','plot_type','power');
-% % plot rastergram
-% PlotData(data,'variable','v','plot_type','rastergram');
+%   - Example 4: One population varying two parameters (input amplitude and
+%                membrane capacitance):
+%       eqns='dv[5]/dt=@current/Cm+amp*(1+randn(1,Npop)); {iNa,iK}';
+%       vary={'','Cm',[1 2]; '','amp',[0 10 20]};
+%       data=SimulateModel(eqns,'vary',vary,'tspan',[0 200]);
+%       PlotData(data);
+%       PlotData(data,'variable','*');
+%       % plot power spectrum
+%       PlotData(data,'variable','v','plot_type','power');
+%       % plot rastergram
+%       PlotData(data,'variable','v','plot_type','rastergram');
 %
-% Two populations: noisy input to E and excitatory connection from E to I
-% spec=[];
-% spec.populations(1).name='E1';
-% spec.populations(1).equations='dv[5]/dt=@current+amp*(1+randn(1,Npop)); amp=10; {iNa,iK}';
-% spec.populations(2).name='E2';
-% spec.populations(2).equations='dv[2]/dt=@current; {iNa,iK}';
-% spec.connections(1).direction='E1->E2';
-% spec.connections(1).mechanism_list='iAMPA';
-% data=SimulateModel(spec,'tspan',[0 200]);
-% PlotData(data); % plot first state variable
-% PlotData(data,'variable','*');
-% % plot monitored synaptic current with post-synaptic voltages:
-% PlotData(data,'variable',{'E2_v','ISYN'});
-% % plot monitored synaptic current with pre- and post-synaptic voltages:
-% PlotData(data,'variable',{'v','ISYN'});
-% % plot power spectrum
-% PlotData(data,'variable','v','plot_type','power');
-% PlotData(data,'variable',{'E2_v','ISYN'},'plot_type','power');
-% % plot rastergram
-% PlotData(data,'variable','v','plot_type','rastergram');
+%   - Example 5: Two populations: noisy input to E and excitatory connection from E to I
+%       spec=[];
+%       spec.populations(1).name='E1';
+%       spec.populations(1).equations='dv[5]/dt=@current+amp*(1+randn(1,Npop)); amp=10; {iNa,iK}';
+%       spec.populations(2).name='E2';
+%       spec.populations(2).equations='dv[2]/dt=@current; {iNa,iK}';
+%       spec.connections(1).direction='E1->E2';
+%       spec.connections(1).mechanism_list='iAMPA';
+%       data=SimulateModel(spec,'tspan',[0 200]);
+%       PlotData(data); % plot first state variable
+%       PlotData(data,'variable','*');
+%       % plot monitored synaptic current with post-synaptic voltages:
+%       PlotData(data,'variable',{'E2_v','ISYN'});
+%       % plot monitored synaptic current with pre- and post-synaptic voltages:
+%       PlotData(data,'variable',{'v','ISYN'});
+%       % plot power spectrum
+%       PlotData(data,'variable','v','plot_type','power');
+%       PlotData(data,'variable',{'E2_v','ISYN'},'plot_type','power');
+%       % plot rastergram
+%       PlotData(data,'variable','v','plot_type','rastergram');
 %
-% Two populations varying one parameter (input amplitude):
-% vary={'E1','amp',[0 10 20]};
-% data=SimulateModel(spec,'vary',vary,'tspan',[0 200]);
-% PlotData(data);
-% PlotData(data,'variable','*');
-% PlotData(data,'variable','*_iNa_*');
-% % plot power spectrum
-% PlotData(data,'variable','v','plot_type','power');
-% % plot rastergram
-% PlotData(data,'variable','v','plot_type','rastergram');
+%   - Example 6: Two populations varying one parameter (input amplitude):
+%       vary={'E1','amp',[0 10 20]};
+%       data=SimulateModel(spec,'vary',vary,'tspan',[0 200]);
+%       PlotData(data);
+%       PlotData(data,'variable','*');
+%       PlotData(data,'variable','*_iNa_*');
+%       % plot power spectrum
+%       PlotData(data,'variable','v','plot_type','power');
+%       % plot rastergram
+%       PlotData(data,'variable','v','plot_type','rastergram');
 %
-% Two populations varying two parameters (input amplitude and synaptic conductance):
-% vary={'E1','amp',[0 10 20]; 'E1->E2','gSYN',[0 .05 .1]};
-% data=SimulateModel(spec,'vary',vary,'tspan',[0 200]);
-% % plot voltage waveforms
-% PlotData(data,'variable','v','plot_type','power');
-% % plot voltage power spectrum
-% PlotData(data,'variable','v','plot_type','waveform');
-% % plot voltage-derived rastergram
-% PlotData(data,'variable','v','plot_type','rastergram');
-% % more plots
-% PlotData(data,'variable','ISYN');
-% PlotData(data,'variable','E1_v');
-% PlotData(data,'variable','*');
+%   - Example 7: Two populations varying two parameters (input amplitude and
+%                synaptic conductance):
+%       vary={'E1','amp',[0 10 20]; 'E1->E2','gSYN',[0 .05 .1]};
+%       data=SimulateModel(spec,'vary',vary,'tspan',[0 200]);
+%       % plot voltage waveforms
+%       PlotData(data,'variable','v','plot_type','power');
+%       % plot voltage power spectrum
+%       PlotData(data,'variable','v','plot_type','waveform');
+%       % plot voltage-derived rastergram
+%       PlotData(data,'variable','v','plot_type','rastergram');
+%       % more plots
+%       PlotData(data,'variable','ISYN');
+%       PlotData(data,'variable','E1_v');
+%       PlotData(data,'variable','*');
 %
 % See also: CalcFR, CalcPower, PlotWaveforms, CheckData
 

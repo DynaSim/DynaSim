@@ -4,7 +4,7 @@
 <head>
   <title>Description of ImportModel</title>
   <meta name="keywords" content="ImportModel">
-  <meta name="description" content="[model,map] = ImportModel(source,'option',value,...)">
+  <meta name="description" content="IMPORTMODEL - import model from raw equations, other program source, etc.">
   <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
   <meta name="generator" content="m2html &copy; 2005 Guillaume Flandin">
   <meta name="robots" content="index, follow">
@@ -20,39 +20,42 @@
 </h1>
 
 <h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
-<div class="box"><strong>[model,map] = ImportModel(source,'option',value,...)</strong></div>
+<div class="box"><strong>IMPORTMODEL - import model from raw equations, other program source, etc.</strong></div>
 
 <h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
 <div class="box"><strong>function [model,map] = ImportModel(source,varargin) </strong></div>
 
 <h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
-<div class="fragment"><pre class="comment"> [model,map] = ImportModel(source,'option',value,...)
- Purpose: import model
+<div class="fragment"><pre class="comment">IMPORTMODEL - import model from raw equations, other program source, etc.
+
+ Usage:
+   [model,map] = ImportModel(source,'option',value,...)
+
  Inputs:
-   source: [string]
+   - source: [string]
      1. file with model equations (DynaSim .mech or .eqns, XPP, ...)
      2. string with equations
      3. reference to DB model with equations
-   options (optional):
-     'namespace': namespace to prepend to all parameter, variable, and function names
-     'ic_pop': name of population with state variables defined in this model
-         note: connection mechanisms in target pop can have ic_pop=source
-     'host': name of database hosting the model to import
+   - options (optional):
+     'namespace'      : namespace to prepend to all parameter, variable, and function names
+     'ic_pop'         : name of population with state variables defined in this model
+         - note: connection mechanisms in target pop can have ic_pop=source
+     'host'           : name of database hosting the model to import
      'user_parameters': cell array of key/value pairs to override model parameters
- 
+
  Output:
    DynaSim model structure (see GenerateModel)
- 
+
  See also: <a href="GenerateModel.html" class="code" title="function [model,name_map]=GenerateModel(specification,varargin)">GenerateModel</a>, <a href="CheckModel.html" class="code" title="function model=CheckModel(model)">CheckModel</a></pre></div>
 
 <!-- crossreference -->
 <h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
 This function calls:
 <ul style="list-style-image:url(../matlabicon.gif)">
-<li><a href="CheckOptions.html" class="code" title="function parms = CheckOptions(options, options_schema, strict)">CheckOptions</a>	CHECKOPTIONS - organize key/value pairs in structure with default or user-supplied values according to a schema</li><li><a href="ParseModelEquations.html" class="code" title="function [model,name_map] = ParseModelEquations(text,varargin)">ParseModelEquations</a>	% model = ParseModelEquations(STRING,'param',value,...)</li></ul>
+<li><a href="CheckOptions.html" class="code" title="function parms = CheckOptions(options, options_schema, strict)">CheckOptions</a>	CHECKOPTIONS - organize key/value pairs in structure with default or user-supplied values according to a schema</li><li><a href="ParseModelEquations.html" class="code" title="function [model,name_map] = ParseModelEquations(text,varargin)">ParseModelEquations</a>	PARSEMODELEQUATIONS - parse equations and organize model data in DynaSim model structure</li></ul>
 This function is called by:
 <ul style="list-style-image:url(../matlabicon.gif)">
-<li><a href="GenerateModel.html" class="code" title="function [model,name_map]=GenerateModel(specification,varargin)">GenerateModel</a>	% [model,name_map]=GenerateModel(specification,'option',value,...)</li></ul>
+<li><a href="GenerateModel.html" class="code" title="function [model,name_map]=GenerateModel(specification,varargin)">GenerateModel</a>	GENERATEMODEL - Parse DynaSim specification and organize model data in DynaSim model structure</li></ul>
 <!-- crossreference -->
 
 <h2><a name="_subfunctions"></a>SUBFUNCTIONS <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
@@ -61,194 +64,212 @@ This function is called by:
 
 <h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
 <div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function [model,map] = ImportModel(source,varargin)</a>
-0002 <span class="comment">% [model,map] = ImportModel(source,'option',value,...)</span>
-0003 <span class="comment">% Purpose: import model</span>
-0004 <span class="comment">% Inputs:</span>
-0005 <span class="comment">%   source: [string]</span>
-0006 <span class="comment">%     1. file with model equations (DynaSim .mech or .eqns, XPP, ...)</span>
-0007 <span class="comment">%     2. string with equations</span>
-0008 <span class="comment">%     3. reference to DB model with equations</span>
-0009 <span class="comment">%   options (optional):</span>
-0010 <span class="comment">%     'namespace': namespace to prepend to all parameter, variable, and function names</span>
-0011 <span class="comment">%     'ic_pop': name of population with state variables defined in this model</span>
-0012 <span class="comment">%         note: connection mechanisms in target pop can have ic_pop=source</span>
-0013 <span class="comment">%     'host': name of database hosting the model to import</span>
-0014 <span class="comment">%     'user_parameters': cell array of key/value pairs to override model parameters</span>
-0015 <span class="comment">%</span>
-0016 <span class="comment">% Output:</span>
-0017 <span class="comment">%   DynaSim model structure (see GenerateModel)</span>
+0002 <span class="comment">%IMPORTMODEL - import model from raw equations, other program source, etc.</span>
+0003 <span class="comment">%</span>
+0004 <span class="comment">% Usage:</span>
+0005 <span class="comment">%   [model,map] = ImportModel(source,'option',value,...)</span>
+0006 <span class="comment">%</span>
+0007 <span class="comment">% Inputs:</span>
+0008 <span class="comment">%   - source: [string]</span>
+0009 <span class="comment">%     1. file with model equations (DynaSim .mech or .eqns, XPP, ...)</span>
+0010 <span class="comment">%     2. string with equations</span>
+0011 <span class="comment">%     3. reference to DB model with equations</span>
+0012 <span class="comment">%   - options (optional):</span>
+0013 <span class="comment">%     'namespace'      : namespace to prepend to all parameter, variable, and function names</span>
+0014 <span class="comment">%     'ic_pop'         : name of population with state variables defined in this model</span>
+0015 <span class="comment">%         - note: connection mechanisms in target pop can have ic_pop=source</span>
+0016 <span class="comment">%     'host'           : name of database hosting the model to import</span>
+0017 <span class="comment">%     'user_parameters': cell array of key/value pairs to override model parameters</span>
 0018 <span class="comment">%</span>
-0019 <span class="comment">% See also: GenerateModel, CheckModel</span>
-0020 
-0021 <span class="comment">% Check inputs</span>
-0022 options=<a href="CheckOptions.html" class="code" title="function parms = CheckOptions(options, options_schema, strict)">CheckOptions</a>(varargin,{<span class="keyword">...</span>
-0023   <span class="string">'host'</span>,<span class="string">'local'</span>,[],<span class="keyword">...</span><span class="comment"> % database, eg: infbrain, modeldb</span>
-0024   <span class="string">'namespace'</span>,[],[],<span class="keyword">...</span><span class="comment"> % namespace, eg: E, I</span>
-0025   <span class="string">'ic_pop'</span>,[],[],<span class="keyword">...</span><span class="comment"> % eg: E, I</span>
-0026   <span class="string">'user_parameters'</span>,[],[],<span class="keyword">...</span><span class="comment"> % eg: {'Cm',1,'gNa',100}</span>
-0027   },false);
-0028 
-0029 <span class="comment">% ------------------------------------------------------------------</span>
-0030 <span class="comment">%% 1.0 Download model if not stored locally</span>
-0031 <span class="comment">% host:</span>
-0032 <span class="comment">% check if source string has form HOST:MODEL; update options.host</span>
-0033 tmp=regexp(source,<span class="string">':'</span>,<span class="string">'split'</span>);
-0034 <span class="keyword">if</span> numel(tmp)&gt;1
-0035   host=tmp{1};
-0036   ModelID=str2num(tmp{2});
-0037 <span class="keyword">else</span>
-0038   host=<span class="string">'local'</span>;
-0039 <span class="keyword">end</span>
-0040 <span class="comment">% download model if source host is known</span>
-0041 <span class="keyword">switch</span> host
-0042  <span class="keyword">case</span> {<span class="string">'infbrain'</span>,<span class="string">'infinitebrain'</span>,<span class="string">'ib'</span>}
-0043    source=<a href="#_sub3" class="code" title="subfunction source=DownloadModel(ModelID)">DownloadModel</a>(ModelID);
-0044 <span class="keyword">end</span>
-0045 
-0046 <span class="comment">% ------------------------------------------------------------------</span>
-0047 <span class="comment">%% 2.0 Convert to DynaSim model structure</span>
-0048 <span class="comment">% if DynaSim .mech, .eqns, .txt:</span>
-0049   <span class="comment">% parse model equations</span>
-0050   [model,map]=<a href="ParseModelEquations.html" class="code" title="function [model,name_map] = ParseModelEquations(text,varargin)">ParseModelEquations</a>(source,<span class="string">'namespace'</span>,options.namespace);
-0051 
-0052 <span class="comment">% if DynaSim .mat: load MAT-file</span>
-0053 <span class="comment">% ... load(source) ...</span>
-0054 
-0055 <span class="comment">% if XPP .ode file: load and convert to DynaSim structure</span>
-0056 <span class="comment">%  ... xpp2dynasim() ...</span>
+0019 <span class="comment">% Output:</span>
+0020 <span class="comment">%   DynaSim model structure (see GenerateModel)</span>
+0021 <span class="comment">%</span>
+0022 <span class="comment">% See also: GenerateModel, CheckModel</span>
+0023 
+0024 <span class="comment">% Check inputs</span>
+0025 options=<a href="CheckOptions.html" class="code" title="function parms = CheckOptions(options, options_schema, strict)">CheckOptions</a>(varargin,{<span class="keyword">...</span>
+0026   <span class="string">'host'</span>,<span class="string">'local'</span>,[],<span class="keyword">...</span><span class="comment"> % database, eg: infbrain, modeldb</span>
+0027   <span class="string">'namespace'</span>,[],[],<span class="keyword">...</span><span class="comment"> % namespace, eg: E, I</span>
+0028   <span class="string">'ic_pop'</span>,[],[],<span class="keyword">...</span><span class="comment"> % eg: E, I</span>
+0029   <span class="string">'user_parameters'</span>,[],[],<span class="keyword">...</span><span class="comment"> % eg: {'Cm',1,'gNa',100}</span>
+0030   },false);
+0031 
+0032 <span class="comment">% ------------------------------------------------------------------</span>
+0033 <span class="comment">%% 1.0 Download model if not stored locally</span>
+0034 <span class="comment">% host:</span>
+0035 <span class="comment">% check if source string has form HOST:MODEL; update options.host</span>
+0036 tmp=regexp(source,<span class="string">':'</span>,<span class="string">'split'</span>);
+0037 <span class="keyword">if</span> numel(tmp)&gt;1
+0038   host=tmp{1};
+0039   ModelID=str2num(tmp{2});
+0040 <span class="keyword">else</span>
+0041   host=<span class="string">'local'</span>;
+0042 <span class="keyword">end</span>
+0043 <span class="comment">% download model if source host is known</span>
+0044 <span class="keyword">switch</span> host
+0045  <span class="keyword">case</span> {<span class="string">'infbrain'</span>,<span class="string">'infinitebrain'</span>,<span class="string">'ib'</span>}
+0046    source=<a href="#_sub3" class="code" title="subfunction source=DownloadModel(ModelID)">DownloadModel</a>(ModelID);
+0047 <span class="keyword">end</span>
+0048 
+0049 <span class="comment">% ------------------------------------------------------------------</span>
+0050 <span class="comment">%% 2.0 Convert to DynaSim model structure</span>
+0051 <span class="comment">% if DynaSim .mech, .eqns, .txt:</span>
+0052   <span class="comment">% parse model equations</span>
+0053   [model,map]=<a href="ParseModelEquations.html" class="code" title="function [model,name_map] = ParseModelEquations(text,varargin)">ParseModelEquations</a>(source,<span class="string">'namespace'</span>,options.namespace);
+0054   
+0055 <span class="comment">% if DynaSim .mat: load MAT-file</span>
+0056 <span class="comment">% ... load(source) ...</span>
 0057 
-0058 <span class="comment">% if NEURON .modl file: ...  neuron2dynasim() ...</span>
-0059 
-0060 <span class="comment">% if NeuroML: ...  neuroml2dynasim() ...</span>
-0061 
-0062 <span class="comment">% if Brian: ...  brian2dynasim() ...</span>
-0063 
-0064 <span class="comment">% ------------------------------------------------------------------</span>
-0065 <span class="comment">%% 3.0 Post-process model</span>
-0066 <span class="comment">% override default parameter values by user-supplied values</span>
-0067 <span class="keyword">if</span> ~isempty(options.user_parameters)
-0068   model=<a href="#_sub1" class="code" title="subfunction modl=set_user_parameters(modl,params,namespace)">set_user_parameters</a>(model,options.user_parameters,options.namespace); <span class="comment">% set user parameters</span>
-0069 <span class="keyword">end</span>
-0070 
-0071 <span class="comment">% check initial conditions of state variables defined in this (sub-)model</span>
-0072 <span class="keyword">if</span> ~isempty(options.ic_pop)
-0073   model=<a href="#_sub2" class="code" title="subfunction modl=add_missing_ICs(modl,popname)">add_missing_ICs</a>(model,options.ic_pop); <span class="comment">% add missing ICs</span>
-0074 <span class="keyword">end</span>
-0075 
-0076 <span class="comment">%% 4.0 cleanup</span>
-0077 <span class="keyword">if</span> ~strcmp(host,<span class="string">'local'</span>) &amp;&amp; exist(source,<span class="string">'file'</span>)
-0078   delete(source);
-0079 <span class="keyword">end</span>
-0080 
-0081 <span class="comment">% ----------------------------------</span>
-0082 <a name="_sub1" href="#_subfunctions" class="code">function modl=set_user_parameters(modl,params,namespace)</a>
-0083   precision=8; <span class="comment">% number of digits allowed for user-supplied values</span>
-0084   <span class="keyword">if</span> isempty(params) || isempty(modl.parameters)
-0085     <span class="keyword">return</span>;
-0086   <span class="keyword">end</span>
-0087   <span class="comment">% prepend namespace to user-supplied params</span>
-0088   user_keys=cellfun(@(x)[namespace <span class="string">'_'</span> x],params(1:2:end),<span class="string">'uni'</span>,0);
-0089   user_vals=params(2:2:end);
-0090   <span class="comment">% get list of parameters in modl</span>
-0091   param_names=fieldnames(modl.parameters);
-0092   <span class="comment">% find adjusted user-supplied param names in this sub-model</span>
-0093   ind=find(ismember(user_keys,param_names));
-0094   <span class="keyword">for</span> p=1:length(ind)
-0095     modl.parameters.(user_keys{ind(p)})=toString(user_vals{ind(p)},precision);
-0096   <span class="keyword">end</span>
-0097   <span class="comment">% repeat for fixed_variables (e.g., connection matrix)</span>
-0098   <span class="keyword">if</span> ~isempty(modl.fixed_variables)
-0099     <span class="comment">% get list of fixed_variables in modl</span>
-0100     fixvars_names=fieldnames(modl.fixed_variables);
-0101     <span class="comment">% find adjusted user-supplied param names in this sub-model</span>
-0102     ind=find(ismember(user_keys,fixvars_names));
-0103     <span class="keyword">for</span> p=1:length(ind)
-0104       <span class="keyword">if</span> ~ischar(user_vals{ind(p)})
-0105         modl.fixed_variables.(user_keys{ind(p)})=toString(user_vals{ind(p)},precision);
-0106       <span class="keyword">else</span>
-0107         modl.fixed_variables.(user_keys{ind(p)})=user_vals{ind(p)};
-0108       <span class="keyword">end</span>
-0109     <span class="keyword">end</span>
-0110   <span class="keyword">end</span>  
-0111 <span class="comment">% ----------------------------------</span>
-0112 <a name="_sub2" href="#_subfunctions" class="code">function modl=add_missing_ICs(modl,popname)</a>
-0113   <span class="keyword">if</span> isempty(modl.state_variables)
-0114     <span class="keyword">return</span>;
-0115   <span class="keyword">end</span>
-0116   Npopstr=[popname <span class="string">'_Npop'</span>];
-0117   <span class="comment">% add default ICs if missing (do not evaluate ICs in GenerateModel; do that in SimulateModel before saving params.mat)</span>
-0118   <span class="keyword">if</span> isstruct(modl.ICs)
-0119     missing_ICs=setdiff(modl.state_variables,fieldnames(modl.ICs));
-0120   <span class="keyword">else</span>
-0121     missing_ICs=modl.state_variables;
-0122   <span class="keyword">end</span>
-0123   <span class="comment">% add default ICs</span>
-0124   <span class="keyword">for</span> ic=1:length(missing_ICs)
-0125     modl.ICs.(missing_ICs{ic})=sprintf(<span class="string">'zeros(1,%s)'</span>,Npopstr);
-0126   <span class="keyword">end</span>    
-0127   <span class="comment">% convert scalar ICs to vectors of population size</span>
-0128   ICfields=fieldnames(modl.ICs);
-0129   <span class="keyword">for</span> ic=1:length(ICfields)
-0130     <span class="comment">% check if scalar (scientific notation or decimal)</span>
-0131     <span class="keyword">if</span> ~isempty(regexp(modl.ICs.(ICfields{ic}),<span class="string">'^((\d+e[\-\+]?\d+)|([\d.-]+))$'</span>,<span class="string">'once'</span>))
-0132       modl.ICs.(ICfields{ic})=sprintf(<span class="string">'%s*ones(1,%s)'</span>,modl.ICs.(ICfields{ic}),Npopstr);
-0133     <span class="keyword">end</span>
-0134   <span class="keyword">end</span>
-0135 
-0136 <a name="_sub3" href="#_subfunctions" class="code">function source=DownloadModel(ModelID)</a>
-0137 <span class="comment">% Set path to your MySQL Connector/J JAR</span>
-0138 jarfile = <span class="string">'/usr/share/java/mysql-connector-java.jar'</span>;
-0139 javaaddpath(jarfile); <span class="comment">% WARNING: this might clear global variables</span>
-0140 
-0141 <span class="comment">% set connection parameters</span>
-0142 cfg.mysql_connector = <span class="string">'database'</span>;
-0143 cfg.webhost = <span class="string">'104.131.218.171'</span>; <span class="comment">% 'infinitebrain.org','104.131.218.171'</span>
-0144 cfg.dbname = <span class="string">'modulator'</span>;
-0145 cfg.dbuser = <span class="string">'querydb'</span>; <span class="comment">% have all users use root to connect to DB and self to transfer files</span>
-0146 cfg.dbpassword = <span class="string">'publicaccess'</span>; <span class="comment">% 'publicaccess'</span>
-0147 cfg.xfruser = <span class="string">'publicuser'</span>;
-0148 cfg.xfrpassword = <span class="string">'publicaccess'</span>;
-0149 cfg.ftp_port=21;
-0150 cfg.MEDIA_PATH = <span class="string">'/project/infinitebrain/media'</span>;  
-0151 target = pwd; <span class="comment">% local directory for temporary files</span>
-0152 
-0153 <span class="comment">% Create the database connection object</span>
-0154 jdbcString = sprintf(<span class="string">'jdbc:mysql://%s/%s'</span>,cfg.webhost,cfg.dbname);
-0155 jdbcDriver = <span class="string">'com.mysql.jdbc.Driver'</span>;
-0156 dbConn = database(cfg.dbname,cfg.dbuser,cfg.dbpassword,jdbcDriver,jdbcString);
-0157 <span class="comment">% list all mechanism metadata from DB</span>
-0158 <span class="comment">%query='select id,name,level,notes,ispublished,project_id from modeldb_model where level=''mechanism'''; %  and privacy='public'</span>
-0159 <span class="comment">%data = get(fetch(exec(dbConn,query)), 'Data');</span>
-0160 <span class="comment">% get file info associated with this ModelID</span>
-0161 query=sprintf(<span class="string">'select file from modeldb_modelspec where model_id=%g'</span>,ModelID);
-0162 data = get(fetch(exec(dbConn,query)), <span class="string">'Data'</span>);
-0163 jsonfile=data{1};
-0164 [usermedia,modelfile,ext] = fileparts(jsonfile); <span class="comment">% remote server media directory</span>
-0165 usermedia=fullfile(cfg.MEDIA_PATH,usermedia);
-0166 modelfile=[modelfile ext];<span class="comment">%'.json'];</span>
-0167 
-0168 <span class="comment">% Open ftp connection and download mechanism file</span>
-0169 f=ftp([cfg.webhost <span class="string">':'</span> num2str(cfg.ftp_port)],cfg.xfruser,cfg.xfrpassword);
-0170 pasv(f);
-0171 cd(f,usermedia);
-0172 mget(f,modelfile,target); 
-0173 
-0174 <span class="comment">% parse mechanism file</span>
-0175 tempfile = fullfile(target,modelfile);
-0176 source=tempfile;
-0177 [model,map]=<a href="ParseModelEquations.html" class="code" title="function [model,name_map] = ParseModelEquations(text,varargin)">ParseModelEquations</a>(source);
-0178 <span class="comment">% if isequal(ext,'.json')</span>
-0179 <span class="comment">%   [spec,jsonspec] = json2spec(tempfile);</span>
-0180 <span class="comment">%   spec.model_uid=ModelID;</span>
-0181 <span class="comment">% elseif isequal(ext,'.txt')</span>
-0182 <span class="comment">%   spec = parse_mech_spec(tempfile,[]);</span>
-0183 <span class="comment">% else</span>
-0184 <span class="comment">%   spec = [];</span>
-0185 <span class="comment">% end</span>
-0186 <span class="comment">% delete(tempfile);</span>
-0187 <span class="comment">%close ftp connection</span>
-0188 close(f);
-0189</pre></div>
-<hr><address>Generated on Fri 24-Feb-2017 14:46:35 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" target="_parent">m2html</a></strong> &copy; 2005</address>
+0058 <span class="comment">% if XPP .ode file: load and convert to DynaSim structure</span>
+0059 <span class="comment">%  ... xpp2dynasim() ...</span>
+0060 
+0061 <span class="comment">% if NEURON .modl file: ...  neuron2dynasim() ...</span>
+0062 
+0063 <span class="comment">% if NeuroML: ...  neuroml2dynasim() ...</span>
+0064 
+0065 <span class="comment">% if Brian: ...  brian2dynasim() ...</span>
+0066 
+0067 <span class="comment">% ------------------------------------------------------------------</span>
+0068 <span class="comment">%% 3.0 Post-process model</span>
+0069 <span class="comment">% override default parameter values by user-supplied values</span>
+0070 <span class="keyword">if</span> ~isempty(options.user_parameters)
+0071   model=<a href="#_sub1" class="code" title="subfunction modl=set_user_parameters(modl,params,namespace)">set_user_parameters</a>(model,options.user_parameters,options.namespace); <span class="comment">% set user parameters</span>
+0072 <span class="keyword">end</span>
+0073 
+0074 <span class="comment">% check initial conditions of state variables defined in this (sub-)model</span>
+0075 <span class="keyword">if</span> ~isempty(options.ic_pop)
+0076   model=<a href="#_sub2" class="code" title="subfunction modl=add_missing_ICs(modl,popname)">add_missing_ICs</a>(model,options.ic_pop); <span class="comment">% add missing ICs</span>
+0077 <span class="keyword">end</span>
+0078 
+0079 <span class="comment">%% 4.0 cleanup</span>
+0080 <span class="keyword">if</span> ~strcmp(host,<span class="string">'local'</span>) &amp;&amp; exist(source,<span class="string">'file'</span>)
+0081   delete(source);
+0082 <span class="keyword">end</span>
+0083 
+0084 <span class="comment">% ----------------------------------</span>
+0085 <a name="_sub1" href="#_subfunctions" class="code">function modl=set_user_parameters(modl,params,namespace)</a>
+0086   precision=8; <span class="comment">% number of digits allowed for user-supplied values</span>
+0087   <span class="keyword">if</span> isempty(params) || isempty(modl.parameters)
+0088     <span class="keyword">return</span>;
+0089   <span class="keyword">end</span>
+0090   <span class="comment">% prepend namespace to user-supplied params</span>
+0091   user_keys=cellfun(@(x)[namespace <span class="string">'_'</span> x],params(1:2:end),<span class="string">'uni'</span>,0);
+0092   user_vals=params(2:2:end);
+0093   
+0094   <span class="comment">% HACK</span>
+0095   <span class="comment">% remove duplicate namespace from user-supplied params</span>
+0096   <span class="keyword">for</span> iKey = 1:length(user_keys)
+0097     locs = regexp(user_keys{iKey}, namespace, <span class="string">'end'</span>);
+0098     <span class="keyword">if</span> length(locs) &gt; 1 <span class="comment">%then duplicated namespace</span>
+0099       user_keys{iKey}(1:locs(1)+1) = []; <span class="comment">%remove duplicate and trailing _</span>
+0100     <span class="keyword">end</span>
+0101   <span class="keyword">end</span>
+0102   
+0103   <span class="comment">% get list of parameters in modl</span>
+0104   param_names=fieldnames(modl.parameters);
+0105   
+0106   <span class="comment">% find adjusted user-supplied param names in this sub-model</span>
+0107   ind=find(ismember(user_keys,param_names));
+0108   <span class="keyword">for</span> p=1:length(ind)
+0109     modl.parameters.(user_keys{ind(p)})=toString(user_vals{ind(p)},precision);
+0110   <span class="keyword">end</span>
+0111   
+0112   <span class="comment">% repeat for fixed_variables (e.g., connection matrix)</span>
+0113   <span class="keyword">if</span> ~isempty(modl.fixed_variables)
+0114     <span class="comment">% get list of fixed_variables in modl</span>
+0115     fixvars_names=fieldnames(modl.fixed_variables);
+0116     
+0117     <span class="comment">% find adjusted user-supplied param names in this sub-model</span>
+0118     ind=find(ismember(user_keys,fixvars_names));
+0119     <span class="keyword">for</span> p=1:length(ind)
+0120       <span class="keyword">if</span> ~ischar(user_vals{ind(p)})
+0121         modl.fixed_variables.(user_keys{ind(p)})=toString(user_vals{ind(p)},precision);
+0122       <span class="keyword">else</span>
+0123         modl.fixed_variables.(user_keys{ind(p)})=user_vals{ind(p)};
+0124       <span class="keyword">end</span>
+0125     <span class="keyword">end</span>
+0126   <span class="keyword">end</span>
+0127 <span class="comment">% ----------------------------------</span>
+0128 <a name="_sub2" href="#_subfunctions" class="code">function modl=add_missing_ICs(modl,popname)</a>
+0129   <span class="keyword">if</span> isempty(modl.state_variables)
+0130     <span class="keyword">return</span>;
+0131   <span class="keyword">end</span>
+0132   Npopstr=[popname <span class="string">'_Npop'</span>];
+0133   <span class="comment">% add default ICs if missing (do not evaluate ICs in GenerateModel; do that in SimulateModel before saving params.mat)</span>
+0134   <span class="keyword">if</span> isstruct(modl.ICs)
+0135     missing_ICs=setdiff(modl.state_variables,fieldnames(modl.ICs));
+0136   <span class="keyword">else</span>
+0137     missing_ICs=modl.state_variables;
+0138   <span class="keyword">end</span>
+0139   
+0140   <span class="comment">% add default ICs</span>
+0141   <span class="keyword">for</span> ic=1:length(missing_ICs)
+0142     modl.ICs.(missing_ICs{ic})=sprintf(<span class="string">'zeros(1,%s)'</span>,Npopstr);
+0143   <span class="keyword">end</span>
+0144   
+0145   <span class="comment">% convert scalar ICs to vectors of population size</span>
+0146   ICfields=fieldnames(modl.ICs);
+0147   <span class="keyword">for</span> ic=1:length(ICfields)
+0148     <span class="comment">% check if scalar (scientific notation or decimal)</span>
+0149     <span class="keyword">if</span> ~isempty(regexp(modl.ICs.(ICfields{ic}),<span class="string">'^((\d+e[\-\+]?\d+)|([\d.-]+))$'</span>,<span class="string">'once'</span>))
+0150       modl.ICs.(ICfields{ic})=sprintf(<span class="string">'%s*ones(1,%s)'</span>,modl.ICs.(ICfields{ic}),Npopstr);
+0151     <span class="keyword">end</span>
+0152   <span class="keyword">end</span>
+0153 
+0154 <a name="_sub3" href="#_subfunctions" class="code">function source=DownloadModel(ModelID)</a>
+0155 <span class="comment">% Set path to your MySQL Connector/J JAR</span>
+0156 jarfile = <span class="string">'/usr/share/java/mysql-connector-java.jar'</span>;
+0157 javaaddpath(jarfile); <span class="comment">% WARNING: this might clear global variables</span>
+0158 
+0159 <span class="comment">% set connection parameters</span>
+0160 cfg.mysql_connector = <span class="string">'database'</span>;
+0161 cfg.webhost = <span class="string">'104.131.218.171'</span>; <span class="comment">% 'infinitebrain.org','104.131.218.171'</span>
+0162 cfg.dbname = <span class="string">'modulator'</span>;
+0163 cfg.dbuser = <span class="string">'querydb'</span>; <span class="comment">% have all users use root to connect to DB and self to transfer files</span>
+0164 cfg.dbpassword = <span class="string">'publicaccess'</span>; <span class="comment">% 'publicaccess'</span>
+0165 cfg.xfruser = <span class="string">'publicuser'</span>;
+0166 cfg.xfrpassword = <span class="string">'publicaccess'</span>;
+0167 cfg.ftp_port=21;
+0168 cfg.MEDIA_PATH = <span class="string">'/project/infinitebrain/media'</span>;
+0169 target = pwd; <span class="comment">% local directory for temporary files</span>
+0170 
+0171 <span class="comment">% Create the database connection object</span>
+0172 jdbcString = sprintf(<span class="string">'jdbc:mysql://%s/%s'</span>,cfg.webhost,cfg.dbname);
+0173 jdbcDriver = <span class="string">'com.mysql.jdbc.Driver'</span>;
+0174 dbConn = database(cfg.dbname,cfg.dbuser,cfg.dbpassword,jdbcDriver,jdbcString);
+0175 
+0176 <span class="comment">% list all mechanism metadata from DB</span>
+0177 <span class="comment">%query='select id,name,level,notes,ispublished,project_id from modeldb_model where level=''mechanism'''; %  and privacy='public'</span>
+0178 <span class="comment">%data = get(fetch(exec(dbConn,query)), 'Data');</span>
+0179 <span class="comment">% get file info associated with this ModelID</span>
+0180 query=sprintf(<span class="string">'select file from modeldb_modelspec where model_id=%g'</span>,ModelID);
+0181 data = get(fetch(exec(dbConn,query)), <span class="string">'Data'</span>);
+0182 jsonfile=data{1};
+0183 [usermedia,modelfile,ext] = fileparts(jsonfile); <span class="comment">% remote server media directory</span>
+0184 usermedia=fullfile(cfg.MEDIA_PATH,usermedia);
+0185 modelfile=[modelfile ext];<span class="comment">%'.json'];</span>
+0186 
+0187 <span class="comment">% Open ftp connection and download mechanism file</span>
+0188 f=ftp([cfg.webhost <span class="string">':'</span> num2str(cfg.ftp_port)],cfg.xfruser,cfg.xfrpassword);
+0189 pasv(f);
+0190 cd(f,usermedia);
+0191 mget(f,modelfile,target);
+0192 
+0193 <span class="comment">% parse mechanism file</span>
+0194 tempfile = fullfile(target,modelfile);
+0195 source=tempfile;
+0196 [model,map]=<a href="ParseModelEquations.html" class="code" title="function [model,name_map] = ParseModelEquations(text,varargin)">ParseModelEquations</a>(source);
+0197 <span class="comment">% if isequal(ext,'.json')</span>
+0198 <span class="comment">%   [spec,jsonspec] = json2spec(tempfile);</span>
+0199 <span class="comment">%   spec.model_uid=ModelID;</span>
+0200 <span class="comment">% elseif isequal(ext,'.txt')</span>
+0201 <span class="comment">%   spec = parse_mech_spec(tempfile,[]);</span>
+0202 <span class="comment">% else</span>
+0203 <span class="comment">%   spec = [];</span>
+0204 <span class="comment">% end</span>
+0205 <span class="comment">% delete(tempfile);</span>
+0206 <span class="comment">%close ftp connection</span>
+0207 close(f);</pre></div>
+<hr><address>Generated on Mon 27-Feb-2017 14:58:50 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" target="_parent">m2html</a></strong> &copy; 2005</address>
 </body>
 </html>

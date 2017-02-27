@@ -1,14 +1,18 @@
 function model=PropagateParameters(model,varargin)
-%% model = SubstituteParameters(model)
-% purpose: substitute parameter values or prepend parameter names with 
-%          prefix across all model equations.
-% input: DynaSim model structure
-% options:
-%   action: {'substitute','prepend'} (default: substitute)
-%   prefix: string prepended to all parameter names if action is 'prepend'
-% output: DynaSim model structure with updated parameter in all equations
-% 
-% see also: PropagateFunctions, WriteDynaSimSolver
+%PROPAGATEPARAMETERS - substitute parameter values or prepend parameter names with prefix across all model equations.
+%
+% Usage:
+%   model = SubstituteParameters(model)
+%
+% Input:
+%   - model: DynaSim model structure
+%   - options:
+%     'action': {'substitute','prepend'} (default: substitute)
+%     'prefix': string prepended to all parameter names if action is 'prepend'
+%
+% Output: DynaSim model structure with updated parameter in all equations
+%
+% See also: PropagateFunctions, WriteDynaSimSolver
 
 % Check inputs
 model=CheckModel(model);

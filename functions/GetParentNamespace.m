@@ -1,20 +1,24 @@
 function parent = GetParentNamespace(namespace)
-%% parent = GetParentNamespace(namespace)
-% purpose: determine parent namespace from namespace specified in namespace
-% input:
-%   namespace: current namespace of object
-% output:
-%   parent: parent namespace containing the current namespace
+%GETPARENTNAMESPACE - determine parent namespace from namespace specified in namespace
 %
-% examples:
-% parent=GetParentNamespace('pop')
-% parent=GetParentNamespace('pop_mech')
-% parent=GetParentNamespace('pop_pop')
-% parent=GetParentNamespace('pop_pop_mech')
-% parent=GetParentNamespace('mech')
-% parent=GetParentNamespace('')
-% 
-% see also: PropagateNamespaces
+% Usage:
+%   parent = GetParentNamespace(namespace)
+%
+% Input:
+%   - namespace: current namespace of object
+%
+% Output:
+%   - parent: parent namespace containing the current namespace
+%
+% Examples:
+%   parent=GetParentNamespace('pop')
+%   parent=GetParentNamespace('pop_mech')
+%   parent=GetParentNamespace('pop_pop')
+%   parent=GetParentNamespace('pop_pop_mech')
+%   parent=GetParentNamespace('mech')
+%   parent=GetParentNamespace('')
+%
+% See also: PropagateNamespaces
 
 if isempty(namespace) && isnumeric(namespace)
   namespace='';

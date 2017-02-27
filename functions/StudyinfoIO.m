@@ -1,15 +1,18 @@
 function studyinfo=StudyinfoIO(studyinfo,study_file,id,verbose_flag)
-% Usage: 
+%STUDYINFOIO - use lock files to manage concurrent access to a shared studyinfo 
+%
+% This is an internal helper function called by CheckStudyinfo, SetupStudy,
+% TrackStudy, and CreateBatch to prevent busy-file conflicts. file. i.e.,
+% serialize read/writes for parallel processes in study batch.
+%
+% Usage:
 %   loading: studyinfo=StudyinfoIO([],study_file,[id,verbose_flag])
 %   saving:  StudyinfoIO(studyinfo,[study_file,id,verbose_flag]);
-% Purpose: use lock files to manage concurrent access to a shared studyinfo 
-% i.e., this is an internal helper function called by CheckStudyinfo, 
-% SetupStudy, TrackStudy, and CreateBatch to prevent busy-file conflicts.
-% file. i.e., serialize read/writes for parallel processes in study batch. 
+%
 % Inputs:
-%   studyinfo: (empty [] for loading) or (DynaSim studyinfo structure to save)
-%   study_file: name of file to load or save
-%   id: process identifier for lock file name [optional]
+%   - studyinfo: (empty [] for loading) or (DynaSim studyinfo structure to save)
+%   - study_file: name of file to load or save
+%   - id: process identifier for lock file name [optional]
 
 % check inputs
 if nargin<4, verbose_flag=0; end
