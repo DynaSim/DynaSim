@@ -499,7 +499,7 @@ if options.parallel_flag==1
     if exist(fullfile(mystudydirs{sim},'solve'),'dir')
       delete(fullfile(mystudydirs{sim},'solve','core*'));
       delete(fullfile(mystudydirs{sim},'solve','params.mat'));
-      delete(fullfile(mystudydirs{sim},'solve','solve_ode*'));
+      %delete(fullfile(mystudydirs{sim},'solve','solve_ode*'));
       %delete(fullfile(mystudydirs{sim},'solve','*'))
       %rmdir(fullfile(mystudydirs{sim},'solve'));
       %rmdir(fullfile(mystudydirs{sim}));
