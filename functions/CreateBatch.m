@@ -42,7 +42,7 @@ options=CheckOptions(varargin,{...
   'verbose_flag',0,{0,1},...
   'overwrite_flag',0,{0,1},...
   'process_id',[],[],... % process identifier for loading studyinfo if necessary
-  'qsub_mode','loop',[],... % 'loop' (old method) or 'array' (new method)
+  'qsub_mode','loop',{'loop','array'},... % whether to submit jobs as an array using qsub -t or in a for loop
   },false);
 
 % Set up studyinfo structure, study directory and output file names
@@ -192,7 +192,7 @@ end
 if strcmp(options.qsub_mode, 'array')
 %   script_filename = fullfile(batch_dir,'scriptSource.txt'); % TODO remove temp method
 elseif strcmp(options.qsub_mode, 'loop')
-  script_filename = fullfile(batch_dir,'scriptSource.txt');
+  script_filename = fullfile(batch_dir,'scriptlist.txt');
   if options.verbose_flag
     fprintf('creating file listing jobs in batch directory: %s\n',script_filename);
   end
