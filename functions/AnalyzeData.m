@@ -152,8 +152,10 @@ end
         for jj=1:size(mods,1) 
           % prepare valid field name for thing varied:
           fld=[mods{jj,1} '_' mods{jj,2}];
+          
           % convert arrows and periods to underscores
           fld=regexprep(fld,'(->)|(<-)|(-)|(\.)','_');
+          
           % remove brackets and parentheses
           fld=regexprep(fld,'[\[\]\(\)\{\}]','');
           result(ii).(fld)=mods{jj,3};

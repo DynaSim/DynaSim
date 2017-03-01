@@ -5,6 +5,7 @@ function handles=PlotFR2(data,varargin)
 %
 % Usage:
 %   PlotFR2(data,'option',value)
+
 %
 % Inputs:
 %   - data: DynaSim data structure (see CheckData)
@@ -33,7 +34,7 @@ handles=[];
 
 options=CheckOptions(varargin,{...
   'plot_type','heatmap_sorted',{'heatmap','heatmap_sorted','meanFR','meanFRdens','summary'},...
-  'variable',[],[],...        
+  'variable',[],[],...
   'threshold',1e-5,[],... % slightly above zero in case variable is point process *_spikes {0,1}
   'bin_size',.05,[],...  % 30
   'bin_shift',.01,[],... % 10
@@ -122,7 +123,7 @@ end
             ytick=[ytick ncells];
           end
         end
-        set(gca,'ytick',ytick,'yticklabel',ytick);       
+        set(gca,'ytick',ytick,'yticklabel',ytick);
         % 2.0 plot sorted firing rate heat map
         subplot(nsets,nc,2+(k-1)*nc); % imagesc(t,cells_sorted,FR)
         tmp=sum(dat,1);
@@ -138,7 +139,7 @@ end
           ytick=[];
           yticklabel=[];
         end
-        set(gca,'ytick',ytick,'yticklabel',yticklabel);   
+        set(gca,'ytick',ytick,'yticklabel',yticklabel);
         % 3.0 plot population-average firing rate trace
         subplot(nsets,nc,3+(k-1)*nc); % plot(t,<FR|pop>)
         plot(time,mean(dat,2),'o-','linewidth',2);
@@ -170,7 +171,7 @@ end
         keep(v)=1;
       end
     end
-    varied=varied(keep==1);    
+    varied=varied(keep==1);
     nvaried=length(varied); % number of model components varied across simulations
     nsims=length(data);
     FRmu=zeros(nsims,nsets);
@@ -190,7 +191,7 @@ end
       end
     end
     % plots for N populations and M varied elements
-    % plot how avg firing rate for each pop varies with each parameter    
+    % plot how avg firing rate for each pop varies with each parameter
     ht=320; % height per subplot row (=per population or FR data set)
     wt=500;
     handles(end+1)=figure('position',[250 max(50,600-(nsets-1)*ht) min(1500,500+(nvaried-1)*wt) min(ht*nsets,750)]);
@@ -222,7 +223,7 @@ end
         % add text: ncells, length(time), npoints
         xpos=min(xlim)+.7*diff(xlim);%.05*diff(xlim);
         ypos=min(ylim)+.2*diff(ylim);%.85*diff(ylim);
-        text(xpos,ypos,sprintf('per point:\n #cells=%g\n #bins=%g\n #sims=%g',ncells,length(time),npoints));        
+        text(xpos,ypos,sprintf('per point:\n #cells=%g\n #bins=%g\n #sims=%g',ncells,length(time),npoints));
       end
     end
     if length(varied)==2
@@ -374,7 +375,7 @@ end
                         ytick=[ytick ncells];
                       end
                     end
-                    set(gca,'ytick',ytick,'yticklabel',ytick);   
+                    set(gca,'ytick',ytick,'yticklabel',ytick);
                 end
                 % 2.0 plot sorted firing rate heat map
                 if strcmp(options.plot_type,'heatmap_sorted')
@@ -392,7 +393,7 @@ end
                       ytick=[];
                       yticklabel=[];
                     end
-                    set(gca,'ytick',ytick,'yticklabel',yticklabel);  
+                    set(gca,'ytick',ytick,'yticklabel',yticklabel);
                 end
                 % 3.0 plot population-average firing rate trace
                 if strcmp(options.plot_type,'meanFR')

@@ -74,10 +74,12 @@ if ischar(file) && isdir(file) % study directory
   clear file
   file.study_dir=study_dir;
 end
+
 if isstruct(file) && isfield(file,'study_dir')
   % "file" is a studyinfo structure.
   % retrieve most up-to-date studyinfo structure from studyinfo.mat file
   studyinfo=CheckStudyinfo(file.study_dir,'process_id',options.process_id);
+  
   % get list of data_files from studyinfo
   data_files={studyinfo.simulations.data_file};
   success=cellfun(@exist,data_files)==2;
@@ -91,6 +93,7 @@ if isstruct(file) && isfield(file,'study_dir')
   end
   data_files=data_files(success);
   sim_info=studyinfo.simulations(success);
+  
   % load each data set recursively
   keyvals=Options2Keyval(options);
   num_files=length(data_files);
@@ -136,6 +139,7 @@ if iscellstr(file)
   success=cellfun(@exist,data_files)==2;
   data_files=data_files(success);
   keyvals=Options2Keyval(options);
+  
   % load each data set recursively
   for i=1:length(data_files)
     tmp_data=ImportData(data_files{i},keyvals{:});
@@ -159,6 +163,7 @@ if ischar(file)
       if isempty(options.time_limits) && isempty(options.variables)
         % load full data set
         data=load(file);
+        
         % if file only contains a structure called 'data' then return that
         if isfield(data,'data') && length(fieldnames(data))==1
           data=data.data;
@@ -169,12 +174,15 @@ if ischar(file)
         obj=matfile(file); % MAT-file object
         varlist=who(obj); % variables stored in mat-file
         labels=obj.labels; % list of state variables and monitors
+        
         if iscellstr(options.variables) % restrict variables to load
           labels=labels(ismember(labels,options.variables));
         end
+        
         simulator_options=obj.simulator_options;
         time=(simulator_options.tspan(1):simulator_options.dt:simulator_options.tspan(2))';
         time=time(1:simulator_options.downsample_factor:length(time));
+        
         if ~isempty(options.time_limits)
           % determine time indices to load
           time_indices=nearest(time,options.time_limits(1)):nearest(time,options.time_limits(2));
@@ -182,18 +190,23 @@ if ischar(file)
           % load all time points
           time_indices=1:length(time);
         end
+        
         % create DynaSim data structure:
         data=[];
         data.labels=labels;
+        
         % load state variables and monitors
         for i=1:length(labels)
           data.(labels{i})=obj.(labels{i})(time_indices,:);
         end
+        
         data.time=time(time_indices);
         data.simulator_options=simulator_options;
+        
         if ismember('model',varlist)
           data.model=obj.model;
         end
+        
         if ismember('varied',varlist)
           varied=obj.varied;
           data.varied=varied;
@@ -201,12 +214,14 @@ if ischar(file)
             data.(varied{i})=obj.(varied{i});
           end
         end
+        
         if ismember('results',varlist)
           results=obj.results;
           if iscellstr(options.variables)
             results=results(ismember(results,options.variables));
           end
           data.results=results;
+          
           % load results
           for i=1:length(results)
             data.(results{i})=obj.(results{i})(time_indices,:);

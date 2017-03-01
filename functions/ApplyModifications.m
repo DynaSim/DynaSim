@@ -127,13 +127,16 @@ end
 % note: should be able to support {'(E,I)','(EK,EK2)',-80}
 if any(~cellfun(@isempty,regexp(modifications(:,1),'^\(.*\)$'))) || ...
    any(~cellfun(@isempty,regexp(modifications(:,2),'^\(.*\)$')))
+ 
   % loop over modifications 
   modifications_={};
   for i=1:size(modifications,1)
     % check namespace for ()
     namespaces=regexp(modifications{i,1},'[\w\.\-<>]+','match');
+    
     % check variable for ()
     variables=regexp(modifications{i,2},'[\w\.-]+','match');
+    
     % check size of values matches number of namespaces, variables
     if isscalar(modifications{i,3}) % in case number of values is one
         modifications{i,3} = repmat(modifications{i,3},length(variables),length(namespaces));
@@ -144,6 +147,9 @@ if any(~cellfun(@isempty,regexp(modifications(:,1),'^\(.*\)$'))) || ...
         % in case values is 1 x number of namespaces
         elseif size(modifications{i,3},2) == length(namespaces) && size(modifications{i,3},1) == 1
             modifications{i,3} = repmat(modifications{i,3},length(variables),1);
+        % TODO: char inputs
+        % elseif ischar(modifications{i,3})
+          % string input
         else
             error(['Numerical values varied over must be in array format,',...
                 'where dimensions 1, 2, and 3 correspond to mechanisms, values, and populations varied over.'])
@@ -168,6 +174,7 @@ if ~isempty(spec.connections)
 else
   con_names=[];
 end
+
 % loop over modifications to apply
 for i=1:size(mods,1)
   obj=mods{i,1}; % population name or connection source-target
@@ -178,11 +185,13 @@ for i=1:size(mods,1)
   if ~ischar(fld) %|| ~ismember(fld,{'name','size','parameters','mechanism_list','equations'})
     error('modification must be applied to population ''name'',''size'',or a parameter referenced by its name');
   end
+  
   % standardize connection object: convert target<-source to source->target
   if any(strfind(obj,'<-'))
     ind=strfind(obj,'<-');
     obj=[obj(ind(1)+2:end) '->' obj(1:ind(1)-1)];
   end
+  
   val=mods{i,3}; % value for population name or size, or parameter to modify
   if ismember(obj,pop_names)
     type='populations';
@@ -194,6 +203,7 @@ for i=1:size(mods,1)
     warning('name of object to modify not found in populations or connections.');
     continue
   end
+  
   index=ismember(names,obj);
   if strcmp(fld,'mechanism_list')
     % support --
@@ -202,7 +212,9 @@ for i=1:size(mods,1)
     % 'E'    'mechanism_list'    '+(iK)'
     % 'E'    'mechanism_list'    '+iK'
     % 'E'    'mechanism_list'    'iK'
+    
     elems=regexp(val,'[\w@]+','match');
+    
     if strcmp(val(1),'+')
       % add mechanisms to existing list
       spec.(type)(index).mechanism_list=unique(cat(2,spec.(type)(index).mechanism_list,elems),'stable');
@@ -247,10 +259,11 @@ for i=1:size(mods,1)
       % support target = FUNCTIONn and FUNCTION=FUNCTION1
       % replace target by n-th FUNCTION LHS
       lines=cellfun(@strtrim,strsplit(eqns,';'),'uni',0); % split equations into statements
-      lines=lines(~cellfun(@isempty,lines)); % eliminate empty elements      
+      lines=lines(~cellfun(@isempty,lines)); % eliminate empty elements
       pattern='^\w+\([a-zA-Z][\w,]*\)\s*='; % pattern for functions
       inds=regexp(lines,pattern,'once'); % indices to function statements
       inds=find(~cellfun(@isempty,inds));
+      
       % get index to the function statement to modify
       if strcmp(target,'FUNCTION')
         ind=inds(1);
@@ -266,12 +279,13 @@ for i=1:size(mods,1)
     % add escape character for using regular expression to match function statements
     target=strrep(target,'(','\(');
     target=strrep(target,')','\)');
+    
     % modify equations
     old=regexp(eqns,[target '\s*=[^;]+'],'match');
     if ~isempty(old)
       eqns=strrep(eqns,old{1},[old{1} expression]);
       spec.(type)(index).equations=eqns;
-    end    
+    end
   elseif ismember(fld,predefined_variables) % not a single parameter to modify
     spec.(type)(index).(fld)=val;
     if strcmp(type,'populations') && strcmp(fld,'name')
@@ -280,11 +294,12 @@ for i=1:size(mods,1)
         if strcmp(pop_names{index},spec.connections(j).source)
           spec.connections(j).source=val;
         end
+        
         if strcmp(pop_names{index},spec.connections(j).target)
           spec.connections(j).target=val;
-        end        
+        end
       end
-    end    
+    end
   else % modify a single parameter in the populations.parameters cell array
     param_names=spec.(type)(index).parameters(1:2:end);
     if isempty(spec.(type)(index).parameters)

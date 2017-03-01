@@ -46,7 +46,7 @@ if numel(data)==1 || ~isfield(data,'varied')
   % plot separate firing rates vs time (one figure per element of data)
   for i=1:length(data)
     plotFR_SingleSim(i);
-  end  
+  end
 else
   % data contains results from a set of simulations varying something
   % plot average firing rates vs whatever was varied
@@ -103,7 +103,7 @@ end
             ytick=[ytick ncells];
           end
         end
-        set(gca,'ytick',ytick,'yticklabel',ytick);       
+        set(gca,'ytick',ytick,'yticklabel',ytick);
         % 2.0 plot sorted firing rate heat map
         subplot(nsets,nc,2+(k-1)*nc); % imagesc(t,cells_sorted,FR)
         tmp=sum(dat,1);
@@ -119,7 +119,7 @@ end
           ytick=[];
           yticklabel=[];
         end
-        set(gca,'ytick',ytick,'yticklabel',yticklabel);   
+        set(gca,'ytick',ytick,'yticklabel',yticklabel);
         % 3.0 plot population-average firing rate trace
         subplot(nsets,nc,3+(k-1)*nc); % plot(t,<FR|pop>)
         plot(time,mean(dat,2),'o-','linewidth',2);
@@ -151,7 +151,7 @@ end
         keep(v)=1;
       end
     end
-    varied=varied(keep==1);    
+    varied=varied(keep==1);
     nvaried=length(varied); % number of model components varied across simulations
     nsims=length(data);
     FRmu=zeros(nsims,nsets);
@@ -171,7 +171,7 @@ end
       end
     end
     % plots for N populations and M varied elements
-    % plot how avg firing rate for each pop varies with each parameter    
+    % plot how avg firing rate for each pop varies with each parameter
     ht=320; % height per subplot row (=per population or FR data set)
     wt=500;
     handles(end+1)=figure('position',[250 max(50,600-(nsets-1)*ht) min(1500,500+(nvaried-1)*wt) min(ht*nsets,750)]);
@@ -203,7 +203,7 @@ end
         % add text: ncells, length(time), npoints
         xpos=min(xlim)+.7*diff(xlim);%.05*diff(xlim);
         ypos=min(ylim)+.2*diff(ylim);%.85*diff(ylim);
-        text(xpos,ypos,sprintf('per point:\n #cells=%g\n #bins=%g\n #sims=%g',ncells,length(time),npoints));        
+        text(xpos,ypos,sprintf('per point:\n #cells=%g\n #bins=%g\n #sims=%g',ncells,length(time),npoints));
       end
     end
     if length(varied)==2
