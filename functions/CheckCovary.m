@@ -53,7 +53,7 @@ for block = 1:no_blocks
     
 end
 
-effective_vary_lengths = vary_lengths;
+effective_vary_lengths = non_singleton_vary_lengths;
 
 for l = 1:number_linked_sets
     
