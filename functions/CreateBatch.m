@@ -277,7 +277,7 @@ StudyinfoIO(studyinfo,study_file,options.simulator_options.sim_id,options.verbos
 % check for qsub on system
 [status,result]=system('which qsub');
 if isempty(result)
-  [jnk,host] = system('hostname');
+  [~,host] = system('hostname');
   fprintf('qsub not found on host (%s).\n',strtrim(host));
   fprintf('Jobs NOT submitted to cluster queue.\n');
 else % on cluster with qsub
@@ -317,10 +317,13 @@ else % on cluster with qsub
     end
     
     [status,result]=system(cmd);
-    if status
+    if status > 0
       fprintf('submit command failed: "%s"\n',cmd);
       disp(result);
       return;
+    else
+      fprintf('submit command status: \n');
+      disp(result);
     end
     
     %if options.verbose_flag

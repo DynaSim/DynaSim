@@ -3,7 +3,7 @@
 set batchdir = ~/batchdirs/$1
 cd $batchdir
 mkdir -p pbsout
-set joblist = `cat scriptlist.txt`
+set joblist = `cat scriptSource.txt`
 
 set h_vmem = $2
 
