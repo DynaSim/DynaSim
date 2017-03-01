@@ -25,8 +25,9 @@ function parms = CheckOptions(options, options_schema, strict)
 %
 % See also: Options2Keyval, CheckSpecification, CheckModel, CheckData
 
-%convert cell argument to struct if contains struct
-if length(options) == 1 && isstruct(options{1})
+
+% Convert cell argument to struct if contains struct (Leave as is if already a struct)
+if length(options) == 1 && ~isstruct(options) && isstruct(options{1})
   options = options{1};
 end
 
@@ -50,7 +51,7 @@ if ~isstruct(options)
       if isempty(options{ind})
         options{ind}=[];
       elseif ~iscell(options{ind}{1})
-        %options{index} = { options{index} }; 
+        %options{index} = { options{index} };
       end
     end
   end
@@ -62,7 +63,7 @@ else
       if isempty(options.(fld))
         options.(fld)=[];
       elseif ~iscell(options.(fld){1})
-        %options{index} = { options{index} }; 
+        %options{index} = { options{index} };
       end
     end
   end
@@ -92,7 +93,7 @@ else
   parms = options;
 end
 
-%   This allows 'pass-through' of parameters; 
+%   This allows 'pass-through' of parameters;
 %   remove any fields that are unknown
 %   unless no schema is defined.
 
@@ -106,7 +107,7 @@ for f=1:3:length(options_schema)
   %   Validate the input parameters by the 'range' field
   if  (isfield(parms,options_schema{f}))
     param_name		= options_schema{f};
-	  param_value		= getfield(parms,param_name);
+    param_value		= getfield(parms,param_name);
     param_range   = options_schema{f+2};
 
     % no value was specified,
@@ -115,7 +116,7 @@ for f=1:3:length(options_schema)
     % no range was specified,
     elseif isempty(param_range)
       continue;
-   	%	param range is a cell array of strings; make sure the current value is within that range.
+     %	param range is a cell array of strings; make sure the current value is within that range.
     elseif iscell(param_range)
       num_flag = 0;
       char_flag = 0;
@@ -142,7 +143,7 @@ for f=1:3:length(options_schema)
         
         if length(find(ismember(param_value,param_range))) ~= length(param_value)
           error('parameter ''%s'' value must be one of the following: { %s}', ...
-  			    param_name, sprintf('''%s'' ',param_range{:}));
+            param_name, sprintf('''%s'' ',param_range{:}));
         end
       elseif num_flag
         param_range = cell2mat(param_range);
@@ -153,7 +154,7 @@ for f=1:3:length(options_schema)
         
         if length(find(ismember(param_value,param_range))) ~= length(param_value)
           error('parameter ''%s'' value must be one of the following: { %s}', ...
-  			    param_name,sprintf('%d ',param_range));
+            param_name,sprintf('%d ',param_range));
         end
       else
         error('type of parameter range specified for parameter ''%s'' is currently unsupported', options_schema{f});
@@ -184,7 +185,7 @@ for f=1:3:length(options_schema)
       
       if length(find(ismember(param_value,param_range))) ~= length(param_value)
         error('parameter ''%s'' value must be one of the following: [ %s]', ...
-  			  param_name,sprintf('%d ',param_range));
+          param_name,sprintf('%d ',param_range));
       end
     %  param range is of a type we currently don't support.
     else
