@@ -10,6 +10,5 @@ echo "JOB_NAME = " $JOB_NAME
 #/usr/local/bin/matlab -nojvm -nosplash -r "$2"
 #matlab -nodisplay -singleCompThread -r "$2"
 #/usr/local/apps/matlab-2014a/bin/matlab -nojvm -nosplash -r "$2"
-/usr/local/apps/matlab-2014a/bin/matlab -nodisplay -singleCompThread -r "addpath(genpath('$1')), $2"
-#/usr/local/apps/matlab-2014a/bin/matlab -nodisplay -singleCompThread -r "$2"
+/usr/local/apps/matlab-2014a/bin/matlab -nodisplay -singleCompThread -r "$2"
 echo "finished"
