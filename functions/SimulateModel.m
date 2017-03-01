@@ -52,9 +52,11 @@ function [data,studyinfo]=SimulateModel(model,varargin)
 %                       using qsub (see CreateBatch) {0 or 1} (default: 0)
 %     'sims_per_job'  : number of simulations to run per batch job (default: 1)
 %     'memory_limit'  : memory to allocate per batch job (default: '8G')
+%     'qsub_mode'     : {'loop', 'array'} whether to submit batch jobs
+%                       using qsub -t array mode ('array') (default:
+%                       'loop')
 %
 %   - options for parallel computing: (requires Parallel Computing Toolbox)
-%     - Note: parallel computing has been DISABLED for debugging...
 %     'parallel_flag' : whether to use parfor to run simulations {0 or 1} (default: 0)
 %     'num_cores'     : number of cores to specify in the parallel pool
 %
@@ -249,6 +251,7 @@ options=CheckOptions(varargin,{...
   'cluster_flag',0,{0,1},...      % whether to run simulations on a cluster
   'sims_per_job',1,[],... % how many sims to run per batch job
   'memory_limit','8G',[],... % how much memory to allocate per batch job
+  'qsub_mode','loop',{'loop','array'},... % whether to submit jobs as an array using qsub -t or in a for loop
   'parallel_flag',0,{0,1},...     % whether to run simulations in parallel (using parfor)
   'num_cores',4,[],... % # cores for parallel processing (SCC supports 1-12)
   'compile_flag',0,{0,1},... % exist('codegen')==6, whether to compile using coder instead of interpreting Matlab
@@ -365,7 +368,7 @@ if ~isempty(options.plot_functions)
 %   end  
 end
 
-%% 1.0 prepare model and study structures for simulation
+%% 1.0 Prepare model and study structures for simulation
 
 % handle special case of input equations with vary() statement
 [model,options]=extract_vary_statement(model,options);
@@ -413,7 +416,7 @@ if options.cluster_flag==1
     end
   end
   keyvals = Options2Keyval(options);
-  studyinfo=CreateBatch(model,modifications_set,'simulator_options',options,'process_id',options.sim_id,keyvals{:});
+  studyinfo = CreateBatch(model,modifications_set,'simulator_options',options,'process_id',options.sim_id,keyvals{:});
   %if options.overwrite_flag==0
     % check status of study
 %     [~,s]=MonitorStudy(studyinfo.study_dir,'verbose_flag',0,'process_id',options.sim_id);

@@ -302,7 +302,7 @@ else % on cluster with qsub
         cmd = sprintf('echo ''%s/qmatjob_array %s sim_job'' | qsub -V -hard -l ''h_vmem=%s'' -wd %s -N %s_sim_job -t 1-%i',...
           dsFnPath, batch_dir, options.memory_limit, batch_dir, batch_dir_name, length(jobs)); %with pipe
       elseif strcmp(options.qsub_mode, 'loop')
-        cmd=sprintf('qmatjobs_memlimit_loop %s %s',batch_dir_name,options.memory_limit);
+        cmd = sprintf('qmatjobs_memlimit_loop %s %s',batch_dir_name,options.memory_limit);
       end
       %status=system('which qmatjobs_memlimit');
     end
