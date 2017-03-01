@@ -2,6 +2,7 @@
 % Get ready...
 
 demos_path = findDemosPath;
+cd(demos_path)
 
 % Set path to your copy of the DynaSim toolbox
 dynasim_path = fullfile(demos_path, '..');
@@ -11,8 +12,6 @@ addpath(genpath(dynasim_path)); % comment this out if already in path
 
 % Set where to save outputs
 output_directory = fullfile(demos_path, 'outputs');
-% move to root directory where outputs will be saved
-cd(output_directory);
 
 % define equations of cell model (same for E and I populations)
 eqns={ 
@@ -45,21 +44,28 @@ vary={
   'E'   ,'Iapp',[0 10 20];      % amplitude of tonic input to E-cells
   'I->E','tauD',[5 10 15]       % inhibition decay time constant from I to E
   };
-SimulateModel(s,'save_data_flag',1,'study_dir','demo_sPING_3b',...
+SimulateModel(s,'save_data_flag',1,'study_dir',fullfile(output_directory, 'demo_sPING_3b'),...
                 'vary',vary,'verbose_flag',1, ...
                 'save_results_flag',1,'plot_functions',@PlotData,'plot_options',{'format','png'} );
 
-cd ..
-
 %% Load the data and import into nDDict class
+demos_path = findDemosPath;
+cd(demos_path)
+
 % ...Assumes we have some DynaSim data already loaded...
-cd outputs
-data=ImportData('demo_sPING_3b');
-cd ..
+data=ImportData(fullfile('outputs', 'demo_sPING_3b'));
 
 % Load the data linearly
-[data_linear,ax,ax_names,time] = DynaSimExtract (data);
-
+[data_linear,ax,ax_names,time] = DynaSimExtract(data);
+  % data_linear: row cell array with cols = num_sims * num_labels. i.e. 1 col
+  %   for each time series recorded over all sims
+  %     looping over (outer to inner): sims, pops, vars
+  % ax: row cell array with num cols = length(ax_names). each cell contains
+  %   row vector or cell array array with length = length(data_linear). Gives
+  %   the parameters associated with each col of data_linear.
+  % ax_names: row cell array with string contents describing the parameter that
+  %   each col of ax represents.
+  % time: col vector of time points from simulation
 
 % Import into an xPlt class
 xp = xPlt;
