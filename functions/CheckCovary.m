@@ -3,6 +3,8 @@ function [effective_vary_lengths, linked_indices] = CheckCovary(vary_lengths, va
 
 non_singleton_vary_lengths = vary_lengths(vary_lengths > 1);
 
+non_singleton_vary_params = vary_params(:, vary_lengths > 1);
+
 diff_vary_lengths = diff(non_singleton_vary_lengths);
 
 equal_vary_length_indices = diff_vary_lengths == 0;
@@ -11,7 +13,7 @@ equal_vary_length_blocks = IndexToBlocks(equal_vary_length_indices);
 
 if ~isempty(equal_vary_length_blocks)
 
-equal_vary_length_blocks(:, 2) = equal_vary_length_blocks(:, 2) + 1;
+    equal_vary_length_blocks(:, 2) = equal_vary_length_blocks(:, 2) + 1;
 
 end
 
@@ -29,7 +31,7 @@ for block = 1:no_blocks
     
     while length(param_indices) > 1
         
-        [linked_set, param_indices] = find_linked_params(param_indices, vary_params);
+        [linked_set, param_indices] = find_linked_params(param_indices, non_singleton_vary_params);
         
         if ~isempty(linked_set)
             
