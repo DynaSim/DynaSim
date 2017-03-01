@@ -1,6 +1,4 @@
-
-
-function [data_linear,ax,ax_names,time] = DynaSimExtract (data)
+function [data_linear,ax,ax_names,time] = DynaSimExtract(data)
     % Converts DynaSim structure to 1D cell array format. Later can use to
     % import to xPlt
 
@@ -14,53 +12,59 @@ function [data_linear,ax,ax_names,time] = DynaSimExtract (data)
     num_sims=length(data); % number of data sets (one per simulation)
     %param_mat=zeros(num_sims,num_varied); % values for each simulation
     
-    for j=1:num_varied
-        if isnumeric(data(1).(varied{j}))
-            params{j} = [data.(varied{j})]; % values for each simulation
-        else
-            for i = 1:length(data)
-                params{j}{i} = data(i).(varied{j});    %vals for each sim
-            end
-        end
-    end
+    % Create params cell array--just used for making ax
+%     for iVar=1:num_varied
+%         if isnumeric(data(1).(varied{iVar}))
+%             params{iVar} = [data.(varied{iVar})]; % store as nested mat
+%         else
+% %             for iSim = 1:length(data)
+% %                 params{iVar}{iSim} = data(iSim).(varied{iVar}); %store as cells
+% %             end
+%             params{iVar} = {data.(varied{iVar})}; %store as nested cell array
+%         end
+%     end
     
     % ## FIELDS Get all fields of data ##
     % Get metadata for all data fields (e.g. populations / currents / state
     % variables) 
     labels = data(1).labels;
-    labels = labels(cellfun(@isempty,strfind(labels,'time')));      % Remove time from labels
-    num_alllabels = length(labels);
+    labels = labels(cellfun(@isempty,strfind(labels,'time'))); % Remove time from labels
+    num_labels = length(labels);
     
     % Determine all unique populations
     pop_names={data(1).model.specification.populations.name}; % list of populations
     
     % Build list populations and variables
-    ind = strfind(labels,'_');
+    separatorInds = strfind(labels,'_');
     func1 = @(x,y) x(1:y(1)-1);
     func2 = @(x,y) x(y(1)+1:end);
-    pops = cellfun(func1,labels,ind,'UniformOutput',0);
-    vars = cellfun(func2,labels,ind,'UniformOutput',0);
+    pops = cellfun(func1,labels,separatorInds,'UniformOutput',0);
+    vars = cellfun(func2,labels,separatorInds,'UniformOutput',0);
     
     % ## Build a large linear list ##
-    z=0;
-    for i = 1:num_sims
-        for k = 1:num_alllabels
+    ind=0;
+    data_linear = cell(1,num_sims*num_labels);
+    for iSim = 1:num_sims
+        for iLabel = 1:num_labels
             
-            z=z+1;
-            data_linear{z} = data(i).(labels{k});
+            ind=ind+1;
+            data_linear{ind} = data(iSim).(labels{iLabel});
             
             % Number of parameter sweeps, plus populations, plus variables (Vm, state variables, functions, etc.)
-            for j = 1:num_varied
-                if isnumeric(data(1).(varied{j})); ax{j}(z) = params{j}(i);
+            for iVar = 1:num_varied
+                if isnumeric(data(1).(varied{iVar}))
+%                     ax{iVar}(ind) = params{iVar}(iSim); % using nested mat
+                    ax{iVar}(ind) = data(iSim).(varied{iVar}); % using nested mat
                 else
-                    ax{j}{z} = params{j}{i};
+%                     ax{iVar}{ind} = params{iVar}{iSim}; % using nested cell array
+                    ax{iVar}{ind} = data(iSim).(varied{iVar}); % using nested cell array
                 end
             end
             
-            ax{num_varied+1}{z} = pops{k};
+            ax{num_varied+1}{ind} = pops{iLabel};
             
-            j=j+1;
-            ax{num_varied+2}{z} = vars{k};
+%             iVar=iVar+1; % REVIEW: I don't think this line does anything
+            ax{num_varied+2}{ind} = vars{iLabel};
             
         end
     end
