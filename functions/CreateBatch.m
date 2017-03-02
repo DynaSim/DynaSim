@@ -189,9 +189,7 @@ if numel(skip_sims)==num_simulations
 end
 
 % create script_filename (list of vars or jobs)
-if strcmp(options.qsub_mode, 'array')
-%   script_filename = fullfile(batch_dir,'scriptSource.txt'); % TODO remove temp method
-elseif strcmp(options.qsub_mode, 'loop')
+if strcmp(options.qsub_mode, 'loop')
   script_filename = fullfile(batch_dir,'scriptlist.txt');
   if options.verbose_flag
     fprintf('creating file listing jobs in batch directory: %s\n',script_filename);
