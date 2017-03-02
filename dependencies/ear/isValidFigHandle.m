@@ -12,9 +12,9 @@ function validBool = isValidFigHandle(h)
 
 try
   if ischar(h) %string input
-    validBool = evalin('caller', ['isvalid(' h ')']);
+    validBool = evalin('caller', ['isvalid(' h ')']) || evalin('caller', ['isgraphics(' h ')']);
   else
-    validBool = isvalid(h);
+    validBool = isvalid(h) || isgraphics(h);
   end
 catch
   validBool = 0;
