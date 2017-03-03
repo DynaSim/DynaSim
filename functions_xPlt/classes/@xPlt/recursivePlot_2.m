@@ -29,7 +29,7 @@ function varargout = recursivePlot_2(xp,function_handles,dimensions,function_han
 %       The function_handles cell array should point to functions of the form:
 %             varargout = function func (xp,varargin)
 %       where xp is an xPlt object. Each function handle
-warning('finish this');
+% warning('finish this');
 % 
 %     Algorithm:
 %     recursivePlot plots the data in a recursive manner. It does the following
@@ -54,19 +54,19 @@ warning('finish this');
 %            
 %     Example
 %         See demos_xPlt.m
-           
-           for plotting the 
-               function_handles{1} cycles through all the entries in xp2
-           The dimensions of xp2 are sz(dimensions{1}), where
-           sz = size(xp). xp2.data contains a function handle. This function
-           handle is a recursive call to 
-        2. Calls function_handles{1} and passes it xp2.
-        3. 
-        
-        Takes dimensions{1} from xp and creates a new 
-
-        Examples:
-            See demos file.
+%            
+%            for plotting the 
+%                function_handles{1} cycles through all the entries in xp2
+%            The dimensions of xp2 are sz(dimensions{1}), where
+%            sz = size(xp). xp2.data contains a function handle. This function
+%            handle is a recursive call to 
+%         2. Calls function_handles{1} and passes it xp2.
+%         3. 
+%         
+%         Takes dimensions{1} from xp and creates a new 
+% 
+%         Examples:
+%             See demos file.
 
 
 %     function_handle_arguments - cell array of argument cell arrays to pass to

@@ -126,6 +126,17 @@ xp4.getaxisinfo
 recursivePlot(xp4,{@xp_subplot_grid3D,@xp_subplot_grid3D,@xp_matrix_basicplot},{[1,2,4],3},{{},{0,1},{}});
 
 
+%% Run a recursive plot
+
+clear xp2 xp3
+xp4 = xp.subset([],[],[],8);
+xp4.getaxisinfo
+
+% recursivePlot(xp4,{@xp_subplot,@xp_subplot,@xp_matrix_basicplot},{1:2,3},{{[],1},{1,1},{}});
+% recursivePlot(xp4,{@xp_subplot_grid3D,@xp_subplot,@xp_matrix_basicplot},{1:2,3},{{},{0,1},{}});
+% recursivePlot(xp4,{@xp_subplot_grid3D,@xp_matrix_basicplot},{[3,1,2]},{{},{}});
+recursivePlot(xp4,{@xp_subplot_grid3D,@xp_subplot,@xp_matrix_basicplot},{[1,2,4],3},{{},{0,1},{}});
+
 
 %% Test subset selection using regular expressions
 xp5 = xp.subset([],[],[1],'iNa*');
@@ -204,7 +215,7 @@ cd ..
 
 [data_linear,ax,ax_names] = DynaSimPlotExtract (data);
 
-xp = nDDict;
+xp = xPlt;
 xp = xp.importLinearData(data_linear,ax{:});
 xp = xp.importAxisNames(ax_names);
 
