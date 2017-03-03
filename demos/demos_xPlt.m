@@ -2,7 +2,6 @@
 % Get ready...
 
 demos_path = findDemosPath;
-cd(demos_path)
 
 % Set path to your copy of the DynaSim toolbox
 dynasim_path = fullfile(demos_path, '..');
@@ -12,6 +11,8 @@ addpath(genpath(dynasim_path)); % comment this out if already in path
 
 % Set where to save outputs
 output_directory = fullfile(demos_path, 'outputs');
+% move to root directory where outputs will be saved
+cd(output_directory);
 
 % define equations of cell model (same for E and I populations)
 eqns={ 
@@ -44,28 +45,21 @@ vary={
   'E'   ,'Iapp',[0 10 20];      % amplitude of tonic input to E-cells
   'I->E','tauD',[5 10 15]       % inhibition decay time constant from I to E
   };
-SimulateModel(s,'save_data_flag',1,'study_dir',fullfile(output_directory, 'demo_sPING_3b'),...
+SimulateModel(s,'save_data_flag',1,'study_dir','demo_sPING_3b',...
                 'vary',vary,'verbose_flag',1, ...
                 'save_results_flag',1,'plot_functions',@PlotData,'plot_options',{'format','png'} );
 
-%% Load the data and import into nDDict class
-demos_path = findDemosPath;
-cd(demos_path)
+cd ..
 
+%% Load the data and import into nDDict class
 % ...Assumes we have some DynaSim data already loaded...
-data=ImportData(fullfile('outputs', 'demo_sPING_3b'));
+cd outputs
+data=ImportData('demo_sPING_3b');
+cd ..
 
 % Load the data linearly
-[data_linear,ax,ax_names,time] = DynaSimExtract(data);
-  % data_linear: row cell array with cols = num_sims * num_labels. i.e. 1 col
-  %   for each time series recorded over all sims
-  %     looping over (outer to inner): sims, pops, vars
-  % ax: row cell array with num cols = length(ax_names). each cell contains
-  %   row vector or cell array array with length = length(data_linear). Gives
-  %   the parameters associated with each col of data_linear.
-  % ax_names: row cell array with string contents describing the parameter that
-  %   each col of ax represents.
-  % time: col vector of time points from simulation
+[data_linear,ax,ax_names,time] = DynaSimExtract (data);
+
 
 % Import into an xPlt class
 xp = xPlt;
@@ -131,6 +125,17 @@ xp4.getaxisinfo
 % recursivePlot(xp4,{@xp_subplot_grid3D,@xp_matrix_basicplot},{[3,1,2]},{{},{}});
 recursivePlot(xp4,{@xp_subplot_grid3D,@xp_subplot_grid3D,@xp_matrix_basicplot},{[1,2,4],3},{{},{0,1},{}});
 
+
+%% Run a recursive plot
+
+clear xp2 xp3
+xp4 = xp.subset([],[],[],8);
+xp4.getaxisinfo
+
+% recursivePlot(xp4,{@xp_subplot,@xp_subplot,@xp_matrix_basicplot},{1:2,3},{{[],1},{1,1},{}});
+% recursivePlot(xp4,{@xp_subplot_grid3D,@xp_subplot,@xp_matrix_basicplot},{1:2,3},{{},{0,1},{}});
+% recursivePlot(xp4,{@xp_subplot_grid3D,@xp_matrix_basicplot},{[3,1,2]},{{},{}});
+recursivePlot(xp4,{@xp_subplot_grid3D,@xp_subplot,@xp_matrix_basicplot},{[1,2,4],3},{{},{0,1},{}});
 
 
 %% Test subset selection using regular expressions
@@ -210,7 +215,7 @@ cd ..
 
 [data_linear,ax,ax_names] = DynaSimPlotExtract (data);
 
-xp = nDDict;
+xp = xPlt;
 xp = xp.importLinearData(data_linear,ax{:});
 xp = xp.importAxisNames(ax_names);
 

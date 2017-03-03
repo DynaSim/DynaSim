@@ -37,6 +37,8 @@ end
 
 
 function h=xp_subplot1_noimage(xp)
+
+        do_tight_subplot = 1;
         
         sz = size(xp);
         N1 = sz(1);
@@ -44,12 +46,15 @@ function h=xp_subplot1_noimage(xp)
         
         % Creates a new figure with a bunch of subplots
         h = figure('Units','normalized','Position',[0,0,1,1]);
+        if do_tight_subplot; haxes = tight_subplot(N1,N2,[.03 .03],[.05 .03],[.03 .01]); end
+        
         c=0;
         for i = 1:N1
             for j = 1:N2
                 c=c+1;
                 figure(h);
-                subplot(N1,N2,c); 
+                if do_tight_subplot; set(gcf,'CurrentAxes',haxes(c));
+                else subplot(N1,N2,c); end
                 xp.data{i,j}(); 
                 xp2 = xp.subset(i,j);
                 title(strrep(xp2.getaxisinfo,'_',' '));
@@ -59,6 +64,8 @@ end
 
 function h0 = xp_subplot2_asimage(xp)
 
+    do_tight_subplot = 1;
+
     sz = size(xp);
     N1 = sz(1);
     N2 = sz(2);
@@ -67,11 +74,15 @@ function h0 = xp_subplot2_asimage(xp)
     h0 = gcf; ha0 = gca;
     %h = figure('visible','off','Position',[ 440   659   497   139]);
     h = figure('visible','off');
+    if do_tight_subplot; haxes = tight_subplot(N1,N2,[.03 .03],[.05 .03],[.03 .01]); end
+    
     c=0;
     for i = 1:N1
         for j = 1:N2
             c=c+1;
-            subplot(N1,N2,c); 
+            
+            if do_tight_subplot; set(gcf,'CurrentAxes',haxes(c));
+            else subplot(N1,N2,c); end
             xp.data{i,j}(); 
             xp2 = xp.subset(i,j);
             title(strrep(xp2.getaxisinfo,'_',' '));
