@@ -62,7 +62,6 @@ data=ImportData('demo_sPING_3b');
 [data_linear,ax,ax_names,time] = DynaSimExtract (data);
 
 
-
 % The xPlt class inherits from the multidimensional dictionaries (nDDict)
 % class and adds some plotting functionality.
 xp = xPlt;
@@ -78,12 +77,14 @@ xp = xp.importAxisNames(ax_names);
 disp(xp);
 
 
-% Viewing contents of xp.axis. Values field stores axis labels. Can be
+% Viewing contents of xp.axis. Axis.values stores axis labels. Can be
 % numeric...
 disp(xp.axis(1));
 
-% ...or string type. Name field stores the name of the dimension. astruct
-% is for internal use.
+% ...or string type. As we shall see below, these axis labels can be
+% referenced via index or regular expression.
+% Axis.name field stores the name of the dimension. 
+% Axis.astruct is for internal use.
 disp(xp.axis(4));
 
 % Add some custom info to xp.metadata. This can be whatever you want.
@@ -110,13 +111,13 @@ xp.fixAxes;         % This attempts to automatically fix any dimension
                     % errors in xp
 
                     
-% Make an xPlt class with errors.
+% Make a "bad" xPlt class, containing errors.
 disp(size(xp.data));                % The 4th dimension of xp.data is of size 8
-disp(xp.axis(4).values);            % Originally it has 8 labels
+disp(xp.axis(4).values);            % It's corresponding axis should have 8 labels
 xp_bad = xp; 
 xp_bad.axis(4).values={'test'};     % Reduce this to 1 (mismatch)
 
-% Check errors in new class
+% Check errors in new class (this produces an error, so disabling it)
 % xp_bad.checkDims;
 
 % Auto fix errors in labels
@@ -124,7 +125,7 @@ xp_fixed = xp_bad.fixAxes;
 
 % View new labels
 xp_fixed.axis(4).values         % The original cell array had been replaced by 
-                                % one of appropraite length
+                                % one of appropriate length
                                 
 % View summary of the classes. Tells the dimensionality of xp.data and also
 % the number of labels in each axis.
@@ -177,22 +178,44 @@ recursivePlot(xp4,{@xp_subplot_grid3D,@xp_subplot_grid3D,@xp_matrix_basicplot},{
 
 
 %% Test subset selection using regular expressions
+
+% Pull out sodium mechs only
 xp5 = xp.subset([],[],[1],'iNa*');
 xp5.getaxisinfo
 
+% Pull out synaptic state variables
 xp5 = xp.subset([],[],[1],'_s');
 xp5.getaxisinfo
 
 %% Test packDims
 clear xp2 xp3 xp4 xp5
+
+% Start by taking a smaller subset of the original xp object.
 % xp2 = xp.subset(2,2,[],[1,3,5:8]);      % Selection based on index locations
 xp2 = xp.subset(2,2,[],'(v|^i||ISYN$)');  % Same thing as above using regular expression. Selects everything except the _s terms. "^" - beginning with; "$" - ending with
 xp2 = xp2.squeeze;
 xp2.getaxisinfo;
-src = 2;
-dest = 3;
+
+% Note that this data is sparse!
+disp(xp2.data);
+
+% Now pack dimension two (columns) of xp2 into xp2.data.
+src = 2;                    % Take 2nd dimension in xp2
+dest = 3;                   % Pack into 3rd dimension in xp2.data matrix
 xp2 = xp2.packDim(src,dest);
 xp2.getaxisinfo;
+
+% Dimension is now missing from xp2
+disp(xp2)
+
+% Instead, it is packed in to xp2.data. (Previously xp2.data was 10001x80;
+% now it is 10001x80x6).
+disp(xp2.data)
+
+% Note some of this data is sparse!
+temp1 = xp2.data{1}(1,1,:);
+temp2 = xp2.data{2}(1,1,:);
+figure; imagesc(isnan(horzcat(temp1(:),temp2(:))'));
 
 %% Average over membrane voltages
 % Analogous to cell2mat
