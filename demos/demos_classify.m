@@ -109,5 +109,5 @@ study_dir = fullfile(demos_path, 'outputs', 'demo_sPING_classify');
 % yAxisVaryParamInd = 1;
 % PlotClass(study_dir, xAxisVaryParamInd, yAxisVaryParamInd);
 
-% imdpRunDS(study_dir, struct('overwrite',1))
-imdpRunDS(study_dir, struct('overwrite',0))
+% gvRunDS(study_dir, struct('overwrite',1))
+gvRunDS(study_dir, struct('overwrite',0))

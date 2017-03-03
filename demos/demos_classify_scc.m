@@ -112,4 +112,4 @@ data=SimulateModel(s,'save_data_flag',0, 'save_results_flag',1, 'overwrite_flag'
 % yAxisVaryParamInd = 1;
 % PlotClass(study_dir, xAxisVaryParamInd, yAxisVaryParamInd);
 
-% imdpRun(study_dir, struct('overwrite',1))
+% gvRun(study_dir, struct('overwrite',1))
