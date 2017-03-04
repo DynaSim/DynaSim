@@ -1,4 +1,4 @@
-function [data_linear,ax,ax_names,time] = DynaSimExtract(data)
+function [data_table,ax_names,time] = DynaSimExtract(data)
     % Converts DynaSim structure to 1D cell array format. Later can use to
     % import to xPlt
 
@@ -72,6 +72,16 @@ function [data_linear,ax,ax_names,time] = DynaSimExtract(data)
     ax_names = varied;
     ax_names{num_varied+1} = 'populations';
     ax_names{num_varied+2} = 'variables';
+    
+    % Transpose everything to make it in terms of columns instead of rows.
+    data_linear = data_linear(:);
+    for i = 1:length(ax)
+        ax{i} = ax{i}';
+    end
+    
+    % Combine everything into one data table
+    data_table = horzcat({data_linear},ax);
+    
 end
 
 

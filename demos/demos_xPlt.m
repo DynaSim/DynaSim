@@ -60,20 +60,23 @@ SimulateModel(s,'save_data_flag',1,'study_dir','demo_sPING_3b',...
 % Load data in traditional DynaSim format
 data=ImportData('demo_sPING_3b');
 
-% Extract the data in a linear format
-[data_linear,ax,ax_names,time] = DynaSimExtract (data);
+% Extract the data in a linear table format
+[data_table,ax_names,time] = DynaSimExtract (data);
+
+% Preview the contents of this table
+previewLinearData(data_table,ax_names);
 
 % Import the linear data into an xPlt object
 xp = xPlt;
-xp = xp.importLinearData(data_linear,ax{:});
+xp = xp.importLinearData(data_table{1},data_table{2:end});
 xp = xp.importAxisNames(ax_names);
 
 
 % xPlt objects are essentially cell arrays (or matricies), but with the
 % option to index using strings instead of just integers. 
 % Thus, they are analogous to dictionaries in Python.
-% The xPlt class inherits from the multidimensional dictionaries (nDDict)
-% class and adds some plotting functionality.
+% (This core functionality is implemented by the multidimensional
+% dictionaries (nDDict), which xPlt inherits adds plotting functionality.)
 disp(xp);
 
 
@@ -123,7 +126,7 @@ xp.checkDims;       % Makes sure all the dimensions match up (e.g. xp.axis
                     % the number of labels
                     
 xp.fixAxes;         % This attempts to automatically fix any dimension
-                    % mismatches between xp.data and xp.axis. This
+                    % mismatches between xp.data and the axis labels. This
                     % particular command does nothing because there are no
                     % errors in xp
 
@@ -150,7 +153,7 @@ xp.getaxisinfo
 xp_fixed.getaxisinfo
 
 %% Plot for 2D parameter sweep
-clear xp2 xp3
+
 xp4 = xp.subset([],[],1,8);         % Eliminate all but 2 dimensions for xp4.
 xp4.getaxisinfo
 
@@ -162,7 +165,7 @@ recursivePlot(xp4,{@xp_subplot,@xp_matrix_basicplot},{[1,2]},{{0,0},{}});
 
 
 %% Plot for 3D data
-clear xp2 xp3
+
 xp4 = xp.subset([],[],[],8);
 xp4.getaxisinfo
 
@@ -172,7 +175,7 @@ recursivePlot(xp4,{@xp_subplot_grid3D,@xp_matrix_basicplot},{[3,1,2]},{{},{}});
 
 
 %% Plot for 3D data (larger one)
-clear xp2 xp3
+
 xp4 = xp.subset([],[],1,[]);
 xp4 = xp4.squeeze;
 xp4.getaxisinfo
@@ -186,7 +189,6 @@ recursivePlot(xp4,{@xp_subplot_grid3D,@xp_matrix_basicplot},{[3,1,2]},{{},{}});
 
 %% Use nested images to fit 3D data into a 2D subplot
 
-clear xp2 xp3
 xp4 = xp.subset([],[],[],8);
 xp4.getaxisinfo
 
@@ -294,7 +296,7 @@ recursivePlot(xp3,{@xp_subplot_grid3D,@xp_matrix_basicplot},{[3,1,2]},{{},{}});
 xp2 = xp.mergeDims([3,4]);
 xp2.getaxisinfo;
 
-%% Convert to Jason's DynaSim format
+%% Use mergeDims to convert to Jason's DynaSim format
 % Analogous to Reshape
 
 % This combines the 2D "vary" sweep into a single dimension. It also
@@ -333,8 +335,5 @@ recursivePlot(xp,{@xp_subplot_grid3D,@xp_plotimage},{[1,2]},{{},{.25}});
 % 
 % 
 % Implement the following:
-% 1. Example of averaging across cells
-% 2. Example of averaging synaptic currents (e.g. LFP estimate)
-% 3. Plotting - plots with embedded images
-% 4. Plotting - load images directly from DynaSim 
-% 5. Starting work on PlotData2 - any new requests?
+% + Make DynaSimPlotExtract more general
+% + Starting work on PlotData2 - any new requests?
