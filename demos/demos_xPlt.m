@@ -1,6 +1,9 @@
 %% Set up paths 
 % Get ready...
 
+% Format
+format compact
+
 % Set path to your copy of the DynaSim toolbox
 dynasim_path = fullfile('..');
 
@@ -52,7 +55,7 @@ SimulateModel(s,'save_data_flag',1,'study_dir','demo_sPING_3b',...
 
 
 
-%% Load the data and import into xPlt class
+%% Load the data and import it into xPlt class
 
 % Load data in traditional DynaSim format
 data=ImportData('demo_sPING_3b');
@@ -60,40 +63,55 @@ data=ImportData('demo_sPING_3b');
 % Extract the data in a linear format
 [data_linear,ax,ax_names,time] = DynaSimExtract (data);
 
-
-% The xPlt class inherits from the multidimensional dictionaries (nDDict)
-% class and adds some plotting functionality.
+% Import the linear data into an xPlt object
 xp = xPlt;
-
-% Import linear data into xp
 xp = xp.importLinearData(data_linear,ax{:});
 xp = xp.importAxisNames(ax_names);
 
-% At its core, xPlt has 3 fields. xp.data stores the actual data (either a 
-% matrix or a cell array). xp.axis stores axis labels associated with each
-% dimension of the data. xp.misc stores meta data for use by the user as they
-% see fit.
+
+% xPlt objects are essentially cell arrays (or matricies), but with the
+% option to index using strings instead of just integers. 
+% Thus, they are analogous to dictionaries in Python.
+% The xPlt class inherits from the multidimensional dictionaries (nDDict)
+% class and adds some plotting functionality.
 disp(xp);
 
 
-% Viewing contents of xp.axis. Axis.values stores axis labels. Can be
-% numeric...
+% At its core, xPlt has 3 fields. xp.data stores the actual data (either a 
+% matrix or a cell array). 
+disp(xp.data);
+size(xp.data);
+
+% Next, xp.axis stores axis labels associated with each dimension in
+% xp.data.
 disp(xp.axis(1));
+
+% Axis.values stores axis labels. These can be numeric...
+disp(xp.axis(1).values);
+
 
 % ...or string type. As we shall see below, these axis labels can be
 % referenced via index or regular expression.
-% Axis.name field stores the name of the dimension. 
-% Axis.astruct is for internal use.
 disp(xp.axis(4));
 
-% Add some custom info to xp.metadata. This can be whatever you want.
+% Axis.name field stores the name of the dimension. 
+disp(xp.axis(4).name)
+
+% Axis.astruct is for internal use.
+
+
+% xp.meta stores meta data for use by the user as they see fit.
+% Here we will add some custom info to xp.metadata. This can be whatever
+% you want. Here, I will use this to provide information about what is
+% stored in each of the matrices in the xp.data cell array. (Alternatively,
+% we could also make each of these matrics an xPlt object!)
 meta = struct;
 meta.datainfo(1:2) = nDDictAxis;
 meta.datainfo(1).name = 'time(ms)';
 meta.datainfo(1).values = time;
 meta.datainfo(2).name = 'cells';
 meta.datainfo(2).values = [];
-xp = xp.importMeta(meta);
+xp.meta = meta;
 clear meta
 
 
@@ -187,6 +205,7 @@ xp5 = xp.subset([],[],[1],'_s');
 xp5.getaxisinfo
 
 %% Test packDims
+% Analogous to cell2mat.
 clear xp2 xp3 xp4 xp5
 
 % Start by taking a smaller subset of the original xp object.
@@ -195,29 +214,41 @@ xp2 = xp.subset(2,2,[],'(v|^i||ISYN$)');  % Same thing as above using regular ex
 xp2 = xp2.squeeze;
 xp2.getaxisinfo;
 
-% Note that this data is sparse!
-disp(xp2.data);
+% Note that xp2 is sparse (there are some empty cells)
+disp(xp2.data);         % (E cells don't receive AMPA synapses, and I cells don't receive GABAA synapses)
 
 % Now pack dimension two (columns) of xp2 into xp2.data.
 src = 2;                    % Take 2nd dimension in xp2
 dest = 3;                   % Pack into 3rd dimension in xp2.data matrix
-xp2 = xp2.packDim(src,dest);
-xp2.getaxisinfo;
+xp3 = xp2.packDim(src,dest);
 
-% Dimension is now missing from xp2
-disp(xp2)
 
-% Instead, it is packed in to xp2.data. (Previously xp2.data was 10001x80;
-% now it is 10001x80x6).
-disp(xp2.data)
+% Check dimensionality of xp3.data
+disp(xp3.data)             % The dimension "variables", which was dimension 2
+                           % in xp2, is now dimension 3 in xp3.data.
+                           % Now xp3.data is time x cells x variables
+
+% View axis of xp3
+xp3.getaxisinfo;            % The dimension "variables" is now missing
 
 % Note some of this data is sparse!
-temp1 = xp2.data{1}(1,1,:);
-temp2 = xp2.data{2}(1,1,:);
-figure; imagesc(isnan(horzcat(temp1(:),temp2(:))'));
+temp1 = squeeze(xp3.data{1}(100,:,:));  % Pick out a random time point
+temp2 = squeeze(xp3.data{2}(100,:,:));  % Pick out a random time point
+figure; 
+subplot(211); imagesc(temp1);
 
-%% Average over membrane voltages
-% Analogous to cell2mat
+ylabel('Cells');
+xlabel(xp2.axis(2).name); 
+set(gca,'XTick',1:length(xp2.axis(2).values)); set(gca,'XTickLabels',strrep(xp2.axis(2).values,'_',' '));
+
+
+subplot(212); imagesc(temp2);
+ylabel('Cells');
+xlabel(xp2.axis(2).name); 
+set(gca,'XTick',1:length(xp2.axis(2).values)); set(gca,'XTickLabels',strrep(xp2.axis(2).values,'_',' '));
+
+
+%% Use packDim to average across cells
 
 xp2 = xp;
 xp2 = xp.subset([],[],[],'v');  % Same thing as above using regular expression. Selects everything except the _s terms. "^" - beginning with; "$" - ending with
@@ -236,14 +267,17 @@ xp3 = xp2.packDim(src,dest);
 recursivePlot(xp3,{@xp_subplot_grid3D,@xp_matrix_basicplot},{[1,2]},{{},{}});
 
 
-%% Average over synaptic currents
+%% Use packDim to average over synaptic currents
 % Analogous to cell2mat
-warning('Hadley Wickham');
+% See also plotting material by Hadley Wickham
 
+% First, pull out synaptic current variables
 xp2 = xp.subset([],[],[],'(ISYN$)');  % Same thing as above using regular expression. Selects everything except the _s terms. "^" - beginning with; "$" - ending with
 xp2.getaxisinfo;
 
+% Second, put this into matrix form, so we can average over them
 xp3 = xp2.packDim(4,3);
+disp(xp3.data)              % xp3.data is now 3D, with the 3rd dim denoting synaptic current
 xp3 = xp3.squeeze;
 xp3.getaxisinfo;
 
@@ -254,25 +288,36 @@ xp3.data = cellfun(@(x) nanmean(x,3), xp3.data,'UniformOutput',0);
 recursivePlot(xp3,{@xp_subplot_grid3D,@xp_matrix_basicplot},{[3,1,2]},{{},{}});
 
 %% Test mergeDims
-% Analogous to Reshape
+% Analogous to Reshape.
+
+% This command combines two (or more) dimensions into a single dimension.
 xp2 = xp.mergeDims([3,4]);
 xp2.getaxisinfo;
 
-%% Convert to Jason's format
+%% Convert to Jason's DynaSim format
 % Analogous to Reshape
+
+% This combines the 2D "vary" sweep into a single dimension. It also
+% combines all populations and variables into a single 1D list. Thus, Axis
+% 1 is equivalent to Jason's structure array - data(1:9). Axis 4 is
+% equivalent to the structure fields in Jason's DynaSim structure.
 xp2 = xp.mergeDims([1,2]);
 xp2 = xp2.mergeDims([3,4]);
 xp2.getaxisinfo;
+
+% Squeeze out the empty dimensions.
+xp3 = squeeze(xp2);
+xp3.getaxisinfo;
 
 
 
 %% Load nDDict structure of images
 
-cd outputs
+% Import plot files
 file = 'demo_sPING_3b';
 data = ImportPlots(file);
-cd ..
 
+% Load into DynaSim structure
 [data_linear,ax,ax_names] = DynaSimPlotExtract (data);
 
 xp = xPlt;
