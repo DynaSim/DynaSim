@@ -64,6 +64,8 @@ data=ImportData('demo_sPING_3b');
 [data_table,ax_names,time] = DynaSimExtract (data);
 
 % Preview the contents of this table
+%     Note: We cannot make this one big cell array since we want to allow
+%     axis labels to be either strings or numerics.
 previewLinearData(data_table,ax_names);
 
 % Import the linear data into an xPlt object
@@ -259,12 +261,19 @@ xp2 = xp2.squeeze;
 % Average across all cells
 xp2.data = cellfun(@(x) mean(x,2), xp2.data,'UniformOutput',0);
 
+% % Convert xp2.data from a matrix into an xPlt object as well. This is
+% % useful for keeping track of axis names. 
+% mat_ax_names = {'Time','Cell Number'};
+% mat_ax_values = {1:10001, []};
+% 
+% % xp2.data = Cell_2_nDDict(xp2.data,mat_ax_names,mat_ax_values);
+
 % Pack E and I cells together
 src=3;
 dest=2;
 xp3 = xp2.packDim(src,dest);
 
-
+%%
 % Plot 
 recursivePlot(xp3,{@xp_subplot_grid3D,@xp_matrix_basicplot},{[1,2]},{{},{}});
 

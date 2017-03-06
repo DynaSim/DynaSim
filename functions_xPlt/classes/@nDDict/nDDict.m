@@ -103,8 +103,10 @@ classdef nDDict
         
         function obj = importAxisNames(obj,ax_names)
             Nd = ndims(obj.data);
+            
             if nargin < 2
-                ax_names = cellfun(@num2str,num2cell(1:5),'UniformOutput',0);
+                ax_names = cellfun(@num2str,num2cell(1:Nd),'UniformOutput',0);
+                ax_names = cellfun(@(s) ['Dim ' s],ax_names,'UniformOutput',0);
             end
             
             if length(ax_names) ~= Nd
@@ -213,9 +215,9 @@ classdef nDDict
             % Make sure that obj.data is a cell array
             if ~iscell(obj.data); error('nDDict.data must be a cell array.'); end
             
-            % Make sure that obj.data is a matrix
-            temp = cellfun(@ismatrix,obj.data);
-            if any(temp(:) ~= 1); error('nDDict.data must contain only matrices'); end
+            % Make sure that obj.data is a numeric
+            temp = cellfun(@isnumeric,obj.data);
+            if any(temp(:) ~= 1); error('nDDict.data must contain only numerics'); end
             % % To do: implement this so it works with cell arrays and nDDict
             % classes in the future too
             
@@ -270,30 +272,6 @@ classdef nDDict
             if any(bool_size_mismatch(:))
                 error('Sizes of nDDict.data are not uniform along packing dimension. (This usually results form trying to combine populations with different numbers of cells.');
             end
-            
-            % Now, pack the data.
-%             for j = 1:sz(2)
-%                 % permute so that contents of each cell has the selected
-%                 % dimenison along dimension 1
-%                 for i = 1:sz(1)
-%                     dat_curr = obj.data{i,j};
-%                     Ndimdat = ndims(dat_curr);
-%                     dat_curr = permute(dat_curr,[dim, 1:dim-1, dim+1:Ndimdat]); %whos dat_curr
-%                     % dat_curr = permute(dat_curr,[2:dim, 1, dim+1:Ndimdat]);    %whos dat_curr       % Uncomment this stuff to make sure it permutes back
-%                     obj.data{i,j} = dat_curr;
-%                 end
-%                 
-%                 % Concatenate the data along dimension 1
-%                 data_new{j} = cat(1,obj.data{j,:});
-%                 
-%                 % Permute the contents of each cell back to original
-%                 for i = 1:sz(1)
-%                     dat_curr = data_new{j};
-%                     dat_curr = permute(dat_curr,[2:dim, 1, dim+1:Ndimdat]);     %whos dat_curr
-%                     data_new{j} = dat_curr;
-%                 end
-%                 
-%             end
         
             for j = 1:sz(2)
                 obj.data{1,j} = cat(dim_target,obj.data{:,j});
@@ -309,25 +287,34 @@ classdef nDDict
             obj.data = reshape(obj.data,sz0);
             obj.data = permute(obj.data,[2:dim_src, 1, dim_src+1:Nd]);
             
-            % Also, update obj.axis
-%             obj.axis(dim_src).values = 1;
-            obj = setAxisDefaultNames(obj,dim_src);
+            % Also, clear obj.axis
+            ax_src = obj.axis(dim_src);
+            obj = setAxisDefaults(obj,dim_src);
             obj.axis(dim_src).name = ['Dim ' num2str(dim_src)];
+            
+            % If obj.data is a nDDict object itself, update axes labels
+            % appropriately
+            for i = 1:numel(obj.data)
+                if isa(obj.data{i},'nDDict')
+                    warning('This mode doesnt work yet');
+                    obj.data{i}.axis(dim_target) = ax_src;
+                end
+            end
             
         end
         
         function out = getaxisinfo(obj)
             % If no output arguments, prints axis info to the screen. If
             % output arguments are supplied, returns this information as a
-            % strin.g
+            % string
             
             if nargout > 0
                 out = '';
             end
             
             if isempty(obj.data)
-                if nargout > 0; out = 'Object is empty';
-                else fprintf('Object is empty \n');
+                if nargout > 0; out = 'obj.data is empty';
+                else fprintf('obj.data is empty \n');
                 end
                 return;
             end
@@ -335,13 +322,13 @@ classdef nDDict
             for i = 1:length(obj.axis)
                 
                 out1 = obj.axis(i).getaxisinfo;
-                temp = '';
+                spacer = '';
                 
                 if nargout > 0
-                    out = [out, temp, out1, '; ' ];
+                    out = [out, spacer, out1, '; ' ];
                 else
-                    temp = ['Axis ', num2str(i), ': '];
-                    fprintf([temp, out1, '\n']);
+                    spacer = ['Axis ', num2str(i), ': '];
+                    fprintf([spacer, out1, '\n']);
                 end
             end
             
@@ -357,7 +344,7 @@ classdef nDDict
         function obj = fixAxes(obj)
             % This function forces the nDDict axis data to be updated to
             % match the dimensions of the data structure.
-            % The convention of nDDict is to have always follow MATLAB
+            % The convention of nDDict is to follow MATLAB
             % conventions for dimensionality. Thus, the size(obj.data)
             % command is used to determine the correct number of axes, and
             % axis is adjusted to match, adding or removing dimensions as
@@ -367,6 +354,9 @@ classdef nDDict
             % The one exception to MATLAB conventions is that there are
             % allowed to be more axes than there are dimensions in obj.data
             % as long as the number of entries in each of these axes is 1.
+            % This allows you to store axis labels and names for trailing
+            % singleton dimensions (e.g. dimensions of greater number than
+            % ndims(obj.data) would return).
 
             Nd = ndims(obj.data);
             Na = length(obj.axis);
@@ -374,7 +364,7 @@ classdef nDDict
             % Sweep through all axes and make sure dimensions are correct.
             % Add new axes if needed, up to Nd.
             for i = 1:Nd
-                obj = setAxisDefaultNames(obj,i);  % Sets axis #i to the default name
+                obj = setAxisDefaults(obj,i);  % Sets axis #i to the default name
             end
 
             % Trim away excess values in axes
@@ -437,9 +427,9 @@ classdef nDDict
             % All good if make it to here
         end
 
-        
+        %% % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % 
         % % % % % % % % % % % OVERLOADED FUNCTIONS % % % % % % % % % % %
-        
+        % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % %
         function A = isempty(obj)
             A = isempty(obj.data);
         end
@@ -528,6 +518,32 @@ classdef nDDict
         end
         
         % % % % % % % % % % % END % % % % % % % % % % %
+        
+        %% % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % 
+        % % % % % % % % % % % OVERLOADED OPERATORS % % % % % % % % % % %
+        % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % %
+%         function varargout = subsref(varargin)
+%             
+%             % Default settings for everything
+%             [varargout{1:nargout}] = builtin('subsref',varargin{:});
+%             
+% %             A = varargin{1};
+% %             S = varargin{2};
+% %             
+% %             switch S.type
+% %                 case '()'
+% %                     %[varargout{1:nargout}] = builtin('subsref',varargin{:});
+% %                     varargout{1} = builtin('subsref',A.data,S);
+% %                 case '{}'
+% %                     %[varargout{1:nargout}] = builtin('subsref',varargin{:});
+% %                     varargout{2} = builtin('subsref',A.data,S);
+% %                 case '.'
+% %                     [varargout{1:nargout}] = builtin('subsref',varargin{:});
+% %                 otherwise
+% %                     error('Unknown indexing method. Should never reach this');
+% %             end
+%              
+%         end
     end
 end
 
@@ -546,7 +562,7 @@ end
 
 
 
-function obj = setAxisDefaultNames(obj,dim)
+function obj = setAxisDefaults(obj,dim)
     % Sets obj.axis(i) to default values
     
     % Get desired size of dataset
@@ -572,6 +588,8 @@ function obj = setAxisDefaultNames(obj,dim)
         % Otherwise, make sure dimensionality is correct. If not, update it
         % missing entries with default names.
         N = length(ax_curr.values);
+        
+        % If too short
         if N < sz_dim
             if isnumeric(ax_curr.values)
                 for j = N:sz_dim; ax_curr.values(j) = j; end
@@ -580,12 +598,14 @@ function obj = setAxisDefaultNames(obj,dim)
             end
         end
         
+        % If too long
         if N > sz_dim
             %ax_curr.values = ax_curr.values(1:sz(dim));
             ax_curr.values = 1:sz_dim;                                                   % Populate with genetic numerics
         end
     end
     
+    % Assign our new axis to the current dimension
     obj.axis(dim) = ax_curr;
 end
 
