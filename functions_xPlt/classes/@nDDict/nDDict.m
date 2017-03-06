@@ -602,7 +602,7 @@ classdef nDDict
             elseif iscell(obj.data)
                 if iscellnum(obj.data)
                     out = 'cellnum';
-                elseif all(cellfun(@(s) isa(s,'nDDict'),obj.data)) || all(cellfun(@(s) isa(s,'xPlt'),obj.data))
+                elseif all(cellfun(@(s) isa(s,'nDDict'),obj.data(:))) || all(cellfun(@(s) isa(s,'xPlt'),obj.data(:)))
                     out = 'cellnDDict';
                 else
                     out = 'cell';
@@ -729,7 +729,7 @@ function OUT = iscellnum(IN)
 % ISCELLNUM(S) returns 1 if IN is a cell array of numerics and 0
 %   otherwise.
 
-    OUT = all(cellfun(@isnumeric,IN));
+    OUT = all(cellfun(@isnumeric,IN(:)));
 
 end
 
