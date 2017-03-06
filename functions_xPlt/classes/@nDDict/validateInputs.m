@@ -38,7 +38,7 @@ function outputformats = validateInputs(xp,field,field_type)
     %     elseif isstring(axlinear)
     %         ax_type = 'string';
         elseif iscell(axlinear)
-            if is_cellarray_of_chars(axlinear)
+            if iscellstr(axlinear)
                 ax_type = 'cell_of_chars';
             else
                 ax_type = 'unknown';
@@ -50,9 +50,6 @@ function outputformats = validateInputs(xp,field,field_type)
     end
 
 
-    function out = is_cellarray_of_chars(c)
-        out = all(cellfun(@ischar,c));
-    end
 
 
 end

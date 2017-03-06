@@ -174,7 +174,7 @@ classdef nDDict
             tempstr = {};
             for i = 1:Nd2p
                 for j = 1:Nmerged
-                    if iscell(temp{i}); currval = temp{i}{j};
+                    if iscellstr(temp{i}); currval = temp{i}{j};
                     else
                         currval = num2str(temp{i}(j));  % If it's not a string, convert it to one.
                     end
@@ -337,13 +337,7 @@ classdef nDDict
             if nargout > 0
                 out = '';
             end
-            
-            if isempty(obj.data)
-                if nargout > 0; out = 'obj.data is empty';
-                else fprintf('obj.data is empty \n');
-                end
-                return;
-            end
+
             
             for i = 1:length(obj.axis)
                 
@@ -356,6 +350,13 @@ classdef nDDict
                     spacer = ['Axis ', num2str(i), ': '];
                     fprintf([spacer, out1, '\n']);
                 end
+            end
+            
+            if isempty(obj.data)
+                if nargout > 0; out = 'obj.data is empty';
+                else fprintf('obj.data is empty \n');
+                end
+                return;
             end
             
             % Lastly output a summary of dimensionality comparing nDDict.axis
@@ -385,6 +386,11 @@ classdef nDDict
 
             Nd = ndims(obj.data);
             Na = length(obj.axis);
+            
+            % Make sure obj.data, obj.axis.name, and obj.axis.values have the right data types
+            if strcmp(getclass_obj_data(obj),'unknown'); error('Obj.data must be either numeric or cell array'); end
+            if any(strcmp(getclass_obj_axis_values(obj),'unknown')); error('Obj.axis.values must be of type numeric or cell array of character vectors.'); end
+            if any(strcmp(getclass_obj_axis_name(obj),'unknown')); error('Obj.axis.name must be of type char.'); end
 
             % Sweep through all axes and make sure dimensions are correct.
             % Add new axes if needed, up to Nd.
@@ -418,6 +424,11 @@ classdef nDDict
             % automatically correct everything.
             
             if isempty(obj); error('Object is empty. Input some data first!'); return; end
+            
+            % Make sure obj.data, obj.axis.name, and obj.axis.values have the right data types
+            if strcmp(getclass_obj_data(obj),'unknown'); error('Obj.data must be either numeric or cell array'); end
+            if any(strcmp(getclass_obj_axis_values(obj),'unknown')); error('Obj.axis.values must be of type numeric or cell array of character vectors.'); end
+            if any(strcmp(getclass_obj_axis_name(obj),'unknown')); error('Obj.axis.name must be of type char.'); end
             
             sza = arrayfun(@(x) length(x.values),obj.axis);
             szd = size(obj.data);
@@ -570,8 +581,55 @@ classdef nDDict
 %         end
     end
     
+    %% % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % 
+    % % % % % % % % % % % PRIVATE FUNCTIONS % % % % % % % % % % %
+    % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % %
     methods (Access = private)
         outputformats = validateInputs(xp,field,field_type)     % Used by importLinearData and other importData functions
+    end
+    
+    %% % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % 
+    % % % % % % % % % % % HELPER FUNCTIONS % % % % % % % % % % %
+    % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % %
+    methods
+        % These functions should only be called by other nDDict methods.
+        % Make these public for now for testing, but set to private
+        % eventually.
+        function out = getclass_obj_data(obj)
+            % Returns class type of entries in obj.data.
+            if isnumeric(obj.data)
+                out = 'numeric';
+            elseif iscell(obj.data)
+                if iscellnum(obj.data)
+                    out = 'cellnum';
+                elseif all(cellfun(@(s) isa(s,'nDDict'),obj.data)) || all(cellfun(@(s) isa(s,'xPlt'),obj.data))
+                    out = 'cellnDDict';
+                else
+                    out = 'cell';
+                end
+            else
+                out = 'unknown';
+            end
+        end
+        
+        function out = getclass_obj_axis_values(obj)
+            % Returns class type of entries in obj.axis.values
+            Na = length(obj.axis);
+            out = cell(1,Na);
+            for i = 1:Na
+                out{i} = obj.axis(i).getclass_values;
+            end
+        end
+        
+        function out = getclass_obj_axis_name(obj)
+            % Returns class type of entries in obj.axis.values            
+            Na = length(obj.axis);
+            out = cell(1,Na);
+            for i = 1:Na
+                out{i} = obj.axis(i).getclass_name;
+            end
+        end
+
     end
 end
 
@@ -624,8 +682,10 @@ function obj = setAxisDefaults(obj,dim)
         if N < sz_dim
             if isnumeric(ax_curr.values)
                 for j = N:sz_dim; ax_curr.values(j) = j; end
-            else
+            elseif iscellstr(ax_curr.values)
                 for j = N:sz_dim; ax_curr.values{j} = num2str(j); end
+            else
+                error('axis.values must be either type numeric or cell array of strings');
             end
         end
         
@@ -664,6 +724,14 @@ end
 %     end
 % end
 
+
+function OUT = iscellnum(IN)
+% ISCELLNUM(S) returns 1 if IN is a cell array of numerics and 0
+%   otherwise.
+
+    OUT = all(cellfun(@isnumeric,IN));
+
+end
 
 
 

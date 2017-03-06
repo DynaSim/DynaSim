@@ -68,6 +68,26 @@ classdef nDDictAxis
             
             
         end
+        
+        function out = getclass_values(obj)
+            % Returns class type of obj.values.
+            if isnumeric(obj.values)
+                out = 'numeric';
+            elseif iscellstr(obj.values)
+                out = 'cellstr';
+            else
+                out = 'unknown';
+            end
+        end
+        
+        function out = getclass_name(obj)
+            % Returns class type of obj.name.
+            if ischar(obj.name)
+                out = 'char';
+            else
+                out = 'unknown';
+            end
+        end
 
         
     end

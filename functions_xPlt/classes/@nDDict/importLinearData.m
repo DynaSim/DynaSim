@@ -76,7 +76,7 @@ function obj = importLinearData(obj,X,varargin)
         % Get subscripts
         subs = cell(1,Ndims);
         for j = 1:Ndims
-            if iscell(axeslinear{j})
+            if iscellstr(axeslinear{j})
                 subs{j} = find(strcmp(axeslinear{j}{i},obj.axis(j).values));
             else
                 subs{j} = find(axeslinear{j}(i) == obj.axis(j).values);
