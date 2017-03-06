@@ -330,7 +330,7 @@ classdef nDDict
             
             % Make sure that obj.data is a numeric
             temp = cellfun(@isnumeric,obj.data);
-            if any(temp(:) ~= 1); error('nDDict.data must contain only numerics'); end
+            if any(temp(:) ~= 1); error('nDDict.data must contain only numerics'); end      % Can redo this in the future to work with nDDicts containing matrices
             % % To do: implement this so it works with cell arrays and nDDict
             % classes in the future too
             

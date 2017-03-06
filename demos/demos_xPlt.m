@@ -62,7 +62,7 @@ data=ImportData('demo_sPING_3b');
 
 % Extract the data in a linear table format
 [data_table,ax_names,time] = DynaSimExtract (data);
-%%
+
 % Preview the contents of this table
 %     Note: We cannot make this one big cell array since we want to allow
 %     axis labels to be either strings or numerics.
