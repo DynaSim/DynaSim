@@ -329,10 +329,20 @@ file = 'demo_sPING_3b';
 data = ImportPlots(file);
 
 % Load into DynaSim structure
-[data_linear,ax,ax_names] = DynaSimPlotExtract (data);
+[data_table,ax_names] = DynaSimExtractField (data,'plot_files');
 
+% Preview the contents of this table
+previewLinearData(data_table,ax_names);
+
+% The entries in the first column contain the paths to the figure files.
+% There can be multiple figures associated with each simulation, which is
+% why these are cell arrays of strings.
+disp(data_table{1}{1})
+disp(data_table{1}{2})
+
+% Import the linear data into an xPlt object
 xp = xPlt;
-xp = xp.importLinearData(data_linear,ax{:});
+xp = xp.importLinearData(data_table{1},data_table{2:end});
 xp = xp.importAxisNames(ax_names);
 
 

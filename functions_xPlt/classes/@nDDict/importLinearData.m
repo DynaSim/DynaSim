@@ -1,18 +1,19 @@
 function obj = importLinearData(obj,X,varargin)
-    % xp = importLinearData(X,axislabels1,...,axislabelsN)
-    % xp = importLinearData(X,axislabels1,...,axislabelsN,'outputformat',Value)
-    % Imports a linear array of data, converts it into a matrix
-    % based on the supplied axislabels, and stores it in xp.data.
-    % Also populates the xp.axis.values appropriately.
-    % X - linear matrix or cell array containing input data
-    % axislabels1 - linear matrix or cell array containing data labels for dimension1
-    % ...
-    % axislabelsN - linear matrix or cell array containing data labels for dimensionN
-    % Value - Specifies storage format of the imported data, either 'cell' or 
-    %         'numeric'. Note: if input data is a cell,
-    %                output format must also be set to 'cell.'
-
-
+%% obj = importLinearData(obj,X,varargin)
+%     Purpose:
+%     Imports a linear array of data, converts it into a matrix
+%     based on the supplied axislabels, and stores it in xp.data.
+%     Also populates the xp.axis.values appropriately.
+% 
+%     Forms:
+%     xp = importLinearData(X,axislabels1,...,axislabelsN)
+% 
+%     Inputs:
+%     X - vector containing input data. Can be numeric or cell array.
+%     axislabels1 - vector containing data labels for dimension1 in X
+%     ...
+%     axislabelsN - vector containing containing data labels for dimensionN in X
+%     NOTE: axislabels1...N must be either numeric or cell arrays of character vectors
 
     % Initialize
     axeslinear = varargin;
