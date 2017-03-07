@@ -66,7 +66,7 @@ data=ImportData('demo_sPING_3b');
 % Preview the contents of this table
 %     Note: We cannot make this one big cell array since we want to allow
 %     axis labels to be either strings or numerics.
-previewLinearData(data_table,ax_names);
+previewTable(data_table,ax_names);
 
 % Import the linear data into an xPlt object
 xp = xPlt;
@@ -332,7 +332,7 @@ data = ImportPlots(file);
 [data_table,ax_names] = DataField2Table (data,'plot_files');
 
 % Preview the contents of this table
-previewLinearData(data_table,ax_names);
+previewTable(data_table,ax_names);
 
 % The entries in the first column contain the paths to the figure files.
 % There can be multiple figures associated with each simulation, which is
