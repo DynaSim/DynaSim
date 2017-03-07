@@ -576,6 +576,15 @@ classdef nDDict
                     case '()'
                         %[varargout{1:nargout}] = builtin('subsref',varargin{:});
                         %varargout{1} = builtin('subsref',obj.data,S);
+                        
+                        % Convert colon operators to empties, which subset
+                        % uses to denote "take everything"
+                        for i = 1:length(S.subs)
+                            if strcmp(S.subs{i},':')
+                                S.subs{i} = [];
+                            end
+                        end
+                        
                         varargout{1} = obj.subset(S.subs{:});
                     case '{}'
                         %[varargout{1:nargout}] = builtin('subsref',varargin{:});

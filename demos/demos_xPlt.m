@@ -74,7 +74,7 @@ X = data_table{1};                          % X holds the data that will populat
 axislabels = data_table(2:end);             % Each entry in X has an associated set of axis labels, which will define its location in multidimensional space. **Must be numeric or cell array of chars only**
 xp = xp.importLinearData(X,axislabels{:});
 xp = xp.importAxisNames(column_titles(2:end));  % There should be 1 axis name for every axis, of type char.
-%%
+
 
 % xPlt objects are essentially cell arrays (or matricies), but with the
 % option to index using strings instead of just integers. 
@@ -98,7 +98,7 @@ disp(xp.axis(1).values);
 
 
 % ...or string type. As we shall see below, these axis labels can be
-% referenced via index or regular expression.
+% referenced via index or regular expression (more on this below).
 disp(xp.axis(4));
 
 % Axis.name field stores the name of the dimension. 
@@ -156,21 +156,44 @@ xp_fixed.axis(4).values         % The original cell array had been replaced by
 xp.getaxisinfo
 xp_fixed.getaxisinfo
 
-%% Plot for 2D parameter sweep
+%% Indexing data
 
-xp4 = xp.subset([],[],1,8);         % Eliminate all but 2 dimensions for xp4.
+% Indexing works just like with normal data. This creates a new xPlt object
+% based on the original data, with the correct axis labels
+xp4 = xp(:,:,1,8);                  % ## Update - This does the same thing as xp.subset([],[],1,8), which was the old way
+                                    % of pulling data subsets. Note that [] and : are equivalent.
 xp4.getaxisinfo
 
+% Similarly, can index string axes using regular expressions
+% Pull out sodium mechs only
+xp5 = xp(:,:,1,'iNa*');
+xp5.getaxisinfo
+
+% Pull out synaptic state variables
+xp5 = xp(:,:,1,'_s');
+xp5.getaxisinfo
+
+% Lastly, you can reference xp.data with the following shorthand
+% (This is the same as xp.data(:,:,1,8). Regular expressions dont work in this mode)
+mydata = xp{:,:,1,8};              
+mydata2 = xp.data(:,:,1,8);
+disp(isequal(mydata,mydata2));
+
+clear mydata mydata2 xp4 xp5
+
+%% Plot for 2D parameter sweep
 % Tip: don't try to understand what recursivePlot is doing - instead, try
 % putting break points in the various function handles to see how this
 % command works.
+
+xp4 = xp(:,:,'E','v');
 recursivePlot(xp4,{@xp_subplot,@xp_matrix_basicplot},{[1,2]},{{0,0},{}});
 
 
 
 %% Plot for 3D data
 
-xp4 = xp.subset([],[],[],8);
+xp4 = xp(:,:,:,8);
 xp4.getaxisinfo
 
 recursivePlot(xp4,{@xp_subplot_grid3D,@xp_matrix_basicplot},{[3,1,2]},{{},{}});
@@ -180,7 +203,7 @@ recursivePlot(xp4,{@xp_subplot_grid3D,@xp_matrix_basicplot},{[3,1,2]},{{},{}});
 
 %% Plot for 3D data (larger one)
 
-xp4 = xp.subset([],[],1,[]);
+xp4 = xp(:,:,1,:);
 xp4 = xp4.squeeze;
 xp4.getaxisinfo
 
@@ -193,22 +216,13 @@ recursivePlot(xp4,{@xp_subplot_grid3D,@xp_matrix_basicplot},{[3,1,2]},{{},{}});
 
 %% Use nested images to fit 3D data into a 2D subplot
 
-xp4 = xp.subset([],[],[],8);
+xp4 = xp(:,:,:,8);
 xp4.getaxisinfo
 
 recursivePlot(xp4,{@xp_subplot_grid3D,@xp_subplot_grid3D,@xp_matrix_basicplot},{[1,2,4],3},{{},{0,1},{}});
 % recursivePlot(xp4,{@xp_subplot_grid3D,@xp_subplot,@xp_matrix_basicplot},{[1,2,4],3},{{},{0,1},{}});
 
 
-%% Test subset selection using regular expressions
-
-% Pull out sodium mechs only
-xp5 = xp.subset([],[],[1],'iNa*');
-xp5.getaxisinfo
-
-% Pull out synaptic state variables
-xp5 = xp.subset([],[],[1],'_s');
-xp5.getaxisinfo
 
 %% Test packDims
 % Analogous to cell2mat.
@@ -216,7 +230,7 @@ clear xp2 xp3 xp4 xp5
 
 % Start by taking a smaller subset of the original xp object.
 % xp2 = xp.subset(2,2,[],[1,3,5:8]);      % Selection based on index locations
-xp2 = xp.subset(2,2,[],'(v|^i||ISYN$)');  % Same thing as above using regular expression. Selects everything except the _s terms. "^" - beginning with; "$" - ending with
+xp2 = xp(2,2,:,'(v|^i||ISYN$)');  % Same thing as above using regular expression. Selects everything except the _s terms. "^" - beginning with; "$" - ending with
 xp2 = xp2.squeeze;
 xp2.getaxisinfo;
 
@@ -257,7 +271,7 @@ set(gca,'XTick',1:length(xp2.axis(2).values)); set(gca,'XTickLabels',strrep(xp2.
 %% Use packDim to average across cells
 
 xp2 = xp;
-xp2 = xp.subset([],[],[],'v');  % Same thing as above using regular expression. Selects everything except the _s terms. "^" - beginning with; "$" - ending with
+xp2 = xp(:,:,:,'v');  % Same thing as above using regular expression. Selects everything except the _s terms. "^" - beginning with; "$" - ending with
 xp2 = xp2.squeeze;
 %
 % Average across all cells
@@ -285,7 +299,7 @@ recursivePlot(xp3,{@xp_subplot_grid3D,@xp_matrix_basicplot},{[1,2]},{{},{}});
 % See also plotting material by Hadley Wickham
 
 % First, pull out synaptic current variables
-xp2 = xp.subset([],[],[],'(ISYN$)');  % Same thing as above using regular expression. Selects everything except the _s terms. "^" - beginning with; "$" - ending with
+xp2 = xp(:,:,:,'(ISYN$)');  % Same thing as above using regular expression. Selects everything except the _s terms. "^" - beginning with; "$" - ending with
 xp2.getaxisinfo;
 
 % Second, put this into matrix form, so we can average over them
