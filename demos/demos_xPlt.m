@@ -61,7 +61,7 @@ SimulateModel(s,'save_data_flag',1,'study_dir','demo_sPING_3b',...
 data=ImportData('demo_sPING_3b');
 
 % Extract the data in a linear table format
-[data_table,ax_names,time] = DynaSimExtract (data);
+[data_table,ax_names,time] = Data2Table (data);
 
 % Preview the contents of this table
 %     Note: We cannot make this one big cell array since we want to allow
@@ -329,7 +329,7 @@ file = 'demo_sPING_3b';
 data = ImportPlots(file);
 
 % Load into DynaSim structure
-[data_table,ax_names] = DynaSimExtractField (data,'plot_files');
+[data_table,ax_names] = DataField2Table (data,'plot_files');
 
 % Preview the contents of this table
 previewLinearData(data_table,ax_names);

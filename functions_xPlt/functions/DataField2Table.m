@@ -1,6 +1,6 @@
 
 
-function [data_table,ax_names,time] = DynaSimExtractField (data,fieldname)
+function [data_table,ax_names,time] = DataField2Table (data,fieldname)
     % Converts DynaSim structure to 1D cell array format. Later can use to
     % import to xPlt. In this case, pulls out a specific field from data,
     % along with the varied information.

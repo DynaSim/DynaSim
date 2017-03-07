@@ -1,4 +1,4 @@
-function [data_table,ax_names,time] = DynaSimExtract(data)
+function [data_table,ax_names,time] = Data2Table(data)
     % Converts DynaSim structure to 1D cell array format. Later can use to
     % import to xPlt
 
