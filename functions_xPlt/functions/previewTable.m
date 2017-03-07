@@ -1,6 +1,6 @@
 
 
-function [dt_formatted, axn_formatted] = previewTable(data_table,ax_names)
+function [dt_formatted, axn_formatted] = previewTable(data_table,col_names)
 
     % All data, formatted into cells
     dt_formatted = data_table;
@@ -10,14 +10,11 @@ function [dt_formatted, axn_formatted] = previewTable(data_table,ax_names)
     end
     dt_formatted = horzcat(dt_formatted{:});
     
-    % Axis names
-    axn_formatted = {'data', ax_names{:}};
-    
     % Build a divider
-    divider = repmat({'------'},1,length(axn_formatted));
+    divider = repmat({'------'},1,length(col_names));
     
-    display(vertcat(axn_formatted,divider,dt_formatted));
-%     display(dt_formatted)
+    % Display the concatenated table
+    display(vertcat(col_names,divider,dt_formatted));
     
 
 end

@@ -1,6 +1,6 @@
 
 
-function [data_table,ax_names] = DataField2Table (data,fieldname,verbose_flag)
+function [data_table,column_titles] = DataField2Table (data,fieldname,verbose_flag)
     % Converts DynaSim structure to 1D cell array format. Later can use to
     % import to xPlt. In this case, pulls out a specific field from data,
     % along with the varied information.
@@ -56,8 +56,11 @@ function [data_table,ax_names] = DataField2Table (data,fieldname,verbose_flag)
     % Combine everything into one data table
     data_table = horzcat({data_linear},ax);
     
+    % List table column names
+    column_titles = {'data',ax_names{:}};
+    
     if verbose_flag
-        previewTable(data_table,ax_names);
+        previewTable(data_table,column_titles);
     end
     
 end

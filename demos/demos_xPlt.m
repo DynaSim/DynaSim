@@ -61,17 +61,17 @@ SimulateModel(s,'save_data_flag',1,'study_dir','demo_sPING_3b',...
 data=ImportData('demo_sPING_3b');
 
 % Extract the data in a linear table format
-[data_table,ax_names,time] = Data2Table (data);
+[data_table,column_titles,time] = Data2Table (data);
 
 % Preview the contents of this table
 %     Note: We cannot make this one big cell array since we want to allow
 %     axis labels to be either strings or numerics.
-previewTable(data_table,ax_names);
+previewTable(data_table,column_titles);
 
 % Import the linear data into an xPlt object
 xp = xPlt;
 xp = xp.importLinearData(data_table{1},data_table{2:end});
-xp = xp.importAxisNames(ax_names);
+xp = xp.importAxisNames(column_titles(2:end));
 
 
 % xPlt objects are essentially cell arrays (or matricies), but with the
@@ -329,10 +329,10 @@ file = 'demo_sPING_3b';
 data = ImportPlots(file);
 
 % Load into DynaSim structure
-[data_table,ax_names] = DataField2Table (data,'plot_files');
+[data_table,column_titles] = DataField2Table (data,'plot_files');
 
 % Preview the contents of this table
-previewTable(data_table,ax_names);
+previewTable(data_table,column_titles);
 
 % The entries in the first column contain the paths to the figure files.
 % There can be multiple figures associated with each simulation, which is
@@ -343,7 +343,7 @@ disp(data_table{1}{2})
 % Import the linear data into an xPlt object
 xp = xPlt;
 xp = xp.importLinearData(data_table{1},data_table{2:end});
-xp = xp.importAxisNames(ax_names);
+xp = xp.importAxisNames(column_titles(2:end));
 
 
 recursivePlot(xp,{@xp_subplot_grid3D,@xp_plotimage},{[1,2]},{{},{.25}});

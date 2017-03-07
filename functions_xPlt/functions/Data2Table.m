@@ -1,4 +1,4 @@
-function [data_table,ax_names,time] = Data2Table(data,verbose_flag)
+function [data_table,column_titles,time] = Data2Table(data,verbose_flag)
     % Converts DynaSim structure to 1D cell array format. Later can use to
     % import to xPlt
     
@@ -87,8 +87,11 @@ function [data_table,ax_names,time] = Data2Table(data,verbose_flag)
     % Combine everything into one data table
     data_table = horzcat({data_linear},ax);
     
+    % List table column names
+    column_titles = {'data',ax_names{:}};
+    
     if verbose_flag
-        previewTable(data_table,ax_names);
+        previewTable(data_table,column_titles);
     end
     
 end
