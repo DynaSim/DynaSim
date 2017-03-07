@@ -88,8 +88,14 @@ classdef nDDict
                 end
             end
             
-            % Initialize
+            % Make sure that size of selection doesnt exceed size of data
             sz = size(obj);
+            for i = 1:Ns
+                if selection{i} > sz(i); error('Selection index exceeds dimensions'); end
+            end
+            
+            % Initialize
+            
             obj2 = obj;             % Create new class of same type as original
             obj2 = obj2.reset;
             obj2.meta = obj.meta;
@@ -557,28 +563,35 @@ classdef nDDict
         %% % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % 
         % % % % % % % % % % % OVERLOADED OPERATORS % % % % % % % % % % %
         % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % %
-%         function varargout = subsref(varargin)
-%             
+        function varargout = subsref(varargin)
+            
 %             % Default settings for everything
 %             [varargout{1:nargout}] = builtin('subsref',varargin{:});
-%             
-% %             A = varargin{1};
-% %             S = varargin{2};
-% %             
-% %             switch S.type
-% %                 case '()'
-% %                     %[varargout{1:nargout}] = builtin('subsref',varargin{:});
-% %                     varargout{1} = builtin('subsref',A.data,S);
-% %                 case '{}'
-% %                     %[varargout{1:nargout}] = builtin('subsref',varargin{:});
-% %                     varargout{2} = builtin('subsref',A.data,S);
-% %                 case '.'
-% %                     [varargout{1:nargout}] = builtin('subsref',varargin{:});
-% %                 otherwise
-% %                     error('Unknown indexing method. Should never reach this');
-% %             end
-%              
-%         end
+            
+            obj = varargin{1};
+            S = varargin{2};
+            
+            if length(S) == 1               % This discounts cases like obj.subset(1,2,3,4)
+                switch S.type
+                    case '()'
+                        %[varargout{1:nargout}] = builtin('subsref',varargin{:});
+                        %varargout{1} = builtin('subsref',obj.data,S);
+                        varargout{1} = obj.subset(S.subs{:});
+                    case '{}'
+                        %[varargout{1:nargout}] = builtin('subsref',varargin{:});
+                        S2 = S;
+                        S2.type = '()';
+                        [varargout{1:nargout}] = builtin('subsref',obj.data,S2,varargin{3:end});
+                    case '.'
+                        [varargout{1:nargout}] = builtin('subsref',varargin{:});
+                    otherwise
+                        error('Unknown indexing method. Should never reach this');
+                end
+            else
+                [varargout{1:nargout}] = builtin('subsref',varargin{:});
+            end
+             
+        end
     end
     
     %% % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % 
