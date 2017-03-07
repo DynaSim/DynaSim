@@ -70,8 +70,10 @@ previewTable(data_table,column_titles);
 
 % Import the linear data into an xPlt object
 xp = xPlt;
-xp = xp.importLinearData(data_table{1},data_table{2:end});
-xp = xp.importAxisNames(column_titles(2:end));
+X = data_table{1};                          % X holds the data that will populate the multidimensional array. Must be numeric or cell array.
+axislabels = data_table(2:end);             % Each entry in X has an associated set of axis labels, which will define its location in multidimensional space. **Must be numeric or cell array of chars only**
+xp = xp.importLinearData(X,axislabels{:});
+xp = xp.importAxisNames(column_titles(2:end));  % There should be 1 axis name for every axis, of type char.
 
 
 % xPlt objects are essentially cell arrays (or matricies), but with the
@@ -342,7 +344,8 @@ disp(data_table{1}{2})
 
 % Import the linear data into an xPlt object
 xp = xPlt;
-xp = xp.importLinearData(data_table{1},data_table{2:end});
+X = data_table{1}; axislabels = data_table(2:end);
+xp = xp.importLinearData(X, axislabels{:});
 xp = xp.importAxisNames(column_titles(2:end));
 
 
