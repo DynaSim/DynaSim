@@ -222,6 +222,17 @@ xp4.getaxisinfo
 recursivePlot(xp4,{@xp_subplot_grid3D,@xp_subplot_grid3D,@xp_matrix_basicplot},{[1,2,4],3},{{},{0,1},{}});
 % recursivePlot(xp4,{@xp_subplot_grid3D,@xp_subplot,@xp_matrix_basicplot},{[1,2,4],3},{{},{0,1},{}});
 
+%% Combine two xPlt objects
+
+xp3 = xp(2,:,'E','v');
+xp3.getaxisinfo
+
+xp4 = xp(:,3,'E','v');
+xp4.getaxisinfo
+
+xp5 = merge(xp3,xp4);
+
+recursivePlot(xp5,{@xp_subplot,@xp_matrix_basicplot},{[1,2]},{{0,0},{}});
 
 
 %% Test packDims
@@ -328,8 +339,8 @@ xp2.getaxisinfo;
 % combines all populations and variables into a single 1D list. Thus, Axis
 % 1 is equivalent to Jason's structure array - data(1:9). Axis 4 is
 % equivalent to the structure fields in Jason's DynaSim structure.
-xp2 = xp.mergeDims([1,2]);
-xp2 = xp2.mergeDims([3,4]);
+xp2 = xp.mergeDims([3,4]);
+xp2 = xp2.mergeDims([1,2]);
 xp2.getaxisinfo;
 
 % Squeeze out the empty dimensions.

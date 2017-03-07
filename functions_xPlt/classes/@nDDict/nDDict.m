@@ -128,16 +128,17 @@ classdef nDDict
         % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % %
         function obj = importAxisNames(obj,ax_names)
             Nd = ndims(obj.data);
+            Na = length(obj.axis);
             
             if nargin < 2
                 ax_names = cellfun(@num2str,num2cell(1:Nd),'UniformOutput',0);
                 ax_names = cellfun(@(s) ['Dim ' s],ax_names,'UniformOutput',0);
             end
             
-            if length(ax_names) ~= Nd
+            if length(ax_names) < Nd
                 error('Mismatch between number of axis names supplied and number of dimensions in dataset'); end
 
-            for i = 1:ndims(obj.data)
+            for i = 1:Nd
                 obj.axis(i).name = ax_names{i};
             end
         end
@@ -159,7 +160,9 @@ classdef nDDict
             
             obj.checkDims;
             Nd2p = length(dims2pack);
-            sz = size(obj.data);
+            %sz = size(obj.data);
+            sz = size(obj);
+            N = ndims(obj);
             Nmerged = prod(sz(dims2pack));       % Final number entries in the merged dimension
             
             
@@ -227,7 +230,8 @@ classdef nDDict
             dat = permute(dat,[dims2pack,dims_remaining]);
             
             % REshape these into a single dim
-            sz = size(dat);
+            %sz = size(dat);
+            sz = arrayfun(@(x) size(dat,x), 1:N);       % Need to use this extended size command to get extra railing 1's for certain use cases.
             dat = reshape(dat,[ prod(sz(1:Nd2p)), ones(1,Nd2p-1), sz(Nd2p+1:end) ]);
             
             % Undo the earlier permute, and put back into obj.data
@@ -329,6 +333,34 @@ classdef nDDict
                 end
             end
             
+        end
+        
+        function obj_out = merge(obj1,obj2)
+            % This mght be slow when working with huge matrices. Perhaps do
+            % alternate approach for them.
+            names = {obj1.axis.name};
+            
+            % Merge two objects together
+            Nd1 = ndims(obj1);
+            obj1 = obj1.mergeDims(1:Nd1);
+            X1 = obj1.data;
+            axislabels1 = obj1.axis(1).astruct.premerged_values;
+            
+            
+            Nd2 = ndims(obj2);
+            obj2 = obj2.mergeDims(1:Nd2);
+            X2 = obj2.data;
+            axislabels2 = obj2.axis(1).astruct.premerged_values;
+            
+            X = vertcat(X1(:),X2(:));
+            for i = 1:length(axislabels1)
+                axl{i} = vertcat(axislabels1{i}(:),axislabels2{i}(:));
+            end
+            
+            obj_out = obj1.reset;
+            obj_out = importLinearData(obj_out,X,axl{:});
+            
+            obj_out = obj_out.importAxisNames(names);
         end
         
         %% % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % 
