@@ -74,7 +74,7 @@ X = data_table{1};                          % X holds the data that will populat
 axislabels = data_table(2:end);             % Each entry in X has an associated set of axis labels, which will define its location in multidimensional space. **Must be numeric or cell array of chars only**
 xp = xp.importLinearData(X,axislabels{:});
 xp = xp.importAxisNames(column_titles(2:end));  % There should be 1 axis name for every axis, of type char.
-
+%%
 
 % xPlt objects are essentially cell arrays (or matricies), but with the
 % option to index using strings instead of just integers. 

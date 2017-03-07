@@ -36,16 +36,16 @@ function obj = importLinearData(obj,X,varargin)
 
     % Error checking - X must be cell or numeric
     obj2 = obj.reset;
-    outputformat = obj2.validateInputs(X, 'data');
+    [temp1,Xformat] = obj2.calcClasses(X,'data');
+    if strcmp(Xformat,'unknown'); error('X must be numeric or cell array'); end
 
-
-    N = length(X);
 
     % Error checking - each entry in axislinear must be either numeric or
     % cell. If it's a cell, all entries must char.
-    temp = obj2.validateInputs(axeslinear,'axis');
+    temp = obj2.calcClasses(axeslinear, 'axis_values');
+    if any(strcmp(temp,'unknown')); error('Axislabels must be numeric or cell array of all chars'); end
 
-
+    N = length(X);
     Ndims = length(axeslinear);
 
     % Set up xp.axis
@@ -61,7 +61,7 @@ function obj = importLinearData(obj,X,varargin)
     end
 
     % Set up target matrix
-    switch outputformat
+    switch Xformat
         case 'cell'
             obj.data=cell(sz);
 %         case 'string'

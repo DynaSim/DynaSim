@@ -585,7 +585,7 @@ classdef nDDict
     % % % % % % % % % % % PRIVATE FUNCTIONS % % % % % % % % % % %
     % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % %
     methods (Access = private)
-        outputformats = validateInputs(xp,field,field_type)     % Used by importLinearData and other importData functions
+        [out, outsimple] = calcClasses(xp,input,field_type)     % Used by importLinearData and other importData functions
     end
     
     %% % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % 
@@ -595,21 +595,8 @@ classdef nDDict
         % These functions should only be called by other nDDict methods.
         % Make these public for now for testing, but set to private
         % eventually.
-        function out = getclass_obj_data(obj)
-            % Returns class type of entries in obj.data.
-            if isnumeric(obj.data)
-                out = 'numeric';
-            elseif iscell(obj.data)
-                if iscellnum(obj.data)
-                    out = 'cellnum';
-                elseif all(cellfun(@(s) isa(s,'nDDict'),obj.data(:))) || all(cellfun(@(s) isa(s,'xPlt'),obj.data(:)))
-                    out = 'cellnDDict';
-                else
-                    out = 'cell';
-                end
-            else
-                out = 'unknown';
-            end
+        function [out, outsimple] = getclass_obj_data(obj)
+            [out, outsimple] = obj.calcClasses(obj.data,'data');
         end
         
         function out = getclass_obj_axis_values(obj)
@@ -723,15 +710,6 @@ end
 %         varargout{1} = sz;
 %     end
 % end
-
-
-function OUT = iscellnum(IN)
-% ISCELLNUM(S) returns 1 if IN is a cell array of numerics and 0
-%   otherwise.
-
-    OUT = all(cellfun(@isnumeric,IN(:)));
-
-end
 
 
 
