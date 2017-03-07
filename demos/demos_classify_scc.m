@@ -14,20 +14,14 @@ at the end of the help section to browse through related help documentation.
 
 % Get ready...
 
-% move to demos folder
-demos_path = findDemosPath;
-cd(demos_path)
-
 % Set path to your copy of the DynaSim toolbox
-dynasim_path = fullfile(demos_path, '..');
+dynasim_path = '..';
 
 % add DynaSim toolbox to Matlab path
 addpath(genpath(dynasim_path)); % comment this out if already in path
 
 % Set where to save outputs
-% study_dir = fullfile(demos_path, 'outputs', 'demo_sPING_classify_scc');
-
-study_dir = fullfile('/projectnb/crc-nak/erob', 'models', 'demo_sPING_classify_scc_output');
+study_dir = fullfile(pwd, 'outputs', 'demo_sPING_classify_scc');
 
 % Here we go!
 
@@ -74,10 +68,10 @@ time_end = 1000;
 dt = 0.01;
 
 % Specify what to vary
-% Tip: use 'vary' Syntax 2 to systematically vary a parameter
+% Tip: use 'vary' Syntax to to systematically vary a parameter
 vary={
-  'E',     'Iapp',  [0:.2:1];
-  'I',     'Iapp',  [0:.2:1];
+  'E',     'Iapp',  [0:.5:1];
+  'I',     'Iapp',  [0:.5:1];
 %   '(E,I)', 'Noise', [0:25:50];
   'E->I',     'prob_cxn', [1, 0.5, .1];
   'I->E',     'prob_cxn', [1, 0.5, .1];
@@ -101,15 +95,6 @@ data=SimulateModel(s,'save_data_flag',0, 'save_results_flag',1, 'overwrite_flag'
   'cluster_flag',1, 'qsub_mode','array');
 
 %% load and plot the saved data
-% study_dir = 'demo_sPING_classify';
-% if ~exist('data','var')
-%   data=ImportData('demo_sPING_classify');
-% end
-% PlotData(data);
-% PlotData(data,'plot_type','rastergram');
 
-% xAxisVaryParamInd = 2;
-% yAxisVaryParamInd = 1;
-% PlotClass(study_dir, xAxisVaryParamInd, yAxisVaryParamInd);
-
-% gvRun(study_dir, struct('overwrite',1))
+% Run this after sims finish
+% gvRun(study_dir)

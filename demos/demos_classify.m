@@ -14,18 +14,14 @@ at the end of the help section to browse through related help documentation.
 
 % Get ready...
 
-% move to demos folder
-demos_path = findDemosPath;
-cd(demos_path)
-
 % Set path to your copy of the DynaSim toolbox
-dynasim_path = fullfile(demos_path, '..');
+dynasim_path = '..';
 
 % add DynaSim toolbox to Matlab path
 addpath(genpath(dynasim_path)); % comment this out if already in path
 
 % Set where to save outputs
-study_dir = fullfile(demos_path, 'outputs', 'demo_sPING_classify');
+study_dir = fullfile(pwd, 'outputs', 'demo_sPING_classify');
 
 % Here we go!
 
@@ -70,9 +66,10 @@ s.connections(2).parameters={'tauD',2, 'gSYN',1, 'prob_cxn',1};
 
 %% Save data from a set of simulations
 time_end = 500;
+dt = 0.01;
 
 % Specify what to vary
-% Tip: use 'vary' Syntax 2 to systematically vary a parameter
+% Tip: use 'vary' Syntax to to systematically vary a parameter
 vary={
   'E',     'Iapp',  [0:0.5:1];
   'I',     'Iapp',  [0:0.5:1];
@@ -88,7 +85,7 @@ vary={
 % end
 
 data=SimulateModel(s,'save_data_flag',0, 'save_results_flag',1, 'overwrite_flag',0, 'study_dir',study_dir, 'compile_flag',1,...
-  'vary',vary, 'solver','euler', 'dt',0.01, 'verbose_flag',1, 'tspan', [0 time_end],...
+  'vary',vary, 'solver','euler', 'dt',0.01, 'verbose_flag',1, 'tspan', [0 time_end], 'downsample_factor',1/dt,...
   'analysis_functions',{@SaveVaried, @classifyEI},...
   'plot_functions',{@PlotData,@PlotData},...
   'plot_options',{
@@ -97,8 +94,7 @@ data=SimulateModel(s,'save_data_flag',0, 'save_results_flag',1, 'overwrite_flag'
   });
 
 %% load and plot the saved data
-demos_path = findDemosPath;
-study_dir = fullfile(demos_path, 'outputs', 'demo_sPING_classify');
+study_dir = fullfile(pwd, 'outputs', 'demo_sPING_classify');
 % if ~exist('data','var')
 %   data=ImportData('demo_sPING_classify');
 % end
