@@ -14,6 +14,7 @@ addpath(genpath(dynasim_path)); % comment this out if already in path
 output_directory = 'outputs';
 
 % move to root directory where outputs will be saved
+mkdir_silent(fullfile(dynasim_path, output_directory));
 cd(fullfile(dynasim_path, output_directory));
 
 %% Run simulation - Sparse Pyramidal-Interneuron-Network-Gamma (sPING)
