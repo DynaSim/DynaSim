@@ -5,17 +5,18 @@
 format compact
 
 % Set path to your copy of the DynaSim toolbox
-dynasim_path = fullfile(pwd,'..');
+dynasim_path = fullfile(pwd, 'DynaSim')
 
 % add DynaSim toolbox to Matlab path
 addpath(genpath(dynasim_path)); % comment this out if already in path
 
 % Set where to save outputs
-output_directory = 'outputs';
+output_directory = 'demos/outputs';
 
 % move to root directory where outputs will be saved
-mkdir_silent(fullfile(dynasim_path, output_directory));
-cd(fullfile(dynasim_path, output_directory));
+output_fulldir = fullfile(dynasim_path, output_directory)
+mkdir(output_fulldir);
+cd(output_fulldir);
 
 %% Run simulation - Sparse Pyramidal-Interneuron-Network-Gamma (sPING)
 
@@ -81,7 +82,8 @@ xp = xp.importAxisNames(column_titles(2:end));  % There should be 1 axis name fo
 % option to index using strings instead of just integers. 
 % Thus, they are analogous to dictionaries in Python.
 % (This core functionality is implemented by the multidimensional
-% dictionaries (nDDict), which xPlt inherits adds plotting functionality.)
+% dictionaries (nDDict), which xPlt inherits, and to which xPlt adds
+% plotting functionality.)
 disp(xp);
 
 
@@ -96,7 +98,6 @@ disp(xp.axis(1));
 
 % Axis.values stores the actual axis labels. These can be numeric...
 disp(xp.axis(1).values);
-
 
 % ...or string type. As we shall see below, these axis labels can be
 % referenced via index or regular expression.
@@ -113,7 +114,7 @@ xp.axis(1).astruct
 % Here we will add some custom info to xp.metadata. This can be whatever
 % you want. Here, I will use this to provide information about what is
 % stored in each of the matrices in the xp.data cell array. (Alternatively,
-% we could also make each of these matrics an xPlt object!)
+% we could also make each of these matrices an xPlt object!)
 meta = struct;
 meta.datainfo(1:2) = nDDictAxis;
 meta.datainfo(1).name = 'time(ms)';

@@ -296,7 +296,6 @@ classdef nDDict
                 error('Dimensions of nDDict.data not uniform along packing dimensions.');
             end
            
-            
             data_sz = cellfun(@size,obj.data,'UniformOutput',false);
             data_sz_firsts = repmat(data_sz(1,:),sz(1),1);
             myfunc = @(x,y) any(x(:) ~= y(:));
@@ -336,7 +335,7 @@ classdef nDDict
         end
         
         function obj_out = merge(obj1,obj2)
-            % This mght be slow when working with huge matrices. Perhaps do
+            % This might be slow when working with huge matrices. Perhaps do
             % alternate approach for them.
             names = {obj1.axis.name};
             
@@ -363,49 +362,108 @@ classdef nDDict
             obj_out = obj_out.importAxisNames(names);
         end
         
-        function obj = unpackDim(obj, dim_src, dim_axis_label, dim_axis)
+        function obj_new = unpackDim(obj, dim_src, dim_name, dim_values)
             
             % Temporarily linearize obj.data.
             sz0 = size(obj.data);
+            dim0 = length(sz0);
             obj.data = reshape(obj.data,prod(sz0),1);
-           
-            dims = cellfun(@(x) length(size(x)), obj.data);
             
+            % Get sizes of dimension dim_src for matrices inside obj.data.
             sizes = cellfun(@(x) size(x, dim_src), obj.data); % , 'UniformOutput', 'false');
             
-            max_size = max([sizes(:)]);
+            max_size = max(sizes);
             
+            % Calculate size of new nDDict object with dim_src unpacked.
+            % The unpacked dimension will be the new first dimension.
+            sz_new = [max_size, sz0];
+            
+            % Initialize new nDDict object which will have dim_src
+            % unpacked.
             obj_new = nDDict;
             
+            % % Creating obj_new.data. % % % % % % % % % % % % % % % % % % 
+            % Loop over linearized indices of old obj.data cell array.
             for data_index = 1:size(obj.data, 1)
                 
-                temp_data = obj.data{data_index};
+                % Retrieve matrix from obj.data at data_index.
+                temp_matrix = obj.data{data_index};
                 
-                temp_size = size(temp_data);
+                [temp_size, slice_size] = deal(size(temp_matrix));
                 
-                for d = 1:length(temp_size)
-                    slice_indices{d} = ':';
-                end
+                slice_size(dim_src) = 1; 
                 
+                % Create indices for an arbitrary slice from dimension
+                % dim_src, padding out with ':' if temp_matrix has fewer
+                % dimensions than dim_src.
+                temp_effective_dimensions = max(length(temp_size), dim_src);
+                
+                slice_indices = cell(1, temp_effective_dimensions);
+                
+                slice_indices(:) = {':'};
+                
+                % Loop over slices of dim_src.
                 for slice_index = 1:max_size
                     
+                    % Find linearized index in obj_new that this slice will inhabit.
                     new_index = (data_index - 1)*max_size + slice_index;
                     
-                    if slice_index <= sizes{data_index}
+                    if slice_index <= sizes(data_index)
                         
-                        slice_indices{dim_src} = slice_index;
+                        slice_indices{dim_src} = slice_index; % Get correct slice indices.
+                        
+                        slice = temp_matrix(slice_indices{:});
                         
                     else
                         
-                        slice_indices{dim_src} = 1;
+                        slice = [];
                         
                     end
                     
-                    obj_new.data{new_index} = temp_data(slice_indices{:});
+                    obj_new.data{new_index} = slice;
                     
                 end
                 
             end
+            
+            % Reshape obj_new to be multidimensional, with the unpacked
+            % dimension as dimension 1.
+            obj_new.data = reshape(obj_new.data, sz_new);
+            
+            %  % Creating obj_new.axis. % % % % % % % % % % % % % % % % % %
+            % Setting default axis name and values.
+            if nargin < 4, dim_values = (1:max_size)'; end
+            
+            if nargin < 3, dim_values = (1:max_size)'; dim_name = sprintf('Matrix_Dim_%d', dim_src); end
+            
+            if length(dim_values) < max_size
+                
+                warning('dimension %d is longer for some cells than dim_values.\n', dim_src)
+                
+                % dim_values((end + 1):max_size) = (length(dim_values) +
+                % 1):max_size; % No longer necessary since we're running
+                % fixAxes on obj_new.
+               
+            elseif length(dim_values) > max_size
+                
+                warning('dimension %d is shorter for all cells than dim_values.\n', dim_src)
+                
+            end
+            
+            % Creating new axis.
+            obj_new.axis = obj.axis;
+            
+            % Make new axis last one, temporarily.
+            obj_new.axis(length(obj.axis) + 1).name = dim_name;
+            
+            obj_new.axis(length(obj.axis) + 1).values = dim_values;
+            
+            obj_new.axis(length(obj.axis) + 1).astruct = struct();
+            
+            % Move new axis to front.
+            obj_new.axis = obj_new.axis([dim0 + 1, 1:dim0]);
+            
+            obj_new = fixAxes(obj_new);
             
         end
         
@@ -768,9 +826,9 @@ function obj = setAxisDefaults(obj,dim)
         % If too short
         if N < sz_dim
             if isnumeric(ax_curr.values)
-                for j = N:sz_dim; ax_curr.values(j) = j; end
+                for j = (N + 1):sz_dim; ax_curr.values(j) = j; end
             elseif iscellstr(ax_curr.values)
-                for j = N:sz_dim; ax_curr.values{j} = num2str(j); end
+                for j = (N + 1):sz_dim; ax_curr.values{j} = num2str(j); end
             else
                 error('axis.values must be either type numeric or cell array of strings');
             end
