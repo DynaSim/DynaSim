@@ -11,11 +11,12 @@ dynasim_path = fullfile(pwd,'..');
 addpath(genpath(dynasim_path)); % comment this out if already in path
 
 % Set where to save outputs
-output_directory = 'outputs';
+output_directory = fullfile(dynasim_path, 'outputs');
+study_dir = fullfile(output_directory,'demo_sPING_3b');
 
 % move to root directory where outputs will be saved
-mkdir_silent(fullfile(dynasim_path, output_directory));
-cd(fullfile(dynasim_path, output_directory));
+mkdir_silent(output_directory);
+% cd(fullfile(dynasim_path, output_directory));
 
 %% Run simulation - Sparse Pyramidal-Interneuron-Network-Gamma (sPING)
 
@@ -50,7 +51,7 @@ vary={
   'E'   ,'Iapp',[0 10 20];      % amplitude of tonic input to E-cells
   'I->E','tauD',[5 10 15]       % inhibition decay time constant from I to E
   };
-SimulateModel(s,'save_data_flag',1,'study_dir','demo_sPING_3b',...
+SimulateModel(s,'save_data_flag',1,'study_dir',study_dir,...
                 'vary',vary,'verbose_flag',1, ...
                 'save_results_flag',1,'plot_functions',@PlotData,'plot_options',{'format','png'} );
 
@@ -59,7 +60,7 @@ SimulateModel(s,'save_data_flag',1,'study_dir','demo_sPING_3b',...
 %% Load the data and import it into xPlt class
 
 % Load data in traditional DynaSim format
-data=ImportData('demo_sPING_3b');
+data=ImportData(study_dir);
 
 % Extract the data in a linear table format
 [data_table,column_titles,time] = Data2Table (data);
@@ -354,8 +355,7 @@ xp3.getaxisinfo;
 %% Load nDDict structure of images
 
 % Import plot files
-file = 'demo_sPING_3b';
-data = ImportPlots(file);
+data = ImportPlots(study_dir);
 
 % Load into DynaSim structure
 [data_table,column_titles] = DataField2Table (data,'plot_files');
