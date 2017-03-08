@@ -1,3 +1,6 @@
+%% % % % % % % % % % % % % % % SETTING UP xPlt OBJECT % % % % % % % % % %
+% % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % 
+
 %% Set up paths 
 % Get ready...
 
@@ -11,7 +14,7 @@ dynasim_path = fullfile(pwd,'..');
 addpath(genpath(dynasim_path)); % comment this out if already in path
 
 % Set where to save outputs
-output_directory = fullfile(dynasim_path, 'outputs');
+output_directory = fullfile(pwd, 'outputs');
 study_dir = fullfile(output_directory,'demo_sPING_3b');
 
 % move to root directory where outputs will be saved
@@ -125,6 +128,8 @@ xp.meta = meta;
 clear meta
 
 
+%% % % % % % % % % % % % % % % xPlt BASICS % % % % % % % % % % % % 
+% % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % 
 
 %% Validate & get some properties of the data
 xp.checkDims;       % Makes sure all the dimensions match up (e.g. xp.axis 
@@ -159,7 +164,7 @@ xp_fixed.axis(4).values         % The original cell array had been replaced by
 xp.getaxisinfo
 xp_fixed.getaxisinfo
 
-%% Indexing data
+%% xPlt Indexing
 
 % Indexing works just like with normal data. This creates a new xPlt object
 % based on the original data, with the correct axis labels
@@ -183,6 +188,9 @@ mydata2 = xp.data(:,:,1,8);
 disp(isequal(mydata,mydata2));
 
 clear mydata mydata2 xp4 xp5
+
+%% % % % % % % % % % % % % % % PLOTTING EXAMPLES % % % % % % % % % % % % 
+% % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % 
 
 %% Plot for 2D parameter sweep
 % Tip: don't try to understand what recursivePlot is doing - instead, try
@@ -236,6 +244,37 @@ xp4.getaxisinfo
 xp5 = merge(xp3,xp4);
 
 recursivePlot(xp5,{@xp_subplot,@xp_matrix_basicplot},{[1,2]},{{0,0},{}});
+
+
+
+%% Plot saved figures rather than raw data
+
+% Import plot files
+data_img = ImportPlots(study_dir);
+
+% Load into DynaSim structure
+[data_table,column_titles] = DataField2Table (data_img,'plot_files');
+
+% Preview the contents of this table
+previewTable(data_table,column_titles);
+
+% The entries in the first column contain the paths to the figure files.
+% There can be multiple figures associated with each simulation, which is
+% why these are cell arrays of strings.
+disp(data_table{1}{1})
+disp(data_table{1}{2})
+
+% Import the linear data into an xPlt object
+xp_img = xPlt;
+X = data_table{1}; axislabels = data_table(2:end);
+xp_img = xp_img.importLinearData(X, axislabels{:});
+xp_img = xp_img.importAxisNames(column_titles(2:end));
+
+recursivePlot(xp_img,{@xp_subplot_grid3D,@xp_plotimage},{[1,2]},{{},{.5}});
+
+
+%% % % % % % % % % % % % % % % ADVANCED xPlt USAGE % % % % % % % % % % % % 
+% % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % 
 
 
 %% Test packDims
@@ -350,32 +389,6 @@ xp2.getaxisinfo;
 xp3 = squeeze(xp2);
 xp3.getaxisinfo;
 
-
-
-%% Load nDDict structure of images
-
-% Import plot files
-data = ImportPlots(study_dir);
-
-% Load into DynaSim structure
-[data_table,column_titles] = DataField2Table (data,'plot_files');
-
-% Preview the contents of this table
-previewTable(data_table,column_titles);
-
-% The entries in the first column contain the paths to the figure files.
-% There can be multiple figures associated with each simulation, which is
-% why these are cell arrays of strings.
-disp(data_table{1}{1})
-disp(data_table{1}{2})
-
-% Import the linear data into an xPlt object
-xp = xPlt;
-X = data_table{1}; axislabels = data_table(2:end);
-xp = xp.importLinearData(X, axislabels{:});
-xp = xp.importAxisNames(column_titles(2:end));
-
-recursivePlot(xp,{@xp_subplot_grid3D,@xp_plotimage},{[1,2]},{{},{.5}});
 
 
 %% To implement
