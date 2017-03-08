@@ -363,6 +363,52 @@ classdef nDDict
             obj_out = obj_out.importAxisNames(names);
         end
         
+        function obj = unpackDim(obj, dim_src, dim_axis_label, dim_axis)
+            
+            % Temporarily linearize obj.data.
+            sz0 = size(obj.data);
+            obj.data = reshape(obj.data,prod(sz0),1);
+           
+            dims = cellfun(@(x) length(size(x)), obj.data);
+            
+            sizes = cellfun(@(x) size(x, dim_src), obj.data); % , 'UniformOutput', 'false');
+            
+            max_size = max([sizes(:)]);
+            
+            obj_new = nDDict;
+            
+            for data_index = 1:size(obj.data, 1)
+                
+                temp_data = obj.data{data_index};
+                
+                temp_size = size(temp_data);
+                
+                for d = 1:length(temp_size)
+                    slice_indices{d} = ':';
+                end
+                
+                for slice_index = 1:max_size
+                    
+                    new_index = (data_index - 1)*max_size + slice_index;
+                    
+                    if slice_index <= sizes{data_index}
+                        
+                        slice_indices{dim_src} = slice_index;
+                        
+                    else
+                        
+                        slice_indices{dim_src} = 1;
+                        
+                    end
+                    
+                    obj_new.data{new_index} = temp_data(slice_indices{:});
+                    
+                end
+                
+            end
+            
+        end
+        
         %% % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % 
         % % % % % % % % % % % HOUSEKEEPING FUNCTIONS % % % % % % % % % % %
         % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % %
