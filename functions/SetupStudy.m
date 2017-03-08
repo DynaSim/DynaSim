@@ -30,7 +30,7 @@ if options.save_data_flag || options.save_results_flag
     options.study_dir=fullfile(options.project_dir,[options.prefix '_' datestr(now,'yyyymmddHHMMSS')]);
   end
   % create study_dir if it doesn't exist
-  if ~isdir(options.study_dir)
+  if ~isdir(fullfile('.',options.study_dir))
     fprintf('creating study directory: %s\n',options.study_dir);
     mkdir(options.study_dir);
   end
