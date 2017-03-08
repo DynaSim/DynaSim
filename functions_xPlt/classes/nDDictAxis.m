@@ -1,7 +1,6 @@
 
 classdef nDDictAxis
-    % Metadata information. This is inserted into the "meta" property of
-    % xPlt class
+    % Helper class for handling axis in nDDict class
 
     properties
         name = ''         % (optional) 1x1 - string naming the axis in question (e.g. time, voltage, cell number, etc)
@@ -15,7 +14,10 @@ classdef nDDictAxis
             
             if isempty(obj.values); out = 'Empty axis'; return; end
             
-            temp = [obj.name, ' -> '];
+            % Add type
+            values_class = obj.getclass_values;
+            
+            temp = [obj.name, ' (' values_class ')  -> '];
             Nvals = length(obj.values);
             Nvals = min(Nvals,max_values_to_display);          % Limit to displaying 10 values
             for i = 1:Nvals-1
@@ -67,6 +69,38 @@ classdef nDDictAxis
             end
             
             
+        end
+        
+        function out = getclass_values(obj)
+            out = obj.calcClasses(obj.values,'values');
+        end
+        
+        function out = getclass_name(obj)
+            out = obj.calcClasses(obj.name,'name');
+        end
+        
+        
+        function out = calcClasses(obj,input,field)
+            switch field
+                case 'values'
+                    % Returns class type of obj.values.
+                    if isnumeric(input)
+                        out = 'numeric';
+                    elseif iscellstr(input)
+                        out = 'cellstr';
+                    else
+                        out = 'unknown';
+                    end
+                case 'name'
+                    % Returns class type of obj.name.
+                    if ischar(input)
+                        out = 'char';
+                    else
+                        out = 'unknown';
+                    end
+                otherwise
+                    error('Unrecognized input foramt');
+            end
         end
 
         

@@ -1,9 +1,13 @@
 
 
-function [data_linear,ax,ax_names,time] = DynaSimPlotExtract (data)
+function [data_table,column_titles] = DataField2Table (data,fieldname,verbose_flag)
     % Converts DynaSim structure to 1D cell array format. Later can use to
-    % import to xPlt
+    % import to xPlt. In this case, pulls out a specific field from data,
+    % along with the varied information.
 
+    if nargin < 3
+        verbose_flag = 0;
+    end
     
     % ## VARIED parameter sweeps ##
     varied=data(1).varied;
@@ -28,7 +32,7 @@ function [data_linear,ax,ax_names,time] = DynaSimPlotExtract (data)
         for k = 1:num_alllabels
             
             z=z+1;
-            data_linear{z} = data(i).plot_files{1};
+            data_linear{z} = data(i).(fieldname);
             
             % Number of parameter sweeps, plus populations, plus variables (Vm, state variables, functions, etc.)
             for j = 1:num_varied
@@ -41,6 +45,23 @@ function [data_linear,ax,ax_names,time] = DynaSimPlotExtract (data)
     end
     
     ax_names = varied;
+    
+    
+    % Transpose everything to make it in terms of columns instead of rows.
+    data_linear = data_linear(:);
+    for i = 1:length(ax)
+        ax{i} = ax{i}';
+    end
+    
+    % Combine everything into one data table
+    data_table = horzcat({data_linear},ax);
+    
+    % List table column names
+    column_titles = {'data',ax_names{:}};
+    
+    if verbose_flag
+        previewTable(data_table,column_titles);
+    end
     
 end
 

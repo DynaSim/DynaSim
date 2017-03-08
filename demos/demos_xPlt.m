@@ -1,8 +1,11 @@
 %% Set up paths 
 % Get ready...
 
+% Format
+format compact
+
 % Set path to your copy of the DynaSim toolbox
-dynasim_path = fullfile('..');
+dynasim_path = fullfile(pwd,'..');
 
 % add DynaSim toolbox to Matlab path
 addpath(genpath(dynasim_path)); % comment this out if already in path
@@ -11,7 +14,8 @@ addpath(genpath(dynasim_path)); % comment this out if already in path
 output_directory = 'outputs';
 
 % move to root directory where outputs will be saved
-cd(output_directory);
+mkdir_silent(fullfile(dynasim_path, output_directory));
+cd(fullfile(dynasim_path, output_directory));
 
 %% Run simulation - Sparse Pyramidal-Interneuron-Network-Gamma (sPING)
 
@@ -52,48 +56,71 @@ SimulateModel(s,'save_data_flag',1,'study_dir','demo_sPING_3b',...
 
 
 
-%% Load the data and import into xPlt class
+%% Load the data and import it into xPlt class
 
 % Load data in traditional DynaSim format
 data=ImportData('demo_sPING_3b');
 
-% Extract the data in a linear format
-[data_linear,ax,ax_names,time] = DynaSimExtract (data);
+% Extract the data in a linear table format
+[data_table,column_titles,time] = Data2Table (data);
 
+% Preview the contents of this table
+%     Note: We cannot make this one big cell array since we want to allow
+%     axis labels to be either strings or numerics.
+previewTable(data_table,column_titles);
 
-% The xPlt class inherits from the multidimensional dictionaries (nDDict)
-% class and adds some plotting functionality.
+% Import the linear data into an xPlt object
 xp = xPlt;
+X = data_table{1};                          % X holds the data that will populate the multidimensional array. Must be numeric or cell array.
+axislabels = data_table(2:end);             % Each entry in X has an associated set of axis labels, which will define its location in multidimensional space. **Must be numeric or cell array of chars only**
+xp = xp.importLinearData(X,axislabels{:});
+xp = xp.importAxisNames(column_titles(2:end));  % There should be 1 axis name for every axis, of type char.
 
-% Import linear data into xp
-xp = xp.importLinearData(data_linear,ax{:});
-xp = xp.importAxisNames(ax_names);
 
-% At its core, xPlt has 3 fields. xp.data stores the actual data (either a 
-% matrix or a cell array). xp.axis stores axis labels associated with each
-% dimension of the data. xp.misc stores meta data for use by the user as they
-% see fit.
+% xPlt objects are essentially cell arrays (or matricies), but with the
+% option to index using strings instead of just integers. 
+% Thus, they are analogous to dictionaries in Python.
+% (This core functionality is implemented by the multidimensional
+% dictionaries (nDDict), which xPlt inherits adds plotting functionality.)
 disp(xp);
 
 
-% Viewing contents of xp.axis. Axis.values stores axis labels. Can be
-% numeric...
+% At its core, xPlt has 3 fields. xp.data stores the actual data (either a 
+% matrix or a cell array). 
+disp(xp.data);
+size(xp.data)
+
+% Next, xp.axis stores axis labels associated with each dimension in
+% xp.data.
 disp(xp.axis(1));
+
+% Axis.values stores the actual axis labels. These can be numeric...
+disp(xp.axis(1).values);
+
 
 % ...or string type. As we shall see below, these axis labels can be
 % referenced via index or regular expression.
-% Axis.name field stores the name of the dimension. 
-% Axis.astruct is for internal use.
-disp(xp.axis(4));
+disp(xp.axis(4).values);
 
-% Add some custom info to xp.metadata. This can be whatever you want.
+% Axis.name field stores the name of the dimension. In this case, it is
+% named after the parameter in the model that was varied.
+disp(xp.axis(1).name)
+
+% Axis.astruct is for internal use.
+xp.axis(1).astruct
+
+% xp.meta stores meta data for use by the user as they see fit.
+% Here we will add some custom info to xp.metadata. This can be whatever
+% you want. Here, I will use this to provide information about what is
+% stored in each of the matrices in the xp.data cell array. (Alternatively,
+% we could also make each of these matrics an xPlt object!)
 meta = struct;
 meta.datainfo(1:2) = nDDictAxis;
 meta.datainfo(1).name = 'time(ms)';
 meta.datainfo(1).values = time;
 meta.datainfo(2).name = 'cells';
 meta.datainfo(2).values = [];
-xp = xp.importMeta(meta);
+xp.meta = meta;
 clear meta
 
 
@@ -105,7 +132,7 @@ xp.checkDims;       % Makes sure all the dimensions match up (e.g. xp.axis
                     % the number of labels
                     
 xp.fixAxes;         % This attempts to automatically fix any dimension
-                    % mismatches between xp.data and xp.axis. This
+                    % mismatches between xp.data and the axis labels. This
                     % particular command does nothing because there are no
                     % errors in xp
 
@@ -117,7 +144,7 @@ xp_bad = xp;
 xp_bad.axis(4).values={'test'};     % Reduce this to 1 (mismatch)
 
 % Check errors in new class (this produces an error, so disabling it)
-% xp_bad.checkDims;
+xp_bad.checkDims;
 
 % Auto fix errors in labels
 xp_fixed = xp_bad.fixAxes; 
@@ -131,21 +158,44 @@ xp_fixed.axis(4).values         % The original cell array had been replaced by
 xp.getaxisinfo
 xp_fixed.getaxisinfo
 
-%% Plot for 2D parameter sweep
-clear xp2 xp3
-xp4 = xp.subset([],[],1,8);         % Eliminate all but 2 dimensions for xp4.
+%% Indexing data
+
+% Indexing works just like with normal data. This creates a new xPlt object
+% based on the original data, with the correct axis labels
+xp4 = xp(:,:,1,8);                  % ## Update - This does the same thing as xp.subset([],[],1,8), which was the old way
+                                    % of pulling data subsets. Note that [] and : are equivalent.
 xp4.getaxisinfo
 
+% Similarly, can index string axes using regular expressions
+% Pull out sodium mechs only
+xp5 = xp(:,:,1,'iNa*');
+xp5.getaxisinfo
+
+% Pull out synaptic state variables
+xp5 = xp(:,:,1,'_s');
+xp5.getaxisinfo
+
+% Lastly, you can reference xp.data with the following shorthand
+% (This is the same as xp.data(:,:,1,8). Regular expressions dont work in this mode)
+mydata = xp{:,:,1,8};              
+mydata2 = xp.data(:,:,1,8);
+disp(isequal(mydata,mydata2));
+
+clear mydata mydata2 xp4 xp5
+
+%% Plot for 2D parameter sweep
 % Tip: don't try to understand what recursivePlot is doing - instead, try
 % putting break points in the various function handles to see how this
 % command works.
+
+xp4 = xp(:,:,'E','v');
 recursivePlot(xp4,{@xp_subplot,@xp_matrix_basicplot},{[1,2]},{{0,0},{}});
 
 
 
 %% Plot for 3D data
-clear xp2 xp3
-xp4 = xp.subset([],[],[],8);
+
+xp4 = xp(:,:,:,8);
 xp4.getaxisinfo
 
 recursivePlot(xp4,{@xp_subplot_grid3D,@xp_matrix_basicplot},{[3,1,2]},{{},{}});
@@ -154,8 +204,8 @@ recursivePlot(xp4,{@xp_subplot_grid3D,@xp_matrix_basicplot},{[3,1,2]},{{},{}});
 
 
 %% Plot for 3D data (larger one)
-clear xp2 xp3
-xp4 = xp.subset([],[],1,[]);
+
+xp4 = xp(:,:,1,:);
 xp4 = xp4.squeeze;
 xp4.getaxisinfo
 
@@ -168,82 +218,106 @@ recursivePlot(xp4,{@xp_subplot_grid3D,@xp_matrix_basicplot},{[3,1,2]},{{},{}});
 
 %% Use nested images to fit 3D data into a 2D subplot
 
-clear xp2 xp3
-xp4 = xp.subset([],[],[],8);
+xp4 = xp(:,:,:,8);
 xp4.getaxisinfo
 
 recursivePlot(xp4,{@xp_subplot_grid3D,@xp_subplot_grid3D,@xp_matrix_basicplot},{[1,2,4],3},{{},{0,1},{}});
 % recursivePlot(xp4,{@xp_subplot_grid3D,@xp_subplot,@xp_matrix_basicplot},{[1,2,4],3},{{},{0,1},{}});
 
+%% Combine two xPlt objects
 
-%% Test subset selection using regular expressions
+xp3 = xp(2,:,'E','v');
+xp3.getaxisinfo
 
-% Pull out sodium mechs only
-xp5 = xp.subset([],[],[1],'iNa*');
-xp5.getaxisinfo
+xp4 = xp(:,3,'E','v');
+xp4.getaxisinfo
 
-% Pull out synaptic state variables
-xp5 = xp.subset([],[],[1],'_s');
-xp5.getaxisinfo
+xp5 = merge(xp3,xp4);
+
+recursivePlot(xp5,{@xp_subplot,@xp_matrix_basicplot},{[1,2]},{{0,0},{}});
+
 
 %% Test packDims
+% Analogous to cell2mat.
 clear xp2 xp3 xp4 xp5
 
 % Start by taking a smaller subset of the original xp object.
 % xp2 = xp.subset(2,2,[],[1,3,5:8]);      % Selection based on index locations
-xp2 = xp.subset(2,2,[],'(v|^i||ISYN$)');  % Same thing as above using regular expression. Selects everything except the _s terms. "^" - beginning with; "$" - ending with
+xp2 = xp(2,2,:,'(v|^i||ISYN$)');  % Same thing as above using regular expression. Selects everything except the _s terms. "^" - beginning with; "$" - ending with
 xp2 = xp2.squeeze;
 xp2.getaxisinfo;
 
-% Note that this data is sparse!
-disp(xp2.data);
+% Note that xp2 is sparse (there are some empty cells)
+disp(xp2.data);         % (E cells don't receive AMPA synapses, and I cells don't receive GABAA synapses)
 
 % Now pack dimension two (columns) of xp2 into xp2.data.
 src = 2;                    % Take 2nd dimension in xp2
 dest = 3;                   % Pack into 3rd dimension in xp2.data matrix
-xp2 = xp2.packDim(src,dest);
-xp2.getaxisinfo;
+xp3 = xp2.packDim(src,dest);
 
-% Dimension is now missing from xp2
-disp(xp2)
 
-% Instead, it is packed in to xp2.data. (Previously xp2.data was 10001x80;
-% now it is 10001x80x6).
-disp(xp2.data)
+% Check dimensionality of xp3.data
+disp(xp3.data)             % The dimension "variables", which was dimension 2
+                           % in xp2, is now dimension 3 in xp3.data.
+                           % Now xp3.data is time x cells x variables
+
+% View axis of xp3
+xp3.getaxisinfo;            % The dimension "variables" is now missing
 
 % Note some of this data is sparse!
-temp1 = xp2.data{1}(1,1,:);
-temp2 = xp2.data{2}(1,1,:);
-figure; imagesc(isnan(horzcat(temp1(:),temp2(:))'));
+temp1 = squeeze(xp3.data{1}(100,:,:));  % Pick out a random time point
+temp2 = squeeze(xp3.data{2}(100,:,:));  % Pick out a random time point
+figure; 
+subplot(211); imagesc(temp1);
 
-%% Average over membrane voltages
-% Analogous to cell2mat
+ylabel('Cells');
+xlabel(xp2.axis(2).name); 
+set(gca,'XTick',1:length(xp2.axis(2).values)); set(gca,'XTickLabels',strrep(xp2.axis(2).values,'_',' '));
+
+
+subplot(212); imagesc(temp2);
+ylabel('Cells');
+xlabel(xp2.axis(2).name); 
+set(gca,'XTick',1:length(xp2.axis(2).values)); set(gca,'XTickLabels',strrep(xp2.axis(2).values,'_',' '));
+
+
+%% Use packDim to average across cells
 
 xp2 = xp;
-xp2 = xp.subset([],[],[],'v');  % Same thing as above using regular expression. Selects everything except the _s terms. "^" - beginning with; "$" - ending with
+xp2 = xp(:,:,:,'v');  % Same thing as above using regular expression. Selects everything except the _s terms. "^" - beginning with; "$" - ending with
 xp2 = xp2.squeeze;
 %
 % Average across all cells
 xp2.data = cellfun(@(x) mean(x,2), xp2.data,'UniformOutput',0);
+
+% % Convert xp2.data from a matrix into an xPlt object as well. This is
+% % useful for keeping track of axis names. 
+% mat_ax_names = {'Time','Cell Number'};
+% mat_ax_values = {1:10001, []};
+% 
+% % xp2.data = Cell_2_nDDict(xp2.data,mat_ax_names,mat_ax_values);
 
 % Pack E and I cells together
 src=3;
 dest=2;
 xp3 = xp2.packDim(src,dest);
 
-
+%%
 % Plot 
 recursivePlot(xp3,{@xp_subplot_grid3D,@xp_matrix_basicplot},{[1,2]},{{},{}});
 
 
-%% Average over synaptic currents
+%% Use packDim to average over synaptic currents
 % Analogous to cell2mat
-warning('Hadley Wickham');
+% See also plotting material by Hadley Wickham
 
-xp2 = xp.subset([],[],[],'(ISYN$)');  % Same thing as above using regular expression. Selects everything except the _s terms. "^" - beginning with; "$" - ending with
+% First, pull out synaptic current variables
+xp2 = xp(:,:,:,'(ISYN$)');  % Same thing as above using regular expression. Selects everything except the _s terms. "^" - beginning with; "$" - ending with
 xp2.getaxisinfo;
 
+% Second, put this into matrix form, so we can average over them
 xp3 = xp2.packDim(4,3);
+disp(xp3.data)              % xp3.data is now 3D, with the 3rd dim denoting synaptic current
 xp3 = xp3.squeeze;
 xp3.getaxisinfo;
 
@@ -254,42 +328,59 @@ xp3.data = cellfun(@(x) nanmean(x,3), xp3.data,'UniformOutput',0);
 recursivePlot(xp3,{@xp_subplot_grid3D,@xp_matrix_basicplot},{[3,1,2]},{{},{}});
 
 %% Test mergeDims
-% Analogous to Reshape
+% Analogous to Reshape.
+
+% This command combines two (or more) dimensions into a single dimension.
 xp2 = xp.mergeDims([3,4]);
 xp2.getaxisinfo;
 
-%% Convert to Jason's format
+%% Use mergeDims to convert to Jason's DynaSim format
 % Analogous to Reshape
-xp2 = xp.mergeDims([1,2]);
-xp2 = xp2.mergeDims([3,4]);
+
+% This combines the 2D "vary" sweep into a single dimension. It also
+% combines all populations and variables into a single 1D list. Thus, Axis
+% 1 is equivalent to Jason's structure array - data(1:9). Axis 4 is
+% equivalent to the structure fields in Jason's DynaSim structure.
+xp2 = xp.mergeDims([3,4]);
+xp2 = xp2.mergeDims([1,2]);
 xp2.getaxisinfo;
+
+% Squeeze out the empty dimensions.
+xp3 = squeeze(xp2);
+xp3.getaxisinfo;
 
 
 
 %% Load nDDict structure of images
 
-cd outputs
+% Import plot files
 file = 'demo_sPING_3b';
 data = ImportPlots(file);
-cd ..
 
-[data_linear,ax,ax_names] = DynaSimPlotExtract (data);
+% Load into DynaSim structure
+[data_table,column_titles] = DataField2Table (data,'plot_files');
 
+% Preview the contents of this table
+previewTable(data_table,column_titles);
+
+% The entries in the first column contain the paths to the figure files.
+% There can be multiple figures associated with each simulation, which is
+% why these are cell arrays of strings.
+disp(data_table{1}{1})
+disp(data_table{1}{2})
+
+% Import the linear data into an xPlt object
 xp = xPlt;
-xp = xp.importLinearData(data_linear,ax{:});
-xp = xp.importAxisNames(ax_names);
+X = data_table{1}; axislabels = data_table(2:end);
+xp = xp.importLinearData(X, axislabels{:});
+xp = xp.importAxisNames(column_titles(2:end));
 
-
-recursivePlot(xp,{@xp_subplot_grid3D,@xp_plotimage},{[1,2]},{{},{.25}});
-
+recursivePlot(xp,{@xp_subplot_grid3D,@xp_plotimage},{[1,2]},{{},{.5}});
 
 
 %% To implement
 % 
 % 
 % Implement the following:
-% 1. Example of averaging across cells
-% 2. Example of averaging synaptic currents (e.g. LFP estimate)
-% 3. Plotting - plots with embedded images
-% 4. Plotting - load images directly from DynaSim 
-% 5. Starting work on PlotData2 - any new requests?
+% + Make DynaSimPlotExtract more general
+% + Starting work on PlotData2 - any new requests?
