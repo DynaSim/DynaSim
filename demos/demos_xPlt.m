@@ -5,7 +5,7 @@
 format compact
 
 % Set path to your copy of the DynaSim toolbox
-dynasim_path = fullfile('..');
+dynasim_path = fullfile(pwd,'..');
 
 % add DynaSim toolbox to Matlab path
 addpath(genpath(dynasim_path)); % comment this out if already in path
@@ -87,7 +87,7 @@ disp(xp);
 % At its core, xPlt has 3 fields. xp.data stores the actual data (either a 
 % matrix or a cell array). 
 disp(xp.data);
-size(xp.data);
+size(xp.data)
 
 % Next, xp.axis stores axis labels associated with each dimension in
 % xp.data.
@@ -99,7 +99,7 @@ disp(xp.axis(1).values);
 
 % ...or string type. As we shall see below, these axis labels can be
 % referenced via index or regular expression (more on this below).
-disp(xp.axis(4));
+disp(xp.axis(4).values);
 
 % Axis.name field stores the name of the dimension. 
 disp(xp.axis(4).name)
@@ -142,7 +142,7 @@ xp_bad = xp;
 xp_bad.axis(4).values={'test'};     % Reduce this to 1 (mismatch)
 
 % Check errors in new class (this produces an error, so disabling it)
-% xp_bad.checkDims;
+xp_bad.checkDims;
 
 % Auto fix errors in labels
 xp_fixed = xp_bad.fixAxes; 
@@ -373,9 +373,10 @@ X = data_table{1}; axislabels = data_table(2:end);
 xp = xp.importLinearData(X, axislabels{:});
 xp = xp.importAxisNames(column_titles(2:end));
 
-
-recursivePlot(xp,{@xp_subplot_grid3D,@xp_plotimage},{[1,2]},{{},{.25}});
-
+profile on
+tic; recursivePlot(xp,{@xp_subplot,@xp_plotimage},{[1,2]},{{},{}}); toc
+profile viewer
+profile off
 
 
 %% To implement

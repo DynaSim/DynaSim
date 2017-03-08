@@ -1,6 +1,6 @@
 
 
-function [dt_formatted, axn_formatted] = previewTable(data_table,col_names)
+function [dt_formatted] = previewTable(data_table,col_names)
 
     % All data, formatted into cells
     dt_formatted = data_table;
