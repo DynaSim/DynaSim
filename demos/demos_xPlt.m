@@ -94,19 +94,20 @@ size(xp.data)
 % xp.data.
 disp(xp.axis(1));
 
-% Axis.values stores axis labels. These can be numeric...
+% Axis.values stores the actual axis labels. These can be numeric...
 disp(xp.axis(1).values);
 
 
 % ...or string type. As we shall see below, these axis labels can be
-% referenced via index or regular expression (more on this below).
+% referenced via index or regular expression.
 disp(xp.axis(4).values);
 
-% Axis.name field stores the name of the dimension. 
-disp(xp.axis(4).name)
+% Axis.name field stores the name of the dimension. In this case, it is
+% named after the parameter in the model that was varied.
+disp(xp.axis(1).name)
 
 % Axis.astruct is for internal use.
-
+xp.axis(1).astruct
 
 % xp.meta stores meta data for use by the user as they see fit.
 % Here we will add some custom info to xp.metadata. This can be whatever
@@ -374,10 +375,7 @@ X = data_table{1}; axislabels = data_table(2:end);
 xp = xp.importLinearData(X, axislabels{:});
 xp = xp.importAxisNames(column_titles(2:end));
 
-profile on
-tic; recursivePlot(xp,{@xp_subplot,@xp_plotimage},{[1,2]},{{},{}}); toc
-profile viewer
-profile off
+recursivePlot(xp,{@xp_subplot_grid3D,@xp_plotimage},{[1,2]},{{},{.5}});
 
 
 %% To implement
