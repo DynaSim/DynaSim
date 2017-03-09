@@ -205,7 +205,7 @@ xp4 = xp(:,:,'E','v');
 xp4.getaxisinfo
 
 % Set up plotting arguments
-function_handles = {@xp_subplot_grid3D,@xp_matrix_basicplot};   % Specifies the handles of the plotting functions
+function_handles = {@xp_subplot_grid,@xp_matrix_basicplot};   % Specifies the handles of the plotting functions
 dimensions = {[1,2],[0]};                                       % Specifies which dimensions of xp each function handle
                                                                 % will operate on. Note that dimension "0" refers to the 
                                                                 % the contents of each element in xp.data (e.g. the matrix of
@@ -230,14 +230,14 @@ xp4.getaxisinfo
 % This will plot E cells and I cells (axis 3) each in separate figures and
 % the parameter sweeps (axes 1 and 2) in as subplots.
 dimensions = {[3],[1,2],0};
-recursivePlot(xp4,{@xp_handles_newfig,@xp_subplot_grid3D,@xp_matrix_imagesc},dimensions);
+recursivePlot(xp4,{@xp_handles_newfig,@xp_subplot_grid,@xp_matrix_imagesc},dimensions);
 
 %% Plot 3D data re-ordered
 
 % Alternatively, we can put E and I cells in the same figure, and the two
 % tauD values of the parameter sweep into separate figures.
 dimensions = {[2],[3,1],0};
-recursivePlot(xp4,{@xp_handles_newfig,@xp_subplot_grid3D,@xp_matrix_imagesc},dimensions);
+recursivePlot(xp4,{@xp_handles_newfig,@xp_subplot_grid,@xp_matrix_imagesc},dimensions);
 
 % Note that here we produced rastergrams instead of time series by
 % submitting a different function to operate on dimension zero.
@@ -260,8 +260,7 @@ dimensions = {[3],[1,2],4,0};
 % as subplots. This "hack" enables nested subplots.
 function_arguments = {{},{},{1},{}};
 
-recursivePlot(xp4,{@xp_handles_newfig,@xp_subplot_grid3D,@xp_subplot_grid3D,@xp_matrix_basicplot},dimensions,function_arguments);
-% recursivePlot(xp4,{@xp_subplot_grid3D,@xp_subplot,@xp_matrix_basicplot},{[1,2,4],3},{{},{0,1},{}});
+recursivePlot(xp4,{@xp_handles_newfig,@xp_subplot_grid,@xp_subplot_grid,@xp_matrix_basicplot},dimensions,function_arguments);
 
 
 %% Plot two xPlt objects combined
@@ -276,7 +275,7 @@ xp5 = merge(xp3,xp4);
 
 dimensions = {[1,2],0};
 figure('Units','normalized','Position',[0,0,1,1]);
-recursivePlot(xp5,{@xp_subplot_grid3D,@xp_matrix_imagesc},dimensions);
+recursivePlot(xp5,{@xp_subplot_grid,@xp_matrix_imagesc},dimensions);
 
 
 
@@ -309,7 +308,7 @@ func_arguments = {{},{.5}};         % The 0.5 argument tells xp_plotimage to
                                     % plots by 0.5. This increases speed.
 
 figure('Units','normalized','Position',[0,0,1,1]);
-recursivePlot(xp_img,{@xp_subplot_grid3D,@xp_plotimage},dimensions,func_arguments);
+recursivePlot(xp_img,{@xp_subplot_grid,@xp_plotimage},dimensions,func_arguments);
 
 
 %% % % % % % % % % % % % % % % ADVANCED xPlt USAGE % % % % % % % % % % % % 
@@ -383,7 +382,7 @@ xp3 = xp2.packDim(src,dest);
 
 
 % Plot 
-recursivePlot(xp3,{@xp_subplot_grid3D,@xp_matrix_basicplot},{[1,2],[]},{{},{}});
+recursivePlot(xp3,{@xp_subplot_grid,@xp_matrix_basicplot},{[1,2],[]},{{},{}});
 
 
 %% Use packDim to average over synaptic currents
@@ -404,7 +403,7 @@ xp3.getaxisinfo;
 xp3.data = cellfun(@(x) nanmean(x,3), xp3.data,'UniformOutput',0);
 
 % Plot 
-recursivePlot(xp3,{@xp_subplot_grid3D,@xp_matrix_basicplot},{[3,1,2],[0]},{{},{}});
+recursivePlot(xp3,{@xp_subplot_grid,@xp_matrix_basicplot},{[3,1,2],[0]},{{},{}});
 
 %% Test mergeDims
 % Analogous to Reshape.
