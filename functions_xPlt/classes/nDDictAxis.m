@@ -131,11 +131,12 @@ classdef nDDictAxis
                     if iscellstr(S(1).subs)
                         [selection_out, startIndex] = regex_lookup(allnames, S(1).subs{1});
                         S(1).subs{1} = selection_out;
+                        [varargout{1:nargout}] = builtin('subsref',obj,S,varargin{3:end});
                     else
                         % Default
                         [varargout{1:nargout}] = builtin('subsref',varargin{:});                        
                     end
-                    [varargout{1:nargout}] = builtin('subsref',obj,S,varargin{3:end});
+                    
                     
                     
                 case '{}'
