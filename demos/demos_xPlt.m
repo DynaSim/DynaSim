@@ -174,7 +174,7 @@ xp4 = xp(:,:,1,8);                  % ## Update - This does the same thing as xp
                                     % of pulling data subsets. Note that [] and : are equivalent.
 xp4.getaxisinfo
 
-% Similarly, can index string axes using regular expressions
+% Similarly, can index axis values using regular expressions
 % Pull out sodium mechs only
 xp5 = xp(:,:,1,'iNa*');
 xp5.getaxisinfo
@@ -182,6 +182,11 @@ xp5.getaxisinfo
 % Pull out synaptic state variables
 xp5 = xp(:,:,1,'_s');
 xp5.getaxisinfo
+
+% Can also reference a given axis based on its index number or based on its
+% name
+disp(xp.axis(4))
+disp(xp.axis('populations'))
 
 % Lastly, you can reference xp.data with the following shorthand
 % (This is the same as xp.data(:,:,1,8). Regular expressions dont work in this mode)
@@ -215,9 +220,13 @@ function_arguments = {{},{}};	% This allows you to supply input arguments to eac
                                 % now we'll leave this empty.
                                                                 
 % Run the plot. Note the "+" icons next to each plot allow zooming. 
-figure('Units','normalized','Position',[0,0,1,1]);
-recursivePlot(xp4,function_handles,dimensions,function_arguments);
+figl; recursivePlot(xp4,function_handles,dimensions,function_arguments);
 
+% Alternatively, dimensions can be specified as axis names instead of
+% indices. The last entry, data, refers to the contents of xp.data (e.g.
+% dimension 0 above).
+dimensions = {{'E_Iapp','I_E_tauD'},'data'}; 
+figl; recursivePlot(xp4,function_handles,dimensions,function_arguments);
 
 %% Plot 3D data 
 
@@ -229,14 +238,14 @@ xp4.getaxisinfo
 
 % This will plot E cells and I cells (axis 3) each in separate figures and
 % the parameter sweeps (axes 1 and 2) in as subplots.
-dimensions = {[3],[1,2],0};
+dimensions = {{'populations'},{'E_Iapp','I_E_tauD'},0};
 recursivePlot(xp4,{@xp_handles_newfig,@xp_subplot_grid,@xp_matrix_imagesc},dimensions);
 
 %% Plot 3D data re-ordered
 
 % Alternatively, we can put E and I cells in the same figure, and the two
 % tauD values of the parameter sweep into separate figures.
-dimensions = {[2],[3,1],0};
+dimensions = {{'I_E_tauD'},{'populations','E_Iapp'},0};
 recursivePlot(xp4,{@xp_handles_newfig,@xp_subplot_grid,@xp_matrix_imagesc},dimensions);
 
 % Note that here we produced rastergrams instead of time series by
@@ -253,7 +262,7 @@ xp4 = xp(1:2,1:2,:,6:7);
 xp4.getaxisinfo
 
 
-dimensions = {[3],[1,2],4,0};
+dimensions = {'populations',{'E_Iapp','I_E_tauD'},'variables',0};       % Note - we can also use a mixture of strings and index locations to specify dimensions
 
 % Note that here we will supply a function argument. This tells the second
 % subplot command to write its output to the axis as an RGB image, rather than
@@ -274,8 +283,7 @@ xp4.getaxisinfo
 xp5 = merge(xp3,xp4);
 
 dimensions = {[1,2],0};
-figure('Units','normalized','Position',[0,0,1,1]);
-recursivePlot(xp5,{@xp_subplot_grid,@xp_matrix_imagesc},dimensions);
+figl; recursivePlot(xp5,{@xp_subplot_grid,@xp_matrix_imagesc},dimensions);
 
 
 
@@ -307,11 +315,10 @@ func_arguments = {{},{.5}};         % The 0.5 argument tells xp_plotimage to
                                     % scale down the resolution of its
                                     % plots by 0.5. This increases speed.
 
-figure('Units','normalized','Position',[0,0,1,1]);
-recursivePlot(xp_img,{@xp_subplot_grid,@xp_plotimage},dimensions,func_arguments);
+figl; recursivePlot(xp_img,{@xp_subplot_grid,@xp_plotimage},dimensions,func_arguments);
 
 
-%% % % % % % % % % % % % % % % ADVANCED xPlt USAGE % % % % % % % % % % % % 
+%% % % % % % % % % % % % % % % ADVANCED xPlt / nDDict USAGE % % % % % % % 
 % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % 
 
 
@@ -382,7 +389,7 @@ xp3 = xp2.packDim(src,dest);
 
 
 % Plot 
-recursivePlot(xp3,{@xp_subplot_grid,@xp_matrix_basicplot},{[1,2],[]},{{},{}});
+figl; recursivePlot(xp3,{@xp_subplot_grid,@xp_matrix_basicplot},{[1,2],[]},{{},{}});
 
 
 %% Use packDim to average over synaptic currents
@@ -403,7 +410,7 @@ xp3.getaxisinfo;
 xp3.data = cellfun(@(x) nanmean(x,3), xp3.data,'UniformOutput',0);
 
 % Plot 
-recursivePlot(xp3,{@xp_subplot_grid,@xp_matrix_basicplot},{[3,1,2],[0]},{{},{}});
+recursivePlot(xp3,{@xp_handles_newfig,@xp_subplot_grid,@xp_matrix_basicplot},{[3],[1,2],[0]});
 
 %% Test mergeDims
 % Analogous to Reshape.

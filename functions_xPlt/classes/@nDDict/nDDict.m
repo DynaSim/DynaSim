@@ -747,7 +747,7 @@ end
 
 
 function [selection_out, startIndex] = regex_lookup(vals, selection)
-    if ~ischar(vals{1}); error('nDDict.axis.values must be strings when using regular expressions');
+    if ~iscellstr(vals); error('nDDict.axis.values must be strings when using regular expressions');
     end
     if ~ischar(selection); error('Selection must be string when using regexp');
     end
