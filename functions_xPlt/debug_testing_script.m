@@ -165,6 +165,19 @@ recursivePlot(xp4,{@xp_subplot,@xp_matrix_basicplot},{[1,2]},{{0,0},{}});
 
 
 
+%% Plot for 3D data (larger one)
+
+xp4 = xp(1:2,1:2,1,:);
+xp4 = xp4.squeeze;
+xp4.getaxisinfo
+
+% recursivePlot(xp4,{@xp_subplot,@xp_subplot,@xp_matrix_basicplot},{1:2,3},{{[],1},{1,1},{}});
+% recursivePlot(xp4,{@xp_subplot_grid3D,@xp_subplot,@xp_matrix_basicplot},{1:2,3},{{},{0,1},{}});
+% recursivePlot(xp4,{@xp_subplot_grid3D,@xp_matrix_basicplot},{[3,1,2]},{{},{}});
+recursivePlot(xp4,{@xp_subplot_grid3D,@xp_matrix_basicplot},{[3,1,2],0},{{},{}});
+
+
+
 
 %% Test subset selection using regular expressions
 xp5 = xp.subset([],[],[1],'iNa*');

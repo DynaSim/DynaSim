@@ -1,13 +1,13 @@
 
 
-function h=xp_subplot (xp,transpose_on,display_mode)
+function h=xp_subplot (xp,display_mode,transpose_on)
     % xp must be 1D or 2D
     
-    if nargin < 2
+    if nargin < 3
         transpose_on = [];
     end
     
-    if nargin < 3
+    if nargin < 2
         display_mode = [];
     end
     
@@ -36,35 +36,35 @@ end
 
 
 
-function h=xp_subplot1_noimage(xp)
+function haxes=xp_subplot1_noimage(xp)
 
-        do_tight_subplot = 1;
+        do_tight_subplot = 0;
         
         sz = size(xp);
         N1 = sz(1);
         N2 = sz(2);
         
         % Creates a new figure with a bunch of subplots
-        h = figure('Units','normalized','Position',[0,0,1,1]);
+        %h = figure('Units','normalized','Position',[0,0,1,1]);
         if do_tight_subplot; haxes = tight_subplot(N1,N2,[.03 .03],[.05 .03],[.03 .01]); end
         
         c=0;
         for i = 1:N1
             for j = 1:N2
                 c=c+1;
-                figure(h);
+                %figure(h);
                 if do_tight_subplot; set(gcf,'CurrentAxes',haxes(c));
-                else subplot(N1,N2,c); end
+                else haxes = subplot(N1,N2,c); end
                 xp.data{i,j}(); 
                 xp2 = xp.subset(i,j);
-                title(strrep(xp2.getaxisinfo,'_',' '));
+                title(strrep(xp2.getaxisinfo(0),'_',' '));
             end
         end
 end
 
-function h0 = xp_subplot2_asimage(xp)
+function haxes = xp_subplot2_asimage(xp)
 
-    do_tight_subplot = 1;
+    do_tight_subplot = 0;
 
     sz = size(xp);
     N1 = sz(1);
@@ -82,10 +82,10 @@ function h0 = xp_subplot2_asimage(xp)
             c=c+1;
             
             if do_tight_subplot; set(gcf,'CurrentAxes',haxes(c));
-            else subplot(N1,N2,c); end
+            else haxes = subplot(N1,N2,c); end
             xp.data{i,j}(); 
             xp2 = xp.subset(i,j);
-            title(strrep(xp2.getaxisinfo,'_',' '));
+            title(strrep(xp2.getaxisinfo(0),'_',' '));
         end
     end
     cdata = print(h,'-RGBImage');

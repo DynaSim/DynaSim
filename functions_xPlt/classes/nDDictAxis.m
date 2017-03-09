@@ -9,7 +9,11 @@ classdef nDDictAxis
     end
     
     methods
-        function out = getaxisinfo(obj)
+        function out = getaxisinfo(obj,show_class)
+            if nargin < 2
+                show_class = 1;
+            end
+            
             max_values_to_display = 10;
             
             if isempty(obj.values); out = 'Empty axis'; return; end
@@ -17,7 +21,11 @@ classdef nDDictAxis
             % Add type
             values_class = obj.getclass_values;
             
-            temp = [obj.name, ' (' values_class ')  -> '];
+            if show_class
+                temp = [obj.name, ' (' values_class ')  -> '];
+            else
+                temp = [obj.name, ' -> '];
+            end
             Nvals = length(obj.values);
             Nvals = min(Nvals,max_values_to_display);          % Limit to displaying 10 values
             for i = 1:Nvals-1

@@ -132,6 +132,7 @@ clear meta
 % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % 
 
 %% Validate & get some properties of the data
+clc
 xp.checkDims;       % Makes sure all the dimensions match up (e.g. xp.axis 
                     % must have the same length as number of dimensions in
                     % xp.data, and the size of each dimension must match
@@ -168,6 +169,7 @@ xp_fixed.getaxisinfo
 
 % Indexing works just like with normal data. This creates a new xPlt object
 % based on the original data, with the correct axis labels
+clc
 xp4 = xp(:,:,1,8);                  % ## Update - This does the same thing as xp.subset([],[],1,8), which was the old way
                                     % of pulling data subsets. Note that [] and : are equivalent.
 xp4.getaxisinfo
@@ -192,49 +194,78 @@ clear mydata mydata2 xp4 xp5
 %% % % % % % % % % % % % % % % PLOTTING EXAMPLES % % % % % % % % % % % % 
 % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % 
 
-%% Plot for 2D parameter sweep
+%% Plot 2D data
 % Tip: don't try to understand what recursivePlot is doing - instead, try
 % putting break points in the various function handles to see how this
 % command works.
 
+% Pull out a 2D subset of the data
+clc
 xp4 = xp(:,:,'E','v');
-recursivePlot(xp4,{@xp_subplot,@xp_matrix_basicplot},{[1,2]},{{0,0},{}});
-
-
-
-%% Plot for 3D data
-
-xp4 = xp(:,:,:,8);
 xp4.getaxisinfo
 
-recursivePlot(xp4,{@xp_subplot_grid3D,@xp_matrix_basicplot},{[3,1,2]},{{},{}});
+% Set up plotting arguments
+function_handles = {@xp_subplot_grid3D,@xp_matrix_basicplot};   % Specifies the handles of the plotting functions
+dimensions = {[1,2],[0]};                                       % Specifies which dimensions of xp each function handle
+                                                                % will operate on. Note that dimension "0" refers to the 
+                                                                % the contents of each element in xp.data (e.g. the matrix of
+                                                                % time series data). If specified, it must come last.
+function_arguments = {{},{}};	% This allows you to supply input arguments to each of the 
+                                % functions in function handles. For
+                                % now we'll leave this empty.
+                                                                
+% Run the plot. Note the "+" icons next to each plot allow zooming. 
+figure('Units','normalized','Position',[0,0,1,1]);
+recursivePlot(xp4,function_handles,dimensions,function_arguments);
 
 
+%% Plot 3D data 
 
-
-%% Plot for 3D data (larger one)
-
-xp4 = xp(:,:,1,:);
-xp4 = xp4.squeeze;
+% Pull out a 3D subset of data (parameter sweeps and the 2 cell
+% types)
+clc
+xp4 = xp(:,1:2,:,'v');
 xp4.getaxisinfo
 
-% recursivePlot(xp4,{@xp_subplot,@xp_subplot,@xp_matrix_basicplot},{1:2,3},{{[],1},{1,1},{}});
-% recursivePlot(xp4,{@xp_subplot_grid3D,@xp_subplot,@xp_matrix_basicplot},{1:2,3},{{},{0,1},{}});
-% recursivePlot(xp4,{@xp_subplot_grid3D,@xp_matrix_basicplot},{[3,1,2]},{{},{}});
-recursivePlot(xp4,{@xp_subplot_grid3D,@xp_matrix_basicplot},{[3,1,2]},{{},{}});
+% This will plot E cells and I cells (axis 3) each in separate figures and
+% the parameter sweeps (axes 1 and 2) in as subplots.
+dimensions = {[3],[1,2],0};
+recursivePlot(xp4,{@xp_handles_newfig,@xp_subplot_grid3D,@xp_matrix_imagesc},dimensions);
+
+%% Plot 3D data re-ordered
+
+% Alternatively, we can put E and I cells in the same figure, and the two
+% tauD values of the parameter sweep into separate figures.
+dimensions = {[2],[3,1],0};
+recursivePlot(xp4,{@xp_handles_newfig,@xp_subplot_grid3D,@xp_matrix_imagesc},dimensions);
+
+% Note that here we produced rastergrams instead of time series by
+% submitting a different function to operate on dimension zero.
 
 
 
-%% Use nested images to fit 3D data into a 2D subplot
 
-xp4 = xp(:,:,:,8);
+%% Plot 4D data
+
+% Pull out sodium channel state variables for E and I cells.
+clc
+xp4 = xp(1:2,1:2,:,6:7);
 xp4.getaxisinfo
 
-recursivePlot(xp4,{@xp_subplot_grid3D,@xp_subplot_grid3D,@xp_matrix_basicplot},{[1,2,4],3},{{},{0,1},{}});
+
+dimensions = {[3],[1,2],4,0};
+
+% Note that here we will supply a function argument. This tells the second
+% subplot command to write its output to the axis as an RGB image, rather than
+% as subplots. This "hack" enables nested subplots.
+function_arguments = {{},{},{1},{}};
+
+recursivePlot(xp4,{@xp_handles_newfig,@xp_subplot_grid3D,@xp_subplot_grid3D,@xp_matrix_basicplot},dimensions,function_arguments);
 % recursivePlot(xp4,{@xp_subplot_grid3D,@xp_subplot,@xp_matrix_basicplot},{[1,2,4],3},{{},{0,1},{}});
 
-%% Combine two xPlt objects
 
+%% Plot two xPlt objects combined
+clc
 xp3 = xp(2,:,'E','v');
 xp3.getaxisinfo
 
@@ -243,7 +274,9 @@ xp4.getaxisinfo
 
 xp5 = merge(xp3,xp4);
 
-recursivePlot(xp5,{@xp_subplot,@xp_matrix_basicplot},{[1,2]},{{0,0},{}});
+dimensions = {[1,2],0};
+figure('Units','normalized','Position',[0,0,1,1]);
+recursivePlot(xp5,{@xp_subplot_grid3D,@xp_matrix_imagesc},dimensions);
 
 
 
@@ -270,7 +303,13 @@ X = data_table{1}; axislabels = data_table(2:end);
 xp_img = xp_img.importLinearData(X, axislabels{:});
 xp_img = xp_img.importAxisNames(column_titles(2:end));
 
-recursivePlot(xp_img,{@xp_subplot_grid3D,@xp_plotimage},{[1,2]},{{},{.5}});
+dimensions = {[1,2],[0]};
+func_arguments = {{},{.5}};         % The 0.5 argument tells xp_plotimage to
+                                    % scale down the resolution of its
+                                    % plots by 0.5. This increases speed.
+
+figure('Units','normalized','Position',[0,0,1,1]);
+recursivePlot(xp_img,{@xp_subplot_grid3D,@xp_plotimage},dimensions,func_arguments);
 
 
 %% % % % % % % % % % % % % % % ADVANCED xPlt USAGE % % % % % % % % % % % % 
@@ -342,9 +381,9 @@ src=3;
 dest=2;
 xp3 = xp2.packDim(src,dest);
 
-%%
+
 % Plot 
-recursivePlot(xp3,{@xp_subplot_grid3D,@xp_matrix_basicplot},{[1,2]},{{},{}});
+recursivePlot(xp3,{@xp_subplot_grid3D,@xp_matrix_basicplot},{[1,2],[]},{{},{}});
 
 
 %% Use packDim to average over synaptic currents
@@ -365,7 +404,7 @@ xp3.getaxisinfo;
 xp3.data = cellfun(@(x) nanmean(x,3), xp3.data,'UniformOutput',0);
 
 % Plot 
-recursivePlot(xp3,{@xp_subplot_grid3D,@xp_matrix_basicplot},{[3,1,2]},{{},{}});
+recursivePlot(xp3,{@xp_subplot_grid3D,@xp_matrix_basicplot},{[3,1,2],[0]},{{},{}});
 
 %% Test mergeDims
 % Analogous to Reshape.
@@ -385,9 +424,9 @@ xp2 = xp.mergeDims([3,4]);
 xp2 = xp2.mergeDims([1,2]);
 xp2.getaxisinfo;
 
-% Squeeze out the empty dimensions.
+% Can optionally squeeze out the empty dimensions.
 xp3 = squeeze(xp2);
-xp3.getaxisinfo;
+
 
 
 

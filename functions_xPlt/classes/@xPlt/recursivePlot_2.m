@@ -1,6 +1,6 @@
 
-function varargout = recursivePlot_2(xp,function_handles,dimensions,function_handle_arguments)
-%% varargout = recursivePlot(xp,function_handles,dimensions,function_handle_arguments)
+function varargout = recursivePlot_2(xp,function_handles,dimensions,function_arguments)
+%% varargout = recursivePlot(xp,function_handles,dimensions,function_arguments)
 %     Purpose: Takes in multidimensional data and a set of function handles for
 %     plotting. Function handles operate on low-dimensional subspaces. 
 %     recursivePlot assigns the high dimensional data in xp to the plotting
@@ -8,7 +8,7 @@ function varargout = recursivePlot_2(xp,function_handles,dimensions,function_han
 % 
 %     Forms:
 %         varargout = recursivePlot_2(xp,function_handles,dimensions)
-%         varargout = recursivePlot_2(xp,function_handles,dimensions,function_handle_arguments)
+%         varargout = recursivePlot_2(xp,function_handles,dimensions,function_arguments)
 % 
 %     Inputs:
 %       xp                          : xPlt structure with Nd dimensions
@@ -20,7 +20,7 @@ function varargout = recursivePlot_2(xp,function_handles,dimensions,function_han
 %                                     to a function handle. Specifies which dimensions
 %                                     in xp to assign to each function handle.
 % 
-%       function_handle_arguments   : (optional) 1xNd cell array of cell arrays, each containing
+%       function_arguments   : (optional) 1xNd cell array of cell arrays, each containing
 %                                     additional arguments to pass to each function
 %                                     handle. There should be one cell array for
 %                                     each function handle.
@@ -69,18 +69,32 @@ function varargout = recursivePlot_2(xp,function_handles,dimensions,function_han
 %             See demos file.
 
 
-%     function_handle_arguments - cell array of argument cell arrays to pass to
+%     function_arguments - cell array of argument cell arrays to pass to
 %     function_handles. Must have one cell array for each function_handle
 %     passed. Use empty cell arrays for no arguments. E.g.
-%     function_handle_arguments = { {}, {}, {1} } for nothing, nothing, and
+%     function_arguments = { {}, {}, {1} } for nothing, nothing, and
 %     1 as arguments.
     
     if nargin < 4
-        function_handle_arguments = cell(size(function_handles));
-        for i = 1:length(function_handle_arguments)
-            function_handle_arguments{i} = {};
+        function_arguments = cell(size(function_handles));
+        for i = 1:length(function_arguments)
+            function_arguments{i} = {};
         end
     end
+    
+    Nfh = length(function_handles);
+    Nd = length(dimensions);
+    Nfha = length(function_arguments);
+    
+    if Nfh ~= Nd; error('Number of cells in dimensions must equal the number of function handles supplied'); end
+    if Nfh ~= Nfha; error('Number of cells in function_arguments must equal number of function handles supplied'); end
+    
+    
+%     Na = ndims(xp);
+%     N_dims_supplied = sum(cellfun(@length,dimensions));
+%     if Na ~= N_dims_supplied
+%         error('Total number of entries supplied in dimensions must equal ndims(xp)');
+%     end
 
     sz = size(xp);
     if length(function_handles) > 1
@@ -108,7 +122,7 @@ function varargout = recursivePlot_2(xp,function_handles,dimensions,function_han
             xp_indices(dimensions{1}) = xp2_indices(call, :);
             
             xp2.data{xp2_indices{call, :}} = @() recursivePlot_2(xp.subset(xp_indices{:}),...
-                function_handles(2:end),dimensions(2:end),function_handle_arguments(2:end));
+                function_handles(2:end),dimensions(2:end),function_arguments(2:end));
             
         end
         
@@ -120,10 +134,10 @@ function varargout = recursivePlot_2(xp,function_handles,dimensions,function_han
         end
         xp2 = xp2.fixAxes;
         
-        [varargout{1:nargout}] = function_handles{1}(xp2,function_handle_arguments{1}{:});
+        [varargout{1:nargout}] = function_handles{1}(xp2,function_arguments{1}{:});
         
     else
-        [varargout{1:nargout}] = function_handles{1}(xp,function_handle_arguments{1}{:});
+        [varargout{1:nargout}] = function_handles{1}(xp,function_arguments{1}{:});
     end
 end
             
