@@ -275,6 +275,9 @@ xp4 = xp3.unpackDim(dest, src);
 xp4.getaxisinfo;
 
 %% Unless new axis info is provided, that is.
+xp4 = xp3.unpackDim(dest, src, 'New_Axis_Names');
+xp4.getaxisinfo;
+
 xp4 = xp3.unpackDim(dest, src, 'New_Axis_Names', {'One','Two','Three','Four','Five','Six'});
 xp4.getaxisinfo;
 
