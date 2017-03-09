@@ -155,7 +155,7 @@ xp_bad = xp;
 xp_bad.axis(4).values={'test'};     % Reduce this to 1 (mismatch)
 
 % Check errors in new class (this produces an error, so disabling it)
-xp_bad.checkDims;
+% xp_bad.checkDims;
 
 % Auto fix errors in labels
 xp_fixed = xp_bad.fixAxes; 
@@ -242,18 +242,19 @@ xp4.getaxisinfo
 
 % This will plot E cells and I cells (axis 3) each in separate figures and
 % the parameter sweeps (axes 1 and 2) in as subplots.
-dimensions = {{'populations'},{'E_Iapp','I_E_tauD'},0};
-recursivePlot(xp4,{@xp_handles_newfig,@xp_subplot_grid,@xp_matrix_imagesc},dimensions);
-
-%% Plot 3D data re-ordered
-
-% Alternatively, we can put E and I cells in the same figure, and the two
-% tauD values of the parameter sweep into separate figures.
-dimensions = {{'I_E_tauD'},{'populations','E_Iapp'},0};
+dimensions = {{'populations'},{'I_E_tauD','E_Iapp'},0};
 recursivePlot(xp4,{@xp_handles_newfig,@xp_subplot_grid,@xp_matrix_imagesc},dimensions);
 
 % Note that here we produced rastergrams instead of time series by
 % submitting a different function to operate on dimension zero.
+
+%% Plot 3D data re-ordered
+
+% Alternatively, we can put E and I cells in the same figure. This
+% essentially swaps the population and tauD axes.
+dimensions = {{'I_E_tauD'},{'populations','E_Iapp'},0};
+recursivePlot(xp4,{@xp_handles_newfig,@xp_subplot_grid,@xp_matrix_imagesc},dimensions);
+
 
 
 
@@ -273,6 +274,7 @@ dimensions = {'populations',{'E_Iapp','I_E_tauD'},'variables',0};       % Note -
 % as subplots. This "hack" enables nested subplots.
 function_arguments = {{},{},{1},{}};
 
+if verLessThan('matlab','8.4'); error('This will not work on earlier versions of MATLAB'); end
 recursivePlot(xp4,{@xp_handles_newfig,@xp_subplot_grid,@xp_subplot_grid,@xp_matrix_basicplot},dimensions,function_arguments);
 
 
@@ -353,21 +355,21 @@ disp(xp3.data)             % The dimension "variables", which was dimension 2
 % View axis of xp3
 xp3.getaxisinfo;            % The dimension "variables" is now missing
 
-% Note some of this data is sparse!
+% Note some of this data is sparse! We can see this sparseness by plotting
+% as follows (note the NaNs)
 temp1 = squeeze(xp3.data{1}(100,:,:));  % Pick out a random time point
 temp2 = squeeze(xp3.data{2}(100,:,:));  % Pick out a random time point
 figure; 
 subplot(211); imagesc(temp1);
-
 ylabel('Cells');
 xlabel(xp2.axis(2).name); 
-set(gca,'XTick',1:length(xp2.axis(2).values)); set(gca,'XTickLabels',strrep(xp2.axis(2).values,'_',' '));
+set(gca,'XTick',1:length(xp2.axis(2).values)); set(gca,'XTickLabel',strrep(xp2.axis(2).values,'_',' '));
 
 
 subplot(212); imagesc(temp2);
 ylabel('Cells');
 xlabel(xp2.axis(2).name); 
-set(gca,'XTick',1:length(xp2.axis(2).values)); set(gca,'XTickLabels',strrep(xp2.axis(2).values,'_',' '));
+set(gca,'XTick',1:length(xp2.axis(2).values)); set(gca,'XTickLabel',strrep(xp2.axis(2).values,'_',' '));
 
 
 %% Use packDim to average across cells
