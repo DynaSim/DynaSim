@@ -584,9 +584,11 @@ classdef nDDict
             if any(strcmp(getclass_obj_axis_name(obj),'unknown')); error('Obj.axis.name must be of type char.'); end
             
             sza = arrayfun(@(x) length(x.values),obj.axis);
-            szd = size(obj.data);
+            [szd, szd_singleton] = deal(size(obj.data));
             
-            Nd = ndims(obj.data);
+            % szd_singleton(szd == 1) = [];
+            % Nd = max(length(szd_singleton), 1);
+            Nd = ndims(obj.data); % This returns an error in the case that obj.data is 1x1.
             Na = length(obj.axis);
 
             if Nd > Na
