@@ -162,7 +162,6 @@ classdef nDDict
             N = ndims(obj);
             Nmerged = prod(sz(dims2pack));       % Final number entries in the merged dimension
             
-            
             % % First, do axis names
             % Get cell array of all linearized axis values.
             inds = 1:Nmerged;
@@ -194,7 +193,6 @@ classdef nDDict
             % axis
             obj.axis(dims2pack(1)).values = tempstr;
             obj.axis(dims2pack(1)).astruct.premerged_values = temp;
-            
             
             % Give it a new axis name, reflecting the merger of all the
             % others
@@ -432,7 +430,8 @@ classdef nDDict
             meta = obj.meta;
             
             % If names and values are empty, search for them in
-            % meta, and if none are found, create defaults.
+            % meta; if they are found, remove them from meta; if none are
+            % found, create defaults.
             dim_src_name = ['matrix_dim_' num2str(dim_src)];
             if isempty(dim_name) && isempty(dim_values)
                 if isfield(meta, dim_src_name)
@@ -446,8 +445,9 @@ classdef nDDict
             end
             
             % Pass meta to obj_new.
-            obj_new.meta = meta;
+            obj_new = importMeta(obj_new, meta);
             
+            % Checking axis dimensions against data dimensions.
             if length(dim_values) < max_size
                 warning('dimension %d is longer for some cells than dim_values.\n', dim_src)
                 % dim_values((end + 1):max_size) = (length(dim_values) +
@@ -457,24 +457,24 @@ classdef nDDict
                 warning('dimension %d is shorter for all cells than dim_values.\n', dim_src)
             end
             
-            % Creating new axis.
-            obj_new.axis = obj.axis;
+            % Creating unpacked axis.
+            unpacked_axis = nDDictAxis;
+            unpacked_axis.name = dim_name;
+            unpacked_axis.values = dim_values;
             
-            % Make new axis last one, temporarily.
-            obj_new.axis(length(obj.axis) + 1).name = dim_name;
-            obj_new.axis(length(obj.axis) + 1).values = dim_values;
-            obj_new.axis(length(obj.axis) + 1).astruct = struct();
-            
-            % Move new axis to front.
-            obj_new.axis = obj_new.axis([dim0 + 1, 1:dim0]);
+            % Make new axis last one, then move to front.
+            axis_new = obj.axis;
+            axis_new(end + 1) = unpacked_axis;
+            axis_new = axis_new([dim0 + 1, 1:dim0]);
             
             % Putting unpacked dimension in dim_target, if given.
             if nargin >= 3 && ~isempty(dim_target)
                 new_dim_order = [2:dim_target 1 (dim_target + 1):(dim0 + 1)];
-                obj_new.data = permute(obj_new.data, new_dim_order);
-                obj_new.axis.name = obj_new.axis(new_dim_order).name;
-                obj_new.axis.values = obj_new.axis(new_dim_order).values;
+                axis_new = axis_new(new_dim_order);
             end
+            
+            % Assigning axis_new to obj_new.
+            obj_new.axis = axis_new;
             
             % Fix axes.
             obj_new = fixAxes(obj_new);
