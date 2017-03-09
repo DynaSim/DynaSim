@@ -436,7 +436,7 @@ classdef nDDict
             dim_src_name = ['matrix_dim_' num2str(dim_src)];
             if isempty(dim_name) && isempty(dim_values)
                 if isfield(meta, dim_src_name)
-                    dim_name = meta.(dim_src_name).values;
+                    dim_name = meta.(dim_src_name).name;
                     dim_values = meta.(dim_src_name).values;
                     meta = rmfield(meta, dim_src_name);
                 else
