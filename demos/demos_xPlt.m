@@ -274,13 +274,23 @@ xp3.meta.matrix_dim_3.getaxisinfo
 xp4 = xp3.unpackDim(dest, src);
 xp4.getaxisinfo;
 
-%% Unless new axis info is provided, that is.
+% Unless new axis info is provided, that is.
 xp4 = xp3.unpackDim(dest, src, 'New_Axis_Names');
 xp4.getaxisinfo;
 
+%% This seems to be broken.
 xp4 = xp3.unpackDim(dest, src, 'New_Axis_Names', {'One','Two','Three','Four','Five','Six'});
 xp4.getaxisinfo;
 
+%% So is this.
+xp4 = xp3.unpackDim(dest, src, 'New_Axis_Names', []);
+xp4.getaxisinfo;
+
+%% And this.
+xp4 = unpackDim(xp3, dest, src, 'New_Axis_Names', []);
+xp4.getaxisinfo;
+
+%%
 % Note some of this data is sparse!
 temp1 = squeeze(xp3.data{1}(100,:,:));  % Pick out a random time point
 temp2 = squeeze(xp3.data{2}(100,:,:));  % Pick out a random time point
