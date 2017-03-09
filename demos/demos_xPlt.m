@@ -244,7 +244,7 @@ clear xp2 xp3 xp4 xp5
 
 % Start by taking a smaller subset of the original xp object.
 % xp2 = xp.subset(2,2,[],[1,3,5:8]);      % Selection based on index locations
-xp2 = xp(2,2,:,'(v|^i||ISYN$)');  % Same thing as above using regular expression. Selects everything except the _s terms. "^" - beginning with; "$" - ending with
+xp2 = xp.subset(2,2,:,'(v|^i||ISYN$)');  % Same thing as above using regular expression. Selects everything except the _s terms. "^" - beginning with; "$" - ending with
 xp2 = xp2.squeeze;
 xp2.getaxisinfo;
 
@@ -275,19 +275,10 @@ xp4 = xp3.unpackDim(dest, src);
 xp4.getaxisinfo;
 
 % Unless new axis info is provided, that is.
-xp4 = xp3.unpackDim(dest, src, 'New_Axis_Names');
+xp4 = xp3.unpackDim(dest, src, 'New_Axis_Names'); % The values can also be left empty, as in xp4 = xp3.unpackDim(dest, src, 'New_Axis_Names', []);
 xp4.getaxisinfo;
 
-%% This seems to be broken.
 xp4 = xp3.unpackDim(dest, src, 'New_Axis_Names', {'One','Two','Three','Four','Five','Six'});
-xp4.getaxisinfo;
-
-%% So is this.
-xp4 = xp3.unpackDim(dest, src, 'New_Axis_Names', []);
-xp4.getaxisinfo;
-
-%% And this.
-xp4 = unpackDim(xp3, dest, src, 'New_Axis_Names', 1:6);
 xp4.getaxisinfo;
 
 %%
