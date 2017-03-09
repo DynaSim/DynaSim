@@ -215,7 +215,7 @@ xp4.getaxisinfo
 
 % Set up plotting arguments
 function_handles = {@xp_subplot_grid,@xp_matrix_basicplot};   % Specifies the handles of the plotting functions
-dimensions = {[1,2],[0]};                                       % Specifies which dimensions of xp each function handle
+dimensions = {[1,2],0};                                       % Specifies which dimensions of xp each function handle
                                                                 % will operate on. Note that dimension "0" refers to the 
                                                                 % the contents of each element in xp.data (e.g. the matrix of
                                                                 % time series data). If specified, it must come last.
@@ -229,7 +229,7 @@ figl; recursivePlot(xp4,function_handles,dimensions,function_arguments);
 % Alternatively, dimensions can be specified as axis names instead of
 % indices. The last entry, data, refers to the contents of xp.data (e.g.
 % dimension 0 above).
-dimensions = {{'E_Iapp','I_E_tauD'},'data'}; 
+dimensions = {{'E_Iapp','I_E_tauD'},{'data'}}; 
 figl; recursivePlot(xp4,function_handles,dimensions,function_arguments);
 
 %% Plot 3D data 
@@ -242,7 +242,7 @@ xp4.getaxisinfo
 
 % This will plot E cells and I cells (axis 3) each in separate figures and
 % the parameter sweeps (axes 1 and 2) in as subplots.
-dimensions = {{'populations'},{'I_E_tauD','E_Iapp'},0};
+dimensions = {{'populations'},{'I_E_tauD','E_Iapp'},{'data'}};
 recursivePlot(xp4,{@xp_handles_newfig,@xp_subplot_grid,@xp_matrix_imagesc},dimensions);
 
 % Note that here we produced rastergrams instead of time series by
@@ -252,7 +252,7 @@ recursivePlot(xp4,{@xp_handles_newfig,@xp_subplot_grid,@xp_matrix_imagesc},dimen
 
 % Alternatively, we can put E and I cells in the same figure. This
 % essentially swaps the population and tauD axes.
-dimensions = {{'I_E_tauD'},{'populations','E_Iapp'},0};
+dimensions = {{'I_E_tauD'},{'populations','E_Iapp'},'data'};
 recursivePlot(xp4,{@xp_handles_newfig,@xp_subplot_grid,@xp_matrix_imagesc},dimensions);
 
 
@@ -434,10 +434,18 @@ xp2.getaxisinfo;
 % equivalent to the structure fields in Jason's DynaSim structure.
 xp2 = xp.mergeDims([3,4]);
 xp2 = xp2.mergeDims([1,2]);
-xp2.getaxisinfo;
+xp3 = squeeze(xp2); % Squeeze out the empty dimensions.
+xp3.getaxisinfo;
 
-% Can optionally squeeze out the empty dimensions.
-xp3 = squeeze(xp2);
+
+% Note that the variable names are not sorted the same was as in Jason's
+% DynaSim structure, in that they alternate E and I cells
+disp(xp3.axis(2).values);
+% Can easily sort them as follows.
+[~,I] = sort(xp3.axis(2).values);
+xp4 = xp3(:,I);
+disp(xp4.axis(2).values);
+
 
 
 
