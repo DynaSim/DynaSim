@@ -7,6 +7,10 @@
 % Format
 format compact
 
+% Check if in right folder
+[~,currfolder] = fileparts(pwd);
+if ~strcmp(currfolder,'demos'); error('Should be in demos folder to run this code.'); end
+
 % Set path to your copy of the DynaSim toolbox
 dynasim_path = fullfile(pwd,'..');
 
