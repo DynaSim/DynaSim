@@ -287,7 +287,7 @@ xp4 = xp3.unpackDim(dest, src, 'New_Axis_Names', []);
 xp4.getaxisinfo;
 
 %% And this.
-xp4 = unpackDim(xp3, dest, src, 'New_Axis_Names', []);
+xp4 = unpackDim(xp3, dest, src, 'New_Axis_Names', 1:6);
 xp4.getaxisinfo;
 
 %%

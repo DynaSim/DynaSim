@@ -741,7 +741,7 @@ classdef nDDict
                     case '.'
                         [varargout{1:nargout}] = builtin('subsref',varargin{:});
                     otherwise
-                        error('Unknown indexing method. Should never reach this');
+                        error('Unknown indexing method. Should never reach this.');
                 end
             else
                 [varargout{1:nargout}] = builtin('subsref',varargin{:});
@@ -804,9 +804,6 @@ function output = inheritObj(output,input)
     end
 end
 
-
-
-
 function obj = setAxisDefaults(obj,dim)
     % Sets obj.axis(i) to default values
     
@@ -856,7 +853,6 @@ function obj = setAxisDefaults(obj,dim)
     obj.axis(dim) = ax_curr;
 end
 
-
 function [selection_out, startIndex] = regex_lookup(vals, selection)
     if ~ischar(vals{1}); error('nDDict.axis.values must be strings when using regular expressions');
     end
@@ -879,6 +875,3 @@ end
 %         varargout{1} = sz;
 %     end
 % end
-
-
-
