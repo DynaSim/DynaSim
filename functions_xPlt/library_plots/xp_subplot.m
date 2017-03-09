@@ -17,10 +17,13 @@ function h=xp_subplot (xp,display_mode,transpose_on)
                           % 1-Plot as an image (cdata)
                           % 2-Save to a figure file
     
-    if transpose_on
+    if verLessThan('matlab','8.4') && display_mode == 1; warning('Display_mode==1 might not work with earlier versions of MATLAB.'); end
+    if transpose_on && ismatrix(xp)
         xp = xp.transpose;
     end
-    
+    if ~ismatrix(xp.data)
+        error('xp must be at most 2D');
+    end
     
     
     if display_mode == 0
