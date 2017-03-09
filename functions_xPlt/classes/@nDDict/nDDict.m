@@ -707,47 +707,47 @@ classdef nDDict
         end
         
         
-%         %% % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % 
-%         % % % % % % % % % % % OVERLOADED OPERATORS % % % % % % % % % % %
-%         % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % %
-%         function varargout = subsref(varargin)
-%             
-% %             % Default settings for everything
-% %             [varargout{1:nargout}] = builtin('subsref',varargin{:});
-%             
-%             obj = varargin{1};
-%             S = varargin{2};
-%             
-%             if length(S) == 1               % This discounts cases like obj.subset(1,2,3,4)
-%                 switch S.type
-%                     case '()'
-%                         %[varargout{1:nargout}] = builtin('subsref',varargin{:});
-%                         %varargout{1} = builtin('subsref',obj.data,S);
-%                         
-%                         % Convert colon operators to empties, which subset
-%                         % uses to denote "take everything"
-%                         for i = 1:length(S.subs)
-%                             if strcmp(S.subs{i},':')
-%                                 S.subs{i} = [];
-%                             end
-%                         end
-%                         
-%                         varargout{1} = obj.subset(S.subs{:});
-%                     case '{}'
-%                         %[varargout{1:nargout}] = builtin('subsref',varargin{:});
-%                         S2 = S;
-%                         S2.type = '()';
-%                         [varargout{1:nargout}] = builtin('subsref',obj.data,S2,varargin{3:end});
-%                     case '.'
-%                         [varargout{1:nargout}] = builtin('subsref',varargin{:});
-%                     otherwise
-%                         error('Unknown indexing method. Should never reach this.');
-%                 end
-%             else
-%                 [varargout{1:nargout}] = builtin('subsref',varargin{:});
-%             end
-%              
-%         end
+        %% % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % 
+        % % % % % % % % % % % OVERLOADED OPERATORS % % % % % % % % % % %
+        % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % %
+        function varargout = subsref(varargin)
+            
+%             % Default settings for everything
+%             [varargout{1:nargout}] = builtin('subsref',varargin{:});
+            
+            obj = varargin{1};
+            S = varargin{2};
+            
+            if length(S) == 1               % This discounts cases like obj.subset(1,2,3,4)
+                switch S.type
+                    case '()'
+                        %[varargout{1:nargout}] = builtin('subsref',varargin{:});
+                        %varargout{1} = builtin('subsref',obj.data,S);
+                        
+                        % Convert colon operators to empties, which subset
+                        % uses to denote "take everything"
+                        for i = 1:length(S.subs)
+                            if strcmp(S.subs{i},':')
+                                S.subs{i} = [];
+                            end
+                        end
+                        
+                        varargout{1} = obj.subset(S.subs{:});
+                    case '{}'
+                        %[varargout{1:nargout}] = builtin('subsref',varargin{:});
+                        S2 = S;
+                        S2.type = '()';
+                        [varargout{1:nargout}] = builtin('subsref',obj.data,S2,varargin{3:end});
+                    case '.'
+                        [varargout{1:nargout}] = builtin('subsref',varargin{:});
+                    otherwise
+                        error('Unknown indexing method. Should never reach this.');
+                end
+            else
+                [varargout{1:nargout}] = builtin('subsref',varargin{:});
+            end
+             
+        end
     end
     
     %% % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % 
