@@ -265,6 +265,19 @@ disp(xp3.data)             % The dimension "variables", which was dimension 2
 % View axis of xp3
 xp3.getaxisinfo;            % The dimension "variables" is now missing
 
+% However, the information is stored in the nDDictAxis matrix_dim_3, a field of xp3.meta.
+xp3.meta.matrix_dim_3.getaxisinfo
+
+% And if dimension 3 of each cell in xp3.data is unpacked using unpackDim,
+% xp3.meta.matrix_dim_3 will be used to provide axis info for the new
+% xPlt object.
+xp4 = xp3.unpackDim(dest, src);
+xp4.getaxisinfo;
+
+%% Unless new axis info is provided, that is.
+xp4 = xp3.unpackDim(dest, src, 'New_Axis_Names', {'One','Two','Three','Four','Five','Six'});
+xp4.getaxisinfo;
+
 % Note some of this data is sparse!
 temp1 = squeeze(xp3.data{1}(100,:,:));  % Pick out a random time point
 temp2 = squeeze(xp3.data{2}(100,:,:));  % Pick out a random time point

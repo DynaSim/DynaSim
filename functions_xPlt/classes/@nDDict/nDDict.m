@@ -360,8 +360,6 @@ classdef nDDict
         
         function obj_new = unpackDim(obj, dim_src, dim_target, dim_name, dim_values)
             
-            display('TO DO: put demonstration of unpackDim in demos_xPlt.')
-            
             % Temporarily linearize obj.data.
             sz0 = size(obj.data);
             dim0 = length(sz0);
@@ -429,20 +427,23 @@ classdef nDDict
             % Save obj.meta to pass to obj_new.
             meta = obj.meta;
             
-            % If names and values are empty, search for them in
-            % meta; if they are found, remove them from meta; if none are
-            % found, create defaults.
+            % If names and/or values are empty, search for them in
+            % meta; if they are found, remove them from meta.
             dim_src_name = ['matrix_dim_' num2str(dim_src)];
-            if isempty(dim_name) && isempty(dim_values)
-                if isfield(meta, dim_src_name)
+            if isfield(meta, dim_src_name)
+                if isempty(dim_name)
                     dim_name = meta.(dim_src_name).name;
-                    dim_values = meta.(dim_src_name).values;
-                    meta = rmfield(meta, dim_src_name);
-                else
-                    dim_name = dim_src_name;
-                    dim_values = (1:max_size)';
                 end
+                if isempty(dim_values)
+                    dim_values = meta.(dim_src_name).values;
+                end
+                meta = rmfield(meta, dim_src_name);
             end
+            
+            % If names and/or values are still empty, replace them with
+            % defaults.
+            if isempty(dim_name), dim_name = dim_src_name; end
+            if isempty(dim_values), dim_values = (1:max_size)'; end
             
             % Pass meta to obj_new.
             obj_new = importMeta(obj_new, meta);
@@ -466,15 +467,13 @@ classdef nDDict
             axis_new = obj.axis;
             axis_new(end + 1) = unpacked_axis;
             axis_new = axis_new([dim0 + 1, 1:dim0]);
+            obj_new.axis = axis_new;
             
             % Putting unpacked dimension in dim_target, if given.
             if nargin >= 3 && ~isempty(dim_target)
                 new_dim_order = [2:dim_target 1 (dim_target + 1):(dim0 + 1)];
-                axis_new = axis_new(new_dim_order);
+                obj_new = permute(obj_new, new_dim_order);
             end
-            
-            % Assigning axis_new to obj_new.
-            obj_new.axis = axis_new;
             
             % Fix axes.
             obj_new = fixAxes(obj_new);
