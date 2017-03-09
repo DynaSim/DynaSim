@@ -18,8 +18,12 @@ function hsg = xp_subplot_grid3D (xp, display_mode, transpose_on)
                           % 1-Plot as an image (cdata)
                           % 2-Save to a figure file 
     
+                          
+    if verLessThan('matlab','8.4') && display_mode == 1; warning('Display_mode==1 might not work with earlier versions of MATLAB.'); end
     if transpose_on && ismatrix(xp)
         xp = xp.transpose;
+    elseif transpose_on && ~ismatrix(xp.data)
+        error('xp must be a matrix (e.g. ndims < 3) in order to use transpose');
     end
     
     % Parameters
@@ -40,7 +44,7 @@ function hsg = xp_subplot_grid3D (xp, display_mode, transpose_on)
         for i = 1:N1
             figure;
             hsg(i) = subplot_grid(N2,N3,subplot_grid_options{:});
-            hsg(i).figplace(N1,i);
+            if ~verLessThan('matlab','8.4'); hsg(i).figplace(N1,i); end
             mytitle = [figformat_str(xp.axis(1).name) ': ' figformat_str(xp.axis(1).getvaluestring(i))];
             hsg(i).figtitle(mytitle);
             c=0;

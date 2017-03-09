@@ -17,8 +17,11 @@ function hsg = xp_subplot_grid (xp, display_mode, transpose_on)
                           % 1-Plot as an image (cdata)
                           % 2-Save to a figure file 
     
+    if verLessThan('matlab','8.4') && display_mode == 1; warning('Display_mode==1 might not work with earlier versions of MATLAB.'); end
     if transpose_on && ismatrix(xp)
         xp = xp.transpose;
+    elseif transpose_on && ~ismatrix(xp.data)
+        error('xp must be a matrix (e.g. ndims < 3) in order to use transpose');
     end
     
     % Parameters
@@ -70,7 +73,7 @@ function hsg = xp_subplot_grid (xp, display_mode, transpose_on)
         
         
     elseif ndims(xp.data) == 3
-        % Use instead xp_subplot_grid3D
+        error('For 3D xp data, use instead xp_subplot_grid3D');
         
     end
     
