@@ -367,10 +367,14 @@ classdef nDDict
         % % % % % % % % % % % HOUSEKEEPING FUNCTIONS % % % % % % % % % % %
         % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % %
         
-        function out = getaxisinfo(obj)
+        function out = getaxisinfo(obj,showclass)
             % If no output arguments, prints axis info to the screen. If
             % output arguments are supplied, returns this information as a
             % string
+            
+            if nargin < 2
+                showclass = 1;
+            end
             
             if nargout > 0
                 out = '';
@@ -379,7 +383,7 @@ classdef nDDict
             
             for i = 1:length(obj.axis)
                 
-                out1 = obj.axis(i).getaxisinfo;
+                out1 = obj.axis(i).getaxisinfo(showclass);
                 spacer = '';
                 
                 if nargout > 0

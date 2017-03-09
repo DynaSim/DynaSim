@@ -1,13 +1,13 @@
 
 
-function hsg = xp_subplot_grid3D (xp,transpose_on, display_mode)
+function hsg = xp_subplot_grid3D (xp, display_mode, transpose_on)
 	% xp must be 1D, 2D, or 3D
     
-    if nargin < 2
+    if nargin < 3
         transpose_on = [];
     end
     
-    if nargin < 3
+    if nargin < 2
         display_mode = [];
     end
     
@@ -36,7 +36,7 @@ function hsg = xp_subplot_grid3D (xp,transpose_on, display_mode)
                 h0 = gcf; ha0 = gca;
                 h = figure('visible','off');
             else
-                figure;
+                %figure;
             end
             
             hsg = subplot_grid(N1,N2,subplot_grid_options{:});
@@ -80,7 +80,8 @@ function hsg = xp_subplot_grid3D (xp,transpose_on, display_mode)
             figure;
             hsg(i) = subplot_grid(N2,N3,subplot_grid_options{:});
             hsg(i).figplace(N1,i);
-            hsg(i).figtitle([xp.axis(1).name ': ' xp.axis(1).getvaluestring(i)]);
+            mytitle = [figformat_str(xp.axis(1).name) ': ' figformat_str(xp.axis(1).getvaluestring(i))];
+            hsg(i).figtitle(mytitle);
             c=0;
             for j = 1:N2
                 for k = 1:N3
