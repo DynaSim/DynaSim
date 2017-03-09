@@ -82,12 +82,18 @@ function varargout = recursivePlot_2(xp,function_handles,dimensions,function_arg
         end
     end
     
+    % Validate inputs
     Nfh = length(function_handles);
     Nd = length(dimensions);
     Nfha = length(function_arguments);
     
     if Nfh ~= Nd; error('Number of cells in dimensions must equal the number of function handles supplied'); end
     if Nfh ~= Nfha; error('Number of cells in function_arguments must equal number of function handles supplied'); end
+    
+    
+    % Convert any regular expressions in dimensions into their
+    % corresponding indices if necessary
+    dimensions = dimensions_regex_2_index(xp,dimensions);
     
     
 %     Na = ndims(xp);
@@ -140,5 +146,35 @@ function varargout = recursivePlot_2(xp,function_handles,dimensions,function_arg
         [varargout{1:nargout}] = function_handles{1}(xp,function_arguments{1}{:});
     end
 end
+    
+
+
+function dimensions = dimensions_regex_2_index(xp,dimensions)
+    for i = 1:length(dimensions)
+        dim_curr = dimensions{i};
+        if iscell(dim_curr)
             
-        
+            for j = find(cellfun(@ischar,dim_curr))
+                
+                dim_curr{j} = findaxis_mod(xp,dim_curr{j});
+            end
+            
+            if any(cellfun(@length,dim_curr) > 1); error('Ambiguous dimension supplied'); end
+            
+            dim_curr = cell2mat(dim_curr);
+        elseif ischar(dim_curr)
+            dim_curr = findaxis_mod(xp,dim_curr);
+        end
+        dimensions{i} = dim_curr;
+    end
+end
+
+function out = findaxis_mod(xp,str)
+
+    if strcmp(str,'data')
+        out = 0;
+    else
+        out = xp.findaxis(str);
+    end
+
+end
