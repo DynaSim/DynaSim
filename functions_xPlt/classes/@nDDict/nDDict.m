@@ -136,7 +136,7 @@ classdef nDDict
             end
             
             if length(ax_names) < Nd
-                error('Mismatch between number of axis names supplied and number of dimensions in dataset'); end
+                error('Mismatch between number of axis names supplied and number of dimensions in dataset.'); end
 
             for i = 1:Nd
                 obj.axis(i).name = ax_names{i};
@@ -148,9 +148,6 @@ classdef nDDict
         end
         
         xp = importLinearData(xp,X,varargin)
-
-        
-
         
         %% % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % 
         % % % % % % % % % % % REARRANGING DATA % % % % % % % % % % %
@@ -210,7 +207,6 @@ classdef nDDict
                 obj.axis(dims2pack(i)).name = ['Dim ' num2str(dims2pack(i))];
                 obj.axis(dims2pack(i)).values = 1;
             end
-
 
             % % Now, work on obj.data
             dat = obj.data;
@@ -310,7 +306,6 @@ classdef nDDict
             end
             
             obj.data = obj.data(1,:);         % Keep only 1st dimension;
-            sz(1) = 1;
             sz0(1) = 1;
 
             % Lastly, restore original dimensions
@@ -322,6 +317,9 @@ classdef nDDict
             ax_src = obj.axis(dim_src);
             obj = setAxisDefaults(obj,dim_src);
             obj.axis(dim_src).name = ['Dim ' num2str(dim_src)];
+            
+            % Store obj.axis(dim_src) as meta data.
+            obj.meta.(['matrix_dim_', num2str(dim_target)]) = ax_src;
             
             % If obj.data is a nDDict object itself, update axes labels
             % appropriately
@@ -362,7 +360,9 @@ classdef nDDict
             obj_out = obj_out.importAxisNames(names);
         end
         
-        function obj_new = unpackDim(obj, dim_src, dim_name, dim_values)
+        function obj_new = unpackDim(obj, dim_src, dim_target, dim_name, dim_values)
+            
+            display('TO DO: put demonstration of unpackDim in demos_xPlt.')
             
             % Temporarily linearize obj.data.
             sz0 = size(obj.data);
@@ -370,8 +370,7 @@ classdef nDDict
             obj.data = reshape(obj.data,prod(sz0),1);
             
             % Get sizes of dimension dim_src for matrices inside obj.data.
-            sizes = cellfun(@(x) size(x, dim_src), obj.data); % , 'UniformOutput', 'false');
-            
+            sizes = cellfun(@(x) size(x, dim_src), obj.data);
             max_size = max(sizes);
             
             % Calculate size of new nDDict object with dim_src unpacked.
@@ -388,18 +387,13 @@ classdef nDDict
                 
                 % Retrieve matrix from obj.data at data_index.
                 temp_matrix = obj.data{data_index};
-                
                 [temp_size, slice_size] = deal(size(temp_matrix));
-                
-                slice_size(dim_src) = 1; 
                 
                 % Create indices for an arbitrary slice from dimension
                 % dim_src, padding out with ':' if temp_matrix has fewer
                 % dimensions than dim_src.
                 temp_effective_dimensions = max(length(temp_size), dim_src);
-                
                 slice_indices = cell(1, temp_effective_dimensions);
-                
                 slice_indices(:) = {':'};
                 
                 % Loop over slices of dim_src.
@@ -409,15 +403,10 @@ classdef nDDict
                     new_index = (data_index - 1)*max_size + slice_index;
                     
                     if slice_index <= sizes(data_index)
-                        
                         slice_indices{dim_src} = slice_index; % Get correct slice indices.
-                        
                         slice = temp_matrix(slice_indices{:});
-                        
                     else
-                        
                         slice = [];
-                        
                     end
                     
                     obj_new.data{new_index} = slice;
@@ -430,24 +419,42 @@ classdef nDDict
             % dimension as dimension 1.
             obj_new.data = reshape(obj_new.data, sz_new);
             
-            %  % Creating obj_new.axis. % % % % % % % % % % % % % % % % % %
+            %  % Creating obj_new.axis and obj_new.meta. % % % % % % % % % 
             % Setting default axis name and values.
-            if nargin < 4, dim_values = (1:max_size)'; end
+            % If none are given, let names and values for the dimension be empty.
+            if nargin == 4
+                dim_values = [];
+            elseif nargin < 4
+                dim_name = []; dim_values = [];
+            end
             
-            if nargin < 3, dim_values = (1:max_size)'; dim_name = sprintf('Matrix_Dim_%d', dim_src); end
+            % Save obj.meta to pass to obj_new.
+            meta = obj.meta;
+            
+            % If names and values are empty, search for them in
+            % meta, and if none are found, create defaults.
+            dim_src_name = ['matrix_dim_' num2str(dim_src)];
+            if isempty(dim_name) && isempty(dim_values)
+                if isfield(meta, dim_src_name)
+                    dim_name = meta.(dim_src_name).values;
+                    dim_values = meta.(dim_src_name).values;
+                    meta = rmfield(meta, dim_src_name);
+                else
+                    dim_name = dim_src_name;
+                    dim_values = (1:max_size)';
+                end
+            end
+            
+            % Pass meta to obj_new.
+            obj_new.meta = meta;
             
             if length(dim_values) < max_size
-                
                 warning('dimension %d is longer for some cells than dim_values.\n', dim_src)
-                
                 % dim_values((end + 1):max_size) = (length(dim_values) +
                 % 1):max_size; % No longer necessary since we're running
                 % fixAxes on obj_new.
-               
             elseif length(dim_values) > max_size
-                
                 warning('dimension %d is shorter for all cells than dim_values.\n', dim_src)
-                
             end
             
             % Creating new axis.
@@ -455,16 +462,23 @@ classdef nDDict
             
             % Make new axis last one, temporarily.
             obj_new.axis(length(obj.axis) + 1).name = dim_name;
-            
             obj_new.axis(length(obj.axis) + 1).values = dim_values;
-            
             obj_new.axis(length(obj.axis) + 1).astruct = struct();
             
             % Move new axis to front.
             obj_new.axis = obj_new.axis([dim0 + 1, 1:dim0]);
             
-            obj_new = fixAxes(obj_new);
+            % Putting unpacked dimension in dim_target, if given.
+            if nargin >= 3 && ~isempty(dim_target)
+                new_dim_order = [2:dim_target 1 (dim_target + 1):(dim0 + 1)];
+                obj_new.data = permute(obj_new.data, new_dim_order);
+                obj_new.axis.name = obj_new.axis(new_dim_order).name;
+                obj_new.axis.values = obj_new.axis(new_dim_order).values;
+            end
             
+            % Fix axes.
+            obj_new = fixAxes(obj_new);
+                
         end
         
         %% % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % 
@@ -480,7 +494,6 @@ classdef nDDict
                 out = '';
             end
 
-            
             for i = 1:length(obj.axis)
                 
                 out1 = obj.axis(i).getaxisinfo;
@@ -552,7 +565,6 @@ classdef nDDict
             end
             
         end
-        
         
         function checkDims(obj)
             % We enforce that size(obj.data) must always match up to 
