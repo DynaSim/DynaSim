@@ -90,6 +90,7 @@ else
 end
 
 [fpath,fname,fext]=fileparts(solve_file);
+
 if isempty(fpath)
   % add path to solve_file name
   if ~isempty(options.sim_id)
@@ -97,6 +98,7 @@ if isempty(fpath)
   else
     solve_file=fullfile(options.study_dir,'solve',[fname fext]);
   end
+  
   % convert relative path to absolute path
   if ~strcmp('/',solve_file(1)) && ~strcmp('\',solve_file(1))
     solve_file=fullfile(pwd,solve_file);
@@ -149,20 +151,26 @@ else
     fprintf('Using previous solver file: %s\n',solve_file);
   end
 end
+
+[fpath,fname,fext]=fileparts(solve_file); % QUESTION: redundant?
+
+%% MEX Compilation
 % create MEX file if desired and doesn't exist
-[fpath,fname,fext]=fileparts(solve_file);
-solve_file_mex=fullfile(fpath,[fname '_mex']);
 if options.compile_flag % compile solver function
+  solve_file_mex=fullfile(fpath,[fname '_mex']);
+  
   if ~exist(solve_file_mex,'file')
     if options.verbose_flag
       fprintf('Compiling solver file: %s\n',solve_file_mex);
     end
+    
     compile_start_time=tic;
     PrepareMEX(solve_file); % mex-file solver
     if options.verbose_flag
       fprintf('\tMEX generation complete!\n\tElapsed time: %g seconds.\n',toc(compile_start_time));
       %toc;
     end
+    
     codemex_dir=fullfile(fileparts(solve_file_mex),'codemex');
     if exist(codemex_dir,'dir')
       if options.verbose_flag
@@ -170,7 +178,7 @@ if options.compile_flag % compile solver function
       end
       rmdir(codemex_dir,'s');
     end
-  else
+  else % mex file exists
     if options.verbose_flag
       fprintf('Using previous compiled solver file: %s\n',solve_file_mex);
     end
