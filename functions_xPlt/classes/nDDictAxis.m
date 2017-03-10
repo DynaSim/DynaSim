@@ -29,14 +29,18 @@ classdef nDDictAxis
                     temp = [temp,obj(ax).getvaluestring(i),', '];
                 end
                 
-                if length(obj.values) > max_values_to_display
+                if length(obj(ax).values) > max_values_to_display
                     temp = [temp,obj(ax).getvaluestring(Nvals),', ...'];
                 else
                     temp = [temp,obj(ax).getvaluestring(Nvals)];
                 end
                 
                 if nargout > 0
-                    out{ax} = temp;
+                    if length_axis > 1
+                        out{ax} = temp;
+                    else
+                        out = temp;
+                    end
                 else
                     fprintf([temp, '\n'])
                 end
@@ -73,8 +77,6 @@ classdef nDDictAxis
             for i = 1:length(obj.values)
                 out{i} = num2str(obj.getvaluenoncell(i));
             end
-            
-            
         end
         
         function out = getclass_values(obj)
