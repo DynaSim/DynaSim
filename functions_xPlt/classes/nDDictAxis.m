@@ -10,36 +10,30 @@ classdef nDDictAxis
     
     methods
         function out = getaxisinfo(obj)
-            
             max_values_to_display = 10;
             
-            if isempty([obj.values]); out = 'Empty axis'; return; end
+            if isempty(obj.values); out = 'Empty axis'; return; end
             
-            length_axis = length(obj);
+            % Add type
+            values_class = obj.getclass_values;
             
-            for ax = 1:length_axis
-                
-                % Add type
-                values_class = obj(ax).getclass_values;
-                
-                temp = [obj(ax).name, ' (' values_class ')  -> '];
-                Nvals = length(obj(ax).values);
-                Nvals = min(Nvals,max_values_to_display);          % Limit to displaying 10 values
-                for i = 1:Nvals-1
-                    temp = [temp,obj(ax).getvaluestring(i),', '];
-                end
-                
-                if length(obj.values) > max_values_to_display
-                    temp = [temp,obj(ax).getvaluestring(Nvals),', ...'];
-                else
-                    temp = [temp,obj(ax).getvaluestring(Nvals)];
-                end
-                
-                if nargout > 0
-                    out{ax} = temp;
-                else
-                    fprintf([temp, '\n'])
-                end
+            temp = [obj.name, ' (' values_class ')  -> '];
+            Nvals = length(obj.values);
+            Nvals = min(Nvals,max_values_to_display);          % Limit to displaying 10 values
+            for i = 1:Nvals-1
+                temp = [temp,obj.getvaluestring(i),', '];
+            end
+            
+            if length(obj.values) > max_values_to_display
+                temp = [temp,obj.getvaluestring(Nvals),', ...'];
+            else
+                temp = [temp,obj.getvaluestring(Nvals)];
+            end
+            
+            if nargout > 0
+                out = temp;
+            else
+                fprintf([temp, '\n'])
             end
         end
         
