@@ -1,4 +1,4 @@
-function [ODEFUN,IC,elem_names]=dynasim2odefun(MODEL)
+function [ODEFUN,IC,elem_names]=dynasim2odefun(MODEL, varargin)
 % Purpose: prepare ODEFUN for use with built-in Matlab solvers.
 % 
 % % Example: solve model using ode23
@@ -41,6 +41,10 @@ function [ODEFUN,IC,elem_names]=dynasim2odefun(MODEL)
 % 3. prepare state vector X
 % 4. replace state vars in ODEs by X
 % 5. combine X ODEs into ODEFUN
+
+options=CheckOptions(varargin,{...
+  'odefun_output','func_handle',{'func_handle','anonymous_func_string','func_body'},...
+  },false);
 
 % evaluate params -> fixed_vars -> funcs
 types={'parameters','fixed_variables','functions'};
@@ -98,6 +102,15 @@ end
 % prepare outputs (function handle string, ICs, and element names for
 % mapping each X(i) to a particular state variable):
 elem_names=cat(2,IC_names{:});
-ODEFUN = eval(['@(t,X) [' ODEs ']'';']);
+
+switch options.odefun_output
+  case 'func_handle'
+    ODEFUN = eval(['@(t,X) [' ODEs ']'';']);
+  case 'anonymous_func_string'
+    ODEFUN = ['@(t,X) [' ODEs ']'';'];
+  case 'func_body'
+    ODEFUN = ODEs;
+end
+
 IC=cat(2,all_ICs{:})';
 

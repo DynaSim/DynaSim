@@ -155,7 +155,7 @@ end
 % 2.1 create mfile
 if ~isempty(options.filename)
   if options.verbose_flag
-    fprintf('creating solver file: %s\n',options.filename);
+    fprintf('Creating solver file: %s\n',options.filename);
   end
   
   fid=fopen(options.filename,'wt');
@@ -171,9 +171,9 @@ if options.disk_flag==1
   fprintf(fid,'%% ------------------------------------------------------------\n');
   fprintf(fid,'%% Open output data file:\n');
   fprintf(fid,'data_file=''%s'';\n',options.data_file);
-  %fprintf(fid,'fileID=fopen(data_file,''wt'');\n'); % <-- 'wt' does not
   
-  % compile in linux. 't' may be necessary on PC. may need to look into this
+  %fprintf(fid,'fileID=fopen(data_file,''wt'');\n'); % <-- 'wt' does not
+    % compile in linux. 't' may be necessary on PC. may need to look into this
   fprintf(fid,'fileID=fopen(data_file,''w'');\n');
   
   % write headers
@@ -259,6 +259,7 @@ else
     fprintf(fid,'rng(%g);\n',options.random_seed);
   end
 end
+
 % initialize time
 fprintf(fid,'t=0; k=1;\n');
 

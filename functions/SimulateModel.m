@@ -591,7 +591,7 @@ try
     else
       %% NOT AN EXPERIMENT (single simulation)
       %% 2.0 prepare solver function (solve_ode.m/mex)
-      % - matlab solver: create @odefun with vectorized state variables
+      % - Matlab solver: create @odefun with vectorized state variables
       % - DynaSim solver: write solve_ode.m and params.mat  (based on dnsimulator())
       % check if model solver needs to be created 
       % (i.e., if is first simulation or a search space varying mechanism list)
@@ -605,7 +605,7 @@ try
         % TODO: consider providing better support for studies that produce different m-files per sim (e.g., varying mechanism_list)
         
         if options.verbose_flag
-          fprintf('SIMULATING MODEL:\n');
+          fprintf('\nSIMULATING MODEL:\n');
           fprintf('solving system using %s\n',options.solve_file);
         end
       else
@@ -619,7 +619,7 @@ try
       % move to directory with solver file
       
       if options.verbose_flag
-        fprintf('changing directory to %s\n',fpath);
+        fprintf('Changing directory to %s\n',fpath);
       end
       
       cd(fpath);
@@ -629,7 +629,7 @@ try
       p=catstruct(CheckSolverOptions(options),model.parameters);
       param_file=fullfile(fpath,'params.mat');
       if options.verbose_flag
-        fprintf('saving model parameters: %s\n',param_file);
+        fprintf('Saving model parameters: %s\n',param_file);
       end
       %pause(.01);
       
