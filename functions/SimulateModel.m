@@ -59,6 +59,7 @@ function [data,studyinfo]=SimulateModel(model,varargin)
 %     'experiment'    : function handle of experiment function (see NOTE 2)
 %     'experiment_options' : single cell array of key/value options for experiment function
 %     'optimization'  : function handle of optimization function (see NOTE 2)
+%     'debug_flag'    : set to debug mode
 % 
 % Outputs:
 %   DynaSim data structure:
@@ -252,6 +253,7 @@ options=CheckOptions(varargin,{...
   'analysis_options',[],[],...
   'plot_functions',[],[],...
   'plot_options',[],[],...
+  'debug_flag',0,{0,1},...
   },false);
 % more options: remove_solve_dir, remove_batch_dir, post_downsample_factor
 
@@ -740,7 +742,7 @@ try
 catch err % error handling
   if options.compile_flag && ~isempty(options.solve_file)
     if options.verbose_flag
-      fprintf('removing failed compiled solve file: %s\n',options.solve_file);
+      fprintf('Removing failed compiled solve file: %s\n',options.solve_file);
     end
     
     delete([options.solve_file '*']);
@@ -754,7 +756,12 @@ catch err % error handling
     data=studyinfo;
   end
   cleanup('error');
-  return  
+  
+  if options.debug_flag
+    keyboard
+  end
+  
+  return
 end
 
 % ---------------------------------------------
