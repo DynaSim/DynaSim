@@ -8,11 +8,11 @@
 format compact
 
 % Check if in right folder
-[~,currfolder] = fileparts(pwd);
+[parentfolder,currfolder] = fileparts(pwd);
 if ~strcmp(currfolder,'demos'); error('Should be in demos folder to run this code.'); end
 
 % Set path to your copy of the DynaSim toolbox
-dynasim_path = fullfile(pwd,'..');
+dynasim_path = fullfile(parentfolder);
 
 % add DynaSim toolbox to Matlab path
 addpath(genpath(dynasim_path)); % comment this out if already in path
@@ -89,7 +89,8 @@ xp = xp.importAxisNames(column_titles(2:end));  % There should be 1 axis name fo
 % option to index using strings instead of just integers. 
 % Thus, they are analogous to dictionaries in Python.
 % (This core functionality is implemented by the multidimensional
-% dictionaries (nDDict), which xPlt inherits adds plotting functionality.)
+% dictionaries (nDDict), which xPlt inherits, and to which xPlt adds
+% plotting functionality.)
 disp(xp);
 
 
@@ -104,7 +105,6 @@ disp(xp.axis(1));
 
 % Axis.values stores the actual axis labels. These can be numeric...
 disp(xp.axis(1).values);
-
 
 % ...or string type. As we shall see below, these axis labels can be
 % referenced via index or regular expression.
@@ -121,7 +121,7 @@ xp.axis(1).astruct
 % Here we will add some custom info to xp.metadata. This can be whatever
 % you want. Here, I will use this to provide information about what is
 % stored in each of the matrices in the xp.data cell array. (Alternatively,
-% we could also make each of these matrics an xPlt object!)
+% we could also make each of these matrices an xPlt object!)
 meta = struct;
 meta.datainfo(1:2) = nDDictAxis;
 meta.datainfo(1).name = 'time(ms)';
@@ -328,13 +328,13 @@ figl; recursivePlot(xp_img,{@xp_subplot_grid,@xp_plotimage},dimensions,func_argu
 % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % 
 
 
-%% Test packDims
+%% Method packDims
 % Analogous to cell2mat.
 clear xp2 xp3 xp4 xp5
 
 % Start by taking a smaller subset of the original xp object.
 % xp2 = xp.subset(2,2,[],[1,3,5:8]);      % Selection based on index locations
-xp2 = xp(2,2,:,'(v|^i||ISYN$)');  % Same thing as above using regular expression. Selects everything except the _s terms. "^" - beginning with; "$" - ending with
+xp2 = xp.subset(2,2,:,'(v|^i||ISYN$)');  % Same thing as above using regular expression. Selects everything except the _s terms. "^" - beginning with; "$" - ending with
 xp2 = xp2.squeeze;
 xp2.getaxisinfo;
 
@@ -370,6 +370,24 @@ subplot(212); imagesc(temp2);
 ylabel('Cells');
 xlabel(xp2.axis(2).name); 
 set(gca,'XTick',1:length(xp2.axis(2).values)); set(gca,'XTickLabel',strrep(xp2.axis(2).values,'_',' '));
+
+%% Method unPackDims (undoing packDims)
+% However, the information in the missing axis is stored in the nDDictAxis matrix_dim_3, a field of xp3.meta.
+xp3.meta.matrix_dim_3.getaxisinfo
+
+% And if dimension 3 of each cell in xp3.data is unpacked using unpackDim,
+% xp3.meta.matrix_dim_3 will be used to provide axis info for the new
+% xPlt object.
+xp4 = xp3.unpackDim(dest, src);
+xp4.getaxisinfo;
+
+% Unless new axis info is provided, that is.
+xp4 = xp3.unpackDim(dest, src, 'New_Axis_Names'); % The values can also be left empty, as in xp4 = xp3.unpackDim(dest, src, 'New_Axis_Names', []);
+xp4.getaxisinfo;
+
+xp4 = xp3.unpackDim(dest, src, 'New_Axis_Names', {'One','Two','Three','Four','Five','Six'});
+xp4.getaxisinfo;
+
 
 
 %% Use packDim to average across cells
