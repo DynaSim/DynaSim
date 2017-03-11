@@ -1,0 +1,3 @@
+[submodule "MDD"]
+	path = MDD
+	url = git@github.com:davestanley/MDD.git
