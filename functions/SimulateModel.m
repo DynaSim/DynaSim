@@ -11,7 +11,7 @@ function [data,studyinfo]=SimulateModel(model,varargin)
 % 
 %   solver options (provided as key/value pairs: 'option1',value1,'option2',value2,...):
 %     'solver'      : solver for numerical integration (see GetSolveFile)
-%                     {'euler','rk2','rk4'} (default: 'rk4')
+%                     {'euler','rk2','rk4', or any built-in matlab solver} (default: 'rk4')
 %     'tspan'       : time limits of simulation [begin,end] (default: [0 100]) [ms]
 %                     note: units must be consistent with dt and model equations
 %     'dt'          : time step used for DynaSim solvers (default: .01) [ms]
@@ -215,7 +215,8 @@ varargin = backward_compatibility(varargin);
 options=CheckOptions(varargin,{...
   'tspan',[0 100],[],...          % [beg,end] (units must be consistent with dt and equations)
   'ic',[],[],...                  % initial conditions (overrides definition in model structure; can input as IC structure or numeric array)
-  'solver','rk4',{'euler','rk1','rk2','rk4','modified_euler','rungekutta','rk','ode23','ode45'},... % DynaSim and built-in Matlab solvers
+  'solver','rk4',{'euler','rk1','rk2','rk4','modified_euler','rungekutta','rk','ode23','ode45',...
+    'ode1','ode2','ode3','ode4','ode5','ode8','ode113','ode15s','ode23s','ode23t','ode23tb'},... % DynaSim and built-in Matlab solvers
   'matlab_solver_options',[],[],... % options from odeset for use with built-in Matlab solvers
   'dt',.01,[],...                 % time step used for fixed step DynaSim solvers
   'downsample_factor',1,[],...    % downsampling applied during simulation (only every downsample_factor-time point is stored in memory or written to disk)

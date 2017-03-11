@@ -39,7 +39,8 @@ elseif isstruct(varargin{1}) % user provided an options structure
 end
 
 options=CheckOptions(varargin,{...
-  'solver','rk4',{'euler','rk1','rk2','rk4','modified_euler','rungekutta','rk','ode23','ode45'},... % DynaSim and built-in Matlab solvers
+  'solver','rk4',{'euler','rk1','rk2','rk4','modified_euler','rungekutta','rk','ode23','ode45',...
+    'ode1','ode2','ode3','ode4','ode5','ode8','ode113','ode15s','ode23s','ode23t','ode23tb'},... % DynaSim and built-in Matlab solvers
   'matlab_solver_options',[],[],... % options from odeset for use with built-in Matlab solvers
   'disk_flag',0,{0,1},...            % whether to write to disk during simulation instead of storing in memory
   'solve_file',[],[],... % m- or mex-file solving the system
