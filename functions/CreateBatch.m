@@ -77,13 +77,17 @@ solve_file=GetSolveFile(base_model,studyinfo,options.simulator_options);
 if options.compile_flag
   % get directory where solve_file is located and the file name
   [fpath,fname]=fileparts(solve_file);
+  
   % get list of files in solve directory
   D=dir(fpath);
+  
   % get extension of files with matching names
   tmp=regexp({D.name},[fname '\.(\w+)$'],'tokens','once');
   tmp=unique([tmp{:}]);
+  
   % append extension to solve_file
   full_solve_file=[solve_file '.' tmp{1}];
+  
   % remove '_mex' suffix from solve_file for compatibility with GetSolveFile()
   solve_file=regexp(solve_file,'(.+)_mex$','tokens','once');
   solve_file=solve_file{1};
@@ -116,6 +120,7 @@ if ~exist(batch_dir,'dir')
   end
   mkdir(batch_dir);
 end
+
 % copy study_file to batchdir
 [success,msg]=copyfile(study_file,batch_dir);
 if ~success, error(msg); end
@@ -123,6 +128,7 @@ if ~success, error(msg); end
 % locate DynaSim toolbox
 dynasim_path=fileparts(fileparts(which(mfilename))); % root is one level up from directory containing this function
 dynasim_functions=fullfile(dynasim_path,'functions');
+
 % locate mechanism files
 [mech_paths,mech_files]=LocateModelFiles(base_model);
 
@@ -151,23 +157,27 @@ for k=1:num_jobs
   sim_ids=sim_cnt+(1:options.sims_per_job);
   sim_ids=sim_ids(sim_ids<=num_simulations);
   sim_cnt=sim_cnt+options.sims_per_job;
+  
   % only run simulations if data_file does not exist (unless overwrite_flag=1)
   proc_sims=[]; % simulations to run in this job
   for j=1:length(sim_ids)
     %if ~exist(studyinfo.simulations(sim_ids(j)).data_file,'file') || options.overwrite_flag
     if (options.simulator_options.save_data_flag && ~exist(studyinfo.simulations(sim_ids(j)).data_file,'file')) || ...
-       (options.simulator_options.save_results_flag && ~exist(studyinfo.simulations(sim_ids(j)).result_files{1},'file')) || ...
+        (options.simulator_options.save_results_flag && ~exist(studyinfo.simulations(sim_ids(j)).result_files{1},'file')) || ...
        options.overwrite_flag
       proc_sims=[proc_sims sim_ids(j)];
     end
   end
+  
   if isempty(proc_sims)
     skip_sims=[skip_sims sim_ids];
     continue; % skip this job
   else
     skip_sims=[skip_sims setdiff(sim_ids,proc_sims)];
   end
+  
   WriteSimJob(proc_sims,job_file); % create job script
+  
   jobs{end+1}=job_file;
   
   % add job_file to studyinfo
@@ -203,10 +213,12 @@ if strcmp(options.qsub_mode, 'array') % TODO remove temp method
 %   fprintf(fScript,'set TASK_ID_END = %i\n',length(jobs));
 elseif strcmp(options.qsub_mode, 'loop')
   fScript=fopen(script_filename,'wt');
+  
   for j=1:length(jobs)
     [~,thisFilename]=fileparts(jobs{j});
     fprintf(fScript,'%s\n',thisFilename);
   end
+  
   fclose(fScript);
 end
 
@@ -223,14 +235,18 @@ for sim=1:num_simulations
   if ismember(sim,skip_sims)
     continue; % do nothing with this simulation
   end
+  
   this_solve_path=fullfile(solve_path,['sim' num2str(sim)]);
+  
   if ~exist(this_solve_path,'dir')
     %if options.verbose_flag
     %  fprintf('creating solver sub-directory for simulation #%g: %s\n',sim,this_solve_path);
     %end
     mkdir(this_solve_path);
   end
+  
   [success,msg]=copyfile(full_solve_file,this_solve_path); % creates solve sub-directory and copies the base solve file to it
+  
   if ~success, error(msg); end
   
   % set studyinfo solve_file to use for this simulation
@@ -254,15 +270,18 @@ for sim=1:num_simulations
   %this_study_file=fullfile(batch_dir,sprintf('studyinfo_%g.mat',sim));
   %save(this_study_file,'studyinfo');
 end
+
 % copy studyinfo file to batch_dir for each simulation
 for sim=1:num_simulations
   this_study_file=fullfile(batch_dir,sprintf('studyinfo_%g.mat',sim));
+  
   if sim==1
     save(this_study_file,'studyinfo');
     first_study_file=this_study_file;
   else
     % use copyfile() after saving first b/c >10x faster than save()
     [success,msg]=copyfile(first_study_file,this_study_file);
+    
     if ~success, error(msg); end
   end
 end
@@ -361,6 +380,7 @@ end
       % use for loop
       fprintf(fjob,'for s=1:length(SimIDs)\n');
     end
+    
     fprintf(fjob,'\tSimID=SimIDs(s);\n');
     
     % each job should have try-catch to capture studyinfo.simulations(k).error_log

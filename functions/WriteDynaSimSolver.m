@@ -98,6 +98,7 @@ end
 if options.save_parameters_flag
   % add parameter struct prefix to parameters in model equations
   model=PropagateParameters(model,'action','prepend','prefix',parameter_prefix);
+  
   % set and capture numeric seed value
   if options.compile_flag==1
     % todo: make seed string (eg, 'shuffle') from param struct work with coder (options.compile_flag=1)
@@ -106,15 +107,18 @@ if options.save_parameters_flag
     rng(options.random_seed);
     options.random_seed=getfield(rng,'Seed');  % <-- current active seed
   end
+  
   % set parameter file name (save with m-file)
   [fpath,fname,fext]=fileparts(options.filename);
   param_file_name = fullfile(fpath,'params.mat');
+  
   % save parameters to disk
   warning('off','catstruct:DuplicatesFound');
   p=catstruct(CheckSolverOptions(options),model.parameters);
   if options.verbose_flag
     fprintf('saving params.mat\n');
   end
+  
   save(param_file_name,'p');
 else
   % insert parameter values into model expressions
@@ -125,16 +129,19 @@ end
 tmp=cellfun(@(x)[x ','],model.state_variables,'uni',0);
 tmp=[tmp{:}];
 output_string=tmp(1:end-1);
+
 if ~isempty(model.monitors)
   tmp=cellfun(@(x)[x ','],fieldnames(model.monitors),'uni',0);
   tmp=[tmp{:}];
   output_string=[output_string ',' tmp(1:end-1)];
 end
+
 if ~isempty(model.fixed_variables)
   tmp=cellfun(@(x)[x ','],fieldnames(model.fixed_variables),'uni',0);
   tmp=[tmp{:}];
   output_string=[output_string ',' tmp(1:end-1)];
-end  
+end
+
 output_string=['[T,' output_string ']']; % state vars, monitors, time vector
 
 % HACK to get IC to work
@@ -150,10 +157,12 @@ if ~isempty(options.filename)
   if options.verbose_flag
     fprintf('creating solver file: %s\n',options.filename);
   end
+  
   fid=fopen(options.filename,'wt');
 else
   fid=options.fileID;
 end
+
 outfile=fopen(fid);
 
 if options.disk_flag==1
@@ -163,22 +172,27 @@ if options.disk_flag==1
   fprintf(fid,'%% Open output data file:\n');
   fprintf(fid,'data_file=''%s'';\n',options.data_file);
   %fprintf(fid,'fileID=fopen(data_file,''wt'');\n'); % <-- 'wt' does not
+  
   % compile in linux. 't' may be necessary on PC. may need to look into this
   fprintf(fid,'fileID=fopen(data_file,''w'');\n');
+  
   % write headers
   [state_var_counts,monitor_counts]=GetOutputCounts(model);
   fprintf(fid,'fprintf(fileID,''time%s'');\n',separator);
+  
   if ~isempty(model.state_variables)
     for i=1:length(model.state_variables)
       fprintf(fid,'for i=1:%g, fprintf(fileID,''%s%s''); end\n',state_var_counts(i),model.state_variables{i},separator);    
     end
   end
+  
   if ~isempty(model.monitors)
     monitor_names=fieldnames(model.monitors);
     for i=1:length(monitor_names)
       fprintf(fid,'for i=1:%g, fprintf(fileID,''%s%s''); end\n',monitor_counts(i),monitor_names{i},separator);    
     end
   end
+  
   fprintf(fid,'fprintf(fileID,''\\n'');\n');
 else
   fprintf(fid,'function %s=solve_ode\n',output_string);
@@ -201,6 +215,7 @@ else
   fprintf(fid,'tspan=[%g %g];\ndt=%g;\ndownsample_factor=%g;\n',options.tspan,options.dt,options.downsample_factor);
   fprintf(fid,'T=(tspan(1):dt:tspan(2))'';\n');
 end
+
 % write calculation of time vector and derived parameters: ntime, nsamp
 fprintf(fid,'ntime=length(T);\nnsamp=length(1:downsample_factor:ntime);\n');
 
@@ -232,6 +247,7 @@ end
 fprintf(fid,'%% ------------------------------------------------------------\n');
 fprintf(fid,'%% Initial conditions:\n');
 fprintf(fid,'%% ------------------------------------------------------------\n');
+
 % 2.2 set random seed
 fprintf(fid,'%% seed the random number generator\n');
 if options.save_parameters_flag
@@ -261,8 +277,9 @@ if options.disk_flag==1
   % add time zero to output data file
   fprintf(fid,'fprintf(fileID,''0%s'');\n',separator);
 end
+
+%% STATE_VARIABLES
 fprintf(fid,'\n%% STATE_VARIABLES:\n');
-% STATE_VARIABLES
 nvals_per_var=zeros(1,length(state_variables));
 IC_expressions=struct2cell(model.ICs);
 for i=1:length(state_variables)
@@ -271,6 +288,7 @@ for i=1:length(state_variables)
     % set var_last=IC;
     fprintf(fid,'%s_last = %s;\n',state_variables{i},IC_expressions{i});
   end
+  
   if options.disk_flag==1
     % print var_last
     var_last=sprintf('%s_last',state_variables{i});
@@ -278,6 +296,7 @@ for i=1:length(state_variables)
   else
     % preallocate state variables
     parts=regexp(state_variables{i},'_','split');
+    
     if numel(parts)==4 % has connection mechanism namespace: target_source_mechanism
       % state variables defined in connection mechanisms are assumed to
       % have dimensionality of the source population
@@ -287,12 +306,14 @@ for i=1:length(state_variables)
       % equations have dimensionality of the target population
       part=parts{1};
     end
+    
     if options.save_parameters_flag
       fprintf(fid,'%s = zeros(nsamp,%s%s_Npop);\n',state_variables{i},parameter_prefix,part);
     else
       fprintf(fid,'%s = zeros(nsamp,%g);\n',state_variables{i},model.parameters.([part '_Npop']));
     end
     nvals_per_var(i)=model.parameters.([part '_Npop']);
+    
     % initialize state variables
     if options.downsample_factor==1
       % set var(1,:)=IC;
@@ -301,13 +322,16 @@ for i=1:length(state_variables)
       % set var(1,:)=var_last;
       fprintf(fid,'  %s(1,:) = %s_last;\n',state_variables{i},state_variables{i});      
     end
-  end
-end
+  end %disk_flag
+end %state_variables
+
+%% MONITORS
 if ~isempty(model.monitors)
   fprintf(fid,'\n%% MONITORS:\n');
-  % MONITORS
+  
   monitor_names=fieldnames(model.monitors);
   monitor_expression=struct2cell(model.monitors);
+  
   for i=1:length(monitor_names)
     if ~isempty(regexp(monitor_names{i},'_spikes$','once'))
     % set expression if monitoring spikes
@@ -318,6 +342,7 @@ if ~isempty(model.monitors)
         % spike finding. if saving *.mat, use matfile() to load only the
         % variables in which to search. add spikes to output data file.
       end
+      
       if isempty(monitor_expression{i})
         spike_threshold=0;
       elseif isempty(regexp(monitor_expression{i},'[^\d]','once'))
@@ -327,11 +352,14 @@ if ~isempty(model.monitors)
         spike_threshold=monitor_expression{i};
         monitor_expression{i}=[];
       end
+      
       % approach: add conditional check for upward threshold crossing
       var_spikes=regexp(monitor_names{i},'(.*)_spikes$','tokens','once');
       var_spikes=var_spikes{1}; % variable to monitor
+      
       if ismember(var_spikes,model.state_variables)
         model.conditionals(end+1).namespace='spike_monitor';
+        
         if isnumeric(spike_threshold)
           model.conditionals(end).condition=...
             sprintf('%s(n,:)>=%g&%s(n-1,:)<%g',var_spikes,spike_threshold,var_spikes,spike_threshold);
@@ -339,25 +367,28 @@ if ~isempty(model.monitors)
           model.conditionals(end).condition=...
             sprintf('%s(n,:)>=%s&%s(n-1,:)<%s',var_spikes,spike_threshold,var_spikes,spike_threshold);
         end
+        
         model.conditionals(end).action=sprintf('%s(n,conditional_test)=1',monitor_names{i});
         model.conditionals(end).else=[];
         % move spike monitor to first position (ie.., to evaluate before other conditionals)
         model.conditionals=model.conditionals([length(model.conditionals) 1:length(model.conditionals)-1]);
         % remove from monitor list
         model.monitors=rmfield(model.monitors,monitor_names{i});
-      end      
+      end
     elseif isempty(monitor_expression{i}) && isfield(model.functions,monitor_names{i})
     % set expression if monitoring function referenced by name
       tmp=regexp(model.functions.(monitor_names{i}),'@\([a-zA-Z][\w,]*\)\s*(.*)','tokens','once');
       monitor_expression{i}=tmp{1};
       model.monitors.(monitor_names{i})=tmp{1};
     end
+    
     % initialize mon_last
     if options.downsample_factor>1 || options.disk_flag==1
       % set mon_last=f(IC);
       tmp=cell2struct({monitor_expression{i}},{monitor_names{i}},1);
       print_monitor_update(fid,tmp,'_last',state_variables,'_last');
     end
+    
     if options.disk_flag==1
       % print mon_last
       mon_last=sprintf('%s_last',monitor_names{i});
@@ -369,10 +400,12 @@ if ~isempty(model.monitors)
         fprintf(fid,'%s = zeros(nsamp,%s%s_Npop);\n',monitor_names{i},parameter_prefix,parts{1});
       else
         fprintf(fid,'%s = zeros(nsamp,%g);\n',monitor_names{i},model.parameters.([parts{1} '_Npop']));
-      end    
+      end
+      
       if isempty(monitor_expression{i})
         continue;
       end
+      
       % initialize monitors
       if options.downsample_factor==1
         % set mon(1,:)=f(IC);
@@ -383,9 +416,10 @@ if ~isempty(model.monitors)
         tmp=cell2struct({monitor_expression{i}},{monitor_names{i}},1);
         print_monitor_update(fid,tmp,'(1,:)',state_variables,'_last');
       end
-    end
-  end
-end
+    end %disk_flag
+  end %monitor_names
+end %monitors
+
 if options.disk_flag==1
   % go to new line for next time point
   fprintf(fid,'fprintf(fileID,''\\n'');\n');
@@ -430,6 +464,7 @@ for i=1:length(odes)
   end
 end
 
+%% Numerical integration
 % write code to do numerical integration
 fprintf(fid,'%% ###########################################################\n');
 fprintf(fid,'%% Numerical integration:\n');
@@ -440,29 +475,38 @@ fprintf(fid,'  t=T(k-1);\n');
 if options.downsample_factor==1 && options.disk_flag==0 % store every time point, do not use var_last
   % update_vars;      % var(:,k-1)->var(k,:) or var(k-1)->var(k)
   update_vars(index_nexts);
+  
   % conditionals;     % var(k,:)->var(k,:) or var(k)->var(k)
   print_conditional_update(fid,model.conditionals,index_nexts,state_variables)
+  
   % update_monitors;  % mon(:,k-1)->mon(k,:) or mon(k-1)->mon(k)
   print_monitor_update(fid,model.monitors,index_nexts,state_variables);
+  
   fprintf(fid,'  n=n+1;\n');
 else % store every downsample_factor time point in memory or on disk
   % update_vars;      % var_last->var_last
   update_vars(index_temps);
+  
   % conditionals;     % var_last->var_last
   print_conditional_update(fid,model.conditionals,index_temps,state_variables);
+  
   % check if it is time to store data
   fprintf(fid,'if mod(k,downsample_factor)==0 %% store this time point\n');
+  
   if options.disk_flag==1 % write to disk
     fprintf(fid,'  %% ------------------------------------------------------------\n');
     fprintf(fid,'  %% Write state variables and monitors to disk:\n');
     fprintf(fid,'  %% ------------------------------------------------------------\n');
+    
     % print current time point to data file
     fprintf(fid,'  fprintf(fileID,''%%g%s'',T(k));\n',separator);  
+    
     % print state variables
     for i=1:length(state_variables)
       var_last=sprintf('%s_last',state_variables{i});
       fprintf(fid,'  for i=1:numel(%s), fprintf(fileID,''%%g%s'',%s(i)); end\n',var_last,separator,var_last);
     end
+    
     % print monitors
     if ~isempty(model.monitors)
       for i=1:length(monitor_names)
@@ -470,16 +514,19 @@ else % store every downsample_factor time point in memory or on disk
           fprintf(fid,'  for i=1:numel(%s), fprintf(fileID,''%%g%s'',%s(i)); end\n',mon_last,separator,mon_last);
       end
     end
+    
     fprintf(fid,'  fprintf(fileID,''\\n'');\n');
   else            % store in memory
     % update_vars;    % var_last -> var(n,:) or var(n)
     print_var_update_last(fid,index_nexts,state_variables)
     % update_monitors;% f(var_last) -> mon(n,:) or mon(n)
     print_monitor_update(fid,model.monitors,index_nexts,state_variables);
-  end
+  end %disk_flag
+  
   fprintf(fid,'  n=n+1;\n');
   fprintf(fid,'end\n');
 end
+
 fprintf(fid,'end\n');
 fprintf(fid,'T=T(1:downsample_factor:ntime);\n');
 
@@ -490,6 +537,7 @@ if options.disk_flag==1
   fprintf(fid,'fclose(fileID);\n');
   fprintf(fid,'%% ------------------------------------------------------------\n');
 end
+
 if ~strcmp(outfile,'"stdout"')
   fclose(fid);
   % wait for file before continuing to simulation
@@ -557,8 +605,9 @@ end
 function print_var_update(fid,index_nexts,index_lasts,update_term,state_variables)
   % purpose: write statements to update state variables according to their dynamics
   % example: 
-  % update_term='(dt/6)*(%s_k1+2*(%s_k2+%s_k3)+%s_k4)';
-  % state_variable='A_v';
+  %   update_term='(dt/6)*(%s_k1+2*(%s_k2+%s_k3)+%s_k4)';
+  %   state_variable='A_v';
+  
   if ~isempty(state_variables)
     fprintf(fid,'  %% ------------------------------------------------------------\n');
     fprintf(fid,'  %% Update state variables:\n');
@@ -566,6 +615,7 @@ function print_var_update(fid,index_nexts,index_lasts,update_term,state_variable
   else
     return;
   end
+  
   for i=1:length(state_variables)
     this_update_term=strrep(update_term,'%s',state_variables{i});
     this_update_expression=sprintf('%s%s=%s%s+%s;',state_variables{i},index_nexts{i},state_variables{i},index_lasts{i},this_update_term);
@@ -581,6 +631,7 @@ function print_var_update_last(fid,index_nexts,state_variables)
   else
     return;
   end
+  
   for i=1:length(state_variables)
     this_update_expression=sprintf('%s%s=%s_last;\n',state_variables{i},index_nexts{i},state_variables{i});
     fprintf(fid,'  %s',this_update_expression);
@@ -589,7 +640,7 @@ end
 
 function print_conditional_update(fid,conditionals,index_nexts,state_variables)
   % purpose: write statements to perform conditional actions (that may
-  % include updating state variables).
+  %   include updating state variables).
   if ~isempty(conditionals)
     fprintf(fid,'  %% ------------------------------------------------------------\n');
     fprintf(fid,'  %% Conditional actions:\n');
@@ -597,16 +648,19 @@ function print_conditional_update(fid,conditionals,index_nexts,state_variables)
   else
     return;
   end
+  
   switch index_nexts{1}(1)
     case '('
       action_index='(n,conditional_test)';
     case '_'
       action_index='_last(conditional_test)';    
   end
+  
   for i=1:length(conditionals)
     condition=conditionals(i).condition;
     action=conditionals(i).action;
     elseaction=conditionals(i).else;
+    
     % add indexes to state variables in conditional actions
     for j=1:length(state_variables)
       if strcmp('spike_monitor',conditionals(i).namespace)
@@ -614,19 +668,24 @@ function print_conditional_update(fid,conditionals,index_nexts,state_variables)
       else
         condition=dynasim_strrep(condition,state_variables{j},[state_variables{j} index_nexts{j}]);
       end
+      
       action=dynasim_strrep(action,state_variables{j},[state_variables{j} action_index]);
+      
       if ~isempty(elseaction)
         elseaction=dynasim_strrep(elseaction,state_variables{j},[state_variables{j} action_index]);
       end
     end
+    
     % write conditional to solver function
     fprintf(fid,'  conditional_test=(%s);\n',condition);
     action=dynasim_strrep(action,'\(n,:','(n,conditional_test');
     fprintf(fid,'  if any(conditional_test), %s; ',action);
+    
     if ~isempty(elseaction)
       elseaction=dynasim_strrep(elseaction,'(n,:','(n,conditional_test');
       fprintf('else %s; ',elseaction);
     end
+    
     fprintf(fid,'end\n');  
   end
 end
@@ -637,13 +696,19 @@ function print_monitor_update(fid,monitors,index_nexts,state_variables,index_las
     fprintf(fid,'  %% Update monitors:\n');
     fprintf(fid,'  %% ------------------------------------------------------------\n');
   end
+  
   if nargin<5, index_lasts=index_nexts; end
+  
   % account for inputs from monitor initialization
+  
   if ~iscell(index_nexts), index_nexts={index_nexts}; end
+  
   if ~iscell(index_lasts), index_lasts={index_lasts}; end
+  
   if length(index_lasts)~=length(state_variables)
     index_lasts=repmat(index_lasts,[1 length(state_variables)]); 
   end
+  
   if isequal(index_nexts{1},'(1,:)')
     monitor_index='(1,:)';
   else
@@ -654,20 +719,24 @@ function print_monitor_update(fid,monitors,index_nexts,state_variables,index_las
         monitor_index='_last';    
     end  
   end
+  
   % purpose: write statements to update monitors given current state variables
-  % note: only run this every time a point is recorded (not necessarily on
-  % every step of the integration).
+  %   note: only run this every time a point is recorded (not necessarily on
+  %   every step of the integration).
   if isempty(monitors)
     return;
   end
+  
   monitor_name=fieldnames(monitors);
   monitor_expression=struct2cell(monitors);
+  
   % add indexes to state variables in monitors
   for i=1:length(monitor_name)
     for j=1:length(state_variables)
       %monitor_expression{i}=dynasim_strrep(monitor_expression{i},state_variables{j},[state_variables{j} index_lasts{j}]);
       monitor_expression{i}=dynasim_strrep(monitor_expression{i},state_variables{j},[state_variables{j} monitor_index]);
     end
+    
     % write monitors to solver function
     fprintf(fid,'  %s%s=%s;\n',monitor_name{i},monitor_index,monitor_expression{i});
   end

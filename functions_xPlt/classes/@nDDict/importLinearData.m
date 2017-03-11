@@ -28,17 +28,13 @@ function obj = importLinearData(obj,X,varargin)
 %         end
 %     end
 
-
-
     % Error checking - X must be linear
     if ~isvector(X); error('X must be linear'); end
-
 
     % Error checking - X must be cell or numeric
     obj2 = obj.reset;
     [temp1,Xformat] = obj2.calcClasses(X,'data');
     if strcmp(Xformat,'unknown'); error('X must be numeric or cell array'); end
-
 
     % Error checking - each entry in axislinear must be either numeric or
     % cell. If it's a cell, all entries must char.
