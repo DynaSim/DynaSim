@@ -147,7 +147,8 @@ classdef nDDict
             obj.meta = meta_struct;
         end
         
-        xp = importLinearData(xp,X,varargin)
+        xp = importLinearData(xp,X,varargin)            % Function for importing data in a linear format
+        
         
         %% % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % 
         % % % % % % % % % % % REARRANGING DATA % % % % % % % % % % %

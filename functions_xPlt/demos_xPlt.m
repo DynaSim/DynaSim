@@ -114,7 +114,7 @@ disp(xp.axis(4).values);
 % named after the parameter in the model that was varied.
 disp(xp.axis(1).name)
 
-% Axis.astruct is for internal use.
+% Axis.astruct is for internal use and is currently empty.
 xp.axis(1).astruct
 
 % xp.meta stores meta data for use by the user as they see fit.
