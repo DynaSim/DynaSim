@@ -17,18 +17,11 @@ dynasim_path = fullfile(parentfolder);
 % add DynaSim toolbox to Matlab path
 addpath(genpath(dynasim_path)); % comment this out if already in path
 
-% Set where to save outputs
-output_directory = fullfile(pwd, 'outputs');
-study_dir = fullfile(output_directory,'demo_sPING_3b');
-
-% move to root directory where outputs will be saved
-mkdir_silent(output_directory);
-% cd(fullfile(dynasim_path, output_directory));
-
 fprintf('Note1 - I am planning to rename nDDict to MDD (MultiDimensional Dictionary).\n');
 fprintf('Note2 - I have moved the rest of this demos script to the ../MDD now in\n ');
 fprintf('order for it to updated in sync with the MDD repo.\n');
 
 % Open demos_xPlt.m script
 edit ../MDD/demos_xPlt.m
+cd  ../MDD/
 
