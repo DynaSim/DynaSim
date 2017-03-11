@@ -1,8 +1,7 @@
 
 
-function hsg = xp_subplot_grid3D (xp, display_mode, transpose_on)
-	% This handles 1D, 2D, or 3D xp data. 3D data is tiled across the
-	% screen in different figures.
+function hsg = xp_subplot_grid (xp, display_mode, transpose_on)
+	% This handles 1D or 2D xp data. For 3D data see xp_subplot_grid3D.
     
     if nargin < 3
         transpose_on = [];
@@ -18,7 +17,6 @@ function hsg = xp_subplot_grid3D (xp, display_mode, transpose_on)
                           % 1-Plot as an image (cdata)
                           % 2-Save to a figure file 
     
-                          
     if verLessThan('matlab','8.4') && display_mode == 1; warning('Display_mode==1 might not work with earlier versions of MATLAB.'); end
     if transpose_on && ismatrix(xp)
         xp = xp.transpose;
@@ -33,41 +31,49 @@ function hsg = xp_subplot_grid3D (xp, display_mode, transpose_on)
     sz = size(xp);
     
     if ndims(xp.data) <= 2
-        hsg = xp_subplot_grid (xp, display_mode, transpose_on);
-        
-        
-    elseif ndims(xp.data) == 3
         N1 = sz(1);
         N2 = sz(2);
-        N3 = sz(3);
         
-        for i = 1:N1
-            figure;
-            hsg(i) = subplot_grid(N2,N3,subplot_grid_options{:});
-            if ~verLessThan('matlab','8.4'); hsg(i).figplace(N1,i); end
-            mytitle = [figformat_str(xp.axis(1).name) ': ' figformat_str(xp.axis(1).getvaluestring(i))];
-            hsg(i).figtitle(mytitle);
+        
+            if display_mode == 1 
+                h0 = gcf; ha0 = gca;
+                h = figure('visible','off');
+            else
+                %figure;
+            end
+            
+            hsg = subplot_grid(N1,N2,subplot_grid_options{:});
             c=0;
-            for j = 1:N2
-                for k = 1:N3
+            for i = 1:N1
+                for j = 1:N2
                     c=c+1;
-                    hsg(i).set_gca(c);
-                    xp.data{i,j,k}(); 
-%                     xp2 = xp.subset(i,j);
-%                     title(strrep(xp2.getaxisinfo,'_',' '));
+                    hsg.set_gca(c);
+                    xp.data{i,j}(); 
                 end
             end
             
             % Do labels for rows
-            rowstr = setup_axis_labels(xp.axis(2));
-            hsg(i).rowtitles(rowstr);
+            rowstr = setup_axis_labels(xp.axis(1));
+            hsg.rowtitles(rowstr);
             
             % Do labels for columns
-            colstr = setup_axis_labels(xp.axis(3));
-            hsg(i).coltitles(colstr);
+            colstr = setup_axis_labels(xp.axis(2));
+            hsg.coltitles(colstr);
             
-            
-        end
+            if display_mode == 1
+                
+                cdata = print(h,'-RGBImage');
+                close(h);
+
+                % Restore original axes and display image
+                figure(h0); axes(ha0);
+                imshow(cdata);
+                
+            end
+        
+        
+    elseif ndims(xp.data) == 3
+        error('For 3D xp data, use instead xp_subplot_grid3D');
         
     end
     

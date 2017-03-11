@@ -110,7 +110,61 @@ classdef nDDictAxis
                     error('Unrecognized input foramt');
             end
         end
+        
+        %% % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % 
+        % % % % % % % % % % % OVERLOADED OPERATORS % % % % % % % % % % %
+        % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % %
+        function varargout = subsref(varargin)
+            
+%             % Default settings for everything
+%             [varargout{1:nargout}] = builtin('subsref',varargin{:});
+            
+            obj = varargin{1};
+            S = varargin{2};
+            
+            switch S(1).type
+                case '()'
+%                     % Default
+%                     [varargout{1:nargout}] = builtin('subsref',varargin{:});                        
+                    
+                    allnames = {obj.name};
+                    if iscellstr(S(1).subs)
+                        [selection_out, startIndex] = regex_lookup(allnames, S(1).subs{1});
+                        S(1).subs{1} = selection_out;
+                        [varargout{1:nargout}] = builtin('subsref',obj,S,varargin{3:end});
+                    else
+                        % Default
+                        [varargout{1:nargout}] = builtin('subsref',varargin{:});                        
+                    end
+                    
+                    
+                    
+                case '{}'
+                    % Default
+                    [varargout{1:nargout}] = builtin('subsref',varargin{:});
+                case '.'
+                    % Default
+                    [varargout{1:nargout}] = builtin('subsref',varargin{:});
+                otherwise
+                    error('Unknown indexing method. Should never reach this');
+            end
+            
+             
+        end
 
         
     end
+end
+
+
+function [selection_out, startIndex] = regex_lookup(vals, selection)
+    if ~iscellstr(vals); error('nDDictAxis.values must be strings when using regular expressions');
+    end
+    if ~ischar(selection); error('Selection must be string when using regexp');
+    end
+    
+    startIndex = regexp(vals,selection);
+    selection_out = logical(~cellfun(@isempty,startIndex));
+    selection_out = find(selection_out);
+    
 end

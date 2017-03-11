@@ -7,8 +7,12 @@
 % Format
 format compact
 
+% Check if in right folder
+[parentfolder,currfolder] = fileparts(pwd);
+if ~strcmp(currfolder,'demos'); error('Should be in demos folder to run this code.'); end
+
 % Set path to your copy of the DynaSim toolbox
-dynasim_path = fullfile(pwd,'..');
+dynasim_path = fullfile(parentfolder);
 
 % add DynaSim toolbox to Matlab path
 addpath(genpath(dynasim_path)); % comment this out if already in path
@@ -85,7 +89,8 @@ xp = xp.importAxisNames(column_titles(2:end));  % There should be 1 axis name fo
 % option to index using strings instead of just integers. 
 % Thus, they are analogous to dictionaries in Python.
 % (This core functionality is implemented by the multidimensional
-% dictionaries (nDDict), which xPlt inherits adds plotting functionality.)
+% dictionaries (nDDict), which xPlt inherits, and to which xPlt adds
+% plotting functionality.)
 disp(xp);
 
 
@@ -100,7 +105,6 @@ disp(xp.axis(1));
 
 % Axis.values stores the actual axis labels. These can be numeric...
 disp(xp.axis(1).values);
-
 
 % ...or string type. As we shall see below, these axis labels can be
 % referenced via index or regular expression.
@@ -117,7 +121,7 @@ xp.axis(1).astruct
 % Here we will add some custom info to xp.metadata. This can be whatever
 % you want. Here, I will use this to provide information about what is
 % stored in each of the matrices in the xp.data cell array. (Alternatively,
-% we could also make each of these matrics an xPlt object!)
+% we could also make each of these matrices an xPlt object!)
 meta = struct;
 meta.datainfo(1:2) = nDDictAxis;
 meta.datainfo(1).name = 'time(ms)';
@@ -151,7 +155,7 @@ xp_bad = xp;
 xp_bad.axis(4).values={'test'};     % Reduce this to 1 (mismatch)
 
 % Check errors in new class (this produces an error, so disabling it)
-xp_bad.checkDims;
+% xp_bad.checkDims;
 
 % Auto fix errors in labels
 xp_fixed = xp_bad.fixAxes; 
@@ -174,7 +178,7 @@ xp4 = xp(:,:,1,8);                  % ## Update - This does the same thing as xp
                                     % of pulling data subsets. Note that [] and : are equivalent.
 xp4.getaxisinfo
 
-% Similarly, can index string axes using regular expressions
+% Similarly, can index axis values using regular expressions
 % Pull out sodium mechs only
 xp5 = xp(:,:,1,'iNa*');
 xp5.getaxisinfo
@@ -182,6 +186,11 @@ xp5.getaxisinfo
 % Pull out synaptic state variables
 xp5 = xp(:,:,1,'_s');
 xp5.getaxisinfo
+
+% Can also reference a given axis based on its index number or based on its
+% name
+disp(xp.axis(4))
+disp(xp.axis('populations'))
 
 % Lastly, you can reference xp.data with the following shorthand
 % (This is the same as xp.data(:,:,1,8). Regular expressions dont work in this mode)
@@ -205,8 +214,8 @@ xp4 = xp(:,:,'E','v');
 xp4.getaxisinfo
 
 % Set up plotting arguments
-function_handles = {@xp_subplot_grid3D,@xp_matrix_basicplot};   % Specifies the handles of the plotting functions
-dimensions = {[1,2],[0]};                                       % Specifies which dimensions of xp each function handle
+function_handles = {@xp_subplot_grid,@xp_matrix_basicplot};   % Specifies the handles of the plotting functions
+dimensions = {[1,2],0};                                       % Specifies which dimensions of xp each function handle
                                                                 % will operate on. Note that dimension "0" refers to the 
                                                                 % the contents of each element in xp.data (e.g. the matrix of
                                                                 % time series data). If specified, it must come last.
@@ -215,9 +224,13 @@ function_arguments = {{},{}};	% This allows you to supply input arguments to eac
                                 % now we'll leave this empty.
                                                                 
 % Run the plot. Note the "+" icons next to each plot allow zooming. 
-figure('Units','normalized','Position',[0,0,1,1]);
-recursivePlot(xp4,function_handles,dimensions,function_arguments);
+figl; recursivePlot(xp4,function_handles,dimensions,function_arguments);
 
+% Alternatively, dimensions can be specified as axis names instead of
+% indices. The last entry, data, refers to the contents of xp.data (e.g.
+% dimension 0 above).
+dimensions = {{'E_Iapp','I_E_tauD'},{'data'}}; 
+figl; recursivePlot(xp4,function_handles,dimensions,function_arguments);
 
 %% Plot 3D data 
 
@@ -229,18 +242,19 @@ xp4.getaxisinfo
 
 % This will plot E cells and I cells (axis 3) each in separate figures and
 % the parameter sweeps (axes 1 and 2) in as subplots.
-dimensions = {[3],[1,2],0};
-recursivePlot(xp4,{@xp_handles_newfig,@xp_subplot_grid3D,@xp_matrix_imagesc},dimensions);
-
-%% Plot 3D data re-ordered
-
-% Alternatively, we can put E and I cells in the same figure, and the two
-% tauD values of the parameter sweep into separate figures.
-dimensions = {[2],[3,1],0};
-recursivePlot(xp4,{@xp_handles_newfig,@xp_subplot_grid3D,@xp_matrix_imagesc},dimensions);
+dimensions = {{'populations'},{'I_E_tauD','E_Iapp'},{'data'}};
+recursivePlot(xp4,{@xp_handles_newfig,@xp_subplot_grid,@xp_matrix_imagesc},dimensions);
 
 % Note that here we produced rastergrams instead of time series by
 % submitting a different function to operate on dimension zero.
+
+%% Plot 3D data re-ordered
+
+% Alternatively, we can put E and I cells in the same figure. This
+% essentially swaps the population and tauD axes.
+dimensions = {{'I_E_tauD'},{'populations','E_Iapp'},'data'};
+recursivePlot(xp4,{@xp_handles_newfig,@xp_subplot_grid,@xp_matrix_imagesc},dimensions);
+
 
 
 
@@ -253,15 +267,15 @@ xp4 = xp(1:2,1:2,:,6:7);
 xp4.getaxisinfo
 
 
-dimensions = {[3],[1,2],4,0};
+dimensions = {'populations',{'E_Iapp','I_E_tauD'},'variables',0};       % Note - we can also use a mixture of strings and index locations to specify dimensions
 
 % Note that here we will supply a function argument. This tells the second
 % subplot command to write its output to the axis as an RGB image, rather than
 % as subplots. This "hack" enables nested subplots.
 function_arguments = {{},{},{1},{}};
 
-recursivePlot(xp4,{@xp_handles_newfig,@xp_subplot_grid3D,@xp_subplot_grid3D,@xp_matrix_basicplot},dimensions,function_arguments);
-% recursivePlot(xp4,{@xp_subplot_grid3D,@xp_subplot,@xp_matrix_basicplot},{[1,2,4],3},{{},{0,1},{}});
+if verLessThan('matlab','8.4'); error('This will not work on earlier versions of MATLAB'); end
+recursivePlot(xp4,{@xp_handles_newfig,@xp_subplot_grid,@xp_subplot_grid,@xp_matrix_basicplot},dimensions,function_arguments);
 
 
 %% Plot two xPlt objects combined
@@ -275,8 +289,7 @@ xp4.getaxisinfo
 xp5 = merge(xp3,xp4);
 
 dimensions = {[1,2],0};
-figure('Units','normalized','Position',[0,0,1,1]);
-recursivePlot(xp5,{@xp_subplot_grid3D,@xp_matrix_imagesc},dimensions);
+figl; recursivePlot(xp5,{@xp_subplot_grid,@xp_matrix_imagesc},dimensions);
 
 
 
@@ -308,21 +321,20 @@ func_arguments = {{},{.5}};         % The 0.5 argument tells xp_plotimage to
                                     % scale down the resolution of its
                                     % plots by 0.5. This increases speed.
 
-figure('Units','normalized','Position',[0,0,1,1]);
-recursivePlot(xp_img,{@xp_subplot_grid3D,@xp_plotimage},dimensions,func_arguments);
+figl; recursivePlot(xp_img,{@xp_subplot_grid,@xp_plotimage},dimensions,func_arguments);
 
 
-%% % % % % % % % % % % % % % % ADVANCED xPlt USAGE % % % % % % % % % % % % 
+%% % % % % % % % % % % % % % % ADVANCED xPlt / nDDict USAGE % % % % % % % 
 % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % 
 
 
-%% Test packDims
+%% Method packDims
 % Analogous to cell2mat.
 clear xp2 xp3 xp4 xp5
 
 % Start by taking a smaller subset of the original xp object.
 % xp2 = xp.subset(2,2,[],[1,3,5:8]);      % Selection based on index locations
-xp2 = xp(2,2,:,'(v|^i||ISYN$)');  % Same thing as above using regular expression. Selects everything except the _s terms. "^" - beginning with; "$" - ending with
+xp2 = xp.subset(2,2,:,'(v|^i||ISYN$)');  % Same thing as above using regular expression. Selects everything except the _s terms. "^" - beginning with; "$" - ending with
 xp2 = xp2.squeeze;
 xp2.getaxisinfo;
 
@@ -343,21 +355,39 @@ disp(xp3.data)             % The dimension "variables", which was dimension 2
 % View axis of xp3
 xp3.getaxisinfo;            % The dimension "variables" is now missing
 
-% Note some of this data is sparse!
+% Note some of this data is sparse! We can see this sparseness by plotting
+% as follows (note the NaNs)
 temp1 = squeeze(xp3.data{1}(100,:,:));  % Pick out a random time point
 temp2 = squeeze(xp3.data{2}(100,:,:));  % Pick out a random time point
 figure; 
 subplot(211); imagesc(temp1);
-
 ylabel('Cells');
 xlabel(xp2.axis(2).name); 
-set(gca,'XTick',1:length(xp2.axis(2).values)); set(gca,'XTickLabels',strrep(xp2.axis(2).values,'_',' '));
+set(gca,'XTick',1:length(xp2.axis(2).values)); set(gca,'XTickLabel',strrep(xp2.axis(2).values,'_',' '));
 
 
 subplot(212); imagesc(temp2);
 ylabel('Cells');
 xlabel(xp2.axis(2).name); 
-set(gca,'XTick',1:length(xp2.axis(2).values)); set(gca,'XTickLabels',strrep(xp2.axis(2).values,'_',' '));
+set(gca,'XTick',1:length(xp2.axis(2).values)); set(gca,'XTickLabel',strrep(xp2.axis(2).values,'_',' '));
+
+%% Method unPackDims (undoing packDims)
+% However, the information in the missing axis is stored in the nDDictAxis matrix_dim_3, a field of xp3.meta.
+xp3.meta.matrix_dim_3.getaxisinfo
+
+% And if dimension 3 of each cell in xp3.data is unpacked using unpackDim,
+% xp3.meta.matrix_dim_3 will be used to provide axis info for the new
+% xPlt object.
+xp4 = xp3.unpackDim(dest, src);
+xp4.getaxisinfo;
+
+% Unless new axis info is provided, that is.
+xp4 = xp3.unpackDim(dest, src, 'New_Axis_Names'); % The values can also be left empty, as in xp4 = xp3.unpackDim(dest, src, 'New_Axis_Names', []);
+xp4.getaxisinfo;
+
+xp4 = xp3.unpackDim(dest, src, 'New_Axis_Names', {'One','Two','Three','Four','Five','Six'});
+xp4.getaxisinfo;
+
 
 
 %% Use packDim to average across cells
@@ -383,7 +413,7 @@ xp3 = xp2.packDim(src,dest);
 
 
 % Plot 
-recursivePlot(xp3,{@xp_subplot_grid3D,@xp_matrix_basicplot},{[1,2],[]},{{},{}});
+figl; recursivePlot(xp3,{@xp_subplot_grid,@xp_matrix_basicplot},{[1,2],[]},{{},{}});
 
 
 %% Use packDim to average over synaptic currents
@@ -404,7 +434,7 @@ xp3.getaxisinfo;
 xp3.data = cellfun(@(x) nanmean(x,3), xp3.data,'UniformOutput',0);
 
 % Plot 
-recursivePlot(xp3,{@xp_subplot_grid3D,@xp_matrix_basicplot},{[3,1,2],[0]},{{},{}});
+recursivePlot(xp3,{@xp_handles_newfig,@xp_subplot_grid,@xp_matrix_basicplot},{[3],[1,2],[0]});
 
 %% Test mergeDims
 % Analogous to Reshape.
@@ -422,10 +452,18 @@ xp2.getaxisinfo;
 % equivalent to the structure fields in Jason's DynaSim structure.
 xp2 = xp.mergeDims([3,4]);
 xp2 = xp2.mergeDims([1,2]);
-xp2.getaxisinfo;
+xp3 = squeeze(xp2); % Squeeze out the empty dimensions.
+xp3.getaxisinfo;
 
-% Can optionally squeeze out the empty dimensions.
-xp3 = squeeze(xp2);
+
+% Note that the variable names are not sorted the same was as in Jason's
+% DynaSim structure, in that they alternate E and I cells
+disp(xp3.axis(2).values);
+% Can easily sort them as follows.
+[~,I] = sort(xp3.axis(2).values);
+xp4 = xp3(:,I);
+disp(xp4.axis(2).values);
+
 
 
 
