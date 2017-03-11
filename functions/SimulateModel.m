@@ -762,7 +762,7 @@ catch err % error handling
     keyboard
   end
   
-  return
+  rethrow(err)
 end
 
 % ---------------------------------------------
