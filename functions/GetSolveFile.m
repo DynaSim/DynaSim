@@ -83,6 +83,11 @@ switch options.solver
     error('unrecognized solver type');
 end
 
+%check type of solver against disk_flag
+if ~strcmp(solver_type, 'dynasim') && options.disk_flag
+  error('Disk_flag not supported with built-in matlab solvers')
+end
+
 if ~isempty(options.solve_file)
   % use user-provided solve_file
   solve_file=options.solve_file;
@@ -158,48 +163,17 @@ else
   end
 end
 
-[fpath,fname,fext]=fileparts(solve_file); % QUESTION: redundant?
-
 %% MEX Compilation
 % create MEX file if desired and doesn't exist
+
 % NOTE: if using stiff built-in solver, it should only compile the odefun, not
-%   the dynasim solve file
+%   the dynasim solve file. this is called from WriteMatlabSolver
+
 if options.compile_flag % compile solver function
-  solve_file_mex=fullfile(fpath,[fname '_mex']);
-  
-  if ~exist(solve_file_mex,'file')
-    if options.verbose_flag
-      fprintf('Compiling solver file: %s\n',solve_file_mex);
-    end
-    
-    compile_start_time=tic;
-    switch solver_type
-      case 'matlab'
-        PrepareMEX(solve_file); % mex-file solver for solve file
-      case 'matlab_no_mex'
-        PrepareMEX(odefun_file); % mex-file solver odefun
-    end
-    
-    if options.verbose_flag
-      fprintf('\tMEX generation complete!\n\tElapsed time: %g seconds.\n',toc(compile_start_time));
-      %toc;
-    end
-    
-    codemex_dir=fullfile(fileparts(solve_file_mex),'codemex');
-    if exist(codemex_dir,'dir')
-      if options.verbose_flag
-        fprintf('\tRemoving temporary codemex directory: %s\n',codemex_dir);
-      end
-      rmdir(codemex_dir,'s');
-    end
-  else % mex file exists
-    if options.verbose_flag
-      fprintf('Using previous compiled solver file: %s\n',solve_file_mex);
-    end
-  end
-  solve_file=solve_file_mex;
+  solve_file = PrepareMEX(solve_file);
 end
 
+%%
 if ~strcmp(cwd,fpath)
   if options.verbose_flag
     fprintf('Changing directory back to %s\n',cwd);
