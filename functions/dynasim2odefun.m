@@ -1,15 +1,15 @@
-function [ODEFUN,IC,elem_names]=dynasim2odefun(MODEL, varargin)
+function [ODEFUN,IC,elem_names]=dynasim2odefun(model, varargin)
 % Purpose: prepare ODEFUN for use with built-in Matlab solvers.
 % 
 % % Example: solve model using ode23
-% [ODEFUN,IC,elem_names]=dynasim2odefun(MODEL);
-% [ODEFUN,IC,elem_names]=dynasim2odefun(PropagateParameters(PropagateFunctions(MODEL)));
+% [ODEFUN,IC,elem_names]=dynasim2odefun(model);
+% [ODEFUN,IC,elem_names]=dynasim2odefun(PropagateParameters(PropagateFunctions(model)));
 % options=odeset('RelTol',1e-2,'AbsTol',1e-4,'InitialStep',.01);
 % [t,y]=ode23(ODEFUN,[0 100],IC,options);
 % figure; plot(t,y); legend(elem_names{:},'Location','EastOutside');
 % 
 % % Example: solve model manually using Euler method:
-% [ODEFUN,IC,elem_names]=dynasim2odefun(MODEL);
+% [ODEFUN,IC,elem_names]=dynasim2odefun(model);
 % dt=.01; t=0:dt:100;
 % y=zeros(length(t),length(IC));
 % y(1,:)=IC;
@@ -50,10 +50,10 @@ options=CheckOptions(varargin,{...
 types={'parameters','fixed_variables','functions'};
 for p=1:length(types)
   type=types{p};
-  if ~isempty(MODEL.(type))
-    fields=fieldnames(MODEL.(type));
+  if ~isempty(model.(type))
+    fields=fieldnames(model.(type));
     for i=1:length(fields)
-      val=MODEL.(type).(fields{i});
+      val=model.(type).(fields{i});
       if ~ischar(val)
         val=toString(val,'compact');
       end
@@ -66,19 +66,21 @@ for p=1:length(types)
 end
 
 % evaluate ICs to get (# elems) per state var and set up generic state var X
-num_vars=length(MODEL.state_variables);
+num_vars=length(model.state_variables);
 num_elems=zeros(1,num_vars);
-old_vars=MODEL.state_variables;
+old_vars=model.state_variables;
 new_vars=cell(1,num_vars);
 new_inds=cell(1,num_vars);
 all_ICs=cell(1,num_vars);
 IC_names={};
 state_var_index=0;
 for i=1:num_vars
-  var=MODEL.state_variables{i};
+  var=model.state_variables{i};
+  
   % evaluate ICs to get (# elems) per state var
-  ic=eval([MODEL.ICs.(var) ';']);
+  ic=eval([model.ICs.(var) ';']);
   num_elems(i)=length(ic);
+  
   % set state var indices a variables for generic state vector X
   all_ICs{i}=ic;
   IC_names{i}=repmat({var},[1 num_elems(i)]);
@@ -88,11 +90,14 @@ for i=1:num_vars
 end
 
 % prepare ODE system (comma-separated ODEs)
-ODEs=strtrim(struct2cell(MODEL.ODEs));
+ODEs=strtrim(struct2cell(model.ODEs));
 idx=cellfun(@isempty,regexp(ODEs,';$')); % lines that need semicolons
 ODEs(idx)=cellfun(@(x)[x ';'],ODEs(idx),'uni',0);
 ODEs=[ODEs{:}]; % concatenate ODEs into a single string
 ODEs=strrep(ODEs,';',','); % replace semicolons by commas
+
+%remove trailing comma
+ODEs(end) = [];
 
 % substitute in generic state vector X
 for i=1:num_vars
