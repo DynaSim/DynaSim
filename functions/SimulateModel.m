@@ -277,7 +277,7 @@ if options.cluster_flag && options.save_data_flag==0
     fprintf('setting ''save_results_flag'' to 1 for storing results of batch jobs for later access.\n');
   end
 end
-% 
+
 % if ischar(options.study_dir) && options.save_data_flag==0
 %   options.save_data_flag=1;
 %   if options.verbose_flag
@@ -767,8 +767,6 @@ end
 
 % ---------------------------------------------
 % TODO:
-% - create function that constructs @odefun
-% - add support for built-in matlab solvers
 % - create helper function that handles log files (creation, standardized format,...)
 % ---------------------------------------------
 
