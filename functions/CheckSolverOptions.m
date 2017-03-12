@@ -16,10 +16,11 @@ options=CheckOptions(keyvals,{...
   'datafile','data.csv',[],... % name of data file if disk_flag=1
   'compile_flag',exist('codegen','file')==6,[],... % whether to prepare script for being compiled using coder instead of interpreting Matlab
   'verbose_flag',1,[],...
+  'matlab_solver_options',[],[],...
   },false);
 
 field_order={'tspan','downsample_factor','random_seed','solver','disk_flag',...
-  'dt','datafile','compile_flag','verbose_flag'};
+  'dt','datafile','compile_flag','verbose_flag','matlab_solver_options'};
 
 if options.compile_flag==1
   % <-- copied from WriteDynaSimSolver.m -->
@@ -32,3 +33,8 @@ end
 
 % standardize field order
 options=orderfields(options,field_order);
+
+% Remove matlab_solver_options if empty
+if isempty(options.matlab_solver_options)
+  options = rmfield(options, 'matlab_solver_options');
+end
