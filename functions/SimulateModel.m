@@ -41,6 +41,9 @@ function [data,studyinfo]=SimulateModel(model,varargin)
 %                     using qsub (see CreateBatch) {0 or 1} (default: 0)
 %     'sims_per_job'  : number of simulations to run per batch job (default: 1)
 %     'memory_limit'  : memory to allocate per batch job (default: '8G')
+%     'qsub_mode'     : whether to use SGE -t array for 1 qsub, mode: 'array'; or
+%                         qsub in csh for loop, mode: 'loop'. (default: 'loop').
+%     'one_solve_file_flag': only use 1 file of each time when solving (default: 0)
 % 
 %   options for parallel computing: (requires Parallel Computing Toolbox)
 %     'parallel_flag' : whether to use parfor to run simulations {0 or 1} (default: 0)
@@ -235,6 +238,8 @@ options=CheckOptions(varargin,{...
   'cluster_flag',0,{0,1},...      % whether to run simulations on a cluster
   'sims_per_job',1,[],... % how many sims to run per batch job
   'memory_limit','8G',[],... % how much memory to allocate per batch job
+  'qsub_mode','loop',{'loop','array'},... % whether to submit jobs as an array using qsub -t or in a for loop
+  'one_solve_file_flag',1,{0,1},... % use only 1 solve file of each type, but can't vary mechs yet
   'parallel_flag',0,{0,1},...     % whether to run simulations in parallel (using parfor)
   'num_cores',4,[],... % # cores for parallel processing (SCC supports 1-12)
   'compile_flag',0,{0,1},... % exist('codegen')==6, whether to compile using coder instead of interpreting Matlab
@@ -261,28 +266,63 @@ if options.parallel_flag
   %error('parallel computing has been disabled for debugging. ''set parallel_flag'' to 0');
 end
 
-if options.compile_flag && options.reduce_function_calls_flag==0
+if options.compile_flag && ~options.reduce_function_calls_flag
   fprintf('setting ''reduce_function_calls_flag'' to 1 for compatibility with ''compile_flag''=1 (coder does not support anonymous functions).\n');
   options.reduce_function_calls_flag=1;
 end
 
-if options.cluster_flag && options.save_data_flag==0
+if options.cluster_flag && ~options.save_data_flag
 %   options.save_data_flag=1;
 %   if options.verbose_flag
-%     fprintf('setting ''save_data_flag'' to 1 for storing results of batch jobs for later access.\n');
+%     fprintf('Setting ''save_data_flag'' to 1 for storing data from batch jobs for later access.\n');
 %   end
   options.save_results_flag=1;
   if options.verbose_flag
-    fprintf('setting ''save_results_flag'' to 1 for storing results of batch jobs for later access.\n');
+    fprintf('Setting ''save_results_flag'' to 1 for storing results of batch jobs for later access.\n');
   end
 end
-% 
+
 % if ischar(options.study_dir) && options.save_data_flag==0
 %   options.save_data_flag=1;
 %   if options.verbose_flag
 %     fprintf('setting ''save_data_flag'' to 1 for storing results in study_dir: %s.\n',options.study_dir);
 %   end
 % end
+
+
+% check for one_solve_file_flag
+if options.one_solve_file_flag && ~options.cluster_flag
+  % One file flag only for cluster
+  fprintf('Since cluster_flag==0, setting options.one_solve_file_flag=0\n')
+  options.one_solve_file_flag = 0;
+
+  % TODO: this is a temp setting until iss_90 is fully implemented
+end
+
+if options.one_solve_file_flag && ~options.overwrite_flag
+  % One file flag will overwrite
+  fprintf('Since one_solve_file_flag==1, setting options.overwrite_flag=1\n')
+  options.overwrite_flag = 1;
+
+  % TODO: this is a temp setting until iss_90 is fully implemented
+end
+
+if options.one_solve_file_flag && ~strcmp(options.qsub_mode, 'array')
+  % One file flag needs array mode
+  fprintf('Since one_solve_file_flag==1, setting options.qsub_mode=''array''\n')
+  options.qsub_mode = 'array';
+
+  % TODO: this is a temp setting until iss_90 is fully implemented
+end
+
+if options.one_solve_file_flag && options.parallel_flag
+  % One file flag can't do parallel_flag
+  fprintf('Since one_solve_file_flag==1, setting options.parallel_flag=0\n')
+  options.parallel_flag = 0;
+
+  % TODO: this is a temp setting until iss_90 is fully implemented
+end
+
 
 % prepare analysis functions and options
 if ~isempty(options.analysis_functions)
@@ -387,6 +427,14 @@ else
   modifications_set={[]};
 end
 
+% check for one_solve_file_flag
+if options.one_solve_file_flag && is_varied_mech_list()
+  % Can't vary mechs if only have 1 file
+  error('Can''t vary mechanism_list if using one_solve_file_flag')
+  
+  % TODO: this is a temp setting until iss_90 is fully implemented
+end
+
 % 1.3 check for parallel simulations
 % 1.3.1 manage cluster computing
 % whether to write jobs for distributed processing on cluster
@@ -434,6 +482,7 @@ if options.parallel_flag==1
   
   % prepare options
   keyvals=Options2Keyval(rmfield(options,{'vary','modifications','solve_file','parallel_flag'}));
+  
   % open pool for distributed processing
   % or instead: require user to open pool before calling SimulateModel...
 %   parpool(options.num_cores) 
@@ -598,17 +647,20 @@ try
       % check if model solver needs to be created 
       % (i.e., if is first simulation or a search space varying mechanism list)
       
-      if sim==1 || (~isempty(modifications_set{1}) && any(cellfun(@(x)strcmp(x{2},'mechanism_list'),modifications_set)))
+      if sim==1 || ( ~isempty(modifications_set{1}) && is_varied_mech_list() )
         % prepare file that solves the model system
-        if isempty(options.solve_file) || (~exist(options.solve_file,'file') && ~exist([options.solve_file '.mexa64'],'file') &&  ~exist([options.solve_file '.mexa32'],'file') && ~exist([options.solve_file '.mexmaci64'],'file'))
-          options.solve_file=GetSolveFile(model,studyinfo,options); % store name of solver file in options struct
+        if isempty(options.solve_file) || (~exist(options.solve_file,'file') &&...
+            ~exist([options.solve_file '.mexa64'],'file') &&...
+            ~exist([options.solve_file '.mexa32'],'file') &&...
+            ~exist([options.solve_file '.mexmaci64'],'file'))
+          options.solve_file = GetSolveFile(model,studyinfo,options); % store name of solver file in options struct
         end
         
         % TODO: consider providing better support for studies that produce different m-files per sim (e.g., varying mechanism_list)
         
         if options.verbose_flag
-          fprintf('SIMULATING MODEL:\n');
-          fprintf('solving system using %s\n',options.solve_file);
+          fprintf('\nSIMULATING MODEL:\n');
+          fprintf('Solving system using %s\n',options.solve_file);
         end
       else
         % use previous solve_file
@@ -881,8 +933,15 @@ end
       cnt=cnt+nvals_per_var(i);
     end
   end
+
+  function logicalOut = is_varied_mech_list()
+    logicalOut = any(cellfun(@(x)strcmp(x{2},'mechanism_list'),modifications_set));
+  end
     
-end
+end %main
+
+
+%% Subfunctions
 
 function modifications=expand_modifications(mods)
   % purpose: expand simultaneous modifications into larger list
