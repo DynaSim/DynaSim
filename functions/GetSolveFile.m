@@ -39,7 +39,8 @@ elseif isstruct(varargin{1}) % user provided an options structure
 end
 
 options=CheckOptions(varargin,{...
-  'solver','rk4',{'euler','rk1','rk2','rk4','modified_euler','rungekutta','rk','ode23','ode45'},... % DynaSim and built-in Matlab solvers
+  'solver','rk4',{'euler','rk1','rk2','rk4','modified_euler','rungekutta','rk','ode23','ode45',...
+    'ode1','ode2','ode3','ode4','ode5','ode8','ode113','ode15s','ode23s','ode23t','ode23tb'},... % DynaSim and built-in Matlab solvers
   'matlab_solver_options',[],[],... % options from odeset for use with built-in Matlab solvers
   'disk_flag',0,{0,1},...            % whether to write to disk during simulation instead of storing in memory
   'solve_file',[],[],... % m- or mex-file solving the system
@@ -73,8 +74,18 @@ switch options.solver
     if options.disk_flag==1
       warning('using disk for real-time storage instead of memory is only available for DynaSim solvers. try using ''euler'',''rk2'', or ''rk4'' for real-time disk usage.');
     end
+  case {'ode1','ode2','ode3','ode4','ode5','ode8','ode113','ode15s','ode23s','ode23t','ode23tb'} % not mex supported
+    solver_type = 'matlab_no_mex';
+    if options.disk_flag==1
+      warning('using disk for real-time storage instead of memory is only available for DynaSim solvers. try using ''euler'',''rk2'', or ''rk4'' for real-time disk usage.');
+    end
   otherwise
     error('unrecognized solver type');
+end
+
+%check type of solver against disk_flag
+if ~strcmp(solver_type, 'dynasim') && options.disk_flag
+  error('Disk_flag not supported with built-in matlab solvers')
 end
 
 if ~isempty(options.solve_file)
@@ -134,8 +145,8 @@ if ~exist(solve_file,'file')
   switch solver_type
     case 'dynasim'  % write DynaSim solver function (solve_ode.m)
       solve_file_m = WriteDynaSimSolver(model,keyvals{:},'filename',solve_file); % create DynaSim solver m-file
-    case 'matlab' % prepare model function handle etc for built-in solver (@odefun)
-      solve_file_m = WriteMatlabSolver(model,keyvals{:},'filename',solve_file); % create Matlab solver m-file
+    case {'matlab', 'matlab_no_mex'} % prepare model function handle etc for built-in solver (@odefun)
+      solve_file_m = WriteMatlabSolver(model,keyvals{:},'filename',solve_file, 'solver_type',solver_type); % create Matlab solver m-file
                 % design: WriteMatlabSolver should be very similar to
                 % WriteDynaSimSolver except have a subfunction with an odefun
                 % format variation and main function that calls odeset and
@@ -152,40 +163,17 @@ else
   end
 end
 
-[fpath,fname,fext]=fileparts(solve_file); % QUESTION: redundant?
-
 %% MEX Compilation
 % create MEX file if desired and doesn't exist
+
+% NOTE: if using stiff built-in solver, it should only compile the odefun, not
+%   the dynasim solve file. this is called from WriteMatlabSolver
+
 if options.compile_flag % compile solver function
-  solve_file_mex=fullfile(fpath,[fname '_mex']);
-  
-  if ~exist(solve_file_mex,'file')
-    if options.verbose_flag
-      fprintf('Compiling solver file: %s\n',solve_file_mex);
-    end
-    
-    compile_start_time=tic;
-    PrepareMEX(solve_file); % mex-file solver
-    if options.verbose_flag
-      fprintf('\tMEX generation complete!\n\tElapsed time: %g seconds.\n',toc(compile_start_time));
-      %toc;
-    end
-    
-    codemex_dir=fullfile(fileparts(solve_file_mex),'codemex');
-    if exist(codemex_dir,'dir')
-      if options.verbose_flag
-        fprintf('\tRemoving temporary codemex directory: %s\n',codemex_dir);
-      end
-      rmdir(codemex_dir,'s');
-    end
-  else % mex file exists
-    if options.verbose_flag
-      fprintf('Using previous compiled solver file: %s\n',solve_file_mex);
-    end
-  end
-  solve_file=solve_file_mex;
+  solve_file = PrepareMEX(solve_file);
 end
 
+%%
 if ~strcmp(cwd,fpath)
   if options.verbose_flag
     fprintf('Changing directory back to %s\n',cwd);
