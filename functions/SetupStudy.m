@@ -27,13 +27,7 @@ if options.save_data_flag || options.save_results_flag
   % set default study_dir if necessary
   if isempty(options.study_dir)
     % format: <study_dir> = <project_dir>/<prefix>_<timestamp>
-%     options.study_dir=fullfile(options.project_dir,[options.prefix '_' datestr(now,'yyyymmddHHMMSS')]);
-%     if options.compile_flag
-        % Putting a time stamp on study_dir as above results in a separate
-        % solve folder being used for each simulation, forcing the user to re-compile
-        % on every run.
-        options.study_dir='.';
-%     end
+    options.study_dir=fullfile(options.project_dir,[options.prefix '_' datestr(now,'yyyymmddHHMMSS')]);
   end
   % create study_dir if it doesn't exist
   if ~isdir(fullfile('.',options.study_dir))
