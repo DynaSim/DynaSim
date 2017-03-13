@@ -22,6 +22,6 @@ fprintf('Note2 - I have moved the rest of this demos script to the ../MDD now in
 fprintf('order for it to updated in sync with the MDD repo.\n');
 
 % Open demos_xPlt.m script
-edit ../MDD/demos_xPlt.m
-cd  ../MDD/
+edit ../dependencies/MDD/demos_xPlt.m
+cd  ../dependencies/MDD/
 
