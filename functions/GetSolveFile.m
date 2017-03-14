@@ -170,7 +170,7 @@ end
 %   the dynasim solve file. this is called from WriteMatlabSolver
 
 if options.compile_flag % compile solver function
-  solve_file = PrepareMEX(solve_file);
+  solve_file = PrepareMEX(solve_file, options);
 end
 
 %%

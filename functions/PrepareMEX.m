@@ -1,27 +1,32 @@
-function solve_file_mex = PrepareMEX(solve_file)
-%PREPAREMEX - take a solver m-file path and compile it using the Matlab coder.
+function mexfileOutput = PrepareMEX(mfileInput, options)
+%PREPAREMEX - take an m-file path and compile it using the Matlab coder.
 %
 % See also: GetSolveFile
 
-% make mex name from solve_file
-[fpath,fname] = fileparts(solve_file);
-solve_file_mex=fullfile(fpath,[fname '_mex']);
+if ~exist(options,'var') || isempty(options)
+  options.verbose_flag = 1; % set verbose to 1 by default
+end
 
-if ~exist(solve_file_mex,'file')
+% make mex name from solve_file
+[fpath,fname] = fileparts(mfileInput);
+mexfileOutput = fullfile(fpath,[fname '_mex']);
+
+if ~exist(mexfileOutput,'file')
   if options.verbose_flag
-    fprintf('Compiling solver file: %s\n',solve_file_mex);
+    fprintf('Compiling file: %s\n',mfileInput);
+    fprintf('            to: %s\n',mexfileOutput);
   end
 
   compile_start_time=tic;
   
-  makeMex(solve_file); % mex-file solver for solve file
+  makeMex(mfileInput); % mex-file solver for solve file
 
   if options.verbose_flag
     fprintf('\tMEX generation complete!\n\tElapsed time: %g seconds.\n',toc(compile_start_time));
     %toc;
   end
 
-  codemex_dir=fullfile(fileparts(solve_file_mex),'codemex');
+  codemex_dir=fullfile(fileparts(mexfileOutput),'codemex');
   if exist(codemex_dir,'dir')
     if options.verbose_flag
       fprintf('\tRemoving temporary codemex directory: %s\n',codemex_dir);
@@ -30,7 +35,7 @@ if ~exist(solve_file_mex,'file')
   end
 else % mex file exists
   if options.verbose_flag
-    fprintf('Using previous compiled solver file: %s\n',solve_file_mex);
+    fprintf('Using previous compiled file: %s\n',mexfileOutput);
   end
 end %if
 
