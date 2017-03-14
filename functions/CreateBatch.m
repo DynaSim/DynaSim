@@ -391,7 +391,7 @@ else % on cluster with qsub
     
     %if options.verbose_flag
       %fprintf('%g jobs successfully submitted!\ntip: use MonitorStudy(''%s'') or MonitorStudy(studyinfo) to track status of cluster jobs.\n',num_jobs,studyinfo.study_dir);
-      fprintf('%g jobs successfully submitted!\n',length(jobs));
+      fprintf('%g jobs successfully submitted!\n',num_jobs);
     %end
   elseif s==1 % study is finished
     if options.verbose_flag

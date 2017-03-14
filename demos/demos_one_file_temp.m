@@ -10,6 +10,7 @@ addpath(genpath(dynasim_path)); % comment this out if already in path
 output_directory = 'outputs';
 
 % move to root directory where outputs will be saved
+mkdir(output_directory);
 cd(output_directory);
 
 %% Solve with one file mode
