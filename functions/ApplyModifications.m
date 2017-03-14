@@ -88,8 +88,10 @@ else
 end
 
 % update specification with whatever is in modifications
-modifications=standardize_modifications(modifications,specification);
-specification=modify_specification(specification,modifications);
+modifications = standardize_modifications(modifications,specification);
+if ismodel % TODO: test this
+  specification = modify_specification(specification,modifications);
+end
 
 % update model if input was a model structure
 if ismodel
@@ -157,6 +159,7 @@ if any(~cellfun(@isempty,regexp(modifications(:,1),'^\(.*\)$'))) || ...
                 'where dimensions 1, 2, and 3 correspond to mechanisms, values, and populations varied over.'])
         end
     end
+    
     % expand list of modifications
     for j=1:length(namespaces)
       for k=1:length(variables)
@@ -209,6 +212,7 @@ for i=1:size(mods,1)
   end
   
   index=ismember(names,obj);
+  
   if strcmp(fld,'mechanism_list')
     % support --
     % 'E'    'mechanism_list'    '(iNa,iK)'
