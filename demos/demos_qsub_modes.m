@@ -16,7 +16,7 @@ output_directory = 'outputs';
 cd(output_directory);
 
 %% Solve with loop mode
-study_dir='study_HH_varyI_cluster_loop'; 
+study_dir = fullfile('.', 'study_HH_varyI_cluster_loop');
 eqns='dv/dt=@current+I; {iNa,iK}';
 vary={'','I',[0:10:50]};
 
@@ -28,7 +28,7 @@ SimulateModel(eqns,'vary',vary, 'study_dir',study_dir,'save_data_flag',1,...
   'cluster_flag',1,'verbose_flag',1,'qsub_mode','loop');
 
 %% Solve with array mode
-study_dir='study_HH_varyI_cluster_array'; 
+study_dir = fullfile('.', 'study_HH_varyI_cluster_array');
 eqns='dv/dt=@current+I; {iNa,iK}';
 vary={'','I',[0:10:50]};
 
