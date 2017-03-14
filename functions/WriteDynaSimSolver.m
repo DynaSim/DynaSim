@@ -81,6 +81,7 @@ options=CheckOptions(varargin,{...
   'fileID',1,[],...
   'compile_flag',exist('codegen')==6,{0,1},... % whether to prepare script for being compiled using coder instead of interpreting Matlab
   'verbose_flag',1,{0,1},...
+  'one_solve_file_flag',0,{0,1},... % use only 1 solve file of each type, but can't vary mechs yet
   },false);
 model=CheckModel(model); 
 separator=','; % ',', '\\t'
@@ -97,7 +98,7 @@ end
 % 1.1 prepare parameters
 if options.save_parameters_flag
   % add parameter struct prefix to parameters in model equations
-  model=PropagateParameters(model,'action','prepend','prefix',parameter_prefix);
+  model=PropagateParameters(model,'action','prepend', 'prefix',parameter_prefix);
   
   % set and capture numeric seed value
   if options.compile_flag==1
@@ -110,16 +111,43 @@ if options.save_parameters_flag
   
   % set parameter file name (save with m-file)
   [fpath,fname,fext]=fileparts(options.filename);
-  param_file_name = fullfile(fpath,'params.mat');
+  param_file_path = fullfile(fpath,'params.mat');
   
   % save parameters to disk
   warning('off','catstruct:DuplicatesFound');
-  p=catstruct(CheckSolverOptions(options),model.parameters);
+  p = catstruct(CheckSolverOptions(options),model.parameters);
   if options.verbose_flag
-    fprintf('saving params.mat\n');
+    fprintf('Saving params.mat\n');
   end
   
-  save(param_file_name,'p');
+  if options.one_solve_file_flag
+    % fill p flds that were varied with vectors
+    vary=CheckOptions(varargin,{'vary',[],[],},false);
+    vary = vary.vary;
+    
+    keyboard
+
+    % TODO: figure this out
+%     modifications_set = Vary2Modifications(vary);
+%     model_temp = model;
+%     for iMod = 1:length(modifications_set)
+%       [output,modifications] = ApplyModifications(model_temp,modifications_set{iMod});
+%     end
+%    [output,modifications] = ApplyModifications(model,mods);
+    
+%     mods = cellfun(@(x) {[x{1} '_' x{2}] x{3}} , mods,'uni',0);
+%     mods = cat(1,mods{:});
+    
+    
+%     for param = fields(model.parameters)'
+%       thisParam = model.parameters.(param{1});
+%       if length(thisParam == 1)
+%         model.parameters.(param{1}) = repmat(model.parameters.(param{1}),1,1); %FIXME
+%       end
+%     end
+  end
+  
+  save(param_file_path,'p');
 else
   % insert parameter values into model expressions
   model=PropagateParameters(model,'action','substitute');
@@ -166,7 +194,12 @@ end
 outfile=fopen(fid);
 
 if options.disk_flag==1
-  fprintf(fid,'function data_file=solve_ode\n');
+  if ~options.one_solve_file_flag
+    fprintf(fid,'function data_file=solve_ode\n');
+  else
+    fprintf(fid,'function data_file=solve_ode(simID)\n');
+  end
+  
   % create output data file
   fprintf(fid,'%% ------------------------------------------------------------\n');
   fprintf(fid,'%% Open output data file:\n');
@@ -194,8 +227,12 @@ if options.disk_flag==1
   end
   
   fprintf(fid,'fprintf(fileID,''\\n'');\n');
-else
-  fprintf(fid,'function %s=solve_ode\n',output_string);
+else %options.disk_flag==0
+  if ~options.one_solve_file_flag
+    fprintf(fid,'function %s=solve_ode\n',output_string);
+  else
+    fprintf(fid,'function %s=solve_ode(simID)\n',output_string);
+  end
 end
 
 % 2.3 load parameters
@@ -203,7 +240,19 @@ if options.save_parameters_flag
   fprintf(fid,'%% ------------------------------------------------------------\n');
   fprintf(fid,'%% Parameters:\n');
   fprintf(fid,'%% ------------------------------------------------------------\n');
-  fprintf(fid,'p=load(''params.mat'',''p''); p=p.p;\n');
+  fprintf(fid,'p = load(''params.mat'',''p''); p = p.p;\n');
+end
+
+if options.one_solve_file_flag
+  % loop through p and for any vector, take simID index of it (ignores tspan)
+  fprintf(fid,'%% For vector params, select index for this simID\n');
+  fprintf(fid,'flds = fields(rmfield(p,''tspan''));\n'); % remove tspan
+  fprintf(fid,'for fld = flds''\n');
+    fprintf(fid,'fld = fld{1};\n');
+    fprintf(fid,'if isnumeric(p.(fld)) && length(p.(fld)) > 1\n');
+      fprintf(fid,'p.(fld) = p.(fld)(simID);\n');
+    fprintf(fid,'end\n');
+  fprintf(fid,'end\n');
 end
 
 % write tspan, dt, and downsample_factor
@@ -554,34 +603,43 @@ end
     switch options.solver
       case {'euler','rk1'}
         print_k(fid,odes,'_k1',state_variables);                              % write k1 using model.ODEs
+        
         % write update for state variables
         print_var_update(fid,index_nexts_,index_lasts,...
           'dt*%s_k1',state_variables);
       case {'rk2','modified_euler'}
         print_k(fid,odes,'_k1',state_variables);                              % write k1 using model.ODEs
+        
         odes_k2=update_odes(odes,'_k1','.5*dt',state_variables,index_lasts);   % F(*,yn+dt*k1/2)
         fprintf(fid,'  t=t+.5*dt;\n');                                          % update t before writing k2
         print_k(fid,odes_k2,'_k2',state_variables);                           % write k2 using odes_k2
+        
         % write update for state variables
         print_var_update(fid,index_nexts_,index_lasts,...
           'dt*%s_k2',state_variables);
       case {'rk4','rungekutta','rk'}
         print_k(fid,odes,'_k1',state_variables);                              % write k1 using model.ODEs
+        
         odes_k2=update_odes(odes,'_k1','.5*dt',state_variables,index_lasts);   % F(*,yn+dt*k1/2)
         fprintf(fid,'  t=t+.5*dt;\n');                                          % update t before writing k2
         print_k(fid,odes_k2,'_k2',state_variables);                           % write k2 using odes_k2
+        
         odes_k3=update_odes(odes,'_k2','.5*dt',state_variables,index_lasts);   % F(*,yn+dt*k2/2)
         print_k(fid,odes_k3,'_k3',state_variables);                           % write k3 using odes_k3
+        
         odes_k4=update_odes(odes,'_k3','dt',state_variables,index_lasts);      % F(*,yn+dt*k3)
         fprintf(fid,'  t=t+.5*dt;\n');                                          % update t before writing k4
         print_k(fid,odes_k4,'_k4',state_variables);                           % write k4 using odes_k4
+        
         % write update for state variables
         print_var_update(fid,index_nexts_,index_lasts,...
           '(dt/6)*(%s_k1+2*(%s_k2+%s_k3)+%s_k4)',state_variables);
     end
   end
 
-end
+end %main
+
+
 % ########################################
 %% SUBFUNCTIONS
 % ########################################

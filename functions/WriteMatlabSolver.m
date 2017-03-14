@@ -52,6 +52,7 @@ options=CheckOptions(varargin,{...
   'fileID',1,[],...
   'compile_flag',exist('codegen')==6,{0,1},... % whether to prepare script for being compiled using coder instead of interpreting Matlab
   'verbose_flag',1,{0,1},...
+  'one_solve_file_flag',0,{0,1},... % use only 1 solve file of each type, but can't vary mechs yet
   },false);
 
 % Check inputs
@@ -113,6 +114,15 @@ if options.save_parameters_flag
 %     p.ic = options.ic;
 %   end
 
+  if options.one_solve_file_flag
+    % fill p flds that were varied with vectors
+    vary=CheckOptions(varargin,{'vary',[],[],},false);
+    vary = vary.vary;
+    
+    keyboard
+  
+  end
+
   save(param_file_name,'p');
 else
   % insert parameter values into model expressions
@@ -161,15 +171,30 @@ end
 % get abs file path
 solve_ode_filepath = fopen(fid);
 
-
-fprintf(fid,'function %s=solve_ode\n',output_string);
+if ~options.one_solve_file_flag
+  fprintf(fid,'function %s=solve_ode\n',output_string);
+else
+  fprintf(fid,'function %s=solve_ode(simID)\n',output_string);
+end
 
 % 2.3 load parameters
 if options.save_parameters_flag
   fprintf(fid,'\n%% ------------------------------------------------------------\n');
   fprintf(fid,'%% Parameters:\n');
   fprintf(fid,'%% ------------------------------------------------------------\n');
-  fprintf(fid,'p=load(''params.mat'',''p''); p=p.p;\n');
+  fprintf(fid,'p = load(''params.mat'',''p''); p = p.p;\n');
+end
+
+if options.one_solve_file_flag
+  % loop through p and for any vector, take simID index of it (ignores tspan)
+  fprintf(fid,'%% For vector params, select index for this simID\n');
+  fprintf(fid,'flds = fields(rmfield(p,''tspan''));\n'); % remove tspan
+  fprintf(fid,'for fld = flds''\n');
+    fprintf(fid,'fld = fld{1};\n');
+    fprintf(fid,'if isnumeric(p.(fld)) && length(p.(fld)) > 1\n');
+      fprintf(fid,'p.(fld) = p.(fld)(simID);\n');
+    fprintf(fid,'end\n');
+  fprintf(fid,'end\n');
 end
 
 % write tspan, dt, and downsample_factor
@@ -184,7 +209,7 @@ end
   % NOTE: T is different here since we take into account downsampling
 
 % write calculation of time vector and derived parameters: ntime, nsamp
-fprintf(fid,'ntime=length(T);\nnsamp=length(1:downsample_factor:ntime);\n');
+fprintf(fid,'ntime = length(T);\nnsamp = length(1:downsample_factor:ntime);\n');
 
 % 2.4 evaluate fixed variables
 if ~isempty(model.fixed_variables)
@@ -292,7 +317,7 @@ if options.compile_flag && strcmp(options.solver_type,'matlab_no_mex') % save od
   fclose(odefun_fid);
   
   %% mex compile odefun
-  PrepareMEX(odefun_filepath);
+  PrepareMEX(odefun_filepath, options);
   
 else %use subfunction
   fprintf(fid,'\n%% ###########################################################\n');

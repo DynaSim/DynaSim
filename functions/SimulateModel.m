@@ -240,7 +240,7 @@ options=CheckOptions(varargin,{...
   'sims_per_job',1,[],... % how many sims to run per batch job
   'memory_limit','8G',[],... % how much memory to allocate per batch job
   'qsub_mode','loop',{'loop','array'},... % whether to submit jobs as an array using qsub -t or in a for loop
-  'one_solve_file_flag',1,{0,1},... % use only 1 solve file of each type, but can't vary mechs yet
+  'one_solve_file_flag',0,{0,1},... % use only 1 solve file of each type, but can't vary mechs yet
   'parallel_flag',0,{0,1},...     % whether to run simulations in parallel (using parfor)
   'num_cores',4,[],... % # cores for parallel processing (SCC supports 1-12)
   'compile_flag',0,{0,1},... % exist('codegen')==6, whether to compile using coder instead of interpreting Matlab
@@ -296,7 +296,6 @@ if options.one_solve_file_flag && ~options.cluster_flag
   % One file flag only for cluster
   fprintf('Since cluster_flag==0, setting options.one_solve_file_flag=0\n')
   options.one_solve_file_flag = 0;
-
   % TODO: this is a temp setting until iss_90 is fully implemented
 end
 
@@ -304,7 +303,6 @@ if options.one_solve_file_flag && ~options.overwrite_flag
   % One file flag will overwrite
   fprintf('Since one_solve_file_flag==1, setting options.overwrite_flag=1\n')
   options.overwrite_flag = 1;
-
   % TODO: this is a temp setting until iss_90 is fully implemented
 end
 
@@ -312,7 +310,6 @@ if options.one_solve_file_flag && ~strcmp(options.qsub_mode, 'array')
   % One file flag needs array mode
   fprintf('Since one_solve_file_flag==1, setting options.qsub_mode=''array''\n')
   options.qsub_mode = 'array';
-
   % TODO: this is a temp setting until iss_90 is fully implemented
 end
 
@@ -320,7 +317,16 @@ if options.one_solve_file_flag && options.parallel_flag
   % One file flag can't do parallel_flag
   fprintf('Since one_solve_file_flag==1, setting options.parallel_flag=0\n')
   options.parallel_flag = 0;
+  % TODO: this is a temp setting until iss_90 is fully implemented
+end
 
+if options.one_solve_file_flag && isa(options.experiment,'function_handle')
+  error('one_solve_file_flag doesn''t work with experiments.')
+end
+
+if options.one_solve_file_flag && ~options.save_parameters_flag
+  fprintf('Since one_solve_file_flag==1, setting options.save_parameters_flag=1\n')
+  options.save_parameters_flag = 1;
   % TODO: this is a temp setting until iss_90 is fully implemented
 end
 
@@ -444,12 +450,22 @@ if options.cluster_flag==1
   % approach: use ApplyModifications(), it does that automatically
   for i=1:length(modifications_set)
     if ~isempty(modifications_set{i}) && ~strcmp(modifications_set{i}{2},'mechanism_list') && ~strcmp(modifications_set{i}{2},'equations')
-      model=ApplyModifications(model,modifications_set{i});
+      model = ApplyModifications(model,modifications_set{i});
       break
     end
   end
   keyvals = Options2Keyval(options);
-  studyinfo=CreateBatch(model,modifications_set,'simulator_options',options,'process_id',options.sim_id,keyvals{:});
+  studyinfo = CreateBatch(model,modifications_set,'simulator_options',options,'process_id',options.sim_id,keyvals{:});
+  
+  if options.one_solve_file_flag
+    % copy params.mat from project_dir to batchdirs
+    param_file_path = fullfile(options.project_dir, options.study_dir, 'solve','params.mat');
+    [~,home]=system('echo $HOME');
+    batch_dir = fullfile(strtrim(home),'batchdirs',options.study_dir);
+    batch_param_file_path = fullfile(batch_dir,'params.mat');
+    [success,msg]=copyfile(param_file_path, batch_param_file_path);
+  end
+  
   %if options.overwrite_flag==0
     % check status of study
 %     [~,s]=MonitorStudy(studyinfo.study_dir,'verbose_flag',0,'process_id',options.sim_id);
@@ -566,7 +582,7 @@ end %parallel_flag
 
 % 1.4 prepare study_dir and studyinfo if saving data
 if isempty(options.studyinfo)
-  [studyinfo,options]=SetupStudy(model,'modifications_set',modifications_set,'simulator_options',options,'process_id',options.sim_id);
+  [studyinfo,options] = SetupStudy(model,'modifications_set',modifications_set,'simulator_options',options,'process_id',options.sim_id);
 else
   studyinfo=options.studyinfo;
 end
@@ -681,8 +697,8 @@ try
       
       % save parameters there
       warning('off','catstruct:DuplicatesFound');
-      p=catstruct(CheckSolverOptions(options),model.parameters);
-      param_file=fullfile(fpath,'params.mat');
+      p = catstruct(CheckSolverOptions(options),model.parameters);
+      param_file = fullfile(fpath,'params.mat');
       if options.verbose_flag
         fprintf('Saving model parameters: %s\n',param_file);
       end
@@ -691,7 +707,9 @@ try
       %% Solve System
       if options.disk_flag  % ### data stored on disk during simulation ###
         sim_start_time=tic;
-        save(param_file,'p'); % save params immediately before solving
+        if ~options.one_solve_file_flag
+          save(param_file,'p'); % save params immediately before solving
+        end
         csv_data_file=feval(fname);  % returns name of file storing the simulated data
         duration=toc(sim_start_time);
         
@@ -721,9 +739,19 @@ try
         sim_start_time=tic;
         
         outputs=cell(1,length(output_variables)); % preallocate for PCT compatibility
-        save(param_file,'p'); % save params immediately before solving
-        [outputs{1:length(output_variables)}]=feval(fname);
         
+        if ~options.one_solve_file_flag
+          save(param_file,'p'); % save params immediately before solving
+        end
+        
+        % feval solve file
+        if ~options.one_solve_file_flag
+          [outputs{1:length(output_variables)}]=feval(fname);
+        else
+          % pass sim_id for slicing params
+          [outputs{1:length(output_variables)}]=feval(fname, sim_id);
+        end
+
         duration=toc(sim_start_time);
         
         
@@ -767,6 +795,7 @@ try
         siminfo=studyinfo.simulations(sim_ind);
         for f=1:length(siminfo.result_functions)
           result=AnalyzeData(tmpdata,siminfo.result_functions{f},'result_file',siminfo.result_files{f},'save_data_flag',1,'save_results_flag',1,siminfo.result_options{f}{:});
+          
           % since the plots are saved, close all generated figures
           if all(ishandle(result))
             close(result);
@@ -779,6 +808,7 @@ try
             tmpdata=AnalyzeData(tmpdata,options.analysis_functions{f},'result_file',[],'save_data_flag',0,'save_results_flag',options.save_results_flag,options.analysis_options{f}{:});
           end
         end
+        
         if ~isempty(options.plot_functions)
           for f=1:length(options.plot_functions)
             AnalyzeData(tmpdata,options.plot_functions{f},'result_file',[],'save_data_flag',0,'save_results_flag',options.save_results_flag,options.plot_options{f}{:});
@@ -786,6 +816,7 @@ try
         end
       end
     end
+    
     if nargout>0
       update_data; % concatenate data structures across simulations
     end
