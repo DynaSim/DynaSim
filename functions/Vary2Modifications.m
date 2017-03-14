@@ -147,14 +147,17 @@ if length(specification)==2
   % convert 2-element specification to 3-element with empty object name
   specification={'',specification{1},specification{2}};
 end
+
 % set default object name
 if isempty(specification{1})
   specification{1}='pop1'; % default population
 end
+
 % expand elements in cell arrays
 namespace=expand_elem(specification{1});
 variable=expand_elem(specification{2});
 values=expand_elem(specification{3});
+
 % combine elements into list of modifications
 list={};
 for i=1:length(namespace)
