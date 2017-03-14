@@ -56,10 +56,10 @@ s.connections(2).mechanism_list={'iAMPA'};
 s.connections(2).parameters={'tauD',2,'gSYN',.1,'netcon','ones(N_pre,N_post)'};
 
 vary={
-  'E'   ,'gNa',[120 100];
-  '(E,I)','Iapp',[0 10 20];      % amplitude of tonic input to E-cells
-  'I->E','tauD',[5 10 15]       % inhibition decay time constant from I to E
+  'E'   ,'(gNa,gK)',[10 20];
+  '(E,I)','Iapp',[0 10];      % amplitude of tonic input to E-cells
+  'I->E','tauD',[5 10]       % inhibition decay time constant from I to E
   };
 
-SimulateModel(eqns,'vary',vary, 'study_dir',study_dir,'save_data_flag',1,...
+SimulateModel(s,'vary',vary, 'study_dir',study_dir,'save_data_flag',1,...
   'cluster_flag',1,'verbose_flag',1,'qsub_mode','array', 'one_solve_file_flag',1);
