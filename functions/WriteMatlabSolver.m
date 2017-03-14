@@ -103,9 +103,7 @@ if options.save_parameters_flag
   warning('off','catstruct:DuplicatesFound');
   
   p=catstruct(CheckSolverOptions(options),model.parameters);
-  if options.verbose_flag
-    fprintf('saving params.mat\n');
-  end
+  
   
 %   % add inital conditions
 %   if isempty(options.ic)
@@ -115,14 +113,66 @@ if options.save_parameters_flag
 %   end
 
   if options.one_solve_file_flag
-    % fill p flds that were varied with vectors
+    % fill p flds that were varied with vectors of length = nSims
+    
     vary=CheckOptions(varargin,{'vary',[],[],},false);
     vary = vary.vary;
-    
-    keyboard
-  
-  end
 
+    mod_set = Vary2Modifications(vary);
+    % The first 2 cols of modifications_set are idenitical to vary, it just
+    % has the last column distributed out to the number of sims
+    
+    
+    % Get param names
+    iMod = 1;
+    % Split extra entries in first 2 cols of mods, so each row is a single pop and param
+    [~, first_mod_set] = ApplyModifications([],mod_set{iMod});
+
+    % replace '->' with '_'
+    first_mod_set(:,1) = strrep(first_mod_set(:,1), '->', '_');
+
+    % add col of underscores
+    first_mod_set = cat(2,first_mod_set(:,1), repmat({'_'},size(first_mod_set,1), 1), first_mod_set(:,2:end));
+    nParamMods = size(first_mod_set, 1);
+    
+    % get param names
+    mod_params = cell(nParamMods,1);
+    for iRow = 1:nParamMods
+      mod_params{iRow} = [first_mod_set{iRow,1:3}];
+
+      %check if variable in namespace
+      if ~any(strcmp(model.namespaces(:,2), mod_params{iRow}))
+        % find correct entry based on param and pop
+        nsInd = logical(~cellfun(@isempty, strfind(model.namespaces(:,2), [first_mod_set{iRow,1} '_'])) .* ...
+          ~cellfun(@isempty, strfind(model.namespaces(:,2), first_mod_set{iRow,3})));
+        
+        assert(sum(nsInd) == 1)
+        
+        % add mech names using namespace
+        mod_params{iRow} = model.namespaces{nsInd,2};
+      end
+    end
+
+    % Get param values for each sim
+    param_values = nan(nParamMods, length(mod_set));
+    for iMod = 1:length(mod_set)
+      % Split extra entries in first 2 cols of mods, so each row is a single pop and param
+      [~, mod_set{iMod}] = ApplyModifications([],mod_set{iMod});
+      
+      % Get scalar values as vector
+      param_values(:, iMod) = [mod_set{iMod}{:,3}];
+    end
+    
+    % Assign value vectors to params
+    for iParam = 1:nParamMods
+      p.(mod_params{iParam}) = param_values(iParam,:);
+    end
+  end % one_solve_file_flag
+  
+  
+  if options.verbose_flag
+    fprintf('saving params.mat\n');
+  end
   save(param_file_name,'p');
 else
   % insert parameter values into model expressions

@@ -44,6 +44,7 @@ function [data,studyinfo]=SimulateModel(model,varargin)
 %     'qsub_mode'     : whether to use SGE -t array for 1 qsub, mode: 'array'; or
 %                         qsub in csh for loop, mode: 'loop'. (default: 'loop').
 %     'one_solve_file_flag': only use 1 file of each time when solving (default: 0)
+%     'optimize_big_vary': Select best options for many sims {0 or 1} (default: 0)
 % 
 %   options for parallel computing: (requires Parallel Computing Toolbox)
 %     'parallel_flag' : whether to use parfor to run simulations {0 or 1} (default: 0)
@@ -260,6 +261,7 @@ options=CheckOptions(varargin,{...
   'plot_functions',[],[],...
   'plot_options',[],[],...
   'debug_flag',0,{0,1},...
+  'optimize_big_vary',0,{0,1},...
   },false);
 % more options: remove_solve_dir, remove_batch_dir, post_downsample_factor
 
@@ -290,6 +292,14 @@ end
 %   end
 % end
 
+if options.optimize_big_vary
+  options.cluster_flag = 1;
+  options.qsub_mode = 'array';
+  options.compile_flag = 1;
+  options.downsample_factor = max(1/options.dt, options.downsample_factor); % at most 1000Hz sampling
+  options.one_solve_file_flag = 1;
+  %options.sims_per_job=5 %?
+end
 
 % check for one_solve_file_flag
 if options.one_solve_file_flag && ~options.cluster_flag
