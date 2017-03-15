@@ -18,7 +18,7 @@ dynasim_path = fullfile(parentfolder);
 addpath(genpath(dynasim_path)); % comment this out if already in path
 
 fprintf('Note1 - I am planning to rename nDDict to MDD (MultiDimensional Dictionary).\n');
-fprintf('Note2 - I have moved the rest of this demos script to the ../MDD now in\n ');
+fprintf('Note2 - I have moved the rest of this demos script to the directory ../MDD now in\n ');
 fprintf('order for it to updated in sync with the MDD repo.\n');
 
 % Open demos_xPlt.m script
