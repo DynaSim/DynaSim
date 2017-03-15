@@ -1,3 +1,3 @@
 [submodule "MDD"]
 	path = dependencies/MDD
-	url = git@github.com:davestanley/MDD.git
+	url = https://github.com/davestanley/MDD
