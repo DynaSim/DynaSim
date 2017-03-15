@@ -1,3 +1,7 @@
+%% TODO
+% run with compilation, 3 types of solvers, matlab_solver_options
+
+
 % %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% DynaSim Demos
 % %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -24,7 +28,6 @@ addpath(genpath(dynasim_path)); % comment this out if already in path
 output_directory = 'outputs';
 
 % move to root directory where outputs will be saved
-mkdir(output_directory);
 cd(output_directory);
 
 % Here we go!
@@ -46,24 +49,7 @@ eqns={
   'dy/dt=r*x-y-x*z';
   'dz/dt=-b*z+x*y';
 };
-data=SimulateModel(eqns,'tspan',[0 100],'ic',[1 2 .5],'solver','rk4');
-% tspan: time limits on integration [ms]
-% ic: initial conditions
-% solver: numerical method to use (default: rk4 = "4th-order Runge-Kutta")
-
-% All models are numerically integrated using a DynaSim solver function
-% created uniquely for a given model and stored in a directory named
-% "solve". The file that solves the system (i.e,. numerically integrates
-% it) is stored in data.simulator_options and can be viewed or rerun afterwards:
-edit(data.simulator_options.solve_file)
-
-% Every component of the model is assigned to a "population", and the 
-% population name (default: 'pop1') is prepended to all variable and
-% function names.
-
-% Simulated data can be easily plotted using the resulting data structure:
-figure; plot(data.pop1_x,data.pop1_z); 
-title('Lorenz equations'); xlabel('x'); ylabel('z')
+data=SimulateModel(eqns,'tspan',[0 100],'study_dir','lorenz_ml_solver', 'ic',[1 2 .5],'solver','ode23s');
 
 %% Izhikevich neuron with noisy drive 
 % (reference: p274 of "Dynamical Systems in Neuroscience" by Izhikevich)
@@ -81,15 +67,8 @@ eqns={
   'du/dt=a*(b*(v-vr)-u); u(0)=0';
   'if(v>vpeak)(v=c; u=u+d)';
   'I(t)=Iapp*(t>ton&t<toff)*(1+.5*rand)'; % define applied input using reserved variables 't' for time and 'dt' for fixed time step of numerical integration
-  'monitor I';                            % indicate to store applied input during simulation
 };
-data=SimulateModel(eqns,'tspan',[0 1000]);
-% plot the simulated voltage and monitored input function
-figure; 
-subplot(2,1,1); plot(data.time,data.pop1_v); % plot voltage
-xlabel('time (ms)'); ylabel('v'); title('Izhikevich neuron')
-subplot(2,1,2); plot(data.time,data.pop1_I); % plot input function
-xlabel('time (ms)'); ylabel('Iapp');
+data=SimulateModel(eqns,'tspan',[0 1000],'study_dir','iz_ml_solver', 'solver','ode23s');
 
 % note: "t", "dt", and "T" are special variables that can be used in model
 % equations. "t" represents the current time point of the simulation. 
@@ -127,7 +106,7 @@ vary={
   {P,'a',-.02;P,'b',-1 ; P,'c',-60; P,'d',8;  P,'I',80} % inhibition-induced spiking
   {P,'a',-.026;P,'b',-1; P,'c',-45; P,'d',0;  P,'I',70} % inhibition-induced bursting
   };
-data=SimulateModel(eqns,'tspan',[0 250],'vary',vary);
+data=SimulateModel(eqns,'tspan',[0 250],'vary',vary,'study_dir','iz_varied_ml_solver', 'solver','ode23s');
 PlotData(data);
 
 % %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -157,26 +136,20 @@ eqns={
   'aN(v) = (.1-.01*(v+65))./(exp(1-.1*(v+65))-1)';
   'bN(v) = .125*exp(-(v+65)/80)';
 };
-data=SimulateModel(eqns);
+data=SimulateModel(eqns,'dt',0.01, 'downsample_factor',100, 'study_dir','hh_ml_solver', 'solver','ode23s');
 figure; plot(data.time,data.(data.labels{1}))
 xlabel('time (ms)'); ylabel('membrane potential (mV)'); title('Hodgkin-Huxley neuron')
 
-% Equivalent Hodgkin-Huxley neuron with predefined mechanisms
-data=SimulateModel('dv/dt=10+@current/Cm; Cm=1; v(0)=-65; {iNa,iK}');
-figure; plot(data.time,data.(data.labels{1}))
-xlabel('time (ms)'); ylabel('membrane potential (mV)'); title('Hodgkin-Huxley neuron')
-
-% View the mechanism files:
-[~,eqnfile]=LocateModelFiles('iNa.mech'); edit(eqnfile{1});
-[~,eqnfile]=LocateModelFiles('iK.mech');  edit(eqnfile{1});
-% Mechanisms can be custom built; however, DynaSim does come pakaged with
-% some common ones like popular ion currents (see <dynasim>/models).
-
-% Example of a bursting neuron model using three active current mechanisms:
-eqns='dv/dt=5+@current; {iNaF,iKDR,iM}; gNaF=100; gKDR=5; gM=1.5; v(0)=-70';
-data=SimulateModel(eqns,'tspan',[0 200]);
-figure; plot(data.time,data.(data.labels{1}))
-xlabel('time (ms)'); ylabel('membrane potential (mV)'); title('Intrinsically Bursting neuron')
+% % Equivalent Hodgkin-Huxley neuron with predefined mechanisms
+% data=SimulateModel('dv/dt=10+@current/Cm; Cm=1; v(0)=-65; {iNa,iK}','study_dir','hh_predef_ml_solver', 'solver','ode23s');
+% figure; plot(data.time,data.(data.labels{1}))
+% xlabel('time (ms)'); ylabel('membrane potential (mV)'); title('Hodgkin-Huxley neuron')
+% 
+% % Example of a bursting neuron model using three active current mechanisms:
+% eqns='dv/dt=5+@current; {iNaF,iKDR,iM}; gNaF=100; gKDR=5; gM=1.5; v(0)=-70';
+% data=SimulateModel(eqns,'tspan',[0 200],'study_dir','hh_active_ml_solver', 'solver','ode23s');
+% figure; plot(data.time,data.(data.labels{1}))
+% xlabel('time (ms)'); ylabel('membrane potential (mV)'); title('Intrinsically Bursting neuron')
 
 % %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% BUILDING LARGE MODELS WITH MULTIPLE POPULATIONS AND CONNECTIONS
@@ -209,12 +182,10 @@ s.connections(1).parameters={'tauD',10,'gSYN',.1,'netcon','ones(N_pre,N_post)'};
 s.connections(2).direction='E->I';
 s.connections(2).mechanism_list={'iAMPA'};
 s.connections(2).parameters={'tauD',2,'gSYN',.1,'netcon',ones(80,20)};
-data=SimulateModel(s);
-PlotData(data);
-PlotData(data,'variable',{'E_v','E_I_iGABAa_ISYN'});
+data=SimulateModel(s,'dt',0.01, 'downsample_factor',100, 'study_dir','sping_ml_solver', 'solver','ode23s', 'matlab_solver_options', {'InitialStep', 0.001}, 'compile_flag',0);
+% PlotData(data);
+% PlotData(data,'variable',{'E_v','E_I_iGABAa_ISYN'});
 
-% View the connection mechanism file:
-[~,eqnfile]=LocateModelFiles('iAMPA.mech'); edit(eqnfile{1});
 
 % %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% SAVING SIMULATED DATA

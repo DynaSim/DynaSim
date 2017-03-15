@@ -123,6 +123,7 @@ con_field_order={'source','target','mechanism_list','parameters'};
 if ~isfield(spec,'populations')
   spec.populations.name='pop1';
 end
+
 if ~isfield(spec,'connections')
   spec.connections=[];
 end
@@ -131,27 +132,35 @@ end
 if ~isfield(spec.populations,'name')
   spec.populations(1).name='pop1';
 end
+
 if ~isfield(spec.populations,'size')
   spec.populations(1).size=1;
 end
+
 if ~isfield(spec.populations,'equations')
   spec.populations(1).equations=[];
 end
+
 if ~isfield(spec.populations,'mechanism_list')
   spec.populations(1).mechanism_list=[];
 end
+
 if ~isfield(spec.populations,'parameters')
   spec.populations(1).parameters={};
 end
+
 if ~isfield(spec.populations,'conditionals')
   spec.populations(1).conditionals=[];
 end
+
 if ~isfield(spec.populations,'monitors')
   spec.populations(1).monitors=[];
 end
+
 if ~isfield(spec.populations,'model')
   spec.populations(1).model=[];
 end
+
 % special case: split equations with '[...][...]...[...]' into multiple populations
 for i=1:length(spec.populations)
   eqn=spec.populations(i).equations;
@@ -168,24 +177,29 @@ for i=1:length(spec.populations)
     end
   end
 end
+
 % standardize each population separately
 for i=1:length(spec.populations)
   % population names
   if isempty(spec.populations(i).name)
     spec.populations(i).name=sprintf('pop%g',i);
   end
+  
   % population sizes
   if isempty(spec.populations(i).size)
     spec.populations(i).size=1;
   end
+  
   % make mechanism list a cell array of mechanism names
   if ischar(spec.populations(i).mechanism_list)
     spec.populations(i).mechanism_list={spec.populations(i).mechanism_list};
   end
+  
   % parameter cell arrays
   if ~iscell(spec.populations(i).parameters)
     spec.populations(i).parameters={};
   end
+  
   % standardize equations
   if ~isempty(spec.populations(i).equations)
     % convert cell array of equations into character array
@@ -199,20 +213,24 @@ for i=1:length(spec.populations)
       end
       spec.populations(i).equations=[eqns{:}];
     end
+    
     % extract name from equations (e.g., TC:...)
     eqn=spec.populations(i).equations;
     name=regexp(eqn,'^\w+:','match','once');
     if ~isempty(name)
       % remove name indicator from equation
       eqn=strrep(eqn,name,'');
+      
       % store name in specification
       name=regexp(name,'^(\w+):','tokens','once');
       spec.populations(i).name=name{1};
       spec.populations(i).equations=eqn;
     end
+    
     % extract size from equations if present (eg, v[4]'=.., dv[4]/dt=...)
     eqn=spec.populations(i).equations;
     pattern='((\w+(\[\d+\])'')|(d\w+(\[\d+\])/dt))\s*='; % support size spec, dv[4]/dt
+    
     % extract all differentials with size specification
     LHSs=regexp(eqn,pattern,'match');
     if ~isempty(LHSs)
@@ -224,18 +242,22 @@ for i=1:length(spec.populations)
           tmp=regexp(LHSs{k},'d\w+\[(\d+)\]/dt','tokens','once');
         end
         szs(k)=str2num(tmp{1});
+        
         % remove size from ODE in population equations
         old=LHSs{k};
         new=strrep(LHSs{k},['[' tmp{1} ']'],'');
         eqn=strrep(eqn,old,new);
       end
+      
       % check that all vars in same population have same size
       if ~all(szs==szs(1))
         error('all variables in same population must have same size. split ODEs with different sizes into different populations.');
       end
+      
       spec.populations(i).equations=eqn;
       spec.populations(i).size=szs(1);
     end
+    
     % add mechanisms embedded in equations to mechanism_list ({M1,M2,...})
     % ----------
     % todo: make the following a subfunction and apply it also to connection
@@ -249,20 +271,26 @@ for i=1:length(spec.populations)
     if ~isempty(mech_lists)
       for k=1:length(mech_lists)
         mech_list=strtrim(mech_lists{k});
+        
         % remove mechanism list from equations
         spec.populations(i).equations=strtrim(strrep(spec.populations(i).equations,mech_list,''));
+        
         % append external link alias to each internal mechanism name (eg, {a,b}@M, alias @M)
-        external_link=regexp(mech_list,'}(@[\w\d]+;?)','tokens');        
+        external_link=regexp(mech_list,'}(@[\w\d]+;?)','tokens');
         if ~isempty(external_link)
           % get external link alias
           external_link=[external_link{:}];
+          
           % remove external link alias from mech_list
           mech_list=strrep(mech_list,external_link{1},'');
+          
           % remove ';' from alias before appending to mech names
-          external_link=strrep(external_link{1},';',''); 
+          external_link=strrep(external_link{1},';','');
+          
           % get list of mechanism names in cell array
           %words=regexp(mech_list,'[a-zA-Z]+[\w:]*','match');
           words=regexp(mech_list(2:end-1),',','split');
+          
           % append external link alias to each mechanism name
           for w=1:length(words)
             mech_list=strrep(mech_list,words{w},[words{w} external_link]);
@@ -270,21 +298,25 @@ for i=1:length(spec.populations)
         end
         % prepend host name to each internal mechanism name (eg,
         % infbrain:{a,b} -> {infbrain:a,infbrain:b}
-        host_name=regexp(mech_list,';?\s*([\w\d]+):{','tokens','once'); 
+        host_name=regexp(mech_list,';?\s*([\w\d]+):{','tokens','once');
         if ~isempty(host_name)
           % get external link alias
           host_name=[host_name{:}];
+          
           % remove external link alias from mech_list
           mech_list=strrep(mech_list,[host_name ':'],'');
+          
           % get list of mechanism names in cell array
           words=regexp(mech_list(2:end-1),',','split');
+          
           % append external link alias to each mechanism name
           for w=1:length(words)
             mech_list=strrep(mech_list,words{w},[host_name ':' words{w}]);
           end
         end
         % split into list of mechanism names
-        mechanisms=regexp(mech_list,'[\w:@]+','match');        
+        mechanisms=regexp(mech_list,'[\w:@]+','match');
+        
         % append mechanism from equations to mechanism_list
         if iscell(spec.populations(i).mechanism_list)
           spec.populations(i).mechanism_list=cat(2,mechanisms,spec.populations(i).mechanism_list);
@@ -309,25 +341,31 @@ for i=1:length(spec.populations)
         end
       end
     end
+    
     % incorporate user-supplied parameters in pop equations if used in them
     if ~isempty(spec.populations(i).parameters)
       keys=spec.populations(i).parameters(1:2:end);
       vals=spec.populations(i).parameters(2:2:end);
+      
       % add user-supplied params to pop equations if present in them
-      % approach: look for populations.parameters in population.equations that are not explicitly 
+      % approach: look for populations.parameters in population.equations that are not explicitly
       % defined in population.equations and append their definition explicitly to pop.eqns
       eqn=spec.populations(i).equations;
+     
       % get list of parameters/variables/functions in population equations
       words=unique(regexp(eqn,'[a-zA-Z]+\w*','match'));
+      
       % find those in user-supplied parameters
       found_words=words(ismember(words,keys));
-      if ~isempty(found_words)     
+      if ~isempty(found_words)
         % set in population equations if not already defined there
         for ff=1:length(found_words)
           found_word=found_words{ff};
+          
           % check if not explicitly set in population equations
           if isempty(regexp(eqn,[';\s*' found_word '\s*='],'once')) && ... % not in middle or at end
              isempty(regexp(eqn,['^' found_word '\s*='],'once')) % not at beginning
+            
             % explicitly set in population equations
             if eqn(end)~=';', eqn(end+1)=';'; end % add semicolon if necessary
             precision=8; % number of digits allowed for user-supplied values
@@ -340,7 +378,7 @@ for i=1:length(spec.populations)
     end
   end
   % expand mechanism list if any element is itself a list of mechanisms (eg, {'iCa','{CaBuffer,iCan}'} or '{CaBuffer,iCan}')
-  spec.populations(i).mechanism_list=expand_list(spec.populations(i).mechanism_list);  
+  spec.populations(i).mechanism_list=expand_list(spec.populations(i).mechanism_list);
 end
 
 % 2.0 standardize connections
@@ -349,12 +387,15 @@ if ~isempty(spec.connections)
   if ~isfield(spec.connections,'source')
     spec.connections(1).source=[];
   end
+  
   if ~isfield(spec.connections,'target')
     spec.connections(1).target=[];
   end
+  
   if ~isfield(spec.connections,'mechanism_list')
     spec.connections(1).mechanism_list=[];
   end
+  
   if ~isfield(spec.connections,'parameters')
     spec.connections(1).parameters={};
   end  
@@ -366,12 +407,15 @@ for i=1:length(spec.connections)
   elseif isempty(spec.connections(i).source) && length(spec.populations)>1
     error('connection source and target populations must be specified in specification.connections when the model contains more than one population.');
   end
+  
   % make mechanism list a cell array of mechanism names
   if ischar(spec.connections(i).mechanism_list)
     spec.connections(i).mechanism_list={spec.connections(i).mechanism_list};
   end
+  
   % expand mechanism list if any element is itself a list of mechanisms (eg, {'AMPA','{GABAa,GABAb}'} or '{GABAa,GABAb}')
   spec.connections(i).mechanism_list=expand_list(spec.connections(i).mechanism_list);
+  
   % parameter cell arrays
   if ~iscell(spec.connections(i).parameters)
     spec.connections(i).parameters={};
@@ -384,8 +428,10 @@ if any(sizes==0)
   % find null populations
   null_pops=find(sizes==0);
   null_names={spec.populations(null_pops).name};
+  
   % remove from .populations
   spec.populations(null_pops)=[];
+  
   % remove from connections
   if ~isempty(spec.connections)
     sources={spec.connections.source};
@@ -393,12 +439,13 @@ if any(sizes==0)
     null_conns=ismember(sources,null_names) | ismember(targets,null_names);
     spec.connections(null_conns)=[];
   end
-end    
+end
 
 % 3.0 sort fields
 % remove extra fields
 otherfields=setdiff(fieldnames(spec.populations),pop_field_order);
 spec.populations=rmfield(spec.populations,otherfields);
+
 % sort standardized fields
 spec.populations=orderfields(spec.populations,pop_field_order);
 if isstruct(spec.connections)
@@ -418,6 +465,7 @@ if ~isempty(files)
     [~,name]=fileparts(files{f});
     fnames{f}=name;
   end
+  
   % update population and connection mechanism lists
   fields={'populations','connections'};
   for f=1:length(fields)
@@ -438,6 +486,7 @@ function list=expand_list(list)
 if isempty(list)
   return;
 end
+
 if any(~cellfun(@isempty,regexp(list,'[{,}]+')))
   mechs={};
   for k=1:length(list)
@@ -454,22 +503,27 @@ if isfield(spec,'nodes')
   spec.populations=spec.nodes;
   spec=rmfield(spec,'nodes');
 end
+
 if isfield(spec,'cells')
   spec.populations=spec.cells;
   spec=rmfield(spec,'cells');
 end
+
 if isfield(spec,'entities')
   spec.populations=spec.entities;
   spec=rmfield(spec,'entities');
 end
+
 if isfield(spec,'pops')
   spec.populations=spec.pops;
   spec=rmfield(spec,'pops');
 end
+
 if isfield(spec,'cons')
   spec.connections=spec.cons;
   spec=rmfield(spec,'cons');
 end
+
 if isfield(spec,'populations')
   % rename population "label" to "name"
   if isfield(spec.populations,'label')
@@ -478,6 +532,7 @@ if isfield(spec,'populations')
     end
     spec.populations=rmfield(spec.populations,'label');
   end
+  
   % rename population "multiplicity" to "size"
   if isfield(spec.populations,'multiplicity')
     for i=1:length(spec.populations)
@@ -485,6 +540,7 @@ if isfield(spec,'populations')
     end
     spec.populations=rmfield(spec.populations,'multiplicity');
   end
+  
   % rename population "dynamics" to "equations"
   if isfield(spec.populations,'dynamics')
     for i=1:length(spec.populations)
@@ -492,6 +548,7 @@ if isfield(spec,'populations')
     end
     spec.populations=rmfield(spec.populations,'dynamics');
   end
+  
   % rename population "mechanisms" to "mechanism_list"
   if isfield(spec.populations,'mechanisms')
     for i=1:length(spec.populations)
@@ -500,6 +557,7 @@ if isfield(spec,'populations')
     spec.populations=rmfield(spec.populations,'mechanisms');
   end
 end
+
 % check for old (pre,post) organization of connections substructure
 if isfield(spec,'connections') && size(spec.connections,1)>1
   % convert to linear connections structure array
@@ -511,11 +569,13 @@ if isfield(spec,'connections') && size(spec.connections,1)>1
       if ~isempty(old(i,j).mechanisms)
         spec.connections(index).source=spec.populations(i).name;
         spec.connections(index).target=spec.populations(j).name;
+        
         if isfield(old,'mechanisms')
           spec.connections(index).mechanism_list=old(i,j).mechanisms;
         elseif isfield(old,'mechanism_list')
           spec.connections(index).mechanism_list=old(i,j).mechanism_list;
         end
+        
         if isfield(old,'parameters')
           spec.connections(index).parameters=old(i,j).parameters;
         end

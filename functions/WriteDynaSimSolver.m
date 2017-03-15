@@ -70,19 +70,20 @@ function [outfile,options]=WriteDynaSimSolver(model,varargin)
 options=CheckOptions(varargin,{...
   'tspan',[0 100],[],...          % [beg,end] (units must be consistent with dt and equations)
   'downsample_factor',1,[],...    % downsampling applied during simulation (only every downsample_factor-time point is stored in memory or written to disk)
+  'dt',.01,[],...                 % time step used for fixed step DynaSim solvers
   'random_seed','shuffle',[],...        % seed for random number generator (usage: rng(random_seed))
   'solver','rk4',{'euler','rk1','rk2','rk4','modified_euler','rungekutta','rk'},... % DynaSim and built-in Matlab solvers
   'disk_flag',0,{0,1},...            % whether to write to disk during simulation instead of storing in memory
-  'dt',.01,[],...                 % time step used for fixed step DynaSim solvers
   'reduce_function_calls_flag',1,{0,1},...   % whether to eliminate internal (anonymous) function calls
   'save_parameters_flag',1,{0,1},...
   'filename',[],[],...         % name of solver file that integrates model
   'data_file','data.csv',[],... % name of data file if disk_flag=1
   'fileID',1,[],...
-  'compile_flag',exist('codegen')==6,{0,1},... % whether to prepare script for being compiled using coder instead of interpreting Matlab
+  'compile_flag',0,{0,1},... % whether to prepare script for being compiled using coder instead of interpreting Matlab
   'verbose_flag',1,{0,1},...
+  'one_solve_file_flag',0,{0,1},... % use only 1 solve file of each type, but can't vary mechs yet
   },false);
-model=CheckModel(model); 
+model=CheckModel(model);
 separator=','; % ',', '\\t'
 
 %% 1.0 prepare model info
@@ -97,7 +98,7 @@ end
 % 1.1 prepare parameters
 if options.save_parameters_flag
   % add parameter struct prefix to parameters in model equations
-  model=PropagateParameters(model,'action','prepend','prefix',parameter_prefix);
+  model=PropagateParameters(model,'action','prepend', 'prefix',parameter_prefix);
   
   % set and capture numeric seed value
   if options.compile_flag==1
@@ -110,16 +111,73 @@ if options.save_parameters_flag
   
   % set parameter file name (save with m-file)
   [fpath,fname,fext]=fileparts(options.filename);
-  param_file_name = fullfile(fpath,'params.mat');
+  param_file_path = fullfile(fpath,'params.mat');
   
   % save parameters to disk
   warning('off','catstruct:DuplicatesFound');
-  p=catstruct(CheckSolverOptions(options),model.parameters);
-  if options.verbose_flag
-    fprintf('saving params.mat\n');
-  end
+  p = catstruct(CheckSolverOptions(options),model.parameters);
   
-  save(param_file_name,'p');
+  if options.one_solve_file_flag
+    % fill p flds that were varied with vectors of length = nSims
+    
+    vary=CheckOptions(varargin,{'vary',[],[],},false);
+    vary = vary.vary;
+
+    mod_set = Vary2Modifications(vary);
+    % The first 2 cols of modifications_set are idenitical to vary, it just
+    % has the last column distributed out to the number of sims
+    
+    
+    % Get param names
+    iMod = 1;
+    % Split extra entries in first 2 cols of mods, so each row is a single pop and param
+    [~, first_mod_set] = ApplyModifications([],mod_set{iMod});
+
+    % replace '->' with '_'
+    first_mod_set(:,1) = strrep(first_mod_set(:,1), '->', '_');
+
+    % add col of underscores
+    first_mod_set = cat(2,first_mod_set(:,1), repmat({'_'},size(first_mod_set,1), 1), first_mod_set(:,2:end));
+    nParamMods = size(first_mod_set, 1);
+    
+    % get param names
+    mod_params = cell(nParamMods,1);
+    for iRow = 1:nParamMods
+      mod_params{iRow} = [first_mod_set{iRow,1:3}];
+
+      %check if variable in namespace
+      if ~any(strcmp(model.namespaces(:,2), mod_params{iRow}))
+        % find correct entry based on param and pop
+        nsInd = logical(~cellfun(@isempty, strfind(model.namespaces(:,2), [first_mod_set{iRow,1} '_'])) .* ...
+          ~cellfun(@isempty, strfind(model.namespaces(:,2), first_mod_set{iRow,3})));
+        
+        assert(sum(nsInd) == 1)
+        
+        % add mech names using namespace
+        mod_params{iRow} = model.namespaces{nsInd,2};
+      end
+    end
+
+    % Get param values for each sim
+    param_values = nan(nParamMods, length(mod_set));
+    for iMod = 1:length(mod_set)
+      % Split extra entries in first 2 cols of mods, so each row is a single pop and param
+      [~, mod_set{iMod}] = ApplyModifications([],mod_set{iMod});
+      
+      % Get scalar values as vector
+      param_values(:, iMod) = [mod_set{iMod}{:,3}];
+    end
+    
+    % Assign value vectors to params
+    for iParam = 1:nParamMods
+      p.(mod_params{iParam}) = param_values(iParam,:);
+    end
+  end % one_solve_file_flag
+  
+  if options.verbose_flag
+    fprintf('Saving params.mat\n');
+  end
+  save(param_file_path,'p');
 else
   % insert parameter values into model expressions
   model=PropagateParameters(model,'action','substitute');
@@ -155,7 +213,7 @@ end
 % 2.1 create mfile
 if ~isempty(options.filename)
   if options.verbose_flag
-    fprintf('creating solver file: %s\n',options.filename);
+    fprintf('Creating solver file: %s\n',options.filename);
   end
   
   fid=fopen(options.filename,'wt');
@@ -166,14 +224,22 @@ end
 outfile=fopen(fid);
 
 if options.disk_flag==1
-  fprintf(fid,'function data_file=solve_ode\n');
+  if ~options.one_solve_file_flag
+    fprintf(fid,'function data_file=solve_ode\n');
+  else
+    fprintf(fid,'function data_file=solve_ode(simID)\n');
+    if options.compile_flag
+      fprintf(fid, 'assert(isa(simID, ''double''));\n');
+    end
+  end
+  
   % create output data file
   fprintf(fid,'%% ------------------------------------------------------------\n');
   fprintf(fid,'%% Open output data file:\n');
   fprintf(fid,'data_file=''%s'';\n',options.data_file);
-  %fprintf(fid,'fileID=fopen(data_file,''wt'');\n'); % <-- 'wt' does not
   
-  % compile in linux. 't' may be necessary on PC. may need to look into this
+  %fprintf(fid,'fileID=fopen(data_file,''wt'');\n'); % <-- 'wt' does not
+    % compile in linux. 't' may be necessary on PC. may need to look into this
   fprintf(fid,'fileID=fopen(data_file,''w'');\n');
   
   % write headers
@@ -182,20 +248,27 @@ if options.disk_flag==1
   
   if ~isempty(model.state_variables)
     for i=1:length(model.state_variables)
-      fprintf(fid,'for i=1:%g, fprintf(fileID,''%s%s''); end\n',state_var_counts(i),model.state_variables{i},separator);    
+      fprintf(fid,'for i=1:%g, fprintf(fileID,''%s%s''); end\n',state_var_counts(i),model.state_variables{i},separator);
     end
   end
   
   if ~isempty(model.monitors)
     monitor_names=fieldnames(model.monitors);
     for i=1:length(monitor_names)
-      fprintf(fid,'for i=1:%g, fprintf(fileID,''%s%s''); end\n',monitor_counts(i),monitor_names{i},separator);    
+      fprintf(fid,'for i=1:%g, fprintf(fileID,''%s%s''); end\n',monitor_counts(i),monitor_names{i},separator);
     end
   end
   
   fprintf(fid,'fprintf(fileID,''\\n'');\n');
-else
-  fprintf(fid,'function %s=solve_ode\n',output_string);
+else %options.disk_flag==0
+  if ~options.one_solve_file_flag
+    fprintf(fid,'function %s=solve_ode\n',output_string);
+  else
+    fprintf(fid,'function %s=solve_ode(simID)\n',output_string);
+    if options.compile_flag
+      fprintf(fid, 'assert(isa(simID, ''double''));\n');
+    end
+  end
 end
 
 % 2.3 load parameters
@@ -203,7 +276,41 @@ if options.save_parameters_flag
   fprintf(fid,'%% ------------------------------------------------------------\n');
   fprintf(fid,'%% Parameters:\n');
   fprintf(fid,'%% ------------------------------------------------------------\n');
-  fprintf(fid,'p=load(''params.mat'',''p''); p=p.p;\n');
+  fprintf(fid,'params = load(''params.mat'',''p'');\n');
+  
+  if options.one_solve_file_flag && options.compile_flag
+    fprintf(fid,'pVecs = params.p;\n');
+  else
+     fprintf(fid,'p = params.p;\n');
+  end
+end
+
+if options.one_solve_file_flag
+  % loop through p and for any vector, take simID index of it (ignores tspan)
+  if ~options.compile_flag
+    fprintf(fid,'\n%% For vector params, select index for this simID\n');
+    fprintf(fid,'flds = fields(rmfield(p,''tspan''));\n'); % remove tspan
+    fprintf(fid,'for fld = flds''\n');
+    fprintf(fid,'  fld = fld{1};\n');
+    fprintf(fid,'  if isnumeric(p.(fld)) && length(p.(fld)) > 1\n');
+    fprintf(fid,'    p.(fld) = p.(fld)(simID);\n');
+    fprintf(fid,'  end\n');
+    fprintf(fid,'end\n\n');
+  else %compile_flag
+    % slice scalar from vector params
+    for iParam = 1:nParamMods
+      fprintf(fid,'p.%s = pVecs.%s(simID);\n', mod_params{iParam}, mod_params{iParam});
+    end
+    
+    % take scalar from scalar params
+    [~,sharedFlds] = intersect(fields(p), mod_params);
+    scalar_params = fields(p);
+    scalar_params(sharedFlds) = [];
+    nScalarParams = length(scalar_params);
+    for iParam = 1:nScalarParams
+      fprintf(fid,'p.%s = pVecs.%s;\n', scalar_params{iParam}, scalar_params{iParam});
+    end
+  end
 end
 
 % write tspan, dt, and downsample_factor
@@ -252,13 +359,14 @@ fprintf(fid,'%% ------------------------------------------------------------\n')
 fprintf(fid,'%% seed the random number generator\n');
 if options.save_parameters_flag
   fprintf(fid,'rng(%srandom_seed);\n',parameter_prefix);
-else  
+else
   if ischar(options.random_seed)
     fprintf(fid,'rng(''%s'');\n',options.random_seed);
   elseif isnumeric(options.random_seed)
     fprintf(fid,'rng(%g);\n',options.random_seed);
   end
 end
+
 % initialize time
 fprintf(fid,'t=0; k=1;\n');
 
@@ -269,7 +377,7 @@ fprintf(fid,'t=0; k=1;\n');
 %   for i = 1:length(state_variables)
 %     %fprintf(fid,'coder.varsize(''%s'',[1e4,1],[true,false]);\n',state_variables{i}); % population size up to 1e4 for variable initial conditions
 %     fprintf(fid,'coder.varsize(''%s'',[1e8,1e4],[true,true]);\n',state_variables{i}); % population size up to 1e4 for variable initial conditions
-%   end  
+%   end
 % end
 
 % preallocate and initialize matrices to store results
@@ -320,7 +428,7 @@ for i=1:length(state_variables)
       fprintf(fid,'  %s(1,:) = %s;\n',state_variables{i},IC_expressions{i});
     else
       % set var(1,:)=var_last;
-      fprintf(fid,'  %s(1,:) = %s_last;\n',state_variables{i},state_variables{i});      
+      fprintf(fid,'  %s(1,:) = %s_last;\n',state_variables{i},state_variables{i});
     end
   end %disk_flag
 end %state_variables
@@ -440,7 +548,7 @@ for i=1:length(state_variables)
     else % use more concise 1D indexing because it is much faster for some Matlab-specific reason...
       index_lasts{i}='(n-1)';
       index_nexts{i}='(n)';
-    end  
+    end
   elseif options.downsample_factor>1 && options.disk_flag==0
     % store state in var_last then update state variables on each downsample_factor integration step
     index_lasts{i}='_last';
@@ -452,7 +560,7 @@ for i=1:length(state_variables)
   elseif options.disk_flag==1
     % always store state in var_last and write on each downsample_factor integration step
       index_lasts{i}='_last';
-      index_nexts{i}='_last';  
+      index_nexts{i}='_last';
   end
 end
 
@@ -499,7 +607,7 @@ else % store every downsample_factor time point in memory or on disk
     fprintf(fid,'  %% ------------------------------------------------------------\n');
     
     % print current time point to data file
-    fprintf(fid,'  fprintf(fileID,''%%g%s'',T(k));\n',separator);  
+    fprintf(fid,'  fprintf(fileID,''%%g%s'',T(k));\n',separator);
     
     % print state variables
     for i=1:length(state_variables)
@@ -553,34 +661,43 @@ end
     switch options.solver
       case {'euler','rk1'}
         print_k(fid,odes,'_k1',state_variables);                              % write k1 using model.ODEs
+        
         % write update for state variables
         print_var_update(fid,index_nexts_,index_lasts,...
           'dt*%s_k1',state_variables);
       case {'rk2','modified_euler'}
         print_k(fid,odes,'_k1',state_variables);                              % write k1 using model.ODEs
+        
         odes_k2=update_odes(odes,'_k1','.5*dt',state_variables,index_lasts);   % F(*,yn+dt*k1/2)
         fprintf(fid,'  t=t+.5*dt;\n');                                          % update t before writing k2
         print_k(fid,odes_k2,'_k2',state_variables);                           % write k2 using odes_k2
+        
         % write update for state variables
         print_var_update(fid,index_nexts_,index_lasts,...
           'dt*%s_k2',state_variables);
       case {'rk4','rungekutta','rk'}
         print_k(fid,odes,'_k1',state_variables);                              % write k1 using model.ODEs
+        
         odes_k2=update_odes(odes,'_k1','.5*dt',state_variables,index_lasts);   % F(*,yn+dt*k1/2)
         fprintf(fid,'  t=t+.5*dt;\n');                                          % update t before writing k2
         print_k(fid,odes_k2,'_k2',state_variables);                           % write k2 using odes_k2
+        
         odes_k3=update_odes(odes,'_k2','.5*dt',state_variables,index_lasts);   % F(*,yn+dt*k2/2)
         print_k(fid,odes_k3,'_k3',state_variables);                           % write k3 using odes_k3
+        
         odes_k4=update_odes(odes,'_k3','dt',state_variables,index_lasts);      % F(*,yn+dt*k3)
         fprintf(fid,'  t=t+.5*dt;\n');                                          % update t before writing k4
         print_k(fid,odes_k4,'_k4',state_variables);                           % write k4 using odes_k4
+        
         % write update for state variables
         print_var_update(fid,index_nexts_,index_lasts,...
           '(dt/6)*(%s_k1+2*(%s_k2+%s_k3)+%s_k4)',state_variables);
     end
   end
 
-end
+end %main
+
+
 % ########################################
 %% SUBFUNCTIONS
 % ########################################
@@ -597,7 +714,7 @@ function odes_out=update_odes(odes,suffix_k,increment,state_variables,index_last
   odes_out=odes;
   for i=1:length(odes)
     for j=1:length(odes)
-      odes_out{i}=dynasim_strrep(odes_out{i},[state_variables{j} index_lasts{j}],sprintf('(%s%s+%s*%s%s)',state_variables{j},index_lasts{j},increment,state_variables{j},suffix_k),'(',')');    
+      odes_out{i}=dynasim_strrep(odes_out{i},[state_variables{j} index_lasts{j}],sprintf('(%s%s+%s*%s%s)',state_variables{j},index_lasts{j},increment,state_variables{j},suffix_k),'(',')');
     end
   end
 end
@@ -653,7 +770,7 @@ function print_conditional_update(fid,conditionals,index_nexts,state_variables)
     case '('
       action_index='(n,conditional_test)';
     case '_'
-      action_index='_last(conditional_test)';    
+      action_index='_last(conditional_test)';
   end
   
   for i=1:length(conditionals)
@@ -686,7 +803,7 @@ function print_conditional_update(fid,conditionals,index_nexts,state_variables)
       fprintf('else %s; ',elseaction);
     end
     
-    fprintf(fid,'end\n');  
+    fprintf(fid,'end\n');
   end
 end
 
@@ -706,7 +823,7 @@ function print_monitor_update(fid,monitors,index_nexts,state_variables,index_las
   if ~iscell(index_lasts), index_lasts={index_lasts}; end
   
   if length(index_lasts)~=length(state_variables)
-    index_lasts=repmat(index_lasts,[1 length(state_variables)]); 
+    index_lasts=repmat(index_lasts,[1 length(state_variables)]);
   end
   
   if isequal(index_nexts{1},'(1,:)')
@@ -716,8 +833,8 @@ function print_monitor_update(fid,monitors,index_nexts,state_variables,index_las
       case '('
         monitor_index='(n,:)';
       case '_'
-        monitor_index='_last';    
-    end  
+        monitor_index='_last';
+    end
   end
   
   % purpose: write statements to update monitors given current state variables
@@ -766,7 +883,7 @@ else
     % var(1,:)=var_last;
     % mon(1,:)=mon_last;
   end
-end  
+end
 
 % numerical integration
 % n=1; % storage index

@@ -11,7 +11,7 @@ function [data,studyinfo]=SimulateModel(model,varargin)
 % 
 %   solver options (provided as key/value pairs: 'option1',value1,'option2',value2,...):
 %     'solver'      : solver for numerical integration (see GetSolveFile)
-%                     {'euler','rk2','rk4'} (default: 'rk4')
+%                     {'euler','rk2','rk4', or any built-in matlab solver} (default: 'rk4')
 %     'tspan'       : time limits of simulation [begin,end] (default: [0 100]) [ms]
 %                     note: units must be consistent with dt and model equations
 %     'dt'          : time step used for DynaSim solvers (default: .01) [ms]
@@ -41,6 +41,10 @@ function [data,studyinfo]=SimulateModel(model,varargin)
 %                     using qsub (see CreateBatch) {0 or 1} (default: 0)
 %     'sims_per_job'  : number of simulations to run per batch job (default: 1)
 %     'memory_limit'  : memory to allocate per batch job (default: '8G')
+%     'qsub_mode'     : whether to use SGE -t array for 1 qsub, mode: 'array'; or
+%                         qsub in csh for loop, mode: 'loop'. (default: 'loop').
+%     'one_solve_file_flag': only use 1 file of each time when solving (default: 0)
+%     'optimize_big_vary': Select best options for doing many sims {0 or 1} (default: 0)
 % 
 %   options for parallel computing: (requires Parallel Computing Toolbox)
 %     'parallel_flag' : whether to use parfor to run simulations {0 or 1} (default: 0)
@@ -59,6 +63,7 @@ function [data,studyinfo]=SimulateModel(model,varargin)
 %     'experiment'    : function handle of experiment function (see NOTE 2)
 %     'experiment_options' : single cell array of key/value options for experiment function
 %     'optimization'  : function handle of optimization function (see NOTE 2)
+%     'debug_flag'    : set to debug mode
 % 
 % Outputs:
 %   DynaSim data structure:
@@ -214,7 +219,8 @@ varargin = backward_compatibility(varargin);
 options=CheckOptions(varargin,{...
   'tspan',[0 100],[],...          % [beg,end] (units must be consistent with dt and equations)
   'ic',[],[],...                  % initial conditions (overrides definition in model structure; can input as IC structure or numeric array)
-  'solver','rk4',{'euler','rk1','rk2','rk4','modified_euler','rungekutta','rk','ode23','ode45'},... % DynaSim and built-in Matlab solvers
+  'solver','rk4',{'euler','rk1','rk2','rk4','modified_euler','rungekutta','rk',...
+    'ode23','ode45','ode113','ode15s','ode23s','ode23t','ode23tb'},... % DynaSim and built-in Matlab solvers
   'matlab_solver_options',[],[],... % options from odeset for use with built-in Matlab solvers
   'dt',.01,[],...                 % time step used for fixed step DynaSim solvers
   'downsample_factor',1,[],...    % downsampling applied during simulation (only every downsample_factor-time point is stored in memory or written to disk)
@@ -234,6 +240,8 @@ options=CheckOptions(varargin,{...
   'cluster_flag',0,{0,1},...      % whether to run simulations on a cluster
   'sims_per_job',1,[],... % how many sims to run per batch job
   'memory_limit','8G',[],... % how much memory to allocate per batch job
+  'qsub_mode','loop',{'loop','array'},... % whether to submit jobs as an array using qsub -t or in a for loop
+  'one_solve_file_flag',0,{0,1},... % use only 1 solve file of each type, but can't vary mechs yet
   'parallel_flag',0,{0,1},...     % whether to run simulations in parallel (using parfor)
   'num_cores',4,[],... % # cores for parallel processing (SCC supports 1-12)
   'compile_flag',0,{0,1},... % exist('codegen')==6, whether to compile using coder instead of interpreting Matlab
@@ -252,6 +260,8 @@ options=CheckOptions(varargin,{...
   'analysis_options',[],[],...
   'plot_functions',[],[],...
   'plot_options',[],[],...
+  'debug_flag',0,{0,1},...
+  'optimize_big_vary',0,{0,1},...
   },false);
 % more options: remove_solve_dir, remove_batch_dir, post_downsample_factor
 
@@ -259,22 +269,27 @@ if options.parallel_flag
   %error('parallel computing has been disabled for debugging. ''set parallel_flag'' to 0');
 end
 
-if options.compile_flag && options.reduce_function_calls_flag==0
-  fprintf('setting ''reduce_function_calls_flag'' to 1 for compatibility with ''compile_flag''=1 (coder does not support anonymous functions).\n');
+if options.compile_flag && ~options.reduce_function_calls_flag
+  fprintf('Setting ''reduce_function_calls_flag'' to 1 for compatibility with ''compile_flag''=1 (coder does not support anonymous functions).\n');
   options.reduce_function_calls_flag=1;
 end
 
-if options.cluster_flag && options.save_data_flag==0
+if options.cluster_flag && ~options.save_data_flag
 %   options.save_data_flag=1;
 %   if options.verbose_flag
-%     fprintf('setting ''save_data_flag'' to 1 for storing results of batch jobs for later access.\n');
+%     fprintf('Setting ''save_data_flag'' to 1 for storing data from batch jobs for later access.\n');
 %   end
   options.save_results_flag=1;
   if options.verbose_flag
-    fprintf('setting ''save_results_flag'' to 1 for storing results of batch jobs for later access.\n');
+    fprintf('Setting ''save_results_flag'' to 1 for storing results of batch jobs for later access.\n');
   end
 end
-% 
+
+if options.disk_flag && any(strcmp(options.solver, {'ode23','ode45','ode113','ode15s','ode23s','ode23t','ode23tb'}))
+  fprintf('Since using built-in solver, setting options.disk_flag=1.\n');
+  options.disk_flag = 1;
+end
+
 % if ischar(options.study_dir) && options.save_data_flag==0
 %   options.save_data_flag=1;
 %   if options.verbose_flag
@@ -282,7 +297,58 @@ end
 %   end
 % end
 
-% prepare analysis functions and options
+%% Non-Batch Checks
+if isempty(options.sim_id) % not in part of a batch sim
+  if options.optimize_big_vary
+    options.cluster_flag = 1;
+    options.qsub_mode = 'array';
+    options.compile_flag = 1;
+    options.downsample_factor = max(1/options.dt, options.downsample_factor); % at most 1000Hz sampling
+    options.one_solve_file_flag = 1;
+    options.sims_per_job = 2;
+  end
+
+  % check for one_solve_file_flag
+  if options.one_solve_file_flag && ~options.cluster_flag
+    % One file flag only for cluster
+    fprintf('Since cluster_flag==0, setting options.one_solve_file_flag=0\n')
+    options.one_solve_file_flag = 0;
+    % TODO: this is a temp setting until iss_90 is fully implemented
+  end
+
+  if options.one_solve_file_flag && ~options.overwrite_flag
+    % One file flag will overwrite
+    fprintf('Since one_solve_file_flag==1, setting options.overwrite_flag=1\n')
+    options.overwrite_flag = 1;
+    % TODO: this is a temp setting until iss_90 is fully implemented
+  end
+
+  if options.one_solve_file_flag && ~strcmp(options.qsub_mode, 'array')
+    % One file flag needs array mode
+    fprintf('Since one_solve_file_flag==1, setting options.qsub_mode=''array''\n')
+    options.qsub_mode = 'array';
+    % TODO: this is a temp setting until iss_90 is fully implemented
+  end
+
+  if options.one_solve_file_flag && options.parallel_flag
+    % One file flag can't do parallel_flag
+    fprintf('Since one_solve_file_flag==1, setting options.parallel_flag=0\n')
+    options.parallel_flag = 0;
+    % TODO: this is a temp setting until iss_90 is fully implemented
+  end
+
+  if options.one_solve_file_flag && isa(options.experiment,'function_handle')
+    error('one_solve_file_flag doesn''t work with experiments.')
+  end
+
+  if options.one_solve_file_flag && ~options.save_parameters_flag
+    fprintf('Since one_solve_file_flag==1, setting options.save_parameters_flag=1\n')
+    options.save_parameters_flag = 1;
+    % TODO: this is a temp setting until iss_90 is fully implemented
+  end
+end % isempty(options.sim_id)
+
+%% prepare analysis functions and options
 if ~isempty(options.analysis_functions)
   if ~iscell(options.analysis_functions)
     % convert function handle into cell array of function handles
@@ -316,7 +382,7 @@ if ~isempty(options.analysis_functions)
 %   end
 end
 
-% prepare plot functions and options
+%% prepare plot functions and options
 if ~isempty(options.plot_functions)
   if ~iscell(options.plot_functions)
     % convert function handle into cell array of function handles
@@ -385,6 +451,14 @@ else
   modifications_set={[]};
 end
 
+% check for one_solve_file_flag
+if options.one_solve_file_flag && is_varied_mech_list()
+  % Can't vary mechs if using 1 file mode
+  error('Can''t vary mechanism_list if using one_solve_file_flag')
+  
+  % TODO: this is a temp setting until iss_90 is fully implemented
+end
+
 % 1.3 check for parallel simulations
 % 1.3.1 manage cluster computing
 % whether to write jobs for distributed processing on cluster
@@ -393,12 +467,22 @@ if options.cluster_flag==1
   % approach: use ApplyModifications(), it does that automatically
   for i=1:length(modifications_set)
     if ~isempty(modifications_set{i}) && ~strcmp(modifications_set{i}{2},'mechanism_list') && ~strcmp(modifications_set{i}{2},'equations')
-      model=ApplyModifications(model,modifications_set{i});
+      model = ApplyModifications(model,modifications_set{i});
       break
     end
   end
   keyvals = Options2Keyval(options);
-  studyinfo=CreateBatch(model,modifications_set,'simulator_options',options,'process_id',options.sim_id,keyvals{:});
+  studyinfo = CreateBatch(model,modifications_set,'simulator_options',options,'process_id',options.sim_id,keyvals{:});
+  
+  if options.one_solve_file_flag
+    % copy params.mat from project_dir to batchdirs
+    param_file_path = fullfile(options.project_dir, options.study_dir, 'solve','params.mat');
+    [~,home]=system('echo $HOME');
+    batch_dir = fullfile(strtrim(home),'batchdirs',options.study_dir);
+    batch_param_file_path = fullfile(batch_dir,'params.mat');
+    [success,msg]=copyfile(param_file_path, batch_param_file_path);
+  end
+  
   %if options.overwrite_flag==0
     % check status of study
 %     [~,s]=MonitorStudy(studyinfo.study_dir,'verbose_flag',0,'process_id',options.sim_id);
@@ -432,6 +516,7 @@ if options.parallel_flag==1
   
   % prepare options
   keyvals=Options2Keyval(rmfield(options,{'vary','modifications','solve_file','parallel_flag'}));
+  
   % open pool for distributed processing
   % or instead: require user to open pool before calling SimulateModel...
 %   parpool(options.num_cores) 
@@ -514,7 +599,7 @@ end %parallel_flag
 
 % 1.4 prepare study_dir and studyinfo if saving data
 if isempty(options.studyinfo)
-  [studyinfo,options]=SetupStudy(model,'modifications_set',modifications_set,'simulator_options',options,'process_id',options.sim_id);
+  [studyinfo,options] = SetupStudy(model,'modifications_set',modifications_set,'simulator_options',options,'process_id',options.sim_id);
 else
   studyinfo=options.studyinfo;
 end
@@ -591,22 +676,25 @@ try
     else
       %% NOT AN EXPERIMENT (single simulation)
       %% 2.0 prepare solver function (solve_ode.m/mex)
-      % - matlab solver: create @odefun with vectorized state variables
+      % - Matlab solver: create @odefun with vectorized state variables
       % - DynaSim solver: write solve_ode.m and params.mat  (based on dnsimulator())
       % check if model solver needs to be created 
       % (i.e., if is first simulation or a search space varying mechanism list)
       
-      if sim==1 || (~isempty(modifications_set{1}) && any(cellfun(@(x)strcmp(x{2},'mechanism_list'),modifications_set)))
+      if sim==1 || ( ~isempty(modifications_set{1}) && is_varied_mech_list() )
         % prepare file that solves the model system
-        if isempty(options.solve_file) || (~exist(options.solve_file,'file') && ~exist([options.solve_file '.mexa64'],'file') &&  ~exist([options.solve_file '.mexa32'],'file') && ~exist([options.solve_file '.mexmaci64'],'file'))
-          options.solve_file=GetSolveFile(model,studyinfo,options); % store name of solver file in options struct
+        if isempty(options.solve_file) || (~exist(options.solve_file,'file') &&...
+            ~exist([options.solve_file '.mexa64'],'file') &&...
+            ~exist([options.solve_file '.mexa32'],'file') &&...
+            ~exist([options.solve_file '.mexmaci64'],'file'))
+          options.solve_file = GetSolveFile(model,studyinfo,options); % store name of solver file in options struct
         end
         
         % TODO: consider providing better support for studies that produce different m-files per sim (e.g., varying mechanism_list)
         
         if options.verbose_flag
-          fprintf('SIMULATING MODEL:\n');
-          fprintf('solving system using %s\n',options.solve_file);
+          fprintf('\nSIMULATING MODEL:\n');
+          fprintf('Solving system using %s\n',options.solve_file);
         end
       else
         % use previous solve_file
@@ -619,24 +707,26 @@ try
       % move to directory with solver file
       
       if options.verbose_flag
-        fprintf('changing directory to %s\n',fpath);
+        fprintf('Changing directory to %s\n',fpath);
       end
       
       cd(fpath);
       
       % save parameters there
       warning('off','catstruct:DuplicatesFound');
-      p=catstruct(CheckSolverOptions(options),model.parameters);
-      param_file=fullfile(fpath,'params.mat');
+      p = catstruct(CheckSolverOptions(options),model.parameters);
+      param_file = fullfile(fpath,'params.mat');
       if options.verbose_flag
-        fprintf('saving model parameters: %s\n',param_file);
+        fprintf('Saving model parameters: %s\n',param_file);
       end
       %pause(.01);
       
       %% Solve System
       if options.disk_flag  % ### data stored on disk during simulation ###
         sim_start_time=tic;
-        save(param_file,'p'); % save params immediately before solving
+        if ~options.one_solve_file_flag
+          save(param_file,'p'); % save params immediately before solving
+        end
         csv_data_file=feval(fname);  % returns name of file storing the simulated data
         duration=toc(sim_start_time);
         
@@ -666,9 +756,19 @@ try
         sim_start_time=tic;
         
         outputs=cell(1,length(output_variables)); % preallocate for PCT compatibility
-        save(param_file,'p'); % save params immediately before solving
-        [outputs{1:length(output_variables)}]=feval(fname);
         
+        if ~options.one_solve_file_flag
+          save(param_file,'p'); % save params immediately before solving
+        end
+        
+        % feval solve file
+        if ~options.one_solve_file_flag
+          [outputs{1:length(output_variables)}]=feval(fname);
+        else
+          % pass sim_id for slicing params
+          [outputs{1:length(output_variables)}]=feval(fname, sim_id);
+        end
+
         duration=toc(sim_start_time);
         
         
@@ -712,6 +812,7 @@ try
         siminfo=studyinfo.simulations(sim_ind);
         for f=1:length(siminfo.result_functions)
           result=AnalyzeData(tmpdata,siminfo.result_functions{f},'result_file',siminfo.result_files{f},'save_data_flag',1,'save_results_flag',1,siminfo.result_options{f}{:});
+          
           % since the plots are saved, close all generated figures
           if all(ishandle(result))
             close(result);
@@ -724,6 +825,7 @@ try
             tmpdata=AnalyzeData(tmpdata,options.analysis_functions{f},'result_file',[],'save_data_flag',0,'save_results_flag',options.save_results_flag,options.analysis_options{f}{:});
           end
         end
+        
         if ~isempty(options.plot_functions)
           for f=1:length(options.plot_functions)
             AnalyzeData(tmpdata,options.plot_functions{f},'result_file',[],'save_data_flag',0,'save_results_flag',options.save_results_flag,options.plot_options{f}{:});
@@ -731,6 +833,7 @@ try
         end
       end
     end
+    
     if nargout>0
       update_data; % concatenate data structures across simulations
     end
@@ -738,9 +841,9 @@ try
   
   cleanup('success');
 catch err % error handling
-  if options.compile_flag && ~isempty(options.solve_file)
+  if options.compile_flag && ~isempty(options.solve_file) && ~options.one_solve_file_flag
     if options.verbose_flag
-      fprintf('removing failed compiled solve file: %s\n',options.solve_file);
+      fprintf('Removing failed compiled solve file: %s\n',options.solve_file);
     end
     
     delete([options.solve_file '*']);
@@ -749,18 +852,21 @@ catch err % error handling
   DisplayError(err);
   
   % update studyinfo
-  if options.save_data_flag
+  if options.save_data_flag && ~options.one_solve_file_flag
     studyinfo=UpdateStudy(studyinfo.study_dir,'process_id',sim_id,'status','failed','verbose_flag',options.verbose_flag);
     data=studyinfo;
   end
   cleanup('error');
-  return  
+  
+  if options.debug_flag
+    keyboard
+  end
+  
+  rethrow(err)
 end
 
 % ---------------------------------------------
 % TODO:
-% - create function that constructs @odefun
-% - add support for built-in matlab solvers
 % - create helper function that handles log files (creation, standardized format,...)
 % ---------------------------------------------
 
@@ -874,8 +980,19 @@ end
       cnt=cnt+nvals_per_var(i);
     end
   end
+
+  function logicalOut = is_varied_mech_list()
+    if ~isempty(modifications_set{1})
+      logicalOut = any(cellfun(@(x) strcmp(x{2},'mechanism_list'),modifications_set));
+    else
+      logicalOut = false;
+    end
+  end
     
-end
+end %main
+
+
+%% Subfunctions
 
 function modifications=expand_modifications(mods)
   % purpose: expand simultaneous modifications into larger list

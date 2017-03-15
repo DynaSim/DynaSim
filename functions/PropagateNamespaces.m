@@ -26,7 +26,7 @@ model=CheckModel(model);
 if ~iscell(map) || size(map,2)~=4
   error('map must be a cell array with four columns for (name, namespace_name, namespace, type)');
 end
-names_in_namespace=cellfun(@(x,y)strncmp(y,x,length(y)),map(:,2),map(:,3)); 
+names_in_namespace=cellfun(@(x,y)strncmp(y,x,length(y)),map(:,2),map(:,3));
 
 % namespace propagation pattern:
 allowed_insert_types.fixed_variables=...
@@ -81,6 +81,7 @@ for type_index=1:length(target_types)
       if numel(find(idx))>1
         % constrain to namespace-conserving entries
         tmp=map(idx&names_in_namespace,3);
+        
         % use the lowest level namespace (i.e., longest namespace name)
         l=cellfun(@length,tmp);
         tmp=tmp{l==max(l)};
@@ -91,6 +92,7 @@ for type_index=1:length(target_types)
     end
     % update expressions for names of this type
     expressions=propagate_namespaces(expressions,namespaces,map,allowed_insert_types.(type));
+    
     % update model with expressions including namespaces
     model.(type)=cell2struct(expressions,fields,1);
   end
@@ -106,14 +108,18 @@ function expressions=propagate_namespaces(expressions,namespaces,map,insert_type
     end
     % get namespace for this expression
     this_namespace=namespaces{i};
+    
     % find parent namespaces
     parent_namespace = GetParentNamespace(this_namespace);
+    
     % find where this and parent namespaces are in map array
     insert_type_constraint = ismember(map(:,4),insert_types);
     this_namespace_map_inds = find(strcmp(this_namespace,map(:,3)) & insert_type_constraint);
     parent_namespace_map_inds = find(strcmp(parent_namespace,map(:,3)) & insert_type_constraint);
+    
     % get list of words in this expression
     words=unique(regexp(expressions{i},'[a-zA-Z]+\w*','match'));
+    
     % loop over words
     for j=1:length(words)
       % search for words in parent namespace of map.names
@@ -121,15 +127,17 @@ function expressions=propagate_namespaces(expressions,namespaces,map,insert_type
         % word found in parent namespace of map
         ind=parent_namespace_map_inds(strcmp(words{j},map(parent_namespace_map_inds,1)));
         new_word=map{ind,2};
+        
         %if IC, need to take just first time index
         if exist('type','var') && strcmp(type, 'ICs') && strcmp(words{j}, 'X')
           new_word = [new_word '_last']; %EAR
         end
+        
         % replace found word in expression by map(names_bar|parent_namespace)
         expressions{i}=dynasim_strrep(expressions{i},words{j},new_word);
         % check whether new word is defined in model
-        % note: this is necessary to account for namespace differences between
-        % user-supplied population parameters that should replace default mechanism-level parameters
+        % NOTE: this is necessary to account for namespace differences between
+        %   user-supplied population parameters that should replace default mechanism-level parameters
         new_word_type=map{ind,4};
 % %{
         if ~isfield(model.(new_word_type),new_word)
@@ -153,6 +161,7 @@ function expressions=propagate_namespaces(expressions,namespaces,map,insert_type
         % word found in this namespace of map
         ind=this_namespace_map_inds(strcmp(words{j},map(this_namespace_map_inds,1)));
         new_word=map{ind,2};
+        
         % replace found word in expression by map(names_bar|this_namespace)
         expressions{i}=dynasim_strrep(expressions{i},words{j},new_word);
       end

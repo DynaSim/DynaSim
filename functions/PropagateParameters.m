@@ -22,8 +22,9 @@ if ~isstruct(model.parameters)
 end
 % Check inputs
 options=CheckOptions(varargin,{...
-  'action','substitute',{'substitute','prepend'},...
+  'action','substitute',{'substitute','prepend','postpend'},...
   'prefix','pset.p.',[],...
+  'suffix','',[],...
   },false);
 
 parameters=model.parameters;
@@ -39,7 +40,7 @@ for type_index=1:length(target_types)
     update_these=fieldnames(s);
     expressions=struct2cell(s);
     % loop over target expressions from which to eliminate internal function calls
-    for i=1:length(expressions)    
+    for i=1:length(expressions)
       if isempty(expressions{i})
         continue;
       end
@@ -48,7 +49,9 @@ for type_index=1:length(target_types)
         case 'substitute'
           expressions{i}=insert_parameters(expressions{i},parameters,[]);
         case 'prepend'
-          expressions{i}=insert_parameters(expressions{i},parameters,options.prefix);
+          expressions{i}=insert_parameters(expressions{i},parameters, 'prefix',options.prefix);
+        case 'postpend'
+          expressions{i}=insert_parameters(expressions{i},parameters, 'suffix',options.suffix);
       end
     end
     % update model with expressions that have parameter values in them
@@ -72,30 +75,36 @@ if ~isempty(model.conditionals)
         case 'substitute'
           expressions{i}=insert_parameters(expressions{i},parameters,[]);
         case 'prepend'
-          expressions{i}=insert_parameters(expressions{i},parameters,options.prefix);
-       end     
+          expressions{i}=insert_parameters(expressions{i},parameters, 'prefix',options.prefix);
+        case 'postpend'
+          expressions{i}=insert_parameters(expressions{i},parameters, 'suffix',options.suffix);
+       end
     end
     [model.conditionals(1:length(model.conditionals)).(type)]=deal(expressions{:});
   end
 end
 
-function expression=insert_parameters(expression,parameters,prefix)
+function expression=insert_parameters(expression,parameters,attachType,attachStr)
   if isnumeric(expression)
     % convert to string and return string
     expression=toString(expression);
     return;
   end
+  
   allwords=regexp(expression,'[a-zA-Z]+\w*','match');
   words=unique(allwords);
   found_parameters=words(ismember(words,fieldnames(parameters)));
+  
   if ~isempty(found_parameters)
     % substitute those found into this target expression
     for ff=1:length(found_parameters)
       % name of found parameter
       found_parameter=found_parameters{ff};
-      if isempty(prefix) % no prefix given, substitute value instead
+      
+      if isempty(attachType) % no prefix given, substitute value instead
         % found value to replace found parameter name in target
         found_value=parameters.(found_parameter);
+        
         % convert found value into string
         if isnumeric(found_value)
           if length(found_value)>1
@@ -114,9 +123,14 @@ function expression=insert_parameters(expression,parameters,prefix)
         elseif isa(found_value,'function_handle')
           found_value=func2str(found_value);
         end
-      else % prefix provided, substitute prefix_name
+      elseif strcmp(attachType, 'prefix') % prefix provided, substitute prefix_name
+        prefix = attachStr;
         found_value=[prefix found_parameter];
+      elseif strcmp(attachType, 'suffix') % suffix provided, substitute suffix_name
+        suffix = attachStr;
+        found_value=[found_parameter suffix];
       end
+      
       if ~ischar(found_value)
         warning('failed to convert parameter ''%s'' to string and substitute into model equations:',found_parameter);
         found_value
@@ -124,9 +138,12 @@ function expression=insert_parameters(expression,parameters,prefix)
         % update expression
         num_found = length(find(ismember(allwords,found_parameter)));
         for iter=1:num_found
-          expression=dynasim_strrep(expression,found_parameter,found_value);
+          if ~strcmp(attachType, 'suffix')
+            expression=dynasim_strrep(expression,found_parameter,found_value);
+          else
+            expression=dynasim_strrep2(expression,found_parameter,found_value);
+          end
         end
       end
     end
   end
-

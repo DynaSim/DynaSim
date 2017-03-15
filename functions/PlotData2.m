@@ -147,19 +147,19 @@ options=CheckOptions(varargin,{...
   'ylim',[],[],...
   'yscale','linear',{'linear','log','log10','log2'},...
   'visible','on',{'on','off'},...
+  'save_data','on',{'on','off'},...
   },false);
 handles=[];
 
-% Check Matlab path to make sure analysis functions can be called
-dynasim_functions=fullfile(fileparts(which(mfilename)),'functions');
-onPath=~isempty(strfind(path,[dynasim_functions, pathsep]));
-if ~onPath
-  addpath(dynasim_functions); % necessary b/c of changing directory for simulation
-end
 
 % todo: add option 'plot_mode' {'trace','image'}
 
+% Set defaults
+if isempty(options.variable)
+    options.variable = 'v';
+end
 
+time=data.time;
 
 % do any analysis if necessary and set x-data
 switch options.plot_type
@@ -193,29 +193,25 @@ if isempty(options.xlim)
   options.xlim=[min(xdata) max(xdata)];
 end
 
+% Extract the data in a linear table format
+[data_table,column_titles,time] = Data2Table (data);
 
-% Arrange all the data into a 1xN cell array
-[data_linear,ax,ax_names,time] = DynaSimExtract (data);
+% Preview the contents of this table
+%     Note: We cannot make this one big cell array since we want to allow
+%     axis labels to be either strings or numerics.
+previewTable(data_table,column_titles);
 
-% Import into an xPlt class
+% Import the linear data into an xPlt object
 xp = xPlt;
-xp = xp.importLinearData(data_linear,ax{:});
-xp = xp.importAxisNames(ax_names);
-meta = struct;
-meta.datainfo(1:2) = xPltAxis;      % Use xPltAxis here, because why not?
-meta.datainfo(1).name = 'time(ms)';
-meta.datainfo(1).values = time;
-meta.datainfo(2).name = 'cells';
-meta.datainfo(2).values = [];
-xp = xp.importMeta(meta);
-all_axis_info = xp.getaxisinfo;
+X = data_table{1};                          % X holds the data that will populate the multidimensional array. Must be numeric or cell array.
+axislabels = data_table(2:end);             % Each entry in X has an associated set of axis labels, which will define its location in multidimensional space. **Must be numeric or cell array of chars only**
+xp = xp.importLinearData(X,axislabels{:});
+xp = xp.importAxisNames(column_titles(2:end));  % There should be 1 axis name for every axis, of type char.
 
 
-% Permute xp to put populations and variable dimensions at the start.
-Nd = ndims(xp);
-xp = permute(xp,[Nd-1:Nd, 1:Nd-2]);     % Population and variable axis should normally be at the end
-if xp.findaxis('population') ~= 1; error('Re-ordering of xp failed.'); end;
-if xp.findaxis('variables') ~= 2; error('Re-ordering of xp failed.'); end;
+% xp = permute(xp,[Nd-1:Nd, 1:Nd-2]);     % Population and variable axis should normally be at the end
+% if xp.findaxis('population') ~= 1; error('Re-ordering of xp failed.'); end;
+% if xp.findaxis('variables') ~= 2; error('Re-ordering of xp failed.'); end;
 
 % User selection for populations
 chosen_pop = options.population;
@@ -225,19 +221,55 @@ chosen_vars = options.variable;
 if isempty(chosen_vars)
     chosen_vars = getdefaultvar(xp);
 end
+chosen_vars=[];
 
 % User selection for remaining varied parameters
 chosen_varied = get_chosen_varied(xp,options.varied);
 
 % Select out chosen data
-xp2 = xp.subset(chosen_pop,chosen_vars,chosen_varied{:});
+xp2 = xp.subset(chosen_varied{:},chosen_pop,chosen_vars);
+
+
+% Squeeze to eliminate all superfluous dimensions
+xp2 = xp2.squeeze;
+Nd = ndims(xp2);
+
+% If still have too many dimensions, then linearize
+Nplotdims = 3;
+ax_ind_pop = xp.findaxis('population'); if isempty(ax_ind_pop); ax_ind_pop = Inf; end
+ax_ind_var = xp.findaxis('variables'); if isempty(ax_ind_var); ax_ind_var = Inf; end
+endax = min([ax_ind_pop,ax_ind_var,Nd+1]);
+
+if Nd > Nplotdims 
+    xp2 = xp2.mergeDims( endax:(endax+Nd-Nplotdims) );
+    xp2 = xp2.squeeze;
+    
+    % Sort entries alphabetically
+    [~,I] = sort(xp2.axis(endax).values);
+    ind = repmat({':'},1,endax);
+    ind{endax} = I;
+    xp2 = xp2(ind{:});
+
+    
+end
+
+xp2.recursivePlot;
+
 
 % Get relevant sizes
-num_pops = size(xp,1);
-num_vars = size(xp,2);
-sz = size(xp);
+num_pops = size(xp2,1);
+num_vars = size(xp2,2);
+sz = size(xp2);
 num_varied = Nd - 2;
-num_sims = prod(sz(3:end));
+num_varied1 = size(xp2,3);
+num_varied2 = size(xp2,3);
+for i = 4:Nd
+    num_remaining(i) = size(xp2,i);
+end
+
+xp3 = squeeze(xp2);
+
+figl; xp3.recursivePlot(data);
 
 
 % % Possible inputs:

@@ -53,6 +53,7 @@ else
   keys=[];
   values=[];
 end
+
 % set namespace
 if ismember('namespace',keys) % check for user-supplied namespace (i.e., namespace)
   namespace=values{ismember(keys,'namespace')}; % user-supplied namespace
@@ -64,16 +65,19 @@ if ismember('namespace',keys) % check for user-supplied namespace (i.e., namespa
 else
   namespace='';
 end
+
 % set delimiter
 if ismember('delimiter',keys) % check for user-supplied delimiter
   delimiter = values(ismember(keys,'delimiter')); % user-supplied delimiter
 else
   delimiter=';';
 end
+
 % error handling for improper input format
 if ~ischar(namespace)
   error('model "namespace" must be a string.');
 end
+
 if ~ischar(delimiter)
   error('expression "delimiter" must be a string.');
 end
@@ -81,12 +85,14 @@ end
 %% 1.0 convert text into cell array of strings (one string per line)
 % check for DynaSim extensions if input is single \w+ string
 if ischar(text) && ~any(which(text)) && isempty(regexp(text,'[^\w.]','once')) % isempty(regexp(text,'[^\w]','once'))
-%if ischar(text) && ~exist(text,'file') && isempty(regexp(text,'[^\w.]','once')) % isempty(regexp(text,'[^\w]','once'))
+
+  %if ischar(text) && ~exist(text,'file') && isempty(regexp(text,'[^\w.]','once')) % isempty(regexp(text,'[^\w]','once'))
   [~,text]=LocateModelFiles(text);
   if iscell(text) && ~isempty(text)
     text=text{1};
   end
 end
+
 % check if input is a filename
 if ischar(text) && exist(text,'file')
   [~,name,ext]=fileparts(text);
@@ -98,20 +104,25 @@ if ischar(text) && exist(text,'file')
       %model=ImportModel(text);
       %return;
   end
+  
   % load equations from file
   [text,res]=readtext(text,'\n','%'); % text: cell array of strings, one element per line in text file
+  
   % remove all lines without text
   text=text(res.stringMask);
+  
   % remove leading/trailing white space
   text=strtrim(text);
+  
   % end each line with semicolon
   for i=1:length(text)
     if ~isequal(text{i}(end),';')
       text{i}(end+1)=';';
     end
   end
+  
   % concatenate into a single string
-  text=[text{:}]; % concatenate text from all lines  
+  text=[text{:}]; % concatenate text from all lines
 end
 
 % split string into cell array of lines delimited by semicolon
@@ -120,13 +131,15 @@ if ischar(text)
   if text(end)==';'
     text=text(1:end-1);
   end
-  % account for the one exception where ';' does not delimit lines: 
+  
+  % account for the one exception where ';' does not delimit lines:
   % conditional actions with multiple statements (expr1; expr2)
   % approach: replace ';' by ',' here then reverse the replacement below
   % when storing the action in model.conditionals
   pattern='(if\([^;]+\)\s*\([^;\)]+);([^;]+\))'; % if(condiiton)(action1;action2)
   replace='$1,$2';
   text=regexprep(text,pattern,replace,'ignorecase');
+  
   % now split string into cell array of lines
   text = strtrim(regexp(text,delimiter,'split'));
 end
@@ -155,6 +168,7 @@ for index=1:length(text) % loop over lines of text
     end
     continue;
   end
+  
   switch ClassifyEquation(line,delimiter) % classify
     case 'parameter'        % var=(string or number)
       rhs=regexp(line,'=(.+)$','tokens','once');
@@ -181,9 +195,9 @@ for index=1:length(text) % loop over lines of text
 %         %error('model specification error: delete the ''@'' character from all function definitions and try again.');
 %       end
       name=regexp(line,'^(.+)\(.*\)\s*=','tokens','once');
-      vars=regexp(line,'\((.+)\)\s*=','tokens','once');      
+      vars=regexp(line,'\((.+)\)\s*=','tokens','once');
       rhs=regexp(line,'=(.+)$','tokens','once');
-      name=strtrim(name{1}); 
+      name=strtrim(name{1});
       expression=sprintf('@(%s)%s',vars{1},rhs{1});
       model.functions.([namespace name]) = expression;
       name_map(end+1,:) = {name,[namespace name],namespace,'functions'};
@@ -197,7 +211,7 @@ for index=1:length(text) % loop over lines of text
       end
       rhs=regexp(line,'=(.+)$','tokens','once');
       state_variable=strtrim(var{1}); expression=rhs{1};
-      model.ODEs.([namespace state_variable])=expression;      
+      model.ODEs.([namespace state_variable])=expression;
       if ~ismember([namespace state_variable],model.state_variables)
         name_map(end+1,:) = {state_variable,[namespace state_variable],namespace,'state_variables'};
         model.state_variables{end+1}=[namespace state_variable];
@@ -215,17 +229,19 @@ for index=1:length(text) % loop over lines of text
       end
     case 'monitor'          % monitor f=(expression or function)
       % split list of monitors
-      lines=strtrim(regexp(line,',','split')); 
+      lines=strtrim(regexp(line,',','split'));
       % loop over monitors in list
       for l=1:length(lines)
         % process this monitor
         line=lines{l};
+        
         % split left and right parts of monitor
         lhs=regexp(line,'^monitor ([\w,@\s\.]+)','tokens','once');
         if isempty(lhs)
           lhs=regexp(line,'([\w,@\s\.]+)','tokens','once');
-        end        
-        rhs=regexp(line,'=(.+)$','tokens','once');      
+        end
+        rhs=regexp(line,'=(.+)$','tokens','once');
+        
         % expand list of monitor names (e.g., monitor iNa.I, iK.I)
         names=strtrim(regexp(lhs{1},',','split'));
         for i=1:length(names) % loop over list of monitors on this line
@@ -241,11 +257,15 @@ for index=1:length(text) % loop over lines of text
               rhs=arg;
             end
           end
+          
           % convert into valid monitor name
-          name=strrep(name,'.','_'); % index sub-namespace (monitor Na.I)        
+          name=strrep(name,'.','_'); % index sub-namespace (monitor Na.I)
+          
           if ~isempty(rhs), expression=rhs{1}; else expression=[]; end
+          
           model.monitors.([namespace name]) = expression;
           name_map(end+1,:) = {name,[namespace name],namespace,'monitors'};
+          
           if ~isempty(comment)
             model.comments{end+1}=sprintf('%s (monitor): %s',[namespace name],comment);
           end
@@ -260,18 +280,22 @@ for index=1:length(text) % loop over lines of text
         if groups{2}(end)==')'
           groups{2}=groups{2}(1:end-1);
         end
+        
         then_action=groups{2};
         else_action=[];
       elseif numel(groups==3)
         if groups{3}(end)==')'
           groups{3}=groups{3}(1:end-1);
         end
+        
         then_action=groups{2};
         else_action=groups{3};
       end
+      
       model.conditionals(end+1).namespace=namespace;
       model.conditionals(end).condition=condition{1};
       model.conditionals(end).action=strrep(then_action,',',';'); % restore semicolon-delimited multiple actions like if(x>1)(x=0;y=0)
+      
       if length(groups)>2
         model.conditionals(end).else=else_action;
       else
@@ -296,17 +320,25 @@ for index=1:length(text) % loop over lines of text
       lhs=regexp(line,'^([^\+\-*/=]+)','tokens','once'); % +=
       rhs=regexp(line,'=>?(.+)$','tokens','once');
       model.linkers(end+1).namespace=namespace;
+      
       if ~isempty(lhs), target=strtrim(lhs{1}); else target=[]; end
+      
       if ~isempty(rhs), expression=strtrim(rhs{1}); else expression=[]; end
+      
       if expression(end)==';', expression=expression(1:end-1); end
+      
       if isempty(target), target=expression; end % for sharing state var across mechanisms in same population
+      
       if isempty(expression), expression=target; end
+      
       model.linkers(end).target=target;
       model.linkers(end).expression=expression;
       model.linkers(end).operation='+=';
+      
       if ~isempty(comment)
         model.comments{end+1}=sprintf('%s linkers(%s->%s): %s',namespace,target,expression,comment);
       end
+      
       if ~isempty(comment)
         model.linkers(end).comment=comment;
       end
@@ -316,14 +348,15 @@ for index=1:length(text) % loop over lines of text
 end
 
 
-% subfunctions
+%% subfunctions
 function [line,comment]=remove_comment(line)
 % purpose: split line into model content and comment
 index=find(line=='%',1,'first');
-if isempty(index) 
+if isempty(index)
   % check other valid comment delimiters
   index=find(line=='#',1,'first');
 end
+
 if isempty(index) % no comment found
   comment='';
 else % split line into comment and non-comment line sections

@@ -79,6 +79,7 @@ if ~isfield(model,'state_variables')
 else
   ismodel=1;
 end
+
 % check specification
 if ismodel
   specification=CheckSpecification(model.specification);
@@ -87,8 +88,10 @@ else
 end
 
 % update specification with whatever is in modifications
-modifications=standardize_modifications(modifications,specification);
-specification=modify_specification(specification,modifications);
+modifications = standardize_modifications(modifications,specification);
+if ismodel % TODO: test this
+  specification = modify_specification(specification,modifications);
+end
 
 % update model if input was a model structure
 if ismodel
@@ -105,6 +108,7 @@ function modifications=standardize_modifications(modifications,specification)
 % 2. partial specification structure
 
 if isstruct(modifications)
+  % TODO
   % convert structure to cell matrix
   % ...
 end
@@ -155,6 +159,7 @@ if any(~cellfun(@isempty,regexp(modifications(:,1),'^\(.*\)$'))) || ...
                 'where dimensions 1, 2, and 3 correspond to mechanisms, values, and populations varied over.'])
         end
     end
+    
     % expand list of modifications
     for j=1:length(namespaces)
       for k=1:length(variables)
@@ -179,9 +184,11 @@ end
 for i=1:size(mods,1)
   obj=mods{i,1}; % population name or connection source-target
   fld=mods{i,2}; % population name, size, or parameter name
+  
   if ~ischar(obj)
     error('modification must be applied to population name or connection source-target');
   end
+  
   if ~ischar(fld) %|| ~ismember(fld,{'name','size','parameters','mechanism_list','equations'})
     error('modification must be applied to population ''name'',''size'',or a parameter referenced by its name');
   end
@@ -205,6 +212,7 @@ for i=1:size(mods,1)
   end
   
   index=ismember(names,obj);
+  
   if strcmp(fld,'mechanism_list')
     % support --
     % 'E'    'mechanism_list'    '(iNa,iK)'
@@ -328,19 +336,23 @@ if size(modifications,2)==2
   end
   modifications=tmp;
 end
+
 % convert 4-column specification to 3-column
 if size(modifications,2)==4
   for i=1:size(modifications,1)
     if strcmp(modifications{i,2},'parameters')
       % shift parameter name to 2nd column
       modifications{i,2}=modifications{i,3};
+      
       % shift parameter value to 3rd column
       modifications{i,3}=modifications{i,4};
     end
   end
+  
   % remove fourth column
   modifications=modifications(:,1:3);
 end
+
 % convert connection reference source-target to source->target
 if any(~cellfun(@isempty,regexp(modifications(:,1),'\w-\w')))
   % find elements to adjust

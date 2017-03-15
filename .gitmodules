@@ -1,3 +1,7 @@
 [submodule "dependencies/gimbl-vis"]
 	path = dependencies/gimbl-vis
 	url = https://github.com/erik-roberts/GIMBL-Vis
+
+[submodule "MDD"]
+	path = dependencies/MDD
+	url = https://github.com/davestanley/MDD
