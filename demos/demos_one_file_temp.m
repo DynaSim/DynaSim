@@ -19,7 +19,7 @@ if exist(study_dir, 'dir')
   rmdir(study_dir, 's')
 end
 
-eqns='dv/dt=@current+I+I2; {iNa,iK}';
+eqns='dv/dt=@current+I; {iNa,iK}';
 vary={'','I',[0:10:30]};
 
 SimulateModel(eqns,'vary',vary, 'study_dir',study_dir,'save_data_flag',1,...
@@ -62,5 +62,5 @@ vary={
   'I->E','tauD',[5 10]       % inhibition decay time constant from I to E
   };
 
-SimulateModel(s,'vary',vary, 'study_dir',study_dir,'save_data_flag',1,...
+SimulateModel(s,'vary',vary, 'study_dir',study_dir,'save_data_flag',1, 'compile_flag',1,...
   'cluster_flag',1,'verbose_flag',1,'qsub_mode','array', 'one_solve_file_flag',1);
