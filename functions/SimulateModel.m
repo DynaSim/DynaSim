@@ -44,7 +44,7 @@ function [data,studyinfo]=SimulateModel(model,varargin)
 %     'qsub_mode'     : whether to use SGE -t array for 1 qsub, mode: 'array'; or
 %                         qsub in csh for loop, mode: 'loop'. (default: 'loop').
 %     'one_solve_file_flag': only use 1 file of each time when solving (default: 0)
-%     'optimize_big_vary': Select best options for many sims {0 or 1} (default: 0)
+%     'optimize_big_vary': Select best options for doing many sims {0 or 1} (default: 0)
 % 
 %   options for parallel computing: (requires Parallel Computing Toolbox)
 %     'parallel_flag' : whether to use parfor to run simulations {0 or 1} (default: 0)
@@ -219,8 +219,8 @@ varargin = backward_compatibility(varargin);
 options=CheckOptions(varargin,{...
   'tspan',[0 100],[],...          % [beg,end] (units must be consistent with dt and equations)
   'ic',[],[],...                  % initial conditions (overrides definition in model structure; can input as IC structure or numeric array)
-  'solver','rk4',{'euler','rk1','rk2','rk4','modified_euler','rungekutta','rk','ode23','ode45',...
-    'ode1','ode2','ode3','ode4','ode5','ode8','ode113','ode15s','ode23s','ode23t','ode23tb'},... % DynaSim and built-in Matlab solvers
+  'solver','rk4',{'euler','rk1','rk2','rk4','modified_euler','rungekutta','rk',...
+    'ode23','ode45','ode113','ode15s','ode23s','ode23t','ode23tb'},... % DynaSim and built-in Matlab solvers
   'matlab_solver_options',[],[],... % options from odeset for use with built-in Matlab solvers
   'dt',.01,[],...                 % time step used for fixed step DynaSim solvers
   'downsample_factor',1,[],...    % downsampling applied during simulation (only every downsample_factor-time point is stored in memory or written to disk)
@@ -270,7 +270,7 @@ if options.parallel_flag
 end
 
 if options.compile_flag && ~options.reduce_function_calls_flag
-  fprintf('setting ''reduce_function_calls_flag'' to 1 for compatibility with ''compile_flag''=1 (coder does not support anonymous functions).\n');
+  fprintf('Setting ''reduce_function_calls_flag'' to 1 for compatibility with ''compile_flag''=1 (coder does not support anonymous functions).\n');
   options.reduce_function_calls_flag=1;
 end
 
@@ -285,6 +285,11 @@ if options.cluster_flag && ~options.save_data_flag
   end
 end
 
+if options.disk_flag && any(strcmp(options.solver, {'ode23','ode45','ode113','ode15s','ode23s','ode23t','ode23tb'}))
+  fprintf('Since using built-in solver, setting options.disk_flag=1.\n');
+  options.disk_flag = 1;
+end
+
 % if ischar(options.study_dir) && options.save_data_flag==0
 %   options.save_data_flag=1;
 %   if options.verbose_flag
@@ -293,14 +298,14 @@ end
 % end
 
 %% Non-Batch Checks
-if isempty(options.sim_id)
+if isempty(options.sim_id) % not in part of a batch sim
   if options.optimize_big_vary
     options.cluster_flag = 1;
     options.qsub_mode = 'array';
     options.compile_flag = 1;
     options.downsample_factor = max(1/options.dt, options.downsample_factor); % at most 1000Hz sampling
     options.one_solve_file_flag = 1;
-    %options.sims_per_job=5 %?
+    options.sims_per_job = 2;
   end
 
   % check for one_solve_file_flag
@@ -343,7 +348,7 @@ if isempty(options.sim_id)
   end
 end % isempty(options.sim_id)
 
-% prepare analysis functions and options
+%% prepare analysis functions and options
 if ~isempty(options.analysis_functions)
   if ~iscell(options.analysis_functions)
     % convert function handle into cell array of function handles
@@ -377,7 +382,7 @@ if ~isempty(options.analysis_functions)
 %   end
 end
 
-% prepare plot functions and options
+%% prepare plot functions and options
 if ~isempty(options.plot_functions)
   if ~iscell(options.plot_functions)
     % convert function handle into cell array of function handles
