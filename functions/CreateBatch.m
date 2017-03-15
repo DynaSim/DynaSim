@@ -455,7 +455,10 @@ end
     end
     % compare paths between compute machine and studyinfo startup
     fprintf(fjob,'\t\t[valid,message]=CheckHostPaths(studyinfo);\n');
-    fprintf(fjob,'\t\tif ~valid\n\t\t  lasterr(message);\n\t\t  for s=1:length(SimIDs), UpdateStudy(studyinfo.study_dir,''sim_id'',SimIDs(s),''status'',''failed''); end\n\t\t  continue;\n\t\tend\n');
+    
+    if ~options.one_solve_file_flag
+      fprintf(fjob,'\t\tif ~valid\n\t\t  lasterr(message);\n\t\t  for s=1:length(SimIDs), UpdateStudy(studyinfo.study_dir,''sim_id'',SimIDs(s),''status'',''failed''); end\n\t\t  continue;\n\t\tend\n');
+    end
     
     % simulate model with proper modifications and options
     fprintf(fjob,'\t\tsiminfo=studyinfo.simulations(SimID);\n');

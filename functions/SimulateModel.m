@@ -292,54 +292,56 @@ end
 %   end
 % end
 
-if options.optimize_big_vary
-  options.cluster_flag = 1;
-  options.qsub_mode = 'array';
-  options.compile_flag = 1;
-  options.downsample_factor = max(1/options.dt, options.downsample_factor); % at most 1000Hz sampling
-  options.one_solve_file_flag = 1;
-  %options.sims_per_job=5 %?
-end
+%% Non-Batch Checks
+if isempty(options.sim_id)
+  if options.optimize_big_vary
+    options.cluster_flag = 1;
+    options.qsub_mode = 'array';
+    options.compile_flag = 1;
+    options.downsample_factor = max(1/options.dt, options.downsample_factor); % at most 1000Hz sampling
+    options.one_solve_file_flag = 1;
+    %options.sims_per_job=5 %?
+  end
 
-% check for one_solve_file_flag
-if options.one_solve_file_flag && ~options.cluster_flag
-  % One file flag only for cluster
-  fprintf('Since cluster_flag==0, setting options.one_solve_file_flag=0\n')
-  options.one_solve_file_flag = 0;
-  % TODO: this is a temp setting until iss_90 is fully implemented
-end
+  % check for one_solve_file_flag
+  if options.one_solve_file_flag && ~options.cluster_flag
+    % One file flag only for cluster
+    fprintf('Since cluster_flag==0, setting options.one_solve_file_flag=0\n')
+    options.one_solve_file_flag = 0;
+    % TODO: this is a temp setting until iss_90 is fully implemented
+  end
 
-if options.one_solve_file_flag && ~options.overwrite_flag
-  % One file flag will overwrite
-  fprintf('Since one_solve_file_flag==1, setting options.overwrite_flag=1\n')
-  options.overwrite_flag = 1;
-  % TODO: this is a temp setting until iss_90 is fully implemented
-end
+  if options.one_solve_file_flag && ~options.overwrite_flag
+    % One file flag will overwrite
+    fprintf('Since one_solve_file_flag==1, setting options.overwrite_flag=1\n')
+    options.overwrite_flag = 1;
+    % TODO: this is a temp setting until iss_90 is fully implemented
+  end
 
-if options.one_solve_file_flag && ~strcmp(options.qsub_mode, 'array')
-  % One file flag needs array mode
-  fprintf('Since one_solve_file_flag==1, setting options.qsub_mode=''array''\n')
-  options.qsub_mode = 'array';
-  % TODO: this is a temp setting until iss_90 is fully implemented
-end
+  if options.one_solve_file_flag && ~strcmp(options.qsub_mode, 'array')
+    % One file flag needs array mode
+    fprintf('Since one_solve_file_flag==1, setting options.qsub_mode=''array''\n')
+    options.qsub_mode = 'array';
+    % TODO: this is a temp setting until iss_90 is fully implemented
+  end
 
-if options.one_solve_file_flag && options.parallel_flag
-  % One file flag can't do parallel_flag
-  fprintf('Since one_solve_file_flag==1, setting options.parallel_flag=0\n')
-  options.parallel_flag = 0;
-  % TODO: this is a temp setting until iss_90 is fully implemented
-end
+  if options.one_solve_file_flag && options.parallel_flag
+    % One file flag can't do parallel_flag
+    fprintf('Since one_solve_file_flag==1, setting options.parallel_flag=0\n')
+    options.parallel_flag = 0;
+    % TODO: this is a temp setting until iss_90 is fully implemented
+  end
 
-if options.one_solve_file_flag && isa(options.experiment,'function_handle')
-  error('one_solve_file_flag doesn''t work with experiments.')
-end
+  if options.one_solve_file_flag && isa(options.experiment,'function_handle')
+    error('one_solve_file_flag doesn''t work with experiments.')
+  end
 
-if options.one_solve_file_flag && ~options.save_parameters_flag
-  fprintf('Since one_solve_file_flag==1, setting options.save_parameters_flag=1\n')
-  options.save_parameters_flag = 1;
-  % TODO: this is a temp setting until iss_90 is fully implemented
-end
-
+  if options.one_solve_file_flag && ~options.save_parameters_flag
+    fprintf('Since one_solve_file_flag==1, setting options.save_parameters_flag=1\n')
+    options.save_parameters_flag = 1;
+    % TODO: this is a temp setting until iss_90 is fully implemented
+  end
+end % isempty(options.sim_id)
 
 % prepare analysis functions and options
 if ~isempty(options.analysis_functions)
@@ -446,7 +448,7 @@ end
 
 % check for one_solve_file_flag
 if options.one_solve_file_flag && is_varied_mech_list()
-  % Can't vary mechs if only have 1 file
+  % Can't vary mechs if using 1 file mode
   error('Can''t vary mechanism_list if using one_solve_file_flag')
   
   % TODO: this is a temp setting until iss_90 is fully implemented
@@ -834,7 +836,7 @@ try
   
   cleanup('success');
 catch err % error handling
-  if options.compile_flag && ~isempty(options.solve_file)
+  if options.compile_flag && ~isempty(options.solve_file) && ~options.one_solve_file_flag
     if options.verbose_flag
       fprintf('Removing failed compiled solve file: %s\n',options.solve_file);
     end
@@ -845,7 +847,7 @@ catch err % error handling
   DisplayError(err);
   
   % update studyinfo
-  if options.save_data_flag
+  if options.save_data_flag && ~options.one_solve_file_flag
     studyinfo=UpdateStudy(studyinfo.study_dir,'process_id',sim_id,'status','failed','verbose_flag',options.verbose_flag);
     data=studyinfo;
   end
@@ -975,7 +977,11 @@ end
   end
 
   function logicalOut = is_varied_mech_list()
-    logicalOut = any(cellfun(@(x)strcmp(x{2},'mechanism_list'),modifications_set));
+    if ~isempty(modifications_set{1})
+      logicalOut = any(cellfun(@(x) strcmp(x{2},'mechanism_list'),modifications_set));
+    else
+      logicalOut = false;
+    end
   end
     
 end %main
