@@ -23,7 +23,8 @@ eqns='dv/dt=@current+I; {iNa,iK}';
 vary={'','I',[0:10:30]};
 
 SimulateModel(eqns,'vary',vary, 'study_dir',study_dir,'save_data_flag',1,...
-  'cluster_flag',1,'verbose_flag',1,'qsub_mode','array', 'one_solve_file_flag',1);
+  'cluster_flag',1,'verbose_flag',1,'qsub_mode','array', 'one_solve_file_flag',1,...
+  'tspan',[0 500], 'dt',0.01, 'solver','euler', 'downsample_factor', 100);
 
 %% Sparse Pyramidal-Interneuron-Network-Gamma (sPING)
 study_dir=fullfile('.', 'study_sPING_one_file');
@@ -63,4 +64,5 @@ vary={
   };
 
 SimulateModel(s,'vary',vary, 'study_dir',study_dir,'save_data_flag',1, 'compile_flag',1,...
-  'cluster_flag',1,'verbose_flag',1,'qsub_mode','array', 'one_solve_file_flag',1);
+  'cluster_flag',1,'verbose_flag',1,'qsub_mode','array', 'one_solve_file_flag',1,...
+  'tspan',[0 500], 'dt',0.01, 'solver','euler', 'downsample_factor', 100);
