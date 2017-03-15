@@ -198,9 +198,10 @@ else %one_solve_file_flag
   
   WriteSimJob([], job_file); % create job script
   
-  if options.compile_flag
-    job_file = PrepareMEX(job_file, options); %compile the job file
-  end
+  % TODO: compile job_file
+%   if options.compile_flag
+%     job_file = PrepareMEX(job_file, options); %compile the job file
+%   end
   
   % add job_file to studyinfo
   [studyinfo.simulations.job_file] = deal(job_file); %same job file for all sims
@@ -317,15 +318,10 @@ else %one_solve_file_flag
     studyinfo.simulations(iSim).simulator_options.sim_id = studyinfo.simulations(iSim).sim_id;
   end
   [studyinfo.simulations.error_log] = deal('');
-  
-  % copy studyinfo to batch_dir for each simulation
-  %this_study_file=fullfile(batch_dir,sprintf('studyinfo_%g.mat',sim));
-  %save(this_study_file,'studyinfo');
-  
-%   % copy studyinfo file to batch_dir % TODO: remove if redundant from ln129
-%   batch_study_file = fullfile(batch_dir,'studyinfo.mat');
-%   save(batch_study_file,'studyinfo');
-
+ 
+  % copy studyinfo file to batch_dir since more information now
+  batch_study_file = fullfile(batch_dir,'studyinfo.mat');
+  save(batch_study_file,'studyinfo');
 end
 
 % update studyinfo on disk
@@ -421,6 +417,12 @@ end
       % function declaration
       [~, job_filename] = fileparts(job_file); %remove path and extension
       fprintf(fjob, 'function %s(simIDstart, simIDstep, simIDlast)\n\n', job_filename);
+      
+      if options.compile_flag
+        fprintf(fjob, 'assert(isa(simIDstart, ''double''));\n');
+        fprintf(fjob, 'assert(isa(simIDstep, ''double''));\n');
+        fprintf(fjob, 'assert(isa(simIDlast, ''double''));\n');
+      end
       
       % set IDs of simulations to run
       fprintf(fjob,'SimIDs = simIDstart:min(simIDlast,simIDstart+simIDstep-1);\n');

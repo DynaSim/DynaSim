@@ -79,7 +79,7 @@ options=CheckOptions(varargin,{...
   'filename',[],[],...         % name of solver file that integrates model
   'data_file','data.csv',[],... % name of data file if disk_flag=1
   'fileID',1,[],...
-  'compile_flag',exist('codegen')==6,{0,1},... % whether to prepare script for being compiled using coder instead of interpreting Matlab
+  'compile_flag',0,{0,1},... % whether to prepare script for being compiled using coder instead of interpreting Matlab
   'verbose_flag',1,{0,1},...
   'one_solve_file_flag',0,{0,1},... % use only 1 solve file of each type, but can't vary mechs yet
   },false);
@@ -228,6 +228,9 @@ if options.disk_flag==1
     fprintf(fid,'function data_file=solve_ode\n');
   else
     fprintf(fid,'function data_file=solve_ode(simID)\n');
+    if options.compile_flag
+      fprintf(fid, 'assert(isa(simID, ''double''));\n');
+    end
   end
   
   % create output data file
@@ -262,6 +265,9 @@ else %options.disk_flag==0
     fprintf(fid,'function %s=solve_ode\n',output_string);
   else
     fprintf(fid,'function %s=solve_ode(simID)\n',output_string);
+    if options.compile_flag
+      fprintf(fid, 'assert(isa(simID, ''double''));\n');
+    end
   end
 end
 
@@ -270,19 +276,41 @@ if options.save_parameters_flag
   fprintf(fid,'%% ------------------------------------------------------------\n');
   fprintf(fid,'%% Parameters:\n');
   fprintf(fid,'%% ------------------------------------------------------------\n');
-  fprintf(fid,'p = load(''params.mat'',''p''); p = p.p;\n');
+  fprintf(fid,'params = load(''params.mat'',''p'');\n');
+  
+  if options.one_solve_file_flag && options.compile_flag
+    fprintf(fid,'pVecs = params.p;\n');
+  else
+     fprintf(fid,'p = params.p;\n');
+  end
 end
 
 if options.one_solve_file_flag
   % loop through p and for any vector, take simID index of it (ignores tspan)
-  fprintf(fid,'\n%% For vector params, select index for this simID\n');
-  fprintf(fid,'flds = fields(rmfield(p,''tspan''));\n'); % remove tspan
-  fprintf(fid,'for fld = flds''\n');
-  fprintf(fid,'  fld = fld{1};\n');
-  fprintf(fid,'  if isnumeric(p.(fld)) && length(p.(fld)) > 1\n');
-  fprintf(fid,'    p.(fld) = p.(fld)(simID);\n');
-  fprintf(fid,'  end\n');
-  fprintf(fid,'end\n\n');
+  if ~options.compile_flag
+    fprintf(fid,'\n%% For vector params, select index for this simID\n');
+    fprintf(fid,'flds = fields(rmfield(p,''tspan''));\n'); % remove tspan
+    fprintf(fid,'for fld = flds''\n');
+    fprintf(fid,'  fld = fld{1};\n');
+    fprintf(fid,'  if isnumeric(p.(fld)) && length(p.(fld)) > 1\n');
+    fprintf(fid,'    p.(fld) = p.(fld)(simID);\n');
+    fprintf(fid,'  end\n');
+    fprintf(fid,'end\n\n');
+  else %compile_flag
+    % slice scalar from vector params
+    for iParam = 1:nParamMods
+      fprintf(fid,'p.%s = pVecs.%s(simID);\n', mod_params{iParam}, mod_params{iParam});
+    end
+    
+    % take scalar from scalar params
+    [~,sharedFlds] = intersect(fields(p), mod_params);
+    scalar_params = fields(p);
+    scalar_params(sharedFlds) = [];
+    nScalarParams = length(scalar_params);
+    for iParam = 1:nScalarParams
+      fprintf(fid,'p.%s = pVecs.%s;\n', scalar_params{iParam}, scalar_params{iParam});
+    end
+  end
 end
 
 % write tspan, dt, and downsample_factor

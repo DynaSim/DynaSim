@@ -3,7 +3,7 @@ function mexfileOutput = PrepareMEX(mfileInput, options)
 %
 % See also: GetSolveFile
 
-if ~exist(options,'var') || isempty(options)
+if ~exist('options','var') || isempty(options)
   options.verbose_flag = 1; % set verbose to 1 by default
 end
 
