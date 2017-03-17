@@ -171,6 +171,9 @@ end
 %   the dynasim solve file. this is called from WriteMatlabSolver
 
 if options.compile_flag && ~strcmp(solver_type,'matlab_no_mex') % compile solver function
+  if options.one_solve_file_flag
+    options.codegen_args = {0};
+  end
   solve_file = PrepareMEX(solve_file, options);
 end
 

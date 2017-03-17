@@ -231,9 +231,6 @@ if ~options.one_solve_file_flag
   fprintf(fid,'function %s=solve_ode\n',output_string);
 else
   fprintf(fid,'function %s=solve_ode(simID)\n',output_string);
-  if options.compile_flag
-    fprintf(fid, 'assert(isa(simID, ''double''));\n');
-  end
 end
 
 % 2.3 load parameters
@@ -341,6 +338,10 @@ fprintf(fid,'%% ###########################################################\n');
 
 if options.compile_flag && strcmp(options.solver_type,'matlab_no_mex')
   odefun_str_name = odefun_filename;
+  
+  if options.compile_flag
+    odefun_str_name = [odefun_str_name '_mex']; % switch to mex version
+  end
 else
   odefun_str_name = 'odefun';
 end
@@ -396,10 +397,6 @@ if options.compile_flag && strcmp(options.solver_type,'matlab_no_mex') % save od
   
   %write to file
   fprintf(odefun_fid,'function dydt = %s(t,X)\n', odefun_filename);
-%   if isempty(regexp(odefun,'[^a-zA-Z]t[^a-zA-Z]','once'))
-    fprintf(odefun_fid, 'assert(isa(t, ''double''));\n');
-%   end
-  fprintf(odefun_fid, 'assert(isa(X, ''double''));\n');
   fprintf(odefun_fid,['dydt = [\n\n' odefun '\n]'';\n']); % make row into col vector
   fprintf(odefun_fid,'end\n');
   
@@ -407,6 +404,7 @@ if options.compile_flag && strcmp(options.solver_type,'matlab_no_mex') % save od
   fclose(odefun_fid);
   
   %% mex compile odefun
+  options.codegen_args = {0,IC};
   PrepareMEX(odefun_filepath, options);
   
 else % use subfunction
