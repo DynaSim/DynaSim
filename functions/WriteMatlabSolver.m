@@ -374,13 +374,15 @@ for i=1:num_vars
 end
 
 %% Monitors
-fprintf(fid,'\n%%Calculate monitors from params and state vars\n');
-monitor_names = fields(model.monitors);
-for iMon = 1:length(monitor_names)
-  thisMonName = monitor_names{iMon};
-  thisMonFcn = regexp(model.functions.(thisMonName),'@\([a-zA-Z][\w,]*\)\s*(.*)','tokens','once');
-  thisMonFcn = thisMonFcn{1};
-  fprintf(fid,'%s = %s;\n', thisMonName, thisMonFcn);
+if ~isempty(model.monitors)
+  fprintf(fid,'\n%%Calculate monitors from params and state vars\n');
+  monitor_names = fields(model.monitors);
+  for iMon = 1:length(monitor_names)
+    thisMonName = monitor_names{iMon};
+    thisMonFcn = regexp(model.functions.(thisMonName),'@\([a-zA-Z][\w,]*\)\s*(.*)','tokens','once');
+    thisMonFcn = thisMonFcn{1};
+    fprintf(fid,'%s = %s;\n', thisMonName, thisMonFcn);
+  end
 end
 
 %% fprintf end for solve function
