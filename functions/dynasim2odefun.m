@@ -94,10 +94,6 @@ ODEs=strtrim(struct2cell(model.ODEs));
 idx=cellfun(@isempty,regexp(ODEs,';$')); % lines that need semicolons
 ODEs(idx)=cellfun(@(x)[x ';'],ODEs(idx),'uni',0);
 ODEs=[ODEs{:}]; % concatenate ODEs into a single string
-ODEs=strrep(ODEs,';',','); % replace semicolons by commas
-
-%remove trailing comma
-ODEs(end) = [];
 
 % substitute in generic state vector X
 for i=1:num_vars
@@ -110,10 +106,15 @@ elem_names=cat(2,IC_names{:});
 
 switch options.odefun_output
   case 'func_handle'
+    ODEs=strrep(ODEs,';',','); % replace semicolons by commas
+    ODEs(end) = []; %remove trailing comma
     ODEFUN = eval(['@(t,X) [' ODEs ']'';']);
   case 'anonymous_func_string'
+    ODEs=strrep(ODEs,';',','); % replace semicolons by commas
+    ODEs(end) = []; %remove trailing comma
     ODEFUN = ['@(t,X) [' ODEs ']'';'];
   case 'func_body'
+    ODEs=strrep(ODEs,';',',...\n'); % replace semicolons by commas with newline
     ODEFUN = ODEs;
 end
 

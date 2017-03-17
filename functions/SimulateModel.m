@@ -265,6 +265,8 @@ options=CheckOptions(varargin,{...
   },false);
 % more options: remove_solve_dir, remove_batch_dir, post_downsample_factor
 
+%% prepare solve options
+
 if options.parallel_flag
   %error('parallel computing has been disabled for debugging. ''set parallel_flag'' to 0');
 end
@@ -285,7 +287,13 @@ if options.cluster_flag && ~options.save_data_flag
   end
 end
 
-if options.disk_flag && any(strcmp(options.solver, {'ode23','ode45','ode113','ode15s','ode23s','ode23t','ode23tb'}))
+if any(strcmp(options.solver, {'ode23','ode45','ode113','ode15s','ode23s','ode23t','ode23tb'}))
+  matlabSolverBool = 1;
+else
+  matlabSolverBool = 0;
+end
+
+if options.disk_flag && matlabSolverBool
   fprintf('Since using built-in solver, setting options.disk_flag=1.\n');
   options.disk_flag = 1;
 end
@@ -296,6 +304,11 @@ end
 %     fprintf('setting ''save_data_flag'' to 1 for storing results in study_dir: %s.\n',options.study_dir);
 %   end
 % end
+
+% convert matlab solver options from key/value to struct using odeset if necessary
+if iscell(options.matlab_solver_options)
+  options.matlab_solver_options = odeset(options.matlab_solver_options{:});
+end
 
 %% Non-Batch Checks
 if isempty(options.sim_id) % not in part of a batch sim
@@ -715,6 +728,21 @@ try
       % save parameters there
       warning('off','catstruct:DuplicatesFound');
       p = catstruct(CheckSolverOptions(options),model.parameters);
+      
+      if matlabSolverBool
+        % add IC to p for use in matlab solver
+        if isempty(options.ic)
+          [~, p.ic]=dynasim2odefun(PropagateParameters(PropagateFunctions(model)), 'odefun_output','func_body');
+        else
+          p.ic = options.ic;
+        end
+        
+        % add matlab_solver_options to p
+        if ~isempty(options.matlab_solver_options)
+          p.matlab_solver_options = options.matlab_solver_options;
+        end
+      end
+      
       param_file = fullfile(fpath,'params.mat');
       if options.verbose_flag
         fprintf('Saving model parameters: %s\n',param_file);

@@ -74,7 +74,8 @@ switch options.solver
     if options.disk_flag==1
       warning('using disk for real-time storage instead of memory is only available for DynaSim solvers. try using ''euler'',''rk2'', or ''rk4'' for real-time disk usage.');
     end
-  case {'ode1','ode2','ode3','ode4','ode5','ode8','ode113','ode15s','ode23s','ode23t','ode23tb'} % not mex supported
+%   case {'ode1','ode2','ode3','ode4','ode5','ode8','ode113','ode15s','ode23s','ode23t','ode23tb'} % not mex supported
+  case {'ode113','ode15s','ode23s','ode23t','ode23tb'} % not mex supported
     solver_type = 'matlab_no_mex';
     if options.disk_flag==1
       warning('using disk for real-time storage instead of memory is only available for DynaSim solvers. try using ''euler'',''rk2'', or ''rk4'' for real-time disk usage.');
@@ -169,7 +170,10 @@ end
 % NOTE: if using stiff built-in solver, it should only compile the odefun, not
 %   the dynasim solve file. this is called from WriteMatlabSolver
 
-if options.compile_flag % compile solver function
+if options.compile_flag && ~strcmp(solver_type,'matlab_no_mex') % compile solver function
+  if options.one_solve_file_flag
+    options.codegen_args = {0};
+  end
   solve_file = PrepareMEX(solve_file, options);
 end
 
