@@ -361,6 +361,17 @@ state_var_index=0;
 for i=1:num_vars
   var=model.state_variables{i};
   
+  % check ICs for use of inital state_var value and put in proper starting value
+  if regexp(model.ICs.(var), '_last')
+    stateVars = regexp(model.ICs.(var), '([\w_]+)_last', 'tokens');
+    model.ICs.(var) = regexprep(model.ICs.(var), '_last', '');
+    
+    for iSVar = 1:length(stateVars)
+      thisSvar = stateVars{iSVar}{1};
+      model.ICs.(var) = regexprep(model.ICs.(var), thisSvar, model.ICs.(thisSvar));
+    end
+  end
+  
   % evaluate ICs to get (# elems) per state var
   num_elems=length(eval([model.ICs.(var) ';']));
   

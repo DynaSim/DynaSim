@@ -39,7 +39,6 @@ allowed_insert_types.ODEs=...
   {'parameters','fixed_variables','functions','state_variables','reserved'}; % into ODEs
 allowed_insert_types.ICs=...
   {'parameters','fixed_variables','functions','state_variables','reserved'}; % into ICs
-%   {'parameters','fixed_variables','functions','reserved'}; % into ICs %EAR
 allowed_insert_types.linkers=...
   {'parameters','fixed_variables','functions','state_variables','reserved'};
 allowed_insert_types.conditionals=...
@@ -130,7 +129,7 @@ function expressions=propagate_namespaces(expressions,namespaces,map,insert_type
         
         %if IC, need to take just first time index
         if exist('type','var') && strcmp(type, 'ICs') && strcmp(words{j}, 'X')
-          new_word = [new_word '_last']; %EAR
+          new_word = [new_word '_last']; % HACK
         end
         
         % replace found word in expression by map(names_bar|parent_namespace)
