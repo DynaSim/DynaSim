@@ -6,14 +6,21 @@ function handles=PlotData2(data,varargin)
 % data.
 % Inputs:
 %   data: DynaSim data structure (see CheckData)
-%   options:
+%   Accepts the following name/value pairs:
 %     'plot_type' {'waveform' (default),'rastergram','rates','power'} - what to plot
-%     'variable' - name of field containing data to plot
-%                  (default: all pops with state variable of variable in data.labels)
-%     'time_limits' - [beg,end] (units of data.time)
+%     'population' - name of population to plot (default: 'all'); accepts
+%                    regexp strings
+%     'variable' - name of variable to plot for each population (default: state variable, X or V);
+%                      accepts regexp strings
+%     'varied1' - Indices of 1st varied model parameter to plot. If the parameter
+%                 is numeric, specify indices (e.g. 1:3 corresponds to 1st-3rd
+%                 varied values. If the parameter is a char array, uses
+%                 regular expressions. Instead of 'varied1', can also use
+%                 the actual parameter name (e.g. 'E_Iapp')
+%     'varied2' - As varied 1, for 2nd varied parameter
 %     'max_num_overlaid' - maximum # of waveforms to overlay per plot
-%     'max_num_rows' - maximum # of subplot rows per figure
-%     'xlim' - [XMIN XMAX], x-axis limits (default: all data)
+%     'xlims' - [XMIN XMAX], x-axis limits (default: all data)
+%     'ylims' - [YMIN YMAX], y-axis limits (default: all data)
 %     'yscale' {'linear','log','log10'}, whether to plot linear or log scale
 %     'visible' {'on','off'}
 %     NOTE: analysis options available depending on plot_type
@@ -29,11 +36,13 @@ data=CheckData(data);
   % note: calling CheckData() at beginning enables analysis/plotting functions to
   % accept data matrix [time x cells] in addition to DynaSim data structure.
 
-options=CheckOptions(varargin,{...
-  'time_limits',[-inf inf],[],...
+  % Flag for returning error if the user specifies name/value pairs that are not in the
+  % CheckOptions list
+  strict_mode = 0;
+  
+[options, options_extras0] = CheckOptions(varargin,{...
   'population',[],[],...        
   'variable',[],[],...        
-  'varied',{[]},[],...
   'max_num_overlaid',50,[],...
   'plot_type','waveform',{'waveform','waveform_mean','rastergram','raster','power','rates'},...
   'xlim',[],[],...
@@ -150,8 +159,26 @@ if isempty(chosen_vars)
     chosen_vars = getdefaultvar(xp);
 end
 
+% Remove populations and variables from all_names
+all_names = xp.exportAxisNames;
+varied_names = only_varieds(all_names);
+
+% Convert 'varied1'...'variedN' values in options extra to actual varied
+% names
+options_extras = convert_variedN_to_axisnames(varied_names,options_extras0);
+
 % User selection for remaining varied parameters
-chosen_varied = get_chosen_varied(xp,options.varied);
+[chosen_varied , options_extras ]= get_chosen_varied(varied_names,options_extras);
+
+% If any options are still leftover, these are extraneous. Report an error
+leftover_fields = fieldnames(options_extras);
+if ~isempty(leftover_fields) && strict_mode
+    error('The following unrecogized name/value pairs were passed in: %s', sprintf('%s ',leftover_fields{:}));
+end
+
+% Convert any "all" strings in chosen_varied to colon operators
+inds = cellfun(@ischar,chosen_varied);
+chosen_varied(inds) = cellfun(@(s) strrep(s,'all',':'),chosen_varied(inds));
 
 % Select out chosen data
 xp2 = xp(chosen_vars,chosen_pop,chosen_varied{:});
@@ -251,25 +278,53 @@ function vars_out = getdefaultvar(xp)
     end
 end
 
+function [chosen_varied, options_varied ]= get_chosen_varied(varied_names,options_varied)
 
-function chosen_varied = get_chosen_varied(xp,varied)
     
-    chosen_varied = repmat({':'},1,xp.ndims);
-    if iscell(varied{1})
-        for i = 1:length(varied)
-            chosen_varied{xp.findaxis(varied{i}{1})} = varied{i}{2};
+    
+    
+    % Initialize output
+    chosen_varied = repmat({':'},1,length(varied_names));
+    
+    % Varied name-value pairs entered by user
+    varied_NVPs = fieldnames(options_varied);
+    
+    % See if any of these match actual varied parameters
+    for i =  1:length(varied_NVPs)
+        ind = find(strcmp(varied_names,varied_NVPs{i}));
+        if length(ind) == 1
+            chosen_varied{ind} = options_varied.(varied_NVPs{i});
+            
+            % Optional (remove from options_varied)
+            options_varied = rmfield(options_varied,varied_NVPs{i});
+        elseif length(ind) > 1
+            error('Multiple varied arguments found');
+        else
+            % Not a varied variable name
         end
-    elseif ~isempty(varied{1})
-        chosen_varied{xp.findaxis(varied{1})} = varied{2};
-    else
+        
+        
     end
     
-    chosen_varied = chosen_varied(3:end);       % Drop 1st two entries, since these 
-                                                % correspond to population
-                                                % and variables, which
-                                                % should always be empty.
 end
 
+function options_extras = convert_variedN_to_axisnames(all_names,options_extras);
+
+    fn = fieldnames(options_extras);
+    fn2 = fn;
+    for i = 1:length(fn)
+        fn_curr = fn{i};
+        if strcmp(fn_curr(1:6),'varied')        % User has entered variedX
+            % fn is original fieldname (e.g. variedX)
+            % fn2 is new field name of varied parameter (e.g. E_Iapp)
+            fn2{i} = all_names{str2num(fn_curr(7:end))};
+            options_extras.(fn2{i}) = options_extras.(fn{i});
+            options_extras = rmfield(options_extras,fn{i});
+        end
+    end
+    
+
+end
 
 function ax_ind_varied = get_ax_ind_varied(xp)
     % get logical indices of axess corresponding to varied parameters
@@ -306,4 +361,11 @@ function xp2 = reduce_dims(xp2,maxNplotdims)
 
         if Nd ~= maxNplotdims; error('something wrong'); end
     end
+end
+
+function varied_names = only_varieds(all_names)
+    inds = true(1,length(all_names));
+    inds(strcmp(all_names,'populations')) = false; 
+    inds(strcmp(all_names,'variables')) = false;
+    varied_names = all_names(inds);
 end
