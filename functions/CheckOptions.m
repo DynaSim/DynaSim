@@ -1,4 +1,4 @@
-function parms = CheckOptions(options, options_schema, strict)
+function [parms, params_unspecified ] = CheckOptions(options, options_schema, strict)
 %CHECKOPTIONS - organize key/value pairs in structure with default or user-supplied values according to a schema
 %
 % Usage:
@@ -97,7 +97,11 @@ end
 %   remove any fields that are unknown
 %   unless no schema is defined.
 
+params_unspecified = struct;
 if (~strict && ~isempty(parms) && ~isempty(options_schema))
+  for i = 1:length(unknown_fields)
+      params_unspecified.(unknown_fields{i}) = parms.(unknown_fields{i});
+  end
   parms = rmfield(parms,unknown_fields);
 end
 
