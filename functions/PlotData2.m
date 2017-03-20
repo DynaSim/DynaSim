@@ -40,14 +40,69 @@ function handles=PlotData2(data,varargin)
 % 
 % See also: CalcFR, CalcPower, PlotWaveforms, CheckData
 
-% Check inputs
-data=CheckData(data);
-  % note: calling CheckData() at beginning enables analysis/plotting functions to
-  % accept data matrix [time x cells] in addition to DynaSim data structure.
+if ~ischar(data)
 
-  
-% Convert input data to xPlt
-xp = DynaSim2xPlt(data);
+    % Check inputs
+    data=CheckData(data);
+      % note: calling CheckData() at beginning enables analysis/plotting functions to
+      % accept data matrix [time x cells] in addition to DynaSim data structure.
+
+
+    % Convert input data to xPlt
+    xp = DynaSim2xPlt(data);
+    is_image = 0;
+else
+    study_dir = data;
+    
+    % Import plot files
+    data_img = ImportPlots(study_dir);
+
+    % Load into DynaSim structure
+    [data_table,column_titles] = DataField2Table (data_img,'plot_files');
+
+    % Preview the contents of this table
+    previewTable(data_table,column_titles);
+
+    % The entries in the first column contain the paths to the figure files.
+    % There can be multiple figures associated with each simulation, which is
+    % why these are cell arrays of strings.
+    disp(data_table{1}{1})
+    disp(data_table{1}{2})
+
+    % Import the linear data into an xPlt object
+    xp = xPlt;
+    X = data_table{1}; axislabels = data_table(2:end);
+    xp = xp.importLinearData(X, axislabels{:});
+    xp = xp.importAxisNames(column_titles(2:end));
+    
+    % Add dummy population and variable dimensions since the code below
+    % expects it
+    xd = xp.data;
+    xv = xp.exportAxisVals;
+    xn = xp.exportAxisNames;
+    
+    xv(end+1:end+2) = {{'Pop1'},{'X'}};
+    xn(end+1:end+2) = {'populations','variables'};
+    
+    xp = xp.importData(xd,xv);
+    xp = xp.importAxisNames(xn);
+    clear xd xv xn
+    
+    % Set up metadata
+    % Store metadata info
+    meta = struct;
+    meta.datainfo(1:2) = nDDictAxis;
+    meta.datainfo(1).name = 'time(ms)';
+    meta.datainfo(1).values = 1:10;
+    meta.datainfo(2).name = 'cells';
+        cell_names = [1:5];
+        cell_names_str = cellfunu(@(s) ['Cell ' num2str(s)], num2cell(cell_names));
+    xp.meta = meta;
+    
+    
+    is_image = 1;
+
+end
 
 % Find out names of varied variables
 all_names = xp.exportAxisNames;
@@ -92,6 +147,11 @@ strict_mode = 1;
   },false);
 handles=[];
 
+% Options overwrite
+if is_image
+    options.force_overlay = 'none';
+end
+
 % Pull out fields from options struct
 plot_type = options.plot_type;
 plot_options = options.plot_options;
@@ -115,42 +175,6 @@ figure_options = struct_addDef(figure_options,'visible',options.visible);
 figure_options = struct_addDef(figure_options,'save_figures',options.save_figures);
 figure_options = struct_addDef(figure_options,'save_figname_path',options.save_figname_path);
 figure_options = struct_addDef(figure_options,'supersize_me',options.supersize_me);
-
-% todo: add option 'plot_mode' {'trace','image'}
-
-time=data.time;
-
-% do any analysis if necessary and set x-data
-switch options.plot_type
-  case 'waveform'   % plot VARIABLE
-    xdata=time;
-    xlab='time (ms)'; % x-axis label
-  case 'power'      % plot VARIABLE_Power_SUA.Pxx
-    if any(cellfun(@isempty,regexp(var_fields,'.*_Power_SUA$')))
-      data=CalcPower(data,varargin{:});
-    end
-    xdata=data(1).([var_fields{1} '_Power_SUA']).frequency;
-    xlab='frequency (Hz)'; % x-axis label
-    % set default x-limits for power spectrum
-    if isempty(options.xlim)
-      options.xlim=[0 200]; % Hz
-    end
-  case {'rastergram','raster'} % raster VARIABLE_spike_times
-    if any(cellfun(@isempty,regexp(var_fields,'.*_spike_times$')))
-      data=CalcFR(data,varargin{:});
-    end
-    xdata=time;
-    xlab='time (ms)'; % x-axis label
-  case 'rates'      % plot VARIABLE_FR
-    if any(cellfun(@isempty,regexp(var_fields,'.*_FR$')))
-      data=CalcFR(data,varargin{:});
-    end
-    xdata=data.time_FR;
-    xlab='time (ms, bins)'; % x-axis label
-end
-% if isempty(options.xlim)
-%   options.xlim=[min(xdata) max(xdata)];
-% end
 
 
 
@@ -288,11 +312,11 @@ subplot_options.legend1 = setup_legends(xp2);
 
 
 % Get axis lims
-if isempty(plot_options.xlims) && options.lock_axes
+if isempty(plot_options.xlims) && options.lock_axes && ~is_image
     xdat = xp.meta.datainfo(1).values;
     plot_options.xlims = [min(xdat) max(xdat)];
 end
-if isempty(plot_options.ylims) && options.lock_axes
+if isempty(plot_options.ylims) && options.lock_axes && ~is_image
     switch plot_type
         case 'waveform'
             % Merge all data into one single huge column
@@ -306,7 +330,7 @@ if isempty(plot_options.ylims) && options.lock_axes
     end
 end
 
-if isempty(plot_options.zlims) && options.lock_axes
+if isempty(plot_options.zlims) && options.lock_axes && ~is_image
     switch plot_type
         case 'heatmap'
             data_all = [xp2.data{:}];
@@ -316,37 +340,49 @@ if isempty(plot_options.zlims) && options.lock_axes
     end
 end
 
+if is_image
+    % Is an image
+    data_plothandle = @xp_plotimage;
+    image_options = struct;
+    image_options.scale = .5;           % Scale of .5 enforces some anti-aliasing
+    args_plothandle = image_options;
+else
+    % Is data
+    data_plothandle = @xp_matrix_advancedplot3D;
+    args_plothandle = plot_options;
+end
+
 % Split available axes into the number of dimensions supported by each
 % axis handle
 switch num_embedded_subplots
     case 1
         % Ordering of axis handles
-        function_handles = {@xp_handles_newfig, @xp_subplot_grid,@xp_matrix_advancedplot3D};   % Specifies the handles of the plotting functions
+        function_handles = {@xp_handles_newfig, @xp_subplot_grid,data_plothandle};   % Specifies the handles of the plotting functions
         dims_per_function_handle = [1,1,1];
-        function_args = {{figure_options},{subplot_options},{plot_options}};
+        function_args = {{figure_options},{subplot_options},{args_plothandle}};
         
     case 2
         % Ordering of axis handles
-        function_handles = {@xp_handles_newfig, @xp_subplot_grid,@xp_matrix_advancedplot3D};   % Specifies the handles of the plotting functions
+        function_handles = {@xp_handles_newfig, @xp_subplot_grid,data_plothandle};   % Specifies the handles of the plotting functions
         dims_per_function_handle = [1,2,1];
-        function_args = {{figure_options},{subplot_options},{plot_options}};
+        function_args = {{figure_options},{subplot_options},{args_plothandle}};
         
     case 3
         % Ordering of axis handles
-        function_handles = {@xp_handles_newfig, @xp_subplot_grid, @xp_subplot_grid,@xp_matrix_advancedplot3D};   % Specifies the handles of the plotting functions
+        function_handles = {@xp_handles_newfig, @xp_subplot_grid, @xp_subplot_grid,data_plothandle};   % Specifies the handles of the plotting functions
         dims_per_function_handle = [1,2,1,1];
         subplot_options2 = subplot_options;
         subplot_options2.legend1 = [];
         subplot_options.display_mode = 1;
-        function_args = {{figure_options},{subplot_options2},{subplot_options},{plot_options}};
+        function_args = {{figure_options},{subplot_options2},{subplot_options},{args_plothandle}};
     case 4
         % Ordering of axis handles
-        function_handles = {@xp_handles_newfig, @xp_subplot_grid, @xp_subplot_grid,@xp_matrix_advancedplot3D};   % Specifies the handles of the plotting functions
+        function_handles = {@xp_handles_newfig, @xp_subplot_grid, @xp_subplot_grid,data_plothandle};   % Specifies the handles of the plotting functions
         dims_per_function_handle = [1,2,2,1];
         subplot_options2 = subplot_options;
         subplot_options2.legend1 = [];
         subplot_options.display_mode = 1;
-        function_args = {{figure_options},{subplot_options2},{subplot_options},{plot_options}};
+        function_args = {{figure_options},{subplot_options2},{subplot_options},{args_plothandle}};
 end
 
 % Linearize dimensions of xp2 that are in excess of the total number we can
