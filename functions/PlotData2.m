@@ -73,6 +73,8 @@ strict_mode = 1;
   'max_num_overlaid',50,[],...
   'do_mean',false,[false true],...
   'force_overlay',[],[],...
+  'do_overlay_shift',false,[false true],...
+  'overlay_shift_val',[],[],...
   'plot_type','waveform',{'waveform','heatmap','rastergram','raster','power','rates'},...
   'xlims',[],[],...
   'ylims',[],[],...
@@ -260,12 +262,21 @@ if ~strcmpi(force_overlay,'none')
     xp2.meta.datainfo(end).values = packed_vars(:)';
     
     
-    
     % Pack the dimension into the first empty dimension
     xp2 = xp2.packDim(force_overlay);
     if only_one_cell
         xp2.data = cellfunu(@squeeze,xp2.data);
     end
+
+end
+
+% Shift the overlay by a certain amount
+if options.do_overlay_shift
+    mydata = xp2.data;
+    for i = 1:numel(mydata)
+        mydata{i} = do_shift_lastdim (mydata{i},options.overlay_shift_val);
+    end
+    xp2.data = mydata;
 end
 
 % Squeeze to eliminate superfluous dimensions
@@ -321,19 +332,19 @@ end
 switch num_embedded_subplots
     case 1
         % Ordering of axis handles
-        function_handles = {@xp_handles_newfig, @xp_subplot_grid,@xp_matrix_basicplot};   % Specifies the handles of the plotting functions
+        function_handles = {@xp_handles_newfig, @xp_subplot_grid,@xp_matrix_advancedplot3D};   % Specifies the handles of the plotting functions
         dims_per_function_handle = [1,1,1];
         function_args = {{figure_options},{subplot_options},{plot_options}};
         
     case 2
         % Ordering of axis handles
-        function_handles = {@xp_handles_newfig, @xp_subplot_grid,@xp_matrix_basicplot};   % Specifies the handles of the plotting functions
+        function_handles = {@xp_handles_newfig, @xp_subplot_grid,@xp_matrix_advancedplot3D};   % Specifies the handles of the plotting functions
         dims_per_function_handle = [1,2,1];
         function_args = {{figure_options},{subplot_options},{plot_options}};
         
     case 3
         % Ordering of axis handles
-        function_handles = {@xp_handles_newfig, @xp_subplot_grid, @xp_subplot_grid,@xp_matrix_basicplot};   % Specifies the handles of the plotting functions
+        function_handles = {@xp_handles_newfig, @xp_subplot_grid, @xp_subplot_grid,@xp_matrix_advancedplot3D};   % Specifies the handles of the plotting functions
         dims_per_function_handle = [1,2,1,1];
         subplot_options2 = subplot_options;
         subplot_options2.legend1 = [];
@@ -341,7 +352,7 @@ switch num_embedded_subplots
         function_args = {{figure_options},{subplot_options2},{subplot_options},{plot_options}};
     case 4
         % Ordering of axis handles
-        function_handles = {@xp_handles_newfig, @xp_subplot_grid, @xp_subplot_grid,@xp_matrix_basicplot};   % Specifies the handles of the plotting functions
+        function_handles = {@xp_handles_newfig, @xp_subplot_grid, @xp_subplot_grid,@xp_matrix_advancedplot3D};   % Specifies the handles of the plotting functions
         dims_per_function_handle = [1,2,2,1];
         subplot_options2 = subplot_options;
         subplot_options2.legend1 = [];
@@ -491,4 +502,26 @@ function varied_names = only_varieds(all_names)
     inds(strcmp(all_names,'populations')) = false; 
     inds(strcmp(all_names,'variables')) = false;
     varied_names = all_names(inds);
+end
+
+function mydata_out = do_shift_lastdim (mydata,shift)
+    sz = size(mydata);
+    nd = ndims(mydata);
+    
+    if isempty(shift)
+        % Do adaptive shift
+        upscale_factor = 2;
+        temp = reshape(mydata,prod(sz(1:nd-1)),sz(nd));
+        stdevs = std(temp)*upscale_factor;
+        sh = [0, stdevs(1:end-1) + stdevs(2:end)]';
+    else
+        sh = shift*[0:sz(end)-1]';      % Fixed shift amount
+    end
+    
+    
+    sh = permute(sh, [2:nd,1]);
+    sh2 = repmat(sh, sz(1:nd-1));
+    
+    mydata_out = mydata + sh2;
+    
 end
