@@ -2,14 +2,18 @@ function [data,studyinfo] = ImportData(file,varargin)
 %IMPORTDATA - load data into DynaSim formatted data structure.
 %
 % Usage:
-%   [data,studyinfo]=ImportData(data_file)
-%   data=ImportData(data_file)
+%   [data,studyinfo] = ImportData(data_file)
+%   [data,studyinfo] = ImportData(studyinfo)
+%   data = ImportData(data_file)
 %
 % Inputs:
-%   - data_file data file name in accepted format (csv, mat, ...), or also
-%     accepted: list of data files, studyinfo structure, study_dir, or studyinfo
-%     file
-%   - studyinfo: DynaSim studyinfo structure (see CheckStudyinfo)
+%   - First input/argument:
+%     - data_file: data file name in accepted format (csv, mat, ...)
+%     - cell array of data files
+%     - study_dir
+%     - studyinfo structure
+%     - studyinfo file
+
 %   - options:
 %     'verbose_flag': {0,1} (default: 1)
 %     'process_id'  : process identifier for loading studyinfo if necessary
@@ -19,14 +23,16 @@ function [data,studyinfo] = ImportData(file,varargin)
 %
 % Outputs:
 %   - DynaSim data structure:
-%     data.labels           : list of state variables and monitors recorded
-%     data.(state_variables): state variable data matrix [time x cells]
-%     data.(monitors)       : monitor data matrix [time x cells]
-%     data.time             : time vector [time x 1]
-%     data.simulator_options: simulator options used to generate simulated data
-%     data.model            : model used to generate simulated data
-%     [data.varied]         : list of varied model components
-%     [data.results]        : list of derived data sets created by post-processing
+%       data.labels           : list of state variables and monitors recorded
+%       data.(state_variables): state variable data matrix [time x cells]
+%       data.(monitors)       : monitor data matrix [time x cells]
+%       data.time             : time vector [time x 1]
+%       data.simulator_options: simulator options used to generate simulated data
+%       data.model            : model used to generate simulated data
+%       [data.varied]         : list of varied model components
+%       [data.results]        : list of derived data sets created by post-processing
+%   - studyinfo: DynaSim studyinfo structure (see CheckStudyinfo)
+%     Note: if data is missing, studyinfo.simulations will only show found data
 %
 % Notes:
 %   - NOTE 1: CSV file structure assumes CSV file contains data organized
@@ -71,11 +77,21 @@ if ischar(options.variables)
   options.variables = {options.variables};
 end
 
-% check if input is a DynaSim studyinfo structure
-if ischar(file) && isdir(file) % study directory
-  study_dir = file;
-  clear file
-  file.study_dir = study_dir;
+% check if input is a DynaSim study_dir or path to studyinfo
+if ischar(file)
+  if isdir(file) % study directory
+    study_dir = file;
+    clear file
+    file.study_dir = study_dir;
+  elseif strfind(file, 'studyinfo')
+    filePath = fileparts(file);
+    if isempty(filePath)
+      filePath = pwd;
+    end
+    study_dir = filePath;
+    clear file
+    file.study_dir = study_dir;
+  end
 end
 
 if isstruct(file) && isfield(file,'study_dir')
@@ -108,6 +124,7 @@ if isstruct(file) && isfield(file,'study_dir')
   
   data_files = data_files(success);
   sim_info = studyinfo.simulations(success);
+  studyinfo.simulations = studyinfo.simulations(success); % remove missing data
   
   % load each data set recursively
   keyvals = Options2Keyval(options);
@@ -153,7 +170,7 @@ else
   studyinfo=[];
 end
 
-% check if input is a list of data files (todo: eliminate duplicate code by
+% check if input is a list of data files (TODO: eliminate duplicate code by
 % combining with the above recursive loading for studyinfo data_files)
 if iscellstr(file)
   data_files=file;
