@@ -11,7 +11,7 @@ function data=xPlt2DynaSim(obj)
 % equivalent to the structure fields in Jason's DynaSim structure.
 
 
-pop_axis = obj.findaxis('populations')
+pop_axis = obj.findaxis('populations');
 obj = obj.mergeDims([1:pop_axis-1]);
 obj = obj.mergeDims([pop_axis:ndims(obj)]);
 obj = squeeze(obj); % Squeeze out the empty dimensions.
@@ -46,5 +46,6 @@ for i = 1:size(obj,1)
     
 end
 
+data = CheckData(data);
 
 end
