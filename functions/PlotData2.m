@@ -20,6 +20,7 @@ function handles=PlotData2(data,varargin)
 %     'varied2' - As varied 1, for 2nd varied parameter
 %     'max_num_overlaid' - maximum # of waveforms to overlay per plot
 %     'xlims' - [XMIN XMAX], x-axis limits (default: all data)
+%     'do_zoom' - {false, true} - Turn on zoom function in subplot_grid
 %     'ylims' - [YMIN YMAX], y-axis limits (default: all data)
 %     'yscale' {'linear','log','log10'}, whether to plot linear or log scale
 %     'visible' {'on','off'}
@@ -43,13 +44,14 @@ data=CheckData(data);
 [options, options_extras0] = CheckOptions(varargin,{...
   'population',[],[],...        
   'variable',[],[],...        
+  'num_embedded_subplots',2,[{1,2,3,4}],...
   'max_num_overlaid',50,[],...
   'plot_type','waveform',{'waveform','waveform_mean','rastergram','raster','power','rates'},...
   'xlim',[],[],...
   'ylim',[],[],...
   'plot_options',struct,[],...
   'subplot_options',struct,[],...
-  'do_zoom',1,[0 1],...
+  'do_zoom',0,[0 1],...
   'yscale','linear',{'linear','log','log10','log2'},...
   'visible','on',{'on','off'},...
   'save_data','on',{'on','off'},...
@@ -59,6 +61,7 @@ handles=[];
 % Pull out fields from options struct
 plot_options = options.plot_options;
 subplot_options = options.subplot_options;
+num_embedded_subplots = options.num_embedded_subplots;
 
 
 % Add default options to structures
@@ -106,20 +109,8 @@ end
 %   options.xlim=[min(xdata) max(xdata)];
 % end
 
-% Extract the data in a linear table format
-[data_table,column_titles,time] = Data2Table (data);
-
-% % Preview the contents of this table
-% %     Note: We cannot make this one big cell array since we want to allow
-% %     axis labels to be either strings or numerics.
-% previewTable(data_table,column_titles);
-
-% Import the linear data into an xPlt object
-xp = xPlt;
-X = data_table{1};                          % X holds the data that will populate the multidimensional array. Must be numeric or cell array.
-axislabels = data_table(2:end);             % Each entry in X has an associated set of axis labels, which will define its location in multidimensional space. **Must be numeric or cell array of chars only**
-xp = xp.importLinearData(X,axislabels{:});
-xp = xp.importAxisNames(column_titles(2:end));  % There should be 1 axis name for every axis, of type char.
+% Import DynaSim data to xPlt
+xp = DynaSim2xPlt(data);
 
 
 % Apply max overlaid
@@ -178,7 +169,7 @@ end
 
 % Convert any "all" strings in chosen_varied to colon operators
 inds = cellfun(@ischar,chosen_varied);
-chosen_varied(inds) = cellfun(@(s) strrep(s,'all',':'),chosen_varied(inds));
+chosen_varied(inds) = cellfun(@(s) strrep(s,'all',':'),chosen_varied(inds),'UniformOutput',0);
 
 % Select out chosen data
 xp2 = xp(chosen_vars,chosen_pop,chosen_varied{:});
@@ -202,7 +193,6 @@ maxNplotdims = 3;
 
  
 
-num_embedded_subplots = 2;
 
 % Split available axes into the number of dimensions supported by each
 % axis handle
@@ -223,24 +213,29 @@ switch num_embedded_subplots
     case 3
         % Ordering of axis handles
         function_handles = {@xp_handles_newfig, @xp_subplot_grid, @xp_subplot_grid,@xp_matrix_basicplot};   % Specifies the handles of the plotting functions
-        dims_per_function_handle = [1,2,1,1];
+        dims_per_function_handle = [1,1,2,1];
+        subplot_options2 = subplot_options;
         subplot_options2.display_mode = 1;
-        function_args = {{},{},{subplot_options2},{plot_options}};
+        function_args = {{},{subplot_options},{subplot_options2},{plot_options}};
     case 4
         % Ordering of axis handles
         function_handles = {@xp_handles_newfig, @xp_subplot_grid, @xp_subplot_grid,@xp_matrix_basicplot};   % Specifies the handles of the plotting functions
         dims_per_function_handle = [1,2,2,1];
+        subplot_options2 = subplot_options;
         subplot_options2.display_mode = 1;
-        function_args = {{},{},{subplot_options2},{plot_options}};
+        function_args = {{},{subplot_options},{subplot_options2},{plot_options}};
 end
 
+% Linearize dimensions of xp2 that are in excess of the total number we can
+% plot
 maxNplotdims = sum(dims_per_function_handle)-1;
 xp2 = reduce_dims(xp2,maxNplotdims);
 
+% Stack up available dimensions based on how much each axis handle can hold
 ax_names = [xp2.exportAxisNames, 'data'];
 dimensions = get_dimensions(ax_names,dims_per_function_handle);
 
-
+% Remove any excess function handles that aren't needed
 available_dims = ~cellfun(@isempty,dimensions);
 function_handles = function_handles(available_dims);
 dimensions = dimensions(available_dims);
@@ -343,7 +338,7 @@ function dimensions = get_dimensions(ax_names,dims_per_function_handle)
     while i > 0 && ~isempty(ax_names)
         
         Ndims_curr = dims_per_function_handle(i);
-        dimensions{i} = ax_names(end-Ndims_curr+1:end);
+        dimensions{i} = ax_names(max(1,end-Ndims_curr+1):end);
         ax_names = ax_names(1:end-Ndims_curr);
         i=i-1;
     end
