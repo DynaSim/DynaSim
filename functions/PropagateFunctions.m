@@ -30,6 +30,7 @@ while keep_going
   keep_going=0;
   update_these=fieldnames(model.functions);
   expressions=struct2cell(model.functions);
+  
   % loop over target functions from which to eliminate internal function calls
   for i=1:length(expressions)
     functions=model.functions; % update functions on each iteration
@@ -37,6 +38,7 @@ while keep_going
     model.functions.(update_these{i})=expressions{i};
   end
 end
+
 % substitute these updated functions into everything else:
 functions=model.functions;
 
@@ -50,14 +52,17 @@ for type_index=1:length(target_types)
   if isstruct(s)
     update_these=fieldnames(s);
     expressions=struct2cell(s);
+    
     % loop over target expressions from which to eliminate internal function calls
     for i=1:length(expressions)
       if isempty(expressions{i})
         continue;
       end
+      
       % update expressions of this type
       expressions{i}=insert_functions(expressions{i},functions);
     end
+    
     % update model with expressions that do not require internal function calls
     model.(type)=cell2struct(expressions,update_these,1);
   end
@@ -69,11 +74,13 @@ if ~isempty(model.conditionals)
   for type_index=1:length(target_types)
     type=target_types{type_index};
     expressions={model.conditionals.(type)};
+    
     % loop over conditional expressions from which to eliminate internal function calls
     for i=1:length(expressions)
       if isempty(expressions{i})
         continue;
       end
+      
       % update expressions
       expressions{i}=insert_functions(expressions{i},functions);
     end
@@ -93,11 +100,14 @@ function [expression,functions_were_found]=insert_functions(expression,functions
     for ff=1:length(found_functions)
       % name of found function
       found_function=found_functions{ff};
+      
       % found expression to replace found function name in target
       found_expression=functions.(found_function);
+      
       % variable names used in the original found function definition
       orig_var_list=regexp(found_expression,'^@\(([^\)]+)\)','tokens','once');
       orig_vars=regexp(orig_var_list{1},',','split'); % variables used in original function definition
+      
       % variable names passed from the target function to the function found in it
       % get arguments to function call, support function arguments
 %       new_var_list=regexp(expression,[found_function '\(*\(([^\)\(]+)\)'],'tokens','once');
@@ -106,6 +116,7 @@ function [expression,functions_were_found]=insert_functions(expression,functions
       lb=find(substr=='('); % indices to open parentheses
       rb=find(substr==')'); % indices to close parentheses
       ix=ones(size(lb)); % binary vector indicating open parentheses that have not been closed
+      
       for i=1:length(rb)
         pos=find(lb<rb(i)&ix==1,1,'last'); % last open parentheses before this closing parenthesis
         if pos==1 % this closing parenthesis closes the function call
@@ -115,26 +126,34 @@ function [expression,functions_were_found]=insert_functions(expression,functions
           ix(pos)=0; % this open parenthesis has been closed
         end
       end
+      
       % add escape character to regexp special characters
       new_var_list{1}=regexprep(substr(lb(1)+1:R-1),'([\(\)\+\*\.\^])','\\$1');
+      
       % split variables on comma
       new_vars=regexp(new_var_list{1},',','split');
+      
       % found expression without the input variable list
       found_expression=regexp(found_expression,'^@\([^\)]+\)(.+)','tokens','once');
       found_expression=found_expression{1};
+      
       if length(orig_vars)~=length(new_vars)
         error('failed to match variables for function %s',found_function);
       end
+      
       % prepare found expression with variable names from the target function
       if ~isequal(orig_vars,new_vars)
         for v=1:length(orig_vars)
           found_expression=dynasim_strrep(found_expression,orig_vars{v},new_vars{v});
         end
       end
+      
       % string to replace in the target function
       oldstr=[found_function '\(' new_var_list{1} '\)'];
+      
       % string to insert in the target function
       newstr=sprintf('(%s)',found_expression);
+      
       % update the target function
       expression=dynasim_strrep(expression,oldstr,newstr,'(',')');
     end
