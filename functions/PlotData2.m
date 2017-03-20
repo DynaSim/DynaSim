@@ -69,7 +69,7 @@ strict_mode = 1;
 [options, options_extras0] = CheckOptions(myargin,{...
   'population',[],[],...        
   'variable',[],[],...        
-  'num_embedded_subplots',2,[{1,2,3,4}],...
+  'num_embedded_subplots',2,{1,2,3,4},...
   'max_num_overlaid',50,[],...
   'do_mean',false,[false true],...
   'force_overlay',[],[],...
@@ -80,10 +80,13 @@ strict_mode = 1;
   'lock_axes',1,[false true],...
   'plot_options',struct,[],...
   'subplot_options',struct,[],...
+  'figure_options',struct,[],...
   'do_zoom',false,[false true],...
   'yscale','linear',{'linear','log','log10','log2'},...
   'visible','on',{'on','off'},...
-  'save_data','on',{'on','off'},...
+  'save_figures',false,[false true],...
+  'save_figname_path',[],[],...
+  'supersize_me',false,[false true],...
   },false);
 handles=[];
 
@@ -91,6 +94,7 @@ handles=[];
 plot_type = options.plot_type;
 plot_options = options.plot_options;
 subplot_options = options.subplot_options;
+figure_options = options.figure_options;
 num_embedded_subplots = options.num_embedded_subplots;
 do_mean = options.do_mean;
 force_overlay = options.force_overlay;
@@ -104,6 +108,11 @@ plot_options = struct_addDef(plot_options,'zlims',options.zlims);
 % Subplot_options
 subplot_options = struct_addDef(subplot_options,'subplotzoom_enabled',options.do_zoom);
 
+% Figure options
+figure_options = struct_addDef(figure_options,'visible',options.visible);
+figure_options = struct_addDef(figure_options,'save_figures',options.save_figures);
+figure_options = struct_addDef(figure_options,'save_figname_path',options.save_figname_path);
+figure_options = struct_addDef(figure_options,'supersize_me',options.supersize_me);
 
 % todo: add option 'plot_mode' {'trace','image'}
 
@@ -259,10 +268,6 @@ if ~strcmpi(force_overlay,'none')
     end
 end
 
-% Make sure xp2.data is not more than 3 dimensions (this is the most we can
-% plot in a single subplot)
-
-
 % Squeeze to eliminate superfluous dimensions
 xp2 = xp2.squeeze;
 Nd = ndims(xp2);
@@ -318,13 +323,13 @@ switch num_embedded_subplots
         % Ordering of axis handles
         function_handles = {@xp_handles_newfig, @xp_subplot_grid,@xp_matrix_basicplot};   % Specifies the handles of the plotting functions
         dims_per_function_handle = [1,1,1];
-        function_args = {{},{subplot_options},{plot_options}};
+        function_args = {{figure_options},{subplot_options},{plot_options}};
         
     case 2
         % Ordering of axis handles
         function_handles = {@xp_handles_newfig, @xp_subplot_grid,@xp_matrix_basicplot};   % Specifies the handles of the plotting functions
         dims_per_function_handle = [1,2,1];
-        function_args = {{},{subplot_options},{plot_options}};
+        function_args = {{figure_options},{subplot_options},{plot_options}};
         
     case 3
         % Ordering of axis handles
@@ -333,7 +338,7 @@ switch num_embedded_subplots
         subplot_options2 = subplot_options;
         subplot_options2.legend1 = [];
         subplot_options.display_mode = 1;
-        function_args = {{},{subplot_options2},{subplot_options},{plot_options}};
+        function_args = {{figure_options},{subplot_options2},{subplot_options},{plot_options}};
     case 4
         % Ordering of axis handles
         function_handles = {@xp_handles_newfig, @xp_subplot_grid, @xp_subplot_grid,@xp_matrix_basicplot};   % Specifies the handles of the plotting functions
@@ -341,7 +346,7 @@ switch num_embedded_subplots
         subplot_options2 = subplot_options;
         subplot_options2.legend1 = [];
         subplot_options.display_mode = 1;
-        function_args = {{},{subplot_options2},{subplot_options},{plot_options}};
+        function_args = {{figure_options},{subplot_options2},{subplot_options},{plot_options}};
 end
 
 % Linearize dimensions of xp2 that are in excess of the total number we can
@@ -360,8 +365,17 @@ dimensions = dimensions(available_dims);
 function_args = function_args(available_dims);
 
 % Open new figure if necessary & plot the data
-if ~isequal(@xp_handles_newfig, function_handles{1}); figl; end
-xp2.recursivePlot(function_handles,dimensions,function_args);
+if ~isequal(@xp_handles_newfig, function_handles{1})
+    % Cheap hack to force it to create a new figure using our desired
+    % parameters for instances when it wouldn't normally call
+    % xp_handles_newfig.
+    xp3 = xPlt;
+    fhandle = @() recursivePlot(xp2,function_handles,dimensions,function_args);
+    xp3 = xp3.importData({fhandle});
+    xp_handles_newfig(xp3,figure_options);
+else
+    xp2.recursivePlot(function_handles,dimensions,function_args);
+end
 
 
 end
