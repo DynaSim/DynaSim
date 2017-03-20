@@ -284,19 +284,8 @@ xp2 = xp2.squeeze;
 Nd = ndims(xp2);
 
 % Set up legend entries
-if isnumeric(xp2.meta.datainfo(2).values)
-    % If axis is numeric, as in the case with varied parameters, convert to
-    % a cell array of strings
-    leg1 = cellfun(@num2str,num2cell(xp2.meta.datainfo(2).values),'UniformOutput',0);
-    
-    % Also pre-pend the name of the variable being varied
-    for j = 1:length(leg1)
-        leg1{j} = [strrep(xp2.meta.datainfo(2).name,'_',' ') ' ' leg1{j}];
-    end
-    subplot_options.legend1 = leg1;
-else
-    subplot_options.legend1 = xp2.meta.datainfo(2).values;
-end
+subplot_options.legend1 = setup_legends(xp2);
+
 
 % Get axis lims
 if isempty(plot_options.xlims) && options.lock_axes
@@ -524,4 +513,42 @@ function mydata_out = do_shift_lastdim (mydata,shift)
     
     mydata_out = mydata + sh2;
     
+end
+
+function leg1 = setup_legends(xp2)
+    
+    % Pull out all metadata names and values
+    for i = 1:length(xp2.meta.datainfo)
+        mn{i} = xp2.meta.datainfo(i).name;
+        mv{i} = xp2.meta.datainfo(i).values;
+    end
+
+    % Convert any numeric entries to cell strings as needed
+    for i = 2:length(xp2.meta.datainfo)
+        if isnumeric(mv{i})
+            % If axis is numeric, as in the case with varied parameters, convert to
+            % a cell array of strings
+            mv{i} = cellfun(@num2str,num2cell(mv{i}),'UniformOutput',0);
+
+            % Also pre-pend the name of the variable being varied
+            for j = 1:length(mv{i})
+                mv{i}{j} = [strrep(mn{i},'_',' ') ' ' mv{i}{j}];
+            end
+        end
+    end
+    
+    if length(mv) == 2
+        leg1 = mv{2};
+    elseif length(mv) == 3
+        %Cartesean product of mv{2} and mv{3}
+        k = 0;
+        for j = 1:length(mv{3})
+            for i = 1:length(mv{2})         % We plot the 2nd dimension 1st; they are grouped together
+                k=k+1;
+                leg1{k} = [mv{2}{i} ' ' mv{3}{j}];
+            end
+        end
+    else
+        error('should not reach');
+    end
 end
