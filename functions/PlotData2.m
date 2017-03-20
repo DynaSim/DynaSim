@@ -27,6 +27,8 @@ function handles=PlotData2(data,varargin)
 %                       PlotData2 to add other information to the overlay.
 %     'xlims' - [XMIN XMAX], x-axis limits (default: all data)
 %     'ylims' - [YMIN YMAX], y-axis limits (default: all data)
+%     'lock_axes' - {false, true}, locks abscissa and ordinate to be
+%                                  the same across all subplots
 %     'do_zoom' - {false, true} - Turn on zoom function in subplot_grid
 %     'yscale' {'linear','log','log10'}, whether to plot linear or log scale
 %     'visible' {'on','off'}
@@ -71,9 +73,11 @@ strict_mode = 1;
   'max_num_overlaid',50,[],...
   'do_mean',false,[false true],...
   'force_overlay',[],[],...
-  'plot_type','waveform',{'waveform','waveform_mean','rastergram','raster','power','rates'},...
-  'xlim',[],[],...
-  'ylim',[],[],...
+  'plot_type','waveform',{'waveform','heatmap','rastergram','raster','power','rates'},...
+  'xlims',[],[],...
+  'ylims',[],[],...
+  'zlims',[],[],...
+  'lock_axes',1,[false true],...
   'plot_options',struct,[],...
   'subplot_options',struct,[],...
   'do_zoom',false,[false true],...
@@ -84,6 +88,7 @@ strict_mode = 1;
 handles=[];
 
 % Pull out fields from options struct
+plot_type = options.plot_type;
 plot_options = options.plot_options;
 subplot_options = options.subplot_options;
 num_embedded_subplots = options.num_embedded_subplots;
@@ -92,8 +97,9 @@ force_overlay = options.force_overlay;
 
 % Add default options to structures
 % Plot_options
-plot_options = struct_addDef(plot_options,'ylims',options.ylim);
-plot_options = struct_addDef(plot_options,'xlims',options.xlim);
+plot_options = struct_addDef(plot_options,'ylims',options.ylims);
+plot_options = struct_addDef(plot_options,'xlims',options.xlims);
+plot_options = struct_addDef(plot_options,'zlims',options.zlims);
 
 % Subplot_options
 subplot_options = struct_addDef(subplot_options,'subplotzoom_enabled',options.do_zoom);
@@ -261,6 +267,7 @@ end
 xp2 = xp2.squeeze;
 Nd = ndims(xp2);
 
+% Set up legend entries
 if isnumeric(xp2.meta.datainfo(2).values)
     % If axis is numeric, as in the case with varied parameters, convert to
     % a cell array of strings
@@ -275,6 +282,34 @@ else
     subplot_options.legend1 = xp2.meta.datainfo(2).values;
 end
 
+% Get axis lims
+if isempty(plot_options.xlims) && options.lock_axes
+    xdat = xp.meta.datainfo(1).values;
+    plot_options.xlims = [min(xdat) max(xdat)];
+end
+if isempty(plot_options.ylims) && options.lock_axes
+    switch plot_type
+        case 'waveform'
+            % Merge all data into one single huge column
+            data_all = xp2.data(:);
+            data_all = cellfunu(@(x) x(:), data_all);
+            data_all = vertcat(data_all{:});
+            % Find the max and minima - these are the largest and smallest
+            % values we could ever see.
+            data_lims = [min(data_all) max(data_all)];
+            plot_options.ylims = data_lims;
+    end
+end
+
+if isempty(plot_options.zlims) && options.lock_axes
+    switch plot_type
+        case 'heatmap'
+            data_all = [xp2.data{:}];
+            data_all = data_all(:);
+            data_lims = [min(data_all) max(data_all)];
+            plot_options.zlims = data_lims;
+    end
+end
 
 % Split available axes into the number of dimensions supported by each
 % axis handle
