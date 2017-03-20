@@ -18,10 +18,16 @@ function handles=PlotData2(data,varargin)
 %                 regular expressions. Instead of 'varied1', can also use
 %                 the actual parameter name (e.g. 'E_Iapp')
 %     'varied2' - As varied 1, for 2nd varied parameter
+%     'num_embedded_subplots' - maximum # of waveforms to overlay per plot
 %     'max_num_overlaid' - maximum # of waveforms to overlay per plot
+%     'do_mean' - {false, true} - Turn on/off averaging across all units
+%                 in a population
+%     'force_overlay' - {'none', 'populations' (default), 'variables', 'varied1' ... 'variedN'}
+%                       If there is only one cell in a population, this forces
+%                       PlotData2 to add other information to the overlay.
 %     'xlims' - [XMIN XMAX], x-axis limits (default: all data)
-%     'do_zoom' - {false, true} - Turn on zoom function in subplot_grid
 %     'ylims' - [YMIN YMAX], y-axis limits (default: all data)
+%     'do_zoom' - {false, true} - Turn on zoom function in subplot_grid
 %     'yscale' {'linear','log','log10'}, whether to plot linear or log scale
 %     'visible' {'on','off'}
 %     NOTE: analysis options available depending on plot_type
@@ -46,12 +52,14 @@ data=CheckData(data);
   'variable',[],[],...        
   'num_embedded_subplots',2,[{1,2,3,4}],...
   'max_num_overlaid',50,[],...
+  'do_mean',false,[false true],...
+  'force_overlay',[],[],...
   'plot_type','waveform',{'waveform','waveform_mean','rastergram','raster','power','rates'},...
   'xlim',[],[],...
   'ylim',[],[],...
   'plot_options',struct,[],...
   'subplot_options',struct,[],...
-  'do_zoom',0,[0 1],...
+  'do_zoom',false,[false true],...
   'yscale','linear',{'linear','log','log10','log2'},...
   'visible','on',{'on','off'},...
   'save_data','on',{'on','off'},...
@@ -62,7 +70,8 @@ handles=[];
 plot_options = options.plot_options;
 subplot_options = options.subplot_options;
 num_embedded_subplots = options.num_embedded_subplots;
-
+do_mean = options.do_mean;
+force_overlay = options.force_overlay;
 
 % Add default options to structures
 % Plot_options
@@ -112,6 +121,25 @@ end
 % Import DynaSim data to xPlt
 xp = DynaSim2xPlt(data);
 
+% Find out names of varied variables
+all_names = xp.exportAxisNames;
+varied_names = only_varieds(all_names);  % Returns only the names of the varied variables
+
+
+% Convert 'varied1'...'variedN' values in options extra to the names of the
+% actual parameters
+options = convert_variedN_to_axisnames(varied_names,options);
+options_extras = convert_variedN_to_axisnames(varied_names,options_extras0);
+
+
+% Average across cells if necessary
+if do_mean 
+    mydata = xp.data;
+    mydata = cellfun(@(x) mean(x,2), mydata,'UniformOutput',0);
+    xp.data = mydata;
+    xp.meta.datainfo(2).values = {'<Cells>'};
+end
+
 
 % Apply max overlaid
 MTPP = options.max_num_overlaid; % max traces per plot
@@ -123,8 +151,14 @@ if any(strcmp(options.plot_type,{'waveform','power'})) && all(cellfun(@isnumeric
             mydata2{i} = mydata{i}(:,1:min(size(mydata{i},2),MTPP));
         end
     end
+    
     xp.data = mydata2;
     clear mydata mydata2
+    
+    % Update cell numbers metadata
+    cell_names = [1:max(cellfun(@(x) size(x,2),xp.data(:)))];
+    cell_names_str = cellfunu(@(s) ['Cell ' num2str(s)], num2cell(cell_names));
+    xp.meta.datainfo(2).values = cell_names_str;
 end
 
 
@@ -150,15 +184,7 @@ if isempty(chosen_vars)
     chosen_vars = getdefaultvar(xp);
 end
 
-% Remove populations and variables from all_names
-all_names = xp.exportAxisNames;
-varied_names = only_varieds(all_names);
-
-% Convert 'varied1'...'variedN' values in options extra to actual varied
-% names
-options_extras = convert_variedN_to_axisnames(varied_names,options_extras0);
-
-% User selection for remaining varied parameters
+% User selection for varied parameters
 [chosen_varied , options_extras ]= get_chosen_varied(varied_names,options_extras);
 
 % If any options are still leftover, these are extraneous. Report an error
@@ -174,10 +200,54 @@ chosen_varied(inds) = cellfun(@(s) strrep(s,'all',':'),chosen_varied(inds),'Unif
 % Select out chosen data
 xp2 = xp(chosen_vars,chosen_pop,chosen_varied{:});
 
+% Assign default value to force_overlay
+if isempty(force_overlay) 
+    if length(xp2.meta.datainfo(2).values) <= 1
+        force_overlay = 'populations';
+    else
+        force_overlay = 'none';
+    end
+end
 
-% % % % % % % % % % % % % % % % % % % % % % % % % 
-% % % % % Insert code for averaging, etc, here
-% % % % % % % % % % % % % % % % % % % % % % % % % 
+if ~strcmpi(force_overlay,'none')
+    ax_num = xp2.findaxis(force_overlay);
+    if length(ax_num) > 1; error('force_overlay: Ambiguous axis specified. Can only pack at most 1 axis');
+    elseif isempty(ax_num)
+        error('force_overlay: Cannot find requested axis');
+    end
+    
+    % Save variables associated with this axis
+    packed_vars = xp2.axis(ax_num).values;
+    packed_name = xp2.axis(ax_num).name;
+    
+    % Add <average> symbols if necessary to packed_vars
+    cellnames = xp2.meta.datainfo(2).values;
+    temp = cellfun(@isempty,strfind(cellnames,'<'));    % Check if originals were averages!
+    if any(~temp)
+        packed_vars = cellfunu(@(s) ['<' s '>'], packed_vars);
+    end
+    
+    % Add this new info to datainfo
+    % If there is still more than 1 cell present, bump this data down a
+    % dimension.
+    only_one_cell = length(xp2.meta.datainfo(2).values) == 1;
+    if ~only_one_cell
+        xp2.meta.datainfo(end+1) = xp2.meta.datainfo(end);
+    end
+    xp2.meta.datainfo(end).name = packed_name;
+    xp2.meta.datainfo(end).values = packed_vars(:)';
+    
+    
+    
+    % Pack the dimension into the first empty dimension
+    xp2 = xp2.packDim(force_overlay);
+    if only_one_cell
+        xp2.data = cellfunu(@squeeze,xp2.data);
+    end
+end
+
+% Make sure xp2.data is not more than 3 dimensions (this is the most we can
+% plot in a single subplot)
 
 
 % Squeeze to eliminate superfluous dimensions
@@ -185,14 +255,7 @@ xp2 = xp2.squeeze;
 Nd = ndims(xp2);
 
 
-% If still have too many dimensions, then linearize varied dimensions
-% together
-maxNplotdims = 3;
-
-
-
- 
-
+subplot_options.legend1 = xp2.meta.datainfo(2).values;
 
 % Split available axes into the number of dimensions supported by each
 % axis handle
@@ -209,21 +272,22 @@ switch num_embedded_subplots
         dims_per_function_handle = [1,2,1];
         function_args = {{},{subplot_options},{plot_options}};
         
-        
     case 3
         % Ordering of axis handles
         function_handles = {@xp_handles_newfig, @xp_subplot_grid, @xp_subplot_grid,@xp_matrix_basicplot};   % Specifies the handles of the plotting functions
-        dims_per_function_handle = [1,1,2,1];
+        dims_per_function_handle = [1,2,1,1];
         subplot_options2 = subplot_options;
-        subplot_options2.display_mode = 1;
-        function_args = {{},{subplot_options},{subplot_options2},{plot_options}};
+        subplot_options2.legend1 = [];
+        subplot_options.display_mode = 1;
+        function_args = {{},{subplot_options2},{subplot_options},{plot_options}};
     case 4
         % Ordering of axis handles
         function_handles = {@xp_handles_newfig, @xp_subplot_grid, @xp_subplot_grid,@xp_matrix_basicplot};   % Specifies the handles of the plotting functions
         dims_per_function_handle = [1,2,2,1];
         subplot_options2 = subplot_options;
-        subplot_options2.display_mode = 1;
-        function_args = {{},{subplot_options},{subplot_options2},{plot_options}};
+        subplot_options2.legend1 = [];
+        subplot_options.display_mode = 1;
+        function_args = {{},{subplot_options2},{subplot_options},{plot_options}};
 end
 
 % Linearize dimensions of xp2 that are in excess of the total number we can
@@ -241,6 +305,8 @@ function_handles = function_handles(available_dims);
 dimensions = dimensions(available_dims);
 function_args = function_args(available_dims);
 
+% Open new figure if necessary & plot the data
+if ~isequal(@xp_handles_newfig, function_handles{1}); figl; end
 xp2.recursivePlot(function_handles,dimensions,function_args);
 
 
@@ -309,7 +375,7 @@ function options_extras = convert_variedN_to_axisnames(all_names,options_extras)
     fn2 = fn;
     for i = 1:length(fn)
         fn_curr = fn{i};
-        if strcmp(fn_curr(1:6),'varied')        % User has entered variedX
+        if strcmp(fn_curr(1:min(6,end)),'varied')        % User has entered variedX
             % fn is original fieldname (e.g. variedX)
             % fn2 is new field name of varied parameter (e.g. E_Iapp)
             fn2{i} = all_names{str2num(fn_curr(7:end))};
