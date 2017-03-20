@@ -130,6 +130,7 @@ strict_mode = 1;
   'force_overlay',[],[],...
   'do_overlay_shift',false,[false true],...
   'overlay_shift_val',[],[],...
+  'do_zscore',[false],[false true],...
   'plot_type','waveform',{'waveform','heatmap','rastergram','raster','power','rates'},...
   'xlims',[],[],...
   'ylims',[],[],...
@@ -150,6 +151,14 @@ handles=[];
 % Options overwrite
 if is_image
     options.force_overlay = 'none';
+end
+
+% Clause to fix things incase user sets force_overlay to zero!
+if isnumeric(options.force_overlay) && ~isempty(options.force_overlay)
+    warning('force overlay should be either none or the name the name of an axis {populations, variables, varied1, ... variedN}');
+    if options.force_overlay == 0
+        options.force_overlay = 'none';
+    end
 end
 
 % Pull out fields from options struct
@@ -179,13 +188,6 @@ figure_options = struct_addDef(figure_options,'supersize_me',options.supersize_m
 
 
 
-% Average across cells if necessary
-if do_mean 
-    mydata = xp.data;
-    mydata = cellfun(@(x) mean(x,2), mydata,'UniformOutput',0);
-    xp.data = mydata;
-    xp.meta.datainfo(2).values = {'<Cells>'};
-end
 
 
 % Apply max overlaid
@@ -206,6 +208,15 @@ if any(strcmp(options.plot_type,{'waveform','power'})) && all(cellfun(@isnumeric
     cell_names = [1:max(cellfun(@(x) size(x,2),xp.data(:)))];
     cell_names_str = cellfunu(@(s) ['Cell ' num2str(s)], num2cell(cell_names));
     xp.meta.datainfo(2).values = cell_names_str;
+end
+
+
+% Average across cells if necessary
+if do_mean 
+    mydata = xp.data;
+    mydata = cellfun(@(x) mean(x,2), mydata,'UniformOutput',0);
+    xp.data = mydata;
+    xp.meta.datainfo(2).values = {'<Cells>'};
 end
 
 
@@ -272,6 +283,7 @@ if ~strcmpi(force_overlay,'none')
     cellnames = xp2.meta.datainfo(2).values;
     temp = cellfun(@isempty,strfind(cellnames,'<'));    % Check if originals were averages!
     if any(~temp)
+        if isnumeric(packed_vars); packed_vars = cellfunu(@(s) [strrep(packed_name,'_',' ') ' ' num2str(s)],num2cell(packed_vars)); end
         packed_vars = cellfunu(@(s) ['<' s '>'], packed_vars);
     end
     
@@ -292,6 +304,14 @@ if ~strcmpi(force_overlay,'none')
         xp2.data = cellfunu(@squeeze,xp2.data);
     end
 
+end
+
+if options.do_zscore
+    mydata = xp2.data;
+    for i = 1:numel(mydata)
+        mydata{i} = zscore(mydata{i});
+    end
+    xp2.data = mydata;
 end
 
 % Shift the overlay by a certain amount
@@ -539,13 +559,19 @@ function mydata_out = do_shift_lastdim (mydata,shift)
         temp = reshape(mydata,prod(sz(1:nd-1)),sz(nd));
         stdevs = std(temp)*upscale_factor;
         sh = [0, stdevs(1:end-1) + stdevs(2:end)]';
+        sh = sh * -1;        % Forces shifts to be downward (same as subplots)
     else
         sh = shift*[0:sz(end)-1]';      % Fixed shift amount
+        sh = sh * -1;        % Forces shifts to be downward (same as subplots)
     end
     
     
     sh = permute(sh, [2:nd,1]);
-    sh2 = repmat(sh, sz(1:nd-1));
+    if length(sz(1:nd-1)) == 1
+        sh2 = repmat(sh, sz(1:nd-1),1);     % Special case for scalar input to repmat. When repmat receives a scalar, it repeats BOTH rows and columns instead of just rows
+    else
+        sh2 = repmat(sh, sz(1:nd-1));
+    end
     
     mydata_out = mydata + sh2;
     
