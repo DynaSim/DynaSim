@@ -8,7 +8,7 @@ if ~exist('options','var') || isempty(options)
 end
 
 % make mex name from solve_file
-[fpath,fname] = fileparts(mfileInput);
+[fpath,fname] = fileparts2(mfileInput);
 mexfileOutput = fullfile(fpath,[fname '_mex']);
 
 if ~exist(mexfileOutput,'file')
@@ -26,7 +26,7 @@ if ~exist(mexfileOutput,'file')
     %toc;
   end
 
-  codemex_dir=fullfile(fileparts(mexfileOutput),'codemex');
+  codemex_dir=fullfile(fileparts2(mexfileOutput),'codemex');
   if exist(codemex_dir,'dir')
     if options.verbose_flag
       fprintf('\tRemoving temporary codemex directory: %s\n',codemex_dir);

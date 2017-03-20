@@ -65,7 +65,7 @@ if ischar(src)
   if exist(src,'file') % data file or studyinfo.mat
     if strfind(src, 'studyinfo') %studyinfo.mat
       [data,studyinfo] = ImportData(src, varargin{:}); % load data
-      studyinfo.study_dir = fileparts(src);
+      studyinfo.study_dir = fileparts2(src);
     else % data file
       [data,studyinfo] = ImportData(src, varargin{:}); % load data
     end

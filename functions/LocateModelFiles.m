@@ -84,7 +84,7 @@ if iscellstr(mechanism_list)
       file='';
     end
     % use 'which' to get full filename of file in Matlab path
-    if isempty(fileparts(file)) % file is a name without a path
+    if isempty(fileparts2(file)) % file is a name without a path
       file=which(file);
     end
     if ~isempty(file)
@@ -94,4 +94,4 @@ if iscellstr(mechanism_list)
 end
 
 % extract unique paths to mechanism files
-paths=unique(cellfun(@fileparts,files,'uni',0),'stable');
+paths=unique(cellfun(@fileparts2,files,'uni',0),'stable');

@@ -95,7 +95,7 @@ end
 
 % check if input is a filename
 if ischar(text) && exist(text,'file')
-  [~,name,ext]=fileparts(text);
+  [~,name,ext]=fileparts2(text);
   switch ext
     case '.m'
       model=feval(name); % evaluate model-creating function and return model

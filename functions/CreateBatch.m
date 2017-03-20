@@ -82,7 +82,7 @@ solve_file = GetSolveFile(base_model,studyinfo,options.simulator_options);
 %   NOTE: the extension depends on whether a 32-bit or 64-bit machine is used
 if options.compile_flag
   % get directory where solve_file is located and the file name
-  [fpath,fname]=fileparts(solve_file);
+  [fpath,fname]=fileparts2(solve_file);
   
   % get list of files in solve directory
   D=dir(fpath);
@@ -114,7 +114,7 @@ timestamp = datestr(studyinfo.study_id,'yyyymmddHHMMSS');
 [o,home]=system('echo $HOME');
 
 % create batch directory
-[study_dir_path,study_dir_name,study_dir_suffix]=fileparts(studyinfo.study_dir);
+[study_dir_path,study_dir_name,study_dir_suffix]=fileparts2(studyinfo.study_dir);
 study_dir_name=[study_dir_name study_dir_suffix];
 batch_dir = fullfile(strtrim(home),'batchdirs',study_dir_name);
 %batch_dir = fullfile(strtrim(home),'batchdirs',['Batch' timestamp]);
@@ -138,7 +138,7 @@ if ~success
 end
 
 % locate DynaSim toolbox
-dynasim_path=fileparts(fileparts(which(mfilename))); % root is one level up from directory containing this function
+dynasim_path=fileparts2(fileparts2(which(mfilename))); % root is one level up from directory containing this function
 dynasim_functions=fullfile(dynasim_path,'functions');
 
 % locate mechanism files
@@ -239,7 +239,7 @@ if strcmp(options.qsub_mode, 'loop')
   fScript=fopen(script_filename,'wt');
   
   for j=1:length(jobs)
-    [~,thisFilename]=fileparts(jobs{j});
+    [~,thisFilename]=fileparts2(jobs{j});
     fprintf(fScript,'%s\n',thisFilename);
   end
   
@@ -252,8 +252,8 @@ if ~options.one_solve_file_flag
   if options.verbose_flag
     fprintf('Creating distinct solver sub-directories for %g simulations...\n',num_simulations);
   end
-  %[solve_path,solve_name,solve_ext]=fileparts(solve_file);
-  [solve_path,solve_name,solve_ext]=fileparts(full_solve_file);
+  %[solve_path,solve_name,solve_ext]=fileparts2(solve_file);
+  [solve_path,solve_name,solve_ext]=fileparts2(full_solve_file);
 
   % prepare studyinfo with simulation-specific metadata
   for sim=1:num_simulations
@@ -348,9 +348,9 @@ else % on cluster with qsub
   
   if s~=1 % study not finished
     % submit jobs using shell script
-    [batch_dir_path,batch_dir_name,batch_suffix]=fileparts(batch_dir);
+    [batch_dir_path,batch_dir_name,batch_suffix]=fileparts2(batch_dir);
     batch_dir_name=[batch_dir_name batch_suffix];
-    dsFnPath = fileparts(mfilename('fullpath'));
+    dsFnPath = fileparts2(mfilename('fullpath'));
     
     if options.parallel_flag
       cmd=sprintf('qmatjobs_pct %s %s %g',batch_dir_name,options.memory_limit,options.num_cores);
@@ -361,7 +361,7 @@ else % on cluster with qsub
         cmd = sprintf('echo ''%s/qmatjob_array %s sim_job'' | qsub -V -hard -l ''h_vmem=%s'' -wd %s -N %s_sim_job -t 1-%i',...
           dsFnPath, batch_dir, options.memory_limit, batch_dir, batch_dir_name, num_jobs);
       elseif strcmp(options.qsub_mode, 'array') && options.one_solve_file_flag
-        [~, job_filename] = fileparts(job_file); %remove path and extension
+        [~, job_filename] = fileparts2(job_file); %remove path and extension
         cmd = sprintf('echo ''%s/qmatjob_array_one_file %s %s'' | qsub -V -hard -l ''h_vmem=%s'' -wd %s -N %s_sim_job -t 1-%i:%i',...
           dsFnPath, batch_dir, job_filename, options.memory_limit, batch_dir, batch_dir_name, num_simulations, options.sims_per_job);
         % NOTE: using num_simulations, not num_jobs, since the job_file will
@@ -421,7 +421,7 @@ end
       fprintf(fjob,'SimIDs=[%s]\n',num2str(sim_ids));
     else %only 1 file
       % function declaration
-      [~, job_filename] = fileparts(job_file); %remove path and extension
+      [~, job_filename] = fileparts2(job_file); %remove path and extension
       fprintf(fjob, 'function %s(simIDstart, simIDstep, simIDlast)\n\n', job_filename);
       
       if options.compile_flag

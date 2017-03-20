@@ -47,7 +47,7 @@ if isstruct(studyinfo) && isfield(studyinfo,'study_dir')
 %     % convert original absolute paths to paths relative to study_dir
 %     for s=1:num_sims
 %       for i=1:num_instances(s)
-%         [~,fname,fext]=fileparts(result_files{s}{i});
+%         [~,fname,fext]=fileparts2(result_files{s}{i});
 %         result_files{s}{i}=fullfile(studyinfo.study_dir,'data',[fname fext]);
 %       end
 %     end
@@ -61,7 +61,7 @@ if isstruct(studyinfo) && isfield(studyinfo,'study_dir')
         results(s,i)=result;
       else
         %check relative path
-        [~,fname,fext]=fileparts(result_files{s}{i});
+        [~,fname,fext]=fileparts2(result_files{s}{i});
         result_files{s}{i}=fullfile(studyinfo.study_dir,'data',[fname fext]);
         if exist(result_files{s}{i},'file')
           load(result_files{s}{i},'result');

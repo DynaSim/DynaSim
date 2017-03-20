@@ -180,7 +180,7 @@ dbConn = database(cfg.dbname,cfg.dbuser,cfg.dbpassword,jdbcDriver,jdbcString);
 query=sprintf('select file from modeldb_modelspec where model_id=%g',ModelID);
 data = get(fetch(exec(dbConn,query)), 'Data');
 jsonfile=data{1};
-[usermedia,modelfile,ext] = fileparts(jsonfile); % remote server media directory
+[usermedia,modelfile,ext] = fileparts2(jsonfile); % remote server media directory
 usermedia=fullfile(cfg.MEDIA_PATH,usermedia);
 modelfile=[modelfile ext];%'.json'];
 

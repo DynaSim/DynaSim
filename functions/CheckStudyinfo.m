@@ -106,7 +106,7 @@ if ischar(studyinfo) && isdir(studyinfo)
 end
 % check if studyinfo.mat was provided (or derived from input study_dir)
 if ischar(studyinfo) && exist(studyinfo,'file')
-  study_dir=fileparts(studyinfo);
+  study_dir=fileparts2(studyinfo);
   studyinfo=StudyinfoIO([],study_dir,options.process_id,options.verbose_flag);
 elseif isnumeric(studyinfo) && isempty(studyinfo) % [], created dummy studyinfo
   % set some default studyinfo fields
@@ -148,9 +148,9 @@ if ~isfield(studyinfo,'matlab_version')
 end
 if ~isfield(studyinfo,'dynasim_hash')
   % get path to the running m-file
-  [fpath,fname]=fileparts(which(mfilename));%which('SimulateModel.m');
+  [fpath,fname]=fileparts2(which(mfilename));%which('SimulateModel.m');
   % get path one step up from functions directory containing this m-file
-  [fpath,fname]=fileparts(fpath);
+  [fpath,fname]=fileparts2(fpath);
   % record current directory
   cwd=pwd;
   % move to dynasim directory

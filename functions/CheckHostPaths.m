@@ -25,7 +25,7 @@ matched=1;
 error_message='';
 
 % locate DynaSim toolbox
-dynasim_path=fileparts(fileparts(which(mfilename))); % root is one level up from directory containing this function
+dynasim_path=fileparts2(fileparts2(which(mfilename))); % root is one level up from directory containing this function
 
 % locate mechanism files
 [mech_paths,mech_files]=LocateModelFiles(studyinfo.base_model);

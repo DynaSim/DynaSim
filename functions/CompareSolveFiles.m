@@ -6,7 +6,7 @@ function solve_file_m=CompareSolveFiles(solve_file_m)
 %
 % See also: GetSolveFile, SimulateModel, CreateBatch
 
-[fpath,fname,fext]=fileparts(solve_file_m);
+[fpath,fname,fext]=fileparts2(solve_file_m);
 
 % get list of files in where solve_file is located
 D=dir(fpath);

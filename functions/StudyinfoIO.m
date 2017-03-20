@@ -22,7 +22,7 @@ if nargin<2 || isempty(study_file)
 elseif isdir(study_file)
   study_file=fullfile(study_file,'studyinfo.mat');
 end
-study_dir=fileparts(study_file);
+study_dir=fileparts2(study_file);
 if nargin<1, studyinfo=[]; end
 
 % determine operating system

@@ -84,7 +84,7 @@ if ischar(file)
     clear file
     file.study_dir = study_dir;
   elseif strfind(file, 'studyinfo')
-    filePath = fileparts(file);
+    filePath = fileparts2(file);
     if isempty(filePath)
       filePath = pwd;
     end
@@ -115,7 +115,7 @@ if isstruct(file) && isfield(file,'study_dir')
   if ~all(success)
     % convert original absolute paths to paths relative to study_dir
     for i = 1:length(data_files)
-      [~,fname,fext] = fileparts(data_files{i});
+      [~,fname,fext] = fileparts2(data_files{i});
       data_files{i} = fullfile(file.study_dir,'data',[fname fext]);
     end
     
@@ -194,7 +194,7 @@ if iscellstr(file)
 end
 
 if ischar(file)
-  [~,~,ext]=fileparts(file);
+  [~,~,ext]=fileparts2(file);
   switch lower(ext)
     case '.mat'
       % MAT-file contains data fields as separate variables (-v7.3 for HDF)

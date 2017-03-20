@@ -712,7 +712,7 @@ try
       else
         % use previous solve_file
       end
-      [fpath,fname,fext]=fileparts(options.solve_file);
+      [fpath,fname,fext]=fileparts2(options.solve_file);
 
       %% 3.0 integrate model with solver of choice and prepare output data
       % - matlab solver: solve @odefun with feval and solver_options

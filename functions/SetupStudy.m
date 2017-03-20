@@ -48,7 +48,7 @@ if options.save_data_flag || options.save_results_flag
   % set solve_file name for this study
   if isempty(options.solve_file)
     % set default solve_file for this study
-    [~,fname] = fileparts(options.study_dir);
+    [~,fname] = fileparts2(options.study_dir);
     fname = ['solve_ode_' fname];
     
     % replace non-word characters by underscores so that matlab can execute

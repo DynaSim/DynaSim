@@ -462,7 +462,7 @@ end
 if ~isempty(files)
   fnames={};
   for f=1:length(files)
-    [~,name]=fileparts(files{f});
+    [~,name]=fileparts2(files{f});
     fnames{f}=name;
   end
   

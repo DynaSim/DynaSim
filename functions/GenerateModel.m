@@ -246,7 +246,7 @@ for i=1:npops
       MechScope=[specification.populations(i).name '_' tmp{2}];
     else
       % extract mechanism file name without path
-      [~,MechID]=fileparts(mechanism);
+      [~,MechID]=fileparts2(mechanism);
       MechScope=[specification.populations(i).name '_' MechID];
     end
 
@@ -300,7 +300,7 @@ for i=1:ncons
     if numel(mechanism_)>1, new_linker=mechanism_{2}; else new_linker=[]; end
     
     % extract mechanism file name without path
-    [~,MechID]=fileparts(mechanism);
+    [~,MechID]=fileparts2(mechanism);
     MechScope=[target '_' source '_' MechID];
         % NOTE: must use target_source_mechanism for connection mechanisms
         % to distinguish their parent namespaces from those of population mechanisms

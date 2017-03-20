@@ -101,7 +101,7 @@ else
   solve_file=['solve_ode_' datestr(now,'yyyymmddHHMMSS_FFF') '.m'];
 end
 
-[fpath,fname,fext]=fileparts(solve_file);
+[fpath,fname,fext]=fileparts2(solve_file);
 
 if isempty(fpath)
   % add path to solve_file name
@@ -116,7 +116,7 @@ if isempty(fpath)
     solve_file=fullfile(pwd,solve_file);
   end
 end
-[fpath,fname,fext]=fileparts(solve_file);
+[fpath,fname,fext]=fileparts2(solve_file);
 
 % check that solve file name is less than max function name allwoed by matlab
 if length(fname)>(63-4) % subtract 4 to allow suffix '_mex'
