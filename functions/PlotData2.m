@@ -43,11 +43,28 @@ data=CheckData(data);
   % note: calling CheckData() at beginning enables analysis/plotting functions to
   % accept data matrix [time x cells] in addition to DynaSim data structure.
 
-  % Flag for returning error if the user specifies name/value pairs that are not in the
-  % CheckOptions list
-  strict_mode = 0;
   
-[options, options_extras0] = CheckOptions(varargin,{...
+% Convert input data to xPlt
+xp = DynaSim2xPlt(data);
+
+% Find out names of varied variables
+all_names = xp.exportAxisNames;
+varied_names = only_varieds(all_names);  % Returns only the names of the varied variables
+
+% Convert 'varied1'...'variedN' values in varargin to the names of the
+% actual varied parameters
+myargin = varargin;
+for i = 1:length(myargin)
+    if ischar(myargin{i})
+        myargin{i} = variedN_to_axisnames(myargin{i},varied_names);
+    end
+end
+  
+% Flag for returning error if the user specifies name/value pairs that are not in the
+% CheckOptions list
+strict_mode = 1;
+  
+[options, options_extras0] = CheckOptions(myargin,{...
   'population',[],[],...        
   'variable',[],[],...        
   'num_embedded_subplots',2,[{1,2,3,4}],...
@@ -118,18 +135,7 @@ end
 %   options.xlim=[min(xdata) max(xdata)];
 % end
 
-% Import DynaSim data to xPlt
-xp = DynaSim2xPlt(data);
 
-% Find out names of varied variables
-all_names = xp.exportAxisNames;
-varied_names = only_varieds(all_names);  % Returns only the names of the varied variables
-
-
-% Convert 'varied1'...'variedN' values in options extra to the names of the
-% actual parameters
-options = convert_variedN_to_axisnames(varied_names,options);
-options_extras = convert_variedN_to_axisnames(varied_names,options_extras0);
 
 
 % Average across cells if necessary
@@ -185,6 +191,7 @@ if isempty(chosen_vars)
 end
 
 % User selection for varied parameters
+options_extras = options_extras0;
 [chosen_varied , options_extras ]= get_chosen_varied(varied_names,options_extras);
 
 % If any options are still leftover, these are extraneous. Report an error
@@ -254,8 +261,20 @@ end
 xp2 = xp2.squeeze;
 Nd = ndims(xp2);
 
+if isnumeric(xp2.meta.datainfo(2).values)
+    % If axis is numeric, as in the case with varied parameters, convert to
+    % a cell array of strings
+    leg1 = cellfun(@num2str,num2cell(xp2.meta.datainfo(2).values),'UniformOutput',0);
+    
+    % Also pre-pend the name of the variable being varied
+    for j = 1:length(leg1)
+        leg1{j} = [strrep(xp2.meta.datainfo(2).name,'_',' ') ' ' leg1{j}];
+    end
+    subplot_options.legend1 = leg1;
+else
+    subplot_options.legend1 = xp2.meta.datainfo(2).values;
+end
 
-subplot_options.legend1 = xp2.meta.datainfo(2).values;
 
 % Split available axes into the number of dimensions supported by each
 % axis handle
@@ -369,22 +388,16 @@ function [chosen_varied, options_varied ]= get_chosen_varied(varied_names,option
     
 end
 
-function options_extras = convert_variedN_to_axisnames(all_names,options_extras);
+function str_out = variedN_to_axisnames(str_in,ax_names_varied)
 
-    fn = fieldnames(options_extras);
-    fn2 = fn;
-    for i = 1:length(fn)
-        fn_curr = fn{i};
-        if strcmp(fn_curr(1:min(6,end)),'varied')        % User has entered variedX
+        if strcmp(str_in(1:min(6,end)),'varied')        % User has entered variedX
             % fn is original fieldname (e.g. variedX)
             % fn2 is new field name of varied parameter (e.g. E_Iapp)
-            fn2{i} = all_names{str2num(fn_curr(7:end))};
-            options_extras.(fn2{i}) = options_extras.(fn{i});
-            options_extras = rmfield(options_extras,fn{i});
+            str_out = ax_names_varied{str2num(str_in(7:end))};
+        else
+            str_out = str_in;
         end
-    end
     
-
 end
 
 function ax_ind_varied = get_ax_ind_varied(xp)
