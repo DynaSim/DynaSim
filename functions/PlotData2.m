@@ -40,7 +40,17 @@ function handles=PlotData2(data,varargin)
 % 
 % See also: CalcFR, CalcPower, PlotWaveforms, CheckData
 
-if ~ischar(data)
+if ischar(data)
+    study_dir = data;
+    
+    % Import plot files
+    data_img = ImportPlots(study_dir);
+    
+    handles = PlotData2(data_img,varargin{:});
+    return;
+end
+
+if ~isfield(data,'plot_files')      % Standard DynaSim data structure
 
     % Check inputs
     data=CheckData(data);
@@ -51,17 +61,11 @@ if ~ischar(data)
     % Convert input data to xPlt
     xp = DynaSim2xPlt(data);
     is_image = 0;
-else
-    study_dir = data;
+else                            % Structure of links to plots
     
-    % Import plot files
-    data_img = ImportPlots(study_dir);
-
+    data_img=data;
     % Load into DynaSim structure
     [data_table,column_titles] = DataField2Table (data_img,'plot_files');
-
-    % Preview the contents of this table
-    previewTable(data_table,column_titles);
 
     % The entries in the first column contain the paths to the figure files.
     % There can be multiple figures associated with each simulation, which is
