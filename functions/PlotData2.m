@@ -557,7 +557,7 @@ function mydata_out = do_shift_lastdim (mydata,shift)
         % Do adaptive shift
         upscale_factor = 2;
         temp = reshape(mydata,prod(sz(1:nd-1)),sz(nd));
-        stdevs = std(temp)*upscale_factor;
+        stdevs = nanstd(temp)*upscale_factor;               % STD ignoring NaNs
         sh = [0, stdevs(1:end-1) + stdevs(2:end)]';
         sh = sh * -1;        % Forces shifts to be downward (same as subplots)
     else
