@@ -99,11 +99,13 @@ analysis_field_order={'analysis_id','function','analysis_options','stop_time','d
 % check if input is string with filename, studyinfo structure, or []
 % prepare studyinfo structure for standardization
 study_dir=pwd;
+
 % check if study_dir was provided
 if ischar(studyinfo) && isdir(studyinfo)
   study_dir=studyinfo;
-  studyinfo=fullfile(study_dir,['studyinfo.mat']);
+  studyinfo=fullfile(study_dir,'studyinfo.mat');
 end
+
 % check if studyinfo.mat was provided (or derived from input study_dir)
 if ischar(studyinfo) && exist(studyinfo,'file')
   study_dir=fileparts2(studyinfo);

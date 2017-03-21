@@ -1,5 +1,5 @@
 function result = AnalyzeData(src,funcIn,varargin)
-%ANALYZEDATA - Apply an analysis function to a DynaSim study or DS data, optionally saving data
+%% ANALYZEDATA - Apply an analysis function to a DynaSim study or DS data, optionally saving data
 %
 % Pass a single DynaSim data structure or an array of data structures to a
 % user-specified analysis function, add varied info to the results and
@@ -16,7 +16,8 @@ function result = AnalyzeData(src,funcIn,varargin)
 %     - studyinfo: DynaSim studyinfo structure or path to studyinfo
 %     - study_dir: DynaSim study directory containing studyinfo.mat
 %   - func: function handle or cell array of function handles pointing to plot
-%           or analysis function(s)
+%           or analysis function(s). Should not contain case-insensitive string
+%           'plot' unless is a function that returns a figure handle for plotting.
 %   - options: (key/value pairs are passed on to the analysis function)
 %     'save_results_flag'   : whether to save result {0 or 1} (default: 0)
 %     'result_file'         : where to save result (default: 'result.mat')
@@ -29,9 +30,8 @@ function result = AnalyzeData(src,funcIn,varargin)
 %                             the corresponding function cell. if only passing a
 %                             single func, can specificy function options as
 %                             key,val list as varargin for AnalyzeData
-%     'one_subplot_flag'    : whether to plot each set of data in a separate
-%                             file. Make sure the plot functions include 'plot' 
-%                             in the function name {0 or 1} (default: 1)
+%     'load_all_data_flag'  : whether to load all the data in studyinfo
+%                             at once {0 or 1} (default: 0)
 %
 % Outputs:
 %   - result: structure returned by the analysis function
@@ -43,7 +43,15 @@ function result = AnalyzeData(src,funcIn,varargin)
 %
 % See also: SimulateModel
 
-% check inputs
+
+%% General cases:
+%   - data struct (likely from SimualteModel call)
+%   - data struct array
+%   - studyinfo with load_all_data_flag==0
+%   - studyinfo with load_all_data_flag==1
+
+
+%% check inputs
 options = CheckOptions(varargin,{...
   'result_file','result',[],...
   'save_results_flag',0,{0,1},...
@@ -52,7 +60,8 @@ options = CheckOptions(varargin,{...
   'plot_type','waveform',{'waveform','rastergram','raster','power','rates'},...
   'save_prefix',[],[],...
   'function_options',{},[],...
-  'one_subplot_flag',1,{0,1},...
+  'simIDs',[],[],...
+  'load_all_data_flag',0,{0,1},...
   },false);
 
 % save data if no output is requested
@@ -60,47 +69,37 @@ if nargout<1
   options.save_results_flag = 1;
 end
 
-% determine type of src
-if ischar(src)
-  if exist(src,'file') % data file or studyinfo.mat
-    if strfind(src, 'studyinfo') %studyinfo.mat
-      [data,studyinfo] = ImportData(src, varargin{:}); % load data
-      studyinfo.study_dir = fileparts2(src);
-    else % data file
-      [data,studyinfo] = ImportData(src, varargin{:}); % load data
-    end
-  elseif isdir(src) % study_dir
-    [data,studyinfo] = ImportData(src, varargin{:}); % load data
-    studyinfo.study_dir = src;
-  else
-    try
-      [data,studyinfo] = ImportData(src, varargin{:}); % load data
-    catch
-      error('Unknown source for first input/argument.')
-    end
-  end
-elseif isstruct(src) && length(src)>1 % data file cell array
-  data = src;
-elseif isstruct(src) % single data struct or studyinfo struct
-  if isfield(src,'time') % single data file 
-    data = src;
-  else % studyinfo struct
-    [data,studyinfo] = ImportData(src, varargin{:}); % load data
-  end
-elseif iscell(src) % cell array of files
-  [data,studyinfo] = ImportData(src, varargin{:}); % load data
-else
-  try
-    [data,studyinfo] = ImportData(src, varargin{:}); % load data
-  catch
-    error('Unknown source for first input/argument.')
-  end
-end
+% varinputs = varargin;
+% % check if simIDs specified
+% if ~isempty(options.simIDs)
+%   if isstruct(varinputs{1})
+%     varinputs.simIDs = options.simIDs;
+%   else
+%     % find simIDs in varinputs
+%     varinputs{find(~cellfun(@isempty,strfind(varinputs(1:2:end), 'simIDs')))*2} = options.simIDs;
+%   end
+% end
 
-% check study_dir
+%% Parse src
+[data, studyinfo] = parseSrc(src);
+% Data at this point:
+%   - 'data' as single struct or struct array, or empty
+%   - 'studyinfo' struct or empty
+
+
+% check if study_dir defined
+if isempty(studyinfo)
+  studyinfoBool = false;
+else
+  studyinfoBool = true;
+end
 if ~isfield(studyinfo,'study_dir') || isempty(studyinfo.study_dir) || ~isdir(studyinfo.study_dir)
   studyinfo.study_dir = pwd;
 end
+% Data at this point:
+%   - 'data' as single struct or struct array, or empty
+%   - 'studyinfo' struct with many flds or just 'study_dir' field
+
 
 % convert data to double precision before analysis
 for j = 1:length(data)
@@ -110,144 +109,130 @@ for j = 1:length(data)
   end
 end
 
-% check if func not a cell array
-if isa(funcIn,'function_handle')
-  nFunc = 1;
-  funcIn = {funcIn}; % make into cell array
-elseif ischar(funcIn)
-  funcIn = {str2func(funcIn)}; % convert string to fn handle
-  
-  if ~isfunction(funcIn)
-    error('Post-processing function must be supplied as a function handle or function name string');
-  end
-  
-  nFunc = 1;
-else
-  nFunc = numel(funcIn);
-end
+% convert func to handle if not a cell array
+[funcIn, nFunc] = parseFuncIn(funcIn);
 
 % check if postSim
-postSimBool = (length(data) > 1);
+postSimBool = studyinfoBool || (length(data) > 1); % since length(data)==1 and no studyinfo with SimulateModel call
 
 for fInd = 1:nFunc % loop over function inputs
   func = funcIn{fInd};
   
-  % confirm function handle or convert to one if possible
-  if ~isa(func,'function_handle')
-    if ischar(func)
-      func = str2func(func); % convert string to fn handle
-      
-      if ~isfunction(func)
-        error('Post-processing function must be supplied as a function handle or function name string');
-      end
-    else
-      error('Post-processing function must be supplied as a function handle or function name string');
-    end
-  end
+  % confirm func is function handle or convert to one if possible
+  func = parseFunc(func);
+  
+  % check if plot in fn name
+  plotFnBool = ~isempty(regexpi(func2str(func), 'plot'));
   
   % change result_file if varied_filename_flag
   if options.varied_filename_flag && isfield(data, 'varied')
-    if isfield(options, 'save_prefix') && ~isempty(options.save_prefix)
-      prefix = options.save_prefix;
-    else
-      if regexpi(func2str(func), 'plot')
-        prefix = options.plot_type;
-      else
-        prefix = func2str(func);
-      end
-    end
-
-    options.result_file = nameFromVaried(data, prefix, options.result_file);
+    options.result_file = filenameFromVaried(options.result_file);
   end
   
   % do analysis
   fprintf('\tExecuting post-processing function: %s\n',func2str(func));
   tstart = tic;
   
-  if ~(regexpi(func2str(func), 'plot') && options.one_subplot_flag) % skip if plot function and one_subplot_flag
-    if isempty(options.function_options)
-      result = feval(func,data,varargin{:});
-    else
-      function_options = options.function_options{fInd};
-      result = feval(func,data,function_options{:});
-    end
+  %% Eval func
+  if length(data)==1 || (postSimBool && options.load_all_data_flag)
+    result = evalFnWithArgs();
+  else
+    result = [];
+  end
+  
+  % calc nResults
+  if ~isempty(results)
+    nResults = length(result);
+  elseif ~isempty(data)
+    nResults = length(data);
+  else
+    nResults = length(siminfo.simulations);
   end
   
   fprintf('\t\tElapsed time: %g sec\n',toc(tstart));
   
   % determine if result is a plot handle or derived data
-  if options.one_subplot_flag || all(ishandle(result)) % analysis function returned a graphics handle
-    if ~options.one_subplot_flag
-      nResults = length(result);
-    else
-      nResults = length(data);
-    end
+  if all(ishandle(result)) || plotFnBool % analysis function returned a graphics handle or has plot in fn name
+    %% Plot Function
     
-    for iResult = 1:nResults
-      % save plot
-      if options.save_results_flag
+    % will save plots else return main fn
+    if options.save_results_flag
+      % loop through results. all results may exist or need to be made during loop
+      for iResult = 1:nResults
         extension = ['.' options.format]; % '.svg'; % {.jpg,.svg}
         
-        if nResults == 1
+        if ~postSimBool % approx nResults == 1 && ~studyinfoBool % approx ~postSimBool
           fname = [options.result_file extension];
-        elseif ~isempty(studyinfo)
+          fPath = fname;
+          
+          thisResult = result(iResult);
+        elseif studyinfoBool
           simID = studyinfo.simulations(iResult).sim_id;
           prefix = func2str(func);
           fname = [prefix '_sim' num2str(simID) '_plot' num2str(fInd) '_' func2str(func)];
           
-          if options.one_subplot_flag
-            result = feval(func,data(iResult),options.function_options{:});
-            iResult = 1; % HACK
+          if (postSimBool && ~options.load_all_data_flag)
+            data = loadDataFromSingleSim();
+            
+            %skip if no data
+            if isempty(data)
+              continue
+            end
+            
+            % calc result for this data
+            thisResult = evalFnWithArgs();
           end
-          
+
           % change result_file if varied_filename_flag
           if options.varied_filename_flag && isfield(data, 'varied')
-            if isfield(options, 'save_prefix') && ~isempty(options.save_prefix)
-              prefix = options.save_prefix;
-            else
-              if regexpi(func2str(func), 'plot')
-                plot_options = CheckOptions(varargin,{'plot_type',['plot' num2str(fInd)],{'waveform','rastergram','raster','power','rates'}},false);
-                prefix = plot_options.plot_type;
-              else
-                prefix = func2str(func);
-              end
-            end
-
-            fname = nameFromVaried(data, prefix, fname);
-            
-            fDir = fullfile(studyinfo.study_dir, 'postSimPlots');
-            if ~exist(fDir,'dir')
-              mkdir(fDir)
-            end
-            fPath = fullfile(fDir,fname);
-            fprintf('\t\tSaving derived data: %s\n', fPath);
+            fname = filenameFromVaried(fname);
           end % varied_filename_flag
-        else
-          fname = [options.result_file '_page' num2str(iResult) extension];
-        end
         
-        set(gcf,'PaperPositionMode','auto');
+          % make fPath
+          fDir = fullfile(studyinfo.study_dir, 'postSimPlots');
+          if ~exist(fDir,'dir')
+            mkdir(fDir)
+          end
+          fPath = fullfile(fDir,fname);
+        else % length(result)>1 and ~studyinfoBool
+          fname = [options.result_file '_page' num2str(iResult) extension];
+          
+          % make fPath
+          fDir = fullfile(studyinfo.study_dir, 'postSimPlots');
+          if ~exist(fDir,'dir')
+            mkdir(fDir)
+          end
+          fPath = fullfile(fDir,fname);
+          
+          thisResult = result(iResult);
+        end
+        % Data needed for plotting:
+        %   - thisResult
+        %   - fPath
+        
+        set(thisResult, 'PaperPositionMode','auto');
         fprintf('\t\tSaving plot: %s\n',fname);
         
         switch extension
           case '.svg'
-            plot2svg(fname,result(iResult));
+            plot2svg(fpath,thisResult);
           case '.jpg'
-            print(result(iResult),fname,'-djpeg');
+            print(thisResult,fPath,'-djpeg');
           case '.eps'
-            print(result(iResult),fname,'-depsc');
+            print(thisResult,fPath,'-depsc');
           case '.png'
-            print(result(iResult),fname,'-dpng');
+            print(thisResult,fPath,'-dpng');
           case '.fig'
-            savefig(result(iResult),fname);
+            savefig(thisResult,fPath);
         end
         
-        if postSimBool
-          close(result)
+        if nResults > 1
+          close(thisResult)
         end
-      end
-    end
+      end %nResults
+    end %save_results_flag
   else % analysis function returned derived data
+    %% Analysis Function
     if isstruct(result)
       result = add_modifications(result);
       
@@ -263,9 +248,48 @@ for fInd = 1:nFunc % loop over function inputs
       end %iResult
     end %isstruct
     
-    % save derived data
+    % save derived data else return main function
     if options.save_results_flag
-      if length(result) == 1
+      if studyinfoBool
+        allResults = result;
+        clear result;
+        
+        for iResult = 1:nResults
+          simID = studyinfo.simulations(iResult).sim_id;
+          
+          if options.load_all_data_flag
+            result = allResults(iResult);
+          else % load data
+            data = loadDataFromSingleSim();
+            
+            %skip if no data
+            if isempty(data)
+              continue
+            end
+            
+            % calc result for this data
+            result = evalFnWithArgs();
+          end
+          
+          prefix = func2str(func);
+          fname = [prefix '_sim' num2str(simID) '_analysis' num2str(fInd) '_' func2str(func) '.mat'];
+          
+          % change result_file if varied_filename_flag
+          if options.varied_filename_flag && isfield(data, 'varied')
+            fname = filenameFromVaried(fname);
+          end % varied_filename_flag
+          
+          % make fPath
+          fDir = fullfile(studyinfo.study_dir, 'analyzedData');
+          if ~exist(fDir,'dir')
+            mkdir(fDir)
+          end
+          fPath = fullfile(fDir,fname);
+          
+          fprintf('\t\tSaving derived data: %s\n', fPath);
+          save(fPath,'result','-v7.3');
+        end %iResult
+      else % ~studyinfoBool, whether 1 or array of struct
         fname = options.result_file;
         extension = '.mat';
         
@@ -275,40 +299,177 @@ for fInd = 1:nFunc % loop over function inputs
         
         fprintf('\t\tSaving derived data: %s\n', fname);
         save(fname,'result','-v7.3');
-      elseif ~isempty(studyinfo) % analyze study
-        allResults = result;
-        clear result;
-        for iResult = 1:length(allResults)
-          result = allResults(iResult);
-          simID = studyinfo.simulations(iResult).sim_id;
-          prefix = func2str(func);
-          fname = [prefix '_sim' num2str(simID) '_analysis' num2str(fInd) '_' func2str(func) '.mat'];
-          
-          % change result_file if varied_filename_flag
-          if options.varied_filename_flag && isfield(data, 'varied')
-            if isfield(options, 'save_prefix') && ~isempty(options.save_prefix)
-              prefix = options.save_prefix;
-            else
-                prefix = func2str(func);
-            end
-
-            fname = nameFromVaried(data, prefix, fname);
-          end % varied_filename_flag
-          
-          fDir = fullfile(studyinfo.study_dir, 'analyzedData');
-          if ~exist(fDir,'dir')
-            mkdir(fDir)
-          end
-          fPath = fullfile(fDir,fname);
-          fprintf('\t\tSaving derived data: %s\n', fPath);
-          save(fname,'result','-v7.3');
-        end %iResult
-      end % if length(result)==1
+      end % scenarios
     end % save_results_flag
   end % ishandle(result)
 end % fInd
 
 %% Nested functions
+  function [data, studyinfo] = parseSrc(src)
+    if isstruct(src) && isfield(src,'time') % data struct (single or array)
+      data = src; % if length==1,then likely from SimulateModel call
+      studyinfo = [];
+    elseif ischar(src) %string input
+      if options.load_all_data_flag
+        [data,studyinfo] = ImportData(src, varargin{:}); % load data
+      else % only load studyinfo
+        data = [];
+        studyinfo = CheckStudyinfo(src);
+      end
+      
+      % update study_dir
+      if exist(src,'file') && strfind(src, 'studyinfo') %studyinfo.mat
+        studyinfo.study_dir = fileparts2(src);
+      elseif isdir(src) % study_dir
+        studyinfo.study_dir = src;
+      end
+    end
+
+    % Old Verbose Way with unnecessary checks
+    % determine type of src
+    % if ischar(src)
+    %   if exist(src,'file') % data file or studyinfo.mat
+    %     if strfind(src, 'studyinfo') %studyinfo.mat
+    %       [data,studyinfo] = ImportData(src, varargin{:}); % load data
+    %       studyinfo.study_dir = fileparts2(src);
+    %     else % data file
+    %       [data,studyinfo] = ImportData(src, varargin{:}); % load data
+    %     end
+    %   elseif isdir(src) % study_dir
+    %     [data,studyinfo] = ImportData(src, varargin{:}); % load data
+    %     studyinfo.study_dir = src;
+    %   else
+    %     try
+    %       [data,studyinfo] = ImportData(src, varargin{:}); % load data
+    %     catch
+    %       error('Unknown source for first input/argument.')
+    %     end
+    %   end
+    % elseif isstruct(src) && length(src)>1 % data file cell array
+    %   data = src;
+    % elseif isstruct(src) % single data struct or studyinfo struct
+    %   if isfield(src,'time') % single data file
+    %     data = src;
+    %   else % studyinfo struct
+    %     [data,studyinfo] = ImportData(src, varargin{:}); % load data
+    %   end
+    % elseif iscell(src) % cell array of files
+    %   [data,studyinfo] = ImportData(src, varargin{:}); % load data
+    % else
+    %   try
+    %     [data,studyinfo] = ImportData(src, varargin{:}); % load data
+    %   catch
+    %     error('Unknown source for first input/argument.')
+    %   end
+    % end
+    %
+    %
+    % % make studyinfo if doesn't exist
+    % if ~exist('studyinfo','var')
+    %   studyinfo = [];
+    % end
+  end
+
+
+  function [funcIn, nFunc] = parseFuncIn(funcIn)
+    % convert funcIn input to handle if not a cell array
+    
+    if isa(funcIn,'function_handle')
+      nFunc = 1;
+      funcIn = {funcIn}; % make into cell array
+    elseif ischar(funcIn)
+      funcIn = {str2func(funcIn)}; % convert string to fn handle
+      
+      if ~isfunction(funcIn)
+        error('Post-processing function must be supplied as a function handle or function name string');
+      end
+      
+      nFunc = 1;
+    else
+      nFunc = numel(funcIn);
+    end
+  end
+
+  function func = parseFunc(func)
+    if ~isa(func,'function_handle')
+      if ischar(func)
+        func = str2func(func); % convert string to fn handle
+        
+        if ~isfunction(func)
+          error('Post-processing function must be supplied as a function handle or function name string');
+        end
+      else
+        error('Post-processing function must be supplied as a function handle or function name string');
+      end
+    end
+  end
+
+
+  function filename = filenameFromVaried(filename)
+    % NOTE: inputs are odd since called from different sources with different
+    %       states.
+    
+    if isfield(options, 'save_prefix') && ~isempty(options.save_prefix)
+      prefix = options.save_prefix;
+    else
+      if plotFnBool
+        if isempty(options.function_options)
+          plot_options = options;
+        else
+          plot_options = options.function_options{fInd};
+        end
+        
+        % check if 'plot_type' given as part of plot_options
+        plot_options = CheckOptions(plot_options,{'plot_type',['plot' num2str(fInd)],[]},false);
+        
+        prefix = plot_options.plot_type; % will be waveform by default due to CheckOptions in main fn
+      else % ~plotFnBool
+        prefix = func2str(func);
+      end
+    end
+
+    filename = nameFromVaried(data, prefix, filename);
+  end
+
+
+  function result = evalFnWithArgs()
+    if isempty(options.function_options)
+      result = feval(func,data,varargin{:});
+    else
+      function_options = options.function_options{fInd};
+      result = feval(func,data,function_options{:});
+    end
+  end
+
+
+  function data = loadDataFromSingleSim()
+    % check if iResult in options.simIDs
+    if isempty(options.simIDs)
+      simIDs = simID;
+    else
+      simIDs = intersect(simID, options.simIDs);
+      
+      if isempty(simIDs) % skip if empty
+        return
+      end
+    end
+    
+    varinputs = varargin; % create copy of varargin
+    if isstruct(varinputs{1})
+      varinputs.simIDs = simIDs;
+    else
+      % find simIDs in varinputs
+      varinputs{find(~cellfun(@isempty,strfind(varinputs(1:2:end), 'simIDs')))*2} = simIDs;
+    end
+    
+    data = ImportData(src, varinputs{:}); % load data
+  end
+
+
+%   function [thisResult, fname] = test
+%   end
+
+
   function result = add_modifications(result)
     % add modifications to result structure, excluding modifications made
     % within experiments. note: while this nested function is similar to 
