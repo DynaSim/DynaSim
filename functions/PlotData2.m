@@ -116,8 +116,18 @@ varied_names = only_varieds(all_names);  % Returns only the names of the varied 
 % actual varied parameters
 myargin = varargin;
 for i = 1:length(myargin)
+    % Char entries 
     if ischar(myargin{i})
         myargin{i} = variedN_to_axisnames(myargin{i},varied_names);
+    end
+    
+    % Nested char entries within cell array entries
+    if iscell(myargin{i})
+        for j = 1:length(myargin{i})
+            if ischar(myargin{i}{j})
+                myargin{i}{j} = variedN_to_axisnames(myargin{i}{j},varied_names);
+            end
+        end
     end
 end
   
@@ -149,6 +159,7 @@ strict_mode = 1;
   'save_figures',false,[false true],...
   'save_figname_path',[],[],...
   'supersize_me',false,[false true],...
+  'dim_stacking',[],[],...
   },false);
 handles=[];
 
@@ -416,7 +427,15 @@ xp2 = reduce_dims(xp2,maxNplotdims);
 
 % Stack up available dimensions based on how much each axis handle can hold
 ax_names = [xp2.exportAxisNames, 'data'];
-dimensions = get_dimensions(ax_names,dims_per_function_handle);
+if ~isempty(options.dim_stacking)
+    if length(options.dim_stacking) ~= length(ax_names) -1
+        error('Incorrect number of dimensions specified. dim_stacking must be some permutation of the following: %s', sprintf('%s ',ax_names{1:end-1}));
+    end
+    dimensions = get_dimensions({options.dim_stacking{:}, 'data'},dims_per_function_handle);
+else
+    
+    dimensions = get_dimensions(ax_names,dims_per_function_handle);
+end
 
 % Remove any excess function handles that aren't needed
 available_dims = ~cellfun(@isempty,dimensions);
