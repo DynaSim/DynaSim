@@ -150,6 +150,7 @@ strict_mode = 1;
   'ylims',[],[],...
   'zlims',[],[],...
   'lock_axes',1,[false true],...
+  'saved_fignum',[1],[],...
   'plot_options',struct,[],...
   'subplot_options',struct,[],...
   'figure_options',struct,[],...
@@ -187,9 +188,12 @@ force_overlay = options.force_overlay;
 
 % Add default options to structures
 % Plot_options
-plot_options = struct_addDef(plot_options,'ylims',options.ylims);
-plot_options = struct_addDef(plot_options,'xlims',options.xlims);
-plot_options = struct_addDef(plot_options,'zlims',options.zlims);
+% Used when running xp_matrix_advancedplot3D
+    plot_options = struct_addDef(plot_options,'ylims',options.ylims);
+    plot_options = struct_addDef(plot_options,'xlims',options.xlims);
+    plot_options = struct_addDef(plot_options,'zlims',options.zlims);
+% Used when running xp_plotimage
+    plot_options = struct_addDef(plot_options,'saved_fignum',options.saved_fignum);
 
 % Subplot_options
 subplot_options = struct_addDef(subplot_options,'subplotzoom_enabled',options.do_zoom);
@@ -378,13 +382,10 @@ end
 if is_image
     % Is an image
     data_plothandle = @xp_plotimage;
-    image_options = struct;
-    image_options.scale = .5;           % Scale of .5 enforces some anti-aliasing
-    args_plothandle = image_options;
+    plot_options.scale = .5;           % Scale of .5 enforces some anti-aliasing
 else
     % Is data
     data_plothandle = @xp_matrix_advancedplot3D;
-    args_plothandle = plot_options;
 end
 
 % Split available axes into the number of dimensions supported by each
@@ -394,13 +395,13 @@ switch num_embedded_subplots
         % Ordering of axis handles
         function_handles = {@xp_handles_newfig, @xp_subplot_grid,data_plothandle};   % Specifies the handles of the plotting functions
         dims_per_function_handle = [1,1,1];
-        function_args = {{figure_options},{subplot_options},{args_plothandle}};
+        function_args = {{figure_options},{subplot_options},{plot_options}};
         
     case 2
         % Ordering of axis handles
         function_handles = {@xp_handles_newfig, @xp_subplot_grid,data_plothandle};   % Specifies the handles of the plotting functions
         dims_per_function_handle = [1,2,1];
-        function_args = {{figure_options},{subplot_options},{args_plothandle}};
+        function_args = {{figure_options},{subplot_options},{plot_options}};
         
     case 3
         % Ordering of axis handles
@@ -409,7 +410,7 @@ switch num_embedded_subplots
         subplot_options2 = subplot_options;
         subplot_options2.legend1 = [];
         subplot_options.display_mode = 1;
-        function_args = {{figure_options},{subplot_options2},{subplot_options},{args_plothandle}};
+        function_args = {{figure_options},{subplot_options2},{subplot_options},{plot_options}};
     case 4
         % Ordering of axis handles
         function_handles = {@xp_handles_newfig, @xp_subplot_grid, @xp_subplot_grid,data_plothandle};   % Specifies the handles of the plotting functions
@@ -417,7 +418,7 @@ switch num_embedded_subplots
         subplot_options2 = subplot_options;
         subplot_options2.legend1 = [];
         subplot_options.display_mode = 1;
-        function_args = {{figure_options},{subplot_options2},{subplot_options},{args_plothandle}};
+        function_args = {{figure_options},{subplot_options2},{subplot_options},{plot_options}};
 end
 
 % Linearize dimensions of xp2 that are in excess of the total number we can
