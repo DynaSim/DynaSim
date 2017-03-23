@@ -1,7 +1,7 @@
 function result = classifyEI(data,varargin)
 
 if ischar(data) && strcmp(data, 'info')
-  result = {'nan', [];
+  result = {'nan', []; % Third column for marker.
             'hfo', [];
             'gamma', [];
             'beta', [];
