@@ -28,11 +28,11 @@ function xp = DynaSim2xPlt(data)
         cell_names = [1:max(cellfun(@(x) size(x,2),xp.data(:)))];
         cell_names_str = cellfunu(@(s) ['Cell ' num2str(s)], num2cell(cell_names));
     meta.datainfo(2).values = cell_names_str;
-    meta.dynasim.labels = data.labels;
-    meta.dynasim.model = data.model;
-    meta.dynasim.simulator_options = data.simulator_options;
-    meta.dynasim.time = data.time;
-    meta.dynasim.varied = data.varied;
+    meta.dynasim.labels = data(1).labels;
+    meta.dynasim.model = data(1).model;
+    meta.dynasim.simulator_options = data(1).simulator_options;
+    meta.dynasim.time = data(1).time;
+    meta.dynasim.varied = data(1).varied;
     xp.meta = meta;
     clear meta
 end
