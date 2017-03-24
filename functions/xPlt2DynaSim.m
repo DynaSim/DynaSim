@@ -11,37 +11,55 @@ function data=xPlt2DynaSim(obj)
 % equivalent to the structure fields in Jason's DynaSim structure.
 
 
-pop_axis = obj.findaxis('populations');
-obj = obj.mergeDims([1:pop_axis-1]);
-obj = obj.mergeDims([pop_axis:ndims(obj)]);
-obj = squeeze(obj); % Squeeze out the empty dimensions.
-% obj.getaxisinfo;
+obj = obj.squeeze;
+pop_axis = obj.findaxis('populations'); if isempty(pop_axis); error('obj must contain a populations axis to be converted to DynaSim'); end
+var_axis = obj.findaxis('variables'); if isempty(var_axis); error('obj must contain a variables axis to be converted to DynaSim'); end
+varied_inds = true(1,ndims(obj)); varied_inds(pop_axis) = false; varied_inds(var_axis) = false;
+varied_axis = find(varied_inds);
 
+if isempty(varied_axis); single_sim = true; else single_sim = false; end
+
+% Bring pop and var to front
+obj = obj.permute([pop_axis,var_axis, varied_axis(:)']);
+
+% Merge populations and variables together
+obj = obj.mergeDims(1:2);
+obj = obj.squeeze;
+
+% Merge all other varied variables
+obj = obj.mergeDims(2:ndims(obj));
+obj = obj.squeeze;
+
+% Build DynaSim data structure
 data = struct;
 ax_vals = obj.exportAxisVals;
 ax_names = obj.exportAxisNames;
-varied = obj.axis(1).astruct.premerged_names;
-varied_vals = obj.axis(1).astruct.premerged_values;
-for i = 1:size(obj,1)
+varied = obj.axis(2).astruct.premerged_names;
+varied_vals = obj.axis(2).astruct.premerged_values;
+for j = 1:size(obj,2)
+    
     % Add actual data
-    for j = 1:size(obj,2)
-        data(i).(ax_vals{2}{j}) = obj.data{i,j};
+    for i = 1:size(obj,1)
+        data(j).(ax_vals{1}{i}) = obj.data{i,j};
     end
     
-    % Add list of varied variables
-    data(i).varied = varied;
-    
-    % Add values of varied variables
-    for j = 1:length(varied)
-        data(i).(varied{j}) = varied_vals{j}(i);
+    % If there are any varied parameters....
+    if ~single_sim
+        % Add list of varied variables
+        data(j).varied = varied;
+
+        % Add values of varied variables
+        for i = 1:length(varied)
+            data(j).(varied{i}) = varied_vals{i}(j);
+        end
     end
     
     % Add other DynaSim info if present
     obj_curr = obj.meta.dynasim;
-    fc = 'labels'; if isfield(obj_curr,fc); data(i).(fc) = obj_curr.(fc); end
-    fc = 'model'; if isfield(obj_curr,fc); data(i).(fc) = obj_curr.(fc); end
-    fc = 'simulator_options'; if isfield(obj_curr,fc); data(i).(fc) = obj_curr.(fc); end
-    fc = 'time'; if isfield(obj_curr,fc); data(i).(fc) = obj_curr.(fc); end
+    fc = 'labels'; if isfield(obj_curr,fc); data(j).(fc) = obj_curr.(fc); end
+    fc = 'model'; if isfield(obj_curr,fc); data(j).(fc) = obj_curr.(fc); end
+    fc = 'simulator_options'; if isfield(obj_curr,fc); data(j).(fc) = obj_curr.(fc); end
+    fc = 'time'; if isfield(obj_curr,fc); data(j).(fc) = obj_curr.(fc); end
     
     
 end
@@ -49,3 +67,12 @@ end
 data = CheckData(data);
 
 end
+
+
+function varied_names = only_varieds(all_names)
+    inds = true(1,length(all_names));
+    inds(strcmp(all_names,'populations')) = false; 
+    inds(strcmp(all_names,'variables')) = false;
+    varied_names = all_names(inds);
+end
+
