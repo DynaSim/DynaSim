@@ -274,6 +274,8 @@ end
 % Convert any "all" strings in chosen_varied to colon operators
 inds = cellfun(@ischar,chosen_varied);
 chosen_varied(inds) = cellfun(@(s) strrep(s,'all',':'),chosen_varied(inds),'UniformOutput',0);
+if strcmp(chosen_vars,'all'); chosen_vars = ':'; end
+if strcmp(chosen_pop,'all'); chosen_vars = ':'; end
 
 % Select out chosen data
 xp2 = xp(chosen_vars,chosen_pop,chosen_varied{:});
