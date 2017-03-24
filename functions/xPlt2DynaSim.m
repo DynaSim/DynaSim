@@ -11,31 +11,29 @@ function data=xPlt2DynaSim(obj)
 % equivalent to the structure fields in Jason's DynaSim structure.
 
 
-obj = obj.squeeze;
+% obj = obj.squeeze;
 pop_axis = obj.findaxis('populations'); if isempty(pop_axis); error('obj must contain a populations axis to be converted to DynaSim'); end
 var_axis = obj.findaxis('variables'); if isempty(var_axis); error('obj must contain a variables axis to be converted to DynaSim'); end
 varied_inds = true(1,ndims(obj)); varied_inds(pop_axis) = false; varied_inds(var_axis) = false;
 varied_axis = find(varied_inds);
-
-if isempty(varied_axis); single_sim = true; else single_sim = false; end
 
 % Bring pop and var to front
 obj = obj.permute([pop_axis,var_axis, varied_axis(:)']);
 
 % Merge populations and variables together
 obj = obj.mergeDims(1:2);
-obj = obj.squeeze;
 
 % Merge all other varied variables
-obj = obj.mergeDims(2:ndims(obj));
-obj = obj.squeeze;
+obj = obj.mergeDims(3:ndims(obj));
 
 % Build DynaSim data structure
 data = struct;
 ax_vals = obj.exportAxisVals;
 ax_names = obj.exportAxisNames;
-varied = obj.axis(2).astruct.premerged_names;
-varied_vals = obj.axis(2).astruct.premerged_values;
+varied = obj.axis(3).astruct.premerged_names;
+varied_vals = obj.axis(3).astruct.premerged_values;
+
+obj = obj.squeeze;
 for j = 1:size(obj,2)
     
     % Add actual data
@@ -44,7 +42,7 @@ for j = 1:size(obj,2)
     end
     
     % If there are any varied parameters....
-    if ~single_sim
+    if 1
         % Add list of varied variables
         data(j).varied = varied;
 
