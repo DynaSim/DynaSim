@@ -20,6 +20,9 @@ function handles=PlotFR2(data,varargin)
 %     'plot_type': options for sim study mode. Options include 'heatmap',
 %                  'heatmap_sorted' (default), 'meanFR,' 'meanFRdens', and
 %                  'summary'.
+%     'lock_gca' : Plots within currently active axis (gca); doesn't
+%                  open new figures or subplots.
+% 
 %
 % Examples:
 % PlotFR(data,'bin_size',30,'bin_shift',10);
@@ -39,9 +42,10 @@ options=CheckOptions(varargin,{...
   'bin_size',.05,[],...  % 30
   'bin_shift',.01,[],... % 10
   'exclude_data_flag',0,{0,1},...
+  'lock_gca',false,[true,false],...
   });
 
-
+lock_gca = options.lock_gca;
 keyvals=Options2Keyval(rmfield(options,{'plot_type'}));
 
 
@@ -58,7 +62,7 @@ time=data.time_FR;
 nsets=length(FR_fields);
 
 % plot firing rates
-if numel(data)==1 || ~isfield(data,'varied')
+if (numel(data)==1 || ~isfield(data,'varied')) && ~lock_gca
   % plot separate firing rates vs time (one figure per element of data)
   for i=1:length(data)
     plotFR_SingleSim(i);
@@ -66,10 +70,14 @@ if numel(data)==1 || ~isfield(data,'varied')
 else
   % data contains results from a set of simulations varying something
   % plot average firing rates vs whatever was varied
-  if strcmp(options.plot_type,'summary')
+  if strcmp(options.plot_type,'summary') && ~lock_gca
       plotFR_SimStudy;
   else
+      if numel(data) > 1 && lock_gca
+          error('Cannot lock gca if number of elements in data is greater than 1');
+      end
       plotFR_SimStudy_specialized;
+      
   end
 end
 
@@ -78,7 +86,7 @@ end
     % purpose: plot each data set data.(FR_fields{k})
     % plots for N populations (FR data sets) from this simulation
     ht=320; % height per subplot row (=per population or FR data set)
-    handles(end+1)=figure('position',[250 max(50,600-(nsets-1)*ht) 1400 min(ht*nsets,750)]);
+    if ~lock_gca; handles(end+1)=figure('position',[250 max(50,600-(nsets-1)*ht) 1400 min(ht*nsets,750)]); end
     for k=1:nsets % index of firing rate data field
       dat=data(i).(FR_fields{k});
       bins=0:1.05*max(dat(:));
@@ -194,7 +202,7 @@ end
     % plot how avg firing rate for each pop varies with each parameter
     ht=320; % height per subplot row (=per population or FR data set)
     wt=500;
-    handles(end+1)=figure('position',[250 max(50,600-(nsets-1)*ht) min(1500,500+(nvaried-1)*wt) min(ht*nsets,750)]);
+    if ~lock_gca; handles(end+1)=figure('position',[250 max(50,600-(nsets-1)*ht) min(1500,500+(nvaried-1)*wt) min(ht*nsets,750)]); end
     cnt=0;
     for k=1:nsets % populations
       popname=regexp(FR_fields{k},'^([a-zA-Z0-9]+)_','tokens','once');
@@ -229,7 +237,7 @@ end
     if length(varied)==2
       % plots for N populations and 2 varied elements
       % organize and imagesc FRmu(param 1, param 2)
-      handles(end+1)=figure('position',[1150 max(50,600-(nsets-1)*ht) 500 min(ht*nsets,750)]);
+      if ~lock_gca; handles(end+1)=figure('position',[1150 max(50,600-(nsets-1)*ht) 500 min(ht*nsets,750)]);end
       pvals1=unique(params(:,1)); nv1=length(pvals1);
       pvals2=unique(params(:,2)); nv2=length(pvals2);
       for k=1:nsets
@@ -302,13 +310,14 @@ end
         %     sim_indices=[sim_indices find(param_mat(:,row_param_index)==row_param_values(row))];
         %   end
         else
-          sim_indices=ones(1,num_rows); % index into data array
-          num_cols=1;
+            num_rows = 1;
+            sim_indices=ones(1,num_rows); % index into data array
+            num_cols=1;
         end
         
         ht=320; % height per subplot row (=per population or FR data set)
-        handles(1) = figure('units','normalized','position',[0,1-min(.33*num_rows,1),min(.25*num_cols,1) min(.33*num_rows,1)]);
-        hsp = subplot_grid(num_rows,num_cols);
+        if ~lock_gca; handles(1) = figure('units','normalized','position',[0,1-min(.33*num_rows,1),min(.25*num_cols,1) min(.33*num_rows,1)]); end
+        if ~lock_gca; hsp = subplot_grid(num_rows,num_cols);  end
         
         axis_counter = 0;
         for row=1:num_rows
@@ -320,7 +329,7 @@ end
                   continue;
                 end
                 
-                hsp.set_gca(axis_counter);
+                if ~lock_gca; hsp.set_gca(axis_counter); end
                 
                 num_pops = 1;
                 if isfield(data,'varied')
@@ -384,7 +393,8 @@ end
                     [tmp,inds]=sort(tmp);
                     imagesc(time,1:ncells,dat(:,inds)'); axis xy
                     caxis(rlims); xlim(tlims);
-                    hsp.figtitle([popname ': firing rates (Hz) ']); title(text_string{row,col});
+                    if ~lock_gca; hsp.figtitle([popname ': firing rates (Hz) ']); title(text_string{row,col}); end;
+                    
                     if row == num_rows; xlabel('time (ms)'); end; ylabel([popname ' cell index (sorted by FR)']);
                     if ncells<=10
                       ytick=1:ncells;
