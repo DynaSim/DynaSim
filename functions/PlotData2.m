@@ -18,6 +18,8 @@ function handles=PlotData2(data,varargin)
 %                 regular expressions. Instead of 'varied1', can also use
 %                 the actual parameter name (e.g. 'E_Iapp')
 %     'varied2' - As varied 1, for 2nd varied parameter
+%     ....
+%     'variedN' - As varied 1, for 2nd varied parameter
 %     'num_embedded_subplots' - maximum # of waveforms to overlay per plot
 %     'max_num_overlaid' - maximum # of waveforms to overlay per plot
 %     'do_mean' - {false, true} - Turn on/off averaging across all units
@@ -40,6 +42,7 @@ function handles=PlotData2(data,varargin)
 % 
 % See also: CalcFR, CalcPower, PlotWaveforms, CheckData
 
+% Convert data as needed
 if ischar(data)
     study_dir = data;
     
@@ -145,11 +148,11 @@ strict_mode = 1;
   'do_overlay_shift',false,[false true],...
   'overlay_shift_val',[],[],...
   'do_zscore',[false],[false true],...
-  'plot_type','waveform',{'waveform','heatmap','rastergram','raster','power','rates'},...
+  'plot_type','waveform',{'waveform','imagesc','rastergram','raster','power','heatmapFR','heatmap_sortedFR','meanFR','meanFRdens'},...
   'xlims',[],[],...
   'ylims',[],[],...
   'zlims',[],[],...
-  'lock_axes',1,[false true],...
+  'lock_axes',true,[false true],...
   'saved_fignum',[1],[],...
   'plot_options',struct,[],...
   'subplot_options',struct,[],...
@@ -194,6 +197,8 @@ force_overlay = options.force_overlay;
     plot_options = struct_addDef(plot_options,'zlims',options.zlims);
 % Used when running xp_plotimage
     plot_options = struct_addDef(plot_options,'saved_fignum',options.saved_fignum);
+% Used when running xp_PlotData or xp_PlotFR2
+    plot_options = struct_addDef(plot_options,'args',{});
 
 % Subplot_options
 subplot_options = struct_addDef(subplot_options,'subplotzoom_enabled',options.do_zoom);
@@ -354,8 +359,8 @@ subplot_options.legend1 = setup_legends(xp2);
 
 % Get axis lims
 if isempty(plot_options.xlims) && options.lock_axes && ~is_image
-    xdat = xp.meta.datainfo(1).values;
-    plot_options.xlims = [min(xdat) max(xdat)];
+        xdat = xp.meta.datainfo(1).values;
+        plot_options.xlims = [min(xdat) max(xdat)];
 end
 if isempty(plot_options.ylims) && options.lock_axes && ~is_image
     switch plot_type
@@ -386,8 +391,29 @@ if is_image
     data_plothandle = @xp_plotimage;
     plot_options.scale = .5;           % Scale of .5 enforces some anti-aliasing
 else
-    % Is data
-    data_plothandle = @xp_matrix_advancedplot3D;
+    switch plot_type
+        case 'waveform'
+            % Is data
+            data_plothandle = @xp_matrix_advancedplot3D;
+        case {'power','rastergram','raster'}
+            % Disable legend when using PlotData
+            subplot_options.legend1 = [];
+            
+            % Setup call to xp_PlotData
+            plot_options.args = {plot_options.args{:}, 'plot_type',plot_type};
+            data_plothandle = @xp_PlotData;
+        case {'heatmapFR','heatmap_sortedFR','meanFR','meanFRdens'}
+            % Disable legend when using PlotFR2
+            subplot_options.legend1 = [];
+            % Remove FR suffix from heatmap and heatmap_sorted plot types
+            if any(strcmp(plot_type,{'heatmapFR','heatmap_sortedFR'}))
+                plot_type = strrep(plot_type,'FR','');
+            end
+            
+            % Setup call to xp_PlotFR2
+            plot_options.args = {plot_options.args{:}, 'plot_type',plot_type};
+            data_plothandle = @xp_PlotFR2;
+    end
 end
 
 % Split available axes into the number of dimensions supported by each
