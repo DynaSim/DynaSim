@@ -19,6 +19,8 @@ function handles = PlotData(data,varargin)
 %     'xlim'            : x-axis limits {[XMIN XMAX]} (default: all data)
 %     'yscale'          : whether to plot linear or log scale {'linear','log','log10'}
 %     'visible'         : {'on','off'}
+%     'lock_gca'        : Plots within currently active axis (gca); doesn't
+%                         open new figures or subplots.
 %     - NOTE: analysis options are available depending on plot_type
 %       - see see CalcFR options for plot_type 'rastergram' or 'rates'
 %       - see CalcPower options for plot_type 'power'
@@ -234,11 +236,14 @@ options=CheckOptions(varargin,{...
   'ylim',[],[],...
   'figwidth',[1],[],...
   'figheight',[1],[],...
+  'lock_gca',[false],[false, true],...
   'yscale','linear',{'linear','log','log10','log2'},...
   'visible','on',{'on','off'},...
   },false);
 data=CheckData(data);
 handles=[];
+
+lock_gca = options.lock_gca;
 
 % todo: add option 'plot_mode' {'trace','image'}
 
@@ -316,8 +321,10 @@ MRPF = options.max_num_rows; % max rows per fig
 MTPP = options.max_num_overlaid; % max traces per plot
 
 % how many plots:
-if num_sims==1 && num_pops==1 && num_vars==1
+if num_sims==1 && num_pops==1 && num_vars==1 && ~lock_gca
   num_fig_sets=1; num_figs=ceil(pop_sizes/MRPF); num_rows=min(pop_sizes,MRPF);
+elseif num_sims==1 && num_pops==1 && num_vars==1 && lock_gca
+  num_fig_sets=1; num_figs=1; num_rows=1;
 elseif num_sims==1 && num_pops==1 && num_vars>1
   num_fig_sets=1; num_figs=ceil(num_vars/MRPF); num_rows=min(num_vars,MRPF);
 elseif num_sims==1 && num_pops>1 && num_vars==1
@@ -334,6 +341,10 @@ elseif num_sims>1 && num_pops>1 && num_vars>1
   num_fig_sets=num_vars; num_figs=ceil(num_sims/MRPF); num_rows=min(num_sims,MRPF);
 else
   error('unrecognized dimensions');
+end
+
+if lock_gca && (num_sims>1 || num_pops>1 || num_vars>1)
+    error('Option lock_gca cannot with more than one simulation, population, or variable');
 end
 
 % make subplot adjustments for varied parameters
@@ -389,9 +400,15 @@ for figset=1:num_fig_sets
   for fig=1:num_figs
     ylims=[nan nan];
     % create figure
-    handles(end+1)=figure('units','normalized','outerposition',[0 0 options.figwidth, options.figheight],'visible',options.visible);
-    % position axes
-    haxes=tight_subplot(num_rows,num_cols,[.01 .03],[.05 .01],[.03 .01]);
+    if ~lock_gca
+        handles(end+1)=figure('units','normalized','outerposition',[0 0 options.figwidth, options.figheight],'visible',options.visible);
+        % position axes
+        haxes=tight_subplot(num_rows,num_cols,[.01 .03],[.05 .01],[.03 .01]);
+    else
+        handles = gcf;
+        haxes = gca;
+    end
+    
     axis_counter=0;
     AuxData=[];
     vlines=[];
@@ -411,7 +428,8 @@ for figset=1:num_fig_sets
         % #################################################################
         % what to plot
         % -----------------------------------------------------------------
-        if num_sims==1 && num_pops==1 && num_vars==1
+        
+        if num_sims==1 && num_pops==1 && num_vars==1 && ~lock_gca
         % -----------------------------------------------------------------
           % one cell per row: dat = data(s=1).(var)(:,c=r) where var=vars{v=1}
           var=var_fields{1};
@@ -432,6 +450,23 @@ for figset=1:num_fig_sets
           end
           if num_rows>1
             text_string{row,col}=sprintf('cell %g',row);
+          end
+          
+        elseif num_sims==1 && num_pops==1 && num_vars==1 && lock_gca
+          % one population per row: dat = data(s=1).(var)(:,1:MTPP) where var=vars{v=r}
+          var=var_fields{1};
+          switch options.plot_type
+            case 'waveform'
+              dat=data(sim_index).(var);
+            case 'power'
+              AuxData=data(sim_index).([var '_Power_MUA']).Pxx;
+              vlines=data(sim_index).([var '_Power_MUA']).PeakFreq;
+              AuxDataName={'MUA Power'};
+              var=[var '_Power_SUA'];
+              dat=data(sim_index).(var).Pxx;
+            case {'rastergram','raster'}
+              set_name=regexp(var,'^([a-zA-Z0-9]+)_','tokens','once');
+              allspikes{1}=data(sim_index).([var '_spike_times']);
           end
         % -----------------------------------------------------------------
         elseif num_sims==1 && num_pops==1 && num_vars>1
