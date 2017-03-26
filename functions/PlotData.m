@@ -327,8 +327,10 @@ elseif num_sims==1 && num_pops==1 && num_vars==1 && lock_gca
   num_fig_sets=1; num_figs=1; num_rows=1;
 elseif num_sims==1 && num_pops==1 && num_vars>1
   num_fig_sets=1; num_figs=ceil(num_vars/MRPF); num_rows=min(num_vars,MRPF);
-elseif num_sims==1 && num_pops>1 && num_vars==1
+elseif num_sims==1 && num_pops>1 && num_vars==1 && ~lock_gca
   num_fig_sets=1; num_figs=ceil(num_pops/MRPF); num_rows=min(num_pops,MRPF);
+elseif num_sims==1 && num_pops>1 && num_vars==1 && lock_gca
+  num_fig_sets=1; num_figs=ceil(num_pops/MRPF); num_rows=1;
 elseif num_sims==1 && num_pops>1 && num_vars>1
   num_fig_sets=num_vars; num_figs=ceil(num_pops/MRPF); num_rows=min(num_pops,MRPF);
 elseif num_sims>1 && num_pops==1 && num_vars==1
@@ -343,8 +345,9 @@ else
   error('unrecognized dimensions');
 end
 
-if lock_gca && (num_sims>1 || num_pops>1 || num_vars>1)
-    error('Option lock_gca cannot with more than one simulation, population, or variable');
+% If are doing rastergram, pops can be greater than 1 when doing lock_gca
+if lock_gca && (num_sims>1 || num_vars>1)
+    error('Option lock_gca cannot with more than one simulation or variable');
 end
 
 % make subplot adjustments for varied parameters
@@ -488,7 +491,7 @@ for figset=1:num_fig_sets
           end
           shared_ylims_flag=0;
         % -----------------------------------------------------------------
-        elseif num_sims==1 && num_pops>1 && num_vars==1
+        elseif num_sims==1 && num_pops>1 && num_vars==1 && ~lock_gca
         % -----------------------------------------------------------------
           % one population per row: dat = data(s=1).(var)(:,1:MTPP) where var=vars{v=r}
           var=var_fields{row};
@@ -504,6 +507,39 @@ for figset=1:num_fig_sets
             case {'rastergram','raster'}
               set_name=regexp(var,'^([a-zA-Z0-9]+)_','tokens','once');
               allspikes{1}=data(sim_index).([var '_spike_times']);
+          end
+        % -----------------------------------------------------------------
+        elseif num_sims==1 && num_pops>1 && num_vars==1 && lock_gca
+        % -----------------------------------------------------------------
+          % one simulation per row, overlay pops: dat = <data(s=r).(var)(:,1:MTPP),2|vars>
+          switch options.plot_type
+            case 'waveform'
+              % calculate averages across populations
+              dat=nan(num_times,num_pops);
+              for k=1:num_pops
+                dat(:,k)=nanmean(data(sim_index).(var_fields{k}),2);
+              end
+              var=['<' variables{1} '>'];
+            case 'power'
+              dat=nan(length(xdata),num_pops);
+              AuxData=nan(length(xdata),num_pops);
+              AuxDataName={}; vlines=[];
+              for k=1:num_pops
+                dat(:,k)=nanmean(data(sim_index).([var_fields{k} '_Power_SUA']).Pxx,2);
+                AuxData(:,k)=data(sim_index).([var_fields{k} '_Power_MUA']).Pxx;
+                AuxDataName{end+1}=strrep([var_fields{k} '_Power_MUA'],'_','\_');
+                vlines(end+1)=data(sim_index).([var_fields{k} '_Power_MUA']).PeakFreq;
+              end
+              var=['<' variables{1} '_Power_SUA>'];
+            case {'rastergram','raster'}
+              set_name={};
+              for k=1:num_pops
+                tmp=regexp(var_fields{k},'^([a-zA-Z0-9]+)_','tokens','once');
+                set_name{k}=tmp{1};
+                allspikes{k}=data(sim_index).([var_fields{k} '_spike_times']);
+              end
+              var=['<' variables{1} '>'];
+              
           end
         % -----------------------------------------------------------------
         elseif num_sims==1 && num_pops>1 && num_vars>1
