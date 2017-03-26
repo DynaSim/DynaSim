@@ -75,6 +75,24 @@ data=ImportData(study_dir);
 data_img = ImportPlots(study_dir);
 
 
+%% Resize data as needed
+
+Num_cells_to_keep = 20;
+downsample_factor = 2;
+mydata = xp.data;
+
+for i = 1:numel(data)
+    if ~isempty(mydata{i})
+        %mydata{i} = mydata{i}(:,1:Num_cells_to_keep);
+        mydata{i} = mydata{i}(:,1:round(size(mydata{i},2)/downsample_factor));
+    end
+end
+
+xp.data = mydata;
+
+data = xPlt2DynaSim(xp);
+
+
 save('sample_data_dynasim_2plots.mat','data','data_img');
 
 %% 
