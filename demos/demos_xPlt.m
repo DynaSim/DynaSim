@@ -11,11 +11,12 @@ format compact
 [parentfolder,currfolder] = fileparts(pwd);
 if ~strcmp(currfolder,'demos'); error('Should be in demos folder to run this code.'); end
 
-% Set path to your copy of the DynaSim toolbox
-dynasim_path = fullfile(parentfolder);
-
-% add DynaSim toolbox to Matlab path
-addpath(genpath(dynasim_path)); % comment this out if already in path
+% Add DynaSim to path if it's not already there
+if exist('setup_DynaSim_path','file')
+    setup_DynaSim_path;
+else
+    error('Add the DynaSim folder to the MATLAB path - e.g. run addpath(genpath(DynaSimPath))');
+end
 
 fprintf('Note1 - I am planning to rename nDDict to MDD (MultiDimensional Dictionary).\n');
 fprintf('Note2 - I have moved the rest of this demos script to the ../MDD now in\n ');
