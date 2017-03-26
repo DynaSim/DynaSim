@@ -16,10 +16,13 @@ function data=xPlt2DynaSim(obj)
 % data2 = data(1);
 % d1 = xPlt2DynaSim(DynaSim2xPlt(data1));
 % d2 = xPlt2DynaSim(DynaSim2xPlt(data2));
+% d2b = xPlt2DynaSim(squeeze(DynaSim2xPlt(data2)));
 % % Make sure 1 is identical
-% close all; PlotData(data1); PlotData(d1);
+% close all; 
+% PlotData(data1); PlotData(d1);
 % % Make sure 2 is identical
-% close all; PlotData(data2); PlotData(d2);
+% PlotData(data2); PlotData(d2);
+% PlotData(data2); PlotData(d2b);
 
 
 % obj = obj.squeeze;
@@ -27,6 +30,7 @@ pop_axis = obj.findaxis('populations');
 var_axis = obj.findaxis('variables');
 varied_inds = true(1,ndims(obj)); varied_inds(pop_axis) = false; varied_inds(var_axis) = false;
 varied_axis = find(varied_inds);
+has_varied = ~isempty(varied_axis);
 
 % Bring pop and var to front
 obj = obj.permute([pop_axis,var_axis, varied_axis(:)']);
@@ -41,14 +45,18 @@ population_sz_all = cellfun(@(x) size(x,2),obj.data,'UniformOutput',1);
 obj = obj.mergeDims(1:2);
 
 % Merge all other varied variables
-obj = obj.mergeDims(3:ndims(obj));
+if has_varied
+    obj = obj.mergeDims(3:ndims(obj));
+end
 
 % Build DynaSim data structure
 data = struct;
 ax_vals = obj.exportAxisVals;
 ax_names = obj.exportAxisNames;
-varied = obj.axis(3).astruct.premerged_names;
-varied_vals = obj.axis(3).astruct.premerged_values;
+if has_varied
+    varied = obj.axis(3).astruct.premerged_names;
+    varied_vals = obj.axis(3).astruct.premerged_values;
+end
 
 obj = obj.squeeze;
 for j = 1:size(obj,2)
@@ -59,7 +67,7 @@ for j = 1:size(obj,2)
     end
     
     % If there are any varied parameters....
-    if 1
+    if has_varied
         % Add list of varied variables
         data(j).varied = varied;
 
@@ -71,31 +79,20 @@ for j = 1:size(obj,2)
     
     % Add other DynaSim info if present
     obj_curr = obj.meta.dynasim;
-    fc = 'labels'; if isfield(obj_curr,fc); data(j).(fc) = obj_curr.(fc); end
+    %fc = 'labels'; if isfield(obj_curr,fc); data(j).(fc) = obj_curr.(fc); end
     fc = 'model'; if isfield(obj_curr,fc); data(j).(fc) = obj_curr.(fc); end
     fc = 'simulator_options'; if isfield(obj_curr,fc); data(j).(fc) = obj_curr.(fc); end
     fc = 'time'; if isfield(obj_curr,fc); data(j).(fc) = obj_curr.(fc); end
-    
-    
-    for i = 1:length(data)
-        for j = 1:num_pops
-            obj_temp = obj(['^' pop_names{j}],i);   % ^ is regexp for begins with
-            
-            % Get size of all variables in this population
-            pop_sz = cellfun(@(x) size(x,2),obj_temp.data);
-            pop_sz2 = pop_sz(pop_sz ~= 0);  % Get rid of empties if any
-            
-            % Make sure that all variables have the same population size
-            if any(pop_sz2 ~= mode(pop_sz2)); error('Variables in population %s have differing population sizes',pop_names{j}); end
-            
-            % Assign population size to model info
-            data(i).model.specification.populations(j).size = mode(pop_sz2);
-        end
-        data(i).labels = {ax_vals{1}{:}, 'time'};
-    end
-    
-    
 end
+
+% Update data.labels
+labels = get_axis_labels(obj,ax_vals);
+for j = 1:length(data)
+    data(j).labels = labels;
+end
+
+% Lastly, update population sizes (data(i).model.specification.populations(j).size)
+data = add_pop_sizes(data,obj,num_pops,pop_names);
 
 data = CheckData(data);
 
@@ -109,3 +106,85 @@ function varied_names = only_varieds(all_names)
     varied_names = all_names(inds);
 end
 
+function data = add_pop_sizes(data,obj,num_pops,pop_names)
+    % num_pops = size(obj,1);
+    for i = 1:length(data)
+        for j = 1:num_pops
+            obj_temp = obj(['^' pop_names{j}],i);   % ^ is regexp for begins with
+
+            % Get list of sizes of all variables in this population
+            pop_sz = cellfun(@(x) size(x,2),obj_temp.data);
+
+            % Find state variable in this population - this one will tell
+            % us the size of the population
+            var_names = obj_temp.axis('variables').values;
+            num_vars = length(var_names);
+            ind = regexp(lower(var_names),'_v$||_vm$||_x$||_xm$||_y$||_ym$');        % Search for all variables to get ones ending in the name of a state variable
+            ind = ~cellfun(@isempty,ind);
+            if all(ind == 0)    % If estimation process failed...
+                % warning('State variable name was not one of the following: {V, Vm, X, Xm, Y, Ym}. Defaulting to back up algorithm for guessing.');
+
+                % Instead, try to find any populations that aren't
+                % following the synapse naming convention:
+                % (PopPost_PopPre_Variable)
+                ind = true(1,num_vars);
+                for k = 1:num_pops
+                    if k == j; continue; end
+                    searchstr = ['^' pop_names{j} '_' pop_names{k} '_'];
+                    ind3 = regexp(var_names,searchstr);
+                    ind3 = ~cellfun(@isempty,ind3);
+                    ind(ind3) = false;
+                end
+                ind = ind & pop_sz(:)' ~= 0;
+
+            end
+            % Select the variable(s) most likely to represent this
+            % population
+            pop_sz2 = pop_sz(ind);  % Get rid of empties if any
+
+
+    %         % % Make sure that all variables have the same population size
+    %             % Disabling this error, since some variables with the same
+    %             % population prefix CAN have different sizes - namely synaptic
+    %             % state vars will have same size as presynaptic population
+    %         if any(pop_sz2 ~= mode(pop_sz2)); error('Variables in population %s have differing population sizes',pop_names{j}); end
+
+            % Assign population size to model info
+            data(i).model.specification.populations(j).size = mode(pop_sz2);
+        end   
+    end
+end
+
+
+function labels = get_axis_labels(obj,ax_vals)
+    % This approach preserves the ordering in the original list of labels
+    % (labels_orig). This is important because PlotData uses the specific
+    % ordering in order to tell what the core state variables are.
+    % The current labels are stored in labels_curr. The algorithm is to 
+    % 1. Start with labels_orig and figure out which are already
+    %    present in labels_curr. Keep these and throw the rest out.
+    % 2. Any that are not in labels_orig that are in labels_curr will be
+    %    tacked on at the end
+
+    labels_orig = obj.meta.dynasim.labels;
+    labels_curr = {ax_vals{1}{:}, 'time'};
+    ind_keep = false(1,length(labels_orig));
+    ind_remove = true(1,length(labels_curr));
+    for i = 1:length(labels_curr)
+        % If current label found in originals, flag it to keep
+        ind_temp = strcmp(labels_orig,labels_curr{i});
+        ind_keep = ind_keep | ind_temp;
+
+        % If it was found, then remove it from the current list
+        if any(ind_temp)
+            ind_temp = strcmp(labels_curr,labels_curr{i});
+            ind_remove(ind_temp) = 0;   % remove from current label
+        end
+    end
+
+    labels_orig = labels_orig(ind_keep);
+    labels_curr = labels_curr(ind_remove);
+    labels = {labels_orig{:} labels_curr{:}};
+    
+    labels = labels(:)';
+end
