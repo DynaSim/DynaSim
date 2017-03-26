@@ -399,6 +399,14 @@ else
             % Disable legend when using PlotData
             subplot_options.legend1 = [];
             
+            % For rastergrams, pack populations together - PlotData can
+            % handle these all as a single subplot!
+            if any(strcmp(plot_type,{'rastergram','raster'}))
+                ind = xp2.findaxis('populations');
+                xp2 = xp2.packDim(ind);
+                xp2 = xp2.squeeze;
+            end
+            
             % Setup call to xp_PlotData
             plot_options.args = {plot_options.args{:}, 'plot_type',plot_type};
             data_plothandle = @xp_PlotData;
