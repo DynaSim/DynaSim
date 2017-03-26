@@ -4,4 +4,5 @@
 outputs
 models/personal
 *.png
+*.mat
 _*/
