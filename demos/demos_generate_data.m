@@ -18,10 +18,10 @@ output_directory = getpath('demos_output');
 
 % move to root directory where outputs will be saved
 mkdir_silent(output_directory);
-study_dir = fullfile(output_directory,'demo_sPING_3b_2plots');
+study_dir = fullfile(output_directory,'demo_sPING_100cells_3x3');
 
 
-%% Generate a huge dataset
+%% Generate a sample dataset
 % Run simulation - Sparse Pyramidal-Interneuron-Network-Gamma (sPING)
 
 % define equations of cell model (same for E and I populations)
@@ -50,23 +50,29 @@ s.connections(2).direction='E->I';
 s.connections(2).mechanism_list={'iAMPA'};
 s.connections(2).parameters={'tauD',2,'gSYN',.1,'netcon',ones(80,20)};
 
+% % Vary two parameters (run a simulation for all combinations of values)
+% vary={
+%   'E'   ,'Iapp',[0:10:10];      % amplitude of tonic input to E-cells
+%   %'I'   ,'Iapp',[0 5 10];      % amplitude of tonic input to E-cells
+%   'I->E','tauD',[5:5:5]       % inhibition decay time constant from I to E
+%   };
+
 % Vary two parameters (run a simulation for all combinations of values)
 vary={
-  'E'   ,'Iapp',[0:10:10];      % amplitude of tonic input to E-cells
-  %'I'   ,'Iapp',[0 5 10];      % amplitude of tonic input to E-cells
-  'I->E','tauD',[5:5:5]       % inhibition decay time constant from I to E
+  'E'   ,'Iapp',[0 10 20];      % amplitude of tonic input to E-cells
+  'I->E','tauD',[5 10 15]       % inhibition decay time constant from I to E
   };
 SimulateModel(s,'save_data_flag',1,'study_dir',study_dir,...
                 'vary',vary,'verbose_flag',1, 'downsample_factor', 10, ...
-                'save_results_flag',1,'plot_functions',{@PlotData,@PlotData},'plot_options',{{'format','png','visible','off','figwidth',0.5,'figheight',0.5}, ...
-                {'format','png','visible','off','plot_type','rastergram','figwidth',0.5,'figheight',0.5}} );
+                'save_results_flag',1,'plot_functions',{@PlotData,@PlotData,@PlotFR2},'plot_options',{{'format','png','visible','off','figwidth',0.5,'figheight',0.5}, ...
+                {'format','png','visible','off','plot_type','rastergram','figwidth',0.5,'figheight',0.5},...
+                {'format','png','visible','off'}} );
+            
 
 %% Load the data
 
 % Load data in traditional DynaSim format
 data=ImportData(study_dir);
-
-% Import the data images
 
 % Import plot files
 data_img = ImportPlots(study_dir);
@@ -74,7 +80,7 @@ data_img = ImportPlots(study_dir);
 
 %% Resize data as needed
 
-Num_cells_to_keep = 20;
+% Num_cells_to_keep = 20;
 downsample_factor = 2;
 mydata = xp.data;
 
@@ -89,6 +95,7 @@ xp.data = mydata;
 
 data = xPlt2DynaSim(xp);
 
+%%
 
 save('sample_data_dynasim_2plots.mat','data','data_img');
 

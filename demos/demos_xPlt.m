@@ -6,7 +6,7 @@
 
 % Format
 format compact
-restoredefaultpath
+% restoredefaultpath
 
 % Add DynaSim to path if it's not already there
 if exist('setup_DynaSim_path','file')
@@ -130,11 +130,11 @@ meta.datainfo(1).name = 'time(ms)';
 meta.datainfo(1).values = time;
 meta.datainfo(2).name = 'cells';
 meta.datainfo(2).values = [];
-meta.dynasim.labels = data.labels;
-meta.dynasim.model = data.model;
-meta.dynasim.simulator_options = data.simulator_options;
-meta.dynasim.time = data.time;
-meta.dynasim.varied = data.varied;
+meta.dynasim.labels = mydata.labels;
+meta.dynasim.model = mydata.model;
+meta.dynasim.simulator_options = mydata.simulator_options;
+meta.dynasim.time = mydata.time;
+meta.dynasim.varied = mydata.varied;
 xp.meta = meta;
 clear meta
 
@@ -151,11 +151,11 @@ clear meta
 % it is also possible to import a high dimensional matrix directly.
 
 % For example let's say we have a random cell array.
-data = xp.data;
+mydata = xp.data;
 
 % We can import the data as follows.
 xp2 = xPlt;
-xp2 = xp2.importData(data);
+xp2 = xp2.importData(mydata);
 
 % We didn't supply any axis names/values, so default values were assgined
 xp2.getaxisinfo;
@@ -164,12 +164,12 @@ xp2.getaxisinfo;
 ax_vals = xp.exportAxisVals;
 clear xp2
 xp2 = xPlt;
-xp2 = xp2.importData(data,ax_vals);
+xp2 = xp2.importData(mydata,ax_vals);
 xp2.getaxisinfo
 
 % Axis names can be assigned in this way as well
 ax_names = xp.exportAxisNames;
-xp2 = xp2.importData(data,ax_vals,ax_names);
+xp2 = xp2.importData(mydata,ax_vals,ax_names);
 xp2.getaxisinfo
 
 
