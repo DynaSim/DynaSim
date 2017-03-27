@@ -1,11 +1,26 @@
-function mexfileOutput = PrepareMEX(mfileInput, options)
+function mexfileOutput = PrepareMEX(mfileInput, varargin)
 %PREPAREMEX - take an m-file path and compile it using the Matlab coder.
 %
 % See also: GetSolveFile
 
-if ~exist('options','var') || isempty(options)
-  options.verbose_flag = 1; % set verbose to 1 by default
+% Input args
+args = varargin;
+
+if isstruct(args{1})
+    % User specified an options structure
+    keyvals = Options2Keyval(args{1});
+    % Convert it to keyvalues and prepend
+    keyvals = horzcat(keyvals,args(2:end));
+else
+    keyvals = args;
 end
+
+options=CheckOptions(keyvals,{...
+  'verbose_flag',0,{0,1},... % set verbose to 1 by default
+  'mexpath',[],[],... % Directory to search for pre-compiled solve files (solve*_mex*)
+  },false);
+
+mexpath = options.mexpath;
 
 % make mex name from solve_file
 [fpath,fname] = fileparts(mfileInput);
@@ -38,6 +53,24 @@ else % mex file exists
     fprintf('Using previous compiled file: %s\n',mexfileOutput);
   end
 end %if
+
+% If mexpath is specified, back up the newly compiled mex files to this
+% folder
+if ~isempty(mexpath)
+    [~,solvefile] = fileparts2(mfileInput);
+    [~,mexfile] = fileparts2(mexfileOutput);
+    
+    if isempty(dir(fullfile(mexpath,[solvefile '.m'])))
+        fprintf('Solve file %s does not yet exist in mexpath %s. Copying... \n',solvefile,mexpath);
+        if ~exist(mexpath,'dir'); error('Cannot find %s! Make sure it exists and is specified as an *absolute* path',mexpath); end
+        copyfile(mfileInput,mexpath);
+    end
+    if isempty(dir(fullfile(mexpath,[mexfile '*'])))
+        fprintf('Mex file %s does not yet exist in mexpath %s. Copying... \n',mexfile,mexpath);
+        if ~exist(mexpath,'dir'); error('Cannot find %s! Make sure it exists and is specified as an *absolute* path',mexpath); end
+        copyfile([mexfileOutput,'*'],mexpath);
+    end
+end
 
 end
 
