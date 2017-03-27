@@ -18,12 +18,59 @@ function [data,studyinfo] = ImportPlots(file,varargin)
 %     data.plotpath : path of corresponding plot file (png, svg, etc.)
 
 % Check inputs
-options=CheckOptions({},{...
+options=CheckOptions(varargin,{...
+  'verbose_flag',1,{0,1},...
   'process_id',[],[],... % process identifier for loading studyinfo if necessary
+  'time_limits',[],[],...
+  'variables',[],[],...
+  'simIDs',[],[],...
   },false);
 
-studyinfo=CheckStudyinfo(file,'process_id',options.process_id);
-sim_info = studyinfo.simulations(:);
+if ischar(options.variables)
+  options.variables = {options.variables};
+end
+
+% check if input is a DynaSim studyinfo structure
+if ischar(file) && isdir(file) % study directory
+  study_dir = file;
+  clear file
+  file.study_dir = study_dir;
+end
+
+if isstruct(file) && isfield(file,'study_dir')
+  % "file" is a studyinfo structure.
+  % retrieve most up-to-date studyinfo structure from studyinfo.mat file
+  studyinfo = CheckStudyinfo(file.study_dir,'process_id',options.process_id);
+  
+  % compare simIDs to sim_id
+  if ~isempty(options.simIDs)
+     [~,~,simsInds] = intersect(options.simIDs, [studyinfo.simulations.sim_id]);
+  end
+  
+  % 
+  for i = 1:length(studyinfo.simulations)
+      for j = 1:length(studyinfo.simulations(i).result_files)
+          rf_orig = studyinfo.simulations(i).result_files{j};
+          if ~exist(rf_orig,'file')
+              [~,fname,fext] = fileparts(rf_orig);
+              rf_new = fullfile(file.study_dir,'plots',[fname,fext]);
+          end
+          studyinfo.simulations(i).result_files{j} = rf_new;
+      end
+  end
+  
+  % get list of data_files from studyinfo
+  if isempty(options.simIDs)
+    result_firsts = arrayfun(@(s) s.result_files{1},studyinfo.simulations,'UniformOutput',0);
+    sim_info = studyinfo.simulations;
+  else
+    result_firsts = arrayfun(@(s) s.result_files{1},studyinfo.simulations(simsInds),'UniformOutput',0);
+    sim_info = studyinfo.simulations(simsInds);
+  end
+  
+  % Keep only successful files
+  success = cellfun(@(x) ~isempty(ls([x '*'])),result_firsts);
+  sim_info = sim_info(success);
 
     for i = 1:length(sim_info)
         tmp_data.varied={};
@@ -47,5 +94,6 @@ sim_info = studyinfo.simulations(:);
         data(i) = tmp_data;
 
     end
+end
 
 end

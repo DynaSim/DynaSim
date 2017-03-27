@@ -1,5 +1,6 @@
 
 %% Attempts to set up DynaSim path from within demos folder
+% Author David Stanley stanleyd@bu.edu
 
 % If DynaSim isn't already in the system path, this code attempts to guess
 % the location of the main DynaSim folder. If cannot find it, returns
