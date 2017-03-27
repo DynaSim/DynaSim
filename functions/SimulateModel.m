@@ -288,13 +288,6 @@ if options.cluster_flag && ~options.save_data_flag
   end
 end
 
-if options.parallel_flag && ~options.save_data_flag
-  options.save_results_flag=1;
-  if options.verbose_flag
-    fprintf('Setting ''save_results_flag'' to 1 for storing results of parallel for later access.\n');
-  end
-end
-
 if any(strcmp(options.solver, {'ode23','ode45','ode113','ode15s','ode23s','ode23t','ode23tb'}))
   matlabSolverBool = 1;
 else

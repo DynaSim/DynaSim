@@ -24,7 +24,10 @@ if options.verbose_flag
   fprintf('PREPARING STUDY:\n');
 end
 
-if options.save_data_flag || options.save_results_flag
+if options.save_data_flag || options.save_results_flag || options.parallel_flag
+                                                            % If in parallel mode, need to calculate
+                                                            % studyinfo regardless of whether or not
+                                                            % are saving data.
   % set default study_dir if necessary
   if isempty(options.study_dir)
     % format: <study_dir> = <project_dir>/<prefix>_<timestamp>
