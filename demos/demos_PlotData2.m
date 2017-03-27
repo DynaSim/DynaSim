@@ -13,14 +13,12 @@ end
 
 % Set where to save outputs
 output_directory = getpath('demos_output');
+study_dir = fullfile(output_directory,'demo_sPING_100cells_3x3');
 
-% move to root directory where outputs will be saved
-mkdir_silent(output_directory);
-            
-%% Load sample DynaSim data
+%% Load data
+% Load data in traditional DynaSim format
+data=ImportData(study_dir);
 
-% Load some sample simulated data
-load('sample_data_dynasim.mat');
 
 %% Do some basic plots with PlotData2
 
@@ -113,10 +111,10 @@ PlotData2(data,'population','E','variable','v|I_iGABAa_s','force_overlay','varia
 %% Import pre-saved images
 
 % Import pre-saved images and tile them
-PlotData2('../../outputs/demo_sPING_3b/')
+PlotData2(study_dir)
 
 % As above, but supersize them
-PlotData2('../../outputs/demo_sPING_3b/','supersize_me',1)
+PlotData2(study_dir,'supersize_me',1)
 
 
 %% Supersize me
