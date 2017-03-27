@@ -8,23 +8,20 @@
 format compact
 restoredefaultpath
 
-% Check if in right folder
-[parentfolder,currfolder] = fileparts(pwd);
-if ~strcmp(currfolder,'MDD'); error('Should be in MDD folder to run this code.'); end
-
-% Set path to your copy of the DynaSim toolbox
-dynasim_path = fullfile(parentfolder,'..');
-
-% add DynaSim toolbox to Matlab path
-addpath(genpath(dynasim_path)); % comment this out if already in path
+% Add DynaSim to path if it's not already there
+if exist('setup_DynaSim_path','file')
+    setup_DynaSim_path;
+else
+    error('Add the DynaSim folder to the MATLAB path - e.g. run addpath(genpath(DynaSimPath))');
+end
 
 % Set where to save outputs
-output_directory = fullfile(parentfolder,'..','outputs');
-study_dir = fullfile(output_directory,'demo_sPING_3b');
+output_directory = getpath('demos_output');
 
-% move to root directory where outputs will be saved
+% Set where to save outputs
+study_dir = fullfile(output_directory,'demo_sPING_100cells_3x3');
 mkdir_silent(output_directory);
-% cd(fullfile(dynasim_path, output_directory));
+
 
 %% Run simulation - Sparse Pyramidal-Interneuron-Network-Gamma (sPING)
 
