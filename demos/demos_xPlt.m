@@ -16,11 +16,11 @@ else
 end
 
 % Set where to save outputs
-output_directory = getpath('demos_output');
+output_directory = getDsVar('demos_path');
 
 % Set where to save outputs
 study_dir = fullfile(output_directory,'demo_sPING_100cells_3x3');
-mkdir_silent(output_directory);
+mkdirSilent(output_directory);
 
 
 %% Run simulation - Sparse Pyramidal-Interneuron-Network-Gamma (sPING)

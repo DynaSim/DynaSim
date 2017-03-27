@@ -11,7 +11,7 @@ end
 output_directory = getDsVar('demos_path');
 
 % move to root directory where outputs will be saved
-mkdir_silent(output_directory);
+mkdirSilent(output_directory);
 cd(output_directory);
 
 %% Sparse Pyramidal-Interneuron-Network-Gamma (sPING)

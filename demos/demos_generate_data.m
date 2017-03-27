@@ -14,10 +14,10 @@ else
 end
 
 % Set where to save outputs
-output_directory = getpath('demos_output');
+output_directory = getDsVar('demos_path');
 
 % move to root directory where outputs will be saved
-mkdir_silent(output_directory);
+mkdirSilent(output_directory);
 study_dir = fullfile(output_directory,'demo_sPING_100cells_3x3');
 
 
