@@ -12,7 +12,7 @@ output_directory = getpath('demos_output');
 
 
 % move to root directory where outputs will be saved
-mkdir(output_directory);
+mkdir_silent(output_directory);
 cd(output_directory);
 
 %% Solve with one file mode
