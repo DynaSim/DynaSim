@@ -288,6 +288,13 @@ if options.cluster_flag && ~options.save_data_flag
   end
 end
 
+if options.parallel_flag && ~options.save_data_flag
+  options.save_results_flag=1;
+  if options.verbose_flag
+    fprintf('Setting ''save_results_flag'' to 1 for storing results of parallel for later access.\n');
+  end
+end
+
 if any(strcmp(options.solver, {'ode23','ode45','ode113','ode15s','ode23s','ode23t','ode23tb'}))
   matlabSolverBool = 1;
 else
@@ -521,89 +528,36 @@ end
     % TODO: debug local parallel sims, doesn't seem to be working right...
     % (however SCC cluster+parallel works)
 if options.parallel_flag==1
-  % prepare solve_file
-  tmp_options=options;
-  
-  if isempty(options.study_dir)
-    tmp_options.study_dir=pwd;
-  end
-  
-  if isempty(options.solve_file) || ~exist(options.solve_file,'file')
-    solve_file=GetSolveFile(model,[],tmp_options);
-  else
-    solve_file=options.solve_file;
-  end
-  
+
+  % prepare studyinfo
+  [studyinfo,options]=SetupStudy(model,'simulator_options',options,'modifications_set',modifications_set);
+
   % prepare options
-  keyvals=Options2Keyval(rmfield(options,{'vary','modifications','solve_file','parallel_flag'}));
-  
-  % open pool for distributed processing
-  % or instead: require user to open pool before calling SimulateModel...
-%   parpool(options.num_cores) 
+  options_temp= rmfield(options,{'vary','modifications','solve_file','parallel_flag','studyinfo'});
+  keyvals=Options2Keyval(options_temp);
+
   % run embarrassingly-parallel simulations
-  
   
   % Previous parallel code would overwrite the same params.mat file on each
   % parallel iteration, resulting in the same parameters being used for all
-  % simulations. This code circumvents this issue by assigning a different
-  % study directory to each simulation.
+  % simulations.
   
 %   % List any core files - these should be deleted, as they are huge (debug)
 %   system (['ls ' fullfile(options.study_dir,'output*')],'-echo');
 %   system('find * -name "core*"','-echo');
  
-  % Generate unique* ID based on date and time (*as long as they dont start on the
-  % exact same second...). Using these unique identfiers will now enable
-  % you to run multiple sims in the same folder.
-  uniqueID = datestr(now,30);
-
-  for sim = 1:length(modifications_set)
-      mystudydirs{sim} = fullfile(options.study_dir,['solve/output_parfor_' uniqueID '_' num2str(sim)]);
-      
-      % Create solve folders as needed
-      if ~exist(mystudydirs{sim},'dir')
-          mkdir(fullfile(mystudydirs{sim}));
-          if ~exist(fullfile(mystudydirs{sim},'solve'),'dir')
-              mkdir(fullfile(mystudydirs{sim},'solve'));
-          end
-      end
-      
-      %warning('Should no longer need this if option mexpath is specified');
-      %[success,msg]=copyfile([strrep(solve_file,'_mex','') '*'],fullfile(mystudydirs{sim},'solve'));    % Copy the mex file into each study directory, to avoid re-compiling
-      %if ~success, error(msg); end
-  end
- 
   clear data
   parfor sim=1:length(modifications_set)
     %data(sim)=SimulateModel(model,'modifications',modifications_set{sim},'solve_file',solve_file,keyvals{:});       % Original parfor code
-    data(sim)=SimulateModel(model,'modifications',modifications_set{sim},keyvals{:},'study_dir',mystudydirs{sim});  % My modification; now specifies a separate study directory for each sim
-    disp(sim);
+    data(sim)=SimulateModel(model,'modifications',modifications_set{sim},keyvals{:},'studyinfo',studyinfo,'sim_id',sim);  % My modification; now specifies a separate study directory for each sim
+    %disp(sim);
   end
 
   
 % Clean up files leftover from sim
 % Unfortunately we can't remove the folders due to locked .nfs files.
 % Need to do this manually later...
-  for sim = 1:length(mystudydirs)
-      
-    % Remove any "core" files that might be present and taking up space
-    if exist(fullfile(mystudydirs{sim},'solve'),'dir')
-      delete(fullfile(mystudydirs{sim},'solve','core*'));
-      delete(fullfile(mystudydirs{sim},'solve','params.mat'));
-      delete(fullfile(mystudydirs{sim},'solve','solve_ode*'));
-      %delete(fullfile(mystudydirs{sim},'solve','*'))
-      %rmdir(fullfile(mystudydirs{sim},'solve'));
-      %rmdir(fullfile(mystudydirs{sim}));
-    end
-  end
-  
-  % Try to force removal of parfor folders (this might produce error if
-  % lock files are present
-  % try rmdir(fullfile(options.study_dir,'output_parfor*'),'s');
-  % catch
-  %     %warning('If this is reached, it is likely because there are locked files in the folder, which cannot be deleted. The error is /.nfs00000000a617655e0000c15a: Device or resource busy. Fix for this is not obvious');
-  % end
-  
+
   % Delete any core files in parent directory
   delete(fullfile(options.study_dir,'core*'));
   
