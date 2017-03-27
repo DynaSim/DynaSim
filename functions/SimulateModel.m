@@ -262,6 +262,7 @@ options=CheckOptions(varargin,{...
   'plot_options',[],[],...
   'debug_flag',0,{0,1},...
   'optimize_big_vary',0,{0,1},...
+  'mexpath',fullfile(pwd,'mexes'),[],... % Directory to search for pre-compiled solve files (solve*_mex*)
   },false);
 % more options: remove_solve_dir, remove_batch_dir, post_downsample_factor
 
@@ -561,8 +562,9 @@ if options.parallel_flag==1
           end
       end
       
-      [success,msg]=copyfile([strrep(solve_file,'_mex','') '*'],fullfile(mystudydirs{sim},'solve'));    % Copy the mex file into each study directory, to avoid re-compiling
-      if ~success, error(msg); end
+      %warning('Should no longer need this if option mexpath is specified');
+      %[success,msg]=copyfile([strrep(solve_file,'_mex','') '*'],fullfile(mystudydirs{sim},'solve'));    % Copy the mex file into each study directory, to avoid re-compiling
+      %if ~success, error(msg); end
   end
  
   clear data
