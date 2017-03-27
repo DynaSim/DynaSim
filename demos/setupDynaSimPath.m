@@ -4,7 +4,7 @@
 % the location of the main DynaSim folder. If cannot find it, it returns
 % an error.
 
-if ~isfunction('SimulateModel')                                                 % If DynaSim not in path...
+if ~exist('SimulateModel','file')                                                 % If DynaSim not in path...
     % Get name of parent folder
     [parentfolder_full,~] = fileparts(pwd);
     [~,parentfolder] = fileparts(parentfolder_full);    
