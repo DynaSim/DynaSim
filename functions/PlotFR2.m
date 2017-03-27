@@ -43,7 +43,8 @@ options=CheckOptions(varargin,{...
   'bin_shift',.01,[],... % 10
   'exclude_data_flag',0,{0,1},...
   'lock_gca',false,[true,false],...
-  });
+  'visible','on',[],...
+  },false);
 
 lock_gca = options.lock_gca;
 keyvals=Options2Keyval(rmfield(options,{'plot_type'}));
@@ -86,7 +87,7 @@ end
     % purpose: plot each data set data.(FR_fields{k})
     % plots for N populations (FR data sets) from this simulation
     ht=320; % height per subplot row (=per population or FR data set)
-    if ~lock_gca; handles(end+1)=figure('position',[250 max(50,600-(nsets-1)*ht) 1400 min(ht*nsets,750)]); end
+    if ~lock_gca; handles(end+1)=figure('position',[250 max(50,600-(nsets-1)*ht) 1400 min(ht*nsets,750)],'visible',options.visible); end
     for k=1:nsets % index of firing rate data field
       dat=data(i).(FR_fields{k});
       bins=0:1.05*max(dat(:));
@@ -202,7 +203,7 @@ end
     % plot how avg firing rate for each pop varies with each parameter
     ht=320; % height per subplot row (=per population or FR data set)
     wt=500;
-    if ~lock_gca; handles(end+1)=figure('position',[250 max(50,600-(nsets-1)*ht) min(1500,500+(nvaried-1)*wt) min(ht*nsets,750)]); end
+    if ~lock_gca; handles(end+1)=figure('position',[250 max(50,600-(nsets-1)*ht) min(1500,500+(nvaried-1)*wt) min(ht*nsets,750)],'visible',options.visible); end
     cnt=0;
     for k=1:nsets % populations
       popname=regexp(FR_fields{k},'^([a-zA-Z0-9]+)_','tokens','once');
@@ -237,7 +238,7 @@ end
     if length(varied)==2
       % plots for N populations and 2 varied elements
       % organize and imagesc FRmu(param 1, param 2)
-      if ~lock_gca; handles(end+1)=figure('position',[1150 max(50,600-(nsets-1)*ht) 500 min(ht*nsets,750)]);end
+      if ~lock_gca; handles(end+1)=figure('position',[1150 max(50,600-(nsets-1)*ht) 500 min(ht*nsets,750)],'visible',options.visible);end
       pvals1=unique(params(:,1)); nv1=length(pvals1);
       pvals2=unique(params(:,2)); nv2=length(pvals2);
       for k=1:nsets
@@ -316,7 +317,7 @@ end
         end
         
         ht=320; % height per subplot row (=per population or FR data set)
-        if ~lock_gca; handles(1) = figure('units','normalized','position',[0,1-min(.33*num_rows,1),min(.25*num_cols,1) min(.33*num_rows,1)]); end
+        if ~lock_gca; handles(1) = figure('units','normalized','position',[0,1-min(.33*num_rows,1),min(.25*num_cols,1) min(.33*num_rows,1)],'visible',options.visible); end
         if ~lock_gca; hsp = subplot_grid(num_rows,num_cols);  end
         
         axis_counter = 0;
