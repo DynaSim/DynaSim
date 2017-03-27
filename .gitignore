@@ -3,4 +3,5 @@
 .DS_Store
 outputs
 models/personal
+dsVars.txt
 _*/
