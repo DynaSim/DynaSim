@@ -19,6 +19,7 @@ dynaSimData_path = fullfile(docs_path,'DynaSimData');
 demos_path = fullfile(dynaSimData_path, 'demos');
 
 ds_path = fileparts(fileparts(which('SimulateModel')));
+demos_zips_path = fullfile(ds_path, 'demos','demo_zips');
 
 %% Write vars to disk
 vars = who; % get all vars

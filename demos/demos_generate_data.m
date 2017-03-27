@@ -78,13 +78,17 @@ data=ImportData(study_dir);
 data_img = ImportPlots(study_dir);
 
 
-%% Resize data as needed
+%% Downsample number of cells if necessary
+% (For saving space)
+
+% Convert to xPlt object
+xp = DynaSim2xPlt(data);
 
 % Num_cells_to_keep = 20;
 downsample_factor = 2;
 mydata = xp.data;
 
-for i = 1:numel(data)
+for i = 1:numel(mydata)
     if ~isempty(mydata{i})
         %mydata{i} = mydata{i}(:,1:Num_cells_to_keep);
         mydata{i} = mydata{i}(:,1:round(size(mydata{i},2)/downsample_factor));
@@ -95,9 +99,11 @@ xp.data = mydata;
 
 data = xPlt2DynaSim(xp);
 
-%%
+%% Package up the data
 
-save('sample_data_dynasim_2plots.mat','data','data_img');
+% Stores it in the DynaSim demos archive for adding to repo
+zipfname = zipDemoData(study_dir);
+% (can later recover this by running: unzipDemoData(study_dir);)
 
 %% 
 

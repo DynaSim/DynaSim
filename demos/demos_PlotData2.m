@@ -15,9 +15,18 @@ end
 output_directory = getDsVar('demos_path');
 study_dir = fullfile(output_directory,'demo_sPING_100cells_3x3');
 
-%% Load data
+%% Import the data
+
+% Make sure sample data exists; if not copy it into place
+if ~exist(study_dir,'dir')
+    unzipDemoData(study_dir);
+end
+
 % Load data in traditional DynaSim format
 data=ImportData(study_dir);
+
+% % Import saved plots from huge sweep of images
+% data_3D_plots = ImportPlots(fullfile(output_directory,'demo_sPING_3b_3D'));
 
 
 %% Do some basic plots with PlotData2

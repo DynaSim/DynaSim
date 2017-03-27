@@ -25,6 +25,11 @@ mkdirSilent(output_directory);
 
 %% Import the data
 
+% Make sure sample data exists; if not copy it into place
+if ~exist(study_dir,'dir')
+    unzipDemoData(study_dir);
+end
+
 % Load data in traditional DynaSim format
 data=ImportData(study_dir);
 

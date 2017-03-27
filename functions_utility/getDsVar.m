@@ -19,6 +19,7 @@ function varOutput = getDsVar(query)
     varOutput = varCell{1}; % eval variable string as variable
   else
     varOutput = [];
+    if isempty(varOutput); warning('Requested path not found. dsVars.txt is possibly corrupt. Try deleting dsVars.txt and running makeDefaultDsVars()');
   end
     
 end
