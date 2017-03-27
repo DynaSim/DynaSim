@@ -5,4 +5,4 @@ outputs
 models/personal
 *.png
 *.mat
-_*/
+dsVars.txt

@@ -1,13 +1,14 @@
 % Get ready...
 
-% Set path to your copy of the DynaSim toolbox
-dynasim_path = fullfile('..');
-
-% add DynaSim toolbox to Matlab path
-addpath(genpath(dynasim_path)); % comment this out if already in path
+% Add DynaSim to path if it's not already there
+if exist('setupDynaSimPath','file')
+    setupDynaSimPath;
+else
+    error('Add the DynaSim folder to the MATLAB path - e.g. run addpath(genpath(DynaSimPath))');
+end
 
 % Set where to save outputs
-output_directory = 'outputs';
+output_directory = getDsVar('demos_path');
 
 % move to root directory where outputs will be saved
 mkdir_silent(output_directory);

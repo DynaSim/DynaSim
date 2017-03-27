@@ -9,8 +9,8 @@ format compact
 % restoredefaultpath
 
 % Add DynaSim to path if it's not already there
-if exist('setup_DynaSim_path','file')
-    setup_DynaSim_path;
+if exist('setupDynaSimPath','file')
+    setupDynaSimPath;
 else
     error('Add the DynaSim folder to the MATLAB path - e.g. run addpath(genpath(DynaSimPath))');
 end
