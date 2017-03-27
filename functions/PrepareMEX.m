@@ -62,12 +62,12 @@ if ~isempty(mexpath)
     
     if isempty(dir(fullfile(mexpath,[solvefile '.m'])))
         fprintf('Solve file %s does not yet exist in mexpath %s. Copying... \n',solvefile,mexpath);
-        if ~exist(mexpath,'dir'); error('Cannot find mexpath! Make sure it exists and is specified as an *absolute* path'); end
+        if ~exist(mexpath,'dir'); error('Cannot find %s! Make sure it exists and is specified as an *absolute* path',mexpath); end
         copyfile(mfileInput,mexpath);
     end
     if isempty(dir(fullfile(mexpath,[mexfile '*'])))
         fprintf('Mex file %s does not yet exist in mexpath %s. Copying... \n',mexfile,mexpath);
-        if ~exist(mexpath,'dir'); error('Cannot find mexpath! Make sure it exists and is specified as an *absolute* path'); end
+        if ~exist(mexpath,'dir'); error('Cannot find %s! Make sure it exists and is specified as an *absolute* path',mexpath); end
         copyfile([mexfileOutput,'*'],mexpath);
     end
 end

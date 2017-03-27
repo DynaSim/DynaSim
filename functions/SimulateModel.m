@@ -311,6 +311,12 @@ if iscell(options.matlab_solver_options)
   options.matlab_solver_options = odeset(options.matlab_solver_options{:});
 end
 
+% Create mexpath if it does not yet exist
+mexpath = options.mexpath;
+if ~exist(mexpath,'dir') && options.compile_flag
+    mkdir(mexpath);
+end
+
 %% Non-Batch Checks
 if isempty(options.sim_id) % not in part of a batch sim
   if options.optimize_big_vary
