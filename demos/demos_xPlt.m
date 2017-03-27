@@ -23,49 +23,14 @@ study_dir = fullfile(output_directory,'demo_sPING_100cells_3x3');
 mkdirSilent(output_directory);
 
 
-%% Run simulation - Sparse Pyramidal-Interneuron-Network-Gamma (sPING)
-
-% define equations of cell model (same for E and I populations)
-eqns={ 
-  'dv/dt=Iapp+@current+noise*randn(1,N_pop)';
-  'monitor iGABAa.functions, iAMPA.functions'
-};
-% Tip: monitor all functions of a mechanism using: monitor MECHANISM.functions
-
-% create DynaSim specification structure
-s=[];
-s.populations(1).name='E';
-s.populations(1).size=80;
-s.populations(1).equations=eqns;
-s.populations(1).mechanism_list={'iNa','iK'};
-s.populations(1).parameters={'Iapp',5,'gNa',120,'gK',36,'noise',40};
-s.populations(2).name='I';
-s.populations(2).size=20;
-s.populations(2).equations=eqns;
-s.populations(2).mechanism_list={'iNa','iK'};
-s.populations(2).parameters={'Iapp',0,'gNa',120,'gK',36,'noise',40};
-s.connections(1).direction='I->E';
-s.connections(1).mechanism_list={'iGABAa'};
-s.connections(1).parameters={'tauD',10,'gSYN',.1,'netcon','ones(N_pre,N_post)'};
-s.connections(2).direction='E->I';
-s.connections(2).mechanism_list={'iAMPA'};
-s.connections(2).parameters={'tauD',2,'gSYN',.1,'netcon',ones(80,20)};
-
-% Vary two parameters (run a simulation for all combinations of values)
-vary={
-  'E'   ,'Iapp',[0 10 20];      % amplitude of tonic input to E-cells
-  'I->E','tauD',[5 10 15]       % inhibition decay time constant from I to E
-  };
-SimulateModel(s,'save_data_flag',1,'study_dir',study_dir,...
-                'vary',vary,'verbose_flag',1, ...
-                'save_results_flag',1,'plot_functions',@PlotData,'plot_options',{'format','png'} );
-
-
-
-%% Load the data and import it into xPlt class
+%% Import the data
 
 % Load data in traditional DynaSim format
 data=ImportData(study_dir);
+
+
+
+%% Convert it into an xPlt class
 
 % Extract the data in a linear table format
 [data_table,column_titles,time] = Data2Table (data);
@@ -130,11 +95,11 @@ meta.datainfo(1).name = 'time(ms)';
 meta.datainfo(1).values = time;
 meta.datainfo(2).name = 'cells';
 meta.datainfo(2).values = [];
-meta.dynasim.labels = mydata.labels;
-meta.dynasim.model = mydata.model;
-meta.dynasim.simulator_options = mydata.simulator_options;
-meta.dynasim.time = mydata.time;
-meta.dynasim.varied = mydata.varied;
+meta.dynasim.labels = data.labels;
+meta.dynasim.model = data.model;
+meta.dynasim.simulator_options = data.simulator_options;
+meta.dynasim.time = data.time;
+meta.dynasim.varied = data.varied;
 xp.meta = meta;
 clear meta
 
@@ -212,6 +177,7 @@ clear mydata mydata2 xp4 xp5
 % Tip: don't try to understand what recursivePlot is doing - instead, try
 % putting break points in the various function handles to see how this
 % command works.
+close all;
 
 % Pull out a 2D subset of the data
 clc
@@ -239,6 +205,8 @@ figl; recursivePlot(xp4,function_handles,dimensions,function_arguments);
 
 %% Plot 3D data 
 
+close all;
+
 % Pull out a 3D subset of data (parameter sweeps and the 2 cell
 % types)
 clc
@@ -262,6 +230,8 @@ recursivePlot(xp4,{@xp_handles_newfig,@xp_subplot_grid,@xp_matrix_imagesc},dimen
 
 %% Plot 4D data
 
+close all;
+
 % Pull out sodium channel state variables for E and I cells.
 clc
 xp4 = xp(1:2,1:2,:,6:7);
@@ -280,6 +250,8 @@ recursivePlot(xp4,{@xp_handles_newfig,@xp_subplot_grid,@xp_subplot_grid,@xp_matr
 
 %% Plot multiple dimensions adaptively.
 
+close all;
+
 % Another option is to use @xp_subplot_grid_adaptive, which will plot the data using axes in
 % descending order of the size of the axis values, and plot remaining
 % combinations of axis values across figures.
@@ -287,6 +259,7 @@ recursivePlot(xp4,{@xp_handles_newfig,@xp_subplot_grid,@xp_subplot_grid,@xp_matr
 recursivePlot(xp4,{@xp_subplot_grid_adaptive,@xp_matrix_basicplot},{1:4,0});
 
 %% Plot two xPlt objects combined
+close all;
 clc
 xp3 = xp(2,:,'E','v');
 xp3.getaxisinfo
@@ -300,6 +273,8 @@ dimensions = {[1,2],0};
 figl; recursivePlot(xp5,{@xp_subplot_grid,@xp_matrix_imagesc},dimensions);
 
 %% Plot saved figures rather than raw data
+
+close all;
 
 % Import plot files
 data_img = ImportPlots(study_dir);

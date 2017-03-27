@@ -5,8 +5,8 @@
 % Get ready...
 
 % Add DynaSim to path if it's not already there
-if exist('setup_DynaSim_path','file')
-    setup_DynaSim_path;
+if exist('setupDynaSimPath','file')
+    setupDynaSimPath;
 else
     error('Add the DynaSim folder to the MATLAB path - e.g. run addpath(genpath(DynaSimPath))');
 end
@@ -22,6 +22,8 @@ data=ImportData(study_dir);
 
 %% Do some basic plots with PlotData2
 
+close all
+
 % Default settings
 PlotData2(data);
 
@@ -36,6 +38,8 @@ PlotData2(data,'do_zoom',1,'population','E');
 PlotData2(data,'population','E','variable','v','E_Iapp',1:3,'varied2',[1,3],'do_zoom',1,'max_num_overlaid',3);
 
 %% Recursive plots with PlotData2
+
+close all
 
 % The number of subplots packed into a single figure can be substantially
 % increased by recurisve subplotting. This is controlled with the
@@ -72,6 +76,8 @@ PlotData2(data,'max_num_overlaid',3,'num_embedded_subplots',4,'population','all'
 
 %% Modifying overlaid traces
 
+close all
+
 % This provides an alternative method for stacking more data into a single
 % plot.
 
@@ -88,6 +94,8 @@ PlotData2(data,'max_num_overlaid',1,'varied1',1:3,'varied2',2:3,'force_overlay',
 
 % Overlays can also be doubly stacked
 PlotData2(data,'max_num_overlaid',10,'force_overlay','populations');
+
+close all
 
 % However, these can be messy, so the groups can be shifted up or down
 PlotData2(data,'max_num_overlaid',10,'force_overlay','populations','do_overlay_shift',true);
@@ -109,6 +117,7 @@ PlotData2(data,'population','E','variable','v|I_iGABAa_s','force_overlay','varia
 
 
 %% Import pre-saved images
+close all
 
 % Import pre-saved images and tile them
 PlotData2(study_dir)
@@ -118,6 +127,6 @@ PlotData2(study_dir,'supersize_me',1)
 
 
 %% Supersize me
-load sample_data_dynasim_large.mat
-
-PlotData2(data);
+% load sample_data_dynasim_large.mat
+% 
+% PlotData2(data);
