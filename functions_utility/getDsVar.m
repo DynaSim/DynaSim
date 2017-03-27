@@ -5,7 +5,7 @@ function varOutput = getDsVar(query)
 
   dsVarsFile = fullfile(dsPath(),'dsVars.txt');
 
-  if ~exist(dsVarsFile, 'dir')
+  if ~exist(dsVarsFile, 'file')
     makeDefaultDsVars(); % bring all path vars into namespace
   end
   
