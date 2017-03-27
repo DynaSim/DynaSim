@@ -8,7 +8,7 @@ function [outfile,options]=WriteDynaSimSolver(model,varargin)
 %   - model: DynaSim model structure (see GenerateModel)
 %   - options:
 %     'solver'     : solver for numerical integration (see GetSolveFile)
-%                    {'euler','rk2','rk4'} (default: 'rk4')
+%                    {'euler'/'rk1', 'rk2'/'modified_euler', 'rungekutta'/'rk'/'rk4'} (default: 'rk4')
 %     'tspan'      : time limits of simulation [begin,end] (default: [0 100]) [ms]
 %                    - Note: units must be consistent with dt and model equations
 %     'dt'         : time step used for DynaSim solvers (default: .01) [ms]
@@ -72,7 +72,7 @@ options=CheckOptions(varargin,{...
   'downsample_factor',1,[],...    % downsampling applied during simulation (only every downsample_factor-time point is stored in memory or written to disk)
   'dt',.01,[],...                 % time step used for fixed step DynaSim solvers
   'random_seed','shuffle',[],...        % seed for random number generator (usage: rng(random_seed))
-  'solver','rk4',{'euler','rk1','rk2','rk4','modified_euler','rungekutta','rk'},... % DynaSim and built-in Matlab solvers
+  'solver','rk4',{'euler','rk1','rk2','rk4','modified_euler','rungekutta','rk'},... % DynaSim solvers
   'disk_flag',0,{0,1},...            % whether to write to disk during simulation instead of storing in memory
   'reduce_function_calls_flag',1,{0,1},...   % whether to eliminate internal (anonymous) function calls
   'save_parameters_flag',1,{0,1},...

@@ -74,8 +74,20 @@ new_inds=cell(1,num_vars);
 all_ICs=cell(1,num_vars);
 IC_names={};
 state_var_index=0;
+
 for i=1:num_vars
   var=model.state_variables{i};
+  
+  % check ICs for use of inital state_var value and put in proper starting value
+  if regexp(model.ICs.(var), '_last')
+    stateVars = regexp(model.ICs.(var), '([\w_]+)_last', 'tokens');
+    model.ICs.(var) = regexprep(model.ICs.(var), '_last', '');
+    
+    for iSVar = 1:length(stateVars)
+      thisSvar = stateVars{iSVar}{1};
+      model.ICs.(var) = regexprep(model.ICs.(var), thisSvar, model.ICs.(thisSvar));
+    end
+  end
   
   % evaluate ICs to get (# elems) per state var
   ic=eval([model.ICs.(var) ';']);
@@ -94,10 +106,6 @@ ODEs=strtrim(struct2cell(model.ODEs));
 idx=cellfun(@isempty,regexp(ODEs,';$')); % lines that need semicolons
 ODEs(idx)=cellfun(@(x)[x ';'],ODEs(idx),'uni',0);
 ODEs=[ODEs{:}]; % concatenate ODEs into a single string
-ODEs=strrep(ODEs,';',','); % replace semicolons by commas
-
-%remove trailing comma
-ODEs(end) = [];
 
 % substitute in generic state vector X
 for i=1:num_vars
@@ -110,10 +118,15 @@ elem_names=cat(2,IC_names{:});
 
 switch options.odefun_output
   case 'func_handle'
+    ODEs=strrep(ODEs,';',','); % replace semicolons by commas
+    ODEs(end) = []; %remove trailing comma
     ODEFUN = eval(['@(t,X) [' ODEs ']'';']);
   case 'anonymous_func_string'
+    ODEs=strrep(ODEs,';',','); % replace semicolons by commas
+    ODEs(end) = []; %remove trailing comma
     ODEFUN = ['@(t,X) [' ODEs ']'';'];
   case 'func_body'
+    ODEs=strrep(ODEs,';',',...\n'); % replace semicolons by commas with newline
     ODEFUN = ODEs;
 end
 

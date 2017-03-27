@@ -10,9 +10,8 @@ function solve_ode_filepath = WriteMatlabSolver(model,varargin)
 %     'tspan'         : units must be consistent with dt and equations
 %                       {[beg,end]} (default: [0 100])
 %     'ic'            : initial conditions; this overrides definition in model structure
-%     'solver'        : DynaSim and built-in Matlab solvers
-%                       {'euler','rk2','rk4','modifiedeuler',
-%                       'ode23','ode45','ode15s','ode23s'}
+%     'solver'        : built-in Matlab solvers
+%                         {'ode23','ode45','ode113','ode15s','ode23s','ode23t','ode23tb'}
 %     'matlab_solver_options': options from odeset for use with built-in Matlab solvers
 %     'dt'            :  time step used for fixed step DSSim solvers (default: 0.01)
 %     'modifications' : DynaSim modifications structure
@@ -42,8 +41,7 @@ options=CheckOptions(varargin,{...
   'dt',.01,[],...                 % time step used for fixed step DynaSim solvers
   'downsample_factor',1,[],...    % downsampling applied after simulation (only every downsample_factor-time point is returned)
   'random_seed','shuffle',[],...        % seed for random number generator (usage: rng(random_seed))
-  'solver','euler',{'ode23','ode45','ode1','ode2','ode3','ode4','ode5','ode8',...
-    'ode113','ode15s','ode23s','ode23t','ode23tb'},... % DSSim and built-in Matlab solvers
+  'solver','ode45',{'ode23','ode45','ode113','ode15s','ode23s','ode23t','ode23tb'},... % built-in Matlab solvers
   'solver_type','matlab',{'matlab', 'matlab_no_mex'},... % if compile_flag==1, will decide whether to mex solve_file or odefun_file
   'matlab_solver_options',[],[],... % options from odeset for use with built-in Matlab solvers
   'reduce_function_calls_flag',1,{0,1},...   % whether to eliminate internal (anonymous) function calls
@@ -68,12 +66,14 @@ end
 % create function that calls feval(@solver,...) and has subfunction
 % defining odefun (including optional conditionals)...
 
-[odefun,IC,elem_names]=dynasim2odefun(PropagateParameters(PropagateFunctions(model)), 'odefun_output','func_body');
-% FIXME: remove netcons
+propagatedModel = PropagateParameters(PropagateFunctions(model));
+propagatedModel = PropagateParameters(propagatedModel, 'param_type', 'fixed_variables');
+[odefun,IC,elem_names] = dynasim2odefun(propagatedModel, 'odefun_output','func_body');
+
 
 %% 2.0 prepare model info
 parameter_prefix='p.';%'pset.p.';
-state_variables=model.state_variables;
+% state_variables=model.state_variables;
 
 % 1.1 eliminate internal (anonymous) function calls from model equations
 % if options.reduce_function_calls_flag==1
@@ -102,16 +102,22 @@ if options.save_parameters_flag
   % save parameters to disk
   warning('off','catstruct:DuplicatesFound');
   
+  % make p struct
   p=catstruct(CheckSolverOptions(options),model.parameters);
   
+  % add IC to p
+  %   NOTE: will get done again in simulateModel
+  if isempty(options.ic)
+    p.ic = IC;
+  else %if overridden from options
+    p.ic = options.ic;
+  end
   
-%   % add inital conditions
-%   if isempty(options.ic)
-%     p.ic = IC;
-%   else %if overridden from options
-%     p.ic = options.ic;
-%   end
-
+  % add matlab_solver_options to p
+  if ~isempty(options.matlab_solver_options)
+    p.matlab_solver_options = options.matlab_solver_options;
+  end
+  
   if options.one_solve_file_flag
     % fill p flds that were varied with vectors of length = nSims
     
@@ -225,9 +231,6 @@ if ~options.one_solve_file_flag
   fprintf(fid,'function %s=solve_ode\n',output_string);
 else
   fprintf(fid,'function %s=solve_ode(simID)\n',output_string);
-  if options.compile_flag
-    fprintf(fid, 'assert(isa(simID, ''double''));\n');
-  end
 end
 
 % 2.3 load parameters
@@ -284,7 +287,7 @@ end
   % NOTE: T is different here since we take into account downsampling
 
 % write calculation of time vector and derived parameters: ntime, nsamp
-fprintf(fid,'ntime = length(T);\nnsamp = length(1:downsample_factor:ntime);\n');
+% fprintf(fid,'ntime = length(T);\nnsamp = length(1:downsample_factor*dt:ntime);\n');
 
 % 2.4 evaluate fixed variables
 if ~isempty(model.fixed_variables)
@@ -327,9 +330,6 @@ else
   end
 end
 
-%% evaluate fixed_variables
-%?
-
 %% Numerical integration
 % write code to do numerical integration
 fprintf(fid,'%% ###########################################################\n');
@@ -338,14 +338,18 @@ fprintf(fid,'%% ###########################################################\n');
 
 if options.compile_flag && strcmp(options.solver_type,'matlab_no_mex')
   odefun_str_name = odefun_filename;
+  
+  if options.compile_flag
+    odefun_str_name = [odefun_str_name '_mex']; % switch to mex version
+  end
 else
   odefun_str_name = 'odefun';
 end
 
 if ~isempty(options.matlab_solver_options)
-  fprintf(fid,'[time,data] = %s(@%s, T, p.ic, p.matlab_solver_options);\n', options.solver, odefun_str_name);
+  fprintf(fid,'[T,data] = %s(@%s, T, p.ic, p.matlab_solver_options);\n', options.solver, odefun_str_name);
 else
-  fprintf(fid,'[time,data] = %s(@%s, T, p.ic);\n', options.solver, odefun_str_name);
+  fprintf(fid,'[T,data] = %s(@%s, T, p.ic);\n', options.solver, odefun_str_name);
 end
 
 %% Get vars from odefun output
@@ -357,6 +361,17 @@ state_var_index=0;
 for i=1:num_vars
   var=model.state_variables{i};
   
+  % check ICs for use of inital state_var value and put in proper starting value
+  if regexp(model.ICs.(var), '_last')
+    stateVars = regexp(model.ICs.(var), '([\w_]+)_last', 'tokens');
+    model.ICs.(var) = regexprep(model.ICs.(var), '_last', '');
+    
+    for iSVar = 1:length(stateVars)
+      thisSvar = stateVars{iSVar}{1};
+      model.ICs.(var) = regexprep(model.ICs.(var), thisSvar, model.ICs.(thisSvar));
+    end
+  end
+  
   % evaluate ICs to get (# elems) per state var
   num_elems=length(eval([model.ICs.(var) ';']));
   
@@ -365,9 +380,21 @@ for i=1:num_vars
   
   assert(strcmp(elem_names{data_inds(1)}, var)) %current elem should be same as var
   
-  fprintf(fid,'%s = data(%i:%i,:)'';\n', var, data_inds(1), data_inds(end)); %make sure to transpose so time is 1st dim
+  fprintf(fid,'%s = data(:, %i:%i);\n', var, data_inds(1), data_inds(end));
   
   state_var_index = state_var_index + num_elems;
+end
+
+%% Monitors
+if ~isempty(model.monitors)
+  fprintf(fid,'\n%%Calculate monitors from params and state vars\n');
+  monitor_names = fields(model.monitors);
+  for iMon = 1:length(monitor_names)
+    thisMonName = monitor_names{iMon};
+    thisMonFcn = regexp(model.functions.(thisMonName),'@\([a-zA-Z][\w,]*\)\s*(.*)','tokens','once');
+    thisMonFcn = thisMonFcn{1};
+    fprintf(fid,'%s = %s;\n', thisMonName, thisMonFcn);
+  end
 end
 
 %% fprintf end for solve function
@@ -381,27 +408,24 @@ if options.compile_flag && strcmp(options.solver_type,'matlab_no_mex') % save od
   
   %write to file
   fprintf(odefun_fid,'function dydt = %s(t,X)\n', odefun_filename);
-%   if isempty(regexp(odefun,'[^a-zA-Z]t[^a-zA-Z]','once'))
-    fprintf(odefun_fid, 'assert(isa(t, ''double''));\n');
-%   end
-  fprintf(odefun_fid, 'assert(isa(X, ''double''));\n');
-  fprintf(odefun_fid,'  dydt = %s;\n', odefun);
+  fprintf(odefun_fid,['dydt = [\n\n' odefun '\n]'';\n']); % make row into col vector
   fprintf(odefun_fid,'end\n');
   
   %close file
   fclose(odefun_fid);
   
   %% mex compile odefun
+  options.codegen_args = {0,IC};
   PrepareMEX(odefun_filepath, options);
   
-else %use subfunction
+else % use subfunction
   fprintf(fid,'\n%% ###########################################################\n');
   fprintf(fid,'%% SUBFUNCTIONS\n');
   fprintf(fid,'%% ###########################################################\n\n');
   
   % make sub function (no shared variables with main function workspace for max performance)
   fprintf(fid,'function dydt = odefun(t,X)\n');
-  fprintf(fid,'  dydt = %s;\n', odefun);
+  fprintf(fid,['dydt = [\n\n' odefun '\n]'';\n']); % make row into col vector
   fprintf(fid,'end\n');
 end
 

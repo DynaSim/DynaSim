@@ -12,16 +12,15 @@ by entering "help FUNCTION_NAME" in the command window. Use the "See also" list
 at the end of the help section to browse through related help documentation.
 %}
 
-% Get ready...
-
-% Set path to your copy of the DynaSim toolbox
-dynasim_path = fullfile('..');
-
-% add DynaSim toolbox to Matlab path
-addpath(genpath(dynasim_path)); % comment this out if already in path
+% Add DynaSim to path if it's not already there
+if exist('setup_DynaSim_path','file')
+    setup_DynaSim_path;
+else
+    error('Add the DynaSim folder to the MATLAB path - e.g. run addpath(genpath(DynaSimPath))');
+end
 
 % Set where to save outputs
-output_directory = 'outputs';
+output_directory = getpath('demos_output');
 
 % move to root directory where outputs will be saved
 mkdir(output_directory);

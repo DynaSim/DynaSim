@@ -19,7 +19,7 @@ if ~exist(mexfileOutput,'file')
 
   compile_start_time=tic;
   
-  makeMex(mfileInput); % mex-file solver for solve file
+  makeMex(mfileInput, options); % mex-file solver for solve file
 
   if options.verbose_flag
     fprintf('\tMEX generation complete!\n\tElapsed time: %g seconds.\n',toc(compile_start_time));
@@ -42,7 +42,7 @@ end %if
 end
 
 %% Subfunctions
-function makeMex(file)
+function makeMex(file, options)
 % Create a MEX configuration object
 cfg = coder.config('mex');
 
@@ -50,5 +50,10 @@ cfg = coder.config('mex');
 cfg.DynamicMemoryAllocation = 'AllVariableSizeArrays';
 
 % Generate MEX function
-eval(['codegen -d codemex -config cfg ',sprintf(file)]);
+if ~isfield(options, 'codegen_args')
+  eval(sprintf('codegen -d codemex -config cfg %s',file));
+else % codegen_args specified
+  eval(sprintf('codegen -args %s -d codemex -config cfg %s', 'options.codegen_args', file));
+end
+
 end

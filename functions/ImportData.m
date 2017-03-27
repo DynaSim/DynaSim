@@ -15,6 +15,7 @@ function [data,studyinfo] = ImportData(file,varargin)
 %     'process_id'  : process identifier for loading studyinfo if necessary
 %     'time_limits' : [beg,end] ms (see NOTE 2)
 %     'variables'   : cell array of matrix names (see NOTE 2)
+%     'simIDs'      : array of simIDs to import (default: [])
 %
 % Outputs:
 %   - DynaSim data structure:
@@ -63,41 +64,56 @@ options=CheckOptions(varargin,{...
   'process_id',[],[],... % process identifier for loading studyinfo if necessary
   'time_limits',[],[],...
   'variables',[],[],...
+  'simIDs',[],[],...
   },false);
 
 if ischar(options.variables)
-  options.variables={options.variables};
+  options.variables = {options.variables};
 end
+
 % check if input is a DynaSim studyinfo structure
 if ischar(file) && isdir(file) % study directory
-  study_dir=file;
+  study_dir = file;
   clear file
-  file.study_dir=study_dir;
+  file.study_dir = study_dir;
 end
 
 if isstruct(file) && isfield(file,'study_dir')
   % "file" is a studyinfo structure.
   % retrieve most up-to-date studyinfo structure from studyinfo.mat file
-  studyinfo=CheckStudyinfo(file.study_dir,'process_id',options.process_id);
+  studyinfo = CheckStudyinfo(file.study_dir,'process_id',options.process_id);
+  
+  % compare simIDs to sim_id
+  if ~isempty(options.simIDs)
+     [~,~,simsInds] = intersect(options.simIDs, [studyinfo.simulations.sim_id]);
+  end
   
   % get list of data_files from studyinfo
-  data_files={studyinfo.simulations.data_file};
-  success=cellfun(@exist,data_files)==2;
+  if isempty(options.simIDs)
+    data_files = {studyinfo.simulations.data_file};
+  else
+    data_files = {studyinfo.simulations(simsInds).data_file};
+  end
+  success = cellfun(@exist,data_files)==2;
+  
   if ~all(success)
     % convert original absolute paths to paths relative to study_dir
-    for i=1:length(data_files)
-      [~,fname,fext]=fileparts(data_files{i});
-      data_files{i}=fullfile(file.study_dir,'data',[fname fext]);
+    for i = 1:length(data_files)
+      [~,fname,fext] = fileparts(data_files{i});
+      data_files{i} = fullfile(file.study_dir,'data',[fname fext]);
     end
-    success=cellfun(@exist,data_files)==2;
+    
+    success = cellfun(@exist,data_files)==2;
   end
-  data_files=data_files(success);
-  sim_info=studyinfo.simulations(success);
+  
+  data_files = data_files(success);
+  sim_info = studyinfo.simulations(success);
   
   % load each data set recursively
-  keyvals=Options2Keyval(options);
-  num_files=length(data_files);
-  for i=1:num_files
+  keyvals = Options2Keyval(options);
+  num_files = length(data_files);
+  
+  for i = 1:num_files
     fprintf('loading file %g/%g: %s\n',i,num_files,data_files{i});
     tmp_data=ImportData(data_files{i},keyvals{:});
     num_sets_per_file=length(tmp_data);
@@ -107,6 +123,7 @@ if isstruct(file) && isfield(file,'study_dir')
       tmp_data.varied={};
       modifications=sim_info(i).modifications;
       modifications(:,1:2) = cellfun( @(x) strrep(x,'->','_'),modifications(:,1:2),'UniformOutput',0);
+      
       for j=1:size(modifications,1)
         varied=[modifications{j,1} '_' modifications{j,2}];
         for k=1:num_sets_per_file
@@ -115,10 +132,12 @@ if isstruct(file) && isfield(file,'study_dir')
         end
       end
     end
+    
     % store this data
     if i==1
       total_num_sets=num_sets_per_file*num_files;
       set_indices=0:num_sets_per_file:total_num_sets-1;
+      
       % preallocate full data matrix based on first data file
       data(1:total_num_sets)=tmp_data(1);
 %       data(1:length(data_files))=tmp_data;
@@ -128,10 +147,12 @@ if isstruct(file) && isfield(file,'study_dir')
     % replace i-th set of data sets by these data sets
     data(set_indices(i)+(1:num_sets_per_file))=tmp_data;
   end
+  
   return;
 else
   studyinfo=[];
 end
+
 % check if input is a list of data files (todo: eliminate duplicate code by
 % combining with the above recursive loading for studyinfo data_files)
 if iscellstr(file)
@@ -231,6 +252,7 @@ if ischar(file)
     case '.csv'
       % assumes CSV file contains data organized according to output from WriteDynaSimSolver:
       data=ImportCSV(file);
+      
       if ~(isempty(options.time_limits) && isempty(options.variables))
         % limit to select subsets
         data=SelectData(data,varargin{:}); % todo: create SelectData()

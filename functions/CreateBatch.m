@@ -44,6 +44,8 @@ options=CheckOptions(varargin,{...
   'process_id',[],[],... % process identifier for loading studyinfo if necessary
   'qsub_mode','loop',{'loop','array'},... % whether to submit jobs as an array using qsub -t or in a for loop
   'one_solve_file_flag',0,{0,1},... % use only 1 solve file of each type, but can't vary mechs yet
+  'solver','rk4',{'euler','rk1','rk2','rk4','modified_euler','rungekutta','rk','ode23','ode45',...
+    'ode1','ode2','ode3','ode4','ode5','ode8','ode113','ode15s','ode23s','ode23t','ode23tb'},... % DynaSim and built-in Matlab solvers
   },false);
 
 % Set up studyinfo structure, study directory and output file names
@@ -89,12 +91,16 @@ if options.compile_flag
   tmp=regexp({D.name},[fname '\.(\w+)$'],'tokens','once');
   tmp=unique([tmp{:}]);
   
-  % append extension to solve_file
-  full_solve_file=[solve_file '.' tmp{1}];
+  % append extension to solve_file if regular mex (not non supported matlab solver mex)
+  if ~any(strcmp(options.solver, {'ode113','ode15s','ode23s','ode23t','ode23tb'})) % not mex supported)
+    full_solve_file=[solve_file '.' tmp{1}];
   
-  % remove '_mex' suffix from solve_file for compatibility with GetSolveFile()
-  solve_file=regexp(solve_file,'(.+)_mex$','tokens','once');
-  solve_file=solve_file{1};
+    % remove '_mex' suffix from solve_file for compatibility with GetSolveFile()
+    solve_file=regexp(solve_file,'(.+)_mex$','tokens','once');
+    solve_file=solve_file{1};
+  else
+    full_solve_file=solve_file;
+  end
 else
   full_solve_file=solve_file;
 end

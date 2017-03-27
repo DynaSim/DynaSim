@@ -20,30 +20,39 @@ if ~isstruct(model.parameters)
   % nothing to do
   return;
 end
+
 % Check inputs
 options=CheckOptions(varargin,{...
   'action','substitute',{'substitute','prepend','postpend'},...
   'prefix','pset.p.',[],...
   'suffix','',[],...
+  'param_type','parameters',{'parameters', 'fixed_variables'}
   },false);
 
-parameters=model.parameters;
+parameters=model.(options.param_type);
+if isempty(parameters)
+  return
+end
 
 %% 1.0 Propagate through sub-structures
 target_types={'fixed_variables','functions','monitors','ODEs','ICs'};
+
 % loop over types of model data
 for type_index=1:length(target_types)
   type=target_types{type_index};
+  
   % info for this type
   s=model.(type);
   if isstruct(s)
     update_these=fieldnames(s);
     expressions=struct2cell(s);
+    
     % loop over target expressions from which to eliminate internal function calls
     for i=1:length(expressions)
       if isempty(expressions{i})
         continue;
       end
+      
       % update expressions of this type
       switch options.action
         case 'substitute'
@@ -54,6 +63,7 @@ for type_index=1:length(target_types)
           expressions{i}=insert_parameters(expressions{i},parameters, 'suffix',options.suffix);
       end
     end
+    
     % update model with expressions that have parameter values in them
     model.(type)=cell2struct(expressions,update_these,1);
   end
@@ -62,14 +72,17 @@ end
 %% 2.0 Propagate parameters through structure arrays (conditionals)
 if ~isempty(model.conditionals)
   target_types={'condition','action','else'};
+  
   for type_index=1:length(target_types)
     type=target_types{type_index};
     expressions={model.conditionals.(type)};
+    
     % loop over conditional expressions from which to eliminate internal function calls
     for i=1:length(expressions)
       if isempty(expressions{i})
         continue; 
       end
+      
       % update expressions of this type
       switch options.action
         case 'substitute'
