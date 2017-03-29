@@ -374,7 +374,7 @@ end
                 if strcmp(options.plot_type,'heatmap')
                     %subplot(nsets,nc,1+(k-1)*nc); % imagesc(t,cells,FR)
                     imagesc(time,1:ncells,dat'); axis xy
-                    hsp.figtitle([popname ': firing rates (Hz) ']); title(text_string{row,col});
+                    if ~lock_gca; hsp.figtitle([popname ': firing rates (Hz) ']); title(text_string{row,col}); end
                     if row == num_rows; xlabel('time (ms)'); end; ylabel([popname ' cell index']);
                     caxis(rlims); xlim(tlims);
                     if ncells<=10
@@ -410,7 +410,7 @@ end
                 if strcmp(options.plot_type,'meanFR')
                     %subplot(nsets,nc,3+(k-1)*nc); % plot(t,<FR|pop>)
                     plot(time,mean(dat,2),'o-','linewidth',2);
-                    hsp.figtitle([popname ': pop. avg FR']); title(text_string{row,col});
+                    if ~lock_gca; hsp.figtitle([popname ': pop. avg FR']); title(text_string{row,col}); end
                     if row == num_rows; xlabel('time (ms)'); end; ylabel([popname ': avg firing rate (Hz)']);
                     ylim(rlims); xlim(tlims);
                 end 
@@ -422,7 +422,7 @@ end
                       h=bar(bins,H); hold on
                       set(get(h,'children'),'FaceAlpha',0,'EdgeAlpha',.4,'linewidth',2);
                       rn=ksr(bins,H,.75,length(bins));
-                      plot(bins,rn.f,'linewidth',2); hsp.figtitle([popname ': FR density']); title(text_string{row,col});
+                      plot(bins,rn.f,'linewidth',2); if ~lock_gca; hsp.figtitle([popname ': FR density']); end; title(text_string{row,col});
                       if row == num_rows; xlabel([popname ': firing rate (Hz)']); end; ylabel('fraction');
                       xlim(rlims); ylim([0 1]);
                     end
