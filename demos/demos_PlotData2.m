@@ -44,7 +44,16 @@ PlotData2(data,'do_zoom',1,'population','E');
 
 % As above, but focus on only a subset of the varied data. Also, reduce the
 % total number of traces displayed.
-PlotData2(data,'population','E','variable','v','E_Iapp',1:3,'varied2',[1,3],'do_zoom',1,'max_num_overlaid',3);
+PlotData2(data,'population','E','variable','v','E_Iapp',1:3,'varied2',[1,3],'do_zoom',1,'max_num_overlaid',10);
+
+
+% All basic plot_types from PlotData should work
+% Options are availalbe from PlotData:
+%     {'waveform','imagesc','rastergram','raster','power'}
+% And also from PlotFR2
+%     {'heatmapFR','heatmap_sortedFR','meanFR','meanFRdens'}
+PlotData2(data,'population','all','plot_type','rastergram')              % Rastergram
+PlotData2(data,'population','I','plot_type','heatmap_sortedFR')          % Firing rate (FR) heatmap
 
 %% Recursive plots with PlotData2
 
@@ -56,23 +65,23 @@ close all
 
 % Plot membrane voltage for E and I cells across the parameter sweep
 % % (1 variable, 2 pops, varied1, varied2: Ndims = 3)
-PlotData2(data,'num_embedded_subplots',2,'do_zoom',1);  % Default
-PlotData2(data,'num_embedded_subplots',4,'do_zoom',1);  % Increase embedding
+PlotData2(data,'num_embedded_subplots',2,'do_zoom',1,'max_num_overlaid',10);  % Default
+PlotData2(data,'num_embedded_subplots',4,'do_zoom',1,'max_num_overlaid',10);  % Nested embedding
 
 % Note that in the prev example, although we set embedded subplots to 4, only
 % the first 3 are used. If excess subplots are requested and unused, they
 % will be thrown out.
-
-% Setting num_embedded_subplots to provides the same data but in a different
-% arrangement.
-PlotData2(data,'num_embedded_subplots',3,'do_zoom',1);
-
-% Depending on the data being plotted, different some arrangements can be
-% more useful than others. For example, this plot embeds varied as a
-% sub-subplot.
-% % (2 variables, 2 pops, varied2, (varied1 is fixed): Ndims = 3)
-PlotData2(data,'num_embedded_subplots',3,'variable','iNa*','varied1',2)
-
+% 
+% % Setting num_embedded_subplots to provides the same data but in a different
+% % arrangement.
+% PlotData2(data,'num_embedded_subplots',3,'do_zoom',1);
+% 
+% % Depending on the data being plotted, different some arrangements can be
+% % more useful than others. For example, this plot embeds varied as a
+% % sub-subplot.
+% % % (2 variables, 2 pops, varied2, (varied1 is fixed): Ndims = 3)
+% PlotData2(data,'num_embedded_subplots',3,'variable','iNa*','varied1',2)
+% 
 % Lastly, 4 subplots can be nested together to view 4 dimensions
 % simultaneously. This can be increased to 5 with the overlay function
 % described below, and 6 if you count multiple figures. While these figures
@@ -101,18 +110,23 @@ PlotData2(data,'max_num_overlaid',1,'varied1',1:3,'varied2',2:3)
 % Turning this overlay off splits up the figures
 PlotData2(data,'max_num_overlaid',1,'varied1',1:3,'varied2',2:3,'force_overlay','none')
 
-% Overlays can also be doubly stacked
-PlotData2(data,'max_num_overlaid',10,'force_overlay','populations');
+close all;
 
-close all
+% Overlays can also be doubly stacked. Note that both E and I cells are
+% shown on a single plot.
+PlotData2(data,'max_num_overlaid',5,'force_overlay','populations');
 
 % However, these can be messy, so the groups can be shifted up or down
-PlotData2(data,'max_num_overlaid',10,'force_overlay','populations','do_overlay_shift',true);
+PlotData2(data,'max_num_overlaid',5,'force_overlay','populations','do_overlay_shift',true);
     % Variables are stacked from top to bottom, so E cells are on top and I
     % cells underneath
 
-% You can overlay any variable. For example, here is injected current
-PlotData2(data,'do_mean',0,'varied1',1:3,'varied2',2:3,'force_overlay','varied1','do_overlay_shift',1,'overlay_shift_val',100)
+% You can overlay any variable. For example, here is injected current.
+% This is accomplished by setting the axis "varied1", which corresponds to
+% the injected current, to be the variable that is rastered across the
+% overlays.
+PlotData2(data,'do_mean',0,'varied1',1:3,'varied2',2:3,...
+    'force_overlay','varied1','do_overlay_shift',1,'overlay_shift_val',100);
 
 
 % Variables with very different units can be compared side-by-side by
