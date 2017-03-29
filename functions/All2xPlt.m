@@ -35,8 +35,13 @@ else                            % Structure of links to plots
     xv = xp.exportAxisVals;
     xn = xp.exportAxisNames;
     
-    xv(end+1:end+2) = {{'Pop1'},{'X'}};
-    xn(end+1:end+2) = {'populations','variables'};
+    Nd = ndims(xp.data);
+    if Nd == 2 && size(xp.data,2) == 1      % If it's a 2x1 matrix, really this is a vector not a matrix, so set Nd to 1.
+        Nd = 1;
+    end
+    
+    xv(Nd+1:Nd+2) = {{'Pop1'},{'X'}};
+    xn(Nd+1:Nd+2) = {'populations','variables'};
     
     xp = xp.importData(xd,xv);
     xp = xp.importAxisNames(xn);

@@ -24,10 +24,27 @@ function data=xPlt2DynaSim(obj)
 % PlotData(data2); PlotData(d2);
 % PlotData(data2); PlotData(d2b);
 
+% If population axis doesn't exist, create it
 
-% obj = obj.squeeze;
+
+% Add dummy axis for variables if needed
+if isempty(obj.findaxis('variables'))
+    Na = length(obj.axis);
+    obj.axis(Na+1).name = 'variables';
+    obj.axis(Na+1).values = {guess_variable_name(obj)};
+end
+
+% Add dummy axis for populations if needed
+if isempty(obj.findaxis('populations'))
+    Na = length(obj.axis);
+    obj.axis(Na+1).name = 'populations';
+    obj.axis(Na+1).values = {guess_population_name(obj)};
+end
+
+% Find population and variable axes
 pop_axis = obj.findaxis('populations');
 var_axis = obj.findaxis('variables');
+
 varied_inds = true(1,ndims(obj)); varied_inds(pop_axis) = false; varied_inds(var_axis) = false;
 varied_axis = find(varied_inds);
 has_varied = ~isempty(varied_axis);
@@ -187,4 +204,33 @@ function labels = get_axis_labels(obj,ax_vals)
     labels = {labels_orig{:} labels_curr{:}};
     
     labels = labels(:)';
+end
+
+
+function out = guess_variable_name(obj)
+    % The first population's state variable should always be the 1st one
+    % according to DynaSim conventions
+    try
+        label = obj.meta.dynasim.labels{1};
+        ind = strfind(labels,'_');
+        out = label(ind+1:end);
+    catch
+        out = 'v';
+    end
+
+end
+
+
+
+function out = guess_population_name(obj)
+    % The first population should always be the 1st label
+    % according to DynaSim conventions
+    try
+        label = obj.meta.dynasim.labels{1};
+        ind = strfind(labels,'_');
+        out = label(1:ind-1);
+    catch
+        out = 'E';
+    end
+
 end

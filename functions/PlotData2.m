@@ -352,8 +352,10 @@ else
             % handle these all as a single subplot!
             if any(strcmp(plot_type,{'rastergram','raster'}))
                 ind = xp2.findaxis('populations');
-                xp2 = xp2.packDim(ind);
-                xp2 = xp2.squeeze;
+                if ~isempty(ind)
+                    xp2 = xp2.packDim(ind);
+                    xp2 = xp2.squeeze;
+                end
             end
             
             % Setup call to xp_PlotData
