@@ -73,14 +73,16 @@ if isstruct(file) && isfield(file,'study_dir')
   sim_info = sim_info(success);
 
     for i = 1:length(sim_info)
-        tmp_data.varied={};
         modifications=sim_info(i).modifications;
-        modifications(:,1:2) = cellfun( @(x) strrep(x,'->','_'),modifications(:,1:2),'UniformOutput',0);
-        for j=1:size(modifications,1)
-            varied=[modifications{j,1} '_' modifications{j,2}];
+        if ~isempty(modifications)
+            tmp_data.varied={};
+            modifications(:,1:2) = cellfun( @(x) strrep(x,'->','_'),modifications(:,1:2),'UniformOutput',0);
+            for j=1:size(modifications,1)
+                varied=[modifications{j,1} '_' modifications{j,2}];
 
-            tmp_data.varied{end+1}=varied;
-            tmp_data.(varied)=modifications{j,3};
+                tmp_data.varied{end+1}=varied;
+                tmp_data.(varied)=modifications{j,3};
+            end
         end
 
         % Get plot files

@@ -9,6 +9,17 @@ function [data_table,column_titles] = DataField2Table (data,fieldname,verbose_fl
         verbose_flag = 0;
     end
     
+    % Create dummy varied variable if none there
+    for i = 1:length(data)
+        if ~isfield(data(i),'varied')
+            data(i).varied = [];
+        end
+        if isempty(data(i).varied)
+            data(i).varied = {'Varied1'};  % Random name for varied data
+            data(i).Varied1 = i;           % Random value
+        end
+    end
+    
     % ## VARIED parameter sweeps ##
     varied=data(1).varied;
     num_varied=length(varied); % number of model components varied across simulations

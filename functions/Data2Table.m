@@ -14,6 +14,9 @@ function [data_table,column_titles,time] = Data2Table(data,verbose_flag)
     % Create dummy varied variable if none there
     for i = 1:length(data)
         if ~isfield(data(i),'varied')
+            data(i).varied = [];
+        end
+        if isempty(data(i).varied)
             data(i).varied = {'Varied1'};  % Random name for varied data
             data(i).Varied1 = i;           % Random value
         end
