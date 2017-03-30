@@ -302,6 +302,11 @@ end
 xp2 = xp2.squeeze;
 Nd = ndims(xp2);
 
+% After squeezing, make sure the data is not 1xN. If it is, convert to Nx1
+if Nd == 2 && size(xp2,1) == 1
+    xp2 = xp2.permute([2,1]);
+end
+
 % Set up legend entries
 subplot_options.legend1 = setup_legends(xp2);
 

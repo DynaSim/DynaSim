@@ -32,7 +32,12 @@ function xp = DynaSim2xPlt(data)
     meta.dynasim.model = data(1).model;
     meta.dynasim.simulator_options = data(1).simulator_options;
     meta.dynasim.time = data(1).time;
-    meta.dynasim.varied = data(1).varied;
+    if isfield(data(1),'varied')
+        meta.dynasim.varied = data(1).varied;
+    else
+        % For case when nothing varied, insert some dummy data
+        meta.dynasim.varied = {'Varied1'};
+    end
     xp.meta = meta;
     clear meta
 end

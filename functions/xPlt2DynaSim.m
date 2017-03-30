@@ -55,7 +55,6 @@ obj = obj.permute([pop_axis,var_axis, varied_axis(:)']);
 % Find population sizes for each population (will be used MUCH later)
 num_pops = size(obj,1);
 pop_names = obj.exportAxisVals; pop_names = pop_names{1};
-population_sz_all = cellfun(@(x) size(x,2),obj.data,'UniformOutput',1);
 
 
 % Merge populations and variables together
@@ -66,16 +65,18 @@ if has_varied
     obj = obj.mergeDims(3:ndims(obj));
 end
 
+% Permute so obj.data is: populations_variables x varieds
+obj = obj.permute([1,3,2,4:ndims(obj)]);
+
 % Build DynaSim data structure
 data = struct;
 ax_vals = obj.exportAxisVals;
 ax_names = obj.exportAxisNames;
 if has_varied
-    varied = obj.axis(3).astruct.premerged_names;
-    varied_vals = obj.axis(3).astruct.premerged_values;
+    varied = obj.axis(2).astruct.premerged_names;
+    varied_vals = obj.axis(2).astruct.premerged_values;
 end
 
-obj = obj.squeeze;
 for j = 1:size(obj,2)
     
     % Add actual data

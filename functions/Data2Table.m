@@ -11,6 +11,14 @@ function [data_table,column_titles,time] = Data2Table(data,verbose_flag)
     % Extract Time variable
     time = data(1).time;
     
+    % Create dummy varied variable if none there
+    for i = 1:length(data)
+        if ~isfield(data(i),'varied')
+            data(i).varied = {'Varied1'};  % Random name for varied data
+            data(i).Varied1 = i;           % Random value
+        end
+    end
+    
     % ## VARIED parameter sweeps ##
     varied=data(1).varied;
     num_varied=length(varied); % number of model components varied across simulations

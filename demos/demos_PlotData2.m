@@ -153,3 +153,48 @@ PlotData2(study_dir,'supersize_me',1)
 % load sample_data_dynasim_large.mat
 % 
 % PlotData2(data);
+
+
+%% Advanced testing for debugging
+
+xp = DynaSim2xPlt(data);
+xp_single_pops = xp(1,1,:,'v');
+xp_single_vars = xp(1,1,1,:);
+xp_row = xp(:,1,1,'v');
+xp_col = xp(1,:,1,'v');
+xp_col_pops = xp(1,:,:,'v');
+xp_col_vars = xp(1,:,1,:);
+xp_col_varspops = xp(1,:,:,:);
+xp_mat_pops = xp(:,:,:,'v');
+xp_mat_vars = xp(:,:,1,:);
+
+data_single_pops = xPlt2DynaSim(xp_single_pops);
+data_single_vars = xPlt2DynaSim(xp_single_vars);
+data_row = xPlt2DynaSim(xp_row);
+data_col = xPlt2DynaSim(xp_col);
+data_col_pops = xPlt2DynaSim(xp_col_pops);
+data_col_vars = xPlt2DynaSim(xp_col_vars);
+data_col_varspops = xPlt2DynaSim(xp_col_varspops);
+data_mat_pops = xPlt2DynaSim(xp_mat_pops);
+data_mat_vars = xPlt2DynaSim(xp_mat_vars);
+data_all = xPlt2DynaSim(xp);
+
+%% Plot everything, comparing PlotData and PlotData2
+close all; d = data_single_pops; PlotData2(d); d = xPlt2DynaSim(DynaSim2xPlt(d)); PlotData2(d); PlotData(d);
+close all; d = data_single_vars; PlotData2(d); d = xPlt2DynaSim(DynaSim2xPlt(d)); PlotData2(d); PlotData(d);
+close all; d = data_row; PlotData2(d); d = xPlt2DynaSim(DynaSim2xPlt(d)); PlotData2(d); PlotData(d);
+close all; d = data_col; PlotData2(d); d = xPlt2DynaSim(DynaSim2xPlt(d)); PlotData2(d); PlotData(d);
+close all; d = data_col_pops; PlotData2(d); d = xPlt2DynaSim(DynaSim2xPlt(d)); PlotData2(d); PlotData(d);
+close all; d = data_col_vars; PlotData2(d); d = xPlt2DynaSim(DynaSim2xPlt(d)); PlotData2(d); PlotData(d);
+close all; d = data_col_varspops; PlotData2(d); d = xPlt2DynaSim(DynaSim2xPlt(d)); PlotData2(d); PlotData(d);
+close all; d = data_mat_pops; PlotData2(d,'do_mean',1); d = xPlt2DynaSim(DynaSim2xPlt(d)); PlotData2(d,'do_mean',1); PlotData(d);
+close all; d = data_mat_vars; PlotData2(d); d = xPlt2DynaSim(DynaSim2xPlt(d)); PlotData2(d); PlotData(d);
+close all; d = data_all; PlotData2(d,'do_mean',1); d = xPlt2DynaSim(DynaSim2xPlt(d)); PlotData2(d,'do_mean',1); PlotData(d);
+
+
+
+
+
+
+
+
