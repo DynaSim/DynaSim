@@ -63,7 +63,7 @@ if ischar(data)
 end
 
 % Convert the incoming DynaSim data structure to an xPlt object
-if ~isa(xp,'xPlt')
+if ~isa(data,'xPlt')
     [xp,is_image] = All2xPlt(data);
 end
 
