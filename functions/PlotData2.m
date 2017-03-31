@@ -43,7 +43,15 @@ function handles=PlotData2(data,varargin)
 % See also: CalcFR, CalcPower, PlotWaveforms, CheckData, PlotData, xPlt,
 %           nDDict
 
-% Convert data as needed
+%% Set Master parameters
+  
+% Flag for returning error if the user specifies name/value pairs that are not in the
+% CheckOptions list
+strict_mode = 1;
+
+%% Convert data input to appropriate form
+
+% If data is path to studyinfo...
 if ischar(data)
     study_dir = data;
     
@@ -57,7 +65,7 @@ end
 % Convert the incoming DynaSim data structure to an xPlt object
 [xp,is_image] = All2xPlt(data);
 
-
+%% Convert varargin to appropriate forms
 % Find out names of varied variables
 all_names = xp.exportAxisNames;
 varied_names = only_varieds(all_names);  % Returns only the names of the varied variables
@@ -80,11 +88,8 @@ for i = 1:length(myargin)
         end
     end
 end
-  
-% Flag for returning error if the user specifies name/value pairs that are not in the
-% CheckOptions list
-strict_mode = 1;
-  
+
+%% Parse varargin and set up defaults
 [options, options_extras0] = CheckOptions(myargin,{...
   'population',[],[],...        
   'variable',[],[],...        
@@ -161,8 +166,7 @@ figure_options = struct_addDef(figure_options,'max_num_newfigs',options.max_num_
 
 
 
-
-
+%% Pre-process raw data contained in xp.data (mean + downsample)
 % Apply max overlaid
 MTPP = options.max_num_overlaid; % max traces per plot
 if any(strcmp(options.plot_type,{'waveform','power'})) && all(cellfun(@isnumeric,xp.data(:))) && ~do_mean
@@ -192,6 +196,8 @@ if do_mean
     xp.meta.datainfo(2).values = {'<Cells>'};
 end
 
+%% Arrange dimensions of xp in appropriate order
+% % Should be variables x populations x varied1 x ... x variedN
 
 % Axis indices of populations
 ax_ind_var = xp.findaxis('variables');
@@ -202,7 +208,8 @@ ax_ind_varied = find(ax_ind_varied);
 % Permute to put varied variables last
 xp = permute(xp,[ax_ind_var, ax_ind_pop, ax_ind_varied(:)']);
 
-
+%% Identify user selections for populations, variables, etc., and convert xp to xp2
+% %  (xp2 contains only user selections)
 % User selection for populations
 chosen_pop = options.population;
 if isempty(chosen_pop)
@@ -234,6 +241,7 @@ if strcmp(chosen_pop,'all'); chosen_pop = ':'; end
 % Select out chosen data
 xp2 = xp(chosen_vars,chosen_pop,chosen_varied{:});
 
+%% Set up force overlay & post-overlay manipulation
 % Assign default value to force_overlay
 if isempty(force_overlay) 
     if length(xp2.meta.datainfo(2).values) <= 1
@@ -298,6 +306,7 @@ if options.do_overlay_shift
     xp2.data = mydata;
 end
 
+%% Squeeze out unused dimensions
 % Squeeze to eliminate superfluous dimensions
 xp2 = xp2.squeeze;
 Nd = ndims(xp2);
@@ -307,6 +316,8 @@ if Nd == 2 && size(xp2,1) == 1
     xp2 = xp2.permute([2,1]);
 end
 
+
+%% Set up legend entries and axis limits
 % Set up legend entries
 subplot_options.legend1 = setup_legends(xp2);
 
@@ -340,6 +351,7 @@ if isempty(plot_options.zlims) && options.lock_axes && ~is_image
     end
 end
 
+%% Prepare plotting handles for specific plot types
 if is_image
     % Is an image
     data_plothandle = @xp_plotimage;
@@ -380,6 +392,7 @@ else
     end
 end
 
+%% Prepare plotting structure depending on number of embedded subplots
 % Split available axes into the number of dimensions supported by each
 % axis handle
 switch num_embedded_subplots
@@ -413,6 +426,7 @@ switch num_embedded_subplots
         function_args = {{figure_options},{subplot_options2},{subplot_options},{plot_options}};
 end
 
+%% Auto trim dimensions as needed
 % Linearize dimensions of xp2 that are in excess of the total number we can
 % plot
 maxNplotdims = sum(dims_per_function_handle)-1;
@@ -436,6 +450,8 @@ function_handles = function_handles(available_dims);
 dimensions = dimensions(available_dims);
 function_args = function_args(available_dims);
 
+
+%% Run the plots!
 % Open new figure if necessary & plot the data
 if ~isequal(@xp_handles_newfig, function_handles{1})
     % Cheap hack to force it to create a new figure using our desired

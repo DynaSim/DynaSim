@@ -158,6 +158,7 @@ PlotData2(study_dir,'supersize_me',1)
 %% Advanced testing for debugging
 
 xp = DynaSim2xPlt(data);
+xp_single = xp(1,1,1,'v');
 xp_single_pops = xp(1,1,:,'v');
 xp_single_vars = xp(1,1,1,:);
 xp_row = xp(:,1,1,'v');
@@ -168,6 +169,8 @@ xp_col_varspops = xp(1,:,:,:);
 xp_mat_pops = xp(:,:,:,'v');
 xp_mat_vars = xp(:,:,1,:);
 
+data_single = xPlt2DynaSim(xp_single);
+data_single_squeeze = xPlt2DynaSim(squeeze(xp_single));
 data_single_pops = xPlt2DynaSim(xp_single_pops);
 data_single_vars = xPlt2DynaSim(xp_single_vars);
 data_row = xPlt2DynaSim(xp_row);
@@ -180,6 +183,8 @@ data_mat_vars = xPlt2DynaSim(xp_mat_vars);
 data_all = xPlt2DynaSim(xp);
 
 %% Plot waveforms, comparing PlotData and PlotData2
+close all; d = data_single; PlotData2(d); d = xPlt2DynaSim(DynaSim2xPlt(d)); PlotData2(d); %PlotData(d);
+close all; d = data_single_squeeze; PlotData2(d); d = xPlt2DynaSim(DynaSim2xPlt(d)); PlotData2(d); %PlotData(d);
 close all; d = data_single_pops; PlotData2(d); d = xPlt2DynaSim(DynaSim2xPlt(d)); PlotData2(d); PlotData(d);
 close all; d = data_single_vars; PlotData2(d); d = xPlt2DynaSim(DynaSim2xPlt(d)); PlotData2(d); PlotData(d);
 close all; d = data_row; PlotData2(d); d = xPlt2DynaSim(DynaSim2xPlt(d)); PlotData2(d); PlotData(d);

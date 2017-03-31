@@ -145,7 +145,7 @@ function data = add_pop_sizes(data,obj,num_pops,pop_names)
 
             % Find state variable in this population - this one will tell
             % us the size of the population
-            var_names = obj_temp.axis('variables').values;
+            var_names = obj_temp.axis('populations_variables').values;
             num_vars = length(var_names);
             ind = regexp(lower(var_names),'_v$||_vm$||_x$||_xm$||_y$||_ym$');        % Search for all variables to get ones ending in the name of a state variable
             ind = ~cellfun(@isempty,ind);
