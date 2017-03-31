@@ -473,6 +473,16 @@ disp(xp3.axis(2).values);
 xp4 = xp3(:,I);
 disp(xp4.axis(2).values);
 
+
+%% Advanced testing
+clear xp2 xp3 xp4 xp5 xp6
+% Test squeezeRegexp
+xp2 = xp(:,1,:,end); xp2.getaxisinfo
+
+xp2b = xp2.squeezeRegexp('var'); xp2b.getaxisinfo
+xp2b = xp2.squeezeRegexp('I_E_tauD'); xp2b.getaxisinfo
+xp2b = xp2.squeezeRegexp('populations'); xp2b.getaxisinfo
+
 %% To implement
 % 
 % 

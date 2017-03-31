@@ -165,7 +165,7 @@ figure_options = struct_addDef(figure_options,'max_num_newfigs',options.max_num_
 
 % Apply max overlaid
 MTPP = options.max_num_overlaid; % max traces per plot
-if any(strcmp(options.plot_type,{'waveform','power'})) && all(cellfun(@isnumeric,xp.data(:)))
+if any(strcmp(options.plot_type,{'waveform','power'})) && all(cellfun(@isnumeric,xp.data(:))) && ~do_mean
     mydata = xp.data;
     mydata2 = cell(size(mydata));
     for i = 1:numel(mydata)

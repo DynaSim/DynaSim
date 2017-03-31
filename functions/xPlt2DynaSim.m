@@ -41,10 +41,14 @@ if isempty(obj.findaxis('populations'))
     obj.axis(Na+1).values = {guess_population_name(obj)};
 end
 
+% Get rid of any empty Dims created by above operations
+obj = obj.squeezeRegexp('Dim');
+
 % Find population and variable axes
 pop_axis = obj.findaxis('populations');
 var_axis = obj.findaxis('variables');
 
+% Find varied axes
 varied_inds = true(1,ndims(obj)); varied_inds(pop_axis) = false; varied_inds(var_axis) = false;
 varied_axis = find(varied_inds);
 has_varied = ~isempty(varied_axis);
@@ -56,6 +60,7 @@ obj = obj.permute([pop_axis,var_axis, varied_axis(:)']);
 num_pops = size(obj,1);
 pop_names = obj.exportAxisVals; pop_names = pop_names{1};
 
+% Should be populations x variables x varied
 
 % Merge populations and variables together
 obj = obj.mergeDims(1:2);
@@ -65,8 +70,12 @@ if has_varied
     obj = obj.mergeDims(3:ndims(obj));
 end
 
-% Permute so obj.data is: populations_variables x varieds
-obj = obj.permute([1,3,2,4:ndims(obj)]);
+% Should now be populations_variables x Dim 1 x varied1_varied2_.... x Dim2
+
+% Get rid of any leftover axes created by mergeDims
+obj = obj.squeezeRegexp('Dim');
+
+% Should now be populations_variables x varied1_varied2_....
 
 % Build DynaSim data structure
 data = struct;
@@ -113,6 +122,7 @@ end
 data = add_pop_sizes(data,obj,num_pops,pop_names);
 
 data = CheckData(data);
+
 
 end
 

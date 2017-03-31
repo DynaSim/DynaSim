@@ -179,7 +179,7 @@ data_mat_pops = xPlt2DynaSim(xp_mat_pops);
 data_mat_vars = xPlt2DynaSim(xp_mat_vars);
 data_all = xPlt2DynaSim(xp);
 
-%% Plot everything, comparing PlotData and PlotData2
+%% Plot waveforms, comparing PlotData and PlotData2
 close all; d = data_single_pops; PlotData2(d); d = xPlt2DynaSim(DynaSim2xPlt(d)); PlotData2(d); PlotData(d);
 close all; d = data_single_vars; PlotData2(d); d = xPlt2DynaSim(DynaSim2xPlt(d)); PlotData2(d); PlotData(d);
 close all; d = data_row; PlotData2(d); d = xPlt2DynaSim(DynaSim2xPlt(d)); PlotData2(d); PlotData(d);
@@ -191,6 +191,18 @@ close all; d = data_mat_pops; PlotData2(d,'do_mean',1); d = xPlt2DynaSim(DynaSim
 close all; d = data_mat_vars; PlotData2(d); d = xPlt2DynaSim(DynaSim2xPlt(d)); PlotData2(d); PlotData(d);
 close all; d = data_all; PlotData2(d,'do_mean',1); d = xPlt2DynaSim(DynaSim2xPlt(d)); PlotData2(d,'do_mean',1); PlotData(d);
 
+
+%% Plot rastergrams, comparing PlotData and PlotData2
+close all; d = data_single_pops; PlotData2(d,'plot_type','rastergram'); d = xPlt2DynaSim(DynaSim2xPlt(d)); PlotData2(d,'plot_type','rastergram'); PlotData(d,'plot_type','rastergram');
+close all; d = data_single_vars; PlotData2(d,'plot_type','rastergram'); d = xPlt2DynaSim(DynaSim2xPlt(d)); PlotData2(d,'plot_type','rastergram'); PlotData(d,'plot_type','rastergram');
+close all; d = data_row; PlotData2(d,'plot_type','rastergram'); d = xPlt2DynaSim(DynaSim2xPlt(d)); PlotData2(d,'plot_type','rastergram'); PlotData(d,'plot_type','rastergram');
+close all; d = data_col; PlotData2(d,'plot_type','rastergram'); d = xPlt2DynaSim(DynaSim2xPlt(d)); PlotData2(d,'plot_type','rastergram'); PlotData(d,'plot_type','rastergram');
+close all; d = data_col_pops; PlotData2(d,'plot_type','rastergram'); d = xPlt2DynaSim(DynaSim2xPlt(d)); PlotData2(d,'plot_type','rastergram'); PlotData(d,'plot_type','rastergram');
+close all; d = data_col_vars; PlotData2(d,'plot_type','rastergram'); d = xPlt2DynaSim(DynaSim2xPlt(d)); PlotData2(d,'plot_type','rastergram'); PlotData(d,'plot_type','rastergram');
+close all; d = data_col_varspops; PlotData2(d,'plot_type','rastergram'); d = xPlt2DynaSim(DynaSim2xPlt(d)); PlotData2(d,'plot_type','rastergram'); PlotData(d,'plot_type','rastergram');
+close all; d = data_mat_pops; PlotData2(d,'plot_type','rastergram','do_mean',1); d = xPlt2DynaSim(DynaSim2xPlt(d)); PlotData2(d,'plot_type','rastergram','do_mean',1); PlotData(d,'plot_type','rastergram');
+close all; d = data_mat_vars; PlotData2(d,'plot_type','rastergram'); d = xPlt2DynaSim(DynaSim2xPlt(d)); PlotData2(d,'plot_type','rastergram'); PlotData(d,'plot_type','rastergram');
+close all; d = data_all; PlotData2(d,'plot_type','rastergram','do_mean',1); d = xPlt2DynaSim(DynaSim2xPlt(d)); PlotData2(d,'plot_type','rastergram','do_mean',1); PlotData(d,'plot_type','rastergram');
 
 
 
