@@ -86,10 +86,10 @@ if has_varied
     varied_vals = obj.axis(2).astruct.premerged_values;
 end
 
-for j = 1:size(obj,2)
+for j = 1:size(obj,2)                               % Loop through varieds
     
     % Add actual data
-    for i = 1:size(obj,1)
+    for i = 1:size(obj,1)                           % Loop through populations
         data(j).(ax_vals{1}{i}) = obj.data{i,j};
     end
     
