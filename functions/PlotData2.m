@@ -1,4 +1,4 @@
-function handles=PlotData2(data,varargin)
+function [handles,xp]=PlotData2(data,varargin)
 %% handles=PlotData(data,'option',value)
 % Purpose: plot data in various ways depending on what data was provided
 % and what options are defined. this function is wrapped by PlotWaveforms,
@@ -63,7 +63,9 @@ if ischar(data)
 end
 
 % Convert the incoming DynaSim data structure to an xPlt object
-[xp,is_image] = All2xPlt(data);
+if ~isa(xp,'xPlt')
+    [xp,is_image] = All2xPlt(data);
+end
 
 %% Convert varargin to appropriate forms
 % Find out names of varied variables
