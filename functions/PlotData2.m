@@ -106,6 +106,7 @@ end
   'xlims',[],[],...
   'ylims',[],[],...
   'zlims',[],[],...
+  'crop_range',[],[],...
   'lock_axes',true,[false true],...
   'saved_fignum',[1],[],...
   'max_num_newfigs',[5],[],...
@@ -143,6 +144,8 @@ figure_options = options.figure_options;
 num_embedded_subplots = options.num_embedded_subplots;
 do_mean = options.do_mean;
 force_overlay = options.force_overlay;
+crop_range = options.crop_range;
+lock_axes = options.lock_axes;
 
 % Add default options to structures
 % Plot_options
@@ -170,9 +173,10 @@ figure_options = struct_addDef(figure_options,'max_num_newfigs',options.max_num_
 
 
 %% Pre-process raw data contained in xp.data (mean + downsample)
+% % Note: these options don't work if data are images
 % Apply max overlaid
 MTPP = options.max_num_overlaid; % max traces per plot
-if any(strcmp(options.plot_type,{'waveform','power'})) && all(cellfun(@isnumeric,xp.data(:))) && ~do_mean
+if any(strcmp(options.plot_type,{'waveform','power'})) && all(cellfun(@isnumeric,xp.data(:))) && ~do_mean && ~is_image
     mydata = xp.data;
     mydata2 = cell(size(mydata));
     for i = 1:numel(mydata)
@@ -192,11 +196,20 @@ end
 
 
 % Average across cells if necessary
-if do_mean 
+if do_mean && ~is_image
     mydata = xp.data;
     mydata = cellfun(@(x) mean(x,2), mydata,'UniformOutput',0);
     xp.data = mydata;
     xp.meta.datainfo(2).values = {'<Cells>'};
+end
+
+% Crop data
+if ~isempty(crop_range) && ~is_image
+    t_temp = xp.meta.datainfo(1).values;
+    ind = (t_temp > crop_range(1) & t_temp <= crop_range(2));
+    for i = 1:numel(xp.data)
+        if ~isempty(xp.data{i}); xp.data{i} = xp.data{i}(ind,:); end
+    end
 end
 
 %% Arrange dimensions of xp in appropriate order
@@ -321,11 +334,11 @@ subplot_options.legend1 = setup_legends(xp2);
 
 
 % Get axis lims
-if isempty(plot_options.xlims) && options.lock_axes && ~is_image
+if isempty(plot_options.xlims) && lock_axes && ~is_image
         xdat = xp.meta.datainfo(1).values;
         plot_options.xlims = [min(xdat) max(xdat)];
 end
-if isempty(plot_options.ylims) && options.lock_axes && ~is_image
+if isempty(plot_options.ylims) && lock_axes && ~is_image
     switch plot_type
         case 'waveform'
             % Merge all data into one single huge column
@@ -339,11 +352,12 @@ if isempty(plot_options.ylims) && options.lock_axes && ~is_image
     end
 end
 
-if isempty(plot_options.zlims) && options.lock_axes && ~is_image
+if isempty(plot_options.zlims) && lock_axes && ~is_image
     switch plot_type
-        case 'heatmap'
-            data_all = [xp2.data{:}];
-            data_all = data_all(:);
+        case 'imagesc'
+            data_all = xp2.data(:);
+            data_all = cellfunu(@(x) x(:), data_all);
+            data_all = vertcat(data_all{:});
             data_lims = [min(data_all) max(data_all)];
             plot_options.zlims = data_lims;
     end
@@ -359,6 +373,25 @@ else
         case 'waveform'
             % Is data
             data_plothandle = @xp_matrix_advancedplot3D;
+        case 'imagesc'
+            data_plothandle = @xp_matrix_imagesc;
+            % Disable legend when using imagesc
+            subplot_options.legend1 = [];
+            % Add time information
+            plot_options.xdat = xp.meta.datainfo(1).values;
+            % Control colorbar
+            if lock_axes
+                % If axes are locked, only need to show 1 colorbar across
+                % all subplots
+                subplot_options.do_colorbar = true;         
+                plot_options.do_colorbar = false;
+%                 subplot_options.do_colorbar = false;         
+%                 plot_options.do_colorbar = true;
+            else
+                subplot_options.do_colorbar = false;         
+                plot_options.do_colorbar = true;
+            end
+            
         case {'power','rastergram','raster'}
             % Disable legend when using PlotData
             subplot_options.legend1 = [];
