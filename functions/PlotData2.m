@@ -491,9 +491,9 @@ if ~isequal(@xp_handles_newfig, function_handles{1})
     xp3 = xPlt;
     fhandle = @() recursivePlot(xp2,function_handles,dimensions,function_args);
     xp3 = xp3.importData({fhandle});
-    xp_handles_newfig(xp3,figure_options);
+    handles = xp_handles_newfig(xp3,figure_options);
 else
-    xp2.recursivePlot(function_handles,dimensions,function_args);
+    handles = xp2.recursivePlot(function_handles,dimensions,function_args);
 end
 
 
