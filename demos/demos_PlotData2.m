@@ -155,6 +155,27 @@ PlotData2(study_dir,'supersize_me',1)
 % PlotData2(data);
 
 
+%% Merging simulations
+
+study_dir2 = fullfile(output_directory,'demo_sPING_100cells_5x1');
+
+% Make sure sample data exists; if not copy it into place
+if ~exist(study_dir2,'dir')
+    unzipDemoData(study_dir2);
+end
+
+% Load data in traditional DynaSim format
+data_sim2=ImportData(study_dir2);
+
+% Test plot of new data
+PlotData2(data_sim2);
+
+% Plot the merged new data with the old data
+data_merged = DynaSimMerge(data,data_sim2);
+
+PlotData2(data_merged,'do_mean',1)
+
+
 %% Advanced testing for debugging
 
 xp = DynaSim2xPlt(data);

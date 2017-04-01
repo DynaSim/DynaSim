@@ -18,7 +18,7 @@ output_directory = getDsVar('demos_path');
 
 % move to root directory where outputs will be saved
 mkdirSilent(output_directory);
-study_dir = fullfile(output_directory,'demo_sPING_100cells_3x3');
+study_dir = fullfile(output_directory,'demo_sPING_100cells_5x1');
 
 
 %% Generate a sample dataset
@@ -59,12 +59,12 @@ s.connections(2).parameters={'tauD',2,'gSYN',.1,'netcon',ones(80,20)};
 
 % Vary two parameters (run a simulation for all combinations of values)
 vary={
-  'E'   ,'Iapp',[0 10 20];      % amplitude of tonic input to E-cells
-  'I->E','tauD',[5 10 15]       % inhibition decay time constant from I to E
+  'E'   ,'Iapp',[1:5];      % amplitude of tonic input to E-cells
+  'I->E','tauD',[10]       % inhibition decay time constant from I to E
   };
 SimulateModel(s,'save_data_flag',1,'study_dir',study_dir,...
                 'vary',vary,'verbose_flag',1, 'downsample_factor', 10, ...
-                'save_results_flag',1,'plot_functions',{@PlotData,@PlotData,@PlotFR2},'plot_options',{{'format','png','visible','off','figwidth',0.5,'figheight',0.5}, ...
+                'save_results_flag',1,'parallel_flag',1,'plot_functions',{@PlotData,@PlotData,@PlotFR2},'plot_options',{{'format','png','visible','off','figwidth',0.5,'figheight',0.5}, ...
                 {'format','png','visible','off','plot_type','rastergram','figwidth',0.5,'figheight',0.5},...
                 {'format','png','visible','off'}} );
             
