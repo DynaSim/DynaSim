@@ -14,26 +14,26 @@ function xp = DynaSimImg2xPlt(data_img)
     xp = xp.importLinearData(X, axislabels{:});
     xp = xp.importAxisNames(column_titles(2:end));
     
-    % Add dummy population and variable dimensions since the code below
-    % expects it
+    % Add dummy population and variable dimensions
     xd = xp.data;
     xv = xp.exportAxisVals;
     xn = xp.exportAxisNames;
     
-    Nd = ndims(xp.data);
-    if Nd == 2 && size(xp.data,2) == 1      % If it's a 2x1 matrix, really this is a vector not a matrix, so set Nd to 1.
-        Nd = 1;
-    end
-    
-    xv(Nd+1:Nd+2) = {{'Pop1'},{'X'}};
-    xn(Nd+1:Nd+2) = {'populations','variables'};
+    xv(end+1:end+2) = {{'Pop1'},{'X'}};
+    xn(end+1:end+2) = {'populations','variables'};
     
     xp = xp.importData(xd,xv);
     xp = xp.importAxisNames(xn);
     clear xd xv xn
     
+    % Squeeze out any empty dims that might have been introduced by the
+    % above operations. This is necessary if xp was originally 2x1 (e.g.
+    % varied1 x Dim 1) and then added populations and variables onto this
+    % after Dim 1
+    xp = xp.squeezeRegexp('Dim');
+    
     % Set up metadata
-    % Store metadata info
+    % Store metadata info (putting random info in here for time being)
     meta = struct;
     meta.datainfo(1:2) = nDDictAxis;
     meta.datainfo(1).name = 'time(ms)';

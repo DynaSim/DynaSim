@@ -142,7 +142,11 @@ PlotData2(data,'population','E','variable','v|I_iGABAa_s','force_overlay','varia
 %% Import pre-saved images
 close all
 
-% Import pre-saved images and tile them
+% Import plot files
+data_img = ImportPlots(study_dir);
+PlotData2(data_img);
+
+% Can also reference study_dir directly
 PlotData2(study_dir)
 
 % As above, but supersize them
@@ -155,7 +159,7 @@ PlotData2(study_dir,'supersize_me',1)
 % PlotData2(data);
 
 
-%% Merging simulations
+%% Merging simulation output data
 
 study_dir2 = fullfile(output_directory,'demo_sPING_100cells_5x1');
 
@@ -172,11 +176,28 @@ PlotData2(data_sim2);
 
 % Plot the merged new data with the old data
 data_merged = DynaSimMerge(data,data_sim2);
-
 PlotData2(data_merged,'do_mean',1)
 
 
-%% Advanced testing for debugging
+%% Merge simulations' saved images
+
+data_img_sim2=ImportPlots(study_dir2);
+
+% Test plot of saved images from sim2
+PlotData2(data_img_sim2);
+
+% Merge
+data_img_merged = DynaSimMerge(data_img,data_img_sim2);
+PlotData2(data_img_merged);
+
+
+
+%%
+% % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % 
+% % % % % % % % Advanced testing for debugging % % % % % % % % % %
+% % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % 
+
+%% Advanced testing for debugging - set up data
 
 xp = DynaSim2xPlt(data);
 xp_single = xp(1,1,1,'v');
@@ -192,8 +213,8 @@ xp_mat_vars = xp(:,:,1,:);
 
 data_single = xPlt2DynaSim(xp_single);
 data_single_squeeze = xPlt2DynaSim(squeeze(xp_single));
-data_single_pops = xPlt2DynaSim(xp_single_pops);
-data_single_vars = xPlt2DynaSim(xp_single_vars);
+data_single_pops = xPlt2DynaSim(xp_single_pops); data_single_pops=rmfield(data_single_pops,{'varied','I_E_tauD','E_Iapp'});  % This removes all the "vary" fields
+data_single_vars = xPlt2DynaSim(xp_single_vars); data_single_vars=rmfield(data_single_vars,{'varied','I_E_tauD','E_Iapp'});  % This removes all the "vary" fields
 data_row = xPlt2DynaSim(xp_row);
 data_col = xPlt2DynaSim(xp_col);
 data_col_pops = xPlt2DynaSim(xp_col_pops);
@@ -233,6 +254,8 @@ close all; d = data_all; PlotData2(d,'plot_type','rastergram','do_mean',1); d = 
 
 
 
+%% Advanced testing for debugging - set up data_img
 
+xp_img = DynaSimImg2xPlt(data_img);
 
 

@@ -130,7 +130,7 @@ end
 
 % Clause to fix things incase user sets force_overlay to zero!
 if isnumeric(options.force_overlay) && ~isempty(options.force_overlay)
-    warning('force overlay should be either none or the name the name of an axis {populations, variables, varied1, ... variedN}');
+    warning('force overlay should be either "none" or the name the name of an axis {populations, variables, varied1, ... variedN}');
     if options.force_overlay == 0
         options.force_overlay = 'none';
     end
@@ -204,7 +204,7 @@ if do_mean && ~is_image
 end
 
 % Crop data
-if ~isempty(crop_range) && ~is_image
+if ~isempty(crop_range) &&  all(cellfun(@isnumeric,xp.data(:))) && ~is_image
     t_temp = xp.meta.datainfo(1).values;
     ind = (t_temp > crop_range(1) & t_temp <= crop_range(2));
     for i = 1:numel(xp.data)
@@ -232,10 +232,10 @@ if isempty(chosen_pop)
     chosen_pop = ':';
 end
 
-% User selection for variables
+% User selection for state variables
 chosen_vars = options.variable;
 if isempty(chosen_vars)
-    chosen_vars = getdefaultvar(xp);
+    chosen_vars = getdefaultstatevar(xp);
 end
 
 % User selection for varied parameters
@@ -257,10 +257,10 @@ if strcmp(chosen_pop,'all'); chosen_pop = ':'; end
 % Select out chosen data
 xp2 = xp(chosen_vars,chosen_pop,chosen_varied{:});
 
-%% Set up force overlay & post-overlay manipulation
+%% Set up force overlay
 % Assign default value to force_overlay
 if isempty(force_overlay) 
-    if length(xp2.meta.datainfo(2).values) <= 1
+    if length(xp2.meta.datainfo(2).values) <= 1 && ~isempty(xp2.findaxis('populations'))
         force_overlay = 'populations';
     else
         force_overlay = 'none';
@@ -305,7 +305,8 @@ if ~strcmpi(force_overlay,'none')
 
 end
 
-if options.do_zscore
+%% Set up do z-score & overlay shift
+if options.do_zscore && all(cellfun(@isnumeric,xp2.data(:))) && ~is_image
     mydata = xp2.data;
     for i = 1:numel(mydata)
         mydata{i} = zscore(mydata{i});
@@ -314,7 +315,7 @@ if options.do_zscore
 end
 
 % Shift the overlay by a certain amount
-if options.do_overlay_shift
+if options.do_overlay_shift && all(cellfun(@isnumeric,xp2.data(:))) && ~is_image
     mydata = xp2.data;
     for i = 1:numel(mydata)
         mydata{i} = do_shift_lastdim (mydata{i},options.overlay_shift_val);
@@ -335,7 +336,7 @@ subplot_options.legend1 = setup_legends(xp2);
 
 % Get axis lims
 if isempty(plot_options.xlims) && lock_axes && ~is_image
-        xdat = xp.meta.datainfo(1).values;
+        xdat = xp2.meta.datainfo(1).values;
         plot_options.xlims = [min(xdat) max(xdat)];
 end
 if isempty(plot_options.ylims) && lock_axes && ~is_image
@@ -378,7 +379,7 @@ else
             % Disable legend when using imagesc
             subplot_options.legend1 = [];
             % Add time information
-            plot_options.xdat = xp.meta.datainfo(1).values;
+            plot_options.xdat = xp2.meta.datainfo(1).values;
             % Control colorbar
             if lock_axes
                 % If axes are locked, only need to show 1 colorbar across
@@ -499,10 +500,16 @@ end
 
 end
 
-function vars_out = getdefaultvar(xp)
+function vars_out = getdefaultstatevar(xp)
     % search through and try to find the variable represnting voltage. If can't find
     % it, just return the first variable listed.
     
+    % See if variables axis even exists
+    if isempty(xp.findaxis('variables'))
+        error('Variables axis not found. Should not reach here (replace with warning or comment out this line to circumvent)');
+        vars_out = 'X';
+        return;
+    end
     
     % Pull out variables
     vars_orig = xp.axis('variables').values;

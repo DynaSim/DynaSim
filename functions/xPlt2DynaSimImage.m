@@ -1,4 +1,4 @@
-function data=xPlt2DynaSim(obj)
+function data=xPlt2DynaSimImage(obj)
 %% data=xPlt2DynaSim(obj,varargin)
 % Dependencies:
 %   Requires the MDD class, which should be part of DynaSim. If not,
@@ -34,8 +34,6 @@ obj = obj.squeezeRegexp('Dim');
 % Make sure the "varied" parameters are along dimension 2 (e.g. so it's
 % 1xNvaried)
 if iscolumn(obj.data); obj=obj.transpose; end
-
-warning('fix this for 0-dimensional case');
 
 % Build DynaSim data structure
 data = struct;
