@@ -226,15 +226,6 @@ if do_mean && ~is_image
     xp.meta.datainfo(2).values = {'<Cells>'};
 end
 
-% Crop data
-if ~isempty(crop_range) &&  all(cellfun(@isnumeric,xp.data(:))) && ~is_image
-    t_temp = xp.meta.datainfo(1).values;
-    ind = (t_temp > crop_range(1) & t_temp <= crop_range(2));
-    for i = 1:numel(xp.data)
-        if ~isempty(xp.data{i}); xp.data{i} = xp.data{i}(ind,:); end
-    end
-end
-
 %% Arrange dimensions of xp in appropriate order
 % % Should be variables x populations x varied1 x ... x variedN
 
@@ -364,6 +355,18 @@ end
 % Squeeze to eliminate superfluous dimensions
 xp2 = xp2.squeeze;
 Nd = ndims(xp2);
+
+
+%% Crop data
+if ~isempty(crop_range) &&  all(cellfun(@isnumeric,xp2.data(:))) && ~is_image
+    t_temp = xp2.meta.datainfo(1).values;
+    ind = (t_temp > crop_range(1) & t_temp <= crop_range(2));
+    for i = 1:numel(xp2.data)
+        if ~isempty(xp2.data{i}); xp2.data{i} = xp2.data{i}(ind,:); end
+    end
+    xp2.meta.datainfo(1).values = t_temp(ind);
+end
+
 
 
 %% Set up legend entries and axis limits
