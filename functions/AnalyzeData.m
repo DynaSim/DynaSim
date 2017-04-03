@@ -32,7 +32,7 @@ options=CheckOptions(varargin,{...
   'save_results_flag',0,{0,1},...
   'format','svg',{'svg','jpg','eps','png','fig'},...
   'varied_filename_flag',0,{0,1},...
-  'plot_type','waveform',{'waveform','rastergram','raster','power','rates'},...
+  'plot_type','waveform',{'waveform','rastergram','raster','power','rates','imagesc','heatmapFR','heatmap_sortedFR','meanFR','meanFRdens'},...
   'save_prefix',[],[],...
   },false);
 
@@ -81,6 +81,15 @@ fprintf('\tExecuting post-processing function: %s\n',func2str(func));
 tstart=tic;
 result=feval(func,data,varargin{:});
 fprintf('\t\tElapsed time: %g sec\n',toc(tstart));
+
+% Dave: Not all plotting functions will return a plot handle. For
+% example, PlotData2 returns a nested structure of figure, axis, and plot
+% handles. This command updates it. 
+if isstruct(result)
+    if isfield(result,'hcurr')
+        result = result.hcurr;
+    end
+end
 
 % determine if result is a plot handle or derived data
 if all(ishandle(result)) % analysis function returned a graphics handle
