@@ -13,19 +13,7 @@ function xp = DynaSimImg2xPlt(data_img)
     X = data_table{1}; axislabels = data_table(2:end);
     xp = xp.importLinearData(X, axislabels{:});
     xp = xp.importAxisNames(column_titles(2:end));
-    
-    % Add dummy population and variable dimensions
-    xd = xp.data;
-    xv = xp.exportAxisVals;
-    xn = xp.exportAxisNames;
-    
-    xv(end+1:end+2) = {{'Pop1'},{'X'}};
-    xn(end+1:end+2) = {'populations','variables'};
-    
-    xp = xp.importData(xd,xv);
-    xp = xp.importAxisNames(xn);
-    clear xd xv xn
-    
+
     % Squeeze out any empty dims that might have been introduced by the
     % above operations. This is necessary if xp was originally 2x1 (e.g.
     % varied1 x Dim 1) and then added populations and variables onto this

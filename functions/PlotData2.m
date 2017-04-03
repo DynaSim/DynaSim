@@ -69,8 +69,7 @@ end
 
 %% Convert varargin to appropriate forms
 % Find out names of varied variables
-all_names = xp.exportAxisNames;
-varied_names = only_varieds(all_names);  % Returns only the names of the varied variables
+varied_names = only_varieds(xp);  % Returns only the names of the varied variables
 
 % Convert 'varied1'...'variedN' values in varargin to the names of the
 % actual varied parameters
@@ -90,6 +89,25 @@ for i = 1:length(myargin)
         end
     end
 end
+
+% %% Add dummy axes as needed. Having these greatly simplifies the code below.
+% if isempty(xp.findaxis('populations'))
+%     Na=length(xp.axis);
+%     xp.axis(Na+1).name = 'populations';
+%     xp.axis(Na+1).values = 'Pop1';
+% end
+% 
+% if isempty(xp.findaxis('variables'))
+%     Na=length(xp.axis);
+%     xp.axis(Na+1).name = 'variables';
+%     xp.axis(Na+1).values = 'X';
+% end
+% 
+% if isempty(findaxis_varied(xp))  % If no varied axes
+%     Na=length(xp.axis);
+%     xp.axis(Na+1).name = 'Varied1';
+%     xp.axis(Na+1).values = 1;
+% end
 
 %% Parse varargin and set up defaults
 [options, options_extras0] = CheckOptions(myargin,{...
@@ -218,8 +236,7 @@ end
 % Axis indices of populations
 ax_ind_var = xp.findaxis('variables');
 ax_ind_pop = xp.findaxis('population');
-ax_ind_varied = get_ax_ind_varied(xp);
-ax_ind_varied = find(ax_ind_varied);
+ax_ind_varied = findaxis_varied(xp);
 
 % Permute to put varied variables last
 xp = permute(xp,[ax_ind_var, ax_ind_pop, ax_ind_varied(:)']);
@@ -301,6 +318,10 @@ if ~strcmpi(force_overlay,'none')
     xp2 = xp2.packDim(force_overlay);
     if only_one_cell
         xp2.data = cellfunu(@squeeze,xp2.data);
+        % Note: This can cause some errors when unpacking the data later. The 
+        % specific scenario is when running in rastergram mode & having only
+        % 1 cell. For example, 
+        % close all; d = data_mat_pops; PlotData2(d,'plot_type','rastergram','do_mean',1);
     end
 
 end
@@ -500,15 +521,22 @@ end
 
 end
 
-function vars_out = getdefaultstatevar(xp)
+
+function var_out = getdefaultstatevar(xp)
     % search through and try to find the variable represnting voltage. If can't find
     % it, just return the first variable listed.
     
     % See if variables axis even exists
     if isempty(xp.findaxis('variables'))
-        error('Variables axis not found. Should not reach here (replace with warning or comment out this line to circumvent)');
-        vars_out = 'X';
+        % If reach here, it means variables is not used in the code. Just
+        % return some dummy values and move on.
+        var_out = ':'; 
         return;
+    end
+    
+    vars_from_labels = get_variables_from_meta(xp);
+    if ~isempty(vars_from_labels)
+        vars_from_labels = vars_from_labels(1);   % Best guess at default state variable. Usually its the 1st entry in labels
     end
     
     % Pull out variables
@@ -517,7 +545,7 @@ function vars_out = getdefaultstatevar(xp)
     % Make everything uppercase to ensure
     % case-insensitive.
     vars = upper(vars_orig);
-    possibilities = upper({'V','X','Vm','Xm','Y','Ym'});
+    possibilities = upper({vars_from_labels{:},'V','X','Vm','Xm','Y','Ym'});
     
     ind = [];
     i=0;
@@ -527,17 +555,14 @@ function vars_out = getdefaultstatevar(xp)
     end
     
     if ~isempty(ind)
-        vars_out = vars_orig{ind};
+        var_out = vars_orig{ind};
     else
-        vars_out = vars_orig{1};
+        var_out = vars_orig{1};
     end
 end
 
 function [chosen_varied, options_varied ]= get_chosen_varied(varied_names,options_varied)
 
-    
-    
-    
     % Initialize output
     chosen_varied = repmat({':'},1,length(varied_names));
     
@@ -575,13 +600,19 @@ function str_out = variedN_to_axisnames(str_in,ax_names_varied)
     
 end
 
-function ax_ind_varied = get_ax_ind_varied(xp)
-    % get logical indices of axess corresponding to varied parameters
-    ax_ind_pop = xp.findaxis('population');
-    ax_ind_var = xp.findaxis('variables');
-    ax_ind_varied = true(1,ndims(xp));
-    if ~isempty(ax_ind_pop); ax_ind_varied(ax_ind_pop) = 0; end
-    if ~isempty(ax_ind_var); ax_ind_varied(ax_ind_var) = 0; end
+function ax_ind_varied = findaxis_varied(xp)
+    % Uses metadata to identify a list of varied variables. Then validates
+    % that they match the available axis names and returns their index.
+    varied = xp.meta.dynasim.varied;
+    ax_names = xp.exportAxisNames;
+    ax_ind_varied = false(1,length(ax_names));
+    for i = 1:length(varied)
+        ind = strcmp(varied{i},ax_names);
+        if sum(ind) ~= 1; error('Varied axis not found OR something wrong with varied label'); end
+        ax_ind_varied = ax_ind_varied | ind;
+    end
+    
+    ax_ind_varied = find(ax_ind_varied);
 end
 
 function dimensions = get_dimensions(ax_names,dims_per_function_handle)
@@ -612,7 +643,18 @@ function xp2 = reduce_dims(xp2,maxNplotdims)
     end
 end
 
-function varied_names = only_varieds(all_names)
+function varied_names = only_varieds(xp)
+    % Get list of varied axis names
+    varied_names = xp.meta.dynasim.varied;
+    
+    % Make sure that they are acutally in xp.axis.names. 
+    findaxis_varied(xp); % This function will return an error if they are missing!
+    
+end
+
+
+function varied_names = only_varieds_old_deleteme(all_names)
+    warning('update this command or possibly merge with findaxis_varied');
     inds = true(1,length(all_names));
     inds(strcmp(all_names,'populations')) = false; 
     inds(strcmp(all_names,'variables')) = false;

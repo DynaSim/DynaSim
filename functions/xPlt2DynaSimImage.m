@@ -24,6 +24,14 @@ function data=xPlt2DynaSimImage(obj)
 % PlotData(data2); PlotData(d2);
 % PlotData(data2); PlotData(d2b);
 
+% Squeeze out populations and variables axes (should remove them if they
+% are of size 1)
+obj = obj.squeezeRegexp('populations');
+obj = obj.squeezeRegexp('variables');
+
+% Find population and variable axes
+if ~isempty(obj.findaxis('populations')); error('Populations axis should be empty'); end
+if ~isempty(obj.findaxis('variables')); error('Variables axis should be empty'); end
 
 % Merge all varieds together
 obj = obj.mergeDims(1:ndims(obj));
@@ -62,4 +70,3 @@ end
 
 
 end
-

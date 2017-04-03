@@ -221,11 +221,10 @@ end
 function out = guess_variable_name(obj)
     % The first population's state variable should always be the 1st one
     % according to DynaSim conventions
-    try
-        label = obj.meta.dynasim.labels{1};
-        ind = strfind(labels,'_');
-        out = label(ind+1:end);
-    catch
+
+    out = get_variables_from_meta(obj);
+    out = out{1};
+    if isempty(out)
         out = 'v';
     end
 
@@ -236,12 +235,12 @@ end
 function out = guess_population_name(obj)
     % The first population should always be the 1st label
     % according to DynaSim conventions
-    try
-        label = obj.meta.dynasim.labels{1};
-        ind = strfind(labels,'_');
-        out = label(1:ind-1);
-    catch
+    
+    out = get_populations_from_meta(obj);
+    out = out{1};
+
+    if isempty(out)
         out = 'E';
     end
-
+    
 end
