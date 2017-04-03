@@ -46,9 +46,9 @@ close all; d = data_col; PlotData2(d,'visible',vis); d = xPlt2DynaSim(DynaSim2xP
 close all; d = data_col_pops; PlotData2(d,'visible',vis); d = xPlt2DynaSim(DynaSim2xPlt(d)); PlotData2(d,'visible',vis); PlotData(d,'visible',vis);
 close all; d = data_col_vars; PlotData2(d,'visible',vis); d = xPlt2DynaSim(DynaSim2xPlt(d)); PlotData2(d,'visible',vis); PlotData(d,'visible',vis);
 close all; d = data_col_varspops; PlotData2(d,'visible',vis); d = xPlt2DynaSim(DynaSim2xPlt(d)); PlotData2(d,'visible',vis); PlotData(d,'visible',vis);
-close all; d = data_mat_pops; PlotData2(d,'do_mean',1); d = xPlt2DynaSim(DynaSim2xPlt(d)); PlotData2(d,'do_mean',1); PlotData(d,'visible',vis);
+close all; d = data_mat_pops; PlotData2(d,'do_mean',1,'visible',vis); d = xPlt2DynaSim(DynaSim2xPlt(d)); PlotData2(d,'do_mean',1,'visible',vis); PlotData(d,'visible',vis);
 close all; d = data_mat_vars; PlotData2(d,'visible',vis); d = xPlt2DynaSim(DynaSim2xPlt(d)); PlotData2(d,'visible',vis); PlotData(d,'visible',vis);
-close all; d = data_all; PlotData2(d,'do_mean',1); d = xPlt2DynaSim(DynaSim2xPlt(d)); PlotData2(d,'do_mean',1); PlotData(d,'visible',vis);
+close all; d = data_all; PlotData2(d,'do_mean',1,'visible',vis); d = xPlt2DynaSim(DynaSim2xPlt(d)); PlotData2(d,'do_mean',1,'visible',vis); PlotData(d,'visible',vis);
 
 
 %% Plot rastergrams, comparing PlotData and PlotData2
@@ -59,9 +59,9 @@ close all; d = data_col; PlotData2(d,'plot_type','rastergram','visible',vis); d 
 close all; d = data_col_pops; PlotData2(d,'plot_type','rastergram','visible',vis); d = xPlt2DynaSim(DynaSim2xPlt(d)); PlotData2(d,'plot_type','rastergram','visible',vis); PlotData(d,'plot_type','rastergram','visible',vis);
 close all; d = data_col_vars; PlotData2(d,'plot_type','rastergram','visible',vis); d = xPlt2DynaSim(DynaSim2xPlt(d)); PlotData2(d,'plot_type','rastergram','visible',vis); PlotData(d,'plot_type','rastergram','visible',vis);
 close all; d = data_col_varspops; PlotData2(d,'plot_type','rastergram','visible',vis); d = xPlt2DynaSim(DynaSim2xPlt(d)); PlotData2(d,'plot_type','rastergram','visible',vis); PlotData(d,'plot_type','rastergram','visible',vis);
-% close all; d = data_mat_pops; PlotData2(d,'plot_type','rastergram','do_mean',1); d = xPlt2DynaSim(DynaSim2xPlt(d)); PlotData2(d,'plot_type','rastergram','do_mean',1); PlotData(d,'plot_type','rastergram','visible',vis);
+% close all; d = data_mat_pops; PlotData2(d,'plot_type','rastergram','do_mean',1,'visible',vis); d = xPlt2DynaSim(DynaSim2xPlt(d)); PlotData2(d,'plot_type','rastergram','do_mean',1,'visible',vis); PlotData(d,'plot_type','rastergram','visible',vis);
 close all; d = data_mat_vars; PlotData2(d,'plot_type','rastergram','visible',vis); d = xPlt2DynaSim(DynaSim2xPlt(d)); PlotData2(d,'plot_type','rastergram','visible',vis); PlotData(d,'plot_type','rastergram','visible',vis);
-% close all; d = data_all; PlotData2(d,'plot_type','rastergram','do_mean',1); d = xPlt2DynaSim(DynaSim2xPlt(d)); PlotData2(d,'plot_type','rastergram','do_mean',1); PlotData(d,'plot_type','rastergram','visible',vis);
+% close all; d = data_all; PlotData2(d,'plot_type','rastergram','do_mean',1,'visible',vis); d = xPlt2DynaSim(DynaSim2xPlt(d)); PlotData2(d,'plot_type','rastergram','do_mean',1,'visible',vis); PlotData(d,'plot_type','rastergram','visible',vis);
 
 
 %% Plot FR2, comparing PlotData and PlotData2
@@ -72,9 +72,9 @@ close all; d = data_col; PlotData2(d,'plot_type','heatmap_sortedFR','visible',vi
 close all; d = data_col_pops; PlotData2(d,'plot_type','heatmap_sortedFR','visible',vis); d = xPlt2DynaSim(DynaSim2xPlt(d)); PlotData2(d,'plot_type','heatmap_sortedFR','visible',vis); PlotFR2(d,'plot_type','heatmap_sorted','visible',vis);
 close all; d = data_col_vars; PlotData2(d,'plot_type','heatmap_sortedFR','visible',vis); d = xPlt2DynaSim(DynaSim2xPlt(d)); PlotData2(d,'plot_type','heatmap_sortedFR','visible',vis); PlotFR2(d,'plot_type','heatmap_sorted','visible',vis);
 close all; d = data_col_varspops; PlotData2(d,'plot_type','heatmap_sortedFR','visible',vis); d = xPlt2DynaSim(DynaSim2xPlt(d)); PlotData2(d,'plot_type','heatmap_sortedFR','visible',vis); PlotFR2(d,'plot_type','heatmap_sorted','visible',vis);
-% close all; d = data_mat_pops; PlotData2(d,'plot_type','heatmap_sortedFR','do_mean',1); d = xPlt2DynaSim(DynaSim2xPlt(d)); PlotData2(d,'plot_type','heatmap_sortedFR','do_mean',1); PlotFR2(d,'plot_type','heatmap_sorted','visible',vis);
+% close all; d = data_mat_pops; PlotData2(d,'plot_type','heatmap_sortedFR','do_mean',1,'visible',vis); d = xPlt2DynaSim(DynaSim2xPlt(d)); PlotData2(d,'plot_type','heatmap_sortedFR','do_mean',1,'visible',vis); PlotFR2(d,'plot_type','heatmap_sorted','visible',vis);
 close all; d = data_mat_vars; PlotData2(d,'plot_type','heatmap_sortedFR','visible',vis); d = xPlt2DynaSim(DynaSim2xPlt(d)); PlotData2(d,'plot_type','heatmap_sortedFR','visible',vis); PlotFR2(d,'plot_type','heatmap_sorted','visible',vis);
-% close all; d = data_all; PlotData2(d,'plot_type','heatmap_sortedFR','do_mean',1); d = xPlt2DynaSim(DynaSim2xPlt(d)); PlotData2(d,'plot_type','heatmap_sortedFR','do_mean',1); PlotFR2(d,'plot_type','heatmap_sorted','visible',vis);
+% close all; d = data_all; PlotData2(d,'plot_type','heatmap_sortedFR','do_mean',1,'visible',vis); d = xPlt2DynaSim(DynaSim2xPlt(d)); PlotData2(d,'plot_type','heatmap_sortedFR','do_mean',1,'visible',vis); PlotFR2(d,'plot_type','heatmap_sorted','visible',vis);
 
 
 

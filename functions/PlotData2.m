@@ -47,7 +47,7 @@ function [handles,xp]=PlotData2(data,varargin)
   
 % Flag for returning error if the user specifies name/value pairs that are not in the
 % CheckOptions list
-strict_mode = 1;
+strict_mode = 0;        % Should be set to zero for this to work within simulate model
 
 %% Convert data input to appropriate form
 
@@ -134,6 +134,7 @@ end
   'do_zoom',false,[false true],...
   'yscale','linear',{'linear','log','log10','log2'},...
   'visible','on',{'on','off'},...
+  'show_colorbar',false,[false true],...
   'save_figures',false,[false true],...
   'save_figname_path',[],[],...
   'supersize_me',false,[false true],...
@@ -239,7 +240,10 @@ ax_ind_pop = xp.findaxis('population');
 ax_ind_varied = findaxis_varied(xp);
 
 % Permute to put varied variables last
-xp = permute(xp,[ax_ind_var, ax_ind_pop, ax_ind_varied(:)']);
+myorder = [ax_ind_var, ax_ind_pop, ax_ind_varied(:)'];
+if length(myorder) > 1
+    xp = permute(xp,myorder);
+end
 
 %% Identify user selections for populations, variables, etc., and convert xp to xp2
 % %  (xp2 contains only user selections)
@@ -272,10 +276,14 @@ if strcmp(chosen_vars,'all'); chosen_vars = ':'; end
 if strcmp(chosen_pop,'all'); chosen_pop = ':'; end
 
 % Select out chosen data
-chosen_all = chosen_varied;
+chosen_all = {};                     
+if ~isempty(ax_ind_varied); chosen_all = [chosen_varied,chosen_all]; end
 if ~isempty(xp.findaxis('populations')); chosen_all = [chosen_pop,chosen_all]; end
 if ~isempty(xp.findaxis('variables')); chosen_all = [chosen_vars,chosen_all]; end
 %xp2 = xp(chosen_vars,chosen_pop,chosen_varied{:});
+if ndims(xp) == 2 && ~isempty(strfind(xp.axis(2).name,'Dim')) && length(chosen_all) == 1
+    chosen_all = [chosen_all {':'}];        % If xp is a column vector and only 1 varied entry present, fill out chosen_all to be size 2.
+end
 xp2 = xp(chosen_all{:});
 
 %% Set up force overlay
@@ -409,13 +417,13 @@ else
             if lock_axes
                 % If axes are locked, only need to show 1 colorbar across
                 % all subplots
-                subplot_options.do_colorbar = true;         
+                subplot_options.do_colorbar = options.show_colorbar;         
                 plot_options.do_colorbar = false;
 %                 subplot_options.do_colorbar = false;         
 %                 plot_options.do_colorbar = true;
             else
                 subplot_options.do_colorbar = false;         
-                plot_options.do_colorbar = true;
+                plot_options.do_colorbar = options.show_colorbar;
             end
             
         case {'power','rastergram','raster'}
