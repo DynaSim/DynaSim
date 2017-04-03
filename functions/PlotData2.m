@@ -272,7 +272,11 @@ if strcmp(chosen_vars,'all'); chosen_vars = ':'; end
 if strcmp(chosen_pop,'all'); chosen_pop = ':'; end
 
 % Select out chosen data
-xp2 = xp(chosen_vars,chosen_pop,chosen_varied{:});
+chosen_all = chosen_varied;
+if ~isempty(xp.findaxis('populations')); chosen_all = [chosen_pop,chosen_all]; end
+if ~isempty(xp.findaxis('variables')); chosen_all = [chosen_vars,chosen_all]; end
+%xp2 = xp(chosen_vars,chosen_pop,chosen_varied{:});
+xp2 = xp(chosen_all{:});
 
 %% Set up force overlay
 % Assign default value to force_overlay

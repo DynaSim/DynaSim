@@ -28,6 +28,15 @@ function xp = DynaSimImg2xPlt(data_img)
     meta.datainfo(1).values = 1:10;
     meta.datainfo(2).name = 'cells';
         cell_names = [1:5];
-        cell_names_str = cellfunu(@(s) ['Cell ' num2str(s)], num2cell(cell_names));
+        cell_names_str = cellfunu(@(s) ['Cell ' num2str(s)], num2cell(cell_names));    
+    if isfield(data_img(1),'varied')
+        meta.dynasim.varied = data_img(1).varied;
+    else
+        % For case when nothing varied, insert some dummy data
+        meta.dynasim.varied = {'Varied1'};
+    end
     xp.meta = meta;
+    
+    
+    
 end
