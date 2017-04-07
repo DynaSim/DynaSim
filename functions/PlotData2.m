@@ -140,9 +140,13 @@ end
   'save_figures',false,[false true],...
   'save_figname_path',[],[],...
   'supersize_me',false,[false true],...
+  'Ndims_pass_to_data',1,[],...
   'dim_stacking',[],[],...
   },false);
 handles=[];
+
+
+
 
 % Options overwrite
 if is_image
@@ -167,6 +171,7 @@ do_mean = options.do_mean;
 force_overlay = options.force_overlay;
 crop_range = options.crop_range;
 lock_axes = options.lock_axes;
+Ndims_pass_to_data = options.Ndims_pass_to_data;
 
 % Add default options to structures
 % Plot_options
@@ -356,8 +361,19 @@ end
 xp2 = xp2.squeeze;
 Nd = ndims(xp2);
 
+% Rearrange dimensions of xp2 for stacking
+if ~isempty(options.dim_stacking)
+    ax_names = xp2.exportAxisNames;
+    if length(options.dim_stacking) ~= length(ax_names) -1
+        error('Incorrect number of dimensions specified. dim_stacking must be some permutation of the following: %s', sprintf('%s ',ax_names{1:end-1}));
+    end
+    xp2.permute(options.dim_stacking);
+end
+
 
 %% Crop data
+% This is inserted here because apparently the operation is slow and it's
+% faster to do this after we've already squeezed / selected.
 if ~isempty(crop_range) &&  all(cellfun(@isnumeric,xp2.data(:))) && ~is_image
     t_temp = xp2.meta.datainfo(1).values;
     ind = (t_temp > crop_range(1) & t_temp <= crop_range(2));
@@ -437,19 +453,23 @@ else
             % Disable legend when using PlotData
             subplot_options.legend1 = [];
             
-            % For rastergrams, pack populations together - PlotData can
-            % handle these all as a single subplot!
-            if any(strcmp(plot_type,{'rastergram','raster'}))
-                ind = xp2.findaxis('populations');
-                if ~isempty(ind)
-                    xp2 = xp2.packDim(ind);
-                    xp2 = xp2.squeeze;
-                end
-            end
-            
             % Setup call to xp_PlotData
             plot_options.args = {plot_options.args{:}, 'plot_type',plot_type};
             data_plothandle = @xp_PlotData;
+            
+            if any(strcmp(plot_type,{'rastergram','raster'}))
+                % Move populations axis to the end of xp2. This ensures
+                ax_names = xp2.exportAxisNames;
+                ind_pop = false(1,length(ax_names));
+                ind_pop(xp2.findaxis('populations')) = true;
+                ind_rest = ~ind_pop;
+                order = [find(ind_rest) find(ind_pop)];
+                xp2 = xp2.permute(order);
+                Ndims_pass_to_data = 2;                 % Overwrite Ndims_pass_to_data to 2. This ensures
+                                                        % that multiple populations can be stacked in a
+                                                        % single subplot.
+            end
+            
         case {'heatmapFR','heatmap_sortedFR','meanFR','meanFRdens'}
             % Disable legend when using PlotFR2
             subplot_options.legend1 = [];
@@ -471,19 +491,19 @@ switch num_embedded_subplots
     case 1
         % Ordering of axis handles
         function_handles = {@xp_handles_newfig, @xp_subplot_grid,data_plothandle};   % Specifies the handles of the plotting functions
-        dims_per_function_handle = [1,1,1];
+        dims_per_function_handle = [1,1,Ndims_pass_to_data];
         function_args = {{figure_options},{subplot_options},{plot_options}};
         
     case 2
         % Ordering of axis handles
         function_handles = {@xp_handles_newfig, @xp_subplot_grid,data_plothandle};   % Specifies the handles of the plotting functions
-        dims_per_function_handle = [1,2,1];
+        dims_per_function_handle = [1,2,Ndims_pass_to_data];
         function_args = {{figure_options},{subplot_options},{plot_options}};
         
     case 3
         % Ordering of axis handles
         function_handles = {@xp_handles_newfig, @xp_subplot_grid, @xp_subplot_grid,data_plothandle};   % Specifies the handles of the plotting functions
-        dims_per_function_handle = [1,2,1,1];
+        dims_per_function_handle = [1,2,1,Ndims_pass_to_data];
         subplot_options2 = subplot_options;
         subplot_options2.legend1 = [];
         subplot_options.display_mode = 1;
@@ -491,12 +511,13 @@ switch num_embedded_subplots
     case 4
         % Ordering of axis handles
         function_handles = {@xp_handles_newfig, @xp_subplot_grid, @xp_subplot_grid,data_plothandle};   % Specifies the handles of the plotting functions
-        dims_per_function_handle = [1,2,2,1];
+        dims_per_function_handle = [1,2,2,Ndims_pass_to_data];
         subplot_options2 = subplot_options;
         subplot_options2.legend1 = [];
         subplot_options.display_mode = 1;
         function_args = {{figure_options},{subplot_options2},{subplot_options},{plot_options}};
 end
+
 
 %% Auto trim dimensions as needed
 % Linearize dimensions of xp2 that are in excess of the total number we can
@@ -506,15 +527,9 @@ xp2 = reduce_dims(xp2,maxNplotdims);
 
 % Stack up available dimensions based on how much each axis handle can hold
 ax_names = [xp2.exportAxisNames, 'data'];
-if ~isempty(options.dim_stacking)
-    if length(options.dim_stacking) ~= length(ax_names) -1
-        error('Incorrect number of dimensions specified. dim_stacking must be some permutation of the following: %s', sprintf('%s ',ax_names{1:end-1}));
-    end
-    dimensions = get_dimensions({options.dim_stacking{:}, 'data'},dims_per_function_handle);
-else
-    
-    dimensions = get_dimensions(ax_names,dims_per_function_handle);
-end
+
+dimensions = get_dimensions(ax_names,dims_per_function_handle);
+
 
 % Remove any excess function handles that aren't needed
 available_dims = ~cellfun(@isempty,dimensions);
