@@ -948,7 +948,7 @@ end
     % first, figure out how many IC values we need (i.e., how many state
     % variables we need across all cells).
     var_names=model.state_variables;
-    [nvals_per_var,monitor_counts]=ds.GetOutputCounts(model);
+    [nvals_per_var,monitor_counts]=ds.getOutputCounts(model);
     num_state_variables=sum(nvals_per_var);
     % check that the correct number of IC values was provided
     if length(options.ic)~=num_state_variables

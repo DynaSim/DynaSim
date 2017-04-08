@@ -6,3 +6,5 @@ models/personal
 *.png
 *.mat
 dsVars.txt
+dsConfig.txt
+_ignore/

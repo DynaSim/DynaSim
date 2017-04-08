@@ -1,8 +1,8 @@
-function [state_var_counts,monitor_counts] = GetOutputCounts(model)
+function [state_var_counts,monitor_counts] = getOutputCounts(model)
 %GETOUTPUTCOUNTS - determine how many copies of each state variable and monitor will be produced by simulating the model.
 %
 % Usage:
-%   [state_var_counts,monitor_counts]=ds.GetOutputCounts(model)
+%   [state_var_counts,monitor_counts]=ds.getOutputCounts(model)
 
 state_var_counts=0;
 if ~isempty(model.state_variables)

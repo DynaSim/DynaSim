@@ -243,7 +243,7 @@ if options.disk_flag==1
   fprintf(fid,'fileID=fopen(data_file,''w'');\n');
   
   % write headers
-  [state_var_counts,monitor_counts]=ds.GetOutputCounts(model);
+  [state_var_counts,monitor_counts]=ds.getOutputCounts(model);
   fprintf(fid,'fprintf(fileID,''time%s'');\n',separator);
   
   if ~isempty(model.state_variables)

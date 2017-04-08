@@ -162,7 +162,7 @@ digraph m2html {
   ds.simulateModel -> ds.createBatch;
   ds.simulateModel -> displayError;
   ds.simulateModel -> ds.exportData;
-  ds.simulateModel -> ds.GetOutputCounts;
+  ds.simulateModel -> ds.getOutputCounts;
   ds.simulateModel -> ds.getSolveFile;
   ds.simulateModel -> ds.importData;
   ds.simulateModel -> ds.options2Keyval;
@@ -184,7 +184,7 @@ digraph m2html {
   ds.writeDynaSimSolver -> ds.checkModel;
   ds.writeDynaSimSolver -> ds.checkOptions;
   ds.writeDynaSimSolver -> ds.checkSolverOptions;
-  ds.writeDynaSimSolver -> ds.GetOutputCounts;
+  ds.writeDynaSimSolver -> ds.getOutputCounts;
   ds.writeDynaSimSolver -> ds.propagateFunctions;
   ds.writeDynaSimSolver -> ds.propagateParameters;
   ds.writeDynaSimSolver -> ds.vary2Modifications;
@@ -243,7 +243,7 @@ digraph m2html {
   ds.exportData [URL="ds.exportData.html"];
   ds.generateDocumentation [URL="ds.generateDocumentation.html"];
   ds.generateModel [URL="ds.generateModel.html"];
-  ds.GetOutputCounts [URL="ds.GetOutputCounts.html"];
+  ds.getOutputCounts [URL="ds.getOutputCounts.html"];
   ds.getParentNamespace [URL="ds.getParentNamespace.html"];
   ds.getSolveFile [URL="ds.getSolveFile.html"];
   ds.importCSV [URL="ds.importCSV.html"];
