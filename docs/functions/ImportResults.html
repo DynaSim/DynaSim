@@ -83,24 +83,54 @@ This function is called by:
 0023   clear studyinfo
 0024   studyinfo.study_dir=study_dir;
 0025 <span class="keyword">end</span>
-0026 <span class="keyword">if</span> isstruct(studyinfo) &amp;&amp; isfield(studyinfo,<span class="string">'study_dir'</span>)
-0027   <span class="comment">% retrieve most up-to-date studyinfo structure from studyinfo.mat file</span>
-0028   studyinfo=<a href="CheckStudyinfo.html" class="code" title="function studyinfo=CheckStudyinfo(studyinfo,varargin)">CheckStudyinfo</a>(studyinfo.study_dir);
-0029   <span class="comment">% get list of data_files from studyinfo</span>
-0030   result_functions=studyinfo.simulations(1).result_functions;
-0031   matches=cellfun(@(x)isequal(x,func),result_functions);
-0032   result_files=cellfun(@(x)x(matches),{studyinfo.simulations.result_files},<span class="string">'uni'</span>,0);
-0033   num_instances=cellfun(@length,result_files);
-0034   num_sims=length(studyinfo.simulations);
-0035   <span class="keyword">for</span> s=1:num_sims
-0036     <span class="keyword">for</span> i=1:num_instances
-0037       <span class="keyword">if</span> exist(result_files{s}{i},<span class="string">'file'</span>)
-0038         load(result_files{s}{i},<span class="string">'result'</span>);
-0039         results(s,i)=result;
-0040       <span class="keyword">end</span>
-0041     <span class="keyword">end</span>
-0042   <span class="keyword">end</span>
-0043 <span class="keyword">end</span></pre></div>
-<hr><address>Generated on Mon 27-Feb-2017 14:58:50 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" target="_parent">m2html</a></strong> &copy; 2005</address>
+0026 
+0027 <span class="keyword">if</span> isstruct(studyinfo) &amp;&amp; isfield(studyinfo,<span class="string">'study_dir'</span>)
+0028   <span class="comment">% retrieve most up-to-date studyinfo structure from studyinfo.mat file</span>
+0029   studyinfo=<a href="CheckStudyinfo.html" class="code" title="function studyinfo=CheckStudyinfo(studyinfo,varargin)">CheckStudyinfo</a>(studyinfo.study_dir);
+0030   <span class="keyword">if</span> exist(<span class="string">'study_dir'</span>,<span class="string">'var'</span>)
+0031     studyinfo.study_dir=study_dir;
+0032   <span class="keyword">end</span>
+0033   
+0034   <span class="comment">% get list of data_files from studyinfo</span>
+0035   result_functions=studyinfo.simulations(1).result_functions;
+0036   matches=cellfun(@(x)isequal(x,func),result_functions);
+0037   <span class="keyword">if</span> ~any(matches)
+0038     wprintf(<span class="string">'Didnt find match for result function parameter'</span>)
+0039     <span class="keyword">return</span>
+0040   <span class="keyword">end</span>
+0041   result_files=cellfun(@(x)x(matches),{studyinfo.simulations.result_files},<span class="string">'uni'</span>,0);
+0042   num_instances=cellfun(@length,result_files);
+0043   num_sims=length(studyinfo.simulations);
+0044   
+0045 <span class="comment">%   result_files_exist=cellfun(@(x) cellfun(@exist, x),result_files)==2;</span>
+0046 <span class="comment">%   if ~any(result_files_exist)</span>
+0047 <span class="comment">%     % convert original absolute paths to paths relative to study_dir</span>
+0048 <span class="comment">%     for s=1:num_sims</span>
+0049 <span class="comment">%       for i=1:num_instances(s)</span>
+0050 <span class="comment">%         [~,fname,fext]=fileparts(result_files{s}{i});</span>
+0051 <span class="comment">%         result_files{s}{i}=fullfile(studyinfo.study_dir,'data',[fname fext]);</span>
+0052 <span class="comment">%       end</span>
+0053 <span class="comment">%     end</span>
+0054 <span class="comment">%   end</span>
+0055   
+0056   <span class="keyword">for</span> s=1:num_sims
+0057     <span class="keyword">for</span> i=1:num_instances(s)
+0058       <span class="comment">%check absolute path</span>
+0059       <span class="keyword">if</span> exist(result_files{s}{i},<span class="string">'file'</span>)
+0060         load(result_files{s}{i},<span class="string">'result'</span>);
+0061         results(s,i)=result;
+0062       <span class="keyword">else</span>
+0063         <span class="comment">%check relative path</span>
+0064         [~,fname,fext]=fileparts(result_files{s}{i});
+0065         result_files{s}{i}=fullfile(studyinfo.study_dir,<span class="string">'data'</span>,[fname fext]);
+0066         <span class="keyword">if</span> exist(result_files{s}{i},<span class="string">'file'</span>)
+0067           load(result_files{s}{i},<span class="string">'result'</span>);
+0068           results(s,i)=result;
+0069         <span class="keyword">end</span>
+0070       <span class="keyword">end</span>
+0071     <span class="keyword">end</span>
+0072   <span class="keyword">end</span>
+0073 <span class="keyword">end</span></pre></div>
+<hr><address>Generated on Fri 07-Apr-2017 20:01:20 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" target="_parent">m2html</a></strong> &copy; 2005</address>
 </body>
 </html>

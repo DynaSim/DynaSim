@@ -138,283 +138,316 @@ This function is called by:
 0053   keys=[];
 0054   values=[];
 0055 <span class="keyword">end</span>
-0056 <span class="comment">% set namespace</span>
-0057 <span class="keyword">if</span> ismember(<span class="string">'namespace'</span>,keys) <span class="comment">% check for user-supplied namespace (i.e., namespace)</span>
-0058   namespace=values{ismember(keys,<span class="string">'namespace'</span>)}; <span class="comment">% user-supplied namespace</span>
-0059   <span class="keyword">if</span> ~isempty(namespace)
-0060     namespace=[namespace <span class="string">'_'</span>];
-0061   <span class="keyword">else</span>
-0062     namespace=<span class="string">''</span>;
-0063   <span class="keyword">end</span>
-0064 <span class="keyword">else</span>
-0065   namespace=<span class="string">''</span>;
-0066 <span class="keyword">end</span>
-0067 <span class="comment">% set delimiter</span>
-0068 <span class="keyword">if</span> ismember(<span class="string">'delimiter'</span>,keys) <span class="comment">% check for user-supplied delimiter</span>
-0069   delimiter = values(ismember(keys,<span class="string">'delimiter'</span>)); <span class="comment">% user-supplied delimiter</span>
-0070 <span class="keyword">else</span>
-0071   delimiter=<span class="string">';'</span>;
-0072 <span class="keyword">end</span>
-0073 <span class="comment">% error handling for improper input format</span>
-0074 <span class="keyword">if</span> ~ischar(namespace)
-0075   error(<span class="string">'model &quot;namespace&quot; must be a string.'</span>);
-0076 <span class="keyword">end</span>
-0077 <span class="keyword">if</span> ~ischar(delimiter)
-0078   error(<span class="string">'expression &quot;delimiter&quot; must be a string.'</span>);
+0056 
+0057 <span class="comment">% set namespace</span>
+0058 <span class="keyword">if</span> ismember(<span class="string">'namespace'</span>,keys) <span class="comment">% check for user-supplied namespace (i.e., namespace)</span>
+0059   namespace=values{ismember(keys,<span class="string">'namespace'</span>)}; <span class="comment">% user-supplied namespace</span>
+0060   <span class="keyword">if</span> ~isempty(namespace)
+0061     namespace=[namespace <span class="string">'_'</span>];
+0062   <span class="keyword">else</span>
+0063     namespace=<span class="string">''</span>;
+0064   <span class="keyword">end</span>
+0065 <span class="keyword">else</span>
+0066   namespace=<span class="string">''</span>;
+0067 <span class="keyword">end</span>
+0068 
+0069 <span class="comment">% set delimiter</span>
+0070 <span class="keyword">if</span> ismember(<span class="string">'delimiter'</span>,keys) <span class="comment">% check for user-supplied delimiter</span>
+0071   delimiter = values(ismember(keys,<span class="string">'delimiter'</span>)); <span class="comment">% user-supplied delimiter</span>
+0072 <span class="keyword">else</span>
+0073   delimiter=<span class="string">';'</span>;
+0074 <span class="keyword">end</span>
+0075 
+0076 <span class="comment">% error handling for improper input format</span>
+0077 <span class="keyword">if</span> ~ischar(namespace)
+0078   error(<span class="string">'model &quot;namespace&quot; must be a string.'</span>);
 0079 <span class="keyword">end</span>
 0080 
-0081 <span class="comment">%% 1.0 convert text into cell array of strings (one string per line)</span>
-0082 <span class="comment">% check for DynaSim extensions if input is single \w+ string</span>
-0083 <span class="keyword">if</span> ischar(text) &amp;&amp; ~any(which(text)) &amp;&amp; isempty(regexp(text,<span class="string">'[^\w.]'</span>,<span class="string">'once'</span>)) <span class="comment">% isempty(regexp(text,'[^\w]','once'))</span>
-0084 <span class="comment">%if ischar(text) &amp;&amp; ~exist(text,'file') &amp;&amp; isempty(regexp(text,'[^\w.]','once')) % isempty(regexp(text,'[^\w]','once'))</span>
-0085   [~,text]=<a href="LocateModelFiles.html" class="code" title="function [paths,files]=LocateModelFiles(input)">LocateModelFiles</a>(text);
-0086   <span class="keyword">if</span> iscell(text) &amp;&amp; ~isempty(text)
-0087     text=text{1};
-0088   <span class="keyword">end</span>
-0089 <span class="keyword">end</span>
-0090 <span class="comment">% check if input is a filename</span>
-0091 <span class="keyword">if</span> ischar(text) &amp;&amp; exist(text,<span class="string">'file'</span>)
-0092   [~,name,ext]=fileparts(text);
-0093   <span class="keyword">switch</span> ext
-0094     <span class="keyword">case</span> <span class="string">'.m'</span>
-0095       model=feval(name); <span class="comment">% evaluate model-creating function and return model</span>
-0096       <span class="keyword">return</span>;
-0097     <span class="keyword">case</span> <span class="string">'.mat'</span> <span class="comment">% todo: uncomment once ImportModel supports loading .mat</span>
-0098       <span class="comment">%model=ImportModel(text);</span>
-0099       <span class="comment">%return;</span>
-0100   <span class="keyword">end</span>
-0101   <span class="comment">% load equations from file</span>
-0102   [text,res]=readtext(text,<span class="string">'\n'</span>,<span class="string">'%'</span>); <span class="comment">% text: cell array of strings, one element per line in text file</span>
-0103   <span class="comment">% remove all lines without text</span>
-0104   text=text(res.stringMask);
-0105   <span class="comment">% remove leading/trailing white space</span>
-0106   text=strtrim(text);
-0107   <span class="comment">% end each line with semicolon</span>
-0108   <span class="keyword">for</span> i=1:length(text)
-0109     <span class="keyword">if</span> ~isequal(text{i}(end),<span class="string">';'</span>)
-0110       text{i}(end+1)=<span class="string">';'</span>;
-0111     <span class="keyword">end</span>
-0112   <span class="keyword">end</span>
-0113   <span class="comment">% concatenate into a single string</span>
-0114   text=[text{:}]; <span class="comment">% concatenate text from all lines</span>
-0115 <span class="keyword">end</span>
-0116 
-0117 <span class="comment">% split string into cell array of lines delimited by semicolon</span>
-0118 <span class="keyword">if</span> ischar(text)
-0119   <span class="comment">% remove end-line semicolon if present so split lines are free of all ';'</span>
-0120   <span class="keyword">if</span> text(end)==<span class="string">';'</span>
-0121     text=text(1:end-1);
+0081 <span class="keyword">if</span> ~ischar(delimiter)
+0082   error(<span class="string">'expression &quot;delimiter&quot; must be a string.'</span>);
+0083 <span class="keyword">end</span>
+0084 
+0085 <span class="comment">%% 1.0 convert text into cell array of strings (one string per line)</span>
+0086 <span class="comment">% check for DynaSim extensions if input is single \w+ string</span>
+0087 <span class="keyword">if</span> ischar(text) &amp;&amp; ~any(which(text)) &amp;&amp; isempty(regexp(text,<span class="string">'[^\w.]'</span>,<span class="string">'once'</span>)) <span class="comment">% isempty(regexp(text,'[^\w]','once'))</span>
+0088 
+0089   <span class="comment">%if ischar(text) &amp;&amp; ~exist(text,'file') &amp;&amp; isempty(regexp(text,'[^\w.]','once')) % isempty(regexp(text,'[^\w]','once'))</span>
+0090   [~,text]=<a href="LocateModelFiles.html" class="code" title="function [paths,files]=LocateModelFiles(input)">LocateModelFiles</a>(text);
+0091   <span class="keyword">if</span> iscell(text) &amp;&amp; ~isempty(text)
+0092     text=text{1};
+0093   <span class="keyword">end</span>
+0094 <span class="keyword">end</span>
+0095 
+0096 <span class="comment">% check if input is a filename</span>
+0097 <span class="keyword">if</span> ischar(text) &amp;&amp; exist(text,<span class="string">'file'</span>)
+0098   [~,name,ext]=fileparts(text);
+0099   <span class="keyword">switch</span> ext
+0100     <span class="keyword">case</span> <span class="string">'.m'</span>
+0101       model=feval(name); <span class="comment">% evaluate model-creating function and return model</span>
+0102       <span class="keyword">return</span>;
+0103     <span class="keyword">case</span> <span class="string">'.mat'</span> <span class="comment">% todo: uncomment once ImportModel supports loading .mat</span>
+0104       <span class="comment">%model=ImportModel(text);</span>
+0105       <span class="comment">%return;</span>
+0106   <span class="keyword">end</span>
+0107   
+0108   <span class="comment">% load equations from file</span>
+0109   [text,res]=readtext(text,<span class="string">'\n'</span>,<span class="string">'%'</span>); <span class="comment">% text: cell array of strings, one element per line in text file</span>
+0110   
+0111   <span class="comment">% remove all lines without text</span>
+0112   text=text(res.stringMask);
+0113   
+0114   <span class="comment">% remove leading/trailing white space</span>
+0115   text=strtrim(text);
+0116   
+0117   <span class="comment">% end each line with semicolon</span>
+0118   <span class="keyword">for</span> i=1:length(text)
+0119     <span class="keyword">if</span> ~isequal(text{i}(end),<span class="string">';'</span>)
+0120       text{i}(end+1)=<span class="string">';'</span>;
+0121     <span class="keyword">end</span>
 0122   <span class="keyword">end</span>
-0123   <span class="comment">% account for the one exception where ';' does not delimit lines:</span>
-0124   <span class="comment">% conditional actions with multiple statements (expr1; expr2)</span>
-0125   <span class="comment">% approach: replace ';' by ',' here then reverse the replacement below</span>
-0126   <span class="comment">% when storing the action in model.conditionals</span>
-0127   pattern=<span class="string">'(if\([^;]+\)\s*\([^;\)]+);([^;]+\))'</span>; <span class="comment">% if(condiiton)(action1;action2)</span>
-0128   replace=<span class="string">'$1,$2'</span>;
-0129   text=regexprep(text,pattern,replace,<span class="string">'ignorecase'</span>);
-0130   <span class="comment">% now split string into cell array of lines</span>
-0131   text = strtrim(regexp(text,delimiter,<span class="string">'split'</span>));
-0132 <span class="keyword">end</span>
-0133 <span class="keyword">if</span> ~iscellstr(text)
-0134   error(<span class="string">'input not recognized. equations must be provided in single string, cell array of strings, or a text file'</span>);
-0135 <span class="keyword">end</span>
-0136 
-0137 <span class="comment">%% 2.0 classify and parse lines; store info in model structure</span>
-0138 model.parameters=[];
-0139 model.fixed_variables=[];
-0140 model.functions=[];
-0141 model.monitors=[];
-0142 model.state_variables={};
-0143 model.ODEs=[];
-0144 model.ICs=[];
-0145 model.conditionals=[];
-0146 model.linkers=[];
-0147 model.comments={};
-0148 <span class="keyword">for</span> index=1:length(text) <span class="comment">% loop over lines of text</span>
-0149   <span class="comment">% organize model data in model structure</span>
-0150   line=text{index}; <span class="comment">% choose a single expression (lines with multiple expressions have already been split above using regexp-split)</span>
-0151   [line,comment]=<a href="#_sub1" class="code" title="subfunction [line,comment]=remove_comment(line)">remove_comment</a>(line); <span class="comment">% remove comments</span>
-0152   <span class="keyword">if</span> isempty(line) <span class="comment">% e.g., entire line was a comment, or there was nothing there originally</span>
-0153     <span class="keyword">if</span> ~isempty(comment)
-0154       model.comments{end+1}=comment;
-0155     <span class="keyword">end</span>
-0156     <span class="keyword">continue</span>;
-0157   <span class="keyword">end</span>
-0158   <span class="keyword">switch</span> <a href="ClassifyEquation.html" class="code" title="function classes=ClassifyEquation(string,delimiter)">ClassifyEquation</a>(line,delimiter) <span class="comment">% classify</span>
-0159     <span class="keyword">case</span> <span class="string">'parameter'</span>        <span class="comment">% var=(string or number)</span>
-0160       rhs=regexp(line,<span class="string">'=(.+)$'</span>,<span class="string">'tokens'</span>,<span class="string">'once'</span>);
-0161       lhs=regexp(line,<span class="string">'^([\w\.]+)\s*='</span>,<span class="string">'tokens'</span>,<span class="string">'once'</span>);
-0162       lhs{1}=strrep(lhs{1},<span class="string">'.'</span>,<span class="string">'_'</span>); <span class="comment">% e.g., Na.g --&gt; Na_g</span>
-0163       name=strtrim(lhs{1}); expression=rhs{1};
-0164       model.parameters.([namespace name]) = expression;
-0165       name_map(end+1,:) = {name,[namespace name],namespace,<span class="string">'parameters'</span>};
-0166       <span class="keyword">if</span> ~isempty(comment)
-0167         model.comments{end+1}=sprintf(<span class="string">'%s (parameter): %s'</span>,[namespace name],comment);
-0168       <span class="keyword">end</span>
-0169     <span class="keyword">case</span> <span class="string">'fixed_variable'</span>   <span class="comment">% var=(expression with grouping or arithmetic), var(#), var([#]), var([# #]), var([#,#]), var(#:#), var(#:end), var([#:#]), var([#:end])</span>
-0170       lhs=regexp(line,<span class="string">'^(\w+)\s*='</span>,<span class="string">'tokens'</span>,<span class="string">'once'</span>);
-0171       rhs=regexp(line,<span class="string">'=(.+)$'</span>,<span class="string">'tokens'</span>,<span class="string">'once'</span>);
-0172       name=strtrim(lhs{1}); expression=rhs{1};
-0173       model.fixed_variables.([namespace name]) = expression;
-0174       name_map(end+1,:) = {name,[namespace name],namespace,<span class="string">'fixed_variables'</span>};
-0175       <span class="keyword">if</span> ~isempty(comment)
-0176         model.comments{end+1}=sprintf(<span class="string">'%s (fixed_variable): %s'</span>,[namespace name],comment);
-0177       <span class="keyword">end</span>
-0178     <span class="keyword">case</span> <span class="string">'function'</span>         <span class="comment">% f(vars)=exression</span>
-0179 <span class="comment">%       if any(line=='@')</span>
-0180 <span class="comment">%         line=strrep(line,'@','');</span>
-0181 <span class="comment">%         %error('model specification error: delete the ''@'' character from all function definitions and try again.');</span>
-0182 <span class="comment">%       end</span>
-0183       name=regexp(line,<span class="string">'^(.+)\(.*\)\s*='</span>,<span class="string">'tokens'</span>,<span class="string">'once'</span>);
-0184       vars=regexp(line,<span class="string">'\((.+)\)\s*='</span>,<span class="string">'tokens'</span>,<span class="string">'once'</span>);      
+0123   
+0124   <span class="comment">% concatenate into a single string</span>
+0125   text=[text{:}]; <span class="comment">% concatenate text from all lines</span>
+0126 <span class="keyword">end</span>
+0127 
+0128 <span class="comment">% split string into cell array of lines delimited by semicolon</span>
+0129 <span class="keyword">if</span> ischar(text)
+0130   <span class="comment">% remove end-line semicolon if present so split lines are free of all ';'</span>
+0131   <span class="keyword">if</span> text(end)==<span class="string">';'</span>
+0132     text=text(1:end-1);
+0133   <span class="keyword">end</span>
+0134   
+0135   <span class="comment">% account for the one exception where ';' does not delimit lines:</span>
+0136   <span class="comment">% conditional actions with multiple statements (expr1; expr2)</span>
+0137   <span class="comment">% approach: replace ';' by ',' here then reverse the replacement below</span>
+0138   <span class="comment">% when storing the action in model.conditionals</span>
+0139   pattern=<span class="string">'(if\([^;]+\)\s*\([^;\)]+);([^;]+\))'</span>; <span class="comment">% if(condiiton)(action1;action2)</span>
+0140   replace=<span class="string">'$1,$2'</span>;
+0141   text=regexprep(text,pattern,replace,<span class="string">'ignorecase'</span>);
+0142   
+0143   <span class="comment">% now split string into cell array of lines</span>
+0144   text = strtrim(regexp(text,delimiter,<span class="string">'split'</span>));
+0145 <span class="keyword">end</span>
+0146 <span class="keyword">if</span> ~iscellstr(text)
+0147   error(<span class="string">'input not recognized. equations must be provided in single string, cell array of strings, or a text file'</span>);
+0148 <span class="keyword">end</span>
+0149 
+0150 <span class="comment">%% 2.0 classify and parse lines; store info in model structure</span>
+0151 model.parameters=[];
+0152 model.fixed_variables=[];
+0153 model.functions=[];
+0154 model.monitors=[];
+0155 model.state_variables={};
+0156 model.ODEs=[];
+0157 model.ICs=[];
+0158 model.conditionals=[];
+0159 model.linkers=[];
+0160 model.comments={};
+0161 <span class="keyword">for</span> index=1:length(text) <span class="comment">% loop over lines of text</span>
+0162   <span class="comment">% organize model data in model structure</span>
+0163   line=text{index}; <span class="comment">% choose a single expression (lines with multiple expressions have already been split above using regexp-split)</span>
+0164   [line,comment]=<a href="#_sub1" class="code" title="subfunction [line,comment]=remove_comment(line)">remove_comment</a>(line); <span class="comment">% remove comments</span>
+0165   <span class="keyword">if</span> isempty(line) <span class="comment">% e.g., entire line was a comment, or there was nothing there originally</span>
+0166     <span class="keyword">if</span> ~isempty(comment)
+0167       model.comments{end+1}=comment;
+0168     <span class="keyword">end</span>
+0169     <span class="keyword">continue</span>;
+0170   <span class="keyword">end</span>
+0171   
+0172   <span class="keyword">switch</span> <a href="ClassifyEquation.html" class="code" title="function classes=ClassifyEquation(string,delimiter)">ClassifyEquation</a>(line,delimiter) <span class="comment">% classify</span>
+0173     <span class="keyword">case</span> <span class="string">'parameter'</span>        <span class="comment">% var=(string or number)</span>
+0174       rhs=regexp(line,<span class="string">'=(.+)$'</span>,<span class="string">'tokens'</span>,<span class="string">'once'</span>);
+0175       lhs=regexp(line,<span class="string">'^([\w\.]+)\s*='</span>,<span class="string">'tokens'</span>,<span class="string">'once'</span>);
+0176       lhs{1}=strrep(lhs{1},<span class="string">'.'</span>,<span class="string">'_'</span>); <span class="comment">% e.g., Na.g --&gt; Na_g</span>
+0177       name=strtrim(lhs{1}); expression=rhs{1};
+0178       model.parameters.([namespace name]) = expression;
+0179       name_map(end+1,:) = {name,[namespace name],namespace,<span class="string">'parameters'</span>};
+0180       <span class="keyword">if</span> ~isempty(comment)
+0181         model.comments{end+1}=sprintf(<span class="string">'%s (parameter): %s'</span>,[namespace name],comment);
+0182       <span class="keyword">end</span>
+0183     <span class="keyword">case</span> <span class="string">'fixed_variable'</span>   <span class="comment">% var=(expression with grouping or arithmetic), var(#), var([#]), var([# #]), var([#,#]), var(#:#), var(#:end), var([#:#]), var([#:end])</span>
+0184       lhs=regexp(line,<span class="string">'^(\w+)\s*='</span>,<span class="string">'tokens'</span>,<span class="string">'once'</span>);
 0185       rhs=regexp(line,<span class="string">'=(.+)$'</span>,<span class="string">'tokens'</span>,<span class="string">'once'</span>);
-0186       name=strtrim(name{1}); 
-0187       expression=sprintf(<span class="string">'@(%s)%s'</span>,vars{1},rhs{1});
-0188       model.functions.([namespace name]) = expression;
-0189       name_map(end+1,:) = {name,[namespace name],namespace,<span class="string">'functions'</span>};
-0190       <span class="keyword">if</span> ~isempty(comment)
-0191         model.comments{end+1}=sprintf(<span class="string">'%s (function): %s'</span>,[namespace name],comment);
-0192       <span class="keyword">end</span>
-0193     <span class="keyword">case</span> <span class="string">'ODE'</span>              <span class="comment">% x'=expression or dx/dt=expression</span>
-0194       var=regexp(line,<span class="string">'^d(\w+)/dt\s*='</span>,<span class="string">'tokens'</span>,<span class="string">'once'</span>); <span class="comment">% x from dx/dt=</span>
-0195       <span class="keyword">if</span> isempty(var)
-0196         var=regexp(line,<span class="string">'^(\w+)''\s*='</span>,<span class="string">'tokens'</span>,<span class="string">'once'</span>); <span class="comment">% x from x'=</span>
-0197       <span class="keyword">end</span>
-0198       rhs=regexp(line,<span class="string">'=(.+)$'</span>,<span class="string">'tokens'</span>,<span class="string">'once'</span>);
-0199       state_variable=strtrim(var{1}); expression=rhs{1};
-0200       model.ODEs.([namespace state_variable])=expression;      
-0201       <span class="keyword">if</span> ~ismember([namespace state_variable],model.state_variables)
-0202         name_map(end+1,:) = {state_variable,[namespace state_variable],namespace,<span class="string">'state_variables'</span>};
-0203         model.state_variables{end+1}=[namespace state_variable];
-0204       <span class="keyword">end</span>
-0205       <span class="keyword">if</span> ~isempty(comment)
-0206         model.comments{end+1}=sprintf(<span class="string">'d/dt %s (ODE): %s'</span>,[namespace state_variable],comment);
-0207       <span class="keyword">end</span>
-0208     <span class="keyword">case</span> <span class="string">'IC'</span>               <span class="comment">% x(0)=expression</span>
-0209       var=regexp(line,<span class="string">'^(\w+)\('</span>,<span class="string">'tokens'</span>,<span class="string">'once'</span>);
-0210       rhs=regexp(line,<span class="string">'=(.+)$'</span>,<span class="string">'tokens'</span>,<span class="string">'once'</span>);
-0211       state_variable=strtrim(var{1}); expression=rhs{1};
-0212       model.ICs.([namespace state_variable])=expression;
-0213       <span class="keyword">if</span> ~isempty(comment)
-0214         model.comments{end+1}=sprintf(<span class="string">'%s(0) (IC): %s'</span>,[namespace state_variable],comment);
-0215       <span class="keyword">end</span>
-0216     <span class="keyword">case</span> <span class="string">'monitor'</span>          <span class="comment">% monitor f=(expression or function)</span>
-0217       <span class="comment">% split list of monitors</span>
-0218       lines=strtrim(regexp(line,<span class="string">','</span>,<span class="string">'split'</span>)); 
-0219       <span class="comment">% loop over monitors in list</span>
-0220       <span class="keyword">for</span> l=1:length(lines)
-0221         <span class="comment">% process this monitor</span>
-0222         line=lines{l};
-0223         <span class="comment">% split left and right parts of monitor</span>
-0224         lhs=regexp(line,<span class="string">'^monitor ([\w,@\s\.]+)'</span>,<span class="string">'tokens'</span>,<span class="string">'once'</span>);
-0225         <span class="keyword">if</span> isempty(lhs)
-0226           lhs=regexp(line,<span class="string">'([\w,@\s\.]+)'</span>,<span class="string">'tokens'</span>,<span class="string">'once'</span>);
-0227         <span class="keyword">end</span>        
-0228         rhs=regexp(line,<span class="string">'=(.+)$'</span>,<span class="string">'tokens'</span>,<span class="string">'once'</span>);      
-0229         <span class="comment">% expand list of monitor names (e.g., monitor iNa.I, iK.I)</span>
-0230         names=strtrim(regexp(lhs{1},<span class="string">','</span>,<span class="string">'split'</span>));
-0231         <span class="keyword">for</span> i=1:length(names) <span class="comment">% loop over list of monitors on this line</span>
-0232           name=names{i};
-0233           <span class="comment">% process special monitors (those including '.', e.g., v.spikes(0))</span>
-0234           <span class="comment">% todo: clean up or generalize this procedure...</span>
-0235           <span class="keyword">if</span> any(name==<span class="string">'.'</span>)
-0236             <span class="comment">% check for numeric monitor argument</span>
-0237             arg=regexp(line,[name <span class="string">'\(([-+]*\w+)\)'</span>],<span class="string">'tokens'</span>,<span class="string">'once'</span>);
-0238             <span class="comment">%arg=regexp(line,[name '\(([-+]*\d+)\)'],'tokens','once');</span>
-0239             <span class="comment">% set argument as expression (see WriteDynaSimSolver() for usage as such)</span>
-0240             <span class="keyword">if</span> ~isempty(arg)
-0241               rhs=arg;
-0242             <span class="keyword">end</span>
-0243           <span class="keyword">end</span>
-0244           <span class="comment">% convert into valid monitor name</span>
-0245           name=strrep(name,<span class="string">'.'</span>,<span class="string">'_'</span>); <span class="comment">% index sub-namespace (monitor Na.I)</span>
-0246           <span class="keyword">if</span> ~isempty(rhs), expression=rhs{1}; <span class="keyword">else</span> expression=[]; <span class="keyword">end</span>
-0247           model.monitors.([namespace name]) = expression;
-0248           name_map(end+1,:) = {name,[namespace name],namespace,<span class="string">'monitors'</span>};
-0249           <span class="keyword">if</span> ~isempty(comment)
-0250             model.comments{end+1}=sprintf(<span class="string">'%s (monitor): %s'</span>,[namespace name],comment);
-0251           <span class="keyword">end</span>
-0252         <span class="keyword">end</span>
-0253       
-0254       <span class="keyword">end</span>
-0255       
-0256     <span class="keyword">case</span> <span class="string">'conditional'</span>      <span class="comment">% if(conditions)(actions)</span>
-0257       groups=regexp(line,<span class="string">')('</span>,<span class="string">'split'</span>);
-0258       condition=regexp(groups{1},<span class="string">'^if\s*\((.*)'</span>,<span class="string">'tokens'</span>,<span class="string">'once'</span>);
-0259       <span class="keyword">if</span> length(groups)==2
-0260         <span class="keyword">if</span> groups{2}(end)==<span class="string">')'</span>
-0261           groups{2}=groups{2}(1:end-1);
-0262         <span class="keyword">end</span>
-0263         then_action=groups{2};
-0264         else_action=[];
-0265       <span class="keyword">elseif</span> numel(groups==3)
-0266         <span class="keyword">if</span> groups{3}(end)==<span class="string">')'</span>
-0267           groups{3}=groups{3}(1:end-1);
-0268         <span class="keyword">end</span>
-0269         then_action=groups{2};
-0270         else_action=groups{3};
-0271       <span class="keyword">end</span>
-0272       model.conditionals(end+1).namespace=namespace;
-0273       model.conditionals(end).condition=condition{1};
-0274       model.conditionals(end).action=strrep(then_action,<span class="string">','</span>,<span class="string">';'</span>); <span class="comment">% restore semicolon-delimited multiple actions like if(x&gt;1)(x=0;y=0)</span>
-0275       <span class="keyword">if</span> length(groups)&gt;2
-0276         model.conditionals(end).else=else_action;
-0277       <span class="keyword">else</span>
-0278         model.conditionals(end).else=[];
-0279       <span class="keyword">end</span>
-0280 <span class="comment">%       groups=regexp(line,'\(((\w+\([\w,@]+\))?[\w@-\+*^/\s&gt;&lt;=,&amp;|\.]+)\)','tokens');</span>
-0281 <span class="comment">%       condition=groups{1}{1};</span>
-0282 <span class="comment">%       model.conditionals(end+1).namespace=namespace;</span>
-0283 <span class="comment">%       model.conditionals(end).condition=condition;</span>
-0284 <span class="comment">%       model.conditionals(end).action=strrep(groups{2}{1},',',';'); % restore semicolon-delimited multiple actions like if(x&gt;1)(x=0;y=0)</span>
-0285 <span class="comment">%       if length(groups)&gt;2</span>
-0286 <span class="comment">%         model.conditionals(end).else=groups{3}{1};</span>
-0287 <span class="comment">%       else</span>
-0288 <span class="comment">%         model.conditionals(end).else=[];</span>
-0289 <span class="comment">%       end</span>
-0290       <span class="keyword">if</span> ~isempty(comment)
-0291         model.comments{end+1}=sprintf(<span class="string">'%s conditional(%s): %s'</span>,namespace,condition,comment);
-0292       <span class="keyword">end</span>
-0293     <span class="keyword">case</span> <span class="string">'linker'</span>           <span class="comment">% [link ]? target operation expression (e.g., link target += f(x))</span>
-0294       <span class="comment">% viable options: ((\+=)|(-=)|(\*=)|(/=)|(=&gt;))</span>
-0295       line=regexprep(line,<span class="string">'^link (\s*\w)'</span>,<span class="string">'$1'</span>);
-0296       lhs=regexp(line,<span class="string">'^([^\+\-*/=]+)'</span>,<span class="string">'tokens'</span>,<span class="string">'once'</span>); <span class="comment">% +=</span>
-0297       rhs=regexp(line,<span class="string">'=&gt;?(.+)$'</span>,<span class="string">'tokens'</span>,<span class="string">'once'</span>);
-0298       model.linkers(end+1).namespace=namespace;
-0299       <span class="keyword">if</span> ~isempty(lhs), target=strtrim(lhs{1}); <span class="keyword">else</span> target=[]; <span class="keyword">end</span>
-0300       <span class="keyword">if</span> ~isempty(rhs), expression=strtrim(rhs{1}); <span class="keyword">else</span> expression=[]; <span class="keyword">end</span>
-0301       <span class="keyword">if</span> expression(end)==<span class="string">';'</span>, expression=expression(1:end-1); <span class="keyword">end</span>
-0302       <span class="keyword">if</span> isempty(target), target=expression; <span class="keyword">end</span> <span class="comment">% for sharing state var across mechanisms in same population</span>
-0303       <span class="keyword">if</span> isempty(expression), expression=target; <span class="keyword">end</span>
-0304       model.linkers(end).target=target;
-0305       model.linkers(end).expression=expression;
-0306       model.linkers(end).operation=<span class="string">'+='</span>;
-0307       <span class="keyword">if</span> ~isempty(comment)
-0308         model.comments{end+1}=sprintf(<span class="string">'%s linkers(%s-&gt;%s): %s'</span>,namespace,target,expression,comment);
-0309       <span class="keyword">end</span>
-0310       <span class="keyword">if</span> ~isempty(comment)
-0311         model.linkers(end).comment=comment;
-0312       <span class="keyword">end</span>
-0313     <span class="keyword">otherwise</span>
-0314       warning(<span class="string">'ignoring line, failed to classify :%s'</span>,line);
-0315   <span class="keyword">end</span>
-0316 <span class="keyword">end</span>
-0317 
-0318 
-0319 <span class="comment">% subfunctions</span>
-0320 <a name="_sub1" href="#_subfunctions" class="code">function [line,comment]=remove_comment(line)</a>
-0321 <span class="comment">% purpose: split line into model content and comment</span>
-0322 index=find(line==<span class="string">'%'</span>,1,<span class="string">'first'</span>);
-0323 <span class="keyword">if</span> isempty(index) 
-0324   <span class="comment">% check other valid comment delimiters</span>
-0325   index=find(line==<span class="string">'#'</span>,1,<span class="string">'first'</span>);
-0326 <span class="keyword">end</span>
-0327 <span class="keyword">if</span> isempty(index) <span class="comment">% no comment found</span>
-0328   comment=<span class="string">''</span>;
-0329 <span class="keyword">else</span> <span class="comment">% split line into comment and non-comment line sections</span>
-0330   comment=line(index:end);
-0331   line=line(1:index-1);
-0332 <span class="keyword">end</span></pre></div>
-<hr><address>Generated on Mon 27-Feb-2017 14:58:50 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" target="_parent">m2html</a></strong> &copy; 2005</address>
+0186       name=strtrim(lhs{1}); expression=rhs{1};
+0187       model.fixed_variables.([namespace name]) = expression;
+0188       name_map(end+1,:) = {name,[namespace name],namespace,<span class="string">'fixed_variables'</span>};
+0189       <span class="keyword">if</span> ~isempty(comment)
+0190         model.comments{end+1}=sprintf(<span class="string">'%s (fixed_variable): %s'</span>,[namespace name],comment);
+0191       <span class="keyword">end</span>
+0192     <span class="keyword">case</span> <span class="string">'function'</span>         <span class="comment">% f(vars)=exression</span>
+0193 <span class="comment">%       if any(line=='@')</span>
+0194 <span class="comment">%         line=strrep(line,'@','');</span>
+0195 <span class="comment">%         %error('model specification error: delete the ''@'' character from all function definitions and try again.');</span>
+0196 <span class="comment">%       end</span>
+0197       name=regexp(line,<span class="string">'^(.+)\(.*\)\s*='</span>,<span class="string">'tokens'</span>,<span class="string">'once'</span>);
+0198       vars=regexp(line,<span class="string">'\((.+)\)\s*='</span>,<span class="string">'tokens'</span>,<span class="string">'once'</span>);
+0199       rhs=regexp(line,<span class="string">'=(.+)$'</span>,<span class="string">'tokens'</span>,<span class="string">'once'</span>);
+0200       name=strtrim(name{1});
+0201       expression=sprintf(<span class="string">'@(%s)%s'</span>,vars{1},rhs{1});
+0202       model.functions.([namespace name]) = expression;
+0203       name_map(end+1,:) = {name,[namespace name],namespace,<span class="string">'functions'</span>};
+0204       <span class="keyword">if</span> ~isempty(comment)
+0205         model.comments{end+1}=sprintf(<span class="string">'%s (function): %s'</span>,[namespace name],comment);
+0206       <span class="keyword">end</span>
+0207     <span class="keyword">case</span> <span class="string">'ODE'</span>              <span class="comment">% x'=expression or dx/dt=expression</span>
+0208       var=regexp(line,<span class="string">'^d(\w+)/dt\s*='</span>,<span class="string">'tokens'</span>,<span class="string">'once'</span>); <span class="comment">% x from dx/dt=</span>
+0209       <span class="keyword">if</span> isempty(var)
+0210         var=regexp(line,<span class="string">'^(\w+)''\s*='</span>,<span class="string">'tokens'</span>,<span class="string">'once'</span>); <span class="comment">% x from x'=</span>
+0211       <span class="keyword">end</span>
+0212       rhs=regexp(line,<span class="string">'=(.+)$'</span>,<span class="string">'tokens'</span>,<span class="string">'once'</span>);
+0213       state_variable=strtrim(var{1}); expression=rhs{1};
+0214       model.ODEs.([namespace state_variable])=expression;
+0215       <span class="keyword">if</span> ~ismember([namespace state_variable],model.state_variables)
+0216         name_map(end+1,:) = {state_variable,[namespace state_variable],namespace,<span class="string">'state_variables'</span>};
+0217         model.state_variables{end+1}=[namespace state_variable];
+0218       <span class="keyword">end</span>
+0219       <span class="keyword">if</span> ~isempty(comment)
+0220         model.comments{end+1}=sprintf(<span class="string">'d/dt %s (ODE): %s'</span>,[namespace state_variable],comment);
+0221       <span class="keyword">end</span>
+0222     <span class="keyword">case</span> <span class="string">'IC'</span>               <span class="comment">% x(0)=expression</span>
+0223       var=regexp(line,<span class="string">'^(\w+)\('</span>,<span class="string">'tokens'</span>,<span class="string">'once'</span>);
+0224       rhs=regexp(line,<span class="string">'=(.+)$'</span>,<span class="string">'tokens'</span>,<span class="string">'once'</span>);
+0225       state_variable=strtrim(var{1}); expression=rhs{1};
+0226       model.ICs.([namespace state_variable])=expression;
+0227       <span class="keyword">if</span> ~isempty(comment)
+0228         model.comments{end+1}=sprintf(<span class="string">'%s(0) (IC): %s'</span>,[namespace state_variable],comment);
+0229       <span class="keyword">end</span>
+0230     <span class="keyword">case</span> <span class="string">'monitor'</span>          <span class="comment">% monitor f=(expression or function)</span>
+0231       <span class="comment">% split list of monitors</span>
+0232       lines=strtrim(regexp(line,<span class="string">','</span>,<span class="string">'split'</span>));
+0233       <span class="comment">% loop over monitors in list</span>
+0234       <span class="keyword">for</span> l=1:length(lines)
+0235         <span class="comment">% process this monitor</span>
+0236         line=lines{l};
+0237         
+0238         <span class="comment">% split left and right parts of monitor</span>
+0239         lhs=regexp(line,<span class="string">'^monitor ([\w,@\s\.]+)'</span>,<span class="string">'tokens'</span>,<span class="string">'once'</span>);
+0240         <span class="keyword">if</span> isempty(lhs)
+0241           lhs=regexp(line,<span class="string">'([\w,@\s\.]+)'</span>,<span class="string">'tokens'</span>,<span class="string">'once'</span>);
+0242         <span class="keyword">end</span>
+0243         rhs=regexp(line,<span class="string">'=(.+)$'</span>,<span class="string">'tokens'</span>,<span class="string">'once'</span>);
+0244         
+0245         <span class="comment">% expand list of monitor names (e.g., monitor iNa.I, iK.I)</span>
+0246         names=strtrim(regexp(lhs{1},<span class="string">','</span>,<span class="string">'split'</span>));
+0247         <span class="keyword">for</span> i=1:length(names) <span class="comment">% loop over list of monitors on this line</span>
+0248           name=names{i};
+0249           <span class="comment">% process special monitors (those including '.', e.g., v.spikes(0))</span>
+0250           <span class="comment">% todo: clean up or generalize this procedure...</span>
+0251           <span class="keyword">if</span> any(name==<span class="string">'.'</span>)
+0252             <span class="comment">% check for numeric monitor argument</span>
+0253             arg=regexp(line,[name <span class="string">'\(([-+]*\w+)\)'</span>],<span class="string">'tokens'</span>,<span class="string">'once'</span>);
+0254             <span class="comment">%arg=regexp(line,[name '\(([-+]*\d+)\)'],'tokens','once');</span>
+0255             <span class="comment">% set argument as expression (see WriteDynaSimSolver() for usage as such)</span>
+0256             <span class="keyword">if</span> ~isempty(arg)
+0257               rhs=arg;
+0258             <span class="keyword">end</span>
+0259           <span class="keyword">end</span>
+0260           
+0261           <span class="comment">% convert into valid monitor name</span>
+0262           name=strrep(name,<span class="string">'.'</span>,<span class="string">'_'</span>); <span class="comment">% index sub-namespace (monitor Na.I)</span>
+0263           
+0264           <span class="keyword">if</span> ~isempty(rhs), expression=rhs{1}; <span class="keyword">else</span> expression=[]; <span class="keyword">end</span>
+0265           
+0266           model.monitors.([namespace name]) = expression;
+0267           name_map(end+1,:) = {name,[namespace name],namespace,<span class="string">'monitors'</span>};
+0268           
+0269           <span class="keyword">if</span> ~isempty(comment)
+0270             model.comments{end+1}=sprintf(<span class="string">'%s (monitor): %s'</span>,[namespace name],comment);
+0271           <span class="keyword">end</span>
+0272         <span class="keyword">end</span>
+0273       
+0274       <span class="keyword">end</span>
+0275       
+0276     <span class="keyword">case</span> <span class="string">'conditional'</span>      <span class="comment">% if(conditions)(actions)</span>
+0277       groups=regexp(line,<span class="string">')('</span>,<span class="string">'split'</span>);
+0278       condition=regexp(groups{1},<span class="string">'^if\s*\((.*)'</span>,<span class="string">'tokens'</span>,<span class="string">'once'</span>);
+0279       <span class="keyword">if</span> length(groups)==2
+0280         <span class="keyword">if</span> groups{2}(end)==<span class="string">')'</span>
+0281           groups{2}=groups{2}(1:end-1);
+0282         <span class="keyword">end</span>
+0283         
+0284         then_action=groups{2};
+0285         else_action=[];
+0286       <span class="keyword">elseif</span> numel(groups==3)
+0287         <span class="keyword">if</span> groups{3}(end)==<span class="string">')'</span>
+0288           groups{3}=groups{3}(1:end-1);
+0289         <span class="keyword">end</span>
+0290         
+0291         then_action=groups{2};
+0292         else_action=groups{3};
+0293       <span class="keyword">end</span>
+0294       
+0295       model.conditionals(end+1).namespace=namespace;
+0296       model.conditionals(end).condition=condition{1};
+0297       model.conditionals(end).action=strrep(then_action,<span class="string">','</span>,<span class="string">';'</span>); <span class="comment">% restore semicolon-delimited multiple actions like if(x&gt;1)(x=0;y=0)</span>
+0298       
+0299       <span class="keyword">if</span> length(groups)&gt;2
+0300         model.conditionals(end).else=else_action;
+0301       <span class="keyword">else</span>
+0302         model.conditionals(end).else=[];
+0303       <span class="keyword">end</span>
+0304 <span class="comment">%       groups=regexp(line,'\(((\w+\([\w,@]+\))?[\w@-\+*^/\s&gt;&lt;=,&amp;|\.]+)\)','tokens');</span>
+0305 <span class="comment">%       condition=groups{1}{1};</span>
+0306 <span class="comment">%       model.conditionals(end+1).namespace=namespace;</span>
+0307 <span class="comment">%       model.conditionals(end).condition=condition;</span>
+0308 <span class="comment">%       model.conditionals(end).action=strrep(groups{2}{1},',',';'); % restore semicolon-delimited multiple actions like if(x&gt;1)(x=0;y=0)</span>
+0309 <span class="comment">%       if length(groups)&gt;2</span>
+0310 <span class="comment">%         model.conditionals(end).else=groups{3}{1};</span>
+0311 <span class="comment">%       else</span>
+0312 <span class="comment">%         model.conditionals(end).else=[];</span>
+0313 <span class="comment">%       end</span>
+0314       <span class="keyword">if</span> ~isempty(comment)
+0315         model.comments{end+1}=sprintf(<span class="string">'%s conditional(%s): %s'</span>,namespace,condition,comment);
+0316       <span class="keyword">end</span>
+0317     <span class="keyword">case</span> <span class="string">'linker'</span>           <span class="comment">% [link ]? target operation expression (e.g., link target += f(x))</span>
+0318       <span class="comment">% viable options: ((\+=)|(-=)|(\*=)|(/=)|(=&gt;))</span>
+0319       line=regexprep(line,<span class="string">'^link (\s*\w)'</span>,<span class="string">'$1'</span>);
+0320       lhs=regexp(line,<span class="string">'^([^\+\-*/=]+)'</span>,<span class="string">'tokens'</span>,<span class="string">'once'</span>); <span class="comment">% +=</span>
+0321       rhs=regexp(line,<span class="string">'=&gt;?(.+)$'</span>,<span class="string">'tokens'</span>,<span class="string">'once'</span>);
+0322       model.linkers(end+1).namespace=namespace;
+0323       
+0324       <span class="keyword">if</span> ~isempty(lhs), target=strtrim(lhs{1}); <span class="keyword">else</span> target=[]; <span class="keyword">end</span>
+0325       
+0326       <span class="keyword">if</span> ~isempty(rhs), expression=strtrim(rhs{1}); <span class="keyword">else</span> expression=[]; <span class="keyword">end</span>
+0327       
+0328       <span class="keyword">if</span> expression(end)==<span class="string">';'</span>, expression=expression(1:end-1); <span class="keyword">end</span>
+0329       
+0330       <span class="keyword">if</span> isempty(target), target=expression; <span class="keyword">end</span> <span class="comment">% for sharing state var across mechanisms in same population</span>
+0331       
+0332       <span class="keyword">if</span> isempty(expression), expression=target; <span class="keyword">end</span>
+0333       
+0334       model.linkers(end).target=target;
+0335       model.linkers(end).expression=expression;
+0336       model.linkers(end).operation=<span class="string">'+='</span>;
+0337       
+0338       <span class="keyword">if</span> ~isempty(comment)
+0339         model.comments{end+1}=sprintf(<span class="string">'%s linkers(%s-&gt;%s): %s'</span>,namespace,target,expression,comment);
+0340       <span class="keyword">end</span>
+0341       
+0342       <span class="keyword">if</span> ~isempty(comment)
+0343         model.linkers(end).comment=comment;
+0344       <span class="keyword">end</span>
+0345     <span class="keyword">otherwise</span>
+0346       warning(<span class="string">'ignoring line, failed to classify :%s'</span>,line);
+0347   <span class="keyword">end</span>
+0348 <span class="keyword">end</span>
+0349 
+0350 
+0351 <span class="comment">%% subfunctions</span>
+0352 <a name="_sub1" href="#_subfunctions" class="code">function [line,comment]=remove_comment(line)</a>
+0353 <span class="comment">% purpose: split line into model content and comment</span>
+0354 index=find(line==<span class="string">'%'</span>,1,<span class="string">'first'</span>);
+0355 <span class="keyword">if</span> isempty(index)
+0356   <span class="comment">% check other valid comment delimiters</span>
+0357   index=find(line==<span class="string">'#'</span>,1,<span class="string">'first'</span>);
+0358 <span class="keyword">end</span>
+0359 
+0360 <span class="keyword">if</span> isempty(index) <span class="comment">% no comment found</span>
+0361   comment=<span class="string">''</span>;
+0362 <span class="keyword">else</span> <span class="comment">% split line into comment and non-comment line sections</span>
+0363   comment=line(index:end);
+0364   line=line(1:index-1);
+0365 <span class="keyword">end</span></pre></div>
+<hr><address>Generated on Fri 07-Apr-2017 20:01:20 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" target="_parent">m2html</a></strong> &copy; 2005</address>
 </body>
 </html>

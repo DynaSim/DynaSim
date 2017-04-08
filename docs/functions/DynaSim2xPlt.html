@@ -1,0 +1,89 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of DynaSim2xPlt</title>
+  <meta name="keywords" content="DynaSim2xPlt">
+  <meta name="description" content="Convert DynaSim data structure to xp format">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html &copy; 2005 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="../m2html.css">
+  <script type="text/javascript">
+    if (top.frames.length == 0) { top.location = "../index.html"; };
+  </script>
+</head>
+<body>
+<a name="_top"></a>
+<!-- menu.html functions -->
+<h1>DynaSim2xPlt
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>Convert DynaSim data structure to xp format</strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>function xp = DynaSim2xPlt(data) </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre class="comment"> Convert DynaSim data structure to xp format</pre></div>
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+This function calls:
+<ul style="list-style-image:url(../matlabicon.gif)">
+<li><a href="CheckData.html" class="code" title="function data=CheckData(data)">CheckData</a>	CHECKDATA - Standardize data structure and auto-populate missing fields</li><li><a href="Data2Table.html" class="code" title="function [data_table,column_titles,time] = Data2Table(data,verbose_flag)">Data2Table</a>	Converts DynaSim structure to 1D cell array format. Later can use to</li></ul>
+This function is called by:
+<ul style="list-style-image:url(../matlabicon.gif)">
+<li><a href="All2xPlt.html" class="code" title="function [xp,is_image] = All2xPlt(data)">All2xPlt</a>	</li></ul>
+<!-- crossreference -->
+
+
+
+<h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre>0001 
+0002 <a name="_sub0" href="#_subfunctions" class="code">function xp = DynaSim2xPlt(data)</a>
+0003     <span class="comment">% Convert DynaSim data structure to xp format</span>
+0004 
+0005     data = <a href="CheckData.html" class="code" title="function data=CheckData(data)">CheckData</a>(data);
+0006     
+0007     <span class="comment">% Extract the data in a linear table format</span>
+0008     [data_table,column_titles,time] = <a href="Data2Table.html" class="code" title="function [data_table,column_titles,time] = Data2Table(data,verbose_flag)">Data2Table</a> (data);
+0009 
+0010     <span class="comment">% % Preview the contents of this table</span>
+0011     <span class="comment">% %     Note: We cannot make this one big cell array since we want to allow</span>
+0012     <span class="comment">% %     axis labels to be either strings or numerics.</span>
+0013     <span class="comment">% previewTable(data_table,column_titles);</span>
+0014 
+0015     <span class="comment">% Import the linear data into an xPlt object</span>
+0016     xp = xPlt;
+0017     X = data_table{1};                          <span class="comment">% X holds the data that will populate the multidimensional array. Must be numeric or cell array.</span>
+0018     axislabels = data_table(2:end);             <span class="comment">% Each entry in X has an associated set of axis labels, which will define its location in multidimensional space. **Must be numeric or cell array of chars only**</span>
+0019     xp = xp.importLinearData(X,axislabels{:});
+0020     xp = xp.importAxisNames(column_titles(2:end));  <span class="comment">% There should be 1 axis name for every axis, of type char.</span>
+0021 
+0022     <span class="comment">% Store metadata info</span>
+0023     meta = struct;
+0024     meta.datainfo(1:2) = nDDictAxis;
+0025     meta.datainfo(1).name = <span class="string">'time(ms)'</span>;
+0026     meta.datainfo(1).values = time;
+0027     meta.datainfo(2).name = <span class="string">'cells'</span>;
+0028         cell_names = [1:max(cellfun(@(x) size(x,2),xp.data(:)))];
+0029         cell_names_str = cellfunu(@(s) [<span class="string">'Cell '</span> num2str(s)], num2cell(cell_names));
+0030     meta.datainfo(2).values = cell_names_str;
+0031     meta.dynasim.labels = data(1).labels;
+0032     meta.dynasim.model = data(1).model;
+0033     meta.dynasim.simulator_options = data(1).simulator_options;
+0034     meta.dynasim.time = data(1).time;
+0035     <span class="keyword">if</span> isfield(data(1),<span class="string">'varied'</span>)
+0036         meta.dynasim.varied = data(1).varied;
+0037     <span class="keyword">else</span>
+0038         <span class="comment">% For case when nothing varied, insert some dummy data</span>
+0039         meta.dynasim.varied = {<span class="string">'Varied1'</span>};
+0040     <span class="keyword">end</span>
+0041     xp.meta = meta;
+0042     clear meta
+0043 <span class="keyword">end</span></pre></div>
+<hr><address>Generated on Fri 07-Apr-2017 20:01:20 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" target="_parent">m2html</a></strong> &copy; 2005</address>
+</body>
+</html>

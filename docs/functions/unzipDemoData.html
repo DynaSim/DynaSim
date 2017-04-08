@@ -1,0 +1,137 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of unzipDemoData</title>
+  <meta name="keywords" content="unzipDemoData">
+  <meta name="description" content="unzipDemoData - Unzips demo data (utility function)">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html &copy; 2005 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="../m2html.css">
+  <script type="text/javascript">
+    if (top.frames.length == 0) { top.location = "../index.html"; };
+  </script>
+</head>
+<body>
+<a name="_top"></a>
+<!-- menu.html functions -->
+<h1>unzipDemoData
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>unzipDemoData - Unzips demo data (utility function)</strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>function study_dir = unzipDemoData(zipfname,overwrite_flag,verbose_flag) </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre class="comment">unzipDemoData - Unzips demo data (utility function)
+
+ Purpose: Restores demo data to the appropriate folder incase the user
+ deleted it.
+
+ Usage:
+   study_dir = unzipDemoData(zipfname,overwrite_flag)
+
+ Inputs:
+   zipfname: string with name of zipped file. Can be either full path or
+       just the filename, since DynaSim knows where to look for its
+       demo zip files.
+   overwrite_flag: {0,1} - Flag to force overwrite if directory already
+       exists.
+   verbose_flag: {0,1} - verbose flag
+
+ Outputs:
+   study_dir: input 
+
+ Examples:
+   study_dir = unDemoData('demo_sPING_100cells_3x3.zip')
+   study_dir = unDemoData('/Users/davestanley/Dropbox/git/DynaSimSherfey/demos/demo_zips/demo_sPING_100cells_3x3.zip')
+       (both return same result)
+ 
+ Author:
+   David Stanley, stanleyd@bu.edu, March 2017
+
+ See also: <a href="zipDemoData.html" class="code" title="function zipfname = zipDemoData(study_dir)">ZipDemoData</a>, demos_generate_data.m (demo script)</pre></div>
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+This function calls:
+<ul style="list-style-image:url(../matlabicon.gif)">
+</ul>
+This function is called by:
+<ul style="list-style-image:url(../matlabicon.gif)">
+</ul>
+<!-- crossreference -->
+
+
+
+<h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function study_dir = unzipDemoData(zipfname,overwrite_flag,verbose_flag)</a>
+0002 <span class="comment">%unzipDemoData - Unzips demo data (utility function)</span>
+0003 <span class="comment">%</span>
+0004 <span class="comment">% Purpose: Restores demo data to the appropriate folder incase the user</span>
+0005 <span class="comment">% deleted it.</span>
+0006 <span class="comment">%</span>
+0007 <span class="comment">% Usage:</span>
+0008 <span class="comment">%   study_dir = unzipDemoData(zipfname,overwrite_flag)</span>
+0009 <span class="comment">%</span>
+0010 <span class="comment">% Inputs:</span>
+0011 <span class="comment">%   zipfname: string with name of zipped file. Can be either full path or</span>
+0012 <span class="comment">%       just the filename, since DynaSim knows where to look for its</span>
+0013 <span class="comment">%       demo zip files.</span>
+0014 <span class="comment">%   overwrite_flag: {0,1} - Flag to force overwrite if directory already</span>
+0015 <span class="comment">%       exists.</span>
+0016 <span class="comment">%   verbose_flag: {0,1} - verbose flag</span>
+0017 <span class="comment">%</span>
+0018 <span class="comment">% Outputs:</span>
+0019 <span class="comment">%   study_dir: input</span>
+0020 <span class="comment">%</span>
+0021 <span class="comment">% Examples:</span>
+0022 <span class="comment">%   study_dir = unDemoData('demo_sPING_100cells_3x3.zip')</span>
+0023 <span class="comment">%   study_dir = unDemoData('/Users/davestanley/Dropbox/git/DynaSimSherfey/demos/demo_zips/demo_sPING_100cells_3x3.zip')</span>
+0024 <span class="comment">%       (both return same result)</span>
+0025 <span class="comment">%</span>
+0026 <span class="comment">% Author:</span>
+0027 <span class="comment">%   David Stanley, stanleyd@bu.edu, March 2017</span>
+0028 <span class="comment">%</span>
+0029 <span class="comment">% See also: ZipDemoData, demos_generate_data.m (demo script)</span>
+0030 
+0031     <span class="keyword">if</span> nargin &lt; 2
+0032         overwrite_flag = 0;
+0033     <span class="keyword">end</span>
+0034     
+0035     <span class="keyword">if</span> nargin &lt; 3
+0036         verbose_flag = 1;
+0037     <span class="keyword">end</span>
+0038 
+0039     ds_path = getDsVar(<span class="string">'ds_path'</span>);
+0040     demos_path = getDsVar(<span class="string">'demos_path'</span>);
+0041     demo_zips_path = getDsVar(<span class="string">'demos_zips_path'</span>);
+0042 
+0043     mkdirSilent(demos_path);
+0044     
+0045     <span class="comment">% Make sure zipfname ends in zip and doesn't have any other crap in</span>
+0046     <span class="comment">% front of it</span>
+0047     [path, zipfilename_only, ext] = fileparts(zipfname);
+0048     zipfname = [zipfilename_only, <span class="string">'.zip'</span>];
+0049     
+0050     <span class="comment">% Get the destination directory</span>
+0051     study_dir = fullfile(demos_path,zipfilename_only);
+0052 
+0053     <span class="comment">% Unzip</span>
+0054     <span class="keyword">if</span> ~exist(study_dir,<span class="string">'dir'</span>)
+0055         unzip(fullfile(demo_zips_path,zipfname),demos_path);
+0056     <span class="keyword">elseif</span> exist(study_dir,<span class="string">'dir'</span>) &amp;&amp; overwrite_flag
+0057         <span class="keyword">if</span> verbose_flag; fprintf(<span class="string">'Demo data folder %s already exists. Overwriting \n'</span>,demos_path); <span class="keyword">end</span>
+0058         unzip(fullfile(demo_zips_path,zipfname),demos_path);
+0059     <span class="keyword">else</span>
+0060         <span class="keyword">if</span> verbose_flag; fprintf(<span class="string">'Failed to create demo data folder: %s \n'</span>,demos_path);<span class="keyword">end</span>
+0061     <span class="keyword">end</span>
+0062     
+0063     
+0064 <span class="keyword">end</span></pre></div>
+<hr><address>Generated on Fri 07-Apr-2017 20:01:20 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" target="_parent">m2html</a></strong> &copy; 2005</address>
+</body>
+</html>

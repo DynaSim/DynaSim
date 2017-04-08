@@ -1,0 +1,72 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of DynaSimMerge</title>
+  <meta name="keywords" content="DynaSimMerge">
+  <meta name="description" content="Merge two Dynasim structures created from different simulations">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html &copy; 2005 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="../m2html.css">
+  <script type="text/javascript">
+    if (top.frames.length == 0) { top.location = "../index.html"; };
+  </script>
+</head>
+<body>
+<a name="_top"></a>
+<!-- menu.html functions -->
+<h1>DynaSimMerge
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>Merge two Dynasim structures created from different simulations</strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>function data_merged = DynaSimMerge(data1,data2) </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre class="comment"> Merge two Dynasim structures created from different simulations</pre></div>
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+This function calls:
+<ul style="list-style-image:url(../matlabicon.gif)">
+<li><a href="All2xPlt.html" class="code" title="function [xp,is_image] = All2xPlt(data)">All2xPlt</a>	</li><li><a href="xPlt2DynaSim.html" class="code" title="function data=xPlt2DynaSim(obj)">xPlt2DynaSim</a>	% data=xPlt2DynaSim(obj,varargin)</li><li><a href="xPlt2DynaSimImage.html" class="code" title="function data=xPlt2DynaSimImage(obj)">xPlt2DynaSimImage</a>	% data=xPlt2DynaSim(obj,varargin)</li></ul>
+This function is called by:
+<ul style="list-style-image:url(../matlabicon.gif)">
+</ul>
+<!-- crossreference -->
+
+
+
+<h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre>0001 
+0002 <a name="_sub0" href="#_subfunctions" class="code">function data_merged = DynaSimMerge(data1,data2)</a>
+0003     <span class="comment">% Merge two Dynasim structures created from different simulations</span>
+0004     
+0005     xp1 = <a href="All2xPlt.html" class="code" title="function [xp,is_image] = All2xPlt(data)">All2xPlt</a>(data1);
+0006     xp2 = <a href="All2xPlt.html" class="code" title="function [xp,is_image] = All2xPlt(data)">All2xPlt</a>(data2);
+0007     
+0008     xp_merged = merge(xp1,xp2);
+0009     xp_merged.meta = xp1.meta; <span class="comment">% Warning - need to make sure metadata merges properly; not yet implemented</span>
+0010     
+0011     <span class="comment">% Sort everything except populations and variables</span>
+0012     inds = true(1,ndims(xp_merged));
+0013     inds(xp_merged.findaxis(<span class="string">'populations'</span>)) = false;
+0014     inds(xp_merged.findaxis(<span class="string">'variables'</span>)) = false;
+0015     xp_merged = xp_merged.sortAxis(find(inds));
+0016     
+0017     <span class="keyword">if</span> isfield(data1,<span class="string">'plot_files'</span>) &amp;&amp; isfield(data2,<span class="string">'plot_files'</span>)
+0018         data_merged = <a href="xPlt2DynaSimImage.html" class="code" title="function data=xPlt2DynaSimImage(obj)">xPlt2DynaSimImage</a>(xp_merged);
+0019     <span class="keyword">elseif</span> ~isfield(data1,<span class="string">'plot_files'</span>) &amp;&amp; ~isfield(data2,<span class="string">'plot_files'</span>)
+0020         data_merged = <a href="xPlt2DynaSim.html" class="code" title="function data=xPlt2DynaSim(obj)">xPlt2DynaSim</a>(xp_merged);
+0021     <span class="keyword">else</span>
+0022         error(<span class="string">'Unknown input types'</span>);
+0023     <span class="keyword">end</span>
+0024     
+0025 <span class="keyword">end</span>
+0026</pre></div>
+<hr><address>Generated on Fri 07-Apr-2017 20:01:20 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" target="_parent">m2html</a></strong> &copy; 2005</address>
+</body>
+</html>

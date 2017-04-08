@@ -56,7 +56,7 @@
 <h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
 This function calls:
 <ul style="list-style-image:url(../matlabicon.gif)">
-<li><a href="CalcPower.html" class="code" title="function data = CalcPower(data,varargin)">CalcPower</a>	CALCPOWER - Compute spectral analysis of DynaSim data</li><li><a href="CheckData.html" class="code" title="function data=CheckData(data)">CheckData</a>	CHECKDATA - Standardize data structure and auto-populate missing fields</li><li><a href="CheckOptions.html" class="code" title="function parms = CheckOptions(options, options_schema, strict)">CheckOptions</a>	CHECKOPTIONS - organize key/value pairs in structure with default or user-supplied values according to a schema</li><li><a href="NWgaussKernelRegr.html" class="code" title="function [inst_rate,time] = NWgaussKernelRegr(time,raster,pop,kwidth,Ts)">NWgaussKernelRegr</a>	Nadaraya-Watson smoothing kernel regression of a rastergram using a Gaussian kernel</li><li><a href="SelectData.html" class="code" title="function data=SelectData(data,varargin)">SelectData</a>	SELECTDATA -  select subset of data</li><li><a href="computeRaster.html" class="code" title="function raster  = computeRaster(t,V,threshold)">computeRaster</a>	COMPUTERASTER - Use a threshold to find spiketrain for a voltage trace</li></ul>
+<li><a href="CalcPower.html" class="code" title="function data = CalcPower(data,varargin)">CalcPower</a>	CALCPOWER - Compute spectral analysis of DynaSim data</li><li><a href="CheckData.html" class="code" title="function data=CheckData(data)">CheckData</a>	CHECKDATA - Standardize data structure and auto-populate missing fields</li><li><a href="CheckOptions.html" class="code" title="function [parms, params_unspecified ] = CheckOptions(options, options_schema, strict)">CheckOptions</a>	CHECKOPTIONS - organize key/value pairs in structure with default or user-supplied values according to a schema</li><li><a href="NWgaussKernelRegr.html" class="code" title="function [inst_rate,time] = NWgaussKernelRegr(time,raster,pop,kwidth,Ts)">NWgaussKernelRegr</a>	Nadaraya-Watson smoothing kernel regression of a rastergram using a Gaussian kernel</li><li><a href="SelectData.html" class="code" title="function data=SelectData(data,varargin)">SelectData</a>	SELECTDATA -  select subset of data</li><li><a href="computeRaster.html" class="code" title="function raster  = computeRaster(t,V,threshold)">computeRaster</a>	COMPUTERASTER - Use a threshold to find spiketrain for a voltage trace</li></ul>
 This function is called by:
 <ul style="list-style-image:url(../matlabicon.gif)">
 </ul>
@@ -93,7 +93,7 @@ This function is called by:
 0026 <span class="comment">%   spike_threshold=[0 .5; 0 .25];</span>
 0027 
 0028 <span class="comment">%% 1.0 Check inputs</span>
-0029 options=<a href="CheckOptions.html" class="code" title="function parms = CheckOptions(options, options_schema, strict)">CheckOptions</a>(varargin,{<span class="keyword">...</span>
+0029 options=<a href="CheckOptions.html" class="code" title="function [parms, params_unspecified ] = CheckOptions(options, options_schema, strict)">CheckOptions</a>(varargin,{<span class="keyword">...</span>
 0030   <span class="string">'ROI_pairs'</span>,[],[],<span class="keyword">...</span><span class="comment">    </span>
 0031   <span class="string">'spike_threshold'</span>,0,[],<span class="keyword">...</span><span class="comment"> % threshold for spike detection</span>
 0032   <span class="string">'kernel_width'</span>,1,[],<span class="keyword">...</span><span class="comment"> % ms, width of gaussian for kernel regression</span>
@@ -370,6 +370,6 @@ This function is called by:
 0303 <span class="comment">% calculate instantaneous population firing rate</span>
 0304 <span class="comment">% pop=unique(raster(:,2));</span>
 0305 <span class="comment">% [inst_pop_rate,time]=NWgaussKernelRegr(t,raster,pop,kwidth,Ts);</span></pre></div>
-<hr><address>Generated on Mon 27-Feb-2017 14:58:50 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" target="_parent">m2html</a></strong> &copy; 2005</address>
+<hr><address>Generated on Fri 07-Apr-2017 20:01:20 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" target="_parent">m2html</a></strong> &copy; 2005</address>
 </body>
 </html>

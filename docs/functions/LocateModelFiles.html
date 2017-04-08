@@ -38,7 +38,7 @@
    - paths: unique paths to mechanism files
    - files: full names of files containing mechanism sub-models
 
- See also (used by): <a href="ParseModelEquations.html" class="code" title="function [model,name_map] = ParseModelEquations(text,varargin)">ParseModelEquations</a>, <a href="CheckHostPaths.html" class="code" title="function [matched,error_message]=CheckHostPaths(studyinfo)">CheckHostPaths</a>, <a href="CreateBatch.html" class="code" title="function studyinfo=CreateBatch(base_model,modifications_set,varargin)">CreateBatch</a></pre></div>
+ See also (used by): <a href="ParseModelEquations.html" class="code" title="function [model,name_map] = ParseModelEquations(text,varargin)">ParseModelEquations</a>, <a href="CheckHostPaths.html" class="code" title="function [matched,error_message]=CheckHostPaths(studyinfo)">CheckHostPaths</a>, <a href="CreateBatch.html" class="code" title="function studyinfo = CreateBatch(base_model,modifications_set,varargin)">CreateBatch</a></pre></div>
 
 <!-- crossreference -->
 <h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
@@ -47,7 +47,7 @@ This function calls:
 </ul>
 This function is called by:
 <ul style="list-style-image:url(../matlabicon.gif)">
-<li><a href="CheckHostPaths.html" class="code" title="function [matched,error_message]=CheckHostPaths(studyinfo)">CheckHostPaths</a>	CHECKHOSTPATHS - Compare paths on host to those set in studyinfo when batch was created</li><li><a href="CheckSpecification.html" class="code" title="function spec=CheckSpecification(specification)">CheckSpecification</a>	CHECKSPECIFICATION - standardize specification structure and auto-populate missing fields</li><li><a href="CreateBatch.html" class="code" title="function studyinfo=CreateBatch(base_model,modifications_set,varargin)">CreateBatch</a>	CREATEBATCH - create and submit jobs to run sets of simulations or analyses.</li><li><a href="ParseModelEquations.html" class="code" title="function [model,name_map] = ParseModelEquations(text,varargin)">ParseModelEquations</a>	PARSEMODELEQUATIONS - parse equations and organize model data in DynaSim model structure</li></ul>
+<li><a href="CheckHostPaths.html" class="code" title="function [matched,error_message]=CheckHostPaths(studyinfo)">CheckHostPaths</a>	CHECKHOSTPATHS - Compare paths on host to those set in studyinfo when batch was created</li><li><a href="CheckSpecification.html" class="code" title="function spec=CheckSpecification(specification)">CheckSpecification</a>	CHECKSPECIFICATION - standardize specification structure and auto-populate missing fields</li><li><a href="CreateBatch.html" class="code" title="function studyinfo = CreateBatch(base_model,modifications_set,varargin)">CreateBatch</a>	CREATEBATCH - create and submit jobs to run sets of simulations or analyses.</li><li><a href="EditModelFiles.html" class="code" title="function EditModelFiles(files)">EditModelFiles</a>	</li><li><a href="ParseModelEquations.html" class="code" title="function [model,name_map] = ParseModelEquations(text,varargin)">ParseModelEquations</a>	PARSEMODELEQUATIONS - parse equations and organize model data in DynaSim model structure</li></ul>
 <!-- crossreference -->
 
 
@@ -150,6 +150,6 @@ This function is called by:
 0095 
 0096 <span class="comment">% extract unique paths to mechanism files</span>
 0097 paths=unique(cellfun(@fileparts,files,<span class="string">'uni'</span>,0),<span class="string">'stable'</span>);</pre></div>
-<hr><address>Generated on Mon 27-Feb-2017 14:58:50 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" target="_parent">m2html</a></strong> &copy; 2005</address>
+<hr><address>Generated on Fri 07-Apr-2017 20:01:20 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" target="_parent">m2html</a></strong> &copy; 2005</address>
 </body>
 </html>

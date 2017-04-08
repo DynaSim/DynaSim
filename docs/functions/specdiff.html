@@ -47,7 +47,7 @@
 <h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
 This function calls:
 <ul style="list-style-image:url(../matlabicon.gif)">
-<li><a href="cellfunu.html" class="code" title="function varargout = cellfunu (varargin)">cellfunu</a>	CELLFUNU - Wraps cellfun, with uniform output set to zero</li><li><a href="../functions_xPlt/classes/@nDDict/nDDict.html" class="code" title="">nDDict</a>	</li></ul>
+</ul>
 This function is called by:
 <ul style="list-style-image:url(../matlabicon.gif)">
 </ul>
@@ -121,7 +121,7 @@ This function is called by:
 0061 
 0062 <span class="comment">% Build specs structure.</span>
 0063 <span class="comment">% population name x entry x spec1 or spec2</span>
-0064 nd = <a href="../functions_xPlt/classes/@nDDict/nDDict.html" class="code" title="">nDDict</a>;
+0064 nd = nDDict;
 0065 nd = nd.importLinearData(val,pop_names,properties,specID);
 0066 nd.axis(1).name = <span class="string">'Populations'</span>;
 0067 nd.axis(2).name = <span class="string">'Properties'</span>;
@@ -164,7 +164,7 @@ This function is called by:
 0104 <span class="comment">% Connection name x entry x spec1 or spec2</span>
 0105 <span class="keyword">if</span> ~isempty(val)
 0106     
-0107     nd = <a href="../functions_xPlt/classes/@nDDict/nDDict.html" class="code" title="">nDDict</a>;
+0107     nd = nDDict;
 0108     nd = nd.importLinearData(val,pop_names,properties,specID);
 0109     nd.axis(1).name = <span class="string">'Connections'</span>;
 0110     nd.axis(2).name = <span class="string">'Properties'</span>;
@@ -273,7 +273,7 @@ This function is called by:
 0213 <a name="_sub4" href="#_subfunctions" class="code">function fprintf_cells(string,cells2print)</a>
 0214 
 0215     <span class="keyword">if</span> ~isempty(cells2print)
-0216         cells2print = <a href="cellfunu.html" class="code" title="function varargout = cellfunu (varargin)">cellfunu</a>(@(x) [x <span class="string">' '</span>], cells2print);
+0216         cells2print = cellfunu(@(x) [x <span class="string">' '</span>], cells2print);
 0217         fprintf([string <span class="string">' '</span> cells2print{:} <span class="string">'\n'</span>]);
 0218     <span class="keyword">end</span>
 0219 
@@ -335,7 +335,7 @@ This function is called by:
 0275     params1 = nd.data(:,:,1);
 0276     params2 = nd.data(:,:,2);
 0277 
-0278     inds = <a href="cellfunu.html" class="code" title="function varargout = cellfunu (varargin)">cellfunu</a>(@(x,y) <a href="#_sub3" class="code" title="subfunction out = mycompare(x,y)">mycompare</a>(x,y), params1,params2);
+0278     inds = cellfunu(@(x,y) <a href="#_sub3" class="code" title="subfunction out = mycompare(x,y)">mycompare</a>(x,y), params1,params2);
 0279     inds2 = cell2mat(inds);
 0280 
 0281     <span class="comment">% Loop through each population present in both models and compare</span>
@@ -408,6 +408,6 @@ This function is called by:
 0348     
 0349 
 0350 <span class="keyword">end</span></pre></div>
-<hr><address>Generated on Mon 27-Feb-2017 14:58:50 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" target="_parent">m2html</a></strong> &copy; 2005</address>
+<hr><address>Generated on Fri 07-Apr-2017 20:01:20 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" target="_parent">m2html</a></strong> &copy; 2005</address>
 </body>
 </html>

@@ -35,10 +35,10 @@
 <h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
 This function calls:
 <ul style="list-style-image:url(../matlabicon.gif)">
-<li><a href="CheckOptions.html" class="code" title="function parms = CheckOptions(options, options_schema, strict)">CheckOptions</a>	CHECKOPTIONS - organize key/value pairs in structure with default or user-supplied values according to a schema</li><li><a href="Options2Keyval.html" class="code" title="function keyval = Options2Keyval(options)">Options2Keyval</a>	OPTIONS2KEYVAL - Convert from options structure to a list of key/value pairs.</li></ul>
+<li><a href="CheckOptions.html" class="code" title="function [parms, params_unspecified ] = CheckOptions(options, options_schema, strict)">CheckOptions</a>	CHECKOPTIONS - organize key/value pairs in structure with default or user-supplied values according to a schema</li><li><a href="Options2Keyval.html" class="code" title="function keyval = Options2Keyval(options)">Options2Keyval</a>	OPTIONS2KEYVAL - Convert from options structure to a list of key/value pairs.</li></ul>
 This function is called by:
 <ul style="list-style-image:url(../matlabicon.gif)">
-<li><a href="SimulateModel.html" class="code" title="function [data,studyinfo]=SimulateModel(model,varargin)">SimulateModel</a>	SIMULATEMODEL -  manage simulation of a DynaSim model.</li><li><a href="WriteDynaSimSolver.html" class="code" title="function [outfile,options]=WriteDynaSimSolver(model,varargin)">WriteDynaSimSolver</a>	WRITEDYNASIMSOLVER - write m-file that numerically inteegrates the model</li></ul>
+<li><a href="SimulateModel.html" class="code" title="function [data,studyinfo]=SimulateModel(model,varargin)">SimulateModel</a>	% data=SimulateModel(model,'option',value,...)</li><li><a href="WriteDynaSimSolver.html" class="code" title="function [outfile,options]=WriteDynaSimSolver(model,varargin)">WriteDynaSimSolver</a>	WRITEDYNASIMSOLVER - write m-file that numerically inteegrates the model</li><li><a href="WriteMatlabSolver.html" class="code" title="function solve_ode_filepath = WriteMatlabSolver(model,varargin)">WriteMatlabSolver</a>	WRITEMATLABSOLVER - write m-file that numerically inteegrates the model</li></ul>
 <!-- crossreference -->
 
 
@@ -52,7 +52,7 @@ This function is called by:
 0006 
 0007 <span class="comment">% standardize and set defaults</span>
 0008 keyvals = <a href="Options2Keyval.html" class="code" title="function keyval = Options2Keyval(options)">Options2Keyval</a>(options);
-0009 options=<a href="CheckOptions.html" class="code" title="function parms = CheckOptions(options, options_schema, strict)">CheckOptions</a>(keyvals,{<span class="keyword">...</span>
+0009 options=<a href="CheckOptions.html" class="code" title="function [parms, params_unspecified ] = CheckOptions(options, options_schema, strict)">CheckOptions</a>(keyvals,{<span class="keyword">...</span>
 0010   <span class="string">'tspan'</span>,[0 100],[],<span class="keyword">...</span><span class="comment">          % [beg,end] (units must be consistent with dt and equations)</span>
 0011   <span class="string">'downsample_factor'</span>,1,[],<span class="keyword">...</span><span class="comment">    % downsampling applied during simulation (only every downsample_factor-time point is stored in memory or written to disk)</span>
 0012   <span class="string">'random_seed'</span>,<span class="string">'shuffle'</span>,[],<span class="keyword">...</span><span class="comment">        % seed for random number generator (usage: rng(random_seed))</span>
@@ -62,22 +62,28 @@ This function is called by:
 0016   <span class="string">'datafile'</span>,<span class="string">'data.csv'</span>,[],<span class="keyword">...</span><span class="comment"> % name of data file if disk_flag=1</span>
 0017   <span class="string">'compile_flag'</span>,exist(<span class="string">'codegen'</span>,<span class="string">'file'</span>)==6,[],<span class="keyword">...</span><span class="comment"> % whether to prepare script for being compiled using coder instead of interpreting Matlab</span>
 0018   <span class="string">'verbose_flag'</span>,1,[],<span class="keyword">...</span>
-0019   },false);
-0020 
-0021 field_order={<span class="string">'tspan'</span>,<span class="string">'downsample_factor'</span>,<span class="string">'random_seed'</span>,<span class="string">'solver'</span>,<span class="string">'disk_flag'</span>,<span class="keyword">...</span>
-0022   <span class="string">'dt'</span>,<span class="string">'datafile'</span>,<span class="string">'compile_flag'</span>,<span class="string">'verbose_flag'</span>};
-0023 
-0024 <span class="keyword">if</span> options.compile_flag==1
-0025   <span class="comment">% &lt;-- copied from WriteDynaSimSolver.m --&gt;</span>
-0026   <span class="comment">% todo: make seed string (eg, 'shuffle') from param struct work with coder (options.compile_flag=1)</span>
-0027   <span class="comment">% (currently raises error: &quot;String input must be constant&quot;)</span>
-0028   <span class="comment">% workaround: (shuffle here and get numeric seed for MEX-compatible params.mat)</span>
-0029   rng(options.random_seed);
-0030   options.random_seed=getfield(rng,<span class="string">'Seed'</span>);
-0031 <span class="keyword">end</span>
-0032 
-0033 <span class="comment">% standardize field order</span>
-0034 options=orderfields(options,field_order);</pre></div>
-<hr><address>Generated on Mon 27-Feb-2017 14:58:50 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" target="_parent">m2html</a></strong> &copy; 2005</address>
+0019   <span class="string">'matlab_solver_options'</span>,[],[],<span class="keyword">...</span>
+0020   },false);
+0021 
+0022 field_order={<span class="string">'tspan'</span>,<span class="string">'downsample_factor'</span>,<span class="string">'random_seed'</span>,<span class="string">'solver'</span>,<span class="string">'disk_flag'</span>,<span class="keyword">...</span>
+0023   <span class="string">'dt'</span>,<span class="string">'datafile'</span>,<span class="string">'compile_flag'</span>,<span class="string">'verbose_flag'</span>,<span class="string">'matlab_solver_options'</span>};
+0024 
+0025 <span class="keyword">if</span> options.compile_flag==1
+0026   <span class="comment">% &lt;-- copied from WriteDynaSimSolver.m --&gt;</span>
+0027   <span class="comment">% todo: make seed string (eg, 'shuffle') from param struct work with coder (options.compile_flag=1)</span>
+0028   <span class="comment">% (currently raises error: &quot;String input must be constant&quot;)</span>
+0029   <span class="comment">% workaround: (shuffle here and get numeric seed for MEX-compatible params.mat)</span>
+0030   rng(options.random_seed);
+0031   options.random_seed=getfield(rng,<span class="string">'Seed'</span>);
+0032 <span class="keyword">end</span>
+0033 
+0034 <span class="comment">% standardize field order</span>
+0035 options=orderfields(options,field_order);
+0036 
+0037 <span class="comment">% Remove matlab_solver_options if empty</span>
+0038 <span class="keyword">if</span> isempty(options.matlab_solver_options)
+0039   options = rmfield(options, <span class="string">'matlab_solver_options'</span>);
+0040 <span class="keyword">end</span></pre></div>
+<hr><address>Generated on Fri 07-Apr-2017 20:01:20 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" target="_parent">m2html</a></strong> &copy; 2005</address>
 </body>
 </html>
