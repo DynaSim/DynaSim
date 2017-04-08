@@ -354,7 +354,7 @@ data=SimulateModel('dv/dt=10+@current/Cm; Cm=1; v(0)=-65; {iNa,iK}');
 % DynaSim parses each mechanism file in turn, adds a distinguishing prefix
 % to each variable and function defined therein (designating "namespaces"),
 % and links their variables and functions to corresponding targets found 
-% in equations outside the mechanism file (.mech). (see CheckModel for more details)
+% in equations outside the mechanism file (.mech). (see checkModel for more details)
 
 % namespace = <population>_ or <population>_<mechanism>_
 data.model.parameters
@@ -408,7 +408,7 @@ data
 %   .parameters     : parameters to assign across all equations in
 %                     mechanisms in this connection's mechanism_list. (default: [])
 
-% see CheckSpecification for more details.
+% see checkSpecification for more details.
 
 % inspect the specification structure for the Hodgkin-Huxley model:
 data=SimulateModel('dv/dt=10+@current; {iNa,iK}');
@@ -583,7 +583,7 @@ title('sPING with E->I turned off');
 % 
 %   other options:
 %     'verbose_flag'  : whether to display informative messages/logs (default: 0)
-%     'modifications' : how to modify DynaSim specification structure component before simulation (see ApplyModifications)
+%     'modifications' : how to modify DynaSim specification structure component before simulation (see applyModifications)
 %     'experiment'    : function handle of experiment function (see NOTE 2)
 %     'optimization'  : function handle of optimization function (see NOTE 2)
 
@@ -643,8 +643,8 @@ PlotData(data,'plot_type','rastergram');
 
 % generic manually calculate and plot firing rate (works with any model)
 data=SelectData(data,'time_limits',[20 80]); % extract times 20-80ms
-data=CalcFR(data,'bin_size',30,'bin_shift',10); % calculate firing rates for each cell in each data set
-FRname=data(1).results{1}; % .results contains a list of fields with results calculated in CalcFR
+data=calcFR(data,'bin_size',30,'bin_shift',10); % calculate firing rates for each cell in each data set
+FRname=data(1).results{1}; % .results contains a list of fields with results calculated in calcFR
 FRmean=cellfun(@mean,{data.(FRname)}); % calculate average firing rates
 figure; plot(param_values,FRmean,'-o');
 xlabel(param_name); ylabel('mean firing rate [Hz]');
@@ -695,7 +695,7 @@ vary={'','I',[0 10 20]};
 
 [data,studyinfo]=SimulateModel(eqns,'vary',vary,'save_data_flag',1,'study_dir',study_dir,'verbose_flag',1);
 
-%   DynaSim studyinfo structure (only showing select fields, see CheckStudyinfo for more details)
+%   DynaSim studyinfo structure (only showing select fields, see checkStudyinfo for more details)
 %     studyinfo.study_dir
 %     studyinfo.base_model (=[]): original model from which a set of simulations was derived
 %     studyinfo.base_simulator_options (=[])
@@ -905,7 +905,7 @@ data.model.monitors
     % change the name, size, equations, mechanism_list, and/or parameters of a
     % population, or mechanism_list and/or parameters of a connection.
 
-    % ApplyModifications() returns the modified specification or 
+    % applyModifications() returns the modified specification or 
     % regenerated model after modifying the specification
     
     % "vary" is a way of specifying sets of modifications
@@ -955,13 +955,13 @@ data.model.monitors
     
     % more examples of single modifications:
     % modifying mechanism_list
-    s=ApplyModifications('dv/dt=10+current; {iNa,iK}; v(0)=-65',...
+    s=applyModifications('dv/dt=10+current; {iNa,iK}; v(0)=-65',...
                          {'pop1','mechanism_list','-iNa'});
     s.populations.mechanism_list
-    s=ApplyModifications('dv/dt=10+current; {iNa,iK}; v(0)=-65',...
+    s=applyModifications('dv/dt=10+current; {iNa,iK}; v(0)=-65',...
                          {'pop1','mechanism_list','+iCa'});
     s.populations.mechanism_list
-    s=ApplyModifications('dv/dt=10+current; {iNa,iK}; v(0)=-65',...
+    s=applyModifications('dv/dt=10+current; {iNa,iK}; v(0)=-65',...
                          {'pop1','mechanism_list','+(iCa,iCan,CaBuffer)'});
     s.populations.mechanism_list
     

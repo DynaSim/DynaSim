@@ -255,7 +255,7 @@ subplot(2,1,1); plot(data.time,data.(data.labels{1}))
 subplot(2,1,2); plot(data.time,data.pop1_x_spikes+repmat(1:20,[length(data.time) 1]));
 
 
-%% make back-compatible - support old DynaSim specs/models (via CheckModel())
+%% make back-compatible - support old DynaSim specs/models (via checkModel())
 
 cd(fullfile(dynasim_path,'models','legacy','B-LTS'));
 
@@ -423,42 +423,42 @@ if 1
 end
 
 % modify mechanism_list
-m=ApplyModifications('dv/dt=10+current; {iNa,iK}; v(0)=-65',...
+m=applyModifications('dv/dt=10+current; {iNa,iK}; v(0)=-65',...
                      {'pop1','mechanism_list','-iNa'});
 %m.populations
 
-m=ApplyModifications('dv/dt=10+current; {iNa,iK}; v(0)=-65',...
+m=applyModifications('dv/dt=10+current; {iNa,iK}; v(0)=-65',...
                      {'pop1','mechanism_list','+iCa'});
 %m.populations
 
-m=ApplyModifications('dv/dt=10+current; {iNa,iK}; v(0)=-65',...
+m=applyModifications('dv/dt=10+current; {iNa,iK}; v(0)=-65',...
                      {'pop1','mechanism_list','+(iCa,iCan,CaBuffer)'});
 %m.populations
 
 % modify equations
-m=ApplyModifications('dv/dt=10+current; {iNa,iK}',...
+m=applyModifications('dv/dt=10+current; {iNa,iK}',...
                                         {'pop1','equations','cat(dv/dt,+I)'});
 %m.populations.equations
-m=ApplyModifications('dv/dt=10+current; {iNa,iK}',...
+m=applyModifications('dv/dt=10+current; {iNa,iK}',...
                                         {'pop1','equations','cat(ODE1,+I)'});
 %m.populations.equations
-m=ApplyModifications('dv/dt=10+current; {iNa,iK}',...
+m=applyModifications('dv/dt=10+current; {iNa,iK}',...
                                         {'pop1','equations','cat(ODE,+I)'});
 %m.populations.equations
-m=ApplyModifications('dv/dt=10+@current; du/dt=-u; {iNa,iK}',...
+m=applyModifications('dv/dt=10+@current; du/dt=-u; {iNa,iK}',...
                      {'pop1','equations','cat(ODE2,+I)'});
 m.populations.equations
-m=ApplyModifications('dv/dt=I(t)+@current; I(t)=10; {iNa,iK}',...
+m=applyModifications('dv/dt=I(t)+@current; I(t)=10; {iNa,iK}',...
                      {'pop1','equations','cat(I(t),+sin(2*pi*t))'});
 % m.populations.equations
-m=ApplyModifications('dv/dt=I(t)+@current; I(t)=10; {iNa,iK}',...
+m=applyModifications('dv/dt=I(t)+@current; I(t)=10; {iNa,iK}',...
                      {'pop1','equations','dv/dt=10+@current'});
 % m.populations.equations
 % m.populations.mechanism_list
-m=ApplyModifications('dv/dt=I(t)+@current; I(t)=10; {iNa,iK}',...
+m=applyModifications('dv/dt=I(t)+@current; I(t)=10; {iNa,iK}',...
                      {'pop1','equations','cat(FUNCTION,+sin(2*pi*t))'});
 %m.populations.equations
-m=ApplyModifications('dv/dt=I(t)+@current; I(t)=10; J(t)=11; {iNa,iK}',...
+m=applyModifications('dv/dt=I(t)+@current; I(t)=10; J(t)=11; {iNa,iK}',...
                      {'pop1','equations','cat(FUNCTION2,+sin(2*pi*t))'});
 %m.populations.equations
 
@@ -666,12 +666,12 @@ s.populations(2).equations='dv/dt=current+10; {iNa,iK}; v(0)=-65';
 data=SimulateModel(s);
 figure; plot(data.time,data.(data.labels{1}))
 data=SelectData(data,'timelimits',[20 80]);
-data=CalcFR(data,'variable','*_v','bin_size',30,'bin_shift',10);
+data=calcFR(data,'variable','*_v','bin_size',30,'bin_shift',10);
 figure; plot(data.time_FR,data.E_v_FR);
 
 vary={'pop1','gNa',[50 100 200]};
 data=SimulateModel('dv/dt=@M+10; {iNa,iK}@M','vary',vary);
-data=AnalyzeStudy(data,@CalcFR,'bin_size',30,'bin_shift',10);
+data=AnalyzeStudy(data,@calcFR,'bin_size',30,'bin_shift',10);
 figure
 FR=cat(2,data.pop1_v_FR);
 subplot(1,2,1); plot(data.time_FR,FR); 
@@ -681,7 +681,7 @@ xlabel('gNa (mS/cm^2)'); ylabel('FR (Hz) avg over time');
 
 vary={'pop1','gNa',[50 100 200]};
 data=SimulateModel('dv/dt=@M+10; {iNa,iK}@M','vary',vary);
-data=CalcFR(data,'variable','*_v','bin_size',30,'bin_shift',10);
+data=calcFR(data,'variable','*_v','bin_size',30,'bin_shift',10);
 
 % PlotFR: 1 pop, 1 cell, 0 varied
 data=SimulateModel('dv/dt=@M+10; {iNa,iK}@M');
@@ -802,21 +802,21 @@ if 0 %strcmp(strtrim(host),'jason-pc') % if on developer computer
   NaMechID=57; % Na+ mechanism in infbrain
   model=ImportModel('infbrain:57'); % import mechanism model (Na+ channel)
 
-  s=CheckSpecification('dv/dt=current; {infbrain:57,iK}');
+  s=checkSpecification('dv/dt=current; {infbrain:57,iK}');
   s.populations
-  s=CheckSpecification('dv/dt=current; {infbrain:57}; {iK}');
+  s=checkSpecification('dv/dt=current; {infbrain:57}; {iK}');
   s.populations
-  s=CheckSpecification('dv/dt=current; infbrain:{57}; {iK}');
+  s=checkSpecification('dv/dt=current; infbrain:{57}; {iK}');
   s.populations
-  s=CheckSpecification('dv/dt=@M; infbrain:{57}@M; {iK}@M');
+  s=checkSpecification('dv/dt=@M; infbrain:{57}@M; {iK}@M');
   s.populations
-  s=CheckSpecification('dv/dt=@M; infbrain:{57}@M; {iK@M}');
+  s=checkSpecification('dv/dt=@M; infbrain:{57}@M; {iK@M}');
   s.populations
-  s=CheckSpecification('dv/dt=@M; infbrain:{57@M}; {iK@M}');
+  s=checkSpecification('dv/dt=@M; infbrain:{57@M}; {iK@M}');
   s.populations
-  s=CheckSpecification('dv/dt=@M; {infbrain:57,iK}@M');
+  s=checkSpecification('dv/dt=@M; {infbrain:57,iK}@M');
   s.populations
-  s=CheckSpecification('dv/dt=@M; {iK@M}; {infbrain:57@M}');
+  s=checkSpecification('dv/dt=@M; {iK@M}; {infbrain:57@M}');
   s.populations
 
   data=SimulateModel('dv/dt=current; {infbrain:57,iK}');
@@ -881,10 +881,10 @@ end
 
 %% Add UpdateStudy() to SimulateModel()
 
-% test CheckStudyinfo:
-studyinfo=CheckStudyinfo([])
+% test checkStudyinfo:
+studyinfo=checkStudyinfo([])
 studyinfo.simulations.sim_id=1;
-studyinfo=CheckStudyinfo(studyinfo);
+studyinfo=checkStudyinfo(studyinfo);
 studyinfo.simulations
 
 if 0 % no longer working ... but not necessary until MonitorStudy is reintroduced
@@ -904,10 +904,10 @@ if 0 % no longer working ... but not necessary until MonitorStudy is reintroduce
   study_dir=pwd; 
   studyinfo=StudyinfoIO([],study_dir); % loading studyinfo
 
-  studyinfo=CheckStudyinfo(study_dir)
-  studyinfo=CheckStudyinfo('studyinfo.mat')
-  studyinfo=CheckStudyinfo(study_dir,'process_id',201)
-  studyinfo=CheckStudyinfo('studyinfo.mat','process_id',201)
+  studyinfo=checkStudyinfo(study_dir)
+  studyinfo=checkStudyinfo('studyinfo.mat')
+  studyinfo=checkStudyinfo(study_dir,'process_id',201)
+  studyinfo=checkStudyinfo('studyinfo.mat','process_id',201)
 end
 
 addpath(dynasim_path)
@@ -1375,35 +1375,35 @@ studyinfo=MonitorStudy(studyinfo.study_dir);
 
 %% extract population names from equations
 
-spec=CheckSpecification('TC:dv/dt=0');
+spec=checkSpecification('TC:dv/dt=0');
 spec.populations
-spec=CheckSpecification('[dv/dt=0]');
+spec=checkSpecification('[dv/dt=0]');
 spec.populations
-spec=CheckSpecification('[TC:dv/dt=0]');
+spec=checkSpecification('[TC:dv/dt=0]');
 spec.populations
-spec=CheckSpecification('[dv/dt=@M;ib:{Na,K}@M][du/dt=@M;{Na,K,Ca}]');
+spec=checkSpecification('[dv/dt=@M;ib:{Na,K}@M][du/dt=@M;{Na,K,Ca}]');
 spec.populations(1)
 spec.populations(2)
-spec=CheckSpecification('[TC:dv/dt=@M;ib:{Na,K}@M][RE:du/dt=@M;{Na,K,Ca}]');
+spec=checkSpecification('[TC:dv/dt=@M;ib:{Na,K}@M][RE:du/dt=@M;{Na,K,Ca}]');
 spec.populations(1)
 spec.populations(2)
-spec=CheckSpecification('[dv[2]/dt=@M;ib:{Na,K}@M][RE:du[3]/dt=@M;{Na,K,Ca}]');
+spec=checkSpecification('[dv[2]/dt=@M;ib:{Na,K}@M][RE:du[3]/dt=@M;{Na,K,Ca}]');
 spec.populations(1)
 spec.populations(2)
-spec=CheckSpecification('[dv[2]/dt=@M;ib:{Na,K}@M][RE:du[3]/dt=@M;{Na,K,Ca};dw[3]/dt=10]');
+spec=checkSpecification('[dv[2]/dt=@M;ib:{Na,K}@M][RE:du[3]/dt=@M;{Na,K,Ca};dw[3]/dt=10]');
 spec.populations(1)
 spec.populations(2)
 
-% todo: edit CheckSpecification to take parameters in .equations and move
+% todo: edit checkSpecification to take parameters in .equations and move
 % them to .parameters...
   % DONE
-spec=CheckSpecification('[TC:dv/dt=0; p=3]');
+spec=checkSpecification('[TC:dv/dt=0; p=3]');
 spec.populations
 
 s=[];
 s.pops.equations='[TC:dv/dt=p; p=3]';
 s.pops.parameters={'p',4};
-spec=CheckSpecification(s);
+spec=checkSpecification(s);
 spec.populations
 m=GenerateModel(spec);
 m.parameters
@@ -1411,7 +1411,7 @@ m.parameters
 s=[];
 s.pops.equations='[TC:dv/dt=p]';
 s.pops.parameters={'p',4};
-spec=CheckSpecification(s);
+spec=checkSpecification(s);
 spec.populations
 m=GenerateModel(spec);
 m.parameters
@@ -1542,15 +1542,15 @@ end
 %% Study post-processing
 
 [~,studyinfo]=SimulateModel('dv/dt=@M+10; {iNa,iK}@M; vary(gNa=[50 100 200])','save_data_flag',1);
-results=AnalyzeStudy(studyinfo,@CalcFR);
+results=AnalyzeStudy(studyinfo,@calcFR);
 
 data=SimulateModel('dv/dt=@M+10; {iNa,iK}@M; vary(gNa=[50 100 200])','save_data_flag',1);
-results=AnalyzeStudy(data,@CalcFR);
+results=AnalyzeStudy(data,@calcFR);
 
-results=AnalyzeStudy('ClusterTestSet2',@CalcFR);
+results=AnalyzeStudy('ClusterTestSet2',@calcFR);
 
 % todo: add cluster support for analyses and plotting
-% results=AnalyzeStudy(data,@CalcFR,'cluster_flag',1);
+% results=AnalyzeStudy(data,@calcFR,'cluster_flag',1);
 
 %% add model i/o (XPP, NeuroML) -- for DynaSim paper
 
