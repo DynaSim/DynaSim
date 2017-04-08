@@ -3,7 +3,7 @@ function modifications_set = Vary2Modifications(vary,model)
 %
 % The returned set of modifications has one element per point in search space;
 % each element can be passed along with DynaSim model or specification to
-% ApplyModifications to produce the modified object.
+% applyModifications to produce the modified object.
 %
 % Usage:
 %   modifications_set=Vary2Modifications(vary)
@@ -103,7 +103,7 @@ function modifications_set = Vary2Modifications(vary,model)
 %   modifications_set = Vary2Modifications(vary); 
 %   modifications_set{:}
 %
-% See also: ApplyModifications, SimulateModel, GenerateModel
+% See also: applyModifications, SimulateModel, GenerateModel
 
 % check inputs
 if iscell(vary) && iscell(vary{1})

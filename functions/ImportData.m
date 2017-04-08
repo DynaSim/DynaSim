@@ -9,7 +9,7 @@ function [data,studyinfo] = ImportData(file,varargin)
 %   - data_file data file name in accepted format (csv, mat, ...), or also
 %     accepted: list of data files, studyinfo structure, study_dir, or studyinfo
 %     file
-%   - studyinfo: DynaSim studyinfo structure (see CheckStudyinfo)
+%   - studyinfo: DynaSim studyinfo structure (see checkStudyinfo)
 %   - options:
 %     'verbose_flag': {0,1} (default: 1)
 %     'process_id'  : process identifier for loading studyinfo if necessary
@@ -55,11 +55,11 @@ function [data,studyinfo] = ImportData(file,varargin)
 %   'I->E','tauI',[15 25]; 'I','mechanism_list','+iM'}
 % - achieve by calling function SelectData() at end of this function.
 
-% See also: SimulateModel, ExportData, CheckData, SelectData
+% See also: SimulateModel, ExportData, checkData, SelectData
 
 
 % Check inputs
-options=CheckOptions(varargin,{...
+options=checkOptions(varargin,{...
   'verbose_flag',1,{0,1},...
   'process_id',[],[],... % process identifier for loading studyinfo if necessary
   'time_limits',[],[],...
@@ -81,7 +81,7 @@ end
 if isstruct(file) && isfield(file,'study_dir')
   % "file" is a studyinfo structure.
   % retrieve most up-to-date studyinfo structure from studyinfo.mat file
-  studyinfo = CheckStudyinfo(file.study_dir,'process_id',options.process_id);
+  studyinfo = checkStudyinfo(file.study_dir,'process_id',options.process_id);
   
   % compare simIDs to sim_id
   if ~isempty(options.simIDs)

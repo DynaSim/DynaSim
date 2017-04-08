@@ -1,4 +1,4 @@
-function str=dynasim_strrep2(str,oldstr,newstr,lpad,rpad)
+function str=dynasimStrrep2(str,oldstr,newstr,lpad,rpad)
 %DYNASIM_STRREP - replace full words by new character strings, WITHOUT ignoring matches that appear as sub-strings.
 %
 % Note: built-in strrep replaces ALL matches.

@@ -1,7 +1,7 @@
-function [output,modifications]=ApplyModifications(model,modifications)
+function [output,modifications]=applyModifications(model,modifications)
 %APPLYMODIFICATIONS - Apply modifications to DynaSim specification or model structure
 %
-% ApplyModifications returns the same kind of structure with
+% applyModifications returns the same kind of structure with
 % modifications applied. In all cases it first modifies the specification
 % (model.specification if input is a model structure). Then it returns
 % the modified specification or regenerates the model using the new
@@ -9,7 +9,7 @@ function [output,modifications]=ApplyModifications(model,modifications)
 %
 % Inputs:
 %   - model: DynaSim model or specification structure
-%     - see CheckModel and CheckSpecification for details
+%     - see checkModel and checkSpecification for details
 %   - modifications: modifications to make to specification structure
 %       {X,Y,Z; X,Y,Z; ...}
 %       X = population name or connection source->target
@@ -23,27 +23,27 @@ function [output,modifications]=ApplyModifications(model,modifications)
 % Examples:
 %   - modifying population size and parameters:
 %       modifications={'E','size',5; 'E','gNa',120};
-%       model=ApplyModifications(model,modifications);
+%       model=applyModifications(model,modifications);
 %
 %   - modifying mechanism_list:
-%       m=ApplyModifications('dv/dt=10+@current; {iNa,iK}',...
+%       m=applyModifications('dv/dt=10+@current; {iNa,iK}',...
 %                            {'pop1','mechanism_list','-iNa'});
 %       m.populations.mechanism_list
-%       m=ApplyModifications('dv/dt=10+@current; {iNa,iK}',...
+%       m=applyModifications('dv/dt=10+@current; {iNa,iK}',...
 %                            {'pop1','mechanism_list','+iCa'});
 %       m.populations.mechanism_list
-%       m=ApplyModifications('dv/dt=10+@current; {iNa,iK}',...
+%       m=applyModifications('dv/dt=10+@current; {iNa,iK}',...
 %                            {'pop1','mechanism_list','+(iCa,iCan,CaBuffer)'});
 %       m.populations.mechanism_list
 %
 %   - modifying equations (using special "cat()" operator or direct substitution)
-%       m=ApplyModifications('dv/dt=10+@current; {iNa,iK}',...
+%       m=applyModifications('dv/dt=10+@current; {iNa,iK}',...
 %                            {'pop1','equations','cat(dv/dt,+I)'});
 %       m.populations.equations
-%       m=ApplyModifications('dv/dt=I(t)+@current; I(t)=10; {iNa,iK}',...
+%       m=applyModifications('dv/dt=I(t)+@current; I(t)=10; {iNa,iK}',...
 %                            {'pop1','equations','cat(I(t),+sin(2*pi*t))'});
 %       m.populations.equations
-%       m=ApplyModifications('dv/dt=I(t)+@current; I(t)=10; {iNa,iK}',...
+%       m=applyModifications('dv/dt=I(t)+@current; I(t)=10; {iNa,iK}',...
 %                            {'pop1','equations','dv/dt=10+@current'});
 %       m.populations.equations
 %       m.populations.mechanism_list
@@ -54,13 +54,13 @@ function [output,modifications]=ApplyModifications(model,modifications)
 %       'ODE' = aliases ODE1
 %       similarly: 'FUNCTIONn' and 'FUNCTION'
 %
-%       m=ApplyModifications('dv/dt=10+@current; {iNa,iK}',...
+%       m=applyModifications('dv/dt=10+@current; {iNa,iK}',...
 %                            {'pop1','equations','cat(ODE,+I)'});
 %       m.populations.equations
-%       m=ApplyModifications('dv/dt=10+@current; du/dt=-u; {iNa,iK}',...
+%       m=applyModifications('dv/dt=10+@current; du/dt=-u; {iNa,iK}',...
 %                            {'pop1','equations','cat(ODE2,+I)'});
 %       m.populations.equations
-%       m=ApplyModifications('dv/dt=I(t)+@current; I(t)=10; {iNa,iK}',...
+%       m=applyModifications('dv/dt=I(t)+@current; I(t)=10; {iNa,iK}',...
 %                            {'pop1','equations','cat(FUNCTION,+sin(2*pi*t))'});
 %       m.populations.equations
 %
@@ -82,9 +82,9 @@ end
 
 % check specification
 if ismodel
-  specification=CheckSpecification(model.specification);
+  specification=checkSpecification(model.specification);
 else
-  specification=CheckSpecification(model);
+  specification=checkSpecification(model);
 end
 
 % update specification with whatever is in modifications

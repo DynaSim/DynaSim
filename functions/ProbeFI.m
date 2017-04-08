@@ -8,19 +8,19 @@ function data=ProbeFI(model,varargin)
 %     target - ...
 %     amplitudes - ...
 %     (any options for SimulateModel)
-%     (any options for CalcFR)
+%     (any options for calcFR)
 % outputs:
 %   array of DynaSim data structures for simulations varying inputs
 % 
-% see also: SimulateModel, CalcFR
+% see also: SimulateModel, calcFR
 
-options=CheckOptions(varargin,{...
+options=checkOptions(varargin,{...
   'target','ODE1',[],...
   'amplitudes',0:2:10,[],...
   'onset',0,[],...
   },false);
 
-model=CheckModel(model);
+model=checkModel(model);
 
 npops=length(model.specification.populations);
 modifications=cell(npops,3);
@@ -35,12 +35,12 @@ for i=1:npops
 end
 
 % apply modifications
-model=ApplyModifications(model,modifications);
+model=applyModifications(model,modifications);
 
 % run simulations varying tonic drives
 data=SimulateModel(model,'vary',vary,varargin{:});
 
-% prepare CalcFR options:
+% prepare calcFR options:
 if ~any(cellfun(@(x)isequal(x,'variable'),varargin))
   % default to extract spike events from the first state variable
   var=regexp(model.state_variables{1},'_(\w+)$','tokens','once');
@@ -50,4 +50,4 @@ if ~any(cellfun(@(x)isequal(x,'variable'),varargin))
   end
 end
 % calculate resulting firing rates for each population
-data=CalcFR(data,varargin{:});
+data=calcFR(data,varargin{:});

@@ -14,7 +14,7 @@ function [model,name_map] = ParseModelEquations(text,varargin)
 %   - user-supplied parameter values: ('key',value): name (key) of parameters to
 %                                     be set and associated user-supplied values
 % Outputs:
-%   - model: DynaSim model structure (see CheckModel for details)
+%   - model: DynaSim model structure (see checkModel for details)
 %   - name_map: useful for namespace-specific substitutions across multiple
 %     sub-models, see description in GenerateModel for more information {name,
 %     namespace_name, namespace, type}

@@ -2,8 +2,8 @@
 function data_merged = DynaSimMerge(data1,data2)
     % Merge two Dynasim structures created from different simulations
     
-    xp1 = All2xPlt(data1);
-    xp2 = All2xPlt(data2);
+    xp1 = all2xPlt(data1);
+    xp2 = all2xPlt(data2);
     
     xp_merged = merge(xp1,xp2);
     xp_merged.meta = xp1.meta; % Warning - need to make sure metadata merges properly; not yet implemented

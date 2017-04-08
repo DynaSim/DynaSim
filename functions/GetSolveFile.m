@@ -6,7 +6,7 @@ function solve_file = GetSolveFile(model,studyinfo,varargin)
 %
 % Inputs:
 %   - model: DynaSim model structure (see GenerateModel)
-%   - studyinfo (optional): DynaSim studyinfo structure (see CheckStudyinfo)
+%   - studyinfo (optional): DynaSim studyinfo structure (see checkStudyinfo)
 %   - options (optional): cell array of key/value pairs or Matlab structure with options
 %     'solver'      : solver for numerical integration (see GetSolveFile)
 %                     {'euler','rk2','rk4'} (default: 'rk4')
@@ -38,7 +38,7 @@ elseif isstruct(varargin{1}) % user provided an options structure
   varargin={};
 end
 
-options=CheckOptions(varargin,{...
+options=checkOptions(varargin,{...
   'solver','rk4',{'euler','rk1','rk2','rk4','modified_euler','rungekutta','rk','ode23','ode45',...
     'ode1','ode2','ode3','ode4','ode5','ode8','ode113','ode15s','ode23s','ode23t','ode23tb'},... % DynaSim and built-in Matlab solvers
   'matlab_solver_options',[],[],... % options from odeset for use with built-in Matlab solvers

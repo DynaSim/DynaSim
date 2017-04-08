@@ -15,14 +15,14 @@ function model=PropagateParameters(model,varargin)
 % See also: PropagateFunctions, WriteDynaSimSolver
 
 % Check inputs
-model=CheckModel(model);
+model=checkModel(model);
 if ~isstruct(model.parameters)
   % nothing to do
   return;
 end
 
 % Check inputs
-options=CheckOptions(varargin,{...
+options=checkOptions(varargin,{...
   'action','substitute',{'substitute','prepend','postpend'},...
   'prefix','pset.p.',[],...
   'suffix','',[],...
@@ -152,9 +152,9 @@ function expression=insert_parameters(expression,parameters,attachType,attachStr
         num_found = length(find(ismember(allwords,found_parameter)));
         for iter=1:num_found
           if ~strcmp(attachType, 'suffix')
-            expression=dynasim_strrep(expression,found_parameter,found_value);
+            expression=dynasimStrrep(expression,found_parameter,found_value);
           else
-            expression=dynasim_strrep2(expression,found_parameter,found_value);
+            expression=dynasimStrrep2(expression,found_parameter,found_value);
           end
         end
       end

@@ -8,7 +8,7 @@ function handles = PlotData(data,varargin)
 %   handles=PlotData(data,'option',value)
 %
 % Inputs:
-%   - data: DynaSim data structure (see CheckData)
+%   - data: DynaSim data structure (see checkData)
 %   - options:
 %     'plot_type'       : what to plot {'waveform' (default),'rastergram','rates','power'}
 %     'variable'        : name of field containing data to plot (default: all
@@ -22,8 +22,8 @@ function handles = PlotData(data,varargin)
 %     'lock_gca'        : Plots within currently active axis (gca); doesn't
 %                         open new figures or subplots.
 %     - NOTE: analysis options are available depending on plot_type
-%       - see see CalcFR options for plot_type 'rastergram' or 'rates'
-%       - see CalcPower options for plot_type 'power'
+%       - see see calcFR options for plot_type 'rastergram' or 'rates'
+%       - see calcPower options for plot_type 'power'
 %
 % Outputs:
 %   - handles: graphic handles to figures
@@ -144,11 +144,11 @@ function handles = PlotData(data,varargin)
 %       PlotData(data,'variable','E1_v');
 %       PlotData(data,'variable','*');
 %
-% See also: CalcFR, CalcPower, PlotWaveforms, CheckData
+% See also: calcFR, calcPower, PlotWaveforms, checkData
 
 % Check inputs
-data=CheckData(data);
-  % note: calling CheckData() at beginning enables analysis/plotting functions to
+data=checkData(data);
+  % note: calling checkData() at beginning enables analysis/plotting functions to
   % accept data matrix [time x cells] in addition to DynaSim data structure.
 
 fields=fieldnames(data);
@@ -175,7 +175,7 @@ if any(strcmp(fields, 'varied'))
         
     end
     
-    [effective_vary_lengths, ~] = CheckCovary(vary_lengths, vary_params);
+    [effective_vary_lengths, ~] = checkCovary(vary_lengths, vary_params);
     
     dimensions_varied = sum(effective_vary_lengths > 1);
     
@@ -225,7 +225,7 @@ if any(strcmp(fields, 'varied'))
     
 end
 
-options=CheckOptions(varargin,{...
+options=checkOptions(varargin,{...
   'time_limits',[-inf inf],[],...
   'variable',[],[],...
   'max_num_overlaid',50,[],...
@@ -240,7 +240,7 @@ options=CheckOptions(varargin,{...
   'yscale','linear',{'linear','log','log10','log2'},...
   'visible','on',{'on','off'},...
   },false);
-data=CheckData(data);
+data=checkData(data);
 handles=[];
 
 lock_gca = options.lock_gca;
@@ -292,7 +292,7 @@ switch options.plot_type
     xlab='time (ms)'; % x-axis label
   case 'power'      % plot VARIABLE_Power_SUA.Pxx
     if any(cellfun(@isempty,regexp(var_fields,'.*_Power_SUA$')))
-      data=CalcPower(data,varargin{:});
+      data=calcPower(data,varargin{:});
     end
     xdata=data(1).([var_fields{1} '_Power_SUA']).frequency;
     xlab='frequency (Hz)'; % x-axis label
@@ -302,13 +302,13 @@ switch options.plot_type
     end
   case {'rastergram','raster'} % raster VARIABLE_spike_times
     if any(cellfun(@isempty,regexp(var_fields,'.*_spike_times$')))
-      data=CalcFR(data,varargin{:});
+      data=calcFR(data,varargin{:});
     end
     xdata=time;
     xlab='time (ms)'; % x-axis label
   case 'rates'      % plot VARIABLE_FR
     if any(cellfun(@isempty,regexp(var_fields,'.*_FR$')))
-      data=CalcFR(data,varargin{:});
+      data=calcFR(data,varargin{:});
     end
     xdata=data.time_FR;
     xlab='time (ms, bins)'; % x-axis label

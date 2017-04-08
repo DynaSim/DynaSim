@@ -19,10 +19,10 @@ function [model,map] = ImportModel(source,varargin)
 % Output:
 %   DynaSim model structure (see GenerateModel)
 %
-% See also: GenerateModel, CheckModel
+% See also: GenerateModel, checkModel
 
 % Check inputs
-options=CheckOptions(varargin,{...
+options=checkOptions(varargin,{...
   'host','local',[],... % database, eg: infbrain, modeldb
   'namespace',[],[],... % namespace, eg: E, I
   'ic_pop',[],[],... % eg: E, I

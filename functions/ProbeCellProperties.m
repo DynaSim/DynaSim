@@ -4,7 +4,7 @@ function data = ProbeCellProperties(model,varargin)
 % one or more populations. It removes all connections between cells and 
 % populations and then runs a series of simulations delivering
 % hyperpolarizing and depolarizing pulses. It is designed to be used in
-% conjunction with the analysis function "CalcCellProperties" which accepts
+% conjunction with the analysis function "calcCellProperties" which accepts
 % the data array produced by this experiment and returns the
 % electrophysiological properties characterizing each cell's response in
 % the population.
@@ -30,7 +30,7 @@ function data = ProbeCellProperties(model,varargin)
 % data=ProbeCellProperties(model,'num_repetitions',2);
 % 
 % Note: this function is based on the DNSim experiment "cell_pulses".
-% See also: CalcCellProperties
+% See also: calcCellProperties
 
 % Experiment: input model, produces data sets for all step levels
 % Analysis: input data sets for all step levels, output one stat structure  
@@ -38,7 +38,7 @@ function data = ProbeCellProperties(model,varargin)
 %           population of the model.
 
 % Check inputs
-options=CheckOptions(varargin,{...
+options=checkOptions(varargin,{...
   'target_equation','ODE1',[],...
   'amplitudes',-30:5:180,[],... % pA. typically: 0-500pA (0-.5nA)
   'membrane_area',1500,[],...     % um^2. typically: 1000-2000 um2
@@ -50,7 +50,7 @@ options=CheckOptions(varargin,{...
   'remove_connections_flag',1,[],...
   },false);
 
-model=CheckModel(model);
+model=checkModel(model);
 
 % check that amplitude=0 is present (for RMP calculation)
 if ~ismember(0,options.amplitudes)
@@ -108,7 +108,7 @@ vary={objects,'TONIC',options.effective_amplitudes;...
       objects,'repetition',1:options.num_repetitions};  
 
 % apply modifications to effectively add experimental apparatus to model
-model=ApplyModifications(model,modifications);
+model=applyModifications(model,modifications);
 
 % execute experimental protocol by varying parameters across simulations
 fprintf('Running experiment: %s\n',mfilename);

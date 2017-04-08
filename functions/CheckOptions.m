@@ -1,8 +1,8 @@
-function [parms, params_unspecified ] = CheckOptions(options, options_schema, strict)
+function [parms, params_unspecified ] = checkOptions(options, options_schema, strict)
 %CHECKOPTIONS - organize key/value pairs in structure with default or user-supplied values according to a schema
 %
 % Usage:
-%   options = CheckOptions(keyvals, options_schema, [strict])
+%   options = checkOptions(keyvals, options_schema, [strict])
 %
 % Inputs:
 %   - keyvals: list of key/value pairs ('option1',value1,'option2',value2,...)
@@ -23,7 +23,7 @@ function [parms, params_unspecified ] = CheckOptions(options, options_schema, st
 % Outputs:
 %   - options: structure with options (using default values if not supplied)
 %
-% See also: Options2Keyval, CheckSpecification, CheckModel, CheckData
+% See also: Options2Keyval, checkSpecification, checkModel, checkData
 
 
 % Convert cell argument to struct if contains struct (Leave as is if already a struct)

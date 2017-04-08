@@ -30,12 +30,12 @@ function solve_ode_filepath = WriteMatlabSolver(model,varargin)
 %   - filepath (solve_ode.m)
 %   - odefun_filepath (solve_ode_odefun.m)
 %
-% Dependencies: CheckOptions, CheckModel
+% Dependencies: checkOptions, checkModel
 %
 % See also: SimulateModel, dynasim2odefun
 
 % Check inputs
-options=CheckOptions(varargin,{...
+options=checkOptions(varargin,{...
   'ic',[],[],...                  % initial conditions (overrides definition in model structure)
   'tspan',[0 100],[],...          % [beg,end] (units must be consistent with dt and equations)
   'dt',.01,[],...                 % time step used for fixed step DynaSim solvers
@@ -54,7 +54,7 @@ options=CheckOptions(varargin,{...
   },false);
 
 % Check inputs
-model=CheckModel(model); 
+model=checkModel(model); 
 
 % convert matlab solver options from key/value to struct using odeset if necessary
 if iscell(options.matlab_solver_options) && ~isempty(options.matlab_solver_options)
@@ -103,7 +103,7 @@ if options.save_parameters_flag
   warning('off','catstruct:DuplicatesFound');
   
   % make p struct
-  p=catstruct(CheckSolverOptions(options),model.parameters);
+  p=catstruct(checkSolverOptions(options),model.parameters);
   
   % add IC to p
   %   NOTE: will get done again in simulateModel
@@ -121,7 +121,7 @@ if options.save_parameters_flag
   if options.one_solve_file_flag
     % fill p flds that were varied with vectors of length = nSims
     
-    vary=CheckOptions(varargin,{'vary',[],[],},false);
+    vary=checkOptions(varargin,{'vary',[],[],},false);
     vary = vary.vary;
 
     mod_set = Vary2Modifications(vary);
@@ -132,7 +132,7 @@ if options.save_parameters_flag
     % Get param names
     iMod = 1;
     % Split extra entries in first 2 cols of mods, so each row is a single pop and param
-    [~, first_mod_set] = ApplyModifications([],mod_set{iMod});
+    [~, first_mod_set] = applyModifications([],mod_set{iMod});
 
     % replace '->' with '_'
     first_mod_set(:,1) = strrep(first_mod_set(:,1), '->', '_');
@@ -163,7 +163,7 @@ if options.save_parameters_flag
     param_values = nan(nParamMods, length(mod_set));
     for iMod = 1:length(mod_set)
       % Split extra entries in first 2 cols of mods, so each row is a single pop and param
-      [~, mod_set{iMod}] = ApplyModifications([],mod_set{iMod});
+      [~, mod_set{iMod}] = applyModifications([],mod_set{iMod});
       
       % Get scalar values as vector
       param_values(:, iMod) = [mod_set{iMod}{:,3}];

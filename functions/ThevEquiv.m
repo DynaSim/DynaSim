@@ -2,7 +2,7 @@ function data = ThevEquiv(data, fields_currents, field_voltage, reversals_list, 
 % Calculates the Th�venin equivalent voltage and conductance for a
 % given set of M specified ionic channels.
 % Inputs:
-%   data - DynaSim data structure (see CheckData)
+%   data - DynaSim data structure (see checkData)
 %   fields_currents - 1xM cell array of field namesthat
 %           contain the ionic currents (M entries, one for each ionic channel).
 %   field_voltage - 1x1 string specifying membrane voltage
@@ -42,8 +42,8 @@ function data = ThevEquiv(data, fields_currents, field_voltage, reversals_list, 
         output_field_name = strcat(prefix,output_field_name);
     end
     
-    data = CheckData(data);
-    % note: calling CheckData() at beginning enables analysis function to
+    data = checkData(data);
+    % note: calling checkData() at beginning enables analysis function to
     % accept data matrix [time x cells] in addition to DynaSim data structure.
 
     for i = 1:length(data)

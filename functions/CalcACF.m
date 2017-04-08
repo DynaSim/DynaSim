@@ -1,11 +1,11 @@
-function data = CalcACF(data,varargin)
+function data = calcACF(data,varargin)
 %CALCACF - Calculate the autocorrelation function.
 %
 % Usage:
-%   data = CalcACF(data,'option',value)
+%   data = calcACF(data,'option',value)
 %
 % Inputs:
-%   - data: DynaSim data structure (see CheckData)
+%   - data: DynaSim data structure (see checkData)
 %   - options:
 %     'variable'         : name of field containing data on which to calculate
 %                          ACFs (default: *_spikes or first variable in data.labels)
@@ -36,13 +36,13 @@ function data = CalcACF(data,varargin)
 %   s.populations(2).name='I';
 %   s.populations(2).equations='dv/dt=@current+10; {iNa,iK}; v(0)=-65';
 %   data=SimulateModel(s);
-%   data=CalcACF(data,'variable','*_v');
+%   data=calcACF(data,'variable','*_v');
 %   data % contains ACFs for E and I pops in .E_v_ACF and .I_v_ACF.
 %
-% See also: PlotFR, AnalyzeStudy, SimulateModel, CheckData, SelectVariables
+% See also: PlotFR, AnalyzeStudy, SimulateModel, checkData, SelectVariables
 
 %% 1.0 Check inputs
-options=CheckOptions(varargin,{...
+options=checkOptions(varargin,{...
   'variable',[],[],...
   'threshold',1e-5,[],... % slightly above zero in case variable is point process *_spikes {0,1}
   'exclude_data_flag',0,{0,1},...
@@ -51,13 +51,13 @@ options=CheckOptions(varargin,{...
   'output_suffix','',[],...
   },false);
 
-data = CheckData(data);
-% note: calling CheckData() at beginning enables analysis function to
+data = checkData(data);
+% note: calling checkData() at beginning enables analysis function to
 % accept data matrix [time x cells] in addition to DynaSim data structure.
 
 if numel(data)>1
-  % use AnalyzeStudy to recursively call CalcACF on each data set
-  data=AnalyzeStudy(data,@CalcACF,varargin{:});
+  % use AnalyzeStudy to recursively call calcACF on each data set
+  data=AnalyzeStudy(data,@calcACF,varargin{:});
   return;
 end
 

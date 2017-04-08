@@ -23,11 +23,11 @@ function studyinfo=UpdateStudy(study_dir,varargin)
 %
 % TODO: this multiple things in this function should be split up into individual functions
 %
-% See also: CheckStudyinfo, SetupStudy, SimulateModel, CreateBatch, AnalyzeStudy
+% See also: checkStudyinfo, SetupStudy, SimulateModel, CreateBatch, AnalyzeStudy
 
 
 % check inputs
-options=CheckOptions(varargin,{...
+options=checkOptions(varargin,{...
   'process_id',[],[],... % identifier for simulation to update
   'status',[],[],... % status of simulation
   'modifications_set',[],[],... % search space
@@ -43,7 +43,7 @@ options=CheckOptions(varargin,{...
 %   'project_id',[],[],... % unique identifier of parent project
 
 % load most recent version of studyinfo structure from file
-studyinfo=CheckStudyinfo(study_dir,'process_id',options.process_id);
+studyinfo=checkStudyinfo(study_dir,'process_id',options.process_id);
 already_finished = all(strcmp('finished',{studyinfo.simulations.status}));
 
 % track status of simulations and analyses

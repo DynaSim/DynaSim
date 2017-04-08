@@ -7,7 +7,7 @@ function [data,studyinfo]=SimulateModel(model,varargin)
 % simulation jobs to a compute cluster.
 % Inputs:
 %   model: DynaSim model structure or equations (see GenerateModel and 
-%          CheckModel for more details)
+%          checkModel for more details)
 % 
 %   solver options (provided as key/value pairs: 'option1',value1,'option2',value2,...):
 %     'solver'      : solver for numerical integration (see GetSolveFile)
@@ -59,7 +59,7 @@ function [data,studyinfo]=SimulateModel(model,varargin)
 % 
 %   other options:
 %     'verbose_flag'  : whether to display informative messages/logs (default: 0)
-%     'modifications' : how to modify DynaSim specification structure component before simulation (see ApplyModifications)
+%     'modifications' : how to modify DynaSim specification structure component before simulation (see applyModifications)
 %     'experiment'    : function handle of experiment function (see NOTE 2)
 %     'experiment_options' : single cell array of key/value options for experiment function
 %     'optimization'  : function handle of optimization function (see NOTE 2)
@@ -75,7 +75,7 @@ function [data,studyinfo]=SimulateModel(model,varargin)
 %     data.model            : model used to generate simulated data
 %     [data.varied]         : list of varied model components (present only if anything was varied)
 % 
-%   DynaSim studyinfo structure (only showing select fields, see CheckStudyinfo for more details)
+%   DynaSim studyinfo structure (only showing select fields, see checkStudyinfo for more details)
 %     studyinfo.study_dir
 %     studyinfo.base_model (=[]): original model from which a set of simulations was derived
 %     studyinfo.base_simulator_options (=[])
@@ -181,13 +181,13 @@ function [data,studyinfo]=SimulateModel(model,varargin)
 %   PlotFR(data,'variable','*_spikes','bin_size',30,'bin_shift',10);
 % 
 % 
-% See also: GenerateModel, CheckModel, GetSolveFile, CheckData, 
-%           Vary2Modifications, CheckStudyinfo, CreateBatch
+% See also: GenerateModel, checkModel, GetSolveFile, checkData, 
+%           Vary2Modifications, checkStudyinfo, CreateBatch
 
 % TODO: rename 'disk_flag' to something more descriptive
 
-% dependencies: WriteDynaSimSolver, WriteMatlabSolver, PropagateFunctions, CheckModel,
-% CheckOptions, Options2Keyval, DisplayError, DynaSim2Odefun
+% dependencies: WriteDynaSimSolver, WriteMatlabSolver, PropagateFunctions, checkModel,
+% checkOptions, Options2Keyval, DisplayError, DynaSim2Odefun
 
 % <-- temporarily removed from help section -->
 % NOTE 2: special functions that recursively call SimulateModel:
@@ -216,7 +216,7 @@ studyinfo=[];
 
 % Check inputs
 varargin = backward_compatibility(varargin);
-options=CheckOptions(varargin,{...
+options=checkOptions(varargin,{...
   'tspan',[0 100],[],...          % [beg,end] (units must be consistent with dt and equations)
   'ic',[],[],...                  % initial conditions (overrides definition in model structure; can input as IC structure or numeric array)
   'solver','rk4',{'euler','rk1','rk2','rk4','modified_euler','rungekutta','rk',...
@@ -442,11 +442,11 @@ end
 [model,options]=extract_vary_statement(model,options);
 
 % check/standardize model
-model=CheckModel(model); % handles conversion when input is a string w/ equations or a DynaSim specification structure
+model=checkModel(model); % handles conversion when input is a string w/ equations or a DynaSim specification structure
 
 % 1.1 apply modifications before simulation and optional further variation across simulations
 if ~isempty(options.modifications)
-  [model,options.modifications]=ApplyModifications(model,options.modifications);
+  [model,options.modifications]=applyModifications(model,options.modifications);
 end
 
 % 1.2 incorporate user-supplied initial conditions
@@ -484,10 +484,10 @@ end
 % whether to write jobs for distributed processing on cluster
 if options.cluster_flag==1
   % add to model any parameters in 'vary' not explicit in current model
-  % approach: use ApplyModifications(), it does that automatically
+  % approach: use applyModifications(), it does that automatically
   for i=1:length(modifications_set)
     if ~isempty(modifications_set{i}) && ~strcmp(modifications_set{i}{2},'mechanism_list') && ~strcmp(modifications_set{i}{2},'equations')
-      model = ApplyModifications(model,modifications_set{i});
+      model = applyModifications(model,modifications_set{i});
       break
     end
   end
@@ -510,7 +510,7 @@ if options.cluster_flag==1
 %       if options.verbose_flag
 %         fprintf('Study already finished. Importing data...\n');
 %       end
-%       studyinfo=CheckStudyinfo(studyinfo.study_dir,'process_id',options.sim_id);
+%       studyinfo=checkStudyinfo(studyinfo.study_dir,'process_id',options.sim_id);
 %       data=ImportData(studyinfo,'process_id',options.sim_id);
 %     end
   %end
@@ -614,7 +614,7 @@ try
     
     % apply modifications for this point in search space
     if ~isempty(modifications_set{sim})
-      model=ApplyModifications(base_model,modifications_set{sim});
+      model=applyModifications(base_model,modifications_set{sim});
     end
     
     % update studyinfo
@@ -682,7 +682,7 @@ try
       
       % save parameters there
       warning('off','catstruct:DuplicatesFound');
-      p = catstruct(CheckSolverOptions(options),model.parameters);
+      p = catstruct(checkSolverOptions(options),model.parameters);
       
       if matlabSolverBool
         % add IC to p for use in matlab solver
@@ -794,7 +794,7 @@ try
         % do analysis and plotting while saving results
         siminfo=studyinfo.simulations(sim_ind);
         for f=1:length(siminfo.result_functions)
-          result=AnalyzeData(tmpdata,siminfo.result_functions{f},'result_file',siminfo.result_files{f},'save_data_flag',1,'save_results_flag',1,siminfo.result_options{f}{:});
+          result=analyzeData(tmpdata,siminfo.result_functions{f},'result_file',siminfo.result_files{f},'save_data_flag',1,'save_results_flag',1,siminfo.result_options{f}{:});
           
           % since the plots are saved, close all generated figures
           if all(ishandle(result))
@@ -805,13 +805,13 @@ try
         % do analysis and plotting without saving results
         if ~isempty(options.analysis_functions)
           for f=1:length(options.analysis_functions)
-            tmpdata=AnalyzeData(tmpdata,options.analysis_functions{f},'result_file',[],'save_data_flag',0,'save_results_flag',options.save_results_flag,options.analysis_options{f}{:});
+            tmpdata=analyzeData(tmpdata,options.analysis_functions{f},'result_file',[],'save_data_flag',0,'save_results_flag',options.save_results_flag,options.analysis_options{f}{:});
           end
         end
         
         if ~isempty(options.plot_functions)
           for f=1:length(options.plot_functions)
-            AnalyzeData(tmpdata,options.plot_functions{f},'result_file',[],'save_data_flag',0,'save_results_flag',options.save_results_flag,options.plot_options{f}{:});
+            analyzeData(tmpdata,options.plot_functions{f},'result_file',[],'save_data_flag',0,'save_results_flag',options.save_results_flag,options.plot_options{f}{:});
           end
         end
       end

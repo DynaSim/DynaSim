@@ -2,7 +2,7 @@
 function xp = DynaSim2xPlt(data)
     % Convert DynaSim data structure to xp format
 
-    data = CheckData(data);
+    data = checkData(data);
     
     % Extract the data in a linear table format
     [data_table,column_titles,time] = Data2Table (data);

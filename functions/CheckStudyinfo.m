@@ -1,8 +1,8 @@
-function studyinfo=CheckStudyinfo(studyinfo,varargin)
+function studyinfo=checkStudyinfo(studyinfo,varargin)
 %CHECKSTUDYINFO - Standardize studyinfo structure and auto-populate missing fields
 %
 % Usage:
-%   studyinfo=CheckStudyinfo(studyinfo)
+%   studyinfo=checkStudyinfo(studyinfo)
 %
 % Input: DynaSim studyinfo structure
 %
@@ -72,14 +72,14 @@ function studyinfo=CheckStudyinfo(studyinfo,varargin)
 %
 % Examples:
 % - Example 1: obtain empty studyinfo structure with all fields
-%     studyinfo=CheckStudyinfo([])
+%     studyinfo=checkStudyinfo([])
 %
 % - Example 2: standardize existing studyinfo
-%     studyinfo=CheckStudyinfo(studyinfo)
+%     studyinfo=checkStudyinfo(studyinfo)
 %
 % See also: SetupStudy, SimulateModel, CreateBatch, ImportData, AnalyzeStudy
 
-options=CheckOptions(varargin,{...
+options=checkOptions(varargin,{...
   'verbose_flag',0,{0,1},...
   'process_id',[],[],... % process identifier for loading studyinfo if necessary
   },false);

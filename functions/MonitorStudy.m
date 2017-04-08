@@ -16,19 +16,19 @@ function [studyinfo,study_status]=MonitorStudy(studyinfo,varargin)
 %       2 (error in study)
 %       -1 (function failed)
 %
-% See also: SimulateModel, CreateBatch, CheckStudyinfo
+% See also: SimulateModel, CreateBatch, checkStudyinfo
 
 % Check inputs
-options=CheckOptions(varargin,{...
+options=checkOptions(varargin,{...
   'verbose_flag',1,{0,1},...
   'process_id',[],[],... % process identifier for loading studyinfo if necessary
   },false);
 if isstruct(studyinfo) && isfield(studyinfo,'study_dir')
   % retrieve most up-to-date studyinfo structure from studyinfo.mat file
-  studyinfo=CheckStudyinfo(studyinfo.study_dir,'process_id',options.process_id);
+  studyinfo=checkStudyinfo(studyinfo.study_dir,'process_id',options.process_id);
 else
   % process the provided studyinfo structure
-  studyinfo=CheckStudyinfo(studyinfo,'process_id',options.process_id);
+  studyinfo=checkStudyinfo(studyinfo,'process_id',options.process_id);
 end
 
 % Check status of study

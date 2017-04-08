@@ -5,7 +5,7 @@ function [handles,xp]=PlotData2(data,varargin)
 % PlotPower, ... to provide a single function for organizing and displaying
 % data.
 % Inputs:
-%   data: DynaSim data structure (see CheckData)
+%   data: DynaSim data structure (see checkData)
 %   Accepts the following name/value pairs:
 %     'plot_type' {'waveform' (default),'rastergram','rates','power'} - what to plot
 %     'population' - name of population to plot (default: 'all'); accepts
@@ -35,18 +35,18 @@ function [handles,xp]=PlotData2(data,varargin)
 %     'yscale' {'linear','log','log10'}, whether to plot linear or log scale
 %     'visible' {'on','off'}
 %     NOTE: analysis options available depending on plot_type
-%       see see CalcFR options for plot_type 'rastergram' or 'rates'
-%       see CalcPower options for plot_type 'power'
+%       see see calcFR options for plot_type 'rastergram' or 'rates'
+%       see calcPower options for plot_type 'power'
 % Outputs:
 %   handles: graphic handles to figures
 % 
-% See also: CalcFR, CalcPower, PlotWaveforms, CheckData, PlotData, xPlt,
+% See also: calcFR, calcPower, PlotWaveforms, checkData, PlotData, xPlt,
 %           nDDict
 
 %% Set Master parameters
   
 % Flag for returning error if the user specifies name/value pairs that are not in the
-% CheckOptions list
+% checkOptions list
 strict_mode = 0;        % Should be set to zero for this to work within simulate model
 
 %% Convert data input to appropriate form
@@ -64,7 +64,7 @@ end
 
 % Convert the incoming DynaSim data structure to an xPlt object
 if ~isa(data,'xPlt')
-    [xp,is_image] = All2xPlt(data);
+    [xp,is_image] = all2xPlt(data);
 end
 
 %% Convert varargin to appropriate forms
@@ -110,7 +110,7 @@ end
 % end
 
 %% Parse varargin and set up defaults
-[options, options_extras0] = CheckOptions(myargin,{...
+[options, options_extras0] = checkOptions(myargin,{...
   'population',[],[],...        
   'variable',[],[],...        
   'num_embedded_subplots',2,{1,2,3,4},...

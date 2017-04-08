@@ -1,5 +1,3 @@
-
-
 function out = getpath(query)
 % out = getpath(query)
 % Author David Stanley stanleyd@bu.edu

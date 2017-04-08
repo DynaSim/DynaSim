@@ -6,7 +6,7 @@ function [studyinfo,options]=SetupStudy(base_model,varargin)
 % See also: SimulateModel, UpdateStudy
 
 % Check inputs
-opts=CheckOptions(varargin,{...
+opts=checkOptions(varargin,{...
   'modifications_set',[],[],... % search space
   'simulator_options',[],[],... % options from SimulateModel
   'process_id',[],[],... % process identifier for loading studyinfo if necessary
@@ -60,7 +60,7 @@ if options.save_data_flag || options.save_results_flag || options.parallel_flag
   % initialize studyinfo if not already initialized
   if ischar(options.study_dir) && isdir(options.study_dir) && exist(fullfile(options.study_dir,'studyinfo.mat'),'file')
     % studyinfo file already exists
-    studyinfo=CheckStudyinfo(options.study_dir,'process_id',process_id);
+    studyinfo=checkStudyinfo(options.study_dir,'process_id',process_id);
     orig_studyinfo=studyinfo;
   else
     orig_studyinfo=[];
@@ -74,7 +74,7 @@ if options.save_data_flag || options.save_results_flag || options.parallel_flag
       studyinfo=[];
     end
     
-    studyinfo=CheckStudyinfo(studyinfo,'process_id',process_id); % auto-fill all fields
+    studyinfo=checkStudyinfo(studyinfo,'process_id',process_id); % auto-fill all fields
   end
   
   % set basic metadata for this study
@@ -156,7 +156,7 @@ if options.save_data_flag || options.save_results_flag || options.parallel_flag
         studyinfo.simulations(k).result_options{end+1}=options.plot_options{kk};
         fname=[options.prefix '_sim' num2str(k) '_plot' num2str(kk) '_' func2str(options.plot_functions{kk})]; 
         % note: extension will depend on output format (jpg,png,eps,svg)
-        % and be set in AnalyzeData().
+        % and be set in analyzeData().
         studyinfo.simulations(k).result_files{end+1}=fullfile(plot_dir,fname);
       end
       

@@ -11,7 +11,7 @@ function [paths,files]=LocateModelFiles(input)
 %   - paths: unique paths to mechanism files
 %   - files: full names of files containing mechanism sub-models
 %
-% See also (used by): ParseModelEquations, CheckHostPaths, CreateBatch
+% See also (used by): ParseModelEquations, checkHostPaths, CreateBatch
 
 % extract list of mechanisms from input
 if ischar(input)

@@ -1,4 +1,4 @@
-function result=AnalyzeData(data,func,varargin)
+function result=analyzeData(data,func,varargin)
 %ANALYZEDATA - Apply an analysis function to DynaSim data, optionally saving data
 %
 % Pass a single DynaSim data structure or an array of data structures to a
@@ -6,7 +6,7 @@ function result=AnalyzeData(data,func,varargin)
 % optionally save the output structure.
 %
 % Usage:
-%   result = AnalyzeData(data,func,'option1',value1,...)
+%   result = analyzeData(data,func,'option1',value1,...)
 %
 % Inputs:
 %   - data: DynaSim data structure (also accepted: data file name)
@@ -27,7 +27,7 @@ function result=AnalyzeData(data,func,varargin)
 % See also: SimulateModel
 
 % check inputs
-options=CheckOptions(varargin,{...
+options=checkOptions(varargin,{...
   'result_file','result',[],...
   'save_results_flag',0,{0,1},...
   'format','svg',{'svg','jpg','eps','png','fig'},...
@@ -61,7 +61,7 @@ if ~isa(func,'function_handle')
 end
 % confirm single analysis function
 if numel(func)>1
-  error('Too many function handles were supplied. AnalyzeData only applies a single function to a single data set.');
+  error('Too many function handles were supplied. analyzeData only applies a single function to a single data set.');
 end
 % save data if no output is requested
 if nargout<1

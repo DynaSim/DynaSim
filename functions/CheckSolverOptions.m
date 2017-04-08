@@ -1,4 +1,4 @@
-function options=CheckSolverOptions(options)
+function options=checkSolverOptions(options)
 %CHECKSOLVEROPTIONS - standardize simulation options appended to params.mat
 %
 % Use this to achieve consistent params.mat whether created by SimulateModel(),
@@ -6,7 +6,7 @@ function options=CheckSolverOptions(options)
 
 % standardize and set defaults
 keyvals = Options2Keyval(options);
-options=CheckOptions(keyvals,{...
+options=checkOptions(keyvals,{...
   'tspan',[0 100],[],...          % [beg,end] (units must be consistent with dt and equations)
   'downsample_factor',1,[],...    % downsampling applied during simulation (only every downsample_factor-time point is stored in memory or written to disk)
   'random_seed','shuffle',[],...        % seed for random number generator (usage: rng(random_seed))

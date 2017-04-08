@@ -1,10 +1,10 @@
-function [xp,is_image] = All2xPlt(data)
+function [xp,is_image] = all2xPlt(data)
 
 if ~isfield(data,'plot_files')      % Standard DynaSim data structure
 
     % Check inputs
-    data=CheckData(data);
-      % note: calling CheckData() at beginning enables analysis/plotting functions to
+    data=checkData(data);
+      % note: calling checkData() at beginning enables analysis/plotting functions to
       % accept data matrix [time x cells] in addition to DynaSim data structure.
 
 

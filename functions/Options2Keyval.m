@@ -7,7 +7,7 @@ function keyval = Options2Keyval(options)
 % Inputs:
 %   - options: options structure to convert
 %
-% See also: CheckOptions
+% See also: checkOptions
 
 % Grab the field names
 fields = fieldnames(options);

@@ -1,11 +1,11 @@
-function stats = CalcSpikeSync(data,varargin)
+function stats = calcSpikeSync(data,varargin)
 %CALCSPIKESYNC - Compute spike synchronization between spiketrains
 %
 % Usage:
-%   stats = CalcSpikeSync(data,'option',value)
+%   stats = calcSpikeSync(data,'option',value)
 %
 % Inputs:
-%   - data: DynaSim data structure (see CheckData)
+%   - data: DynaSim data structure (see checkData)
 %   - options:
 %     'ROI_pairs'   : {'var1',roi1,'var2',roi2; ...}
 %     'kernel_width': ms, width of gaussian for kernel regression (default: 1)
@@ -26,7 +26,7 @@ function stats = CalcSpikeSync(data,varargin)
 %   spike_threshold=[0 .5; 0 .25];
 
 %% 1.0 Check inputs
-options=CheckOptions(varargin,{...
+options=checkOptions(varargin,{...
   'ROI_pairs',[],[],...    
   'spike_threshold',0,[],... % threshold for spike detection
   'kernel_width',1,[],... % ms, width of gaussian for kernel regression
@@ -34,10 +34,10 @@ options=CheckOptions(varargin,{...
   'maxlag_time',10,[],... % ms, max lag time for cross correlation
   'time_limits',[100 inf],[],... % time limits for spectral analysis
   },false);
-data=CheckData(data);
+data=checkData(data);
 
 if numel(data)>1
-  error('CalcSpikeSync currently only supports one data set at a time');
+  error('calcSpikeSync currently only supports one data set at a time');
 end
 if isempty(options.ROI_pairs)
   % set default ROIs
@@ -240,14 +240,14 @@ for pair=1:npairs
   
   % spectral analysis
   dat=SelectData(data,'roi',{var1,roi1});
-  dat=CalcPower(dat,'time_limits',options.time_limits);
+  dat=calcPower(dat,'time_limits',options.time_limits);
   Power_MUA1=dat.([var1 '_Power_MUA']);
   Power_SUA1=dat.([var1 '_Power_SUA']);
   Power_SUA1.Pxx_mu=nanmean(Power_SUA1.Pxx,2);
   Power_SUA1.Pxx_sd=nanstd(Power_SUA1.Pxx,[],2);
 
   dat=SelectData(data,'roi',{var2,roi2});
-  dat=CalcPower(dat,'time_limits',options.time_limits);
+  dat=calcPower(dat,'time_limits',options.time_limits);
   Power_MUA2=dat.([var2 '_Power_MUA']);
   Power_SUA2=dat.([var2 '_Power_SUA']);
   Power_SUA2.Pxx_mu=nanmean(Power_SUA2.Pxx,2);   

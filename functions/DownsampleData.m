@@ -2,22 +2,22 @@ function data_out = DownsampleData(data,ds)
 %DOWNSAMPLEDATA - Downsamples DynaSim data structre data
 %
 % Usage:
-%   data_out = CalcFR(data,'option',value)
+%   data_out = calcFR(data,'option',value)
 %
 % Inputs:
-%   - data: DynaSim data structure (see CheckData)
+%   - data: DynaSim data structure (see checkData)
 %   - ds: number of datapoints to downsample
 %
 % Outputs:
 %   - data_out: data structure all fields replaced by their average valeus
 %               (averaged across neurons).
 %
-% See also: PlotFR, AnalyzeStudy, SimulateModel, CheckData, SelectVariables
+% See also: PlotFR, AnalyzeStudy, SimulateModel, checkData, SelectVariables
 
 %% 1.0 Check inputs
 
-data = CheckData(data);
-% note: calling CheckData() at beginning enables analysis function to
+data = checkData(data);
+% note: calling checkData() at beginning enables analysis function to
 % accept data matrix [time x cells] in addition to DynaSim data structure.
 
 %% do the averaging

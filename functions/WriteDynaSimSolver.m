@@ -62,12 +62,12 @@ function [outfile,options]=WriteDynaSimSolver(model,varargin)
 %     tic; WriteDynaSimSolver(model,'save_parameters_flag',1,'reduce_function_calls_flag',1,'solver','rk1','filename','solve_ode.m','dt',.001,'downsample_factor',10); v=solve_ode; plot(v); toc
 %     tic; WriteDynaSimSolver(model,'save_parameters_flag',1,'reduce_function_calls_flag',1,'solver','rk1','filename','solve_ode.m','dt',.005,'tspan',[0 200],'downsample_factor',10); v=solve_ode; plot(v); toc
 %
-% Dependencies: CheckOptions, CheckModel
+% Dependencies: checkOptions, checkModel
 %
 % See also: GetSolveFile, SimulateModel, WriteMatlabSolver
 
 % Check inputs
-options=CheckOptions(varargin,{...
+options=checkOptions(varargin,{...
   'tspan',[0 100],[],...          % [beg,end] (units must be consistent with dt and equations)
   'downsample_factor',1,[],...    % downsampling applied during simulation (only every downsample_factor-time point is stored in memory or written to disk)
   'dt',.01,[],...                 % time step used for fixed step DynaSim solvers
@@ -83,7 +83,7 @@ options=CheckOptions(varargin,{...
   'verbose_flag',1,{0,1},...
   'one_solve_file_flag',0,{0,1},... % use only 1 solve file of each type, but can't vary mechs yet
   },false);
-model=CheckModel(model);
+model=checkModel(model);
 separator=','; % ',', '\\t'
 
 %% 1.0 prepare model info
@@ -115,12 +115,12 @@ if options.save_parameters_flag
   
   % save parameters to disk
   warning('off','catstruct:DuplicatesFound');
-  p = catstruct(CheckSolverOptions(options),model.parameters);
+  p = catstruct(checkSolverOptions(options),model.parameters);
   
   if options.one_solve_file_flag
     % fill p flds that were varied with vectors of length = nSims
     
-    vary=CheckOptions(varargin,{'vary',[],[],},false);
+    vary=checkOptions(varargin,{'vary',[],[],},false);
     vary = vary.vary;
 
     mod_set = Vary2Modifications(vary);
@@ -131,7 +131,7 @@ if options.save_parameters_flag
     % Get param names
     iMod = 1;
     % Split extra entries in first 2 cols of mods, so each row is a single pop and param
-    [~, first_mod_set] = ApplyModifications([],mod_set{iMod});
+    [~, first_mod_set] = applyModifications([],mod_set{iMod});
 
     % replace '->' with '_'
     first_mod_set(:,1) = strrep(first_mod_set(:,1), '->', '_');
@@ -162,7 +162,7 @@ if options.save_parameters_flag
     param_values = nan(nParamMods, length(mod_set));
     for iMod = 1:length(mod_set)
       % Split extra entries in first 2 cols of mods, so each row is a single pop and param
-      [~, mod_set{iMod}] = ApplyModifications([],mod_set{iMod});
+      [~, mod_set{iMod}] = applyModifications([],mod_set{iMod});
       
       % Get scalar values as vector
       param_values(:, iMod) = [mod_set{iMod}{:,3}];
@@ -568,7 +568,7 @@ end
 odes = struct2cell(model.ODEs);
 for i=1:length(odes)
   for j=1:length(state_variables)
-    odes{i}=dynasim_strrep(odes{i},state_variables{j},[state_variables{j} index_lasts{j}]);
+    odes{i}=dynasimStrrep(odes{i},state_variables{j},[state_variables{j} index_lasts{j}]);
   end
 end
 
@@ -714,7 +714,7 @@ function odes_out=update_odes(odes,suffix_k,increment,state_variables,index_last
   odes_out=odes;
   for i=1:length(odes)
     for j=1:length(odes)
-      odes_out{i}=dynasim_strrep(odes_out{i},[state_variables{j} index_lasts{j}],sprintf('(%s%s+%s*%s%s)',state_variables{j},index_lasts{j},increment,state_variables{j},suffix_k),'(',')');
+      odes_out{i}=dynasimStrrep(odes_out{i},[state_variables{j} index_lasts{j}],sprintf('(%s%s+%s*%s%s)',state_variables{j},index_lasts{j},increment,state_variables{j},suffix_k),'(',')');
     end
   end
 end
@@ -783,23 +783,23 @@ function print_conditional_update(fid,conditionals,index_nexts,state_variables)
       if strcmp('spike_monitor',conditionals(i).namespace)
         % do nothing if spike_monitor
       else
-        condition=dynasim_strrep(condition,state_variables{j},[state_variables{j} index_nexts{j}]);
+        condition=dynasimStrrep(condition,state_variables{j},[state_variables{j} index_nexts{j}]);
       end
       
-      action=dynasim_strrep(action,state_variables{j},[state_variables{j} action_index]);
+      action=dynasimStrrep(action,state_variables{j},[state_variables{j} action_index]);
       
       if ~isempty(elseaction)
-        elseaction=dynasim_strrep(elseaction,state_variables{j},[state_variables{j} action_index]);
+        elseaction=dynasimStrrep(elseaction,state_variables{j},[state_variables{j} action_index]);
       end
     end
     
     % write conditional to solver function
     fprintf(fid,'  conditional_test=(%s);\n',condition);
-    action=dynasim_strrep(action,'\(n,:','(n,conditional_test');
+    action=dynasimStrrep(action,'\(n,:','(n,conditional_test');
     fprintf(fid,'  if any(conditional_test), %s; ',action);
     
     if ~isempty(elseaction)
-      elseaction=dynasim_strrep(elseaction,'(n,:','(n,conditional_test');
+      elseaction=dynasimStrrep(elseaction,'(n,:','(n,conditional_test');
       fprintf('else %s; ',elseaction);
     end
     
@@ -850,8 +850,8 @@ function print_monitor_update(fid,monitors,index_nexts,state_variables,index_las
   % add indexes to state variables in monitors
   for i=1:length(monitor_name)
     for j=1:length(state_variables)
-      %monitor_expression{i}=dynasim_strrep(monitor_expression{i},state_variables{j},[state_variables{j} index_lasts{j}]);
-      monitor_expression{i}=dynasim_strrep(monitor_expression{i},state_variables{j},[state_variables{j} monitor_index]);
+      %monitor_expression{i}=dynasimStrrep(monitor_expression{i},state_variables{j},[state_variables{j} index_lasts{j}]);
+      monitor_expression{i}=dynasimStrrep(monitor_expression{i},state_variables{j},[state_variables{j} monitor_index]);
     end
     
     % write monitors to solver function

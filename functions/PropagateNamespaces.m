@@ -21,7 +21,7 @@ function model = PropagateNamespaces(model,map)
 % See also: GenerateModel, PropagateFunctions, ParseModelEquations, GetParentNamespace
 
 % Check model
-model=CheckModel(model);
+model=checkModel(model);
 % Check map
 if ~iscell(map) || size(map,2)~=4
   error('map must be a cell array with four columns for (name, namespace_name, namespace, type)');
@@ -133,7 +133,7 @@ function expressions=propagate_namespaces(expressions,namespaces,map,insert_type
         end
         
         % replace found word in expression by map(names_bar|parent_namespace)
-        expressions{i}=dynasim_strrep(expressions{i},words{j},new_word);
+        expressions{i}=dynasimStrrep(expressions{i},words{j},new_word);
         % check whether new word is defined in model
         % NOTE: this is necessary to account for namespace differences between
         %   user-supplied population parameters that should replace default mechanism-level parameters
@@ -162,7 +162,7 @@ function expressions=propagate_namespaces(expressions,namespaces,map,insert_type
         new_word=map{ind,2};
         
         % replace found word in expression by map(names_bar|this_namespace)
-        expressions{i}=dynasim_strrep(expressions{i},words{j},new_word);
+        expressions{i}=dynasimStrrep(expressions{i},words{j},new_word);
       end
     end
   end

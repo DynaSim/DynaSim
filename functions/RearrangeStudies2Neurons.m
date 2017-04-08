@@ -16,7 +16,7 @@ function data_out = RearrangeStudies2Neurons(data)
 %   data_out = RearrangeStudies2Cells(data,'option',value)
 %
 % Inputs:
-%   - data: DynaSim data structure array (see CheckData). Length(data) should
+%   - data: DynaSim data structure array (see checkData). Length(data) should
 %           be greater than 1.
 %
 % Outputs:
@@ -26,17 +26,17 @@ function data_out = RearrangeStudies2Neurons(data)
 %   data = RearrangeStudies2Cells(data)
 %   PlotData(data)
 %
-% See also: CalcAverages, AnalyzeStudy, SimulateModel, CheckData, SelectVariables
+% See also: calcAverages, AnalyzeStudy, SimulateModel, checkData, SelectVariables
 
 %% 1.0 Check inputs
 
-data = CheckData(data);
-% note: calling CheckData() at beginning enables analysis function to
+data = checkData(data);
+% note: calling checkData() at beginning enables analysis function to
 % accept data matrix [time x cells] in addition to DynaSim data structure.
 
 %% Average all cells together if necessary
 
-data = CalcAverages(data);
+data = calcAverages(data);
 
 %% Compress data structure array into a single structure
 

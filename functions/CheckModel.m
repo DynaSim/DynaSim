@@ -1,8 +1,8 @@
-function model=CheckModel(model)
+function model=checkModel(model)
 %CHECKMODEL - Standardize model structure and auto-populate missing fields
 %
 % Usage:
-%   model=CheckModel(model)
+%   model=checkModel(model)
 %
 % Input: DynaSim model structure or equations
 %
@@ -28,7 +28,7 @@ function model=CheckModel(model)
 %       .expression: string giving the expression to insert
 %       .operation : string giving the operation to use to insert expression
 %     model.comments{i}     : cell array of comments found in model files
-%     model.specification   : specification used to generate the model (see CheckSpecification)
+%     model.specification   : specification used to generate the model (see checkSpecification)
 %     model.namespaces      : (see NOTE 3)
 %
 %   - NOTE 1: "action" may include multiple statements separated by semicolons.
@@ -60,12 +60,12 @@ function model=CheckModel(model)
 %
 % Examples:
 % - Example 1: obtain empty model structure with all fields
-%     model=CheckModel([])
+%     model=checkModel([])
 %
 % - Example 2: standardize existing model
-%     model=CheckModel(model)
+%     model=checkModel(model)
 %
-% see also: GenerateModel, CheckSpecification, CheckData
+% see also: GenerateModel, checkSpecification, checkData
 
 field_order={'parameters','fixed_variables','functions','monitors',...
   'state_variables','ODEs','ICs','conditionals','linkers','comments',...
@@ -105,7 +105,7 @@ model=backward_compatibility(model);
 % note: auto-populating and standardization of field order may not be
 % necessary or beneficial for DynaSim model structures. It only adds extra
 % time... if the above is uncommented-out, then CombineModels() should also
-% be edited by uncommenting-out the call to CheckModel() and commenting-out
+% be edited by uncommenting-out the call to checkModel() and commenting-out
 % the call to orderfields according to first input (at the end of the
 % function).
 

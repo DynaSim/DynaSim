@@ -1,8 +1,8 @@
-function data=CheckData(data)
+function data=checkData(data)
 %CHECKDATA - Standardize data structure and auto-populate missing fields
 %
 % Usage:
-%   data=CheckData(data)
+%   data=checkData(data)
 %
 % Input: DynaSim data structure, data matrix [time x cells], or cell array of data matrices
 %

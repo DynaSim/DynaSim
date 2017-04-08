@@ -1,11 +1,11 @@
-function data = CalcPower(data,varargin)
+function data = calcPower(data,varargin)
 %CALCPOWER - Compute spectral analysis of DynaSim data
 %
 % Usage:
-%   data = CalcPower(data,'option',value)
+%   data = calcPower(data,'option',value)
 %
 % Inputs:
-%   - data: DynaSim data structure (see CheckData)
+%   - data: DynaSim data structure (see checkData)
 %   - options:
 %     'variable'              : name of field containing data on which to
 %                               calculate firing rates (default: *_spikes or
@@ -49,14 +49,14 @@ function data = CalcPower(data,varargin)
 %   s.populations(2).name='I';
 %   s.populations(2).equations='dv/dt=@current+10; {iNa,iK}; v(0)=-65';
 %   data=SimulateModel(s,'tspan',[0 1000]);
-%   data=CalcPower(data,'variable','v');
+%   data=calcPower(data,'variable','v');
 %   % Plot the spectrum of the E-cell average population voltage
 %   figure; plot(data.E_v_Power_MUA.frequency,data.E_v_Power_MUA.Pxx);
 %   xlabel('frequency (Hz)'); ylabel('power'); xlim([0 200]);
 %
-% See also: PlotPower, AnalyzeStudy, SimulateModel, CheckData, SelectVariables
+% See also: PlotPower, AnalyzeStudy, SimulateModel, checkData, SelectVariables
 %% 1.0 Check inputs
-options=CheckOptions(varargin,{...
+options=checkOptions(varargin,{...
   'variable',[],[],...
   'time_limits',[-inf inf],[],...
   'smooth_factor',5,[],... % number of samples for smoothing the spectrum
@@ -69,13 +69,13 @@ options=CheckOptions(varargin,{...
   'output_suffix','',[],...
   },false);
 
-data = CheckData(data);
-% note: calling CheckData() at beginning enables analysis function to
+data = checkData(data);
+% note: calling checkData() at beginning enables analysis function to
 % accept data matrix [time x cells] in addition to DynaSim data structure.
 
 if numel(data)>1
-  % use AnalyzeStudy to recursively call CalcPower on each data set
-  data=AnalyzeStudy(data,@CalcPower,varargin{:});
+  % use AnalyzeStudy to recursively call calcPower on each data set
+  data=AnalyzeStudy(data,@calcPower,varargin{:});
   return;
 end
 

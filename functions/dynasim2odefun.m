@@ -42,7 +42,7 @@ function [ODEFUN,IC,elem_names]=dynasim2odefun(model, varargin)
 % 4. replace state vars in ODEs by X
 % 5. combine X ODEs into ODEFUN
 
-options=CheckOptions(varargin,{...
+options=checkOptions(varargin,{...
   'odefun_output','func_handle',{'func_handle','anonymous_func_string','func_body'},...
   },false);
 
@@ -109,7 +109,7 @@ ODEs=[ODEs{:}]; % concatenate ODEs into a single string
 
 % substitute in generic state vector X
 for i=1:num_vars
-  ODEs=dynasim_strrep(ODEs,old_vars{i},new_vars{i});
+  ODEs=dynasimStrrep(ODEs,old_vars{i},new_vars{i});
 end
 
 % prepare outputs (function handle string, ICs, and element names for

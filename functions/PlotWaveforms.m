@@ -5,7 +5,7 @@ function PlotWaveforms(data,varargin)
 %   PlotWaveforms(data,'option',value)
 %
 % Inputs:
-%   - data: DynaSim data structure (see CheckData)
+%   - data: DynaSim data structure (see checkData)
 %   - options:
 %     'variable': name of field containing data to plot (default: all pops with
 %                 state variable of variable in data.labels)
@@ -97,13 +97,13 @@ function PlotWaveforms(data,varargin)
 %     PlotWaveforms(data,'variable','E1_v');
 %     PlotWaveforms(data,'variable','*');
 %
-% See also: PlotFR, CheckData
+% See also: PlotFR, checkData
 
 % Check inputs
-data=CheckData(data);
+data=checkData(data);
 fields=fieldnames(data);
 
-options=CheckOptions(varargin,{...
+options=checkOptions(varargin,{...
   'time_limits',[-inf inf],[],...
   'variable',[],[],...        
   'max_num_overlaid',50,[],...

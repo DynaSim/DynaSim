@@ -1,4 +1,4 @@
-function stats = CalcCellProperties(data,varargin)
+function stats = calcCellProperties(data,varargin)
 %CALCCELLPROPERTIES - calculates the intrinsic electrophysiological properties of all cells in one or more populations
 %
 % This is designed to be used in conjunction with the experiment
@@ -8,7 +8,7 @@ function stats = CalcCellProperties(data,varargin)
 % "cell_pulses".
 %
 % Usage:
-%   stats = CalcCellProperties(data,'option1',option1,...)
+%   stats = calcCellProperties(data,'option1',option1,...)
 %
 % Inputs:
 %   - data: array of DynaSim data structures returned by ProbeCellProperties
@@ -105,19 +105,19 @@ function stats = CalcCellProperties(data,varargin)
 %
 % Example:
 %   data = ProbeCellProperties(model)
-%   stats = CalcCellProperties(data)
+%   stats = calcCellProperties(data)
 %
 % See also: ProbeCellProperties
 
 % Check inputs
-options=CheckOptions(varargin,{...
+options=checkOptions(varargin,{...
   'spike_threshold',1e-5,[],...
   'skip_time',10,[],... % time [ms] to exclude from detection
   'plot_flag',0,{0,1},...
   'equivalent_cells_flag',0,[],... % if true, only process one cell per pop
   },false);
 
-data=CheckData(data);
+data=checkData(data);
 model=data(1).model;
 time=data(1).time;
 num_times=length(time);

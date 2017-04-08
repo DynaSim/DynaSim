@@ -5,8 +5,8 @@ function handles=PlotFR(data,varargin)
 %   PlotFR(data,'option',value)
 %
 % Inputs:
-%   - data: DynaSim data structure (see CheckData)
-%   - options: (same as CalcFR)
+%   - data: DynaSim data structure (see checkData)
+%   - options: (same as calcFR)
 %     'variable' : name of field containing data on which to calculate firing
 %                  rates (default: *_spikes or first variable in data.labels)
 %     'threshold': scalar threshold value for detecting events (default: 0)
@@ -23,15 +23,15 @@ function handles=PlotFR(data,varargin)
 %
 % TODO: add rastergrams
 %
-% See also: CalcFR, SimulateModel, CheckData
+% See also: calcFR, SimulateModel, checkData
 
-data=CheckData(data);
+data=checkData(data);
 fields=fieldnames(data);
 handles=[];
 
 % calc firing rates if not already present in data
 if all(cellfun(@isempty,regexp(fields,'.*_FR$')))
-  data=CalcFR(data,varargin{:}); % equivalent: data=AnalyzeStudy(data,@CalcFR,varargin{:});
+  data=calcFR(data,varargin{:}); % equivalent: data=AnalyzeStudy(data,@calcFR,varargin{:});
   fields=fieldnames(data);
 end
 % get list of fields with firing rate data

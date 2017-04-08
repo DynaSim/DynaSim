@@ -6,19 +6,19 @@ function [model,name_map]=GenerateModel(specification,varargin)
 %
 % Inputs:
 %   - specification: one of:
-%     - DynaSim specification structure (see below and CheckSpecification for more details)
+%     - DynaSim specification structure (see below and checkSpecification for more details)
 %     - string with name of MAT-file containing DynaSim specification structure
 %     - string with equations
 %     - string with name of file containing equations (.eqns)
 %       note: .eqns files can also be converted into model structure using LoadModel()
 %   - options (with defaults): 'option1',value1,'option2',value2,...
 %     'modifications'  : specify modifications to apply to specification
-%                        before generating the model, see ApplyModifications
+%                        before generating the model, see applyModifications
 %                        for more details (default?: []).
 %     'open_link_flag' : whether to leave linker identifiers in place (default: 0)
 %
 % Outputs:
-%   - model: DynaSim model structure (see CheckModel for more details):
+%   - model: DynaSim model structure (see checkModel for more details):
 %     .parameters      : substructure with model parameters
 %     .fixed_variables : substructure with fixed variable definitions
 %     .functions       : substructure with function definitions
@@ -30,17 +30,17 @@ function [model,name_map]=GenerateModel(specification,varargin)
 %                             each state variable
 %     .conditionals(i) : structure array with each element indicating
 %                             conditional actions specified in subfields
-%                             "condition","action","else" (see NOTE 1 in CheckModel)
+%                             "condition","action","else" (see NOTE 1 in checkModel)
 %     .linkers(i)      : structure array with each element indicating
 %                             an "expression" that should be inserted
 %                             (according to "operation") into any equations
-%                             where the "target" appears. (see NOTE 2 in CheckModel)
+%                             where the "target" appears. (see NOTE 2 in checkModel)
 %       .target    : string giving the target where expression should be inserted
 %       .expression: string giving the expression to insert
 %       .operation : string giving the operation to use to insert expression
 %     .comments{i}     : cell array of comments found in model files
 %     .specification   : specification used to generate the model
-%     .namespaces      : (see NOTE 3 in CheckModel)
+%     .namespaces      : (see NOTE 3 in checkModel)
 %   - name_map: cell matrix mapping parameter, variable, and function names
 %       between the user-created specification (population equations and mechanism
 %       files) and the full model with automatically generated namespaces. It
@@ -49,13 +49,13 @@ function [model,name_map]=GenerateModel(specification,varargin)
 %       'functions', or 'monitors') indicating the category to which the named
 %       element belongs.
 %
-% - DynaSim specification structure (see CheckSpecification for more details)
+% - DynaSim specification structure (see checkSpecification for more details)
 %   .populations(i) (required): contains info for defining independent population models
 %       .name (default: 'pop1')      : name of population
 %       .size (default: 1)           : number of elements in population (i.e., # cells)
-%       .equations (required)        : string listing equations (see NOTE 1 in CheckSpecification)
+%       .equations (required)        : string listing equations (see NOTE 1 in checkSpecification)
 %       .mechanism_list (default: []): cell array listing mechanisms (see NOTE 2
-%                                      in CheckSpecification)
+%                                      in checkSpecification)
 %       .parameters (default: [])    : parameters to assign across all equations in
 %         the population. provide as cell array list of key/value pairs
 %         {'param1',value1,'param2',value2,...}
@@ -111,7 +111,7 @@ function [model,name_map]=GenerateModel(specification,varargin)
 %     and "57" is the Na+ current at http://infinitebrain.org/models/57.
 %     note: currently not supported on *most* machines...
 %
-% See also: CheckSpecification, CheckModel, ParseModelEquations, SimulateModel
+% See also: checkSpecification, checkModel, ParseModelEquations, SimulateModel
 
 % Check inputs
 % ------------------------------------------------------
@@ -126,7 +126,7 @@ if nargin==0
 end
 % ------------------------------------------------------
 
-options=CheckOptions(varargin,{...
+options=checkOptions(varargin,{...
   'modifications',[],[],...
   'open_link_flag',0,{0,1},...
   },false);
@@ -142,11 +142,11 @@ if isfield(specification,'state_variables')
 %   end
 end
 % standardize specification
-specification=CheckSpecification(specification); % standardize & auto-populate as needed
+specification=checkSpecification(specification); % standardize & auto-populate as needed
 
 % Apply modifications to specification before generating model
 if ~isempty(options.modifications)
-  specification=ApplyModifications(specification,options.modifications);
+  specification=applyModifications(specification,options.modifications);
 end
 
 % specification metadata:
@@ -172,7 +172,7 @@ ncons=length(specification.connections); % number of connections
 %     - add support for dv/dt=@M; {Na@M,K@M}
 %       have GenerateModel split mech_name on '@' and replace first
 %       linker in mech (e.g., @current) by what follows '@' (e.g., @M)
-%     - then have CheckSpecification convert {Na,K}@M into {Na@M,K@M}
+%     - then have checkSpecification convert {Na,K}@M into {Na@M,K@M}
 
 %% 1.0 load sub-models, assign namespaces, and combine across all equations and mechanisms in specification
 model.parameters={};
@@ -198,10 +198,10 @@ for i=1:npops
     % adjust the name if necessary
     if ~strcmp(specification.populations(i).name,tmpname)
       % use the name in the specification
-      tmpmodel=ApplyModifications(tmpmodel,{tmpname,'name',specification.populations(i).name});
+      tmpmodel=applyModifications(tmpmodel,{tmpname,'name',specification.populations(i).name});
     elseif strcmp(tmpname,'pop1') % if default name
       % use default name for this population index
-      tmpmodel=ApplyModifications(tmpmodel,{tmpname,'name',sprintf('pop%g',i)});
+      tmpmodel=applyModifications(tmpmodel,{tmpname,'name',sprintf('pop%g',i)});
     end
     
     tmpmodel.linkers=[]; % remove old linkers from original model construction
@@ -658,7 +658,7 @@ model.parameters = cell2struct(c,f,1);
 model.specification = specification; % store specification to enable modifications to be applied later
 model.namespaces = name_map; % store name_map for transparency
 
-model=CheckModel(model);
+model=checkModel(model);
 
 end
 
@@ -676,7 +676,7 @@ function str=linker_strrep(str,oldstr,newstr,operator)
   
   % check if anything besides a single variable:
   if isempty(regexp(newstr,'[^a-z_A-Z\d]+','once'))
-    str=dynasim_strrep(str,oldstr,newstr);
+    str=dynasimStrrep(str,oldstr,newstr);
   else
     % otherwise do substitution with operator and parenthesis
     pat=['([^\w]+)' oldstr '([^\w]+)']; % in the middle

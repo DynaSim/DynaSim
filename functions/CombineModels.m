@@ -8,11 +8,11 @@ function model=CombineModels(model1,model2)
 %
 % Output: DynaSim model with fields combined from both models
 %
-% See also: CheckModel, GenerateModel
+% See also: checkModel, GenerateModel
 
 % standardize model structures
-model1=CheckModel(model1);
-model2=CheckModel(model2);
+model1=checkModel(model1);
+model2=checkModel(model2);
 
 % combine fields from sub-structures
 model.parameters=concatenate_structures(model1.parameters,model2.parameters);
@@ -35,9 +35,9 @@ model.comments=cat(2,model1.comments,model2.comments);
 % ...
 
 % standardize resulting model
-% model=CheckModel(model);
-  % note: if this call to CheckModel() is uncommented-out, the changes noted
-  % in CheckModel() should also be made...
+% model=checkModel(model);
+  % note: if this call to checkModel() is uncommented-out, the changes noted
+  % in checkModel() should also be made...
 
 % reorder fields according to first input
 model=orderfields(model,model1);

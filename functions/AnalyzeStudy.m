@@ -21,10 +21,10 @@ function [results,studyinfo]=AnalyzeStudy(data,func,varargin)
 %
 % TODO: annotate figures with data set-specific modifications
 %
-% See also: SimulateModel, CalcFR
+% See also: SimulateModel, calcFR
 
 % check inputs
-options=CheckOptions(varargin,{...
+options=checkOptions(varargin,{...
   'prefix','study_analysis',[],...
   'save_data_flag',0,{0,1},...
   'detailed_names_flag',0,{0,1},...
@@ -37,7 +37,7 @@ if ~(isstruct(data) && isfield(data,'time'))
   % this is a data file, list of data files, studyinfo structure, study_dir, or studyinfo file
   [data,studyinfo]=ImportData(data,varargin{:}); % load all data in study
 else
-  studyinfo=CheckStudyinfo([]);
+  studyinfo=checkStudyinfo([]);
 end
 
 % studyinfo.base_simulator_options (contains study_dir, etc)
@@ -53,7 +53,7 @@ for i=1:length(func)
     error('the second argument must be a function handle (or cell array of them) for the desired analysis function.');
   end
 end
-data=CheckData(data);
+data=checkData(data);
 
 % pass each element of data to the analysis function
 for i=1:length(data)

@@ -12,7 +12,7 @@ function [handles, hsp, h2]=PlotStudy(data,myplot_handle,varargin)
 %   [handles, h2, hsp] = PlotStudy(data,myplot_handle)
 %
 % Inputs:
-%     - data: DynaSim data structure (see CheckData)
+%     - data: DynaSim data structure (see checkData)
 %     - myplot_handle: Handle for plotting function.
 %     - options:
 %       'textfontsize': default text font size of 10
@@ -31,10 +31,10 @@ function [handles, hsp, h2]=PlotStudy(data,myplot_handle,varargin)
 % Dependencies:
 %     Uses subplot_grid.
 
-% data=CheckData(data);
+% data=checkData(data);
 handles=[];
 
-options=CheckOptions(varargin,{...
+options=checkOptions(varargin,{...
   'textfontsize',10,[],...
   'use_subplot_grid',1,{0,1},...
   },false);

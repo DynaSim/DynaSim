@@ -46,9 +46,9 @@ function data=SelectData(data,varargin)
 % See also: SimulateModel, Vary2Modifications, ImportData
 
 % check inputs
-data=CheckData(data);
+data=checkData(data);
 
-options=CheckOptions(varargin,{...
+options=checkOptions(varargin,{...
   'time_limits',[-inf inf],[],...
   'varied',[],[],...
   'roi',[],[],...
@@ -58,7 +58,7 @@ options=CheckOptions(varargin,{...
 if ~isempty(options.varied) && isfield(data,'varied')
   if size(options.varied,2)==3
     % convert into field name (set in SimulateModel:prepare_varied_metadata)
-    % note: this code is redundant with SimulateModel and AnalyzeData.
+    % note: this code is redundant with SimulateModel and analyzeData.
     % todo: eliminate redundancy
     varied={};
     for i=1:size(options.varied,1)

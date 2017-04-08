@@ -11,7 +11,7 @@ function model=PropagateFunctions(model)
 % See also: SimulateModel, GenerateModel, PropagateNamespaces
 
 % Check inputs
-model=CheckModel(model);
+model=checkModel(model);
 if ~isstruct(model.functions)
   % nothing to do
   return;
@@ -144,7 +144,7 @@ function [expression,functions_were_found]=insert_functions(expression,functions
       % prepare found expression with variable names from the target function
       if ~isequal(orig_vars,new_vars)
         for v=1:length(orig_vars)
-          found_expression=dynasim_strrep(found_expression,orig_vars{v},new_vars{v});
+          found_expression=dynasimStrrep(found_expression,orig_vars{v},new_vars{v});
         end
       end
       
@@ -155,6 +155,6 @@ function [expression,functions_were_found]=insert_functions(expression,functions
       newstr=sprintf('(%s)',found_expression);
       
       % update the target function
-      expression=dynasim_strrep(expression,oldstr,newstr,'(',')');
+      expression=dynasimStrrep(expression,oldstr,newstr,'(',')');
     end
   end

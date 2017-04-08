@@ -5,7 +5,7 @@ function data_out = CropData(data,inds)
 %   data_out = CropData(data,'option',value)
 %
 % Inputs:
-%   - data: DynaSim data structure (see CheckData)
+%   - data: DynaSim data structure (see checkData)
 %   - inds: data points to retain
 %
 % Outputs:
@@ -13,8 +13,8 @@ function data_out = CropData(data,inds)
 
 %% 1.0 Check inputs
 
-data = CheckData(data);
-% note: calling CheckData() at beginning enables analysis function to
+data = checkData(data);
+% note: calling checkData() at beginning enables analysis function to
 % accept data matrix [time x cells] in addition to DynaSim data structure.
 
 %% do the cropping

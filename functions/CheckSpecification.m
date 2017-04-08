@@ -1,8 +1,8 @@
-function spec=CheckSpecification(specification)
+function spec=checkSpecification(specification)
 %CHECKSPECIFICATION - standardize specification structure and auto-populate missing fields
 %
 % Usage:
-%   specification=CheckSpecification(specification)
+%   specification=checkSpecification(specification)
 %
 % Input: DynaSim specification structure or equations
 %
@@ -75,10 +75,10 @@ function spec=CheckSpecification(specification)
 %
 % Examples:
 %   - Example 1: obtain empty specification structure with all fields
-%       specification=CheckSpecification([]);
+%       specification=checkSpecification([]);
 %
 %   - Example 2: standardize existing specification
-%       specification=CheckSpecification(specification)
+%       specification=checkSpecification(specification)
 %
 %   - Example 3: standardize equations in cell array
 %       eqns={
@@ -86,23 +86,23 @@ function spec=CheckSpecification(specification)
 %         'dx/dt=s*(y-x)';
 %         'dy/dt=r*x-y-x*z';
 %         'dz/dt=-b*z+x*y';
-%       specification=CheckSpecification(eqns);
+%       specification=checkSpecification(eqns);
 %
 %   - Example 4: standardize equations in character array
 %       eqns='tau=10; R=10; E=-70; dV/dt=(E-V+R*1.55)/tau; if(V>-55)(V=-75)';
-%       specification=CheckSpecification(eqns);
+%       specification=checkSpecification(eqns);
 %
 %   - Example 5: standardize specification with compact field names
 %       s.pops.size=10;
 %       s.pops.equations='dv/dt=-v';
 %       s.cons.mechanism_list='iGABAa';
-%       s=CheckSpecification(s)
+%       s=checkSpecification(s)
 %
 %   - Example 6: standardize specification with everything in equation string
 %       s.pops.equations='E:dv[10]/dt=@M+I; {iNa,iK}@M; I=10';
-%       s=CheckSpecification(s)
+%       s=checkSpecification(s)
 %
-% See also: GenerateModel, CheckModel
+% See also: GenerateModel, checkModel
 
 % check if input is a string or cell with equations and package in spec structure
 if ischar(specification) || iscell(specification)

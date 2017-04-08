@@ -1,7 +1,7 @@
 function studyinfo=StudyinfoIO(studyinfo,study_file,id,verbose_flag)
 %STUDYINFOIO - use lock files to manage concurrent access to a shared studyinfo 
 %
-% This is an internal helper function called by CheckStudyinfo, SetupStudy,
+% This is an internal helper function called by checkStudyinfo, SetupStudy,
 % TrackStudy, and CreateBatch to prevent busy-file conflicts. file. i.e.,
 % serialize read/writes for parallel processes in study batch.
 %

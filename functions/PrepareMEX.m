@@ -15,7 +15,7 @@ else
     keyvals = args;
 end
 
-options=CheckOptions(keyvals,{...
+options=checkOptions(keyvals,{...
   'verbose_flag',0,{0,1},... % set verbose to 1 by default
   'mexpath',[],[],... % Directory to search for pre-compiled solve files (solve*_mex*)
   },false);

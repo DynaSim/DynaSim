@@ -6,7 +6,7 @@ function [data_table,column_titles,time] = Data2Table(data,verbose_flag)
         verbose_flag = 0;
     end
 
-    CheckData(data);            % Makes sure it's a valid DynaSim Data structure
+    checkData(data);            % Makes sure it's a valid DynaSim Data structure
     
     % Extract Time variable
     time = data(1).time;

@@ -1,5 +1,3 @@
-
-
 function [dt_formatted] = previewTable(data_table,col_names)
 
     % All data, formatted into cells

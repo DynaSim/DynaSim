@@ -1,11 +1,11 @@
-function data = CalcFRmulti(data,varargin)
-%CALCFRMULTI - extends CalcFR to get SUA and MUA firing rates
+function data = calcFRmulti(data,varargin)
+%CALCFRMULTI - extends calcFR to get SUA and MUA firing rates
 %
 % Usage:
-%   data = CalcFRmulti(data,'option',value)
+%   data = calcFRmulti(data,'option',value)
 %
 % Inputs:
-%   - data: DynaSim data structure (see CheckData)
+%   - data: DynaSim data structure (see checkData)
 %   - options:
 %     'variable'         : name of field containing data on which to calculate
 %                          firing rates (default: *_spikes or first variable in data.labels)
@@ -38,13 +38,13 @@ function data = CalcFRmulti(data,varargin)
 %   s.populations(2).name='I';
 %   s.populations(2).equations='dv/dt=@current+10; {iNa,iK}; v(0)=-65';
 %   data=SimulateModel(s);
-%   data=CalcFR(data,'variable','*_v');
+%   data=calcFR(data,'variable','*_v');
 %   data % contains firing rates for E and I pops in .E_v_FR_SUA/MUA and .I_v_FR_SUA/MUA.
 %
-% See also: PlotFR, AnalyzeStudy, SimulateModel, CheckData, SelectVariables
+% See also: PlotFR, AnalyzeStudy, SimulateModel, checkData, SelectVariables
 
 %% 1.0 Check inputs
-options=CheckOptions(varargin,{...
+options=checkOptions(varargin,{...
   'variable',[],[],...
   'time_limits',[-inf inf],[],...
   'threshold',1e-5,[],... % slightly above zero in case variable is point process *_spikes {0,1}
@@ -54,13 +54,13 @@ options=CheckOptions(varargin,{...
   'output_suffix','',[],...
   },false);
 
-data = CheckData(data);
-% note: calling CheckData() at beginning enables analysis function to
+data = checkData(data);
+% note: calling checkData() at beginning enables analysis function to
 % accept data matrix [time x cells] in addition to DynaSim data structure.
 
 if numel(data)>1
-  % use AnalyzeStudy to recursively call CalcFRmulti on each data set
-  data=AnalyzeStudy(data,@CalcFRmulti,varargin{:});
+  % use AnalyzeStudy to recursively call calcFRmulti on each data set
+  data=AnalyzeStudy(data,@calcFRmulti,varargin{:});
   return;
 end
 

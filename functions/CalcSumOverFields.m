@@ -1,11 +1,11 @@
-function data = CalcSumOverFields(data, fields, output_field_name)
+function data = calcSumOverFields(data, fields, output_field_name)
 %CALCSUMOVERFIELDS - Creates a new field in data that is the sum of a bunch of other fields
 %
 % These fields are specified by the "fields" cell array. Stores the output in
 % "output_field_name." Useful for adding multiple ionic currents together.
 %
 % Inputs:
-%   - data: DynaSim data structure (see CheckData)
+%   - data: DynaSim data structure (see checkData)
 %   - fields: cell array of field names. These will be summed and stored in the
 %       field called output_field_name.
 %   - output_field_name: string containing the desired output field name.
@@ -32,8 +32,8 @@ if isempty(strfind(output_field_name,'_'))
 
 end
 
-data = CheckData(data);
-% note: calling CheckData() at beginning enables analysis function to
+data = checkData(data);
+% note: calling checkData() at beginning enables analysis function to
 % accept data matrix [time x cells] in addition to DynaSim data structure.
 
 for i = 1:length(data)

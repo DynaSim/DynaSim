@@ -1,11 +1,11 @@
-function data = CalcISI(data,varargin)
+function data = calcISI(data,varargin)
 %CALCISI - Calculate the interspike interval.
 %
 % Usage:
-%   data = CalcISI(data,'option',value)
+%   data = calcISI(data,'option',value)
 %
 % Inputs:
-%   - data: DynaSim data structure (see CheckData)
+%   - data: DynaSim data structure (see checkData)
 %   - options:
 %     'variable'         : name of field containing data on which to calculate
 %                          ISIs (default: *_spikes or first variable in data.labels)
@@ -33,26 +33,26 @@ function data = CalcISI(data,varargin)
 %   s.populations(2).name='I';
 %   s.populations(2).equations='dv/dt=@current+10; {iNa,iK}; v(0)=-65';
 %   data=SimulateModel(s);
-%   data=CalcISI(data,'variable','*_v');
+%   data=calcISI(data,'variable','*_v');
 %   data % contains ISIs for E and I pops in .E_v_ISI_SUA/MUA and .I_v_ISI_SUA/MUA
 %
-% See also: PlotFR, AnalyzeStudy, SimulateModel, CheckData, SelectVariables
+% See also: PlotFR, AnalyzeStudy, SimulateModel, checkData, SelectVariables
 
 %% 1.0 Check inputs
-options=CheckOptions(varargin,{...
+options=checkOptions(varargin,{...
   'variable',[],[],...
   'threshold',1e-5,[],... % slightly above zero in case variable is point process *_spikes {0,1}
   'exclude_data_flag',0,{0,1},...
   'output_suffix','',[],...
   },false);
 
-data = CheckData(data);
-% note: calling CheckData() at beginning enables analysis function to
+data = checkData(data);
+% note: calling checkData() at beginning enables analysis function to
 % accept data matrix [time x cells] in addition to DynaSim data structure.
 
 if numel(data)>1
-  % use AnalyzeStudy to recursively call CalcISI on each data set
-  data=AnalyzeStudy(data,@CalcISI,varargin{:});
+  % use AnalyzeStudy to recursively call calcISI on each data set
+  data=AnalyzeStudy(data,@calcISI,varargin{:});
   return;
 end
 

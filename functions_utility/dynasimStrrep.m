@@ -1,16 +1,16 @@
-function str=dynasim_strrep(str,oldstr,newstr,lpad,rpad)
-%DYNASIM_STRREP - replace full words by new character strings, ignoring matches that appear as sub-strings.
+function str=dynasimStrrep(str,oldstr,newstr,lpad,rpad)
+%dynasimStrrep - replace full words by new character strings, ignoring matches that appear as sub-strings.
 %
 % Note: built-in strrep replaces ALL matches.
 %
 % Examples:
-%   dynasim_strrep('(v)*(-av)','v','pop1_v')
-%   dynasim_strrep('v-v^2+vav','v','pop1_v')
-%   dynasim_strrep('v-v-v','v','pop1_v')
-%   dynasim_strrep('v-v-v^2','v','pop1_v')
-%   dynasim_strrep('(v-v-v^2)','v','pop1_v')
-%   dynasim_strrep('E-pop1_V+1','pop1_V','pop1_V(n-1)')
-%   dynasim_strrep('v=1; u=u+d','u','u(n,test)')
+%   dynasimStrrep('(v)*(-av)','v','pop1_v')
+%   dynasimStrrep('v-v^2+vav','v','pop1_v')
+%   dynasimStrrep('v-v-v','v','pop1_v')
+%   dynasimStrrep('v-v-v^2','v','pop1_v')
+%   dynasimStrrep('(v-v-v^2)','v','pop1_v')
+%   dynasimStrrep('E-pop1_V+1','pop1_V','pop1_V(n-1)')
+%   dynasimStrrep('v=1; u=u+d','u','u(n,test)')
 
 if nargin<4, lpad=''; end
 if nargin<5, rpad=''; end

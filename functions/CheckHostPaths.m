@@ -1,7 +1,7 @@
-function [matched,error_message]=CheckHostPaths(studyinfo)
+function [matched,error_message]=checkHostPaths(studyinfo)
 %CHECKHOSTPATHS - Compare paths on host to those set in studyinfo when batch was created
 %
-% Call CheckHostPaths() in job.m before first simulation to make sure the
+% Call checkHostPaths() in job.m before first simulation to make sure the
 % paths on the compute matchine match those in studyinfo created when the
 % study was began.
 %
@@ -9,7 +9,7 @@ function [matched,error_message]=CheckHostPaths(studyinfo)
 % .error_log (see CreateBatch() or any jobX.m script).
 %
 % Usage:
-%   CheckHostPaths(studyinfo)
+%   checkHostPaths(studyinfo)
 %
 % Inputs:
 %   - studyinfo: DynaSim studyinfo structure

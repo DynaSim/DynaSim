@@ -8,8 +8,8 @@ function handles=PlotFR2(data,varargin)
 
 %
 % Inputs:
-%   - data: DynaSim data structure (see CheckData)
-%   - options: (same as CalcFR)
+%   - data: DynaSim data structure (see checkData)
+%   - options: (same as calcFR)
 %     'variable' : name of field containing data on which to calculate firing
 %                  rates (default: *_spikes or first variable in data.labels)
 %     'threshold': scalar threshold value for detecting events (default: 0)
@@ -29,13 +29,13 @@ function handles=PlotFR2(data,varargin)
 %
 % TODO: add rastergrams
 %
-% See also: CalcFR, SimulateModel, CheckData
+% See also: calcFR, SimulateModel, checkData
 
-data=CheckData(data);
+data=checkData(data);
 fields=fieldnames(data);
 handles=[];
 
-options=CheckOptions(varargin,{...
+options=checkOptions(varargin,{...
   'plot_type','heatmap_sorted',{'heatmap','heatmap_sorted','meanFR','meanFRdens','summary'},...
   'variable',[],[],...
   'threshold',1e-5,[],... % slightly above zero in case variable is point process *_spikes {0,1}
@@ -52,7 +52,7 @@ keyvals=Options2Keyval(rmfield(options,{'plot_type'}));
 
 % calc firing rates if not already present in data
 if all(cellfun(@isempty,regexp(fields,'.*_FR$')))
-  data=CalcFR(data,keyvals{:}); % equivalent: data=AnalyzeStudy(data,@CalcFR,varargin{:});
+  data=calcFR(data,keyvals{:}); % equivalent: data=AnalyzeStudy(data,@calcFR,varargin{:});
   fields=fieldnames(data);
 end
 % get list of fields with firing rate data

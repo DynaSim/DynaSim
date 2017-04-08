@@ -24,14 +24,14 @@ function studyinfo = CreateBatch(base_model,modifications_set,varargin)
 %       'num_cores'     : number of cores to specify in the parallel pool
 %
 % Outputs:
-%   - DynaSim studyinfo (see CheckStudyinfo for schema info)
+%   - DynaSim studyinfo (see checkStudyinfo for schema info)
 %
 % Dependencies: SetupStudy, UpdateStudy
 %
-% See also: GenerateModel, SimulateModel, CheckStudyinfo, Vary2Modifications
+% See also: GenerateModel, SimulateModel, checkStudyinfo, Vary2Modifications
 
 % check inputs
-options=CheckOptions(varargin,{...
+options=checkOptions(varargin,{...
   'compile_flag',0,{0,1},...
   'parallel_flag',0,{0,1},...
   'num_cores',4,[],... % # cores for parallel processing (SCC supports 1-12)
@@ -62,7 +62,7 @@ num_simulations=length(modifications_set);
       fprintf('Study already finished. Not creating new batch.\n');
     end
     
-    studyinfo=CheckStudyinfo(studyinfo.study_dir,'process_id',options.process_id);
+    studyinfo=checkStudyinfo(studyinfo.study_dir,'process_id',options.process_id);
     
     return;
   end
@@ -410,7 +410,7 @@ end
     fjob=fopen(job_file,'wt');
     
     % load studyinfo using helper function to avoid busy file errors
-    %fprintf(fjob,'studyinfo=CheckStudyinfo(''%s'',''process_id'',%g);\n',study_file,sim_ids(1));
+    %fprintf(fjob,'studyinfo=checkStudyinfo(''%s'',''process_id'',%g);\n',study_file,sim_ids(1));
     %fprintf(fjob,'load(''%s'',''studyinfo'');\n',study_file);
     
     if ~options.one_solve_file_flag
@@ -460,7 +460,7 @@ end
       fprintf(fjob,'\t\tload(fullfile(''%s'',''studyinfo.mat''),''studyinfo'');\n',batch_dir);
     end
     % compare paths between compute machine and studyinfo startup
-    fprintf(fjob,'\t\t[valid,message]=CheckHostPaths(studyinfo);\n');
+    fprintf(fjob,'\t\t[valid,message]=checkHostPaths(studyinfo);\n');
     
     if ~options.one_solve_file_flag
       fprintf(fjob,'\t\tif ~valid\n\t\t  lasterr(message);\n\t\t  for s=1:length(SimIDs), UpdateStudy(studyinfo.study_dir,''sim_id'',SimIDs(s),''status'',''failed''); end\n\t\t  continue;\n\t\tend\n');
@@ -475,7 +475,7 @@ end
     fprintf(fjob,'\t\tfprintf(''-----------------------------------------------------\\n'');\n');
     fprintf(fjob,'\t\tdata=SimulateModel(studyinfo.base_model,''modifications'',siminfo.modifications,''studyinfo'',studyinfo,''sim_id'',SimID,keyvals{:});\n');
     fprintf(fjob,'\t\tfor i=1:length(siminfo.result_functions)\n');
-    fprintf(fjob,'\t\t\tAnalyzeData(data,siminfo.result_functions{i},''result_file'',siminfo.result_files{i},''save_data_flag'',1,siminfo.result_options{i}{:});\n');
+    fprintf(fjob,'\t\t\tanalyzeData(data,siminfo.result_functions{i},''result_file'',siminfo.result_files{i},''save_data_flag'',1,siminfo.result_options{i}{:});\n');
     fprintf(fjob,'\t\tend\n');
     
     % add error handling
