@@ -2,8 +2,8 @@
                 "http://www.w3.org/TR/REC-html40/loose.dtd">
 <html>
 <head>
-  <title>Description of RearrangeStudies2Neurons</title>
-  <meta name="keywords" content="RearrangeStudies2Neurons">
+  <title>Description of ds.rearrangeStudies2Neurons</title>
+  <meta name="keywords" content="ds.rearrangeStudies2Neurons">
   <meta name="description" content="REARRANGESTUDIES2NEURONS - Takes a DynaSim data structure that is the result of a parameter sweep and rearranges it into a single (1D) data structure.">
   <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
   <meta name="generator" content="m2html &copy; 2005 Guillaume Flandin">
@@ -16,14 +16,14 @@
 <body>
 <a name="_top"></a>
 <!-- menu.html functions -->
-<h1>RearrangeStudies2Neurons
+<h1>ds.rearrangeStudies2Neurons
 </h1>
 
 <h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
 <div class="box"><strong>REARRANGESTUDIES2NEURONS - Takes a DynaSim data structure that is the result of a parameter sweep and rearranges it into a single (1D) data structure.</strong></div>
 
 <h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
-<div class="box"><strong>function data_out = RearrangeStudies2Neurons(data) </strong></div>
+<div class="box"><strong>function data_out = ds.rearrangeStudies2Neurons(data) </strong></div>
 
 <h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
 <div class="fragment"><pre class="comment">REARRANGESTUDIES2NEURONS - Takes a DynaSim data structure that is the result of a parameter sweep and rearranges it into a single (1D) data structure.
@@ -43,7 +43,7 @@
    data_out = RearrangeStudies2Cells(data,'option',value)
 
  Inputs:
-   - data: DynaSim data structure array (see checkData). Length(data) should
+   - data: DynaSim data structure array (see ds.checkData). Length(data) should
            be greater than 1.
 
  Outputs:
@@ -51,15 +51,15 @@
 
  Example:
    data = RearrangeStudies2Cells(data)
-   PlotData(data)
+   ds.plotData(data)
 
- See also: <a href="calcAverages.html" class="code" title="function data_out = calcAverages(data,opts)">calcAverages</a>, <a href="AnalyzeStudy.html" class="code" title="function [results,studyinfo]=AnalyzeStudy(data,func,varargin)">AnalyzeStudy</a>, <a href="SimulateModel.html" class="code" title="function [data,studyinfo]=SimulateModel(model,varargin)">SimulateModel</a>, <a href="checkData.html" class="code" title="function data=checkData(data)">checkData</a>, <a href="SelectVariables.html" class="code" title="function [variables,pop_names]=SelectVariables(labels,var_strings)">SelectVariables</a></pre></div>
+ See also: <a href="ds.calcAverages.html" class="code" title="function data_out = ds.calcAverages(data,opts)">ds.calcAverages</a>, <a href="AnalyzeStudy.html" class="code" title="function [results,studyinfo]=AnalyzeStudy(data,func,varargin)">AnalyzeStudy</a>, <a href="ds.simulateModel.html" class="code" title="function [data,studyinfo]=ds.simulateModel(model,varargin)">ds.simulateModel</a>, <a href="ds.checkData.html" class="code" title="function data=ds.checkData(data)">ds.checkData</a>, <a href="ds.selectVariables.html" class="code" title="function [variables,pop_names]=ds.selectVariables(labels,var_strings)">ds.selectVariables</a></pre></div>
 
 <!-- crossreference -->
 <h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
 This function calls:
 <ul style="list-style-image:url(../matlabicon.gif)">
-<li><a href="calcAverages.html" class="code" title="function data_out = calcAverages(data,opts)">calcAverages</a>	CALCAVERAGES - Average fields in a DynaSim data struct across neurons</li><li><a href="checkData.html" class="code" title="function data=checkData(data)">checkData</a>	CHECKDATA - Standardize data structure and auto-populate missing fields</li></ul>
+<li><a href="ds.calcAverages.html" class="code" title="function data_out = ds.calcAverages(data,opts)">ds.calcAverages</a>	CALCAVERAGES - Average fields in a DynaSim data struct across neurons</li><li><a href="ds.checkData.html" class="code" title="function data=ds.checkData(data)">ds.checkData</a>	CHECKDATA - Standardize data structure and auto-populate missing fields</li></ul>
 This function is called by:
 <ul style="list-style-image:url(../matlabicon.gif)">
 </ul>
@@ -68,7 +68,7 @@ This function is called by:
 
 
 <h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
-<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function data_out = RearrangeStudies2Neurons(data)</a>
+<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function data_out = ds.rearrangeStudies2Neurons(data)</a>
 0002 <span class="comment">%REARRANGESTUDIES2NEURONS - Takes a DynaSim data structure that is the result of a parameter sweep and rearranges it into a single (1D) data structure.</span>
 0003 <span class="comment">%</span>
 0004 <span class="comment">% Each &quot;neuron&quot; in this new data structure corresponds to a simulation in the</span>
@@ -86,7 +86,7 @@ This function is called by:
 0016 <span class="comment">%   data_out = RearrangeStudies2Cells(data,'option',value)</span>
 0017 <span class="comment">%</span>
 0018 <span class="comment">% Inputs:</span>
-0019 <span class="comment">%   - data: DynaSim data structure array (see checkData). Length(data) should</span>
+0019 <span class="comment">%   - data: DynaSim data structure array (see ds.checkData). Length(data) should</span>
 0020 <span class="comment">%           be greater than 1.</span>
 0021 <span class="comment">%</span>
 0022 <span class="comment">% Outputs:</span>
@@ -94,19 +94,19 @@ This function is called by:
 0024 <span class="comment">%</span>
 0025 <span class="comment">% Example:</span>
 0026 <span class="comment">%   data = RearrangeStudies2Cells(data)</span>
-0027 <span class="comment">%   PlotData(data)</span>
+0027 <span class="comment">%   ds.plotData(data)</span>
 0028 <span class="comment">%</span>
-0029 <span class="comment">% See also: calcAverages, AnalyzeStudy, SimulateModel, checkData, SelectVariables</span>
+0029 <span class="comment">% See also: ds.calcAverages, AnalyzeStudy, ds.simulateModel, ds.checkData, ds.selectVariables</span>
 0030 
 0031 <span class="comment">%% 1.0 Check inputs</span>
 0032 
-0033 data = <a href="checkData.html" class="code" title="function data=checkData(data)">checkData</a>(data);
-0034 <span class="comment">% note: calling checkData() at beginning enables analysis function to</span>
+0033 data = <a href="ds.checkData.html" class="code" title="function data=ds.checkData(data)">ds.checkData</a>(data);
+0034 <span class="comment">% note: calling ds.checkData() at beginning enables analysis function to</span>
 0035 <span class="comment">% accept data matrix [time x cells] in addition to DynaSim data structure.</span>
 0036 
 0037 <span class="comment">%% Average all cells together if necessary</span>
 0038 
-0039 data = <a href="calcAverages.html" class="code" title="function data_out = calcAverages(data,opts)">calcAverages</a>(data);
+0039 data = <a href="ds.calcAverages.html" class="code" title="function data_out = ds.calcAverages(data,opts)">ds.calcAverages</a>(data);
 0040 
 0041 <span class="comment">%% Compress data structure array into a single structure</span>
 0042 

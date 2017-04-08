@@ -2,8 +2,8 @@
                 "http://www.w3.org/TR/REC-html40/loose.dtd">
 <html>
 <head>
-  <title>Description of PlotFR2</title>
-  <meta name="keywords" content="PlotFR2">
+  <title>Description of ds.plotFR2</title>
+  <meta name="keywords" content="ds.plotFR2">
   <meta name="description" content="PLOTFR2 - plot spike rates in various ways depending on what data was provided.">
   <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
   <meta name="generator" content="m2html &copy; 2005 Guillaume Flandin">
@@ -16,28 +16,28 @@
 <body>
 <a name="_top"></a>
 <!-- menu.html functions -->
-<h1>PlotFR2
+<h1>ds.plotFR2
 </h1>
 
 <h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
 <div class="box"><strong>PLOTFR2 - plot spike rates in various ways depending on what data was provided.</strong></div>
 
 <h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
-<div class="box"><strong>function handles=PlotFR2(data,varargin) </strong></div>
+<div class="box"><strong>function handles=ds.plotFR2(data,varargin) </strong></div>
 
 <h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
 <div class="fragment"><pre class="comment">PLOTFR2 - plot spike rates in various ways depending on what data was provided.
 
- As with PlotFR, but has additional options for controlling output of SimStudy mode.
+ As with ds.plotFR, but has additional options for controlling output of SimStudy mode.
 
  Usage:
-   PlotFR2(data,'option',value)</pre></div>
+   ds.plotFR2(data,'option',value)</pre></div>
 
 <!-- crossreference -->
 <h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
 This function calls:
 <ul style="list-style-image:url(../matlabicon.gif)">
-<li><a href="calcFR.html" class="code" title="function data = calcFR(data,varargin)">calcFR</a>	CALCFR - Calculate firing rage for DynaSim data</li><li><a href="checkData.html" class="code" title="function data=checkData(data)">checkData</a>	CHECKDATA - Standardize data structure and auto-populate missing fields</li><li><a href="checkOptions.html" class="code" title="function [parms, params_unspecified ] = checkOptions(options, options_schema, strict)">checkOptions</a>	CHECKOPTIONS - organize key/value pairs in structure with default or user-supplied values according to a schema</li><li><a href="Options2Keyval.html" class="code" title="function keyval = Options2Keyval(options)">Options2Keyval</a>	OPTIONS2KEYVAL - Convert from options structure to a list of key/value pairs.</li></ul>
+<li><a href="ds.calcFR.html" class="code" title="function data = ds.calcFR(data,varargin)">ds.calcFR</a>	CALCFR - Calculate firing rage for DynaSim data</li><li><a href="ds.checkData.html" class="code" title="function data=ds.checkData(data)">ds.checkData</a>	CHECKDATA - Standardize data structure and auto-populate missing fields</li><li><a href="ds.checkOptions.html" class="code" title="function [parms, params_unspecified ] = ds.checkOptions(options, options_schema, strict)">ds.checkOptions</a>	CHECKOPTIONS - organize key/value pairs in structure with default or user-supplied values according to a schema</li><li><a href="ds.options2Keyval.html" class="code" title="function keyval = ds.options2Keyval(options)">ds.options2Keyval</a>	OPTIONS2KEYVAL - Convert from options structure to a list of key/value pairs.</li></ul>
 This function is called by:
 <ul style="list-style-image:url(../matlabicon.gif)">
 </ul>
@@ -48,18 +48,18 @@ This function is called by:
 <li><a href="#_sub1" class="code">function plotFR_SingleSim(i)</a></li><li><a href="#_sub2" class="code">function plotFR_SimStudy</a></li><li><a href="#_sub3" class="code">function plotFR_SimStudy_specialized</a></li></ul>
 
 <h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
-<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function handles=PlotFR2(data,varargin)</a>
+<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function handles=ds.plotFR2(data,varargin)</a>
 0002 <span class="comment">%PLOTFR2 - plot spike rates in various ways depending on what data was provided.</span>
 0003 <span class="comment">%</span>
-0004 <span class="comment">% As with PlotFR, but has additional options for controlling output of SimStudy mode.</span>
+0004 <span class="comment">% As with ds.plotFR, but has additional options for controlling output of SimStudy mode.</span>
 0005 <span class="comment">%</span>
 0006 <span class="comment">% Usage:</span>
-0007 <span class="comment">%   PlotFR2(data,'option',value)</span>
+0007 <span class="comment">%   ds.plotFR2(data,'option',value)</span>
 0008 
 0009 <span class="comment">%</span>
 0010 <span class="comment">% Inputs:</span>
-0011 <span class="comment">%   - data: DynaSim data structure (see checkData)</span>
-0012 <span class="comment">%   - options: (same as calcFR)</span>
+0011 <span class="comment">%   - data: DynaSim data structure (see ds.checkData)</span>
+0012 <span class="comment">%   - options: (same as ds.calcFR)</span>
 0013 <span class="comment">%     'variable' : name of field containing data on which to calculate firing</span>
 0014 <span class="comment">%                  rates (default: *_spikes or first variable in data.labels)</span>
 0015 <span class="comment">%     'threshold': scalar threshold value for detecting events (default: 0)</span>
@@ -75,17 +75,17 @@ This function is called by:
 0025 <span class="comment">%</span>
 0026 <span class="comment">%</span>
 0027 <span class="comment">% Examples:</span>
-0028 <span class="comment">% PlotFR(data,'bin_size',30,'bin_shift',10);</span>
+0028 <span class="comment">% ds.plotFR(data,'bin_size',30,'bin_shift',10);</span>
 0029 <span class="comment">%</span>
 0030 <span class="comment">% TODO: add rastergrams</span>
 0031 <span class="comment">%</span>
-0032 <span class="comment">% See also: calcFR, SimulateModel, checkData</span>
+0032 <span class="comment">% See also: ds.calcFR, ds.simulateModel, ds.checkData</span>
 0033 
-0034 data=<a href="checkData.html" class="code" title="function data=checkData(data)">checkData</a>(data);
+0034 data=<a href="ds.checkData.html" class="code" title="function data=ds.checkData(data)">ds.checkData</a>(data);
 0035 fields=fieldnames(data);
 0036 handles=[];
 0037 
-0038 options=<a href="checkOptions.html" class="code" title="function [parms, params_unspecified ] = checkOptions(options, options_schema, strict)">checkOptions</a>(varargin,{<span class="keyword">...</span>
+0038 options=<a href="ds.checkOptions.html" class="code" title="function [parms, params_unspecified ] = ds.checkOptions(options, options_schema, strict)">ds.checkOptions</a>(varargin,{<span class="keyword">...</span>
 0039   <span class="string">'plot_type'</span>,<span class="string">'heatmap_sorted'</span>,{<span class="string">'heatmap'</span>,<span class="string">'heatmap_sorted'</span>,<span class="string">'meanFR'</span>,<span class="string">'meanFRdens'</span>,<span class="string">'summary'</span>},<span class="keyword">...</span>
 0040   <span class="string">'variable'</span>,[],[],<span class="keyword">...</span>
 0041   <span class="string">'threshold'</span>,1e-5,[],<span class="keyword">...</span><span class="comment"> % slightly above zero in case variable is point process *_spikes {0,1}</span>
@@ -97,12 +97,12 @@ This function is called by:
 0047   },false);
 0048 
 0049 lock_gca = options.lock_gca;
-0050 keyvals=<a href="Options2Keyval.html" class="code" title="function keyval = Options2Keyval(options)">Options2Keyval</a>(rmfield(options,{<span class="string">'plot_type'</span>}));
+0050 keyvals=<a href="ds.options2Keyval.html" class="code" title="function keyval = ds.options2Keyval(options)">ds.options2Keyval</a>(rmfield(options,{<span class="string">'plot_type'</span>}));
 0051 
 0052 
 0053 <span class="comment">% calc firing rates if not already present in data</span>
 0054 <span class="keyword">if</span> all(cellfun(@isempty,regexp(fields,<span class="string">'.*_FR$'</span>)))
-0055   data=<a href="calcFR.html" class="code" title="function data = calcFR(data,varargin)">calcFR</a>(data,keyvals{:}); <span class="comment">% equivalent: data=AnalyzeStudy(data,@calcFR,varargin{:});</span>
+0055   data=<a href="ds.calcFR.html" class="code" title="function data = ds.calcFR(data,varargin)">ds.calcFR</a>(data,keyvals{:}); <span class="comment">% equivalent: data=AnalyzeStudy(data,@ds.calcFR,varargin{:});</span>
 0056   fields=fieldnames(data);
 0057 <span class="keyword">end</span>
 0058 <span class="comment">% get list of fields with firing rate data</span>
@@ -313,7 +313,7 @@ This function is called by:
 0263     <a name="_sub3" href="#_subfunctions" class="code">function plotFR_SimStudy_specialized    </a><span class="comment">% Specifc plot for all sims, based on options.plot_type</span>
 0264         <span class="comment">%%</span>
 0265         
-0266         <span class="comment">% New code (imported from PlotData)</span>
+0266         <span class="comment">% New code (imported from ds.plotData)</span>
 0267         num_sims=length(data); <span class="comment">% number of simulations</span>
 0268         
 0269         
@@ -333,7 +333,7 @@ This function is called by:
 0283               param_cell{j}=unique([data.(varied{j})]); <span class="comment">% unique values for each parameter</span>
 0284             <span class="keyword">else</span>
 0285               <span class="comment">% todo: handle sims varying non-numeric model components</span>
-0286               <span class="comment">% (eg, mechanisms) (also in PlotFR and SelectData)</span>
+0286               <span class="comment">% (eg, mechanisms) (also in ds.plotFR and ds.selectData)</span>
 0287             <span class="keyword">end</span>
 0288           <span class="keyword">end</span>
 0289           param_size=cellfun(@length,param_cell); <span class="comment">% number of unique values for each parameter</span>

@@ -2,8 +2,8 @@
                 "http://www.w3.org/TR/REC-html40/loose.dtd">
 <html>
 <head>
-  <title>Description of ImportModel</title>
-  <meta name="keywords" content="ImportModel">
+  <title>Description of ds.importModel</title>
+  <meta name="keywords" content="ds.importModel">
   <meta name="description" content="IMPORTMODEL - import model from raw equations, other program source, etc.">
   <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
   <meta name="generator" content="m2html &copy; 2005 Guillaume Flandin">
@@ -16,20 +16,20 @@
 <body>
 <a name="_top"></a>
 <!-- menu.html functions -->
-<h1>ImportModel
+<h1>ds.importModel
 </h1>
 
 <h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
 <div class="box"><strong>IMPORTMODEL - import model from raw equations, other program source, etc.</strong></div>
 
 <h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
-<div class="box"><strong>function [model,map] = ImportModel(source,varargin) </strong></div>
+<div class="box"><strong>function [model,map] = ds.importModel(source,varargin) </strong></div>
 
 <h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
 <div class="fragment"><pre class="comment">IMPORTMODEL - import model from raw equations, other program source, etc.
 
  Usage:
-   [model,map] = ImportModel(source,'option',value,...)
+   [model,map] = ds.importModel(source,'option',value,...)
 
  Inputs:
    - source: [string]
@@ -44,18 +44,18 @@
      'user_parameters': cell array of key/value pairs to override model parameters
 
  Output:
-   DynaSim model structure (see GenerateModel)
+   DynaSim model structure (see ds.generateModel)
 
- See also: <a href="GenerateModel.html" class="code" title="function [model,name_map]=GenerateModel(specification,varargin)">GenerateModel</a>, <a href="checkModel.html" class="code" title="function model=checkModel(model)">checkModel</a></pre></div>
+ See also: <a href="ds.generateModel.html" class="code" title="function [model,name_map]=ds.generateModel(specification,varargin)">ds.generateModel</a>, <a href="ds.checkModel.html" class="code" title="function model=ds.checkModel(model)">ds.checkModel</a></pre></div>
 
 <!-- crossreference -->
 <h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
 This function calls:
 <ul style="list-style-image:url(../matlabicon.gif)">
-<li><a href="checkOptions.html" class="code" title="function [parms, params_unspecified ] = checkOptions(options, options_schema, strict)">checkOptions</a>	CHECKOPTIONS - organize key/value pairs in structure with default or user-supplied values according to a schema</li><li><a href="ParseModelEquations.html" class="code" title="function [model,name_map] = ParseModelEquations(text,varargin)">ParseModelEquations</a>	PARSEMODELEQUATIONS - parse equations and organize model data in DynaSim model structure</li></ul>
+<li><a href="ds.checkOptions.html" class="code" title="function [parms, params_unspecified ] = ds.checkOptions(options, options_schema, strict)">ds.checkOptions</a>	CHECKOPTIONS - organize key/value pairs in structure with default or user-supplied values according to a schema</li><li><a href="ds.parseModelEquations.html" class="code" title="function [model,name_map] = ds.parseModelEquations(text,varargin)">ds.parseModelEquations</a>	PARSEMODELEQUATIONS - parse equations and organize model data in DynaSim model structure</li></ul>
 This function is called by:
 <ul style="list-style-image:url(../matlabicon.gif)">
-<li><a href="GenerateModel.html" class="code" title="function [model,name_map]=GenerateModel(specification,varargin)">GenerateModel</a>	GENERATEMODEL - Parse DynaSim specification and organize model data in DynaSim model structure</li></ul>
+<li><a href="ds.generateModel.html" class="code" title="function [model,name_map]=ds.generateModel(specification,varargin)">ds.generateModel</a>	GENERATEMODEL - Parse DynaSim specification and organize model data in DynaSim model structure</li></ul>
 <!-- crossreference -->
 
 <h2><a name="_subfunctions"></a>SUBFUNCTIONS <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
@@ -63,11 +63,11 @@ This function is called by:
 <li><a href="#_sub1" class="code">function modl=set_user_parameters(modl,params,namespace)</a></li><li><a href="#_sub2" class="code">function modl=add_missing_ICs(modl,popname)</a></li><li><a href="#_sub3" class="code">function source=DownloadModel(ModelID)</a></li></ul>
 
 <h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
-<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function [model,map] = ImportModel(source,varargin)</a>
+<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function [model,map] = ds.importModel(source,varargin)</a>
 0002 <span class="comment">%IMPORTMODEL - import model from raw equations, other program source, etc.</span>
 0003 <span class="comment">%</span>
 0004 <span class="comment">% Usage:</span>
-0005 <span class="comment">%   [model,map] = ImportModel(source,'option',value,...)</span>
+0005 <span class="comment">%   [model,map] = ds.importModel(source,'option',value,...)</span>
 0006 <span class="comment">%</span>
 0007 <span class="comment">% Inputs:</span>
 0008 <span class="comment">%   - source: [string]</span>
@@ -82,12 +82,12 @@ This function is called by:
 0017 <span class="comment">%     'user_parameters': cell array of key/value pairs to override model parameters</span>
 0018 <span class="comment">%</span>
 0019 <span class="comment">% Output:</span>
-0020 <span class="comment">%   DynaSim model structure (see GenerateModel)</span>
+0020 <span class="comment">%   DynaSim model structure (see ds.generateModel)</span>
 0021 <span class="comment">%</span>
-0022 <span class="comment">% See also: GenerateModel, checkModel</span>
+0022 <span class="comment">% See also: ds.generateModel, ds.checkModel</span>
 0023 
 0024 <span class="comment">% Check inputs</span>
-0025 options=<a href="checkOptions.html" class="code" title="function [parms, params_unspecified ] = checkOptions(options, options_schema, strict)">checkOptions</a>(varargin,{<span class="keyword">...</span>
+0025 options=<a href="ds.checkOptions.html" class="code" title="function [parms, params_unspecified ] = ds.checkOptions(options, options_schema, strict)">ds.checkOptions</a>(varargin,{<span class="keyword">...</span>
 0026   <span class="string">'host'</span>,<span class="string">'local'</span>,[],<span class="keyword">...</span><span class="comment"> % database, eg: infbrain, modeldb</span>
 0027   <span class="string">'namespace'</span>,[],[],<span class="keyword">...</span><span class="comment"> % namespace, eg: E, I</span>
 0028   <span class="string">'ic_pop'</span>,[],[],<span class="keyword">...</span><span class="comment"> % eg: E, I</span>
@@ -115,7 +115,7 @@ This function is called by:
 0050 <span class="comment">%% 2.0 Convert to DynaSim model structure</span>
 0051 <span class="comment">% if DynaSim .mech, .eqns, .txt:</span>
 0052   <span class="comment">% parse model equations</span>
-0053   [model,map]=<a href="ParseModelEquations.html" class="code" title="function [model,name_map] = ParseModelEquations(text,varargin)">ParseModelEquations</a>(source,<span class="string">'namespace'</span>,options.namespace);
+0053   [model,map]=<a href="ds.parseModelEquations.html" class="code" title="function [model,name_map] = ds.parseModelEquations(text,varargin)">ds.parseModelEquations</a>(source,<span class="string">'namespace'</span>,options.namespace);
 0054   
 0055 <span class="comment">% if DynaSim .mat: load MAT-file</span>
 0056 <span class="comment">% ... load(source) ...</span>
@@ -195,7 +195,7 @@ This function is called by:
 0130     <span class="keyword">return</span>;
 0131   <span class="keyword">end</span>
 0132   Npopstr=[popname <span class="string">'_Npop'</span>];
-0133   <span class="comment">% add default ICs if missing (do not evaluate ICs in GenerateModel; do that in SimulateModel before saving params.mat)</span>
+0133   <span class="comment">% add default ICs if missing (do not evaluate ICs in ds.generateModel; do that in ds.simulateModel before saving params.mat)</span>
 0134   <span class="keyword">if</span> isstruct(modl.ICs)
 0135     missing_ICs=setdiff(modl.state_variables,fieldnames(modl.ICs));
 0136   <span class="keyword">else</span>
@@ -258,7 +258,7 @@ This function is called by:
 0193 <span class="comment">% parse mechanism file</span>
 0194 tempfile = fullfile(target,modelfile);
 0195 source=tempfile;
-0196 [model,map]=<a href="ParseModelEquations.html" class="code" title="function [model,name_map] = ParseModelEquations(text,varargin)">ParseModelEquations</a>(source);
+0196 [model,map]=<a href="ds.parseModelEquations.html" class="code" title="function [model,name_map] = ds.parseModelEquations(text,varargin)">ds.parseModelEquations</a>(source);
 0197 <span class="comment">% if isequal(ext,'.json')</span>
 0198 <span class="comment">%   [spec,jsonspec] = json2spec(tempfile);</span>
 0199 <span class="comment">%   spec.model_uid=ModelID;</span>

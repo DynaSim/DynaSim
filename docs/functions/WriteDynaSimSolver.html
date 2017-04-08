@@ -2,8 +2,8 @@
                 "http://www.w3.org/TR/REC-html40/loose.dtd">
 <html>
 <head>
-  <title>Description of WriteDynaSimSolver</title>
-  <meta name="keywords" content="WriteDynaSimSolver">
+  <title>Description of ds.writeDynaSimSolver</title>
+  <meta name="keywords" content="ds.writeDynaSimSolver">
   <meta name="description" content="WRITEDYNASIMSOLVER - write m-file that numerically inteegrates the model">
   <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
   <meta name="generator" content="m2html &copy; 2005 Guillaume Flandin">
@@ -16,25 +16,25 @@
 <body>
 <a name="_top"></a>
 <!-- menu.html functions -->
-<h1>WriteDynaSimSolver
+<h1>ds.writeDynaSimSolver
 </h1>
 
 <h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
 <div class="box"><strong>WRITEDYNASIMSOLVER - write m-file that numerically inteegrates the model</strong></div>
 
 <h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
-<div class="box"><strong>function [outfile,options]=WriteDynaSimSolver(model,varargin) </strong></div>
+<div class="box"><strong>function [outfile,options]=ds.writeDynaSimSolver(model,varargin) </strong></div>
 
 <h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
 <div class="fragment"><pre class="comment">WRITEDYNASIMSOLVER - write m-file that numerically inteegrates the model
 
  Usage:
-   solver_file=WriteDynaSimSolver(model,varargin)
+   solver_file=ds.writeDynaSimSolver(model,varargin)
 
  Inputs:
-   - model: DynaSim model structure (see GenerateModel)
+   - model: DynaSim model structure (see ds.generateModel)
    - options:
-     'solver'     : solver for numerical integration (see GetSolveFile)
+     'solver'     : solver for numerical integration (see ds.getSolveFile)
                     {'euler'/'rk1', 'rk2'/'modified_euler', 'rungekutta'/'rk'/'rk4'} (default: 'rk4')
      'tspan'      : time limits of simulation [begin,end] (default: [0 100]) [ms]
                     - Note: units must be consistent with dt and model equations
@@ -55,52 +55,52 @@
 
  Examples:
    - Example 1: test solver production, display function in standard output
-       model=GenerateModel; % test model
+       model=ds.generateModel; % test model
        without writing anything to disk:
-       WriteDynaSimSolver(model,'fileID',1,'save_parameters_flag',0,'solver','rk4');
-       WriteDynaSimSolver(model,'fileID',1,'save_parameters_flag',1,'solver','rk4');
-       model=PropagateFunctions(model);
-       WriteDynaSimSolver(model,'fileID',1,'save_parameters_flag',0,'solver','rk4');
-       WriteDynaSimSolver(model,'fileID',1,'save_parameters_flag',1,'solver','rk4');
+       ds.writeDynaSimSolver(model,'fileID',1,'save_parameters_flag',0,'solver','rk4');
+       ds.writeDynaSimSolver(model,'fileID',1,'save_parameters_flag',1,'solver','rk4');
+       model=ds.propagateFunctions(model);
+       ds.writeDynaSimSolver(model,'fileID',1,'save_parameters_flag',0,'solver','rk4');
+       ds.writeDynaSimSolver(model,'fileID',1,'save_parameters_flag',1,'solver','rk4');
 
    - Example 2: real-time downsampling
-       WriteDynaSimSolver(model,'downsample_factor',10,'fileID',1,'solver','rk4');
+       ds.writeDynaSimSolver(model,'downsample_factor',10,'fileID',1,'solver','rk4');
 
    - Example 3: real-time writing data to disk (reduce memory demand)
-       WriteDynaSimSolver(model,'disk_flag',1,'fileID',1,'solver','rk4');
+       ds.writeDynaSimSolver(model,'disk_flag',1,'fileID',1,'solver','rk4');
 
    - Example 4: maximally conserve memory: downsample and write to disk
-       WriteDynaSimSolver(model,'disk_flag',1,'downsample_factor',10,'fileID',1,'solver','rk4');
+       ds.writeDynaSimSolver(model,'disk_flag',1,'downsample_factor',10,'fileID',1,'solver','rk4');
 
  More Examples:
-     WriteDynaSimSolver(model,'solver','euler');
-     WriteDynaSimSolver(model,'solver','rk2');
-     WriteDynaSimSolver(model,'solver','rk4');
+     ds.writeDynaSimSolver(model,'solver','euler');
+     ds.writeDynaSimSolver(model,'solver','rk2');
+     ds.writeDynaSimSolver(model,'solver','rk4');
 
-     model=GenerateModel; % test model
-     tic; WriteDynaSimSolver(model,'save_parameters_flag',0,'reduce_function_calls_flag',0,'solver','rk4','filename','solve_ode.m'); v=solve_ode; plot(v); toc
-     tic; WriteDynaSimSolver(model,'save_parameters_flag',1,'reduce_function_calls_flag',0,'solver','rk4','filename','solve_ode.m'); v=solve_ode; plot(v); toc
-     tic; WriteDynaSimSolver(model,'save_parameters_flag',0,'reduce_function_calls_flag',1,'solver','rk4','filename','solve_ode.m'); v=solve_ode; plot(v); toc
-     tic; WriteDynaSimSolver(model,'save_parameters_flag',1,'reduce_function_calls_flag',1,'solver','rk4','filename','solve_ode.m'); v=solve_ode; plot(v); toc
-     tic; WriteDynaSimSolver(model,'save_parameters_flag',1,'reduce_function_calls_flag',1,'solver','rk2','filename','solve_ode.m'); v=solve_ode; plot(v); toc
-     tic; WriteDynaSimSolver(model,'save_parameters_flag',1,'reduce_function_calls_flag',1,'solver','rk1','filename','solve_ode.m'); v=solve_ode; plot(v); toc
-     tic; WriteDynaSimSolver(model,'save_parameters_flag',1,'reduce_function_calls_flag',1,'solver','rk1','filename','solve_ode.m','downsample_factor',10); v=solve_ode; plot(v); toc
-     tic; WriteDynaSimSolver(model,'save_parameters_flag',1,'reduce_function_calls_flag',1,'solver','rk2','filename','solve_ode.m','dt',.001,'downsample_factor',10); v=solve_ode; plot(v); toc
-     tic; WriteDynaSimSolver(model,'save_parameters_flag',1,'reduce_function_calls_flag',1,'solver','rk1','filename','solve_ode.m','dt',.001,'downsample_factor',10); v=solve_ode; plot(v); toc
-     tic; WriteDynaSimSolver(model,'save_parameters_flag',1,'reduce_function_calls_flag',1,'solver','rk1','filename','solve_ode.m','dt',.005,'tspan',[0 200],'downsample_factor',10); v=solve_ode; plot(v); toc
+     model=ds.generateModel; % test model
+     tic; ds.writeDynaSimSolver(model,'save_parameters_flag',0,'reduce_function_calls_flag',0,'solver','rk4','filename','solve_ode.m'); v=solve_ode; plot(v); toc
+     tic; ds.writeDynaSimSolver(model,'save_parameters_flag',1,'reduce_function_calls_flag',0,'solver','rk4','filename','solve_ode.m'); v=solve_ode; plot(v); toc
+     tic; ds.writeDynaSimSolver(model,'save_parameters_flag',0,'reduce_function_calls_flag',1,'solver','rk4','filename','solve_ode.m'); v=solve_ode; plot(v); toc
+     tic; ds.writeDynaSimSolver(model,'save_parameters_flag',1,'reduce_function_calls_flag',1,'solver','rk4','filename','solve_ode.m'); v=solve_ode; plot(v); toc
+     tic; ds.writeDynaSimSolver(model,'save_parameters_flag',1,'reduce_function_calls_flag',1,'solver','rk2','filename','solve_ode.m'); v=solve_ode; plot(v); toc
+     tic; ds.writeDynaSimSolver(model,'save_parameters_flag',1,'reduce_function_calls_flag',1,'solver','rk1','filename','solve_ode.m'); v=solve_ode; plot(v); toc
+     tic; ds.writeDynaSimSolver(model,'save_parameters_flag',1,'reduce_function_calls_flag',1,'solver','rk1','filename','solve_ode.m','downsample_factor',10); v=solve_ode; plot(v); toc
+     tic; ds.writeDynaSimSolver(model,'save_parameters_flag',1,'reduce_function_calls_flag',1,'solver','rk2','filename','solve_ode.m','dt',.001,'downsample_factor',10); v=solve_ode; plot(v); toc
+     tic; ds.writeDynaSimSolver(model,'save_parameters_flag',1,'reduce_function_calls_flag',1,'solver','rk1','filename','solve_ode.m','dt',.001,'downsample_factor',10); v=solve_ode; plot(v); toc
+     tic; ds.writeDynaSimSolver(model,'save_parameters_flag',1,'reduce_function_calls_flag',1,'solver','rk1','filename','solve_ode.m','dt',.005,'tspan',[0 200],'downsample_factor',10); v=solve_ode; plot(v); toc
 
- Dependencies: checkOptions, checkModel
+ Dependencies: ds.checkOptions, ds.checkModel
 
- See also: <a href="GetSolveFile.html" class="code" title="function solve_file = GetSolveFile(model,studyinfo,varargin)">GetSolveFile</a>, <a href="SimulateModel.html" class="code" title="function [data,studyinfo]=SimulateModel(model,varargin)">SimulateModel</a>, <a href="WriteMatlabSolver.html" class="code" title="function solve_ode_filepath = WriteMatlabSolver(model,varargin)">WriteMatlabSolver</a></pre></div>
+ See also: <a href="ds.getSolveFile.html" class="code" title="function solve_file = ds.getSolveFile(model,studyinfo,varargin)">ds.getSolveFile</a>, <a href="ds.simulateModel.html" class="code" title="function [data,studyinfo]=ds.simulateModel(model,varargin)">ds.simulateModel</a>, <a href="ds.writeMatlabSolver.html" class="code" title="function solve_ode_filepath = ds.writeMatlabSolver(model,varargin)">ds.writeMatlabSolver</a></pre></div>
 
 <!-- crossreference -->
 <h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
 This function calls:
 <ul style="list-style-image:url(../matlabicon.gif)">
-<li><a href="applyModifications.html" class="code" title="function [output,modifications]=applyModifications(model,modifications)">applyModifications</a>	APPLYMODIFICATIONS - Apply modifications to DynaSim specification or model structure</li><li><a href="checkModel.html" class="code" title="function model=checkModel(model)">checkModel</a>	CHECKMODEL - Standardize model structure and auto-populate missing fields</li><li><a href="checkOptions.html" class="code" title="function [parms, params_unspecified ] = checkOptions(options, options_schema, strict)">checkOptions</a>	CHECKOPTIONS - organize key/value pairs in structure with default or user-supplied values according to a schema</li><li><a href="checkSolverOptions.html" class="code" title="function options=checkSolverOptions(options)">checkSolverOptions</a>	CHECKSOLVEROPTIONS - standardize simulation options appended to params.mat</li><li><a href="GetOutputCounts.html" class="code" title="function [state_var_counts,monitor_counts]=GetOutputCounts(model)">GetOutputCounts</a>	GETOUTPUTCOUNTS - determine how many copies of each state variable and monitor will be produced by simulating the model.</li><li><a href="PropagateFunctions.html" class="code" title="function model=PropagateFunctions(model)">PropagateFunctions</a>	PROPAGATEFUNCTIONS - eliminate internal function calls from model ODEs, ICs, monitors, and conditionals.</li><li><a href="PropagateParameters.html" class="code" title="function model=PropagateParameters(model,varargin)">PropagateParameters</a>	PROPAGATEPARAMETERS - substitute parameter values or prepend parameter names with prefix across all model equations.</li><li><a href="Vary2Modifications.html" class="code" title="function modifications_set = Vary2Modifications(vary,model)">Vary2Modifications</a>	VARY2MODIFICATIONS - convert specification of things to vary into a set of modifications indicating how to vary the desired things.</li></ul>
+<li><a href="ds.applyModifications.html" class="code" title="function [output,modifications]=ds.applyModifications(model,modifications)">ds.applyModifications</a>	APPLYMODIFICATIONS - Apply modifications to DynaSim specification or model structure</li><li><a href="ds.checkModel.html" class="code" title="function model=ds.checkModel(model)">ds.checkModel</a>	CHECKMODEL - Standardize model structure and auto-populate missing fields</li><li><a href="ds.checkOptions.html" class="code" title="function [parms, params_unspecified ] = ds.checkOptions(options, options_schema, strict)">ds.checkOptions</a>	CHECKOPTIONS - organize key/value pairs in structure with default or user-supplied values according to a schema</li><li><a href="ds.checkSolverOptions.html" class="code" title="function options=ds.checkSolverOptions(options)">ds.checkSolverOptions</a>	CHECKSOLVEROPTIONS - standardize simulation options appended to params.mat</li><li><a href="ds.GetOutputCounts.html" class="code" title="function [state_var_counts,monitor_counts]=ds.GetOutputCounts(model)">ds.GetOutputCounts</a>	GETOUTPUTCOUNTS - determine how many copies of each state variable and monitor will be produced by simulating the model.</li><li><a href="ds.propagateFunctions.html" class="code" title="function model=ds.propagateFunctions(model)">ds.propagateFunctions</a>	PROPAGATEFUNCTIONS - eliminate internal function calls from model ODEs, ICs, monitors, and conditionals.</li><li><a href="ds.propagateParameters.html" class="code" title="function model=ds.propagateParameters(model,varargin)">ds.propagateParameters</a>	PROPAGATEPARAMETERS - substitute parameter values or prepend parameter names with prefix across all model equations.</li><li><a href="ds.vary2Modifications.html" class="code" title="function modifications_set = ds.vary2Modifications(vary,model)">ds.vary2Modifications</a>	VARY2MODIFICATIONS - convert specification of things to vary into a set of modifications indicating how to vary the desired things.</li></ul>
 This function is called by:
 <ul style="list-style-image:url(../matlabicon.gif)">
-<li><a href="GetSolveFile.html" class="code" title="function solve_file = GetSolveFile(model,studyinfo,varargin)">GetSolveFile</a>	GETSOLVEFILE - helper function that creates or retrieves the desired solver file.</li></ul>
+<li><a href="ds.getSolveFile.html" class="code" title="function solve_file = ds.getSolveFile(model,studyinfo,varargin)">ds.getSolveFile</a>	GETSOLVEFILE - helper function that creates or retrieves the desired solver file.</li></ul>
 <!-- crossreference -->
 
 <h2><a name="_subfunctions"></a>SUBFUNCTIONS <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
@@ -108,16 +108,16 @@ This function is called by:
 <li><a href="#_sub1" class="code">function update_vars(index_nexts_)</a></li><li><a href="#_sub2" class="code">function print_k(fid,odes_k,suffix_k,state_variables,nvals_per_var)</a></li><li><a href="#_sub3" class="code">function odes_out=update_odes(odes,suffix_k,increment,state_variables,index_lasts)</a></li><li><a href="#_sub4" class="code">function print_var_update(fid,index_nexts,index_lasts,update_term,state_variables)</a></li><li><a href="#_sub5" class="code">function print_var_update_last(fid,index_nexts,state_variables)</a></li><li><a href="#_sub6" class="code">function print_conditional_update(fid,conditionals,index_nexts,state_variables)</a></li><li><a href="#_sub7" class="code">function print_monitor_update(fid,monitors,index_nexts,state_variables,index_lasts)</a></li></ul>
 
 <h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
-<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function [outfile,options]=WriteDynaSimSolver(model,varargin)</a>
+<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function [outfile,options]=ds.writeDynaSimSolver(model,varargin)</a>
 0002 <span class="comment">%WRITEDYNASIMSOLVER - write m-file that numerically inteegrates the model</span>
 0003 <span class="comment">%</span>
 0004 <span class="comment">% Usage:</span>
-0005 <span class="comment">%   solver_file=WriteDynaSimSolver(model,varargin)</span>
+0005 <span class="comment">%   solver_file=ds.writeDynaSimSolver(model,varargin)</span>
 0006 <span class="comment">%</span>
 0007 <span class="comment">% Inputs:</span>
-0008 <span class="comment">%   - model: DynaSim model structure (see GenerateModel)</span>
+0008 <span class="comment">%   - model: DynaSim model structure (see ds.generateModel)</span>
 0009 <span class="comment">%   - options:</span>
-0010 <span class="comment">%     'solver'     : solver for numerical integration (see GetSolveFile)</span>
+0010 <span class="comment">%     'solver'     : solver for numerical integration (see ds.getSolveFile)</span>
 0011 <span class="comment">%                    {'euler'/'rk1', 'rk2'/'modified_euler', 'rungekutta'/'rk'/'rk4'} (default: 'rk4')</span>
 0012 <span class="comment">%     'tspan'      : time limits of simulation [begin,end] (default: [0 100]) [ms]</span>
 0013 <span class="comment">%                    - Note: units must be consistent with dt and model equations</span>
@@ -138,46 +138,46 @@ This function is called by:
 0028 <span class="comment">%</span>
 0029 <span class="comment">% Examples:</span>
 0030 <span class="comment">%   - Example 1: test solver production, display function in standard output</span>
-0031 <span class="comment">%       model=GenerateModel; % test model</span>
+0031 <span class="comment">%       model=ds.generateModel; % test model</span>
 0032 <span class="comment">%       without writing anything to disk:</span>
-0033 <span class="comment">%       WriteDynaSimSolver(model,'fileID',1,'save_parameters_flag',0,'solver','rk4');</span>
-0034 <span class="comment">%       WriteDynaSimSolver(model,'fileID',1,'save_parameters_flag',1,'solver','rk4');</span>
-0035 <span class="comment">%       model=PropagateFunctions(model);</span>
-0036 <span class="comment">%       WriteDynaSimSolver(model,'fileID',1,'save_parameters_flag',0,'solver','rk4');</span>
-0037 <span class="comment">%       WriteDynaSimSolver(model,'fileID',1,'save_parameters_flag',1,'solver','rk4');</span>
+0033 <span class="comment">%       ds.writeDynaSimSolver(model,'fileID',1,'save_parameters_flag',0,'solver','rk4');</span>
+0034 <span class="comment">%       ds.writeDynaSimSolver(model,'fileID',1,'save_parameters_flag',1,'solver','rk4');</span>
+0035 <span class="comment">%       model=ds.propagateFunctions(model);</span>
+0036 <span class="comment">%       ds.writeDynaSimSolver(model,'fileID',1,'save_parameters_flag',0,'solver','rk4');</span>
+0037 <span class="comment">%       ds.writeDynaSimSolver(model,'fileID',1,'save_parameters_flag',1,'solver','rk4');</span>
 0038 <span class="comment">%</span>
 0039 <span class="comment">%   - Example 2: real-time downsampling</span>
-0040 <span class="comment">%       WriteDynaSimSolver(model,'downsample_factor',10,'fileID',1,'solver','rk4');</span>
+0040 <span class="comment">%       ds.writeDynaSimSolver(model,'downsample_factor',10,'fileID',1,'solver','rk4');</span>
 0041 <span class="comment">%</span>
 0042 <span class="comment">%   - Example 3: real-time writing data to disk (reduce memory demand)</span>
-0043 <span class="comment">%       WriteDynaSimSolver(model,'disk_flag',1,'fileID',1,'solver','rk4');</span>
+0043 <span class="comment">%       ds.writeDynaSimSolver(model,'disk_flag',1,'fileID',1,'solver','rk4');</span>
 0044 <span class="comment">%</span>
 0045 <span class="comment">%   - Example 4: maximally conserve memory: downsample and write to disk</span>
-0046 <span class="comment">%       WriteDynaSimSolver(model,'disk_flag',1,'downsample_factor',10,'fileID',1,'solver','rk4');</span>
+0046 <span class="comment">%       ds.writeDynaSimSolver(model,'disk_flag',1,'downsample_factor',10,'fileID',1,'solver','rk4');</span>
 0047 <span class="comment">%</span>
 0048 <span class="comment">% More Examples:</span>
-0049 <span class="comment">%     WriteDynaSimSolver(model,'solver','euler');</span>
-0050 <span class="comment">%     WriteDynaSimSolver(model,'solver','rk2');</span>
-0051 <span class="comment">%     WriteDynaSimSolver(model,'solver','rk4');</span>
+0049 <span class="comment">%     ds.writeDynaSimSolver(model,'solver','euler');</span>
+0050 <span class="comment">%     ds.writeDynaSimSolver(model,'solver','rk2');</span>
+0051 <span class="comment">%     ds.writeDynaSimSolver(model,'solver','rk4');</span>
 0052 <span class="comment">%</span>
-0053 <span class="comment">%     model=GenerateModel; % test model</span>
-0054 <span class="comment">%     tic; WriteDynaSimSolver(model,'save_parameters_flag',0,'reduce_function_calls_flag',0,'solver','rk4','filename','solve_ode.m'); v=solve_ode; plot(v); toc</span>
-0055 <span class="comment">%     tic; WriteDynaSimSolver(model,'save_parameters_flag',1,'reduce_function_calls_flag',0,'solver','rk4','filename','solve_ode.m'); v=solve_ode; plot(v); toc</span>
-0056 <span class="comment">%     tic; WriteDynaSimSolver(model,'save_parameters_flag',0,'reduce_function_calls_flag',1,'solver','rk4','filename','solve_ode.m'); v=solve_ode; plot(v); toc</span>
-0057 <span class="comment">%     tic; WriteDynaSimSolver(model,'save_parameters_flag',1,'reduce_function_calls_flag',1,'solver','rk4','filename','solve_ode.m'); v=solve_ode; plot(v); toc</span>
-0058 <span class="comment">%     tic; WriteDynaSimSolver(model,'save_parameters_flag',1,'reduce_function_calls_flag',1,'solver','rk2','filename','solve_ode.m'); v=solve_ode; plot(v); toc</span>
-0059 <span class="comment">%     tic; WriteDynaSimSolver(model,'save_parameters_flag',1,'reduce_function_calls_flag',1,'solver','rk1','filename','solve_ode.m'); v=solve_ode; plot(v); toc</span>
-0060 <span class="comment">%     tic; WriteDynaSimSolver(model,'save_parameters_flag',1,'reduce_function_calls_flag',1,'solver','rk1','filename','solve_ode.m','downsample_factor',10); v=solve_ode; plot(v); toc</span>
-0061 <span class="comment">%     tic; WriteDynaSimSolver(model,'save_parameters_flag',1,'reduce_function_calls_flag',1,'solver','rk2','filename','solve_ode.m','dt',.001,'downsample_factor',10); v=solve_ode; plot(v); toc</span>
-0062 <span class="comment">%     tic; WriteDynaSimSolver(model,'save_parameters_flag',1,'reduce_function_calls_flag',1,'solver','rk1','filename','solve_ode.m','dt',.001,'downsample_factor',10); v=solve_ode; plot(v); toc</span>
-0063 <span class="comment">%     tic; WriteDynaSimSolver(model,'save_parameters_flag',1,'reduce_function_calls_flag',1,'solver','rk1','filename','solve_ode.m','dt',.005,'tspan',[0 200],'downsample_factor',10); v=solve_ode; plot(v); toc</span>
+0053 <span class="comment">%     model=ds.generateModel; % test model</span>
+0054 <span class="comment">%     tic; ds.writeDynaSimSolver(model,'save_parameters_flag',0,'reduce_function_calls_flag',0,'solver','rk4','filename','solve_ode.m'); v=solve_ode; plot(v); toc</span>
+0055 <span class="comment">%     tic; ds.writeDynaSimSolver(model,'save_parameters_flag',1,'reduce_function_calls_flag',0,'solver','rk4','filename','solve_ode.m'); v=solve_ode; plot(v); toc</span>
+0056 <span class="comment">%     tic; ds.writeDynaSimSolver(model,'save_parameters_flag',0,'reduce_function_calls_flag',1,'solver','rk4','filename','solve_ode.m'); v=solve_ode; plot(v); toc</span>
+0057 <span class="comment">%     tic; ds.writeDynaSimSolver(model,'save_parameters_flag',1,'reduce_function_calls_flag',1,'solver','rk4','filename','solve_ode.m'); v=solve_ode; plot(v); toc</span>
+0058 <span class="comment">%     tic; ds.writeDynaSimSolver(model,'save_parameters_flag',1,'reduce_function_calls_flag',1,'solver','rk2','filename','solve_ode.m'); v=solve_ode; plot(v); toc</span>
+0059 <span class="comment">%     tic; ds.writeDynaSimSolver(model,'save_parameters_flag',1,'reduce_function_calls_flag',1,'solver','rk1','filename','solve_ode.m'); v=solve_ode; plot(v); toc</span>
+0060 <span class="comment">%     tic; ds.writeDynaSimSolver(model,'save_parameters_flag',1,'reduce_function_calls_flag',1,'solver','rk1','filename','solve_ode.m','downsample_factor',10); v=solve_ode; plot(v); toc</span>
+0061 <span class="comment">%     tic; ds.writeDynaSimSolver(model,'save_parameters_flag',1,'reduce_function_calls_flag',1,'solver','rk2','filename','solve_ode.m','dt',.001,'downsample_factor',10); v=solve_ode; plot(v); toc</span>
+0062 <span class="comment">%     tic; ds.writeDynaSimSolver(model,'save_parameters_flag',1,'reduce_function_calls_flag',1,'solver','rk1','filename','solve_ode.m','dt',.001,'downsample_factor',10); v=solve_ode; plot(v); toc</span>
+0063 <span class="comment">%     tic; ds.writeDynaSimSolver(model,'save_parameters_flag',1,'reduce_function_calls_flag',1,'solver','rk1','filename','solve_ode.m','dt',.005,'tspan',[0 200],'downsample_factor',10); v=solve_ode; plot(v); toc</span>
 0064 <span class="comment">%</span>
-0065 <span class="comment">% Dependencies: checkOptions, checkModel</span>
+0065 <span class="comment">% Dependencies: ds.checkOptions, ds.checkModel</span>
 0066 <span class="comment">%</span>
-0067 <span class="comment">% See also: GetSolveFile, SimulateModel, WriteMatlabSolver</span>
+0067 <span class="comment">% See also: ds.getSolveFile, ds.simulateModel, ds.writeMatlabSolver</span>
 0068 
 0069 <span class="comment">% Check inputs</span>
-0070 options=<a href="checkOptions.html" class="code" title="function [parms, params_unspecified ] = checkOptions(options, options_schema, strict)">checkOptions</a>(varargin,{<span class="keyword">...</span>
+0070 options=<a href="ds.checkOptions.html" class="code" title="function [parms, params_unspecified ] = ds.checkOptions(options, options_schema, strict)">ds.checkOptions</a>(varargin,{<span class="keyword">...</span>
 0071   <span class="string">'tspan'</span>,[0 100],[],<span class="keyword">...</span><span class="comment">          % [beg,end] (units must be consistent with dt and equations)</span>
 0072   <span class="string">'downsample_factor'</span>,1,[],<span class="keyword">...</span><span class="comment">    % downsampling applied during simulation (only every downsample_factor-time point is stored in memory or written to disk)</span>
 0073   <span class="string">'dt'</span>,.01,[],<span class="keyword">...</span><span class="comment">                 % time step used for fixed step DynaSim solvers</span>
@@ -193,7 +193,7 @@ This function is called by:
 0083   <span class="string">'verbose_flag'</span>,1,{0,1},<span class="keyword">...</span>
 0084   <span class="string">'one_solve_file_flag'</span>,0,{0,1},<span class="keyword">...</span><span class="comment"> % use only 1 solve file of each type, but can't vary mechs yet</span>
 0085   },false);
-0086 model=<a href="checkModel.html" class="code" title="function model=checkModel(model)">checkModel</a>(model);
+0086 model=<a href="ds.checkModel.html" class="code" title="function model=ds.checkModel(model)">ds.checkModel</a>(model);
 0087 separator=<span class="string">','</span>; <span class="comment">% ',', '\\t'</span>
 0088 
 0089 <span class="comment">%% 1.0 prepare model info</span>
@@ -202,13 +202,13 @@ This function is called by:
 0092 
 0093 <span class="comment">% 1.1 eliminate internal (anonymous) function calls from model equations</span>
 0094 <span class="keyword">if</span> options.reduce_function_calls_flag==1
-0095   model=<a href="PropagateFunctions.html" class="code" title="function model=PropagateFunctions(model)">PropagateFunctions</a>(model);
+0095   model=<a href="ds.propagateFunctions.html" class="code" title="function model=ds.propagateFunctions(model)">ds.propagateFunctions</a>(model);
 0096 <span class="keyword">end</span>
 0097 
 0098 <span class="comment">% 1.1 prepare parameters</span>
 0099 <span class="keyword">if</span> options.save_parameters_flag
 0100   <span class="comment">% add parameter struct prefix to parameters in model equations</span>
-0101   model=<a href="PropagateParameters.html" class="code" title="function model=PropagateParameters(model,varargin)">PropagateParameters</a>(model,<span class="string">'action'</span>,<span class="string">'prepend'</span>, <span class="string">'prefix'</span>,parameter_prefix);
+0101   model=<a href="ds.propagateParameters.html" class="code" title="function model=ds.propagateParameters(model,varargin)">ds.propagateParameters</a>(model,<span class="string">'action'</span>,<span class="string">'prepend'</span>, <span class="string">'prefix'</span>,parameter_prefix);
 0102   
 0103   <span class="comment">% set and capture numeric seed value</span>
 0104   <span class="keyword">if</span> options.compile_flag==1
@@ -225,15 +225,15 @@ This function is called by:
 0115   
 0116   <span class="comment">% save parameters to disk</span>
 0117   warning(<span class="string">'off'</span>,<span class="string">'catstruct:DuplicatesFound'</span>);
-0118   p = catstruct(<a href="checkSolverOptions.html" class="code" title="function options=checkSolverOptions(options)">checkSolverOptions</a>(options),model.parameters);
+0118   p = catstruct(<a href="ds.checkSolverOptions.html" class="code" title="function options=ds.checkSolverOptions(options)">ds.checkSolverOptions</a>(options),model.parameters);
 0119   
 0120   <span class="keyword">if</span> options.one_solve_file_flag
 0121     <span class="comment">% fill p flds that were varied with vectors of length = nSims</span>
 0122     
-0123     vary=<a href="checkOptions.html" class="code" title="function [parms, params_unspecified ] = checkOptions(options, options_schema, strict)">checkOptions</a>(varargin,{<span class="string">'vary'</span>,[],[],},false);
+0123     vary=<a href="ds.checkOptions.html" class="code" title="function [parms, params_unspecified ] = ds.checkOptions(options, options_schema, strict)">ds.checkOptions</a>(varargin,{<span class="string">'vary'</span>,[],[],},false);
 0124     vary = vary.vary;
 0125 
-0126     mod_set = <a href="Vary2Modifications.html" class="code" title="function modifications_set = Vary2Modifications(vary,model)">Vary2Modifications</a>(vary);
+0126     mod_set = <a href="ds.vary2Modifications.html" class="code" title="function modifications_set = ds.vary2Modifications(vary,model)">ds.vary2Modifications</a>(vary);
 0127     <span class="comment">% The first 2 cols of modifications_set are idenitical to vary, it just</span>
 0128     <span class="comment">% has the last column distributed out to the number of sims</span>
 0129     
@@ -241,7 +241,7 @@ This function is called by:
 0131     <span class="comment">% Get param names</span>
 0132     iMod = 1;
 0133     <span class="comment">% Split extra entries in first 2 cols of mods, so each row is a single pop and param</span>
-0134     [~, first_mod_set] = <a href="applyModifications.html" class="code" title="function [output,modifications]=applyModifications(model,modifications)">applyModifications</a>([],mod_set{iMod});
+0134     [~, first_mod_set] = <a href="ds.applyModifications.html" class="code" title="function [output,modifications]=ds.applyModifications(model,modifications)">ds.applyModifications</a>([],mod_set{iMod});
 0135 
 0136     <span class="comment">% replace '-&gt;' with '_'</span>
 0137     first_mod_set(:,1) = strrep(first_mod_set(:,1), <span class="string">'-&gt;'</span>, <span class="string">'_'</span>);
@@ -272,7 +272,7 @@ This function is called by:
 0162     param_values = nan(nParamMods, length(mod_set));
 0163     <span class="keyword">for</span> iMod = 1:length(mod_set)
 0164       <span class="comment">% Split extra entries in first 2 cols of mods, so each row is a single pop and param</span>
-0165       [~, mod_set{iMod}] = <a href="applyModifications.html" class="code" title="function [output,modifications]=applyModifications(model,modifications)">applyModifications</a>([],mod_set{iMod});
+0165       [~, mod_set{iMod}] = <a href="ds.applyModifications.html" class="code" title="function [output,modifications]=ds.applyModifications(model,modifications)">ds.applyModifications</a>([],mod_set{iMod});
 0166       
 0167       <span class="comment">% Get scalar values as vector</span>
 0168       param_values(:, iMod) = [mod_set{iMod}{:,3}];
@@ -290,7 +290,7 @@ This function is called by:
 0180   save(param_file_path,<span class="string">'p'</span>);
 0181 <span class="keyword">else</span>
 0182   <span class="comment">% insert parameter values into model expressions</span>
-0183   model=<a href="PropagateParameters.html" class="code" title="function model=PropagateParameters(model,varargin)">PropagateParameters</a>(model,<span class="string">'action'</span>,<span class="string">'substitute'</span>);
+0183   model=<a href="ds.propagateParameters.html" class="code" title="function model=ds.propagateParameters(model,varargin)">ds.propagateParameters</a>(model,<span class="string">'action'</span>,<span class="string">'substitute'</span>);
 0184 <span class="keyword">end</span>
 0185 
 0186 <span class="comment">% 1.2 prepare list of outputs (state variables and monitors)</span>
@@ -353,7 +353,7 @@ This function is called by:
 0243   fprintf(fid,<span class="string">'fileID=fopen(data_file,''w'');\n'</span>);
 0244   
 0245   <span class="comment">% write headers</span>
-0246   [state_var_counts,monitor_counts]=<a href="GetOutputCounts.html" class="code" title="function [state_var_counts,monitor_counts]=GetOutputCounts(model)">GetOutputCounts</a>(model);
+0246   [state_var_counts,monitor_counts]=<a href="ds.GetOutputCounts.html" class="code" title="function [state_var_counts,monitor_counts]=ds.GetOutputCounts(model)">ds.GetOutputCounts</a>(model);
 0247   fprintf(fid,<span class="string">'fprintf(fileID,''time%s'');\n'</span>,separator);
 0248   
 0249   <span class="keyword">if</span> ~isempty(model.state_variables)
@@ -678,7 +678,7 @@ This function is called by:
 0568 odes = struct2cell(model.ODEs);
 0569 <span class="keyword">for</span> i=1:length(odes)
 0570   <span class="keyword">for</span> j=1:length(state_variables)
-0571     odes{i}=dynasimStrrep(odes{i},state_variables{j},[state_variables{j} index_lasts{j}]);
+0571     odes{i}=ds.strrep(odes{i},state_variables{j},[state_variables{j} index_lasts{j}]);
 0572   <span class="keyword">end</span>
 0573 <span class="keyword">end</span>
 0574 
@@ -824,7 +824,7 @@ This function is called by:
 0714   odes_out=odes;
 0715   <span class="keyword">for</span> i=1:length(odes)
 0716     <span class="keyword">for</span> j=1:length(odes)
-0717       odes_out{i}=dynasimStrrep(odes_out{i},[state_variables{j} index_lasts{j}],sprintf(<span class="string">'(%s%s+%s*%s%s)'</span>,state_variables{j},index_lasts{j},increment,state_variables{j},suffix_k),<span class="string">'('</span>,<span class="string">')'</span>);
+0717       odes_out{i}=ds.strrep(odes_out{i},[state_variables{j} index_lasts{j}],sprintf(<span class="string">'(%s%s+%s*%s%s)'</span>,state_variables{j},index_lasts{j},increment,state_variables{j},suffix_k),<span class="string">'('</span>,<span class="string">')'</span>);
 0718     <span class="keyword">end</span>
 0719   <span class="keyword">end</span>
 0720 <span class="keyword">end</span>
@@ -893,23 +893,23 @@ This function is called by:
 0783       <span class="keyword">if</span> strcmp(<span class="string">'spike_monitor'</span>,conditionals(i).namespace)
 0784         <span class="comment">% do nothing if spike_monitor</span>
 0785       <span class="keyword">else</span>
-0786         condition=dynasimStrrep(condition,state_variables{j},[state_variables{j} index_nexts{j}]);
+0786         condition=ds.strrep(condition,state_variables{j},[state_variables{j} index_nexts{j}]);
 0787       <span class="keyword">end</span>
 0788       
-0789       action=dynasimStrrep(action,state_variables{j},[state_variables{j} action_index]);
+0789       action=ds.strrep(action,state_variables{j},[state_variables{j} action_index]);
 0790       
 0791       <span class="keyword">if</span> ~isempty(elseaction)
-0792         elseaction=dynasimStrrep(elseaction,state_variables{j},[state_variables{j} action_index]);
+0792         elseaction=ds.strrep(elseaction,state_variables{j},[state_variables{j} action_index]);
 0793       <span class="keyword">end</span>
 0794     <span class="keyword">end</span>
 0795     
 0796     <span class="comment">% write conditional to solver function</span>
 0797     fprintf(fid,<span class="string">'  conditional_test=(%s);\n'</span>,condition);
-0798     action=dynasimStrrep(action,<span class="string">'\(n,:'</span>,<span class="string">'(n,conditional_test'</span>);
+0798     action=ds.strrep(action,<span class="string">'\(n,:'</span>,<span class="string">'(n,conditional_test'</span>);
 0799     fprintf(fid,<span class="string">'  if any(conditional_test), %s; '</span>,action);
 0800     
 0801     <span class="keyword">if</span> ~isempty(elseaction)
-0802       elseaction=dynasimStrrep(elseaction,<span class="string">'(n,:'</span>,<span class="string">'(n,conditional_test'</span>);
+0802       elseaction=ds.strrep(elseaction,<span class="string">'(n,:'</span>,<span class="string">'(n,conditional_test'</span>);
 0803       fprintf(<span class="string">'else %s; '</span>,elseaction);
 0804     <span class="keyword">end</span>
 0805     
@@ -960,8 +960,8 @@ This function is called by:
 0850   <span class="comment">% add indexes to state variables in monitors</span>
 0851   <span class="keyword">for</span> i=1:length(monitor_name)
 0852     <span class="keyword">for</span> j=1:length(state_variables)
-0853       <span class="comment">%monitor_expression{i}=dynasimStrrep(monitor_expression{i},state_variables{j},[state_variables{j} index_lasts{j}]);</span>
-0854       monitor_expression{i}=dynasimStrrep(monitor_expression{i},state_variables{j},[state_variables{j} monitor_index]);
+0853       <span class="comment">%monitor_expression{i}=ds.strrep(monitor_expression{i},state_variables{j},[state_variables{j} index_lasts{j}]);</span>
+0854       monitor_expression{i}=ds.strrep(monitor_expression{i},state_variables{j},[state_variables{j} monitor_index]);
 0855     <span class="keyword">end</span>
 0856     
 0857     <span class="comment">% write monitors to solver function</span>

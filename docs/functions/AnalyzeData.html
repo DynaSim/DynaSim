@@ -2,8 +2,8 @@
                 "http://www.w3.org/TR/REC-html40/loose.dtd">
 <html>
 <head>
-  <title>Description of analyzeData</title>
-  <meta name="keywords" content="analyzeData">
+  <title>Description of ds.analyzeData</title>
+  <meta name="keywords" content="ds.analyzeData">
   <meta name="description" content="ANALYZEDATA - Apply an analysis function to DynaSim data, optionally saving data">
   <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
   <meta name="generator" content="m2html &copy; 2005 Guillaume Flandin">
@@ -16,14 +16,14 @@
 <body>
 <a name="_top"></a>
 <!-- menu.html functions -->
-<h1>analyzeData
+<h1>ds.analyzeData
 </h1>
 
 <h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
 <div class="box"><strong>ANALYZEDATA - Apply an analysis function to DynaSim data, optionally saving data</strong></div>
 
 <h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
-<div class="box"><strong>function result=analyzeData(data,func,varargin) </strong></div>
+<div class="box"><strong>function result=ds.analyzeData(data,func,varargin) </strong></div>
 
 <h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
 <div class="fragment"><pre class="comment">ANALYZEDATA - Apply an analysis function to DynaSim data, optionally saving data
@@ -33,7 +33,7 @@
  optionally save the output structure.
 
  Usage:
-   result = analyzeData(data,func,'option1',value1,...)
+   result = ds.analyzeData(data,func,'option1',value1,...)
 
  Inputs:
    - data: DynaSim data structure (also accepted: data file name)
@@ -51,16 +51,16 @@
 
  TODO: annotate figures with data set-specific modifications
 
- See also: <a href="SimulateModel.html" class="code" title="function [data,studyinfo]=SimulateModel(model,varargin)">SimulateModel</a></pre></div>
+ See also: <a href="ds.simulateModel.html" class="code" title="function [data,studyinfo]=ds.simulateModel(model,varargin)">ds.simulateModel</a></pre></div>
 
 <!-- crossreference -->
 <h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
 This function calls:
 <ul style="list-style-image:url(../matlabicon.gif)">
-<li><a href="checkOptions.html" class="code" title="function [parms, params_unspecified ] = checkOptions(options, options_schema, strict)">checkOptions</a>	CHECKOPTIONS - organize key/value pairs in structure with default or user-supplied values according to a schema</li><li><a href="ImportData.html" class="code" title="function [data,studyinfo] = ImportData(file,varargin)">ImportData</a>	IMPORTDATA - load data into DynaSim formatted data structure.</li><li><a href="nameFromVaried.html" class="code" title="function new_result_file = nameFromVaried(data, file_type, old_result_file)">nameFromVaried</a>	NAMEFROMVARIED - makes a filename based on the parameters in data.varied.</li></ul>
+<li><a href="ds.checkOptions.html" class="code" title="function [parms, params_unspecified ] = ds.checkOptions(options, options_schema, strict)">ds.checkOptions</a>	CHECKOPTIONS - organize key/value pairs in structure with default or user-supplied values according to a schema</li><li><a href="ds.importData.html" class="code" title="function [data,studyinfo] = ds.importData(file,varargin)">ds.importData</a>	IMPORTDATA - load data into DynaSim formatted data structure.</li><li><a href="ds.nameFromVaried.html" class="code" title="function new_result_file = ds.nameFromVaried(data, file_type, old_result_file)">ds.nameFromVaried</a>	NAMEFROMVARIED - makes a filename based on the parameters in data.varied.</li></ul>
 This function is called by:
 <ul style="list-style-image:url(../matlabicon.gif)">
-<li><a href="SimulateModel.html" class="code" title="function [data,studyinfo]=SimulateModel(model,varargin)">SimulateModel</a>	% data=SimulateModel(model,'option',value,...)</li></ul>
+<li><a href="ds.simulateModel.html" class="code" title="function [data,studyinfo]=ds.simulateModel(model,varargin)">ds.simulateModel</a>	% data=ds.simulateModel(model,'option',value,...)</li></ul>
 <!-- crossreference -->
 
 <h2><a name="_subfunctions"></a>SUBFUNCTIONS <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
@@ -68,7 +68,7 @@ This function is called by:
 <li><a href="#_sub1" class="code">function result = add_modifications(result)</a></li></ul>
 
 <h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
-<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function result=analyzeData(data,func,varargin)</a>
+<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function result=ds.analyzeData(data,func,varargin)</a>
 0002 <span class="comment">%ANALYZEDATA - Apply an analysis function to DynaSim data, optionally saving data</span>
 0003 <span class="comment">%</span>
 0004 <span class="comment">% Pass a single DynaSim data structure or an array of data structures to a</span>
@@ -76,7 +76,7 @@ This function is called by:
 0006 <span class="comment">% optionally save the output structure.</span>
 0007 <span class="comment">%</span>
 0008 <span class="comment">% Usage:</span>
-0009 <span class="comment">%   result = analyzeData(data,func,'option1',value1,...)</span>
+0009 <span class="comment">%   result = ds.analyzeData(data,func,'option1',value1,...)</span>
 0010 <span class="comment">%</span>
 0011 <span class="comment">% Inputs:</span>
 0012 <span class="comment">%   - data: DynaSim data structure (also accepted: data file name)</span>
@@ -94,10 +94,10 @@ This function is called by:
 0024 <span class="comment">%</span>
 0025 <span class="comment">% TODO: annotate figures with data set-specific modifications</span>
 0026 <span class="comment">%</span>
-0027 <span class="comment">% See also: SimulateModel</span>
+0027 <span class="comment">% See also: ds.simulateModel</span>
 0028 
 0029 <span class="comment">% check inputs</span>
-0030 options=<a href="checkOptions.html" class="code" title="function [parms, params_unspecified ] = checkOptions(options, options_schema, strict)">checkOptions</a>(varargin,{<span class="keyword">...</span>
+0030 options=<a href="ds.checkOptions.html" class="code" title="function [parms, params_unspecified ] = ds.checkOptions(options, options_schema, strict)">ds.checkOptions</a>(varargin,{<span class="keyword">...</span>
 0031   <span class="string">'result_file'</span>,<span class="string">'result'</span>,[],<span class="keyword">...</span>
 0032   <span class="string">'save_results_flag'</span>,0,{0,1},<span class="keyword">...</span>
 0033   <span class="string">'format'</span>,<span class="string">'svg'</span>,{<span class="string">'svg'</span>,<span class="string">'jpg'</span>,<span class="string">'eps'</span>,<span class="string">'png'</span>,<span class="string">'fig'</span>},<span class="keyword">...</span>
@@ -117,12 +117,12 @@ This function is called by:
 0047       prefix = func2str(func);
 0048     <span class="keyword">end</span>
 0049   <span class="keyword">end</span>
-0050   options.result_file = <a href="nameFromVaried.html" class="code" title="function new_result_file = nameFromVaried(data, file_type, old_result_file)">nameFromVaried</a>(data, prefix, options.result_file);
+0050   options.result_file = <a href="ds.nameFromVaried.html" class="code" title="function new_result_file = ds.nameFromVaried(data, file_type, old_result_file)">ds.nameFromVaried</a>(data, prefix, options.result_file);
 0051 <span class="keyword">end</span>
 0052 
 0053 <span class="comment">% load data if input is not a DynaSim data structure</span>
 0054 <span class="keyword">if</span> ~(isstruct(data) &amp;&amp; isfield(data,<span class="string">'time'</span>))
-0055   data=<a href="ImportData.html" class="code" title="function [data,studyinfo] = ImportData(file,varargin)">ImportData</a>(data,varargin{:}); <span class="comment">% load data</span>
+0055   data=<a href="ds.importData.html" class="code" title="function [data,studyinfo] = ds.importData(file,varargin)">ds.importData</a>(data,varargin{:}); <span class="comment">% load data</span>
 0056 <span class="keyword">end</span>
 0057 
 0058 <span class="comment">% confirm function handle</span>
@@ -131,7 +131,7 @@ This function is called by:
 0061 <span class="keyword">end</span>
 0062 <span class="comment">% confirm single analysis function</span>
 0063 <span class="keyword">if</span> numel(func)&gt;1
-0064   error(<span class="string">'Too many function handles were supplied. analyzeData only applies a single function to a single data set.'</span>);
+0064   error(<span class="string">'Too many function handles were supplied. ds.analyzeData only applies a single function to a single data set.'</span>);
 0065 <span class="keyword">end</span>
 0066 <span class="comment">% save data if no output is requested</span>
 0067 <span class="keyword">if</span> nargout&lt;1
@@ -153,7 +153,7 @@ This function is called by:
 0083 fprintf(<span class="string">'\t\tElapsed time: %g sec\n'</span>,toc(tstart));
 0084 
 0085 <span class="comment">% Dave: Not all plotting functions will return a plot handle. For</span>
-0086 <span class="comment">% example, PlotData2 returns a nested structure of figure, axis, and plot</span>
+0086 <span class="comment">% example, ds.plotData2 returns a nested structure of figure, axis, and plot</span>
 0087 <span class="comment">% handles. This command updates it.</span>
 0088 <span class="keyword">if</span> isstruct(result)
 0089     <span class="keyword">if</span> isfield(result,<span class="string">'hcurr'</span>)
@@ -220,7 +220,7 @@ This function is called by:
 0150   <a name="_sub1" href="#_subfunctions" class="code">function result = add_modifications(result)</a>
 0151     <span class="comment">% add modifications to result structure, excluding modifications made</span>
 0152     <span class="comment">% within experiments. note: while this nested function is similar to</span>
-0153     <span class="comment">% prepare_varied_metadata in SimulateModel, the data structure contains</span>
+0153     <span class="comment">% prepare_varied_metadata in ds.simulateModel, the data structure contains</span>
 0154     <span class="comment">% all modifications (those within and across experiments; listed in 'varied').</span>
 0155     <span class="comment">% the result structure collapses data sets from an experiment into a single</span>
 0156     <span class="comment">% result; thus, each result corresponds to modifications across</span>

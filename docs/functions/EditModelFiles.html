@@ -2,8 +2,8 @@
                 "http://www.w3.org/TR/REC-html40/loose.dtd">
 <html>
 <head>
-  <title>Description of EditModelFiles</title>
-  <meta name="keywords" content="EditModelFiles">
+  <title>Description of ds.editModelFiles</title>
+  <meta name="keywords" content="ds.editModelFiles">
   <meta name="description" content="">
   <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
   <meta name="generator" content="m2html &copy; 2005 Guillaume Flandin">
@@ -16,14 +16,14 @@
 <body>
 <a name="_top"></a>
 <!-- menu.html functions -->
-<h1>EditModelFiles
+<h1>ds.editModelFiles
 </h1>
 
 <h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
 <div class="box"><strong></strong></div>
 
 <h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
-<div class="box"><strong>function EditModelFiles(files) </strong></div>
+<div class="box"><strong>function ds.editModelFiles(files) </strong></div>
 
 <h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
 <div class="fragment"><pre class="comment"></pre></div>
@@ -32,7 +32,7 @@
 <h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
 This function calls:
 <ul style="list-style-image:url(../matlabicon.gif)">
-<li><a href="LocateModelFiles.html" class="code" title="function [paths,files]=LocateModelFiles(input)">LocateModelFiles</a>	LOCATEMODELFILES - locate mechanism files associated with DynaSim specifications.</li></ul>
+<li><a href="ds.locateModelFiles.html" class="code" title="function [paths,files]=ds.locateModelFiles(input)">ds.locateModelFiles</a>	LOCATEMODELFILES - locate mechanism files associated with DynaSim specifications.</li></ul>
 This function is called by:
 <ul style="list-style-image:url(../matlabicon.gif)">
 </ul>
@@ -41,9 +41,9 @@ This function is called by:
 
 
 <h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
-<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function EditModelFiles(files)</a>
+<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function ds.editModelFiles(files)</a>
 0002 
-0003 [~,eqnfiles]= <a href="LocateModelFiles.html" class="code" title="function [paths,files]=LocateModelFiles(input)">LocateModelFiles</a>(files);
+0003 [~,eqnfiles]= <a href="ds.locateModelFiles.html" class="code" title="function [paths,files]=ds.locateModelFiles(input)">ds.locateModelFiles</a>(files);
 0004 
 0005 <span class="keyword">for</span> file = eqnfiles(:)'
 0006   edit(file{1});

@@ -16,7 +16,7 @@ else
 end
 
 % Set where to save outputs
-output_directory = getDsVar('demos_path');
+output_directory = ds.getConfig('demos_path');
 
 % Set where to save outputs
 study_dir = fullfile(output_directory,'demo_sPING_100cells_3x3');
@@ -27,23 +27,23 @@ mkdirSilent(output_directory);
 
 % Make sure sample data exists; if not copy it into place
 if ~exist(study_dir,'dir')
-    unzipDemoData(study_dir);
+    ds.unzipDemoData(study_dir);
 end
 
 % Load data in traditional DynaSim format
-data=ImportData(study_dir);
+data=ds.importData(study_dir);
 
 
 
 %% Convert it into an xPlt class
 
 % Extract the data in a linear table format
-[data_table,column_titles,time] = Data2Table (data);
+[data_table,column_titles,time] = ds.data2Table (data);
 
 % Preview the contents of this table
 %     Note: We cannot make this one big cell array since we want to allow
 %     axis labels to be either strings or numerics.
-previewTable(data_table,column_titles);
+ds.previewTable(data_table,column_titles);
 
 % Import the linear data into an xPlt object
 xp = xPlt;
@@ -272,7 +272,7 @@ xp3.getaxisinfo
 xp4 = xp(:,3,'E','v');
 xp4.getaxisinfo
 
-xp5 = merge(xp3,xp4);
+xp5 = mergeData(xp3,xp4);
 
 dimensions = {[1,2],0};
 figl; recursivePlot(xp5,{@xp_subplot_grid,@xp_matrix_imagesc},dimensions);
@@ -282,13 +282,13 @@ figl; recursivePlot(xp5,{@xp_subplot_grid,@xp_matrix_imagesc},dimensions);
 close all;
 
 % Import plot files
-data_img = ImportPlots(study_dir);
+data_img = ds.importPlots(study_dir);
 
 % Load into DynaSim structure
-[data_table,column_titles] = DataField2Table (data_img,'plot_files');
+[data_table,column_titles] = ds.dataField2Table (data_img,'plot_files');
 
 % Preview the contents of this table
-previewTable(data_table,column_titles);
+ds.previewTable(data_table,column_titles);
 
 % The entries in the first column contain the paths to the figure files.
 % There can be multiple figures associated with each simulation, which is
@@ -488,4 +488,4 @@ xp2b = xp2.squeezeRegexp('populations'); xp2b.getaxisinfo
 % 
 % Implement the following:
 % + Make DynaSimPlotExtract more general
-% + Starting work on PlotData2 - any new requests?
+% + Starting work on ds.plotData2 - any new requests?

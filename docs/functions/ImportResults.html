@@ -2,8 +2,8 @@
                 "http://www.w3.org/TR/REC-html40/loose.dtd">
 <html>
 <head>
-  <title>Description of ImportResults</title>
-  <meta name="keywords" content="ImportResults">
+  <title>Description of ds.importResults</title>
+  <meta name="keywords" content="ds.importResults">
   <meta name="description" content="IMPORTRESULTS - Import analysis result of a simulation">
   <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
   <meta name="generator" content="m2html &copy; 2005 Guillaume Flandin">
@@ -16,20 +16,20 @@
 <body>
 <a name="_top"></a>
 <!-- menu.html functions -->
-<h1>ImportResults
+<h1>ds.importResults
 </h1>
 
 <h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
 <div class="box"><strong>IMPORTRESULTS - Import analysis result of a simulation</strong></div>
 
 <h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
-<div class="box"><strong>function results = ImportResults(studyinfo,func) </strong></div>
+<div class="box"><strong>function results = ds.importResults(studyinfo,func) </strong></div>
 
 <h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
 <div class="fragment"><pre class="comment">IMPORTRESULTS - Import analysis result of a simulation
 
  Usage:
-   results = ImportResults(studyinfo,func)
+   results = ds.importResults(studyinfo,func)
 
  Inputs:
    - studyinfo: DynaSim studyinfo structure or study_dir
@@ -39,9 +39,9 @@
    - results: structure of results [num_sims x num_calls]
 
  TODO:
-   - This command breaks when &quot;results&quot; are figures e.g. outputs of PlotData
+   - This command breaks when &quot;results&quot; are figures e.g. outputs of ds.plotData
    (dave, Feb 2017). Does not know how to &quot;load&quot; an image, nor does it
-   recognize the image extensions. I wrote &quot;ImportPlots&quot; as a way around this,
+   recognize the image extensions. I wrote &quot;ds.importPlots&quot; as a way around this,
    but there might be better solutions for differentiating &quot;plots&quot; from other
    &quot;results&quot;</pre></div>
 
@@ -49,7 +49,7 @@
 <h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
 This function calls:
 <ul style="list-style-image:url(../matlabicon.gif)">
-<li><a href="checkStudyinfo.html" class="code" title="function studyinfo=checkStudyinfo(studyinfo,varargin)">checkStudyinfo</a>	CHECKSTUDYINFO - Standardize studyinfo structure and auto-populate missing fields</li></ul>
+<li><a href="ds.checkStudyinfo.html" class="code" title="function studyinfo=ds.checkStudyinfo(studyinfo,varargin)">ds.checkStudyinfo</a>	CHECKSTUDYINFO - Standardize studyinfo structure and auto-populate missing fields</li></ul>
 This function is called by:
 <ul style="list-style-image:url(../matlabicon.gif)">
 </ul>
@@ -58,11 +58,11 @@ This function is called by:
 
 
 <h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
-<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function results = ImportResults(studyinfo,func)</a>
+<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function results = ds.importResults(studyinfo,func)</a>
 0002 <span class="comment">%IMPORTRESULTS - Import analysis result of a simulation</span>
 0003 <span class="comment">%</span>
 0004 <span class="comment">% Usage:</span>
-0005 <span class="comment">%   results = ImportResults(studyinfo,func)</span>
+0005 <span class="comment">%   results = ds.importResults(studyinfo,func)</span>
 0006 <span class="comment">%</span>
 0007 <span class="comment">% Inputs:</span>
 0008 <span class="comment">%   - studyinfo: DynaSim studyinfo structure or study_dir</span>
@@ -72,9 +72,9 @@ This function is called by:
 0012 <span class="comment">%   - results: structure of results [num_sims x num_calls]</span>
 0013 <span class="comment">%</span>
 0014 <span class="comment">% TODO:</span>
-0015 <span class="comment">%   - This command breaks when &quot;results&quot; are figures e.g. outputs of PlotData</span>
+0015 <span class="comment">%   - This command breaks when &quot;results&quot; are figures e.g. outputs of ds.plotData</span>
 0016 <span class="comment">%   (dave, Feb 2017). Does not know how to &quot;load&quot; an image, nor does it</span>
-0017 <span class="comment">%   recognize the image extensions. I wrote &quot;ImportPlots&quot; as a way around this,</span>
+0017 <span class="comment">%   recognize the image extensions. I wrote &quot;ds.importPlots&quot; as a way around this,</span>
 0018 <span class="comment">%   but there might be better solutions for differentiating &quot;plots&quot; from other</span>
 0019 <span class="comment">%   &quot;results&quot;</span>
 0020 
@@ -86,7 +86,7 @@ This function is called by:
 0026 
 0027 <span class="keyword">if</span> isstruct(studyinfo) &amp;&amp; isfield(studyinfo,<span class="string">'study_dir'</span>)
 0028   <span class="comment">% retrieve most up-to-date studyinfo structure from studyinfo.mat file</span>
-0029   studyinfo=<a href="checkStudyinfo.html" class="code" title="function studyinfo=checkStudyinfo(studyinfo,varargin)">checkStudyinfo</a>(studyinfo.study_dir);
+0029   studyinfo=<a href="ds.checkStudyinfo.html" class="code" title="function studyinfo=ds.checkStudyinfo(studyinfo,varargin)">ds.checkStudyinfo</a>(studyinfo.study_dir);
 0030   <span class="keyword">if</span> exist(<span class="string">'study_dir'</span>,<span class="string">'var'</span>)
 0031     studyinfo.study_dir=study_dir;
 0032   <span class="keyword">end</span>

@@ -1,6 +1,6 @@
 /* Created by mdot for Matlab */
 digraph m2html {
 
-  get_populations_from_meta [URL="get_populations_from_meta.html"];
-  get_variables_from_meta [URL="get_variables_from_meta.html"];
+  ds.xPlt.get_populations_from_meta [URL="ds.xPlt.get_populations_from_meta.html"];
+  ds.xPlt.get_variables_from_meta [URL="ds.xPlt.get_variables_from_meta.html"];
 }

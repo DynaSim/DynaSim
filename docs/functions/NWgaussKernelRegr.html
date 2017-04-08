@@ -2,8 +2,8 @@
                 "http://www.w3.org/TR/REC-html40/loose.dtd">
 <html>
 <head>
-  <title>Description of NWgaussKernelRegr</title>
-  <meta name="keywords" content="NWgaussKernelRegr">
+  <title>Description of ds.nwGaussKernelRegr</title>
+  <meta name="keywords" content="ds.nwGaussKernelRegr">
   <meta name="description" content="Nadaraya-Watson smoothing kernel regression of a rastergram using a Gaussian kernel">
   <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
   <meta name="generator" content="m2html &copy; 2005 Guillaume Flandin">
@@ -16,14 +16,14 @@
 <body>
 <a name="_top"></a>
 <!-- menu.html functions -->
-<h1>NWgaussKernelRegr
+<h1>ds.nwGaussKernelRegr
 </h1>
 
 <h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
 <div class="box"><strong>Nadaraya-Watson smoothing kernel regression of a rastergram using a Gaussian kernel</strong></div>
 
 <h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
-<div class="box"><strong>function [inst_rate,time] = NWgaussKernelRegr(time,raster,pop,kwidth,Ts) </strong></div>
+<div class="box"><strong>function [inst_rate,time] = ds.nwGaussKernelRegr(time,raster,pop,kwidth,Ts) </strong></div>
 
 <h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
 <div class="fragment"><pre class="comment">  Nadaraya-Watson smoothing kernel regression of a rastergram using a Gaussian kernel</pre></div>
@@ -35,13 +35,13 @@ This function calls:
 </ul>
 This function is called by:
 <ul style="list-style-image:url(../matlabicon.gif)">
-<li><a href="calcSpikeSync.html" class="code" title="function stats = calcSpikeSync(data,varargin)">calcSpikeSync</a>	CALCSPIKESYNC - Compute spike synchronization between spiketrains</li></ul>
+<li><a href="ds.calcSpikeSync.html" class="code" title="function stats = ds.calcSpikeSync(data,varargin)">ds.calcSpikeSync</a>	CALCSPIKESYNC - Compute spike synchronization between spiketrains</li></ul>
 <!-- crossreference -->
 
 
 
 <h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
-<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function [inst_rate,time] = NWgaussKernelRegr(time,raster,pop,kwidth,Ts)</a>
+<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function [inst_rate,time] = ds.nwGaussKernelRegr(time,raster,pop,kwidth,Ts)</a>
 0002 
 0003 <span class="comment">%  Nadaraya-Watson smoothing kernel regression of a rastergram using a Gaussian kernel</span>
 0004   cumSpikesPop_dt = zeros(size(time));

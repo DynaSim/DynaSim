@@ -2,8 +2,8 @@
                 "http://www.w3.org/TR/REC-html40/loose.dtd">
 <html>
 <head>
-  <title>Description of DynaSimImg2xPlt</title>
-  <meta name="keywords" content="DynaSimImg2xPlt">
+  <title>Description of ds.img2xPlt</title>
+  <meta name="keywords" content="ds.img2xPlt">
   <meta name="description" content="Load into DynaSim structure">
   <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
   <meta name="generator" content="m2html &copy; 2005 Guillaume Flandin">
@@ -16,14 +16,14 @@
 <body>
 <a name="_top"></a>
 <!-- menu.html functions -->
-<h1>DynaSimImg2xPlt
+<h1>ds.img2xPlt
 </h1>
 
 <h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
 <div class="box"><strong>Load into DynaSim structure</strong></div>
 
 <h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
-<div class="box"><strong>function xp = DynaSimImg2xPlt(data_img) </strong></div>
+<div class="box"><strong>function xp = ds.img2xPlt(data_img) </strong></div>
 
 <h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
 <div class="fragment"><pre class="comment"> Load into DynaSim structure</pre></div>
@@ -32,18 +32,18 @@
 <h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
 This function calls:
 <ul style="list-style-image:url(../matlabicon.gif)">
-<li><a href="DataField2Table.html" class="code" title="function [data_table,column_titles] = DataField2Table (data,fieldname,verbose_flag)">DataField2Table</a>	Converts DynaSim structure to 1D cell array format. Later can use to</li></ul>
+<li><a href="ds.dataField2Table.html" class="code" title="function [data_table,column_titles] = ds.dataField2Table (data,fieldname,verbose_flag)">ds.dataField2Table</a>	Converts DynaSim structure to 1D cell array format. Later can use to</li></ul>
 This function is called by:
 <ul style="list-style-image:url(../matlabicon.gif)">
-<li><a href="all2xPlt.html" class="code" title="function [xp,is_image] = all2xPlt(data)">all2xPlt</a>	</li></ul>
+<li><a href="ds.xPlt.all2xPlt.html" class="code" title="function [xp,is_image] = ds.xPlt.all2xPlt(data)">ds.xPlt.all2xPlt</a>	</li></ul>
 <!-- crossreference -->
 
 
 
 <h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
-<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function xp = DynaSimImg2xPlt(data_img)</a>
+<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function xp = ds.img2xPlt(data_img)</a>
 0002     <span class="comment">% Load into DynaSim structure</span>
-0003     [data_table,column_titles] = <a href="DataField2Table.html" class="code" title="function [data_table,column_titles] = DataField2Table (data,fieldname,verbose_flag)">DataField2Table</a> (data_img,<span class="string">'plot_files'</span>);
+0003     [data_table,column_titles] = <a href="ds.dataField2Table.html" class="code" title="function [data_table,column_titles] = ds.dataField2Table (data,fieldname,verbose_flag)">ds.dataField2Table</a> (data_img,<span class="string">'plot_files'</span>);
 0004 
 0005     <span class="comment">% The entries in the first column contain the paths to the figure files.</span>
 0006     <span class="comment">% There can be multiple figures associated with each simulation, which is</span>

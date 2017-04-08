@@ -2,8 +2,8 @@
                 "http://www.w3.org/TR/REC-html40/loose.dtd">
 <html>
 <head>
-  <title>Description of DataField2Table</title>
-  <meta name="keywords" content="DataField2Table">
+  <title>Description of ds.dataField2Table</title>
+  <meta name="keywords" content="ds.dataField2Table">
   <meta name="description" content="Converts DynaSim structure to 1D cell array format. Later can use to">
   <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
   <meta name="generator" content="m2html &copy; 2005 Guillaume Flandin">
@@ -16,14 +16,14 @@
 <body>
 <a name="_top"></a>
 <!-- menu.html functions -->
-<h1>DataField2Table
+<h1>ds.dataField2Table
 </h1>
 
 <h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
 <div class="box"><strong>Converts DynaSim structure to 1D cell array format. Later can use to</strong></div>
 
 <h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
-<div class="box"><strong>function [data_table,column_titles] = DataField2Table (data,fieldname,verbose_flag) </strong></div>
+<div class="box"><strong>function [data_table,column_titles] = ds.dataField2Table (data,fieldname,verbose_flag) </strong></div>
 
 <h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
 <div class="fragment"><pre class="comment"> Converts DynaSim structure to 1D cell array format. Later can use to
@@ -34,10 +34,10 @@
 <h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
 This function calls:
 <ul style="list-style-image:url(../matlabicon.gif)">
-<li><a href="previewTable.html" class="code" title="function [dt_formatted] = previewTable(data_table,col_names)">previewTable</a>	All data, formatted into cells</li></ul>
+<li><a href="ds.previewTable.html" class="code" title="function [dt_formatted] = ds.previewTable(data_table,col_names)">ds.previewTable</a>	All data, formatted into cells</li></ul>
 This function is called by:
 <ul style="list-style-image:url(../matlabicon.gif)">
-<li><a href="DynaSimImg2xPlt.html" class="code" title="function xp = DynaSimImg2xPlt(data_img)">DynaSimImg2xPlt</a>	Load into DynaSim structure</li></ul>
+<li><a href="ds.img2xPlt.html" class="code" title="function xp = ds.img2xPlt(data_img)">ds.img2xPlt</a>	Load into DynaSim structure</li></ul>
 <!-- crossreference -->
 
 
@@ -45,7 +45,7 @@ This function is called by:
 <h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
 <div class="fragment"><pre>0001 
 0002 
-0003 <a name="_sub0" href="#_subfunctions" class="code">function [data_table,column_titles] = DataField2Table (data,fieldname,verbose_flag)</a>
+0003 <a name="_sub0" href="#_subfunctions" class="code">function [data_table,column_titles] = ds.dataField2Table (data,fieldname,verbose_flag)</a>
 0004     <span class="comment">% Converts DynaSim structure to 1D cell array format. Later can use to</span>
 0005     <span class="comment">% import to xPlt. In this case, pulls out a specific field from data,</span>
 0006     <span class="comment">% along with the varied information.</span>
@@ -116,7 +116,7 @@ This function is called by:
 0071     column_titles = {<span class="string">'data'</span>,ax_names{:}};
 0072     
 0073     <span class="keyword">if</span> verbose_flag
-0074         <a href="previewTable.html" class="code" title="function [dt_formatted] = previewTable(data_table,col_names)">previewTable</a>(data_table,column_titles);
+0074         <a href="ds.previewTable.html" class="code" title="function [dt_formatted] = ds.previewTable(data_table,col_names)">ds.previewTable</a>(data_table,column_titles);
 0075     <span class="keyword">end</span>
 0076     
 0077 <span class="keyword">end</span>

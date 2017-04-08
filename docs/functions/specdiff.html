@@ -2,9 +2,9 @@
                 "http://www.w3.org/TR/REC-html40/loose.dtd">
 <html>
 <head>
-  <title>Description of specdiff</title>
-  <meta name="keywords" content="specdiff">
-  <meta name="description" content="SPECDIFF - Scans two DynaSim specs for differences">
+  <title>Description of ds.specDiff</title>
+  <meta name="keywords" content="ds.specDiff">
+  <meta name="description" content="ds.specDiff - Scans two DynaSim specs for differences">
   <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
   <meta name="generator" content="m2html &copy; 2005 Guillaume Flandin">
   <meta name="robots" content="index, follow">
@@ -16,20 +16,20 @@
 <body>
 <a name="_top"></a>
 <!-- menu.html functions -->
-<h1>specdiff
+<h1>ds.specDiff
 </h1>
 
 <h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
-<div class="box"><strong>SPECDIFF - Scans two DynaSim specs for differences</strong></div>
+<div class="box"><strong>ds.specDiff - Scans two DynaSim specs for differences</strong></div>
 
 <h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
-<div class="box"><strong>function [pop_diff,conn_diff] = specdiff(spec1,spec2,verbose) </strong></div>
+<div class="box"><strong>function [pop_diff,conn_diff] = ds.specDiff(spec1,spec2,verbose) </strong></div>
 
 <h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
-<div class="fragment"><pre class="comment">SPECDIFF - Scans two DynaSim specs for differences
+<div class="fragment"><pre class="comment">ds.specDiff - Scans two DynaSim specs for differences
 
  Usage:
-   [pop_diff,conn_diff] = specdiff(spec1,spec2)
+   [pop_diff,conn_diff] = ds.specDiff(spec1,spec2)
 
  Inputs:
     - spec1, spec2        : DynaSim model specifications to be compared
@@ -58,11 +58,11 @@ This function is called by:
 <li><a href="#_sub1" class="code">function [val,pop_name,properties] = extract_pop_lists(s)</a></li><li><a href="#_sub2" class="code">function [val,pop_name,properties] = extract_conn_lists(s)</a></li><li><a href="#_sub3" class="code">function out = mycompare(x,y)</a></li><li><a href="#_sub4" class="code">function fprintf_cells(string,cells2print)</a></li><li><a href="#_sub5" class="code">function [str_merged,ind1,ind2] = compare_string_cells(string1,string2)</a></li><li><a href="#_sub6" class="code">function run_comparison(nd)</a></li><li><a href="#_sub7" class="code">function s = return_comparison(nd)</a></li></ul>
 
 <h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
-<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function [pop_diff,conn_diff] = specdiff(spec1,spec2,verbose)</a>
-0002 <span class="comment">%SPECDIFF - Scans two DynaSim specs for differences</span>
+<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function [pop_diff,conn_diff] = ds.specDiff(spec1,spec2,verbose)</a>
+0002 <span class="comment">%ds.specDiff - Scans two DynaSim specs for differences</span>
 0003 <span class="comment">%</span>
 0004 <span class="comment">% Usage:</span>
-0005 <span class="comment">%   [pop_diff,conn_diff] = specdiff(spec1,spec2)</span>
+0005 <span class="comment">%   [pop_diff,conn_diff] = ds.specDiff(spec1,spec2)</span>
 0006 <span class="comment">%</span>
 0007 <span class="comment">% Inputs:</span>
 0008 <span class="comment">%    - spec1, spec2        : DynaSim model specifications to be compared</span>
