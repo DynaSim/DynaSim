@@ -13,10 +13,10 @@ if ~exist('SimulateModel','file')                                               
     [currfolder_full] = pwd;
     [~,currfolder] = fileparts(currfolder_full);
     
-    if ~isempty(strfind(parentfolder,'DynaSim'))                                % Check if parent folder is DynaSim
+    if ~isempty(regexpi(parentfolder,'DynaSim'))                                % Check if parent folder is DynaSim
         addpath(genpath(parentfolder_full));                                    %     If is, add to path
         rmpath(genpath(fullfile(parentfolder_full,'.git')));                    %        (Remove .git folder)
-    elseif ~isempty(strfind(currfolder,'DynaSim'))                              % Check if current folder is DynaSim
+    elseif ~isempty(regexpi(currfolder,'DynaSim'))                              % Check if current folder is DynaSim
         addpath(genpath(currfolder_full));                                      %     If is, add to path
         rmpath(genpath(fullfile(currfolder_full,'.git')));                      %         (Remove .git folder)
     else
