@@ -2,8 +2,8 @@
                 "http://www.w3.org/TR/REC-html40/loose.dtd">
 <html>
 <head>
-  <title>Description of calcCellProperties</title>
-  <meta name="keywords" content="calcCellProperties">
+  <title>Description of ds.calcCellProperties</title>
+  <meta name="keywords" content="ds.calcCellProperties">
   <meta name="description" content="CALCCELLPROPERTIES - calculates the intrinsic electrophysiological properties of all cells in one or more populations">
   <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
   <meta name="generator" content="m2html &copy; 2005 Guillaume Flandin">
@@ -16,29 +16,29 @@
 <body>
 <a name="_top"></a>
 <!-- menu.html functions -->
-<h1>calcCellProperties
+<h1>ds.calcCellProperties
 </h1>
 
 <h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
 <div class="box"><strong>CALCCELLPROPERTIES - calculates the intrinsic electrophysiological properties of all cells in one or more populations</strong></div>
 
 <h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
-<div class="box"><strong>function stats = calcCellProperties(data,varargin) </strong></div>
+<div class="box"><strong>function stats = ds.calcCellProperties(data,varargin) </strong></div>
 
 <h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
 <div class="fragment"><pre class="comment">CALCCELLPROPERTIES - calculates the intrinsic electrophysiological properties of all cells in one or more populations
 
  This is designed to be used in conjunction with the experiment
- ProbeCellProperties which removes all connections from a model and produces
+ ds.probeCellProperties which removes all connections from a model and produces
  a data array of simulated data in response to a series of hyperpolarizing and
  depolarizing pulses. This function is based on the DNSim experiment
  &quot;cell_pulses&quot;.
 
  Usage:
-   stats = calcCellProperties(data,'option1',option1,...)
+   stats = ds.calcCellProperties(data,'option1',option1,...)
 
  Inputs:
-   - data: array of DynaSim data structures returned by ProbeCellProperties
+   - data: array of DynaSim data structures returned by ds.probeCellProperties
 
  Outputs:
    - stats.(pop).(measure) [1 x num_cells] (averaged over repetitions)
@@ -131,16 +131,16 @@
      3150-3166.
 
  Example:
-   data = ProbeCellProperties(model)
-   stats = calcCellProperties(data)
+   data = ds.probeCellProperties(model)
+   stats = ds.calcCellProperties(data)
 
- See also: <a href="ProbeCellProperties.html" class="code" title="function data = ProbeCellProperties(model,varargin)">ProbeCellProperties</a></pre></div>
+ See also: <a href="ds.probeCellProperties.html" class="code" title="function data = ds.probeCellProperties(model,varargin)">ds.probeCellProperties</a></pre></div>
 
 <!-- crossreference -->
 <h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
 This function calls:
 <ul style="list-style-image:url(../matlabicon.gif)">
-<li><a href="checkData.html" class="code" title="function data=checkData(data)">checkData</a>	CHECKDATA - Standardize data structure and auto-populate missing fields</li><li><a href="checkOptions.html" class="code" title="function [parms, params_unspecified ] = checkOptions(options, options_schema, strict)">checkOptions</a>	CHECKOPTIONS - organize key/value pairs in structure with default or user-supplied values according to a schema</li><li><a href="SelectVariables.html" class="code" title="function [variables,pop_names]=SelectVariables(labels,var_strings)">SelectVariables</a>	SELECTVARIABLES - determine what variables to plot</li></ul>
+<li><a href="ds.checkData.html" class="code" title="function data=ds.checkData(data)">ds.checkData</a>	CHECKDATA - Standardize data structure and auto-populate missing fields</li><li><a href="ds.checkOptions.html" class="code" title="function [parms, params_unspecified ] = ds.checkOptions(options, options_schema, strict)">ds.checkOptions</a>	CHECKOPTIONS - organize key/value pairs in structure with default or user-supplied values according to a schema</li><li><a href="ds.selectVariables.html" class="code" title="function [variables,pop_names]=ds.selectVariables(labels,var_strings)">ds.selectVariables</a>	SELECTVARIABLES - determine what variables to plot</li></ul>
 This function is called by:
 <ul style="list-style-image:url(../matlabicon.gif)">
 </ul>
@@ -149,20 +149,20 @@ This function is called by:
 
 
 <h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
-<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function stats = calcCellProperties(data,varargin)</a>
+<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function stats = ds.calcCellProperties(data,varargin)</a>
 0002 <span class="comment">%CALCCELLPROPERTIES - calculates the intrinsic electrophysiological properties of all cells in one or more populations</span>
 0003 <span class="comment">%</span>
 0004 <span class="comment">% This is designed to be used in conjunction with the experiment</span>
-0005 <span class="comment">% ProbeCellProperties which removes all connections from a model and produces</span>
+0005 <span class="comment">% ds.probeCellProperties which removes all connections from a model and produces</span>
 0006 <span class="comment">% a data array of simulated data in response to a series of hyperpolarizing and</span>
 0007 <span class="comment">% depolarizing pulses. This function is based on the DNSim experiment</span>
 0008 <span class="comment">% &quot;cell_pulses&quot;.</span>
 0009 <span class="comment">%</span>
 0010 <span class="comment">% Usage:</span>
-0011 <span class="comment">%   stats = calcCellProperties(data,'option1',option1,...)</span>
+0011 <span class="comment">%   stats = ds.calcCellProperties(data,'option1',option1,...)</span>
 0012 <span class="comment">%</span>
 0013 <span class="comment">% Inputs:</span>
-0014 <span class="comment">%   - data: array of DynaSim data structures returned by ProbeCellProperties</span>
+0014 <span class="comment">%   - data: array of DynaSim data structures returned by ds.probeCellProperties</span>
 0015 <span class="comment">%</span>
 0016 <span class="comment">% Outputs:</span>
 0017 <span class="comment">%   - stats.(pop).(measure) [1 x num_cells] (averaged over repetitions)</span>
@@ -255,20 +255,20 @@ This function is called by:
 0104 <span class="comment">%     3150-3166.</span>
 0105 <span class="comment">%</span>
 0106 <span class="comment">% Example:</span>
-0107 <span class="comment">%   data = ProbeCellProperties(model)</span>
-0108 <span class="comment">%   stats = calcCellProperties(data)</span>
+0107 <span class="comment">%   data = ds.probeCellProperties(model)</span>
+0108 <span class="comment">%   stats = ds.calcCellProperties(data)</span>
 0109 <span class="comment">%</span>
-0110 <span class="comment">% See also: ProbeCellProperties</span>
+0110 <span class="comment">% See also: ds.probeCellProperties</span>
 0111 
 0112 <span class="comment">% Check inputs</span>
-0113 options=<a href="checkOptions.html" class="code" title="function [parms, params_unspecified ] = checkOptions(options, options_schema, strict)">checkOptions</a>(varargin,{<span class="keyword">...</span>
+0113 options=<a href="ds.checkOptions.html" class="code" title="function [parms, params_unspecified ] = ds.checkOptions(options, options_schema, strict)">ds.checkOptions</a>(varargin,{<span class="keyword">...</span>
 0114   <span class="string">'spike_threshold'</span>,1e-5,[],<span class="keyword">...</span>
 0115   <span class="string">'skip_time'</span>,10,[],<span class="keyword">...</span><span class="comment"> % time [ms] to exclude from detection</span>
 0116   <span class="string">'plot_flag'</span>,0,{0,1},<span class="keyword">...</span>
 0117   <span class="string">'equivalent_cells_flag'</span>,0,[],<span class="keyword">...</span><span class="comment"> % if true, only process one cell per pop</span>
 0118   },false);
 0119 
-0120 data=<a href="checkData.html" class="code" title="function data=checkData(data)">checkData</a>(data);
+0120 data=<a href="ds.checkData.html" class="code" title="function data=ds.checkData(data)">ds.checkData</a>(data);
 0121 model=data(1).model;
 0122 time=data(1).time;
 0123 num_times=length(time);
@@ -303,7 +303,7 @@ This function is called by:
 0152 num_steps=length(amplitudes);
 0153 
 0154 <span class="comment">% get list of variables to analyze</span>
-0155 [vars,vars_pop]=<a href="SelectVariables.html" class="code" title="function [variables,pop_names]=SelectVariables(labels,var_strings)">SelectVariables</a>(data(1).labels);
+0155 [vars,vars_pop]=<a href="ds.selectVariables.html" class="code" title="function [variables,pop_names]=ds.selectVariables(labels,var_strings)">ds.selectVariables</a>(data(1).labels);
 0156 
 0157 <span class="comment">% assume only one variable per population</span>
 0158 <span class="keyword">if</span> length(unique(vars_pop))&gt;num_pops

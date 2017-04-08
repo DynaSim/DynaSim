@@ -2,8 +2,8 @@
                 "http://www.w3.org/TR/REC-html40/loose.dtd">
 <html>
 <head>
-  <title>Description of checkModel</title>
-  <meta name="keywords" content="checkModel">
+  <title>Description of ds.checkModel</title>
+  <meta name="keywords" content="ds.checkModel">
   <meta name="description" content="CHECKMODEL - Standardize model structure and auto-populate missing fields">
   <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
   <meta name="generator" content="m2html &copy; 2005 Guillaume Flandin">
@@ -16,20 +16,20 @@
 <body>
 <a name="_top"></a>
 <!-- menu.html functions -->
-<h1>checkModel
+<h1>ds.checkModel
 </h1>
 
 <h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
 <div class="box"><strong>CHECKMODEL - Standardize model structure and auto-populate missing fields</strong></div>
 
 <h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
-<div class="box"><strong>function model=checkModel(model) </strong></div>
+<div class="box"><strong>function model=ds.checkModel(model) </strong></div>
 
 <h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
 <div class="fragment"><pre class="comment">CHECKMODEL - Standardize model structure and auto-populate missing fields
 
  Usage:
-   model=checkModel(model)
+   model=ds.checkModel(model)
 
  Input: DynaSim model structure or equations
 
@@ -55,7 +55,7 @@
        .expression: string giving the expression to insert
        .operation : string giving the operation to use to insert expression
      model.comments{i}     : cell array of comments found in model files
-     model.specification   : specification used to generate the model (see checkSpecification)
+     model.specification   : specification used to generate the model (see ds.checkSpecification)
      model.namespaces      : (see NOTE 3)
 
    - NOTE 1: &quot;action&quot; may include multiple statements separated by semicolons.
@@ -87,21 +87,21 @@
 
  Examples:
  - Example 1: obtain empty model structure with all fields
-     model=checkModel([])
+     model=ds.checkModel([])
 
  - Example 2: standardize existing model
-     model=checkModel(model)
+     model=ds.checkModel(model)
 
- see also: <a href="GenerateModel.html" class="code" title="function [model,name_map]=GenerateModel(specification,varargin)">GenerateModel</a>, <a href="checkSpecification.html" class="code" title="function spec=checkSpecification(specification)">checkSpecification</a>, <a href="checkData.html" class="code" title="function data=checkData(data)">checkData</a></pre></div>
+ see also: <a href="ds.generateModel.html" class="code" title="function [model,name_map]=ds.generateModel(specification,varargin)">ds.generateModel</a>, <a href="ds.checkSpecification.html" class="code" title="function spec=ds.checkSpecification(specification)">ds.checkSpecification</a>, <a href="ds.checkData.html" class="code" title="function data=ds.checkData(data)">ds.checkData</a></pre></div>
 
 <!-- crossreference -->
 <h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
 This function calls:
 <ul style="list-style-image:url(../matlabicon.gif)">
-<li><a href="GenerateModel.html" class="code" title="function [model,name_map]=GenerateModel(specification,varargin)">GenerateModel</a>	GENERATEMODEL - Parse DynaSim specification and organize model data in DynaSim model structure</li></ul>
+<li><a href="ds.generateModel.html" class="code" title="function [model,name_map]=ds.generateModel(specification,varargin)">ds.generateModel</a>	GENERATEMODEL - Parse DynaSim specification and organize model data in DynaSim model structure</li></ul>
 This function is called by:
 <ul style="list-style-image:url(../matlabicon.gif)">
-<li><a href="CombineModels.html" class="code" title="function model=CombineModels(model1,model2)">CombineModels</a>	COMBINEMODELS - combine subfields in two DynaSim model structures</li><li><a href="GenerateModel.html" class="code" title="function [model,name_map]=GenerateModel(specification,varargin)">GenerateModel</a>	GENERATEMODEL - Parse DynaSim specification and organize model data in DynaSim model structure</li><li><a href="ProbeCellProperties.html" class="code" title="function data = ProbeCellProperties(model,varargin)">ProbeCellProperties</a>	data = ProbeCellProperties(model,'option1',option1,...)</li><li><a href="ProbeFI.html" class="code" title="function data=ProbeFI(model,varargin)">ProbeFI</a>	% data=ProbeFI(model,varargin)</li><li><a href="PropagateFunctions.html" class="code" title="function model=PropagateFunctions(model)">PropagateFunctions</a>	PROPAGATEFUNCTIONS - eliminate internal function calls from model ODEs, ICs, monitors, and conditionals.</li><li><a href="PropagateNamespaces.html" class="code" title="function model = PropagateNamespaces(model,map)">PropagateNamespaces</a>	PROPAGATENAMESPACES - namespace-establishing namespace substitutions.</li><li><a href="PropagateParameters.html" class="code" title="function model=PropagateParameters(model,varargin)">PropagateParameters</a>	PROPAGATEPARAMETERS - substitute parameter values or prepend parameter names with prefix across all model equations.</li><li><a href="SimulateModel.html" class="code" title="function [data,studyinfo]=SimulateModel(model,varargin)">SimulateModel</a>	% data=SimulateModel(model,'option',value,...)</li><li><a href="WriteDynaSimSolver.html" class="code" title="function [outfile,options]=WriteDynaSimSolver(model,varargin)">WriteDynaSimSolver</a>	WRITEDYNASIMSOLVER - write m-file that numerically inteegrates the model</li><li><a href="WriteMatlabSolver.html" class="code" title="function solve_ode_filepath = WriteMatlabSolver(model,varargin)">WriteMatlabSolver</a>	WRITEMATLABSOLVER - write m-file that numerically inteegrates the model</li></ul>
+<li><a href="ds.combineModels.html" class="code" title="function model=ds.combineModels(model1,model2)">ds.combineModels</a>	COMBINEMODELS - combine subfields in two DynaSim model structures</li><li><a href="ds.generateModel.html" class="code" title="function [model,name_map]=ds.generateModel(specification,varargin)">ds.generateModel</a>	GENERATEMODEL - Parse DynaSim specification and organize model data in DynaSim model structure</li><li><a href="ds.probeCellProperties.html" class="code" title="function data = ds.probeCellProperties(model,varargin)">ds.probeCellProperties</a>	data = ds.probeCellProperties(model,'option1',option1,...)</li><li><a href="ds.probeFI.html" class="code" title="function data=ds.probeFI(model,varargin)">ds.probeFI</a>	% data=ds.probeFI(model,varargin)</li><li><a href="ds.propagateFunctions.html" class="code" title="function model=ds.propagateFunctions(model)">ds.propagateFunctions</a>	PROPAGATEFUNCTIONS - eliminate internal function calls from model ODEs, ICs, monitors, and conditionals.</li><li><a href="ds.propagateNamespaces.html" class="code" title="function model = ds.propagateNamespaces(model,map)">ds.propagateNamespaces</a>	PROPAGATENAMESPACES - namespace-establishing namespace substitutions.</li><li><a href="ds.propagateParameters.html" class="code" title="function model=ds.propagateParameters(model,varargin)">ds.propagateParameters</a>	PROPAGATEPARAMETERS - substitute parameter values or prepend parameter names with prefix across all model equations.</li><li><a href="ds.simulateModel.html" class="code" title="function [data,studyinfo]=ds.simulateModel(model,varargin)">ds.simulateModel</a>	% data=ds.simulateModel(model,'option',value,...)</li><li><a href="ds.writeDynaSimSolver.html" class="code" title="function [outfile,options]=ds.writeDynaSimSolver(model,varargin)">ds.writeDynaSimSolver</a>	WRITEDYNASIMSOLVER - write m-file that numerically inteegrates the model</li><li><a href="ds.writeMatlabSolver.html" class="code" title="function solve_ode_filepath = ds.writeMatlabSolver(model,varargin)">ds.writeMatlabSolver</a>	WRITEMATLABSOLVER - write m-file that numerically inteegrates the model</li></ul>
 <!-- crossreference -->
 
 <h2><a name="_subfunctions"></a>SUBFUNCTIONS <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
@@ -109,11 +109,11 @@ This function is called by:
 <li><a href="#_sub1" class="code">function model=backward_compatibility(model)</a></li></ul>
 
 <h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
-<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function model=checkModel(model)</a>
+<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function model=ds.checkModel(model)</a>
 0002 <span class="comment">%CHECKMODEL - Standardize model structure and auto-populate missing fields</span>
 0003 <span class="comment">%</span>
 0004 <span class="comment">% Usage:</span>
-0005 <span class="comment">%   model=checkModel(model)</span>
+0005 <span class="comment">%   model=ds.checkModel(model)</span>
 0006 <span class="comment">%</span>
 0007 <span class="comment">% Input: DynaSim model structure or equations</span>
 0008 <span class="comment">%</span>
@@ -139,7 +139,7 @@ This function is called by:
 0028 <span class="comment">%       .expression: string giving the expression to insert</span>
 0029 <span class="comment">%       .operation : string giving the operation to use to insert expression</span>
 0030 <span class="comment">%     model.comments{i}     : cell array of comments found in model files</span>
-0031 <span class="comment">%     model.specification   : specification used to generate the model (see checkSpecification)</span>
+0031 <span class="comment">%     model.specification   : specification used to generate the model (see ds.checkSpecification)</span>
 0032 <span class="comment">%     model.namespaces      : (see NOTE 3)</span>
 0033 <span class="comment">%</span>
 0034 <span class="comment">%   - NOTE 1: &quot;action&quot; may include multiple statements separated by semicolons.</span>
@@ -171,12 +171,12 @@ This function is called by:
 0060 <span class="comment">%</span>
 0061 <span class="comment">% Examples:</span>
 0062 <span class="comment">% - Example 1: obtain empty model structure with all fields</span>
-0063 <span class="comment">%     model=checkModel([])</span>
+0063 <span class="comment">%     model=ds.checkModel([])</span>
 0064 <span class="comment">%</span>
 0065 <span class="comment">% - Example 2: standardize existing model</span>
-0066 <span class="comment">%     model=checkModel(model)</span>
+0066 <span class="comment">%     model=ds.checkModel(model)</span>
 0067 <span class="comment">%</span>
-0068 <span class="comment">% see also: GenerateModel, checkSpecification, checkData</span>
+0068 <span class="comment">% see also: ds.generateModel, ds.checkSpecification, ds.checkData</span>
 0069 
 0070 field_order={<span class="string">'parameters'</span>,<span class="string">'fixed_variables'</span>,<span class="string">'functions'</span>,<span class="string">'monitors'</span>,<span class="keyword">...</span>
 0071   <span class="string">'state_variables'</span>,<span class="string">'ODEs'</span>,<span class="string">'ICs'</span>,<span class="string">'conditionals'</span>,<span class="string">'linkers'</span>,<span class="string">'comments'</span>,<span class="keyword">...</span>
@@ -192,12 +192,12 @@ This function is called by:
 0081 
 0082 <span class="comment">% % check if input is string with name of file containing model</span>
 0083 <span class="comment">% if ischar(model) &amp;&amp; exist(model,'file')</span>
-0084 <span class="comment">%   model=ImportModel(model);</span>
+0084 <span class="comment">%   model=ds.importModel(model);</span>
 0085 <span class="comment">% end</span>
 0086 
 0087 <span class="comment">% check if input is string or cell with equations or spec struct and convert to model structure</span>
 0088 <span class="keyword">if</span> ischar(model) || iscell(model) || ~isfield(model,<span class="string">'state_variables'</span>)
-0089   model=<a href="GenerateModel.html" class="code" title="function [model,name_map]=GenerateModel(specification,varargin)">GenerateModel</a>(model);
+0089   model=<a href="ds.generateModel.html" class="code" title="function [model,name_map]=ds.generateModel(specification,varargin)">ds.generateModel</a>(model);
 0090 <span class="keyword">end</span>
 0091 
 0092 <span class="comment">% check back compatibility</span>
@@ -215,8 +215,8 @@ This function is called by:
 0104 
 0105 <span class="comment">% note: auto-populating and standardization of field order may not be</span>
 0106 <span class="comment">% necessary or beneficial for DynaSim model structures. It only adds extra</span>
-0107 <span class="comment">% time... if the above is uncommented-out, then CombineModels() should also</span>
-0108 <span class="comment">% be edited by uncommenting-out the call to checkModel() and commenting-out</span>
+0107 <span class="comment">% time... if the above is uncommented-out, then ds.combineModels() should also</span>
+0108 <span class="comment">% be edited by uncommenting-out the call to ds.checkModel() and commenting-out</span>
 0109 <span class="comment">% the call to orderfields according to first input (at the end of the</span>
 0110 <span class="comment">% function).</span>
 0111 

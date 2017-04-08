@@ -2,8 +2,8 @@
                 "http://www.w3.org/TR/REC-html40/loose.dtd">
 <html>
 <head>
-  <title>Description of calcISI</title>
-  <meta name="keywords" content="calcISI">
+  <title>Description of ds.calcISI</title>
+  <meta name="keywords" content="ds.calcISI">
   <meta name="description" content="CALCISI - Calculate the interspike interval.">
   <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
   <meta name="generator" content="m2html &copy; 2005 Guillaume Flandin">
@@ -16,23 +16,23 @@
 <body>
 <a name="_top"></a>
 <!-- menu.html functions -->
-<h1>calcISI
+<h1>ds.calcISI
 </h1>
 
 <h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
 <div class="box"><strong>CALCISI - Calculate the interspike interval.</strong></div>
 
 <h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
-<div class="box"><strong>function data = calcISI(data,varargin) </strong></div>
+<div class="box"><strong>function data = ds.calcISI(data,varargin) </strong></div>
 
 <h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
 <div class="fragment"><pre class="comment">CALCISI - Calculate the interspike interval.
 
  Usage:
-   data = calcISI(data,'option',value)
+   data = ds.calcISI(data,'option',value)
 
  Inputs:
-   - data: DynaSim data structure (see checkData)
+   - data: DynaSim data structure (see ds.checkData)
    - options:
      'variable'         : name of field containing data on which to calculate
                           ISIs (default: *_spikes or first variable in data.labels)
@@ -47,10 +47,10 @@
  Notes:
  - &quot;variable&quot; can be specified as the name of a variable listed in
      data.labels, a cell array of string listing variable names, or as a regular
-     expression pattern for identifying variables to process. See SelectVariables
+     expression pattern for identifying variables to process. See ds.selectVariables
      for more info on supported specifications.
  - DynaSim spike monitor returns spike data in variables *_spikes.
-   - e.g., `data=SimulateModel('dv/dt=@current+10; {iNa,iK}; monitor v.spikes');`
+   - e.g., `data=ds.simulateModel('dv/dt=@current+10; {iNa,iK}; monitor v.spikes');`
      returns spikes in data.pop1_v_spikes (where 'pop1' is the default
      population name if not specified by the user).
 
@@ -59,33 +59,33 @@
    s.populations(1).equations='dv/dt=@current+10; {iNa,iK}; v(0)=-65';
    s.populations(2).name='I';
    s.populations(2).equations='dv/dt=@current+10; {iNa,iK}; v(0)=-65';
-   data=SimulateModel(s);
-   data=calcISI(data,'variable','*_v');
+   data=ds.simulateModel(s);
+   data=ds.calcISI(data,'variable','*_v');
    data % contains ISIs for E and I pops in .E_v_ISI_SUA/MUA and .I_v_ISI_SUA/MUA
 
- See also: <a href="PlotFR.html" class="code" title="function handles=PlotFR(data,varargin)">PlotFR</a>, <a href="AnalyzeStudy.html" class="code" title="function [results,studyinfo]=AnalyzeStudy(data,func,varargin)">AnalyzeStudy</a>, <a href="SimulateModel.html" class="code" title="function [data,studyinfo]=SimulateModel(model,varargin)">SimulateModel</a>, <a href="checkData.html" class="code" title="function data=checkData(data)">checkData</a>, <a href="SelectVariables.html" class="code" title="function [variables,pop_names]=SelectVariables(labels,var_strings)">SelectVariables</a></pre></div>
+ See also: <a href="ds.plotFR.html" class="code" title="function handles=ds.plotFR(data,varargin)">ds.plotFR</a>, <a href="AnalyzeStudy.html" class="code" title="function [results,studyinfo]=AnalyzeStudy(data,func,varargin)">AnalyzeStudy</a>, <a href="ds.simulateModel.html" class="code" title="function [data,studyinfo]=ds.simulateModel(model,varargin)">ds.simulateModel</a>, <a href="ds.checkData.html" class="code" title="function data=ds.checkData(data)">ds.checkData</a>, <a href="ds.selectVariables.html" class="code" title="function [variables,pop_names]=ds.selectVariables(labels,var_strings)">ds.selectVariables</a></pre></div>
 
 <!-- crossreference -->
 <h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
 This function calls:
 <ul style="list-style-image:url(../matlabicon.gif)">
-<li><a href="AnalyzeStudy.html" class="code" title="function [results,studyinfo]=AnalyzeStudy(data,func,varargin)">AnalyzeStudy</a>	ANALYZESTUDY - Apply an analysis function to DynaSim data, optionally saving data</li><li><a href="calcISI.html" class="code" title="function data = calcISI(data,varargin)">calcISI</a>	CALCISI - Calculate the interspike interval.</li><li><a href="checkData.html" class="code" title="function data=checkData(data)">checkData</a>	CHECKDATA - Standardize data structure and auto-populate missing fields</li><li><a href="checkOptions.html" class="code" title="function [parms, params_unspecified ] = checkOptions(options, options_schema, strict)">checkOptions</a>	CHECKOPTIONS - organize key/value pairs in structure with default or user-supplied values according to a schema</li><li><a href="SelectVariables.html" class="code" title="function [variables,pop_names]=SelectVariables(labels,var_strings)">SelectVariables</a>	SELECTVARIABLES - determine what variables to plot</li></ul>
+<li><a href="AnalyzeStudy.html" class="code" title="function [results,studyinfo]=AnalyzeStudy(data,func,varargin)">AnalyzeStudy</a>	ANALYZESTUDY - Apply an analysis function to DynaSim data, optionally saving data</li><li><a href="ds.calcISI.html" class="code" title="function data = ds.calcISI(data,varargin)">ds.calcISI</a>	CALCISI - Calculate the interspike interval.</li><li><a href="ds.checkData.html" class="code" title="function data=ds.checkData(data)">ds.checkData</a>	CHECKDATA - Standardize data structure and auto-populate missing fields</li><li><a href="ds.checkOptions.html" class="code" title="function [parms, params_unspecified ] = ds.checkOptions(options, options_schema, strict)">ds.checkOptions</a>	CHECKOPTIONS - organize key/value pairs in structure with default or user-supplied values according to a schema</li><li><a href="ds.selectVariables.html" class="code" title="function [variables,pop_names]=ds.selectVariables(labels,var_strings)">ds.selectVariables</a>	SELECTVARIABLES - determine what variables to plot</li></ul>
 This function is called by:
 <ul style="list-style-image:url(../matlabicon.gif)">
-<li><a href="calcISI.html" class="code" title="function data = calcISI(data,varargin)">calcISI</a>	CALCISI - Calculate the interspike interval.</li></ul>
+<li><a href="ds.calcISI.html" class="code" title="function data = ds.calcISI(data,varargin)">ds.calcISI</a>	CALCISI - Calculate the interspike interval.</li></ul>
 <!-- crossreference -->
 
 
 
 <h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
-<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function data = calcISI(data,varargin)</a>
+<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function data = ds.calcISI(data,varargin)</a>
 0002 <span class="comment">%CALCISI - Calculate the interspike interval.</span>
 0003 <span class="comment">%</span>
 0004 <span class="comment">% Usage:</span>
-0005 <span class="comment">%   data = calcISI(data,'option',value)</span>
+0005 <span class="comment">%   data = ds.calcISI(data,'option',value)</span>
 0006 <span class="comment">%</span>
 0007 <span class="comment">% Inputs:</span>
-0008 <span class="comment">%   - data: DynaSim data structure (see checkData)</span>
+0008 <span class="comment">%   - data: DynaSim data structure (see ds.checkData)</span>
 0009 <span class="comment">%   - options:</span>
 0010 <span class="comment">%     'variable'         : name of field containing data on which to calculate</span>
 0011 <span class="comment">%                          ISIs (default: *_spikes or first variable in data.labels)</span>
@@ -100,10 +100,10 @@ This function is called by:
 0020 <span class="comment">% Notes:</span>
 0021 <span class="comment">% - &quot;variable&quot; can be specified as the name of a variable listed in</span>
 0022 <span class="comment">%     data.labels, a cell array of string listing variable names, or as a regular</span>
-0023 <span class="comment">%     expression pattern for identifying variables to process. See SelectVariables</span>
+0023 <span class="comment">%     expression pattern for identifying variables to process. See ds.selectVariables</span>
 0024 <span class="comment">%     for more info on supported specifications.</span>
 0025 <span class="comment">% - DynaSim spike monitor returns spike data in variables *_spikes.</span>
-0026 <span class="comment">%   - e.g., `data=SimulateModel('dv/dt=@current+10; {iNa,iK}; monitor v.spikes');`</span>
+0026 <span class="comment">%   - e.g., `data=ds.simulateModel('dv/dt=@current+10; {iNa,iK}; monitor v.spikes');`</span>
 0027 <span class="comment">%     returns spikes in data.pop1_v_spikes (where 'pop1' is the default</span>
 0028 <span class="comment">%     population name if not specified by the user).</span>
 0029 <span class="comment">%</span>
@@ -112,27 +112,27 @@ This function is called by:
 0032 <span class="comment">%   s.populations(1).equations='dv/dt=@current+10; {iNa,iK}; v(0)=-65';</span>
 0033 <span class="comment">%   s.populations(2).name='I';</span>
 0034 <span class="comment">%   s.populations(2).equations='dv/dt=@current+10; {iNa,iK}; v(0)=-65';</span>
-0035 <span class="comment">%   data=SimulateModel(s);</span>
-0036 <span class="comment">%   data=calcISI(data,'variable','*_v');</span>
+0035 <span class="comment">%   data=ds.simulateModel(s);</span>
+0036 <span class="comment">%   data=ds.calcISI(data,'variable','*_v');</span>
 0037 <span class="comment">%   data % contains ISIs for E and I pops in .E_v_ISI_SUA/MUA and .I_v_ISI_SUA/MUA</span>
 0038 <span class="comment">%</span>
-0039 <span class="comment">% See also: PlotFR, AnalyzeStudy, SimulateModel, checkData, SelectVariables</span>
+0039 <span class="comment">% See also: ds.plotFR, AnalyzeStudy, ds.simulateModel, ds.checkData, ds.selectVariables</span>
 0040 
 0041 <span class="comment">%% 1.0 Check inputs</span>
-0042 options=<a href="checkOptions.html" class="code" title="function [parms, params_unspecified ] = checkOptions(options, options_schema, strict)">checkOptions</a>(varargin,{<span class="keyword">...</span>
+0042 options=<a href="ds.checkOptions.html" class="code" title="function [parms, params_unspecified ] = ds.checkOptions(options, options_schema, strict)">ds.checkOptions</a>(varargin,{<span class="keyword">...</span>
 0043   <span class="string">'variable'</span>,[],[],<span class="keyword">...</span>
 0044   <span class="string">'threshold'</span>,1e-5,[],<span class="keyword">...</span><span class="comment"> % slightly above zero in case variable is point process *_spikes {0,1}</span>
 0045   <span class="string">'exclude_data_flag'</span>,0,{0,1},<span class="keyword">...</span>
 0046   <span class="string">'output_suffix'</span>,<span class="string">''</span>,[],<span class="keyword">...</span>
 0047   },false);
 0048 
-0049 data = <a href="checkData.html" class="code" title="function data=checkData(data)">checkData</a>(data);
-0050 <span class="comment">% note: calling checkData() at beginning enables analysis function to</span>
+0049 data = <a href="ds.checkData.html" class="code" title="function data=ds.checkData(data)">ds.checkData</a>(data);
+0050 <span class="comment">% note: calling ds.checkData() at beginning enables analysis function to</span>
 0051 <span class="comment">% accept data matrix [time x cells] in addition to DynaSim data structure.</span>
 0052 
 0053 <span class="keyword">if</span> numel(data)&gt;1
-0054   <span class="comment">% use AnalyzeStudy to recursively call calcISI on each data set</span>
-0055   data=<a href="AnalyzeStudy.html" class="code" title="function [results,studyinfo]=AnalyzeStudy(data,func,varargin)">AnalyzeStudy</a>(data,@<a href="calcISI.html" class="code" title="function data = calcISI(data,varargin)">calcISI</a>,varargin{:});
+0054   <span class="comment">% use AnalyzeStudy to recursively call ds.calcISI on each data set</span>
+0055   data=<a href="AnalyzeStudy.html" class="code" title="function [results,studyinfo]=AnalyzeStudy(data,func,varargin)">AnalyzeStudy</a>(data,@<a href="ds.calcISI.html" class="code" title="function data = ds.calcISI(data,varargin)">ds.calcISI</a>,varargin{:});
 0056   <span class="keyword">return</span>;
 0057 <span class="keyword">end</span>
 0058 
@@ -157,7 +157,7 @@ This function is called by:
 0077 <span class="keyword">end</span>
 0078 
 0079 <span class="comment">%% 2.0 set list of variables to process as cell array of strings</span>
-0080 options.variable=<a href="SelectVariables.html" class="code" title="function [variables,pop_names]=SelectVariables(labels,var_strings)">SelectVariables</a>(data(1).labels,options.variable);
+0080 options.variable=<a href="ds.selectVariables.html" class="code" title="function [variables,pop_names]=ds.selectVariables(labels,var_strings)">ds.selectVariables</a>(data(1).labels,options.variable);
 0081 
 0082 <span class="comment">%% 3.0 calculate ISIs for each variable</span>
 0083 <span class="keyword">if</span> ~isfield(data,<span class="string">'results'</span>)

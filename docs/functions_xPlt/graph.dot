@@ -1,7 +1,7 @@
 /* Created by mdot for Matlab */
 digraph m2html {
-  debug_testing_script -> PlotData2;
+  debug_testing_script -> ds.plotData2;
 
-  PlotData2 [URL="PlotData2.html"];
+  ds.plotData2 [URL="ds.plotData2.html"];
   debug_testing_script [URL="debug_testing_script.html"];
 }

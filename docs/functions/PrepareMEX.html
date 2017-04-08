@@ -2,8 +2,8 @@
                 "http://www.w3.org/TR/REC-html40/loose.dtd">
 <html>
 <head>
-  <title>Description of PrepareMEX</title>
-  <meta name="keywords" content="PrepareMEX">
+  <title>Description of ds.prepareMEX</title>
+  <meta name="keywords" content="ds.prepareMEX">
   <meta name="description" content="PREPAREMEX - take an m-file path and compile it using the Matlab coder.">
   <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
   <meta name="generator" content="m2html &copy; 2005 Guillaume Flandin">
@@ -16,28 +16,28 @@
 <body>
 <a name="_top"></a>
 <!-- menu.html functions -->
-<h1>PrepareMEX
+<h1>ds.prepareMEX
 </h1>
 
 <h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
 <div class="box"><strong>PREPAREMEX - take an m-file path and compile it using the Matlab coder.</strong></div>
 
 <h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
-<div class="box"><strong>function mexfileOutput = PrepareMEX(mfileInput, varargin) </strong></div>
+<div class="box"><strong>function mexfileOutput = ds.prepareMEX(mfileInput, varargin) </strong></div>
 
 <h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
 <div class="fragment"><pre class="comment">PREPAREMEX - take an m-file path and compile it using the Matlab coder.
 
- See also: <a href="GetSolveFile.html" class="code" title="function solve_file = GetSolveFile(model,studyinfo,varargin)">GetSolveFile</a></pre></div>
+ See also: <a href="ds.getSolveFile.html" class="code" title="function solve_file = ds.getSolveFile(model,studyinfo,varargin)">ds.getSolveFile</a></pre></div>
 
 <!-- crossreference -->
 <h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
 This function calls:
 <ul style="list-style-image:url(../matlabicon.gif)">
-<li><a href="checkOptions.html" class="code" title="function [parms, params_unspecified ] = checkOptions(options, options_schema, strict)">checkOptions</a>	CHECKOPTIONS - organize key/value pairs in structure with default or user-supplied values according to a schema</li><li><a href="Options2Keyval.html" class="code" title="function keyval = Options2Keyval(options)">Options2Keyval</a>	OPTIONS2KEYVAL - Convert from options structure to a list of key/value pairs.</li></ul>
+<li><a href="ds.checkOptions.html" class="code" title="function [parms, params_unspecified ] = ds.checkOptions(options, options_schema, strict)">ds.checkOptions</a>	CHECKOPTIONS - organize key/value pairs in structure with default or user-supplied values according to a schema</li><li><a href="ds.options2Keyval.html" class="code" title="function keyval = ds.options2Keyval(options)">ds.options2Keyval</a>	OPTIONS2KEYVAL - Convert from options structure to a list of key/value pairs.</li></ul>
 This function is called by:
 <ul style="list-style-image:url(../matlabicon.gif)">
-<li><a href="GetSolveFile.html" class="code" title="function solve_file = GetSolveFile(model,studyinfo,varargin)">GetSolveFile</a>	GETSOLVEFILE - helper function that creates or retrieves the desired solver file.</li><li><a href="WriteMatlabSolver.html" class="code" title="function solve_ode_filepath = WriteMatlabSolver(model,varargin)">WriteMatlabSolver</a>	WRITEMATLABSOLVER - write m-file that numerically inteegrates the model</li></ul>
+<li><a href="ds.getSolveFile.html" class="code" title="function solve_file = ds.getSolveFile(model,studyinfo,varargin)">ds.getSolveFile</a>	GETSOLVEFILE - helper function that creates or retrieves the desired solver file.</li><li><a href="ds.writeMatlabSolver.html" class="code" title="function solve_ode_filepath = ds.writeMatlabSolver(model,varargin)">ds.writeMatlabSolver</a>	WRITEMATLABSOLVER - write m-file that numerically inteegrates the model</li></ul>
 <!-- crossreference -->
 
 <h2><a name="_subfunctions"></a>SUBFUNCTIONS <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
@@ -45,24 +45,24 @@ This function is called by:
 <li><a href="#_sub1" class="code">function makeMex(file, options)</a></li></ul>
 
 <h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
-<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function mexfileOutput = PrepareMEX(mfileInput, varargin)</a>
+<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function mexfileOutput = ds.prepareMEX(mfileInput, varargin)</a>
 0002 <span class="comment">%PREPAREMEX - take an m-file path and compile it using the Matlab coder.</span>
 0003 <span class="comment">%</span>
-0004 <span class="comment">% See also: GetSolveFile</span>
+0004 <span class="comment">% See also: ds.getSolveFile</span>
 0005 
 0006 <span class="comment">% Input args</span>
 0007 args = varargin;
 0008 
 0009 <span class="keyword">if</span> isstruct(args{1})
 0010     <span class="comment">% User specified an options structure</span>
-0011     keyvals = <a href="Options2Keyval.html" class="code" title="function keyval = Options2Keyval(options)">Options2Keyval</a>(args{1});
+0011     keyvals = <a href="ds.options2Keyval.html" class="code" title="function keyval = ds.options2Keyval(options)">ds.options2Keyval</a>(args{1});
 0012     <span class="comment">% Convert it to keyvalues and prepend</span>
 0013     keyvals = horzcat(keyvals,args(2:end));
 0014 <span class="keyword">else</span>
 0015     keyvals = args;
 0016 <span class="keyword">end</span>
 0017 
-0018 options=<a href="checkOptions.html" class="code" title="function [parms, params_unspecified ] = checkOptions(options, options_schema, strict)">checkOptions</a>(keyvals,{<span class="keyword">...</span>
+0018 options=<a href="ds.checkOptions.html" class="code" title="function [parms, params_unspecified ] = ds.checkOptions(options, options_schema, strict)">ds.checkOptions</a>(keyvals,{<span class="keyword">...</span>
 0019   <span class="string">'verbose_flag'</span>,0,{0,1},<span class="keyword">...</span><span class="comment"> % set verbose to 1 by default</span>
 0020   <span class="string">'mexpath'</span>,[],[],<span class="keyword">...</span><span class="comment"> % Directory to search for pre-compiled solve files (solve*_mex*)</span>
 0021   },false);

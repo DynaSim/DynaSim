@@ -2,9 +2,9 @@
                 "http://www.w3.org/TR/REC-html40/loose.dtd">
 <html>
 <head>
-  <title>Description of dynasimStrrep</title>
-  <meta name="keywords" content="dynasimStrrep">
-  <meta name="description" content="dynasimStrrep - replace full words by new character strings, ignoring matches that appear as sub-strings.">
+  <title>Description of ds.strrep</title>
+  <meta name="keywords" content="ds.strrep">
+  <meta name="description" content="ds.strrep - replace full words by new character strings, ignoring matches that appear as sub-strings.">
   <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
   <meta name="generator" content="m2html &copy; 2005 Guillaume Flandin">
   <meta name="robots" content="index, follow">
@@ -16,28 +16,28 @@
 <body>
 <a name="_top"></a>
 <!-- menu.html functions -->
-<h1>dynasimStrrep
+<h1>ds.strrep
 </h1>
 
 <h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
-<div class="box"><strong>dynasimStrrep - replace full words by new character strings, ignoring matches that appear as sub-strings.</strong></div>
+<div class="box"><strong>ds.strrep - replace full words by new character strings, ignoring matches that appear as sub-strings.</strong></div>
 
 <h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
-<div class="box"><strong>function str=dynasimStrrep(str,oldstr,newstr,lpad,rpad) </strong></div>
+<div class="box"><strong>function str=ds.strrep(str,oldstr,newstr,lpad,rpad) </strong></div>
 
 <h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
-<div class="fragment"><pre class="comment">dynasimStrrep - replace full words by new character strings, ignoring matches that appear as sub-strings.
+<div class="fragment"><pre class="comment">ds.strrep - replace full words by new character strings, ignoring matches that appear as sub-strings.
 
  Note: built-in strrep replaces ALL matches.
 
  Examples:
-   dynasimStrrep('(v)*(-av)','v','pop1_v')
-   dynasimStrrep('v-v^2+vav','v','pop1_v')
-   dynasimStrrep('v-v-v','v','pop1_v')
-   dynasimStrrep('v-v-v^2','v','pop1_v')
-   dynasimStrrep('(v-v-v^2)','v','pop1_v')
-   dynasimStrrep('E-pop1_V+1','pop1_V','pop1_V(n-1)')
-   dynasimStrrep('v=1; u=u+d','u','u(n,test)')</pre></div>
+   ds.strrep('(v)*(-av)','v','pop1_v')
+   ds.strrep('v-v^2+vav','v','pop1_v')
+   ds.strrep('v-v-v','v','pop1_v')
+   ds.strrep('v-v-v^2','v','pop1_v')
+   ds.strrep('(v-v-v^2)','v','pop1_v')
+   ds.strrep('E-pop1_V+1','pop1_V','pop1_V(n-1)')
+   ds.strrep('v=1; u=u+d','u','u(n,test)')</pre></div>
 
 <!-- crossreference -->
 <h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
@@ -46,25 +46,25 @@ This function calls:
 </ul>
 This function is called by:
 <ul style="list-style-image:url(../matlabicon.gif)">
-<li><a href="GenerateModel.html" class="code" title="function [model,name_map]=GenerateModel(specification,varargin)">GenerateModel</a>	GENERATEMODEL - Parse DynaSim specification and organize model data in DynaSim model structure</li><li><a href="PropagateFunctions.html" class="code" title="function model=PropagateFunctions(model)">PropagateFunctions</a>	PROPAGATEFUNCTIONS - eliminate internal function calls from model ODEs, ICs, monitors, and conditionals.</li><li><a href="PropagateNamespaces.html" class="code" title="function model = PropagateNamespaces(model,map)">PropagateNamespaces</a>	PROPAGATENAMESPACES - namespace-establishing namespace substitutions.</li><li><a href="PropagateParameters.html" class="code" title="function model=PropagateParameters(model,varargin)">PropagateParameters</a>	PROPAGATEPARAMETERS - substitute parameter values or prepend parameter names with prefix across all model equations.</li><li><a href="WriteDynaSimSolver.html" class="code" title="function [outfile,options]=WriteDynaSimSolver(model,varargin)">WriteDynaSimSolver</a>	WRITEDYNASIMSOLVER - write m-file that numerically inteegrates the model</li></ul>
+<li><a href="ds.generateModel.html" class="code" title="function [model,name_map]=ds.generateModel(specification,varargin)">ds.generateModel</a>	GENERATEMODEL - Parse DynaSim specification and organize model data in DynaSim model structure</li><li><a href="ds.propagateFunctions.html" class="code" title="function model=ds.propagateFunctions(model)">ds.propagateFunctions</a>	PROPAGATEFUNCTIONS - eliminate internal function calls from model ODEs, ICs, monitors, and conditionals.</li><li><a href="ds.propagateNamespaces.html" class="code" title="function model = ds.propagateNamespaces(model,map)">ds.propagateNamespaces</a>	PROPAGATENAMESPACES - namespace-establishing namespace substitutions.</li><li><a href="ds.propagateParameters.html" class="code" title="function model=ds.propagateParameters(model,varargin)">ds.propagateParameters</a>	PROPAGATEPARAMETERS - substitute parameter values or prepend parameter names with prefix across all model equations.</li><li><a href="ds.writeDynaSimSolver.html" class="code" title="function [outfile,options]=ds.writeDynaSimSolver(model,varargin)">ds.writeDynaSimSolver</a>	WRITEDYNASIMSOLVER - write m-file that numerically inteegrates the model</li></ul>
 <!-- crossreference -->
 
 
 
 <h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
-<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function str=dynasimStrrep(str,oldstr,newstr,lpad,rpad)</a>
-0002 <span class="comment">%dynasimStrrep - replace full words by new character strings, ignoring matches that appear as sub-strings.</span>
+<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function str=ds.strrep(str,oldstr,newstr,lpad,rpad)</a>
+0002 <span class="comment">%ds.strrep - replace full words by new character strings, ignoring matches that appear as sub-strings.</span>
 0003 <span class="comment">%</span>
 0004 <span class="comment">% Note: built-in strrep replaces ALL matches.</span>
 0005 <span class="comment">%</span>
 0006 <span class="comment">% Examples:</span>
-0007 <span class="comment">%   dynasimStrrep('(v)*(-av)','v','pop1_v')</span>
-0008 <span class="comment">%   dynasimStrrep('v-v^2+vav','v','pop1_v')</span>
-0009 <span class="comment">%   dynasimStrrep('v-v-v','v','pop1_v')</span>
-0010 <span class="comment">%   dynasimStrrep('v-v-v^2','v','pop1_v')</span>
-0011 <span class="comment">%   dynasimStrrep('(v-v-v^2)','v','pop1_v')</span>
-0012 <span class="comment">%   dynasimStrrep('E-pop1_V+1','pop1_V','pop1_V(n-1)')</span>
-0013 <span class="comment">%   dynasimStrrep('v=1; u=u+d','u','u(n,test)')</span>
+0007 <span class="comment">%   ds.strrep('(v)*(-av)','v','pop1_v')</span>
+0008 <span class="comment">%   ds.strrep('v-v^2+vav','v','pop1_v')</span>
+0009 <span class="comment">%   ds.strrep('v-v-v','v','pop1_v')</span>
+0010 <span class="comment">%   ds.strrep('v-v-v^2','v','pop1_v')</span>
+0011 <span class="comment">%   ds.strrep('(v-v-v^2)','v','pop1_v')</span>
+0012 <span class="comment">%   ds.strrep('E-pop1_V+1','pop1_V','pop1_V(n-1)')</span>
+0013 <span class="comment">%   ds.strrep('v=1; u=u+d','u','u(n,test)')</span>
 0014 
 0015 <span class="keyword">if</span> nargin&lt;4, lpad=<span class="string">''</span>; <span class="keyword">end</span>
 0016 <span class="keyword">if</span> nargin&lt;5, rpad=<span class="string">''</span>; <span class="keyword">end</span>

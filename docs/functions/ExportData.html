@@ -2,8 +2,8 @@
                 "http://www.w3.org/TR/REC-html40/loose.dtd">
 <html>
 <head>
-  <title>Description of ExportData</title>
-  <meta name="keywords" content="ExportData">
+  <title>Description of ds.exportData</title>
+  <meta name="keywords" content="ds.exportData">
   <meta name="description" content="EXPORTDATA - export DynaSim data structure in various formats.">
   <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
   <meta name="generator" content="m2html &copy; 2005 Guillaume Flandin">
@@ -16,59 +16,59 @@
 <body>
 <a name="_top"></a>
 <!-- menu.html functions -->
-<h1>ExportData
+<h1>ds.exportData
 </h1>
 
 <h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
 <div class="box"><strong>EXPORTDATA - export DynaSim data structure in various formats.</strong></div>
 
 <h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
-<div class="box"><strong>function ExportData(data,varargin) </strong></div>
+<div class="box"><strong>function ds.exportData(data,varargin) </strong></div>
 
 <h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
 <div class="fragment"><pre class="comment">EXPORTDATA - export DynaSim data structure in various formats.
 
  Usage:
-   ExportData(data,varargin)
+   ds.exportData(data,varargin)
 
  Inputs:
-   - data: DynaSim data structure (see checkData)
+   - data: DynaSim data structure (see ds.checkData)
    - options:
      'filename'    : name of output data file (default: 'data.mat')
      'format'      : mat. todo: csv, HDF. (default: 'mat')
      'verbose_flag': whether to print log info (default: 0)
  
- See also: <a href="ImportData.html" class="code" title="function [data,studyinfo] = ImportData(file,varargin)">ImportData</a>, <a href="checkData.html" class="code" title="function data=checkData(data)">checkData</a>, <a href="SimulateModel.html" class="code" title="function [data,studyinfo]=SimulateModel(model,varargin)">SimulateModel</a></pre></div>
+ See also: <a href="ds.importData.html" class="code" title="function [data,studyinfo] = ds.importData(file,varargin)">ds.importData</a>, <a href="ds.checkData.html" class="code" title="function data=ds.checkData(data)">ds.checkData</a>, <a href="ds.simulateModel.html" class="code" title="function [data,studyinfo]=ds.simulateModel(model,varargin)">ds.simulateModel</a></pre></div>
 
 <!-- crossreference -->
 <h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
 This function calls:
 <ul style="list-style-image:url(../matlabicon.gif)">
-<li><a href="checkOptions.html" class="code" title="function [parms, params_unspecified ] = checkOptions(options, options_schema, strict)">checkOptions</a>	CHECKOPTIONS - organize key/value pairs in structure with default or user-supplied values according to a schema</li></ul>
+<li><a href="ds.checkOptions.html" class="code" title="function [parms, params_unspecified ] = ds.checkOptions(options, options_schema, strict)">ds.checkOptions</a>	CHECKOPTIONS - organize key/value pairs in structure with default or user-supplied values according to a schema</li></ul>
 This function is called by:
 <ul style="list-style-image:url(../matlabicon.gif)">
-<li><a href="SimulateModel.html" class="code" title="function [data,studyinfo]=SimulateModel(model,varargin)">SimulateModel</a>	% data=SimulateModel(model,'option',value,...)</li></ul>
+<li><a href="ds.simulateModel.html" class="code" title="function [data,studyinfo]=ds.simulateModel(model,varargin)">ds.simulateModel</a>	% data=ds.simulateModel(model,'option',value,...)</li></ul>
 <!-- crossreference -->
 
 
 
 <h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
-<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function ExportData(data,varargin)</a>
+<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function ds.exportData(data,varargin)</a>
 0002 <span class="comment">%EXPORTDATA - export DynaSim data structure in various formats.</span>
 0003 <span class="comment">%</span>
 0004 <span class="comment">% Usage:</span>
-0005 <span class="comment">%   ExportData(data,varargin)</span>
+0005 <span class="comment">%   ds.exportData(data,varargin)</span>
 0006 <span class="comment">%</span>
 0007 <span class="comment">% Inputs:</span>
-0008 <span class="comment">%   - data: DynaSim data structure (see checkData)</span>
+0008 <span class="comment">%   - data: DynaSim data structure (see ds.checkData)</span>
 0009 <span class="comment">%   - options:</span>
 0010 <span class="comment">%     'filename'    : name of output data file (default: 'data.mat')</span>
 0011 <span class="comment">%     'format'      : mat. todo: csv, HDF. (default: 'mat')</span>
 0012 <span class="comment">%     'verbose_flag': whether to print log info (default: 0)</span>
 0013 <span class="comment">%</span>
-0014 <span class="comment">% See also: ImportData, checkData, SimulateModel</span>
+0014 <span class="comment">% See also: ds.importData, ds.checkData, ds.simulateModel</span>
 0015 
-0016 options=<a href="checkOptions.html" class="code" title="function [parms, params_unspecified ] = checkOptions(options, options_schema, strict)">checkOptions</a>(varargin,{<span class="keyword">...</span>
+0016 options=<a href="ds.checkOptions.html" class="code" title="function [parms, params_unspecified ] = ds.checkOptions(options, options_schema, strict)">ds.checkOptions</a>(varargin,{<span class="keyword">...</span>
 0017   <span class="string">'filename'</span>,<span class="string">'data.mat'</span>,[],<span class="keyword">...</span><span class="comment"> % name of output data file</span>
 0018   <span class="string">'format'</span>,<span class="string">'mat'</span>,[],<span class="keyword">...</span><span class="comment"> % mat. todo: csv, HDF</span>
 0019   <span class="string">'verbose_flag'</span>,0,{0,1},<span class="keyword">...</span><span class="comment"> % whether to print log info</span>

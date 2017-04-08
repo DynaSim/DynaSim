@@ -2,9 +2,9 @@
                 "http://www.w3.org/TR/REC-html40/loose.dtd">
 <html>
 <head>
-  <title>Description of unzipDemoData</title>
-  <meta name="keywords" content="unzipDemoData">
-  <meta name="description" content="unzipDemoData - Unzips demo data (utility function)">
+  <title>Description of ds.unzipDemoData</title>
+  <meta name="keywords" content="ds.unzipDemoData">
+  <meta name="description" content="ds.unzipDemoData - Unzips demo data (utility function)">
   <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
   <meta name="generator" content="m2html &copy; 2005 Guillaume Flandin">
   <meta name="robots" content="index, follow">
@@ -16,23 +16,23 @@
 <body>
 <a name="_top"></a>
 <!-- menu.html functions -->
-<h1>unzipDemoData
+<h1>ds.unzipDemoData
 </h1>
 
 <h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
-<div class="box"><strong>unzipDemoData - Unzips demo data (utility function)</strong></div>
+<div class="box"><strong>ds.unzipDemoData - Unzips demo data (utility function)</strong></div>
 
 <h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
-<div class="box"><strong>function study_dir = unzipDemoData(zipfname,overwrite_flag,verbose_flag) </strong></div>
+<div class="box"><strong>function study_dir = ds.unzipDemoData(zipfname,overwrite_flag,verbose_flag) </strong></div>
 
 <h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
-<div class="fragment"><pre class="comment">unzipDemoData - Unzips demo data (utility function)
+<div class="fragment"><pre class="comment">ds.unzipDemoData - Unzips demo data (utility function)
 
  Purpose: Restores demo data to the appropriate folder incase the user
  deleted it.
 
  Usage:
-   study_dir = unzipDemoData(zipfname,overwrite_flag)
+   study_dir = ds.unzipDemoData(zipfname,overwrite_flag)
 
  Inputs:
    zipfname: string with name of zipped file. Can be either full path or
@@ -68,14 +68,14 @@ This function is called by:
 
 
 <h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
-<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function study_dir = unzipDemoData(zipfname,overwrite_flag,verbose_flag)</a>
-0002 <span class="comment">%unzipDemoData - Unzips demo data (utility function)</span>
+<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function study_dir = ds.unzipDemoData(zipfname,overwrite_flag,verbose_flag)</a>
+0002 <span class="comment">%ds.unzipDemoData - Unzips demo data (utility function)</span>
 0003 <span class="comment">%</span>
 0004 <span class="comment">% Purpose: Restores demo data to the appropriate folder incase the user</span>
 0005 <span class="comment">% deleted it.</span>
 0006 <span class="comment">%</span>
 0007 <span class="comment">% Usage:</span>
-0008 <span class="comment">%   study_dir = unzipDemoData(zipfname,overwrite_flag)</span>
+0008 <span class="comment">%   study_dir = ds.unzipDemoData(zipfname,overwrite_flag)</span>
 0009 <span class="comment">%</span>
 0010 <span class="comment">% Inputs:</span>
 0011 <span class="comment">%   zipfname: string with name of zipped file. Can be either full path or</span>
@@ -106,9 +106,9 @@ This function is called by:
 0036         verbose_flag = 1;
 0037     <span class="keyword">end</span>
 0038 
-0039     ds_path = getDsVar(<span class="string">'ds_path'</span>);
-0040     demos_path = getDsVar(<span class="string">'demos_path'</span>);
-0041     demo_zips_path = getDsVar(<span class="string">'demos_zips_path'</span>);
+0039     ds_path = ds.getConfig(<span class="string">'ds_path'</span>);
+0040     demos_path = ds.getConfig(<span class="string">'demos_path'</span>);
+0041     demo_zips_path = ds.getConfig(<span class="string">'demos_zips_path'</span>);
 0042 
 0043     mkdirSilent(demos_path);
 0044     

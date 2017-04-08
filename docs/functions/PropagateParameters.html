@@ -2,8 +2,8 @@
                 "http://www.w3.org/TR/REC-html40/loose.dtd">
 <html>
 <head>
-  <title>Description of PropagateParameters</title>
-  <meta name="keywords" content="PropagateParameters">
+  <title>Description of ds.propagateParameters</title>
+  <meta name="keywords" content="ds.propagateParameters">
   <meta name="description" content="PROPAGATEPARAMETERS - substitute parameter values or prepend parameter names with prefix across all model equations.">
   <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
   <meta name="generator" content="m2html &copy; 2005 Guillaume Flandin">
@@ -16,14 +16,14 @@
 <body>
 <a name="_top"></a>
 <!-- menu.html functions -->
-<h1>PropagateParameters
+<h1>ds.propagateParameters
 </h1>
 
 <h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
 <div class="box"><strong>PROPAGATEPARAMETERS - substitute parameter values or prepend parameter names with prefix across all model equations.</strong></div>
 
 <h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
-<div class="box"><strong>function model=PropagateParameters(model,varargin) </strong></div>
+<div class="box"><strong>function model=ds.propagateParameters(model,varargin) </strong></div>
 
 <h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
 <div class="fragment"><pre class="comment">PROPAGATEPARAMETERS - substitute parameter values or prepend parameter names with prefix across all model equations.
@@ -39,16 +39,16 @@
 
  Output: DynaSim model structure with updated parameter in all equations
 
- See also: <a href="PropagateFunctions.html" class="code" title="function model=PropagateFunctions(model)">PropagateFunctions</a>, <a href="WriteDynaSimSolver.html" class="code" title="function [outfile,options]=WriteDynaSimSolver(model,varargin)">WriteDynaSimSolver</a></pre></div>
+ See also: <a href="ds.propagateFunctions.html" class="code" title="function model=ds.propagateFunctions(model)">ds.propagateFunctions</a>, <a href="ds.writeDynaSimSolver.html" class="code" title="function [outfile,options]=ds.writeDynaSimSolver(model,varargin)">ds.writeDynaSimSolver</a></pre></div>
 
 <!-- crossreference -->
 <h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
 This function calls:
 <ul style="list-style-image:url(../matlabicon.gif)">
-<li><a href="checkModel.html" class="code" title="function model=checkModel(model)">checkModel</a>	CHECKMODEL - Standardize model structure and auto-populate missing fields</li><li><a href="checkOptions.html" class="code" title="function [parms, params_unspecified ] = checkOptions(options, options_schema, strict)">checkOptions</a>	CHECKOPTIONS - organize key/value pairs in structure with default or user-supplied values according to a schema</li></ul>
+<li><a href="ds.checkModel.html" class="code" title="function model=ds.checkModel(model)">ds.checkModel</a>	CHECKMODEL - Standardize model structure and auto-populate missing fields</li><li><a href="ds.checkOptions.html" class="code" title="function [parms, params_unspecified ] = ds.checkOptions(options, options_schema, strict)">ds.checkOptions</a>	CHECKOPTIONS - organize key/value pairs in structure with default or user-supplied values according to a schema</li></ul>
 This function is called by:
 <ul style="list-style-image:url(../matlabicon.gif)">
-<li><a href="SimulateModel.html" class="code" title="function [data,studyinfo]=SimulateModel(model,varargin)">SimulateModel</a>	% data=SimulateModel(model,'option',value,...)</li><li><a href="WriteDynaSimSolver.html" class="code" title="function [outfile,options]=WriteDynaSimSolver(model,varargin)">WriteDynaSimSolver</a>	WRITEDYNASIMSOLVER - write m-file that numerically inteegrates the model</li><li><a href="WriteMatlabSolver.html" class="code" title="function solve_ode_filepath = WriteMatlabSolver(model,varargin)">WriteMatlabSolver</a>	WRITEMATLABSOLVER - write m-file that numerically inteegrates the model</li></ul>
+<li><a href="ds.simulateModel.html" class="code" title="function [data,studyinfo]=ds.simulateModel(model,varargin)">ds.simulateModel</a>	% data=ds.simulateModel(model,'option',value,...)</li><li><a href="ds.writeDynaSimSolver.html" class="code" title="function [outfile,options]=ds.writeDynaSimSolver(model,varargin)">ds.writeDynaSimSolver</a>	WRITEDYNASIMSOLVER - write m-file that numerically inteegrates the model</li><li><a href="ds.writeMatlabSolver.html" class="code" title="function solve_ode_filepath = ds.writeMatlabSolver(model,varargin)">ds.writeMatlabSolver</a>	WRITEMATLABSOLVER - write m-file that numerically inteegrates the model</li></ul>
 <!-- crossreference -->
 
 <h2><a name="_subfunctions"></a>SUBFUNCTIONS <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
@@ -56,7 +56,7 @@ This function is called by:
 <li><a href="#_sub1" class="code">function expression=insert_parameters(expression,parameters,attachType,attachStr)</a></li></ul>
 
 <h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
-<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function model=PropagateParameters(model,varargin)</a>
+<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function model=ds.propagateParameters(model,varargin)</a>
 0002 <span class="comment">%PROPAGATEPARAMETERS - substitute parameter values or prepend parameter names with prefix across all model equations.</span>
 0003 <span class="comment">%</span>
 0004 <span class="comment">% Usage:</span>
@@ -70,17 +70,17 @@ This function is called by:
 0012 <span class="comment">%</span>
 0013 <span class="comment">% Output: DynaSim model structure with updated parameter in all equations</span>
 0014 <span class="comment">%</span>
-0015 <span class="comment">% See also: PropagateFunctions, WriteDynaSimSolver</span>
+0015 <span class="comment">% See also: ds.propagateFunctions, ds.writeDynaSimSolver</span>
 0016 
 0017 <span class="comment">% Check inputs</span>
-0018 model=<a href="checkModel.html" class="code" title="function model=checkModel(model)">checkModel</a>(model);
+0018 model=<a href="ds.checkModel.html" class="code" title="function model=ds.checkModel(model)">ds.checkModel</a>(model);
 0019 <span class="keyword">if</span> ~isstruct(model.parameters)
 0020   <span class="comment">% nothing to do</span>
 0021   <span class="keyword">return</span>;
 0022 <span class="keyword">end</span>
 0023 
 0024 <span class="comment">% Check inputs</span>
-0025 options=<a href="checkOptions.html" class="code" title="function [parms, params_unspecified ] = checkOptions(options, options_schema, strict)">checkOptions</a>(varargin,{<span class="keyword">...</span>
+0025 options=<a href="ds.checkOptions.html" class="code" title="function [parms, params_unspecified ] = ds.checkOptions(options, options_schema, strict)">ds.checkOptions</a>(varargin,{<span class="keyword">...</span>
 0026   <span class="string">'action'</span>,<span class="string">'substitute'</span>,{<span class="string">'substitute'</span>,<span class="string">'prepend'</span>,<span class="string">'postpend'</span>},<span class="keyword">...</span>
 0027   <span class="string">'prefix'</span>,<span class="string">'pset.p.'</span>,[],<span class="keyword">...</span>
 0028   <span class="string">'suffix'</span>,<span class="string">''</span>,[],<span class="keyword">...</span>
@@ -210,9 +210,9 @@ This function is called by:
 0152         num_found = length(find(ismember(allwords,found_parameter)));
 0153         <span class="keyword">for</span> iter=1:num_found
 0154           <span class="keyword">if</span> ~strcmp(attachType, <span class="string">'suffix'</span>)
-0155             expression=dynasimStrrep(expression,found_parameter,found_value);
+0155             expression=ds.strrep(expression,found_parameter,found_value);
 0156           <span class="keyword">else</span>
-0157             expression=dynasimStrrep2(expression,found_parameter,found_value);
+0157             expression=ds.strrep2(expression,found_parameter,found_value);
 0158           <span class="keyword">end</span>
 0159         <span class="keyword">end</span>
 0160       <span class="keyword">end</span>

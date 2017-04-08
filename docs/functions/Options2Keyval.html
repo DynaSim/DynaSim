@@ -2,8 +2,8 @@
                 "http://www.w3.org/TR/REC-html40/loose.dtd">
 <html>
 <head>
-  <title>Description of Options2Keyval</title>
-  <meta name="keywords" content="Options2Keyval">
+  <title>Description of ds.options2Keyval</title>
+  <meta name="keywords" content="ds.options2Keyval">
   <meta name="description" content="OPTIONS2KEYVAL - Convert from options structure to a list of key/value pairs.">
   <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
   <meta name="generator" content="m2html &copy; 2005 Guillaume Flandin">
@@ -16,25 +16,25 @@
 <body>
 <a name="_top"></a>
 <!-- menu.html functions -->
-<h1>Options2Keyval
+<h1>ds.options2Keyval
 </h1>
 
 <h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
 <div class="box"><strong>OPTIONS2KEYVAL - Convert from options structure to a list of key/value pairs.</strong></div>
 
 <h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
-<div class="box"><strong>function keyval = Options2Keyval(options) </strong></div>
+<div class="box"><strong>function keyval = ds.options2Keyval(options) </strong></div>
 
 <h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
 <div class="fragment"><pre class="comment">OPTIONS2KEYVAL - Convert from options structure to a list of key/value pairs.
 
  Usage:
-   keyvals = Options2Keyval(options)
+   keyvals = ds.options2Keyval(options)
 
  Inputs:
    - options: options structure to convert
 
- See also: <a href="checkOptions.html" class="code" title="function [parms, params_unspecified ] = checkOptions(options, options_schema, strict)">checkOptions</a></pre></div>
+ See also: <a href="ds.checkOptions.html" class="code" title="function [parms, params_unspecified ] = ds.checkOptions(options, options_schema, strict)">ds.checkOptions</a></pre></div>
 
 <!-- crossreference -->
 <h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
@@ -43,22 +43,22 @@ This function calls:
 </ul>
 This function is called by:
 <ul style="list-style-image:url(../matlabicon.gif)">
-<li><a href="checkSolverOptions.html" class="code" title="function options=checkSolverOptions(options)">checkSolverOptions</a>	CHECKSOLVEROPTIONS - standardize simulation options appended to params.mat</li><li><a href="GetSolveFile.html" class="code" title="function solve_file = GetSolveFile(model,studyinfo,varargin)">GetSolveFile</a>	GETSOLVEFILE - helper function that creates or retrieves the desired solver file.</li><li><a href="ImportData.html" class="code" title="function [data,studyinfo] = ImportData(file,varargin)">ImportData</a>	IMPORTDATA - load data into DynaSim formatted data structure.</li><li><a href="PlotFR2.html" class="code" title="function handles=PlotFR2(data,varargin)">PlotFR2</a>	PLOTFR2 - plot spike rates in various ways depending on what data was provided.</li><li><a href="PrepareMEX.html" class="code" title="function mexfileOutput = PrepareMEX(mfileInput, varargin)">PrepareMEX</a>	PREPAREMEX - take an m-file path and compile it using the Matlab coder.</li><li><a href="SimulateModel.html" class="code" title="function [data,studyinfo]=SimulateModel(model,varargin)">SimulateModel</a>	% data=SimulateModel(model,'option',value,...)</li></ul>
+<li><a href="ds.checkSolverOptions.html" class="code" title="function options=ds.checkSolverOptions(options)">ds.checkSolverOptions</a>	CHECKSOLVEROPTIONS - standardize simulation options appended to params.mat</li><li><a href="ds.getSolveFile.html" class="code" title="function solve_file = ds.getSolveFile(model,studyinfo,varargin)">ds.getSolveFile</a>	GETSOLVEFILE - helper function that creates or retrieves the desired solver file.</li><li><a href="ds.importData.html" class="code" title="function [data,studyinfo] = ds.importData(file,varargin)">ds.importData</a>	IMPORTDATA - load data into DynaSim formatted data structure.</li><li><a href="ds.plotFR2.html" class="code" title="function handles=ds.plotFR2(data,varargin)">ds.plotFR2</a>	PLOTFR2 - plot spike rates in various ways depending on what data was provided.</li><li><a href="ds.prepareMEX.html" class="code" title="function mexfileOutput = ds.prepareMEX(mfileInput, varargin)">ds.prepareMEX</a>	PREPAREMEX - take an m-file path and compile it using the Matlab coder.</li><li><a href="ds.simulateModel.html" class="code" title="function [data,studyinfo]=ds.simulateModel(model,varargin)">ds.simulateModel</a>	% data=ds.simulateModel(model,'option',value,...)</li></ul>
 <!-- crossreference -->
 
 
 
 <h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
-<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function keyval = Options2Keyval(options)</a>
+<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function keyval = ds.options2Keyval(options)</a>
 0002 <span class="comment">%OPTIONS2KEYVAL - Convert from options structure to a list of key/value pairs.</span>
 0003 <span class="comment">%</span>
 0004 <span class="comment">% Usage:</span>
-0005 <span class="comment">%   keyvals = Options2Keyval(options)</span>
+0005 <span class="comment">%   keyvals = ds.options2Keyval(options)</span>
 0006 <span class="comment">%</span>
 0007 <span class="comment">% Inputs:</span>
 0008 <span class="comment">%   - options: options structure to convert</span>
 0009 <span class="comment">%</span>
-0010 <span class="comment">% See also: checkOptions</span>
+0010 <span class="comment">% See also: ds.checkOptions</span>
 0011 
 0012 <span class="comment">% Grab the field names</span>
 0013 fields = fieldnames(options);

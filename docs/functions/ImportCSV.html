@@ -2,8 +2,8 @@
                 "http://www.w3.org/TR/REC-html40/loose.dtd">
 <html>
 <head>
-  <title>Description of ImportCSV</title>
-  <meta name="keywords" content="ImportCSV">
+  <title>Description of ds.importCSV</title>
+  <meta name="keywords" content="ds.importCSV">
   <meta name="description" content="IMPORTCSV - load CSV data into DynaSim formatted data structure.">
   <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
   <meta name="generator" content="m2html &copy; 2005 Guillaume Flandin">
@@ -16,23 +16,23 @@
 <body>
 <a name="_top"></a>
 <!-- menu.html functions -->
-<h1>ImportCSV
+<h1>ds.importCSV
 </h1>
 
 <h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
 <div class="box"><strong>IMPORTCSV - load CSV data into DynaSim formatted data structure.</strong></div>
 
 <h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
-<div class="box"><strong>function data=ImportCSV(file) </strong></div>
+<div class="box"><strong>function data=ds.importCSV(file) </strong></div>
 
 <h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
 <div class="fragment"><pre class="comment">IMPORTCSV - load CSV data into DynaSim formatted data structure.
 
  Usage:
-   data=ImportCSV(csvfile)
+   data=ds.importCSV(csvfile)
 
  Inputs:
-   - datafile: CSV file organized according to output from WriteDynaSimSolver
+   - datafile: CSV file organized according to output from ds.writeDynaSimSolver
 
  Outputs:
    - DynaSim data structure:
@@ -43,13 +43,13 @@
 
  Note:
    - CSV file structure assumes CSV file contains data organized according to
-   output from WriteDynaSimSolver: time points along rows; state variables and
+   output from ds.writeDynaSimSolver: time points along rows; state variables and
    monitors are columns; first column is time vector; next columns are state
    variables; final columns are monitors. first row has headers for each
    column. if a population has more than one cell, different cells are
    sequential columns with same header repeated for each cell.
 
- See also: <a href="ImportData.html" class="code" title="function [data,studyinfo] = ImportData(file,varargin)">ImportData</a></pre></div>
+ See also: <a href="ds.importData.html" class="code" title="function [data,studyinfo] = ds.importData(file,varargin)">ds.importData</a></pre></div>
 
 <!-- crossreference -->
 <h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
@@ -58,20 +58,20 @@ This function calls:
 </ul>
 This function is called by:
 <ul style="list-style-image:url(../matlabicon.gif)">
-<li><a href="ImportData.html" class="code" title="function [data,studyinfo] = ImportData(file,varargin)">ImportData</a>	IMPORTDATA - load data into DynaSim formatted data structure.</li></ul>
+<li><a href="ds.importData.html" class="code" title="function [data,studyinfo] = ds.importData(file,varargin)">ds.importData</a>	IMPORTDATA - load data into DynaSim formatted data structure.</li></ul>
 <!-- crossreference -->
 
 
 
 <h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
-<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function data=ImportCSV(file)</a>
+<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function data=ds.importCSV(file)</a>
 0002 <span class="comment">%IMPORTCSV - load CSV data into DynaSim formatted data structure.</span>
 0003 <span class="comment">%</span>
 0004 <span class="comment">% Usage:</span>
-0005 <span class="comment">%   data=ImportCSV(csvfile)</span>
+0005 <span class="comment">%   data=ds.importCSV(csvfile)</span>
 0006 <span class="comment">%</span>
 0007 <span class="comment">% Inputs:</span>
-0008 <span class="comment">%   - datafile: CSV file organized according to output from WriteDynaSimSolver</span>
+0008 <span class="comment">%   - datafile: CSV file organized according to output from ds.writeDynaSimSolver</span>
 0009 <span class="comment">%</span>
 0010 <span class="comment">% Outputs:</span>
 0011 <span class="comment">%   - DynaSim data structure:</span>
@@ -82,13 +82,13 @@ This function is called by:
 0016 <span class="comment">%</span>
 0017 <span class="comment">% Note:</span>
 0018 <span class="comment">%   - CSV file structure assumes CSV file contains data organized according to</span>
-0019 <span class="comment">%   output from WriteDynaSimSolver: time points along rows; state variables and</span>
+0019 <span class="comment">%   output from ds.writeDynaSimSolver: time points along rows; state variables and</span>
 0020 <span class="comment">%   monitors are columns; first column is time vector; next columns are state</span>
 0021 <span class="comment">%   variables; final columns are monitors. first row has headers for each</span>
 0022 <span class="comment">%   column. if a population has more than one cell, different cells are</span>
 0023 <span class="comment">%   sequential columns with same header repeated for each cell.</span>
 0024 <span class="comment">%</span>
-0025 <span class="comment">% See also: ImportData</span>
+0025 <span class="comment">% See also: ds.importData</span>
 0026 
 0027 <span class="comment">% check inputs</span>
 0028 <span class="keyword">if</span> ~exist(file,<span class="string">'file'</span>)

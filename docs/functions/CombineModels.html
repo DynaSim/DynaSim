@@ -2,8 +2,8 @@
                 "http://www.w3.org/TR/REC-html40/loose.dtd">
 <html>
 <head>
-  <title>Description of CombineModels</title>
-  <meta name="keywords" content="CombineModels">
+  <title>Description of ds.combineModels</title>
+  <meta name="keywords" content="ds.combineModels">
   <meta name="description" content="COMBINEMODELS - combine subfields in two DynaSim model structures">
   <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
   <meta name="generator" content="m2html &copy; 2005 Guillaume Flandin">
@@ -16,35 +16,35 @@
 <body>
 <a name="_top"></a>
 <!-- menu.html functions -->
-<h1>CombineModels
+<h1>ds.combineModels
 </h1>
 
 <h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
 <div class="box"><strong>COMBINEMODELS - combine subfields in two DynaSim model structures</strong></div>
 
 <h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
-<div class="box"><strong>function model=CombineModels(model1,model2) </strong></div>
+<div class="box"><strong>function model=ds.combineModels(model1,model2) </strong></div>
 
 <h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
 <div class="fragment"><pre class="comment">COMBINEMODELS - combine subfields in two DynaSim model structures
 
  Usage:
-   model=CombineModels(model1,model2)
+   model=ds.combineModels(model1,model2)
 
  Inputs: two models to be combined
 
  Output: DynaSim model with fields combined from both models
 
- See also: <a href="checkModel.html" class="code" title="function model=checkModel(model)">checkModel</a>, <a href="GenerateModel.html" class="code" title="function [model,name_map]=GenerateModel(specification,varargin)">GenerateModel</a></pre></div>
+ See also: <a href="ds.checkModel.html" class="code" title="function model=ds.checkModel(model)">ds.checkModel</a>, <a href="ds.generateModel.html" class="code" title="function [model,name_map]=ds.generateModel(specification,varargin)">ds.generateModel</a></pre></div>
 
 <!-- crossreference -->
 <h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
 This function calls:
 <ul style="list-style-image:url(../matlabicon.gif)">
-<li><a href="checkModel.html" class="code" title="function model=checkModel(model)">checkModel</a>	CHECKMODEL - Standardize model structure and auto-populate missing fields</li></ul>
+<li><a href="ds.checkModel.html" class="code" title="function model=ds.checkModel(model)">ds.checkModel</a>	CHECKMODEL - Standardize model structure and auto-populate missing fields</li></ul>
 This function is called by:
 <ul style="list-style-image:url(../matlabicon.gif)">
-<li><a href="GenerateModel.html" class="code" title="function [model,name_map]=GenerateModel(specification,varargin)">GenerateModel</a>	GENERATEMODEL - Parse DynaSim specification and organize model data in DynaSim model structure</li></ul>
+<li><a href="ds.generateModel.html" class="code" title="function [model,name_map]=ds.generateModel(specification,varargin)">ds.generateModel</a>	GENERATEMODEL - Parse DynaSim specification and organize model data in DynaSim model structure</li></ul>
 <!-- crossreference -->
 
 <h2><a name="_subfunctions"></a>SUBFUNCTIONS <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
@@ -52,21 +52,21 @@ This function is called by:
 <li><a href="#_sub1" class="code">function out=concatenate_structures(a,b)</a></li></ul>
 
 <h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
-<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function model=CombineModels(model1,model2)</a>
+<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function model=ds.combineModels(model1,model2)</a>
 0002 <span class="comment">%COMBINEMODELS - combine subfields in two DynaSim model structures</span>
 0003 <span class="comment">%</span>
 0004 <span class="comment">% Usage:</span>
-0005 <span class="comment">%   model=CombineModels(model1,model2)</span>
+0005 <span class="comment">%   model=ds.combineModels(model1,model2)</span>
 0006 <span class="comment">%</span>
 0007 <span class="comment">% Inputs: two models to be combined</span>
 0008 <span class="comment">%</span>
 0009 <span class="comment">% Output: DynaSim model with fields combined from both models</span>
 0010 <span class="comment">%</span>
-0011 <span class="comment">% See also: checkModel, GenerateModel</span>
+0011 <span class="comment">% See also: ds.checkModel, ds.generateModel</span>
 0012 
 0013 <span class="comment">% standardize model structures</span>
-0014 model1=<a href="checkModel.html" class="code" title="function model=checkModel(model)">checkModel</a>(model1);
-0015 model2=<a href="checkModel.html" class="code" title="function model=checkModel(model)">checkModel</a>(model2);
+0014 model1=<a href="ds.checkModel.html" class="code" title="function model=ds.checkModel(model)">ds.checkModel</a>(model1);
+0015 model2=<a href="ds.checkModel.html" class="code" title="function model=ds.checkModel(model)">ds.checkModel</a>(model2);
 0016 
 0017 <span class="comment">% combine fields from sub-structures</span>
 0018 model.parameters=<a href="#_sub1" class="code" title="subfunction out=concatenate_structures(a,b)">concatenate_structures</a>(model1.parameters,model2.parameters);
@@ -89,9 +89,9 @@ This function is called by:
 0035 <span class="comment">% ...</span>
 0036 
 0037 <span class="comment">% standardize resulting model</span>
-0038 <span class="comment">% model=checkModel(model);</span>
-0039   <span class="comment">% note: if this call to checkModel() is uncommented-out, the changes noted</span>
-0040   <span class="comment">% in checkModel() should also be made...</span>
+0038 <span class="comment">% model=ds.checkModel(model);</span>
+0039   <span class="comment">% note: if this call to ds.checkModel() is uncommented-out, the changes noted</span>
+0040   <span class="comment">% in ds.checkModel() should also be made...</span>
 0041 
 0042 <span class="comment">% reorder fields according to first input</span>
 0043 model=orderfields(model,model1);

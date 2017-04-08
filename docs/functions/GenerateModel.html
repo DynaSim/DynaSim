@@ -2,8 +2,8 @@
                 "http://www.w3.org/TR/REC-html40/loose.dtd">
 <html>
 <head>
-  <title>Description of GenerateModel</title>
-  <meta name="keywords" content="GenerateModel">
+  <title>Description of ds.generateModel</title>
+  <meta name="keywords" content="ds.generateModel">
   <meta name="description" content="GENERATEMODEL - Parse DynaSim specification and organize model data in DynaSim model structure">
   <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
   <meta name="generator" content="m2html &copy; 2005 Guillaume Flandin">
@@ -16,36 +16,36 @@
 <body>
 <a name="_top"></a>
 <!-- menu.html functions -->
-<h1>GenerateModel
+<h1>ds.generateModel
 </h1>
 
 <h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
 <div class="box"><strong>GENERATEMODEL - Parse DynaSim specification and organize model data in DynaSim model structure</strong></div>
 
 <h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
-<div class="box"><strong>function [model,name_map]=GenerateModel(specification,varargin) </strong></div>
+<div class="box"><strong>function [model,name_map]=ds.generateModel(specification,varargin) </strong></div>
 
 <h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
 <div class="fragment"><pre class="comment">GENERATEMODEL - Parse DynaSim specification and organize model data in DynaSim model structure
 
  Usage:
-   [model,name_map]=GenerateModel(specification,'option',value,...)
+   [model,name_map]=ds.generateModel(specification,'option',value,...)
 
  Inputs:
    - specification: one of:
-     - DynaSim specification structure (see below and checkSpecification for more details)
+     - DynaSim specification structure (see below and ds.checkSpecification for more details)
      - string with name of MAT-file containing DynaSim specification structure
      - string with equations
      - string with name of file containing equations (.eqns)
        note: .eqns files can also be converted into model structure using LoadModel()
    - options (with defaults): 'option1',value1,'option2',value2,...
      'modifications'  : specify modifications to apply to specification
-                        before generating the model, see applyModifications
+                        before generating the model, see ds.applyModifications
                         for more details (default?: []).
      'open_link_flag' : whether to leave linker identifiers in place (default: 0)
 
  Outputs:
-   - model: DynaSim model structure (see checkModel for more details):
+   - model: DynaSim model structure (see ds.checkModel for more details):
      .parameters      : substructure with model parameters
      .fixed_variables : substructure with fixed variable definitions
      .functions       : substructure with function definitions
@@ -57,17 +57,17 @@
                              each state variable
      .conditionals(i) : structure array with each element indicating
                              conditional actions specified in subfields
-                             &quot;condition&quot;,&quot;action&quot;,&quot;else&quot; (see NOTE 1 in checkModel)
+                             &quot;condition&quot;,&quot;action&quot;,&quot;else&quot; (see NOTE 1 in ds.checkModel)
      .linkers(i)      : structure array with each element indicating
                              an &quot;expression&quot; that should be inserted
                              (according to &quot;operation&quot;) into any equations
-                             where the &quot;target&quot; appears. (see NOTE 2 in checkModel)
+                             where the &quot;target&quot; appears. (see NOTE 2 in ds.checkModel)
        .target    : string giving the target where expression should be inserted
        .expression: string giving the expression to insert
        .operation : string giving the operation to use to insert expression
      .comments{i}     : cell array of comments found in model files
      .specification   : specification used to generate the model
-     .namespaces      : (see NOTE 3 in checkModel)
+     .namespaces      : (see NOTE 3 in ds.checkModel)
    - name_map: cell matrix mapping parameter, variable, and function names
        between the user-created specification (population equations and mechanism
        files) and the full model with automatically generated namespaces. It
@@ -76,13 +76,13 @@
        'functions', or 'monitors') indicating the category to which the named
        element belongs.
 
- - DynaSim specification structure (see checkSpecification for more details)
+ - DynaSim specification structure (see ds.checkSpecification for more details)
    .populations(i) (required): contains info for defining independent population models
        .name (default: 'pop1')      : name of population
        .size (default: 1)           : number of elements in population (i.e., # cells)
-       .equations (required)        : string listing equations (see NOTE 1 in checkSpecification)
+       .equations (required)        : string listing equations (see NOTE 1 in ds.checkSpecification)
        .mechanism_list (default: []): cell array listing mechanisms (see NOTE 2
-                                      in checkSpecification)
+                                      in ds.checkSpecification)
        .parameters (default: [])    : parameters to assign across all equations in
          the population. provide as cell array list of key/value pairs
          {'param1',value1,'param2',value2,...}
@@ -96,7 +96,7 @@
 
  Examples:
    - Example 0:
-     model=GenerateModel('db/dt=3')
+     model=ds.generateModel('db/dt=3')
 
    - Example 1: Lorenz equations
      eqns={
@@ -105,49 +105,49 @@
        'dy/dt=r*x-y-x*z';
        'dz/dt=-b*z+x*y';
      };
-     model=GenerateModel(eqns)
+     model=ds.generateModel(eqns)
 
    - Example 2: Leaky integrate-and-fire neuron
-     model=GenerateModel('tau=10; R=10; E=-70; dV/dt=(E-V+R*1.55)/tau; if(V&gt;-55)(V=-75)')
+     model=ds.generateModel('tau=10; R=10; E=-70; dV/dt=(E-V+R*1.55)/tau; if(V&gt;-55)(V=-75)')
 
    - Example 3: Hodgkin-Huxley neuron with sinusoidal drive
-     model=GenerateModel('dv/dt=current+sin(2*pi*t); {iNa,iK}')
+     model=ds.generateModel('dv/dt=current+sin(2*pi*t); {iNa,iK}')
 
    - Example 4: HH with self inhibition and sinusoidal drive
      specification.populations(1).equations='dv/dt=current+sin(2*pi); v(0)=-65';
      specification.populations(1).mechanism_list={'iNa','iK'};
      specification.connections(1).mechanism_list={'iGABAa'};
      specification.connections(1).parameters={'tauDx',15};
-     model=GenerateModel(specification)
+     model=ds.generateModel(specification)
 
    - Example 5: using custom mechanism alias in equations (for modularization)
      specification.populations(1).equations='dv/dt=@M+sin(2*pi); v(0)=-65';
      specification.populations(1).mechanism_list={'iNa@M','iK@M'};
-     model=GenerateModel(specification)
+     model=ds.generateModel(specification)
 
      or:
 
      specification.populations(1).equations='dv/dt=@M+sin(2*pi); {iNa,iK}@M; v(0)=-65';
-     model=GenerateModel(specification)
+     model=ds.generateModel(specification)
 
    - Example 6: directly incorporating mechanism models from online repositories:
 
-     model=GenerateModel('dv/dt=@M; {ib:57,iK}@M')
+     model=ds.generateModel('dv/dt=@M; {ib:57,iK}@M')
 
      where &quot;ib&quot; is a known alias for the infinitebrain.org repository,
      and &quot;57&quot; is the Na+ current at http://infinitebrain.org/models/57.
      note: currently not supported on *most* machines...
 
- See also: <a href="checkSpecification.html" class="code" title="function spec=checkSpecification(specification)">checkSpecification</a>, <a href="checkModel.html" class="code" title="function model=checkModel(model)">checkModel</a>, <a href="ParseModelEquations.html" class="code" title="function [model,name_map] = ParseModelEquations(text,varargin)">ParseModelEquations</a>, <a href="SimulateModel.html" class="code" title="function [data,studyinfo]=SimulateModel(model,varargin)">SimulateModel</a></pre></div>
+ See also: <a href="ds.checkSpecification.html" class="code" title="function spec=ds.checkSpecification(specification)">ds.checkSpecification</a>, <a href="ds.checkModel.html" class="code" title="function model=ds.checkModel(model)">ds.checkModel</a>, <a href="ds.parseModelEquations.html" class="code" title="function [model,name_map] = ds.parseModelEquations(text,varargin)">ds.parseModelEquations</a>, <a href="ds.simulateModel.html" class="code" title="function [data,studyinfo]=ds.simulateModel(model,varargin)">ds.simulateModel</a></pre></div>
 
 <!-- crossreference -->
 <h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
 This function calls:
 <ul style="list-style-image:url(../matlabicon.gif)">
-<li><a href="applyModifications.html" class="code" title="function [output,modifications]=applyModifications(model,modifications)">applyModifications</a>	APPLYMODIFICATIONS - Apply modifications to DynaSim specification or model structure</li><li><a href="checkModel.html" class="code" title="function model=checkModel(model)">checkModel</a>	CHECKMODEL - Standardize model structure and auto-populate missing fields</li><li><a href="checkOptions.html" class="code" title="function [parms, params_unspecified ] = checkOptions(options, options_schema, strict)">checkOptions</a>	CHECKOPTIONS - organize key/value pairs in structure with default or user-supplied values according to a schema</li><li><a href="checkSpecification.html" class="code" title="function spec=checkSpecification(specification)">checkSpecification</a>	CHECKSPECIFICATION - standardize specification structure and auto-populate missing fields</li><li><a href="CombineModels.html" class="code" title="function model=CombineModels(model1,model2)">CombineModels</a>	COMBINEMODELS - combine subfields in two DynaSim model structures</li><li><a href="ImportModel.html" class="code" title="function [model,map] = ImportModel(source,varargin)">ImportModel</a>	IMPORTMODEL - import model from raw equations, other program source, etc.</li><li><a href="PropagateNamespaces.html" class="code" title="function model = PropagateNamespaces(model,map)">PropagateNamespaces</a>	PROPAGATENAMESPACES - namespace-establishing namespace substitutions.</li></ul>
+<li><a href="ds.applyModifications.html" class="code" title="function [output,modifications]=ds.applyModifications(model,modifications)">ds.applyModifications</a>	APPLYMODIFICATIONS - Apply modifications to DynaSim specification or model structure</li><li><a href="ds.checkModel.html" class="code" title="function model=ds.checkModel(model)">ds.checkModel</a>	CHECKMODEL - Standardize model structure and auto-populate missing fields</li><li><a href="ds.checkOptions.html" class="code" title="function [parms, params_unspecified ] = ds.checkOptions(options, options_schema, strict)">ds.checkOptions</a>	CHECKOPTIONS - organize key/value pairs in structure with default or user-supplied values according to a schema</li><li><a href="ds.checkSpecification.html" class="code" title="function spec=ds.checkSpecification(specification)">ds.checkSpecification</a>	CHECKSPECIFICATION - standardize specification structure and auto-populate missing fields</li><li><a href="ds.combineModels.html" class="code" title="function model=ds.combineModels(model1,model2)">ds.combineModels</a>	COMBINEMODELS - combine subfields in two DynaSim model structures</li><li><a href="ds.importModel.html" class="code" title="function [model,map] = ds.importModel(source,varargin)">ds.importModel</a>	IMPORTMODEL - import model from raw equations, other program source, etc.</li><li><a href="ds.propagateNamespaces.html" class="code" title="function model = ds.propagateNamespaces(model,map)">ds.propagateNamespaces</a>	PROPAGATENAMESPACES - namespace-establishing namespace substitutions.</li></ul>
 This function is called by:
 <ul style="list-style-image:url(../matlabicon.gif)">
-<li><a href="applyModifications.html" class="code" title="function [output,modifications]=applyModifications(model,modifications)">applyModifications</a>	APPLYMODIFICATIONS - Apply modifications to DynaSim specification or model structure</li><li><a href="checkModel.html" class="code" title="function model=checkModel(model)">checkModel</a>	CHECKMODEL - Standardize model structure and auto-populate missing fields</li><li><a href="ProbeCellProperties.html" class="code" title="function data = ProbeCellProperties(model,varargin)">ProbeCellProperties</a>	data = ProbeCellProperties(model,'option1',option1,...)</li></ul>
+<li><a href="ds.applyModifications.html" class="code" title="function [output,modifications]=ds.applyModifications(model,modifications)">ds.applyModifications</a>	APPLYMODIFICATIONS - Apply modifications to DynaSim specification or model structure</li><li><a href="ds.checkModel.html" class="code" title="function model=ds.checkModel(model)">ds.checkModel</a>	CHECKMODEL - Standardize model structure and auto-populate missing fields</li><li><a href="ds.probeCellProperties.html" class="code" title="function data = ds.probeCellProperties(model,varargin)">ds.probeCellProperties</a>	data = ds.probeCellProperties(model,'option1',option1,...)</li></ul>
 <!-- crossreference -->
 
 <h2><a name="_subfunctions"></a>SUBFUNCTIONS <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
@@ -155,27 +155,27 @@ This function is called by:
 <li><a href="#_sub1" class="code">function_names=fieldnames(model.functions);</a></li><li><a href="#_sub2" class="code">function_names={};</a></li><li><a href="#_sub3" class="code">function_monitor_index=find(~cellfun(@isempty,regexp(monitor_names,</a></li><li><a href="#_sub4" class="code">functions_to_monitor={};</a></li><li><a href="#_sub5" class="code">function_index=find(~cellfun(@isempty,regexp(function_names,[</a></li><li><a href="#_sub6" class="code">functions_to_monitor=cat(1,functions_to_monitor,function_names(function_index));</a></li><li><a href="#_sub7" class="code">functions_to_monitor=unique(functions_to_monitor);</a></li><li><a href="#_sub8" class="code">function add_keywords(src,dst,namespace)</a></li><li><a href="#_sub9" class="code">function_names=fieldnames(model.functions);</a></li><li><a href="#_sub10" class="code">function str=linker_strrep(str,oldstr,newstr,operator)</a></li></ul>
 
 <h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
-<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function [model,name_map]=GenerateModel(specification,varargin)</a>
+<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function [model,name_map]=ds.generateModel(specification,varargin)</a>
 0002 <span class="comment">%GENERATEMODEL - Parse DynaSim specification and organize model data in DynaSim model structure</span>
 0003 <span class="comment">%</span>
 0004 <span class="comment">% Usage:</span>
-0005 <span class="comment">%   [model,name_map]=GenerateModel(specification,'option',value,...)</span>
+0005 <span class="comment">%   [model,name_map]=ds.generateModel(specification,'option',value,...)</span>
 0006 <span class="comment">%</span>
 0007 <span class="comment">% Inputs:</span>
 0008 <span class="comment">%   - specification: one of:</span>
-0009 <span class="comment">%     - DynaSim specification structure (see below and checkSpecification for more details)</span>
+0009 <span class="comment">%     - DynaSim specification structure (see below and ds.checkSpecification for more details)</span>
 0010 <span class="comment">%     - string with name of MAT-file containing DynaSim specification structure</span>
 0011 <span class="comment">%     - string with equations</span>
 0012 <span class="comment">%     - string with name of file containing equations (.eqns)</span>
 0013 <span class="comment">%       note: .eqns files can also be converted into model structure using LoadModel()</span>
 0014 <span class="comment">%   - options (with defaults): 'option1',value1,'option2',value2,...</span>
 0015 <span class="comment">%     'modifications'  : specify modifications to apply to specification</span>
-0016 <span class="comment">%                        before generating the model, see applyModifications</span>
+0016 <span class="comment">%                        before generating the model, see ds.applyModifications</span>
 0017 <span class="comment">%                        for more details (default?: []).</span>
 0018 <span class="comment">%     'open_link_flag' : whether to leave linker identifiers in place (default: 0)</span>
 0019 <span class="comment">%</span>
 0020 <span class="comment">% Outputs:</span>
-0021 <span class="comment">%   - model: DynaSim model structure (see checkModel for more details):</span>
+0021 <span class="comment">%   - model: DynaSim model structure (see ds.checkModel for more details):</span>
 0022 <span class="comment">%     .parameters      : substructure with model parameters</span>
 0023 <span class="comment">%     .fixed_variables : substructure with fixed variable definitions</span>
 0024 <span class="comment">%     .functions       : substructure with function definitions</span>
@@ -187,17 +187,17 @@ This function is called by:
 0030 <span class="comment">%                             each state variable</span>
 0031 <span class="comment">%     .conditionals(i) : structure array with each element indicating</span>
 0032 <span class="comment">%                             conditional actions specified in subfields</span>
-0033 <span class="comment">%                             &quot;condition&quot;,&quot;action&quot;,&quot;else&quot; (see NOTE 1 in checkModel)</span>
+0033 <span class="comment">%                             &quot;condition&quot;,&quot;action&quot;,&quot;else&quot; (see NOTE 1 in ds.checkModel)</span>
 0034 <span class="comment">%     .linkers(i)      : structure array with each element indicating</span>
 0035 <span class="comment">%                             an &quot;expression&quot; that should be inserted</span>
 0036 <span class="comment">%                             (according to &quot;operation&quot;) into any equations</span>
-0037 <span class="comment">%                             where the &quot;target&quot; appears. (see NOTE 2 in checkModel)</span>
+0037 <span class="comment">%                             where the &quot;target&quot; appears. (see NOTE 2 in ds.checkModel)</span>
 0038 <span class="comment">%       .target    : string giving the target where expression should be inserted</span>
 0039 <span class="comment">%       .expression: string giving the expression to insert</span>
 0040 <span class="comment">%       .operation : string giving the operation to use to insert expression</span>
 0041 <span class="comment">%     .comments{i}     : cell array of comments found in model files</span>
 0042 <span class="comment">%     .specification   : specification used to generate the model</span>
-0043 <span class="comment">%     .namespaces      : (see NOTE 3 in checkModel)</span>
+0043 <span class="comment">%     .namespaces      : (see NOTE 3 in ds.checkModel)</span>
 0044 <span class="comment">%   - name_map: cell matrix mapping parameter, variable, and function names</span>
 0045 <span class="comment">%       between the user-created specification (population equations and mechanism</span>
 0046 <span class="comment">%       files) and the full model with automatically generated namespaces. It</span>
@@ -206,13 +206,13 @@ This function is called by:
 0049 <span class="comment">%       'functions', or 'monitors') indicating the category to which the named</span>
 0050 <span class="comment">%       element belongs.</span>
 0051 <span class="comment">%</span>
-0052 <span class="comment">% - DynaSim specification structure (see checkSpecification for more details)</span>
+0052 <span class="comment">% - DynaSim specification structure (see ds.checkSpecification for more details)</span>
 0053 <span class="comment">%   .populations(i) (required): contains info for defining independent population models</span>
 0054 <span class="comment">%       .name (default: 'pop1')      : name of population</span>
 0055 <span class="comment">%       .size (default: 1)           : number of elements in population (i.e., # cells)</span>
-0056 <span class="comment">%       .equations (required)        : string listing equations (see NOTE 1 in checkSpecification)</span>
+0056 <span class="comment">%       .equations (required)        : string listing equations (see NOTE 1 in ds.checkSpecification)</span>
 0057 <span class="comment">%       .mechanism_list (default: []): cell array listing mechanisms (see NOTE 2</span>
-0058 <span class="comment">%                                      in checkSpecification)</span>
+0058 <span class="comment">%                                      in ds.checkSpecification)</span>
 0059 <span class="comment">%       .parameters (default: [])    : parameters to assign across all equations in</span>
 0060 <span class="comment">%         the population. provide as cell array list of key/value pairs</span>
 0061 <span class="comment">%         {'param1',value1,'param2',value2,...}</span>
@@ -226,7 +226,7 @@ This function is called by:
 0069 <span class="comment">%</span>
 0070 <span class="comment">% Examples:</span>
 0071 <span class="comment">%   - Example 0:</span>
-0072 <span class="comment">%     model=GenerateModel('db/dt=3')</span>
+0072 <span class="comment">%     model=ds.generateModel('db/dt=3')</span>
 0073 <span class="comment">%</span>
 0074 <span class="comment">%   - Example 1: Lorenz equations</span>
 0075 <span class="comment">%     eqns={</span>
@@ -235,40 +235,40 @@ This function is called by:
 0078 <span class="comment">%       'dy/dt=r*x-y-x*z';</span>
 0079 <span class="comment">%       'dz/dt=-b*z+x*y';</span>
 0080 <span class="comment">%     };</span>
-0081 <span class="comment">%     model=GenerateModel(eqns)</span>
+0081 <span class="comment">%     model=ds.generateModel(eqns)</span>
 0082 <span class="comment">%</span>
 0083 <span class="comment">%   - Example 2: Leaky integrate-and-fire neuron</span>
-0084 <span class="comment">%     model=GenerateModel('tau=10; R=10; E=-70; dV/dt=(E-V+R*1.55)/tau; if(V&gt;-55)(V=-75)')</span>
+0084 <span class="comment">%     model=ds.generateModel('tau=10; R=10; E=-70; dV/dt=(E-V+R*1.55)/tau; if(V&gt;-55)(V=-75)')</span>
 0085 <span class="comment">%</span>
 0086 <span class="comment">%   - Example 3: Hodgkin-Huxley neuron with sinusoidal drive</span>
-0087 <span class="comment">%     model=GenerateModel('dv/dt=current+sin(2*pi*t); {iNa,iK}')</span>
+0087 <span class="comment">%     model=ds.generateModel('dv/dt=current+sin(2*pi*t); {iNa,iK}')</span>
 0088 <span class="comment">%</span>
 0089 <span class="comment">%   - Example 4: HH with self inhibition and sinusoidal drive</span>
 0090 <span class="comment">%     specification.populations(1).equations='dv/dt=current+sin(2*pi); v(0)=-65';</span>
 0091 <span class="comment">%     specification.populations(1).mechanism_list={'iNa','iK'};</span>
 0092 <span class="comment">%     specification.connections(1).mechanism_list={'iGABAa'};</span>
 0093 <span class="comment">%     specification.connections(1).parameters={'tauDx',15};</span>
-0094 <span class="comment">%     model=GenerateModel(specification)</span>
+0094 <span class="comment">%     model=ds.generateModel(specification)</span>
 0095 <span class="comment">%</span>
 0096 <span class="comment">%   - Example 5: using custom mechanism alias in equations (for modularization)</span>
 0097 <span class="comment">%     specification.populations(1).equations='dv/dt=@M+sin(2*pi); v(0)=-65';</span>
 0098 <span class="comment">%     specification.populations(1).mechanism_list={'iNa@M','iK@M'};</span>
-0099 <span class="comment">%     model=GenerateModel(specification)</span>
+0099 <span class="comment">%     model=ds.generateModel(specification)</span>
 0100 <span class="comment">%</span>
 0101 <span class="comment">%     or:</span>
 0102 <span class="comment">%</span>
 0103 <span class="comment">%     specification.populations(1).equations='dv/dt=@M+sin(2*pi); {iNa,iK}@M; v(0)=-65';</span>
-0104 <span class="comment">%     model=GenerateModel(specification)</span>
+0104 <span class="comment">%     model=ds.generateModel(specification)</span>
 0105 <span class="comment">%</span>
 0106 <span class="comment">%   - Example 6: directly incorporating mechanism models from online repositories:</span>
 0107 <span class="comment">%</span>
-0108 <span class="comment">%     model=GenerateModel('dv/dt=@M; {ib:57,iK}@M')</span>
+0108 <span class="comment">%     model=ds.generateModel('dv/dt=@M; {ib:57,iK}@M')</span>
 0109 <span class="comment">%</span>
 0110 <span class="comment">%     where &quot;ib&quot; is a known alias for the infinitebrain.org repository,</span>
 0111 <span class="comment">%     and &quot;57&quot; is the Na+ current at http://infinitebrain.org/models/57.</span>
 0112 <span class="comment">%     note: currently not supported on *most* machines...</span>
 0113 <span class="comment">%</span>
-0114 <span class="comment">% See also: checkSpecification, checkModel, ParseModelEquations, SimulateModel</span>
+0114 <span class="comment">% See also: ds.checkSpecification, ds.checkModel, ds.parseModelEquations, ds.simulateModel</span>
 0115 
 0116 <span class="comment">% Check inputs</span>
 0117 <span class="comment">% ------------------------------------------------------</span>
@@ -283,7 +283,7 @@ This function is called by:
 0126 <span class="keyword">end</span>
 0127 <span class="comment">% ------------------------------------------------------</span>
 0128 
-0129 options=<a href="checkOptions.html" class="code" title="function [parms, params_unspecified ] = checkOptions(options, options_schema, strict)">checkOptions</a>(varargin,{<span class="keyword">...</span>
+0129 options=<a href="ds.checkOptions.html" class="code" title="function [parms, params_unspecified ] = ds.checkOptions(options, options_schema, strict)">ds.checkOptions</a>(varargin,{<span class="keyword">...</span>
 0130   <span class="string">'modifications'</span>,[],[],<span class="keyword">...</span>
 0131   <span class="string">'open_link_flag'</span>,0,{0,1},<span class="keyword">...</span>
 0132   },false);
@@ -299,11 +299,11 @@ This function is called by:
 0142 <span class="comment">%   end</span>
 0143 <span class="keyword">end</span>
 0144 <span class="comment">% standardize specification</span>
-0145 specification=<a href="checkSpecification.html" class="code" title="function spec=checkSpecification(specification)">checkSpecification</a>(specification); <span class="comment">% standardize &amp; auto-populate as needed</span>
+0145 specification=<a href="ds.checkSpecification.html" class="code" title="function spec=ds.checkSpecification(specification)">ds.checkSpecification</a>(specification); <span class="comment">% standardize &amp; auto-populate as needed</span>
 0146 
 0147 <span class="comment">% Apply modifications to specification before generating model</span>
 0148 <span class="keyword">if</span> ~isempty(options.modifications)
-0149   specification=<a href="applyModifications.html" class="code" title="function [output,modifications]=applyModifications(model,modifications)">applyModifications</a>(specification,options.modifications);
+0149   specification=<a href="ds.applyModifications.html" class="code" title="function [output,modifications]=ds.applyModifications(model,modifications)">ds.applyModifications</a>(specification,options.modifications);
 0150 <span class="keyword">end</span>
 0151 
 0152 <span class="comment">% specification metadata:</span>
@@ -317,7 +317,7 @@ This function is called by:
 0160 <span class="comment">%% 1.0 load sub-models, assign namespaces, and combine across all equations and mechanisms in specification</span>
 0161 <span class="comment">% [model,name_map]=LoadModelSet(specification) % bug: disrupted subsequent namespace propagation (without raising an error)</span>
 0162 <span class="comment">%% 2.0 propagate namespaces through variable and function names</span>
-0163 <span class="comment">% model = PropagateNamespaces(model,name_map); % this works</span>
+0163 <span class="comment">% model = ds.propagateNamespaces(model,name_map); % this works</span>
 0164 <span class="comment">%% 3.0 expand population equations according to mechanism linkers</span>
 0165 <span class="comment">% model = LinkMechanisms(model,name_map);      % problem: unable to identify linker population from model.linkers; see notes below (3.0) for more details</span>
 0166 <span class="comment">% -------------------------------------------------------------------------</span>
@@ -327,9 +327,9 @@ This function is called by:
 0170 <span class="comment">% (eg, dv/dt=@M; {Na,K}@M w/ Na.mech: @current += I(IN,m,h)).</span>
 0171 <span class="comment">%     approach taken below:</span>
 0172 <span class="comment">%     - add support for dv/dt=@M; {Na@M,K@M}</span>
-0173 <span class="comment">%       have GenerateModel split mech_name on '@' and replace first</span>
+0173 <span class="comment">%       have ds.generateModel split mech_name on '@' and replace first</span>
 0174 <span class="comment">%       linker in mech (e.g., @current) by what follows '@' (e.g., @M)</span>
-0175 <span class="comment">%     - then have checkSpecification convert {Na,K}@M into {Na@M,K@M}</span>
+0175 <span class="comment">%     - then have ds.checkSpecification convert {Na,K}@M into {Na@M,K@M}</span>
 0176 
 0177 <span class="comment">%% 1.0 load sub-models, assign namespaces, and combine across all equations and mechanisms in specification</span>
 0178 model.parameters={};
@@ -355,24 +355,24 @@ This function is called by:
 0198     <span class="comment">% adjust the name if necessary</span>
 0199     <span class="keyword">if</span> ~strcmp(specification.populations(i).name,tmpname)
 0200       <span class="comment">% use the name in the specification</span>
-0201       tmpmodel=<a href="applyModifications.html" class="code" title="function [output,modifications]=applyModifications(model,modifications)">applyModifications</a>(tmpmodel,{tmpname,<span class="string">'name'</span>,specification.populations(i).name});
+0201       tmpmodel=<a href="ds.applyModifications.html" class="code" title="function [output,modifications]=ds.applyModifications(model,modifications)">ds.applyModifications</a>(tmpmodel,{tmpname,<span class="string">'name'</span>,specification.populations(i).name});
 0202     <span class="keyword">elseif</span> strcmp(tmpname,<span class="string">'pop1'</span>) <span class="comment">% if default name</span>
 0203       <span class="comment">% use default name for this population index</span>
-0204       tmpmodel=<a href="applyModifications.html" class="code" title="function [output,modifications]=applyModifications(model,modifications)">applyModifications</a>(tmpmodel,{tmpname,<span class="string">'name'</span>,sprintf(<span class="string">'pop%g'</span>,i)});
+0204       tmpmodel=<a href="ds.applyModifications.html" class="code" title="function [output,modifications]=ds.applyModifications(model,modifications)">ds.applyModifications</a>(tmpmodel,{tmpname,<span class="string">'name'</span>,sprintf(<span class="string">'pop%g'</span>,i)});
 0205     <span class="keyword">end</span>
 0206     
 0207     tmpmodel.linkers=[]; <span class="comment">% remove old linkers from original model construction</span>
-0208     model=<a href="CombineModels.html" class="code" title="function model=CombineModels(model1,model2)">CombineModels</a>(model,tmpmodel);
+0208     model=<a href="ds.combineModels.html" class="code" title="function model=ds.combineModels(model1,model2)">ds.combineModels</a>(model,tmpmodel);
 0209     name_map=<a href="#_sub6" class="code" title="subfunctions_to_monitor=cat(1,functions_to_monitor,function_names(function_index));">cat</a>(1,name_map,tmpmodel.namespaces);
 0210     <span class="keyword">continue</span>;
 0211   <span class="keyword">end</span>
 0212   <span class="comment">% construct new population model</span>
 0213   PopScope=specification.populations(i).name;
-0214     <span class="comment">% NOTE: ParseModelEquations adds a '_' suffix to the namespace; therefore,</span>
+0214     <span class="comment">% NOTE: ds.parseModelEquations adds a '_' suffix to the namespace; therefore,</span>
 0215     <span class="comment">% a '_' suffix is added to PopScope when used below for consistency of</span>
 0216     <span class="comment">% namespaces/namespaces. (this could be cleaned up by adding '_' to PopScope</span>
 0217     <span class="comment">% here, removing it below, and removing the additional '_' from</span>
-0218     <span class="comment">% ParseModelEquations).</span>
+0218     <span class="comment">% ds.parseModelEquations).</span>
 0219     
 0220   <span class="comment">% 1.1.1 parse population equations</span>
 0221   equations=specification.populations(i).equations;
@@ -381,8 +381,8 @@ This function is called by:
 0224   
 0225   <span class="comment">% parse population equations</span>
 0226   <span class="keyword">if</span> ~isempty(equations)
-0227     [tmpmodel,tmpmap]=<a href="ImportModel.html" class="code" title="function [model,map] = ImportModel(source,varargin)">ImportModel</a>(equations,<span class="string">'namespace'</span>,PopScope,<span class="string">'ic_pop'</span>,specification.populations(i).name,<span class="string">'user_parameters'</span>,parameters);
-0228     model=<a href="CombineModels.html" class="code" title="function model=CombineModels(model1,model2)">CombineModels</a>(model,tmpmodel);
+0227     [tmpmodel,tmpmap]=<a href="ds.importModel.html" class="code" title="function [model,map] = ds.importModel(source,varargin)">ds.importModel</a>(equations,<span class="string">'namespace'</span>,PopScope,<span class="string">'ic_pop'</span>,specification.populations(i).name,<span class="string">'user_parameters'</span>,parameters);
+0228     model=<a href="ds.combineModels.html" class="code" title="function model=ds.combineModels(model1,model2)">ds.combineModels</a>(model,tmpmodel);
 0229     name_map=<a href="#_sub6" class="code" title="subfunctions_to_monitor=cat(1,functions_to_monitor,function_names(function_index));">cat</a>(1,name_map,tmpmap);
 0230   <span class="keyword">end</span>
 0231   
@@ -408,7 +408,7 @@ This function is called by:
 0251     <span class="keyword">end</span>
 0252 
 0253     <span class="comment">% parse mechanism equations</span>
-0254     [tmpmodel,tmpmap]=<a href="ImportModel.html" class="code" title="function [model,map] = ImportModel(source,varargin)">ImportModel</a>(mechanism,<span class="string">'namespace'</span>,MechScope,<span class="string">'ic_pop'</span>,specification.populations(i).name,<span class="string">'user_parameters'</span>,parameters);
+0254     [tmpmodel,tmpmap]=<a href="ds.importModel.html" class="code" title="function [model,map] = ds.importModel(source,varargin)">ds.importModel</a>(mechanism,<span class="string">'namespace'</span>,MechScope,<span class="string">'ic_pop'</span>,specification.populations(i).name,<span class="string">'user_parameters'</span>,parameters);
 0255     <span class="comment">% replace 1st linker name by the one in specification</span>
 0256     <span class="keyword">if</span> ~isempty(new_linker) &amp;&amp; ~isempty(tmpmodel.linkers)
 0257       <span class="comment">% first try to find 1st linker target starting with @</span>
@@ -426,7 +426,7 @@ This function is called by:
 0269     <span class="keyword">end</span>
 0270     
 0271     <span class="comment">% combine sub-model with other sub-models</span>
-0272     model=<a href="CombineModels.html" class="code" title="function model=CombineModels(model1,model2)">CombineModels</a>(model,tmpmodel);
+0272     model=<a href="ds.combineModels.html" class="code" title="function model=ds.combineModels(model1,model2)">ds.combineModels</a>(model,tmpmodel);
 0273     name_map=<a href="#_sub6" class="code" title="subfunctions_to_monitor=cat(1,functions_to_monitor,function_names(function_index));">cat</a>(1,name_map,tmpmap);
 0274     linker_pops=<a href="#_sub6" class="code" title="subfunctions_to_monitor=cat(1,functions_to_monitor,function_names(function_index));">cat</a>(2,linker_pops,repmat({specification.populations(i).name},[1 length(tmpmodel.linkers)]));
 0275   <span class="keyword">end</span>
@@ -445,8 +445,8 @@ This function is called by:
 0288   parameters=specification.connections(i).parameters;
 0289   ConScope=[target <span class="string">'_'</span> source <span class="string">'_'</span>];
 0290     <span class="comment">% NOTE: in contrast to PopScope above, ConScope is never passed to</span>
-0291     <span class="comment">% ParseModelEquations; thus the '_' should be added here for consistency</span>
-0292     <span class="comment">% with mechanism namespaces (which are modified by ParseModelEquations).</span>
+0291     <span class="comment">% ds.parseModelEquations; thus the '_' should be added here for consistency</span>
+0292     <span class="comment">% with mechanism namespaces (which are modified by ds.parseModelEquations).</span>
 0293   <span class="keyword">for</span> j=1:length(specification.connections(i).mechanism_list)
 0294     mechanism_=specification.connections(i).mechanism_list{j};
 0295     
@@ -461,17 +461,17 @@ This function is called by:
 0304     MechScope=[target <span class="string">'_'</span> source <span class="string">'_'</span> MechID];
 0305         <span class="comment">% NOTE: must use target_source_mechanism for connection mechanisms</span>
 0306         <span class="comment">% to distinguish their parent namespaces from those of population mechanisms</span>
-0307         <span class="comment">% see: GetParentNamespace</span>
+0307         <span class="comment">% see: ds.getParentNamespace</span>
 0308     
 0309     <span class="comment">% parse model equations</span>
-0310     [tmpmodel,tmpmap]=<a href="ImportModel.html" class="code" title="function [model,map] = ImportModel(source,varargin)">ImportModel</a>(mechanism,<span class="string">'namespace'</span>,MechScope,<span class="string">'ic_pop'</span>,source,<span class="string">'user_parameters'</span>,parameters);
+0310     [tmpmodel,tmpmap]=<a href="ds.importModel.html" class="code" title="function [model,map] = ds.importModel(source,varargin)">ds.importModel</a>(mechanism,<span class="string">'namespace'</span>,MechScope,<span class="string">'ic_pop'</span>,source,<span class="string">'user_parameters'</span>,parameters);
 0311     
 0312     <span class="comment">% replace 1st linker name by the one in specification</span>
 0313     <span class="keyword">if</span> ~isempty(new_linker) &amp;&amp; ~isempty(tmpmodel.linkers)
 0314       tmpmodel.linkers(1).target=[<span class="string">'@'</span> new_linker];
 0315     <span class="keyword">end</span>
 0316     
-0317     model=<a href="CombineModels.html" class="code" title="function model=CombineModels(model1,model2)">CombineModels</a>(model,tmpmodel);
+0317     model=<a href="ds.combineModels.html" class="code" title="function model=ds.combineModels(model1,model2)">ds.combineModels</a>(model,tmpmodel);
 0318     name_map=<a href="#_sub6" class="code" title="subfunctions_to_monitor=cat(1,functions_to_monitor,function_names(function_index));">cat</a>(1,name_map,tmpmap);
 0319     
 0320     <span class="comment">% link this mechanism to the target population</span>
@@ -553,7 +553,7 @@ This function is called by:
 0396   <span class="comment">% NESTED FUNCTIONS</span>
 0397   <span class="comment">% ----------------------------------</span>
 0398   <a name="_sub8" href="#_subfunctions" class="code">function add_keywords(src,dst,namespace)</a>
-0399     <span class="comment">% NOTE: this needs to be coordinated with update_keywords() in SimulateModel()</span>
+0399     <span class="comment">% NOTE: this needs to be coordinated with update_keywords() in ds.simulateModel()</span>
 0400     <span class="comment">%   for parameters</span>
 0401     Nsrc=[src <span class="string">'_Npop'</span>];
 0402     Ndst=[dst <span class="string">'_Npop'</span>];
@@ -633,7 +633,7 @@ This function is called by:
 0476 
 0477 <span class="comment">%% 2.0 propagate namespaces through variable and function names</span>
 0478 <span class="comment">%      i.e., to establish uniqueness of names by adding namespace/namespace prefixes)</span>
-0479 model = <a href="PropagateNamespaces.html" class="code" title="function model = PropagateNamespaces(model,map)">PropagateNamespaces</a>(model,name_map);
+0479 model = <a href="ds.propagateNamespaces.html" class="code" title="function model = ds.propagateNamespaces(model,map)">ds.propagateNamespaces</a>(model,name_map);
 0480 
 0481 <span class="comment">%% 3.0 expand population equations according to mechanism linkers</span>
 0482 <span class="comment">% purpose: expand population equations according to linkers</span>
@@ -667,7 +667,7 @@ This function is called by:
 0510   operation=model.linkers(i).operation;
 0511   oldstr=model.linkers(i).target;
 0512   newstr=model.linkers(i).expression;
-0513   <span class="keyword">switch</span> operation <span class="comment">% see ClassifyEquation and ParseModelEquations   % ('((\+=)|(-=)|(\*=)|(/=)|(=&gt;))')</span>
+0513   <span class="keyword">switch</span> operation <span class="comment">% see ds.classifyEquation and ds.parseModelEquations   % ('((\+=)|(-=)|(\*=)|(/=)|(=&gt;))')</span>
 0514     <span class="keyword">case</span> <span class="string">'+='</span>
 0515       operator=<span class="string">'+'</span>;
 0516     <span class="keyword">case</span> <span class="string">'-='</span>
@@ -815,7 +815,7 @@ This function is called by:
 0658 model.specification = specification; <span class="comment">% store specification to enable modifications to be applied later</span>
 0659 model.namespaces = name_map; <span class="comment">% store name_map for transparency</span>
 0660 
-0661 model=<a href="checkModel.html" class="code" title="function model=checkModel(model)">checkModel</a>(model);
+0661 model=<a href="ds.checkModel.html" class="code" title="function model=ds.checkModel(model)">ds.checkModel</a>(model);
 0662 
 0663 <span class="keyword">end</span>
 0664 
@@ -833,7 +833,7 @@ This function is called by:
 0676   
 0677   <span class="comment">% check if anything besides a single variable:</span>
 0678   <span class="keyword">if</span> isempty(regexp(newstr,<span class="string">'[^a-z_A-Z\d]+'</span>,<span class="string">'once'</span>))
-0679     str=dynasimStrrep(str,oldstr,newstr);
+0679     str=ds.strrep(str,oldstr,newstr);
 0680   <span class="keyword">else</span>
 0681     <span class="comment">% otherwise do substitution with operator and parenthesis</span>
 0682     pat=[<span class="string">'([^\w]+)'</span> oldstr <span class="string">'([^\w]+)'</span>]; <span class="comment">% in the middle</span>

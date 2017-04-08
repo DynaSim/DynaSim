@@ -11,7 +11,7 @@ else
 end
 
 % Set where to save outputs
-output_directory = getDsVar('demos_path');
+output_directory = ds.getConfig('demos_path');
 
 % move to root directory where outputs will be saved
 mkdirSilent(output_directory);
@@ -26,7 +26,7 @@ if exist(study_dir, 'dir')
   rmdir(study_dir, 's')
 end
 
-SimulateModel(eqns,'vary',vary, 'study_dir',study_dir,'save_data_flag',1,...
+ds.simulateModel(eqns,'vary',vary, 'study_dir',study_dir,'save_data_flag',1,...
   'cluster_flag',1,'verbose_flag',1,'qsub_mode','loop');
 
 %% Solve with array mode
@@ -38,5 +38,5 @@ if exist(study_dir, 'dir')
   rmdir(study_dir, 's')
 end
 
-SimulateModel(eqns,'vary',vary, 'study_dir',study_dir,'save_data_flag',1,...
+ds.simulateModel(eqns,'vary',vary, 'study_dir',study_dir,'save_data_flag',1,...
   'cluster_flag',1,'verbose_flag',1,'qsub_mode','array');

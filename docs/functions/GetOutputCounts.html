@@ -2,8 +2,8 @@
                 "http://www.w3.org/TR/REC-html40/loose.dtd">
 <html>
 <head>
-  <title>Description of GetOutputCounts</title>
-  <meta name="keywords" content="GetOutputCounts">
+  <title>Description of ds.getOutputCounts</title>
+  <meta name="keywords" content="ds.getOutputCounts">
   <meta name="description" content="GETOUTPUTCOUNTS - determine how many copies of each state variable and monitor will be produced by simulating the model.">
   <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
   <meta name="generator" content="m2html &copy; 2005 Guillaume Flandin">
@@ -16,20 +16,20 @@
 <body>
 <a name="_top"></a>
 <!-- menu.html functions -->
-<h1>GetOutputCounts
+<h1>ds.getOutputCounts
 </h1>
 
 <h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
 <div class="box"><strong>GETOUTPUTCOUNTS - determine how many copies of each state variable and monitor will be produced by simulating the model.</strong></div>
 
 <h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
-<div class="box"><strong>function [state_var_counts,monitor_counts]=GetOutputCounts(model) </strong></div>
+<div class="box"><strong>function [state_var_counts,monitor_counts]=ds.getOutputCounts(model) </strong></div>
 
 <h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
 <div class="fragment"><pre class="comment">GETOUTPUTCOUNTS - determine how many copies of each state variable and monitor will be produced by simulating the model.
 
  Usage:
-   [state_var_counts,monitor_counts]=GetOutputCounts(model)</pre></div>
+   [state_var_counts,monitor_counts]=ds.getOutputCounts(model)</pre></div>
 
 <!-- crossreference -->
 <h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
@@ -38,17 +38,17 @@ This function calls:
 </ul>
 This function is called by:
 <ul style="list-style-image:url(../matlabicon.gif)">
-<li><a href="SimulateModel.html" class="code" title="function [data,studyinfo]=SimulateModel(model,varargin)">SimulateModel</a>	% data=SimulateModel(model,'option',value,...)</li><li><a href="WriteDynaSimSolver.html" class="code" title="function [outfile,options]=WriteDynaSimSolver(model,varargin)">WriteDynaSimSolver</a>	WRITEDYNASIMSOLVER - write m-file that numerically inteegrates the model</li></ul>
+<li><a href="ds.simulateModel.html" class="code" title="function [data,studyinfo]=ds.simulateModel(model,varargin)">ds.simulateModel</a>	% data=ds.simulateModel(model,'option',value,...)</li><li><a href="ds.writeDynaSimSolver.html" class="code" title="function [outfile,options]=ds.writeDynaSimSolver(model,varargin)">ds.writeDynaSimSolver</a>	WRITEDYNASIMSOLVER - write m-file that numerically inteegrates the model</li></ul>
 <!-- crossreference -->
 
 
 
 <h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
-<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function [state_var_counts,monitor_counts]=GetOutputCounts(model)</a>
+<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function [state_var_counts,monitor_counts]=ds.getOutputCounts(model)</a>
 0002 <span class="comment">%GETOUTPUTCOUNTS - determine how many copies of each state variable and monitor will be produced by simulating the model.</span>
 0003 <span class="comment">%</span>
 0004 <span class="comment">% Usage:</span>
-0005 <span class="comment">%   [state_var_counts,monitor_counts]=GetOutputCounts(model)</span>
+0005 <span class="comment">%   [state_var_counts,monitor_counts]=ds.getOutputCounts(model)</span>
 0006 
 0007 state_var_counts=0;
 0008 <span class="keyword">if</span> ~isempty(model.state_variables)

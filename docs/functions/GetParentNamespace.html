@@ -2,8 +2,8 @@
                 "http://www.w3.org/TR/REC-html40/loose.dtd">
 <html>
 <head>
-  <title>Description of GetParentNamespace</title>
-  <meta name="keywords" content="GetParentNamespace">
+  <title>Description of ds.getParentNamespace</title>
+  <meta name="keywords" content="ds.getParentNamespace">
   <meta name="description" content="GETPARENTNAMESPACE - determine parent namespace from namespace specified in namespace">
   <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
   <meta name="generator" content="m2html &copy; 2005 Guillaume Flandin">
@@ -16,20 +16,20 @@
 <body>
 <a name="_top"></a>
 <!-- menu.html functions -->
-<h1>GetParentNamespace
+<h1>ds.getParentNamespace
 </h1>
 
 <h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
 <div class="box"><strong>GETPARENTNAMESPACE - determine parent namespace from namespace specified in namespace</strong></div>
 
 <h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
-<div class="box"><strong>function parent = GetParentNamespace(namespace) </strong></div>
+<div class="box"><strong>function parent = ds.getParentNamespace(namespace) </strong></div>
 
 <h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
 <div class="fragment"><pre class="comment">GETPARENTNAMESPACE - determine parent namespace from namespace specified in namespace
 
  Usage:
-   parent = GetParentNamespace(namespace)
+   parent = ds.getParentNamespace(namespace)
 
  Input:
    - namespace: current namespace of object
@@ -38,14 +38,14 @@
    - parent: parent namespace containing the current namespace
 
  Examples:
-   parent=GetParentNamespace('pop')
-   parent=GetParentNamespace('pop_mech')
-   parent=GetParentNamespace('pop_pop')
-   parent=GetParentNamespace('pop_pop_mech')
-   parent=GetParentNamespace('mech')
-   parent=GetParentNamespace('')
+   parent=ds.getParentNamespace('pop')
+   parent=ds.getParentNamespace('pop_mech')
+   parent=ds.getParentNamespace('pop_pop')
+   parent=ds.getParentNamespace('pop_pop_mech')
+   parent=ds.getParentNamespace('mech')
+   parent=ds.getParentNamespace('')
 
- See also: <a href="PropagateNamespaces.html" class="code" title="function model = PropagateNamespaces(model,map)">PropagateNamespaces</a></pre></div>
+ See also: <a href="ds.propagateNamespaces.html" class="code" title="function model = ds.propagateNamespaces(model,map)">ds.propagateNamespaces</a></pre></div>
 
 <!-- crossreference -->
 <h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
@@ -54,17 +54,17 @@ This function calls:
 </ul>
 This function is called by:
 <ul style="list-style-image:url(../matlabicon.gif)">
-<li><a href="PropagateNamespaces.html" class="code" title="function model = PropagateNamespaces(model,map)">PropagateNamespaces</a>	PROPAGATENAMESPACES - namespace-establishing namespace substitutions.</li></ul>
+<li><a href="ds.propagateNamespaces.html" class="code" title="function model = ds.propagateNamespaces(model,map)">ds.propagateNamespaces</a>	PROPAGATENAMESPACES - namespace-establishing namespace substitutions.</li></ul>
 <!-- crossreference -->
 
 
 
 <h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
-<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function parent = GetParentNamespace(namespace)</a>
+<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function parent = ds.getParentNamespace(namespace)</a>
 0002 <span class="comment">%GETPARENTNAMESPACE - determine parent namespace from namespace specified in namespace</span>
 0003 <span class="comment">%</span>
 0004 <span class="comment">% Usage:</span>
-0005 <span class="comment">%   parent = GetParentNamespace(namespace)</span>
+0005 <span class="comment">%   parent = ds.getParentNamespace(namespace)</span>
 0006 <span class="comment">%</span>
 0007 <span class="comment">% Input:</span>
 0008 <span class="comment">%   - namespace: current namespace of object</span>
@@ -73,14 +73,14 @@ This function is called by:
 0011 <span class="comment">%   - parent: parent namespace containing the current namespace</span>
 0012 <span class="comment">%</span>
 0013 <span class="comment">% Examples:</span>
-0014 <span class="comment">%   parent=GetParentNamespace('pop')</span>
-0015 <span class="comment">%   parent=GetParentNamespace('pop_mech')</span>
-0016 <span class="comment">%   parent=GetParentNamespace('pop_pop')</span>
-0017 <span class="comment">%   parent=GetParentNamespace('pop_pop_mech')</span>
-0018 <span class="comment">%   parent=GetParentNamespace('mech')</span>
-0019 <span class="comment">%   parent=GetParentNamespace('')</span>
+0014 <span class="comment">%   parent=ds.getParentNamespace('pop')</span>
+0015 <span class="comment">%   parent=ds.getParentNamespace('pop_mech')</span>
+0016 <span class="comment">%   parent=ds.getParentNamespace('pop_pop')</span>
+0017 <span class="comment">%   parent=ds.getParentNamespace('pop_pop_mech')</span>
+0018 <span class="comment">%   parent=ds.getParentNamespace('mech')</span>
+0019 <span class="comment">%   parent=ds.getParentNamespace('')</span>
 0020 <span class="comment">%</span>
-0021 <span class="comment">% See also: PropagateNamespaces</span>
+0021 <span class="comment">% See also: ds.propagateNamespaces</span>
 0022 
 0023 <span class="keyword">if</span> isempty(namespace) &amp;&amp; isnumeric(namespace)
 0024   namespace=<span class="string">''</span>;

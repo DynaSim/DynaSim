@@ -2,8 +2,8 @@
                 "http://www.w3.org/TR/REC-html40/loose.dtd">
 <html>
 <head>
-  <title>Description of Data2Table</title>
-  <meta name="keywords" content="Data2Table">
+  <title>Description of ds.data2Table</title>
+  <meta name="keywords" content="ds.data2Table">
   <meta name="description" content="Converts DynaSim structure to 1D cell array format. Later can use to">
   <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
   <meta name="generator" content="m2html &copy; 2005 Guillaume Flandin">
@@ -16,14 +16,14 @@
 <body>
 <a name="_top"></a>
 <!-- menu.html functions -->
-<h1>Data2Table
+<h1>ds.data2Table
 </h1>
 
 <h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
 <div class="box"><strong>Converts DynaSim structure to 1D cell array format. Later can use to</strong></div>
 
 <h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
-<div class="box"><strong>function [data_table,column_titles,time] = Data2Table(data,verbose_flag) </strong></div>
+<div class="box"><strong>function [data_table,column_titles,time] = ds.data2Table(data,verbose_flag) </strong></div>
 
 <h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
 <div class="fragment"><pre class="comment"> Converts DynaSim structure to 1D cell array format. Later can use to
@@ -33,16 +33,16 @@
 <h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
 This function calls:
 <ul style="list-style-image:url(../matlabicon.gif)">
-<li><a href="checkData.html" class="code" title="function data=checkData(data)">checkData</a>	CHECKDATA - Standardize data structure and auto-populate missing fields</li><li><a href="previewTable.html" class="code" title="function [dt_formatted] = previewTable(data_table,col_names)">previewTable</a>	All data, formatted into cells</li></ul>
+<li><a href="ds.checkData.html" class="code" title="function data=ds.checkData(data)">ds.checkData</a>	CHECKDATA - Standardize data structure and auto-populate missing fields</li><li><a href="ds.previewTable.html" class="code" title="function [dt_formatted] = ds.previewTable(data_table,col_names)">ds.previewTable</a>	All data, formatted into cells</li></ul>
 This function is called by:
 <ul style="list-style-image:url(../matlabicon.gif)">
-<li><a href="DynaSim2xPlt.html" class="code" title="function xp = DynaSim2xPlt(data)">DynaSim2xPlt</a>	Convert DynaSim data structure to xp format</li></ul>
+<li><a href="ds.ds2xPlt.html" class="code" title="function xp = ds.ds2xPlt(data)">ds.ds2xPlt</a>	Convert DynaSim data structure to xp format</li></ul>
 <!-- crossreference -->
 
 
 
 <h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
-<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function [data_table,column_titles,time] = Data2Table(data,verbose_flag)</a>
+<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function [data_table,column_titles,time] = ds.data2Table(data,verbose_flag)</a>
 0002     <span class="comment">% Converts DynaSim structure to 1D cell array format. Later can use to</span>
 0003     <span class="comment">% import to xPlt</span>
 0004     
@@ -50,7 +50,7 @@ This function is called by:
 0006         verbose_flag = 0;
 0007     <span class="keyword">end</span>
 0008 
-0009     <a href="checkData.html" class="code" title="function data=checkData(data)">checkData</a>(data);            <span class="comment">% Makes sure it's a valid DynaSim Data structure</span>
+0009     <a href="ds.checkData.html" class="code" title="function data=ds.checkData(data)">ds.checkData</a>(data);            <span class="comment">% Makes sure it's a valid DynaSim Data structure</span>
 0010     
 0011     <span class="comment">% Extract Time variable</span>
 0012     time = data(1).time;
@@ -146,7 +146,7 @@ This function is called by:
 0102     column_titles = {<span class="string">'data'</span>,ax_names{:}};
 0103     
 0104     <span class="keyword">if</span> verbose_flag
-0105         <a href="previewTable.html" class="code" title="function [dt_formatted] = previewTable(data_table,col_names)">previewTable</a>(data_table,column_titles);
+0105         <a href="ds.previewTable.html" class="code" title="function [dt_formatted] = ds.previewTable(data_table,col_names)">ds.previewTable</a>(data_table,column_titles);
 0106     <span class="keyword">end</span>
 0107     
 0108 <span class="keyword">end</span>
