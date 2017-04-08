@@ -31,7 +31,7 @@
  one or more populations. It removes all connections between cells and 
  populations and then runs a series of simulations delivering
  hyperpolarizing and depolarizing pulses. It is designed to be used in
- conjunction with the analysis function &quot;CalcCellProperties&quot; which accepts
+ conjunction with the analysis function &quot;calcCellProperties&quot; which accepts
  the data array produced by this experiment and returns the
  electrophysiological properties characterizing each cell's response in
  the population.
@@ -57,13 +57,13 @@
  data=ProbeCellProperties(model,'num_repetitions',2);
  
  Note: this function is based on the DNSim experiment &quot;cell_pulses&quot;.
- See also: <a href="CalcCellProperties.html" class="code" title="function stats = CalcCellProperties(data,varargin)">CalcCellProperties</a></pre></div>
+ See also: <a href="calcCellProperties.html" class="code" title="function stats = calcCellProperties(data,varargin)">calcCellProperties</a></pre></div>
 
 <!-- crossreference -->
 <h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
 This function calls:
 <ul style="list-style-image:url(../matlabicon.gif)">
-<li><a href="ApplyModifications.html" class="code" title="function [output,modifications]=ApplyModifications(model,modifications)">ApplyModifications</a>	APPLYMODIFICATIONS - Apply modifications to DynaSim specification or model structure</li><li><a href="CheckModel.html" class="code" title="function model=CheckModel(model)">CheckModel</a>	CHECKMODEL - Standardize model structure and auto-populate missing fields</li><li><a href="CheckOptions.html" class="code" title="function [parms, params_unspecified ] = CheckOptions(options, options_schema, strict)">CheckOptions</a>	CHECKOPTIONS - organize key/value pairs in structure with default or user-supplied values according to a schema</li><li><a href="GenerateModel.html" class="code" title="function [model,name_map]=GenerateModel(specification,varargin)">GenerateModel</a>	GENERATEMODEL - Parse DynaSim specification and organize model data in DynaSim model structure</li><li><a href="RemoveKeyval.html" class="code" title="function keyvals_out = RemoveKeyval(keyvals,keys)">RemoveKeyval</a>	REMOVEKEYVAL - remove keys from keyvals_in.</li><li><a href="SimulateModel.html" class="code" title="function [data,studyinfo]=SimulateModel(model,varargin)">SimulateModel</a>	% data=SimulateModel(model,'option',value,...)</li></ul>
+<li><a href="applyModifications.html" class="code" title="function [output,modifications]=applyModifications(model,modifications)">applyModifications</a>	APPLYMODIFICATIONS - Apply modifications to DynaSim specification or model structure</li><li><a href="checkModel.html" class="code" title="function model=checkModel(model)">checkModel</a>	CHECKMODEL - Standardize model structure and auto-populate missing fields</li><li><a href="checkOptions.html" class="code" title="function [parms, params_unspecified ] = checkOptions(options, options_schema, strict)">checkOptions</a>	CHECKOPTIONS - organize key/value pairs in structure with default or user-supplied values according to a schema</li><li><a href="GenerateModel.html" class="code" title="function [model,name_map]=GenerateModel(specification,varargin)">GenerateModel</a>	GENERATEMODEL - Parse DynaSim specification and organize model data in DynaSim model structure</li><li><a href="RemoveKeyval.html" class="code" title="function keyvals_out = RemoveKeyval(keyvals,keys)">RemoveKeyval</a>	REMOVEKEYVAL - remove keys from keyvals_in.</li><li><a href="SimulateModel.html" class="code" title="function [data,studyinfo]=SimulateModel(model,varargin)">SimulateModel</a>	% data=SimulateModel(model,'option',value,...)</li></ul>
 This function is called by:
 <ul style="list-style-image:url(../matlabicon.gif)">
 </ul>
@@ -78,7 +78,7 @@ This function is called by:
 0004 <span class="comment">% one or more populations. It removes all connections between cells and</span>
 0005 <span class="comment">% populations and then runs a series of simulations delivering</span>
 0006 <span class="comment">% hyperpolarizing and depolarizing pulses. It is designed to be used in</span>
-0007 <span class="comment">% conjunction with the analysis function &quot;CalcCellProperties&quot; which accepts</span>
+0007 <span class="comment">% conjunction with the analysis function &quot;calcCellProperties&quot; which accepts</span>
 0008 <span class="comment">% the data array produced by this experiment and returns the</span>
 0009 <span class="comment">% electrophysiological properties characterizing each cell's response in</span>
 0010 <span class="comment">% the population.</span>
@@ -104,7 +104,7 @@ This function is called by:
 0030 <span class="comment">% data=ProbeCellProperties(model,'num_repetitions',2);</span>
 0031 <span class="comment">%</span>
 0032 <span class="comment">% Note: this function is based on the DNSim experiment &quot;cell_pulses&quot;.</span>
-0033 <span class="comment">% See also: CalcCellProperties</span>
+0033 <span class="comment">% See also: calcCellProperties</span>
 0034 
 0035 <span class="comment">% Experiment: input model, produces data sets for all step levels</span>
 0036 <span class="comment">% Analysis: input data sets for all step levels, output one stat structure</span>
@@ -112,7 +112,7 @@ This function is called by:
 0038 <span class="comment">%           population of the model.</span>
 0039 
 0040 <span class="comment">% Check inputs</span>
-0041 options=<a href="CheckOptions.html" class="code" title="function [parms, params_unspecified ] = CheckOptions(options, options_schema, strict)">CheckOptions</a>(varargin,{<span class="keyword">...</span>
+0041 options=<a href="checkOptions.html" class="code" title="function [parms, params_unspecified ] = checkOptions(options, options_schema, strict)">checkOptions</a>(varargin,{<span class="keyword">...</span>
 0042   <span class="string">'target_equation'</span>,<span class="string">'ODE1'</span>,[],<span class="keyword">...</span>
 0043   <span class="string">'amplitudes'</span>,-30:5:180,[],<span class="keyword">...</span><span class="comment"> % pA. typically: 0-500pA (0-.5nA)</span>
 0044   <span class="string">'membrane_area'</span>,1500,[],<span class="keyword">...</span><span class="comment">     % um^2. typically: 1000-2000 um2</span>
@@ -124,7 +124,7 @@ This function is called by:
 0050   <span class="string">'remove_connections_flag'</span>,1,[],<span class="keyword">...</span>
 0051   },false);
 0052 
-0053 model=<a href="CheckModel.html" class="code" title="function model=CheckModel(model)">CheckModel</a>(model);
+0053 model=<a href="checkModel.html" class="code" title="function model=checkModel(model)">checkModel</a>(model);
 0054 
 0055 <span class="comment">% check that amplitude=0 is present (for RMP calculation)</span>
 0056 <span class="keyword">if</span> ~ismember(0,options.amplitudes)
@@ -182,7 +182,7 @@ This function is called by:
 0108       objects,<span class="string">'repetition'</span>,1:options.num_repetitions};  
 0109 
 0110 <span class="comment">% apply modifications to effectively add experimental apparatus to model</span>
-0111 model=<a href="ApplyModifications.html" class="code" title="function [output,modifications]=ApplyModifications(model,modifications)">ApplyModifications</a>(model,modifications);
+0111 model=<a href="applyModifications.html" class="code" title="function [output,modifications]=applyModifications(model,modifications)">applyModifications</a>(model,modifications);
 0112 
 0113 <span class="comment">% execute experimental protocol by varying parameters across simulations</span>
 0114 fprintf(<span class="string">'Running experiment: %s\n'</span>,mfilename);

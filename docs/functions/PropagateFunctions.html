@@ -41,7 +41,7 @@
 <h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
 This function calls:
 <ul style="list-style-image:url(../matlabicon.gif)">
-<li><a href="CheckModel.html" class="code" title="function model=CheckModel(model)">CheckModel</a>	CHECKMODEL - Standardize model structure and auto-populate missing fields</li></ul>
+<li><a href="checkModel.html" class="code" title="function model=checkModel(model)">checkModel</a>	CHECKMODEL - Standardize model structure and auto-populate missing fields</li></ul>
 This function is called by:
 <ul style="list-style-image:url(../matlabicon.gif)">
 <li><a href="SimulateModel.html" class="code" title="function [data,studyinfo]=SimulateModel(model,varargin)">SimulateModel</a>	% data=SimulateModel(model,'option',value,...)</li><li><a href="WriteDynaSimSolver.html" class="code" title="function [outfile,options]=WriteDynaSimSolver(model,varargin)">WriteDynaSimSolver</a>	WRITEDYNASIMSOLVER - write m-file that numerically inteegrates the model</li><li><a href="WriteMatlabSolver.html" class="code" title="function solve_ode_filepath = WriteMatlabSolver(model,varargin)">WriteMatlabSolver</a>	WRITEMATLABSOLVER - write m-file that numerically inteegrates the model</li></ul>
@@ -65,7 +65,7 @@ This function is called by:
 0011 <span class="comment">% See also: SimulateModel, GenerateModel, PropagateNamespaces</span>
 0012 
 0013 <span class="comment">% Check inputs</span>
-0014 model=<a href="CheckModel.html" class="code" title="function model=CheckModel(model)">CheckModel</a>(model);
+0014 model=<a href="checkModel.html" class="code" title="function model=checkModel(model)">checkModel</a>(model);
 0015 <span class="keyword">if</span> ~isstruct(model.functions)
 0016   <span class="comment">% nothing to do</span>
 0017   <span class="keyword">return</span>;
@@ -198,7 +198,7 @@ This function is called by:
 0144       <span class="comment">% prepare found expression with variable names from the target function</span>
 0145       <span class="keyword">if</span> ~isequal(orig_vars,new_vars)
 0146         <span class="keyword">for</span> v=1:length(orig_vars)
-0147           found_expression=dynasim_strrep(found_expression,orig_vars{v},new_vars{v});
+0147           found_expression=dynasimStrrep(found_expression,orig_vars{v},new_vars{v});
 0148         <span class="keyword">end</span>
 0149       <span class="keyword">end</span>
 0150       
@@ -209,7 +209,7 @@ This function is called by:
 0155       newstr=sprintf(<span class="string">'(%s)'</span>,found_expression);
 0156       
 0157       <span class="comment">% update the target function</span>
-0158       expression=dynasim_strrep(expression,oldstr,newstr,<span class="string">'('</span>,<span class="string">')'</span>);
+0158       expression=dynasimStrrep(expression,oldstr,newstr,<span class="string">'('</span>,<span class="string">')'</span>);
 0159     <span class="keyword">end</span>
 0160   <span class="keyword">end</span></pre></div>
 <hr><address>Generated on Fri 07-Apr-2017 20:01:20 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" target="_parent">m2html</a></strong> &copy; 2005</address>

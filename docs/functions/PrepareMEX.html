@@ -34,7 +34,7 @@
 <h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
 This function calls:
 <ul style="list-style-image:url(../matlabicon.gif)">
-<li><a href="CheckOptions.html" class="code" title="function [parms, params_unspecified ] = CheckOptions(options, options_schema, strict)">CheckOptions</a>	CHECKOPTIONS - organize key/value pairs in structure with default or user-supplied values according to a schema</li><li><a href="Options2Keyval.html" class="code" title="function keyval = Options2Keyval(options)">Options2Keyval</a>	OPTIONS2KEYVAL - Convert from options structure to a list of key/value pairs.</li></ul>
+<li><a href="checkOptions.html" class="code" title="function [parms, params_unspecified ] = checkOptions(options, options_schema, strict)">checkOptions</a>	CHECKOPTIONS - organize key/value pairs in structure with default or user-supplied values according to a schema</li><li><a href="Options2Keyval.html" class="code" title="function keyval = Options2Keyval(options)">Options2Keyval</a>	OPTIONS2KEYVAL - Convert from options structure to a list of key/value pairs.</li></ul>
 This function is called by:
 <ul style="list-style-image:url(../matlabicon.gif)">
 <li><a href="GetSolveFile.html" class="code" title="function solve_file = GetSolveFile(model,studyinfo,varargin)">GetSolveFile</a>	GETSOLVEFILE - helper function that creates or retrieves the desired solver file.</li><li><a href="WriteMatlabSolver.html" class="code" title="function solve_ode_filepath = WriteMatlabSolver(model,varargin)">WriteMatlabSolver</a>	WRITEMATLABSOLVER - write m-file that numerically inteegrates the model</li></ul>
@@ -62,7 +62,7 @@ This function is called by:
 0015     keyvals = args;
 0016 <span class="keyword">end</span>
 0017 
-0018 options=<a href="CheckOptions.html" class="code" title="function [parms, params_unspecified ] = CheckOptions(options, options_schema, strict)">CheckOptions</a>(keyvals,{<span class="keyword">...</span>
+0018 options=<a href="checkOptions.html" class="code" title="function [parms, params_unspecified ] = checkOptions(options, options_schema, strict)">checkOptions</a>(keyvals,{<span class="keyword">...</span>
 0019   <span class="string">'verbose_flag'</span>,0,{0,1},<span class="keyword">...</span><span class="comment"> % set verbose to 1 by default</span>
 0020   <span class="string">'mexpath'</span>,[],[],<span class="keyword">...</span><span class="comment"> % Directory to search for pre-compiled solve files (solve*_mex*)</span>
 0021   },false);

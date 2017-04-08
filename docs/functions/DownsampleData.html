@@ -29,23 +29,23 @@
 <div class="fragment"><pre class="comment">DOWNSAMPLEDATA - Downsamples DynaSim data structre data
 
  Usage:
-   data_out = CalcFR(data,'option',value)
+   data_out = calcFR(data,'option',value)
 
  Inputs:
-   - data: DynaSim data structure (see CheckData)
+   - data: DynaSim data structure (see checkData)
    - ds: number of datapoints to downsample
 
  Outputs:
    - data_out: data structure all fields replaced by their average valeus
                (averaged across neurons).
 
- See also: <a href="PlotFR.html" class="code" title="function handles=PlotFR(data,varargin)">PlotFR</a>, <a href="AnalyzeStudy.html" class="code" title="function [results,studyinfo]=AnalyzeStudy(data,func,varargin)">AnalyzeStudy</a>, <a href="SimulateModel.html" class="code" title="function [data,studyinfo]=SimulateModel(model,varargin)">SimulateModel</a>, <a href="CheckData.html" class="code" title="function data=CheckData(data)">CheckData</a>, <a href="SelectVariables.html" class="code" title="function [variables,pop_names]=SelectVariables(labels,var_strings)">SelectVariables</a></pre></div>
+ See also: <a href="PlotFR.html" class="code" title="function handles=PlotFR(data,varargin)">PlotFR</a>, <a href="AnalyzeStudy.html" class="code" title="function [results,studyinfo]=AnalyzeStudy(data,func,varargin)">AnalyzeStudy</a>, <a href="SimulateModel.html" class="code" title="function [data,studyinfo]=SimulateModel(model,varargin)">SimulateModel</a>, <a href="checkData.html" class="code" title="function data=checkData(data)">checkData</a>, <a href="SelectVariables.html" class="code" title="function [variables,pop_names]=SelectVariables(labels,var_strings)">SelectVariables</a></pre></div>
 
 <!-- crossreference -->
 <h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
 This function calls:
 <ul style="list-style-image:url(../matlabicon.gif)">
-<li><a href="CheckData.html" class="code" title="function data=CheckData(data)">CheckData</a>	CHECKDATA - Standardize data structure and auto-populate missing fields</li></ul>
+<li><a href="checkData.html" class="code" title="function data=checkData(data)">checkData</a>	CHECKDATA - Standardize data structure and auto-populate missing fields</li></ul>
 This function is called by:
 <ul style="list-style-image:url(../matlabicon.gif)">
 </ul>
@@ -58,22 +58,22 @@ This function is called by:
 0002 <span class="comment">%DOWNSAMPLEDATA - Downsamples DynaSim data structre data</span>
 0003 <span class="comment">%</span>
 0004 <span class="comment">% Usage:</span>
-0005 <span class="comment">%   data_out = CalcFR(data,'option',value)</span>
+0005 <span class="comment">%   data_out = calcFR(data,'option',value)</span>
 0006 <span class="comment">%</span>
 0007 <span class="comment">% Inputs:</span>
-0008 <span class="comment">%   - data: DynaSim data structure (see CheckData)</span>
+0008 <span class="comment">%   - data: DynaSim data structure (see checkData)</span>
 0009 <span class="comment">%   - ds: number of datapoints to downsample</span>
 0010 <span class="comment">%</span>
 0011 <span class="comment">% Outputs:</span>
 0012 <span class="comment">%   - data_out: data structure all fields replaced by their average valeus</span>
 0013 <span class="comment">%               (averaged across neurons).</span>
 0014 <span class="comment">%</span>
-0015 <span class="comment">% See also: PlotFR, AnalyzeStudy, SimulateModel, CheckData, SelectVariables</span>
+0015 <span class="comment">% See also: PlotFR, AnalyzeStudy, SimulateModel, checkData, SelectVariables</span>
 0016 
 0017 <span class="comment">%% 1.0 Check inputs</span>
 0018 
-0019 data = <a href="CheckData.html" class="code" title="function data=CheckData(data)">CheckData</a>(data);
-0020 <span class="comment">% note: calling CheckData() at beginning enables analysis function to</span>
+0019 data = <a href="checkData.html" class="code" title="function data=checkData(data)">checkData</a>(data);
+0020 <span class="comment">% note: calling checkData() at beginning enables analysis function to</span>
 0021 <span class="comment">% accept data matrix [time x cells] in addition to DynaSim data structure.</span>
 0022 
 0023 <span class="comment">%% do the averaging</span>

@@ -32,7 +32,7 @@
    PlotWaveforms(data,'option',value)
 
  Inputs:
-   - data: DynaSim data structure (see CheckData)
+   - data: DynaSim data structure (see checkData)
    - options:
      'variable': name of field containing data to plot (default: all pops with
                  state variable of variable in data.labels)
@@ -124,13 +124,13 @@
      PlotWaveforms(data,'variable','E1_v');
      PlotWaveforms(data,'variable','*');
 
- See also: <a href="PlotFR.html" class="code" title="function handles=PlotFR(data,varargin)">PlotFR</a>, <a href="CheckData.html" class="code" title="function data=CheckData(data)">CheckData</a></pre></div>
+ See also: <a href="PlotFR.html" class="code" title="function handles=PlotFR(data,varargin)">PlotFR</a>, <a href="checkData.html" class="code" title="function data=checkData(data)">checkData</a></pre></div>
 
 <!-- crossreference -->
 <h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
 This function calls:
 <ul style="list-style-image:url(../matlabicon.gif)">
-<li><a href="CheckData.html" class="code" title="function data=CheckData(data)">CheckData</a>	CHECKDATA - Standardize data structure and auto-populate missing fields</li><li><a href="CheckOptions.html" class="code" title="function [parms, params_unspecified ] = CheckOptions(options, options_schema, strict)">CheckOptions</a>	CHECKOPTIONS - organize key/value pairs in structure with default or user-supplied values according to a schema</li><li><a href="SelectVariables.html" class="code" title="function [variables,pop_names]=SelectVariables(labels,var_strings)">SelectVariables</a>	SELECTVARIABLES - determine what variables to plot</li></ul>
+<li><a href="checkData.html" class="code" title="function data=checkData(data)">checkData</a>	CHECKDATA - Standardize data structure and auto-populate missing fields</li><li><a href="checkOptions.html" class="code" title="function [parms, params_unspecified ] = checkOptions(options, options_schema, strict)">checkOptions</a>	CHECKOPTIONS - organize key/value pairs in structure with default or user-supplied values according to a schema</li><li><a href="SelectVariables.html" class="code" title="function [variables,pop_names]=SelectVariables(labels,var_strings)">SelectVariables</a>	SELECTVARIABLES - determine what variables to plot</li></ul>
 This function is called by:
 <ul style="list-style-image:url(../matlabicon.gif)">
 </ul>
@@ -146,7 +146,7 @@ This function is called by:
 0005 <span class="comment">%   PlotWaveforms(data,'option',value)</span>
 0006 <span class="comment">%</span>
 0007 <span class="comment">% Inputs:</span>
-0008 <span class="comment">%   - data: DynaSim data structure (see CheckData)</span>
+0008 <span class="comment">%   - data: DynaSim data structure (see checkData)</span>
 0009 <span class="comment">%   - options:</span>
 0010 <span class="comment">%     'variable': name of field containing data to plot (default: all pops with</span>
 0011 <span class="comment">%                 state variable of variable in data.labels)</span>
@@ -238,13 +238,13 @@ This function is called by:
 0097 <span class="comment">%     PlotWaveforms(data,'variable','E1_v');</span>
 0098 <span class="comment">%     PlotWaveforms(data,'variable','*');</span>
 0099 <span class="comment">%</span>
-0100 <span class="comment">% See also: PlotFR, CheckData</span>
+0100 <span class="comment">% See also: PlotFR, checkData</span>
 0101 
 0102 <span class="comment">% Check inputs</span>
-0103 data=<a href="CheckData.html" class="code" title="function data=CheckData(data)">CheckData</a>(data);
+0103 data=<a href="checkData.html" class="code" title="function data=checkData(data)">checkData</a>(data);
 0104 fields=fieldnames(data);
 0105 
-0106 options=<a href="CheckOptions.html" class="code" title="function [parms, params_unspecified ] = CheckOptions(options, options_schema, strict)">CheckOptions</a>(varargin,{<span class="keyword">...</span>
+0106 options=<a href="checkOptions.html" class="code" title="function [parms, params_unspecified ] = checkOptions(options, options_schema, strict)">checkOptions</a>(varargin,{<span class="keyword">...</span>
 0107   <span class="string">'time_limits'</span>,[-inf inf],[],<span class="keyword">...</span>
 0108   <span class="string">'variable'</span>,[],[],<span class="keyword">...</span><span class="comment">        </span>
 0109   <span class="string">'max_num_overlaid'</span>,50,[],<span class="keyword">...</span>

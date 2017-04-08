@@ -35,13 +35,13 @@
 
  Output: DynaSim model with fields combined from both models
 
- See also: <a href="CheckModel.html" class="code" title="function model=CheckModel(model)">CheckModel</a>, <a href="GenerateModel.html" class="code" title="function [model,name_map]=GenerateModel(specification,varargin)">GenerateModel</a></pre></div>
+ See also: <a href="checkModel.html" class="code" title="function model=checkModel(model)">checkModel</a>, <a href="GenerateModel.html" class="code" title="function [model,name_map]=GenerateModel(specification,varargin)">GenerateModel</a></pre></div>
 
 <!-- crossreference -->
 <h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
 This function calls:
 <ul style="list-style-image:url(../matlabicon.gif)">
-<li><a href="CheckModel.html" class="code" title="function model=CheckModel(model)">CheckModel</a>	CHECKMODEL - Standardize model structure and auto-populate missing fields</li></ul>
+<li><a href="checkModel.html" class="code" title="function model=checkModel(model)">checkModel</a>	CHECKMODEL - Standardize model structure and auto-populate missing fields</li></ul>
 This function is called by:
 <ul style="list-style-image:url(../matlabicon.gif)">
 <li><a href="GenerateModel.html" class="code" title="function [model,name_map]=GenerateModel(specification,varargin)">GenerateModel</a>	GENERATEMODEL - Parse DynaSim specification and organize model data in DynaSim model structure</li></ul>
@@ -62,11 +62,11 @@ This function is called by:
 0008 <span class="comment">%</span>
 0009 <span class="comment">% Output: DynaSim model with fields combined from both models</span>
 0010 <span class="comment">%</span>
-0011 <span class="comment">% See also: CheckModel, GenerateModel</span>
+0011 <span class="comment">% See also: checkModel, GenerateModel</span>
 0012 
 0013 <span class="comment">% standardize model structures</span>
-0014 model1=<a href="CheckModel.html" class="code" title="function model=CheckModel(model)">CheckModel</a>(model1);
-0015 model2=<a href="CheckModel.html" class="code" title="function model=CheckModel(model)">CheckModel</a>(model2);
+0014 model1=<a href="checkModel.html" class="code" title="function model=checkModel(model)">checkModel</a>(model1);
+0015 model2=<a href="checkModel.html" class="code" title="function model=checkModel(model)">checkModel</a>(model2);
 0016 
 0017 <span class="comment">% combine fields from sub-structures</span>
 0018 model.parameters=<a href="#_sub1" class="code" title="subfunction out=concatenate_structures(a,b)">concatenate_structures</a>(model1.parameters,model2.parameters);
@@ -89,9 +89,9 @@ This function is called by:
 0035 <span class="comment">% ...</span>
 0036 
 0037 <span class="comment">% standardize resulting model</span>
-0038 <span class="comment">% model=CheckModel(model);</span>
-0039   <span class="comment">% note: if this call to CheckModel() is uncommented-out, the changes noted</span>
-0040   <span class="comment">% in CheckModel() should also be made...</span>
+0038 <span class="comment">% model=checkModel(model);</span>
+0039   <span class="comment">% note: if this call to checkModel() is uncommented-out, the changes noted</span>
+0040   <span class="comment">% in checkModel() should also be made...</span>
 0041 
 0042 <span class="comment">% reorder fields according to first input</span>
 0043 model=orderfields(model,model1);

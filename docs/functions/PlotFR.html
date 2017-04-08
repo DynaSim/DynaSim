@@ -32,8 +32,8 @@
    PlotFR(data,'option',value)
 
  Inputs:
-   - data: DynaSim data structure (see CheckData)
-   - options: (same as CalcFR)
+   - data: DynaSim data structure (see checkData)
+   - options: (same as calcFR)
      'variable' : name of field containing data on which to calculate firing
                   rates (default: *_spikes or first variable in data.labels)
      'threshold': scalar threshold value for detecting events (default: 0)
@@ -50,13 +50,13 @@
 
  TODO: add rastergrams
 
- See also: <a href="CalcFR.html" class="code" title="function data = CalcFR(data,varargin)">CalcFR</a>, <a href="SimulateModel.html" class="code" title="function [data,studyinfo]=SimulateModel(model,varargin)">SimulateModel</a>, <a href="CheckData.html" class="code" title="function data=CheckData(data)">CheckData</a></pre></div>
+ See also: <a href="calcFR.html" class="code" title="function data = calcFR(data,varargin)">calcFR</a>, <a href="SimulateModel.html" class="code" title="function [data,studyinfo]=SimulateModel(model,varargin)">SimulateModel</a>, <a href="checkData.html" class="code" title="function data=checkData(data)">checkData</a></pre></div>
 
 <!-- crossreference -->
 <h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
 This function calls:
 <ul style="list-style-image:url(../matlabicon.gif)">
-<li><a href="CalcFR.html" class="code" title="function data = CalcFR(data,varargin)">CalcFR</a>	CALCFR - Calculate firing rage for DynaSim data</li><li><a href="CheckData.html" class="code" title="function data=CheckData(data)">CheckData</a>	CHECKDATA - Standardize data structure and auto-populate missing fields</li></ul>
+<li><a href="calcFR.html" class="code" title="function data = calcFR(data,varargin)">calcFR</a>	CALCFR - Calculate firing rage for DynaSim data</li><li><a href="checkData.html" class="code" title="function data=checkData(data)">checkData</a>	CHECKDATA - Standardize data structure and auto-populate missing fields</li></ul>
 This function is called by:
 <ul style="list-style-image:url(../matlabicon.gif)">
 </ul>
@@ -74,8 +74,8 @@ This function is called by:
 0005 <span class="comment">%   PlotFR(data,'option',value)</span>
 0006 <span class="comment">%</span>
 0007 <span class="comment">% Inputs:</span>
-0008 <span class="comment">%   - data: DynaSim data structure (see CheckData)</span>
-0009 <span class="comment">%   - options: (same as CalcFR)</span>
+0008 <span class="comment">%   - data: DynaSim data structure (see checkData)</span>
+0009 <span class="comment">%   - options: (same as calcFR)</span>
 0010 <span class="comment">%     'variable' : name of field containing data on which to calculate firing</span>
 0011 <span class="comment">%                  rates (default: *_spikes or first variable in data.labels)</span>
 0012 <span class="comment">%     'threshold': scalar threshold value for detecting events (default: 0)</span>
@@ -92,15 +92,15 @@ This function is called by:
 0023 <span class="comment">%</span>
 0024 <span class="comment">% TODO: add rastergrams</span>
 0025 <span class="comment">%</span>
-0026 <span class="comment">% See also: CalcFR, SimulateModel, CheckData</span>
+0026 <span class="comment">% See also: calcFR, SimulateModel, checkData</span>
 0027 
-0028 data=<a href="CheckData.html" class="code" title="function data=CheckData(data)">CheckData</a>(data);
+0028 data=<a href="checkData.html" class="code" title="function data=checkData(data)">checkData</a>(data);
 0029 fields=fieldnames(data);
 0030 handles=[];
 0031 
 0032 <span class="comment">% calc firing rates if not already present in data</span>
 0033 <span class="keyword">if</span> all(cellfun(@isempty,regexp(fields,<span class="string">'.*_FR$'</span>)))
-0034   data=<a href="CalcFR.html" class="code" title="function data = CalcFR(data,varargin)">CalcFR</a>(data,varargin{:}); <span class="comment">% equivalent: data=AnalyzeStudy(data,@CalcFR,varargin{:});</span>
+0034   data=<a href="calcFR.html" class="code" title="function data = calcFR(data,varargin)">calcFR</a>(data,varargin{:}); <span class="comment">% equivalent: data=AnalyzeStudy(data,@calcFR,varargin{:});</span>
 0035   fields=fieldnames(data);
 0036 <span class="keyword">end</span>
 0037 <span class="comment">% get list of fields with firing rate data</span>

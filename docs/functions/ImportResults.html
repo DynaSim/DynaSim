@@ -49,7 +49,7 @@
 <h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
 This function calls:
 <ul style="list-style-image:url(../matlabicon.gif)">
-<li><a href="CheckStudyinfo.html" class="code" title="function studyinfo=CheckStudyinfo(studyinfo,varargin)">CheckStudyinfo</a>	CHECKSTUDYINFO - Standardize studyinfo structure and auto-populate missing fields</li></ul>
+<li><a href="checkStudyinfo.html" class="code" title="function studyinfo=checkStudyinfo(studyinfo,varargin)">checkStudyinfo</a>	CHECKSTUDYINFO - Standardize studyinfo structure and auto-populate missing fields</li></ul>
 This function is called by:
 <ul style="list-style-image:url(../matlabicon.gif)">
 </ul>
@@ -86,7 +86,7 @@ This function is called by:
 0026 
 0027 <span class="keyword">if</span> isstruct(studyinfo) &amp;&amp; isfield(studyinfo,<span class="string">'study_dir'</span>)
 0028   <span class="comment">% retrieve most up-to-date studyinfo structure from studyinfo.mat file</span>
-0029   studyinfo=<a href="CheckStudyinfo.html" class="code" title="function studyinfo=CheckStudyinfo(studyinfo,varargin)">CheckStudyinfo</a>(studyinfo.study_dir);
+0029   studyinfo=<a href="checkStudyinfo.html" class="code" title="function studyinfo=checkStudyinfo(studyinfo,varargin)">checkStudyinfo</a>(studyinfo.study_dir);
 0030   <span class="keyword">if</span> exist(<span class="string">'study_dir'</span>,<span class="string">'var'</span>)
 0031     studyinfo.study_dir=study_dir;
 0032   <span class="keyword">end</span>

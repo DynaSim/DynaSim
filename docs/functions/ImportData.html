@@ -36,7 +36,7 @@
    - data_file data file name in accepted format (csv, mat, ...), or also
      accepted: list of data files, studyinfo structure, study_dir, or studyinfo
      file
-   - studyinfo: DynaSim studyinfo structure (see CheckStudyinfo)
+   - studyinfo: DynaSim studyinfo structure (see checkStudyinfo)
    - options:
      'verbose_flag': {0,1} (default: 1)
      'process_id'  : process identifier for loading studyinfo if necessary
@@ -86,10 +86,10 @@
 <h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
 This function calls:
 <ul style="list-style-image:url(../matlabicon.gif)">
-<li><a href="CheckOptions.html" class="code" title="function [parms, params_unspecified ] = CheckOptions(options, options_schema, strict)">CheckOptions</a>	CHECKOPTIONS - organize key/value pairs in structure with default or user-supplied values according to a schema</li><li><a href="CheckStudyinfo.html" class="code" title="function studyinfo=CheckStudyinfo(studyinfo,varargin)">CheckStudyinfo</a>	CHECKSTUDYINFO - Standardize studyinfo structure and auto-populate missing fields</li><li><a href="ImportCSV.html" class="code" title="function data=ImportCSV(file)">ImportCSV</a>	IMPORTCSV - load CSV data into DynaSim formatted data structure.</li><li><a href="ImportData.html" class="code" title="function [data,studyinfo] = ImportData(file,varargin)">ImportData</a>	IMPORTDATA - load data into DynaSim formatted data structure.</li><li><a href="Options2Keyval.html" class="code" title="function keyval = Options2Keyval(options)">Options2Keyval</a>	OPTIONS2KEYVAL - Convert from options structure to a list of key/value pairs.</li><li><a href="SelectData.html" class="code" title="function data=SelectData(data,varargin)">SelectData</a>	SELECTDATA -  select subset of data</li></ul>
+<li><a href="checkOptions.html" class="code" title="function [parms, params_unspecified ] = checkOptions(options, options_schema, strict)">checkOptions</a>	CHECKOPTIONS - organize key/value pairs in structure with default or user-supplied values according to a schema</li><li><a href="checkStudyinfo.html" class="code" title="function studyinfo=checkStudyinfo(studyinfo,varargin)">checkStudyinfo</a>	CHECKSTUDYINFO - Standardize studyinfo structure and auto-populate missing fields</li><li><a href="ImportCSV.html" class="code" title="function data=ImportCSV(file)">ImportCSV</a>	IMPORTCSV - load CSV data into DynaSim formatted data structure.</li><li><a href="ImportData.html" class="code" title="function [data,studyinfo] = ImportData(file,varargin)">ImportData</a>	IMPORTDATA - load data into DynaSim formatted data structure.</li><li><a href="Options2Keyval.html" class="code" title="function keyval = Options2Keyval(options)">Options2Keyval</a>	OPTIONS2KEYVAL - Convert from options structure to a list of key/value pairs.</li><li><a href="SelectData.html" class="code" title="function data=SelectData(data,varargin)">SelectData</a>	SELECTDATA -  select subset of data</li></ul>
 This function is called by:
 <ul style="list-style-image:url(../matlabicon.gif)">
-<li><a href="AnalyzeData.html" class="code" title="function result=AnalyzeData(data,func,varargin)">AnalyzeData</a>	ANALYZEDATA - Apply an analysis function to DynaSim data, optionally saving data</li><li><a href="AnalyzeStudy.html" class="code" title="function [results,studyinfo]=AnalyzeStudy(data,func,varargin)">AnalyzeStudy</a>	ANALYZESTUDY - Apply an analysis function to DynaSim data, optionally saving data</li><li><a href="ImportData.html" class="code" title="function [data,studyinfo] = ImportData(file,varargin)">ImportData</a>	IMPORTDATA - load data into DynaSim formatted data structure.</li><li><a href="SimulateModel.html" class="code" title="function [data,studyinfo]=SimulateModel(model,varargin)">SimulateModel</a>	% data=SimulateModel(model,'option',value,...)</li></ul>
+<li><a href="analyzeData.html" class="code" title="function result=analyzeData(data,func,varargin)">analyzeData</a>	ANALYZEDATA - Apply an analysis function to DynaSim data, optionally saving data</li><li><a href="AnalyzeStudy.html" class="code" title="function [results,studyinfo]=AnalyzeStudy(data,func,varargin)">AnalyzeStudy</a>	ANALYZESTUDY - Apply an analysis function to DynaSim data, optionally saving data</li><li><a href="ImportData.html" class="code" title="function [data,studyinfo] = ImportData(file,varargin)">ImportData</a>	IMPORTDATA - load data into DynaSim formatted data structure.</li><li><a href="SimulateModel.html" class="code" title="function [data,studyinfo]=SimulateModel(model,varargin)">SimulateModel</a>	% data=SimulateModel(model,'option',value,...)</li></ul>
 <!-- crossreference -->
 
 
@@ -106,7 +106,7 @@ This function is called by:
 0009 <span class="comment">%   - data_file data file name in accepted format (csv, mat, ...), or also</span>
 0010 <span class="comment">%     accepted: list of data files, studyinfo structure, study_dir, or studyinfo</span>
 0011 <span class="comment">%     file</span>
-0012 <span class="comment">%   - studyinfo: DynaSim studyinfo structure (see CheckStudyinfo)</span>
+0012 <span class="comment">%   - studyinfo: DynaSim studyinfo structure (see checkStudyinfo)</span>
 0013 <span class="comment">%   - options:</span>
 0014 <span class="comment">%     'verbose_flag': {0,1} (default: 1)</span>
 0015 <span class="comment">%     'process_id'  : process identifier for loading studyinfo if necessary</span>
@@ -152,11 +152,11 @@ This function is called by:
 0055 <span class="comment">%   'I-&gt;E','tauI',[15 25]; 'I','mechanism_list','+iM'}</span>
 0056 <span class="comment">% - achieve by calling function SelectData() at end of this function.</span>
 0057 
-0058 <span class="comment">% See also: SimulateModel, ExportData, CheckData, SelectData</span>
+0058 <span class="comment">% See also: SimulateModel, ExportData, checkData, SelectData</span>
 0059 
 0060 
 0061 <span class="comment">% Check inputs</span>
-0062 options=<a href="CheckOptions.html" class="code" title="function [parms, params_unspecified ] = CheckOptions(options, options_schema, strict)">CheckOptions</a>(varargin,{<span class="keyword">...</span>
+0062 options=<a href="checkOptions.html" class="code" title="function [parms, params_unspecified ] = checkOptions(options, options_schema, strict)">checkOptions</a>(varargin,{<span class="keyword">...</span>
 0063   <span class="string">'verbose_flag'</span>,1,{0,1},<span class="keyword">...</span>
 0064   <span class="string">'process_id'</span>,[],[],<span class="keyword">...</span><span class="comment"> % process identifier for loading studyinfo if necessary</span>
 0065   <span class="string">'time_limits'</span>,[],[],<span class="keyword">...</span>
@@ -178,7 +178,7 @@ This function is called by:
 0081 <span class="keyword">if</span> isstruct(file) &amp;&amp; isfield(file,<span class="string">'study_dir'</span>)
 0082   <span class="comment">% &quot;file&quot; is a studyinfo structure.</span>
 0083   <span class="comment">% retrieve most up-to-date studyinfo structure from studyinfo.mat file</span>
-0084   studyinfo = <a href="CheckStudyinfo.html" class="code" title="function studyinfo=CheckStudyinfo(studyinfo,varargin)">CheckStudyinfo</a>(file.study_dir,<span class="string">'process_id'</span>,options.process_id);
+0084   studyinfo = <a href="checkStudyinfo.html" class="code" title="function studyinfo=checkStudyinfo(studyinfo,varargin)">checkStudyinfo</a>(file.study_dir,<span class="string">'process_id'</span>,options.process_id);
 0085   
 0086   <span class="comment">% compare simIDs to sim_id</span>
 0087   <span class="keyword">if</span> ~isempty(options.simIDs)

@@ -41,7 +41,7 @@
    - user-supplied parameter values: ('key',value): name (key) of parameters to
                                      be set and associated user-supplied values
  Outputs:
-   - model: DynaSim model structure (see CheckModel for details)
+   - model: DynaSim model structure (see checkModel for details)
    - name_map: useful for namespace-specific substitutions across multiple
      sub-models, see description in GenerateModel for more information {name,
      namespace_name, namespace, type}
@@ -75,7 +75,7 @@ This function calls:
 <li><a href="ClassifyEquation.html" class="code" title="function classes=ClassifyEquation(string,delimiter)">ClassifyEquation</a>	CLASSIFYEQUATION - use regular expressions to classify model expressions in STRING</li><li><a href="LocateModelFiles.html" class="code" title="function [paths,files]=LocateModelFiles(input)">LocateModelFiles</a>	LOCATEMODELFILES - locate mechanism files associated with DynaSim specifications.</li></ul>
 This function is called by:
 <ul style="list-style-image:url(../matlabicon.gif)">
-<li><a href="CheckSpecification.html" class="code" title="function spec=CheckSpecification(specification)">CheckSpecification</a>	CHECKSPECIFICATION - standardize specification structure and auto-populate missing fields</li><li><a href="ImportModel.html" class="code" title="function [model,map] = ImportModel(source,varargin)">ImportModel</a>	IMPORTMODEL - import model from raw equations, other program source, etc.</li></ul>
+<li><a href="checkSpecification.html" class="code" title="function spec=checkSpecification(specification)">checkSpecification</a>	CHECKSPECIFICATION - standardize specification structure and auto-populate missing fields</li><li><a href="ImportModel.html" class="code" title="function [model,map] = ImportModel(source,varargin)">ImportModel</a>	IMPORTMODEL - import model from raw equations, other program source, etc.</li></ul>
 <!-- crossreference -->
 
 <h2><a name="_subfunctions"></a>SUBFUNCTIONS <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
@@ -99,7 +99,7 @@ This function is called by:
 0014 <span class="comment">%   - user-supplied parameter values: ('key',value): name (key) of parameters to</span>
 0015 <span class="comment">%                                     be set and associated user-supplied values</span>
 0016 <span class="comment">% Outputs:</span>
-0017 <span class="comment">%   - model: DynaSim model structure (see CheckModel for details)</span>
+0017 <span class="comment">%   - model: DynaSim model structure (see checkModel for details)</span>
 0018 <span class="comment">%   - name_map: useful for namespace-specific substitutions across multiple</span>
 0019 <span class="comment">%     sub-models, see description in GenerateModel for more information {name,</span>
 0020 <span class="comment">%     namespace_name, namespace, type}</span>

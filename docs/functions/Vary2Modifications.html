@@ -30,7 +30,7 @@
 
  The returned set of modifications has one element per point in search space;
  each element can be passed along with DynaSim model or specification to
- ApplyModifications to produce the modified object.
+ applyModifications to produce the modified object.
 
  Usage:
    modifications_set=Vary2Modifications(vary)
@@ -130,7 +130,7 @@
    modifications_set = Vary2Modifications(vary); 
    modifications_set{:}
 
- See also: <a href="ApplyModifications.html" class="code" title="function [output,modifications]=ApplyModifications(model,modifications)">ApplyModifications</a>, <a href="SimulateModel.html" class="code" title="function [data,studyinfo]=SimulateModel(model,varargin)">SimulateModel</a>, <a href="GenerateModel.html" class="code" title="function [model,name_map]=GenerateModel(specification,varargin)">GenerateModel</a></pre></div>
+ See also: <a href="applyModifications.html" class="code" title="function [output,modifications]=applyModifications(model,modifications)">applyModifications</a>, <a href="SimulateModel.html" class="code" title="function [data,studyinfo]=SimulateModel(model,varargin)">SimulateModel</a>, <a href="GenerateModel.html" class="code" title="function [model,name_map]=GenerateModel(specification,varargin)">GenerateModel</a></pre></div>
 
 <!-- crossreference -->
 <h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
@@ -152,7 +152,7 @@ This function is called by:
 0003 <span class="comment">%</span>
 0004 <span class="comment">% The returned set of modifications has one element per point in search space;</span>
 0005 <span class="comment">% each element can be passed along with DynaSim model or specification to</span>
-0006 <span class="comment">% ApplyModifications to produce the modified object.</span>
+0006 <span class="comment">% applyModifications to produce the modified object.</span>
 0007 <span class="comment">%</span>
 0008 <span class="comment">% Usage:</span>
 0009 <span class="comment">%   modifications_set=Vary2Modifications(vary)</span>
@@ -252,7 +252,7 @@ This function is called by:
 0103 <span class="comment">%   modifications_set = Vary2Modifications(vary);</span>
 0104 <span class="comment">%   modifications_set{:}</span>
 0105 <span class="comment">%</span>
-0106 <span class="comment">% See also: ApplyModifications, SimulateModel, GenerateModel</span>
+0106 <span class="comment">% See also: applyModifications, SimulateModel, GenerateModel</span>
 0107 
 0108 <span class="comment">% check inputs</span>
 0109 <span class="keyword">if</span> iscell(vary) &amp;&amp; iscell(vary{1})

@@ -35,7 +35,7 @@
    handles=PlotData(data,'option',value)
 
  Inputs:
-   - data: DynaSim data structure (see CheckData)
+   - data: DynaSim data structure (see checkData)
    - options:
      'plot_type'       : what to plot {'waveform' (default),'rastergram','rates','power'}
      'variable'        : name of field containing data to plot (default: all
@@ -49,8 +49,8 @@
      'lock_gca'        : Plots within currently active axis (gca); doesn't
                          open new figures or subplots.
      - NOTE: analysis options are available depending on plot_type
-       - see see CalcFR options for plot_type 'rastergram' or 'rates'
-       - see CalcPower options for plot_type 'power'
+       - see see calcFR options for plot_type 'rastergram' or 'rates'
+       - see calcPower options for plot_type 'power'
 
  Outputs:
    - handles: graphic handles to figures
@@ -171,13 +171,13 @@
        PlotData(data,'variable','E1_v');
        PlotData(data,'variable','*');
 
- See also: <a href="CalcFR.html" class="code" title="function data = CalcFR(data,varargin)">CalcFR</a>, <a href="CalcPower.html" class="code" title="function data = CalcPower(data,varargin)">CalcPower</a>, <a href="PlotWaveforms.html" class="code" title="function PlotWaveforms(data,varargin)">PlotWaveforms</a>, <a href="CheckData.html" class="code" title="function data=CheckData(data)">CheckData</a></pre></div>
+ See also: <a href="calcFR.html" class="code" title="function data = calcFR(data,varargin)">calcFR</a>, <a href="calcPower.html" class="code" title="function data = calcPower(data,varargin)">calcPower</a>, <a href="PlotWaveforms.html" class="code" title="function PlotWaveforms(data,varargin)">PlotWaveforms</a>, <a href="checkData.html" class="code" title="function data=checkData(data)">checkData</a></pre></div>
 
 <!-- crossreference -->
 <h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
 This function calls:
 <ul style="list-style-image:url(../matlabicon.gif)">
-<li><a href="CalcFR.html" class="code" title="function data = CalcFR(data,varargin)">CalcFR</a>	CALCFR - Calculate firing rage for DynaSim data</li><li><a href="CalcPower.html" class="code" title="function data = CalcPower(data,varargin)">CalcPower</a>	CALCPOWER - Compute spectral analysis of DynaSim data</li><li><a href="CheckCovary.html" class="code" title="function [effective_vary_lengths, linked_indices] = CheckCovary(vary_lengths, vary_params)">CheckCovary</a>	CHECKCOVARY - TODO I assume this checks if any varied parameters are covaried?</li><li><a href="CheckData.html" class="code" title="function data=CheckData(data)">CheckData</a>	CHECKDATA - Standardize data structure and auto-populate missing fields</li><li><a href="CheckOptions.html" class="code" title="function [parms, params_unspecified ] = CheckOptions(options, options_schema, strict)">CheckOptions</a>	CHECKOPTIONS - organize key/value pairs in structure with default or user-supplied values according to a schema</li><li><a href="PlotData.html" class="code" title="function handles = PlotData(data,varargin)">PlotData</a>	PLOTDATA - plot data in various ways depending on what data was provided and what options are defined.</li><li><a href="SelectVariables.html" class="code" title="function [variables,pop_names]=SelectVariables(labels,var_strings)">SelectVariables</a>	SELECTVARIABLES - determine what variables to plot</li></ul>
+<li><a href="calcFR.html" class="code" title="function data = calcFR(data,varargin)">calcFR</a>	CALCFR - Calculate firing rage for DynaSim data</li><li><a href="calcPower.html" class="code" title="function data = calcPower(data,varargin)">calcPower</a>	CALCPOWER - Compute spectral analysis of DynaSim data</li><li><a href="checkCovary.html" class="code" title="function [effective_vary_lengths, linked_indices] = checkCovary(vary_lengths, vary_params)">checkCovary</a>	CHECKCOVARY - TODO I assume this checks if any varied parameters are covaried?</li><li><a href="checkData.html" class="code" title="function data=checkData(data)">checkData</a>	CHECKDATA - Standardize data structure and auto-populate missing fields</li><li><a href="checkOptions.html" class="code" title="function [parms, params_unspecified ] = checkOptions(options, options_schema, strict)">checkOptions</a>	CHECKOPTIONS - organize key/value pairs in structure with default or user-supplied values according to a schema</li><li><a href="PlotData.html" class="code" title="function handles = PlotData(data,varargin)">PlotData</a>	PLOTDATA - plot data in various ways depending on what data was provided and what options are defined.</li><li><a href="SelectVariables.html" class="code" title="function [variables,pop_names]=SelectVariables(labels,var_strings)">SelectVariables</a>	SELECTVARIABLES - determine what variables to plot</li></ul>
 This function is called by:
 <ul style="list-style-image:url(../matlabicon.gif)">
 <li><a href="PlotData.html" class="code" title="function handles = PlotData(data,varargin)">PlotData</a>	PLOTDATA - plot data in various ways depending on what data was provided and what options are defined.</li></ul>
@@ -196,7 +196,7 @@ This function is called by:
 0008 <span class="comment">%   handles=PlotData(data,'option',value)</span>
 0009 <span class="comment">%</span>
 0010 <span class="comment">% Inputs:</span>
-0011 <span class="comment">%   - data: DynaSim data structure (see CheckData)</span>
+0011 <span class="comment">%   - data: DynaSim data structure (see checkData)</span>
 0012 <span class="comment">%   - options:</span>
 0013 <span class="comment">%     'plot_type'       : what to plot {'waveform' (default),'rastergram','rates','power'}</span>
 0014 <span class="comment">%     'variable'        : name of field containing data to plot (default: all</span>
@@ -210,8 +210,8 @@ This function is called by:
 0022 <span class="comment">%     'lock_gca'        : Plots within currently active axis (gca); doesn't</span>
 0023 <span class="comment">%                         open new figures or subplots.</span>
 0024 <span class="comment">%     - NOTE: analysis options are available depending on plot_type</span>
-0025 <span class="comment">%       - see see CalcFR options for plot_type 'rastergram' or 'rates'</span>
-0026 <span class="comment">%       - see CalcPower options for plot_type 'power'</span>
+0025 <span class="comment">%       - see see calcFR options for plot_type 'rastergram' or 'rates'</span>
+0026 <span class="comment">%       - see calcPower options for plot_type 'power'</span>
 0027 <span class="comment">%</span>
 0028 <span class="comment">% Outputs:</span>
 0029 <span class="comment">%   - handles: graphic handles to figures</span>
@@ -332,11 +332,11 @@ This function is called by:
 0144 <span class="comment">%       PlotData(data,'variable','E1_v');</span>
 0145 <span class="comment">%       PlotData(data,'variable','*');</span>
 0146 <span class="comment">%</span>
-0147 <span class="comment">% See also: CalcFR, CalcPower, PlotWaveforms, CheckData</span>
+0147 <span class="comment">% See also: calcFR, calcPower, PlotWaveforms, checkData</span>
 0148 
 0149 <span class="comment">% Check inputs</span>
-0150 data=<a href="CheckData.html" class="code" title="function data=CheckData(data)">CheckData</a>(data);
-0151   <span class="comment">% note: calling CheckData() at beginning enables analysis/plotting functions to</span>
+0150 data=<a href="checkData.html" class="code" title="function data=checkData(data)">checkData</a>(data);
+0151   <span class="comment">% note: calling checkData() at beginning enables analysis/plotting functions to</span>
 0152   <span class="comment">% accept data matrix [time x cells] in addition to DynaSim data structure.</span>
 0153 
 0154 fields=fieldnames(data);
@@ -363,7 +363,7 @@ This function is called by:
 0175         
 0176     <span class="keyword">end</span>
 0177     
-0178     [effective_vary_lengths, ~] = <a href="CheckCovary.html" class="code" title="function [effective_vary_lengths, linked_indices] = CheckCovary(vary_lengths, vary_params)">CheckCovary</a>(vary_lengths, vary_params);
+0178     [effective_vary_lengths, ~] = <a href="checkCovary.html" class="code" title="function [effective_vary_lengths, linked_indices] = checkCovary(vary_lengths, vary_params)">checkCovary</a>(vary_lengths, vary_params);
 0179     
 0180     dimensions_varied = sum(effective_vary_lengths &gt; 1);
 0181     
@@ -413,7 +413,7 @@ This function is called by:
 0225     
 0226 <span class="keyword">end</span>
 0227 
-0228 options=<a href="CheckOptions.html" class="code" title="function [parms, params_unspecified ] = CheckOptions(options, options_schema, strict)">CheckOptions</a>(varargin,{<span class="keyword">...</span>
+0228 options=<a href="checkOptions.html" class="code" title="function [parms, params_unspecified ] = checkOptions(options, options_schema, strict)">checkOptions</a>(varargin,{<span class="keyword">...</span>
 0229   <span class="string">'time_limits'</span>,[-inf inf],[],<span class="keyword">...</span>
 0230   <span class="string">'variable'</span>,[],[],<span class="keyword">...</span>
 0231   <span class="string">'max_num_overlaid'</span>,50,[],<span class="keyword">...</span>
@@ -428,7 +428,7 @@ This function is called by:
 0240   <span class="string">'yscale'</span>,<span class="string">'linear'</span>,{<span class="string">'linear'</span>,<span class="string">'log'</span>,<span class="string">'log10'</span>,<span class="string">'log2'</span>},<span class="keyword">...</span>
 0241   <span class="string">'visible'</span>,<span class="string">'on'</span>,{<span class="string">'on'</span>,<span class="string">'off'</span>},<span class="keyword">...</span>
 0242   },false);
-0243 data=<a href="CheckData.html" class="code" title="function data=CheckData(data)">CheckData</a>(data);
+0243 data=<a href="checkData.html" class="code" title="function data=checkData(data)">checkData</a>(data);
 0244 handles=[];
 0245 
 0246 lock_gca = options.lock_gca;
@@ -480,7 +480,7 @@ This function is called by:
 0292     xlab=<span class="string">'time (ms)'</span>; <span class="comment">% x-axis label</span>
 0293   <span class="keyword">case</span> <span class="string">'power'</span>      <span class="comment">% plot VARIABLE_Power_SUA.Pxx</span>
 0294     <span class="keyword">if</span> any(cellfun(@isempty,regexp(var_fields,<span class="string">'.*_Power_SUA$'</span>)))
-0295       data=<a href="CalcPower.html" class="code" title="function data = CalcPower(data,varargin)">CalcPower</a>(data,varargin{:});
+0295       data=<a href="calcPower.html" class="code" title="function data = calcPower(data,varargin)">calcPower</a>(data,varargin{:});
 0296     <span class="keyword">end</span>
 0297     xdata=data(1).([var_fields{1} <span class="string">'_Power_SUA'</span>]).frequency;
 0298     xlab=<span class="string">'frequency (Hz)'</span>; <span class="comment">% x-axis label</span>
@@ -490,13 +490,13 @@ This function is called by:
 0302     <span class="keyword">end</span>
 0303   <span class="keyword">case</span> {<span class="string">'rastergram'</span>,<span class="string">'raster'</span>} <span class="comment">% raster VARIABLE_spike_times</span>
 0304     <span class="keyword">if</span> any(cellfun(@isempty,regexp(var_fields,<span class="string">'.*_spike_times$'</span>)))
-0305       data=<a href="CalcFR.html" class="code" title="function data = CalcFR(data,varargin)">CalcFR</a>(data,varargin{:});
+0305       data=<a href="calcFR.html" class="code" title="function data = calcFR(data,varargin)">calcFR</a>(data,varargin{:});
 0306     <span class="keyword">end</span>
 0307     xdata=time;
 0308     xlab=<span class="string">'time (ms)'</span>; <span class="comment">% x-axis label</span>
 0309   <span class="keyword">case</span> <span class="string">'rates'</span>      <span class="comment">% plot VARIABLE_FR</span>
 0310     <span class="keyword">if</span> any(cellfun(@isempty,regexp(var_fields,<span class="string">'.*_FR$'</span>)))
-0311       data=<a href="CalcFR.html" class="code" title="function data = CalcFR(data,varargin)">CalcFR</a>(data,varargin{:});
+0311       data=<a href="calcFR.html" class="code" title="function data = calcFR(data,varargin)">calcFR</a>(data,varargin{:});
 0312     <span class="keyword">end</span>
 0313     xdata=data.time_FR;
 0314     xlab=<span class="string">'time (ms, bins)'</span>; <span class="comment">% x-axis label</span>

@@ -33,19 +33,19 @@
 
  Inputs:
    - specification: one of:
-     - DynaSim specification structure (see below and CheckSpecification for more details)
+     - DynaSim specification structure (see below and checkSpecification for more details)
      - string with name of MAT-file containing DynaSim specification structure
      - string with equations
      - string with name of file containing equations (.eqns)
        note: .eqns files can also be converted into model structure using LoadModel()
    - options (with defaults): 'option1',value1,'option2',value2,...
      'modifications'  : specify modifications to apply to specification
-                        before generating the model, see ApplyModifications
+                        before generating the model, see applyModifications
                         for more details (default?: []).
      'open_link_flag' : whether to leave linker identifiers in place (default: 0)
 
  Outputs:
-   - model: DynaSim model structure (see CheckModel for more details):
+   - model: DynaSim model structure (see checkModel for more details):
      .parameters      : substructure with model parameters
      .fixed_variables : substructure with fixed variable definitions
      .functions       : substructure with function definitions
@@ -57,17 +57,17 @@
                              each state variable
      .conditionals(i) : structure array with each element indicating
                              conditional actions specified in subfields
-                             &quot;condition&quot;,&quot;action&quot;,&quot;else&quot; (see NOTE 1 in CheckModel)
+                             &quot;condition&quot;,&quot;action&quot;,&quot;else&quot; (see NOTE 1 in checkModel)
      .linkers(i)      : structure array with each element indicating
                              an &quot;expression&quot; that should be inserted
                              (according to &quot;operation&quot;) into any equations
-                             where the &quot;target&quot; appears. (see NOTE 2 in CheckModel)
+                             where the &quot;target&quot; appears. (see NOTE 2 in checkModel)
        .target    : string giving the target where expression should be inserted
        .expression: string giving the expression to insert
        .operation : string giving the operation to use to insert expression
      .comments{i}     : cell array of comments found in model files
      .specification   : specification used to generate the model
-     .namespaces      : (see NOTE 3 in CheckModel)
+     .namespaces      : (see NOTE 3 in checkModel)
    - name_map: cell matrix mapping parameter, variable, and function names
        between the user-created specification (population equations and mechanism
        files) and the full model with automatically generated namespaces. It
@@ -76,13 +76,13 @@
        'functions', or 'monitors') indicating the category to which the named
        element belongs.
 
- - DynaSim specification structure (see CheckSpecification for more details)
+ - DynaSim specification structure (see checkSpecification for more details)
    .populations(i) (required): contains info for defining independent population models
        .name (default: 'pop1')      : name of population
        .size (default: 1)           : number of elements in population (i.e., # cells)
-       .equations (required)        : string listing equations (see NOTE 1 in CheckSpecification)
+       .equations (required)        : string listing equations (see NOTE 1 in checkSpecification)
        .mechanism_list (default: []): cell array listing mechanisms (see NOTE 2
-                                      in CheckSpecification)
+                                      in checkSpecification)
        .parameters (default: [])    : parameters to assign across all equations in
          the population. provide as cell array list of key/value pairs
          {'param1',value1,'param2',value2,...}
@@ -138,16 +138,16 @@
      and &quot;57&quot; is the Na+ current at http://infinitebrain.org/models/57.
      note: currently not supported on *most* machines...
 
- See also: <a href="CheckSpecification.html" class="code" title="function spec=CheckSpecification(specification)">CheckSpecification</a>, <a href="CheckModel.html" class="code" title="function model=CheckModel(model)">CheckModel</a>, <a href="ParseModelEquations.html" class="code" title="function [model,name_map] = ParseModelEquations(text,varargin)">ParseModelEquations</a>, <a href="SimulateModel.html" class="code" title="function [data,studyinfo]=SimulateModel(model,varargin)">SimulateModel</a></pre></div>
+ See also: <a href="checkSpecification.html" class="code" title="function spec=checkSpecification(specification)">checkSpecification</a>, <a href="checkModel.html" class="code" title="function model=checkModel(model)">checkModel</a>, <a href="ParseModelEquations.html" class="code" title="function [model,name_map] = ParseModelEquations(text,varargin)">ParseModelEquations</a>, <a href="SimulateModel.html" class="code" title="function [data,studyinfo]=SimulateModel(model,varargin)">SimulateModel</a></pre></div>
 
 <!-- crossreference -->
 <h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
 This function calls:
 <ul style="list-style-image:url(../matlabicon.gif)">
-<li><a href="ApplyModifications.html" class="code" title="function [output,modifications]=ApplyModifications(model,modifications)">ApplyModifications</a>	APPLYMODIFICATIONS - Apply modifications to DynaSim specification or model structure</li><li><a href="CheckModel.html" class="code" title="function model=CheckModel(model)">CheckModel</a>	CHECKMODEL - Standardize model structure and auto-populate missing fields</li><li><a href="CheckOptions.html" class="code" title="function [parms, params_unspecified ] = CheckOptions(options, options_schema, strict)">CheckOptions</a>	CHECKOPTIONS - organize key/value pairs in structure with default or user-supplied values according to a schema</li><li><a href="CheckSpecification.html" class="code" title="function spec=CheckSpecification(specification)">CheckSpecification</a>	CHECKSPECIFICATION - standardize specification structure and auto-populate missing fields</li><li><a href="CombineModels.html" class="code" title="function model=CombineModels(model1,model2)">CombineModels</a>	COMBINEMODELS - combine subfields in two DynaSim model structures</li><li><a href="ImportModel.html" class="code" title="function [model,map] = ImportModel(source,varargin)">ImportModel</a>	IMPORTMODEL - import model from raw equations, other program source, etc.</li><li><a href="PropagateNamespaces.html" class="code" title="function model = PropagateNamespaces(model,map)">PropagateNamespaces</a>	PROPAGATENAMESPACES - namespace-establishing namespace substitutions.</li></ul>
+<li><a href="applyModifications.html" class="code" title="function [output,modifications]=applyModifications(model,modifications)">applyModifications</a>	APPLYMODIFICATIONS - Apply modifications to DynaSim specification or model structure</li><li><a href="checkModel.html" class="code" title="function model=checkModel(model)">checkModel</a>	CHECKMODEL - Standardize model structure and auto-populate missing fields</li><li><a href="checkOptions.html" class="code" title="function [parms, params_unspecified ] = checkOptions(options, options_schema, strict)">checkOptions</a>	CHECKOPTIONS - organize key/value pairs in structure with default or user-supplied values according to a schema</li><li><a href="checkSpecification.html" class="code" title="function spec=checkSpecification(specification)">checkSpecification</a>	CHECKSPECIFICATION - standardize specification structure and auto-populate missing fields</li><li><a href="CombineModels.html" class="code" title="function model=CombineModels(model1,model2)">CombineModels</a>	COMBINEMODELS - combine subfields in two DynaSim model structures</li><li><a href="ImportModel.html" class="code" title="function [model,map] = ImportModel(source,varargin)">ImportModel</a>	IMPORTMODEL - import model from raw equations, other program source, etc.</li><li><a href="PropagateNamespaces.html" class="code" title="function model = PropagateNamespaces(model,map)">PropagateNamespaces</a>	PROPAGATENAMESPACES - namespace-establishing namespace substitutions.</li></ul>
 This function is called by:
 <ul style="list-style-image:url(../matlabicon.gif)">
-<li><a href="ApplyModifications.html" class="code" title="function [output,modifications]=ApplyModifications(model,modifications)">ApplyModifications</a>	APPLYMODIFICATIONS - Apply modifications to DynaSim specification or model structure</li><li><a href="CheckModel.html" class="code" title="function model=CheckModel(model)">CheckModel</a>	CHECKMODEL - Standardize model structure and auto-populate missing fields</li><li><a href="ProbeCellProperties.html" class="code" title="function data = ProbeCellProperties(model,varargin)">ProbeCellProperties</a>	data = ProbeCellProperties(model,'option1',option1,...)</li></ul>
+<li><a href="applyModifications.html" class="code" title="function [output,modifications]=applyModifications(model,modifications)">applyModifications</a>	APPLYMODIFICATIONS - Apply modifications to DynaSim specification or model structure</li><li><a href="checkModel.html" class="code" title="function model=checkModel(model)">checkModel</a>	CHECKMODEL - Standardize model structure and auto-populate missing fields</li><li><a href="ProbeCellProperties.html" class="code" title="function data = ProbeCellProperties(model,varargin)">ProbeCellProperties</a>	data = ProbeCellProperties(model,'option1',option1,...)</li></ul>
 <!-- crossreference -->
 
 <h2><a name="_subfunctions"></a>SUBFUNCTIONS <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
@@ -163,19 +163,19 @@ This function is called by:
 0006 <span class="comment">%</span>
 0007 <span class="comment">% Inputs:</span>
 0008 <span class="comment">%   - specification: one of:</span>
-0009 <span class="comment">%     - DynaSim specification structure (see below and CheckSpecification for more details)</span>
+0009 <span class="comment">%     - DynaSim specification structure (see below and checkSpecification for more details)</span>
 0010 <span class="comment">%     - string with name of MAT-file containing DynaSim specification structure</span>
 0011 <span class="comment">%     - string with equations</span>
 0012 <span class="comment">%     - string with name of file containing equations (.eqns)</span>
 0013 <span class="comment">%       note: .eqns files can also be converted into model structure using LoadModel()</span>
 0014 <span class="comment">%   - options (with defaults): 'option1',value1,'option2',value2,...</span>
 0015 <span class="comment">%     'modifications'  : specify modifications to apply to specification</span>
-0016 <span class="comment">%                        before generating the model, see ApplyModifications</span>
+0016 <span class="comment">%                        before generating the model, see applyModifications</span>
 0017 <span class="comment">%                        for more details (default?: []).</span>
 0018 <span class="comment">%     'open_link_flag' : whether to leave linker identifiers in place (default: 0)</span>
 0019 <span class="comment">%</span>
 0020 <span class="comment">% Outputs:</span>
-0021 <span class="comment">%   - model: DynaSim model structure (see CheckModel for more details):</span>
+0021 <span class="comment">%   - model: DynaSim model structure (see checkModel for more details):</span>
 0022 <span class="comment">%     .parameters      : substructure with model parameters</span>
 0023 <span class="comment">%     .fixed_variables : substructure with fixed variable definitions</span>
 0024 <span class="comment">%     .functions       : substructure with function definitions</span>
@@ -187,17 +187,17 @@ This function is called by:
 0030 <span class="comment">%                             each state variable</span>
 0031 <span class="comment">%     .conditionals(i) : structure array with each element indicating</span>
 0032 <span class="comment">%                             conditional actions specified in subfields</span>
-0033 <span class="comment">%                             &quot;condition&quot;,&quot;action&quot;,&quot;else&quot; (see NOTE 1 in CheckModel)</span>
+0033 <span class="comment">%                             &quot;condition&quot;,&quot;action&quot;,&quot;else&quot; (see NOTE 1 in checkModel)</span>
 0034 <span class="comment">%     .linkers(i)      : structure array with each element indicating</span>
 0035 <span class="comment">%                             an &quot;expression&quot; that should be inserted</span>
 0036 <span class="comment">%                             (according to &quot;operation&quot;) into any equations</span>
-0037 <span class="comment">%                             where the &quot;target&quot; appears. (see NOTE 2 in CheckModel)</span>
+0037 <span class="comment">%                             where the &quot;target&quot; appears. (see NOTE 2 in checkModel)</span>
 0038 <span class="comment">%       .target    : string giving the target where expression should be inserted</span>
 0039 <span class="comment">%       .expression: string giving the expression to insert</span>
 0040 <span class="comment">%       .operation : string giving the operation to use to insert expression</span>
 0041 <span class="comment">%     .comments{i}     : cell array of comments found in model files</span>
 0042 <span class="comment">%     .specification   : specification used to generate the model</span>
-0043 <span class="comment">%     .namespaces      : (see NOTE 3 in CheckModel)</span>
+0043 <span class="comment">%     .namespaces      : (see NOTE 3 in checkModel)</span>
 0044 <span class="comment">%   - name_map: cell matrix mapping parameter, variable, and function names</span>
 0045 <span class="comment">%       between the user-created specification (population equations and mechanism</span>
 0046 <span class="comment">%       files) and the full model with automatically generated namespaces. It</span>
@@ -206,13 +206,13 @@ This function is called by:
 0049 <span class="comment">%       'functions', or 'monitors') indicating the category to which the named</span>
 0050 <span class="comment">%       element belongs.</span>
 0051 <span class="comment">%</span>
-0052 <span class="comment">% - DynaSim specification structure (see CheckSpecification for more details)</span>
+0052 <span class="comment">% - DynaSim specification structure (see checkSpecification for more details)</span>
 0053 <span class="comment">%   .populations(i) (required): contains info for defining independent population models</span>
 0054 <span class="comment">%       .name (default: 'pop1')      : name of population</span>
 0055 <span class="comment">%       .size (default: 1)           : number of elements in population (i.e., # cells)</span>
-0056 <span class="comment">%       .equations (required)        : string listing equations (see NOTE 1 in CheckSpecification)</span>
+0056 <span class="comment">%       .equations (required)        : string listing equations (see NOTE 1 in checkSpecification)</span>
 0057 <span class="comment">%       .mechanism_list (default: []): cell array listing mechanisms (see NOTE 2</span>
-0058 <span class="comment">%                                      in CheckSpecification)</span>
+0058 <span class="comment">%                                      in checkSpecification)</span>
 0059 <span class="comment">%       .parameters (default: [])    : parameters to assign across all equations in</span>
 0060 <span class="comment">%         the population. provide as cell array list of key/value pairs</span>
 0061 <span class="comment">%         {'param1',value1,'param2',value2,...}</span>
@@ -268,7 +268,7 @@ This function is called by:
 0111 <span class="comment">%     and &quot;57&quot; is the Na+ current at http://infinitebrain.org/models/57.</span>
 0112 <span class="comment">%     note: currently not supported on *most* machines...</span>
 0113 <span class="comment">%</span>
-0114 <span class="comment">% See also: CheckSpecification, CheckModel, ParseModelEquations, SimulateModel</span>
+0114 <span class="comment">% See also: checkSpecification, checkModel, ParseModelEquations, SimulateModel</span>
 0115 
 0116 <span class="comment">% Check inputs</span>
 0117 <span class="comment">% ------------------------------------------------------</span>
@@ -283,7 +283,7 @@ This function is called by:
 0126 <span class="keyword">end</span>
 0127 <span class="comment">% ------------------------------------------------------</span>
 0128 
-0129 options=<a href="CheckOptions.html" class="code" title="function [parms, params_unspecified ] = CheckOptions(options, options_schema, strict)">CheckOptions</a>(varargin,{<span class="keyword">...</span>
+0129 options=<a href="checkOptions.html" class="code" title="function [parms, params_unspecified ] = checkOptions(options, options_schema, strict)">checkOptions</a>(varargin,{<span class="keyword">...</span>
 0130   <span class="string">'modifications'</span>,[],[],<span class="keyword">...</span>
 0131   <span class="string">'open_link_flag'</span>,0,{0,1},<span class="keyword">...</span>
 0132   },false);
@@ -299,11 +299,11 @@ This function is called by:
 0142 <span class="comment">%   end</span>
 0143 <span class="keyword">end</span>
 0144 <span class="comment">% standardize specification</span>
-0145 specification=<a href="CheckSpecification.html" class="code" title="function spec=CheckSpecification(specification)">CheckSpecification</a>(specification); <span class="comment">% standardize &amp; auto-populate as needed</span>
+0145 specification=<a href="checkSpecification.html" class="code" title="function spec=checkSpecification(specification)">checkSpecification</a>(specification); <span class="comment">% standardize &amp; auto-populate as needed</span>
 0146 
 0147 <span class="comment">% Apply modifications to specification before generating model</span>
 0148 <span class="keyword">if</span> ~isempty(options.modifications)
-0149   specification=<a href="ApplyModifications.html" class="code" title="function [output,modifications]=ApplyModifications(model,modifications)">ApplyModifications</a>(specification,options.modifications);
+0149   specification=<a href="applyModifications.html" class="code" title="function [output,modifications]=applyModifications(model,modifications)">applyModifications</a>(specification,options.modifications);
 0150 <span class="keyword">end</span>
 0151 
 0152 <span class="comment">% specification metadata:</span>
@@ -329,7 +329,7 @@ This function is called by:
 0172 <span class="comment">%     - add support for dv/dt=@M; {Na@M,K@M}</span>
 0173 <span class="comment">%       have GenerateModel split mech_name on '@' and replace first</span>
 0174 <span class="comment">%       linker in mech (e.g., @current) by what follows '@' (e.g., @M)</span>
-0175 <span class="comment">%     - then have CheckSpecification convert {Na,K}@M into {Na@M,K@M}</span>
+0175 <span class="comment">%     - then have checkSpecification convert {Na,K}@M into {Na@M,K@M}</span>
 0176 
 0177 <span class="comment">%% 1.0 load sub-models, assign namespaces, and combine across all equations and mechanisms in specification</span>
 0178 model.parameters={};
@@ -355,10 +355,10 @@ This function is called by:
 0198     <span class="comment">% adjust the name if necessary</span>
 0199     <span class="keyword">if</span> ~strcmp(specification.populations(i).name,tmpname)
 0200       <span class="comment">% use the name in the specification</span>
-0201       tmpmodel=<a href="ApplyModifications.html" class="code" title="function [output,modifications]=ApplyModifications(model,modifications)">ApplyModifications</a>(tmpmodel,{tmpname,<span class="string">'name'</span>,specification.populations(i).name});
+0201       tmpmodel=<a href="applyModifications.html" class="code" title="function [output,modifications]=applyModifications(model,modifications)">applyModifications</a>(tmpmodel,{tmpname,<span class="string">'name'</span>,specification.populations(i).name});
 0202     <span class="keyword">elseif</span> strcmp(tmpname,<span class="string">'pop1'</span>) <span class="comment">% if default name</span>
 0203       <span class="comment">% use default name for this population index</span>
-0204       tmpmodel=<a href="ApplyModifications.html" class="code" title="function [output,modifications]=ApplyModifications(model,modifications)">ApplyModifications</a>(tmpmodel,{tmpname,<span class="string">'name'</span>,sprintf(<span class="string">'pop%g'</span>,i)});
+0204       tmpmodel=<a href="applyModifications.html" class="code" title="function [output,modifications]=applyModifications(model,modifications)">applyModifications</a>(tmpmodel,{tmpname,<span class="string">'name'</span>,sprintf(<span class="string">'pop%g'</span>,i)});
 0205     <span class="keyword">end</span>
 0206     
 0207     tmpmodel.linkers=[]; <span class="comment">% remove old linkers from original model construction</span>
@@ -815,7 +815,7 @@ This function is called by:
 0658 model.specification = specification; <span class="comment">% store specification to enable modifications to be applied later</span>
 0659 model.namespaces = name_map; <span class="comment">% store name_map for transparency</span>
 0660 
-0661 model=<a href="CheckModel.html" class="code" title="function model=CheckModel(model)">CheckModel</a>(model);
+0661 model=<a href="checkModel.html" class="code" title="function model=checkModel(model)">checkModel</a>(model);
 0662 
 0663 <span class="keyword">end</span>
 0664 
@@ -833,7 +833,7 @@ This function is called by:
 0676   
 0677   <span class="comment">% check if anything besides a single variable:</span>
 0678   <span class="keyword">if</span> isempty(regexp(newstr,<span class="string">'[^a-z_A-Z\d]+'</span>,<span class="string">'once'</span>))
-0679     str=dynasim_strrep(str,oldstr,newstr);
+0679     str=dynasimStrrep(str,oldstr,newstr);
 0680   <span class="keyword">else</span>
 0681     <span class="comment">% otherwise do substitution with operator and parenthesis</span>
 0682     pat=[<span class="string">'([^\w]+)'</span> oldstr <span class="string">'([^\w]+)'</span>]; <span class="comment">% in the middle</span>

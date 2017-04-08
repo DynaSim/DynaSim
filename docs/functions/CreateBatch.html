@@ -51,17 +51,17 @@
        'num_cores'     : number of cores to specify in the parallel pool
 
  Outputs:
-   - DynaSim studyinfo (see CheckStudyinfo for schema info)
+   - DynaSim studyinfo (see checkStudyinfo for schema info)
 
  Dependencies: SetupStudy, UpdateStudy
 
- See also: <a href="GenerateModel.html" class="code" title="function [model,name_map]=GenerateModel(specification,varargin)">GenerateModel</a>, <a href="SimulateModel.html" class="code" title="function [data,studyinfo]=SimulateModel(model,varargin)">SimulateModel</a>, <a href="CheckStudyinfo.html" class="code" title="function studyinfo=CheckStudyinfo(studyinfo,varargin)">CheckStudyinfo</a>, <a href="Vary2Modifications.html" class="code" title="function modifications_set = Vary2Modifications(vary,model)">Vary2Modifications</a></pre></div>
+ See also: <a href="GenerateModel.html" class="code" title="function [model,name_map]=GenerateModel(specification,varargin)">GenerateModel</a>, <a href="SimulateModel.html" class="code" title="function [data,studyinfo]=SimulateModel(model,varargin)">SimulateModel</a>, <a href="checkStudyinfo.html" class="code" title="function studyinfo=checkStudyinfo(studyinfo,varargin)">checkStudyinfo</a>, <a href="Vary2Modifications.html" class="code" title="function modifications_set = Vary2Modifications(vary,model)">Vary2Modifications</a></pre></div>
 
 <!-- crossreference -->
 <h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
 This function calls:
 <ul style="list-style-image:url(../matlabicon.gif)">
-<li><a href="CheckOptions.html" class="code" title="function [parms, params_unspecified ] = CheckOptions(options, options_schema, strict)">CheckOptions</a>	CHECKOPTIONS - organize key/value pairs in structure with default or user-supplied values according to a schema</li><li><a href="CheckStudyinfo.html" class="code" title="function studyinfo=CheckStudyinfo(studyinfo,varargin)">CheckStudyinfo</a>	CHECKSTUDYINFO - Standardize studyinfo structure and auto-populate missing fields</li><li><a href="GetSolveFile.html" class="code" title="function solve_file = GetSolveFile(model,studyinfo,varargin)">GetSolveFile</a>	GETSOLVEFILE - helper function that creates or retrieves the desired solver file.</li><li><a href="LocateModelFiles.html" class="code" title="function [paths,files]=LocateModelFiles(input)">LocateModelFiles</a>	LOCATEMODELFILES - locate mechanism files associated with DynaSim specifications.</li><li><a href="MonitorStudy.html" class="code" title="function [studyinfo,study_status]=MonitorStudy(studyinfo,varargin)">MonitorStudy</a>	MONITORSTUDY - display information on study progress.</li><li><a href="SetupStudy.html" class="code" title="function [studyinfo,options]=SetupStudy(base_model,varargin)">SetupStudy</a>	SETUPSTUDY - Initialize DynaSim studyinfo structure, prepare list of output file names, and create output directories</li><li><a href="StudyinfoIO.html" class="code" title="function studyinfo=StudyinfoIO(studyinfo,study_file,id,verbose_flag)">StudyinfoIO</a>	STUDYINFOIO - use lock files to manage concurrent access to a shared studyinfo</li></ul>
+<li><a href="checkOptions.html" class="code" title="function [parms, params_unspecified ] = checkOptions(options, options_schema, strict)">checkOptions</a>	CHECKOPTIONS - organize key/value pairs in structure with default or user-supplied values according to a schema</li><li><a href="checkStudyinfo.html" class="code" title="function studyinfo=checkStudyinfo(studyinfo,varargin)">checkStudyinfo</a>	CHECKSTUDYINFO - Standardize studyinfo structure and auto-populate missing fields</li><li><a href="GetSolveFile.html" class="code" title="function solve_file = GetSolveFile(model,studyinfo,varargin)">GetSolveFile</a>	GETSOLVEFILE - helper function that creates or retrieves the desired solver file.</li><li><a href="LocateModelFiles.html" class="code" title="function [paths,files]=LocateModelFiles(input)">LocateModelFiles</a>	LOCATEMODELFILES - locate mechanism files associated with DynaSim specifications.</li><li><a href="MonitorStudy.html" class="code" title="function [studyinfo,study_status]=MonitorStudy(studyinfo,varargin)">MonitorStudy</a>	MONITORSTUDY - display information on study progress.</li><li><a href="SetupStudy.html" class="code" title="function [studyinfo,options]=SetupStudy(base_model,varargin)">SetupStudy</a>	SETUPSTUDY - Initialize DynaSim studyinfo structure, prepare list of output file names, and create output directories</li><li><a href="StudyinfoIO.html" class="code" title="function studyinfo=StudyinfoIO(studyinfo,study_file,id,verbose_flag)">StudyinfoIO</a>	STUDYINFOIO - use lock files to manage concurrent access to a shared studyinfo</li></ul>
 This function is called by:
 <ul style="list-style-image:url(../matlabicon.gif)">
 <li><a href="SimulateModel.html" class="code" title="function [data,studyinfo]=SimulateModel(model,varargin)">SimulateModel</a>	% data=SimulateModel(model,'option',value,...)</li></ul>
@@ -98,14 +98,14 @@ This function is called by:
 0024 <span class="comment">%       'num_cores'     : number of cores to specify in the parallel pool</span>
 0025 <span class="comment">%</span>
 0026 <span class="comment">% Outputs:</span>
-0027 <span class="comment">%   - DynaSim studyinfo (see CheckStudyinfo for schema info)</span>
+0027 <span class="comment">%   - DynaSim studyinfo (see checkStudyinfo for schema info)</span>
 0028 <span class="comment">%</span>
 0029 <span class="comment">% Dependencies: SetupStudy, UpdateStudy</span>
 0030 <span class="comment">%</span>
-0031 <span class="comment">% See also: GenerateModel, SimulateModel, CheckStudyinfo, Vary2Modifications</span>
+0031 <span class="comment">% See also: GenerateModel, SimulateModel, checkStudyinfo, Vary2Modifications</span>
 0032 
 0033 <span class="comment">% check inputs</span>
-0034 options=<a href="CheckOptions.html" class="code" title="function [parms, params_unspecified ] = CheckOptions(options, options_schema, strict)">CheckOptions</a>(varargin,{<span class="keyword">...</span>
+0034 options=<a href="checkOptions.html" class="code" title="function [parms, params_unspecified ] = checkOptions(options, options_schema, strict)">checkOptions</a>(varargin,{<span class="keyword">...</span>
 0035   <span class="string">'compile_flag'</span>,0,{0,1},<span class="keyword">...</span>
 0036   <span class="string">'parallel_flag'</span>,0,{0,1},<span class="keyword">...</span>
 0037   <span class="string">'num_cores'</span>,4,[],<span class="keyword">...</span><span class="comment"> % # cores for parallel processing (SCC supports 1-12)</span>
@@ -136,7 +136,7 @@ This function is called by:
 0062       fprintf(<span class="string">'Study already finished. Not creating new batch.\n'</span>);
 0063     <span class="keyword">end</span>
 0064     
-0065     studyinfo=<a href="CheckStudyinfo.html" class="code" title="function studyinfo=CheckStudyinfo(studyinfo,varargin)">CheckStudyinfo</a>(studyinfo.study_dir,<span class="string">'process_id'</span>,options.process_id);
+0065     studyinfo=<a href="checkStudyinfo.html" class="code" title="function studyinfo=checkStudyinfo(studyinfo,varargin)">checkStudyinfo</a>(studyinfo.study_dir,<span class="string">'process_id'</span>,options.process_id);
 0066     
 0067     <span class="keyword">return</span>;
 0068   <span class="keyword">end</span>
@@ -484,7 +484,7 @@ This function is called by:
 0410     fjob=fopen(job_file,<span class="string">'wt'</span>);
 0411     
 0412     <span class="comment">% load studyinfo using helper function to avoid busy file errors</span>
-0413     <span class="comment">%fprintf(fjob,'studyinfo=CheckStudyinfo(''%s'',''process_id'',%g);\n',study_file,sim_ids(1));</span>
+0413     <span class="comment">%fprintf(fjob,'studyinfo=checkStudyinfo(''%s'',''process_id'',%g);\n',study_file,sim_ids(1));</span>
 0414     <span class="comment">%fprintf(fjob,'load(''%s'',''studyinfo'');\n',study_file);</span>
 0415     
 0416     <span class="keyword">if</span> ~options.one_solve_file_flag
@@ -534,7 +534,7 @@ This function is called by:
 0460       fprintf(fjob,<span class="string">'\t\tload(fullfile(''%s'',''studyinfo.mat''),''studyinfo'');\n'</span>,batch_dir);
 0461     <span class="keyword">end</span>
 0462     <span class="comment">% compare paths between compute machine and studyinfo startup</span>
-0463     fprintf(fjob,<span class="string">'\t\t[valid,message]=CheckHostPaths(studyinfo);\n'</span>);
+0463     fprintf(fjob,<span class="string">'\t\t[valid,message]=checkHostPaths(studyinfo);\n'</span>);
 0464     
 0465     <span class="keyword">if</span> ~options.one_solve_file_flag
 0466       fprintf(fjob,<span class="string">'\t\tif ~valid\n\t\t  lasterr(message);\n\t\t  for s=1:length(SimIDs), UpdateStudy(studyinfo.study_dir,''sim_id'',SimIDs(s),''status'',''failed''); end\n\t\t  continue;\n\t\tend\n'</span>);
@@ -549,7 +549,7 @@ This function is called by:
 0475     fprintf(fjob,<span class="string">'\t\tfprintf(''-----------------------------------------------------\\n'');\n'</span>);
 0476     fprintf(fjob,<span class="string">'\t\tdata=SimulateModel(studyinfo.base_model,''modifications'',siminfo.modifications,''studyinfo'',studyinfo,''sim_id'',SimID,keyvals{:});\n'</span>);
 0477     fprintf(fjob,<span class="string">'\t\tfor i=1:length(siminfo.result_functions)\n'</span>);
-0478     fprintf(fjob,<span class="string">'\t\t\tAnalyzeData(data,siminfo.result_functions{i},''result_file'',siminfo.result_files{i},''save_data_flag'',1,siminfo.result_options{i}{:});\n'</span>);
+0478     fprintf(fjob,<span class="string">'\t\t\tanalyzeData(data,siminfo.result_functions{i},''result_file'',siminfo.result_files{i},''save_data_flag'',1,siminfo.result_options{i}{:});\n'</span>);
 0479     fprintf(fjob,<span class="string">'\t\tend\n'</span>);
 0480     
 0481     <span class="comment">% add error handling</span>

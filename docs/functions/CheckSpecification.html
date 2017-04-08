@@ -2,8 +2,8 @@
                 "http://www.w3.org/TR/REC-html40/loose.dtd">
 <html>
 <head>
-  <title>Description of CheckSpecification</title>
-  <meta name="keywords" content="CheckSpecification">
+  <title>Description of checkSpecification</title>
+  <meta name="keywords" content="checkSpecification">
   <meta name="description" content="CHECKSPECIFICATION - standardize specification structure and auto-populate missing fields">
   <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
   <meta name="generator" content="m2html &copy; 2005 Guillaume Flandin">
@@ -16,20 +16,20 @@
 <body>
 <a name="_top"></a>
 <!-- menu.html functions -->
-<h1>CheckSpecification
+<h1>checkSpecification
 </h1>
 
 <h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
 <div class="box"><strong>CHECKSPECIFICATION - standardize specification structure and auto-populate missing fields</strong></div>
 
 <h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
-<div class="box"><strong>function spec=CheckSpecification(specification) </strong></div>
+<div class="box"><strong>function spec=checkSpecification(specification) </strong></div>
 
 <h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
 <div class="fragment"><pre class="comment">CHECKSPECIFICATION - standardize specification structure and auto-populate missing fields
 
  Usage:
-   specification=CheckSpecification(specification)
+   specification=checkSpecification(specification)
 
  Input: DynaSim specification structure or equations
 
@@ -102,10 +102,10 @@
 
  Examples:
    - Example 1: obtain empty specification structure with all fields
-       specification=CheckSpecification([]);
+       specification=checkSpecification([]);
 
    - Example 2: standardize existing specification
-       specification=CheckSpecification(specification)
+       specification=checkSpecification(specification)
 
    - Example 3: standardize equations in cell array
        eqns={
@@ -113,23 +113,23 @@
          'dx/dt=s*(y-x)';
          'dy/dt=r*x-y-x*z';
          'dz/dt=-b*z+x*y';
-       specification=CheckSpecification(eqns);
+       specification=checkSpecification(eqns);
 
    - Example 4: standardize equations in character array
        eqns='tau=10; R=10; E=-70; dV/dt=(E-V+R*1.55)/tau; if(V&gt;-55)(V=-75)';
-       specification=CheckSpecification(eqns);
+       specification=checkSpecification(eqns);
 
    - Example 5: standardize specification with compact field names
        s.pops.size=10;
        s.pops.equations='dv/dt=-v';
        s.cons.mechanism_list='iGABAa';
-       s=CheckSpecification(s)
+       s=checkSpecification(s)
 
    - Example 6: standardize specification with everything in equation string
        s.pops.equations='E:dv[10]/dt=@M+I; {iNa,iK}@M; I=10';
-       s=CheckSpecification(s)
+       s=checkSpecification(s)
 
- See also: <a href="GenerateModel.html" class="code" title="function [model,name_map]=GenerateModel(specification,varargin)">GenerateModel</a>, <a href="CheckModel.html" class="code" title="function model=CheckModel(model)">CheckModel</a></pre></div>
+ See also: <a href="GenerateModel.html" class="code" title="function [model,name_map]=GenerateModel(specification,varargin)">GenerateModel</a>, <a href="checkModel.html" class="code" title="function model=checkModel(model)">checkModel</a></pre></div>
 
 <!-- crossreference -->
 <h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
@@ -138,7 +138,7 @@ This function calls:
 <li><a href="LocateModelFiles.html" class="code" title="function [paths,files]=LocateModelFiles(input)">LocateModelFiles</a>	LOCATEMODELFILES - locate mechanism files associated with DynaSim specifications.</li><li><a href="ParseModelEquations.html" class="code" title="function [model,name_map] = ParseModelEquations(text,varargin)">ParseModelEquations</a>	PARSEMODELEQUATIONS - parse equations and organize model data in DynaSim model structure</li></ul>
 This function is called by:
 <ul style="list-style-image:url(../matlabicon.gif)">
-<li><a href="ApplyModifications.html" class="code" title="function [output,modifications]=ApplyModifications(model,modifications)">ApplyModifications</a>	APPLYMODIFICATIONS - Apply modifications to DynaSim specification or model structure</li><li><a href="GenerateModel.html" class="code" title="function [model,name_map]=GenerateModel(specification,varargin)">GenerateModel</a>	GENERATEMODEL - Parse DynaSim specification and organize model data in DynaSim model structure</li></ul>
+<li><a href="applyModifications.html" class="code" title="function [output,modifications]=applyModifications(model,modifications)">applyModifications</a>	APPLYMODIFICATIONS - Apply modifications to DynaSim specification or model structure</li><li><a href="GenerateModel.html" class="code" title="function [model,name_map]=GenerateModel(specification,varargin)">GenerateModel</a>	GENERATEMODEL - Parse DynaSim specification and organize model data in DynaSim model structure</li></ul>
 <!-- crossreference -->
 
 <h2><a name="_subfunctions"></a>SUBFUNCTIONS <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
@@ -146,11 +146,11 @@ This function is called by:
 <li><a href="#_sub1" class="code">function list=expand_list(list)</a></li><li><a href="#_sub2" class="code">function spec=backward_compatibility(spec)</a></li></ul>
 
 <h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
-<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function spec=CheckSpecification(specification)</a>
+<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function spec=checkSpecification(specification)</a>
 0002 <span class="comment">%CHECKSPECIFICATION - standardize specification structure and auto-populate missing fields</span>
 0003 <span class="comment">%</span>
 0004 <span class="comment">% Usage:</span>
-0005 <span class="comment">%   specification=CheckSpecification(specification)</span>
+0005 <span class="comment">%   specification=checkSpecification(specification)</span>
 0006 <span class="comment">%</span>
 0007 <span class="comment">% Input: DynaSim specification structure or equations</span>
 0008 <span class="comment">%</span>
@@ -223,10 +223,10 @@ This function is called by:
 0075 <span class="comment">%</span>
 0076 <span class="comment">% Examples:</span>
 0077 <span class="comment">%   - Example 1: obtain empty specification structure with all fields</span>
-0078 <span class="comment">%       specification=CheckSpecification([]);</span>
+0078 <span class="comment">%       specification=checkSpecification([]);</span>
 0079 <span class="comment">%</span>
 0080 <span class="comment">%   - Example 2: standardize existing specification</span>
-0081 <span class="comment">%       specification=CheckSpecification(specification)</span>
+0081 <span class="comment">%       specification=checkSpecification(specification)</span>
 0082 <span class="comment">%</span>
 0083 <span class="comment">%   - Example 3: standardize equations in cell array</span>
 0084 <span class="comment">%       eqns={</span>
@@ -234,23 +234,23 @@ This function is called by:
 0086 <span class="comment">%         'dx/dt=s*(y-x)';</span>
 0087 <span class="comment">%         'dy/dt=r*x-y-x*z';</span>
 0088 <span class="comment">%         'dz/dt=-b*z+x*y';</span>
-0089 <span class="comment">%       specification=CheckSpecification(eqns);</span>
+0089 <span class="comment">%       specification=checkSpecification(eqns);</span>
 0090 <span class="comment">%</span>
 0091 <span class="comment">%   - Example 4: standardize equations in character array</span>
 0092 <span class="comment">%       eqns='tau=10; R=10; E=-70; dV/dt=(E-V+R*1.55)/tau; if(V&gt;-55)(V=-75)';</span>
-0093 <span class="comment">%       specification=CheckSpecification(eqns);</span>
+0093 <span class="comment">%       specification=checkSpecification(eqns);</span>
 0094 <span class="comment">%</span>
 0095 <span class="comment">%   - Example 5: standardize specification with compact field names</span>
 0096 <span class="comment">%       s.pops.size=10;</span>
 0097 <span class="comment">%       s.pops.equations='dv/dt=-v';</span>
 0098 <span class="comment">%       s.cons.mechanism_list='iGABAa';</span>
-0099 <span class="comment">%       s=CheckSpecification(s)</span>
+0099 <span class="comment">%       s=checkSpecification(s)</span>
 0100 <span class="comment">%</span>
 0101 <span class="comment">%   - Example 6: standardize specification with everything in equation string</span>
 0102 <span class="comment">%       s.pops.equations='E:dv[10]/dt=@M+I; {iNa,iK}@M; I=10';</span>
-0103 <span class="comment">%       s=CheckSpecification(s)</span>
+0103 <span class="comment">%       s=checkSpecification(s)</span>
 0104 <span class="comment">%</span>
-0105 <span class="comment">% See also: GenerateModel, CheckModel</span>
+0105 <span class="comment">% See also: GenerateModel, checkModel</span>
 0106 
 0107 <span class="comment">% check if input is a string or cell with equations and package in spec structure</span>
 0108 <span class="keyword">if</span> ischar(specification) || iscell(specification)

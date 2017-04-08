@@ -32,7 +32,7 @@
    data_out = CropData(data,'option',value)
 
  Inputs:
-   - data: DynaSim data structure (see CheckData)
+   - data: DynaSim data structure (see checkData)
    - inds: data points to retain
 
  Outputs:
@@ -42,7 +42,7 @@
 <h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
 This function calls:
 <ul style="list-style-image:url(../matlabicon.gif)">
-<li><a href="CheckData.html" class="code" title="function data=CheckData(data)">CheckData</a>	CHECKDATA - Standardize data structure and auto-populate missing fields</li></ul>
+<li><a href="checkData.html" class="code" title="function data=checkData(data)">checkData</a>	CHECKDATA - Standardize data structure and auto-populate missing fields</li></ul>
 This function is called by:
 <ul style="list-style-image:url(../matlabicon.gif)">
 </ul>
@@ -58,7 +58,7 @@ This function is called by:
 0005 <span class="comment">%   data_out = CropData(data,'option',value)</span>
 0006 <span class="comment">%</span>
 0007 <span class="comment">% Inputs:</span>
-0008 <span class="comment">%   - data: DynaSim data structure (see CheckData)</span>
+0008 <span class="comment">%   - data: DynaSim data structure (see checkData)</span>
 0009 <span class="comment">%   - inds: data points to retain</span>
 0010 <span class="comment">%</span>
 0011 <span class="comment">% Outputs:</span>
@@ -66,8 +66,8 @@ This function is called by:
 0013 
 0014 <span class="comment">%% 1.0 Check inputs</span>
 0015 
-0016 data = <a href="CheckData.html" class="code" title="function data=CheckData(data)">CheckData</a>(data);
-0017 <span class="comment">% note: calling CheckData() at beginning enables analysis function to</span>
+0016 data = <a href="checkData.html" class="code" title="function data=checkData(data)">checkData</a>(data);
+0017 <span class="comment">% note: calling checkData() at beginning enables analysis function to</span>
 0018 <span class="comment">% accept data matrix [time x cells] in addition to DynaSim data structure.</span>
 0019 
 0020 <span class="comment">%% do the cropping</span>

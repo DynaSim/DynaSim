@@ -2,8 +2,8 @@
                 "http://www.w3.org/TR/REC-html40/loose.dtd">
 <html>
 <head>
-  <title>Description of CalcAverages</title>
-  <meta name="keywords" content="CalcAverages">
+  <title>Description of calcAverages</title>
+  <meta name="keywords" content="calcAverages">
   <meta name="description" content="CALCAVERAGES - Average fields in a DynaSim data struct across neurons">
   <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
   <meta name="generator" content="m2html &copy; 2005 Guillaume Flandin">
@@ -16,23 +16,23 @@
 <body>
 <a name="_top"></a>
 <!-- menu.html functions -->
-<h1>CalcAverages
+<h1>calcAverages
 </h1>
 
 <h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
 <div class="box"><strong>CALCAVERAGES - Average fields in a DynaSim data struct across neurons</strong></div>
 
 <h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
-<div class="box"><strong>function data_out = CalcAverages(data,opts) </strong></div>
+<div class="box"><strong>function data_out = calcAverages(data,opts) </strong></div>
 
 <h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
 <div class="fragment"><pre class="comment">CALCAVERAGES - Average fields in a DynaSim data struct across neurons
 
  Usage:
-   data_out = CalcAverages(data,'option',value)
+   data_out = calcAverages(data,'option',value)
 
  Inputs:
-   - data: DynaSim data structure (see CheckData)
+   - data: DynaSim data structure (see checkData)
    - opts: Options structure
      'opts.save_std': Also creates new fields storing standard deviations
                       (true or false)
@@ -41,13 +41,13 @@
    - data_out: data structure, all fields replaced by their average values
        (averaged across neurons).
 
- See also: <a href="PlotFR.html" class="code" title="function handles=PlotFR(data,varargin)">PlotFR</a>, <a href="AnalyzeStudy.html" class="code" title="function [results,studyinfo]=AnalyzeStudy(data,func,varargin)">AnalyzeStudy</a>, <a href="SimulateModel.html" class="code" title="function [data,studyinfo]=SimulateModel(model,varargin)">SimulateModel</a>, <a href="CheckData.html" class="code" title="function data=CheckData(data)">CheckData</a>, <a href="SelectVariables.html" class="code" title="function [variables,pop_names]=SelectVariables(labels,var_strings)">SelectVariables</a></pre></div>
+ See also: <a href="PlotFR.html" class="code" title="function handles=PlotFR(data,varargin)">PlotFR</a>, <a href="AnalyzeStudy.html" class="code" title="function [results,studyinfo]=AnalyzeStudy(data,func,varargin)">AnalyzeStudy</a>, <a href="SimulateModel.html" class="code" title="function [data,studyinfo]=SimulateModel(model,varargin)">SimulateModel</a>, <a href="checkData.html" class="code" title="function data=checkData(data)">checkData</a>, <a href="SelectVariables.html" class="code" title="function [variables,pop_names]=SelectVariables(labels,var_strings)">SelectVariables</a></pre></div>
 
 <!-- crossreference -->
 <h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
 This function calls:
 <ul style="list-style-image:url(../matlabicon.gif)">
-<li><a href="CheckData.html" class="code" title="function data=CheckData(data)">CheckData</a>	CHECKDATA - Standardize data structure and auto-populate missing fields</li><li><a href="struct_addDef.html" class="code" title="function s = struct_addDef(s,fieldname,default_value)">struct_addDef</a>	STRUCT_ADDDEF - add fieldname to structure if it doesn't already exist</li></ul>
+<li><a href="checkData.html" class="code" title="function data=checkData(data)">checkData</a>	CHECKDATA - Standardize data structure and auto-populate missing fields</li><li><a href="struct_addDef.html" class="code" title="function s = struct_addDef(s,fieldname,default_value)">struct_addDef</a>	STRUCT_ADDDEF - add fieldname to structure if it doesn't already exist</li></ul>
 This function is called by:
 <ul style="list-style-image:url(../matlabicon.gif)">
 <li><a href="RearrangeStudies2Neurons.html" class="code" title="function data_out = RearrangeStudies2Neurons(data)">RearrangeStudies2Neurons</a>	REARRANGESTUDIES2NEURONS - Takes a DynaSim data structure that is the result of a parameter sweep and rearranges it into a single (1D) data structure.</li></ul>
@@ -56,14 +56,14 @@ This function is called by:
 
 
 <h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
-<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function data_out = CalcAverages(data,opts)</a>
+<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function data_out = calcAverages(data,opts)</a>
 0002 <span class="comment">%CALCAVERAGES - Average fields in a DynaSim data struct across neurons</span>
 0003 <span class="comment">%</span>
 0004 <span class="comment">% Usage:</span>
-0005 <span class="comment">%   data_out = CalcAverages(data,'option',value)</span>
+0005 <span class="comment">%   data_out = calcAverages(data,'option',value)</span>
 0006 <span class="comment">%</span>
 0007 <span class="comment">% Inputs:</span>
-0008 <span class="comment">%   - data: DynaSim data structure (see CheckData)</span>
+0008 <span class="comment">%   - data: DynaSim data structure (see checkData)</span>
 0009 <span class="comment">%   - opts: Options structure</span>
 0010 <span class="comment">%     'opts.save_std': Also creates new fields storing standard deviations</span>
 0011 <span class="comment">%                      (true or false)</span>
@@ -72,7 +72,7 @@ This function is called by:
 0014 <span class="comment">%   - data_out: data structure, all fields replaced by their average values</span>
 0015 <span class="comment">%       (averaged across neurons).</span>
 0016 <span class="comment">%</span>
-0017 <span class="comment">% See also: PlotFR, AnalyzeStudy, SimulateModel, CheckData, SelectVariables</span>
+0017 <span class="comment">% See also: PlotFR, AnalyzeStudy, SimulateModel, checkData, SelectVariables</span>
 0018 
 0019 <span class="comment">%% 1.0 Check inputs</span>
 0020 
@@ -80,8 +80,8 @@ This function is called by:
 0022     opts = struct;
 0023 <span class="keyword">end</span>
 0024 
-0025 data = <a href="CheckData.html" class="code" title="function data=CheckData(data)">CheckData</a>(data);
-0026 <span class="comment">% note: calling CheckData() at beginning enables analysis function to</span>
+0025 data = <a href="checkData.html" class="code" title="function data=checkData(data)">checkData</a>(data);
+0026 <span class="comment">% note: calling checkData() at beginning enables analysis function to</span>
 0027 <span class="comment">% accept data matrix [time x cells] in addition to DynaSim data structure.</span>
 0028 
 0029 opts = <a href="struct_addDef.html" class="code" title="function s = struct_addDef(s,fieldname,default_value)">struct_addDef</a>(opts,<span class="string">'save_std'</span>,0);

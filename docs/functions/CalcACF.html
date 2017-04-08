@@ -2,8 +2,8 @@
                 "http://www.w3.org/TR/REC-html40/loose.dtd">
 <html>
 <head>
-  <title>Description of CalcACF</title>
-  <meta name="keywords" content="CalcACF">
+  <title>Description of calcACF</title>
+  <meta name="keywords" content="calcACF">
   <meta name="description" content="CALCACF - Calculate the autocorrelation function.">
   <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
   <meta name="generator" content="m2html &copy; 2005 Guillaume Flandin">
@@ -16,23 +16,23 @@
 <body>
 <a name="_top"></a>
 <!-- menu.html functions -->
-<h1>CalcACF
+<h1>calcACF
 </h1>
 
 <h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
 <div class="box"><strong>CALCACF - Calculate the autocorrelation function.</strong></div>
 
 <h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
-<div class="box"><strong>function data = CalcACF(data,varargin) </strong></div>
+<div class="box"><strong>function data = calcACF(data,varargin) </strong></div>
 
 <h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
 <div class="fragment"><pre class="comment">CALCACF - Calculate the autocorrelation function.
 
  Usage:
-   data = CalcACF(data,'option',value)
+   data = calcACF(data,'option',value)
 
  Inputs:
-   - data: DynaSim data structure (see CheckData)
+   - data: DynaSim data structure (see checkData)
    - options:
      'variable'         : name of field containing data on which to calculate
                           ACFs (default: *_spikes or first variable in data.labels)
@@ -63,32 +63,32 @@
    s.populations(2).name='I';
    s.populations(2).equations='dv/dt=@current+10; {iNa,iK}; v(0)=-65';
    data=SimulateModel(s);
-   data=CalcACF(data,'variable','*_v');
+   data=calcACF(data,'variable','*_v');
    data % contains ACFs for E and I pops in .E_v_ACF and .I_v_ACF.
 
- See also: <a href="PlotFR.html" class="code" title="function handles=PlotFR(data,varargin)">PlotFR</a>, <a href="AnalyzeStudy.html" class="code" title="function [results,studyinfo]=AnalyzeStudy(data,func,varargin)">AnalyzeStudy</a>, <a href="SimulateModel.html" class="code" title="function [data,studyinfo]=SimulateModel(model,varargin)">SimulateModel</a>, <a href="CheckData.html" class="code" title="function data=CheckData(data)">CheckData</a>, <a href="SelectVariables.html" class="code" title="function [variables,pop_names]=SelectVariables(labels,var_strings)">SelectVariables</a></pre></div>
+ See also: <a href="PlotFR.html" class="code" title="function handles=PlotFR(data,varargin)">PlotFR</a>, <a href="AnalyzeStudy.html" class="code" title="function [results,studyinfo]=AnalyzeStudy(data,func,varargin)">AnalyzeStudy</a>, <a href="SimulateModel.html" class="code" title="function [data,studyinfo]=SimulateModel(model,varargin)">SimulateModel</a>, <a href="checkData.html" class="code" title="function data=checkData(data)">checkData</a>, <a href="SelectVariables.html" class="code" title="function [variables,pop_names]=SelectVariables(labels,var_strings)">SelectVariables</a></pre></div>
 
 <!-- crossreference -->
 <h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
 This function calls:
 <ul style="list-style-image:url(../matlabicon.gif)">
-<li><a href="AnalyzeStudy.html" class="code" title="function [results,studyinfo]=AnalyzeStudy(data,func,varargin)">AnalyzeStudy</a>	ANALYZESTUDY - Apply an analysis function to DynaSim data, optionally saving data</li><li><a href="CalcACF.html" class="code" title="function data = CalcACF(data,varargin)">CalcACF</a>	CALCACF - Calculate the autocorrelation function.</li><li><a href="CheckData.html" class="code" title="function data=CheckData(data)">CheckData</a>	CHECKDATA - Standardize data structure and auto-populate missing fields</li><li><a href="CheckOptions.html" class="code" title="function [parms, params_unspecified ] = CheckOptions(options, options_schema, strict)">CheckOptions</a>	CHECKOPTIONS - organize key/value pairs in structure with default or user-supplied values according to a schema</li><li><a href="SelectVariables.html" class="code" title="function [variables,pop_names]=SelectVariables(labels,var_strings)">SelectVariables</a>	SELECTVARIABLES - determine what variables to plot</li></ul>
+<li><a href="AnalyzeStudy.html" class="code" title="function [results,studyinfo]=AnalyzeStudy(data,func,varargin)">AnalyzeStudy</a>	ANALYZESTUDY - Apply an analysis function to DynaSim data, optionally saving data</li><li><a href="calcACF.html" class="code" title="function data = calcACF(data,varargin)">calcACF</a>	CALCACF - Calculate the autocorrelation function.</li><li><a href="checkData.html" class="code" title="function data=checkData(data)">checkData</a>	CHECKDATA - Standardize data structure and auto-populate missing fields</li><li><a href="checkOptions.html" class="code" title="function [parms, params_unspecified ] = checkOptions(options, options_schema, strict)">checkOptions</a>	CHECKOPTIONS - organize key/value pairs in structure with default or user-supplied values according to a schema</li><li><a href="SelectVariables.html" class="code" title="function [variables,pop_names]=SelectVariables(labels,var_strings)">SelectVariables</a>	SELECTVARIABLES - determine what variables to plot</li></ul>
 This function is called by:
 <ul style="list-style-image:url(../matlabicon.gif)">
-<li><a href="CalcACF.html" class="code" title="function data = CalcACF(data,varargin)">CalcACF</a>	CALCACF - Calculate the autocorrelation function.</li></ul>
+<li><a href="calcACF.html" class="code" title="function data = calcACF(data,varargin)">calcACF</a>	CALCACF - Calculate the autocorrelation function.</li></ul>
 <!-- crossreference -->
 
 
 
 <h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
-<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function data = CalcACF(data,varargin)</a>
+<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function data = calcACF(data,varargin)</a>
 0002 <span class="comment">%CALCACF - Calculate the autocorrelation function.</span>
 0003 <span class="comment">%</span>
 0004 <span class="comment">% Usage:</span>
-0005 <span class="comment">%   data = CalcACF(data,'option',value)</span>
+0005 <span class="comment">%   data = calcACF(data,'option',value)</span>
 0006 <span class="comment">%</span>
 0007 <span class="comment">% Inputs:</span>
-0008 <span class="comment">%   - data: DynaSim data structure (see CheckData)</span>
+0008 <span class="comment">%   - data: DynaSim data structure (see checkData)</span>
 0009 <span class="comment">%   - options:</span>
 0010 <span class="comment">%     'variable'         : name of field containing data on which to calculate</span>
 0011 <span class="comment">%                          ACFs (default: *_spikes or first variable in data.labels)</span>
@@ -119,13 +119,13 @@ This function is called by:
 0036 <span class="comment">%   s.populations(2).name='I';</span>
 0037 <span class="comment">%   s.populations(2).equations='dv/dt=@current+10; {iNa,iK}; v(0)=-65';</span>
 0038 <span class="comment">%   data=SimulateModel(s);</span>
-0039 <span class="comment">%   data=CalcACF(data,'variable','*_v');</span>
+0039 <span class="comment">%   data=calcACF(data,'variable','*_v');</span>
 0040 <span class="comment">%   data % contains ACFs for E and I pops in .E_v_ACF and .I_v_ACF.</span>
 0041 <span class="comment">%</span>
-0042 <span class="comment">% See also: PlotFR, AnalyzeStudy, SimulateModel, CheckData, SelectVariables</span>
+0042 <span class="comment">% See also: PlotFR, AnalyzeStudy, SimulateModel, checkData, SelectVariables</span>
 0043 
 0044 <span class="comment">%% 1.0 Check inputs</span>
-0045 options=<a href="CheckOptions.html" class="code" title="function [parms, params_unspecified ] = CheckOptions(options, options_schema, strict)">CheckOptions</a>(varargin,{<span class="keyword">...</span>
+0045 options=<a href="checkOptions.html" class="code" title="function [parms, params_unspecified ] = checkOptions(options, options_schema, strict)">checkOptions</a>(varargin,{<span class="keyword">...</span>
 0046   <span class="string">'variable'</span>,[],[],<span class="keyword">...</span>
 0047   <span class="string">'threshold'</span>,1e-5,[],<span class="keyword">...</span><span class="comment"> % slightly above zero in case variable is point process *_spikes {0,1}</span>
 0048   <span class="string">'exclude_data_flag'</span>,0,{0,1},<span class="keyword">...</span>
@@ -134,13 +134,13 @@ This function is called by:
 0051   <span class="string">'output_suffix'</span>,<span class="string">''</span>,[],<span class="keyword">...</span>
 0052   },false);
 0053 
-0054 data = <a href="CheckData.html" class="code" title="function data=CheckData(data)">CheckData</a>(data);
-0055 <span class="comment">% note: calling CheckData() at beginning enables analysis function to</span>
+0054 data = <a href="checkData.html" class="code" title="function data=checkData(data)">checkData</a>(data);
+0055 <span class="comment">% note: calling checkData() at beginning enables analysis function to</span>
 0056 <span class="comment">% accept data matrix [time x cells] in addition to DynaSim data structure.</span>
 0057 
 0058 <span class="keyword">if</span> numel(data)&gt;1
-0059   <span class="comment">% use AnalyzeStudy to recursively call CalcACF on each data set</span>
-0060   data=<a href="AnalyzeStudy.html" class="code" title="function [results,studyinfo]=AnalyzeStudy(data,func,varargin)">AnalyzeStudy</a>(data,@<a href="CalcACF.html" class="code" title="function data = CalcACF(data,varargin)">CalcACF</a>,varargin{:});
+0059   <span class="comment">% use AnalyzeStudy to recursively call calcACF on each data set</span>
+0060   data=<a href="AnalyzeStudy.html" class="code" title="function [results,studyinfo]=AnalyzeStudy(data,func,varargin)">AnalyzeStudy</a>(data,@<a href="calcACF.html" class="code" title="function data = calcACF(data,varargin)">calcACF</a>,varargin{:});
 0061   <span class="keyword">return</span>;
 0062 <span class="keyword">end</span>
 0063 

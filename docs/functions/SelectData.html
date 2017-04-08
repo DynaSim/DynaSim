@@ -76,10 +76,10 @@
 <h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
 This function calls:
 <ul style="list-style-image:url(../matlabicon.gif)">
-<li><a href="CheckData.html" class="code" title="function data=CheckData(data)">CheckData</a>	CHECKDATA - Standardize data structure and auto-populate missing fields</li><li><a href="CheckOptions.html" class="code" title="function [parms, params_unspecified ] = CheckOptions(options, options_schema, strict)">CheckOptions</a>	CHECKOPTIONS - organize key/value pairs in structure with default or user-supplied values according to a schema</li></ul>
+<li><a href="checkData.html" class="code" title="function data=checkData(data)">checkData</a>	CHECKDATA - Standardize data structure and auto-populate missing fields</li><li><a href="checkOptions.html" class="code" title="function [parms, params_unspecified ] = checkOptions(options, options_schema, strict)">checkOptions</a>	CHECKOPTIONS - organize key/value pairs in structure with default or user-supplied values according to a schema</li></ul>
 This function is called by:
 <ul style="list-style-image:url(../matlabicon.gif)">
-<li><a href="CalcSpikeSync.html" class="code" title="function stats = CalcSpikeSync(data,varargin)">CalcSpikeSync</a>	CALCSPIKESYNC - Compute spike synchronization between spiketrains</li><li><a href="ImportData.html" class="code" title="function [data,studyinfo] = ImportData(file,varargin)">ImportData</a>	IMPORTDATA - load data into DynaSim formatted data structure.</li></ul>
+<li><a href="calcSpikeSync.html" class="code" title="function stats = calcSpikeSync(data,varargin)">calcSpikeSync</a>	CALCSPIKESYNC - Compute spike synchronization between spiketrains</li><li><a href="ImportData.html" class="code" title="function [data,studyinfo] = ImportData(file,varargin)">ImportData</a>	IMPORTDATA - load data into DynaSim formatted data structure.</li></ul>
 <!-- crossreference -->
 
 
@@ -133,9 +133,9 @@ This function is called by:
 0046 <span class="comment">% See also: SimulateModel, Vary2Modifications, ImportData</span>
 0047 
 0048 <span class="comment">% check inputs</span>
-0049 data=<a href="CheckData.html" class="code" title="function data=CheckData(data)">CheckData</a>(data);
+0049 data=<a href="checkData.html" class="code" title="function data=checkData(data)">checkData</a>(data);
 0050 
-0051 options=<a href="CheckOptions.html" class="code" title="function [parms, params_unspecified ] = CheckOptions(options, options_schema, strict)">CheckOptions</a>(varargin,{<span class="keyword">...</span>
+0051 options=<a href="checkOptions.html" class="code" title="function [parms, params_unspecified ] = checkOptions(options, options_schema, strict)">checkOptions</a>(varargin,{<span class="keyword">...</span>
 0052   <span class="string">'time_limits'</span>,[-inf inf],[],<span class="keyword">...</span>
 0053   <span class="string">'varied'</span>,[],[],<span class="keyword">...</span>
 0054   <span class="string">'roi'</span>,[],[],<span class="keyword">...</span>
@@ -145,7 +145,7 @@ This function is called by:
 0058 <span class="keyword">if</span> ~isempty(options.varied) &amp;&amp; isfield(data,<span class="string">'varied'</span>)
 0059   <span class="keyword">if</span> size(options.varied,2)==3
 0060     <span class="comment">% convert into field name (set in SimulateModel:prepare_varied_metadata)</span>
-0061     <span class="comment">% note: this code is redundant with SimulateModel and AnalyzeData.</span>
+0061     <span class="comment">% note: this code is redundant with SimulateModel and analyzeData.</span>
 0062     <span class="comment">% todo: eliminate redundancy</span>
 0063     varied={};
 0064     <span class="keyword">for</span> i=1:size(options.varied,1)

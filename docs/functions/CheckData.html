@@ -2,8 +2,8 @@
                 "http://www.w3.org/TR/REC-html40/loose.dtd">
 <html>
 <head>
-  <title>Description of CheckData</title>
-  <meta name="keywords" content="CheckData">
+  <title>Description of checkData</title>
+  <meta name="keywords" content="checkData">
   <meta name="description" content="CHECKDATA - Standardize data structure and auto-populate missing fields">
   <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
   <meta name="generator" content="m2html &copy; 2005 Guillaume Flandin">
@@ -16,20 +16,20 @@
 <body>
 <a name="_top"></a>
 <!-- menu.html functions -->
-<h1>CheckData
+<h1>checkData
 </h1>
 
 <h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
 <div class="box"><strong>CHECKDATA - Standardize data structure and auto-populate missing fields</strong></div>
 
 <h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
-<div class="box"><strong>function data=CheckData(data) </strong></div>
+<div class="box"><strong>function data=checkData(data) </strong></div>
 
 <h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
 <div class="fragment"><pre class="comment">CHECKDATA - Standardize data structure and auto-populate missing fields
 
  Usage:
-   data=CheckData(data)
+   data=checkData(data)
 
  Input: DynaSim data structure, data matrix [time x cells], or cell array of data matrices
 
@@ -53,17 +53,17 @@ This function calls:
 </ul>
 This function is called by:
 <ul style="list-style-image:url(../matlabicon.gif)">
-<li><a href="All2xPlt.html" class="code" title="function [xp,is_image] = All2xPlt(data)">All2xPlt</a>	</li><li><a href="AnalyzeStudy.html" class="code" title="function [results,studyinfo]=AnalyzeStudy(data,func,varargin)">AnalyzeStudy</a>	ANALYZESTUDY - Apply an analysis function to DynaSim data, optionally saving data</li><li><a href="CalcACF.html" class="code" title="function data = CalcACF(data,varargin)">CalcACF</a>	CALCACF - Calculate the autocorrelation function.</li><li><a href="CalcAverages.html" class="code" title="function data_out = CalcAverages(data,opts)">CalcAverages</a>	CALCAVERAGES - Average fields in a DynaSim data struct across neurons</li><li><a href="CalcCellProperties.html" class="code" title="function stats = CalcCellProperties(data,varargin)">CalcCellProperties</a>	CALCCELLPROPERTIES - calculates the intrinsic electrophysiological properties of all cells in one or more populations</li><li><a href="CalcFR.html" class="code" title="function data = CalcFR(data,varargin)">CalcFR</a>	CALCFR - Calculate firing rage for DynaSim data</li><li><a href="CalcFRmulti.html" class="code" title="function data = CalcFRmulti(data,varargin)">CalcFRmulti</a>	CALCFRMULTI - extends CalcFR to get SUA and MUA firing rates</li><li><a href="CalcISI.html" class="code" title="function data = CalcISI(data,varargin)">CalcISI</a>	CALCISI - Calculate the interspike interval.</li><li><a href="CalcPower.html" class="code" title="function data = CalcPower(data,varargin)">CalcPower</a>	CALCPOWER - Compute spectral analysis of DynaSim data</li><li><a href="CalcSpikeSync.html" class="code" title="function stats = CalcSpikeSync(data,varargin)">CalcSpikeSync</a>	CALCSPIKESYNC - Compute spike synchronization between spiketrains</li><li><a href="CalcSumOverFields.html" class="code" title="function data = CalcSumOverFields(data, fields, output_field_name)">CalcSumOverFields</a>	CALCSUMOVERFIELDS - Creates a new field in data that is the sum of a bunch of other fields</li><li><a href="CropData.html" class="code" title="function data_out = CropData(data,inds)">CropData</a>	CROPDATA - Crops DynaSim data structre</li><li><a href="Data2Table.html" class="code" title="function [data_table,column_titles,time] = Data2Table(data,verbose_flag)">Data2Table</a>	Converts DynaSim structure to 1D cell array format. Later can use to</li><li><a href="DownsampleData.html" class="code" title="function data_out = DownsampleData(data,ds)">DownsampleData</a>	DOWNSAMPLEDATA - Downsamples DynaSim data structre data</li><li><a href="DynaSim2xPlt.html" class="code" title="function xp = DynaSim2xPlt(data)">DynaSim2xPlt</a>	Convert DynaSim data structure to xp format</li><li><a href="PlotData.html" class="code" title="function handles = PlotData(data,varargin)">PlotData</a>	PLOTDATA - plot data in various ways depending on what data was provided and what options are defined.</li><li><a href="PlotFR.html" class="code" title="function handles=PlotFR(data,varargin)">PlotFR</a>	PLOTFR - plot spike rates in various ways depending on what data was provided.</li><li><a href="PlotFR2.html" class="code" title="function handles=PlotFR2(data,varargin)">PlotFR2</a>	PLOTFR2 - plot spike rates in various ways depending on what data was provided.</li><li><a href="PlotWaveforms.html" class="code" title="function PlotWaveforms(data,varargin)">PlotWaveforms</a>	PLOTWAVEFORMS - plot waveforms in various ways depending on what data was provided.</li><li><a href="RearrangeStudies2Neurons.html" class="code" title="function data_out = RearrangeStudies2Neurons(data)">RearrangeStudies2Neurons</a>	REARRANGESTUDIES2NEURONS - Takes a DynaSim data structure that is the result of a parameter sweep and rearranges it into a single (1D) data structure.</li><li><a href="SelectData.html" class="code" title="function data=SelectData(data,varargin)">SelectData</a>	SELECTDATA -  select subset of data</li><li><a href="ThevEquiv.html" class="code" title="function data = ThevEquiv(data, fields_currents, field_voltage, reversals_list, output_field_name)">ThevEquiv</a>	Calculates the Th�venin equivalent voltage and conductance for a</li><li><a href="xPlt2DynaSim.html" class="code" title="function data=xPlt2DynaSim(obj)">xPlt2DynaSim</a>	% data=xPlt2DynaSim(obj,varargin)</li></ul>
+<li><a href="all2xPlt.html" class="code" title="function [xp,is_image] = all2xPlt(data)">all2xPlt</a>	</li><li><a href="AnalyzeStudy.html" class="code" title="function [results,studyinfo]=AnalyzeStudy(data,func,varargin)">AnalyzeStudy</a>	ANALYZESTUDY - Apply an analysis function to DynaSim data, optionally saving data</li><li><a href="calcACF.html" class="code" title="function data = calcACF(data,varargin)">calcACF</a>	CALCACF - Calculate the autocorrelation function.</li><li><a href="calcAverages.html" class="code" title="function data_out = calcAverages(data,opts)">calcAverages</a>	CALCAVERAGES - Average fields in a DynaSim data struct across neurons</li><li><a href="calcCellProperties.html" class="code" title="function stats = calcCellProperties(data,varargin)">calcCellProperties</a>	CALCCELLPROPERTIES - calculates the intrinsic electrophysiological properties of all cells in one or more populations</li><li><a href="calcFR.html" class="code" title="function data = calcFR(data,varargin)">calcFR</a>	CALCFR - Calculate firing rage for DynaSim data</li><li><a href="calcFRmulti.html" class="code" title="function data = calcFRmulti(data,varargin)">calcFRmulti</a>	CALCFRMULTI - extends calcFR to get SUA and MUA firing rates</li><li><a href="calcISI.html" class="code" title="function data = calcISI(data,varargin)">calcISI</a>	CALCISI - Calculate the interspike interval.</li><li><a href="calcPower.html" class="code" title="function data = calcPower(data,varargin)">calcPower</a>	CALCPOWER - Compute spectral analysis of DynaSim data</li><li><a href="calcSpikeSync.html" class="code" title="function stats = calcSpikeSync(data,varargin)">calcSpikeSync</a>	CALCSPIKESYNC - Compute spike synchronization between spiketrains</li><li><a href="calcSumOverFields.html" class="code" title="function data = calcSumOverFields(data, fields, output_field_name)">calcSumOverFields</a>	CALCSUMOVERFIELDS - Creates a new field in data that is the sum of a bunch of other fields</li><li><a href="CropData.html" class="code" title="function data_out = CropData(data,inds)">CropData</a>	CROPDATA - Crops DynaSim data structre</li><li><a href="Data2Table.html" class="code" title="function [data_table,column_titles,time] = Data2Table(data,verbose_flag)">Data2Table</a>	Converts DynaSim structure to 1D cell array format. Later can use to</li><li><a href="DownsampleData.html" class="code" title="function data_out = DownsampleData(data,ds)">DownsampleData</a>	DOWNSAMPLEDATA - Downsamples DynaSim data structre data</li><li><a href="DynaSim2xPlt.html" class="code" title="function xp = DynaSim2xPlt(data)">DynaSim2xPlt</a>	Convert DynaSim data structure to xp format</li><li><a href="PlotData.html" class="code" title="function handles = PlotData(data,varargin)">PlotData</a>	PLOTDATA - plot data in various ways depending on what data was provided and what options are defined.</li><li><a href="PlotFR.html" class="code" title="function handles=PlotFR(data,varargin)">PlotFR</a>	PLOTFR - plot spike rates in various ways depending on what data was provided.</li><li><a href="PlotFR2.html" class="code" title="function handles=PlotFR2(data,varargin)">PlotFR2</a>	PLOTFR2 - plot spike rates in various ways depending on what data was provided.</li><li><a href="PlotWaveforms.html" class="code" title="function PlotWaveforms(data,varargin)">PlotWaveforms</a>	PLOTWAVEFORMS - plot waveforms in various ways depending on what data was provided.</li><li><a href="RearrangeStudies2Neurons.html" class="code" title="function data_out = RearrangeStudies2Neurons(data)">RearrangeStudies2Neurons</a>	REARRANGESTUDIES2NEURONS - Takes a DynaSim data structure that is the result of a parameter sweep and rearranges it into a single (1D) data structure.</li><li><a href="SelectData.html" class="code" title="function data=SelectData(data,varargin)">SelectData</a>	SELECTDATA -  select subset of data</li><li><a href="ThevEquiv.html" class="code" title="function data = ThevEquiv(data, fields_currents, field_voltage, reversals_list, output_field_name)">ThevEquiv</a>	Calculates the Th�venin equivalent voltage and conductance for a</li><li><a href="xPlt2DynaSim.html" class="code" title="function data=xPlt2DynaSim(obj)">xPlt2DynaSim</a>	% data=xPlt2DynaSim(obj,varargin)</li></ul>
 <!-- crossreference -->
 
 
 
 <h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
-<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function data=CheckData(data)</a>
+<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function data=checkData(data)</a>
 0002 <span class="comment">%CHECKDATA - Standardize data structure and auto-populate missing fields</span>
 0003 <span class="comment">%</span>
 0004 <span class="comment">% Usage:</span>
-0005 <span class="comment">%   data=CheckData(data)</span>
+0005 <span class="comment">%   data=checkData(data)</span>
 0006 <span class="comment">%</span>
 0007 <span class="comment">% Input: DynaSim data structure, data matrix [time x cells], or cell array of data matrices</span>
 0008 <span class="comment">%</span>

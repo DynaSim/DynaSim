@@ -33,7 +33,7 @@
 <h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
 This function calls:
 <ul style="list-style-image:url(../matlabicon.gif)">
-<li><a href="CheckData.html" class="code" title="function data=CheckData(data)">CheckData</a>	CHECKDATA - Standardize data structure and auto-populate missing fields</li><li><a href="previewTable.html" class="code" title="function [dt_formatted] = previewTable(data_table,col_names)">previewTable</a>	All data, formatted into cells</li></ul>
+<li><a href="checkData.html" class="code" title="function data=checkData(data)">checkData</a>	CHECKDATA - Standardize data structure and auto-populate missing fields</li><li><a href="previewTable.html" class="code" title="function [dt_formatted] = previewTable(data_table,col_names)">previewTable</a>	All data, formatted into cells</li></ul>
 This function is called by:
 <ul style="list-style-image:url(../matlabicon.gif)">
 <li><a href="DynaSim2xPlt.html" class="code" title="function xp = DynaSim2xPlt(data)">DynaSim2xPlt</a>	Convert DynaSim data structure to xp format</li></ul>
@@ -50,7 +50,7 @@ This function is called by:
 0006         verbose_flag = 0;
 0007     <span class="keyword">end</span>
 0008 
-0009     <a href="CheckData.html" class="code" title="function data=CheckData(data)">CheckData</a>(data);            <span class="comment">% Makes sure it's a valid DynaSim Data structure</span>
+0009     <a href="checkData.html" class="code" title="function data=checkData(data)">checkData</a>(data);            <span class="comment">% Makes sure it's a valid DynaSim Data structure</span>
 0010     
 0011     <span class="comment">% Extract Time variable</span>
 0012     time = data(1).time;

@@ -89,7 +89,7 @@
      tic; WriteDynaSimSolver(model,'save_parameters_flag',1,'reduce_function_calls_flag',1,'solver','rk1','filename','solve_ode.m','dt',.001,'downsample_factor',10); v=solve_ode; plot(v); toc
      tic; WriteDynaSimSolver(model,'save_parameters_flag',1,'reduce_function_calls_flag',1,'solver','rk1','filename','solve_ode.m','dt',.005,'tspan',[0 200],'downsample_factor',10); v=solve_ode; plot(v); toc
 
- Dependencies: CheckOptions, CheckModel
+ Dependencies: checkOptions, checkModel
 
  See also: <a href="GetSolveFile.html" class="code" title="function solve_file = GetSolveFile(model,studyinfo,varargin)">GetSolveFile</a>, <a href="SimulateModel.html" class="code" title="function [data,studyinfo]=SimulateModel(model,varargin)">SimulateModel</a>, <a href="WriteMatlabSolver.html" class="code" title="function solve_ode_filepath = WriteMatlabSolver(model,varargin)">WriteMatlabSolver</a></pre></div>
 
@@ -97,7 +97,7 @@
 <h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
 This function calls:
 <ul style="list-style-image:url(../matlabicon.gif)">
-<li><a href="ApplyModifications.html" class="code" title="function [output,modifications]=ApplyModifications(model,modifications)">ApplyModifications</a>	APPLYMODIFICATIONS - Apply modifications to DynaSim specification or model structure</li><li><a href="CheckModel.html" class="code" title="function model=CheckModel(model)">CheckModel</a>	CHECKMODEL - Standardize model structure and auto-populate missing fields</li><li><a href="CheckOptions.html" class="code" title="function [parms, params_unspecified ] = CheckOptions(options, options_schema, strict)">CheckOptions</a>	CHECKOPTIONS - organize key/value pairs in structure with default or user-supplied values according to a schema</li><li><a href="CheckSolverOptions.html" class="code" title="function options=CheckSolverOptions(options)">CheckSolverOptions</a>	CHECKSOLVEROPTIONS - standardize simulation options appended to params.mat</li><li><a href="GetOutputCounts.html" class="code" title="function [state_var_counts,monitor_counts]=GetOutputCounts(model)">GetOutputCounts</a>	GETOUTPUTCOUNTS - determine how many copies of each state variable and monitor will be produced by simulating the model.</li><li><a href="PropagateFunctions.html" class="code" title="function model=PropagateFunctions(model)">PropagateFunctions</a>	PROPAGATEFUNCTIONS - eliminate internal function calls from model ODEs, ICs, monitors, and conditionals.</li><li><a href="PropagateParameters.html" class="code" title="function model=PropagateParameters(model,varargin)">PropagateParameters</a>	PROPAGATEPARAMETERS - substitute parameter values or prepend parameter names with prefix across all model equations.</li><li><a href="Vary2Modifications.html" class="code" title="function modifications_set = Vary2Modifications(vary,model)">Vary2Modifications</a>	VARY2MODIFICATIONS - convert specification of things to vary into a set of modifications indicating how to vary the desired things.</li></ul>
+<li><a href="applyModifications.html" class="code" title="function [output,modifications]=applyModifications(model,modifications)">applyModifications</a>	APPLYMODIFICATIONS - Apply modifications to DynaSim specification or model structure</li><li><a href="checkModel.html" class="code" title="function model=checkModel(model)">checkModel</a>	CHECKMODEL - Standardize model structure and auto-populate missing fields</li><li><a href="checkOptions.html" class="code" title="function [parms, params_unspecified ] = checkOptions(options, options_schema, strict)">checkOptions</a>	CHECKOPTIONS - organize key/value pairs in structure with default or user-supplied values according to a schema</li><li><a href="checkSolverOptions.html" class="code" title="function options=checkSolverOptions(options)">checkSolverOptions</a>	CHECKSOLVEROPTIONS - standardize simulation options appended to params.mat</li><li><a href="GetOutputCounts.html" class="code" title="function [state_var_counts,monitor_counts]=GetOutputCounts(model)">GetOutputCounts</a>	GETOUTPUTCOUNTS - determine how many copies of each state variable and monitor will be produced by simulating the model.</li><li><a href="PropagateFunctions.html" class="code" title="function model=PropagateFunctions(model)">PropagateFunctions</a>	PROPAGATEFUNCTIONS - eliminate internal function calls from model ODEs, ICs, monitors, and conditionals.</li><li><a href="PropagateParameters.html" class="code" title="function model=PropagateParameters(model,varargin)">PropagateParameters</a>	PROPAGATEPARAMETERS - substitute parameter values or prepend parameter names with prefix across all model equations.</li><li><a href="Vary2Modifications.html" class="code" title="function modifications_set = Vary2Modifications(vary,model)">Vary2Modifications</a>	VARY2MODIFICATIONS - convert specification of things to vary into a set of modifications indicating how to vary the desired things.</li></ul>
 This function is called by:
 <ul style="list-style-image:url(../matlabicon.gif)">
 <li><a href="GetSolveFile.html" class="code" title="function solve_file = GetSolveFile(model,studyinfo,varargin)">GetSolveFile</a>	GETSOLVEFILE - helper function that creates or retrieves the desired solver file.</li></ul>
@@ -172,12 +172,12 @@ This function is called by:
 0062 <span class="comment">%     tic; WriteDynaSimSolver(model,'save_parameters_flag',1,'reduce_function_calls_flag',1,'solver','rk1','filename','solve_ode.m','dt',.001,'downsample_factor',10); v=solve_ode; plot(v); toc</span>
 0063 <span class="comment">%     tic; WriteDynaSimSolver(model,'save_parameters_flag',1,'reduce_function_calls_flag',1,'solver','rk1','filename','solve_ode.m','dt',.005,'tspan',[0 200],'downsample_factor',10); v=solve_ode; plot(v); toc</span>
 0064 <span class="comment">%</span>
-0065 <span class="comment">% Dependencies: CheckOptions, CheckModel</span>
+0065 <span class="comment">% Dependencies: checkOptions, checkModel</span>
 0066 <span class="comment">%</span>
 0067 <span class="comment">% See also: GetSolveFile, SimulateModel, WriteMatlabSolver</span>
 0068 
 0069 <span class="comment">% Check inputs</span>
-0070 options=<a href="CheckOptions.html" class="code" title="function [parms, params_unspecified ] = CheckOptions(options, options_schema, strict)">CheckOptions</a>(varargin,{<span class="keyword">...</span>
+0070 options=<a href="checkOptions.html" class="code" title="function [parms, params_unspecified ] = checkOptions(options, options_schema, strict)">checkOptions</a>(varargin,{<span class="keyword">...</span>
 0071   <span class="string">'tspan'</span>,[0 100],[],<span class="keyword">...</span><span class="comment">          % [beg,end] (units must be consistent with dt and equations)</span>
 0072   <span class="string">'downsample_factor'</span>,1,[],<span class="keyword">...</span><span class="comment">    % downsampling applied during simulation (only every downsample_factor-time point is stored in memory or written to disk)</span>
 0073   <span class="string">'dt'</span>,.01,[],<span class="keyword">...</span><span class="comment">                 % time step used for fixed step DynaSim solvers</span>
@@ -193,7 +193,7 @@ This function is called by:
 0083   <span class="string">'verbose_flag'</span>,1,{0,1},<span class="keyword">...</span>
 0084   <span class="string">'one_solve_file_flag'</span>,0,{0,1},<span class="keyword">...</span><span class="comment"> % use only 1 solve file of each type, but can't vary mechs yet</span>
 0085   },false);
-0086 model=<a href="CheckModel.html" class="code" title="function model=CheckModel(model)">CheckModel</a>(model);
+0086 model=<a href="checkModel.html" class="code" title="function model=checkModel(model)">checkModel</a>(model);
 0087 separator=<span class="string">','</span>; <span class="comment">% ',', '\\t'</span>
 0088 
 0089 <span class="comment">%% 1.0 prepare model info</span>
@@ -225,12 +225,12 @@ This function is called by:
 0115   
 0116   <span class="comment">% save parameters to disk</span>
 0117   warning(<span class="string">'off'</span>,<span class="string">'catstruct:DuplicatesFound'</span>);
-0118   p = catstruct(<a href="CheckSolverOptions.html" class="code" title="function options=CheckSolverOptions(options)">CheckSolverOptions</a>(options),model.parameters);
+0118   p = catstruct(<a href="checkSolverOptions.html" class="code" title="function options=checkSolverOptions(options)">checkSolverOptions</a>(options),model.parameters);
 0119   
 0120   <span class="keyword">if</span> options.one_solve_file_flag
 0121     <span class="comment">% fill p flds that were varied with vectors of length = nSims</span>
 0122     
-0123     vary=<a href="CheckOptions.html" class="code" title="function [parms, params_unspecified ] = CheckOptions(options, options_schema, strict)">CheckOptions</a>(varargin,{<span class="string">'vary'</span>,[],[],},false);
+0123     vary=<a href="checkOptions.html" class="code" title="function [parms, params_unspecified ] = checkOptions(options, options_schema, strict)">checkOptions</a>(varargin,{<span class="string">'vary'</span>,[],[],},false);
 0124     vary = vary.vary;
 0125 
 0126     mod_set = <a href="Vary2Modifications.html" class="code" title="function modifications_set = Vary2Modifications(vary,model)">Vary2Modifications</a>(vary);
@@ -241,7 +241,7 @@ This function is called by:
 0131     <span class="comment">% Get param names</span>
 0132     iMod = 1;
 0133     <span class="comment">% Split extra entries in first 2 cols of mods, so each row is a single pop and param</span>
-0134     [~, first_mod_set] = <a href="ApplyModifications.html" class="code" title="function [output,modifications]=ApplyModifications(model,modifications)">ApplyModifications</a>([],mod_set{iMod});
+0134     [~, first_mod_set] = <a href="applyModifications.html" class="code" title="function [output,modifications]=applyModifications(model,modifications)">applyModifications</a>([],mod_set{iMod});
 0135 
 0136     <span class="comment">% replace '-&gt;' with '_'</span>
 0137     first_mod_set(:,1) = strrep(first_mod_set(:,1), <span class="string">'-&gt;'</span>, <span class="string">'_'</span>);
@@ -272,7 +272,7 @@ This function is called by:
 0162     param_values = nan(nParamMods, length(mod_set));
 0163     <span class="keyword">for</span> iMod = 1:length(mod_set)
 0164       <span class="comment">% Split extra entries in first 2 cols of mods, so each row is a single pop and param</span>
-0165       [~, mod_set{iMod}] = <a href="ApplyModifications.html" class="code" title="function [output,modifications]=ApplyModifications(model,modifications)">ApplyModifications</a>([],mod_set{iMod});
+0165       [~, mod_set{iMod}] = <a href="applyModifications.html" class="code" title="function [output,modifications]=applyModifications(model,modifications)">applyModifications</a>([],mod_set{iMod});
 0166       
 0167       <span class="comment">% Get scalar values as vector</span>
 0168       param_values(:, iMod) = [mod_set{iMod}{:,3}];
@@ -678,7 +678,7 @@ This function is called by:
 0568 odes = struct2cell(model.ODEs);
 0569 <span class="keyword">for</span> i=1:length(odes)
 0570   <span class="keyword">for</span> j=1:length(state_variables)
-0571     odes{i}=dynasim_strrep(odes{i},state_variables{j},[state_variables{j} index_lasts{j}]);
+0571     odes{i}=dynasimStrrep(odes{i},state_variables{j},[state_variables{j} index_lasts{j}]);
 0572   <span class="keyword">end</span>
 0573 <span class="keyword">end</span>
 0574 
@@ -824,7 +824,7 @@ This function is called by:
 0714   odes_out=odes;
 0715   <span class="keyword">for</span> i=1:length(odes)
 0716     <span class="keyword">for</span> j=1:length(odes)
-0717       odes_out{i}=dynasim_strrep(odes_out{i},[state_variables{j} index_lasts{j}],sprintf(<span class="string">'(%s%s+%s*%s%s)'</span>,state_variables{j},index_lasts{j},increment,state_variables{j},suffix_k),<span class="string">'('</span>,<span class="string">')'</span>);
+0717       odes_out{i}=dynasimStrrep(odes_out{i},[state_variables{j} index_lasts{j}],sprintf(<span class="string">'(%s%s+%s*%s%s)'</span>,state_variables{j},index_lasts{j},increment,state_variables{j},suffix_k),<span class="string">'('</span>,<span class="string">')'</span>);
 0718     <span class="keyword">end</span>
 0719   <span class="keyword">end</span>
 0720 <span class="keyword">end</span>
@@ -893,23 +893,23 @@ This function is called by:
 0783       <span class="keyword">if</span> strcmp(<span class="string">'spike_monitor'</span>,conditionals(i).namespace)
 0784         <span class="comment">% do nothing if spike_monitor</span>
 0785       <span class="keyword">else</span>
-0786         condition=dynasim_strrep(condition,state_variables{j},[state_variables{j} index_nexts{j}]);
+0786         condition=dynasimStrrep(condition,state_variables{j},[state_variables{j} index_nexts{j}]);
 0787       <span class="keyword">end</span>
 0788       
-0789       action=dynasim_strrep(action,state_variables{j},[state_variables{j} action_index]);
+0789       action=dynasimStrrep(action,state_variables{j},[state_variables{j} action_index]);
 0790       
 0791       <span class="keyword">if</span> ~isempty(elseaction)
-0792         elseaction=dynasim_strrep(elseaction,state_variables{j},[state_variables{j} action_index]);
+0792         elseaction=dynasimStrrep(elseaction,state_variables{j},[state_variables{j} action_index]);
 0793       <span class="keyword">end</span>
 0794     <span class="keyword">end</span>
 0795     
 0796     <span class="comment">% write conditional to solver function</span>
 0797     fprintf(fid,<span class="string">'  conditional_test=(%s);\n'</span>,condition);
-0798     action=dynasim_strrep(action,<span class="string">'\(n,:'</span>,<span class="string">'(n,conditional_test'</span>);
+0798     action=dynasimStrrep(action,<span class="string">'\(n,:'</span>,<span class="string">'(n,conditional_test'</span>);
 0799     fprintf(fid,<span class="string">'  if any(conditional_test), %s; '</span>,action);
 0800     
 0801     <span class="keyword">if</span> ~isempty(elseaction)
-0802       elseaction=dynasim_strrep(elseaction,<span class="string">'(n,:'</span>,<span class="string">'(n,conditional_test'</span>);
+0802       elseaction=dynasimStrrep(elseaction,<span class="string">'(n,:'</span>,<span class="string">'(n,conditional_test'</span>);
 0803       fprintf(<span class="string">'else %s; '</span>,elseaction);
 0804     <span class="keyword">end</span>
 0805     
@@ -960,8 +960,8 @@ This function is called by:
 0850   <span class="comment">% add indexes to state variables in monitors</span>
 0851   <span class="keyword">for</span> i=1:length(monitor_name)
 0852     <span class="keyword">for</span> j=1:length(state_variables)
-0853       <span class="comment">%monitor_expression{i}=dynasim_strrep(monitor_expression{i},state_variables{j},[state_variables{j} index_lasts{j}]);</span>
-0854       monitor_expression{i}=dynasim_strrep(monitor_expression{i},state_variables{j},[state_variables{j} monitor_index]);
+0853       <span class="comment">%monitor_expression{i}=dynasimStrrep(monitor_expression{i},state_variables{j},[state_variables{j} index_lasts{j}]);</span>
+0854       monitor_expression{i}=dynasimStrrep(monitor_expression{i},state_variables{j},[state_variables{j} monitor_index]);
 0855     <span class="keyword">end</span>
 0856     
 0857     <span class="comment">% write monitors to solver function</span>

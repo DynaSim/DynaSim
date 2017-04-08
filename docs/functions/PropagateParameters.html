@@ -45,7 +45,7 @@
 <h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
 This function calls:
 <ul style="list-style-image:url(../matlabicon.gif)">
-<li><a href="CheckModel.html" class="code" title="function model=CheckModel(model)">CheckModel</a>	CHECKMODEL - Standardize model structure and auto-populate missing fields</li><li><a href="CheckOptions.html" class="code" title="function [parms, params_unspecified ] = CheckOptions(options, options_schema, strict)">CheckOptions</a>	CHECKOPTIONS - organize key/value pairs in structure with default or user-supplied values according to a schema</li></ul>
+<li><a href="checkModel.html" class="code" title="function model=checkModel(model)">checkModel</a>	CHECKMODEL - Standardize model structure and auto-populate missing fields</li><li><a href="checkOptions.html" class="code" title="function [parms, params_unspecified ] = checkOptions(options, options_schema, strict)">checkOptions</a>	CHECKOPTIONS - organize key/value pairs in structure with default or user-supplied values according to a schema</li></ul>
 This function is called by:
 <ul style="list-style-image:url(../matlabicon.gif)">
 <li><a href="SimulateModel.html" class="code" title="function [data,studyinfo]=SimulateModel(model,varargin)">SimulateModel</a>	% data=SimulateModel(model,'option',value,...)</li><li><a href="WriteDynaSimSolver.html" class="code" title="function [outfile,options]=WriteDynaSimSolver(model,varargin)">WriteDynaSimSolver</a>	WRITEDYNASIMSOLVER - write m-file that numerically inteegrates the model</li><li><a href="WriteMatlabSolver.html" class="code" title="function solve_ode_filepath = WriteMatlabSolver(model,varargin)">WriteMatlabSolver</a>	WRITEMATLABSOLVER - write m-file that numerically inteegrates the model</li></ul>
@@ -73,14 +73,14 @@ This function is called by:
 0015 <span class="comment">% See also: PropagateFunctions, WriteDynaSimSolver</span>
 0016 
 0017 <span class="comment">% Check inputs</span>
-0018 model=<a href="CheckModel.html" class="code" title="function model=CheckModel(model)">CheckModel</a>(model);
+0018 model=<a href="checkModel.html" class="code" title="function model=checkModel(model)">checkModel</a>(model);
 0019 <span class="keyword">if</span> ~isstruct(model.parameters)
 0020   <span class="comment">% nothing to do</span>
 0021   <span class="keyword">return</span>;
 0022 <span class="keyword">end</span>
 0023 
 0024 <span class="comment">% Check inputs</span>
-0025 options=<a href="CheckOptions.html" class="code" title="function [parms, params_unspecified ] = CheckOptions(options, options_schema, strict)">CheckOptions</a>(varargin,{<span class="keyword">...</span>
+0025 options=<a href="checkOptions.html" class="code" title="function [parms, params_unspecified ] = checkOptions(options, options_schema, strict)">checkOptions</a>(varargin,{<span class="keyword">...</span>
 0026   <span class="string">'action'</span>,<span class="string">'substitute'</span>,{<span class="string">'substitute'</span>,<span class="string">'prepend'</span>,<span class="string">'postpend'</span>},<span class="keyword">...</span>
 0027   <span class="string">'prefix'</span>,<span class="string">'pset.p.'</span>,[],<span class="keyword">...</span>
 0028   <span class="string">'suffix'</span>,<span class="string">''</span>,[],<span class="keyword">...</span>
@@ -210,9 +210,9 @@ This function is called by:
 0152         num_found = length(find(ismember(allwords,found_parameter)));
 0153         <span class="keyword">for</span> iter=1:num_found
 0154           <span class="keyword">if</span> ~strcmp(attachType, <span class="string">'suffix'</span>)
-0155             expression=dynasim_strrep(expression,found_parameter,found_value);
+0155             expression=dynasimStrrep(expression,found_parameter,found_value);
 0156           <span class="keyword">else</span>
-0157             expression=dynasim_strrep2(expression,found_parameter,found_value);
+0157             expression=dynasimStrrep2(expression,found_parameter,found_value);
 0158           <span class="keyword">end</span>
 0159         <span class="keyword">end</span>
 0160       <span class="keyword">end</span>

@@ -2,8 +2,8 @@
                 "http://www.w3.org/TR/REC-html40/loose.dtd">
 <html>
 <head>
-  <title>Description of CheckHostPaths</title>
-  <meta name="keywords" content="CheckHostPaths">
+  <title>Description of checkHostPaths</title>
+  <meta name="keywords" content="checkHostPaths">
   <meta name="description" content="CHECKHOSTPATHS - Compare paths on host to those set in studyinfo when batch was created">
   <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
   <meta name="generator" content="m2html &copy; 2005 Guillaume Flandin">
@@ -16,19 +16,19 @@
 <body>
 <a name="_top"></a>
 <!-- menu.html functions -->
-<h1>CheckHostPaths
+<h1>checkHostPaths
 </h1>
 
 <h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
 <div class="box"><strong>CHECKHOSTPATHS - Compare paths on host to those set in studyinfo when batch was created</strong></div>
 
 <h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
-<div class="box"><strong>function [matched,error_message]=CheckHostPaths(studyinfo) </strong></div>
+<div class="box"><strong>function [matched,error_message]=checkHostPaths(studyinfo) </strong></div>
 
 <h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
 <div class="fragment"><pre class="comment">CHECKHOSTPATHS - Compare paths on host to those set in studyinfo when batch was created
 
- Call CheckHostPaths() in job.m before first simulation to make sure the
+ Call checkHostPaths() in job.m before first simulation to make sure the
  paths on the compute matchine match those in studyinfo created when the
  study was began.
 
@@ -36,7 +36,7 @@
  .error_log (see CreateBatch() or any jobX.m script).
 
  Usage:
-   CheckHostPaths(studyinfo)
+   checkHostPaths(studyinfo)
 
  Inputs:
    - studyinfo: DynaSim studyinfo structure
@@ -61,10 +61,10 @@ This function is called by:
 
 
 <h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
-<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function [matched,error_message]=CheckHostPaths(studyinfo)</a>
+<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function [matched,error_message]=checkHostPaths(studyinfo)</a>
 0002 <span class="comment">%CHECKHOSTPATHS - Compare paths on host to those set in studyinfo when batch was created</span>
 0003 <span class="comment">%</span>
-0004 <span class="comment">% Call CheckHostPaths() in job.m before first simulation to make sure the</span>
+0004 <span class="comment">% Call checkHostPaths() in job.m before first simulation to make sure the</span>
 0005 <span class="comment">% paths on the compute matchine match those in studyinfo created when the</span>
 0006 <span class="comment">% study was began.</span>
 0007 <span class="comment">%</span>
@@ -72,7 +72,7 @@ This function is called by:
 0009 <span class="comment">% .error_log (see CreateBatch() or any jobX.m script).</span>
 0010 <span class="comment">%</span>
 0011 <span class="comment">% Usage:</span>
-0012 <span class="comment">%   CheckHostPaths(studyinfo)</span>
+0012 <span class="comment">%   checkHostPaths(studyinfo)</span>
 0013 <span class="comment">%</span>
 0014 <span class="comment">% Inputs:</span>
 0015 <span class="comment">%   - studyinfo: DynaSim studyinfo structure</span>

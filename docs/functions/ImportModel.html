@@ -46,13 +46,13 @@
  Output:
    DynaSim model structure (see GenerateModel)
 
- See also: <a href="GenerateModel.html" class="code" title="function [model,name_map]=GenerateModel(specification,varargin)">GenerateModel</a>, <a href="CheckModel.html" class="code" title="function model=CheckModel(model)">CheckModel</a></pre></div>
+ See also: <a href="GenerateModel.html" class="code" title="function [model,name_map]=GenerateModel(specification,varargin)">GenerateModel</a>, <a href="checkModel.html" class="code" title="function model=checkModel(model)">checkModel</a></pre></div>
 
 <!-- crossreference -->
 <h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
 This function calls:
 <ul style="list-style-image:url(../matlabicon.gif)">
-<li><a href="CheckOptions.html" class="code" title="function [parms, params_unspecified ] = CheckOptions(options, options_schema, strict)">CheckOptions</a>	CHECKOPTIONS - organize key/value pairs in structure with default or user-supplied values according to a schema</li><li><a href="ParseModelEquations.html" class="code" title="function [model,name_map] = ParseModelEquations(text,varargin)">ParseModelEquations</a>	PARSEMODELEQUATIONS - parse equations and organize model data in DynaSim model structure</li></ul>
+<li><a href="checkOptions.html" class="code" title="function [parms, params_unspecified ] = checkOptions(options, options_schema, strict)">checkOptions</a>	CHECKOPTIONS - organize key/value pairs in structure with default or user-supplied values according to a schema</li><li><a href="ParseModelEquations.html" class="code" title="function [model,name_map] = ParseModelEquations(text,varargin)">ParseModelEquations</a>	PARSEMODELEQUATIONS - parse equations and organize model data in DynaSim model structure</li></ul>
 This function is called by:
 <ul style="list-style-image:url(../matlabicon.gif)">
 <li><a href="GenerateModel.html" class="code" title="function [model,name_map]=GenerateModel(specification,varargin)">GenerateModel</a>	GENERATEMODEL - Parse DynaSim specification and organize model data in DynaSim model structure</li></ul>
@@ -84,10 +84,10 @@ This function is called by:
 0019 <span class="comment">% Output:</span>
 0020 <span class="comment">%   DynaSim model structure (see GenerateModel)</span>
 0021 <span class="comment">%</span>
-0022 <span class="comment">% See also: GenerateModel, CheckModel</span>
+0022 <span class="comment">% See also: GenerateModel, checkModel</span>
 0023 
 0024 <span class="comment">% Check inputs</span>
-0025 options=<a href="CheckOptions.html" class="code" title="function [parms, params_unspecified ] = CheckOptions(options, options_schema, strict)">CheckOptions</a>(varargin,{<span class="keyword">...</span>
+0025 options=<a href="checkOptions.html" class="code" title="function [parms, params_unspecified ] = checkOptions(options, options_schema, strict)">checkOptions</a>(varargin,{<span class="keyword">...</span>
 0026   <span class="string">'host'</span>,<span class="string">'local'</span>,[],<span class="keyword">...</span><span class="comment"> % database, eg: infbrain, modeldb</span>
 0027   <span class="string">'namespace'</span>,[],[],<span class="keyword">...</span><span class="comment"> % namespace, eg: E, I</span>
 0028   <span class="string">'ic_pop'</span>,[],[],<span class="keyword">...</span><span class="comment"> % eg: E, I</span>

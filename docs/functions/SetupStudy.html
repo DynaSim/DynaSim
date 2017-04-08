@@ -36,7 +36,7 @@
 <h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
 This function calls:
 <ul style="list-style-image:url(../matlabicon.gif)">
-<li><a href="CheckOptions.html" class="code" title="function [parms, params_unspecified ] = CheckOptions(options, options_schema, strict)">CheckOptions</a>	CHECKOPTIONS - organize key/value pairs in structure with default or user-supplied values according to a schema</li><li><a href="CheckStudyinfo.html" class="code" title="function studyinfo=CheckStudyinfo(studyinfo,varargin)">CheckStudyinfo</a>	CHECKSTUDYINFO - Standardize studyinfo structure and auto-populate missing fields</li><li><a href="StudyinfoIO.html" class="code" title="function studyinfo=StudyinfoIO(studyinfo,study_file,id,verbose_flag)">StudyinfoIO</a>	STUDYINFOIO - use lock files to manage concurrent access to a shared studyinfo</li></ul>
+<li><a href="checkOptions.html" class="code" title="function [parms, params_unspecified ] = checkOptions(options, options_schema, strict)">checkOptions</a>	CHECKOPTIONS - organize key/value pairs in structure with default or user-supplied values according to a schema</li><li><a href="checkStudyinfo.html" class="code" title="function studyinfo=checkStudyinfo(studyinfo,varargin)">checkStudyinfo</a>	CHECKSTUDYINFO - Standardize studyinfo structure and auto-populate missing fields</li><li><a href="StudyinfoIO.html" class="code" title="function studyinfo=StudyinfoIO(studyinfo,study_file,id,verbose_flag)">StudyinfoIO</a>	STUDYINFOIO - use lock files to manage concurrent access to a shared studyinfo</li></ul>
 This function is called by:
 <ul style="list-style-image:url(../matlabicon.gif)">
 <li><a href="CreateBatch.html" class="code" title="function studyinfo = CreateBatch(base_model,modifications_set,varargin)">CreateBatch</a>	CREATEBATCH - create and submit jobs to run sets of simulations or analyses.</li><li><a href="SimulateModel.html" class="code" title="function [data,studyinfo]=SimulateModel(model,varargin)">SimulateModel</a>	% data=SimulateModel(model,'option',value,...)</li></ul>
@@ -53,7 +53,7 @@ This function is called by:
 0006 <span class="comment">% See also: SimulateModel, UpdateStudy</span>
 0007 
 0008 <span class="comment">% Check inputs</span>
-0009 opts=<a href="CheckOptions.html" class="code" title="function [parms, params_unspecified ] = CheckOptions(options, options_schema, strict)">CheckOptions</a>(varargin,{<span class="keyword">...</span>
+0009 opts=<a href="checkOptions.html" class="code" title="function [parms, params_unspecified ] = checkOptions(options, options_schema, strict)">checkOptions</a>(varargin,{<span class="keyword">...</span>
 0010   <span class="string">'modifications_set'</span>,[],[],<span class="keyword">...</span><span class="comment"> % search space</span>
 0011   <span class="string">'simulator_options'</span>,[],[],<span class="keyword">...</span><span class="comment"> % options from SimulateModel</span>
 0012   <span class="string">'process_id'</span>,[],[],<span class="keyword">...</span><span class="comment"> % process identifier for loading studyinfo if necessary</span>
@@ -107,7 +107,7 @@ This function is called by:
 0060   <span class="comment">% initialize studyinfo if not already initialized</span>
 0061   <span class="keyword">if</span> ischar(options.study_dir) &amp;&amp; isdir(options.study_dir) &amp;&amp; exist(fullfile(options.study_dir,<span class="string">'studyinfo.mat'</span>),<span class="string">'file'</span>)
 0062     <span class="comment">% studyinfo file already exists</span>
-0063     studyinfo=<a href="CheckStudyinfo.html" class="code" title="function studyinfo=CheckStudyinfo(studyinfo,varargin)">CheckStudyinfo</a>(options.study_dir,<span class="string">'process_id'</span>,process_id);
+0063     studyinfo=<a href="checkStudyinfo.html" class="code" title="function studyinfo=checkStudyinfo(studyinfo,varargin)">checkStudyinfo</a>(options.study_dir,<span class="string">'process_id'</span>,process_id);
 0064     orig_studyinfo=studyinfo;
 0065   <span class="keyword">else</span>
 0066     orig_studyinfo=[];
@@ -121,7 +121,7 @@ This function is called by:
 0074       studyinfo=[];
 0075     <span class="keyword">end</span>
 0076     
-0077     studyinfo=<a href="CheckStudyinfo.html" class="code" title="function studyinfo=CheckStudyinfo(studyinfo,varargin)">CheckStudyinfo</a>(studyinfo,<span class="string">'process_id'</span>,process_id); <span class="comment">% auto-fill all fields</span>
+0077     studyinfo=<a href="checkStudyinfo.html" class="code" title="function studyinfo=checkStudyinfo(studyinfo,varargin)">checkStudyinfo</a>(studyinfo,<span class="string">'process_id'</span>,process_id); <span class="comment">% auto-fill all fields</span>
 0078   <span class="keyword">end</span>
 0079   
 0080   <span class="comment">% set basic metadata for this study</span>
@@ -203,7 +203,7 @@ This function is called by:
 0156         studyinfo.simulations(k).result_options{end+1}=options.plot_options{kk};
 0157         fname=[options.prefix <span class="string">'_sim'</span> num2str(k) <span class="string">'_plot'</span> num2str(kk) <span class="string">'_'</span> func2str(options.plot_functions{kk})]; 
 0158         <span class="comment">% note: extension will depend on output format (jpg,png,eps,svg)</span>
-0159         <span class="comment">% and be set in AnalyzeData().</span>
+0159         <span class="comment">% and be set in analyzeData().</span>
 0160         studyinfo.simulations(k).result_files{end+1}=fullfile(plot_dir,fname);
 0161       <span class="keyword">end</span>
 0162       

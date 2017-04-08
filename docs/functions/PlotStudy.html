@@ -39,7 +39,7 @@
    [handles, h2, hsp] = PlotStudy(data,myplot_handle)
 
  Inputs:
-     - data: DynaSim data structure (see CheckData)
+     - data: DynaSim data structure (see checkData)
      - myplot_handle: Handle for plotting function.
      - options:
        'textfontsize': default text font size of 10
@@ -62,7 +62,7 @@
 <h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
 This function calls:
 <ul style="list-style-image:url(../matlabicon.gif)">
-<li><a href="CheckOptions.html" class="code" title="function [parms, params_unspecified ] = CheckOptions(options, options_schema, strict)">CheckOptions</a>	CHECKOPTIONS - organize key/value pairs in structure with default or user-supplied values according to a schema</li></ul>
+<li><a href="checkOptions.html" class="code" title="function [parms, params_unspecified ] = checkOptions(options, options_schema, strict)">checkOptions</a>	CHECKOPTIONS - organize key/value pairs in structure with default or user-supplied values according to a schema</li></ul>
 This function is called by:
 <ul style="list-style-image:url(../matlabicon.gif)">
 </ul>
@@ -85,7 +85,7 @@ This function is called by:
 0012 <span class="comment">%   [handles, h2, hsp] = PlotStudy(data,myplot_handle)</span>
 0013 <span class="comment">%</span>
 0014 <span class="comment">% Inputs:</span>
-0015 <span class="comment">%     - data: DynaSim data structure (see CheckData)</span>
+0015 <span class="comment">%     - data: DynaSim data structure (see checkData)</span>
 0016 <span class="comment">%     - myplot_handle: Handle for plotting function.</span>
 0017 <span class="comment">%     - options:</span>
 0018 <span class="comment">%       'textfontsize': default text font size of 10</span>
@@ -104,10 +104,10 @@ This function is called by:
 0031 <span class="comment">% Dependencies:</span>
 0032 <span class="comment">%     Uses subplot_grid.</span>
 0033 
-0034 <span class="comment">% data=CheckData(data);</span>
+0034 <span class="comment">% data=checkData(data);</span>
 0035 handles=[];
 0036 
-0037 options=<a href="CheckOptions.html" class="code" title="function [parms, params_unspecified ] = CheckOptions(options, options_schema, strict)">CheckOptions</a>(varargin,{<span class="keyword">...</span>
+0037 options=<a href="checkOptions.html" class="code" title="function [parms, params_unspecified ] = checkOptions(options, options_schema, strict)">checkOptions</a>(varargin,{<span class="keyword">...</span>
 0038   <span class="string">'textfontsize'</span>,10,[],<span class="keyword">...</span>
 0039   <span class="string">'use_subplot_grid'</span>,1,{0,1},<span class="keyword">...</span>
 0040   },false);

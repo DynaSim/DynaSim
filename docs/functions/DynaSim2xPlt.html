@@ -32,10 +32,10 @@
 <h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
 This function calls:
 <ul style="list-style-image:url(../matlabicon.gif)">
-<li><a href="CheckData.html" class="code" title="function data=CheckData(data)">CheckData</a>	CHECKDATA - Standardize data structure and auto-populate missing fields</li><li><a href="Data2Table.html" class="code" title="function [data_table,column_titles,time] = Data2Table(data,verbose_flag)">Data2Table</a>	Converts DynaSim structure to 1D cell array format. Later can use to</li></ul>
+<li><a href="checkData.html" class="code" title="function data=checkData(data)">checkData</a>	CHECKDATA - Standardize data structure and auto-populate missing fields</li><li><a href="Data2Table.html" class="code" title="function [data_table,column_titles,time] = Data2Table(data,verbose_flag)">Data2Table</a>	Converts DynaSim structure to 1D cell array format. Later can use to</li></ul>
 This function is called by:
 <ul style="list-style-image:url(../matlabicon.gif)">
-<li><a href="All2xPlt.html" class="code" title="function [xp,is_image] = All2xPlt(data)">All2xPlt</a>	</li></ul>
+<li><a href="all2xPlt.html" class="code" title="function [xp,is_image] = all2xPlt(data)">all2xPlt</a>	</li></ul>
 <!-- crossreference -->
 
 
@@ -45,7 +45,7 @@ This function is called by:
 0002 <a name="_sub0" href="#_subfunctions" class="code">function xp = DynaSim2xPlt(data)</a>
 0003     <span class="comment">% Convert DynaSim data structure to xp format</span>
 0004 
-0005     data = <a href="CheckData.html" class="code" title="function data=CheckData(data)">CheckData</a>(data);
+0005     data = <a href="checkData.html" class="code" title="function data=checkData(data)">checkData</a>(data);
 0006     
 0007     <span class="comment">% Extract the data in a linear table format</span>
 0008     [data_table,column_titles,time] = <a href="Data2Table.html" class="code" title="function [data_table,column_titles,time] = Data2Table(data,verbose_flag)">Data2Table</a> (data);

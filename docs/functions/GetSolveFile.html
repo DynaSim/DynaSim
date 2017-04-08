@@ -33,7 +33,7 @@
 
  Inputs:
    - model: DynaSim model structure (see GenerateModel)
-   - studyinfo (optional): DynaSim studyinfo structure (see CheckStudyinfo)
+   - studyinfo (optional): DynaSim studyinfo structure (see checkStudyinfo)
    - options (optional): cell array of key/value pairs or Matlab structure with options
      'solver'      : solver for numerical integration (see GetSolveFile)
                      {'euler','rk2','rk4'} (default: 'rk4')
@@ -53,7 +53,7 @@
 <h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
 This function calls:
 <ul style="list-style-image:url(../matlabicon.gif)">
-<li><a href="CheckOptions.html" class="code" title="function [parms, params_unspecified ] = CheckOptions(options, options_schema, strict)">CheckOptions</a>	CHECKOPTIONS - organize key/value pairs in structure with default or user-supplied values according to a schema</li><li><a href="CompareSolveFiles.html" class="code" title="function solve_file_m=CompareSolveFiles(solve_file_m,mexpath)">CompareSolveFiles</a>	COMPARESOLVEFILES - look for an equivalent file in same directory</li><li><a href="Options2Keyval.html" class="code" title="function keyval = Options2Keyval(options)">Options2Keyval</a>	OPTIONS2KEYVAL - Convert from options structure to a list of key/value pairs.</li><li><a href="PrepareMEX.html" class="code" title="function mexfileOutput = PrepareMEX(mfileInput, varargin)">PrepareMEX</a>	PREPAREMEX - take an m-file path and compile it using the Matlab coder.</li><li><a href="WriteDynaSimSolver.html" class="code" title="function [outfile,options]=WriteDynaSimSolver(model,varargin)">WriteDynaSimSolver</a>	WRITEDYNASIMSOLVER - write m-file that numerically inteegrates the model</li><li><a href="WriteMatlabSolver.html" class="code" title="function solve_ode_filepath = WriteMatlabSolver(model,varargin)">WriteMatlabSolver</a>	WRITEMATLABSOLVER - write m-file that numerically inteegrates the model</li></ul>
+<li><a href="checkOptions.html" class="code" title="function [parms, params_unspecified ] = checkOptions(options, options_schema, strict)">checkOptions</a>	CHECKOPTIONS - organize key/value pairs in structure with default or user-supplied values according to a schema</li><li><a href="CompareSolveFiles.html" class="code" title="function solve_file_m=CompareSolveFiles(solve_file_m,mexpath)">CompareSolveFiles</a>	COMPARESOLVEFILES - look for an equivalent file in same directory</li><li><a href="Options2Keyval.html" class="code" title="function keyval = Options2Keyval(options)">Options2Keyval</a>	OPTIONS2KEYVAL - Convert from options structure to a list of key/value pairs.</li><li><a href="PrepareMEX.html" class="code" title="function mexfileOutput = PrepareMEX(mfileInput, varargin)">PrepareMEX</a>	PREPAREMEX - take an m-file path and compile it using the Matlab coder.</li><li><a href="WriteDynaSimSolver.html" class="code" title="function [outfile,options]=WriteDynaSimSolver(model,varargin)">WriteDynaSimSolver</a>	WRITEDYNASIMSOLVER - write m-file that numerically inteegrates the model</li><li><a href="WriteMatlabSolver.html" class="code" title="function solve_ode_filepath = WriteMatlabSolver(model,varargin)">WriteMatlabSolver</a>	WRITEMATLABSOLVER - write m-file that numerically inteegrates the model</li></ul>
 This function is called by:
 <ul style="list-style-image:url(../matlabicon.gif)">
 <li><a href="CreateBatch.html" class="code" title="function studyinfo = CreateBatch(base_model,modifications_set,varargin)">CreateBatch</a>	CREATEBATCH - create and submit jobs to run sets of simulations or analyses.</li><li><a href="SimulateModel.html" class="code" title="function [data,studyinfo]=SimulateModel(model,varargin)">SimulateModel</a>	% data=SimulateModel(model,'option',value,...)</li></ul>
@@ -70,7 +70,7 @@ This function is called by:
 0006 <span class="comment">%</span>
 0007 <span class="comment">% Inputs:</span>
 0008 <span class="comment">%   - model: DynaSim model structure (see GenerateModel)</span>
-0009 <span class="comment">%   - studyinfo (optional): DynaSim studyinfo structure (see CheckStudyinfo)</span>
+0009 <span class="comment">%   - studyinfo (optional): DynaSim studyinfo structure (see checkStudyinfo)</span>
 0010 <span class="comment">%   - options (optional): cell array of key/value pairs or Matlab structure with options</span>
 0011 <span class="comment">%     'solver'      : solver for numerical integration (see GetSolveFile)</span>
 0012 <span class="comment">%                     {'euler','rk2','rk4'} (default: 'rk4')</span>
@@ -102,7 +102,7 @@ This function is called by:
 0038   varargin={};
 0039 <span class="keyword">end</span>
 0040 
-0041 options=<a href="CheckOptions.html" class="code" title="function [parms, params_unspecified ] = CheckOptions(options, options_schema, strict)">CheckOptions</a>(varargin,{<span class="keyword">...</span>
+0041 options=<a href="checkOptions.html" class="code" title="function [parms, params_unspecified ] = checkOptions(options, options_schema, strict)">checkOptions</a>(varargin,{<span class="keyword">...</span>
 0042   <span class="string">'solver'</span>,<span class="string">'rk4'</span>,{<span class="string">'euler'</span>,<span class="string">'rk1'</span>,<span class="string">'rk2'</span>,<span class="string">'rk4'</span>,<span class="string">'modified_euler'</span>,<span class="string">'rungekutta'</span>,<span class="string">'rk'</span>,<span class="string">'ode23'</span>,<span class="string">'ode45'</span>,<span class="keyword">...</span>
 0043     <span class="string">'ode1'</span>,<span class="string">'ode2'</span>,<span class="string">'ode3'</span>,<span class="string">'ode4'</span>,<span class="string">'ode5'</span>,<span class="string">'ode8'</span>,<span class="string">'ode113'</span>,<span class="string">'ode15s'</span>,<span class="string">'ode23s'</span>,<span class="string">'ode23t'</span>,<span class="string">'ode23tb'</span>},<span class="keyword">...</span><span class="comment"> % DynaSim and built-in Matlab solvers</span>
 0044   <span class="string">'matlab_solver_options'</span>,[],[],<span class="keyword">...</span><span class="comment"> % options from odeset for use with built-in Matlab solvers</span>
