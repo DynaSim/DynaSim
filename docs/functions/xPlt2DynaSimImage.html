@@ -2,9 +2,9 @@
                 "http://www.w3.org/TR/REC-html40/loose.dtd">
 <html>
 <head>
-  <title>Description of xPlt2DynaSimImage</title>
-  <meta name="keywords" content="xPlt2DynaSimImage">
-  <meta name="description" content="% data=xPlt2DynaSim(obj,varargin)">
+  <title>Description of ds.xPlt.xPlt2dsImage</title>
+  <meta name="keywords" content="ds.xPlt.xPlt2dsImage">
+  <meta name="description" content="% data=ds.xPlt.xPlt2ds(obj,varargin)">
   <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
   <meta name="generator" content="m2html &copy; 2005 Guillaume Flandin">
   <meta name="robots" content="index, follow">
@@ -16,17 +16,17 @@
 <body>
 <a name="_top"></a>
 <!-- menu.html functions -->
-<h1>xPlt2DynaSimImage
+<h1>ds.xPlt.xPlt2dsImage
 </h1>
 
 <h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
-<div class="box"><strong>% data=xPlt2DynaSim(obj,varargin)</strong></div>
+<div class="box"><strong>% data=ds.xPlt.xPlt2ds(obj,varargin)</strong></div>
 
 <h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
-<div class="box"><strong>function data=xPlt2DynaSimImage(obj) </strong></div>
+<div class="box"><strong>function data=ds.xPlt.xPlt2dsImage(obj) </strong></div>
 
 <h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
-<div class="fragment"><pre class="comment">% data=xPlt2DynaSim(obj,varargin)
+<div class="fragment"><pre class="comment">% data=ds.xPlt.xPlt2ds(obj,varargin)
  Dependencies:
    Requires the MDD class, which should be part of DynaSim. If not,
    get it here https://github.com/davestanley/MDD
@@ -39,14 +39,14 @@ This function calls:
 </ul>
 This function is called by:
 <ul style="list-style-image:url(../matlabicon.gif)">
-<li><a href="DynaSimMerge.html" class="code" title="function data_merged = DynaSimMerge(data1,data2)">DynaSimMerge</a>	Merge two Dynasim structures created from different simulations</li></ul>
+<li><a href="ds.merge.html" class="code" title="function data_merged = ds.mergeData(data1,data2)">ds.merge</a>	Merge two Dynasim structures created from different simulations</li></ul>
 <!-- crossreference -->
 
 
 
 <h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
-<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function data=xPlt2DynaSimImage(obj)</a>
-0002 <span class="comment">%% data=xPlt2DynaSim(obj,varargin)</span>
+<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function data=ds.xPlt.xPlt2dsImage(obj)</a>
+0002 <span class="comment">%% data=ds.xPlt.xPlt2ds(obj,varargin)</span>
 0003 <span class="comment">% Dependencies:</span>
 0004 <span class="comment">%   Requires the MDD class, which should be part of DynaSim. If not,</span>
 0005 <span class="comment">%   get it here https://github.com/davestanley/MDD</span>
@@ -61,15 +61,15 @@ This function is called by:
 0014 <span class="comment">% load sample_data_dynasim.mat</span>
 0015 <span class="comment">% data1=data;</span>
 0016 <span class="comment">% data2 = data(1);</span>
-0017 <span class="comment">% d1 = xPlt2DynaSim(DynaSim2xPlt(data1));</span>
-0018 <span class="comment">% d2 = xPlt2DynaSim(DynaSim2xPlt(data2));</span>
-0019 <span class="comment">% d2b = xPlt2DynaSim(squeeze(DynaSim2xPlt(data2)));</span>
+0017 <span class="comment">% d1 = ds.xPlt.xPlt2ds(ds.ds2xPlt(data1));</span>
+0018 <span class="comment">% d2 = ds.xPlt.xPlt2ds(ds.ds2xPlt(data2));</span>
+0019 <span class="comment">% d2b = ds.xPlt.xPlt2ds(squeeze(ds.ds2xPlt(data2)));</span>
 0020 <span class="comment">% % Make sure 1 is identical</span>
 0021 <span class="comment">% close all;</span>
-0022 <span class="comment">% PlotData(data1); PlotData(d1);</span>
+0022 <span class="comment">% ds.plotData(data1); ds.plotData(d1);</span>
 0023 <span class="comment">% % Make sure 2 is identical</span>
-0024 <span class="comment">% PlotData(data2); PlotData(d2);</span>
-0025 <span class="comment">% PlotData(data2); PlotData(d2b);</span>
+0024 <span class="comment">% ds.plotData(data2); ds.plotData(d2);</span>
+0025 <span class="comment">% ds.plotData(data2); ds.plotData(d2b);</span>
 0026 
 0027 <span class="comment">% Squeeze out populations and variables axes (should remove them if they</span>
 0028 <span class="comment">% are of size 1)</span>

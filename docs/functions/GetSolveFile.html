@@ -2,8 +2,8 @@
                 "http://www.w3.org/TR/REC-html40/loose.dtd">
 <html>
 <head>
-  <title>Description of GetSolveFile</title>
-  <meta name="keywords" content="GetSolveFile">
+  <title>Description of ds.getSolveFile</title>
+  <meta name="keywords" content="ds.getSolveFile">
   <meta name="description" content="GETSOLVEFILE - helper function that creates or retrieves the desired solver file.">
   <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
   <meta name="generator" content="m2html &copy; 2005 Guillaume Flandin">
@@ -16,26 +16,26 @@
 <body>
 <a name="_top"></a>
 <!-- menu.html functions -->
-<h1>GetSolveFile
+<h1>ds.getSolveFile
 </h1>
 
 <h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
 <div class="box"><strong>GETSOLVEFILE - helper function that creates or retrieves the desired solver file.</strong></div>
 
 <h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
-<div class="box"><strong>function solve_file = GetSolveFile(model,studyinfo,varargin) </strong></div>
+<div class="box"><strong>function solve_file = ds.getSolveFile(model,studyinfo,varargin) </strong></div>
 
 <h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
 <div class="fragment"><pre class="comment">GETSOLVEFILE - helper function that creates or retrieves the desired solver file.
 
  Usage:
-   solve_file = GetSolveFile(model,studyinfo,options)
+   solve_file = ds.getSolveFile(model,studyinfo,options)
 
  Inputs:
-   - model: DynaSim model structure (see GenerateModel)
-   - studyinfo (optional): DynaSim studyinfo structure (see CheckStudyinfo)
+   - model: DynaSim model structure (see ds.generateModel)
+   - studyinfo (optional): DynaSim studyinfo structure (see ds.checkStudyinfo)
    - options (optional): cell array of key/value pairs or Matlab structure with options
-     'solver'      : solver for numerical integration (see GetSolveFile)
+     'solver'      : solver for numerical integration (see ds.getSolveFile)
                      {'euler','rk2','rk4'} (default: 'rk4')
      'disk_flag'   : whether to write to disk during simulation instead of
                      storing in memory {0 or 1} (default: 0)
@@ -46,33 +46,33 @@
  Output:
    - solver_file: full file name of file solving the system in model
 
- See also: <a href="WriteDynaSimSolver.html" class="code" title="function [outfile,options]=WriteDynaSimSolver(model,varargin)">WriteDynaSimSolver</a>, <a href="CompareSolveFiles.html" class="code" title="function solve_file_m=CompareSolveFiles(solve_file_m,mexpath)">CompareSolveFiles</a>, <a href="PrepareMEX.html" class="code" title="function mexfileOutput = PrepareMEX(mfileInput, varargin)">PrepareMEX</a>,
-           <a href="SimulateModel.html" class="code" title="function [data,studyinfo]=SimulateModel(model,varargin)">SimulateModel</a>, <a href="CreateBatch.html" class="code" title="function studyinfo = CreateBatch(base_model,modifications_set,varargin)">CreateBatch</a></pre></div>
+ See also: <a href="ds.writeDynaSimSolver.html" class="code" title="function [outfile,options]=ds.writeDynaSimSolver(model,varargin)">ds.writeDynaSimSolver</a>, <a href="ds.compareSolveFiles.html" class="code" title="function solve_file_m=ds.compareSolveFiles(solve_file_m,mexpath)">ds.compareSolveFiles</a>, <a href="ds.prepareMEX.html" class="code" title="function mexfileOutput = ds.prepareMEX(mfileInput, varargin)">ds.prepareMEX</a>,
+           <a href="ds.simulateModel.html" class="code" title="function [data,studyinfo]=ds.simulateModel(model,varargin)">ds.simulateModel</a>, <a href="ds.createBatch.html" class="code" title="function studyinfo = ds.createBatch(base_model,modifications_set,varargin)">ds.createBatch</a></pre></div>
 
 <!-- crossreference -->
 <h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
 This function calls:
 <ul style="list-style-image:url(../matlabicon.gif)">
-<li><a href="CheckOptions.html" class="code" title="function [parms, params_unspecified ] = CheckOptions(options, options_schema, strict)">CheckOptions</a>	CHECKOPTIONS - organize key/value pairs in structure with default or user-supplied values according to a schema</li><li><a href="CompareSolveFiles.html" class="code" title="function solve_file_m=CompareSolveFiles(solve_file_m,mexpath)">CompareSolveFiles</a>	COMPARESOLVEFILES - look for an equivalent file in same directory</li><li><a href="Options2Keyval.html" class="code" title="function keyval = Options2Keyval(options)">Options2Keyval</a>	OPTIONS2KEYVAL - Convert from options structure to a list of key/value pairs.</li><li><a href="PrepareMEX.html" class="code" title="function mexfileOutput = PrepareMEX(mfileInput, varargin)">PrepareMEX</a>	PREPAREMEX - take an m-file path and compile it using the Matlab coder.</li><li><a href="WriteDynaSimSolver.html" class="code" title="function [outfile,options]=WriteDynaSimSolver(model,varargin)">WriteDynaSimSolver</a>	WRITEDYNASIMSOLVER - write m-file that numerically inteegrates the model</li><li><a href="WriteMatlabSolver.html" class="code" title="function solve_ode_filepath = WriteMatlabSolver(model,varargin)">WriteMatlabSolver</a>	WRITEMATLABSOLVER - write m-file that numerically inteegrates the model</li></ul>
+<li><a href="ds.checkOptions.html" class="code" title="function [parms, params_unspecified ] = ds.checkOptions(options, options_schema, strict)">ds.checkOptions</a>	CHECKOPTIONS - organize key/value pairs in structure with default or user-supplied values according to a schema</li><li><a href="ds.compareSolveFiles.html" class="code" title="function solve_file_m=ds.compareSolveFiles(solve_file_m,mexpath)">ds.compareSolveFiles</a>	COMPARESOLVEFILES - look for an equivalent file in same directory</li><li><a href="ds.options2Keyval.html" class="code" title="function keyval = ds.options2Keyval(options)">ds.options2Keyval</a>	OPTIONS2KEYVAL - Convert from options structure to a list of key/value pairs.</li><li><a href="ds.prepareMEX.html" class="code" title="function mexfileOutput = ds.prepareMEX(mfileInput, varargin)">ds.prepareMEX</a>	PREPAREMEX - take an m-file path and compile it using the Matlab coder.</li><li><a href="ds.writeDynaSimSolver.html" class="code" title="function [outfile,options]=ds.writeDynaSimSolver(model,varargin)">ds.writeDynaSimSolver</a>	WRITEDYNASIMSOLVER - write m-file that numerically inteegrates the model</li><li><a href="ds.writeMatlabSolver.html" class="code" title="function solve_ode_filepath = ds.writeMatlabSolver(model,varargin)">ds.writeMatlabSolver</a>	WRITEMATLABSOLVER - write m-file that numerically inteegrates the model</li></ul>
 This function is called by:
 <ul style="list-style-image:url(../matlabicon.gif)">
-<li><a href="CreateBatch.html" class="code" title="function studyinfo = CreateBatch(base_model,modifications_set,varargin)">CreateBatch</a>	CREATEBATCH - create and submit jobs to run sets of simulations or analyses.</li><li><a href="SimulateModel.html" class="code" title="function [data,studyinfo]=SimulateModel(model,varargin)">SimulateModel</a>	% data=SimulateModel(model,'option',value,...)</li></ul>
+<li><a href="ds.createBatch.html" class="code" title="function studyinfo = ds.createBatch(base_model,modifications_set,varargin)">ds.createBatch</a>	CREATEBATCH - create and submit jobs to run sets of simulations or analyses.</li><li><a href="ds.simulateModel.html" class="code" title="function [data,studyinfo]=ds.simulateModel(model,varargin)">ds.simulateModel</a>	% data=ds.simulateModel(model,'option',value,...)</li></ul>
 <!-- crossreference -->
 
 
 
 <h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
-<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function solve_file = GetSolveFile(model,studyinfo,varargin)</a>
+<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function solve_file = ds.getSolveFile(model,studyinfo,varargin)</a>
 0002 <span class="comment">%GETSOLVEFILE - helper function that creates or retrieves the desired solver file.</span>
 0003 <span class="comment">%</span>
 0004 <span class="comment">% Usage:</span>
-0005 <span class="comment">%   solve_file = GetSolveFile(model,studyinfo,options)</span>
+0005 <span class="comment">%   solve_file = ds.getSolveFile(model,studyinfo,options)</span>
 0006 <span class="comment">%</span>
 0007 <span class="comment">% Inputs:</span>
-0008 <span class="comment">%   - model: DynaSim model structure (see GenerateModel)</span>
-0009 <span class="comment">%   - studyinfo (optional): DynaSim studyinfo structure (see CheckStudyinfo)</span>
+0008 <span class="comment">%   - model: DynaSim model structure (see ds.generateModel)</span>
+0009 <span class="comment">%   - studyinfo (optional): DynaSim studyinfo structure (see ds.checkStudyinfo)</span>
 0010 <span class="comment">%   - options (optional): cell array of key/value pairs or Matlab structure with options</span>
-0011 <span class="comment">%     'solver'      : solver for numerical integration (see GetSolveFile)</span>
+0011 <span class="comment">%     'solver'      : solver for numerical integration (see ds.getSolveFile)</span>
 0012 <span class="comment">%                     {'euler','rk2','rk4'} (default: 'rk4')</span>
 0013 <span class="comment">%     'disk_flag'   : whether to write to disk during simulation instead of</span>
 0014 <span class="comment">%                     storing in memory {0 or 1} (default: 0)</span>
@@ -83,8 +83,8 @@ This function is called by:
 0019 <span class="comment">% Output:</span>
 0020 <span class="comment">%   - solver_file: full file name of file solving the system in model</span>
 0021 <span class="comment">%</span>
-0022 <span class="comment">% See also: WriteDynaSimSolver, CompareSolveFiles, PrepareMEX,</span>
-0023 <span class="comment">%           SimulateModel, CreateBatch</span>
+0022 <span class="comment">% See also: ds.writeDynaSimSolver, ds.compareSolveFiles, ds.prepareMEX,</span>
+0023 <span class="comment">%           ds.simulateModel, ds.createBatch</span>
 0024 
 0025 <span class="comment">% Check inputs</span>
 0026 opts=[];
@@ -102,7 +102,7 @@ This function is called by:
 0038   varargin={};
 0039 <span class="keyword">end</span>
 0040 
-0041 options=<a href="CheckOptions.html" class="code" title="function [parms, params_unspecified ] = CheckOptions(options, options_schema, strict)">CheckOptions</a>(varargin,{<span class="keyword">...</span>
+0041 options=<a href="ds.checkOptions.html" class="code" title="function [parms, params_unspecified ] = ds.checkOptions(options, options_schema, strict)">ds.checkOptions</a>(varargin,{<span class="keyword">...</span>
 0042   <span class="string">'solver'</span>,<span class="string">'rk4'</span>,{<span class="string">'euler'</span>,<span class="string">'rk1'</span>,<span class="string">'rk2'</span>,<span class="string">'rk4'</span>,<span class="string">'modified_euler'</span>,<span class="string">'rungekutta'</span>,<span class="string">'rk'</span>,<span class="string">'ode23'</span>,<span class="string">'ode45'</span>,<span class="keyword">...</span>
 0043     <span class="string">'ode1'</span>,<span class="string">'ode2'</span>,<span class="string">'ode3'</span>,<span class="string">'ode4'</span>,<span class="string">'ode5'</span>,<span class="string">'ode8'</span>,<span class="string">'ode113'</span>,<span class="string">'ode15s'</span>,<span class="string">'ode23s'</span>,<span class="string">'ode23t'</span>,<span class="string">'ode23tb'</span>},<span class="keyword">...</span><span class="comment"> % DynaSim and built-in Matlab solvers</span>
 0044   <span class="string">'matlab_solver_options'</span>,[],[],<span class="keyword">...</span><span class="comment"> % options from odeset for use with built-in Matlab solvers</span>
@@ -157,7 +157,7 @@ This function is called by:
 0093 <span class="keyword">if</span> ~isempty(options.solve_file)
 0094   <span class="comment">% use user-provided solve_file</span>
 0095   solve_file=options.solve_file;
-0096   <span class="comment">% note: options.solve_file is used by cluster sim jobs (see CreateBatch())</span>
+0096   <span class="comment">% note: options.solve_file is used by cluster sim jobs (see ds.createBatch())</span>
 0097 <span class="keyword">elseif</span> isfield(studyinfo,<span class="string">'solve_file'</span>)
 0098   <span class="comment">% use study-associated solve_file</span>
 0099   solve_file=studyinfo.solve_file;
@@ -207,24 +207,24 @@ This function is called by:
 0143 
 0144 <span class="comment">% create solve_file if it doesn't exist</span>
 0145 <span class="keyword">if</span> ~exist(solve_file,<span class="string">'file'</span>)
-0146   keyvals = <a href="Options2Keyval.html" class="code" title="function keyval = Options2Keyval(options)">Options2Keyval</a>(options);
+0146   keyvals = <a href="ds.options2Keyval.html" class="code" title="function keyval = ds.options2Keyval(options)">ds.options2Keyval</a>(options);
 0147   <span class="keyword">switch</span> solver_type
 0148     <span class="keyword">case</span> <span class="string">'dynasim'</span>  <span class="comment">% write DynaSim solver function (solve_ode.m)</span>
-0149       solve_file_m = <a href="WriteDynaSimSolver.html" class="code" title="function [outfile,options]=WriteDynaSimSolver(model,varargin)">WriteDynaSimSolver</a>(model,keyvals{:},<span class="string">'filename'</span>,solve_file); <span class="comment">% create DynaSim solver m-file</span>
+0149       solve_file_m = <a href="ds.writeDynaSimSolver.html" class="code" title="function [outfile,options]=ds.writeDynaSimSolver(model,varargin)">ds.writeDynaSimSolver</a>(model,keyvals{:},<span class="string">'filename'</span>,solve_file); <span class="comment">% create DynaSim solver m-file</span>
 0150     <span class="keyword">case</span> {<span class="string">'matlab'</span>, <span class="string">'matlab_no_mex'</span>} <span class="comment">% prepare model function handle etc for built-in solver (@odefun)</span>
-0151       solve_file_m = <a href="WriteMatlabSolver.html" class="code" title="function solve_ode_filepath = WriteMatlabSolver(model,varargin)">WriteMatlabSolver</a>(model,keyvals{:},<span class="string">'filename'</span>,solve_file, <span class="string">'solver_type'</span>,solver_type); <span class="comment">% create Matlab solver m-file</span>
-0152                 <span class="comment">% design: WriteMatlabSolver should be very similar to</span>
-0153                 <span class="comment">% WriteDynaSimSolver except have a subfunction with an odefun</span>
+0151       solve_file_m = <a href="ds.writeMatlabSolver.html" class="code" title="function solve_ode_filepath = ds.writeMatlabSolver(model,varargin)">ds.writeMatlabSolver</a>(model,keyvals{:},<span class="string">'filename'</span>,solve_file, <span class="string">'solver_type'</span>,solver_type); <span class="comment">% create Matlab solver m-file</span>
+0152                 <span class="comment">% design: ds.writeMatlabSolver should be very similar to</span>
+0153                 <span class="comment">% ds.writeDynaSimSolver except have a subfunction with an odefun</span>
 0154                 <span class="comment">% format variation and main function that calls odeset and</span>
 0155                 <span class="comment">% feval.</span>
 0156                 <span class="comment">% DynaSimToOdefun(): a function called outside of</span>
-0157                 <span class="comment">% SimulateModel. it should evaluate fixed_variables and</span>
-0158                 <span class="comment">% return @odefun with all substitutions. SimulateModel</span>
-0159                 <span class="comment">% should be able to handle: SimulateModel(@odefun,'tspan',tspan,'ic',ic)</span>
+0157                 <span class="comment">% ds.simulateModel. it should evaluate fixed_variables and</span>
+0158                 <span class="comment">% return @odefun with all substitutions. ds.simulateModel</span>
+0159                 <span class="comment">% should be able to handle: ds.simulateModel(@odefun,'tspan',tspan,'ic',ic)</span>
 0160   <span class="keyword">end</span>
-0161   solve_file=<a href="CompareSolveFiles.html" class="code" title="function solve_file_m=CompareSolveFiles(solve_file_m,mexpath)">CompareSolveFiles</a>(solve_file_m);               <span class="comment">% First search in local solve folder...</span>
+0161   solve_file=<a href="ds.compareSolveFiles.html" class="code" title="function solve_file_m=ds.compareSolveFiles(solve_file_m,mexpath)">ds.compareSolveFiles</a>(solve_file_m);               <span class="comment">% First search in local solve folder...</span>
 0162   <span class="keyword">if</span> options.compile_flag
-0163     solve_file=<a href="CompareSolveFiles.html" class="code" title="function solve_file_m=CompareSolveFiles(solve_file_m,mexpath)">CompareSolveFiles</a>(solve_file,options.mexpath); <span class="comment">% Then search in mexpath (if it exists and if compile_flag==1).</span>
+0163     solve_file=<a href="ds.compareSolveFiles.html" class="code" title="function solve_file_m=ds.compareSolveFiles(solve_file_m,mexpath)">ds.compareSolveFiles</a>(solve_file,options.mexpath); <span class="comment">% Then search in mexpath (if it exists and if compile_flag==1).</span>
 0164   <span class="keyword">end</span>
 0165 <span class="keyword">else</span>
 0166   <span class="keyword">if</span> options.verbose_flag
@@ -236,13 +236,13 @@ This function is called by:
 0172 <span class="comment">% create MEX file if desired and doesn't exist</span>
 0173 
 0174 <span class="comment">% NOTE: if using stiff built-in solver, it should only compile the odefun, not</span>
-0175 <span class="comment">%   the dynasim solve file. this is called from WriteMatlabSolver</span>
+0175 <span class="comment">%   the dynasim solve file. this is called from ds.writeMatlabSolver</span>
 0176 
 0177 <span class="keyword">if</span> options.compile_flag &amp;&amp; ~strcmp(solver_type,<span class="string">'matlab_no_mex'</span>) <span class="comment">% compile solver function</span>
 0178   <span class="keyword">if</span> options.one_solve_file_flag
 0179     options.codegen_args = {0};
 0180   <span class="keyword">end</span>
-0181   solve_file = <a href="PrepareMEX.html" class="code" title="function mexfileOutput = PrepareMEX(mfileInput, varargin)">PrepareMEX</a>(solve_file, options);
+0181   solve_file = <a href="ds.prepareMEX.html" class="code" title="function mexfileOutput = ds.prepareMEX(mfileInput, varargin)">ds.prepareMEX</a>(solve_file, options);
 0182 <span class="keyword">end</span>
 0183 
 0184 <span class="comment">%%</span>

@@ -2,8 +2,8 @@
                 "http://www.w3.org/TR/REC-html40/loose.dtd">
 <html>
 <head>
-  <title>Description of SetupStudy</title>
-  <meta name="keywords" content="SetupStudy">
+  <title>Description of ds.setupStudy</title>
+  <meta name="keywords" content="ds.setupStudy">
   <meta name="description" content="SETUPSTUDY - Initialize DynaSim studyinfo structure, prepare list of output file names, and create output directories">
   <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
   <meta name="generator" content="m2html &copy; 2005 Guillaume Flandin">
@@ -16,51 +16,51 @@
 <body>
 <a name="_top"></a>
 <!-- menu.html functions -->
-<h1>SetupStudy
+<h1>ds.setupStudy
 </h1>
 
 <h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
 <div class="box"><strong>SETUPSTUDY - Initialize DynaSim studyinfo structure, prepare list of output file names, and create output directories</strong></div>
 
 <h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
-<div class="box"><strong>function [studyinfo,options]=SetupStudy(base_model,varargin) </strong></div>
+<div class="box"><strong>function [studyinfo,options]=ds.setupStudy(base_model,varargin) </strong></div>
 
 <h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
 <div class="fragment"><pre class="comment">SETUPSTUDY - Initialize DynaSim studyinfo structure, prepare list of output file names, and create output directories
 
  TODO: break up this function into smaller functions
 
- See also: <a href="SimulateModel.html" class="code" title="function [data,studyinfo]=SimulateModel(model,varargin)">SimulateModel</a>, <a href="UpdateStudy.html" class="code" title="function studyinfo=UpdateStudy(study_dir,varargin)">UpdateStudy</a></pre></div>
+ See also: <a href="ds.simulateModel.html" class="code" title="function [data,studyinfo]=ds.simulateModel(model,varargin)">ds.simulateModel</a>, <a href="ds.updateStudy.html" class="code" title="function studyinfo=ds.updateStudy(study_dir,varargin)">ds.updateStudy</a></pre></div>
 
 <!-- crossreference -->
 <h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
 This function calls:
 <ul style="list-style-image:url(../matlabicon.gif)">
-<li><a href="CheckOptions.html" class="code" title="function [parms, params_unspecified ] = CheckOptions(options, options_schema, strict)">CheckOptions</a>	CHECKOPTIONS - organize key/value pairs in structure with default or user-supplied values according to a schema</li><li><a href="CheckStudyinfo.html" class="code" title="function studyinfo=CheckStudyinfo(studyinfo,varargin)">CheckStudyinfo</a>	CHECKSTUDYINFO - Standardize studyinfo structure and auto-populate missing fields</li><li><a href="StudyinfoIO.html" class="code" title="function studyinfo=StudyinfoIO(studyinfo,study_file,id,verbose_flag)">StudyinfoIO</a>	STUDYINFOIO - use lock files to manage concurrent access to a shared studyinfo</li></ul>
+<li><a href="ds.checkOptions.html" class="code" title="function [parms, params_unspecified ] = ds.checkOptions(options, options_schema, strict)">ds.checkOptions</a>	CHECKOPTIONS - organize key/value pairs in structure with default or user-supplied values according to a schema</li><li><a href="ds.checkStudyinfo.html" class="code" title="function studyinfo=ds.checkStudyinfo(studyinfo,varargin)">ds.checkStudyinfo</a>	CHECKSTUDYINFO - Standardize studyinfo structure and auto-populate missing fields</li><li><a href="ds.studyinfoIO.html" class="code" title="function studyinfo=ds.studyinfoIO(studyinfo,study_file,id,verbose_flag)">ds.studyinfoIO</a>	STUDYINFOIO - use lock files to manage concurrent access to a shared studyinfo</li></ul>
 This function is called by:
 <ul style="list-style-image:url(../matlabicon.gif)">
-<li><a href="CreateBatch.html" class="code" title="function studyinfo = CreateBatch(base_model,modifications_set,varargin)">CreateBatch</a>	CREATEBATCH - create and submit jobs to run sets of simulations or analyses.</li><li><a href="SimulateModel.html" class="code" title="function [data,studyinfo]=SimulateModel(model,varargin)">SimulateModel</a>	% data=SimulateModel(model,'option',value,...)</li></ul>
+<li><a href="ds.createBatch.html" class="code" title="function studyinfo = ds.createBatch(base_model,modifications_set,varargin)">ds.createBatch</a>	CREATEBATCH - create and submit jobs to run sets of simulations or analyses.</li><li><a href="ds.simulateModel.html" class="code" title="function [data,studyinfo]=ds.simulateModel(model,varargin)">ds.simulateModel</a>	% data=ds.simulateModel(model,'option',value,...)</li></ul>
 <!-- crossreference -->
 
 
 
 <h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
-<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function [studyinfo,options]=SetupStudy(base_model,varargin)</a>
+<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function [studyinfo,options]=ds.setupStudy(base_model,varargin)</a>
 0002 <span class="comment">%SETUPSTUDY - Initialize DynaSim studyinfo structure, prepare list of output file names, and create output directories</span>
 0003 <span class="comment">%</span>
 0004 <span class="comment">% TODO: break up this function into smaller functions</span>
 0005 <span class="comment">%</span>
-0006 <span class="comment">% See also: SimulateModel, UpdateStudy</span>
+0006 <span class="comment">% See also: ds.simulateModel, ds.updateStudy</span>
 0007 
 0008 <span class="comment">% Check inputs</span>
-0009 opts=<a href="CheckOptions.html" class="code" title="function [parms, params_unspecified ] = CheckOptions(options, options_schema, strict)">CheckOptions</a>(varargin,{<span class="keyword">...</span>
+0009 opts=<a href="ds.checkOptions.html" class="code" title="function [parms, params_unspecified ] = ds.checkOptions(options, options_schema, strict)">ds.checkOptions</a>(varargin,{<span class="keyword">...</span>
 0010   <span class="string">'modifications_set'</span>,[],[],<span class="keyword">...</span><span class="comment"> % search space</span>
-0011   <span class="string">'simulator_options'</span>,[],[],<span class="keyword">...</span><span class="comment"> % options from SimulateModel</span>
+0011   <span class="string">'simulator_options'</span>,[],[],<span class="keyword">...</span><span class="comment"> % options from ds.simulateModel</span>
 0012   <span class="string">'process_id'</span>,[],[],<span class="keyword">...</span><span class="comment"> % process identifier for loading studyinfo if necessary</span>
 0013   },false);
 0014 
 0015 <span class="keyword">if</span> isempty(opts.simulator_options)
-0016   error(<span class="string">'SetupStudy must be given a simulator_options structure from SimulateModel'</span>);
+0016   error(<span class="string">'ds.setupStudy must be given a simulator_options structure from ds.simulateModel'</span>);
 0017 <span class="keyword">end</span>
 0018 modifications_set=opts.modifications_set;
 0019 process_id=opts.process_id;
@@ -107,7 +107,7 @@ This function is called by:
 0060   <span class="comment">% initialize studyinfo if not already initialized</span>
 0061   <span class="keyword">if</span> ischar(options.study_dir) &amp;&amp; isdir(options.study_dir) &amp;&amp; exist(fullfile(options.study_dir,<span class="string">'studyinfo.mat'</span>),<span class="string">'file'</span>)
 0062     <span class="comment">% studyinfo file already exists</span>
-0063     studyinfo=<a href="CheckStudyinfo.html" class="code" title="function studyinfo=CheckStudyinfo(studyinfo,varargin)">CheckStudyinfo</a>(options.study_dir,<span class="string">'process_id'</span>,process_id);
+0063     studyinfo=<a href="ds.checkStudyinfo.html" class="code" title="function studyinfo=ds.checkStudyinfo(studyinfo,varargin)">ds.checkStudyinfo</a>(options.study_dir,<span class="string">'process_id'</span>,process_id);
 0064     orig_studyinfo=studyinfo;
 0065   <span class="keyword">else</span>
 0066     orig_studyinfo=[];
@@ -121,7 +121,7 @@ This function is called by:
 0074       studyinfo=[];
 0075     <span class="keyword">end</span>
 0076     
-0077     studyinfo=<a href="CheckStudyinfo.html" class="code" title="function studyinfo=CheckStudyinfo(studyinfo,varargin)">CheckStudyinfo</a>(studyinfo,<span class="string">'process_id'</span>,process_id); <span class="comment">% auto-fill all fields</span>
+0077     studyinfo=<a href="ds.checkStudyinfo.html" class="code" title="function studyinfo=ds.checkStudyinfo(studyinfo,varargin)">ds.checkStudyinfo</a>(studyinfo,<span class="string">'process_id'</span>,process_id); <span class="comment">% auto-fill all fields</span>
 0078   <span class="keyword">end</span>
 0079   
 0080   <span class="comment">% set basic metadata for this study</span>
@@ -203,7 +203,7 @@ This function is called by:
 0156         studyinfo.simulations(k).result_options{end+1}=options.plot_options{kk};
 0157         fname=[options.prefix <span class="string">'_sim'</span> num2str(k) <span class="string">'_plot'</span> num2str(kk) <span class="string">'_'</span> func2str(options.plot_functions{kk})]; 
 0158         <span class="comment">% note: extension will depend on output format (jpg,png,eps,svg)</span>
-0159         <span class="comment">% and be set in AnalyzeData().</span>
+0159         <span class="comment">% and be set in ds.analyzeData().</span>
 0160         studyinfo.simulations(k).result_files{end+1}=fullfile(plot_dir,fname);
 0161       <span class="keyword">end</span>
 0162       
@@ -218,7 +218,7 @@ This function is called by:
 0171   <span class="keyword">if</span> ~isequal(orig_studyinfo,studyinfo)
 0172     <span class="comment">% save studyinfo structure to disk</span>
 0173     study_file=fullfile(options.study_dir,<span class="string">'studyinfo.mat'</span>);
-0174     <a href="StudyinfoIO.html" class="code" title="function studyinfo=StudyinfoIO(studyinfo,study_file,id,verbose_flag)">StudyinfoIO</a>(studyinfo,study_file,process_id,options.verbose_flag);
+0174     <a href="ds.studyinfoIO.html" class="code" title="function studyinfo=ds.studyinfoIO(studyinfo,study_file,id,verbose_flag)">ds.studyinfoIO</a>(studyinfo,study_file,process_id,options.verbose_flag);
 0175   <span class="keyword">end</span>
 0176 <span class="keyword">else</span>
 0177   <span class="comment">% set defaults for not saving anything</span>

@@ -2,8 +2,8 @@
                 "http://www.w3.org/TR/REC-html40/loose.dtd">
 <html>
 <head>
-  <title>Description of nameFromVaried</title>
-  <meta name="keywords" content="nameFromVaried">
+  <title>Description of ds.nameFromVaried</title>
+  <meta name="keywords" content="ds.nameFromVaried">
   <meta name="description" content="NAMEFROMVARIED - makes a filename based on the parameters in data.varied.">
   <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
   <meta name="generator" content="m2html &copy; 2005 Guillaume Flandin">
@@ -16,20 +16,20 @@
 <body>
 <a name="_top"></a>
 <!-- menu.html functions -->
-<h1>nameFromVaried
+<h1>ds.nameFromVaried
 </h1>
 
 <h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
 <div class="box"><strong>NAMEFROMVARIED - makes a filename based on the parameters in data.varied.</strong></div>
 
 <h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
-<div class="box"><strong>function new_result_file = nameFromVaried(data, file_type, old_result_file) </strong></div>
+<div class="box"><strong>function new_result_file = ds.nameFromVaried(data, file_type, old_result_file) </strong></div>
 
 <h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
 <div class="fragment"><pre class="comment">NAMEFROMVARIED - makes a filename based on the parameters in data.varied.
 
  Usage:
-   new_result_file = nameFromVaried(data, file_type, old_result_file)
+   new_result_file = ds.nameFromVaried(data, file_type, old_result_file)
 
  Inputs:
    - data: DynaSim data structure (also accepted: data file name)
@@ -46,17 +46,17 @@ This function calls:
 </ul>
 This function is called by:
 <ul style="list-style-image:url(../matlabicon.gif)">
-<li><a href="AnalyzeData.html" class="code" title="function result=AnalyzeData(data,func,varargin)">AnalyzeData</a>	ANALYZEDATA - Apply an analysis function to DynaSim data, optionally saving data</li></ul>
+<li><a href="ds.analyzeData.html" class="code" title="function result=ds.analyzeData(data,func,varargin)">ds.analyzeData</a>	ANALYZEDATA - Apply an analysis function to DynaSim data, optionally saving data</li></ul>
 <!-- crossreference -->
 
 
 
 <h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
-<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function new_result_file = nameFromVaried(data, file_type, old_result_file)</a>
+<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function new_result_file = ds.nameFromVaried(data, file_type, old_result_file)</a>
 0002 <span class="comment">%NAMEFROMVARIED - makes a filename based on the parameters in data.varied.</span>
 0003 <span class="comment">%</span>
 0004 <span class="comment">% Usage:</span>
-0005 <span class="comment">%   new_result_file = nameFromVaried(data, file_type, old_result_file)</span>
+0005 <span class="comment">%   new_result_file = ds.nameFromVaried(data, file_type, old_result_file)</span>
 0006 <span class="comment">%</span>
 0007 <span class="comment">% Inputs:</span>
 0008 <span class="comment">%   - data: DynaSim data structure (also accepted: data file name)</span>

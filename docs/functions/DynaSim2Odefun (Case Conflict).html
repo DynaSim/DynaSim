@@ -2,8 +2,8 @@
                 "http://www.w3.org/TR/REC-html40/loose.dtd">
 <html>
 <head>
-  <title>Description of dynasim2odefun</title>
-  <meta name="keywords" content="dynasim2odefun">
+  <title>Description of ds.dynasim2odefun</title>
+  <meta name="keywords" content="ds.dynasim2odefun">
   <meta name="description" content="Purpose: prepare ODEFUN for use with built-in Matlab solvers.">
   <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
   <meta name="generator" content="m2html &copy; 2005 Guillaume Flandin">
@@ -16,27 +16,27 @@
 <body>
 <a name="_top"></a>
 <!-- menu.html functions -->
-<h1>dynasim2odefun
+<h1>ds.dynasim2odefun
 </h1>
 
 <h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
 <div class="box"><strong>Purpose: prepare ODEFUN for use with built-in Matlab solvers.</strong></div>
 
 <h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
-<div class="box"><strong>function [ODEFUN,IC,elem_names]=dynasim2odefun(model, varargin) </strong></div>
+<div class="box"><strong>function [ODEFUN,IC,elem_names]=ds.dynasim2odefun(model, varargin) </strong></div>
 
 <h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
 <div class="fragment"><pre class="comment"> Purpose: prepare ODEFUN for use with built-in Matlab solvers.
  
  % Example: solve model using ode23
- [ODEFUN,IC,elem_names]=dynasim2odefun(model);
- [ODEFUN,IC,elem_names]=dynasim2odefun(PropagateParameters(PropagateFunctions(model)));
+ [ODEFUN,IC,elem_names]=ds.dynasim2odefun(model);
+ [ODEFUN,IC,elem_names]=ds.dynasim2odefun(ds.propagateParameters(ds.propagateFunctions(model)));
  options=odeset('RelTol',1e-2,'AbsTol',1e-4,'InitialStep',.01);
  [t,y]=ode23(ODEFUN,[0 100],IC,options);
  figure; plot(t,y); legend(elem_names{:},'Location','EastOutside');
  
  % Example: solve model manually using Euler method:
- [ODEFUN,IC,elem_names]=dynasim2odefun(model);
+ [ODEFUN,IC,elem_names]=ds.dynasim2odefun(model);
  dt=.01; t=0:dt:100;
  y=zeros(length(t),length(IC));
  y(1,:)=IC;
@@ -66,27 +66,27 @@
 <h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
 This function calls:
 <ul style="list-style-image:url(../matlabicon.gif)">
-<li><a href="CheckOptions.html" class="code" title="function [parms, params_unspecified ] = CheckOptions(options, options_schema, strict)">CheckOptions</a>	CHECKOPTIONS - organize key/value pairs in structure with default or user-supplied values according to a schema</li></ul>
+<li><a href="ds.checkOptions.html" class="code" title="function [parms, params_unspecified ] = ds.checkOptions(options, options_schema, strict)">ds.checkOptions</a>	CHECKOPTIONS - organize key/value pairs in structure with default or user-supplied values according to a schema</li></ul>
 This function is called by:
 <ul style="list-style-image:url(../matlabicon.gif)">
-<li><a href="SimulateModel.html" class="code" title="function [data,studyinfo]=SimulateModel(model,varargin)">SimulateModel</a>	% data=SimulateModel(model,'option',value,...)</li><li><a href="WriteMatlabSolver.html" class="code" title="function solve_ode_filepath = WriteMatlabSolver(model,varargin)">WriteMatlabSolver</a>	WRITEMATLABSOLVER - write m-file that numerically inteegrates the model</li></ul>
+<li><a href="ds.simulateModel.html" class="code" title="function [data,studyinfo]=ds.simulateModel(model,varargin)">ds.simulateModel</a>	% data=ds.simulateModel(model,'option',value,...)</li><li><a href="ds.writeMatlabSolver.html" class="code" title="function solve_ode_filepath = ds.writeMatlabSolver(model,varargin)">ds.writeMatlabSolver</a>	WRITEMATLABSOLVER - write m-file that numerically inteegrates the model</li></ul>
 <!-- crossreference -->
 
 
 
 <h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
-<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function [ODEFUN,IC,elem_names]=dynasim2odefun(model, varargin)</a>
+<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function [ODEFUN,IC,elem_names]=ds.dynasim2odefun(model, varargin)</a>
 0002 <span class="comment">% Purpose: prepare ODEFUN for use with built-in Matlab solvers.</span>
 0003 <span class="comment">%</span>
 0004 <span class="comment">% % Example: solve model using ode23</span>
-0005 <span class="comment">% [ODEFUN,IC,elem_names]=dynasim2odefun(model);</span>
-0006 <span class="comment">% [ODEFUN,IC,elem_names]=dynasim2odefun(PropagateParameters(PropagateFunctions(model)));</span>
+0005 <span class="comment">% [ODEFUN,IC,elem_names]=ds.dynasim2odefun(model);</span>
+0006 <span class="comment">% [ODEFUN,IC,elem_names]=ds.dynasim2odefun(ds.propagateParameters(ds.propagateFunctions(model)));</span>
 0007 <span class="comment">% options=odeset('RelTol',1e-2,'AbsTol',1e-4,'InitialStep',.01);</span>
 0008 <span class="comment">% [t,y]=ode23(ODEFUN,[0 100],IC,options);</span>
 0009 <span class="comment">% figure; plot(t,y); legend(elem_names{:},'Location','EastOutside');</span>
 0010 <span class="comment">%</span>
 0011 <span class="comment">% % Example: solve model manually using Euler method:</span>
-0012 <span class="comment">% [ODEFUN,IC,elem_names]=dynasim2odefun(model);</span>
+0012 <span class="comment">% [ODEFUN,IC,elem_names]=ds.dynasim2odefun(model);</span>
 0013 <span class="comment">% dt=.01; t=0:dt:100;</span>
 0014 <span class="comment">% y=zeros(length(t),length(IC));</span>
 0015 <span class="comment">% y(1,:)=IC;</span>
@@ -119,7 +119,7 @@ This function is called by:
 0042 <span class="comment">% 4. replace state vars in ODEs by X</span>
 0043 <span class="comment">% 5. combine X ODEs into ODEFUN</span>
 0044 
-0045 options=<a href="CheckOptions.html" class="code" title="function [parms, params_unspecified ] = CheckOptions(options, options_schema, strict)">CheckOptions</a>(varargin,{<span class="keyword">...</span>
+0045 options=<a href="ds.checkOptions.html" class="code" title="function [parms, params_unspecified ] = ds.checkOptions(options, options_schema, strict)">ds.checkOptions</a>(varargin,{<span class="keyword">...</span>
 0046   <span class="string">'odefun_output'</span>,<span class="string">'func_handle'</span>,{<span class="string">'func_handle'</span>,<span class="string">'anonymous_func_string'</span>,<span class="string">'func_body'</span>},<span class="keyword">...</span>
 0047   },false);
 0048 
@@ -186,7 +186,7 @@ This function is called by:
 0109 
 0110 <span class="comment">% substitute in generic state vector X</span>
 0111 <span class="keyword">for</span> i=1:num_vars
-0112   ODEs=dynasim_strrep(ODEs,old_vars{i},new_vars{i});
+0112   ODEs=ds.strrep(ODEs,old_vars{i},new_vars{i});
 0113 <span class="keyword">end</span>
 0114 
 0115 <span class="comment">% prepare outputs (function handle string, ICs, and element names for</span>

@@ -2,8 +2,8 @@
                 "http://www.w3.org/TR/REC-html40/loose.dtd">
 <html>
 <head>
-  <title>Description of CheckCovary</title>
-  <meta name="keywords" content="CheckCovary">
+  <title>Description of ds.checkCovary</title>
+  <meta name="keywords" content="ds.checkCovary">
   <meta name="description" content="CHECKCOVARY - TODO I assume this checks if any varied parameters are covaried?">
   <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
   <meta name="generator" content="m2html &copy; 2005 Guillaume Flandin">
@@ -16,14 +16,14 @@
 <body>
 <a name="_top"></a>
 <!-- menu.html functions -->
-<h1>CheckCovary
+<h1>ds.checkCovary
 </h1>
 
 <h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
 <div class="box"><strong>CHECKCOVARY - TODO I assume this checks if any varied parameters are covaried?</strong></div>
 
 <h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
-<div class="box"><strong>function [effective_vary_lengths, linked_indices] = CheckCovary(vary_lengths, vary_params) </strong></div>
+<div class="box"><strong>function [effective_vary_lengths, linked_indices] = ds.checkCovary(vary_lengths, vary_params) </strong></div>
 
 <h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
 <div class="fragment"><pre class="comment">CHECKCOVARY - TODO I assume this checks if any varied parameters are covaried?</pre></div>
@@ -32,10 +32,10 @@
 <h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
 This function calls:
 <ul style="list-style-image:url(../matlabicon.gif)">
-<li><a href="IndexToBlocks.html" class="code" title="function blocks = IndexToBlocks(index)">IndexToBlocks</a>	INDEXTOBLOCKS - TODO unclear what this does</li></ul>
+<li><a href="ds.indexToBlocks.html" class="code" title="function blocks = ds.indexToBlocks(index)">ds.indexToBlocks</a>	INDEXTOBLOCKS - TODO unclear what this does</li></ul>
 This function is called by:
 <ul style="list-style-image:url(../matlabicon.gif)">
-<li><a href="PlotData.html" class="code" title="function handles = PlotData(data,varargin)">PlotData</a>	PLOTDATA - plot data in various ways depending on what data was provided and what options are defined.</li></ul>
+<li><a href="ds.plotData.html" class="code" title="function handles = ds.plotData(data,varargin)">ds.plotData</a>	PLOTDATA - plot data in various ways depending on what data was provided and what options are defined.</li></ul>
 <!-- crossreference -->
 
 <h2><a name="_subfunctions"></a>SUBFUNCTIONS <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
@@ -43,7 +43,7 @@ This function is called by:
 <li><a href="#_sub1" class="code">function [linked_indices, non_linked_indices] = find_linked_params(param_indices, vary_params)</a></li></ul>
 
 <h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
-<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function [effective_vary_lengths, linked_indices] = CheckCovary(vary_lengths, vary_params)</a>
+<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function [effective_vary_lengths, linked_indices] = ds.checkCovary(vary_lengths, vary_params)</a>
 0002 <span class="comment">%CHECKCOVARY - TODO I assume this checks if any varied parameters are covaried?</span>
 0003 
 0004 non_singleton_vary_lengths = vary_lengths(vary_lengths &gt; 1);
@@ -54,7 +54,7 @@ This function is called by:
 0009 
 0010 equal_vary_length_indices = diff_vary_lengths == 0;
 0011 
-0012 equal_vary_length_blocks = <a href="IndexToBlocks.html" class="code" title="function blocks = IndexToBlocks(index)">IndexToBlocks</a>(equal_vary_length_indices);
+0012 equal_vary_length_blocks = <a href="ds.indexToBlocks.html" class="code" title="function blocks = ds.indexToBlocks(index)">ds.indexToBlocks</a>(equal_vary_length_indices);
 0013 
 0014 <span class="keyword">if</span> ~isempty(equal_vary_length_blocks)
 0015 

@@ -44,7 +44,7 @@
  Examples:
    zipfname = zipDemoData('/Users/davestanley/Documents/DynaSimData/demos/demo_sPING_100cells_3x3')
 
- See also: <a href="unzipDemoData.html" class="code" title="function study_dir = unzipDemoData(zipfname,overwrite_flag,verbose_flag)">unZipDemoData</a>, demos_generate_data.m (demo script)</pre></div>
+ See also: <a href="ds.unzipDemoData.html" class="code" title="function study_dir = ds.unzipDemoData(zipfname,overwrite_flag,verbose_flag)">ds.unzipDemoData</a>, demos_generate_data.m (demo script)</pre></div>
 
 <!-- crossreference -->
 <h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
@@ -78,11 +78,11 @@ This function is called by:
 0017 <span class="comment">% Examples:</span>
 0018 <span class="comment">%   zipfname = zipDemoData('/Users/davestanley/Documents/DynaSimData/demos/demo_sPING_100cells_3x3')</span>
 0019 <span class="comment">%</span>
-0020 <span class="comment">% See also: unZipDemoData, demos_generate_data.m (demo script)</span>
+0020 <span class="comment">% See also: ds.unzipDemoData, demos_generate_data.m (demo script)</span>
 0021 
-0022     ds_path = getDsVar(<span class="string">'ds_path'</span>);
-0023     demos_path = getDsVar(<span class="string">'demos_path'</span>);
-0024     demo_zips_path = getDsVar(<span class="string">'demos_zips_path'</span>);
+0022     ds_root_path = ds.getConfig(<span class="string">'ds_root_path'</span>);
+0023     demos_path = ds.getConfig(<span class="string">'demos_path'</span>);
+0024     demo_zips_path = ds.getConfig(<span class="string">'demos_zips_path'</span>);
 0025 
 0026     mkdirSilent(demo_zips_path);
 0027 

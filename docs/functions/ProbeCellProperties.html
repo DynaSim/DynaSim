@@ -2,9 +2,9 @@
                 "http://www.w3.org/TR/REC-html40/loose.dtd">
 <html>
 <head>
-  <title>Description of ProbeCellProperties</title>
-  <meta name="keywords" content="ProbeCellProperties">
-  <meta name="description" content="data = ProbeCellProperties(model,'option1',option1,...)">
+  <title>Description of ds.probeCellProperties</title>
+  <meta name="keywords" content="ds.probeCellProperties">
+  <meta name="description" content="data = ds.probeCellProperties(model,'option1',option1,...)">
   <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
   <meta name="generator" content="m2html &copy; 2005 Guillaume Flandin">
   <meta name="robots" content="index, follow">
@@ -16,22 +16,22 @@
 <body>
 <a name="_top"></a>
 <!-- menu.html functions -->
-<h1>ProbeCellProperties
+<h1>ds.probeCellProperties
 </h1>
 
 <h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
-<div class="box"><strong>data = ProbeCellProperties(model,'option1',option1,...)</strong></div>
+<div class="box"><strong>data = ds.probeCellProperties(model,'option1',option1,...)</strong></div>
 
 <h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
-<div class="box"><strong>function data = ProbeCellProperties(model,varargin) </strong></div>
+<div class="box"><strong>function data = ds.probeCellProperties(model,varargin) </strong></div>
 
 <h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
-<div class="fragment"><pre class="comment"> data = ProbeCellProperties(model,'option1',option1,...)
+<div class="fragment"><pre class="comment"> data = ds.probeCellProperties(model,'option1',option1,...)
  This experiment is designed to probe the intrinsic properties of cells in
  one or more populations. It removes all connections between cells and 
  populations and then runs a series of simulations delivering
  hyperpolarizing and depolarizing pulses. It is designed to be used in
- conjunction with the analysis function &quot;CalcCellProperties&quot; which accepts
+ conjunction with the analysis function &quot;ds.calcCellProperties&quot; which accepts
  the data array produced by this experiment and returns the
  electrophysiological properties characterizing each cell's response in
  the population.
@@ -49,21 +49,21 @@
  
  Example: ...
  model='dv/dt=(@current-.1*(v+70))/Cm; Cm=1; {iNa,iK}';
- data=ProbeCellProperties(model,'verbose_flag',1);
- PlotData(data(1:10));
- PlotData(data(11:20));
+ data=ds.probeCellProperties(model,'verbose_flag',1);
+ ds.plotData(data(1:10));
+ ds.plotData(data(11:20));
  
  model='dv/dt=@current-.1*(v+70)+5*randn; {iNa,iK}';
- data=ProbeCellProperties(model,'num_repetitions',2);
+ data=ds.probeCellProperties(model,'num_repetitions',2);
  
  Note: this function is based on the DNSim experiment &quot;cell_pulses&quot;.
- See also: <a href="CalcCellProperties.html" class="code" title="function stats = CalcCellProperties(data,varargin)">CalcCellProperties</a></pre></div>
+ See also: <a href="ds.calcCellProperties.html" class="code" title="function stats = ds.calcCellProperties(data,varargin)">ds.calcCellProperties</a></pre></div>
 
 <!-- crossreference -->
 <h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
 This function calls:
 <ul style="list-style-image:url(../matlabicon.gif)">
-<li><a href="ApplyModifications.html" class="code" title="function [output,modifications]=ApplyModifications(model,modifications)">ApplyModifications</a>	APPLYMODIFICATIONS - Apply modifications to DynaSim specification or model structure</li><li><a href="CheckModel.html" class="code" title="function model=CheckModel(model)">CheckModel</a>	CHECKMODEL - Standardize model structure and auto-populate missing fields</li><li><a href="CheckOptions.html" class="code" title="function [parms, params_unspecified ] = CheckOptions(options, options_schema, strict)">CheckOptions</a>	CHECKOPTIONS - organize key/value pairs in structure with default or user-supplied values according to a schema</li><li><a href="GenerateModel.html" class="code" title="function [model,name_map]=GenerateModel(specification,varargin)">GenerateModel</a>	GENERATEMODEL - Parse DynaSim specification and organize model data in DynaSim model structure</li><li><a href="RemoveKeyval.html" class="code" title="function keyvals_out = RemoveKeyval(keyvals,keys)">RemoveKeyval</a>	REMOVEKEYVAL - remove keys from keyvals_in.</li><li><a href="SimulateModel.html" class="code" title="function [data,studyinfo]=SimulateModel(model,varargin)">SimulateModel</a>	% data=SimulateModel(model,'option',value,...)</li></ul>
+<li><a href="ds.applyModifications.html" class="code" title="function [output,modifications]=ds.applyModifications(model,modifications)">ds.applyModifications</a>	APPLYMODIFICATIONS - Apply modifications to DynaSim specification or model structure</li><li><a href="ds.checkModel.html" class="code" title="function model=ds.checkModel(model)">ds.checkModel</a>	CHECKMODEL - Standardize model structure and auto-populate missing fields</li><li><a href="ds.checkOptions.html" class="code" title="function [parms, params_unspecified ] = ds.checkOptions(options, options_schema, strict)">ds.checkOptions</a>	CHECKOPTIONS - organize key/value pairs in structure with default or user-supplied values according to a schema</li><li><a href="ds.generateModel.html" class="code" title="function [model,name_map]=ds.generateModel(specification,varargin)">ds.generateModel</a>	GENERATEMODEL - Parse DynaSim specification and organize model data in DynaSim model structure</li><li><a href="ds.removeKeyval.html" class="code" title="function keyvals_out = ds.removeKeyval(keyvals,keys)">ds.removeKeyval</a>	REMOVEKEYVAL - remove keys from keyvals_in.</li><li><a href="ds.simulateModel.html" class="code" title="function [data,studyinfo]=ds.simulateModel(model,varargin)">ds.simulateModel</a>	% data=ds.simulateModel(model,'option',value,...)</li></ul>
 This function is called by:
 <ul style="list-style-image:url(../matlabicon.gif)">
 </ul>
@@ -72,13 +72,13 @@ This function is called by:
 
 
 <h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
-<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function data = ProbeCellProperties(model,varargin)</a>
-0002 <span class="comment">% data = ProbeCellProperties(model,'option1',option1,...)</span>
+<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function data = ds.probeCellProperties(model,varargin)</a>
+0002 <span class="comment">% data = ds.probeCellProperties(model,'option1',option1,...)</span>
 0003 <span class="comment">% This experiment is designed to probe the intrinsic properties of cells in</span>
 0004 <span class="comment">% one or more populations. It removes all connections between cells and</span>
 0005 <span class="comment">% populations and then runs a series of simulations delivering</span>
 0006 <span class="comment">% hyperpolarizing and depolarizing pulses. It is designed to be used in</span>
-0007 <span class="comment">% conjunction with the analysis function &quot;CalcCellProperties&quot; which accepts</span>
+0007 <span class="comment">% conjunction with the analysis function &quot;ds.calcCellProperties&quot; which accepts</span>
 0008 <span class="comment">% the data array produced by this experiment and returns the</span>
 0009 <span class="comment">% electrophysiological properties characterizing each cell's response in</span>
 0010 <span class="comment">% the population.</span>
@@ -96,15 +96,15 @@ This function is called by:
 0022 <span class="comment">%</span>
 0023 <span class="comment">% Example: ...</span>
 0024 <span class="comment">% model='dv/dt=(@current-.1*(v+70))/Cm; Cm=1; {iNa,iK}';</span>
-0025 <span class="comment">% data=ProbeCellProperties(model,'verbose_flag',1);</span>
-0026 <span class="comment">% PlotData(data(1:10));</span>
-0027 <span class="comment">% PlotData(data(11:20));</span>
+0025 <span class="comment">% data=ds.probeCellProperties(model,'verbose_flag',1);</span>
+0026 <span class="comment">% ds.plotData(data(1:10));</span>
+0027 <span class="comment">% ds.plotData(data(11:20));</span>
 0028 <span class="comment">%</span>
 0029 <span class="comment">% model='dv/dt=@current-.1*(v+70)+5*randn; {iNa,iK}';</span>
-0030 <span class="comment">% data=ProbeCellProperties(model,'num_repetitions',2);</span>
+0030 <span class="comment">% data=ds.probeCellProperties(model,'num_repetitions',2);</span>
 0031 <span class="comment">%</span>
 0032 <span class="comment">% Note: this function is based on the DNSim experiment &quot;cell_pulses&quot;.</span>
-0033 <span class="comment">% See also: CalcCellProperties</span>
+0033 <span class="comment">% See also: ds.calcCellProperties</span>
 0034 
 0035 <span class="comment">% Experiment: input model, produces data sets for all step levels</span>
 0036 <span class="comment">% Analysis: input data sets for all step levels, output one stat structure</span>
@@ -112,7 +112,7 @@ This function is called by:
 0038 <span class="comment">%           population of the model.</span>
 0039 
 0040 <span class="comment">% Check inputs</span>
-0041 options=<a href="CheckOptions.html" class="code" title="function [parms, params_unspecified ] = CheckOptions(options, options_schema, strict)">CheckOptions</a>(varargin,{<span class="keyword">...</span>
+0041 options=<a href="ds.checkOptions.html" class="code" title="function [parms, params_unspecified ] = ds.checkOptions(options, options_schema, strict)">ds.checkOptions</a>(varargin,{<span class="keyword">...</span>
 0042   <span class="string">'target_equation'</span>,<span class="string">'ODE1'</span>,[],<span class="keyword">...</span>
 0043   <span class="string">'amplitudes'</span>,-30:5:180,[],<span class="keyword">...</span><span class="comment"> % pA. typically: 0-500pA (0-.5nA)</span>
 0044   <span class="string">'membrane_area'</span>,1500,[],<span class="keyword">...</span><span class="comment">     % um^2. typically: 1000-2000 um2</span>
@@ -124,7 +124,7 @@ This function is called by:
 0050   <span class="string">'remove_connections_flag'</span>,1,[],<span class="keyword">...</span>
 0051   },false);
 0052 
-0053 model=<a href="CheckModel.html" class="code" title="function model=CheckModel(model)">CheckModel</a>(model);
+0053 model=<a href="ds.checkModel.html" class="code" title="function model=ds.checkModel(model)">ds.checkModel</a>(model);
 0054 
 0055 <span class="comment">% check that amplitude=0 is present (for RMP calculation)</span>
 0056 <span class="keyword">if</span> ~ismember(0,options.amplitudes)
@@ -140,7 +140,7 @@ This function is called by:
 0066 <span class="keyword">if</span> ~isempty(model.specification.connections) &amp;&amp; options.remove_connections_flag
 0067   specification=model.specification;
 0068   specification.connections=[];
-0069   model=<a href="GenerateModel.html" class="code" title="function [model,name_map]=GenerateModel(specification,varargin)">GenerateModel</a>(specification);
+0069   model=<a href="ds.generateModel.html" class="code" title="function [model,name_map]=ds.generateModel(specification,varargin)">ds.generateModel</a>(specification);
 0070 <span class="keyword">end</span>
 0071 
 0072 <span class="comment">% Extract population info</span>
@@ -182,12 +182,12 @@ This function is called by:
 0108       objects,<span class="string">'repetition'</span>,1:options.num_repetitions};  
 0109 
 0110 <span class="comment">% apply modifications to effectively add experimental apparatus to model</span>
-0111 model=<a href="ApplyModifications.html" class="code" title="function [output,modifications]=ApplyModifications(model,modifications)">ApplyModifications</a>(model,modifications);
+0111 model=<a href="ds.applyModifications.html" class="code" title="function [output,modifications]=ds.applyModifications(model,modifications)">ds.applyModifications</a>(model,modifications);
 0112 
 0113 <span class="comment">% execute experimental protocol by varying parameters across simulations</span>
 0114 fprintf(<span class="string">'Running experiment: %s\n'</span>,mfilename);
-0115 keyvals=<a href="RemoveKeyval.html" class="code" title="function keyvals_out = RemoveKeyval(keyvals,keys)">RemoveKeyval</a>(varargin,<span class="string">'tspan'</span>);
-0116 data=<a href="SimulateModel.html" class="code" title="function [data,studyinfo]=SimulateModel(model,varargin)">SimulateModel</a>(model,<span class="string">'vary'</span>,vary,<span class="string">'tspan'</span>,options.tspan,keyvals{:});
+0115 keyvals=<a href="ds.removeKeyval.html" class="code" title="function keyvals_out = ds.removeKeyval(keyvals,keys)">ds.removeKeyval</a>(varargin,<span class="string">'tspan'</span>);
+0116 data=<a href="ds.simulateModel.html" class="code" title="function [data,studyinfo]=ds.simulateModel(model,varargin)">ds.simulateModel</a>(model,<span class="string">'vary'</span>,vary,<span class="string">'tspan'</span>,options.tspan,keyvals{:});
 0117 
 0118 <span class="comment">% add options to data</span>
 0119 <span class="keyword">for</span> i=1:length(data)

@@ -2,8 +2,8 @@
                 "http://www.w3.org/TR/REC-html40/loose.dtd">
 <html>
 <head>
-  <title>Description of ImportData</title>
-  <meta name="keywords" content="ImportData">
+  <title>Description of ds.importData</title>
+  <meta name="keywords" content="ds.importData">
   <meta name="description" content="IMPORTDATA - load data into DynaSim formatted data structure.">
   <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
   <meta name="generator" content="m2html &copy; 2005 Guillaume Flandin">
@@ -16,27 +16,27 @@
 <body>
 <a name="_top"></a>
 <!-- menu.html functions -->
-<h1>ImportData
+<h1>ds.importData
 </h1>
 
 <h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
 <div class="box"><strong>IMPORTDATA - load data into DynaSim formatted data structure.</strong></div>
 
 <h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
-<div class="box"><strong>function [data,studyinfo] = ImportData(file,varargin) </strong></div>
+<div class="box"><strong>function [data,studyinfo] = ds.importData(file,varargin) </strong></div>
 
 <h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
 <div class="fragment"><pre class="comment">IMPORTDATA - load data into DynaSim formatted data structure.
 
  Usage:
-   [data,studyinfo]=ImportData(data_file)
-   data=ImportData(data_file)
+   [data,studyinfo]=ds.importData(data_file)
+   data=ds.importData(data_file)
 
  Inputs:
    - data_file data file name in accepted format (csv, mat, ...), or also
      accepted: list of data files, studyinfo structure, study_dir, or studyinfo
      file
-   - studyinfo: DynaSim studyinfo structure (see CheckStudyinfo)
+   - studyinfo: DynaSim studyinfo structure (see ds.checkStudyinfo)
    - options:
      'verbose_flag': {0,1} (default: 1)
      'process_id'  : process identifier for loading studyinfo if necessary
@@ -57,56 +57,56 @@
 
  Notes:
    - NOTE 1: CSV file structure assumes CSV file contains data organized
-   according to output from WriteDynaSimSolver: time points along rows; state
+   according to output from ds.writeDynaSimSolver: time points along rows; state
    variables and monitors are columns; first column is time vector; next
    columns are state variables; final columns are monitors. first row has
    headers for each column. if a population has more than one cell, different
    cells are sequential columns with same header repeated for each cell.
 
    - NOTE 2: DynaSim data exported to MAT-files are HDF-compatible. To obtain
-   partial data sets without having to load the entire file, use ImportData
+   partial data sets without having to load the entire file, use ds.importData
    with options 'time_limits' and/or 'variables'. Alternatively, the entire
-   data set can be loaded using ImportData with default options, then subsets
-   extracted using SelectData with appropriate options.
+   data set can be loaded using ds.importData with default options, then subsets
+   extracted using ds.selectData with appropriate options.
 
  Examples:
    - Example 1: full data set
-       data=ImportData('data.mat'); % load single data set
-       data=ImportData(studyinfo); % load all data sets in studyinfo.study_dir
+       data=ds.importData('data.mat'); % load single data set
+       data=ds.importData(studyinfo); % load all data sets in studyinfo.study_dir
    - Example 2: partial data set with HDF-style loading
-       data=ImportData('data.mat','variables','pop1_v','time_limits',[1000 4000])
+       data=ds.importData('data.mat','variables','pop1_v','time_limits',[1000 4000])
 
  TODO:
  - specify subsets to return in terms of varied parameters, time_limits, ROIs,
    etc possible format for specifying range_varied: {'E','gNa',[.1 .3];
    'I-&gt;E','tauI',[15 25]; 'I','mechanism_list','+iM'}
- - achieve by calling function SelectData() at end of this function.</pre></div>
+ - achieve by calling function ds.selectData() at end of this function.</pre></div>
 
 <!-- crossreference -->
 <h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
 This function calls:
 <ul style="list-style-image:url(../matlabicon.gif)">
-<li><a href="CheckOptions.html" class="code" title="function [parms, params_unspecified ] = CheckOptions(options, options_schema, strict)">CheckOptions</a>	CHECKOPTIONS - organize key/value pairs in structure with default or user-supplied values according to a schema</li><li><a href="CheckStudyinfo.html" class="code" title="function studyinfo=CheckStudyinfo(studyinfo,varargin)">CheckStudyinfo</a>	CHECKSTUDYINFO - Standardize studyinfo structure and auto-populate missing fields</li><li><a href="ImportCSV.html" class="code" title="function data=ImportCSV(file)">ImportCSV</a>	IMPORTCSV - load CSV data into DynaSim formatted data structure.</li><li><a href="ImportData.html" class="code" title="function [data,studyinfo] = ImportData(file,varargin)">ImportData</a>	IMPORTDATA - load data into DynaSim formatted data structure.</li><li><a href="Options2Keyval.html" class="code" title="function keyval = Options2Keyval(options)">Options2Keyval</a>	OPTIONS2KEYVAL - Convert from options structure to a list of key/value pairs.</li><li><a href="SelectData.html" class="code" title="function data=SelectData(data,varargin)">SelectData</a>	SELECTDATA -  select subset of data</li></ul>
+<li><a href="ds.checkOptions.html" class="code" title="function [parms, params_unspecified ] = ds.checkOptions(options, options_schema, strict)">ds.checkOptions</a>	CHECKOPTIONS - organize key/value pairs in structure with default or user-supplied values according to a schema</li><li><a href="ds.checkStudyinfo.html" class="code" title="function studyinfo=ds.checkStudyinfo(studyinfo,varargin)">ds.checkStudyinfo</a>	CHECKSTUDYINFO - Standardize studyinfo structure and auto-populate missing fields</li><li><a href="ds.importCSV.html" class="code" title="function data=ds.importCSV(file)">ds.importCSV</a>	IMPORTCSV - load CSV data into DynaSim formatted data structure.</li><li><a href="ds.importData.html" class="code" title="function [data,studyinfo] = ds.importData(file,varargin)">ds.importData</a>	IMPORTDATA - load data into DynaSim formatted data structure.</li><li><a href="ds.options2Keyval.html" class="code" title="function keyval = ds.options2Keyval(options)">ds.options2Keyval</a>	OPTIONS2KEYVAL - Convert from options structure to a list of key/value pairs.</li><li><a href="ds.selectData.html" class="code" title="function data=ds.selectData(data,varargin)">ds.selectData</a>	SELECTDATA -  select subset of data</li></ul>
 This function is called by:
 <ul style="list-style-image:url(../matlabicon.gif)">
-<li><a href="AnalyzeData.html" class="code" title="function result=AnalyzeData(data,func,varargin)">AnalyzeData</a>	ANALYZEDATA - Apply an analysis function to DynaSim data, optionally saving data</li><li><a href="AnalyzeStudy.html" class="code" title="function [results,studyinfo]=AnalyzeStudy(data,func,varargin)">AnalyzeStudy</a>	ANALYZESTUDY - Apply an analysis function to DynaSim data, optionally saving data</li><li><a href="ImportData.html" class="code" title="function [data,studyinfo] = ImportData(file,varargin)">ImportData</a>	IMPORTDATA - load data into DynaSim formatted data structure.</li><li><a href="SimulateModel.html" class="code" title="function [data,studyinfo]=SimulateModel(model,varargin)">SimulateModel</a>	% data=SimulateModel(model,'option',value,...)</li></ul>
+<li><a href="ds.analyzeData.html" class="code" title="function result=ds.analyzeData(data,func,varargin)">ds.analyzeData</a>	ANALYZEDATA - Apply an analysis function to DynaSim data, optionally saving data</li><li><a href="AnalyzeStudy.html" class="code" title="function [results,studyinfo]=AnalyzeStudy(data,func,varargin)">AnalyzeStudy</a>	ANALYZESTUDY - Apply an analysis function to DynaSim data, optionally saving data</li><li><a href="ds.importData.html" class="code" title="function [data,studyinfo] = ds.importData(file,varargin)">ds.importData</a>	IMPORTDATA - load data into DynaSim formatted data structure.</li><li><a href="ds.simulateModel.html" class="code" title="function [data,studyinfo]=ds.simulateModel(model,varargin)">ds.simulateModel</a>	% data=ds.simulateModel(model,'option',value,...)</li></ul>
 <!-- crossreference -->
 
 
 
 <h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
-<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function [data,studyinfo] = ImportData(file,varargin)</a>
+<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function [data,studyinfo] = ds.importData(file,varargin)</a>
 0002 <span class="comment">%IMPORTDATA - load data into DynaSim formatted data structure.</span>
 0003 <span class="comment">%</span>
 0004 <span class="comment">% Usage:</span>
-0005 <span class="comment">%   [data,studyinfo]=ImportData(data_file)</span>
-0006 <span class="comment">%   data=ImportData(data_file)</span>
+0005 <span class="comment">%   [data,studyinfo]=ds.importData(data_file)</span>
+0006 <span class="comment">%   data=ds.importData(data_file)</span>
 0007 <span class="comment">%</span>
 0008 <span class="comment">% Inputs:</span>
 0009 <span class="comment">%   - data_file data file name in accepted format (csv, mat, ...), or also</span>
 0010 <span class="comment">%     accepted: list of data files, studyinfo structure, study_dir, or studyinfo</span>
 0011 <span class="comment">%     file</span>
-0012 <span class="comment">%   - studyinfo: DynaSim studyinfo structure (see CheckStudyinfo)</span>
+0012 <span class="comment">%   - studyinfo: DynaSim studyinfo structure (see ds.checkStudyinfo)</span>
 0013 <span class="comment">%   - options:</span>
 0014 <span class="comment">%     'verbose_flag': {0,1} (default: 1)</span>
 0015 <span class="comment">%     'process_id'  : process identifier for loading studyinfo if necessary</span>
@@ -127,36 +127,36 @@ This function is called by:
 0030 <span class="comment">%</span>
 0031 <span class="comment">% Notes:</span>
 0032 <span class="comment">%   - NOTE 1: CSV file structure assumes CSV file contains data organized</span>
-0033 <span class="comment">%   according to output from WriteDynaSimSolver: time points along rows; state</span>
+0033 <span class="comment">%   according to output from ds.writeDynaSimSolver: time points along rows; state</span>
 0034 <span class="comment">%   variables and monitors are columns; first column is time vector; next</span>
 0035 <span class="comment">%   columns are state variables; final columns are monitors. first row has</span>
 0036 <span class="comment">%   headers for each column. if a population has more than one cell, different</span>
 0037 <span class="comment">%   cells are sequential columns with same header repeated for each cell.</span>
 0038 <span class="comment">%</span>
 0039 <span class="comment">%   - NOTE 2: DynaSim data exported to MAT-files are HDF-compatible. To obtain</span>
-0040 <span class="comment">%   partial data sets without having to load the entire file, use ImportData</span>
+0040 <span class="comment">%   partial data sets without having to load the entire file, use ds.importData</span>
 0041 <span class="comment">%   with options 'time_limits' and/or 'variables'. Alternatively, the entire</span>
-0042 <span class="comment">%   data set can be loaded using ImportData with default options, then subsets</span>
-0043 <span class="comment">%   extracted using SelectData with appropriate options.</span>
+0042 <span class="comment">%   data set can be loaded using ds.importData with default options, then subsets</span>
+0043 <span class="comment">%   extracted using ds.selectData with appropriate options.</span>
 0044 <span class="comment">%</span>
 0045 <span class="comment">% Examples:</span>
 0046 <span class="comment">%   - Example 1: full data set</span>
-0047 <span class="comment">%       data=ImportData('data.mat'); % load single data set</span>
-0048 <span class="comment">%       data=ImportData(studyinfo); % load all data sets in studyinfo.study_dir</span>
+0047 <span class="comment">%       data=ds.importData('data.mat'); % load single data set</span>
+0048 <span class="comment">%       data=ds.importData(studyinfo); % load all data sets in studyinfo.study_dir</span>
 0049 <span class="comment">%   - Example 2: partial data set with HDF-style loading</span>
-0050 <span class="comment">%       data=ImportData('data.mat','variables','pop1_v','time_limits',[1000 4000])</span>
+0050 <span class="comment">%       data=ds.importData('data.mat','variables','pop1_v','time_limits',[1000 4000])</span>
 0051 <span class="comment">%</span>
 0052 <span class="comment">% TODO:</span>
 0053 <span class="comment">% - specify subsets to return in terms of varied parameters, time_limits, ROIs,</span>
 0054 <span class="comment">%   etc possible format for specifying range_varied: {'E','gNa',[.1 .3];</span>
 0055 <span class="comment">%   'I-&gt;E','tauI',[15 25]; 'I','mechanism_list','+iM'}</span>
-0056 <span class="comment">% - achieve by calling function SelectData() at end of this function.</span>
+0056 <span class="comment">% - achieve by calling function ds.selectData() at end of this function.</span>
 0057 
-0058 <span class="comment">% See also: SimulateModel, ExportData, CheckData, SelectData</span>
+0058 <span class="comment">% See also: ds.simulateModel, ds.exportData, ds.checkData, ds.selectData</span>
 0059 
 0060 
 0061 <span class="comment">% Check inputs</span>
-0062 options=<a href="CheckOptions.html" class="code" title="function [parms, params_unspecified ] = CheckOptions(options, options_schema, strict)">CheckOptions</a>(varargin,{<span class="keyword">...</span>
+0062 options=<a href="ds.checkOptions.html" class="code" title="function [parms, params_unspecified ] = ds.checkOptions(options, options_schema, strict)">ds.checkOptions</a>(varargin,{<span class="keyword">...</span>
 0063   <span class="string">'verbose_flag'</span>,1,{0,1},<span class="keyword">...</span>
 0064   <span class="string">'process_id'</span>,[],[],<span class="keyword">...</span><span class="comment"> % process identifier for loading studyinfo if necessary</span>
 0065   <span class="string">'time_limits'</span>,[],[],<span class="keyword">...</span>
@@ -178,7 +178,7 @@ This function is called by:
 0081 <span class="keyword">if</span> isstruct(file) &amp;&amp; isfield(file,<span class="string">'study_dir'</span>)
 0082   <span class="comment">% &quot;file&quot; is a studyinfo structure.</span>
 0083   <span class="comment">% retrieve most up-to-date studyinfo structure from studyinfo.mat file</span>
-0084   studyinfo = <a href="CheckStudyinfo.html" class="code" title="function studyinfo=CheckStudyinfo(studyinfo,varargin)">CheckStudyinfo</a>(file.study_dir,<span class="string">'process_id'</span>,options.process_id);
+0084   studyinfo = <a href="ds.checkStudyinfo.html" class="code" title="function studyinfo=ds.checkStudyinfo(studyinfo,varargin)">ds.checkStudyinfo</a>(file.study_dir,<span class="string">'process_id'</span>,options.process_id);
 0085   
 0086   <span class="comment">% compare simIDs to sim_id</span>
 0087   <span class="keyword">if</span> ~isempty(options.simIDs)
@@ -207,12 +207,12 @@ This function is called by:
 0110   sim_info = studyinfo.simulations(success);
 0111   
 0112   <span class="comment">% load each data set recursively</span>
-0113   keyvals = <a href="Options2Keyval.html" class="code" title="function keyval = Options2Keyval(options)">Options2Keyval</a>(options);
+0113   keyvals = <a href="ds.options2Keyval.html" class="code" title="function keyval = ds.options2Keyval(options)">ds.options2Keyval</a>(options);
 0114   num_files = length(data_files);
 0115   
 0116   <span class="keyword">for</span> i = 1:num_files
 0117     fprintf(<span class="string">'loading file %g/%g: %s\n'</span>,i,num_files,data_files{i});
-0118     tmp_data=<a href="ImportData.html" class="code" title="function [data,studyinfo] = ImportData(file,varargin)">ImportData</a>(data_files{i},keyvals{:});
+0118     tmp_data=<a href="ds.importData.html" class="code" title="function [data,studyinfo] = ds.importData(file,varargin)">ds.importData</a>(data_files{i},keyvals{:});
 0119     num_sets_per_file=length(tmp_data);
 0120     <span class="keyword">if</span> ~isfield(tmp_data,<span class="string">'varied'</span>)
 0121     <span class="comment">% add varied info</span>
@@ -256,11 +256,11 @@ This function is called by:
 0159   data_files=file;
 0160   success=cellfun(@exist,data_files)==2;
 0161   data_files=data_files(success);
-0162   keyvals=<a href="Options2Keyval.html" class="code" title="function keyval = Options2Keyval(options)">Options2Keyval</a>(options);
+0162   keyvals=<a href="ds.options2Keyval.html" class="code" title="function keyval = ds.options2Keyval(options)">ds.options2Keyval</a>(options);
 0163   
 0164   <span class="comment">% load each data set recursively</span>
 0165   <span class="keyword">for</span> i=1:length(data_files)
-0166     tmp_data=<a href="ImportData.html" class="code" title="function [data,studyinfo] = ImportData(file,varargin)">ImportData</a>(data_files{i},keyvals{:});
+0166     tmp_data=<a href="ds.importData.html" class="code" title="function [data,studyinfo] = ds.importData(file,varargin)">ds.importData</a>(data_files{i},keyvals{:});
 0167     <span class="comment">% store this data</span>
 0168     <span class="keyword">if</span> i==1
 0169       <span class="comment">% preallocate full data matrix based on first data file</span>
@@ -347,15 +347,15 @@ This function is called by:
 0250         <span class="keyword">end</span>
 0251       <span class="keyword">end</span>
 0252     <span class="keyword">case</span> <span class="string">'.csv'</span>
-0253       <span class="comment">% assumes CSV file contains data organized according to output from WriteDynaSimSolver:</span>
-0254       data=<a href="ImportCSV.html" class="code" title="function data=ImportCSV(file)">ImportCSV</a>(file);
+0253       <span class="comment">% assumes CSV file contains data organized according to output from ds.writeDynaSimSolver:</span>
+0254       data=<a href="ds.importCSV.html" class="code" title="function data=ds.importCSV(file)">ds.importCSV</a>(file);
 0255       
 0256       <span class="keyword">if</span> ~(isempty(options.time_limits) &amp;&amp; isempty(options.variables))
 0257         <span class="comment">% limit to select subsets</span>
-0258         data=<a href="SelectData.html" class="code" title="function data=SelectData(data,varargin)">SelectData</a>(data,varargin{:}); <span class="comment">% todo: create SelectData()</span>
+0258         data=<a href="ds.selectData.html" class="code" title="function data=ds.selectData(data,varargin)">ds.selectData</a>(data,varargin{:}); <span class="comment">% todo: create ds.selectData()</span>
 0259       <span class="keyword">end</span>
 0260     <span class="keyword">otherwise</span>
-0261       error(<span class="string">'file type not recognized. ImportData currently supports DynaSim data structure in MAT file, data values in CSV file.'</span>);
+0261       error(<span class="string">'file type not recognized. ds.importData currently supports DynaSim data structure in MAT file, data values in CSV file.'</span>);
 0262   <span class="keyword">end</span>
 0263 <span class="keyword">end</span></pre></div>
 <hr><address>Generated on Fri 07-Apr-2017 20:01:20 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" target="_parent">m2html</a></strong> &copy; 2005</address>

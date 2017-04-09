@@ -2,8 +2,8 @@
                 "http://www.w3.org/TR/REC-html40/loose.dtd">
 <html>
 <head>
-  <title>Description of DynaSim2xPlt</title>
-  <meta name="keywords" content="DynaSim2xPlt">
+  <title>Description of ds.ds2xPlt</title>
+  <meta name="keywords" content="ds.ds2xPlt">
   <meta name="description" content="Convert DynaSim data structure to xp format">
   <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
   <meta name="generator" content="m2html &copy; 2005 Guillaume Flandin">
@@ -16,14 +16,14 @@
 <body>
 <a name="_top"></a>
 <!-- menu.html functions -->
-<h1>DynaSim2xPlt
+<h1>ds.ds2xPlt
 </h1>
 
 <h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
 <div class="box"><strong>Convert DynaSim data structure to xp format</strong></div>
 
 <h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
-<div class="box"><strong>function xp = DynaSim2xPlt(data) </strong></div>
+<div class="box"><strong>function xp = ds.ds2xPlt(data) </strong></div>
 
 <h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
 <div class="fragment"><pre class="comment"> Convert DynaSim data structure to xp format</pre></div>
@@ -32,28 +32,28 @@
 <h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
 This function calls:
 <ul style="list-style-image:url(../matlabicon.gif)">
-<li><a href="CheckData.html" class="code" title="function data=CheckData(data)">CheckData</a>	CHECKDATA - Standardize data structure and auto-populate missing fields</li><li><a href="Data2Table.html" class="code" title="function [data_table,column_titles,time] = Data2Table(data,verbose_flag)">Data2Table</a>	Converts DynaSim structure to 1D cell array format. Later can use to</li></ul>
+<li><a href="ds.checkData.html" class="code" title="function data=ds.checkData(data)">ds.checkData</a>	CHECKDATA - Standardize data structure and auto-populate missing fields</li><li><a href="ds.data2Table.html" class="code" title="function [data_table,column_titles,time] = ds.data2Table(data,verbose_flag)">ds.data2Table</a>	Converts DynaSim structure to 1D cell array format. Later can use to</li></ul>
 This function is called by:
 <ul style="list-style-image:url(../matlabicon.gif)">
-<li><a href="All2xPlt.html" class="code" title="function [xp,is_image] = All2xPlt(data)">All2xPlt</a>	</li></ul>
+<li><a href="ds.xPlt.all2xPlt.html" class="code" title="function [xp,is_image] = ds.xPlt.all2xPlt(data)">ds.xPlt.all2xPlt</a>	</li></ul>
 <!-- crossreference -->
 
 
 
 <h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
 <div class="fragment"><pre>0001 
-0002 <a name="_sub0" href="#_subfunctions" class="code">function xp = DynaSim2xPlt(data)</a>
+0002 <a name="_sub0" href="#_subfunctions" class="code">function xp = ds.ds2xPlt(data)</a>
 0003     <span class="comment">% Convert DynaSim data structure to xp format</span>
 0004 
-0005     data = <a href="CheckData.html" class="code" title="function data=CheckData(data)">CheckData</a>(data);
+0005     data = <a href="ds.checkData.html" class="code" title="function data=ds.checkData(data)">ds.checkData</a>(data);
 0006     
 0007     <span class="comment">% Extract the data in a linear table format</span>
-0008     [data_table,column_titles,time] = <a href="Data2Table.html" class="code" title="function [data_table,column_titles,time] = Data2Table(data,verbose_flag)">Data2Table</a> (data);
+0008     [data_table,column_titles,time] = <a href="ds.data2Table.html" class="code" title="function [data_table,column_titles,time] = ds.data2Table(data,verbose_flag)">ds.data2Table</a> (data);
 0009 
 0010     <span class="comment">% % Preview the contents of this table</span>
 0011     <span class="comment">% %     Note: We cannot make this one big cell array since we want to allow</span>
 0012     <span class="comment">% %     axis labels to be either strings or numerics.</span>
-0013     <span class="comment">% previewTable(data_table,column_titles);</span>
+0013     <span class="comment">% ds.previewTable(data_table,column_titles);</span>
 0014 
 0015     <span class="comment">% Import the linear data into an xPlt object</span>
 0016     xp = xPlt;

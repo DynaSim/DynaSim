@@ -2,8 +2,8 @@
                 "http://www.w3.org/TR/REC-html40/loose.dtd">
 <html>
 <head>
-  <title>Description of CreateBatch</title>
-  <meta name="keywords" content="CreateBatch">
+  <title>Description of ds.createBatch</title>
+  <meta name="keywords" content="ds.createBatch">
   <meta name="description" content="CREATEBATCH - create and submit jobs to run sets of simulations or analyses.">
   <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
   <meta name="generator" content="m2html &copy; 2005 Guillaume Flandin">
@@ -16,24 +16,24 @@
 <body>
 <a name="_top"></a>
 <!-- menu.html functions -->
-<h1>CreateBatch
+<h1>ds.createBatch
 </h1>
 
 <h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
 <div class="box"><strong>CREATEBATCH - create and submit jobs to run sets of simulations or analyses.</strong></div>
 
 <h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
-<div class="box"><strong>function studyinfo = CreateBatch(base_model,modifications_set,varargin) </strong></div>
+<div class="box"><strong>function studyinfo = ds.createBatch(base_model,modifications_set,varargin) </strong></div>
 
 <h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
 <div class="fragment"><pre class="comment">CREATEBATCH - create and submit jobs to run sets of simulations or analyses.
 
  Usage:
-   studyinfo=CreateBatch(model,varargin)
+   studyinfo=ds.createBatch(model,varargin)
 
  Inputs:
-   - DynaSim model (see GenerateModel)
-   - modifications_set (as returned by Vary2Modifications())
+   - DynaSim model (see ds.generateModel)
+   - modifications_set (as returned by ds.vary2Modifications())
      - options:
        'compile_flag'  : whether to compile simulation using coder instead of
                          interpreting Matlab {0 or 1} (default: 0)
@@ -51,20 +51,20 @@
        'num_cores'     : number of cores to specify in the parallel pool
 
  Outputs:
-   - DynaSim studyinfo (see CheckStudyinfo for schema info)
+   - DynaSim studyinfo (see ds.checkStudyinfo for schema info)
 
- Dependencies: SetupStudy, UpdateStudy
+ Dependencies: ds.setupStudy, ds.updateStudy
 
- See also: <a href="GenerateModel.html" class="code" title="function [model,name_map]=GenerateModel(specification,varargin)">GenerateModel</a>, <a href="SimulateModel.html" class="code" title="function [data,studyinfo]=SimulateModel(model,varargin)">SimulateModel</a>, <a href="CheckStudyinfo.html" class="code" title="function studyinfo=CheckStudyinfo(studyinfo,varargin)">CheckStudyinfo</a>, <a href="Vary2Modifications.html" class="code" title="function modifications_set = Vary2Modifications(vary,model)">Vary2Modifications</a></pre></div>
+ See also: <a href="ds.generateModel.html" class="code" title="function [model,name_map]=ds.generateModel(specification,varargin)">ds.generateModel</a>, <a href="ds.simulateModel.html" class="code" title="function [data,studyinfo]=ds.simulateModel(model,varargin)">ds.simulateModel</a>, <a href="ds.checkStudyinfo.html" class="code" title="function studyinfo=ds.checkStudyinfo(studyinfo,varargin)">ds.checkStudyinfo</a>, <a href="ds.vary2Modifications.html" class="code" title="function modifications_set = ds.vary2Modifications(vary,model)">ds.vary2Modifications</a></pre></div>
 
 <!-- crossreference -->
 <h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
 This function calls:
 <ul style="list-style-image:url(../matlabicon.gif)">
-<li><a href="CheckOptions.html" class="code" title="function [parms, params_unspecified ] = CheckOptions(options, options_schema, strict)">CheckOptions</a>	CHECKOPTIONS - organize key/value pairs in structure with default or user-supplied values according to a schema</li><li><a href="CheckStudyinfo.html" class="code" title="function studyinfo=CheckStudyinfo(studyinfo,varargin)">CheckStudyinfo</a>	CHECKSTUDYINFO - Standardize studyinfo structure and auto-populate missing fields</li><li><a href="GetSolveFile.html" class="code" title="function solve_file = GetSolveFile(model,studyinfo,varargin)">GetSolveFile</a>	GETSOLVEFILE - helper function that creates or retrieves the desired solver file.</li><li><a href="LocateModelFiles.html" class="code" title="function [paths,files]=LocateModelFiles(input)">LocateModelFiles</a>	LOCATEMODELFILES - locate mechanism files associated with DynaSim specifications.</li><li><a href="MonitorStudy.html" class="code" title="function [studyinfo,study_status]=MonitorStudy(studyinfo,varargin)">MonitorStudy</a>	MONITORSTUDY - display information on study progress.</li><li><a href="SetupStudy.html" class="code" title="function [studyinfo,options]=SetupStudy(base_model,varargin)">SetupStudy</a>	SETUPSTUDY - Initialize DynaSim studyinfo structure, prepare list of output file names, and create output directories</li><li><a href="StudyinfoIO.html" class="code" title="function studyinfo=StudyinfoIO(studyinfo,study_file,id,verbose_flag)">StudyinfoIO</a>	STUDYINFOIO - use lock files to manage concurrent access to a shared studyinfo</li></ul>
+<li><a href="ds.checkOptions.html" class="code" title="function [parms, params_unspecified ] = ds.checkOptions(options, options_schema, strict)">ds.checkOptions</a>	CHECKOPTIONS - organize key/value pairs in structure with default or user-supplied values according to a schema</li><li><a href="ds.checkStudyinfo.html" class="code" title="function studyinfo=ds.checkStudyinfo(studyinfo,varargin)">ds.checkStudyinfo</a>	CHECKSTUDYINFO - Standardize studyinfo structure and auto-populate missing fields</li><li><a href="ds.getSolveFile.html" class="code" title="function solve_file = ds.getSolveFile(model,studyinfo,varargin)">ds.getSolveFile</a>	GETSOLVEFILE - helper function that creates or retrieves the desired solver file.</li><li><a href="ds.locateModelFiles.html" class="code" title="function [paths,files]=ds.locateModelFiles(input)">ds.locateModelFiles</a>	LOCATEMODELFILES - locate mechanism files associated with DynaSim specifications.</li><li><a href="ds.monitorStudy.html" class="code" title="function [studyinfo,study_status]=ds.monitorStudy(studyinfo,varargin)">ds.monitorStudy</a>	MONITORSTUDY - display information on study progress.</li><li><a href="ds.setupStudy.html" class="code" title="function [studyinfo,options]=ds.setupStudy(base_model,varargin)">ds.setupStudy</a>	SETUPSTUDY - Initialize DynaSim studyinfo structure, prepare list of output file names, and create output directories</li><li><a href="ds.studyinfoIO.html" class="code" title="function studyinfo=ds.studyinfoIO(studyinfo,study_file,id,verbose_flag)">ds.studyinfoIO</a>	STUDYINFOIO - use lock files to manage concurrent access to a shared studyinfo</li></ul>
 This function is called by:
 <ul style="list-style-image:url(../matlabicon.gif)">
-<li><a href="SimulateModel.html" class="code" title="function [data,studyinfo]=SimulateModel(model,varargin)">SimulateModel</a>	% data=SimulateModel(model,'option',value,...)</li></ul>
+<li><a href="ds.simulateModel.html" class="code" title="function [data,studyinfo]=ds.simulateModel(model,varargin)">ds.simulateModel</a>	% data=ds.simulateModel(model,'option',value,...)</li></ul>
 <!-- crossreference -->
 
 <h2><a name="_subfunctions"></a>SUBFUNCTIONS <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
@@ -72,15 +72,15 @@ This function is called by:
 <li><a href="#_sub1" class="code">function WriteSimJob(sim_ids,job_file)</a></li></ul>
 
 <h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
-<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function studyinfo = CreateBatch(base_model,modifications_set,varargin)</a>
+<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function studyinfo = ds.createBatch(base_model,modifications_set,varargin)</a>
 0002 <span class="comment">%CREATEBATCH - create and submit jobs to run sets of simulations or analyses.</span>
 0003 <span class="comment">%</span>
 0004 <span class="comment">% Usage:</span>
-0005 <span class="comment">%   studyinfo=CreateBatch(model,varargin)</span>
+0005 <span class="comment">%   studyinfo=ds.createBatch(model,varargin)</span>
 0006 <span class="comment">%</span>
 0007 <span class="comment">% Inputs:</span>
-0008 <span class="comment">%   - DynaSim model (see GenerateModel)</span>
-0009 <span class="comment">%   - modifications_set (as returned by Vary2Modifications())</span>
+0008 <span class="comment">%   - DynaSim model (see ds.generateModel)</span>
+0009 <span class="comment">%   - modifications_set (as returned by ds.vary2Modifications())</span>
 0010 <span class="comment">%     - options:</span>
 0011 <span class="comment">%       'compile_flag'  : whether to compile simulation using coder instead of</span>
 0012 <span class="comment">%                         interpreting Matlab {0 or 1} (default: 0)</span>
@@ -98,14 +98,14 @@ This function is called by:
 0024 <span class="comment">%       'num_cores'     : number of cores to specify in the parallel pool</span>
 0025 <span class="comment">%</span>
 0026 <span class="comment">% Outputs:</span>
-0027 <span class="comment">%   - DynaSim studyinfo (see CheckStudyinfo for schema info)</span>
+0027 <span class="comment">%   - DynaSim studyinfo (see ds.checkStudyinfo for schema info)</span>
 0028 <span class="comment">%</span>
-0029 <span class="comment">% Dependencies: SetupStudy, UpdateStudy</span>
+0029 <span class="comment">% Dependencies: ds.setupStudy, ds.updateStudy</span>
 0030 <span class="comment">%</span>
-0031 <span class="comment">% See also: GenerateModel, SimulateModel, CheckStudyinfo, Vary2Modifications</span>
+0031 <span class="comment">% See also: ds.generateModel, ds.simulateModel, ds.checkStudyinfo, ds.vary2Modifications</span>
 0032 
 0033 <span class="comment">% check inputs</span>
-0034 options=<a href="CheckOptions.html" class="code" title="function [parms, params_unspecified ] = CheckOptions(options, options_schema, strict)">CheckOptions</a>(varargin,{<span class="keyword">...</span>
+0034 options=<a href="ds.checkOptions.html" class="code" title="function [parms, params_unspecified ] = ds.checkOptions(options, options_schema, strict)">ds.checkOptions</a>(varargin,{<span class="keyword">...</span>
 0035   <span class="string">'compile_flag'</span>,0,{0,1},<span class="keyword">...</span>
 0036   <span class="string">'parallel_flag'</span>,0,{0,1},<span class="keyword">...</span>
 0037   <span class="string">'num_cores'</span>,4,[],<span class="keyword">...</span><span class="comment"> % # cores for parallel processing (SCC supports 1-12)</span>
@@ -123,20 +123,20 @@ This function is called by:
 0049   },false);
 0050 
 0051 <span class="comment">% Set up studyinfo structure, study directory and output file names</span>
-0052 <span class="comment">%[studyinfo,options.simulator_options]=SetupStudy(base_model,modifications_set,options.simulator_options);</span>
-0053 [studyinfo,options.simulator_options]=<a href="SetupStudy.html" class="code" title="function [studyinfo,options]=SetupStudy(base_model,varargin)">SetupStudy</a>(base_model,<span class="string">'modifications_set'</span>,modifications_set,<span class="string">'simulator_options'</span>,options.simulator_options,<span class="string">'process_id'</span>,options.process_id);
+0052 <span class="comment">%[studyinfo,options.simulator_options]=ds.setupStudy(base_model,modifications_set,options.simulator_options);</span>
+0053 [studyinfo,options.simulator_options]=<a href="ds.setupStudy.html" class="code" title="function [studyinfo,options]=ds.setupStudy(base_model,varargin)">ds.setupStudy</a>(base_model,<span class="string">'modifications_set'</span>,modifications_set,<span class="string">'simulator_options'</span>,options.simulator_options,<span class="string">'process_id'</span>,options.process_id);
 0054 study_file=fullfile(studyinfo.study_dir,<span class="string">'studyinfo.mat'</span>);
 0055 num_simulations=length(modifications_set);
 0056 
 0057 <span class="comment">% check whether study has already completed</span>
 0058 <span class="comment">% if options.overwrite_flag==0</span>
-0059   [~,s]=<a href="MonitorStudy.html" class="code" title="function [studyinfo,study_status]=MonitorStudy(studyinfo,varargin)">MonitorStudy</a>(studyinfo.study_dir,<span class="string">'verbose_flag'</span>,0,<span class="string">'process_id'</span>,options.process_id);
+0059   [~,s]=<a href="ds.monitorStudy.html" class="code" title="function [studyinfo,study_status]=ds.monitorStudy(studyinfo,varargin)">ds.monitorStudy</a>(studyinfo.study_dir,<span class="string">'verbose_flag'</span>,0,<span class="string">'process_id'</span>,options.process_id);
 0060   <span class="keyword">if</span> s==1 <span class="comment">% study finished</span>
 0061     <span class="keyword">if</span> options.verbose_flag
 0062       fprintf(<span class="string">'Study already finished. Not creating new batch.\n'</span>);
 0063     <span class="keyword">end</span>
 0064     
-0065     studyinfo=<a href="CheckStudyinfo.html" class="code" title="function studyinfo=CheckStudyinfo(studyinfo,varargin)">CheckStudyinfo</a>(studyinfo.study_dir,<span class="string">'process_id'</span>,options.process_id);
+0065     studyinfo=<a href="ds.checkStudyinfo.html" class="code" title="function studyinfo=ds.checkStudyinfo(studyinfo,varargin)">ds.checkStudyinfo</a>(studyinfo.study_dir,<span class="string">'process_id'</span>,options.process_id);
 0066     
 0067     <span class="keyword">return</span>;
 0068   <span class="keyword">end</span>
@@ -150,7 +150,7 @@ This function is called by:
 0076 <span class="keyword">end</span>
 0077 
 0078 <span class="comment">% create base solve_file (m- or MEX-file)</span>
-0079 solve_file = <a href="GetSolveFile.html" class="code" title="function solve_file = GetSolveFile(model,studyinfo,varargin)">GetSolveFile</a>(base_model,studyinfo,options.simulator_options);
+0079 solve_file = <a href="ds.getSolveFile.html" class="code" title="function solve_file = ds.getSolveFile(model,studyinfo,varargin)">ds.getSolveFile</a>(base_model,studyinfo,options.simulator_options);
 0080 
 0081 <span class="comment">% add appropriate MEX extension if compiled</span>
 0082 <span class="comment">%   NOTE: the extension depends on whether a 32-bit or 64-bit machine is used</span>
@@ -169,7 +169,7 @@ This function is called by:
 0095   <span class="keyword">if</span> ~any(strcmp(options.solver, {<span class="string">'ode113'</span>,<span class="string">'ode15s'</span>,<span class="string">'ode23s'</span>,<span class="string">'ode23t'</span>,<span class="string">'ode23tb'</span>})) <span class="comment">% not mex supported)</span>
 0096     full_solve_file=[solve_file <span class="string">'.'</span> tmp{1}];
 0097   
-0098     <span class="comment">% remove '_mex' suffix from solve_file for compatibility with GetSolveFile()</span>
+0098     <span class="comment">% remove '_mex' suffix from solve_file for compatibility with ds.getSolveFile()</span>
 0099     solve_file=regexp(solve_file,<span class="string">'(.+)_mex$'</span>,<span class="string">'tokens'</span>,<span class="string">'once'</span>);
 0100     solve_file=solve_file{1};
 0101   <span class="keyword">else</span>
@@ -216,7 +216,7 @@ This function is called by:
 0142 dynasim_functions=fullfile(dynasim_path,<span class="string">'functions'</span>);
 0143 
 0144 <span class="comment">% locate mechanism files</span>
-0145 [mech_paths,mech_files]=<a href="LocateModelFiles.html" class="code" title="function [paths,files]=LocateModelFiles(input)">LocateModelFiles</a>(base_model);
+0145 [mech_paths,mech_files]=<a href="ds.locateModelFiles.html" class="code" title="function [paths,files]=ds.locateModelFiles(input)">ds.locateModelFiles</a>(base_model);
 0146 
 0147 <span class="comment">% add paths to studyinfo structure</span>
 0148 studyinfo.paths.dynasim_functions = dynasim_path;
@@ -280,7 +280,7 @@ This function is called by:
 0206   
 0207   <span class="comment">% TODO: compile job_file</span>
 0208 <span class="comment">%   if options.compile_flag</span>
-0209 <span class="comment">%     job_file = PrepareMEX(job_file, options); %compile the job file</span>
+0209 <span class="comment">%     job_file = ds.prepareMEX(job_file, options); %compile the job file</span>
 0210 <span class="comment">%   end</span>
 0211   
 0212   <span class="comment">% add job_file to studyinfo</span>
@@ -354,7 +354,7 @@ This function is called by:
 0280     studyinfo.simulations(sim).batch_dir=batch_dir;
 0281     studyinfo.simulations(sim).simulator_options=options.simulator_options;
 0282 
-0283     <span class="comment">% set solve_file for this simulation (will be passed to SimulateModel as an option)</span>
+0283     <span class="comment">% set solve_file for this simulation (will be passed to ds.simulateModel as an option)</span>
 0284     <span class="keyword">if</span> isa(options.simulator_options.experiment,<span class="string">'function_handle'</span>)
 0285       studyinfo.simulations(sim).simulator_options.solve_file=[];
 0286     <span class="keyword">else</span>
@@ -405,7 +405,7 @@ This function is called by:
 0331 <span class="keyword">end</span>
 0332 
 0333 <span class="comment">% update studyinfo on disk</span>
-0334 <a href="StudyinfoIO.html" class="code" title="function studyinfo=StudyinfoIO(studyinfo,study_file,id,verbose_flag)">StudyinfoIO</a>(studyinfo,study_file,options.simulator_options.sim_id,options.verbose_flag);
+0334 <a href="ds.studyinfoIO.html" class="code" title="function studyinfo=ds.studyinfoIO(studyinfo,study_file,id,verbose_flag)">ds.studyinfoIO</a>(studyinfo,study_file,options.simulator_options.sim_id,options.verbose_flag);
 0335 
 0336 <span class="comment">% TODO: remove old lock files ..</span>
 0337 
@@ -418,7 +418,7 @@ This function is called by:
 0344 <span class="keyword">else</span> <span class="comment">% on cluster with qsub</span>
 0345   <span class="comment">% submit jobs (e.g., fScripjobs_memlimit batch_dir 32G)</span>
 0346   <span class="comment">% check status of study</span>
-0347   [~,s]=<a href="MonitorStudy.html" class="code" title="function [studyinfo,study_status]=MonitorStudy(studyinfo,varargin)">MonitorStudy</a>(studyinfo.study_dir,<span class="string">'verbose_flag'</span>,0);
+0347   [~,s]=<a href="ds.monitorStudy.html" class="code" title="function [studyinfo,study_status]=ds.monitorStudy(studyinfo,varargin)">ds.monitorStudy</a>(studyinfo.study_dir,<span class="string">'verbose_flag'</span>,0);
 0348   
 0349   <span class="keyword">if</span> s~=1 <span class="comment">% study not finished</span>
 0350     <span class="comment">% submit jobs using shell script</span>
@@ -466,7 +466,7 @@ This function is called by:
 0392     <span class="keyword">end</span>
 0393     
 0394     <span class="comment">%if options.verbose_flag</span>
-0395       <span class="comment">%fprintf('%g jobs successfully submitted!\ntip: use MonitorStudy(''%s'') or MonitorStudy(studyinfo) to track status of cluster jobs.\n',num_jobs,studyinfo.study_dir);</span>
+0395       <span class="comment">%fprintf('%g jobs successfully submitted!\ntip: use ds.monitorStudy(''%s'') or ds.monitorStudy(studyinfo) to track status of cluster jobs.\n',num_jobs,studyinfo.study_dir);</span>
 0396       fprintf(<span class="string">'%g jobs successfully submitted!\n'</span>,num_jobs);
 0397     <span class="comment">%end</span>
 0398   <span class="keyword">elseif</span> s==1 <span class="comment">% study is finished</span>
@@ -484,7 +484,7 @@ This function is called by:
 0410     fjob=fopen(job_file,<span class="string">'wt'</span>);
 0411     
 0412     <span class="comment">% load studyinfo using helper function to avoid busy file errors</span>
-0413     <span class="comment">%fprintf(fjob,'studyinfo=CheckStudyinfo(''%s'',''process_id'',%g);\n',study_file,sim_ids(1));</span>
+0413     <span class="comment">%fprintf(fjob,'studyinfo=ds.checkStudyinfo(''%s'',''process_id'',%g);\n',study_file,sim_ids(1));</span>
 0414     <span class="comment">%fprintf(fjob,'load(''%s'',''studyinfo'');\n',study_file);</span>
 0415     
 0416     <span class="keyword">if</span> ~options.one_solve_file_flag
@@ -534,29 +534,29 @@ This function is called by:
 0460       fprintf(fjob,<span class="string">'\t\tload(fullfile(''%s'',''studyinfo.mat''),''studyinfo'');\n'</span>,batch_dir);
 0461     <span class="keyword">end</span>
 0462     <span class="comment">% compare paths between compute machine and studyinfo startup</span>
-0463     fprintf(fjob,<span class="string">'\t\t[valid,message]=CheckHostPaths(studyinfo);\n'</span>);
+0463     fprintf(fjob,<span class="string">'\t\t[valid,message]=ds.checkHostPaths(studyinfo);\n'</span>);
 0464     
 0465     <span class="keyword">if</span> ~options.one_solve_file_flag
-0466       fprintf(fjob,<span class="string">'\t\tif ~valid\n\t\t  lasterr(message);\n\t\t  for s=1:length(SimIDs), UpdateStudy(studyinfo.study_dir,''sim_id'',SimIDs(s),''status'',''failed''); end\n\t\t  continue;\n\t\tend\n'</span>);
+0466       fprintf(fjob,<span class="string">'\t\tif ~valid\n\t\t  lasterr(message);\n\t\t  for s=1:length(SimIDs), ds.updateStudy(studyinfo.study_dir,''sim_id'',SimIDs(s),''status'',''failed''); end\n\t\t  continue;\n\t\tend\n'</span>);
 0467     <span class="keyword">end</span>
 0468     
 0469     <span class="comment">% simulate model with proper modifications and options</span>
 0470     fprintf(fjob,<span class="string">'\t\tsiminfo=studyinfo.simulations(SimID);\n'</span>);
 0471     fprintf(fjob,<span class="string">'\t\toptions=rmfield(siminfo.simulator_options,{''modifications'',''studyinfo'',''analysis_functions'',''plot_functions'',''sim_id''});\n'</span>);
-0472     fprintf(fjob,<span class="string">'\t\tkeyvals=Options2Keyval(options);\n'</span>);
+0472     fprintf(fjob,<span class="string">'\t\tkeyvals=ds.options2Keyval(options);\n'</span>);
 0473     fprintf(fjob,<span class="string">'\t\tfprintf(''-----------------------------------------------------\\n'');\n'</span>);
 0474     fprintf(fjob,<span class="string">'\t\tfprintf(''Processing simulation %%g (%%g of %%g in this job)...\\n'',SimID,s,length(SimIDs));\n'</span>);
 0475     fprintf(fjob,<span class="string">'\t\tfprintf(''-----------------------------------------------------\\n'');\n'</span>);
-0476     fprintf(fjob,<span class="string">'\t\tdata=SimulateModel(studyinfo.base_model,''modifications'',siminfo.modifications,''studyinfo'',studyinfo,''sim_id'',SimID,keyvals{:});\n'</span>);
+0476     fprintf(fjob,<span class="string">'\t\tdata=ds.simulateModel(studyinfo.base_model,''modifications'',siminfo.modifications,''studyinfo'',studyinfo,''sim_id'',SimID,keyvals{:});\n'</span>);
 0477     fprintf(fjob,<span class="string">'\t\tfor i=1:length(siminfo.result_functions)\n'</span>);
-0478     fprintf(fjob,<span class="string">'\t\t\tAnalyzeData(data,siminfo.result_functions{i},''result_file'',siminfo.result_files{i},''save_data_flag'',1,siminfo.result_options{i}{:});\n'</span>);
+0478     fprintf(fjob,<span class="string">'\t\t\tds.analyzeData(data,siminfo.result_functions{i},''result_file'',siminfo.result_files{i},''save_data_flag'',1,siminfo.result_options{i}{:});\n'</span>);
 0479     fprintf(fjob,<span class="string">'\t\tend\n'</span>);
 0480     
 0481     <span class="comment">% add error handling</span>
 0482     fprintf(fjob,<span class="string">'\tcatch err\n'</span>);
 0483     
 0484     <span class="comment">%fprintf(fjob,'\t\ttry delete(fullfile(studyinfo.study_dir,[''.locked_'' num2str(SimID)])); end\n');</span>
-0485     fprintf(fjob,<span class="string">'\t\tDisplayError(err);\n'</span>);
+0485     fprintf(fjob,<span class="string">'\t\tdisplayError(err);\n'</span>);
 0486     fprintf(fjob,<span class="string">'\tend\n'</span>);
 0487     
 0488     <span class="comment">% end loop over simulations in this job</span>
@@ -579,7 +579,7 @@ This function is called by:
 0505 <span class="keyword">end</span>
 0506 
 0507 <span class="comment">% -------------------</span>
-0508 <span class="comment">% in CreateBatch():</span>
+0508 <span class="comment">% in ds.createBatch():</span>
 0509 <span class="comment">% -------------------</span>
 0510 <span class="comment">% create solve_file</span>
 0511 <span class="comment">% for each sim k</span>
@@ -587,7 +587,7 @@ This function is called by:
 0513 <span class="comment">%   set studyinfo.simulations(k).solve_file=this_solve_file</span>
 0514 <span class="comment">% ...</span>
 0515 <span class="comment">% in sim job.m:</span>
-0516 <span class="comment">% SimulateModel(model{k},'solve_file',solve_file{k},...)</span>
+0516 <span class="comment">% ds.simulateModel(model{k},'solve_file',solve_file{k},...)</span>
 0517 <span class="comment">% where solve_file{k}=studyinfo.simulations(k).solve_file</span></pre></div>
 <hr><address>Generated on Fri 07-Apr-2017 20:01:20 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" target="_parent">m2html</a></strong> &copy; 2005</address>
 </body>

@@ -2,8 +2,8 @@
                 "http://www.w3.org/TR/REC-html40/loose.dtd">
 <html>
 <head>
-  <title>Description of ParseModelEquations</title>
-  <meta name="keywords" content="ParseModelEquations">
+  <title>Description of ds.parseModelEquations</title>
+  <meta name="keywords" content="ds.parseModelEquations">
   <meta name="description" content="PARSEMODELEQUATIONS - parse equations and organize model data in DynaSim model structure">
   <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
   <meta name="generator" content="m2html &copy; 2005 Guillaume Flandin">
@@ -16,20 +16,20 @@
 <body>
 <a name="_top"></a>
 <!-- menu.html functions -->
-<h1>ParseModelEquations
+<h1>ds.parseModelEquations
 </h1>
 
 <h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
 <div class="box"><strong>PARSEMODELEQUATIONS - parse equations and organize model data in DynaSim model structure</strong></div>
 
 <h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
-<div class="box"><strong>function [model,name_map] = ParseModelEquations(text,varargin) </strong></div>
+<div class="box"><strong>function [model,name_map] = ds.parseModelEquations(text,varargin) </strong></div>
 
 <h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
 <div class="fragment"><pre class="comment">PARSEMODELEQUATIONS - parse equations and organize model data in DynaSim model structure
 
  Usage:
-   model = ParseModelEquations(STRING,'param',value,...)
+   model = ds.parseModelEquations(STRING,'param',value,...)
 
  Inputs:
    - STRING (required): one of:
@@ -41,9 +41,9 @@
    - user-supplied parameter values: ('key',value): name (key) of parameters to
                                      be set and associated user-supplied values
  Outputs:
-   - model: DynaSim model structure (see CheckModel for details)
+   - model: DynaSim model structure (see ds.checkModel for details)
    - name_map: useful for namespace-specific substitutions across multiple
-     sub-models, see description in GenerateModel for more information {name,
+     sub-models, see description in ds.generateModel for more information {name,
      namespace_name, namespace, type}
 
  Notes:
@@ -52,30 +52,30 @@
      However, this function does not distinguish between the two.
 
  Examples:
-     model = ParseModelEquations('dx/dt=3*a*x; x(0)=0','a',0);
-     model = ParseModelEquations('dx/dt=3*a*x, x(0)=0','a',0,'delimiter',',');
-     model = ParseModelEquations('CalciumPump.mech','namespace','HH');
-     model = ParseModelEquations('LIFneuron.eqns');
-     model = ParseModelEquations('a=2; b=2*a; f(x)=b; dx/dt=f(x); x(0)=0; if(x&gt;1)(x=0); current-&gt;f(x); monitor f(x); % comments')
+     model = ds.parseModelEquations('dx/dt=3*a*x; x(0)=0','a',0);
+     model = ds.parseModelEquations('dx/dt=3*a*x, x(0)=0','a',0,'delimiter',',');
+     model = ds.parseModelEquations('CalciumPump.mech','namespace','HH');
+     model = ds.parseModelEquations('LIFneuron.eqns');
+     model = ds.parseModelEquations('a=2; b=2*a; f(x)=b; dx/dt=f(x); x(0)=0; if(x&gt;1)(x=0); current-&gt;f(x); monitor f(x); % comments')
 
    - parsing individual sub-models from specification:
      equations=specification.populations(1).equations;
-     [model,map] = ParseModelEquations(equations,'namespace','pop')
+     [model,map] = ds.parseModelEquations(equations,'namespace','pop')
      population_mechanism=specification.populations(1).mechanism_list{1};
-     [model,map] = ParseModelEquations(population_mechanism,'namespace','pop_mech')
+     [model,map] = ds.parseModelEquations(population_mechanism,'namespace','pop_mech')
      connection_mechanism=specification.connections(1).mechanism_list{1};
-     [model,map] = ParseModelEquations(connection_mechanism,'namespace','pop_pop_mech')
+     [model,map] = ds.parseModelEquations(connection_mechanism,'namespace','pop_pop_mech')
 
- See also: <a href="ClassifyEquation.html" class="code" title="function classes=ClassifyEquation(string,delimiter)">ClassifyEquation</a>, <a href="GenerateModel.html" class="code" title="function [model,name_map]=GenerateModel(specification,varargin)">GenerateModel</a>, <a href="LocateModelFiles.html" class="code" title="function [paths,files]=LocateModelFiles(input)">LocateModelFiles</a></pre></div>
+ See also: <a href="ds.classifyEquation.html" class="code" title="function classes=ds.classifyEquation(string,delimiter)">ds.classifyEquation</a>, <a href="ds.generateModel.html" class="code" title="function [model,name_map]=ds.generateModel(specification,varargin)">ds.generateModel</a>, <a href="ds.locateModelFiles.html" class="code" title="function [paths,files]=ds.locateModelFiles(input)">ds.locateModelFiles</a></pre></div>
 
 <!-- crossreference -->
 <h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
 This function calls:
 <ul style="list-style-image:url(../matlabicon.gif)">
-<li><a href="ClassifyEquation.html" class="code" title="function classes=ClassifyEquation(string,delimiter)">ClassifyEquation</a>	CLASSIFYEQUATION - use regular expressions to classify model expressions in STRING</li><li><a href="LocateModelFiles.html" class="code" title="function [paths,files]=LocateModelFiles(input)">LocateModelFiles</a>	LOCATEMODELFILES - locate mechanism files associated with DynaSim specifications.</li></ul>
+<li><a href="ds.classifyEquation.html" class="code" title="function classes=ds.classifyEquation(string,delimiter)">ds.classifyEquation</a>	CLASSIFYEQUATION - use regular expressions to classify model expressions in STRING</li><li><a href="ds.locateModelFiles.html" class="code" title="function [paths,files]=ds.locateModelFiles(input)">ds.locateModelFiles</a>	LOCATEMODELFILES - locate mechanism files associated with DynaSim specifications.</li></ul>
 This function is called by:
 <ul style="list-style-image:url(../matlabicon.gif)">
-<li><a href="CheckSpecification.html" class="code" title="function spec=CheckSpecification(specification)">CheckSpecification</a>	CHECKSPECIFICATION - standardize specification structure and auto-populate missing fields</li><li><a href="ImportModel.html" class="code" title="function [model,map] = ImportModel(source,varargin)">ImportModel</a>	IMPORTMODEL - import model from raw equations, other program source, etc.</li></ul>
+<li><a href="ds.checkSpecification.html" class="code" title="function spec=ds.checkSpecification(specification)">ds.checkSpecification</a>	CHECKSPECIFICATION - standardize specification structure and auto-populate missing fields</li><li><a href="ds.importModel.html" class="code" title="function [model,map] = ds.importModel(source,varargin)">ds.importModel</a>	IMPORTMODEL - import model from raw equations, other program source, etc.</li></ul>
 <!-- crossreference -->
 
 <h2><a name="_subfunctions"></a>SUBFUNCTIONS <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
@@ -83,11 +83,11 @@ This function is called by:
 <li><a href="#_sub1" class="code">function [line,comment]=remove_comment(line)</a></li></ul>
 
 <h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
-<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function [model,name_map] = ParseModelEquations(text,varargin)</a>
+<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function [model,name_map] = ds.parseModelEquations(text,varargin)</a>
 0002 <span class="comment">%PARSEMODELEQUATIONS - parse equations and organize model data in DynaSim model structure</span>
 0003 <span class="comment">%</span>
 0004 <span class="comment">% Usage:</span>
-0005 <span class="comment">%   model = ParseModelEquations(STRING,'param',value,...)</span>
+0005 <span class="comment">%   model = ds.parseModelEquations(STRING,'param',value,...)</span>
 0006 <span class="comment">%</span>
 0007 <span class="comment">% Inputs:</span>
 0008 <span class="comment">%   - STRING (required): one of:</span>
@@ -99,9 +99,9 @@ This function is called by:
 0014 <span class="comment">%   - user-supplied parameter values: ('key',value): name (key) of parameters to</span>
 0015 <span class="comment">%                                     be set and associated user-supplied values</span>
 0016 <span class="comment">% Outputs:</span>
-0017 <span class="comment">%   - model: DynaSim model structure (see CheckModel for details)</span>
+0017 <span class="comment">%   - model: DynaSim model structure (see ds.checkModel for details)</span>
 0018 <span class="comment">%   - name_map: useful for namespace-specific substitutions across multiple</span>
-0019 <span class="comment">%     sub-models, see description in GenerateModel for more information {name,</span>
+0019 <span class="comment">%     sub-models, see description in ds.generateModel for more information {name,</span>
 0020 <span class="comment">%     namespace_name, namespace, type}</span>
 0021 <span class="comment">%</span>
 0022 <span class="comment">% Notes:</span>
@@ -110,21 +110,21 @@ This function is called by:
 0025 <span class="comment">%     However, this function does not distinguish between the two.</span>
 0026 <span class="comment">%</span>
 0027 <span class="comment">% Examples:</span>
-0028 <span class="comment">%     model = ParseModelEquations('dx/dt=3*a*x; x(0)=0','a',0);</span>
-0029 <span class="comment">%     model = ParseModelEquations('dx/dt=3*a*x, x(0)=0','a',0,'delimiter',',');</span>
-0030 <span class="comment">%     model = ParseModelEquations('CalciumPump.mech','namespace','HH');</span>
-0031 <span class="comment">%     model = ParseModelEquations('LIFneuron.eqns');</span>
-0032 <span class="comment">%     model = ParseModelEquations('a=2; b=2*a; f(x)=b; dx/dt=f(x); x(0)=0; if(x&gt;1)(x=0); current-&gt;f(x); monitor f(x); % comments')</span>
+0028 <span class="comment">%     model = ds.parseModelEquations('dx/dt=3*a*x; x(0)=0','a',0);</span>
+0029 <span class="comment">%     model = ds.parseModelEquations('dx/dt=3*a*x, x(0)=0','a',0,'delimiter',',');</span>
+0030 <span class="comment">%     model = ds.parseModelEquations('CalciumPump.mech','namespace','HH');</span>
+0031 <span class="comment">%     model = ds.parseModelEquations('LIFneuron.eqns');</span>
+0032 <span class="comment">%     model = ds.parseModelEquations('a=2; b=2*a; f(x)=b; dx/dt=f(x); x(0)=0; if(x&gt;1)(x=0); current-&gt;f(x); monitor f(x); % comments')</span>
 0033 <span class="comment">%</span>
 0034 <span class="comment">%   - parsing individual sub-models from specification:</span>
 0035 <span class="comment">%     equations=specification.populations(1).equations;</span>
-0036 <span class="comment">%     [model,map] = ParseModelEquations(equations,'namespace','pop')</span>
+0036 <span class="comment">%     [model,map] = ds.parseModelEquations(equations,'namespace','pop')</span>
 0037 <span class="comment">%     population_mechanism=specification.populations(1).mechanism_list{1};</span>
-0038 <span class="comment">%     [model,map] = ParseModelEquations(population_mechanism,'namespace','pop_mech')</span>
+0038 <span class="comment">%     [model,map] = ds.parseModelEquations(population_mechanism,'namespace','pop_mech')</span>
 0039 <span class="comment">%     connection_mechanism=specification.connections(1).mechanism_list{1};</span>
-0040 <span class="comment">%     [model,map] = ParseModelEquations(connection_mechanism,'namespace','pop_pop_mech')</span>
+0040 <span class="comment">%     [model,map] = ds.parseModelEquations(connection_mechanism,'namespace','pop_pop_mech')</span>
 0041 <span class="comment">%</span>
-0042 <span class="comment">% See also: ClassifyEquation, GenerateModel, LocateModelFiles</span>
+0042 <span class="comment">% See also: ds.classifyEquation, ds.generateModel, ds.locateModelFiles</span>
 0043 
 0044 model=[];
 0045 name_map={};
@@ -172,7 +172,7 @@ This function is called by:
 0087 <span class="keyword">if</span> ischar(text) &amp;&amp; ~any(which(text)) &amp;&amp; isempty(regexp(text,<span class="string">'[^\w.]'</span>,<span class="string">'once'</span>)) <span class="comment">% isempty(regexp(text,'[^\w]','once'))</span>
 0088 
 0089   <span class="comment">%if ischar(text) &amp;&amp; ~exist(text,'file') &amp;&amp; isempty(regexp(text,'[^\w.]','once')) % isempty(regexp(text,'[^\w]','once'))</span>
-0090   [~,text]=<a href="LocateModelFiles.html" class="code" title="function [paths,files]=LocateModelFiles(input)">LocateModelFiles</a>(text);
+0090   [~,text]=<a href="ds.locateModelFiles.html" class="code" title="function [paths,files]=ds.locateModelFiles(input)">ds.locateModelFiles</a>(text);
 0091   <span class="keyword">if</span> iscell(text) &amp;&amp; ~isempty(text)
 0092     text=text{1};
 0093   <span class="keyword">end</span>
@@ -185,8 +185,8 @@ This function is called by:
 0100     <span class="keyword">case</span> <span class="string">'.m'</span>
 0101       model=feval(name); <span class="comment">% evaluate model-creating function and return model</span>
 0102       <span class="keyword">return</span>;
-0103     <span class="keyword">case</span> <span class="string">'.mat'</span> <span class="comment">% todo: uncomment once ImportModel supports loading .mat</span>
-0104       <span class="comment">%model=ImportModel(text);</span>
+0103     <span class="keyword">case</span> <span class="string">'.mat'</span> <span class="comment">% todo: uncomment once ds.importModel supports loading .mat</span>
+0104       <span class="comment">%model=ds.importModel(text);</span>
 0105       <span class="comment">%return;</span>
 0106   <span class="keyword">end</span>
 0107   
@@ -254,7 +254,7 @@ This function is called by:
 0169     <span class="keyword">continue</span>;
 0170   <span class="keyword">end</span>
 0171   
-0172   <span class="keyword">switch</span> <a href="ClassifyEquation.html" class="code" title="function classes=ClassifyEquation(string,delimiter)">ClassifyEquation</a>(line,delimiter) <span class="comment">% classify</span>
+0172   <span class="keyword">switch</span> <a href="ds.classifyEquation.html" class="code" title="function classes=ds.classifyEquation(string,delimiter)">ds.classifyEquation</a>(line,delimiter) <span class="comment">% classify</span>
 0173     <span class="keyword">case</span> <span class="string">'parameter'</span>        <span class="comment">% var=(string or number)</span>
 0174       rhs=regexp(line,<span class="string">'=(.+)$'</span>,<span class="string">'tokens'</span>,<span class="string">'once'</span>);
 0175       lhs=regexp(line,<span class="string">'^([\w\.]+)\s*='</span>,<span class="string">'tokens'</span>,<span class="string">'once'</span>);
@@ -337,7 +337,7 @@ This function is called by:
 0252             <span class="comment">% check for numeric monitor argument</span>
 0253             arg=regexp(line,[name <span class="string">'\(([-+]*\w+)\)'</span>],<span class="string">'tokens'</span>,<span class="string">'once'</span>);
 0254             <span class="comment">%arg=regexp(line,[name '\(([-+]*\d+)\)'],'tokens','once');</span>
-0255             <span class="comment">% set argument as expression (see WriteDynaSimSolver() for usage as such)</span>
+0255             <span class="comment">% set argument as expression (see ds.writeDynaSimSolver() for usage as such)</span>
 0256             <span class="keyword">if</span> ~isempty(arg)
 0257               rhs=arg;
 0258             <span class="keyword">end</span>

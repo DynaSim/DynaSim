@@ -2,8 +2,8 @@
                 "http://www.w3.org/TR/REC-html40/loose.dtd">
 <html>
 <head>
-  <title>Description of DynaSimMerge</title>
-  <meta name="keywords" content="DynaSimMerge">
+  <title>Description of ds.merge</title>
+  <meta name="keywords" content="ds.merge">
   <meta name="description" content="Merge two Dynasim structures created from different simulations">
   <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
   <meta name="generator" content="m2html &copy; 2005 Guillaume Flandin">
@@ -16,14 +16,14 @@
 <body>
 <a name="_top"></a>
 <!-- menu.html functions -->
-<h1>DynaSimMerge
+<h1>ds.merge
 </h1>
 
 <h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
 <div class="box"><strong>Merge two Dynasim structures created from different simulations</strong></div>
 
 <h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
-<div class="box"><strong>function data_merged = DynaSimMerge(data1,data2) </strong></div>
+<div class="box"><strong>function data_merged = ds.mergeData(data1,data2) </strong></div>
 
 <h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
 <div class="fragment"><pre class="comment"> Merge two Dynasim structures created from different simulations</pre></div>
@@ -32,7 +32,7 @@
 <h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
 This function calls:
 <ul style="list-style-image:url(../matlabicon.gif)">
-<li><a href="All2xPlt.html" class="code" title="function [xp,is_image] = All2xPlt(data)">All2xPlt</a>	</li><li><a href="xPlt2DynaSim.html" class="code" title="function data=xPlt2DynaSim(obj)">xPlt2DynaSim</a>	% data=xPlt2DynaSim(obj,varargin)</li><li><a href="xPlt2DynaSimImage.html" class="code" title="function data=xPlt2DynaSimImage(obj)">xPlt2DynaSimImage</a>	% data=xPlt2DynaSim(obj,varargin)</li></ul>
+<li><a href="ds.xPlt.all2xPlt.html" class="code" title="function [xp,is_image] = ds.xPlt.all2xPlt(data)">ds.xPlt.all2xPlt</a>	</li><li><a href="ds.xPlt.xPlt2ds.html" class="code" title="function data=ds.xPlt.xPlt2ds(obj)">ds.xPlt.xPlt2ds</a>	% data=ds.xPlt.xPlt2ds(obj,varargin)</li><li><a href="ds.xPlt.xPlt2dsImage.html" class="code" title="function data=ds.xPlt.xPlt2dsImage(obj)">ds.xPlt.xPlt2dsImage</a>	% data=ds.xPlt.xPlt2ds(obj,varargin)</li></ul>
 This function is called by:
 <ul style="list-style-image:url(../matlabicon.gif)">
 </ul>
@@ -42,13 +42,13 @@ This function is called by:
 
 <h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
 <div class="fragment"><pre>0001 
-0002 <a name="_sub0" href="#_subfunctions" class="code">function data_merged = DynaSimMerge(data1,data2)</a>
+0002 <a name="_sub0" href="#_subfunctions" class="code">function data_merged = ds.mergeData(data1,data2)</a>
 0003     <span class="comment">% Merge two Dynasim structures created from different simulations</span>
 0004     
-0005     xp1 = <a href="All2xPlt.html" class="code" title="function [xp,is_image] = All2xPlt(data)">All2xPlt</a>(data1);
-0006     xp2 = <a href="All2xPlt.html" class="code" title="function [xp,is_image] = All2xPlt(data)">All2xPlt</a>(data2);
+0005     xp1 = <a href="ds.xPlt.all2xPlt.html" class="code" title="function [xp,is_image] = ds.xPlt.all2xPlt(data)">ds.xPlt.all2xPlt</a>(data1);
+0006     xp2 = <a href="ds.xPlt.all2xPlt.html" class="code" title="function [xp,is_image] = ds.xPlt.all2xPlt(data)">ds.xPlt.all2xPlt</a>(data2);
 0007     
-0008     xp_merged = merge(xp1,xp2);
+0008     xp_merged = mergeData(xp1,xp2);
 0009     xp_merged.meta = xp1.meta; <span class="comment">% Warning - need to make sure metadata merges properly; not yet implemented</span>
 0010     
 0011     <span class="comment">% Sort everything except populations and variables</span>
@@ -58,9 +58,9 @@ This function is called by:
 0015     xp_merged = xp_merged.sortAxis(find(inds));
 0016     
 0017     <span class="keyword">if</span> isfield(data1,<span class="string">'plot_files'</span>) &amp;&amp; isfield(data2,<span class="string">'plot_files'</span>)
-0018         data_merged = <a href="xPlt2DynaSimImage.html" class="code" title="function data=xPlt2DynaSimImage(obj)">xPlt2DynaSimImage</a>(xp_merged);
+0018         data_merged = <a href="ds.xPlt.xPlt2dsImage.html" class="code" title="function data=ds.xPlt.xPlt2dsImage(obj)">ds.xPlt.xPlt2dsImage</a>(xp_merged);
 0019     <span class="keyword">elseif</span> ~isfield(data1,<span class="string">'plot_files'</span>) &amp;&amp; ~isfield(data2,<span class="string">'plot_files'</span>)
-0020         data_merged = <a href="xPlt2DynaSim.html" class="code" title="function data=xPlt2DynaSim(obj)">xPlt2DynaSim</a>(xp_merged);
+0020         data_merged = <a href="ds.xPlt.xPlt2ds.html" class="code" title="function data=ds.xPlt.xPlt2ds(obj)">ds.xPlt.xPlt2ds</a>(xp_merged);
 0021     <span class="keyword">else</span>
 0022         error(<span class="string">'Unknown input types'</span>);
 0023     <span class="keyword">end</span>

@@ -2,8 +2,8 @@
                 "http://www.w3.org/TR/REC-html40/loose.dtd">
 <html>
 <head>
-  <title>Description of PlotStudy</title>
-  <meta name="keywords" content="PlotStudy">
+  <title>Description of ds.plotStudy</title>
+  <meta name="keywords" content="ds.plotStudy">
   <meta name="description" content="PLOTSTUDY - Applies a user-specified plotting function to each element of data structure.">
   <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
   <meta name="generator" content="m2html &copy; 2005 Guillaume Flandin">
@@ -16,14 +16,14 @@
 <body>
 <a name="_top"></a>
 <!-- menu.html functions -->
-<h1>PlotStudy
+<h1>ds.plotStudy
 </h1>
 
 <h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
 <div class="box"><strong>PLOTSTUDY - Applies a user-specified plotting function to each element of data structure.</strong></div>
 
 <h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
-<div class="box"><strong>function [handles, hsp, h2]=PlotStudy(data,myplot_handle,varargin) </strong></div>
+<div class="box"><strong>function [handles, hsp, h2]=ds.plotStudy(data,myplot_handle,varargin) </strong></div>
 
 <h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
 <div class="fragment"><pre class="comment">PLOTSTUDY - Applies a user-specified plotting function to each element of data structure.
@@ -32,14 +32,14 @@
  any new figures or subplots. It can return an axis handle, but this is not
  necessary.
 
- Arrays the output plots in a grid, similar to PlotData. Intended for use with
+ Arrays the output plots in a grid, similar to ds.plotData. Intended for use with
  results from simulation studies varying some aspect of the model or inputs.
 
  Usage:
-   [handles, h2, hsp] = PlotStudy(data,myplot_handle)
+   [handles, h2, hsp] = ds.plotStudy(data,myplot_handle)
 
  Inputs:
-     - data: DynaSim data structure (see CheckData)
+     - data: DynaSim data structure (see ds.checkData)
      - myplot_handle: Handle for plotting function.
      - options:
        'textfontsize': default text font size of 10
@@ -62,7 +62,7 @@
 <h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
 This function calls:
 <ul style="list-style-image:url(../matlabicon.gif)">
-<li><a href="CheckOptions.html" class="code" title="function [parms, params_unspecified ] = CheckOptions(options, options_schema, strict)">CheckOptions</a>	CHECKOPTIONS - organize key/value pairs in structure with default or user-supplied values according to a schema</li></ul>
+<li><a href="ds.checkOptions.html" class="code" title="function [parms, params_unspecified ] = ds.checkOptions(options, options_schema, strict)">ds.checkOptions</a>	CHECKOPTIONS - organize key/value pairs in structure with default or user-supplied values according to a schema</li></ul>
 This function is called by:
 <ul style="list-style-image:url(../matlabicon.gif)">
 </ul>
@@ -71,21 +71,21 @@ This function is called by:
 
 
 <h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
-<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function [handles, hsp, h2]=PlotStudy(data,myplot_handle,varargin)</a>
+<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function [handles, hsp, h2]=ds.plotStudy(data,myplot_handle,varargin)</a>
 0002 <span class="comment">%PLOTSTUDY - Applies a user-specified plotting function to each element of data structure.</span>
 0003 <span class="comment">%</span>
 0004 <span class="comment">% **IMPORTANT**: This function should just produce a plot. It should not open</span>
 0005 <span class="comment">% any new figures or subplots. It can return an axis handle, but this is not</span>
 0006 <span class="comment">% necessary.</span>
 0007 <span class="comment">%</span>
-0008 <span class="comment">% Arrays the output plots in a grid, similar to PlotData. Intended for use with</span>
+0008 <span class="comment">% Arrays the output plots in a grid, similar to ds.plotData. Intended for use with</span>
 0009 <span class="comment">% results from simulation studies varying some aspect of the model or inputs.</span>
 0010 <span class="comment">%</span>
 0011 <span class="comment">% Usage:</span>
-0012 <span class="comment">%   [handles, h2, hsp] = PlotStudy(data,myplot_handle)</span>
+0012 <span class="comment">%   [handles, h2, hsp] = ds.plotStudy(data,myplot_handle)</span>
 0013 <span class="comment">%</span>
 0014 <span class="comment">% Inputs:</span>
-0015 <span class="comment">%     - data: DynaSim data structure (see CheckData)</span>
+0015 <span class="comment">%     - data: DynaSim data structure (see ds.checkData)</span>
 0016 <span class="comment">%     - myplot_handle: Handle for plotting function.</span>
 0017 <span class="comment">%     - options:</span>
 0018 <span class="comment">%       'textfontsize': default text font size of 10</span>
@@ -104,10 +104,10 @@ This function is called by:
 0031 <span class="comment">% Dependencies:</span>
 0032 <span class="comment">%     Uses subplot_grid.</span>
 0033 
-0034 <span class="comment">% data=CheckData(data);</span>
+0034 <span class="comment">% data=ds.checkData(data);</span>
 0035 handles=[];
 0036 
-0037 options=<a href="CheckOptions.html" class="code" title="function [parms, params_unspecified ] = CheckOptions(options, options_schema, strict)">CheckOptions</a>(varargin,{<span class="keyword">...</span>
+0037 options=<a href="ds.checkOptions.html" class="code" title="function [parms, params_unspecified ] = ds.checkOptions(options, options_schema, strict)">ds.checkOptions</a>(varargin,{<span class="keyword">...</span>
 0038   <span class="string">'textfontsize'</span>,10,[],<span class="keyword">...</span>
 0039   <span class="string">'use_subplot_grid'</span>,1,{0,1},<span class="keyword">...</span>
 0040   },false);
@@ -115,7 +115,7 @@ This function is called by:
 0042 textfontsize = options.textfontsize;
 0043 use_subplot_grid = options.use_subplot_grid;
 0044 
-0045 <span class="comment">% New code (imported from PlotData)</span>
+0045 <span class="comment">% New code (imported from ds.plotData)</span>
 0046 num_sims=length(data); <span class="comment">% number of simulations</span>
 0047 
 0048 <span class="comment">% make subplot adjustments for varied parameters</span>
@@ -137,7 +137,7 @@ This function is called by:
 0064       param_cell{j}=unique([data.(varied{j})]); <span class="comment">% unique values for each parameter</span>
 0065     <span class="keyword">else</span>
 0066       <span class="comment">% todo: handle sims varying non-numeric model components</span>
-0067       <span class="comment">% (eg, mechanisms) (also in PlotFR and SelectData)</span>
+0067       <span class="comment">% (eg, mechanisms) (also in ds.plotFR and ds.selectData)</span>
 0068     <span class="keyword">end</span>
 0069   <span class="keyword">end</span>
 0070   

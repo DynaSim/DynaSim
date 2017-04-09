@@ -2,9 +2,9 @@
                 "http://www.w3.org/TR/REC-html40/loose.dtd">
 <html>
 <head>
-  <title>Description of PlotData2</title>
-  <meta name="keywords" content="PlotData2">
-  <meta name="description" content="% handles=PlotData(data,'option',value)">
+  <title>Description of ds.plotData2</title>
+  <meta name="keywords" content="ds.plotData2">
+  <meta name="description" content="% handles=ds.plotData(data,'option',value)">
   <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
   <meta name="generator" content="m2html &copy; 2005 Guillaume Flandin">
   <meta name="robots" content="index, follow">
@@ -16,23 +16,23 @@
 <body>
 <a name="_top"></a>
 <!-- menu.html functions -->
-<h1>PlotData2
+<h1>ds.plotData2
 </h1>
 
 <h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
-<div class="box"><strong>% handles=PlotData(data,'option',value)</strong></div>
+<div class="box"><strong>% handles=ds.plotData(data,'option',value)</strong></div>
 
 <h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
-<div class="box"><strong>function [handles,xp]=PlotData2(data,varargin) </strong></div>
+<div class="box"><strong>function [handles,xp]=ds.plotData2(data,varargin) </strong></div>
 
 <h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
-<div class="fragment"><pre class="comment">% handles=PlotData(data,'option',value)
+<div class="fragment"><pre class="comment">% handles=ds.plotData(data,'option',value)
  Purpose: plot data in various ways depending on what data was provided
- and what options are defined. this function is wrapped by PlotWaveforms,
+ and what options are defined. this function is wrapped by ds.plotWaveforms,
  PlotPower, ... to provide a single function for organizing and displaying
  data.
  Inputs:
-   data: DynaSim data structure (see CheckData)
+   data: DynaSim data structure (see ds.checkData)
    Accepts the following name/value pairs:
      'plot_type' {'waveform' (default),'rastergram','rates','power'} - what to plot
      'population' - name of population to plot (default: 'all'); accepts
@@ -53,7 +53,7 @@
                  in a population
      'force_overlay' - {'none', 'populations' (default), 'variables', 'varied1' ... 'variedN'}
                        If there is only one cell in a population, this forces
-                       PlotData2 to add other information to the overlay.
+                       ds.plotData2 to add other information to the overlay.
      'xlims' - [XMIN XMAX], x-axis limits (default: all data)
      'ylims' - [YMIN YMAX], y-axis limits (default: all data)
      'lock_axes' - {false, true}, locks abscissa and ordinate to be
@@ -62,22 +62,22 @@
      'yscale' {'linear','log','log10'}, whether to plot linear or log scale
      'visible' {'on','off'}
      NOTE: analysis options available depending on plot_type
-       see see CalcFR options for plot_type 'rastergram' or 'rates'
-       see CalcPower options for plot_type 'power'
+       see see ds.calcFR options for plot_type 'rastergram' or 'rates'
+       see ds.calcPower options for plot_type 'power'
  Outputs:
    handles: graphic handles to figures
  
- See also: <a href="CalcFR.html" class="code" title="function data = CalcFR(data,varargin)">CalcFR</a>, <a href="CalcPower.html" class="code" title="function data = CalcPower(data,varargin)">CalcPower</a>, <a href="PlotWaveforms.html" class="code" title="function PlotWaveforms(data,varargin)">PlotWaveforms</a>, <a href="CheckData.html" class="code" title="function data=CheckData(data)">CheckData</a>, <a href="PlotData.html" class="code" title="function handles = PlotData(data,varargin)">PlotData</a>, xPlt,
+ See also: <a href="ds.calcFR.html" class="code" title="function data = ds.calcFR(data,varargin)">ds.calcFR</a>, <a href="ds.calcPower.html" class="code" title="function data = ds.calcPower(data,varargin)">ds.calcPower</a>, <a href="ds.plotWaveforms.html" class="code" title="function ds.plotWaveforms(data,varargin)">ds.plotWaveforms</a>, <a href="ds.checkData.html" class="code" title="function data=ds.checkData(data)">ds.checkData</a>, <a href="ds.plotData.html" class="code" title="function handles = ds.plotData(data,varargin)">ds.plotData</a>, xPlt,
            nDDict</pre></div>
 
 <!-- crossreference -->
 <h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
 This function calls:
 <ul style="list-style-image:url(../matlabicon.gif)">
-<li><a href="All2xPlt.html" class="code" title="function [xp,is_image] = All2xPlt(data)">All2xPlt</a>	</li><li><a href="CheckOptions.html" class="code" title="function [parms, params_unspecified ] = CheckOptions(options, options_schema, strict)">CheckOptions</a>	CHECKOPTIONS - organize key/value pairs in structure with default or user-supplied values according to a schema</li><li><a href="ImportPlots.html" class="code" title="function [data,studyinfo] = ImportPlots(file,varargin)">ImportPlots</a>	IMPORTPLOTS - load info about saved images (generated by SimulateMode or AnalyzeData) alongwith corresponding varied model components.</li><li><a href="PlotData2.html" class="code" title="function [handles,xp]=PlotData2(data,varargin)">PlotData2</a>	% handles=PlotData(data,'option',value)</li><li><a href="struct_addDef.html" class="code" title="function s = struct_addDef(s,fieldname,default_value)">struct_addDef</a>	STRUCT_ADDDEF - add fieldname to structure if it doesn't already exist</li><li><a href="../functions/supporting_DynaSim2xPlt/get_variables_from_meta.html" class="code" title="function varlabels = get_variables_from_meta(xp)">get_variables_from_meta</a>	</li></ul>
+<li><a href="ds.xPlt.all2xPlt.html" class="code" title="function [xp,is_image] = ds.xPlt.all2xPlt(data)">ds.xPlt.all2xPlt</a>	</li><li><a href="ds.checkOptions.html" class="code" title="function [parms, params_unspecified ] = ds.checkOptions(options, options_schema, strict)">ds.checkOptions</a>	CHECKOPTIONS - organize key/value pairs in structure with default or user-supplied values according to a schema</li><li><a href="ds.importPlots.html" class="code" title="function [data,studyinfo] = ds.importPlots(file,varargin)">ds.importPlots</a>	IMPORTPLOTS - load info about saved images (generated by SimulateMode or ds.analyzeData) alongwith corresponding varied model components.</li><li><a href="ds.plotData2.html" class="code" title="function [handles,xp]=ds.plotData2(data,varargin)">ds.plotData2</a>	% handles=ds.plotData(data,'option',value)</li><li><a href="struct_addDef.html" class="code" title="function s = struct_addDef(s,fieldname,default_value)">struct_addDef</a>	STRUCT_ADDDEF - add fieldname to structure if it doesn't already exist</li><li><a href="../functions/supporting_ds.ds2xPlt/ds.xPlt.get_variables_from_meta.html" class="code" title="function varlabels = ds.xPlt.get_variables_from_meta(xp)">ds.xPlt.get_variables_from_meta</a>	</li></ul>
 This function is called by:
 <ul style="list-style-image:url(../matlabicon.gif)">
-<li><a href="PlotData2.html" class="code" title="function [handles,xp]=PlotData2(data,varargin)">PlotData2</a>	% handles=PlotData(data,'option',value)</li></ul>
+<li><a href="ds.plotData2.html" class="code" title="function [handles,xp]=ds.plotData2(data,varargin)">ds.plotData2</a>	% handles=ds.plotData(data,'option',value)</li></ul>
 <!-- crossreference -->
 
 <h2><a name="_subfunctions"></a>SUBFUNCTIONS <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
@@ -85,14 +85,14 @@ This function is called by:
 <li><a href="#_sub1" class="code">function_handles = {@xp_handles_newfig, @xp_subplot_grid,data_plothandle};</a></li><li><a href="#_sub2" class="code">function_args = {{figure_options},{subplot_options},{plot_options}};</a></li><li><a href="#_sub3" class="code">function_handles = {@xp_handles_newfig, @xp_subplot_grid,data_plothandle};</a></li><li><a href="#_sub4" class="code">function_args = {{figure_options},{subplot_options},{plot_options}};</a></li><li><a href="#_sub5" class="code">function_handles = {@xp_handles_newfig, @xp_subplot_grid, @xp_subplot_grid,data_plothandle};</a></li><li><a href="#_sub6" class="code">function_args = {{figure_options},{subplot_options2},{subplot_options},{plot_options}};</a></li><li><a href="#_sub7" class="code">function_handles = {@xp_handles_newfig, @xp_subplot_grid, @xp_subplot_grid,data_plothandle};</a></li><li><a href="#_sub8" class="code">function_args = {{figure_options},{subplot_options2},{subplot_options},{plot_options}};</a></li><li><a href="#_sub9" class="code">function_handles = function_handles(available_dims);</a></li><li><a href="#_sub10" class="code">function_args = function_args(available_dims);</a></li><li><a href="#_sub11" class="code">function var_out = getdefaultstatevar(xp)</a></li><li><a href="#_sub12" class="code">function [chosen_varied, options_varied ]= get_chosen_varied(varied_names,options_varied)</a></li><li><a href="#_sub13" class="code">function str_out = variedN_to_axisnames(str_in,ax_names_varied)</a></li><li><a href="#_sub14" class="code">function ax_ind_varied = findaxis_varied(xp)</a></li><li><a href="#_sub15" class="code">function dimensions = get_dimensions(ax_names,dims_per_function_handle)</a></li><li><a href="#_sub16" class="code">function xp2 = reduce_dims(xp2,maxNplotdims)</a></li><li><a href="#_sub17" class="code">function varied_names = only_varieds(xp)</a></li><li><a href="#_sub18" class="code">function varied_names = only_varieds_old_deleteme(all_names)</a></li><li><a href="#_sub19" class="code">function mydata_out = do_shift_lastdim (mydata,shift)</a></li><li><a href="#_sub20" class="code">function leg1 = setup_legends(xp2)</a></li></ul>
 
 <h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
-<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function [handles,xp]=PlotData2(data,varargin)</a>
-0002 <span class="comment">%% handles=PlotData(data,'option',value)</span>
+<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function [handles,xp]=ds.plotData2(data,varargin)</a>
+0002 <span class="comment">%% handles=ds.plotData(data,'option',value)</span>
 0003 <span class="comment">% Purpose: plot data in various ways depending on what data was provided</span>
-0004 <span class="comment">% and what options are defined. this function is wrapped by PlotWaveforms,</span>
+0004 <span class="comment">% and what options are defined. this function is wrapped by ds.plotWaveforms,</span>
 0005 <span class="comment">% PlotPower, ... to provide a single function for organizing and displaying</span>
 0006 <span class="comment">% data.</span>
 0007 <span class="comment">% Inputs:</span>
-0008 <span class="comment">%   data: DynaSim data structure (see CheckData)</span>
+0008 <span class="comment">%   data: DynaSim data structure (see ds.checkData)</span>
 0009 <span class="comment">%   Accepts the following name/value pairs:</span>
 0010 <span class="comment">%     'plot_type' {'waveform' (default),'rastergram','rates','power'} - what to plot</span>
 0011 <span class="comment">%     'population' - name of population to plot (default: 'all'); accepts</span>
@@ -113,7 +113,7 @@ This function is called by:
 0026 <span class="comment">%                 in a population</span>
 0027 <span class="comment">%     'force_overlay' - {'none', 'populations' (default), 'variables', 'varied1' ... 'variedN'}</span>
 0028 <span class="comment">%                       If there is only one cell in a population, this forces</span>
-0029 <span class="comment">%                       PlotData2 to add other information to the overlay.</span>
+0029 <span class="comment">%                       ds.plotData2 to add other information to the overlay.</span>
 0030 <span class="comment">%     'xlims' - [XMIN XMAX], x-axis limits (default: all data)</span>
 0031 <span class="comment">%     'ylims' - [YMIN YMAX], y-axis limits (default: all data)</span>
 0032 <span class="comment">%     'lock_axes' - {false, true}, locks abscissa and ordinate to be</span>
@@ -122,18 +122,18 @@ This function is called by:
 0035 <span class="comment">%     'yscale' {'linear','log','log10'}, whether to plot linear or log scale</span>
 0036 <span class="comment">%     'visible' {'on','off'}</span>
 0037 <span class="comment">%     NOTE: analysis options available depending on plot_type</span>
-0038 <span class="comment">%       see see CalcFR options for plot_type 'rastergram' or 'rates'</span>
-0039 <span class="comment">%       see CalcPower options for plot_type 'power'</span>
+0038 <span class="comment">%       see see ds.calcFR options for plot_type 'rastergram' or 'rates'</span>
+0039 <span class="comment">%       see ds.calcPower options for plot_type 'power'</span>
 0040 <span class="comment">% Outputs:</span>
 0041 <span class="comment">%   handles: graphic handles to figures</span>
 0042 <span class="comment">%</span>
-0043 <span class="comment">% See also: CalcFR, CalcPower, PlotWaveforms, CheckData, PlotData, xPlt,</span>
+0043 <span class="comment">% See also: ds.calcFR, ds.calcPower, ds.plotWaveforms, ds.checkData, ds.plotData, xPlt,</span>
 0044 <span class="comment">%           nDDict</span>
 0045 
 0046 <span class="comment">%% Set Master parameters</span>
 0047   
 0048 <span class="comment">% Flag for returning error if the user specifies name/value pairs that are not in the</span>
-0049 <span class="comment">% CheckOptions list</span>
+0049 <span class="comment">% ds.checkOptions list</span>
 0050 strict_mode = 0;        <span class="comment">% Should be set to zero for this to work within simulate model</span>
 0051 
 0052 <span class="comment">%% Convert data input to appropriate form</span>
@@ -143,15 +143,15 @@ This function is called by:
 0056     study_dir = data;
 0057     
 0058     <span class="comment">% Import plot files</span>
-0059     data_img = <a href="ImportPlots.html" class="code" title="function [data,studyinfo] = ImportPlots(file,varargin)">ImportPlots</a>(study_dir);
+0059     data_img = <a href="ds.importPlots.html" class="code" title="function [data,studyinfo] = ds.importPlots(file,varargin)">ds.importPlots</a>(study_dir);
 0060     
-0061     handles = <a href="PlotData2.html" class="code" title="function [handles,xp]=PlotData2(data,varargin)">PlotData2</a>(data_img,varargin{:});
+0061     handles = <a href="ds.plotData2.html" class="code" title="function [handles,xp]=ds.plotData2(data,varargin)">ds.plotData2</a>(data_img,varargin{:});
 0062     <span class="keyword">return</span>;
 0063 <span class="keyword">end</span>
 0064 
 0065 <span class="comment">% Convert the incoming DynaSim data structure to an xPlt object</span>
 0066 <span class="keyword">if</span> ~isa(data,<span class="string">'xPlt'</span>)
-0067     [xp,is_image] = <a href="All2xPlt.html" class="code" title="function [xp,is_image] = All2xPlt(data)">All2xPlt</a>(data);
+0067     [xp,is_image] = <a href="ds.xPlt.all2xPlt.html" class="code" title="function [xp,is_image] = ds.xPlt.all2xPlt(data)">ds.xPlt.all2xPlt</a>(data);
 0068 <span class="keyword">end</span>
 0069 
 0070 <span class="comment">%% Convert varargin to appropriate forms</span>
@@ -197,7 +197,7 @@ This function is called by:
 0110 <span class="comment">% end</span>
 0111 
 0112 <span class="comment">%% Parse varargin and set up defaults</span>
-0113 [options, options_extras0] = <a href="CheckOptions.html" class="code" title="function [parms, params_unspecified ] = CheckOptions(options, options_schema, strict)">CheckOptions</a>(myargin,{<span class="keyword">...</span>
+0113 [options, options_extras0] = <a href="ds.checkOptions.html" class="code" title="function [parms, params_unspecified ] = ds.checkOptions(options, options_schema, strict)">ds.checkOptions</a>(myargin,{<span class="keyword">...</span>
 0114   <span class="string">'population'</span>,[],[],<span class="keyword">...</span><span class="comment">        </span>
 0115   <span class="string">'variable'</span>,[],[],<span class="keyword">...</span><span class="comment">        </span>
 0116   <span class="string">'num_embedded_subplots'</span>,2,{1,2,3,4},<span class="keyword">...</span>
@@ -268,7 +268,7 @@ This function is called by:
 0181     plot_options = <a href="struct_addDef.html" class="code" title="function s = struct_addDef(s,fieldname,default_value)">struct_addDef</a>(plot_options,<span class="string">'zlims'</span>,options.zlims);
 0182 <span class="comment">% Used when running xp_plotimage</span>
 0183     plot_options = <a href="struct_addDef.html" class="code" title="function s = struct_addDef(s,fieldname,default_value)">struct_addDef</a>(plot_options,<span class="string">'saved_fignum'</span>,options.saved_fignum);
-0184 <span class="comment">% Used when running xp_PlotData or xp_PlotFR2</span>
+0184 <span class="comment">% Used when running xp_ds.plotData or xp_ds.plotFR2</span>
 0185     plot_options = <a href="struct_addDef.html" class="code" title="function s = struct_addDef(s,fieldname,default_value)">struct_addDef</a>(plot_options,<span class="string">'args'</span>,{});
 0186 
 0187 <span class="comment">% Subplot_options</span>
@@ -420,7 +420,7 @@ This function is called by:
 0333         <span class="comment">% Note: This can cause some errors when unpacking the data later. The</span>
 0334         <span class="comment">% specific scenario is when running in rastergram mode &amp; having only</span>
 0335         <span class="comment">% 1 cell. For example,</span>
-0336         <span class="comment">% close all; d = data_mat_pops; PlotData2(d,'plot_type','rastergram','do_mean',1);</span>
+0336         <span class="comment">% close all; d = data_mat_pops; ds.plotData2(d,'plot_type','rastergram','do_mean',1);</span>
 0337     <span class="keyword">end</span>
 0338 
 0339 <span class="keyword">end</span>
@@ -537,12 +537,12 @@ This function is called by:
 0450             <span class="keyword">end</span>
 0451             
 0452         <span class="keyword">case</span> {<span class="string">'power'</span>,<span class="string">'rastergram'</span>,<span class="string">'raster'</span>}
-0453             <span class="comment">% Disable legend when using PlotData</span>
+0453             <span class="comment">% Disable legend when using ds.plotData</span>
 0454             subplot_options.legend1 = [];
 0455             
-0456             <span class="comment">% Setup call to xp_PlotData</span>
+0456             <span class="comment">% Setup call to xp_ds.plotData</span>
 0457             plot_options.args = {plot_options.args{:}, <span class="string">'plot_type'</span>,plot_type};
-0458             data_plothandle = @xp_PlotData;
+0458             data_plothandle = @xp_ds.plotData;
 0459             
 0460             <span class="keyword">if</span> any(strcmp(plot_type,{<span class="string">'rastergram'</span>,<span class="string">'raster'</span>}))
 0461                 <span class="comment">% Move populations axis to the end of xp2. This ensures</span>
@@ -558,16 +558,16 @@ This function is called by:
 0471             <span class="keyword">end</span>
 0472             
 0473         <span class="keyword">case</span> {<span class="string">'heatmapFR'</span>,<span class="string">'heatmap_sortedFR'</span>,<span class="string">'meanFR'</span>,<span class="string">'meanFRdens'</span>}
-0474             <span class="comment">% Disable legend when using PlotFR2</span>
+0474             <span class="comment">% Disable legend when using ds.plotFR2</span>
 0475             subplot_options.legend1 = [];
 0476             <span class="comment">% Remove FR suffix from heatmap and heatmap_sorted plot types</span>
 0477             <span class="keyword">if</span> any(strcmp(plot_type,{<span class="string">'heatmapFR'</span>,<span class="string">'heatmap_sortedFR'</span>}))
 0478                 plot_type = strrep(plot_type,<span class="string">'FR'</span>,<span class="string">''</span>);
 0479             <span class="keyword">end</span>
 0480             
-0481             <span class="comment">% Setup call to xp_PlotFR2</span>
+0481             <span class="comment">% Setup call to xp_ds.plotFR2</span>
 0482             plot_options.args = {plot_options.args{:}, <span class="string">'plot_type'</span>,plot_type};
-0483             data_plothandle = @xp_PlotFR2;
+0483             data_plothandle = @xp_ds.plotFR2;
 0484     <span class="keyword">end</span>
 0485 <span class="keyword">end</span>
 0486 
@@ -655,7 +655,7 @@ This function is called by:
 0568         <span class="keyword">return</span>;
 0569     <span class="keyword">end</span>
 0570     
-0571     vars_from_labels = <a href="../functions/supporting_DynaSim2xPlt/get_variables_from_meta.html" class="code" title="function varlabels = get_variables_from_meta(xp)">get_variables_from_meta</a>(xp);
+0571     vars_from_labels = <a href="../functions/supporting_ds.ds2xPlt/ds.xPlt.get_variables_from_meta.html" class="code" title="function varlabels = ds.xPlt.get_variables_from_meta(xp)">ds.xPlt.get_variables_from_meta</a>(xp);
 0572     <span class="keyword">if</span> ~isempty(vars_from_labels)
 0573         vars_from_labels = vars_from_labels(1);   <span class="comment">% Best guess at default state variable. Usually its the 1st entry in labels</span>
 0574     <span class="keyword">end</span>

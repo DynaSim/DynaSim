@@ -2,8 +2,8 @@
                 "http://www.w3.org/TR/REC-html40/loose.dtd">
 <html>
 <head>
-  <title>Description of SelectVariables</title>
-  <meta name="keywords" content="SelectVariables">
+  <title>Description of ds.selectVariables</title>
+  <meta name="keywords" content="ds.selectVariables">
   <meta name="description" content="SELECTVARIABLES - determine what variables to plot">
   <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
   <meta name="generator" content="m2html &copy; 2005 Guillaume Flandin">
@@ -16,20 +16,20 @@
 <body>
 <a name="_top"></a>
 <!-- menu.html functions -->
-<h1>SelectVariables
+<h1>ds.selectVariables
 </h1>
 
 <h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
 <div class="box"><strong>SELECTVARIABLES - determine what variables to plot</strong></div>
 
 <h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
-<div class="box"><strong>function [variables,pop_names]=SelectVariables(labels,var_strings) </strong></div>
+<div class="box"><strong>function [variables,pop_names]=ds.selectVariables(labels,var_strings) </strong></div>
 
 <h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
 <div class="fragment"><pre class="comment">SELECTVARIABLES - determine what variables to plot
 
  Usage:
-   variables=SelectVariables(labels,var_strings)
+   variables=ds.selectVariables(labels,var_strings)
 
  Inputs:
    - labels: cell array of variable names
@@ -55,17 +55,17 @@ This function calls:
 </ul>
 This function is called by:
 <ul style="list-style-image:url(../matlabicon.gif)">
-<li><a href="CalcACF.html" class="code" title="function data = CalcACF(data,varargin)">CalcACF</a>	CALCACF - Calculate the autocorrelation function.</li><li><a href="CalcCellProperties.html" class="code" title="function stats = CalcCellProperties(data,varargin)">CalcCellProperties</a>	CALCCELLPROPERTIES - calculates the intrinsic electrophysiological properties of all cells in one or more populations</li><li><a href="CalcFR.html" class="code" title="function data = CalcFR(data,varargin)">CalcFR</a>	CALCFR - Calculate firing rage for DynaSim data</li><li><a href="CalcFRmulti.html" class="code" title="function data = CalcFRmulti(data,varargin)">CalcFRmulti</a>	CALCFRMULTI - extends CalcFR to get SUA and MUA firing rates</li><li><a href="CalcISI.html" class="code" title="function data = CalcISI(data,varargin)">CalcISI</a>	CALCISI - Calculate the interspike interval.</li><li><a href="CalcPower.html" class="code" title="function data = CalcPower(data,varargin)">CalcPower</a>	CALCPOWER - Compute spectral analysis of DynaSim data</li><li><a href="PlotData.html" class="code" title="function handles = PlotData(data,varargin)">PlotData</a>	PLOTDATA - plot data in various ways depending on what data was provided and what options are defined.</li><li><a href="PlotWaveforms.html" class="code" title="function PlotWaveforms(data,varargin)">PlotWaveforms</a>	PLOTWAVEFORMS - plot waveforms in various ways depending on what data was provided.</li></ul>
+<li><a href="ds.calcACF.html" class="code" title="function data = ds.calcACF(data,varargin)">ds.calcACF</a>	CALCACF - Calculate the autocorrelation function.</li><li><a href="ds.calcCellProperties.html" class="code" title="function stats = ds.calcCellProperties(data,varargin)">ds.calcCellProperties</a>	CALCCELLPROPERTIES - calculates the intrinsic electrophysiological properties of all cells in one or more populations</li><li><a href="ds.calcFR.html" class="code" title="function data = ds.calcFR(data,varargin)">ds.calcFR</a>	CALCFR - Calculate firing rage for DynaSim data</li><li><a href="ds.calcFRmulti.html" class="code" title="function data = ds.calcFRmulti(data,varargin)">ds.calcFRmulti</a>	CALCFRMULTI - extends ds.calcFR to get SUA and MUA firing rates</li><li><a href="ds.calcISI.html" class="code" title="function data = ds.calcISI(data,varargin)">ds.calcISI</a>	CALCISI - Calculate the interspike interval.</li><li><a href="ds.calcPower.html" class="code" title="function data = ds.calcPower(data,varargin)">ds.calcPower</a>	CALCPOWER - Compute spectral analysis of DynaSim data</li><li><a href="ds.plotData.html" class="code" title="function handles = ds.plotData(data,varargin)">ds.plotData</a>	PLOTDATA - plot data in various ways depending on what data was provided and what options are defined.</li><li><a href="ds.plotWaveforms.html" class="code" title="function ds.plotWaveforms(data,varargin)">ds.plotWaveforms</a>	PLOTWAVEFORMS - plot waveforms in various ways depending on what data was provided.</li></ul>
 <!-- crossreference -->
 
 
 
 <h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
-<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function [variables,pop_names]=SelectVariables(labels,var_strings)</a>
+<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function [variables,pop_names]=ds.selectVariables(labels,var_strings)</a>
 0002 <span class="comment">%SELECTVARIABLES - determine what variables to plot</span>
 0003 <span class="comment">%</span>
 0004 <span class="comment">% Usage:</span>
-0005 <span class="comment">%   variables=SelectVariables(labels,var_strings)</span>
+0005 <span class="comment">%   variables=ds.selectVariables(labels,var_strings)</span>
 0006 <span class="comment">%</span>
 0007 <span class="comment">% Inputs:</span>
 0008 <span class="comment">%   - labels: cell array of variable names</span>

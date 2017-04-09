@@ -2,8 +2,8 @@
                 "http://www.w3.org/TR/REC-html40/loose.dtd">
 <html>
 <head>
-  <title>Description of PropagateNamespaces</title>
-  <meta name="keywords" content="PropagateNamespaces">
+  <title>Description of ds.propagateNamespaces</title>
+  <meta name="keywords" content="ds.propagateNamespaces">
   <meta name="description" content="PROPAGATENAMESPACES - namespace-establishing namespace substitutions.">
   <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
   <meta name="generator" content="m2html &copy; 2005 Guillaume Flandin">
@@ -16,23 +16,23 @@
 <body>
 <a name="_top"></a>
 <!-- menu.html functions -->
-<h1>PropagateNamespaces
+<h1>ds.propagateNamespaces
 </h1>
 
 <h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
 <div class="box"><strong>PROPAGATENAMESPACES - namespace-establishing namespace substitutions.</strong></div>
 
 <h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
-<div class="box"><strong>function model = PropagateNamespaces(model,map) </strong></div>
+<div class="box"><strong>function model = ds.propagateNamespaces(model,map) </strong></div>
 
 <h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
 <div class="fragment"><pre class="comment">PROPAGATENAMESPACES - namespace-establishing namespace substitutions.
 
  Usage:
-   model = PropagateNamespaces(model,name_map)
+   model = ds.propagateNamespaces(model,name_map)
 
  Inputs:
-   - model: DynaSim model structure (see GenerateModel)
+   - model: DynaSim model structure (see ds.generateModel)
    - name_map: cell matrix mapping parameter, variable, and function names
      between the user-created specification (population equations and mechanism
      files) and the full model with automatically generated namespaces. It has
@@ -45,16 +45,16 @@
 
  Example 1: TODO
 
- See also: <a href="GenerateModel.html" class="code" title="function [model,name_map]=GenerateModel(specification,varargin)">GenerateModel</a>, <a href="PropagateFunctions.html" class="code" title="function model=PropagateFunctions(model)">PropagateFunctions</a>, <a href="ParseModelEquations.html" class="code" title="function [model,name_map] = ParseModelEquations(text,varargin)">ParseModelEquations</a>, <a href="GetParentNamespace.html" class="code" title="function parent = GetParentNamespace(namespace)">GetParentNamespace</a></pre></div>
+ See also: <a href="ds.generateModel.html" class="code" title="function [model,name_map]=ds.generateModel(specification,varargin)">ds.generateModel</a>, <a href="ds.propagateFunctions.html" class="code" title="function model=ds.propagateFunctions(model)">ds.propagateFunctions</a>, <a href="ds.parseModelEquations.html" class="code" title="function [model,name_map] = ds.parseModelEquations(text,varargin)">ds.parseModelEquations</a>, <a href="ds.getParentNamespace.html" class="code" title="function parent = ds.getParentNamespace(namespace)">ds.getParentNamespace</a></pre></div>
 
 <!-- crossreference -->
 <h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
 This function calls:
 <ul style="list-style-image:url(../matlabicon.gif)">
-<li><a href="CheckModel.html" class="code" title="function model=CheckModel(model)">CheckModel</a>	CHECKMODEL - Standardize model structure and auto-populate missing fields</li><li><a href="GetParentNamespace.html" class="code" title="function parent = GetParentNamespace(namespace)">GetParentNamespace</a>	GETPARENTNAMESPACE - determine parent namespace from namespace specified in namespace</li></ul>
+<li><a href="ds.checkModel.html" class="code" title="function model=ds.checkModel(model)">ds.checkModel</a>	CHECKMODEL - Standardize model structure and auto-populate missing fields</li><li><a href="ds.getParentNamespace.html" class="code" title="function parent = ds.getParentNamespace(namespace)">ds.getParentNamespace</a>	GETPARENTNAMESPACE - determine parent namespace from namespace specified in namespace</li></ul>
 This function is called by:
 <ul style="list-style-image:url(../matlabicon.gif)">
-<li><a href="GenerateModel.html" class="code" title="function [model,name_map]=GenerateModel(specification,varargin)">GenerateModel</a>	GENERATEMODEL - Parse DynaSim specification and organize model data in DynaSim model structure</li></ul>
+<li><a href="ds.generateModel.html" class="code" title="function [model,name_map]=ds.generateModel(specification,varargin)">ds.generateModel</a>	GENERATEMODEL - Parse DynaSim specification and organize model data in DynaSim model structure</li></ul>
 <!-- crossreference -->
 
 <h2><a name="_subfunctions"></a>SUBFUNCTIONS <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
@@ -62,14 +62,14 @@ This function is called by:
 <li><a href="#_sub1" class="code">function expressions=propagate_namespaces(expressions,namespaces,map,insert_types)</a></li></ul>
 
 <h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
-<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function model = PropagateNamespaces(model,map)</a>
+<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function model = ds.propagateNamespaces(model,map)</a>
 0002 <span class="comment">%PROPAGATENAMESPACES - namespace-establishing namespace substitutions.</span>
 0003 <span class="comment">%</span>
 0004 <span class="comment">% Usage:</span>
-0005 <span class="comment">%   model = PropagateNamespaces(model,name_map)</span>
+0005 <span class="comment">%   model = ds.propagateNamespaces(model,name_map)</span>
 0006 <span class="comment">%</span>
 0007 <span class="comment">% Inputs:</span>
-0008 <span class="comment">%   - model: DynaSim model structure (see GenerateModel)</span>
+0008 <span class="comment">%   - model: DynaSim model structure (see ds.generateModel)</span>
 0009 <span class="comment">%   - name_map: cell matrix mapping parameter, variable, and function names</span>
 0010 <span class="comment">%     between the user-created specification (population equations and mechanism</span>
 0011 <span class="comment">%     files) and the full model with automatically generated namespaces. It has</span>
@@ -82,10 +82,10 @@ This function is called by:
 0018 <span class="comment">%</span>
 0019 <span class="comment">% Example 1: TODO</span>
 0020 <span class="comment">%</span>
-0021 <span class="comment">% See also: GenerateModel, PropagateFunctions, ParseModelEquations, GetParentNamespace</span>
+0021 <span class="comment">% See also: ds.generateModel, ds.propagateFunctions, ds.parseModelEquations, ds.getParentNamespace</span>
 0022 
 0023 <span class="comment">% Check model</span>
-0024 model=<a href="CheckModel.html" class="code" title="function model=CheckModel(model)">CheckModel</a>(model);
+0024 model=<a href="ds.checkModel.html" class="code" title="function model=ds.checkModel(model)">ds.checkModel</a>(model);
 0025 <span class="comment">% Check map</span>
 0026 <span class="keyword">if</span> ~iscell(map) || size(map,2)~=4
 0027   error(<span class="string">'map must be a cell array with four columns for (name, namespace_name, namespace, type)'</span>);
@@ -173,7 +173,7 @@ This function is called by:
 0109     this_namespace=namespaces{i};
 0110     
 0111     <span class="comment">% find parent namespaces</span>
-0112     parent_namespace = <a href="GetParentNamespace.html" class="code" title="function parent = GetParentNamespace(namespace)">GetParentNamespace</a>(this_namespace);
+0112     parent_namespace = <a href="ds.getParentNamespace.html" class="code" title="function parent = ds.getParentNamespace(namespace)">ds.getParentNamespace</a>(this_namespace);
 0113     
 0114     <span class="comment">% find where this and parent namespaces are in map array</span>
 0115     insert_type_constraint = ismember(map(:,4),insert_types);
@@ -197,7 +197,7 @@ This function is called by:
 0133         <span class="keyword">end</span>
 0134         
 0135         <span class="comment">% replace found word in expression by map(names_bar|parent_namespace)</span>
-0136         expressions{i}=dynasim_strrep(expressions{i},words{j},new_word);
+0136         expressions{i}=ds.strrep(expressions{i},words{j},new_word);
 0137         <span class="comment">% check whether new word is defined in model</span>
 0138         <span class="comment">% NOTE: this is necessary to account for namespace differences between</span>
 0139         <span class="comment">%   user-supplied population parameters that should replace default mechanism-level parameters</span>
@@ -226,7 +226,7 @@ This function is called by:
 0162         new_word=map{ind,2};
 0163         
 0164         <span class="comment">% replace found word in expression by map(names_bar|this_namespace)</span>
-0165         expressions{i}=dynasim_strrep(expressions{i},words{j},new_word);
+0165         expressions{i}=ds.strrep(expressions{i},words{j},new_word);
 0166       <span class="keyword">end</span>
 0167     <span class="keyword">end</span>
 0168   <span class="keyword">end</span>

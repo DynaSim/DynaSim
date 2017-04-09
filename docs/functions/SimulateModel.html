@@ -2,9 +2,9 @@
                 "http://www.w3.org/TR/REC-html40/loose.dtd">
 <html>
 <head>
-  <title>Description of SimulateModel</title>
-  <meta name="keywords" content="SimulateModel">
-  <meta name="description" content="% data=SimulateModel(model,'option',value,...)">
+  <title>Description of ds.simulateModel</title>
+  <meta name="keywords" content="ds.simulateModel">
+  <meta name="description" content="% data=ds.simulateModel(model,'option',value,...)">
   <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
   <meta name="generator" content="m2html &copy; 2005 Guillaume Flandin">
   <meta name="robots" content="index, follow">
@@ -16,28 +16,28 @@
 <body>
 <a name="_top"></a>
 <!-- menu.html functions -->
-<h1>SimulateModel
+<h1>ds.simulateModel
 </h1>
 
 <h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
-<div class="box"><strong>% data=SimulateModel(model,'option',value,...)</strong></div>
+<div class="box"><strong>% data=ds.simulateModel(model,'option',value,...)</strong></div>
 
 <h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
-<div class="box"><strong>function [data,studyinfo]=SimulateModel(model,varargin) </strong></div>
+<div class="box"><strong>function [data,studyinfo]=ds.simulateModel(model,varargin) </strong></div>
 
 <h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
-<div class="fragment"><pre class="comment">% data=SimulateModel(model,'option',value,...)
+<div class="fragment"><pre class="comment">% data=ds.simulateModel(model,'option',value,...)
  Purpose: manage simulation of a DynaSim model. This high-level function 
  offers many options to control the number of simulations, how the model is 
  optionally varied across simulations, and how the numerical integration
  is performed. It can optionally save the simulated data and create/submit
  simulation jobs to a compute cluster.
  Inputs:
-   model: DynaSim model structure or equations (see GenerateModel and 
-          CheckModel for more details)
+   model: DynaSim model structure or equations (see ds.generateModel and 
+          ds.checkModel for more details)
  
    solver options (provided as key/value pairs: 'option1',value1,'option2',value2,...):
-     'solver'      : solver for numerical integration (see GetSolveFile)
+     'solver'      : solver for numerical integration (see ds.getSolveFile)
                      {'euler','rk2','rk4', or any built-in matlab solver} (default: 'rk4')
      'tspan'       : time limits of simulation [begin,end] (default: [0 100]) [ms]
                      note: units must be consistent with dt and model equations
@@ -52,7 +52,7 @@
  
    options for running sets of simulations:
      'vary'        : (default: [], vary nothing): cell matrix specifying model
-                     components to vary across simulations (see NOTE 1 and Vary2Modifications)
+                     components to vary across simulations (see NOTE 1 and ds.vary2Modifications)
  
    options to control saved data:
      'save_results_flag': whether to save results of analysis and plotting
@@ -65,7 +65,7 @@
 
    options for cluster computing:
      'cluster_flag'  : whether to run simulations on a cluster submitted 
-                     using qsub (see CreateBatch) {0 or 1} (default: 0)
+                     using qsub (see ds.createBatch) {0 or 1} (default: 0)
      'sims_per_job'  : number of simulations to run per batch job (default: 1)
      'memory_limit'  : memory to allocate per batch job (default: '8G')
      'qsub_mode'     : whether to use SGE -t array for 1 qsub, mode: 'array'; or
@@ -86,7 +86,7 @@
  
    other options:
      'verbose_flag'  : whether to display informative messages/logs (default: 0)
-     'modifications' : how to modify DynaSim specification structure component before simulation (see ApplyModifications)
+     'modifications' : how to modify DynaSim specification structure component before simulation (see ds.applyModifications)
      'experiment'    : function handle of experiment function (see NOTE 2)
      'experiment_options' : single cell array of key/value options for experiment function
      'optimization'  : function handle of optimization function (see NOTE 2)
@@ -102,7 +102,7 @@
      data.model            : model used to generate simulated data
      [data.varied]         : list of varied model components (present only if anything was varied)
  
-   DynaSim studyinfo structure (only showing select fields, see CheckStudyinfo for more details)
+   DynaSim studyinfo structure (only showing select fields, see ds.checkStudyinfo for more details)
      studyinfo.study_dir
      studyinfo.base_model (=[]): original model from which a set of simulations was derived
      studyinfo.base_simulator_options (=[])
@@ -122,7 +122,7 @@
  parameter 'gNa', taking on values 100 and 120, in population 'E', set
  vary={'E','gNa',[100 120]}. To additionally vary 'gSYN' in the connection
  mechanism from 'E' to 'I', set vary={'E','gNa',[100 120];'E-&gt;I','gSYN',[0 1]}.
- Mechanism lists and equations can also be varied. (see Vary2Modifications 
+ Mechanism lists and equations can also be varied. (see ds.vary2Modifications 
  for more details and examples).
  
  EXAMPLES:
@@ -133,7 +133,7 @@
      'dy/dt=r*x-y-x*z';
      'dz/dt=-b*z+x*y';
    };
-   data=SimulateModel(eqns,'tspan',[0 100],'ic',[1 2 .5]);
+   data=ds.simulateModel(eqns,'tspan',[0 100],'ic',[1 2 .5]);
    plot(data.pop1_x,data.pop1_z); title('Lorenz equations'); xlabel('x'); ylabel('z')
  
  Example 2: Leaky integrate-and-fire with spike monitor
@@ -142,21 +142,21 @@
      'dV/dt=(E-V+R*I)/tau; if(V&gt;thresh)(V=reset)';
      'monitor V.spikes(thresh)';
    };
-   data=SimulateModel(eqns,'tspan',[0 200],'ic',-75);
+   data=ds.simulateModel(eqns,'tspan',[0 200],'ic',-75);
    data.pop1_V(data.pop1_V_spikes==1)=20; % insert spike
    plot(data.time,data.pop1_V); xlabel('time (ms)'); ylabel('V'); title('LIF with spikes')
  
  Example 3: Hodgkin-Huxley-type Intrinsically Bursting neuron
    eqns='dv/dt=5+@current; {iNaF,iKDR,iM}; gNaF=100; gKDR=5; gM=1.5; v(0)=-70';
-   data=SimulateModel(eqns,'tspan',[0 200]);
+   data=ds.simulateModel(eqns,'tspan',[0 200]);
    figure; plot(data.time,data.(data.labels{1}))
    xlabel('time (ms)'); ylabel('membrane potential (mV)'); title('Intrinsically Bursting neuron')
  
  Example 4: varying max Na+ conductance in Hodgkin-Huxley neuron
    eqns='dv/dt=@current+10; {iNa,iK}; v(0)=-60';
-   data=SimulateModel(eqns,'vary',{'','gNa',[50 100 200]});
+   data=ds.simulateModel(eqns,'vary',{'','gNa',[50 100 200]});
    % plot how mean firing rate varies with parameter
-   PlotFR(data,'bin_size',30,'bin_shift',10); % bin_size and bin_shift in [ms]
+   ds.plotFR(data,'bin_size',30,'bin_shift',10); % bin_size and bin_shift in [ms]
  
  Example 5: Sparse Pyramidal-Interneuron-Network-Gamma rhythm with rastergram
    % define equations of cell model (same for E and I populations)
@@ -185,7 +185,7 @@
    s.connections(2).mechanism_list={'iAMPA'};
    s.connections(2).parameters={'tauD',2,'gSYN',.1,'netcon',ones(80,20)};
    % simulate model
-   data=SimulateModel(s);
+   data=ds.simulateModel(s);
    % plot voltages and rastergram
    figure;
    subplot(2,1,1); % voltage traces
@@ -203,22 +203,22 @@
      'E'   ,'Iapp',[0 10 20];     % amplitude of tonic input to E-cells
      'I-&gt;E','tauD',[5 10 15]      % inhibition decay time constant from I to E
      };
-   data=SimulateModel(s,'vary',vary);
+   data=ds.simulateModel(s,'vary',vary);
    % plot firing rates calculated from spike monitor in both populations
-   PlotFR(data,'variable','*_spikes','bin_size',30,'bin_shift',10);
+   ds.plotFR(data,'variable','*_spikes','bin_size',30,'bin_shift',10);
  
  
- See also: <a href="GenerateModel.html" class="code" title="function [model,name_map]=GenerateModel(specification,varargin)">GenerateModel</a>, <a href="CheckModel.html" class="code" title="function model=CheckModel(model)">CheckModel</a>, <a href="GetSolveFile.html" class="code" title="function solve_file = GetSolveFile(model,studyinfo,varargin)">GetSolveFile</a>, <a href="CheckData.html" class="code" title="function data=CheckData(data)">CheckData</a>,
-           <a href="Vary2Modifications.html" class="code" title="function modifications_set = Vary2Modifications(vary,model)">Vary2Modifications</a>, <a href="CheckStudyinfo.html" class="code" title="function studyinfo=CheckStudyinfo(studyinfo,varargin)">CheckStudyinfo</a>, <a href="CreateBatch.html" class="code" title="function studyinfo = CreateBatch(base_model,modifications_set,varargin)">CreateBatch</a></pre></div>
+ See also: <a href="ds.generateModel.html" class="code" title="function [model,name_map]=ds.generateModel(specification,varargin)">ds.generateModel</a>, <a href="ds.checkModel.html" class="code" title="function model=ds.checkModel(model)">ds.checkModel</a>, <a href="ds.getSolveFile.html" class="code" title="function solve_file = ds.getSolveFile(model,studyinfo,varargin)">ds.getSolveFile</a>, <a href="ds.checkData.html" class="code" title="function data=ds.checkData(data)">ds.checkData</a>,
+           <a href="ds.vary2Modifications.html" class="code" title="function modifications_set = ds.vary2Modifications(vary,model)">ds.vary2Modifications</a>, <a href="ds.checkStudyinfo.html" class="code" title="function studyinfo=ds.checkStudyinfo(studyinfo,varargin)">ds.checkStudyinfo</a>, <a href="ds.createBatch.html" class="code" title="function studyinfo = ds.createBatch(base_model,modifications_set,varargin)">ds.createBatch</a></pre></div>
 
 <!-- crossreference -->
 <h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
 This function calls:
 <ul style="list-style-image:url(../matlabicon.gif)">
-<li><a href="AnalyzeData.html" class="code" title="function result=AnalyzeData(data,func,varargin)">AnalyzeData</a>	ANALYZEDATA - Apply an analysis function to DynaSim data, optionally saving data</li><li><a href="ApplyModifications.html" class="code" title="function [output,modifications]=ApplyModifications(model,modifications)">ApplyModifications</a>	APPLYMODIFICATIONS - Apply modifications to DynaSim specification or model structure</li><li><a href="CheckModel.html" class="code" title="function model=CheckModel(model)">CheckModel</a>	CHECKMODEL - Standardize model structure and auto-populate missing fields</li><li><a href="CheckOptions.html" class="code" title="function [parms, params_unspecified ] = CheckOptions(options, options_schema, strict)">CheckOptions</a>	CHECKOPTIONS - organize key/value pairs in structure with default or user-supplied values according to a schema</li><li><a href="CheckSolverOptions.html" class="code" title="function options=CheckSolverOptions(options)">CheckSolverOptions</a>	CHECKSOLVEROPTIONS - standardize simulation options appended to params.mat</li><li><a href="CreateBatch.html" class="code" title="function studyinfo = CreateBatch(base_model,modifications_set,varargin)">CreateBatch</a>	CREATEBATCH - create and submit jobs to run sets of simulations or analyses.</li><li><a href="DisplayError.html" class="code" title="function DisplayError(err)">DisplayError</a>	DISPLAYERROR - Wrapper to print MATLAB error</li><li><a href="ExportData.html" class="code" title="function ExportData(data,varargin)">ExportData</a>	EXPORTDATA - export DynaSim data structure in various formats.</li><li><a href="GetOutputCounts.html" class="code" title="function [state_var_counts,monitor_counts]=GetOutputCounts(model)">GetOutputCounts</a>	GETOUTPUTCOUNTS - determine how many copies of each state variable and monitor will be produced by simulating the model.</li><li><a href="GetSolveFile.html" class="code" title="function solve_file = GetSolveFile(model,studyinfo,varargin)">GetSolveFile</a>	GETSOLVEFILE - helper function that creates or retrieves the desired solver file.</li><li><a href="ImportData.html" class="code" title="function [data,studyinfo] = ImportData(file,varargin)">ImportData</a>	IMPORTDATA - load data into DynaSim formatted data structure.</li><li><a href="Options2Keyval.html" class="code" title="function keyval = Options2Keyval(options)">Options2Keyval</a>	OPTIONS2KEYVAL - Convert from options structure to a list of key/value pairs.</li><li><a href="PropagateFunctions.html" class="code" title="function model=PropagateFunctions(model)">PropagateFunctions</a>	PROPAGATEFUNCTIONS - eliminate internal function calls from model ODEs, ICs, monitors, and conditionals.</li><li><a href="PropagateParameters.html" class="code" title="function model=PropagateParameters(model,varargin)">PropagateParameters</a>	PROPAGATEPARAMETERS - substitute parameter values or prepend parameter names with prefix across all model equations.</li><li><a href="RemoveKeyval.html" class="code" title="function keyvals_out = RemoveKeyval(keyvals,keys)">RemoveKeyval</a>	REMOVEKEYVAL - remove keys from keyvals_in.</li><li><a href="SetupStudy.html" class="code" title="function [studyinfo,options]=SetupStudy(base_model,varargin)">SetupStudy</a>	SETUPSTUDY - Initialize DynaSim studyinfo structure, prepare list of output file names, and create output directories</li><li><a href="SimulateModel.html" class="code" title="function [data,studyinfo]=SimulateModel(model,varargin)">SimulateModel</a>	% data=SimulateModel(model,'option',value,...)</li><li><a href="UpdateStudy.html" class="code" title="function studyinfo=UpdateStudy(study_dir,varargin)">UpdateStudy</a>	UPDATESTUDY - helper function to keep track of study metadata when anything is saved</li><li><a href="Vary2Modifications.html" class="code" title="function modifications_set = Vary2Modifications(vary,model)">Vary2Modifications</a>	VARY2MODIFICATIONS - convert specification of things to vary into a set of modifications indicating how to vary the desired things.</li><li><a href="dynasim2odefun.html" class="code" title="function [ODEFUN,IC,elem_names]=dynasim2odefun(model, varargin)">dynasim2odefun</a>	Purpose: prepare ODEFUN for use with built-in Matlab solvers.</li></ul>
+<li><a href="ds.analyzeData.html" class="code" title="function result=ds.analyzeData(data,func,varargin)">ds.analyzeData</a>	ANALYZEDATA - Apply an analysis function to DynaSim data, optionally saving data</li><li><a href="ds.applyModifications.html" class="code" title="function [output,modifications]=ds.applyModifications(model,modifications)">ds.applyModifications</a>	APPLYMODIFICATIONS - Apply modifications to DynaSim specification or model structure</li><li><a href="ds.checkModel.html" class="code" title="function model=ds.checkModel(model)">ds.checkModel</a>	CHECKMODEL - Standardize model structure and auto-populate missing fields</li><li><a href="ds.checkOptions.html" class="code" title="function [parms, params_unspecified ] = ds.checkOptions(options, options_schema, strict)">ds.checkOptions</a>	CHECKOPTIONS - organize key/value pairs in structure with default or user-supplied values according to a schema</li><li><a href="ds.checkSolverOptions.html" class="code" title="function options=ds.checkSolverOptions(options)">ds.checkSolverOptions</a>	CHECKSOLVEROPTIONS - standardize simulation options appended to params.mat</li><li><a href="ds.createBatch.html" class="code" title="function studyinfo = ds.createBatch(base_model,modifications_set,varargin)">ds.createBatch</a>	CREATEBATCH - create and submit jobs to run sets of simulations or analyses.</li><li><a href="displayError.html" class="code" title="function displayError(err)">displayError</a>	DISPLAYERROR - Wrapper to print MATLAB error</li><li><a href="ds.exportData.html" class="code" title="function ds.exportData(data,varargin)">ds.exportData</a>	EXPORTDATA - export DynaSim data structure in various formats.</li><li><a href="ds.getOutputCounts.html" class="code" title="function [state_var_counts,monitor_counts]=ds.getOutputCounts(model)">ds.getOutputCounts</a>	GETOUTPUTCOUNTS - determine how many copies of each state variable and monitor will be produced by simulating the model.</li><li><a href="ds.getSolveFile.html" class="code" title="function solve_file = ds.getSolveFile(model,studyinfo,varargin)">ds.getSolveFile</a>	GETSOLVEFILE - helper function that creates or retrieves the desired solver file.</li><li><a href="ds.importData.html" class="code" title="function [data,studyinfo] = ds.importData(file,varargin)">ds.importData</a>	IMPORTDATA - load data into DynaSim formatted data structure.</li><li><a href="ds.options2Keyval.html" class="code" title="function keyval = ds.options2Keyval(options)">ds.options2Keyval</a>	OPTIONS2KEYVAL - Convert from options structure to a list of key/value pairs.</li><li><a href="ds.propagateFunctions.html" class="code" title="function model=ds.propagateFunctions(model)">ds.propagateFunctions</a>	PROPAGATEFUNCTIONS - eliminate internal function calls from model ODEs, ICs, monitors, and conditionals.</li><li><a href="ds.propagateParameters.html" class="code" title="function model=ds.propagateParameters(model,varargin)">ds.propagateParameters</a>	PROPAGATEPARAMETERS - substitute parameter values or prepend parameter names with prefix across all model equations.</li><li><a href="ds.removeKeyval.html" class="code" title="function keyvals_out = ds.removeKeyval(keyvals,keys)">ds.removeKeyval</a>	REMOVEKEYVAL - remove keys from keyvals_in.</li><li><a href="ds.setupStudy.html" class="code" title="function [studyinfo,options]=ds.setupStudy(base_model,varargin)">ds.setupStudy</a>	SETUPSTUDY - Initialize DynaSim studyinfo structure, prepare list of output file names, and create output directories</li><li><a href="ds.simulateModel.html" class="code" title="function [data,studyinfo]=ds.simulateModel(model,varargin)">ds.simulateModel</a>	% data=ds.simulateModel(model,'option',value,...)</li><li><a href="ds.updateStudy.html" class="code" title="function studyinfo=ds.updateStudy(study_dir,varargin)">ds.updateStudy</a>	UPDATESTUDY - helper function to keep track of study metadata when anything is saved</li><li><a href="ds.vary2Modifications.html" class="code" title="function modifications_set = ds.vary2Modifications(vary,model)">ds.vary2Modifications</a>	VARY2MODIFICATIONS - convert specification of things to vary into a set of modifications indicating how to vary the desired things.</li><li><a href="ds.dynasim2odefun.html" class="code" title="function [ODEFUN,IC,elem_names]=ds.dynasim2odefun(model, varargin)">ds.dynasim2odefun</a>	Purpose: prepare ODEFUN for use with built-in Matlab solvers.</li></ul>
 This function is called by:
 <ul style="list-style-image:url(../matlabicon.gif)">
-<li><a href="ProbeCellProperties.html" class="code" title="function data = ProbeCellProperties(model,varargin)">ProbeCellProperties</a>	data = ProbeCellProperties(model,'option1',option1,...)</li><li><a href="ProbeFI.html" class="code" title="function data=ProbeFI(model,varargin)">ProbeFI</a>	% data=ProbeFI(model,varargin)</li><li><a href="SimulateModel.html" class="code" title="function [data,studyinfo]=SimulateModel(model,varargin)">SimulateModel</a>	% data=SimulateModel(model,'option',value,...)</li></ul>
+<li><a href="ds.probeCellProperties.html" class="code" title="function data = ds.probeCellProperties(model,varargin)">ds.probeCellProperties</a>	data = ds.probeCellProperties(model,'option1',option1,...)</li><li><a href="ds.probeFI.html" class="code" title="function data=ds.probeFI(model,varargin)">ds.probeFI</a>	% data=ds.probeFI(model,varargin)</li><li><a href="ds.simulateModel.html" class="code" title="function [data,studyinfo]=ds.simulateModel(model,varargin)">ds.simulateModel</a>	% data=ds.simulateModel(model,'option',value,...)</li></ul>
 <!-- crossreference -->
 
 <h2><a name="_subfunctions"></a>SUBFUNCTIONS <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
@@ -226,19 +226,19 @@ This function is called by:
 <li><a href="#_sub1" class="code">function update_data</a></li><li><a href="#_sub2" class="code">function tmpdata = prepare_varied_metadata(tmpdata)</a></li><li><a href="#_sub3" class="code">function cleanup(status)</a></li><li><a href="#_sub4" class="code">function all_ICs=ProcessNumericICs</a></li><li><a href="#_sub5" class="code">function logicalOut = is_varied_mech_list()</a></li><li><a href="#_sub6" class="code">function modifications=expand_modifications(mods)</a></li><li><a href="#_sub7" class="code">function [model,options]=extract_vary_statement(model,options)</a></li><li><a href="#_sub8" class="code">function options = backward_compatibility(options)</a></li></ul>
 
 <h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
-<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function [data,studyinfo]=SimulateModel(model,varargin)</a>
-0002 <span class="comment">%% data=SimulateModel(model,'option',value,...)</span>
+<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function [data,studyinfo]=ds.simulateModel(model,varargin)</a>
+0002 <span class="comment">%% data=ds.simulateModel(model,'option',value,...)</span>
 0003 <span class="comment">% Purpose: manage simulation of a DynaSim model. This high-level function</span>
 0004 <span class="comment">% offers many options to control the number of simulations, how the model is</span>
 0005 <span class="comment">% optionally varied across simulations, and how the numerical integration</span>
 0006 <span class="comment">% is performed. It can optionally save the simulated data and create/submit</span>
 0007 <span class="comment">% simulation jobs to a compute cluster.</span>
 0008 <span class="comment">% Inputs:</span>
-0009 <span class="comment">%   model: DynaSim model structure or equations (see GenerateModel and</span>
-0010 <span class="comment">%          CheckModel for more details)</span>
+0009 <span class="comment">%   model: DynaSim model structure or equations (see ds.generateModel and</span>
+0010 <span class="comment">%          ds.checkModel for more details)</span>
 0011 <span class="comment">%</span>
 0012 <span class="comment">%   solver options (provided as key/value pairs: 'option1',value1,'option2',value2,...):</span>
-0013 <span class="comment">%     'solver'      : solver for numerical integration (see GetSolveFile)</span>
+0013 <span class="comment">%     'solver'      : solver for numerical integration (see ds.getSolveFile)</span>
 0014 <span class="comment">%                     {'euler','rk2','rk4', or any built-in matlab solver} (default: 'rk4')</span>
 0015 <span class="comment">%     'tspan'       : time limits of simulation [begin,end] (default: [0 100]) [ms]</span>
 0016 <span class="comment">%                     note: units must be consistent with dt and model equations</span>
@@ -253,7 +253,7 @@ This function is called by:
 0025 <span class="comment">%</span>
 0026 <span class="comment">%   options for running sets of simulations:</span>
 0027 <span class="comment">%     'vary'        : (default: [], vary nothing): cell matrix specifying model</span>
-0028 <span class="comment">%                     components to vary across simulations (see NOTE 1 and Vary2Modifications)</span>
+0028 <span class="comment">%                     components to vary across simulations (see NOTE 1 and ds.vary2Modifications)</span>
 0029 <span class="comment">%</span>
 0030 <span class="comment">%   options to control saved data:</span>
 0031 <span class="comment">%     'save_results_flag': whether to save results of analysis and plotting</span>
@@ -266,7 +266,7 @@ This function is called by:
 0038 <span class="comment">%</span>
 0039 <span class="comment">%   options for cluster computing:</span>
 0040 <span class="comment">%     'cluster_flag'  : whether to run simulations on a cluster submitted</span>
-0041 <span class="comment">%                     using qsub (see CreateBatch) {0 or 1} (default: 0)</span>
+0041 <span class="comment">%                     using qsub (see ds.createBatch) {0 or 1} (default: 0)</span>
 0042 <span class="comment">%     'sims_per_job'  : number of simulations to run per batch job (default: 1)</span>
 0043 <span class="comment">%     'memory_limit'  : memory to allocate per batch job (default: '8G')</span>
 0044 <span class="comment">%     'qsub_mode'     : whether to use SGE -t array for 1 qsub, mode: 'array'; or</span>
@@ -287,7 +287,7 @@ This function is called by:
 0059 <span class="comment">%</span>
 0060 <span class="comment">%   other options:</span>
 0061 <span class="comment">%     'verbose_flag'  : whether to display informative messages/logs (default: 0)</span>
-0062 <span class="comment">%     'modifications' : how to modify DynaSim specification structure component before simulation (see ApplyModifications)</span>
+0062 <span class="comment">%     'modifications' : how to modify DynaSim specification structure component before simulation (see ds.applyModifications)</span>
 0063 <span class="comment">%     'experiment'    : function handle of experiment function (see NOTE 2)</span>
 0064 <span class="comment">%     'experiment_options' : single cell array of key/value options for experiment function</span>
 0065 <span class="comment">%     'optimization'  : function handle of optimization function (see NOTE 2)</span>
@@ -303,7 +303,7 @@ This function is called by:
 0075 <span class="comment">%     data.model            : model used to generate simulated data</span>
 0076 <span class="comment">%     [data.varied]         : list of varied model components (present only if anything was varied)</span>
 0077 <span class="comment">%</span>
-0078 <span class="comment">%   DynaSim studyinfo structure (only showing select fields, see CheckStudyinfo for more details)</span>
+0078 <span class="comment">%   DynaSim studyinfo structure (only showing select fields, see ds.checkStudyinfo for more details)</span>
 0079 <span class="comment">%     studyinfo.study_dir</span>
 0080 <span class="comment">%     studyinfo.base_model (=[]): original model from which a set of simulations was derived</span>
 0081 <span class="comment">%     studyinfo.base_simulator_options (=[])</span>
@@ -323,7 +323,7 @@ This function is called by:
 0095 <span class="comment">% parameter 'gNa', taking on values 100 and 120, in population 'E', set</span>
 0096 <span class="comment">% vary={'E','gNa',[100 120]}. To additionally vary 'gSYN' in the connection</span>
 0097 <span class="comment">% mechanism from 'E' to 'I', set vary={'E','gNa',[100 120];'E-&gt;I','gSYN',[0 1]}.</span>
-0098 <span class="comment">% Mechanism lists and equations can also be varied. (see Vary2Modifications</span>
+0098 <span class="comment">% Mechanism lists and equations can also be varied. (see ds.vary2Modifications</span>
 0099 <span class="comment">% for more details and examples).</span>
 0100 <span class="comment">%</span>
 0101 <span class="comment">% EXAMPLES:</span>
@@ -334,7 +334,7 @@ This function is called by:
 0106 <span class="comment">%     'dy/dt=r*x-y-x*z';</span>
 0107 <span class="comment">%     'dz/dt=-b*z+x*y';</span>
 0108 <span class="comment">%   };</span>
-0109 <span class="comment">%   data=SimulateModel(eqns,'tspan',[0 100],'ic',[1 2 .5]);</span>
+0109 <span class="comment">%   data=ds.simulateModel(eqns,'tspan',[0 100],'ic',[1 2 .5]);</span>
 0110 <span class="comment">%   plot(data.pop1_x,data.pop1_z); title('Lorenz equations'); xlabel('x'); ylabel('z')</span>
 0111 <span class="comment">%</span>
 0112 <span class="comment">% Example 2: Leaky integrate-and-fire with spike monitor</span>
@@ -343,21 +343,21 @@ This function is called by:
 0115 <span class="comment">%     'dV/dt=(E-V+R*I)/tau; if(V&gt;thresh)(V=reset)';</span>
 0116 <span class="comment">%     'monitor V.spikes(thresh)';</span>
 0117 <span class="comment">%   };</span>
-0118 <span class="comment">%   data=SimulateModel(eqns,'tspan',[0 200],'ic',-75);</span>
+0118 <span class="comment">%   data=ds.simulateModel(eqns,'tspan',[0 200],'ic',-75);</span>
 0119 <span class="comment">%   data.pop1_V(data.pop1_V_spikes==1)=20; % insert spike</span>
 0120 <span class="comment">%   plot(data.time,data.pop1_V); xlabel('time (ms)'); ylabel('V'); title('LIF with spikes')</span>
 0121 <span class="comment">%</span>
 0122 <span class="comment">% Example 3: Hodgkin-Huxley-type Intrinsically Bursting neuron</span>
 0123 <span class="comment">%   eqns='dv/dt=5+@current; {iNaF,iKDR,iM}; gNaF=100; gKDR=5; gM=1.5; v(0)=-70';</span>
-0124 <span class="comment">%   data=SimulateModel(eqns,'tspan',[0 200]);</span>
+0124 <span class="comment">%   data=ds.simulateModel(eqns,'tspan',[0 200]);</span>
 0125 <span class="comment">%   figure; plot(data.time,data.(data.labels{1}))</span>
 0126 <span class="comment">%   xlabel('time (ms)'); ylabel('membrane potential (mV)'); title('Intrinsically Bursting neuron')</span>
 0127 <span class="comment">%</span>
 0128 <span class="comment">% Example 4: varying max Na+ conductance in Hodgkin-Huxley neuron</span>
 0129 <span class="comment">%   eqns='dv/dt=@current+10; {iNa,iK}; v(0)=-60';</span>
-0130 <span class="comment">%   data=SimulateModel(eqns,'vary',{'','gNa',[50 100 200]});</span>
+0130 <span class="comment">%   data=ds.simulateModel(eqns,'vary',{'','gNa',[50 100 200]});</span>
 0131 <span class="comment">%   % plot how mean firing rate varies with parameter</span>
-0132 <span class="comment">%   PlotFR(data,'bin_size',30,'bin_shift',10); % bin_size and bin_shift in [ms]</span>
+0132 <span class="comment">%   ds.plotFR(data,'bin_size',30,'bin_shift',10); % bin_size and bin_shift in [ms]</span>
 0133 <span class="comment">%</span>
 0134 <span class="comment">% Example 5: Sparse Pyramidal-Interneuron-Network-Gamma rhythm with rastergram</span>
 0135 <span class="comment">%   % define equations of cell model (same for E and I populations)</span>
@@ -386,7 +386,7 @@ This function is called by:
 0158 <span class="comment">%   s.connections(2).mechanism_list={'iAMPA'};</span>
 0159 <span class="comment">%   s.connections(2).parameters={'tauD',2,'gSYN',.1,'netcon',ones(80,20)};</span>
 0160 <span class="comment">%   % simulate model</span>
-0161 <span class="comment">%   data=SimulateModel(s);</span>
+0161 <span class="comment">%   data=ds.simulateModel(s);</span>
 0162 <span class="comment">%   % plot voltages and rastergram</span>
 0163 <span class="comment">%   figure;</span>
 0164 <span class="comment">%   subplot(2,1,1); % voltage traces</span>
@@ -404,21 +404,21 @@ This function is called by:
 0176 <span class="comment">%     'E'   ,'Iapp',[0 10 20];     % amplitude of tonic input to E-cells</span>
 0177 <span class="comment">%     'I-&gt;E','tauD',[5 10 15]      % inhibition decay time constant from I to E</span>
 0178 <span class="comment">%     };</span>
-0179 <span class="comment">%   data=SimulateModel(s,'vary',vary);</span>
+0179 <span class="comment">%   data=ds.simulateModel(s,'vary',vary);</span>
 0180 <span class="comment">%   % plot firing rates calculated from spike monitor in both populations</span>
-0181 <span class="comment">%   PlotFR(data,'variable','*_spikes','bin_size',30,'bin_shift',10);</span>
+0181 <span class="comment">%   ds.plotFR(data,'variable','*_spikes','bin_size',30,'bin_shift',10);</span>
 0182 <span class="comment">%</span>
 0183 <span class="comment">%</span>
-0184 <span class="comment">% See also: GenerateModel, CheckModel, GetSolveFile, CheckData,</span>
-0185 <span class="comment">%           Vary2Modifications, CheckStudyinfo, CreateBatch</span>
+0184 <span class="comment">% See also: ds.generateModel, ds.checkModel, ds.getSolveFile, ds.checkData,</span>
+0185 <span class="comment">%           ds.vary2Modifications, ds.checkStudyinfo, ds.createBatch</span>
 0186 
 0187 <span class="comment">% TODO: rename 'disk_flag' to something more descriptive</span>
 0188 
-0189 <span class="comment">% dependencies: WriteDynaSimSolver, WriteMatlabSolver, PropagateFunctions, CheckModel,</span>
-0190 <span class="comment">% CheckOptions, Options2Keyval, DisplayError, DynaSim2Odefun</span>
+0189 <span class="comment">% dependencies: ds.writeDynaSimSolver, ds.writeMatlabSolver, ds.propagateFunctions, ds.checkModel,</span>
+0190 <span class="comment">% ds.checkOptions, ds.options2Keyval, displayError, DynaSim2Odefun</span>
 0191 
 0192 <span class="comment">% &lt;-- temporarily removed from help section --&gt;</span>
-0193 <span class="comment">% NOTE 2: special functions that recursively call SimulateModel:</span>
+0193 <span class="comment">% NOTE 2: special functions that recursively call ds.simulateModel:</span>
 0194 <span class="comment">% - &quot;Experiments&quot; are ways of hacking the ODE system to incorporate additional</span>
 0195 <span class="comment">% models (e.g., controlled inputs) and use them to simulate experimental</span>
 0196 <span class="comment">% protocols by systematically varying Model Components across simulations in</span>
@@ -444,7 +444,7 @@ This function is called by:
 0216 
 0217 <span class="comment">% Check inputs</span>
 0218 varargin = <a href="#_sub8" class="code" title="subfunction options = backward_compatibility(options)">backward_compatibility</a>(varargin);
-0219 options=<a href="CheckOptions.html" class="code" title="function [parms, params_unspecified ] = CheckOptions(options, options_schema, strict)">CheckOptions</a>(varargin,{<span class="keyword">...</span>
+0219 options=<a href="ds.checkOptions.html" class="code" title="function [parms, params_unspecified ] = ds.checkOptions(options, options_schema, strict)">ds.checkOptions</a>(varargin,{<span class="keyword">...</span>
 0220   <span class="string">'tspan'</span>,[0 100],[],<span class="keyword">...</span><span class="comment">          % [beg,end] (units must be consistent with dt and equations)</span>
 0221   <span class="string">'ic'</span>,[],[],<span class="keyword">...</span><span class="comment">                  % initial conditions (overrides definition in model structure; can input as IC structure or numeric array)</span>
 0222   <span class="string">'solver'</span>,<span class="string">'rk4'</span>,{<span class="string">'euler'</span>,<span class="string">'rk1'</span>,<span class="string">'rk2'</span>,<span class="string">'rk4'</span>,<span class="string">'modified_euler'</span>,<span class="string">'rungekutta'</span>,<span class="string">'rk'</span>,<span class="keyword">...</span>
@@ -670,11 +670,11 @@ This function is called by:
 0442 [model,options]=<a href="#_sub7" class="code" title="subfunction [model,options]=extract_vary_statement(model,options)">extract_vary_statement</a>(model,options);
 0443 
 0444 <span class="comment">% check/standardize model</span>
-0445 model=<a href="CheckModel.html" class="code" title="function model=CheckModel(model)">CheckModel</a>(model); <span class="comment">% handles conversion when input is a string w/ equations or a DynaSim specification structure</span>
+0445 model=<a href="ds.checkModel.html" class="code" title="function model=ds.checkModel(model)">ds.checkModel</a>(model); <span class="comment">% handles conversion when input is a string w/ equations or a DynaSim specification structure</span>
 0446 
 0447 <span class="comment">% 1.1 apply modifications before simulation and optional further variation across simulations</span>
 0448 <span class="keyword">if</span> ~isempty(options.modifications)
-0449   [model,options.modifications]=<a href="ApplyModifications.html" class="code" title="function [output,modifications]=ApplyModifications(model,modifications)">ApplyModifications</a>(model,options.modifications);
+0449   [model,options.modifications]=<a href="ds.applyModifications.html" class="code" title="function [output,modifications]=ds.applyModifications(model,modifications)">ds.applyModifications</a>(model,options.modifications);
 0450 <span class="keyword">end</span>
 0451 
 0452 <span class="comment">% 1.2 incorporate user-supplied initial conditions</span>
@@ -694,7 +694,7 @@ This function is called by:
 0466 
 0467 <span class="comment">% expand set of things to vary across simulations</span>
 0468 <span class="keyword">if</span> ~isempty(options.vary)
-0469   modifications_set=<a href="Vary2Modifications.html" class="code" title="function modifications_set = Vary2Modifications(vary,model)">Vary2Modifications</a>(options.vary,model);
+0469   modifications_set=<a href="ds.vary2Modifications.html" class="code" title="function modifications_set = ds.vary2Modifications(vary,model)">ds.vary2Modifications</a>(options.vary,model);
 0470 <span class="keyword">else</span>
 0471   modifications_set={[]};
 0472 <span class="keyword">end</span>
@@ -712,15 +712,15 @@ This function is called by:
 0484 <span class="comment">% whether to write jobs for distributed processing on cluster</span>
 0485 <span class="keyword">if</span> options.cluster_flag==1
 0486   <span class="comment">% add to model any parameters in 'vary' not explicit in current model</span>
-0487   <span class="comment">% approach: use ApplyModifications(), it does that automatically</span>
+0487   <span class="comment">% approach: use ds.applyModifications(), it does that automatically</span>
 0488   <span class="keyword">for</span> i=1:length(modifications_set)
 0489     <span class="keyword">if</span> ~isempty(modifications_set{i}) &amp;&amp; ~strcmp(modifications_set{i}{2},<span class="string">'mechanism_list'</span>) &amp;&amp; ~strcmp(modifications_set{i}{2},<span class="string">'equations'</span>)
-0490       model = <a href="ApplyModifications.html" class="code" title="function [output,modifications]=ApplyModifications(model,modifications)">ApplyModifications</a>(model,modifications_set{i});
+0490       model = <a href="ds.applyModifications.html" class="code" title="function [output,modifications]=ds.applyModifications(model,modifications)">ds.applyModifications</a>(model,modifications_set{i});
 0491       <span class="keyword">break</span>
 0492     <span class="keyword">end</span>
 0493   <span class="keyword">end</span>
-0494   keyvals = <a href="Options2Keyval.html" class="code" title="function keyval = Options2Keyval(options)">Options2Keyval</a>(options);
-0495   studyinfo = <a href="CreateBatch.html" class="code" title="function studyinfo = CreateBatch(base_model,modifications_set,varargin)">CreateBatch</a>(model,modifications_set,<span class="string">'simulator_options'</span>,options,<span class="string">'process_id'</span>,options.sim_id,keyvals{:});
+0494   keyvals = <a href="ds.options2Keyval.html" class="code" title="function keyval = ds.options2Keyval(options)">ds.options2Keyval</a>(options);
+0495   studyinfo = <a href="ds.createBatch.html" class="code" title="function studyinfo = ds.createBatch(base_model,modifications_set,varargin)">ds.createBatch</a>(model,modifications_set,<span class="string">'simulator_options'</span>,options,<span class="string">'process_id'</span>,options.sim_id,keyvals{:});
 0496   
 0497   <span class="keyword">if</span> options.one_solve_file_flag
 0498     <span class="comment">% copy params.mat from project_dir to batchdirs</span>
@@ -733,13 +733,13 @@ This function is called by:
 0505   
 0506   <span class="comment">%if options.overwrite_flag==0</span>
 0507     <span class="comment">% check status of study</span>
-0508 <span class="comment">%     [~,s]=MonitorStudy(studyinfo.study_dir,'verbose_flag',0,'process_id',options.sim_id);</span>
+0508 <span class="comment">%     [~,s]=ds.monitorStudy(studyinfo.study_dir,'verbose_flag',0,'process_id',options.sim_id);</span>
 0509 <span class="comment">%     if s==1 % study finished</span>
 0510 <span class="comment">%       if options.verbose_flag</span>
 0511 <span class="comment">%         fprintf('Study already finished. Importing data...\n');</span>
 0512 <span class="comment">%       end</span>
-0513 <span class="comment">%       studyinfo=CheckStudyinfo(studyinfo.study_dir,'process_id',options.sim_id);</span>
-0514 <span class="comment">%       data=ImportData(studyinfo,'process_id',options.sim_id);</span>
+0513 <span class="comment">%       studyinfo=ds.checkStudyinfo(studyinfo.study_dir,'process_id',options.sim_id);</span>
+0514 <span class="comment">%       data=ds.importData(studyinfo,'process_id',options.sim_id);</span>
 0515 <span class="comment">%     end</span>
 0516   <span class="comment">%end</span>
 0517   <span class="keyword">return</span>;
@@ -751,11 +751,11 @@ This function is called by:
 0523 <span class="keyword">if</span> options.parallel_flag==1
 0524 
 0525   <span class="comment">% prepare studyinfo</span>
-0526   [studyinfo,options]=<a href="SetupStudy.html" class="code" title="function [studyinfo,options]=SetupStudy(base_model,varargin)">SetupStudy</a>(model,<span class="string">'simulator_options'</span>,options,<span class="string">'modifications_set'</span>,modifications_set);
+0526   [studyinfo,options]=<a href="ds.setupStudy.html" class="code" title="function [studyinfo,options]=ds.setupStudy(base_model,varargin)">ds.setupStudy</a>(model,<span class="string">'simulator_options'</span>,options,<span class="string">'modifications_set'</span>,modifications_set);
 0527 
 0528   <span class="comment">% prepare options</span>
 0529   options_temp= rmfield(options,{<span class="string">'vary'</span>,<span class="string">'modifications'</span>,<span class="string">'solve_file'</span>,<span class="string">'parallel_flag'</span>,<span class="string">'studyinfo'</span>});
-0530   keyvals=<a href="Options2Keyval.html" class="code" title="function keyval = Options2Keyval(options)">Options2Keyval</a>(options_temp);
+0530   keyvals=<a href="ds.options2Keyval.html" class="code" title="function keyval = ds.options2Keyval(options)">ds.options2Keyval</a>(options_temp);
 0531 
 0532   <span class="comment">% run embarrassingly-parallel simulations</span>
 0533   
@@ -769,8 +769,8 @@ This function is called by:
 0541  
 0542   clear data
 0543   parfor sim=1:length(modifications_set)
-0544     <span class="comment">%data(sim)=SimulateModel(model,'modifications',modifications_set{sim},'solve_file',solve_file,keyvals{:});       % Original parfor code</span>
-0545     data(sim)=<a href="SimulateModel.html" class="code" title="function [data,studyinfo]=SimulateModel(model,varargin)">SimulateModel</a>(model,<span class="string">'modifications'</span>,modifications_set{sim},keyvals{:},<span class="string">'studyinfo'</span>,studyinfo,<span class="string">'sim_id'</span>,sim);  <span class="comment">% My modification; now specifies a separate study directory for each sim</span>
+0544     <span class="comment">%data(sim)=ds.simulateModel(model,'modifications',modifications_set{sim},'solve_file',solve_file,keyvals{:});       % Original parfor code</span>
+0545     data(sim)=<a href="ds.simulateModel.html" class="code" title="function [data,studyinfo]=ds.simulateModel(model,varargin)">ds.simulateModel</a>(model,<span class="string">'modifications'</span>,modifications_set{sim},keyvals{:},<span class="string">'studyinfo'</span>,studyinfo,<span class="string">'sim_id'</span>,sim);  <span class="comment">% My modification; now specifies a separate study directory for each sim</span>
 0546     <span class="comment">%disp(sim);</span>
 0547   <span class="keyword">end</span>
 0548 
@@ -795,7 +795,7 @@ This function is called by:
 0567 
 0568 <span class="comment">% 1.4 prepare study_dir and studyinfo if saving data</span>
 0569 <span class="keyword">if</span> isempty(options.studyinfo)
-0570   [studyinfo,options] = <a href="SetupStudy.html" class="code" title="function [studyinfo,options]=SetupStudy(base_model,varargin)">SetupStudy</a>(model,<span class="string">'modifications_set'</span>,modifications_set,<span class="string">'simulator_options'</span>,options,<span class="string">'process_id'</span>,options.sim_id);
+0570   [studyinfo,options] = <a href="ds.setupStudy.html" class="code" title="function [studyinfo,options]=ds.setupStudy(base_model,varargin)">ds.setupStudy</a>(model,<span class="string">'modifications_set'</span>,modifications_set,<span class="string">'simulator_options'</span>,options,<span class="string">'process_id'</span>,options.sim_id);
 0571 <span class="keyword">else</span>
 0572   studyinfo=options.studyinfo;
 0573 <span class="keyword">end</span>
@@ -805,9 +805,9 @@ This function is called by:
 0577 <span class="keyword">try</span>
 0578   
 0579   <span class="comment">% functions:          outputs:</span>
-0580   <span class="comment">% WriteDynaSimSolver    m-file for DynaSim solver</span>
-0581   <span class="comment">% WriteMatlabSolver   m-file for Matlab solver (including @odefun)</span>
-0582   <span class="comment">% PrepareMEX          mex-file for m-file</span>
+0580   <span class="comment">% ds.writeDynaSimSolver    m-file for DynaSim solver</span>
+0581   <span class="comment">% ds.writeMatlabSolver   m-file for Matlab solver (including @odefun)</span>
+0582   <span class="comment">% ds.prepareMEX          mex-file for m-file</span>
 0583 
 0584   <span class="comment">%% 1.5 loop over simulations, possibly varying things</span>
 0585   base_model=model;
@@ -834,7 +834,7 @@ This function is called by:
 0606           <span class="comment">% note: this is important, should always display</span>
 0607           fprintf(<span class="string">'loading data from %s\n'</span>,data_file);
 0608         <span class="keyword">end</span>
-0609         tmpdata=<a href="ImportData.html" class="code" title="function [data,studyinfo] = ImportData(file,varargin)">ImportData</a>(data_file,<span class="string">'process_id'</span>,sim_id);
+0609         tmpdata=<a href="ds.importData.html" class="code" title="function [data,studyinfo] = ds.importData(file,varargin)">ds.importData</a>(data_file,<span class="string">'process_id'</span>,sim_id);
 0610         <a href="#_sub1" class="code" title="subfunction update_data">update_data</a>; <span class="comment">% concatenate data structures across simulations</span>
 0611         <span class="keyword">continue</span>; <span class="comment">% skip to next simulation</span>
 0612       <span class="keyword">end</span>
@@ -842,12 +842,12 @@ This function is called by:
 0614     
 0615     <span class="comment">% apply modifications for this point in search space</span>
 0616     <span class="keyword">if</span> ~isempty(modifications_set{sim})
-0617       model=<a href="ApplyModifications.html" class="code" title="function [output,modifications]=ApplyModifications(model,modifications)">ApplyModifications</a>(base_model,modifications_set{sim});
+0617       model=<a href="ds.applyModifications.html" class="code" title="function [output,modifications]=ds.applyModifications(model,modifications)">ds.applyModifications</a>(base_model,modifications_set{sim});
 0618     <span class="keyword">end</span>
 0619     
 0620     <span class="comment">% update studyinfo</span>
 0621     <span class="keyword">if</span> options.save_data_flag
-0622       <span class="comment">%studyinfo=UpdateStudy(studyinfo.study_dir,'process_id',sim_id,'status','started','model',model,'simulator_options',options,'verbose_flag',options.verbose_flag);</span>
+0622       <span class="comment">%studyinfo=ds.updateStudy(studyinfo.study_dir,'process_id',sim_id,'status','started','model',model,'simulator_options',options,'verbose_flag',options.verbose_flag);</span>
 0623     <span class="keyword">end</span>
 0624     
 0625     <span class="comment">%% Experiment</span>
@@ -860,11 +860,11 @@ This function is called by:
 0632       <span class="comment">% from varargin...</span>
 0633       <span class="comment">% remove 'experiment', 'modifications', 'vary', 'cluster_flag' to avoid undesired recursive action in experiment function</span>
 0634       <span class="comment">% remove 'save_data_flag' to prevent individual simulations from being saved during experiment</span>
-0635       keyvals=<a href="RemoveKeyval.html" class="code" title="function keyvals_out = RemoveKeyval(keyvals,keys)">RemoveKeyval</a>(varargin,{<span class="string">'experiment'</span>,<span class="string">'cluster_flag'</span>,<span class="string">'vary'</span>,<span class="string">'modifications'</span>,<span class="string">'save_data_flag'</span>});
+0635       keyvals=<a href="ds.removeKeyval.html" class="code" title="function keyvals_out = ds.removeKeyval(keyvals,keys)">ds.removeKeyval</a>(varargin,{<span class="string">'experiment'</span>,<span class="string">'cluster_flag'</span>,<span class="string">'vary'</span>,<span class="string">'modifications'</span>,<span class="string">'save_data_flag'</span>});
 0636       
 0637       <span class="keyword">if</span> ~isempty(options.experiment_options)
-0638         <span class="comment">% user-supplied experiment options override any found in SimulateModel options</span>
-0639         keyvals=<a href="RemoveKeyval.html" class="code" title="function keyvals_out = RemoveKeyval(keyvals,keys)">RemoveKeyval</a>(keyvals,options.experiment_options(1:2:end));
+0638         <span class="comment">% user-supplied experiment options override any found in ds.simulateModel options</span>
+0639         keyvals=<a href="ds.removeKeyval.html" class="code" title="function keyvals_out = ds.removeKeyval(keyvals,keys)">ds.removeKeyval</a>(keyvals,options.experiment_options(1:2:end));
 0640         keyvals=cat(2,keyvals,options.experiment_options);
 0641       <span class="keyword">end</span>
 0642       
@@ -883,7 +883,7 @@ This function is called by:
 0655             ~exist([options.solve_file <span class="string">'.mexa64'</span>],<span class="string">'file'</span>) &amp;&amp;<span class="keyword">...</span>
 0656             ~exist([options.solve_file <span class="string">'.mexa32'</span>],<span class="string">'file'</span>) &amp;&amp;<span class="keyword">...</span>
 0657             ~exist([options.solve_file <span class="string">'.mexmaci64'</span>],<span class="string">'file'</span>))
-0658           options.solve_file = <a href="GetSolveFile.html" class="code" title="function solve_file = GetSolveFile(model,studyinfo,varargin)">GetSolveFile</a>(model,studyinfo,options); <span class="comment">% store name of solver file in options struct</span>
+0658           options.solve_file = <a href="ds.getSolveFile.html" class="code" title="function solve_file = ds.getSolveFile(model,studyinfo,varargin)">ds.getSolveFile</a>(model,studyinfo,options); <span class="comment">% store name of solver file in options struct</span>
 0659         <span class="keyword">end</span>
 0660         
 0661         <span class="comment">% TODO: consider providing better support for studies that produce different m-files per sim (e.g., varying mechanism_list)</span>
@@ -910,12 +910,12 @@ This function is called by:
 0682       
 0683       <span class="comment">% save parameters there</span>
 0684       warning(<span class="string">'off'</span>,<span class="string">'catstruct:DuplicatesFound'</span>);
-0685       p = catstruct(<a href="CheckSolverOptions.html" class="code" title="function options=CheckSolverOptions(options)">CheckSolverOptions</a>(options),model.parameters);
+0685       p = catstruct(<a href="ds.checkSolverOptions.html" class="code" title="function options=ds.checkSolverOptions(options)">ds.checkSolverOptions</a>(options),model.parameters);
 0686       
 0687       <span class="keyword">if</span> matlabSolverBool
 0688         <span class="comment">% add IC to p for use in matlab solver</span>
 0689         <span class="keyword">if</span> isempty(options.ic)
-0690           [~, p.ic]=<a href="dynasim2odefun.html" class="code" title="function [ODEFUN,IC,elem_names]=dynasim2odefun(model, varargin)">dynasim2odefun</a>(<a href="PropagateParameters.html" class="code" title="function model=PropagateParameters(model,varargin)">PropagateParameters</a>(<a href="PropagateFunctions.html" class="code" title="function model=PropagateFunctions(model)">PropagateFunctions</a>(model)), <span class="string">'odefun_output'</span>,<span class="string">'func_body'</span>);
+0690           [~, p.ic]=<a href="ds.dynasim2odefun.html" class="code" title="function [ODEFUN,IC,elem_names]=ds.dynasim2odefun(model, varargin)">ds.dynasim2odefun</a>(<a href="ds.propagateParameters.html" class="code" title="function model=ds.propagateParameters(model,varargin)">ds.propagateParameters</a>(<a href="ds.propagateFunctions.html" class="code" title="function model=ds.propagateFunctions(model)">ds.propagateFunctions</a>(model)), <span class="string">'odefun_output'</span>,<span class="string">'func_body'</span>);
 0691         <span class="keyword">else</span>
 0692           p.ic = options.ic;
 0693         <span class="keyword">end</span>
@@ -942,7 +942,7 @@ This function is called by:
 0714         duration=toc(sim_start_time);
 0715         
 0716         <span class="keyword">if</span> nargout&gt;0 || options.save_data_flag
-0717           tmpdata=<a href="ImportData.html" class="code" title="function [data,studyinfo] = ImportData(file,varargin)">ImportData</a>(csv_data_file,<span class="string">'process_id'</span>,sim_id); <span class="comment">% eg, data.csv</span>
+0717           tmpdata=<a href="ds.importData.html" class="code" title="function [data,studyinfo] = ds.importData(file,varargin)">ds.importData</a>(csv_data_file,<span class="string">'process_id'</span>,sim_id); <span class="comment">% eg, data.csv</span>
 0718         <span class="keyword">end</span>
 0719       <span class="keyword">else</span>                  <span class="comment">% ### data stored in memory during simulation ###</span>
 0720         <span class="comment">% create list of output variables to capture</span>
@@ -1013,8 +1013,8 @@ This function is called by:
 0785     tmpdata = <a href="#_sub2" class="code" title="subfunction tmpdata = prepare_varied_metadata(tmpdata)">prepare_varied_metadata</a>(tmpdata);
 0786     <span class="comment">% save single data set and update studyinfo</span>
 0787     <span class="keyword">if</span> options.save_data_flag
-0788       <a href="ExportData.html" class="code" title="function ExportData(data,varargin)">ExportData</a>(tmpdata,<span class="string">'filename'</span>,data_file,<span class="string">'format'</span>,<span class="string">'mat'</span>,<span class="string">'verbose_flag'</span>,options.verbose_flag);
-0789       <span class="comment">%studyinfo=UpdateStudy(studyinfo.study_dir,'process_id',sim_id,'status','finished','duration',duration,'solve_file',options.solve_file,'email',options.email,'verbose_flag',options.verbose_flag,'model',model,'simulator_options',options);</span>
+0788       <a href="ds.exportData.html" class="code" title="function ds.exportData(data,varargin)">ds.exportData</a>(tmpdata,<span class="string">'filename'</span>,data_file,<span class="string">'format'</span>,<span class="string">'mat'</span>,<span class="string">'verbose_flag'</span>,options.verbose_flag);
+0789       <span class="comment">%studyinfo=ds.updateStudy(studyinfo.study_dir,'process_id',sim_id,'status','finished','duration',duration,'solve_file',options.solve_file,'email',options.email,'verbose_flag',options.verbose_flag,'model',model,'simulator_options',options);</span>
 0790     <span class="keyword">end</span>
 0791     <span class="comment">% do post-simulation analysis and plotting</span>
 0792     <span class="keyword">if</span> ~isempty(options.analysis_functions) || ~isempty(options.plot_functions)
@@ -1022,7 +1022,7 @@ This function is called by:
 0794         <span class="comment">% do analysis and plotting while saving results</span>
 0795         siminfo=studyinfo.simulations(sim_ind);
 0796         <span class="keyword">for</span> f=1:length(siminfo.result_functions)
-0797           result=<a href="AnalyzeData.html" class="code" title="function result=AnalyzeData(data,func,varargin)">AnalyzeData</a>(tmpdata,siminfo.result_functions{f},<span class="string">'result_file'</span>,siminfo.result_files{f},<span class="string">'save_data_flag'</span>,1,<span class="string">'save_results_flag'</span>,1,siminfo.result_options{f}{:});
+0797           result=<a href="ds.analyzeData.html" class="code" title="function result=ds.analyzeData(data,func,varargin)">ds.analyzeData</a>(tmpdata,siminfo.result_functions{f},<span class="string">'result_file'</span>,siminfo.result_files{f},<span class="string">'save_data_flag'</span>,1,<span class="string">'save_results_flag'</span>,1,siminfo.result_options{f}{:});
 0798           
 0799           <span class="comment">% since the plots are saved, close all generated figures</span>
 0800           <span class="keyword">if</span> all(ishandle(result))
@@ -1033,13 +1033,13 @@ This function is called by:
 0805         <span class="comment">% do analysis and plotting without saving results</span>
 0806         <span class="keyword">if</span> ~isempty(options.analysis_functions)
 0807           <span class="keyword">for</span> f=1:length(options.analysis_functions)
-0808             tmpdata=<a href="AnalyzeData.html" class="code" title="function result=AnalyzeData(data,func,varargin)">AnalyzeData</a>(tmpdata,options.analysis_functions{f},<span class="string">'result_file'</span>,[],<span class="string">'save_data_flag'</span>,0,<span class="string">'save_results_flag'</span>,options.save_results_flag,options.analysis_options{f}{:});
+0808             tmpdata=<a href="ds.analyzeData.html" class="code" title="function result=ds.analyzeData(data,func,varargin)">ds.analyzeData</a>(tmpdata,options.analysis_functions{f},<span class="string">'result_file'</span>,[],<span class="string">'save_data_flag'</span>,0,<span class="string">'save_results_flag'</span>,options.save_results_flag,options.analysis_options{f}{:});
 0809           <span class="keyword">end</span>
 0810         <span class="keyword">end</span>
 0811         
 0812         <span class="keyword">if</span> ~isempty(options.plot_functions)
 0813           <span class="keyword">for</span> f=1:length(options.plot_functions)
-0814             <a href="AnalyzeData.html" class="code" title="function result=AnalyzeData(data,func,varargin)">AnalyzeData</a>(tmpdata,options.plot_functions{f},<span class="string">'result_file'</span>,[],<span class="string">'save_data_flag'</span>,0,<span class="string">'save_results_flag'</span>,options.save_results_flag,options.plot_options{f}{:});
+0814             <a href="ds.analyzeData.html" class="code" title="function result=ds.analyzeData(data,func,varargin)">ds.analyzeData</a>(tmpdata,options.plot_functions{f},<span class="string">'result_file'</span>,[],<span class="string">'save_data_flag'</span>,0,<span class="string">'save_results_flag'</span>,options.save_results_flag,options.plot_options{f}{:});
 0815           <span class="keyword">end</span>
 0816         <span class="keyword">end</span>
 0817       <span class="keyword">end</span>
@@ -1060,11 +1060,11 @@ This function is called by:
 0832     delete([options.solve_file <span class="string">'*'</span>]);
 0833   <span class="keyword">end</span>
 0834   
-0835   <a href="DisplayError.html" class="code" title="function DisplayError(err)">DisplayError</a>(err);
+0835   <a href="displayError.html" class="code" title="function displayError(err)">displayError</a>(err);
 0836   
 0837   <span class="comment">% update studyinfo</span>
 0838   <span class="keyword">if</span> options.save_data_flag &amp;&amp; ~options.one_solve_file_flag
-0839     studyinfo=<a href="UpdateStudy.html" class="code" title="function studyinfo=UpdateStudy(study_dir,varargin)">UpdateStudy</a>(studyinfo.study_dir,<span class="string">'process_id'</span>,sim_id,<span class="string">'status'</span>,<span class="string">'failed'</span>,<span class="string">'verbose_flag'</span>,options.verbose_flag);
+0839     studyinfo=<a href="ds.updateStudy.html" class="code" title="function studyinfo=ds.updateStudy(study_dir,varargin)">ds.updateStudy</a>(studyinfo.study_dir,<span class="string">'process_id'</span>,sim_id,<span class="string">'status'</span>,<span class="string">'failed'</span>,<span class="string">'verbose_flag'</span>,options.verbose_flag);
 0840     data=studyinfo;
 0841   <span class="keyword">end</span>
 0842   <a href="#_sub3" class="code" title="subfunction cleanup(status)">cleanup</a>(<span class="string">'error'</span>);
@@ -1176,7 +1176,7 @@ This function is called by:
 0948     <span class="comment">% first, figure out how many IC values we need (i.e., how many state</span>
 0949     <span class="comment">% variables we need across all cells).</span>
 0950     var_names=model.state_variables;
-0951     [nvals_per_var,monitor_counts]=<a href="GetOutputCounts.html" class="code" title="function [state_var_counts,monitor_counts]=GetOutputCounts(model)">GetOutputCounts</a>(model);
+0951     [nvals_per_var,monitor_counts]=<a href="ds.getOutputCounts.html" class="code" title="function [state_var_counts,monitor_counts]=ds.getOutputCounts(model)">ds.getOutputCounts</a>(model);
 0952     num_state_variables=sum(nvals_per_var);
 0953     <span class="comment">% check that the correct number of IC values was provided</span>
 0954     <span class="keyword">if</span> length(options.ic)~=num_state_variables

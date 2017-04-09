@@ -2,8 +2,8 @@
                 "http://www.w3.org/TR/REC-html40/loose.dtd">
 <html>
 <head>
-  <title>Description of Vary2Modifications</title>
-  <meta name="keywords" content="Vary2Modifications">
+  <title>Description of ds.vary2Modifications</title>
+  <meta name="keywords" content="ds.vary2Modifications">
   <meta name="description" content="VARY2MODIFICATIONS - convert specification of things to vary into a set of modifications indicating how to vary the desired things.">
   <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
   <meta name="generator" content="m2html &copy; 2005 Guillaume Flandin">
@@ -16,24 +16,24 @@
 <body>
 <a name="_top"></a>
 <!-- menu.html functions -->
-<h1>Vary2Modifications
+<h1>ds.vary2Modifications
 </h1>
 
 <h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
 <div class="box"><strong>VARY2MODIFICATIONS - convert specification of things to vary into a set of modifications indicating how to vary the desired things.</strong></div>
 
 <h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
-<div class="box"><strong>function modifications_set = Vary2Modifications(vary,model) </strong></div>
+<div class="box"><strong>function modifications_set = ds.vary2Modifications(vary,model) </strong></div>
 
 <h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
 <div class="fragment"><pre class="comment">VARY2MODIFICATIONS - convert specification of things to vary into a set of modifications indicating how to vary the desired things.
 
  The returned set of modifications has one element per point in search space;
  each element can be passed along with DynaSim model or specification to
- ApplyModifications to produce the modified object.
+ ds.applyModifications to produce the modified object.
 
  Usage:
-   modifications_set=Vary2Modifications(vary)
+   modifications_set=ds.vary2Modifications(vary)
 
  Inputs:
    - vary: {object, variable, values; ...}
@@ -44,13 +44,13 @@
 
  Examples:
    vary={'pop1','gNa',[100 120]};
-   mod_set=Vary2Modifications(vary); % {{'pop1','gNa',100},{'pop1','gNa',120}}
+   mod_set=ds.vary2Modifications(vary); % {{'pop1','gNa',100},{'pop1','gNa',120}}
    for i=1:length(mod_set)
-     data(i)=SimulateModel('dv/dt=@current+10; {iNa,iK}','modifications',mod_set{i});
+     data(i)=ds.simulateModel('dv/dt=@current+10; {iNa,iK}','modifications',mod_set{i});
      figure; plot(data(i).time,data(i).(data(i).labels{1}))
    end
-   % note: the same data set can be obtained directly from SimulateModel by:
-   data=SimulateModel('dv/dt=@current+10; {iNa,iK}','vary',vary);
+   % note: the same data set can be obtained directly from ds.simulateModel by:
+   data=ds.simulateModel('dv/dt=@current+10; {iNa,iK}','vary',vary);
 
    vary={'E','gNa',[100 120]};
    vary={'E','gNa',[100 120];'E-&gt;I','gSYN',[0 1]};
@@ -109,28 +109,28 @@
 
  More Examples:
    vary={'[E,I]','mechanism_list','{iNa,iK}'};
-   modifications_set = Vary2Modifications(vary); 
+   modifications_set = ds.vary2Modifications(vary); 
    modifications_set{:}
    vary={'{E,I}','mechanism_list','{iNa,iK}'};
-   modifications_set = Vary2Modifications(vary); 
+   modifications_set = ds.vary2Modifications(vary); 
    modifications_set{:}
    vary={'{E,I}','mechanism_list','+[iNa,iK]'; 'E','gNa',[100 120]};
-   modifications_set = Vary2Modifications(vary); 
+   modifications_set = ds.vary2Modifications(vary); 
    modifications_set{:}
    vary={'[E,I]','gNa',linspace(100,130,3); 'E-&gt;I','gSYN',[0 1]};
-   modifications_set = Vary2Modifications(vary); 
+   modifications_set = ds.vary2Modifications(vary); 
    modifications_set{:}
    vary={'(E,I)','(gNa,gK)',rand(2,5); 'E-&gt;I','gSYN',[0 1]};
-   modifications_set = Vary2Modifications(vary); 
+   modifications_set = ds.vary2Modifications(vary); 
    modifications_set{:}
    vary={'(E,I)','(gNa,gK)',rand(1,5,2); 'E-&gt;I','gSYN',[0 1]};
-   modifications_set = Vary2Modifications(vary); 
+   modifications_set = ds.vary2Modifications(vary); 
    modifications_set{:}
    vary={'(E,I)','(gNa,gK)',rand(2,5,2); 'E-&gt;I','gSYN',[0 1]};
-   modifications_set = Vary2Modifications(vary); 
+   modifications_set = ds.vary2Modifications(vary); 
    modifications_set{:}
 
- See also: <a href="ApplyModifications.html" class="code" title="function [output,modifications]=ApplyModifications(model,modifications)">ApplyModifications</a>, <a href="SimulateModel.html" class="code" title="function [data,studyinfo]=SimulateModel(model,varargin)">SimulateModel</a>, <a href="GenerateModel.html" class="code" title="function [model,name_map]=GenerateModel(specification,varargin)">GenerateModel</a></pre></div>
+ See also: <a href="ds.applyModifications.html" class="code" title="function [output,modifications]=ds.applyModifications(model,modifications)">ds.applyModifications</a>, <a href="ds.simulateModel.html" class="code" title="function [data,studyinfo]=ds.simulateModel(model,varargin)">ds.simulateModel</a>, <a href="ds.generateModel.html" class="code" title="function [model,name_map]=ds.generateModel(specification,varargin)">ds.generateModel</a></pre></div>
 
 <!-- crossreference -->
 <h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
@@ -139,7 +139,7 @@ This function calls:
 </ul>
 This function is called by:
 <ul style="list-style-image:url(../matlabicon.gif)">
-<li><a href="SimulateModel.html" class="code" title="function [data,studyinfo]=SimulateModel(model,varargin)">SimulateModel</a>	% data=SimulateModel(model,'option',value,...)</li><li><a href="WriteDynaSimSolver.html" class="code" title="function [outfile,options]=WriteDynaSimSolver(model,varargin)">WriteDynaSimSolver</a>	WRITEDYNASIMSOLVER - write m-file that numerically inteegrates the model</li><li><a href="WriteMatlabSolver.html" class="code" title="function solve_ode_filepath = WriteMatlabSolver(model,varargin)">WriteMatlabSolver</a>	WRITEMATLABSOLVER - write m-file that numerically inteegrates the model</li></ul>
+<li><a href="ds.simulateModel.html" class="code" title="function [data,studyinfo]=ds.simulateModel(model,varargin)">ds.simulateModel</a>	% data=ds.simulateModel(model,'option',value,...)</li><li><a href="ds.writeDynaSimSolver.html" class="code" title="function [outfile,options]=ds.writeDynaSimSolver(model,varargin)">ds.writeDynaSimSolver</a>	WRITEDYNASIMSOLVER - write m-file that numerically inteegrates the model</li><li><a href="ds.writeMatlabSolver.html" class="code" title="function solve_ode_filepath = ds.writeMatlabSolver(model,varargin)">ds.writeMatlabSolver</a>	WRITEMATLABSOLVER - write m-file that numerically inteegrates the model</li></ul>
 <!-- crossreference -->
 
 <h2><a name="_subfunctions"></a>SUBFUNCTIONS <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
@@ -147,15 +147,15 @@ This function is called by:
 <li><a href="#_sub1" class="code">function list = expand_vary(specification)</a></li><li><a href="#_sub2" class="code">function list = expand_elem(item)</a></li><li><a href="#_sub3" class="code">function list = getcombos(elems)</a></li></ul>
 
 <h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
-<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function modifications_set = Vary2Modifications(vary,model)</a>
+<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function modifications_set = ds.vary2Modifications(vary,model)</a>
 0002 <span class="comment">%VARY2MODIFICATIONS - convert specification of things to vary into a set of modifications indicating how to vary the desired things.</span>
 0003 <span class="comment">%</span>
 0004 <span class="comment">% The returned set of modifications has one element per point in search space;</span>
 0005 <span class="comment">% each element can be passed along with DynaSim model or specification to</span>
-0006 <span class="comment">% ApplyModifications to produce the modified object.</span>
+0006 <span class="comment">% ds.applyModifications to produce the modified object.</span>
 0007 <span class="comment">%</span>
 0008 <span class="comment">% Usage:</span>
-0009 <span class="comment">%   modifications_set=Vary2Modifications(vary)</span>
+0009 <span class="comment">%   modifications_set=ds.vary2Modifications(vary)</span>
 0010 <span class="comment">%</span>
 0011 <span class="comment">% Inputs:</span>
 0012 <span class="comment">%   - vary: {object, variable, values; ...}</span>
@@ -166,13 +166,13 @@ This function is called by:
 0017 <span class="comment">%</span>
 0018 <span class="comment">% Examples:</span>
 0019 <span class="comment">%   vary={'pop1','gNa',[100 120]};</span>
-0020 <span class="comment">%   mod_set=Vary2Modifications(vary); % {{'pop1','gNa',100},{'pop1','gNa',120}}</span>
+0020 <span class="comment">%   mod_set=ds.vary2Modifications(vary); % {{'pop1','gNa',100},{'pop1','gNa',120}}</span>
 0021 <span class="comment">%   for i=1:length(mod_set)</span>
-0022 <span class="comment">%     data(i)=SimulateModel('dv/dt=@current+10; {iNa,iK}','modifications',mod_set{i});</span>
+0022 <span class="comment">%     data(i)=ds.simulateModel('dv/dt=@current+10; {iNa,iK}','modifications',mod_set{i});</span>
 0023 <span class="comment">%     figure; plot(data(i).time,data(i).(data(i).labels{1}))</span>
 0024 <span class="comment">%   end</span>
-0025 <span class="comment">%   % note: the same data set can be obtained directly from SimulateModel by:</span>
-0026 <span class="comment">%   data=SimulateModel('dv/dt=@current+10; {iNa,iK}','vary',vary);</span>
+0025 <span class="comment">%   % note: the same data set can be obtained directly from ds.simulateModel by:</span>
+0026 <span class="comment">%   data=ds.simulateModel('dv/dt=@current+10; {iNa,iK}','vary',vary);</span>
 0027 <span class="comment">%</span>
 0028 <span class="comment">%   vary={'E','gNa',[100 120]};</span>
 0029 <span class="comment">%   vary={'E','gNa',[100 120];'E-&gt;I','gSYN',[0 1]};</span>
@@ -231,28 +231,28 @@ This function is called by:
 0082 <span class="comment">%</span>
 0083 <span class="comment">% More Examples:</span>
 0084 <span class="comment">%   vary={'[E,I]','mechanism_list','{iNa,iK}'};</span>
-0085 <span class="comment">%   modifications_set = Vary2Modifications(vary);</span>
+0085 <span class="comment">%   modifications_set = ds.vary2Modifications(vary);</span>
 0086 <span class="comment">%   modifications_set{:}</span>
 0087 <span class="comment">%   vary={'{E,I}','mechanism_list','{iNa,iK}'};</span>
-0088 <span class="comment">%   modifications_set = Vary2Modifications(vary);</span>
+0088 <span class="comment">%   modifications_set = ds.vary2Modifications(vary);</span>
 0089 <span class="comment">%   modifications_set{:}</span>
 0090 <span class="comment">%   vary={'{E,I}','mechanism_list','+[iNa,iK]'; 'E','gNa',[100 120]};</span>
-0091 <span class="comment">%   modifications_set = Vary2Modifications(vary);</span>
+0091 <span class="comment">%   modifications_set = ds.vary2Modifications(vary);</span>
 0092 <span class="comment">%   modifications_set{:}</span>
 0093 <span class="comment">%   vary={'[E,I]','gNa',linspace(100,130,3); 'E-&gt;I','gSYN',[0 1]};</span>
-0094 <span class="comment">%   modifications_set = Vary2Modifications(vary);</span>
+0094 <span class="comment">%   modifications_set = ds.vary2Modifications(vary);</span>
 0095 <span class="comment">%   modifications_set{:}</span>
 0096 <span class="comment">%   vary={'(E,I)','(gNa,gK)',rand(2,5); 'E-&gt;I','gSYN',[0 1]};</span>
-0097 <span class="comment">%   modifications_set = Vary2Modifications(vary);</span>
+0097 <span class="comment">%   modifications_set = ds.vary2Modifications(vary);</span>
 0098 <span class="comment">%   modifications_set{:}</span>
 0099 <span class="comment">%   vary={'(E,I)','(gNa,gK)',rand(1,5,2); 'E-&gt;I','gSYN',[0 1]};</span>
-0100 <span class="comment">%   modifications_set = Vary2Modifications(vary);</span>
+0100 <span class="comment">%   modifications_set = ds.vary2Modifications(vary);</span>
 0101 <span class="comment">%   modifications_set{:}</span>
 0102 <span class="comment">%   vary={'(E,I)','(gNa,gK)',rand(2,5,2); 'E-&gt;I','gSYN',[0 1]};</span>
-0103 <span class="comment">%   modifications_set = Vary2Modifications(vary);</span>
+0103 <span class="comment">%   modifications_set = ds.vary2Modifications(vary);</span>
 0104 <span class="comment">%   modifications_set{:}</span>
 0105 <span class="comment">%</span>
-0106 <span class="comment">% See also: ApplyModifications, SimulateModel, GenerateModel</span>
+0106 <span class="comment">% See also: ds.applyModifications, ds.simulateModel, ds.generateModel</span>
 0107 
 0108 <span class="comment">% check inputs</span>
 0109 <span class="keyword">if</span> iscell(vary) &amp;&amp; iscell(vary{1})

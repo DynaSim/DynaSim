@@ -14,7 +14,7 @@ else
 end
 
 % Set where to save outputs
-output_directory = getDsVar('demos_path');
+output_directory = ds.getConfig('demos_path');
 
 % move to root directory where outputs will be saved
 mkdirSilent(output_directory);
@@ -62,9 +62,9 @@ vary={
   'E'   ,'Iapp',[1:5];      % amplitude of tonic input to E-cells
   'I->E','tauD',[10]       % inhibition decay time constant from I to E
   };
-SimulateModel(s,'save_data_flag',1,'study_dir',study_dir,...
+ds.simulateModel(s,'save_data_flag',1,'study_dir',study_dir,...
                 'vary',vary,'verbose_flag',1, 'downsample_factor', 10, ...
-                'save_results_flag',1,'parallel_flag',1,'plot_functions',{@PlotData,@PlotData,@PlotFR2},'plot_options',{{'format','png','visible','off','figwidth',0.5,'figheight',0.5}, ...
+                'save_results_flag',1,'parallel_flag',1,'plot_functions',{@ds.plotData,@ds.plotData,@ds.plotFR2},'plot_options',{{'format','png','visible','off','figwidth',0.5,'figheight',0.5}, ...
                 {'format','png','visible','off','plot_type','rastergram','figwidth',0.5,'figheight',0.5},...
                 {'format','png','visible','off'}} );
             
@@ -72,17 +72,17 @@ SimulateModel(s,'save_data_flag',1,'study_dir',study_dir,...
 %% Load the data
 
 % Load data in traditional DynaSim format
-data=ImportData(study_dir);
+data=ds.importData(study_dir);
 
 % Import plot files
-data_img = ImportPlots(study_dir);
+data_img = ds.importPlots(study_dir);
 
 
 %% Downsample number of cells if necessary
 % (For saving space)
 
 % Convert to xPlt object
-xp = DynaSim2xPlt(data);
+xp = ds.ds2xPlt(data);
 
 % Num_cells_to_keep = 20;
 downsample_factor = 2;
@@ -97,22 +97,22 @@ end
 
 xp.data = mydata;
 
-data = xPlt2DynaSim(xp);
+data = ds.xPlt.xPlt2ds(xp);
 
 %% Package up the data
 
 % Stores it in the DynaSim demos archive for adding to repo
 zipfname = zipDemoData(study_dir);
-% (can later recover this by running: unzipDemoData(study_dir);)
+% (can later recover this by running: ds.unzipDemoData(study_dir);)
 
 %% 
 
 
 % Load into DynaSim structure
-[data_table,column_titles] = DataField2Table (data_img,'plot_files');
+[data_table,column_titles] = ds.dataField2Table (data_img,'plot_files');
 
 % Preview the contents of this table
-previewTable(data_table,column_titles);
+ds.previewTable(data_table,column_titles);
 
 % The entries in the first column contain the paths to the figure files.
 % There can be multiple figures associated with each simulation, which is

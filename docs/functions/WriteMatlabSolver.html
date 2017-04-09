@@ -2,8 +2,8 @@
                 "http://www.w3.org/TR/REC-html40/loose.dtd">
 <html>
 <head>
-  <title>Description of WriteMatlabSolver</title>
-  <meta name="keywords" content="WriteMatlabSolver">
+  <title>Description of ds.writeMatlabSolver</title>
+  <meta name="keywords" content="ds.writeMatlabSolver">
   <meta name="description" content="WRITEMATLABSOLVER - write m-file that numerically inteegrates the model">
   <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
   <meta name="generator" content="m2html &copy; 2005 Guillaume Flandin">
@@ -16,23 +16,23 @@
 <body>
 <a name="_top"></a>
 <!-- menu.html functions -->
-<h1>WriteMatlabSolver
+<h1>ds.writeMatlabSolver
 </h1>
 
 <h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
 <div class="box"><strong>WRITEMATLABSOLVER - write m-file that numerically inteegrates the model</strong></div>
 
 <h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
-<div class="box"><strong>function solve_ode_filepath = WriteMatlabSolver(model,varargin) </strong></div>
+<div class="box"><strong>function solve_ode_filepath = ds.writeMatlabSolver(model,varargin) </strong></div>
 
 <h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
 <div class="fragment"><pre class="comment">WRITEMATLABSOLVER - write m-file that numerically inteegrates the model
 
  Usage:
-   filepath = WriteMatlabSolver(model,varargin)
+   filepath = ds.writeMatlabSolver(model,varargin)
 
  Inputs:
-   - model: DynaSim model structure (see GenerateModel)
+   - model: DynaSim model structure (see ds.generateModel)
    - options:
      'tspan'         : units must be consistent with dt and equations
                        {[beg,end]} (default: [0 100])
@@ -57,31 +57,31 @@
    - filepath (solve_ode.m)
    - odefun_filepath (solve_ode_odefun.m)
 
- Dependencies: CheckOptions, CheckModel
+ Dependencies: ds.checkOptions, ds.checkModel
 
- See also: <a href="SimulateModel.html" class="code" title="function [data,studyinfo]=SimulateModel(model,varargin)">SimulateModel</a>, <a href="dynasim2odefun.html" class="code" title="function [ODEFUN,IC,elem_names]=dynasim2odefun(model, varargin)">dynasim2odefun</a></pre></div>
+ See also: <a href="ds.simulateModel.html" class="code" title="function [data,studyinfo]=ds.simulateModel(model,varargin)">ds.simulateModel</a>, <a href="ds.dynasim2odefun.html" class="code" title="function [ODEFUN,IC,elem_names]=ds.dynasim2odefun(model, varargin)">ds.dynasim2odefun</a></pre></div>
 
 <!-- crossreference -->
 <h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
 This function calls:
 <ul style="list-style-image:url(../matlabicon.gif)">
-<li><a href="ApplyModifications.html" class="code" title="function [output,modifications]=ApplyModifications(model,modifications)">ApplyModifications</a>	APPLYMODIFICATIONS - Apply modifications to DynaSim specification or model structure</li><li><a href="CheckModel.html" class="code" title="function model=CheckModel(model)">CheckModel</a>	CHECKMODEL - Standardize model structure and auto-populate missing fields</li><li><a href="CheckOptions.html" class="code" title="function [parms, params_unspecified ] = CheckOptions(options, options_schema, strict)">CheckOptions</a>	CHECKOPTIONS - organize key/value pairs in structure with default or user-supplied values according to a schema</li><li><a href="CheckSolverOptions.html" class="code" title="function options=CheckSolverOptions(options)">CheckSolverOptions</a>	CHECKSOLVEROPTIONS - standardize simulation options appended to params.mat</li><li><a href="PrepareMEX.html" class="code" title="function mexfileOutput = PrepareMEX(mfileInput, varargin)">PrepareMEX</a>	PREPAREMEX - take an m-file path and compile it using the Matlab coder.</li><li><a href="PropagateFunctions.html" class="code" title="function model=PropagateFunctions(model)">PropagateFunctions</a>	PROPAGATEFUNCTIONS - eliminate internal function calls from model ODEs, ICs, monitors, and conditionals.</li><li><a href="PropagateParameters.html" class="code" title="function model=PropagateParameters(model,varargin)">PropagateParameters</a>	PROPAGATEPARAMETERS - substitute parameter values or prepend parameter names with prefix across all model equations.</li><li><a href="Vary2Modifications.html" class="code" title="function modifications_set = Vary2Modifications(vary,model)">Vary2Modifications</a>	VARY2MODIFICATIONS - convert specification of things to vary into a set of modifications indicating how to vary the desired things.</li><li><a href="dynasim2odefun.html" class="code" title="function [ODEFUN,IC,elem_names]=dynasim2odefun(model, varargin)">dynasim2odefun</a>	Purpose: prepare ODEFUN for use with built-in Matlab solvers.</li></ul>
+<li><a href="ds.applyModifications.html" class="code" title="function [output,modifications]=ds.applyModifications(model,modifications)">ds.applyModifications</a>	APPLYMODIFICATIONS - Apply modifications to DynaSim specification or model structure</li><li><a href="ds.checkModel.html" class="code" title="function model=ds.checkModel(model)">ds.checkModel</a>	CHECKMODEL - Standardize model structure and auto-populate missing fields</li><li><a href="ds.checkOptions.html" class="code" title="function [parms, params_unspecified ] = ds.checkOptions(options, options_schema, strict)">ds.checkOptions</a>	CHECKOPTIONS - organize key/value pairs in structure with default or user-supplied values according to a schema</li><li><a href="ds.checkSolverOptions.html" class="code" title="function options=ds.checkSolverOptions(options)">ds.checkSolverOptions</a>	CHECKSOLVEROPTIONS - standardize simulation options appended to params.mat</li><li><a href="ds.prepareMEX.html" class="code" title="function mexfileOutput = ds.prepareMEX(mfileInput, varargin)">ds.prepareMEX</a>	PREPAREMEX - take an m-file path and compile it using the Matlab coder.</li><li><a href="ds.propagateFunctions.html" class="code" title="function model=ds.propagateFunctions(model)">ds.propagateFunctions</a>	PROPAGATEFUNCTIONS - eliminate internal function calls from model ODEs, ICs, monitors, and conditionals.</li><li><a href="ds.propagateParameters.html" class="code" title="function model=ds.propagateParameters(model,varargin)">ds.propagateParameters</a>	PROPAGATEPARAMETERS - substitute parameter values or prepend parameter names with prefix across all model equations.</li><li><a href="ds.vary2Modifications.html" class="code" title="function modifications_set = ds.vary2Modifications(vary,model)">ds.vary2Modifications</a>	VARY2MODIFICATIONS - convert specification of things to vary into a set of modifications indicating how to vary the desired things.</li><li><a href="ds.dynasim2odefun.html" class="code" title="function [ODEFUN,IC,elem_names]=ds.dynasim2odefun(model, varargin)">ds.dynasim2odefun</a>	Purpose: prepare ODEFUN for use with built-in Matlab solvers.</li></ul>
 This function is called by:
 <ul style="list-style-image:url(../matlabicon.gif)">
-<li><a href="GetSolveFile.html" class="code" title="function solve_file = GetSolveFile(model,studyinfo,varargin)">GetSolveFile</a>	GETSOLVEFILE - helper function that creates or retrieves the desired solver file.</li></ul>
+<li><a href="ds.getSolveFile.html" class="code" title="function solve_file = ds.getSolveFile(model,studyinfo,varargin)">ds.getSolveFile</a>	GETSOLVEFILE - helper function that creates or retrieves the desired solver file.</li></ul>
 <!-- crossreference -->
 
 
 
 <h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
-<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function solve_ode_filepath = WriteMatlabSolver(model,varargin)</a>
+<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function solve_ode_filepath = ds.writeMatlabSolver(model,varargin)</a>
 0002 <span class="comment">%WRITEMATLABSOLVER - write m-file that numerically inteegrates the model</span>
 0003 <span class="comment">%</span>
 0004 <span class="comment">% Usage:</span>
-0005 <span class="comment">%   filepath = WriteMatlabSolver(model,varargin)</span>
+0005 <span class="comment">%   filepath = ds.writeMatlabSolver(model,varargin)</span>
 0006 <span class="comment">%</span>
 0007 <span class="comment">% Inputs:</span>
-0008 <span class="comment">%   - model: DynaSim model structure (see GenerateModel)</span>
+0008 <span class="comment">%   - model: DynaSim model structure (see ds.generateModel)</span>
 0009 <span class="comment">%   - options:</span>
 0010 <span class="comment">%     'tspan'         : units must be consistent with dt and equations</span>
 0011 <span class="comment">%                       {[beg,end]} (default: [0 100])</span>
@@ -106,12 +106,12 @@ This function is called by:
 0030 <span class="comment">%   - filepath (solve_ode.m)</span>
 0031 <span class="comment">%   - odefun_filepath (solve_ode_odefun.m)</span>
 0032 <span class="comment">%</span>
-0033 <span class="comment">% Dependencies: CheckOptions, CheckModel</span>
+0033 <span class="comment">% Dependencies: ds.checkOptions, ds.checkModel</span>
 0034 <span class="comment">%</span>
-0035 <span class="comment">% See also: SimulateModel, dynasim2odefun</span>
+0035 <span class="comment">% See also: ds.simulateModel, ds.dynasim2odefun</span>
 0036 
 0037 <span class="comment">% Check inputs</span>
-0038 options=<a href="CheckOptions.html" class="code" title="function [parms, params_unspecified ] = CheckOptions(options, options_schema, strict)">CheckOptions</a>(varargin,{<span class="keyword">...</span>
+0038 options=<a href="ds.checkOptions.html" class="code" title="function [parms, params_unspecified ] = ds.checkOptions(options, options_schema, strict)">ds.checkOptions</a>(varargin,{<span class="keyword">...</span>
 0039   <span class="string">'ic'</span>,[],[],<span class="keyword">...</span><span class="comment">                  % initial conditions (overrides definition in model structure)</span>
 0040   <span class="string">'tspan'</span>,[0 100],[],<span class="keyword">...</span><span class="comment">          % [beg,end] (units must be consistent with dt and equations)</span>
 0041   <span class="string">'dt'</span>,.01,[],<span class="keyword">...</span><span class="comment">                 % time step used for fixed step DynaSim solvers</span>
@@ -130,7 +130,7 @@ This function is called by:
 0054   },false);
 0055 
 0056 <span class="comment">% Check inputs</span>
-0057 model=<a href="CheckModel.html" class="code" title="function model=CheckModel(model)">CheckModel</a>(model); 
+0057 model=<a href="ds.checkModel.html" class="code" title="function model=ds.checkModel(model)">ds.checkModel</a>(model); 
 0058 
 0059 <span class="comment">% convert matlab solver options from key/value to struct using odeset if necessary</span>
 0060 <span class="keyword">if</span> iscell(options.matlab_solver_options) &amp;&amp; ~isempty(options.matlab_solver_options)
@@ -142,9 +142,9 @@ This function is called by:
 0066 <span class="comment">% create function that calls feval(@solver,...) and has subfunction</span>
 0067 <span class="comment">% defining odefun (including optional conditionals)...</span>
 0068 
-0069 propagatedModel = <a href="PropagateParameters.html" class="code" title="function model=PropagateParameters(model,varargin)">PropagateParameters</a>(<a href="PropagateFunctions.html" class="code" title="function model=PropagateFunctions(model)">PropagateFunctions</a>(model));
-0070 propagatedModel = <a href="PropagateParameters.html" class="code" title="function model=PropagateParameters(model,varargin)">PropagateParameters</a>(propagatedModel, <span class="string">'param_type'</span>, <span class="string">'fixed_variables'</span>);
-0071 [odefun,IC,elem_names] = <a href="dynasim2odefun.html" class="code" title="function [ODEFUN,IC,elem_names]=dynasim2odefun(model, varargin)">dynasim2odefun</a>(propagatedModel, <span class="string">'odefun_output'</span>,<span class="string">'func_body'</span>);
+0069 propagatedModel = <a href="ds.propagateParameters.html" class="code" title="function model=ds.propagateParameters(model,varargin)">ds.propagateParameters</a>(<a href="ds.propagateFunctions.html" class="code" title="function model=ds.propagateFunctions(model)">ds.propagateFunctions</a>(model));
+0070 propagatedModel = <a href="ds.propagateParameters.html" class="code" title="function model=ds.propagateParameters(model,varargin)">ds.propagateParameters</a>(propagatedModel, <span class="string">'param_type'</span>, <span class="string">'fixed_variables'</span>);
+0071 [odefun,IC,elem_names] = <a href="ds.dynasim2odefun.html" class="code" title="function [ODEFUN,IC,elem_names]=ds.dynasim2odefun(model, varargin)">ds.dynasim2odefun</a>(propagatedModel, <span class="string">'odefun_output'</span>,<span class="string">'func_body'</span>);
 0072 
 0073 
 0074 <span class="comment">%% 2.0 prepare model info</span>
@@ -153,13 +153,13 @@ This function is called by:
 0077 
 0078 <span class="comment">% 1.1 eliminate internal (anonymous) function calls from model equations</span>
 0079 <span class="comment">% if options.reduce_function_calls_flag==1</span>
-0080   model=<a href="PropagateFunctions.html" class="code" title="function model=PropagateFunctions(model)">PropagateFunctions</a>(model);
+0080   model=<a href="ds.propagateFunctions.html" class="code" title="function model=ds.propagateFunctions(model)">ds.propagateFunctions</a>(model);
 0081 <span class="comment">% end</span>
 0082 
 0083 <span class="comment">% 1.1 prepare parameters</span>
 0084 <span class="keyword">if</span> options.save_parameters_flag
 0085   <span class="comment">% add parameter struct prefix to parameters in model equations</span>
-0086   model=<a href="PropagateParameters.html" class="code" title="function model=PropagateParameters(model,varargin)">PropagateParameters</a>(model,<span class="string">'action'</span>,<span class="string">'prepend'</span>,<span class="string">'prefix'</span>,parameter_prefix);
+0086   model=<a href="ds.propagateParameters.html" class="code" title="function model=ds.propagateParameters(model,varargin)">ds.propagateParameters</a>(model,<span class="string">'action'</span>,<span class="string">'prepend'</span>,<span class="string">'prefix'</span>,parameter_prefix);
 0087   
 0088   <span class="comment">% set and capture numeric seed value</span>
 0089   <span class="keyword">if</span> options.compile_flag==1
@@ -179,7 +179,7 @@ This function is called by:
 0103   warning(<span class="string">'off'</span>,<span class="string">'catstruct:DuplicatesFound'</span>);
 0104   
 0105   <span class="comment">% make p struct</span>
-0106   p=catstruct(<a href="CheckSolverOptions.html" class="code" title="function options=CheckSolverOptions(options)">CheckSolverOptions</a>(options),model.parameters);
+0106   p=catstruct(<a href="ds.checkSolverOptions.html" class="code" title="function options=ds.checkSolverOptions(options)">ds.checkSolverOptions</a>(options),model.parameters);
 0107   
 0108   <span class="comment">% add IC to p</span>
 0109   <span class="comment">%   NOTE: will get done again in simulateModel</span>
@@ -197,10 +197,10 @@ This function is called by:
 0121   <span class="keyword">if</span> options.one_solve_file_flag
 0122     <span class="comment">% fill p flds that were varied with vectors of length = nSims</span>
 0123     
-0124     vary=<a href="CheckOptions.html" class="code" title="function [parms, params_unspecified ] = CheckOptions(options, options_schema, strict)">CheckOptions</a>(varargin,{<span class="string">'vary'</span>,[],[],},false);
+0124     vary=<a href="ds.checkOptions.html" class="code" title="function [parms, params_unspecified ] = ds.checkOptions(options, options_schema, strict)">ds.checkOptions</a>(varargin,{<span class="string">'vary'</span>,[],[],},false);
 0125     vary = vary.vary;
 0126 
-0127     mod_set = <a href="Vary2Modifications.html" class="code" title="function modifications_set = Vary2Modifications(vary,model)">Vary2Modifications</a>(vary);
+0127     mod_set = <a href="ds.vary2Modifications.html" class="code" title="function modifications_set = ds.vary2Modifications(vary,model)">ds.vary2Modifications</a>(vary);
 0128     <span class="comment">% The first 2 cols of modifications_set are idenitical to vary, it just</span>
 0129     <span class="comment">% has the last column distributed out to the number of sims</span>
 0130     
@@ -208,7 +208,7 @@ This function is called by:
 0132     <span class="comment">% Get param names</span>
 0133     iMod = 1;
 0134     <span class="comment">% Split extra entries in first 2 cols of mods, so each row is a single pop and param</span>
-0135     [~, first_mod_set] = <a href="ApplyModifications.html" class="code" title="function [output,modifications]=ApplyModifications(model,modifications)">ApplyModifications</a>([],mod_set{iMod});
+0135     [~, first_mod_set] = <a href="ds.applyModifications.html" class="code" title="function [output,modifications]=ds.applyModifications(model,modifications)">ds.applyModifications</a>([],mod_set{iMod});
 0136 
 0137     <span class="comment">% replace '-&gt;' with '_'</span>
 0138     first_mod_set(:,1) = strrep(first_mod_set(:,1), <span class="string">'-&gt;'</span>, <span class="string">'_'</span>);
@@ -239,7 +239,7 @@ This function is called by:
 0163     param_values = nan(nParamMods, length(mod_set));
 0164     <span class="keyword">for</span> iMod = 1:length(mod_set)
 0165       <span class="comment">% Split extra entries in first 2 cols of mods, so each row is a single pop and param</span>
-0166       [~, mod_set{iMod}] = <a href="ApplyModifications.html" class="code" title="function [output,modifications]=ApplyModifications(model,modifications)">ApplyModifications</a>([],mod_set{iMod});
+0166       [~, mod_set{iMod}] = <a href="ds.applyModifications.html" class="code" title="function [output,modifications]=ds.applyModifications(model,modifications)">ds.applyModifications</a>([],mod_set{iMod});
 0167       
 0168       <span class="comment">% Get scalar values as vector</span>
 0169       param_values(:, iMod) = [mod_set{iMod}{:,3}];
@@ -258,7 +258,7 @@ This function is called by:
 0182   save(param_file_name,<span class="string">'p'</span>);
 0183 <span class="keyword">else</span>
 0184   <span class="comment">% insert parameter values into model expressions</span>
-0185   model=<a href="PropagateParameters.html" class="code" title="function model=PropagateParameters(model,varargin)">PropagateParameters</a>(model,<span class="string">'action'</span>,<span class="string">'substitute'</span>);
+0185   model=<a href="ds.propagateParameters.html" class="code" title="function model=ds.propagateParameters(model,varargin)">ds.propagateParameters</a>(model,<span class="string">'action'</span>,<span class="string">'substitute'</span>);
 0186 <span class="keyword">end</span>
 0187 
 0188 <span class="comment">% 1.2 prepare list of outputs (state variables and monitors)</span>
@@ -492,7 +492,7 @@ This function is called by:
 0416   
 0417   <span class="comment">%% mex compile odefun</span>
 0418   options.codegen_args = {0,IC};
-0419   <a href="PrepareMEX.html" class="code" title="function mexfileOutput = PrepareMEX(mfileInput, varargin)">PrepareMEX</a>(odefun_filepath, options);
+0419   <a href="ds.prepareMEX.html" class="code" title="function mexfileOutput = ds.prepareMEX(mfileInput, varargin)">ds.prepareMEX</a>(odefun_filepath, options);
 0420   
 0421 <span class="keyword">else</span> <span class="comment">% use subfunction</span>
 0422   fprintf(fid,<span class="string">'\n%% ###########################################################\n'</span>);
