@@ -115,7 +115,7 @@ if options.auto_gen_test_data_flag
   % specific to this function
   argout = {output, modifications};
   
-  ds.saveAutoGenTestData(argin, argout)
+  ds.saveAutoGenTestData(argin, argout);
 end
 
 end
@@ -204,7 +204,7 @@ if options.auto_gen_test_data_flag
   % specific to this function
   argout = {modifications};
   
-  ds.saveAutoGenTestData(argin, argout)
+  ds.saveAutoGenTestDataLocalFn(argin, argout); % localfn
 end
 
 end
@@ -379,7 +379,7 @@ if options.auto_gen_test_data_flag
   % specific to this function
   argout = {spec};
   
-  ds.saveAutoGenTestData(argin, argout)
+  ds.saveAutoGenTestDataLocalFn(argin, argout); % localfn
 end
 
 end
