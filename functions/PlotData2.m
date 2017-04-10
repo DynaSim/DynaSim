@@ -24,7 +24,7 @@ function [handles,xp]=PlotData2(data,varargin)
 %     'max_num_overlaid' - maximum # of waveforms to overlay per plot
 %     'do_mean' - {false, true} - Turn on/off averaging across all units
 %                 in a population
-%     'force_overlay' - {'none', 'populations' (default), 'variables', 'varied1' ... 'variedN'}
+%     'force_last' - {'none', 'populations' (default), 'variables', 'varied1' ... 'variedN'}
 %                       If there is only one cell in a population, this forces
 %                       PlotData2 to add other information to the overlay.
 %     'xlims' - [XMIN XMAX], x-axis limits (default: all data)
@@ -116,7 +116,7 @@ end
   'num_embedded_subplots',2,{1,2,3,4},...
   'max_num_overlaid',50,[],...
   'do_mean',false,[false true],...
-  'force_overlay',[],[],...
+  'force_last',[],[],...
   'do_overlay_shift',false,[false true],...
   'overlay_shift_val',[],[],...
   'do_zscore',[false],[false true],...
@@ -151,7 +151,7 @@ handles=[];
 
 % Options overwrite
 if is_image
-    options.force_overlay = false;
+    options.force_last = false;
 end
 
 
@@ -162,7 +162,7 @@ subplot_options = options.subplot_options;
 figure_options = options.figure_options;
 num_embedded_subplots = options.num_embedded_subplots;
 do_mean = options.do_mean;
-force_overlay = options.force_overlay;
+force_last = options.force_last;
 crop_range = options.crop_range;
 lock_axes = options.lock_axes;
 Ndims_per_subplot = options.Ndims_per_subplot;
@@ -322,18 +322,18 @@ if length(xp2.meta.datainfo(2).values) <= 1
     xp2.meta.datainfo(2).name = packed_name;
     xp2.meta.datainfo(2).values = packed_vars(:)';
     
-    xp2 = xp2.packDim(ax2overlay);
+    xp2 = xp2.packDim(ax2overlay,2);
     xp2 = xp2.squeezeRegexp('Dim');    
 end
 
 
 
 %% If doing force overlay, move overlay population to the end
-if ~isempty(force_overlay)
-    ax_ind = xp2.findaxis(force_overlay);
+if ~isempty(force_last)
+    ax_ind = xp2.findaxis(force_last);
     if isempty(ax_ind)
         ax_names = xp2.exportAxisNames;
-        error('Requested axis not found. force_overlay must be one of the following: : %s', sprintf('%s ',ax_names{1:end}));
+        error('Requested axis not found. force_last must be one of the following: : %s', sprintf('%s ',ax_names{1:end}));
     end
     
     Ndims_per_subplot = 2;
