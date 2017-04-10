@@ -4,7 +4,7 @@ classdef test_autogen_query < matlab.unittest.TestCase
   end
   
   properties (TestParameter)
-    dataFileName = lscell(fullfile(ds.getConfig('ds_testData_path'), 'autogen', ['*' evalin('base','query') '*_autogen_*']));
+    dataFileName = ds.unit.getAutogenFiles(false, true);
   end
   
   methods (Test,  TestTags = {'autogen', 'query'})
