@@ -142,6 +142,7 @@ end
   'supersize_me',false,[false true],...
   'Ndims_per_subplot',[],[],...
   'dim_stacking',[],[],...
+  'plot_handle',[],[],...
   },false);
 handles=[];
 
@@ -165,6 +166,7 @@ force_overlay = options.force_overlay;
 crop_range = options.crop_range;
 lock_axes = options.lock_axes;
 Ndims_per_subplot = options.Ndims_per_subplot;
+plot_handle = options.plot_handle;
 
 % Add default options to structures
 % Plot_options
@@ -424,7 +426,11 @@ else
     switch plot_type
         case 'waveform'
             % Is data
-            data_plothandle = @xp1D_matrix_plot;
+            if isempty(plot_handle)
+                data_plothandle = @xp1D_matrix_plot;
+            else
+                data_plothandle = plot_handle;
+            end
         case 'imagesc'
             data_plothandle = @xp_matrix_imagesc;
             % Disable legend when using imagesc
