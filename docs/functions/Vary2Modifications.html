@@ -46,11 +46,11 @@
    vary={'pop1','gNa',[100 120]};
    mod_set=ds.vary2Modifications(vary); % {{'pop1','gNa',100},{'pop1','gNa',120}}
    for i=1:length(mod_set)
-     data(i)=ds.simulateModel('dv/dt=@current+10; {iNa,iK}','modifications',mod_set{i});
+     data(i)=dsSimulate('dv/dt=@current+10; {iNa,iK}','modifications',mod_set{i});
      figure; plot(data(i).time,data(i).(data(i).labels{1}))
    end
-   % note: the same data set can be obtained directly from ds.simulateModel by:
-   data=ds.simulateModel('dv/dt=@current+10; {iNa,iK}','vary',vary);
+   % note: the same data set can be obtained directly from dsSimulate by:
+   data=dsSimulate('dv/dt=@current+10; {iNa,iK}','vary',vary);
 
    vary={'E','gNa',[100 120]};
    vary={'E','gNa',[100 120];'E-&gt;I','gSYN',[0 1]};
@@ -130,7 +130,7 @@
    modifications_set = ds.vary2Modifications(vary); 
    modifications_set{:}
 
- See also: <a href="ds.applyModifications.html" class="code" title="function [output,modifications]=ds.applyModifications(model,modifications)">ds.applyModifications</a>, <a href="ds.simulateModel.html" class="code" title="function [data,studyinfo]=ds.simulateModel(model,varargin)">ds.simulateModel</a>, <a href="ds.generateModel.html" class="code" title="function [model,name_map]=ds.generateModel(specification,varargin)">ds.generateModel</a></pre></div>
+ See also: <a href="ds.applyModifications.html" class="code" title="function [output,modifications]=ds.applyModifications(model,modifications)">ds.applyModifications</a>, <a href="dsSimulate.html" class="code" title="function [data,studyinfo]=dsSimulate(model,varargin)">dsSimulate</a>, <a href="ds.generateModel.html" class="code" title="function [model,name_map]=ds.generateModel(specification,varargin)">ds.generateModel</a></pre></div>
 
 <!-- crossreference -->
 <h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
@@ -139,7 +139,7 @@ This function calls:
 </ul>
 This function is called by:
 <ul style="list-style-image:url(../matlabicon.gif)">
-<li><a href="ds.simulateModel.html" class="code" title="function [data,studyinfo]=ds.simulateModel(model,varargin)">ds.simulateModel</a>	% data=ds.simulateModel(model,'option',value,...)</li><li><a href="ds.writeDynaSimSolver.html" class="code" title="function [outfile,options]=ds.writeDynaSimSolver(model,varargin)">ds.writeDynaSimSolver</a>	WRITEDYNASIMSOLVER - write m-file that numerically inteegrates the model</li><li><a href="ds.writeMatlabSolver.html" class="code" title="function solve_ode_filepath = ds.writeMatlabSolver(model,varargin)">ds.writeMatlabSolver</a>	WRITEMATLABSOLVER - write m-file that numerically inteegrates the model</li></ul>
+<li><a href="dsSimulate.html" class="code" title="function [data,studyinfo]=dsSimulate(model,varargin)">dsSimulate</a>	% data=dsSimulate(model,'option',value,...)</li><li><a href="ds.writeDynaSimSolver.html" class="code" title="function [outfile,options]=ds.writeDynaSimSolver(model,varargin)">ds.writeDynaSimSolver</a>	WRITEDYNASIMSOLVER - write m-file that numerically inteegrates the model</li><li><a href="ds.writeMatlabSolver.html" class="code" title="function solve_ode_filepath = ds.writeMatlabSolver(model,varargin)">ds.writeMatlabSolver</a>	WRITEMATLABSOLVER - write m-file that numerically inteegrates the model</li></ul>
 <!-- crossreference -->
 
 <h2><a name="_subfunctions"></a>SUBFUNCTIONS <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
@@ -168,11 +168,11 @@ This function is called by:
 0019 <span class="comment">%   vary={'pop1','gNa',[100 120]};</span>
 0020 <span class="comment">%   mod_set=ds.vary2Modifications(vary); % {{'pop1','gNa',100},{'pop1','gNa',120}}</span>
 0021 <span class="comment">%   for i=1:length(mod_set)</span>
-0022 <span class="comment">%     data(i)=ds.simulateModel('dv/dt=@current+10; {iNa,iK}','modifications',mod_set{i});</span>
+0022 <span class="comment">%     data(i)=dsSimulate('dv/dt=@current+10; {iNa,iK}','modifications',mod_set{i});</span>
 0023 <span class="comment">%     figure; plot(data(i).time,data(i).(data(i).labels{1}))</span>
 0024 <span class="comment">%   end</span>
-0025 <span class="comment">%   % note: the same data set can be obtained directly from ds.simulateModel by:</span>
-0026 <span class="comment">%   data=ds.simulateModel('dv/dt=@current+10; {iNa,iK}','vary',vary);</span>
+0025 <span class="comment">%   % note: the same data set can be obtained directly from dsSimulate by:</span>
+0026 <span class="comment">%   data=dsSimulate('dv/dt=@current+10; {iNa,iK}','vary',vary);</span>
 0027 <span class="comment">%</span>
 0028 <span class="comment">%   vary={'E','gNa',[100 120]};</span>
 0029 <span class="comment">%   vary={'E','gNa',[100 120];'E-&gt;I','gSYN',[0 1]};</span>
@@ -252,7 +252,7 @@ This function is called by:
 0103 <span class="comment">%   modifications_set = ds.vary2Modifications(vary);</span>
 0104 <span class="comment">%   modifications_set{:}</span>
 0105 <span class="comment">%</span>
-0106 <span class="comment">% See also: ds.applyModifications, ds.simulateModel, ds.generateModel</span>
+0106 <span class="comment">% See also: ds.applyModifications, dsSimulate, ds.generateModel</span>
 0107 
 0108 <span class="comment">% check inputs</span>
 0109 <span class="keyword">if</span> iscell(vary) &amp;&amp; iscell(vary{1})

@@ -91,7 +91,7 @@
                             {'pop1','equations','cat(FUNCTION,+sin(2*pi*t))'});
        m.populations.equations
 
- See also: <a href="ds.generateModel.html" class="code" title="function [model,name_map]=ds.generateModel(specification,varargin)">ds.generateModel</a>, <a href="ds.simulateModel.html" class="code" title="function [data,studyinfo]=ds.simulateModel(model,varargin)">ds.simulateModel</a>, <a href="ds.vary2Modifications.html" class="code" title="function modifications_set = ds.vary2Modifications(vary,model)">ds.vary2Modifications</a></pre></div>
+ See also: <a href="ds.generateModel.html" class="code" title="function [model,name_map]=ds.generateModel(specification,varargin)">ds.generateModel</a>, <a href="dsSimulate.html" class="code" title="function [data,studyinfo]=dsSimulate(model,varargin)">dsSimulate</a>, <a href="ds.vary2Modifications.html" class="code" title="function modifications_set = ds.vary2Modifications(vary,model)">ds.vary2Modifications</a></pre></div>
 
 <!-- crossreference -->
 <h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
@@ -100,7 +100,7 @@ This function calls:
 <li><a href="ds.checkSpecification.html" class="code" title="function spec=ds.checkSpecification(specification)">ds.checkSpecification</a>	CHECKSPECIFICATION - standardize specification structure and auto-populate missing fields</li><li><a href="ds.generateModel.html" class="code" title="function [model,name_map]=ds.generateModel(specification,varargin)">ds.generateModel</a>	GENERATEMODEL - Parse DynaSim specification and organize model data in DynaSim model structure</li></ul>
 This function is called by:
 <ul style="list-style-image:url(../matlabicon.gif)">
-<li><a href="ds.generateModel.html" class="code" title="function [model,name_map]=ds.generateModel(specification,varargin)">ds.generateModel</a>	GENERATEMODEL - Parse DynaSim specification and organize model data in DynaSim model structure</li><li><a href="ds.probeCellProperties.html" class="code" title="function data = ds.probeCellProperties(model,varargin)">ds.probeCellProperties</a>	data = ds.probeCellProperties(model,'option1',option1,...)</li><li><a href="ds.probeFI.html" class="code" title="function data=ds.probeFI(model,varargin)">ds.probeFI</a>	% data=ds.probeFI(model,varargin)</li><li><a href="ds.simulateModel.html" class="code" title="function [data,studyinfo]=ds.simulateModel(model,varargin)">ds.simulateModel</a>	% data=ds.simulateModel(model,'option',value,...)</li><li><a href="ds.writeDynaSimSolver.html" class="code" title="function [outfile,options]=ds.writeDynaSimSolver(model,varargin)">ds.writeDynaSimSolver</a>	WRITEDYNASIMSOLVER - write m-file that numerically inteegrates the model</li><li><a href="ds.writeMatlabSolver.html" class="code" title="function solve_ode_filepath = ds.writeMatlabSolver(model,varargin)">ds.writeMatlabSolver</a>	WRITEMATLABSOLVER - write m-file that numerically inteegrates the model</li></ul>
+<li><a href="ds.generateModel.html" class="code" title="function [model,name_map]=ds.generateModel(specification,varargin)">ds.generateModel</a>	GENERATEMODEL - Parse DynaSim specification and organize model data in DynaSim model structure</li><li><a href="ds.probeCellProperties.html" class="code" title="function data = ds.probeCellProperties(model,varargin)">ds.probeCellProperties</a>	data = ds.probeCellProperties(model,'option1',option1,...)</li><li><a href="ds.probeFI.html" class="code" title="function data=ds.probeFI(model,varargin)">ds.probeFI</a>	% data=ds.probeFI(model,varargin)</li><li><a href="dsSimulate.html" class="code" title="function [data,studyinfo]=dsSimulate(model,varargin)">dsSimulate</a>	% data=dsSimulate(model,'option',value,...)</li><li><a href="ds.writeDynaSimSolver.html" class="code" title="function [outfile,options]=ds.writeDynaSimSolver(model,varargin)">ds.writeDynaSimSolver</a>	WRITEDYNASIMSOLVER - write m-file that numerically inteegrates the model</li><li><a href="ds.writeMatlabSolver.html" class="code" title="function solve_ode_filepath = ds.writeMatlabSolver(model,varargin)">ds.writeMatlabSolver</a>	WRITEMATLABSOLVER - write m-file that numerically inteegrates the model</li></ul>
 <!-- crossreference -->
 
 <h2><a name="_subfunctions"></a>SUBFUNCTIONS <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
@@ -174,7 +174,7 @@ This function is called by:
 0064 <span class="comment">%                            {'pop1','equations','cat(FUNCTION,+sin(2*pi*t))'});</span>
 0065 <span class="comment">%       m.populations.equations</span>
 0066 <span class="comment">%</span>
-0067 <span class="comment">% See also: ds.generateModel, ds.simulateModel, ds.vary2Modifications</span>
+0067 <span class="comment">% See also: ds.generateModel, dsSimulate, ds.vary2Modifications</span>
 0068 
 0069 <span class="comment">% check for modifications</span>
 0070 <span class="keyword">if</span> isempty(modifications)

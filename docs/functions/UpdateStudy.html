@@ -44,13 +44,13 @@
 
  Notes:
  - Note: this function is not intended for users. it is an internal function
-   called by functions like ds.simulateModel, AnalyzeStudy, and ds.createBatch.
+   called by functions like dsSimulate, AnalyzeStudy, and ds.createBatch.
  - Note: this function should only update metadata stored in the
    studyinfo.simulations substructure.
 
  TODO: this multiple things in this function should be split up into individual functions
 
- See also: <a href="ds.checkStudyinfo.html" class="code" title="function studyinfo=ds.checkStudyinfo(studyinfo,varargin)">ds.checkStudyinfo</a>, <a href="ds.setupStudy.html" class="code" title="function [studyinfo,options]=ds.setupStudy(base_model,varargin)">ds.setupStudy</a>, <a href="ds.simulateModel.html" class="code" title="function [data,studyinfo]=ds.simulateModel(model,varargin)">ds.simulateModel</a>, <a href="ds.createBatch.html" class="code" title="function studyinfo = ds.createBatch(base_model,modifications_set,varargin)">ds.createBatch</a>, <a href="AnalyzeStudy.html" class="code" title="function [results,studyinfo]=AnalyzeStudy(data,func,varargin)">AnalyzeStudy</a></pre></div>
+ See also: <a href="ds.checkStudyinfo.html" class="code" title="function studyinfo=ds.checkStudyinfo(studyinfo,varargin)">ds.checkStudyinfo</a>, <a href="ds.setupStudy.html" class="code" title="function [studyinfo,options]=ds.setupStudy(base_model,varargin)">ds.setupStudy</a>, <a href="dsSimulate.html" class="code" title="function [data,studyinfo]=dsSimulate(model,varargin)">dsSimulate</a>, <a href="ds.createBatch.html" class="code" title="function studyinfo = ds.createBatch(base_model,modifications_set,varargin)">ds.createBatch</a>, <a href="AnalyzeStudy.html" class="code" title="function [results,studyinfo]=AnalyzeStudy(data,func,varargin)">AnalyzeStudy</a></pre></div>
 
 <!-- crossreference -->
 <h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
@@ -59,7 +59,7 @@ This function calls:
 <li><a href="ds.checkOptions.html" class="code" title="function [parms, params_unspecified ] = ds.checkOptions(options, options_schema, strict)">ds.checkOptions</a>	CHECKOPTIONS - organize key/value pairs in structure with default or user-supplied values according to a schema</li><li><a href="ds.checkStudyinfo.html" class="code" title="function studyinfo=ds.checkStudyinfo(studyinfo,varargin)">ds.checkStudyinfo</a>	CHECKSTUDYINFO - Standardize studyinfo structure and auto-populate missing fields</li><li><a href="displayError.html" class="code" title="function displayError(err)">displayError</a>	DISPLAYERROR - Wrapper to print MATLAB error</li><li><a href="ds.studyinfoIO.html" class="code" title="function studyinfo=ds.studyinfoIO(studyinfo,study_file,id,verbose_flag)">ds.studyinfoIO</a>	STUDYINFOIO - use lock files to manage concurrent access to a shared studyinfo</li></ul>
 This function is called by:
 <ul style="list-style-image:url(../matlabicon.gif)">
-<li><a href="ds.simulateModel.html" class="code" title="function [data,studyinfo]=ds.simulateModel(model,varargin)">ds.simulateModel</a>	% data=ds.simulateModel(model,'option',value,...)</li></ul>
+<li><a href="dsSimulate.html" class="code" title="function [data,studyinfo]=dsSimulate(model,varargin)">dsSimulate</a>	% data=dsSimulate(model,'option',value,...)</li></ul>
 <!-- crossreference -->
 
 
@@ -84,13 +84,13 @@ This function is called by:
 0017 <span class="comment">%</span>
 0018 <span class="comment">% Notes:</span>
 0019 <span class="comment">% - Note: this function is not intended for users. it is an internal function</span>
-0020 <span class="comment">%   called by functions like ds.simulateModel, AnalyzeStudy, and ds.createBatch.</span>
+0020 <span class="comment">%   called by functions like dsSimulate, AnalyzeStudy, and ds.createBatch.</span>
 0021 <span class="comment">% - Note: this function should only update metadata stored in the</span>
 0022 <span class="comment">%   studyinfo.simulations substructure.</span>
 0023 <span class="comment">%</span>
 0024 <span class="comment">% TODO: this multiple things in this function should be split up into individual functions</span>
 0025 <span class="comment">%</span>
-0026 <span class="comment">% See also: ds.checkStudyinfo, ds.setupStudy, ds.simulateModel, ds.createBatch, AnalyzeStudy</span>
+0026 <span class="comment">% See also: ds.checkStudyinfo, ds.setupStudy, dsSimulate, ds.createBatch, AnalyzeStudy</span>
 0027 
 0028 
 0029 <span class="comment">% check inputs</span>

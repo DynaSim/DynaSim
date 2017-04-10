@@ -38,7 +38,7 @@
      'format'      : mat. todo: csv, HDF. (default: 'mat')
      'verbose_flag': whether to print log info (default: 0)
  
- See also: <a href="ds.importData.html" class="code" title="function [data,studyinfo] = ds.importData(file,varargin)">ds.importData</a>, <a href="ds.checkData.html" class="code" title="function data=ds.checkData(data)">ds.checkData</a>, <a href="ds.simulateModel.html" class="code" title="function [data,studyinfo]=ds.simulateModel(model,varargin)">ds.simulateModel</a></pre></div>
+ See also: <a href="ds.importData.html" class="code" title="function [data,studyinfo] = ds.importData(file,varargin)">ds.importData</a>, <a href="ds.checkData.html" class="code" title="function data=ds.checkData(data)">ds.checkData</a>, <a href="dsSimulate.html" class="code" title="function [data,studyinfo]=dsSimulate(model,varargin)">dsSimulate</a></pre></div>
 
 <!-- crossreference -->
 <h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
@@ -47,7 +47,7 @@ This function calls:
 <li><a href="ds.checkOptions.html" class="code" title="function [parms, params_unspecified ] = ds.checkOptions(options, options_schema, strict)">ds.checkOptions</a>	CHECKOPTIONS - organize key/value pairs in structure with default or user-supplied values according to a schema</li></ul>
 This function is called by:
 <ul style="list-style-image:url(../matlabicon.gif)">
-<li><a href="ds.simulateModel.html" class="code" title="function [data,studyinfo]=ds.simulateModel(model,varargin)">ds.simulateModel</a>	% data=ds.simulateModel(model,'option',value,...)</li></ul>
+<li><a href="dsSimulate.html" class="code" title="function [data,studyinfo]=dsSimulate(model,varargin)">dsSimulate</a>	% data=dsSimulate(model,'option',value,...)</li></ul>
 <!-- crossreference -->
 
 
@@ -66,7 +66,7 @@ This function is called by:
 0011 <span class="comment">%     'format'      : mat. todo: csv, HDF. (default: 'mat')</span>
 0012 <span class="comment">%     'verbose_flag': whether to print log info (default: 0)</span>
 0013 <span class="comment">%</span>
-0014 <span class="comment">% See also: ds.importData, ds.checkData, ds.simulateModel</span>
+0014 <span class="comment">% See also: ds.importData, ds.checkData, dsSimulate</span>
 0015 
 0016 options=<a href="ds.checkOptions.html" class="code" title="function [parms, params_unspecified ] = ds.checkOptions(options, options_schema, strict)">ds.checkOptions</a>(varargin,{<span class="keyword">...</span>
 0017   <span class="string">'filename'</span>,<span class="string">'data.mat'</span>,[],<span class="keyword">...</span><span class="comment"> % name of output data file</span>

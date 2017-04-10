@@ -53,7 +53,7 @@
      See ds.selectVariables for more info on supported specifications.
 
    - DynaSim spike monitor returns spike data in variables *_spikes.
-     - e.g., `data=ds.simulateModel('dv/dt=@current+10; {iNa,iK}; monitor v.spikes');`
+     - e.g., `data=dsSimulate('dv/dt=@current+10; {iNa,iK}; monitor v.spikes');`
        returns spikes in data.pop1_v_spikes (where 'pop1' is the default
        population name if not specified by the user).
 
@@ -62,11 +62,11 @@
    s.populations(1).equations='dv/dt=@current+10; {iNa,iK}; v(0)=-65';
    s.populations(2).name='I';
    s.populations(2).equations='dv/dt=@current+10; {iNa,iK}; v(0)=-65';
-   data=ds.simulateModel(s);
+   data=dsSimulate(s);
    data=ds.calcACF(data,'variable','*_v');
    data % contains ACFs for E and I pops in .E_v_ACF and .I_v_ACF.
 
- See also: <a href="ds.plotFR.html" class="code" title="function handles=ds.plotFR(data,varargin)">ds.plotFR</a>, <a href="AnalyzeStudy.html" class="code" title="function [results,studyinfo]=AnalyzeStudy(data,func,varargin)">AnalyzeStudy</a>, <a href="ds.simulateModel.html" class="code" title="function [data,studyinfo]=ds.simulateModel(model,varargin)">ds.simulateModel</a>, <a href="ds.checkData.html" class="code" title="function data=ds.checkData(data)">ds.checkData</a>, <a href="ds.selectVariables.html" class="code" title="function [variables,pop_names]=ds.selectVariables(labels,var_strings)">ds.selectVariables</a></pre></div>
+ See also: <a href="ds.plotFR.html" class="code" title="function handles=ds.plotFR(data,varargin)">ds.plotFR</a>, <a href="AnalyzeStudy.html" class="code" title="function [results,studyinfo]=AnalyzeStudy(data,func,varargin)">AnalyzeStudy</a>, <a href="dsSimulate.html" class="code" title="function [data,studyinfo]=dsSimulate(model,varargin)">dsSimulate</a>, <a href="ds.checkData.html" class="code" title="function data=ds.checkData(data)">ds.checkData</a>, <a href="ds.selectVariables.html" class="code" title="function [variables,pop_names]=ds.selectVariables(labels,var_strings)">ds.selectVariables</a></pre></div>
 
 <!-- crossreference -->
 <h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
@@ -109,7 +109,7 @@ This function is called by:
 0026 <span class="comment">%     See ds.selectVariables for more info on supported specifications.</span>
 0027 <span class="comment">%</span>
 0028 <span class="comment">%   - DynaSim spike monitor returns spike data in variables *_spikes.</span>
-0029 <span class="comment">%     - e.g., `data=ds.simulateModel('dv/dt=@current+10; {iNa,iK}; monitor v.spikes');`</span>
+0029 <span class="comment">%     - e.g., `data=dsSimulate('dv/dt=@current+10; {iNa,iK}; monitor v.spikes');`</span>
 0030 <span class="comment">%       returns spikes in data.pop1_v_spikes (where 'pop1' is the default</span>
 0031 <span class="comment">%       population name if not specified by the user).</span>
 0032 <span class="comment">%</span>
@@ -118,11 +118,11 @@ This function is called by:
 0035 <span class="comment">%   s.populations(1).equations='dv/dt=@current+10; {iNa,iK}; v(0)=-65';</span>
 0036 <span class="comment">%   s.populations(2).name='I';</span>
 0037 <span class="comment">%   s.populations(2).equations='dv/dt=@current+10; {iNa,iK}; v(0)=-65';</span>
-0038 <span class="comment">%   data=ds.simulateModel(s);</span>
+0038 <span class="comment">%   data=dsSimulate(s);</span>
 0039 <span class="comment">%   data=ds.calcACF(data,'variable','*_v');</span>
 0040 <span class="comment">%   data % contains ACFs for E and I pops in .E_v_ACF and .I_v_ACF.</span>
 0041 <span class="comment">%</span>
-0042 <span class="comment">% See also: ds.plotFR, AnalyzeStudy, ds.simulateModel, ds.checkData, ds.selectVariables</span>
+0042 <span class="comment">% See also: ds.plotFR, AnalyzeStudy, dsSimulate, ds.checkData, ds.selectVariables</span>
 0043 
 0044 <span class="comment">%% 1.0 Check inputs</span>
 0045 options=<a href="ds.checkOptions.html" class="code" title="function [parms, params_unspecified ] = ds.checkOptions(options, options_schema, strict)">ds.checkOptions</a>(varargin,{<span class="keyword">...</span>

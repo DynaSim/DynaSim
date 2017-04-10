@@ -138,7 +138,7 @@
      and &quot;57&quot; is the Na+ current at http://infinitebrain.org/models/57.
      note: currently not supported on *most* machines...
 
- See also: <a href="ds.checkSpecification.html" class="code" title="function spec=ds.checkSpecification(specification)">ds.checkSpecification</a>, <a href="ds.checkModel.html" class="code" title="function model=ds.checkModel(model)">ds.checkModel</a>, <a href="ds.parseModelEquations.html" class="code" title="function [model,name_map] = ds.parseModelEquations(text,varargin)">ds.parseModelEquations</a>, <a href="ds.simulateModel.html" class="code" title="function [data,studyinfo]=ds.simulateModel(model,varargin)">ds.simulateModel</a></pre></div>
+ See also: <a href="ds.checkSpecification.html" class="code" title="function spec=ds.checkSpecification(specification)">ds.checkSpecification</a>, <a href="ds.checkModel.html" class="code" title="function model=ds.checkModel(model)">ds.checkModel</a>, <a href="ds.parseModelEquations.html" class="code" title="function [model,name_map] = ds.parseModelEquations(text,varargin)">ds.parseModelEquations</a>, <a href="dsSimulate.html" class="code" title="function [data,studyinfo]=dsSimulate(model,varargin)">dsSimulate</a></pre></div>
 
 <!-- crossreference -->
 <h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
@@ -268,7 +268,7 @@ This function is called by:
 0111 <span class="comment">%     and &quot;57&quot; is the Na+ current at http://infinitebrain.org/models/57.</span>
 0112 <span class="comment">%     note: currently not supported on *most* machines...</span>
 0113 <span class="comment">%</span>
-0114 <span class="comment">% See also: ds.checkSpecification, ds.checkModel, ds.parseModelEquations, ds.simulateModel</span>
+0114 <span class="comment">% See also: ds.checkSpecification, ds.checkModel, ds.parseModelEquations, dsSimulate</span>
 0115 
 0116 <span class="comment">% Check inputs</span>
 0117 <span class="comment">% ------------------------------------------------------</span>
@@ -553,7 +553,7 @@ This function is called by:
 0396   <span class="comment">% NESTED FUNCTIONS</span>
 0397   <span class="comment">% ----------------------------------</span>
 0398   <a name="_sub8" href="#_subfunctions" class="code">function add_keywords(src,dst,namespace)</a>
-0399     <span class="comment">% NOTE: this needs to be coordinated with update_keywords() in ds.simulateModel()</span>
+0399     <span class="comment">% NOTE: this needs to be coordinated with update_keywords() in dsSimulate()</span>
 0400     <span class="comment">%   for parameters</span>
 0401     Nsrc=[src <span class="string">'_Npop'</span>];
 0402     Ndst=[dst <span class="string">'_Npop'</span>];

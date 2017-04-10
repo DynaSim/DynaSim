@@ -26,7 +26,7 @@ if exist(study_dir, 'dir')
   rmdir(study_dir, 's')
 end
 
-ds.simulateModel(eqns,'vary',vary, 'study_dir',study_dir,'save_data_flag',1,...
+dsSimulate(eqns,'vary',vary, 'study_dir',study_dir,'save_data_flag',1,...
   'cluster_flag',1,'verbose_flag',1,'qsub_mode','loop');
 
 %% Solve with array mode
@@ -38,5 +38,5 @@ if exist(study_dir, 'dir')
   rmdir(study_dir, 's')
 end
 
-ds.simulateModel(eqns,'vary',vary, 'study_dir',study_dir,'save_data_flag',1,...
+dsSimulate(eqns,'vary',vary, 'study_dir',study_dir,'save_data_flag',1,...
   'cluster_flag',1,'verbose_flag',1,'qsub_mode','array');

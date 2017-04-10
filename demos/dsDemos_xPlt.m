@@ -488,4 +488,4 @@ xp2b = xp2.squeezeRegexp('populations'); xp2b.getaxisinfo
 % 
 % Implement the following:
 % + Make DynaSimPlotExtract more general
-% + Starting work on ds.plotData2 - any new requests?
+% + Starting work on dsPlot2 - any new requests?

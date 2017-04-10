@@ -56,7 +56,7 @@
 <h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
 This function calls:
 <ul style="list-style-image:url(../matlabicon.gif)">
-<li><a href="ds.calcPower.html" class="code" title="function data = ds.calcPower(data,varargin)">ds.calcPower</a>	CALCPOWER - Compute spectral analysis of DynaSim data</li><li><a href="ds.checkData.html" class="code" title="function data=ds.checkData(data)">ds.checkData</a>	CHECKDATA - Standardize data structure and auto-populate missing fields</li><li><a href="ds.checkOptions.html" class="code" title="function [parms, params_unspecified ] = ds.checkOptions(options, options_schema, strict)">ds.checkOptions</a>	CHECKOPTIONS - organize key/value pairs in structure with default or user-supplied values according to a schema</li><li><a href="ds.nwGaussKernelRegr.html" class="code" title="function [inst_rate,time] = ds.nwGaussKernelRegr(time,raster,pop,kwidth,Ts)">ds.nwGaussKernelRegr</a>	Nadaraya-Watson smoothing kernel regression of a rastergram using a Gaussian kernel</li><li><a href="ds.selectData.html" class="code" title="function data=ds.selectData(data,varargin)">ds.selectData</a>	SELECTDATA -  select subset of data</li><li><a href="ds.computeRaster.html" class="code" title="function raster  = ds.computeRaster(t,V,threshold)">ds.computeRaster</a>	ds.computeRaster - Use a threshold to find spiketrain for a voltage trace</li></ul>
+<li><a href="ds.calcPower.html" class="code" title="function data = ds.calcPower(data,varargin)">ds.calcPower</a>	CALCPOWER - Compute spectral analysis of DynaSim data</li><li><a href="ds.checkData.html" class="code" title="function data=ds.checkData(data)">ds.checkData</a>	CHECKDATA - Standardize data structure and auto-populate missing fields</li><li><a href="ds.checkOptions.html" class="code" title="function [parms, params_unspecified ] = ds.checkOptions(options, options_schema, strict)">ds.checkOptions</a>	CHECKOPTIONS - organize key/value pairs in structure with default or user-supplied values according to a schema</li><li><a href="ds.nwGaussKernelRegr.html" class="code" title="function [inst_rate,time] = ds.nwGaussKernelRegr(time,raster,pop,kwidth,Ts)">ds.nwGaussKernelRegr</a>	Nadaraya-Watson smoothing kernel regression of a rastergram using a Gaussian kernel</li><li><a href="dsSelect.html" class="code" title="function data=dsSelect(data,varargin)">dsSelect</a>	SELECTDATA -  select subset of data</li><li><a href="ds.computeRaster.html" class="code" title="function raster  = ds.computeRaster(t,V,threshold)">ds.computeRaster</a>	ds.computeRaster - Use a threshold to find spiketrain for a voltage trace</li></ul>
 This function is called by:
 <ul style="list-style-image:url(../matlabicon.gif)">
 </ul>
@@ -306,14 +306,14 @@ This function is called by:
 0239   maxN=max(num_spikes1,num_spikes2);  
 0240   
 0241   <span class="comment">% spectral analysis</span>
-0242   dat=<a href="ds.selectData.html" class="code" title="function data=ds.selectData(data,varargin)">ds.selectData</a>(data,<span class="string">'roi'</span>,{var1,roi1});
+0242   dat=<a href="dsSelect.html" class="code" title="function data=dsSelect(data,varargin)">dsSelect</a>(data,<span class="string">'roi'</span>,{var1,roi1});
 0243   dat=<a href="ds.calcPower.html" class="code" title="function data = ds.calcPower(data,varargin)">ds.calcPower</a>(dat,<span class="string">'time_limits'</span>,options.time_limits);
 0244   Power_MUA1=dat.([var1 <span class="string">'_Power_MUA'</span>]);
 0245   Power_SUA1=dat.([var1 <span class="string">'_Power_SUA'</span>]);
 0246   Power_SUA1.Pxx_mu=nanmean(Power_SUA1.Pxx,2);
 0247   Power_SUA1.Pxx_sd=nanstd(Power_SUA1.Pxx,[],2);
 0248 
-0249   dat=<a href="ds.selectData.html" class="code" title="function data=ds.selectData(data,varargin)">ds.selectData</a>(data,<span class="string">'roi'</span>,{var2,roi2});
+0249   dat=<a href="dsSelect.html" class="code" title="function data=dsSelect(data,varargin)">dsSelect</a>(data,<span class="string">'roi'</span>,{var2,roi2});
 0250   dat=<a href="ds.calcPower.html" class="code" title="function data = ds.calcPower(data,varargin)">ds.calcPower</a>(dat,<span class="string">'time_limits'</span>,options.time_limits);
 0251   Power_MUA2=dat.([var2 <span class="string">'_Power_MUA'</span>]);
 0252   Power_SUA2=dat.([var2 <span class="string">'_Power_SUA'</span>]);

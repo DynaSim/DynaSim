@@ -45,9 +45,9 @@ eqns={
   'dy/dt=r*x-y-x*z';
   'dz/dt=-b*z+x*y';
 };
-data=ds.simulateModel(eqns,'tspan',[0 100],'study_dir','lorenz_ml_solver', 'ic',[1 2 .5],'solver','ode45',...
+data=dsSimulate(eqns,'tspan',[0 100],'study_dir','lorenz_ml_solver', 'ic',[1 2 .5],'solver','ode45',...
   'verbose_flag',1);
-ds.plotData(data)
+dsPlot(data)
 
 %% QUICKLY BUILDING LARGE MODELS FROM EXISTING "MECHANISMS"
 
@@ -74,19 +74,19 @@ eqns={
   'aN(v) = (.1-.01*(v+65))./(exp(1-.1*(v+65))-1)';
   'bN(v) = .125*exp(-(v+65)/80)';
 };
-data=ds.simulateModel(eqns,'dt',0.01, 'downsample_factor',100, 'study_dir','hh_ml_solver', 'solver','ode45',...
+data=dsSimulate(eqns,'dt',0.01, 'downsample_factor',100, 'study_dir','hh_ml_solver', 'solver','ode45',...
   'verbose_flag',1);
 figure; plot(data.time,data.(data.labels{1}))
 xlabel('time (ms)'); ylabel('membrane potential (mV)'); title('Hodgkin-Huxley neuron')
 
 % % Equivalent Hodgkin-Huxley neuron with predefined mechanisms
-% data=ds.simulateModel('dv/dt=10+@current/Cm; Cm=1; v(0)=-65; {iNa,iK}','study_dir','hh_predef_ml_solver', 'solver','ode45');
+% data=dsSimulate('dv/dt=10+@current/Cm; Cm=1; v(0)=-65; {iNa,iK}','study_dir','hh_predef_ml_solver', 'solver','ode45');
 % figure; plot(data.time,data.(data.labels{1}))
 % xlabel('time (ms)'); ylabel('membrane potential (mV)'); title('Hodgkin-Huxley neuron')
 % 
 % % Example of a bursting neuron model using three active current mechanisms:
 % eqns='dv/dt=5+@current; {iNaF,iKDR,iM}; gNaF=100; gKDR=5; gM=1.5; v(0)=-70';
-% data=ds.simulateModel(eqns,'tspan',[0 200],'study_dir','hh_active_ml_solver', 'solver','ode45');
+% data=dsSimulate(eqns,'tspan',[0 200],'study_dir','hh_active_ml_solver', 'solver','ode45');
 % figure; plot(data.time,data.(data.labels{1}))
 % xlabel('time (ms)'); ylabel('membrane potential (mV)'); title('Intrinsically Bursting neuron')
 
@@ -121,10 +121,10 @@ s.connections(2).direction='E->I';
 s.connections(2).mechanism_list={'iAMPA'};
 s.connections(2).parameters={'tauD',2,'gSYN',.1,'netcon','ones(N_pre,N_post)'};
 
-data=ds.simulateModel(s,'dt',0.01, 'downsample_factor',100, 'study_dir','sPing_ml_solver',...
+data=dsSimulate(s,'dt',0.01, 'downsample_factor',100, 'study_dir','sPing_ml_solver',...
   'solver','ode45', 'matlab_solver_options', {'InitialStep', 0.01}, 'compile_flag',1,...
   'verbose_flag',1);
-ds.plotData(data);
+dsPlot(data);
 
 
 %% RUNNING SIMULATIONS ON THE CLUSTER
@@ -137,25 +137,25 @@ eqns='dv/dt=@current+I; {iNa,iK}';
 vary={'','I',[0 10 20]};
 
 % od45
-ds.simulateModel(eqns,'save_data_flag',1,'study_dir','demo_cluster_1_ml_solver_ode45',...
+dsSimulate(eqns,'save_data_flag',1,'study_dir','demo_cluster_1_ml_solver_ode45',...
                    'vary',vary,'cluster_flag',1,'overwrite_flag',1,'verbose_flag',1,...
                    'dt',0.01, 'downsample_factor',100,'solver','ode45',...
                     'matlab_solver_options', {'InitialStep', 0.01}, 'compile_flag',0);
   
 % ode45 compiled
-ds.simulateModel(eqns,'save_data_flag',1,'study_dir','demo_cluster_1_ml_solver_ode45_compiled',...
+dsSimulate(eqns,'save_data_flag',1,'study_dir','demo_cluster_1_ml_solver_ode45_compiled',...
                    'vary',vary,'cluster_flag',1,'overwrite_flag',1,'verbose_flag',1,...
                    'dt',0.01, 'downsample_factor',100,'solver','ode45',...
                     'matlab_solver_options', {'InitialStep', 0.01}, 'compile_flag',1);
                
 % ode23
-ds.simulateModel(eqns,'save_data_flag',1,'study_dir','demo_cluster_1_ml_solver_ode23s',...
+dsSimulate(eqns,'save_data_flag',1,'study_dir','demo_cluster_1_ml_solver_ode23s',...
                    'vary',vary,'cluster_flag',1,'overwrite_flag',1,'verbose_flag',1,...
                    'dt',0.01, 'downsample_factor',100,'solver','ode23s',...
                     'matlab_solver_options', {'InitialStep', 0.01}, 'compile_flag',0);
                   
 % ode23 compiled
-ds.simulateModel(eqns,'save_data_flag',1,'study_dir','demo_cluster_1_ml_solver_ode23s_compiled',...
+dsSimulate(eqns,'save_data_flag',1,'study_dir','demo_cluster_1_ml_solver_ode23s_compiled',...
                    'vary',vary,'cluster_flag',1,'overwrite_flag',1,'verbose_flag',1,...
                    'dt',0.01, 'downsample_factor',100,'solver','ode23s',...
                     'matlab_solver_options', {'InitialStep', 0.01}, 'compile_flag',1);

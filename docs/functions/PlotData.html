@@ -2,8 +2,8 @@
                 "http://www.w3.org/TR/REC-html40/loose.dtd">
 <html>
 <head>
-  <title>Description of ds.plotData</title>
-  <meta name="keywords" content="ds.plotData">
+  <title>Description of dsPlot</title>
+  <meta name="keywords" content="dsPlot">
   <meta name="description" content="PLOTDATA - plot data in various ways depending on what data was provided and what options are defined.">
   <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
   <meta name="generator" content="m2html &copy; 2005 Guillaume Flandin">
@@ -16,14 +16,14 @@
 <body>
 <a name="_top"></a>
 <!-- menu.html functions -->
-<h1>ds.plotData
+<h1>dsPlot
 </h1>
 
 <h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
 <div class="box"><strong>PLOTDATA - plot data in various ways depending on what data was provided and what options are defined.</strong></div>
 
 <h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
-<div class="box"><strong>function handles = ds.plotData(data,varargin) </strong></div>
+<div class="box"><strong>function handles = dsPlot(data,varargin) </strong></div>
 
 <h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
 <div class="fragment"><pre class="comment">PLOTDATA - plot data in various ways depending on what data was provided and what options are defined.
@@ -32,7 +32,7 @@
  function for organizing and displaying data.
 
  Usage:
-   handles=ds.plotData(data,'option',value)
+   handles=dsPlot(data,'option',value)
 
  Inputs:
    - data: DynaSim data structure (see ds.checkData)
@@ -77,52 +77,52 @@
 
  Examples:
    - Example 1: One cell:
-       data=ds.simulateModel('dv/dt=@current+10; {iNa,iK}','tspan',[0 500]);
-       ds.plotData(data); % plot first state variable ('v')
-       ds.plotData(data,'variable','*'); % plot all state variables
+       data=dsSimulate('dv/dt=@current+10; {iNa,iK}','tspan',[0 500]);
+       dsPlot(data); % plot first state variable ('v')
+       dsPlot(data,'variable','*'); % plot all state variables
        % plot all variables and time 30-60ms
-       ds.plotData(data,'variable','*','time_limits',[30 60]);
+       dsPlot(data,'variable','*','time_limits',[30 60]);
        % plot power spectrum
-       ds.plotData(data,'variable','v','plot_type','power');
-       ds.plotData(data,'variable','*','plot_type','power');
+       dsPlot(data,'variable','v','plot_type','power');
+       dsPlot(data,'variable','*','plot_type','power');
 
    - Example 2: One population with noisy input:
-       data=ds.simulateModel('dv[5]/dt=@current+10*(1+randn(1,Npop)); {iNa,iK}','tspan',[0 250]);
-       ds.plotData(data);
-       ds.plotData(data,'variable','*'); % plot all state variables (all cells)
-       ds.plotData(data,'variable','m'); % plot state variable 'm' (all cells)
+       data=dsSimulate('dv[5]/dt=@current+10*(1+randn(1,Npop)); {iNa,iK}','tspan',[0 250]);
+       dsPlot(data);
+       dsPlot(data,'variable','*'); % plot all state variables (all cells)
+       dsPlot(data,'variable','m'); % plot state variable 'm' (all cells)
        % plot all variables and time 30-60ms
-       ds.plotData(data,'variable','*','time_limits',[30 60]);
+       dsPlot(data,'variable','*','time_limits',[30 60]);
        % plot power spectrum
-       ds.plotData(data,'variable','v','plot_type','power');
-       ds.plotData(data,'variable','*','plot_type','power');
+       dsPlot(data,'variable','v','plot_type','power');
+       dsPlot(data,'variable','*','plot_type','power');
        % plot rastergram
-       ds.plotData(data,'variable','v','plot_type','rastergram');
-       ds.plotData(data,'variable','*','plot_type','rastergram');
+       dsPlot(data,'variable','v','plot_type','rastergram');
+       dsPlot(data,'variable','*','plot_type','rastergram');
 
    - Example 3: One population varying one parameter (input amplitude):
        eqns='dv[5]/dt=@current+amp*(1+randn(1,Npop)); {iNa,iK}';
        vary={'','amp',[0 10 20]};
-       data=ds.simulateModel(eqns,'vary',vary,'tspan',[0 200]);
-       ds.plotData(data);
-       ds.plotData(data,'variable','m');
-       ds.plotData(data,'variable','*');
+       data=dsSimulate(eqns,'vary',vary,'tspan',[0 200]);
+       dsPlot(data);
+       dsPlot(data,'variable','m');
+       dsPlot(data,'variable','*');
        % plot power spectrum
-       ds.plotData(data,'variable','v','plot_type','power');
+       dsPlot(data,'variable','v','plot_type','power');
        % plot rastergram
-       ds.plotData(data,'variable','v','plot_type','rastergram');
+       dsPlot(data,'variable','v','plot_type','rastergram');
 
    - Example 4: One population varying two parameters (input amplitude and
                 membrane capacitance):
        eqns='dv[5]/dt=@current/Cm+amp*(1+randn(1,Npop)); {iNa,iK}';
        vary={'','Cm',[1 2]; '','amp',[0 10 20]};
-       data=ds.simulateModel(eqns,'vary',vary,'tspan',[0 200]);
-       ds.plotData(data);
-       ds.plotData(data,'variable','*');
+       data=dsSimulate(eqns,'vary',vary,'tspan',[0 200]);
+       dsPlot(data);
+       dsPlot(data,'variable','*');
        % plot power spectrum
-       ds.plotData(data,'variable','v','plot_type','power');
+       dsPlot(data,'variable','v','plot_type','power');
        % plot rastergram
-       ds.plotData(data,'variable','v','plot_type','rastergram');
+       dsPlot(data,'variable','v','plot_type','rastergram');
 
    - Example 5: Two populations: noisy input to E and excitatory connection from E to I
        spec=[];
@@ -132,44 +132,44 @@
        spec.populations(2).equations='dv[2]/dt=@current; {iNa,iK}';
        spec.connections(1).direction='E1-&gt;E2';
        spec.connections(1).mechanism_list='iAMPA';
-       data=ds.simulateModel(spec,'tspan',[0 200]);
-       ds.plotData(data); % plot first state variable
-       ds.plotData(data,'variable','*');
+       data=dsSimulate(spec,'tspan',[0 200]);
+       dsPlot(data); % plot first state variable
+       dsPlot(data,'variable','*');
        % plot monitored synaptic current with post-synaptic voltages:
-       ds.plotData(data,'variable',{'E2_v','ISYN'});
+       dsPlot(data,'variable',{'E2_v','ISYN'});
        % plot monitored synaptic current with pre- and post-synaptic voltages:
-       ds.plotData(data,'variable',{'v','ISYN'});
+       dsPlot(data,'variable',{'v','ISYN'});
        % plot power spectrum
-       ds.plotData(data,'variable','v','plot_type','power');
-       ds.plotData(data,'variable',{'E2_v','ISYN'},'plot_type','power');
+       dsPlot(data,'variable','v','plot_type','power');
+       dsPlot(data,'variable',{'E2_v','ISYN'},'plot_type','power');
        % plot rastergram
-       ds.plotData(data,'variable','v','plot_type','rastergram');
+       dsPlot(data,'variable','v','plot_type','rastergram');
 
    - Example 6: Two populations varying one parameter (input amplitude):
        vary={'E1','amp',[0 10 20]};
-       data=ds.simulateModel(spec,'vary',vary,'tspan',[0 200]);
-       ds.plotData(data);
-       ds.plotData(data,'variable','*');
-       ds.plotData(data,'variable','*_iNa_*');
+       data=dsSimulate(spec,'vary',vary,'tspan',[0 200]);
+       dsPlot(data);
+       dsPlot(data,'variable','*');
+       dsPlot(data,'variable','*_iNa_*');
        % plot power spectrum
-       ds.plotData(data,'variable','v','plot_type','power');
+       dsPlot(data,'variable','v','plot_type','power');
        % plot rastergram
-       ds.plotData(data,'variable','v','plot_type','rastergram');
+       dsPlot(data,'variable','v','plot_type','rastergram');
 
    - Example 7: Two populations varying two parameters (input amplitude and
                 synaptic conductance):
        vary={'E1','amp',[0 10 20]; 'E1-&gt;E2','gSYN',[0 .05 .1]};
-       data=ds.simulateModel(spec,'vary',vary,'tspan',[0 200]);
+       data=dsSimulate(spec,'vary',vary,'tspan',[0 200]);
        % plot voltage waveforms
-       ds.plotData(data,'variable','v','plot_type','power');
+       dsPlot(data,'variable','v','plot_type','power');
        % plot voltage power spectrum
-       ds.plotData(data,'variable','v','plot_type','waveform');
+       dsPlot(data,'variable','v','plot_type','waveform');
        % plot voltage-derived rastergram
-       ds.plotData(data,'variable','v','plot_type','rastergram');
+       dsPlot(data,'variable','v','plot_type','rastergram');
        % more plots
-       ds.plotData(data,'variable','ISYN');
-       ds.plotData(data,'variable','E1_v');
-       ds.plotData(data,'variable','*');
+       dsPlot(data,'variable','ISYN');
+       dsPlot(data,'variable','E1_v');
+       dsPlot(data,'variable','*');
 
  See also: <a href="ds.calcFR.html" class="code" title="function data = ds.calcFR(data,varargin)">ds.calcFR</a>, <a href="ds.calcPower.html" class="code" title="function data = ds.calcPower(data,varargin)">ds.calcPower</a>, <a href="ds.plotWaveforms.html" class="code" title="function ds.plotWaveforms(data,varargin)">ds.plotWaveforms</a>, <a href="ds.checkData.html" class="code" title="function data=ds.checkData(data)">ds.checkData</a></pre></div>
 
@@ -177,23 +177,23 @@
 <h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
 This function calls:
 <ul style="list-style-image:url(../matlabicon.gif)">
-<li><a href="ds.calcFR.html" class="code" title="function data = ds.calcFR(data,varargin)">ds.calcFR</a>	CALCFR - Calculate firing rage for DynaSim data</li><li><a href="ds.calcPower.html" class="code" title="function data = ds.calcPower(data,varargin)">ds.calcPower</a>	CALCPOWER - Compute spectral analysis of DynaSim data</li><li><a href="ds.checkCovary.html" class="code" title="function [effective_vary_lengths, linked_indices] = ds.checkCovary(vary_lengths, vary_params)">ds.checkCovary</a>	CHECKCOVARY - TODO I assume this checks if any varied parameters are covaried?</li><li><a href="ds.checkData.html" class="code" title="function data=ds.checkData(data)">ds.checkData</a>	CHECKDATA - Standardize data structure and auto-populate missing fields</li><li><a href="ds.checkOptions.html" class="code" title="function [parms, params_unspecified ] = ds.checkOptions(options, options_schema, strict)">ds.checkOptions</a>	CHECKOPTIONS - organize key/value pairs in structure with default or user-supplied values according to a schema</li><li><a href="ds.plotData.html" class="code" title="function handles = ds.plotData(data,varargin)">ds.plotData</a>	PLOTDATA - plot data in various ways depending on what data was provided and what options are defined.</li><li><a href="ds.selectVariables.html" class="code" title="function [variables,pop_names]=ds.selectVariables(labels,var_strings)">ds.selectVariables</a>	SELECTVARIABLES - determine what variables to plot</li></ul>
+<li><a href="ds.calcFR.html" class="code" title="function data = ds.calcFR(data,varargin)">ds.calcFR</a>	CALCFR - Calculate firing rage for DynaSim data</li><li><a href="ds.calcPower.html" class="code" title="function data = ds.calcPower(data,varargin)">ds.calcPower</a>	CALCPOWER - Compute spectral analysis of DynaSim data</li><li><a href="ds.checkCovary.html" class="code" title="function [effective_vary_lengths, linked_indices] = ds.checkCovary(vary_lengths, vary_params)">ds.checkCovary</a>	CHECKCOVARY - TODO I assume this checks if any varied parameters are covaried?</li><li><a href="ds.checkData.html" class="code" title="function data=ds.checkData(data)">ds.checkData</a>	CHECKDATA - Standardize data structure and auto-populate missing fields</li><li><a href="ds.checkOptions.html" class="code" title="function [parms, params_unspecified ] = ds.checkOptions(options, options_schema, strict)">ds.checkOptions</a>	CHECKOPTIONS - organize key/value pairs in structure with default or user-supplied values according to a schema</li><li><a href="dsPlot.html" class="code" title="function handles = dsPlot(data,varargin)">dsPlot</a>	PLOTDATA - plot data in various ways depending on what data was provided and what options are defined.</li><li><a href="ds.selectVariables.html" class="code" title="function [variables,pop_names]=ds.selectVariables(labels,var_strings)">ds.selectVariables</a>	SELECTVARIABLES - determine what variables to plot</li></ul>
 This function is called by:
 <ul style="list-style-image:url(../matlabicon.gif)">
-<li><a href="ds.plotData.html" class="code" title="function handles = ds.plotData(data,varargin)">ds.plotData</a>	PLOTDATA - plot data in various ways depending on what data was provided and what options are defined.</li></ul>
+<li><a href="dsPlot.html" class="code" title="function handles = dsPlot(data,varargin)">dsPlot</a>	PLOTDATA - plot data in various ways depending on what data was provided and what options are defined.</li></ul>
 <!-- crossreference -->
 
 
 
 <h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
-<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function handles = ds.plotData(data,varargin)</a>
+<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function handles = dsPlot(data,varargin)</a>
 0002 <span class="comment">%PLOTDATA - plot data in various ways depending on what data was provided and what options are defined.</span>
 0003 <span class="comment">%</span>
 0004 <span class="comment">% This function is wrapped by ds.plotWaveforms, PlotPower, etc. to provide a single</span>
 0005 <span class="comment">% function for organizing and displaying data.</span>
 0006 <span class="comment">%</span>
 0007 <span class="comment">% Usage:</span>
-0008 <span class="comment">%   handles=ds.plotData(data,'option',value)</span>
+0008 <span class="comment">%   handles=dsPlot(data,'option',value)</span>
 0009 <span class="comment">%</span>
 0010 <span class="comment">% Inputs:</span>
 0011 <span class="comment">%   - data: DynaSim data structure (see ds.checkData)</span>
@@ -238,52 +238,52 @@ This function is called by:
 0050 <span class="comment">%</span>
 0051 <span class="comment">% Examples:</span>
 0052 <span class="comment">%   - Example 1: One cell:</span>
-0053 <span class="comment">%       data=ds.simulateModel('dv/dt=@current+10; {iNa,iK}','tspan',[0 500]);</span>
-0054 <span class="comment">%       ds.plotData(data); % plot first state variable ('v')</span>
-0055 <span class="comment">%       ds.plotData(data,'variable','*'); % plot all state variables</span>
+0053 <span class="comment">%       data=dsSimulate('dv/dt=@current+10; {iNa,iK}','tspan',[0 500]);</span>
+0054 <span class="comment">%       dsPlot(data); % plot first state variable ('v')</span>
+0055 <span class="comment">%       dsPlot(data,'variable','*'); % plot all state variables</span>
 0056 <span class="comment">%       % plot all variables and time 30-60ms</span>
-0057 <span class="comment">%       ds.plotData(data,'variable','*','time_limits',[30 60]);</span>
+0057 <span class="comment">%       dsPlot(data,'variable','*','time_limits',[30 60]);</span>
 0058 <span class="comment">%       % plot power spectrum</span>
-0059 <span class="comment">%       ds.plotData(data,'variable','v','plot_type','power');</span>
-0060 <span class="comment">%       ds.plotData(data,'variable','*','plot_type','power');</span>
+0059 <span class="comment">%       dsPlot(data,'variable','v','plot_type','power');</span>
+0060 <span class="comment">%       dsPlot(data,'variable','*','plot_type','power');</span>
 0061 <span class="comment">%</span>
 0062 <span class="comment">%   - Example 2: One population with noisy input:</span>
-0063 <span class="comment">%       data=ds.simulateModel('dv[5]/dt=@current+10*(1+randn(1,Npop)); {iNa,iK}','tspan',[0 250]);</span>
-0064 <span class="comment">%       ds.plotData(data);</span>
-0065 <span class="comment">%       ds.plotData(data,'variable','*'); % plot all state variables (all cells)</span>
-0066 <span class="comment">%       ds.plotData(data,'variable','m'); % plot state variable 'm' (all cells)</span>
+0063 <span class="comment">%       data=dsSimulate('dv[5]/dt=@current+10*(1+randn(1,Npop)); {iNa,iK}','tspan',[0 250]);</span>
+0064 <span class="comment">%       dsPlot(data);</span>
+0065 <span class="comment">%       dsPlot(data,'variable','*'); % plot all state variables (all cells)</span>
+0066 <span class="comment">%       dsPlot(data,'variable','m'); % plot state variable 'm' (all cells)</span>
 0067 <span class="comment">%       % plot all variables and time 30-60ms</span>
-0068 <span class="comment">%       ds.plotData(data,'variable','*','time_limits',[30 60]);</span>
+0068 <span class="comment">%       dsPlot(data,'variable','*','time_limits',[30 60]);</span>
 0069 <span class="comment">%       % plot power spectrum</span>
-0070 <span class="comment">%       ds.plotData(data,'variable','v','plot_type','power');</span>
-0071 <span class="comment">%       ds.plotData(data,'variable','*','plot_type','power');</span>
+0070 <span class="comment">%       dsPlot(data,'variable','v','plot_type','power');</span>
+0071 <span class="comment">%       dsPlot(data,'variable','*','plot_type','power');</span>
 0072 <span class="comment">%       % plot rastergram</span>
-0073 <span class="comment">%       ds.plotData(data,'variable','v','plot_type','rastergram');</span>
-0074 <span class="comment">%       ds.plotData(data,'variable','*','plot_type','rastergram');</span>
+0073 <span class="comment">%       dsPlot(data,'variable','v','plot_type','rastergram');</span>
+0074 <span class="comment">%       dsPlot(data,'variable','*','plot_type','rastergram');</span>
 0075 <span class="comment">%</span>
 0076 <span class="comment">%   - Example 3: One population varying one parameter (input amplitude):</span>
 0077 <span class="comment">%       eqns='dv[5]/dt=@current+amp*(1+randn(1,Npop)); {iNa,iK}';</span>
 0078 <span class="comment">%       vary={'','amp',[0 10 20]};</span>
-0079 <span class="comment">%       data=ds.simulateModel(eqns,'vary',vary,'tspan',[0 200]);</span>
-0080 <span class="comment">%       ds.plotData(data);</span>
-0081 <span class="comment">%       ds.plotData(data,'variable','m');</span>
-0082 <span class="comment">%       ds.plotData(data,'variable','*');</span>
+0079 <span class="comment">%       data=dsSimulate(eqns,'vary',vary,'tspan',[0 200]);</span>
+0080 <span class="comment">%       dsPlot(data);</span>
+0081 <span class="comment">%       dsPlot(data,'variable','m');</span>
+0082 <span class="comment">%       dsPlot(data,'variable','*');</span>
 0083 <span class="comment">%       % plot power spectrum</span>
-0084 <span class="comment">%       ds.plotData(data,'variable','v','plot_type','power');</span>
+0084 <span class="comment">%       dsPlot(data,'variable','v','plot_type','power');</span>
 0085 <span class="comment">%       % plot rastergram</span>
-0086 <span class="comment">%       ds.plotData(data,'variable','v','plot_type','rastergram');</span>
+0086 <span class="comment">%       dsPlot(data,'variable','v','plot_type','rastergram');</span>
 0087 <span class="comment">%</span>
 0088 <span class="comment">%   - Example 4: One population varying two parameters (input amplitude and</span>
 0089 <span class="comment">%                membrane capacitance):</span>
 0090 <span class="comment">%       eqns='dv[5]/dt=@current/Cm+amp*(1+randn(1,Npop)); {iNa,iK}';</span>
 0091 <span class="comment">%       vary={'','Cm',[1 2]; '','amp',[0 10 20]};</span>
-0092 <span class="comment">%       data=ds.simulateModel(eqns,'vary',vary,'tspan',[0 200]);</span>
-0093 <span class="comment">%       ds.plotData(data);</span>
-0094 <span class="comment">%       ds.plotData(data,'variable','*');</span>
+0092 <span class="comment">%       data=dsSimulate(eqns,'vary',vary,'tspan',[0 200]);</span>
+0093 <span class="comment">%       dsPlot(data);</span>
+0094 <span class="comment">%       dsPlot(data,'variable','*');</span>
 0095 <span class="comment">%       % plot power spectrum</span>
-0096 <span class="comment">%       ds.plotData(data,'variable','v','plot_type','power');</span>
+0096 <span class="comment">%       dsPlot(data,'variable','v','plot_type','power');</span>
 0097 <span class="comment">%       % plot rastergram</span>
-0098 <span class="comment">%       ds.plotData(data,'variable','v','plot_type','rastergram');</span>
+0098 <span class="comment">%       dsPlot(data,'variable','v','plot_type','rastergram');</span>
 0099 <span class="comment">%</span>
 0100 <span class="comment">%   - Example 5: Two populations: noisy input to E and excitatory connection from E to I</span>
 0101 <span class="comment">%       spec=[];</span>
@@ -293,44 +293,44 @@ This function is called by:
 0105 <span class="comment">%       spec.populations(2).equations='dv[2]/dt=@current; {iNa,iK}';</span>
 0106 <span class="comment">%       spec.connections(1).direction='E1-&gt;E2';</span>
 0107 <span class="comment">%       spec.connections(1).mechanism_list='iAMPA';</span>
-0108 <span class="comment">%       data=ds.simulateModel(spec,'tspan',[0 200]);</span>
-0109 <span class="comment">%       ds.plotData(data); % plot first state variable</span>
-0110 <span class="comment">%       ds.plotData(data,'variable','*');</span>
+0108 <span class="comment">%       data=dsSimulate(spec,'tspan',[0 200]);</span>
+0109 <span class="comment">%       dsPlot(data); % plot first state variable</span>
+0110 <span class="comment">%       dsPlot(data,'variable','*');</span>
 0111 <span class="comment">%       % plot monitored synaptic current with post-synaptic voltages:</span>
-0112 <span class="comment">%       ds.plotData(data,'variable',{'E2_v','ISYN'});</span>
+0112 <span class="comment">%       dsPlot(data,'variable',{'E2_v','ISYN'});</span>
 0113 <span class="comment">%       % plot monitored synaptic current with pre- and post-synaptic voltages:</span>
-0114 <span class="comment">%       ds.plotData(data,'variable',{'v','ISYN'});</span>
+0114 <span class="comment">%       dsPlot(data,'variable',{'v','ISYN'});</span>
 0115 <span class="comment">%       % plot power spectrum</span>
-0116 <span class="comment">%       ds.plotData(data,'variable','v','plot_type','power');</span>
-0117 <span class="comment">%       ds.plotData(data,'variable',{'E2_v','ISYN'},'plot_type','power');</span>
+0116 <span class="comment">%       dsPlot(data,'variable','v','plot_type','power');</span>
+0117 <span class="comment">%       dsPlot(data,'variable',{'E2_v','ISYN'},'plot_type','power');</span>
 0118 <span class="comment">%       % plot rastergram</span>
-0119 <span class="comment">%       ds.plotData(data,'variable','v','plot_type','rastergram');</span>
+0119 <span class="comment">%       dsPlot(data,'variable','v','plot_type','rastergram');</span>
 0120 <span class="comment">%</span>
 0121 <span class="comment">%   - Example 6: Two populations varying one parameter (input amplitude):</span>
 0122 <span class="comment">%       vary={'E1','amp',[0 10 20]};</span>
-0123 <span class="comment">%       data=ds.simulateModel(spec,'vary',vary,'tspan',[0 200]);</span>
-0124 <span class="comment">%       ds.plotData(data);</span>
-0125 <span class="comment">%       ds.plotData(data,'variable','*');</span>
-0126 <span class="comment">%       ds.plotData(data,'variable','*_iNa_*');</span>
+0123 <span class="comment">%       data=dsSimulate(spec,'vary',vary,'tspan',[0 200]);</span>
+0124 <span class="comment">%       dsPlot(data);</span>
+0125 <span class="comment">%       dsPlot(data,'variable','*');</span>
+0126 <span class="comment">%       dsPlot(data,'variable','*_iNa_*');</span>
 0127 <span class="comment">%       % plot power spectrum</span>
-0128 <span class="comment">%       ds.plotData(data,'variable','v','plot_type','power');</span>
+0128 <span class="comment">%       dsPlot(data,'variable','v','plot_type','power');</span>
 0129 <span class="comment">%       % plot rastergram</span>
-0130 <span class="comment">%       ds.plotData(data,'variable','v','plot_type','rastergram');</span>
+0130 <span class="comment">%       dsPlot(data,'variable','v','plot_type','rastergram');</span>
 0131 <span class="comment">%</span>
 0132 <span class="comment">%   - Example 7: Two populations varying two parameters (input amplitude and</span>
 0133 <span class="comment">%                synaptic conductance):</span>
 0134 <span class="comment">%       vary={'E1','amp',[0 10 20]; 'E1-&gt;E2','gSYN',[0 .05 .1]};</span>
-0135 <span class="comment">%       data=ds.simulateModel(spec,'vary',vary,'tspan',[0 200]);</span>
+0135 <span class="comment">%       data=dsSimulate(spec,'vary',vary,'tspan',[0 200]);</span>
 0136 <span class="comment">%       % plot voltage waveforms</span>
-0137 <span class="comment">%       ds.plotData(data,'variable','v','plot_type','power');</span>
+0137 <span class="comment">%       dsPlot(data,'variable','v','plot_type','power');</span>
 0138 <span class="comment">%       % plot voltage power spectrum</span>
-0139 <span class="comment">%       ds.plotData(data,'variable','v','plot_type','waveform');</span>
+0139 <span class="comment">%       dsPlot(data,'variable','v','plot_type','waveform');</span>
 0140 <span class="comment">%       % plot voltage-derived rastergram</span>
-0141 <span class="comment">%       ds.plotData(data,'variable','v','plot_type','rastergram');</span>
+0141 <span class="comment">%       dsPlot(data,'variable','v','plot_type','rastergram');</span>
 0142 <span class="comment">%       % more plots</span>
-0143 <span class="comment">%       ds.plotData(data,'variable','ISYN');</span>
-0144 <span class="comment">%       ds.plotData(data,'variable','E1_v');</span>
-0145 <span class="comment">%       ds.plotData(data,'variable','*');</span>
+0143 <span class="comment">%       dsPlot(data,'variable','ISYN');</span>
+0144 <span class="comment">%       dsPlot(data,'variable','E1_v');</span>
+0145 <span class="comment">%       dsPlot(data,'variable','*');</span>
 0146 <span class="comment">%</span>
 0147 <span class="comment">% See also: ds.calcFR, ds.calcPower, ds.plotWaveforms, ds.checkData</span>
 0148 
@@ -395,7 +395,7 @@ This function is called by:
 0207                 
 0208             <span class="keyword">end</span>
 0209             
-0210             handles = <a href="ds.plotData.html" class="code" title="function handles = ds.plotData(data,varargin)">ds.plotData</a>(data(f, :), varargin{:});
+0210             handles = <a href="dsPlot.html" class="code" title="function handles = dsPlot(data,varargin)">dsPlot</a>(data(f, :), varargin{:});
 0211             
 0212             <span class="keyword">for</span> h = 1:length(handles)
 0213                 
@@ -554,7 +554,7 @@ This function is called by:
 0366       param_cell{j}=unique([data.(varied{j})]); <span class="comment">% unique values for each parameter</span>
 0367     <span class="keyword">else</span>
 0368       <span class="comment">% todo: handle sims varying non-numeric model components</span>
-0369       <span class="comment">% (eg, mechanisms) (also in ds.plotFR and ds.selectData)</span>
+0369       <span class="comment">% (eg, mechanisms) (also in ds.plotFR and dsSelect)</span>
 0370     <span class="keyword">end</span>
 0371   <span class="keyword">end</span>
 0372   param_size=cellfun(@length,param_cell); <span class="comment">% number of unique values for each parameter</span>

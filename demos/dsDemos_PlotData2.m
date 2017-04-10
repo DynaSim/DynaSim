@@ -1,4 +1,4 @@
-%% % % % % % % % ds.plotData2 tutorial % % % % % % % %
+%% % % % % % % % dsPlot2 tutorial % % % % % % % %
 % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % 
 
 %% Set up paths 
@@ -29,33 +29,33 @@ data=ds.importData(study_dir);
 % data_3D_plots = ds.importPlots(fullfile(output_directory,'demo_sPING_3b_3D'));
 
 
-%% Do some basic plots with ds.plotData2
+%% Do some basic plots with dsPlot2
 
 close all
 
 % Default settings
-ds.plotData2(data);
+dsPlot2(data);
 
 % Take mean
-ds.plotData2(data,'do_mean',1);
+dsPlot2(data,'do_mean',1);
 
 % Plot data, just E cells, with zoom turned on
-ds.plotData2(data,'do_zoom',1,'population','E');
+dsPlot2(data,'do_zoom',1,'population','E');
 
 % As above, but focus on only a subset of the varied data. Also, reduce the
 % total number of traces displayed.
-ds.plotData2(data,'population','E','variable','v','E_Iapp',1:3,'varied2',[1,3],'do_zoom',1,'max_num_overlaid',10);
+dsPlot2(data,'population','E','variable','v','E_Iapp',1:3,'varied2',[1,3],'do_zoom',1,'max_num_overlaid',10);
 
 
-% All basic plot_types from ds.plotData should work
-% Options are availalbe from ds.plotData:
+% All basic plot_types from dsPlot should work
+% Options are availalbe from dsPlot:
 %     {'waveform','imagesc','rastergram','raster','power'}
 % And also from ds.plotFR2
 %     {'heatmapFR','heatmap_sortedFR','meanFR','meanFRdens'}
-ds.plotData2(data,'population','all','plot_type','rastergram')              % Rastergram
-ds.plotData2(data,'population','I','plot_type','heatmap_sortedFR')          % Firing rate (FR) heatmap
+dsPlot2(data,'population','all','plot_type','rastergram')              % Rastergram
+dsPlot2(data,'population','I','plot_type','heatmap_sortedFR')          % Firing rate (FR) heatmap
 
-%% Recursive plots with ds.plotData2
+%% Recursive plots with dsPlot2
 
 close all
 
@@ -65,8 +65,8 @@ close all
 
 % Plot membrane voltage for E and I cells across the parameter sweep
 % % (1 variable, 2 pops, varied1, varied2: Ndims = 3)
-ds.plotData2(data,'num_embedded_subplots',2,'do_zoom',1,'max_num_overlaid',10);  % Default
-ds.plotData2(data,'num_embedded_subplots',4,'do_zoom',1,'max_num_overlaid',10);  % Nested embedding
+dsPlot2(data,'num_embedded_subplots',2,'do_zoom',1,'max_num_overlaid',10);  % Default
+dsPlot2(data,'num_embedded_subplots',4,'do_zoom',1,'max_num_overlaid',10);  % Nested embedding
 
 % Note that in the prev example, although we set embedded subplots to 4, only
 % the first 3 are used. If excess subplots are requested and unused, they
@@ -74,13 +74,13 @@ ds.plotData2(data,'num_embedded_subplots',4,'do_zoom',1,'max_num_overlaid',10); 
 % 
 % % Setting num_embedded_subplots to provides the same data but in a different
 % % arrangement.
-% ds.plotData2(data,'num_embedded_subplots',3,'do_zoom',1);
+% dsPlot2(data,'num_embedded_subplots',3,'do_zoom',1);
 % 
 % % Depending on the data being plotted, different some arrangements can be
 % % more useful than others. For example, this plot embeds varied as a
 % % sub-subplot.
 % % % (2 variables, 2 pops, varied2, (varied1 is fixed): Ndims = 3)
-% ds.plotData2(data,'num_embedded_subplots',3,'variable','iNa*','varied1',2)
+% dsPlot2(data,'num_embedded_subplots',3,'variable','iNa*','varied1',2)
 % 
 % Lastly, 4 subplots can be nested together to view 4 dimensions
 % simultaneously. This can be increased to 5 with the overlay function
@@ -89,7 +89,7 @@ ds.plotData2(data,'num_embedded_subplots',4,'do_zoom',1,'max_num_overlaid',10); 
 % address this by producing single figures occupying very large canvases,
 % which can be zoomed to a high level of detail.
 % % (2 vars, 2 pops, varied1, varied2: Ndims = 4)
-ds.plotData2(data,'max_num_overlaid',3,'num_embedded_subplots',4,'population','all','variable','v|iNa_h','varied1',2:3,'lock_axes',false);
+dsPlot2(data,'max_num_overlaid',3,'num_embedded_subplots',4,'population','all','variable','v|iNa_h','varied1',2:3,'lock_axes',false);
 
 
 %% Modifying overlaid traces
@@ -99,25 +99,25 @@ close all
 % This provides an alternative method for stacking more data into a single
 % plot.
 
-% If there is only 1 cell from each population, ds.plotData will overlay
+% If there is only 1 cell from each population, dsPlot will overlay
 % cells from different populations by default.
 % This can be achieved by averaging across cells...
-ds.plotData2(data,'do_mean',1,'varied1',1:3,'varied2',2:3)
+dsPlot2(data,'do_mean',1,'varied1',1:3,'varied2',2:3)
 
 % ... or by looking at only the 1st cell in each population
-ds.plotData2(data,'max_num_overlaid',1,'varied1',1:3,'varied2',2:3)
+dsPlot2(data,'max_num_overlaid',1,'varied1',1:3,'varied2',2:3)
 
 % Turning this overlay off splits up the figures
-ds.plotData2(data,'max_num_overlaid',1,'varied1',1:3,'varied2',2:3,'force_overlay','none')
+dsPlot2(data,'max_num_overlaid',1,'varied1',1:3,'varied2',2:3,'force_overlay','none')
 
 close all;
 
 % Overlays can also be doubly stacked. Note that both E and I cells are
 % shown on a single plot.
-ds.plotData2(data,'max_num_overlaid',5,'force_overlay','populations');
+dsPlot2(data,'max_num_overlaid',5,'force_overlay','populations');
 
 % However, these can be messy, so the groups can be shifted up or down
-ds.plotData2(data,'max_num_overlaid',5,'force_overlay','populations','do_overlay_shift',true);
+dsPlot2(data,'max_num_overlaid',5,'force_overlay','populations','do_overlay_shift',true);
     % Variables are stacked from top to bottom, so E cells are on top and I
     % cells underneath
 
@@ -125,18 +125,18 @@ ds.plotData2(data,'max_num_overlaid',5,'force_overlay','populations','do_overlay
 % This is accomplished by setting the axis "varied1", which corresponds to
 % the injected current, to be the variable that is rastered across the
 % overlays.
-ds.plotData2(data,'do_mean',0,'varied1',1:3,'varied2',2:3,...
+dsPlot2(data,'do_mean',0,'varied1',1:3,'varied2',2:3,...
     'force_overlay','varied1','do_overlay_shift',1,'overlay_shift_val',100);
 
 
 % Variables with very different units can be compared side-by-side by
 % taking the z-score first. In this case we compare E cell membrane voltage
 % to its inhibitory synaptic input.
-ds.plotData2(data,'population','E','variable','v|I_iGABAa_s','force_overlay','variables','do_overlay_shift',true,'overlay_shift_val',3,'do_zscore',true,'do_zoom',1);
+dsPlot2(data,'population','E','variable','v|I_iGABAa_s','force_overlay','variables','do_overlay_shift',true,'overlay_shift_val',3,'do_zscore',true,'do_zoom',1);
 
 % % Double stack overlays
-% ds.plotData2(data,'population','E','variable','iNa_m|I_iGABAa_s','force_overlay','variables','do_overlay_shift',true);
-% ds.plotData2(data,'population','I','variable','v');
+% dsPlot2(data,'population','E','variable','iNa_m|I_iGABAa_s','force_overlay','variables','do_overlay_shift',true);
+% dsPlot2(data,'population','I','variable','v');
 
 
 %% Import pre-saved images
@@ -144,19 +144,19 @@ close all
 
 % Import plot files
 data_img = ds.importPlots(study_dir);
-ds.plotData2(data_img);
+dsPlot2(data_img);
 
 % Can also reference study_dir directly
-ds.plotData2(study_dir)
+dsPlot2(study_dir)
 
 % As above, but supersize them
-ds.plotData2(study_dir,'supersize_me',1)
+dsPlot2(study_dir,'supersize_me',1)
 
 
 %% Supersize me
 % load sample_data_dynasim_large.mat
 % 
-% ds.plotData2(data);
+% dsPlot2(data);
 
 
 %% Merging simulation output data
@@ -172,11 +172,11 @@ end
 data_sim2=ds.importData(study_dir2);
 
 % Test plot of new data
-ds.plotData2(data_sim2);
+dsPlot2(data_sim2);
 
 % Plot the merged new data with the old data
 data_merged = ds.mergeData(data,data_sim2);
-ds.plotData2(data_merged,'do_mean',1)
+dsPlot2(data_merged,'do_mean',1)
 
 
 %% Merge simulations' saved images
@@ -184,11 +184,11 @@ ds.plotData2(data_merged,'do_mean',1)
 data_img_sim2=ds.importPlots(study_dir2);
 
 % Test plot of saved images from sim2
-ds.plotData2(data_img_sim2);
+dsPlot2(data_img_sim2);
 
 % Merge
 data_img_merged = ds.mergeData(data_img,data_img_sim2);
-ds.plotData2(data_img_merged);
+dsPlot2(data_img_merged);
 
 
 

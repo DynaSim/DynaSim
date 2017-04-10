@@ -50,8 +50,8 @@
  Example: ...
  model='dv/dt=(@current-.1*(v+70))/Cm; Cm=1; {iNa,iK}';
  data=ds.probeCellProperties(model,'verbose_flag',1);
- ds.plotData(data(1:10));
- ds.plotData(data(11:20));
+ dsPlot(data(1:10));
+ dsPlot(data(11:20));
  
  model='dv/dt=@current-.1*(v+70)+5*randn; {iNa,iK}';
  data=ds.probeCellProperties(model,'num_repetitions',2);
@@ -63,7 +63,7 @@
 <h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
 This function calls:
 <ul style="list-style-image:url(../matlabicon.gif)">
-<li><a href="ds.applyModifications.html" class="code" title="function [output,modifications]=ds.applyModifications(model,modifications)">ds.applyModifications</a>	APPLYMODIFICATIONS - Apply modifications to DynaSim specification or model structure</li><li><a href="ds.checkModel.html" class="code" title="function model=ds.checkModel(model)">ds.checkModel</a>	CHECKMODEL - Standardize model structure and auto-populate missing fields</li><li><a href="ds.checkOptions.html" class="code" title="function [parms, params_unspecified ] = ds.checkOptions(options, options_schema, strict)">ds.checkOptions</a>	CHECKOPTIONS - organize key/value pairs in structure with default or user-supplied values according to a schema</li><li><a href="ds.generateModel.html" class="code" title="function [model,name_map]=ds.generateModel(specification,varargin)">ds.generateModel</a>	GENERATEMODEL - Parse DynaSim specification and organize model data in DynaSim model structure</li><li><a href="ds.removeKeyval.html" class="code" title="function keyvals_out = ds.removeKeyval(keyvals,keys)">ds.removeKeyval</a>	REMOVEKEYVAL - remove keys from keyvals_in.</li><li><a href="ds.simulateModel.html" class="code" title="function [data,studyinfo]=ds.simulateModel(model,varargin)">ds.simulateModel</a>	% data=ds.simulateModel(model,'option',value,...)</li></ul>
+<li><a href="ds.applyModifications.html" class="code" title="function [output,modifications]=ds.applyModifications(model,modifications)">ds.applyModifications</a>	APPLYMODIFICATIONS - Apply modifications to DynaSim specification or model structure</li><li><a href="ds.checkModel.html" class="code" title="function model=ds.checkModel(model)">ds.checkModel</a>	CHECKMODEL - Standardize model structure and auto-populate missing fields</li><li><a href="ds.checkOptions.html" class="code" title="function [parms, params_unspecified ] = ds.checkOptions(options, options_schema, strict)">ds.checkOptions</a>	CHECKOPTIONS - organize key/value pairs in structure with default or user-supplied values according to a schema</li><li><a href="ds.generateModel.html" class="code" title="function [model,name_map]=ds.generateModel(specification,varargin)">ds.generateModel</a>	GENERATEMODEL - Parse DynaSim specification and organize model data in DynaSim model structure</li><li><a href="ds.removeKeyval.html" class="code" title="function keyvals_out = ds.removeKeyval(keyvals,keys)">ds.removeKeyval</a>	REMOVEKEYVAL - remove keys from keyvals_in.</li><li><a href="dsSimulate.html" class="code" title="function [data,studyinfo]=dsSimulate(model,varargin)">dsSimulate</a>	% data=dsSimulate(model,'option',value,...)</li></ul>
 This function is called by:
 <ul style="list-style-image:url(../matlabicon.gif)">
 </ul>
@@ -97,8 +97,8 @@ This function is called by:
 0023 <span class="comment">% Example: ...</span>
 0024 <span class="comment">% model='dv/dt=(@current-.1*(v+70))/Cm; Cm=1; {iNa,iK}';</span>
 0025 <span class="comment">% data=ds.probeCellProperties(model,'verbose_flag',1);</span>
-0026 <span class="comment">% ds.plotData(data(1:10));</span>
-0027 <span class="comment">% ds.plotData(data(11:20));</span>
+0026 <span class="comment">% dsPlot(data(1:10));</span>
+0027 <span class="comment">% dsPlot(data(11:20));</span>
 0028 <span class="comment">%</span>
 0029 <span class="comment">% model='dv/dt=@current-.1*(v+70)+5*randn; {iNa,iK}';</span>
 0030 <span class="comment">% data=ds.probeCellProperties(model,'num_repetitions',2);</span>
@@ -187,7 +187,7 @@ This function is called by:
 0113 <span class="comment">% execute experimental protocol by varying parameters across simulations</span>
 0114 fprintf(<span class="string">'Running experiment: %s\n'</span>,mfilename);
 0115 keyvals=<a href="ds.removeKeyval.html" class="code" title="function keyvals_out = ds.removeKeyval(keyvals,keys)">ds.removeKeyval</a>(varargin,<span class="string">'tspan'</span>);
-0116 data=<a href="ds.simulateModel.html" class="code" title="function [data,studyinfo]=ds.simulateModel(model,varargin)">ds.simulateModel</a>(model,<span class="string">'vary'</span>,vary,<span class="string">'tspan'</span>,options.tspan,keyvals{:});
+0116 data=<a href="dsSimulate.html" class="code" title="function [data,studyinfo]=dsSimulate(model,varargin)">dsSimulate</a>(model,<span class="string">'vary'</span>,vary,<span class="string">'tspan'</span>,options.tspan,keyvals{:});
 0117 
 0118 <span class="comment">% add options to data</span>
 0119 <span class="keyword">for</span> i=1:length(data)

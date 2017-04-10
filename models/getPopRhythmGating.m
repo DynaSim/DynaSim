@@ -21,7 +21,7 @@ function [sext,tstart,Pinputs,Psource,conn,T,lambda]=getPopRhythmGating(num_sour
 % % Example:
 % Nin=10; Nout=10; p=.6; f=5; FR=5; w=10; T=0:.01:1000; tau=2; kick=1;
 % sext=getPopRhythmGating(Nin,Nout,p,FR,f,w,T,0,inf,tau,kick);
-% ds.plotData(sext)
+% dsPlot(sext)
 % figure
 % subplot(2,1,1); plot(T,sum(sext,2)); xlabel('t'); ylabel('total input from source rhythm')
 % subplot(2,1,2); plot(T,sext); xlabel('t'); ylabel('inputs to each target cell');

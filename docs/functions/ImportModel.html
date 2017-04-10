@@ -195,7 +195,7 @@ This function is called by:
 0130     <span class="keyword">return</span>;
 0131   <span class="keyword">end</span>
 0132   Npopstr=[popname <span class="string">'_Npop'</span>];
-0133   <span class="comment">% add default ICs if missing (do not evaluate ICs in ds.generateModel; do that in ds.simulateModel before saving params.mat)</span>
+0133   <span class="comment">% add default ICs if missing (do not evaluate ICs in ds.generateModel; do that in dsSimulate before saving params.mat)</span>
 0134   <span class="keyword">if</span> isstruct(modl.ICs)
 0135     missing_ICs=setdiff(modl.state_variables,fieldnames(modl.ICs));
 0136   <span class="keyword">else</span>

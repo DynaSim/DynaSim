@@ -30,7 +30,7 @@
 
  TODO: break up this function into smaller functions
 
- See also: <a href="ds.simulateModel.html" class="code" title="function [data,studyinfo]=ds.simulateModel(model,varargin)">ds.simulateModel</a>, <a href="ds.updateStudy.html" class="code" title="function studyinfo=ds.updateStudy(study_dir,varargin)">ds.updateStudy</a></pre></div>
+ See also: <a href="dsSimulate.html" class="code" title="function [data,studyinfo]=dsSimulate(model,varargin)">dsSimulate</a>, <a href="ds.updateStudy.html" class="code" title="function studyinfo=ds.updateStudy(study_dir,varargin)">ds.updateStudy</a></pre></div>
 
 <!-- crossreference -->
 <h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
@@ -39,7 +39,7 @@ This function calls:
 <li><a href="ds.checkOptions.html" class="code" title="function [parms, params_unspecified ] = ds.checkOptions(options, options_schema, strict)">ds.checkOptions</a>	CHECKOPTIONS - organize key/value pairs in structure with default or user-supplied values according to a schema</li><li><a href="ds.checkStudyinfo.html" class="code" title="function studyinfo=ds.checkStudyinfo(studyinfo,varargin)">ds.checkStudyinfo</a>	CHECKSTUDYINFO - Standardize studyinfo structure and auto-populate missing fields</li><li><a href="ds.studyinfoIO.html" class="code" title="function studyinfo=ds.studyinfoIO(studyinfo,study_file,id,verbose_flag)">ds.studyinfoIO</a>	STUDYINFOIO - use lock files to manage concurrent access to a shared studyinfo</li></ul>
 This function is called by:
 <ul style="list-style-image:url(../matlabicon.gif)">
-<li><a href="ds.createBatch.html" class="code" title="function studyinfo = ds.createBatch(base_model,modifications_set,varargin)">ds.createBatch</a>	CREATEBATCH - create and submit jobs to run sets of simulations or analyses.</li><li><a href="ds.simulateModel.html" class="code" title="function [data,studyinfo]=ds.simulateModel(model,varargin)">ds.simulateModel</a>	% data=ds.simulateModel(model,'option',value,...)</li></ul>
+<li><a href="ds.createBatch.html" class="code" title="function studyinfo = ds.createBatch(base_model,modifications_set,varargin)">ds.createBatch</a>	CREATEBATCH - create and submit jobs to run sets of simulations or analyses.</li><li><a href="dsSimulate.html" class="code" title="function [data,studyinfo]=dsSimulate(model,varargin)">dsSimulate</a>	% data=dsSimulate(model,'option',value,...)</li></ul>
 <!-- crossreference -->
 
 
@@ -50,17 +50,17 @@ This function is called by:
 0003 <span class="comment">%</span>
 0004 <span class="comment">% TODO: break up this function into smaller functions</span>
 0005 <span class="comment">%</span>
-0006 <span class="comment">% See also: ds.simulateModel, ds.updateStudy</span>
+0006 <span class="comment">% See also: dsSimulate, ds.updateStudy</span>
 0007 
 0008 <span class="comment">% Check inputs</span>
 0009 opts=<a href="ds.checkOptions.html" class="code" title="function [parms, params_unspecified ] = ds.checkOptions(options, options_schema, strict)">ds.checkOptions</a>(varargin,{<span class="keyword">...</span>
 0010   <span class="string">'modifications_set'</span>,[],[],<span class="keyword">...</span><span class="comment"> % search space</span>
-0011   <span class="string">'simulator_options'</span>,[],[],<span class="keyword">...</span><span class="comment"> % options from ds.simulateModel</span>
+0011   <span class="string">'simulator_options'</span>,[],[],<span class="keyword">...</span><span class="comment"> % options from dsSimulate</span>
 0012   <span class="string">'process_id'</span>,[],[],<span class="keyword">...</span><span class="comment"> % process identifier for loading studyinfo if necessary</span>
 0013   },false);
 0014 
 0015 <span class="keyword">if</span> isempty(opts.simulator_options)
-0016   error(<span class="string">'ds.setupStudy must be given a simulator_options structure from ds.simulateModel'</span>);
+0016   error(<span class="string">'ds.setupStudy must be given a simulator_options structure from dsSimulate'</span>);
 0017 <span class="keyword">end</span>
 0018 modifications_set=opts.modifications_set;
 0019 process_id=opts.process_id;
@@ -203,7 +203,7 @@ This function is called by:
 0156         studyinfo.simulations(k).result_options{end+1}=options.plot_options{kk};
 0157         fname=[options.prefix <span class="string">'_sim'</span> num2str(k) <span class="string">'_plot'</span> num2str(kk) <span class="string">'_'</span> func2str(options.plot_functions{kk})]; 
 0158         <span class="comment">% note: extension will depend on output format (jpg,png,eps,svg)</span>
-0159         <span class="comment">% and be set in ds.analyzeData().</span>
+0159         <span class="comment">% and be set in dsAnalyze().</span>
 0160         studyinfo.simulations(k).result_files{end+1}=fullfile(plot_dir,fname);
 0161       <span class="keyword">end</span>
 0162       

@@ -32,7 +32,7 @@
  any new figures or subplots. It can return an axis handle, but this is not
  necessary.
 
- Arrays the output plots in a grid, similar to ds.plotData. Intended for use with
+ Arrays the output plots in a grid, similar to dsPlot. Intended for use with
  results from simulation studies varying some aspect of the model or inputs.
 
  Usage:
@@ -78,7 +78,7 @@ This function is called by:
 0005 <span class="comment">% any new figures or subplots. It can return an axis handle, but this is not</span>
 0006 <span class="comment">% necessary.</span>
 0007 <span class="comment">%</span>
-0008 <span class="comment">% Arrays the output plots in a grid, similar to ds.plotData. Intended for use with</span>
+0008 <span class="comment">% Arrays the output plots in a grid, similar to dsPlot. Intended for use with</span>
 0009 <span class="comment">% results from simulation studies varying some aspect of the model or inputs.</span>
 0010 <span class="comment">%</span>
 0011 <span class="comment">% Usage:</span>
@@ -115,7 +115,7 @@ This function is called by:
 0042 textfontsize = options.textfontsize;
 0043 use_subplot_grid = options.use_subplot_grid;
 0044 
-0045 <span class="comment">% New code (imported from ds.plotData)</span>
+0045 <span class="comment">% New code (imported from dsPlot)</span>
 0046 num_sims=length(data); <span class="comment">% number of simulations</span>
 0047 
 0048 <span class="comment">% make subplot adjustments for varied parameters</span>
@@ -137,7 +137,7 @@ This function is called by:
 0064       param_cell{j}=unique([data.(varied{j})]); <span class="comment">% unique values for each parameter</span>
 0065     <span class="keyword">else</span>
 0066       <span class="comment">% todo: handle sims varying non-numeric model components</span>
-0067       <span class="comment">% (eg, mechanisms) (also in ds.plotFR and ds.selectData)</span>
+0067       <span class="comment">% (eg, mechanisms) (also in ds.plotFR and dsSelect)</span>
 0068     <span class="keyword">end</span>
 0069   <span class="keyword">end</span>
 0070   

@@ -48,7 +48,7 @@
  % Example:
  Nin=10; Nout=10; p=.6; f=5; FR=5; w=10; T=0:.01:1000; tau=2; kick=1;
  sext=getPopRhythmGating(Nin,Nout,p,FR,f,w,T,0,inf,tau,kick);
- ds.plotData(sext)
+ dsPlot(sext)
  figure
  subplot(2,1,1); plot(T,sum(sext,2)); xlabel('t'); ylabel('total input from source rhythm')
  subplot(2,1,2); plot(T,sext); xlabel('t'); ylabel('inputs to each target cell');</pre></div>
@@ -91,7 +91,7 @@ This function is called by:
 0021 <span class="comment">% % Example:</span>
 0022 <span class="comment">% Nin=10; Nout=10; p=.6; f=5; FR=5; w=10; T=0:.01:1000; tau=2; kick=1;</span>
 0023 <span class="comment">% sext=getPopRhythmGating(Nin,Nout,p,FR,f,w,T,0,inf,tau,kick);</span>
-0024 <span class="comment">% ds.plotData(sext)</span>
+0024 <span class="comment">% dsPlot(sext)</span>
 0025 <span class="comment">% figure</span>
 0026 <span class="comment">% subplot(2,1,1); plot(T,sum(sext,2)); xlabel('t'); ylabel('total input from source rhythm')</span>
 0027 <span class="comment">% subplot(2,1,2); plot(T,sext); xlabel('t'); ylabel('inputs to each target cell');</span>

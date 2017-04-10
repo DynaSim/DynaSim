@@ -13,25 +13,25 @@ function sext=getPoissonGating(baseline,dc,ac,freq,phase,onset,offset,tau,T,N,ke
 % time=0:.01:1e3; % ms, time vector
 % Npop=2;         % size of target population
 % s=getPoissonGating(baseline,DC,AC,f,phi,onset,offset,tau,time,Npop);
-% ds.plotData(s,'plot_type','waveform');
-% ds.plotData(s,'plot_type','power');
+% dsPlot(s,'plot_type','waveform');
+% dsPlot(s,'plot_type','power');
 % 
 % % Example 2: single cell with poisson-based AMPA input (lambda=100Hz)
 % eqns='dV/dt=@current-s(k,:).*V; s=getPoissonGating(0,100); {iNa,iK}';
-% data=ds.simulateModel(eqns,'tspan',[0 1000]);
-% ds.plotData(data);
+% data=dsSimulate(eqns,'tspan',[0 1000]);
+% dsPlot(data);
 % 
 % % Example 3: parameterized version of Example 2
 % eqns='dV/dt=@current-g*s(k,:).*(V-E); s=getPoissonGating(0,DC); {iNa,iK}; g=1; E=0; DC=0';
-% data=ds.simulateModel(eqns,'tspan',[0 500],'vary',{'DC',[0 100 1000];'g',[.01 1]});
-% ds.plotData(data);
+% data=dsSimulate(eqns,'tspan',[0 500],'vary',{'DC',[0 100 1000];'g',[.01 1]});
+% dsPlot(data);
 % 
 % % Example 4: rhythmically-modulated poisson, AMPA synapse, monitoring input
 % eqns={'dV/dt=@current+Iampa(V); {iNa,iK}; monitor Iampa';
 %       'Iampa(V)=-gext*s(k,:).*(V-0); s=getPoissonGating(0,DC,AC,f)';
 %       'gext=.001; DC=25000; AC=25000; f=5; V(0)=-65'};
-% data=ds.simulateModel(eqns,'tspan',[0 1000]);
-% ds.plotData(data,'variable',{'V','Iampa'});
+% data=dsSimulate(eqns,'tspan',[0 1000]);
+% dsPlot(data,'variable',{'V','Iampa'});
 
 % default parameters
 if nargin<1, baseline=0; end % Hz

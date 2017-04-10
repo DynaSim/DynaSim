@@ -79,7 +79,7 @@ This function is called by:
 0029 <span class="comment">%</span>
 0030 <span class="comment">% TODO: add rastergrams</span>
 0031 <span class="comment">%</span>
-0032 <span class="comment">% See also: ds.calcFR, ds.simulateModel, ds.checkData</span>
+0032 <span class="comment">% See also: ds.calcFR, dsSimulate, ds.checkData</span>
 0033 
 0034 data=<a href="ds.checkData.html" class="code" title="function data=ds.checkData(data)">ds.checkData</a>(data);
 0035 fields=fieldnames(data);
@@ -313,7 +313,7 @@ This function is called by:
 0263     <a name="_sub3" href="#_subfunctions" class="code">function plotFR_SimStudy_specialized    </a><span class="comment">% Specifc plot for all sims, based on options.plot_type</span>
 0264         <span class="comment">%%</span>
 0265         
-0266         <span class="comment">% New code (imported from ds.plotData)</span>
+0266         <span class="comment">% New code (imported from dsPlot)</span>
 0267         num_sims=length(data); <span class="comment">% number of simulations</span>
 0268         
 0269         
@@ -333,7 +333,7 @@ This function is called by:
 0283               param_cell{j}=unique([data.(varied{j})]); <span class="comment">% unique values for each parameter</span>
 0284             <span class="keyword">else</span>
 0285               <span class="comment">% todo: handle sims varying non-numeric model components</span>
-0286               <span class="comment">% (eg, mechanisms) (also in ds.plotFR and ds.selectData)</span>
+0286               <span class="comment">% (eg, mechanisms) (also in ds.plotFR and dsSelect)</span>
 0287             <span class="keyword">end</span>
 0288           <span class="keyword">end</span>
 0289           param_size=cellfun(@length,param_cell); <span class="comment">% number of unique values for each parameter</span>

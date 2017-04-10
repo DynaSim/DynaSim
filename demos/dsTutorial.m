@@ -47,7 +47,7 @@ eqns={
   'dy/dt=r*x-y-x*z';
   'dz/dt=-b*z+x*y';
 };
-data=ds.simulateModel(eqns,'tspan',[0 100],'ic',[1 2 .5],'solver','rk4');
+data=dsSimulate(eqns,'tspan',[0 100],'ic',[1 2 .5],'solver','rk4');
 % tspan: time limits on integration [ms]
 % ic: initial conditions
 % solver: numerical method to use (default: rk4 = "4th-order Runge-Kutta")
@@ -55,7 +55,7 @@ data=ds.simulateModel(eqns,'tspan',[0 100],'ic',[1 2 .5],'solver','rk4');
 % Simulated data are returned in a DynaSim data structure:
 data
 data.labels % list of state variables (and functions) that are stored in data structure
-data.simulator_options % ds.simulateModel options used to solve the model system
+data.simulator_options % dsSimulate options used to solve the model system
 
 % The simulated model is also stored as a DynaSim model structure:
 data.model
@@ -98,7 +98,7 @@ title('Lorenz equations'); xlabel('t'); ylabel('x')
 % more Matlab statements separated by semicolons.
 
 eqns='tau=10; R=10; E=-70; dV/dt=(E-V+R*1.55)/tau; if(V>-55)(V=-75)';
-data=ds.simulateModel(eqns,'tspan',[0 200],'ic',-75);
+data=dsSimulate(eqns,'tspan',[0 200],'ic',-75);
 
 % view the solver file:
 edit(data.simulator_options.solve_file)
@@ -129,7 +129,7 @@ eqns={
   'dV/dt=(E-V+R*I)/tau; if(V>thresh)(V=reset)';
   'monitor V.spikes(thresh)';
 };
-data=ds.simulateModel(eqns,'tspan',[0 200],'ic',-75);
+data=dsSimulate(eqns,'tspan',[0 200],'ic',-75);
 % insert spike where LIF resets occur
 data.pop1_V(data.pop1_V_spikes==1)=20;
 % plot the LIF response with spikes
@@ -147,7 +147,7 @@ xlabel('time (ms)'); ylabel('V'); title('LIF with spikes')
 % I(t) that turns on while t>ton and t<toff, and is scaled by a noisy 
 % factor using the built-in "rand" function. The example also demonstrates 
 % how initial conditions can be defined in the equations themselves, 
-% instead of passing them as an option to ds.simulateModel.
+% instead of passing them as an option to dsSimulate.
 
 eqns={
   'C=100; vr=-60; vt=-40; k=.7; Iapp=70; ton=200; toff=800';
@@ -158,7 +158,7 @@ eqns={
   'I(t)=Iapp*(t>ton&t<toff)*(1+.5*rand)'; % define applied input using reserved variables 't' for time and 'dt' for fixed time step of numerical integration
   'monitor I';                            % indicate to store applied input during simulation
 };
-data=ds.simulateModel(eqns,'tspan',[0 1000]);
+data=dsSimulate(eqns,'tspan',[0 1000]);
 % plot the simulated voltage and monitored input function
 figure; 
 subplot(2,1,1); plot(data.time,data.pop1_v); % plot voltage
@@ -188,13 +188,13 @@ eqns={
   'aN(v) = (.1-.01*(v+65))./(exp(1-.1*(v+65))-1)';
   'bN(v) = .125*exp(-(v+65)/80)';
 };
-data=ds.simulateModel(eqns);
+data=dsSimulate(eqns);
 figure; plot(data.time,data.(data.labels{1}))
 xlabel('time (ms)'); ylabel('membrane potential (mV)'); title('Hodgkin-Huxley neuron')
 
 % Equations can also be stored in a text file and simulated by passing the
-% file name to ds.simulateModel:
-data=ds.simulateModel('HH.eqns');
+% file name to dsSimulate:
+data=dsSimulate('HH.eqns');
 
 % Model files used for simulation can be easily located:
 [~,eqnfile]=ds.locateModelFiles(data); % eqnfile is a cell array of file names
@@ -252,7 +252,7 @@ edit(eqnfile{1}); % compare to the above list of equations
 
 % Example of simplified specification of bursting neuron using mechanisms:
 eqns='dv/dt=5+@current; {iNaF,iKDR,iM}; gNaF=100; gKDR=5; gM=1.5; v(0)=-70';
-data=ds.simulateModel(eqns,'tspan',[0 200]);
+data=dsSimulate(eqns,'tspan',[0 200]);
 figure; plot(data.time,data.(data.labels{1}))
 xlabel('time (ms)'); ylabel('membrane potential (mV)'); title('Intrinsically Bursting neuron')
 % The model uses three ion current mechanisms stored in separate files: (in <dynasim>/models)
@@ -321,7 +321,7 @@ eqns={
 % mechanism function INa to all locations where @IDENTIFIER appears in the same
 % population.
 % 2. In target equation (e.g., in another mechanism or equation passed to
-% ds.simulateModel): include the target location IDENTIFIER in the equation
+% dsSimulate): include the target location IDENTIFIER in the equation
 % where the variable or function should be substituted. Example:
 % "dX/dt=@IDENTIFIER" means insert all functions linked to @IDENTIFIER by all
 % mechanisms of the same population.
@@ -343,7 +343,7 @@ eqns={
 % functions to be incorporated in equations defined elsewhere. 
 
 % Demonstrate mechanism-based HH model simulation:
-data=ds.simulateModel('dv/dt=10+@current/Cm; Cm=1; v(0)=-65; {iNa,iK}');
+data=dsSimulate('dv/dt=10+@current/Cm; Cm=1; v(0)=-65; {iNa,iK}');
 
 % As models get larger and incorporate an increasing number of model files, 
 % the chance of two files using the same name for a variable or function increases. 
@@ -365,7 +365,7 @@ data
 
 % All functions of a mechanism can be monitored using the following syntax: 
 % monitor MECHANISM.functions. Example:
-data=ds.simulateModel('dv/dt=10+@current; {iNa,iK}; monitor iNa.functions');
+data=dsSimulate('dv/dt=10+@current; {iNa,iK}; monitor iNa.functions');
 data.model.functions
 data.model.monitors
 data
@@ -411,7 +411,7 @@ data
 % see ds.checkSpecification for more details.
 
 % inspect the specification structure for the Hodgkin-Huxley model:
-data=ds.simulateModel('dv/dt=10+@current; {iNa,iK}');
+data=dsSimulate('dv/dt=10+@current; {iNa,iK}');
 data.model.specification.populations
 data.model.specification.populations.equations
 data.model.specification.populations.mechanism_list
@@ -425,14 +425,14 @@ data.model.specification.connections % no connections between populations
 % method #1 -- list mechanisms in equation string
 specification=[];
 specification.populations.equations='dv/dt=10+@current; {iNa,iK}';
-data=ds.simulateModel(specification);
+data=dsSimulate(specification);
 %figure; plot(data.time,data.(data.labels{1}))
 
 % method #2 -- list mechanisms separately in mechanism_list cell array
 specification=[];
 specification.populations.equations='dv/dt=10+@current';
 specification.populations.mechanism_list={'iNa','iK'};
-data=ds.simulateModel(specification);
+data=dsSimulate(specification);
 %figure; plot(data.time,data.(data.labels{1}))
 % Tip: use method #2 in script with mechanism names stored in variables
 % to easily control the mechanisms that are incorporated in a model.
@@ -448,7 +448,7 @@ s.connections(1).source='I';
 s.connections(1).target='E';
 s.connections(1).mechanism_list='iGABAa';
 s.connections(1).parameters={'gSYN',100};
-data=ds.simulateModel(s,'tspan',[0 400]);
+data=dsSimulate(s,'tspan',[0 400]);
 figure; plot(data.time,data.E_v,'b-',data.time,data.I_v,'r-'); 
 title('E/I network'); xlabel('time (ms)'); ylabel('v'); legend('E (decay)','I (LIF)'); ylim([-80 -50])
 
@@ -478,7 +478,7 @@ s.connections(2).source='E';
 s.connections(2).target='I';
 s.connections(2).mechanism_list={'iAMPA'};
 s.connections(2).parameters={'tauD',2,'gSYN',.1,'netcon',ones(80,20)};
-data=ds.simulateModel(s);
+data=dsSimulate(s);
 
 % Resulting data matrices have dimensions [time x cells].
 %   DynaSim data structure:
@@ -529,7 +529,7 @@ s.cons(2).source='E';
 s.cons(2).target='I';
 s.cons(2).mechanism_list={'iAMPA'};
 s.cons(2).parameters={'tauD',2,'gSYN',.1,'netcon',0*ones(80,20)};
-data=ds.simulateModel(s);
+data=dsSimulate(s);
 figure; plot(data.time,data.E_v,'b-',data.time,data.I_v,'r-')
 title('sPING with E->I turned off');
 
@@ -608,8 +608,8 @@ title('sPING with E->I turned off');
 % for more details and examples).
 
 eqns='dv/dt=@current+10; {iNa,iK}; v(0)=-60';
-data=ds.simulateModel(eqns,'vary',{'pop1','gNa',[50 100 200]});
-data=ds.simulateModel(eqns,'vary',{'','gNa',[50 100 200]}); % since only 1 pop
+data=dsSimulate(eqns,'vary',{'pop1','gNa',[50 100 200]});
+data=dsSimulate(eqns,'vary',{'','gNa',[50 100 200]}); % since only 1 pop
 data
 data(1)
 [data.pop1_gNa]
@@ -630,11 +630,11 @@ ds.plotFR(data,'bin_size',30,'bin_shift',10); % bin_size and bin_shift in [ms]
 % plot how firing rate varies over time for one data set
 ds.plotFR(data(2),'bin_size',30,'bin_shift',10); % bin_size and bin_shift in [ms]
 % plot waveforms
-ds.plotData(data,'plot_type','waveform')
+dsPlot(data,'plot_type','waveform')
 % plot power spectrum
-ds.plotData(data,'plot_type','power')
+dsPlot(data,'plot_type','power')
 % plot rastergram
-ds.plotData(data,'plot_type','rastergram');
+dsPlot(data,'plot_type','rastergram');
 
 % note: ds.plotFR accepts any DynaSim data structure or array of data
 % structures and generates different plots depending on properties of the
@@ -642,7 +642,7 @@ ds.plotData(data,'plot_type','rastergram');
 % it always try to generate the most informative plots.
 
 % generic manually calculate and plot firing rate (works with any model)
-data=ds.selectData(data,'time_limits',[20 80]); % extract times 20-80ms
+data=dsSelect(data,'time_limits',[20 80]); % extract times 20-80ms
 data=ds.calcFR(data,'bin_size',30,'bin_shift',10); % calculate firing rates for each cell in each data set
 FRname=data(1).results{1}; % .results contains a list of fields with results calculated in ds.calcFR
 FRmean=cellfun(@mean,{data.(FRname)}); % calculate average firing rates
@@ -655,7 +655,7 @@ vary={
   'E'   ,'Iapp',[0 10 20];     % amplitude of tonic input to E-cells
   'I->E','tauD',[5 10 15]   % inhibition decay time constant from I to E
   };
-data=ds.simulateModel(sPING_model,'vary',vary);
+data=dsSimulate(sPING_model,'vary',vary);
 % plot firing rates calculated from spike monitor in both populations
 ds.plotFR(data,'variable','*_spikes','bin_size',30,'bin_shift',10);
 % plot firing rates calculated from voltage state variables in both populations
@@ -666,7 +666,7 @@ ds.plotFR(data,'variable','*_spikes','bin_size',30,'bin_shift',10);
 % Spike Monitor (threshold=10) for different tonic amplitudes and max sodium conductance
 eqns='dv/dt=@current+amp; {iNa,iK}; monitor v.spikes(10)';
 vary={'','amp',2:2:60;'','gNa',[100 120]};
-data=ds.simulateModel(eqns,'vary',vary);
+data=dsSimulate(eqns,'vary',vary);
 figure
 a=[data.pop1_amp]; amps=unique(a);
 b=[data.pop1_gNa]; gNas=unique(b);
@@ -693,7 +693,7 @@ study_dir='study_HH_varyI';
 eqns='dv/dt=@current+I; {iNa,iK}';
 vary={'','I',[0 10 20]};
 
-[data,studyinfo]=ds.simulateModel(eqns,'vary',vary,'save_data_flag',1,'study_dir',study_dir,'verbose_flag',1);
+[data,studyinfo]=dsSimulate(eqns,'vary',vary,'save_data_flag',1,'study_dir',study_dir,'verbose_flag',1);
 
 %   DynaSim studyinfo structure (only showing select fields, see ds.checkStudyinfo for more details)
 %     studyinfo.study_dir
@@ -729,13 +729,13 @@ data=ds.importData('study_HH_varyI');
 ds.plotFR(data);
 
 % re-running the simulation loads data if it already exists (see log)
-[data,studyinfo]=ds.simulateModel(eqns,'vary',vary,'save_data_flag',1,'study_dir',study_dir,'verbose_flag',1);
+[data,studyinfo]=dsSimulate(eqns,'vary',vary,'save_data_flag',1,'study_dir',study_dir,'verbose_flag',1);
 
 %% cluster computing
 % How to: set 'cluster_flag' to 1
 % Requirement: you must be logged on to a cluster that recognizes 'qsub'
 
-% DynaSim creates m-files called jobs that run ds.simulateModel for one or
+% DynaSim creates m-files called jobs that run dsSimulate for one or
 % more simulations. Jobs are saved in ~/batchdirs/<study_dir> and are
 % submitted to the cluster queue using the command 'qsub'. Standard out and
 % error logs for each job are saved in ~/batchdirs/<study_dir>/pbsout.
@@ -746,7 +746,7 @@ study_dir='study_HH_varyI_cluster';
 eqns='dv/dt=@current+I; {iNa,iK}';
 vary={'','I',[0 10 20]};
 
-[data,studyinfo]=ds.simulateModel(eqns,'vary',vary,...
+[data,studyinfo]=dsSimulate(eqns,'vary',vary,...
   'study_dir',study_dir,'save_data_flag',1,'cluster_flag',1,'verbose_flag',1);
 % note: if on a cluster, jobs will be automatically submitted using "qsub"
 studyinfo.simulations(1)
@@ -777,7 +777,7 @@ study_dir='study_HH_varyI_cluster2';
 eqns='dv/dt=@current+I; {iNa,iK}';
 vary={'','I',[0:10:50]};
 
-[data,studyinfo]=ds.simulateModel(eqns,'vary',vary,...
+[data,studyinfo]=dsSimulate(eqns,'vary',vary,...
   'study_dir',study_dir,'cluster_flag',1,'sims_per_job',3,'save_data_flag',1,'verbose_flag',1);
 
 if 0 % manually run the simulation jobs (see caution above)
@@ -809,8 +809,8 @@ vary={
   {P,'a',-.02;P,'b',-1 ; P,'c',-60; P,'d',8;  P,'I',80} % inhibition-induced spiking
   {P,'a',-.026;P,'b',-1; P,'c',-45; P,'d',0;  P,'I',70} % inhibition-induced bursting
   };
-data=ds.simulateModel(eqns,'tspan',[0 250],'vary',vary);
-ds.plotData(data);
+data=dsSimulate(eqns,'tspan',[0 250],'vary',vary);
+dsPlot(data);
     
     
 return
@@ -823,7 +823,7 @@ return
 %% Converting models from DNSim to DynaSim
 
 % Replace function calls: buildmodel() by ds.generateModel(); runsim() by 
-% ds.simulateModel(); simstudy() by ds.simulateModel() with (scope,variable,values) 
+% dsSimulate(); simstudy() by dsSimulate() with (scope,variable,values) 
 % reorganized and passed as modifications={scope,variable,values; scope,variable,values; ...}.
 
 % Each variable/monitor now has dimensions [data] = time x cells.  
@@ -853,7 +853,7 @@ return
 % variables and functions can be linked between mechanisms in the same way 
 % they are linked from mechanism to population equations. 
 
-data=ds.simulateModel('dv/dt=@current; {iNa,iK,iCa,iCan,CaBuffer}');
+data=dsSimulate('dv/dt=@current; {iNa,iK,iCa,iCan,CaBuffer}');
 figure; plot(data.time,data.(data.labels{1}))
 % linkers and linked ODEs:
 % CaBuffer.mech: @cai += cai
@@ -867,7 +867,7 @@ eqns={
   'dv/dt=@current; {iNa,iK,iCa,iCan,CaBuffer}';
   'monitor o=sqrt(@cai), ica=@ica, iCa.I, iCan.I';
   };
-data=ds.simulateModel(eqns)
+data=dsSimulate(eqns)
 data.model.monitors
 % plot iCa.I, iCan.I, @ica (= sum of the other two)
   
@@ -887,16 +887,16 @@ data.model.monitors
     % 'dv/dt=@M; {iNa,iK}@M'; or .mechanism_list={'iNa@M','iK@M'}).
 
     eqns='dv/dt=@M+I; {iNa,iK}@M; monitor functions';
-    data=ds.simulateModel(eqns,'vary',{'','I',[0 10 20]});
+    data=dsSimulate(eqns,'vary',{'','I',[0 10 20]});
     ds.plotFR(data);
 
     eqns='dv/dt=@M+10; {iNa,iK}@M; monitor functions';
-    data=ds.simulateModel(eqns,'vary',{'','gNa',[50 100 200]});
+    data=dsSimulate(eqns,'vary',{'','gNa',[50 100 200]});
     ds.plotFR(data);
 
 %% Special functions: Experiment [and Optimization]
 
-    data=ds.simulateModel('dv/dt=@current+10; {iNa,iK}','experiment',@ds.probeFI);
+    data=dsSimulate('dv/dt=@current+10; {iNa,iK}','experiment',@ds.probeFI);
     ds.plotFR(data);
 
 %% Modifications and Vary
@@ -913,17 +913,17 @@ data.model.monitors
     % ds.vary2Modifications() returns a cell array of modifications specified 
     % by the vary statement
     
-    % ds.simulateModel() supports both "modifications" and "vary" options; if
+    % dsSimulate() supports both "modifications" and "vary" options; if
     % the latter is provided, a set of simulations are performed and a set
     % of simulated data sets are returned and/or saved.
     
     eqns='dv/dt=@current+I; {iNa,iK}';
     modifications={'','I',10};
-    data=ds.simulateModel(eqns,'modifications',modifications);
+    data=dsSimulate(eqns,'modifications',modifications);
 
     eqns='dv/dt=@current+I; {iNa,iK}';
     vary={'','I',[0 10 20]};
-    data=ds.simulateModel(eqns,'vary',vary);
+    data=dsSimulate(eqns,'vary',vary);
     
     
     vary={'pop1','gNa',[50 100 200]};
@@ -932,18 +932,18 @@ data.model.monitors
     clear data; figure
     for i=1:length(modifications_set)
       modifications=modifications_set{i};
-      data(i)=ds.simulateModel('dv/dt=@M+10; {iNa,iK}@M','modifications',modifications);
+      data(i)=dsSimulate('dv/dt=@M+10; {iNa,iK}@M','modifications',modifications);
       subplot(1,length(modifications_set),i); plot(data(i).time,data(i).(data(i).labels{1}))
       title(sprintf('gNa=%g',modifications{3}));
     end
 
     % auto-constructed search space given special case specification of what to vary
-    data=ds.simulateModel('dv/dt=@M+10; {iNa,iK}@M','vary',{'','gNa',[50 100 200]});
-    data=ds.simulateModel('dv/dt=@M+10; {iNa,iK}@M; vary(gNa=[50 100 200])');
+    data=dsSimulate('dv/dt=@M+10; {iNa,iK}@M','vary',{'','gNa',[50 100 200]});
+    data=dsSimulate('dv/dt=@M+10; {iNa,iK}@M; vary(gNa=[50 100 200])');
       % note: special syntax "vary(...)" only works for varying 1 parameter in a 1-population model
     % eqivalent manual construction of search space
     vary={{'pop1','gNa',50},{'pop1','gNa',100},{'pop1','gNa',200}};
-    data=ds.simulateModel('dv/dt=@M+10; {iNa,iK}@M','vary',vary);
+    data=dsSimulate('dv/dt=@M+10; {iNa,iK}@M','vary',vary);
 
     % more examples of 'vary'
     vary={'E','gNa',[100 120]};
@@ -975,7 +975,7 @@ data.model.monitors
 %     % note: 'k' is an internal index to the current time step during
 %     % simulation; 'T' is an internal variable storing the full time array;
 %     % 'Npop' is an internal variable storing the size of the population.
-%   data=ds.simulateModel(eqns,'tspan',[0 1000]);
+%   data=dsSimulate(eqns,'tspan',[0 1000]);
 % 3. plot the state variable stored in the post-simulation model structure
 %   figure; plot(data.time,data.model.fixed_variables.pop1_I)
 

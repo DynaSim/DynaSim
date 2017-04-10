@@ -1,13 +1,13 @@
 
 %%
 % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % 
-% % % % % % % % Advanced testing for debugging ds.plotData2 % % % % %
+% % % % % % % % Advanced testing for debugging dsPlot2 % % % % %
 % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % 
 %% Advanced testing for debugging - set up data
 
 % Make sure data is loaded and path is ready
-if ~exist('ds.simulateModel','file'); error('Use demos_ds.plotData2.m script to set up simulation path.'); end
-if ~exist('data','var'); error('Use demos_ds.plotData2.m script to load data'); end
+if ~exist('dsSimulate','file'); error('Use demos_dsPlot2.m script to set up simulation path.'); end
+if ~exist('data','var'); error('Use demos_dsPlot2.m script to load data'); end
 
 xp = ds.ds2xPlt(data);
 xp_single = xp(1,1,1,'v');
@@ -36,45 +36,45 @@ data_all = ds.xPlt.xPlt2ds(xp);
 
 vis = 'off';
 
-%% Plot waveforms, comparing ds.plotData and ds.plotData2
-close all; d = data_single; ds.plotData2(d,'visible',vis); d = ds.xPlt.xPlt2ds(ds.ds2xPlt(d)); ds.plotData2(d,'visible',vis); %ds.plotData(d,'visible',vis);
-close all; d = data_single_squeeze; ds.plotData2(d,'visible',vis); d = ds.xPlt.xPlt2ds(ds.ds2xPlt(d)); ds.plotData2(d,'visible',vis); %ds.plotData(d,'visible',vis);
-close all; d = data_single_pops; ds.plotData2(d,'visible',vis); d = ds.xPlt.xPlt2ds(ds.ds2xPlt(d)); ds.plotData2(d,'visible',vis); ds.plotData(d,'visible',vis);
-close all; d = data_single_vars; ds.plotData2(d,'visible',vis); d = ds.xPlt.xPlt2ds(ds.ds2xPlt(d)); ds.plotData2(d,'visible',vis); %ds.plotData(d,'visible',vis);
-close all; d = data_row; ds.plotData2(d,'visible',vis); d = ds.xPlt.xPlt2ds(ds.ds2xPlt(d)); ds.plotData2(d,'visible',vis); ds.plotData(d,'visible',vis);
-close all; d = data_col; ds.plotData2(d,'visible',vis); d = ds.xPlt.xPlt2ds(ds.ds2xPlt(d)); ds.plotData2(d,'visible',vis); ds.plotData(d,'visible',vis);
-close all; d = data_col_pops; ds.plotData2(d,'visible',vis); d = ds.xPlt.xPlt2ds(ds.ds2xPlt(d)); ds.plotData2(d,'visible',vis); ds.plotData(d,'visible',vis);
-close all; d = data_col_vars; ds.plotData2(d,'visible',vis); d = ds.xPlt.xPlt2ds(ds.ds2xPlt(d)); ds.plotData2(d,'visible',vis); ds.plotData(d,'visible',vis);
-close all; d = data_col_varspops; ds.plotData2(d,'visible',vis); d = ds.xPlt.xPlt2ds(ds.ds2xPlt(d)); ds.plotData2(d,'visible',vis); ds.plotData(d,'visible',vis);
-close all; d = data_mat_pops; ds.plotData2(d,'do_mean',1,'visible',vis); d = ds.xPlt.xPlt2ds(ds.ds2xPlt(d)); ds.plotData2(d,'do_mean',1,'visible',vis); ds.plotData(d,'visible',vis);
-close all; d = data_mat_vars; ds.plotData2(d,'visible',vis); d = ds.xPlt.xPlt2ds(ds.ds2xPlt(d)); ds.plotData2(d,'visible',vis); ds.plotData(d,'visible',vis);
-close all; d = data_all; ds.plotData2(d,'do_mean',1,'visible',vis); d = ds.xPlt.xPlt2ds(ds.ds2xPlt(d)); ds.plotData2(d,'do_mean',1,'visible',vis); ds.plotData(d,'visible',vis);
+%% Plot waveforms, comparing dsPlot and dsPlot2
+close all; d = data_single; dsPlot2(d,'visible',vis); d = ds.xPlt.xPlt2ds(ds.ds2xPlt(d)); dsPlot2(d,'visible',vis); %dsPlot(d,'visible',vis);
+close all; d = data_single_squeeze; dsPlot2(d,'visible',vis); d = ds.xPlt.xPlt2ds(ds.ds2xPlt(d)); dsPlot2(d,'visible',vis); %dsPlot(d,'visible',vis);
+close all; d = data_single_pops; dsPlot2(d,'visible',vis); d = ds.xPlt.xPlt2ds(ds.ds2xPlt(d)); dsPlot2(d,'visible',vis); dsPlot(d,'visible',vis);
+close all; d = data_single_vars; dsPlot2(d,'visible',vis); d = ds.xPlt.xPlt2ds(ds.ds2xPlt(d)); dsPlot2(d,'visible',vis); %dsPlot(d,'visible',vis);
+close all; d = data_row; dsPlot2(d,'visible',vis); d = ds.xPlt.xPlt2ds(ds.ds2xPlt(d)); dsPlot2(d,'visible',vis); dsPlot(d,'visible',vis);
+close all; d = data_col; dsPlot2(d,'visible',vis); d = ds.xPlt.xPlt2ds(ds.ds2xPlt(d)); dsPlot2(d,'visible',vis); dsPlot(d,'visible',vis);
+close all; d = data_col_pops; dsPlot2(d,'visible',vis); d = ds.xPlt.xPlt2ds(ds.ds2xPlt(d)); dsPlot2(d,'visible',vis); dsPlot(d,'visible',vis);
+close all; d = data_col_vars; dsPlot2(d,'visible',vis); d = ds.xPlt.xPlt2ds(ds.ds2xPlt(d)); dsPlot2(d,'visible',vis); dsPlot(d,'visible',vis);
+close all; d = data_col_varspops; dsPlot2(d,'visible',vis); d = ds.xPlt.xPlt2ds(ds.ds2xPlt(d)); dsPlot2(d,'visible',vis); dsPlot(d,'visible',vis);
+close all; d = data_mat_pops; dsPlot2(d,'do_mean',1,'visible',vis); d = ds.xPlt.xPlt2ds(ds.ds2xPlt(d)); dsPlot2(d,'do_mean',1,'visible',vis); dsPlot(d,'visible',vis);
+close all; d = data_mat_vars; dsPlot2(d,'visible',vis); d = ds.xPlt.xPlt2ds(ds.ds2xPlt(d)); dsPlot2(d,'visible',vis); dsPlot(d,'visible',vis);
+close all; d = data_all; dsPlot2(d,'do_mean',1,'visible',vis); d = ds.xPlt.xPlt2ds(ds.ds2xPlt(d)); dsPlot2(d,'do_mean',1,'visible',vis); dsPlot(d,'visible',vis);
 
 
-%% Plot rastergrams, comparing ds.plotData and ds.plotData2
-close all; d = data_single_pops; ds.plotData2(d,'plot_type','rastergram','visible',vis); d = ds.xPlt.xPlt2ds(ds.ds2xPlt(d)); ds.plotData2(d,'plot_type','rastergram','visible',vis); ds.plotData(d,'plot_type','rastergram','visible',vis);
-close all; d = data_single_vars; ds.plotData2(d,'plot_type','rastergram','visible',vis); d = ds.xPlt.xPlt2ds(ds.ds2xPlt(d)); ds.plotData2(d,'plot_type','rastergram','visible',vis); ds.plotData(d,'plot_type','rastergram','visible',vis);
-close all; d = data_row; ds.plotData2(d,'plot_type','rastergram','visible',vis); d = ds.xPlt.xPlt2ds(ds.ds2xPlt(d)); ds.plotData2(d,'plot_type','rastergram','visible',vis); ds.plotData(d,'plot_type','rastergram','visible',vis);
-close all; d = data_col; ds.plotData2(d,'plot_type','rastergram','visible',vis); d = ds.xPlt.xPlt2ds(ds.ds2xPlt(d)); ds.plotData2(d,'plot_type','rastergram','visible',vis); ds.plotData(d,'plot_type','rastergram','visible',vis);
-close all; d = data_col_pops; ds.plotData2(d,'plot_type','rastergram','visible',vis); d = ds.xPlt.xPlt2ds(ds.ds2xPlt(d)); ds.plotData2(d,'plot_type','rastergram','visible',vis); ds.plotData(d,'plot_type','rastergram','visible',vis);
-close all; d = data_col_vars; ds.plotData2(d,'plot_type','rastergram','visible',vis); d = ds.xPlt.xPlt2ds(ds.ds2xPlt(d)); ds.plotData2(d,'plot_type','rastergram','visible',vis); ds.plotData(d,'plot_type','rastergram','visible',vis);
-close all; d = data_col_varspops; ds.plotData2(d,'plot_type','rastergram','visible',vis); d = ds.xPlt.xPlt2ds(ds.ds2xPlt(d)); ds.plotData2(d,'plot_type','rastergram','visible',vis); ds.plotData(d,'plot_type','rastergram','visible',vis);
-% close all; d = data_mat_pops; ds.plotData2(d,'plot_type','rastergram','do_mean',1,'visible',vis); d = ds.xPlt.xPlt2ds(ds.ds2xPlt(d)); ds.plotData2(d,'plot_type','rastergram','do_mean',1,'visible',vis); ds.plotData(d,'plot_type','rastergram','visible',vis);
-close all; d = data_mat_vars; ds.plotData2(d,'plot_type','rastergram','visible',vis); d = ds.xPlt.xPlt2ds(ds.ds2xPlt(d)); ds.plotData2(d,'plot_type','rastergram','visible',vis); ds.plotData(d,'plot_type','rastergram','visible',vis);
-% close all; d = data_all; ds.plotData2(d,'plot_type','rastergram','do_mean',1,'visible',vis); d = ds.xPlt.xPlt2ds(ds.ds2xPlt(d)); ds.plotData2(d,'plot_type','rastergram','do_mean',1,'visible',vis); ds.plotData(d,'plot_type','rastergram','visible',vis);
+%% Plot rastergrams, comparing dsPlot and dsPlot2
+close all; d = data_single_pops; dsPlot2(d,'plot_type','rastergram','visible',vis); d = ds.xPlt.xPlt2ds(ds.ds2xPlt(d)); dsPlot2(d,'plot_type','rastergram','visible',vis); dsPlot(d,'plot_type','rastergram','visible',vis);
+close all; d = data_single_vars; dsPlot2(d,'plot_type','rastergram','visible',vis); d = ds.xPlt.xPlt2ds(ds.ds2xPlt(d)); dsPlot2(d,'plot_type','rastergram','visible',vis); dsPlot(d,'plot_type','rastergram','visible',vis);
+close all; d = data_row; dsPlot2(d,'plot_type','rastergram','visible',vis); d = ds.xPlt.xPlt2ds(ds.ds2xPlt(d)); dsPlot2(d,'plot_type','rastergram','visible',vis); dsPlot(d,'plot_type','rastergram','visible',vis);
+close all; d = data_col; dsPlot2(d,'plot_type','rastergram','visible',vis); d = ds.xPlt.xPlt2ds(ds.ds2xPlt(d)); dsPlot2(d,'plot_type','rastergram','visible',vis); dsPlot(d,'plot_type','rastergram','visible',vis);
+close all; d = data_col_pops; dsPlot2(d,'plot_type','rastergram','visible',vis); d = ds.xPlt.xPlt2ds(ds.ds2xPlt(d)); dsPlot2(d,'plot_type','rastergram','visible',vis); dsPlot(d,'plot_type','rastergram','visible',vis);
+close all; d = data_col_vars; dsPlot2(d,'plot_type','rastergram','visible',vis); d = ds.xPlt.xPlt2ds(ds.ds2xPlt(d)); dsPlot2(d,'plot_type','rastergram','visible',vis); dsPlot(d,'plot_type','rastergram','visible',vis);
+close all; d = data_col_varspops; dsPlot2(d,'plot_type','rastergram','visible',vis); d = ds.xPlt.xPlt2ds(ds.ds2xPlt(d)); dsPlot2(d,'plot_type','rastergram','visible',vis); dsPlot(d,'plot_type','rastergram','visible',vis);
+% close all; d = data_mat_pops; dsPlot2(d,'plot_type','rastergram','do_mean',1,'visible',vis); d = ds.xPlt.xPlt2ds(ds.ds2xPlt(d)); dsPlot2(d,'plot_type','rastergram','do_mean',1,'visible',vis); dsPlot(d,'plot_type','rastergram','visible',vis);
+close all; d = data_mat_vars; dsPlot2(d,'plot_type','rastergram','visible',vis); d = ds.xPlt.xPlt2ds(ds.ds2xPlt(d)); dsPlot2(d,'plot_type','rastergram','visible',vis); dsPlot(d,'plot_type','rastergram','visible',vis);
+% close all; d = data_all; dsPlot2(d,'plot_type','rastergram','do_mean',1,'visible',vis); d = ds.xPlt.xPlt2ds(ds.ds2xPlt(d)); dsPlot2(d,'plot_type','rastergram','do_mean',1,'visible',vis); dsPlot(d,'plot_type','rastergram','visible',vis);
 
 
-%% Plot FR2, comparing ds.plotData and ds.plotData2
-close all; d = data_single_pops; ds.plotData2(d,'plot_type','heatmap_sortedFR','visible',vis); d = ds.xPlt.xPlt2ds(ds.ds2xPlt(d)); ds.plotData2(d,'plot_type','heatmap_sortedFR','visible',vis); ds.plotFR2(d,'plot_type','heatmap_sorted','visible',vis);
-close all; d = data_single_vars; ds.plotData2(d,'plot_type','heatmap_sortedFR','visible',vis); d = ds.xPlt.xPlt2ds(ds.ds2xPlt(d)); ds.plotData2(d,'plot_type','heatmap_sortedFR','visible',vis); ds.plotFR2(d,'plot_type','heatmap_sorted','visible',vis);
-close all; d = data_row; ds.plotData2(d,'plot_type','heatmap_sortedFR','visible',vis); d = ds.xPlt.xPlt2ds(ds.ds2xPlt(d)); ds.plotData2(d,'plot_type','heatmap_sortedFR','visible',vis); ds.plotFR2(d,'plot_type','heatmap_sorted','visible',vis);
-close all; d = data_col; ds.plotData2(d,'plot_type','heatmap_sortedFR','visible',vis); d = ds.xPlt.xPlt2ds(ds.ds2xPlt(d)); ds.plotData2(d,'plot_type','heatmap_sortedFR','visible',vis); ds.plotFR2(d,'plot_type','heatmap_sorted','visible',vis);
-close all; d = data_col_pops; ds.plotData2(d,'plot_type','heatmap_sortedFR','visible',vis); d = ds.xPlt.xPlt2ds(ds.ds2xPlt(d)); ds.plotData2(d,'plot_type','heatmap_sortedFR','visible',vis); ds.plotFR2(d,'plot_type','heatmap_sorted','visible',vis);
-close all; d = data_col_vars; ds.plotData2(d,'plot_type','heatmap_sortedFR','visible',vis); d = ds.xPlt.xPlt2ds(ds.ds2xPlt(d)); ds.plotData2(d,'plot_type','heatmap_sortedFR','visible',vis); ds.plotFR2(d,'plot_type','heatmap_sorted','visible',vis);
-close all; d = data_col_varspops; ds.plotData2(d,'plot_type','heatmap_sortedFR','visible',vis); d = ds.xPlt.xPlt2ds(ds.ds2xPlt(d)); ds.plotData2(d,'plot_type','heatmap_sortedFR','visible',vis); ds.plotFR2(d,'plot_type','heatmap_sorted','visible',vis);
-% close all; d = data_mat_pops; ds.plotData2(d,'plot_type','heatmap_sortedFR','do_mean',1,'visible',vis); d = ds.xPlt.xPlt2ds(ds.ds2xPlt(d)); ds.plotData2(d,'plot_type','heatmap_sortedFR','do_mean',1,'visible',vis); ds.plotFR2(d,'plot_type','heatmap_sorted','visible',vis);
-close all; d = data_mat_vars; ds.plotData2(d,'plot_type','heatmap_sortedFR','visible',vis); d = ds.xPlt.xPlt2ds(ds.ds2xPlt(d)); ds.plotData2(d,'plot_type','heatmap_sortedFR','visible',vis); ds.plotFR2(d,'plot_type','heatmap_sorted','visible',vis);
-% close all; d = data_all; ds.plotData2(d,'plot_type','heatmap_sortedFR','do_mean',1,'visible',vis); d = ds.xPlt.xPlt2ds(ds.ds2xPlt(d)); ds.plotData2(d,'plot_type','heatmap_sortedFR','do_mean',1,'visible',vis); ds.plotFR2(d,'plot_type','heatmap_sorted','visible',vis);
+%% Plot FR2, comparing dsPlot and dsPlot2
+close all; d = data_single_pops; dsPlot2(d,'plot_type','heatmap_sortedFR','visible',vis); d = ds.xPlt.xPlt2ds(ds.ds2xPlt(d)); dsPlot2(d,'plot_type','heatmap_sortedFR','visible',vis); ds.plotFR2(d,'plot_type','heatmap_sorted','visible',vis);
+close all; d = data_single_vars; dsPlot2(d,'plot_type','heatmap_sortedFR','visible',vis); d = ds.xPlt.xPlt2ds(ds.ds2xPlt(d)); dsPlot2(d,'plot_type','heatmap_sortedFR','visible',vis); ds.plotFR2(d,'plot_type','heatmap_sorted','visible',vis);
+close all; d = data_row; dsPlot2(d,'plot_type','heatmap_sortedFR','visible',vis); d = ds.xPlt.xPlt2ds(ds.ds2xPlt(d)); dsPlot2(d,'plot_type','heatmap_sortedFR','visible',vis); ds.plotFR2(d,'plot_type','heatmap_sorted','visible',vis);
+close all; d = data_col; dsPlot2(d,'plot_type','heatmap_sortedFR','visible',vis); d = ds.xPlt.xPlt2ds(ds.ds2xPlt(d)); dsPlot2(d,'plot_type','heatmap_sortedFR','visible',vis); ds.plotFR2(d,'plot_type','heatmap_sorted','visible',vis);
+close all; d = data_col_pops; dsPlot2(d,'plot_type','heatmap_sortedFR','visible',vis); d = ds.xPlt.xPlt2ds(ds.ds2xPlt(d)); dsPlot2(d,'plot_type','heatmap_sortedFR','visible',vis); ds.plotFR2(d,'plot_type','heatmap_sorted','visible',vis);
+close all; d = data_col_vars; dsPlot2(d,'plot_type','heatmap_sortedFR','visible',vis); d = ds.xPlt.xPlt2ds(ds.ds2xPlt(d)); dsPlot2(d,'plot_type','heatmap_sortedFR','visible',vis); ds.plotFR2(d,'plot_type','heatmap_sorted','visible',vis);
+close all; d = data_col_varspops; dsPlot2(d,'plot_type','heatmap_sortedFR','visible',vis); d = ds.xPlt.xPlt2ds(ds.ds2xPlt(d)); dsPlot2(d,'plot_type','heatmap_sortedFR','visible',vis); ds.plotFR2(d,'plot_type','heatmap_sorted','visible',vis);
+% close all; d = data_mat_pops; dsPlot2(d,'plot_type','heatmap_sortedFR','do_mean',1,'visible',vis); d = ds.xPlt.xPlt2ds(ds.ds2xPlt(d)); dsPlot2(d,'plot_type','heatmap_sortedFR','do_mean',1,'visible',vis); ds.plotFR2(d,'plot_type','heatmap_sorted','visible',vis);
+close all; d = data_mat_vars; dsPlot2(d,'plot_type','heatmap_sortedFR','visible',vis); d = ds.xPlt.xPlt2ds(ds.ds2xPlt(d)); dsPlot2(d,'plot_type','heatmap_sortedFR','visible',vis); ds.plotFR2(d,'plot_type','heatmap_sorted','visible',vis);
+% close all; d = data_all; dsPlot2(d,'plot_type','heatmap_sortedFR','do_mean',1,'visible',vis); d = ds.xPlt.xPlt2ds(ds.ds2xPlt(d)); dsPlot2(d,'plot_type','heatmap_sortedFR','do_mean',1,'visible',vis); ds.plotFR2(d,'plot_type','heatmap_sorted','visible',vis);
 
 
 

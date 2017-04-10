@@ -67,7 +67,7 @@
    partial data sets without having to load the entire file, use ds.importData
    with options 'time_limits' and/or 'variables'. Alternatively, the entire
    data set can be loaded using ds.importData with default options, then subsets
-   extracted using ds.selectData with appropriate options.
+   extracted using dsSelect with appropriate options.
 
  Examples:
    - Example 1: full data set
@@ -80,16 +80,16 @@
  - specify subsets to return in terms of varied parameters, time_limits, ROIs,
    etc possible format for specifying range_varied: {'E','gNa',[.1 .3];
    'I-&gt;E','tauI',[15 25]; 'I','mechanism_list','+iM'}
- - achieve by calling function ds.selectData() at end of this function.</pre></div>
+ - achieve by calling function dsSelect() at end of this function.</pre></div>
 
 <!-- crossreference -->
 <h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
 This function calls:
 <ul style="list-style-image:url(../matlabicon.gif)">
-<li><a href="ds.checkOptions.html" class="code" title="function [parms, params_unspecified ] = ds.checkOptions(options, options_schema, strict)">ds.checkOptions</a>	CHECKOPTIONS - organize key/value pairs in structure with default or user-supplied values according to a schema</li><li><a href="ds.checkStudyinfo.html" class="code" title="function studyinfo=ds.checkStudyinfo(studyinfo,varargin)">ds.checkStudyinfo</a>	CHECKSTUDYINFO - Standardize studyinfo structure and auto-populate missing fields</li><li><a href="ds.importCSV.html" class="code" title="function data=ds.importCSV(file)">ds.importCSV</a>	IMPORTCSV - load CSV data into DynaSim formatted data structure.</li><li><a href="ds.importData.html" class="code" title="function [data,studyinfo] = ds.importData(file,varargin)">ds.importData</a>	IMPORTDATA - load data into DynaSim formatted data structure.</li><li><a href="ds.options2Keyval.html" class="code" title="function keyval = ds.options2Keyval(options)">ds.options2Keyval</a>	OPTIONS2KEYVAL - Convert from options structure to a list of key/value pairs.</li><li><a href="ds.selectData.html" class="code" title="function data=ds.selectData(data,varargin)">ds.selectData</a>	SELECTDATA -  select subset of data</li></ul>
+<li><a href="ds.checkOptions.html" class="code" title="function [parms, params_unspecified ] = ds.checkOptions(options, options_schema, strict)">ds.checkOptions</a>	CHECKOPTIONS - organize key/value pairs in structure with default or user-supplied values according to a schema</li><li><a href="ds.checkStudyinfo.html" class="code" title="function studyinfo=ds.checkStudyinfo(studyinfo,varargin)">ds.checkStudyinfo</a>	CHECKSTUDYINFO - Standardize studyinfo structure and auto-populate missing fields</li><li><a href="ds.importCSV.html" class="code" title="function data=ds.importCSV(file)">ds.importCSV</a>	IMPORTCSV - load CSV data into DynaSim formatted data structure.</li><li><a href="ds.importData.html" class="code" title="function [data,studyinfo] = ds.importData(file,varargin)">ds.importData</a>	IMPORTDATA - load data into DynaSim formatted data structure.</li><li><a href="ds.options2Keyval.html" class="code" title="function keyval = ds.options2Keyval(options)">ds.options2Keyval</a>	OPTIONS2KEYVAL - Convert from options structure to a list of key/value pairs.</li><li><a href="dsSelect.html" class="code" title="function data=dsSelect(data,varargin)">dsSelect</a>	SELECTDATA -  select subset of data</li></ul>
 This function is called by:
 <ul style="list-style-image:url(../matlabicon.gif)">
-<li><a href="ds.analyzeData.html" class="code" title="function result=ds.analyzeData(data,func,varargin)">ds.analyzeData</a>	ANALYZEDATA - Apply an analysis function to DynaSim data, optionally saving data</li><li><a href="AnalyzeStudy.html" class="code" title="function [results,studyinfo]=AnalyzeStudy(data,func,varargin)">AnalyzeStudy</a>	ANALYZESTUDY - Apply an analysis function to DynaSim data, optionally saving data</li><li><a href="ds.importData.html" class="code" title="function [data,studyinfo] = ds.importData(file,varargin)">ds.importData</a>	IMPORTDATA - load data into DynaSim formatted data structure.</li><li><a href="ds.simulateModel.html" class="code" title="function [data,studyinfo]=ds.simulateModel(model,varargin)">ds.simulateModel</a>	% data=ds.simulateModel(model,'option',value,...)</li></ul>
+<li><a href="dsAnalyze.html" class="code" title="function result=dsAnalyze(data,func,varargin)">dsAnalyze</a>	DSANALYZE - Apply an analysis function to DynaSim data, optionally saving data</li><li><a href="AnalyzeStudy.html" class="code" title="function [results,studyinfo]=AnalyzeStudy(data,func,varargin)">AnalyzeStudy</a>	ANALYZESTUDY - Apply an analysis function to DynaSim data, optionally saving data</li><li><a href="ds.importData.html" class="code" title="function [data,studyinfo] = ds.importData(file,varargin)">ds.importData</a>	IMPORTDATA - load data into DynaSim formatted data structure.</li><li><a href="dsSimulate.html" class="code" title="function [data,studyinfo]=dsSimulate(model,varargin)">dsSimulate</a>	% data=dsSimulate(model,'option',value,...)</li></ul>
 <!-- crossreference -->
 
 
@@ -137,7 +137,7 @@ This function is called by:
 0040 <span class="comment">%   partial data sets without having to load the entire file, use ds.importData</span>
 0041 <span class="comment">%   with options 'time_limits' and/or 'variables'. Alternatively, the entire</span>
 0042 <span class="comment">%   data set can be loaded using ds.importData with default options, then subsets</span>
-0043 <span class="comment">%   extracted using ds.selectData with appropriate options.</span>
+0043 <span class="comment">%   extracted using dsSelect with appropriate options.</span>
 0044 <span class="comment">%</span>
 0045 <span class="comment">% Examples:</span>
 0046 <span class="comment">%   - Example 1: full data set</span>
@@ -150,9 +150,9 @@ This function is called by:
 0053 <span class="comment">% - specify subsets to return in terms of varied parameters, time_limits, ROIs,</span>
 0054 <span class="comment">%   etc possible format for specifying range_varied: {'E','gNa',[.1 .3];</span>
 0055 <span class="comment">%   'I-&gt;E','tauI',[15 25]; 'I','mechanism_list','+iM'}</span>
-0056 <span class="comment">% - achieve by calling function ds.selectData() at end of this function.</span>
+0056 <span class="comment">% - achieve by calling function dsSelect() at end of this function.</span>
 0057 
-0058 <span class="comment">% See also: ds.simulateModel, ds.exportData, ds.checkData, ds.selectData</span>
+0058 <span class="comment">% See also: dsSimulate, ds.exportData, ds.checkData, dsSelect</span>
 0059 
 0060 
 0061 <span class="comment">% Check inputs</span>
@@ -352,7 +352,7 @@ This function is called by:
 0255       
 0256       <span class="keyword">if</span> ~(isempty(options.time_limits) &amp;&amp; isempty(options.variables))
 0257         <span class="comment">% limit to select subsets</span>
-0258         data=<a href="ds.selectData.html" class="code" title="function data=ds.selectData(data,varargin)">ds.selectData</a>(data,varargin{:}); <span class="comment">% todo: create ds.selectData()</span>
+0258         data=<a href="dsSelect.html" class="code" title="function data=dsSelect(data,varargin)">dsSelect</a>(data,varargin{:}); <span class="comment">% todo: create dsSelect()</span>
 0259       <span class="keyword">end</span>
 0260     <span class="keyword">otherwise</span>
 0261       error(<span class="string">'file type not recognized. ds.importData currently supports DynaSim data structure in MAT file, data values in CSV file.'</span>);

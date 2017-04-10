@@ -55,7 +55,7 @@
 
  Dependencies: ds.setupStudy, ds.updateStudy
 
- See also: <a href="ds.generateModel.html" class="code" title="function [model,name_map]=ds.generateModel(specification,varargin)">ds.generateModel</a>, <a href="ds.simulateModel.html" class="code" title="function [data,studyinfo]=ds.simulateModel(model,varargin)">ds.simulateModel</a>, <a href="ds.checkStudyinfo.html" class="code" title="function studyinfo=ds.checkStudyinfo(studyinfo,varargin)">ds.checkStudyinfo</a>, <a href="ds.vary2Modifications.html" class="code" title="function modifications_set = ds.vary2Modifications(vary,model)">ds.vary2Modifications</a></pre></div>
+ See also: <a href="ds.generateModel.html" class="code" title="function [model,name_map]=ds.generateModel(specification,varargin)">ds.generateModel</a>, <a href="dsSimulate.html" class="code" title="function [data,studyinfo]=dsSimulate(model,varargin)">dsSimulate</a>, <a href="ds.checkStudyinfo.html" class="code" title="function studyinfo=ds.checkStudyinfo(studyinfo,varargin)">ds.checkStudyinfo</a>, <a href="ds.vary2Modifications.html" class="code" title="function modifications_set = ds.vary2Modifications(vary,model)">ds.vary2Modifications</a></pre></div>
 
 <!-- crossreference -->
 <h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
@@ -64,7 +64,7 @@ This function calls:
 <li><a href="ds.checkOptions.html" class="code" title="function [parms, params_unspecified ] = ds.checkOptions(options, options_schema, strict)">ds.checkOptions</a>	CHECKOPTIONS - organize key/value pairs in structure with default or user-supplied values according to a schema</li><li><a href="ds.checkStudyinfo.html" class="code" title="function studyinfo=ds.checkStudyinfo(studyinfo,varargin)">ds.checkStudyinfo</a>	CHECKSTUDYINFO - Standardize studyinfo structure and auto-populate missing fields</li><li><a href="ds.getSolveFile.html" class="code" title="function solve_file = ds.getSolveFile(model,studyinfo,varargin)">ds.getSolveFile</a>	GETSOLVEFILE - helper function that creates or retrieves the desired solver file.</li><li><a href="ds.locateModelFiles.html" class="code" title="function [paths,files]=ds.locateModelFiles(input)">ds.locateModelFiles</a>	LOCATEMODELFILES - locate mechanism files associated with DynaSim specifications.</li><li><a href="ds.monitorStudy.html" class="code" title="function [studyinfo,study_status]=ds.monitorStudy(studyinfo,varargin)">ds.monitorStudy</a>	MONITORSTUDY - display information on study progress.</li><li><a href="ds.setupStudy.html" class="code" title="function [studyinfo,options]=ds.setupStudy(base_model,varargin)">ds.setupStudy</a>	SETUPSTUDY - Initialize DynaSim studyinfo structure, prepare list of output file names, and create output directories</li><li><a href="ds.studyinfoIO.html" class="code" title="function studyinfo=ds.studyinfoIO(studyinfo,study_file,id,verbose_flag)">ds.studyinfoIO</a>	STUDYINFOIO - use lock files to manage concurrent access to a shared studyinfo</li></ul>
 This function is called by:
 <ul style="list-style-image:url(../matlabicon.gif)">
-<li><a href="ds.simulateModel.html" class="code" title="function [data,studyinfo]=ds.simulateModel(model,varargin)">ds.simulateModel</a>	% data=ds.simulateModel(model,'option',value,...)</li></ul>
+<li><a href="dsSimulate.html" class="code" title="function [data,studyinfo]=dsSimulate(model,varargin)">dsSimulate</a>	% data=dsSimulate(model,'option',value,...)</li></ul>
 <!-- crossreference -->
 
 <h2><a name="_subfunctions"></a>SUBFUNCTIONS <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
@@ -102,7 +102,7 @@ This function is called by:
 0028 <span class="comment">%</span>
 0029 <span class="comment">% Dependencies: ds.setupStudy, ds.updateStudy</span>
 0030 <span class="comment">%</span>
-0031 <span class="comment">% See also: ds.generateModel, ds.simulateModel, ds.checkStudyinfo, ds.vary2Modifications</span>
+0031 <span class="comment">% See also: ds.generateModel, dsSimulate, ds.checkStudyinfo, ds.vary2Modifications</span>
 0032 
 0033 <span class="comment">% check inputs</span>
 0034 options=<a href="ds.checkOptions.html" class="code" title="function [parms, params_unspecified ] = ds.checkOptions(options, options_schema, strict)">ds.checkOptions</a>(varargin,{<span class="keyword">...</span>
@@ -354,7 +354,7 @@ This function is called by:
 0280     studyinfo.simulations(sim).batch_dir=batch_dir;
 0281     studyinfo.simulations(sim).simulator_options=options.simulator_options;
 0282 
-0283     <span class="comment">% set solve_file for this simulation (will be passed to ds.simulateModel as an option)</span>
+0283     <span class="comment">% set solve_file for this simulation (will be passed to dsSimulate as an option)</span>
 0284     <span class="keyword">if</span> isa(options.simulator_options.experiment,<span class="string">'function_handle'</span>)
 0285       studyinfo.simulations(sim).simulator_options.solve_file=[];
 0286     <span class="keyword">else</span>
@@ -547,9 +547,9 @@ This function is called by:
 0473     fprintf(fjob,<span class="string">'\t\tfprintf(''-----------------------------------------------------\\n'');\n'</span>);
 0474     fprintf(fjob,<span class="string">'\t\tfprintf(''Processing simulation %%g (%%g of %%g in this job)...\\n'',SimID,s,length(SimIDs));\n'</span>);
 0475     fprintf(fjob,<span class="string">'\t\tfprintf(''-----------------------------------------------------\\n'');\n'</span>);
-0476     fprintf(fjob,<span class="string">'\t\tdata=ds.simulateModel(studyinfo.base_model,''modifications'',siminfo.modifications,''studyinfo'',studyinfo,''sim_id'',SimID,keyvals{:});\n'</span>);
+0476     fprintf(fjob,<span class="string">'\t\tdata=dsSimulate(studyinfo.base_model,''modifications'',siminfo.modifications,''studyinfo'',studyinfo,''sim_id'',SimID,keyvals{:});\n'</span>);
 0477     fprintf(fjob,<span class="string">'\t\tfor i=1:length(siminfo.result_functions)\n'</span>);
-0478     fprintf(fjob,<span class="string">'\t\t\tds.analyzeData(data,siminfo.result_functions{i},''result_file'',siminfo.result_files{i},''save_data_flag'',1,siminfo.result_options{i}{:});\n'</span>);
+0478     fprintf(fjob,<span class="string">'\t\t\tdsAnalyze(data,siminfo.result_functions{i},''result_file'',siminfo.result_files{i},''save_data_flag'',1,siminfo.result_options{i}{:});\n'</span>);
 0479     fprintf(fjob,<span class="string">'\t\tend\n'</span>);
 0480     
 0481     <span class="comment">% add error handling</span>
@@ -587,7 +587,7 @@ This function is called by:
 0513 <span class="comment">%   set studyinfo.simulations(k).solve_file=this_solve_file</span>
 0514 <span class="comment">% ...</span>
 0515 <span class="comment">% in sim job.m:</span>
-0516 <span class="comment">% ds.simulateModel(model{k},'solve_file',solve_file{k},...)</span>
+0516 <span class="comment">% dsSimulate(model{k},'solve_file',solve_file{k},...)</span>
 0517 <span class="comment">% where solve_file{k}=studyinfo.simulations(k).solve_file</span></pre></div>
 <hr><address>Generated on Fri 07-Apr-2017 20:01:20 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" target="_parent">m2html</a></strong> &copy; 2005</address>
 </body>

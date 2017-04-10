@@ -73,6 +73,6 @@ s.connections(2).parameters={'tauD',2,'gSYN',.1,'netcon',ones(80,20)};
 %       This sets modifications:
 %           * E_EK1 = -75, E_EK2 = -80, I_EK1 = -85, I_EK2 = -90.
 %           * E_EK1 = -55, E_EK2 = -60, I_EK1 = -65, I_EK2 = -70.
-ds.simulateModel(s,'save_data_flag',0,'study_dir','demo_sPING_covary',...
+dsSimulate(s,'save_data_flag',0,'study_dir','demo_sPING_covary',...
                 'vary',vary,'verbose_flag',1);
 

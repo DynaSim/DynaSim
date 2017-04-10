@@ -47,7 +47,7 @@
    - solver_file: full file name of file solving the system in model
 
  See also: <a href="ds.writeDynaSimSolver.html" class="code" title="function [outfile,options]=ds.writeDynaSimSolver(model,varargin)">ds.writeDynaSimSolver</a>, <a href="ds.compareSolveFiles.html" class="code" title="function solve_file_m=ds.compareSolveFiles(solve_file_m,mexpath)">ds.compareSolveFiles</a>, <a href="ds.prepareMEX.html" class="code" title="function mexfileOutput = ds.prepareMEX(mfileInput, varargin)">ds.prepareMEX</a>,
-           <a href="ds.simulateModel.html" class="code" title="function [data,studyinfo]=ds.simulateModel(model,varargin)">ds.simulateModel</a>, <a href="ds.createBatch.html" class="code" title="function studyinfo = ds.createBatch(base_model,modifications_set,varargin)">ds.createBatch</a></pre></div>
+           <a href="dsSimulate.html" class="code" title="function [data,studyinfo]=dsSimulate(model,varargin)">dsSimulate</a>, <a href="ds.createBatch.html" class="code" title="function studyinfo = ds.createBatch(base_model,modifications_set,varargin)">ds.createBatch</a></pre></div>
 
 <!-- crossreference -->
 <h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
@@ -56,7 +56,7 @@ This function calls:
 <li><a href="ds.checkOptions.html" class="code" title="function [parms, params_unspecified ] = ds.checkOptions(options, options_schema, strict)">ds.checkOptions</a>	CHECKOPTIONS - organize key/value pairs in structure with default or user-supplied values according to a schema</li><li><a href="ds.compareSolveFiles.html" class="code" title="function solve_file_m=ds.compareSolveFiles(solve_file_m,mexpath)">ds.compareSolveFiles</a>	COMPARESOLVEFILES - look for an equivalent file in same directory</li><li><a href="ds.options2Keyval.html" class="code" title="function keyval = ds.options2Keyval(options)">ds.options2Keyval</a>	OPTIONS2KEYVAL - Convert from options structure to a list of key/value pairs.</li><li><a href="ds.prepareMEX.html" class="code" title="function mexfileOutput = ds.prepareMEX(mfileInput, varargin)">ds.prepareMEX</a>	PREPAREMEX - take an m-file path and compile it using the Matlab coder.</li><li><a href="ds.writeDynaSimSolver.html" class="code" title="function [outfile,options]=ds.writeDynaSimSolver(model,varargin)">ds.writeDynaSimSolver</a>	WRITEDYNASIMSOLVER - write m-file that numerically inteegrates the model</li><li><a href="ds.writeMatlabSolver.html" class="code" title="function solve_ode_filepath = ds.writeMatlabSolver(model,varargin)">ds.writeMatlabSolver</a>	WRITEMATLABSOLVER - write m-file that numerically inteegrates the model</li></ul>
 This function is called by:
 <ul style="list-style-image:url(../matlabicon.gif)">
-<li><a href="ds.createBatch.html" class="code" title="function studyinfo = ds.createBatch(base_model,modifications_set,varargin)">ds.createBatch</a>	CREATEBATCH - create and submit jobs to run sets of simulations or analyses.</li><li><a href="ds.simulateModel.html" class="code" title="function [data,studyinfo]=ds.simulateModel(model,varargin)">ds.simulateModel</a>	% data=ds.simulateModel(model,'option',value,...)</li></ul>
+<li><a href="ds.createBatch.html" class="code" title="function studyinfo = ds.createBatch(base_model,modifications_set,varargin)">ds.createBatch</a>	CREATEBATCH - create and submit jobs to run sets of simulations or analyses.</li><li><a href="dsSimulate.html" class="code" title="function [data,studyinfo]=dsSimulate(model,varargin)">dsSimulate</a>	% data=dsSimulate(model,'option',value,...)</li></ul>
 <!-- crossreference -->
 
 
@@ -84,7 +84,7 @@ This function is called by:
 0020 <span class="comment">%   - solver_file: full file name of file solving the system in model</span>
 0021 <span class="comment">%</span>
 0022 <span class="comment">% See also: ds.writeDynaSimSolver, ds.compareSolveFiles, ds.prepareMEX,</span>
-0023 <span class="comment">%           ds.simulateModel, ds.createBatch</span>
+0023 <span class="comment">%           dsSimulate, ds.createBatch</span>
 0024 
 0025 <span class="comment">% Check inputs</span>
 0026 opts=[];
@@ -218,9 +218,9 @@ This function is called by:
 0154                 <span class="comment">% format variation and main function that calls odeset and</span>
 0155                 <span class="comment">% feval.</span>
 0156                 <span class="comment">% DynaSimToOdefun(): a function called outside of</span>
-0157                 <span class="comment">% ds.simulateModel. it should evaluate fixed_variables and</span>
-0158                 <span class="comment">% return @odefun with all substitutions. ds.simulateModel</span>
-0159                 <span class="comment">% should be able to handle: ds.simulateModel(@odefun,'tspan',tspan,'ic',ic)</span>
+0157                 <span class="comment">% dsSimulate. it should evaluate fixed_variables and</span>
+0158                 <span class="comment">% return @odefun with all substitutions. dsSimulate</span>
+0159                 <span class="comment">% should be able to handle: dsSimulate(@odefun,'tspan',tspan,'ic',ic)</span>
 0160   <span class="keyword">end</span>
 0161   solve_file=<a href="ds.compareSolveFiles.html" class="code" title="function solve_file_m=ds.compareSolveFiles(solve_file_m,mexpath)">ds.compareSolveFiles</a>(solve_file_m);               <span class="comment">% First search in local solve folder...</span>
 0162   <span class="keyword">if</span> options.compile_flag

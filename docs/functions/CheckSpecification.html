@@ -79,7 +79,7 @@
        them in .equations.
      - Example:
          spec.populations.equations='dv/dt=-v; if(v&lt;eps)(v=10); monitor o=v^2'
-         data=ds.simulateModel(spec); figure; plot(data.time,data.pop1_o);
+         data=dsSimulate(spec); figure; plot(data.time,data.pop1_o);
 
    - NOTE 4: &quot;pops&quot; can be used instead of &quot;populations&quot;. &quot;cons&quot; can be used
        instead of &quot;connections&quot;.
@@ -200,7 +200,7 @@ This function is called by:
 0052 <span class="comment">%       them in .equations.</span>
 0053 <span class="comment">%     - Example:</span>
 0054 <span class="comment">%         spec.populations.equations='dv/dt=-v; if(v&lt;eps)(v=10); monitor o=v^2'</span>
-0055 <span class="comment">%         data=ds.simulateModel(spec); figure; plot(data.time,data.pop1_o);</span>
+0055 <span class="comment">%         data=dsSimulate(spec); figure; plot(data.time,data.pop1_o);</span>
 0056 <span class="comment">%</span>
 0057 <span class="comment">%   - NOTE 4: &quot;pops&quot; can be used instead of &quot;populations&quot;. &quot;cons&quot; can be used</span>
 0058 <span class="comment">%       instead of &quot;connections&quot;.</span>

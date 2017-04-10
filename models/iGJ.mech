@@ -18,9 +18,9 @@
 % s.connections(1).direction='E1->E2';
 % s.connections(1).mechanism_list={'iGJ'};
 % s.connections(1).parameters={'gGJ',.2};
-% data=ds.simulateModel(s);
-% ds.plotData(data,'plot_type','waveform');
-% ds.plotData(data,'plot_type','rastergram');
+% data=dsSimulate(s);
+% dsPlot(data,'plot_type','waveform');
+% dsPlot(data,'plot_type','rastergram');
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 % Parameters

@@ -34,18 +34,18 @@
    options:
      target - ...
      amplitudes - ...
-     (any options for ds.simulateModel)
+     (any options for dsSimulate)
      (any options for ds.calcFR)
  outputs:
    array of DynaSim data structures for simulations varying inputs
  
- see also: <a href="ds.simulateModel.html" class="code" title="function [data,studyinfo]=ds.simulateModel(model,varargin)">ds.simulateModel</a>, <a href="ds.calcFR.html" class="code" title="function data = ds.calcFR(data,varargin)">ds.calcFR</a></pre></div>
+ see also: <a href="dsSimulate.html" class="code" title="function [data,studyinfo]=dsSimulate(model,varargin)">dsSimulate</a>, <a href="ds.calcFR.html" class="code" title="function data = ds.calcFR(data,varargin)">ds.calcFR</a></pre></div>
 
 <!-- crossreference -->
 <h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
 This function calls:
 <ul style="list-style-image:url(../matlabicon.gif)">
-<li><a href="ds.applyModifications.html" class="code" title="function [output,modifications]=ds.applyModifications(model,modifications)">ds.applyModifications</a>	APPLYMODIFICATIONS - Apply modifications to DynaSim specification or model structure</li><li><a href="ds.calcFR.html" class="code" title="function data = ds.calcFR(data,varargin)">ds.calcFR</a>	CALCFR - Calculate firing rage for DynaSim data</li><li><a href="ds.checkModel.html" class="code" title="function model=ds.checkModel(model)">ds.checkModel</a>	CHECKMODEL - Standardize model structure and auto-populate missing fields</li><li><a href="ds.checkOptions.html" class="code" title="function [parms, params_unspecified ] = ds.checkOptions(options, options_schema, strict)">ds.checkOptions</a>	CHECKOPTIONS - organize key/value pairs in structure with default or user-supplied values according to a schema</li><li><a href="ds.simulateModel.html" class="code" title="function [data,studyinfo]=ds.simulateModel(model,varargin)">ds.simulateModel</a>	% data=ds.simulateModel(model,'option',value,...)</li></ul>
+<li><a href="ds.applyModifications.html" class="code" title="function [output,modifications]=ds.applyModifications(model,modifications)">ds.applyModifications</a>	APPLYMODIFICATIONS - Apply modifications to DynaSim specification or model structure</li><li><a href="ds.calcFR.html" class="code" title="function data = ds.calcFR(data,varargin)">ds.calcFR</a>	CALCFR - Calculate firing rage for DynaSim data</li><li><a href="ds.checkModel.html" class="code" title="function model=ds.checkModel(model)">ds.checkModel</a>	CHECKMODEL - Standardize model structure and auto-populate missing fields</li><li><a href="ds.checkOptions.html" class="code" title="function [parms, params_unspecified ] = ds.checkOptions(options, options_schema, strict)">ds.checkOptions</a>	CHECKOPTIONS - organize key/value pairs in structure with default or user-supplied values according to a schema</li><li><a href="dsSimulate.html" class="code" title="function [data,studyinfo]=dsSimulate(model,varargin)">dsSimulate</a>	% data=dsSimulate(model,'option',value,...)</li></ul>
 This function is called by:
 <ul style="list-style-image:url(../matlabicon.gif)">
 </ul>
@@ -63,12 +63,12 @@ This function is called by:
 0007 <span class="comment">%   options:</span>
 0008 <span class="comment">%     target - ...</span>
 0009 <span class="comment">%     amplitudes - ...</span>
-0010 <span class="comment">%     (any options for ds.simulateModel)</span>
+0010 <span class="comment">%     (any options for dsSimulate)</span>
 0011 <span class="comment">%     (any options for ds.calcFR)</span>
 0012 <span class="comment">% outputs:</span>
 0013 <span class="comment">%   array of DynaSim data structures for simulations varying inputs</span>
 0014 <span class="comment">%</span>
-0015 <span class="comment">% see also: ds.simulateModel, ds.calcFR</span>
+0015 <span class="comment">% see also: dsSimulate, ds.calcFR</span>
 0016 
 0017 options=<a href="ds.checkOptions.html" class="code" title="function [parms, params_unspecified ] = ds.checkOptions(options, options_schema, strict)">ds.checkOptions</a>(varargin,{<span class="keyword">...</span>
 0018   <span class="string">'target'</span>,<span class="string">'ODE1'</span>,[],<span class="keyword">...</span>
@@ -94,7 +94,7 @@ This function is called by:
 0038 model=<a href="ds.applyModifications.html" class="code" title="function [output,modifications]=ds.applyModifications(model,modifications)">ds.applyModifications</a>(model,modifications);
 0039 
 0040 <span class="comment">% run simulations varying tonic drives</span>
-0041 data=<a href="ds.simulateModel.html" class="code" title="function [data,studyinfo]=ds.simulateModel(model,varargin)">ds.simulateModel</a>(model,<span class="string">'vary'</span>,vary,varargin{:});
+0041 data=<a href="dsSimulate.html" class="code" title="function [data,studyinfo]=dsSimulate(model,varargin)">dsSimulate</a>(model,<span class="string">'vary'</span>,vary,varargin{:});
 0042 
 0043 <span class="comment">% prepare ds.calcFR options:</span>
 0044 <span class="keyword">if</span> ~any(cellfun(@(x)isequal(x,<span class="string">'variable'</span>),varargin))

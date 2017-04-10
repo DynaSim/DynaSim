@@ -1,6 +1,6 @@
 function [sext,tstart,Ptot,sources_eg]=getBurstGating(T,freq,width,num_spikes,dc,num_targets,minIBI,meanIBI,tau,kick,kernel,shared_sources_flag,onset,offset,ramp_dc_flag,ramp_ac_flag,num_sources)
 % T=0:.01:1000; f=10; w=10; nspk=10; dc=0; Npop=2; minIBI=0; meanIBI=0; [sext,ts,Ptot,Peg]=getBurstGating(T,f,w,nspk,dc,Npop,minIBI,meanIBI,2,1,ones(1,Npop),0,0,inf,0,0,1);
-% ds.plotData(sext)
+% dsPlot(sext)
 
 % Poisson-based spike bursts with variable spike synchrony
 % Bursts can occur periodically or with exponentially-distributed

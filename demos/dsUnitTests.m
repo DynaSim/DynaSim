@@ -79,32 +79,32 @@ spec=[];
 spec.populations(1).equations='dv/dt=current; {iNa,iK};';
 spec.populations(1).size=1;
 model=ds.generateModel(spec);
-data=ds.simulateModel(model,'compile_flag',0); 
+data=dsSimulate(model,'compile_flag',0); 
 figure; plot(data.time,data.(data.labels{1}))
 
 spec=[];
 spec.populations(1).equations='dv/dt=current; {iNa,iK};';
 spec.populations(1).size=2;
 model=ds.generateModel(spec);
-data=ds.simulateModel(model,'compile_flag',0); 
+data=dsSimulate(model,'compile_flag',0); 
 figure; plot(data.time,data.(data.labels{1}))
 
 spec=[];
 spec.populations(1).equations='dv/dt=current; {iNa,iK,iCa};';
 spec.populations(1).size=1;
 model=ds.generateModel(spec);
-data=ds.simulateModel(model,'compile_flag',0); 
+data=dsSimulate(model,'compile_flag',0); 
 figure; plot(data.time,data.(data.labels{1}))
 
 spec=[];
 spec.populations(1).equations='dv/dt=current; {iNa,iK,iCa};';
 spec.populations(1).size=2;
 model=ds.generateModel(spec);
-data=ds.simulateModel(model,'compile_flag',0); 
+data=dsSimulate(model,'compile_flag',0); 
 figure; plot(data.time,data.(data.labels{1}))
 
 if 1
-  % DEBUG (broke after adding save/ds.updateStudy to ds.simulateModel)
+  % DEBUG (broke after adding save/ds.updateStudy to dsSimulate)
   % problem might be same as below where the model is so equivalent that a new ODE solve file 
   % is not being generate when it should be.  
   % edit: probably same as reason "pause" is necessary throughout demo script
@@ -114,7 +114,7 @@ if 1
   spec.populations(1).equations='dv/dt=current; {iNa,iK,iCa,CaBuffer,iCan};';
   spec.populations(1).size=1;
   model=ds.generateModel(spec);
-  data=ds.simulateModel(model,'compile_flag',0); 
+  data=dsSimulate(model,'compile_flag',0); 
   figure; plot(data.time,data.(data.labels{1}))
 
   % !rm solve_ode.m params.mat
@@ -122,7 +122,7 @@ if 1
   spec.populations(1).equations='dv/dt=current; {iNa,iK,iCa,CaBuffer,iCan};';
   spec.populations(1).size=5;
   model=ds.generateModel(spec);
-  data=ds.simulateModel(model,'compile_flag',0); 
+  data=dsSimulate(model,'compile_flag',0); 
   figure; plot(data.time,data.(data.labels{1}))
   
   !rm solve_ode.m params.mat
@@ -131,7 +131,7 @@ if 1
   spec.populations(1).size=5;
   spec.connections(1).mechanism_list={'GABAa'};
   model=ds.generateModel(spec);
-  data=ds.simulateModel(model,'compile_flag',0); 
+  data=dsSimulate(model,'compile_flag',0); 
   figure; plot(data.time,data.(data.labels{1}))
 end
 
@@ -144,34 +144,34 @@ spec.connections(1).source='pop1';
 spec.connections(1).target='pop2';
 spec.connections(1).mechanism_list={'GABAa'};
 model=ds.generateModel(spec);
-data=ds.simulateModel(model,'compile_flag',0,'verbose_flag',1); 
+data=dsSimulate(model,'compile_flag',0,'verbose_flag',1); 
 figure; plot(data.time,data.pop1_v,'b'); hold on; plot(data.time,data.pop2_v,'r')
-data=ds.simulateModel(model,'compile_flag',1); 
+data=dsSimulate(model,'compile_flag',1); 
 figure; plot(data.time,data.pop1_v,'b'); hold on; plot(data.time,data.pop2_v,'r')
 
 spec=[];
 spec.populations(1).equations='dv/dt=@current+10; {iNa3,iK3};';
 model=ds.generateModel(spec);
-data=ds.simulateModel(model,'compile_flag',0); 
+data=dsSimulate(model,'compile_flag',0); 
 figure; plot(data.time,data.(data.labels{1}))
 
 spec=[];
 spec.populations(1).equations='dv/dt=@M+@current+10; {iNa3@M,iK3};';
 model=ds.generateModel(spec);
-data=ds.simulateModel(model,'compile_flag',0); 
+data=dsSimulate(model,'compile_flag',0); 
 figure; plot(data.time,data.(data.labels{1}))
 
 spec=[];
 spec.populations(1).equations='dv/dt=@M+10; {iNa3@M,iK3@M};';
 model=ds.generateModel(spec);
-data=ds.simulateModel(model,'compile_flag',0); 
+data=dsSimulate(model,'compile_flag',0); 
 figure; plot(data.time,data.(data.labels{1}))
 
 % EXAMPLE: fully modularized model specification (iNa3.mech uses 'X')
 spec=[];
 spec.populations(1).equations='dv/dt=@M+10; {iNa3,iK3}@M;';
 model=ds.generateModel(spec);
-data=ds.simulateModel(model,'compile_flag',0); 
+data=dsSimulate(model,'compile_flag',0); 
 figure; plot(data.time,data.(data.labels{1}))
 
 % todo:
@@ -183,34 +183,34 @@ spec=[];
 spec.populations(1).equations='dv/dt=@M+10; monitor o=v/1000; {iNa3,iK3}@M;';
 model=ds.generateModel(spec);
 % pause(1) % does this fix the bug? YES. it should if problem is solver file gets same timestamp-based name
-data=ds.simulateModel(model,'compile_flag',0); 
+data=dsSimulate(model,'compile_flag',0); 
 figure; plot(data.time,data.pop1_o)
 figure; plot(data.time,data.pop1_iNa3_I) % monitor set in iNa3.mech
 
 spec=[];
 spec.populations(1).equations='dv/dt=@M+10; monitor iK3.I; {iNa3,iK3}@M;';
 model=ds.generateModel(spec);
-data=ds.simulateModel(model,'compile_flag',0);
+data=dsSimulate(model,'compile_flag',0);
 figure; plot(data.time,data.pop1_iK3_I)
 
 spec=[];
 spec.populations(1).equations='dv/dt=@M+10; monitor iK3_I; {iNa3,iK3}@M;';
 model=ds.generateModel(spec);
-data=ds.simulateModel(model,'compile_flag',0);
+data=dsSimulate(model,'compile_flag',0);
 figure; plot(data.time,data.pop1_iK3_I)
 
 % Spike Monitor (default threshold=0)
 spec=[];
 spec.populations(1).equations='dv/dt=@M+10; {iNa3,iK3}@M; monitor v.spikes;';
 model=ds.generateModel(spec);
-data=ds.simulateModel(model,'compile_flag',0);
+data=dsSimulate(model,'compile_flag',0);
 figure; plot(data.time,data.pop1_v); hold on; plot(data.time,100*data.pop1_v_spikes,'r');
 
 % Spike Monitor with custom threshold (=60)
 spec=[];
 spec.populations(1).equations=...
   'dv/dt=@M+10; {iNa3,iK3}@M; monitor v.spikes(60);';
-data=ds.simulateModel(spec);
+data=dsSimulate(spec);
 figure; plot(data.time,data.pop1_v); hold on; plot(data.time,100*data.pop1_v_spikes,'r');
 
 % Spike Monitor (threshold=10) for different tonic amplitudes and max sodium conductance
@@ -222,7 +222,7 @@ for j=1:length(gNas)
     'dv/dt=@current+amp; amp=0; {iNa3,iK3}; monitor v.spikes(10);';
   for i=1:length(amps)
     spec.populations.parameters={'amp',amps(i),'gNa',gNas(j)};
-    data=ds.simulateModel(spec,'tspan',[0 100],'solver','rk4','dt',.01);
+    data=dsSimulate(spec,'tspan',[0 100],'solver','rk4','dt',.01);
     if i==1,spikes=zeros(length(data.time),length(amps));end
     spikes(:,i)=amps(i)+data.pop1_v_spikes;
   end
@@ -233,21 +233,21 @@ for j=1:length(gNas)
 end
 
 % test ds.parseModelEquations robustness
-data=ds.simulateModel('dv/dt=@current+10; {iNa3,iK3}');
+data=dsSimulate('dv/dt=@current+10; {iNa3,iK3}');
 figure; plot(data.time,data.(data.labels{1}))
 
-data=ds.simulateModel('dv/dt=@M+10; {iNa3,iK3}@M');
+data=dsSimulate('dv/dt=@M+10; {iNa3,iK3}@M');
 figure; plot(data.time,data.(data.labels{1}))
 
 % Size embedded in population equations with fully modularized mechanisms
 
-data=ds.simulateModel('dx[20]/dt=@M+5*(1+randn(1,Npop)); {iNa3,iK3}@M');
+data=dsSimulate('dx[20]/dt=@M+5*(1+randn(1,Npop)); {iNa3,iK3}@M');
 figure; plot(data.time,data.(data.labels{1}))
 % with different differential notation: x'=...
-data=ds.simulateModel('x[20]''=@M+5*(1+randn(1,Npop)); {iNa3,iK3}@M');
+data=dsSimulate('x[20]''=@M+5*(1+randn(1,Npop)); {iNa3,iK3}@M');
 figure; plot(data.time,data.(data.labels{1}))
 % with spike monitor
-data=ds.simulateModel(...
+data=dsSimulate(...
   'x[20]''=@M+50*(1+randn(1,Npop)); {iNa3,iK3}@M; monitor x.spikes(0)'...
   );
 figure; 
@@ -294,7 +294,7 @@ spec.connections(2,2).label = 'LTS-B';
 spec.connections(2,2).mechanisms = {'iSYN'};
 spec.connections(2,2).parameters = {'g_SYN',gLTSB,'E_SYN',-80,'tauDx',20,'tauRx',.5,'IC_noise',0};
 model=ds.generateModel(spec);
-data=ds.simulateModel(model,'tspan',[0 1000],'compile_flag',1); 
+data=dsSimulate(model,'tspan',[0 1000],'compile_flag',1); 
 figure; plot(data.time,data.B_V,'r-',data.time,data.LTS_V,'g-')
 
 
@@ -319,7 +319,7 @@ spec.connections(2,1).label = 'I-E';
 spec.connections(2,1).mechanisms = {'GABAa2'};
 spec.connections(2,1).parameters = {'tauDx',tauI,'g_SYN',gI*(20/nI)};
 model=ds.generateModel(spec);
-data=ds.simulateModel(model,'tspan',[0 100],'compile_flag',0); 
+data=dsSimulate(model,'tspan',[0 100],'compile_flag',0); 
 figure; plot(data.time,data.E_V,'b-',data.time,data.I_V,'r-')
 
 % Sparse PING in new specification format
@@ -338,7 +338,7 @@ s.cons(2).source='I';
 s.cons(2).target='E';
 s.cons(2).mechanism_list={'GABAa2'};
 s.cons(2).parameters={'tauDx',10,'g_SYN',.1};
-data=ds.simulateModel(s,'tspan',[0 100],'solver','rk4','compile_flag',0);
+data=dsSimulate(s,'tspan',[0 100],'solver','rk4','compile_flag',0);
 figure; plot(data.time,data.E_V,'b-',data.time,data.I_V,'r-')
 
 % Sparse PING in new specification format w/ full modularization (w/o input mechanism or pop state var IC)
@@ -357,7 +357,7 @@ s.cons(2).source='I';
 s.cons(2).target='E';
 s.cons(2).mechanism_list={'GABAa2@M'};
 s.cons(2).parameters={'tauDx',10,'g_SYN',.1};
-data=ds.simulateModel(s,'tspan',[0 100],'solver','rk4','compile_flag',0);
+data=dsSimulate(s,'tspan',[0 100],'solver','rk4','compile_flag',0);
 figure; plot(data.time,data.E_y,'b-',data.time,data.I_y,'r-')
 
 % equivalent with explicit noise term
@@ -376,7 +376,7 @@ s.cons(2).source='I';
 s.cons(2).target='E';
 s.cons(2).mechanism_list={'GABAa2@M'};
 s.cons(2).parameters={'tauDx',10,'g_SYN',.1};
-data=ds.simulateModel(s,'tspan',[0 100],'solver','rk4','compile_flag',0);
+data=dsSimulate(s,'tspan',[0 100],'solver','rk4','compile_flag',0);
 figure; plot(data.time,data.E_y,'b-',data.time,data.I_y,'r-')
 
 % simulate with data stored on disk: method 1
@@ -385,7 +385,7 @@ ds.writeDynaSimSolver(m,'disk_flag',1,'filename','solve_ode.m','datafile','data.
 solve_ode; data=ds.importData('data.csv');
 
 % simulate with data stored on disk: method 2
-data=ds.simulateModel(s,'tspan',[0 100],'disk_flag',1,'downsample_factor',10);
+data=dsSimulate(s,'tspan',[0 100],'disk_flag',1,'downsample_factor',10);
 figure; plot(data.time,data.E_y,'b-',data.time,data.I_y,'r-')
 %figure; plot(data.time,data.(data.labels{1}))
 
@@ -393,22 +393,22 @@ figure; plot(data.time,data.E_y,'b-',data.time,data.I_y,'r-')
 
 cd(output_directory);
 
-data=ds.simulateModel('dv/dt=@current/c;c=1; {iNa3,iK3}',...
+data=dsSimulate('dv/dt=@current/c;c=1; {iNa3,iK3}',...
   'modifications',{'pop1','size',5});
 figure; plot(data.time,data.(data.labels{1}))
 
 % test backward-compatibility:
-data=ds.simulateModel('dv/dt=@current/c+100; c=1; {iNa3,iK3}',...
+data=dsSimulate('dv/dt=@current/c+100; c=1; {iNa3,iK3}',...
   'modifications',{'pop1','size',5,[];'pop1','parameters','c',10});
 figure; plot(data.time,data.(data.labels{1}))
 s=[];
 s.pops(1).equations='dv/dt=@current+100; {iNa3,iK3}';
 s.pops(1).parameters={'gNa',120};
-data=ds.simulateModel(s,'modifications',{'pop1','parameters','gNa',250});
+data=dsSimulate(s,'modifications',{'pop1','parameters','gNa',250});
 figure; plot(data.time,data.(data.labels{1}))
 
 if 1
-  % DEBUG (broke after adding save/ds.updateStudy to ds.simulateModel) - same model broken above
+  % DEBUG (broke after adding save/ds.updateStudy to dsSimulate) - same model broken above
   % test modifying connection parameters:
   % !rm solve_ode.m params.mat
   spec=[];
@@ -416,9 +416,9 @@ if 1
   spec.pops.size=5;
   spec.cons.mechanism_list={'GABAa'};
   model=ds.generateModel(spec,'modifications',{'pop1->pop1','g_SYN',1});
-  data=ds.simulateModel(model); 
+  data=dsSimulate(model); 
   % !rm solve_ode.m params.mat
-  data=ds.simulateModel(spec,'modifications',{'pop1->pop1','g_SYN',1});
+  data=dsSimulate(spec,'modifications',{'pop1->pop1','g_SYN',1});
   figure; plot(data.time,data.(data.labels{1}))
 end
 
@@ -478,7 +478,7 @@ eqns={
 'aN(v) = (.1-.01*(v+65))./(exp(1-.1*(v+65))-1)';
 'bN(v) = .125*exp(-(v+65)/80)';
 };
-data=ds.simulateModel(eqns); 
+data=dsSimulate(eqns); 
 figure; plot(data.time,data.(data.labels{1}))
 
 eqns={
@@ -495,7 +495,7 @@ eqns={
 'aN(v) = (.1-.01*(v+65))./(exp(1-.1*(v+65))-1)';
 'bN(v) = .125*exp(-(v+65)/80)';
 };
-data=ds.simulateModel(eqns); 
+data=dsSimulate(eqns); 
 figure; plot(data.time,data.(data.labels{1}))
 
 eqns={};
@@ -511,7 +511,7 @@ eqns{end+1}='aH(v) = .07*exp(-(v+65)/20)';
 eqns{end+1}='bH(v) = 1./(exp(3-.1*(v+65))+1)';
 eqns{end+1}='aN(v) = (.1-.01*(v+65))./(exp(1-.1*(v+65))-1)';
 eqns{end+1}='bN(v) = .125*exp(-(v+65)/80)';
-data=ds.simulateModel(eqns); 
+data=dsSimulate(eqns); 
 figure; plot(data.time,data.(data.labels{1}))
 
 eqns=[...
@@ -528,13 +528,13 @@ eqns=[...
 'aN(v) = (.1-.01*(v+65))./(exp(1-.1*(v+65))-1);' ...
 'bN(v) = .125*exp(-(v+65)/80);' ...
 ];
-data=ds.simulateModel(eqns); 
+data=dsSimulate(eqns); 
 figure; plot(data.time,data.(data.labels{1}))
 
-data=ds.simulateModel('HH.eqns'); 
+data=dsSimulate('HH.eqns'); 
 figure; plot(data.time,data.(data.labels{1}))
 
-data=ds.simulateModel('dv/dt=10+current; {iNa,iK}; v(0)=-65'); 
+data=dsSimulate('dv/dt=10+current; {iNa,iK}; v(0)=-65'); 
 figure; plot(data.time,data.(data.labels{1}))
 
 % with parameters and 'X':
@@ -556,7 +556,7 @@ eqns={
 'dn/dt = aN(X).*(1-n)-bN(X).*n';
 };
 model=ds.generateModel(eqns);
-data=ds.simulateModel(model); 
+data=dsSimulate(model); 
 figure; plot(data.time,data.(data.labels{1}))
 
 %%
@@ -572,13 +572,13 @@ figure; plot(data.time,data.(data.labels{1}))
 
 % todo v0.2:
 % 1. design study framework -- DONE
-% ...ds.simulateModel() with 'vary' and BatchManager() with studyinfo -- DONE
+% ...dsSimulate() with 'vary' and BatchManager() with studyinfo -- DONE
 % ...AnalyzeStudy(data,@FR) -- DONE
-% ... special case in pop eqns: vary() parsed in ds.simulateModel -- DONE
+% ... special case in pop eqns: vary() parsed in dsSimulate -- DONE
 
 %% plan study framework
-%   ideas: have quick option recognized by ds.simulateModel, or include .vary
-%   in model, or other; in either case, may be best to have ds.simulateModel
+%   ideas: have quick option recognized by dsSimulate, or include .vary
+%   in model, or other; in either case, may be best to have dsSimulate
 %   be the single interface to simulations (instead of creating a separate
 %   function like simstudy())
 
@@ -586,26 +586,26 @@ clear data; figure
 vary={'pop1','gNa',[50 100 200]};
 mod_set=ds.vary2Modifications(vary); % {{'pop1','gNa',100},{'pop1','gNa',120}}
 for i=1:length(mod_set)
-  data(i)=ds.simulateModel('dv/dt=@M+10; {iNa,iK}@M','modifications',mod_set{i});
+  data(i)=dsSimulate('dv/dt=@M+10; {iNa,iK}@M','modifications',mod_set{i});
   subplot(1,length(mod_set),i); plot(data(i).time,data(i).(data(i).labels{1}))
   title(sprintf('gNa=%g',mod_set{i}{3}));
 end
 
-% the same data set and plot can be obtained directly from ds.simulateModel by:
+% the same data set and plot can be obtained directly from dsSimulate by:
 vary={'pop1','gNa',[50 100 200]};
-data=ds.simulateModel('dv/dt=@M+10; {iNa,iK}@M','vary',vary);
+data=dsSimulate('dv/dt=@M+10; {iNa,iK}@M','vary',vary);
 % [data.pop1_gNa]
 
 vary={'','gNa',[50 100 200]};
-data=ds.simulateModel('dv/dt=@M+10; {iNa,iK}@M','vary',vary);
+data=dsSimulate('dv/dt=@M+10; {iNa,iK}@M','vary',vary);
 
 vary={[],'gNa',[50 100 200]};
-data=ds.simulateModel('dv/dt=@M+10; {iNa,iK}@M','vary',vary);
+data=dsSimulate('dv/dt=@M+10; {iNa,iK}@M','vary',vary);
 
-% special case of vary statement passed in equation to ds.simulateModel:
-data=ds.simulateModel('dv/dt=@M/Cm+10; {iNa,iK}@M; vary(Cm=[.2 .5 1 5])');
+% special case of vary statement passed in equation to dsSimulate:
+data=dsSimulate('dv/dt=@M/Cm+10; {iNa,iK}@M; vary(Cm=[.2 .5 1 5])');
 
-data=ds.simulateModel('dv/dt=@M+amp; {iNa,iK}@M; vary(amp=[5 10 20])');
+data=dsSimulate('dv/dt=@M+amp; {iNa,iK}@M; vary(amp=[5 10 20])');
 figure
 for i=1:length(data)
   subplot(1,length(data),i); plot(data(i).time,data(i).(data(i).labels{1}));
@@ -614,10 +614,10 @@ for i=1:length(data)
 end
 
 % auto-constructed search space given special case specification of what to vary
-data=ds.simulateModel('dv/dt=@M+10; {iNa,iK}@M; vary(gNa=[50 100 200])');
+data=dsSimulate('dv/dt=@M+10; {iNa,iK}@M; vary(gNa=[50 100 200])');
 % eqivalent manual construction of search space
 vary={{'pop1','gNa',50},{'pop1','gNa',100},{'pop1','gNa',200}};
-data=ds.simulateModel('dv/dt=@M+10; {iNa,iK}@M','vary',vary);
+data=dsSimulate('dv/dt=@M+10; {iNa,iK}@M','vary',vary);
 figure
 for i=1:length(data)
   subplot(1,length(data),i); plot(data(i).time,data(i).(data(i).labels{1}));
@@ -627,7 +627,7 @@ end
 
 % Spike Monitor (threshold=10) for different tonic amplitudes and max sodium conductance
 vary={'pop1','amp',2:2:60;'pop1','gNa',[100 120]};
-data=ds.simulateModel('dv/dt=@current+amp; {iNa3,iK3}; monitor v.spikes(10)','vary',vary);
+data=dsSimulate('dv/dt=@current+amp; {iNa3,iK3}; monitor v.spikes(10)','vary',vary);
 figure
 a=[data.pop1_amp]; amps=unique(a);
 b=[data.pop1_gNa]; gNas=unique(b);
@@ -642,17 +642,17 @@ set(gca,'ytick',amps,'yticklabel',amps);
 C=1; gl=1; El=-60; sT=1; vT=-45; sT=1; a=.5; tau=1; vmax=0; vr=-60;
 s.pops.equations='dv/dt=(-gl*(v-El)+gl*sT*exp((v-vT)/sT)-w+I)/C; dw/dt=(a*(v-El)-w)/tau; if(v>vmax)(v=vr); v(0)=-70';
 s.pops.parameters={'C',C,'gl',gl,'El',El,'vT',vT,'sT',sT,'a',a,'tau',tau,'I',25,'vr',vr,'vmax',vmax};
-data=ds.simulateModel(s);
+data=dsSimulate(s);
 figure; plot(data.time,data.(data.labels{1}))
 % eqivalent adaptive exponential integrate and fire
 if 1
   % DEBUG. problem: this model is so equivalent that a new ODE solve file 
   % is not being generate when it should be.
-  data=ds.simulateModel('dv/dt=(-gl*(v-El)+gl*sT*exp((v-vT)/sT)-w+I)/C; if(v>0)(v=-60); dw/dt=(a*(v-El)-w)/tau; v(0)=-70; gl=1; El=-60; sT=1; vT=-45; C=1; a=.5; tau=1; I=25');
+  data=dsSimulate('dv/dt=(-gl*(v-El)+gl*sT*exp((v-vT)/sT)-w+I)/C; if(v>0)(v=-60); dw/dt=(a*(v-El)-w)/tau; v(0)=-70; gl=1; El=-60; sT=1; vT=-45; C=1; a=.5; tau=1; I=25');
   figure; plot(data.time,data.(data.labels{1}))
 end
 % adaptive integrate and fire
-data=ds.simulateModel('dv/dt=-(v-El)-w+100; if(v>0)(v=-60); dw/dt=a*(v-El)-w; a=.75; El=-60;');
+data=dsSimulate('dv/dt=-(v-El)-w+100; if(v>0)(v=-60); dw/dt=a*(v-El)-w; a=.75; El=-60;');
 figure; plot(data.time,data.(data.labels{1}))
 
 
@@ -663,14 +663,14 @@ s.populations(1).name='E';
 s.populations(1).equations='dv/dt=current+10; {iNa,iK}; v(0)=-65';
 s.populations(2).name='I';
 s.populations(2).equations='dv/dt=current+10; {iNa,iK}; v(0)=-65';
-data=ds.simulateModel(s);
+data=dsSimulate(s);
 figure; plot(data.time,data.(data.labels{1}))
-data=ds.selectData(data,'timelimits',[20 80]);
+data=dsSelect(data,'timelimits',[20 80]);
 data=ds.calcFR(data,'variable','*_v','bin_size',30,'bin_shift',10);
 figure; plot(data.time_FR,data.E_v_FR);
 
 vary={'pop1','gNa',[50 100 200]};
-data=ds.simulateModel('dv/dt=@M+10; {iNa,iK}@M','vary',vary);
+data=dsSimulate('dv/dt=@M+10; {iNa,iK}@M','vary',vary);
 data=AnalyzeStudy(data,@ds.calcFR,'bin_size',30,'bin_shift',10);
 figure
 FR=cat(2,data.pop1_v_FR);
@@ -680,15 +680,15 @@ subplot(1,2,2); plot([data.pop1_gNa],mean(FR,1),'o-');
 xlabel('gNa (mS/cm^2)'); ylabel('FR (Hz) avg over time');
 
 vary={'pop1','gNa',[50 100 200]};
-data=ds.simulateModel('dv/dt=@M+10; {iNa,iK}@M','vary',vary);
+data=dsSimulate('dv/dt=@M+10; {iNa,iK}@M','vary',vary);
 data=ds.calcFR(data,'variable','*_v','bin_size',30,'bin_shift',10);
 
 % ds.plotFR: 1 pop, 1 cell, 0 varied
-data=ds.simulateModel('dv/dt=@M+10; {iNa,iK}@M');
+data=dsSimulate('dv/dt=@M+10; {iNa,iK}@M');
 ds.plotFR(data,'bin_size',50,'bin_shift',15)
 
 % ds.plotFR: 1 pop, 5 cells, 0 varied
-data=ds.simulateModel('dv[5]/dt=@M+10*(t>150*rand(1,Npop)); {iNa,iK}@M','tspan',[0 300]);
+data=dsSimulate('dv[5]/dt=@M+10*(t>150*rand(1,Npop)); {iNa,iK}@M','tspan',[0 300]);
 ds.plotFR(data,'bin_size',50,'bin_shift',15)
 figure; plot(data.time,data.(data.labels{1}))
 
@@ -696,31 +696,31 @@ figure; plot(data.time,data.(data.labels{1}))
 s=[];
 s.pops(1).equations='dv/dt=@M+10*(t>150*rand(1,Npop)); {iNa,iK}@M; v(0)=-65';
 s.pops(2).equations='dv/dt=@M+10*(t>150*rand(1,Npop)); {iNa,iK}@M; v(0)=-65';
-data=ds.simulateModel(s,'tspan',[0 400]);
+data=dsSimulate(s,'tspan',[0 400]);
 ds.plotFR(data,'bin_size',50,'bin_shift',15,'variable','*_v')
 
 % ds.plotFR: 2 pops, 1 cell & 5 cells, 0 varied
 s=[];
 s.pops(1).equations='dv/dt=@M+10*(t>150*rand(1,Npop)); {iNa,iK}@M; v(0)=-65';
 s.pops(2).equations='dv[5]/dt=@M+10*(t>150*rand(1,Npop)); {iNa,iK}@M; v(0)=-65';
-data=ds.simulateModel(s,'tspan',[0 400]);
+data=dsSimulate(s,'tspan',[0 400]);
 ds.plotFR(data,'bin_size',50,'bin_shift',15,'variable','*_v')
 
 % ds.plotFR: 2 pops, 5 cells/each, 0 varied
 s=[];
 s.pops(1).equations='dv[5]/dt=@M+10*(t>150*rand(1,Npop)); {iNa,iK}@M; v(0)=-65';
 s.pops(2).equations='dv[5]/dt=@M+10*(t>150*rand(1,Npop)); {iNa,iK}@M; v(0)=-65';
-data=ds.simulateModel(s,'tspan',[0 600]);
+data=dsSimulate(s,'tspan',[0 600]);
 ds.plotFR(data,'bin_size',50,'bin_shift',15,'variable','*_v')
 
 % ds.plotFR: 1 pop, 1 cell, 1 varied
 vary={'pop1','gNa',[50 200 400]};
-data=ds.simulateModel('dv/dt=@M+10*(t>150*rand(1,Npop)); {iNa,iK}@M','vary',vary);
+data=dsSimulate('dv/dt=@M+10*(t>150*rand(1,Npop)); {iNa,iK}@M','vary',vary);
 ds.plotFR(data,'bin_size',30,'bin_shift',10);
 
 % ds.plotFR: 1 pop, 5 cells, 1 varied
 vary={'pop1','gNa',[50 200 400]};
-data=ds.simulateModel('dv[5]/dt=@M+10*(t>150*rand(1,Npop)); {iNa,iK}@M','vary',vary);
+data=dsSimulate('dv[5]/dt=@M+10*(t>150*rand(1,Npop)); {iNa,iK}@M','vary',vary);
 ds.plotFR(data,'bin_size',30,'bin_shift',10);
 
 % ds.plotFR: 2 pops, 5 cells/each, 1 varied
@@ -728,17 +728,17 @@ vary={'pop1','gNa',[50 200 400]};
 s=[];
 s.pops(1).equations='dv[5]/dt=@M+10*(t>150*rand(1,Npop)); {iNa,iK}@M; v(0)=-65';
 s.pops(2).equations='dv[5]/dt=@M+10*(t>150*rand(1,Npop)); {iNa,iK}@M; v(0)=-65';
-data=ds.simulateModel(s,'tspan',[0 600],'vary',vary);
+data=dsSimulate(s,'tspan',[0 600],'vary',vary);
 ds.plotFR(data,'bin_size',50,'bin_shift',15,'variable','*_v')
 
 % ds.plotFR: 1 pop, 1 cell, 2 varied
 vary={'pop1','gNa',[50 200 400];'pop1','gK',[25 50 100]};
-data=ds.simulateModel('dv/dt=@M+10*(t>150*rand(1,Npop)); {iNa,iK}@M','vary',vary);
+data=dsSimulate('dv/dt=@M+10*(t>150*rand(1,Npop)); {iNa,iK}@M','vary',vary);
 ds.plotFR(data,'bin_size',30,'bin_shift',10);
 
 % ds.plotFR: 1 pop, 5 cells, 2 varied
 vary={'pop1','gNa',[50 200 400];'pop1','gK',[25 50 100]};
-data=ds.simulateModel('dv[5]/dt=@M+10*(t>150*rand(1,Npop)); {iNa,iK}@M','vary',vary);
+data=dsSimulate('dv[5]/dt=@M+10*(t>150*rand(1,Npop)); {iNa,iK}@M','vary',vary);
 ds.plotFR(data,'bin_size',30,'bin_shift',10);
 
 % ds.plotFR: 2 pops, 5 cells/each, 2 varied
@@ -746,17 +746,17 @@ vary={'pop1','gNa',[50 200 400];'pop1','gK',[25 100]};
 s=[];
 s.pops(1).equations='dv[5]/dt=@M+10*(t>150*rand(1,Npop)); {iNa,iK}@M; v(0)=-65';
 s.pops(2).equations='dv[5]/dt=@M+10*(t>150*rand(1,Npop)); {iNa,iK}@M; v(0)=-65';
-data=ds.simulateModel(s,'tspan',[0 600],'vary',vary);
+data=dsSimulate(s,'tspan',[0 600],'vary',vary);
 ds.plotFR(data,'bin_size',50,'bin_shift',15,'variable','*_v')
 
 % ds.plotFR: 1 pop, 1 cell, 3 varied
 vary={'pop1','gNa',[50 400];'pop1','gK',[25 100];'pop1','amp',[10 20]};
-data=ds.simulateModel('dv/dt=@M+amp*(t>150*rand(1,Npop)); {iNa,iK}@M','vary',vary);
+data=dsSimulate('dv/dt=@M+amp*(t>150*rand(1,Npop)); {iNa,iK}@M','vary',vary);
 ds.plotFR(data,'bin_size',30,'bin_shift',10);
 
 % ds.plotFR: 1 pop, 5 cells, 3 varied
 vary={'pop1','gNa',[50 400];'pop1','gK',[25 100];'pop1','amp',[10 20]};
-data=ds.simulateModel('dv[5]/dt=@M+amp*(t>150*rand(1,Npop)); {iNa,iK}@M','vary',vary);
+data=dsSimulate('dv[5]/dt=@M+amp*(t>150*rand(1,Npop)); {iNa,iK}@M','vary',vary);
 ds.plotFR(data,'bin_size',30,'bin_shift',10);
 
 % ds.plotFR: 2 pops, 5 cells/each, 3 varied
@@ -764,12 +764,12 @@ vary={'pop1','gNa',[50 400];'pop1','gK',[25 100];'pop2','amp',[10 20]};
 s=[];
 s.pops(1).equations='dv[5]/dt=@M+amp*(t>150*rand(1,Npop)); {iNa,iK}@M; v(0)=-65; amp=10';
 s.pops(2).equations='dv[5]/dt=@M+amp*(t>150*rand(1,Npop)); {iNa,iK}@M; v(0)=-65; amp=10';
-data=ds.simulateModel(s,'tspan',[0 600],'vary',vary);
+data=dsSimulate(s,'tspan',[0 600],'vary',vary);
 ds.plotFR(data,'bin_size',50,'bin_shift',15,'variable','*_v')
 
 % ------------------------------------------------
 % Super simple single-parameter rate effects
-data=ds.simulateModel('dv/dt=@M+10; {iNa,iK}@M; vary(gNa=[50 100 200])');
+data=dsSimulate('dv/dt=@M+10; {iNa,iK}@M; vary(gNa=[50 100 200])');
 ds.plotFR(data,'bin_size',30,'bin_shift',10);
 % ------------------------------------------------
 
@@ -781,7 +781,7 @@ if 1
   % !rm solve_ode.m params.mat
   % ------------------------------------------------
   % Super simple experiment
-    data=ds.simulateModel('dv/dt=@M+10; {iNa,iK}@M','experiment',@ds.probeFI);
+    data=dsSimulate('dv/dt=@M+10; {iNa,iK}@M','experiment',@ds.probeFI);
     ds.plotFR(data,'bin_size',30,'bin_shift',10);
   % ------------------------------------------------
 
@@ -789,7 +789,7 @@ if 1
   s=[];
   s.pops(1).equations='dv[5]/dt=@M; {iNa,iK}@M; v(0)=-65';
   s.pops(2).equations='dv[5]/dt=@M; {iNa,iK}@M; v(0)=-65';
-  data=ds.simulateModel(s,'experiment',@ds.probeFI,'amplitudes',-10:10:10,'tspan',[0 600]);
+  data=dsSimulate(s,'experiment',@ds.probeFI,'amplitudes',-10:10:10,'tspan',[0 600]);
   ds.plotFR(data,'bin_size',50,'bin_shift',15)
   
 end
@@ -819,22 +819,22 @@ if 0 %strcmp(strtrim(host),'jason-pc') % if on developer computer
   s=ds.checkSpecification('dv/dt=@M; {iK@M}; {infbrain:57@M}');
   s.populations
 
-  data=ds.simulateModel('dv/dt=current; {infbrain:57,iK}');
+  data=dsSimulate('dv/dt=current; {infbrain:57,iK}');
   figure; plot(data.time,data.(data.labels{1}))
 
-  data=ds.simulateModel('dv/dt=current; infbrain:{57}; {iK}');
+  data=dsSimulate('dv/dt=current; infbrain:{57}; {iK}');
   figure; plot(data.time,data.(data.labels{1}))
 
-  data=ds.simulateModel('dv/dt=@M; {infbrain:57,iK}@M');
+  data=dsSimulate('dv/dt=@M; {infbrain:57,iK}@M');
   figure; plot(data.time,data.(data.labels{1}))
 
-  data=ds.simulateModel('dv/dt=@M; infbrain:{57}@M; {iK}@M');
+  data=dsSimulate('dv/dt=@M; infbrain:{57}@M; {iK}@M');
   figure; plot(data.time,data.(data.labels{1}))
 
-  data=ds.simulateModel('dv/dt=@M; {iK@M}; {infbrain:57@M}');
+  data=dsSimulate('dv/dt=@M; {iK@M}; {infbrain:57@M}');
   figure; plot(data.time,data.(data.labels{1}))
 
-  data=ds.simulateModel('dv/dt=@M; {iK@M}; infbrain:{57@M}');
+  data=dsSimulate('dv/dt=@M; {iK@M}; infbrain:{57@M}');
   figure; plot(data.time,data.(data.labels{1}))
 
   % todo: test these (importing population model, ...)
@@ -854,14 +854,14 @@ if 0 %strcmp(strtrim(host),'jason-pc') % if on developer computer
 
   % todo: consider pulling experiments from remote server as well:
   % eqn='dv/dt=@M+10; ib:{iNa,iK}@M';
-  % data=ds.simulateModel(eqn,'experiment','ib:@ds.probeFI');
+  % data=dsSimulate(eqn,'experiment','ib:@ds.probeFI');
 
   % ------------------------------------------------------------------
   % Example of concise powerful statements in DynaSim:
   % single statement to (1) specify a 4-cell noisy HH-type population model combining 
   % locally and remotely-stored mechanism sub-models and (2) specify and run three 
   % 200ms simulations varying a parameter gna of the remote Na+ channel mechanism (ib:57):
-  data=ds.simulateModel('dv[4]/dt=@M+50*rand(1,Npop); {ib:57,iK}@M; vary(gna=[50 75 150])','tspan',[0 200]);
+  data=dsSimulate('dv[4]/dt=@M+50*rand(1,Npop); {ib:57,iK}@M; vary(gna=[50 75 150])','tspan',[0 200]);
   % plot overlay of cell voltage traces for gna=75 (second value for varied parameter)
   figure; plot(data(2).time,data(2).(data(2).labels{1})); xlabel('time (ms)'); ylabel(data(2).labels{1});
   % plot Firing Rates in each of the three simulations
@@ -879,7 +879,7 @@ if 0 %strcmp(strtrim(host),'jason-pc') % if on developer computer
   % ------------------------------------------------------------------
 end
 
-%% Add ds.updateStudy() to ds.simulateModel()
+%% Add ds.updateStudy() to dsSimulate()
 
 % test ds.checkStudyinfo:
 studyinfo=ds.checkStudyinfo([])
@@ -915,13 +915,13 @@ addpath(dynasim_path)
 % without using studyinfo (save_data_flag=0): #############################
 
 % test sim: local, one sim, not compiled
-data=ds.simulateModel('dv/dt=@M+10; {iNa,iK}@M');
-data=ds.simulateModel('dv/dt=@M+10; {iNa,iK}@M');
+data=dsSimulate('dv/dt=@M+10; {iNa,iK}@M');
+data=dsSimulate('dv/dt=@M+10; {iNa,iK}@M');
 ds.plotFR(data); 
 
 % test sim: local, 3 sims, not compiled
-data=ds.simulateModel('dv/dt=@M+10; {iNa,iK}@M; vary(gNa=[50 100 200])');
-data=ds.simulateModel('dv/dt=@M+10; {iNa,iK}@M; vary(gNa=[50 100 200])');
+data=dsSimulate('dv/dt=@M+10; {iNa,iK}@M; vary(gNa=[50 100 200])');
+data=dsSimulate('dv/dt=@M+10; {iNa,iK}@M; vary(gNa=[50 100 200])');
 ds.plotFR(data);
 % --------------------------------------
 % ERROR -- 
@@ -930,31 +930,31 @@ ds.plotFR(data);
 % --------------------------------------
 
 % test sim: local, one sim, compiled
-data=ds.simulateModel('dv/dt=@M+10; {iNa,iK}@M','compile_flag',1);
-data=ds.simulateModel('dv/dt=@M+10; {iNa,iK}@M','compile_flag',1);
+data=dsSimulate('dv/dt=@M+10; {iNa,iK}@M','compile_flag',1);
+data=dsSimulate('dv/dt=@M+10; {iNa,iK}@M','compile_flag',1);
 ds.plotFR(data);
 
 % test sim: local, 3 sims, compiled
-data=ds.simulateModel('dv/dt=@M+10; {iNa,iK}@M; vary(gNa=[50 100 200])','compile_flag',1);
-data=ds.simulateModel('dv/dt=@M+10; {iNa,iK}@M; vary(gNa=[50 100 200])','compile_flag',1);
+data=dsSimulate('dv/dt=@M+10; {iNa,iK}@M; vary(gNa=[50 100 200])','compile_flag',1);
+data=dsSimulate('dv/dt=@M+10; {iNa,iK}@M; vary(gNa=[50 100 200])','compile_flag',1);
 ds.plotFR(data);
 
 % % using studyinfo (save_data_flag=1): ###################################
 % 
 % test sim: local, one sim, not compiled
-ds.simulateModel('dv/dt=@M+10; {iNa,iK}@M','save_data_flag',1,'verbose_flag',1);
-data=ds.simulateModel('dv/dt=@M+10; {iNa,iK}@M','save_data_flag',1,'verbose_flag',1);
+dsSimulate('dv/dt=@M+10; {iNa,iK}@M','save_data_flag',1,'verbose_flag',1);
+data=dsSimulate('dv/dt=@M+10; {iNa,iK}@M','save_data_flag',1,'verbose_flag',1);
 ds.plotFR(data);
 
 % test sim: local, one sim, not compiled -- single user-assigned study_dir
-ds.simulateModel('dv/dt=@M+10; {iNa,iK}@M','save_data_flag',1,'study_dir','StudyA','verbose_flag',1);
+dsSimulate('dv/dt=@M+10; {iNa,iK}@M','save_data_flag',1,'study_dir','StudyA','verbose_flag',1);
 % - saves data to StudyA
-data=ds.simulateModel('dv/dt=@M+10; {iNa,iK}@M','save_data_flag',1,'study_dir','StudyA','verbose_flag',1);
+data=dsSimulate('dv/dt=@M+10; {iNa,iK}@M','save_data_flag',1,'study_dir','StudyA','verbose_flag',1);
 % - loads existing data from StudyA
 ds.plotFR(data);
 
 % test sim: local, 3 sims, not compiled
-data=ds.simulateModel('dv/dt=@M+10; {iNa,iK}@M; vary(gNa=[50 100 200])','save_data_flag',1,'study_dir','StudyB','verbose_flag',1);
+data=dsSimulate('dv/dt=@M+10; {iNa,iK}@M; vary(gNa=[50 100 200])','save_data_flag',1,'study_dir','StudyB','verbose_flag',1);
 ds.plotFR(data);
 load('StudyB/studyinfo.mat','studyinfo')
 studyinfo
@@ -963,23 +963,23 @@ studyinfo.simulations(2)
 studyinfo.simulations(2).machine_info
 
 % test sim: local, one sim, compiled
-ds.simulateModel('dv/dt=@M+10; {iNa,iK}@M','compile_flag',1,'save_data_flag',1,'study_dir','StudyC','verbose_flag',1);
-data=ds.simulateModel('dv/dt=@M+10; {iNa,iK}@M','compile_flag',1,'save_data_flag',1,'study_dir','StudyC','verbose_flag',1);
+dsSimulate('dv/dt=@M+10; {iNa,iK}@M','compile_flag',1,'save_data_flag',1,'study_dir','StudyC','verbose_flag',1);
+data=dsSimulate('dv/dt=@M+10; {iNa,iK}@M','compile_flag',1,'save_data_flag',1,'study_dir','StudyC','verbose_flag',1);
 ds.plotFR(data);
 
 % test sim: local, 3 sims, compiled
-ds.simulateModel('dv/dt=@M+10; {iNa,iK}@M; vary(gNa=[50 100 200])','compile_flag',1,'save_data_flag',1,'study_dir','StudyD','verbose_flag',1);
-data=ds.simulateModel('dv/dt=@M+10; {iNa,iK}@M; vary(gNa=[50 100 200])','compile_flag',1,'save_data_flag',1,'study_dir','StudyD','verbose_flag',1);
+dsSimulate('dv/dt=@M+10; {iNa,iK}@M; vary(gNa=[50 100 200])','compile_flag',1,'save_data_flag',1,'study_dir','StudyD','verbose_flag',1);
+data=dsSimulate('dv/dt=@M+10; {iNa,iK}@M; vary(gNa=[50 100 200])','compile_flag',1,'save_data_flag',1,'study_dir','StudyD','verbose_flag',1);
 ds.plotFR(data);
 
 % test tspan=[0 200]
-data=ds.simulateModel('dv/dt=@M+10; {iNa,iK}@M; vary(gNa=[50 100 200])','tspan',[0 200]);
+data=dsSimulate('dv/dt=@M+10; {iNa,iK}@M; vary(gNa=[50 100 200])','tspan',[0 200]);
 data(1).time(end)
-data=ds.simulateModel('dv/dt=@M+10; {iNa,iK}@M','compile_flag',1,'tspan',[0 200]);
+data=dsSimulate('dv/dt=@M+10; {iNa,iK}@M','compile_flag',1,'tspan',[0 200]);
 data(1).time(end)
-data=ds.simulateModel('dv/dt=@M+10; {iNa,iK}@M','compile_flag',1,'tspan',[0 200],'save_data_flag',1);
+data=dsSimulate('dv/dt=@M+10; {iNa,iK}@M','compile_flag',1,'tspan',[0 200],'save_data_flag',1);
 data(1).time(end)
-data=ds.simulateModel('dv/dt=@M+10; {iNa,iK}@M','compile_flag',1,'tspan',[0 200],'save_data_flag',1,'study_dir','StudyE');
+data=dsSimulate('dv/dt=@M+10; {iNa,iK}@M','compile_flag',1,'tspan',[0 200],'save_data_flag',1,'study_dir','StudyE');
 data(1).time(end)
 ds.plotFR(data);
 
@@ -988,8 +988,8 @@ if 1 % errors to debug and features to implement
   
   % IMPORTANT TODO: make it so that varied params maintain consistent
   % parameter name (pop1_iNa_gNa should not become pop1_gNa when gNa is varied)
-  data=ds.simulateModel('dv/dt=@M+10; {iNa,iK}@M');
-  data=ds.simulateModel('dv/dt=@M+10; {iNa,iK}@M; vary(gNa=[50 100 200])');
+  data=dsSimulate('dv/dt=@M+10; {iNa,iK}@M');
+  data=dsSimulate('dv/dt=@M+10; {iNa,iK}@M; vary(gNa=[50 100 200])');
   data(1).model.parameters
   data(2).model.parameters
   data(3).model.parameters
@@ -1018,7 +1018,7 @@ modifications_set{:}
 
 % test sim: cluster, one sim, not compiled
 % verbose_flag
-[data,studyinfo]=ds.simulateModel('dv/dt=@M+10; {iNa,iK}@M',...
+[data,studyinfo]=dsSimulate('dv/dt=@M+10; {iNa,iK}@M',...
   'cluster_flag',1,'study_dir','ClusterTest','verbose_flag',1);
 ds.monitorStudy(studyinfo.study_dir);
 run(studyinfo.simulations.job_file);
@@ -1026,7 +1026,7 @@ ds.monitorStudy(studyinfo.study_dir);
 load(fullfile(studyinfo.study_dir,'studyinfo.mat'),'studyinfo');
 studyinfo.simulations
 % not verbose_flag
-[data,studyinfo]=ds.simulateModel('dv/dt=@M+10; {iNa,iK}@M',...
+[data,studyinfo]=dsSimulate('dv/dt=@M+10; {iNa,iK}@M',...
   'cluster_flag',1,'study_dir','ClusterTest');
 run(studyinfo.simulations.job_file);
 load(fullfile(studyinfo.study_dir,'studyinfo.mat'),'studyinfo');
@@ -1036,7 +1036,7 @@ figure; plot(data.time,data.(data.labels{1}))
 ds.plotFR(data)
 
 % test sim: cluster, 3 sims, not compiled
-[data,studyinfo]=ds.simulateModel('dv/dt=(@M+10)/Cm; Cm=1; {iNa,iK}@M; vary(Cm=[1 2 3])',...
+[data,studyinfo]=dsSimulate('dv/dt=(@M+10)/Cm; Cm=1; {iNa,iK}@M; vary(Cm=[1 2 3])',...
   'cluster_flag',1,'study_dir','ClusterTestSet','verbose_flag',1);
 ds.monitorStudy(studyinfo.study_dir);
 run(studyinfo.simulations(1).job_file);
@@ -1050,7 +1050,7 @@ studyinfo=ds.monitorStudy(studyinfo.study_dir);
 
 % -------------------
 % GOOD EXAMPLE:
-[data,studyinfo]=ds.simulateModel('dv/dt=(@M+10)/Cm; Cm=1; {iNa,iK}@M; vary(Cm=[1 2 3])',...
+[data,studyinfo]=dsSimulate('dv/dt=(@M+10)/Cm; Cm=1; {iNa,iK}@M; vary(Cm=[1 2 3])',...
   'cluster_flag',1,'study_dir','ClusterTestSetb','verbose_flag',1);
 if isempty(data) % will not be empty if study is ran again after completion
   run(studyinfo.simulations(1).job_file);
@@ -1063,20 +1063,20 @@ ds.plotFR(data);
 % -------------------
 
 if 1
-  [data,studyinfo]=ds.simulateModel('dv/dt=@M+10; {iNa,iK}@M; vary(gNa=[50 100 200])',...
+  [data,studyinfo]=dsSimulate('dv/dt=@M+10; {iNa,iK}@M; vary(gNa=[50 100 200])',...
     'cluster_flag',1,'study_dir','ClusterTestSetc','verbose_flag',1);
   run(studyinfo.simulations(1).job_file);
 end
 
 % test sim: cluster, one sim, compiled
-[data,studyinfo]=ds.simulateModel('dv/dt=@M+10; {iNa,iK}@M',...
+[data,studyinfo]=dsSimulate('dv/dt=@M+10; {iNa,iK}@M',...
   'cluster_flag',1,'compile_flag',1,'study_dir','ClusterTestMEX','verbose_flag',1);
 ds.monitorStudy(studyinfo.study_dir);
 run(studyinfo.simulations.job_file);
 ds.monitorStudy(studyinfo.study_dir);
 
 % test sim: cluster, 3 sims, compiled
-[data,studyinfo]=ds.simulateModel('dv/dt=(@M+10)/Cm; Cm=1; {iNa,iK}@M; vary(Cm=[1 2 3])',...
+[data,studyinfo]=dsSimulate('dv/dt=(@M+10)/Cm; Cm=1; {iNa,iK}@M; vary(Cm=[1 2 3])',...
   'cluster_flag',1,'compile_flag',1,'study_dir','TestClusterSetMEX','verbose_flag',1);
 ds.monitorStudy(studyinfo.study_dir);
 run(studyinfo.simulations(1).job_file);
@@ -1090,7 +1090,7 @@ studyinfo=ds.monitorStudy(studyinfo.study_dir);
 
 % test sim: cluster, 3 sims in 2 jobs, not compiled
 % set sims_per_job=2
-[data,studyinfo]=ds.simulateModel('dv/dt=(@M+10)/Cm; Cm=1; {iNa,iK}@M; vary(Cm=[1 2 3])',...
+[data,studyinfo]=dsSimulate('dv/dt=(@M+10)/Cm; Cm=1; {iNa,iK}@M; vary(Cm=[1 2 3])',...
   'cluster_flag',1,'compile_flag',0,'sims_per_job',2,'study_dir','ClusterTestSet2','verbose_flag',1);
 ds.monitorStudy(studyinfo.study_dir);
 run(studyinfo.simulations(1).job_file);
@@ -1111,7 +1111,7 @@ exist(studyinfo.simulations(3).data_file)
 
 % test sim: cluster, 3 sims in 2 jobs, compiled
 % set sims_per_job=2
-[data,studyinfo]=ds.simulateModel('dv/dt=(@M+10)/Cm; Cm=1; {iNa,iK}@M; vary(Cm=[1 2 3])',...
+[data,studyinfo]=dsSimulate('dv/dt=(@M+10)/Cm; Cm=1; {iNa,iK}@M; vary(Cm=[1 2 3])',...
   'cluster_flag',1,'compile_flag',1,'sims_per_job',2,'study_dir','ClusterTestSetMEX2','verbose_flag',1);
 ds.monitorStudy(studyinfo.study_dir);
 run(studyinfo.simulations(1).job_file);
@@ -1131,7 +1131,7 @@ exist(studyinfo.simulations(2).data_file)
 exist(studyinfo.simulations(3).data_file)
 
 % test email notification when study simulations are complete
-[data,studyinfo]=ds.simulateModel('dv/dt=(@M+10)/Cm; Cm=1; {iNa,iK}@M; vary(Cm=[1 2 3])',...
+[data,studyinfo]=dsSimulate('dv/dt=(@M+10)/Cm; Cm=1; {iNa,iK}@M; vary(Cm=[1 2 3])',...
   'cluster_flag',1,'compile_flag',1,'sims_per_job',2,'email','jssherfey@gmail.com','study_dir','ClusterTestSetMEX3','verbose_flag',1);
 run(studyinfo.simulations(1).job_file);
 run(studyinfo.simulations(3).job_file);
@@ -1140,7 +1140,7 @@ ds.monitorStudy(studyinfo.study_dir);
 % tests with disk_flag=1:
 
 % test sim: cluster, 3 sims, not compiled, save csv
-[data,studyinfo]=ds.simulateModel('dv/dt=(@M+10)/Cm; Cm=1; {iNa,iK}@M; vary(Cm=[1 2 3])',...
+[data,studyinfo]=dsSimulate('dv/dt=(@M+10)/Cm; Cm=1; {iNa,iK}@M; vary(Cm=[1 2 3])',...
   'cluster_flag',1,'disk_flag',1,'study_dir','TestDiskClusterSet','verbose_flag',1);
 ds.monitorStudy(studyinfo.study_dir);
 run(studyinfo.simulations(1).job_file);
@@ -1153,7 +1153,7 @@ data=ds.importData('TestDiskClusterSet');
 ds.plotFR(data);
 
 % test sim: cluster, 3 sims, compiled, save csv
-[data,studyinfo]=ds.simulateModel('dv/dt=(@M+10)/Cm; Cm=1; {iNa,iK}@M; vary(Cm=[1 2 3])',...
+[data,studyinfo]=dsSimulate('dv/dt=(@M+10)/Cm; Cm=1; {iNa,iK}@M; vary(Cm=[1 2 3])',...
   'cluster_flag',1,'disk_flag',1,'compile_flag',1,'study_dir','TestDiskClusterSetMEX','verbose_flag',1);
 ds.monitorStudy(studyinfo.study_dir);
 run(studyinfo.simulations(1).job_file);
@@ -1166,14 +1166,14 @@ data=ds.importData('TestDiskClusterSetMEX');
 ds.plotFR(data);
 
 % test sim: local, 3 sims, not compiled, save csv
-[data,studyinfo]=ds.simulateModel('dv/dt=(@M+10)/Cm; Cm=1; {iNa,iK}@M; vary(Cm=[1 2 3])',...
+[data,studyinfo]=dsSimulate('dv/dt=(@M+10)/Cm; Cm=1; {iNa,iK}@M; vary(Cm=[1 2 3])',...
   'cluster_flag',0,'disk_flag',1,'compile_flag',0,'study_dir','TestDiskLocalSet','verbose_flag',1);
 ds.plotFR(data);
 data2=ds.importData('TestDiskLocalSet');
 ds.plotFR(data2);
 
 % test sim: local, 3 sims, compiled, save csv
-[data,studyinfo]=ds.simulateModel('dv/dt=(@M+10)/Cm; Cm=1; {iNa,iK}@M; vary(Cm=[1 2 3])',...
+[data,studyinfo]=dsSimulate('dv/dt=(@M+10)/Cm; Cm=1; {iNa,iK}@M; vary(Cm=[1 2 3])',...
   'cluster_flag',0,'disk_flag',1,'compile_flag',1,'study_dir','TestDiskLocalSetMEX','verbose_flag',1);
 ds.plotFR(data);
 data2=ds.importData('TestDiskLocalSetMEX');
@@ -1201,7 +1201,7 @@ m.ODEs.pop1_pop1_AMPA_s
 m.functions.pop1_pop1_AMPA_ISYN
 
 if 1 % todo -- DONE: FIX: data sets returned are identical and only reflect the last result
-  [data,studyinfo]=ds.simulateModel('dv/dt=(@M+10)/Cm; Cm=1; {iNa,iK}@M; vary(gNa=[100 200])',...
+  [data,studyinfo]=dsSimulate('dv/dt=(@M+10)/Cm; Cm=1; {iNa,iK}@M; vary(gNa=[100 200])',...
   'cluster_flag',1,'compile_flag',1,'study_dir','Test4','verbose_flag',1);
   ds.monitorStudy(studyinfo.study_dir);
   run(studyinfo.simulations(1).job_file);
@@ -1211,11 +1211,11 @@ if 1 % todo -- DONE: FIX: data sets returned are identical and only reflect the 
   data=ds.importData('Test4');
   ds.plotFR(data);
   % should look like this:
-  [data,studyinfo]=ds.simulateModel('dv/dt=(@M+10)/Cm; Cm=1; {iNa,iK}@M; vary(gNa=[100 200])',...
+  [data,studyinfo]=dsSimulate('dv/dt=(@M+10)/Cm; Cm=1; {iNa,iK}@M; vary(gNa=[100 200])',...
   'cluster_flag',0,'compile_flag',1,'verbose_flag',1);
   ds.plotFR(data);
   
-  [data,studyinfo]=ds.simulateModel('dv/dt=(@M+10)/Cm; Cm=1; {iNa,iK}@M; vary(gNa=[100 200])',...
+  [data,studyinfo]=dsSimulate('dv/dt=(@M+10)/Cm; Cm=1; {iNa,iK}@M; vary(gNa=[100 200])',...
   'cluster_flag',1,'compile_flag',0,'study_dir','Test4b','verbose_flag',1);
   ds.monitorStudy(studyinfo.study_dir);
   run(studyinfo.simulations(1).job_file);
@@ -1227,26 +1227,26 @@ if 1 % todo -- DONE: FIX: data sets returned are identical and only reflect the 
 end  
 
 % A) * FIX: tspan not adjustable after compiling MEX -- DONE
-data=ds.simulateModel('dv/dt=@M+10; {iNa,iK}@M; vary(gNa=[50 100 200])',...
+data=dsSimulate('dv/dt=@M+10; {iNa,iK}@M; vary(gNa=[50 100 200])',...
   'tspan',[0 200],'compile_flag',1,'verbose_flag',1);
 ds.plotFR(data); ds.plotFR(data(2));
-data=ds.simulateModel('dv/dt=@M+10; {iNa,iK}@M; vary(gNa=[50 100 200])',...
+data=dsSimulate('dv/dt=@M+10; {iNa,iK}@M; vary(gNa=[50 100 200])',...
   'tspan',[0 100],'compile_flag',1,'verbose_flag',1);
 ds.plotFR(data); ds.plotFR(data(2));
 % works
 
-data=ds.simulateModel('dv/dt=@M+10; {iNa,iK}@M; vary(gNa=[50 100 200])',...
+data=dsSimulate('dv/dt=@M+10; {iNa,iK}@M; vary(gNa=[50 100 200])',...
   'tspan',[0 200],'compile_flag',1,'save_data_flag',1,'verbose_flag',1);
 ds.plotFR(data); ds.plotFR(data(2));
-data=ds.simulateModel('dv/dt=@M+10; {iNa,iK}@M; vary(gNa=[50 100 200])',...
+data=dsSimulate('dv/dt=@M+10; {iNa,iK}@M; vary(gNa=[50 100 200])',...
   'tspan',[0 100],'compile_flag',1,'save_data_flag',1,'verbose_flag',1);
 ds.plotFR(data); ds.plotFR(data(2));
 % works
 
-data=ds.simulateModel('dv/dt=@M+10; {iNa,iK}@M; vary(gNa=[50 100 200])',...
+data=dsSimulate('dv/dt=@M+10; {iNa,iK}@M; vary(gNa=[50 100 200])',...
   'tspan',[0 200],'compile_flag',1,'save_data_flag',1,'study_dir','StudyG','verbose_flag',1);
 ds.plotFR(data); ds.plotFR(data(2));
-data=ds.simulateModel('dv/dt=@M+10; {iNa,iK}@M; vary(gNa=[50 100 200])',...
+data=dsSimulate('dv/dt=@M+10; {iNa,iK}@M; vary(gNa=[50 100 200])',...
   'tspan',[0 100],'compile_flag',1,'save_data_flag',1,'study_dir','StudyG','verbose_flag',1);
 ds.plotFR(data); ds.plotFR(data(2));
 % works as it should; second simulation loads the result saved from the
@@ -1255,7 +1255,7 @@ ds.plotFR(data); ds.plotFR(data(2));
 % the data_file name, (2) compare parameters between new and old in 
 % addition to the data_file name before deciding whether to load existing 
 % data or run a new simulation.
-data=ds.simulateModel('dv/dt=@M+10; {iNa,iK}@M; vary(gNa=[50 100 200])',...
+data=dsSimulate('dv/dt=@M+10; {iNa,iK}@M; vary(gNa=[50 100 200])',...
   'tspan',[0 100],'compile_flag',1,'save_data_flag',1,'study_dir','StudyG',...
   'overwrite_flag',1,'verbose_flag',1);
 ds.plotFR(data); ds.plotFR(data(2));
@@ -1269,10 +1269,10 @@ if 1 % original example of bug
   C=1; gl=1; El=-60; sT=1; vT=-45; sT=1; a=.5; tau=1; vmax=0; vr=-60;
   s.pops.equations='dv/dt=(-gl*(v-El)+gl*sT*exp((v-vT)/sT)-w+I)/C; dw/dt=(a*(v-El)-w)/tau; if(v>vmax)(v=vr); v(0)=-70';
   s.pops.parameters={'C',C,'gl',gl,'El',El,'vT',vT,'sT',sT,'a',a,'tau',tau,'I',25,'vr',vr,'vmax',vmax};
-  data=ds.simulateModel(s);
+  data=dsSimulate(s);
   figure; plot(data.time,data.(data.labels{1}))
   % eqivalent adaptive exponential integrate and fire
-  data=ds.simulateModel('dv/dt=(-gl*(v-El)+gl*sT*exp((v-vT)/sT)-w+I)/C; if(v>0)(v=-60); dw/dt=(a*(v-El)-w)/tau; v(0)=-70; gl=1; El=-60; sT=1; vT=-45; C=1; a=.5; tau=1; I=25');
+  data=dsSimulate('dv/dt=(-gl*(v-El)+gl*sT*exp((v-vT)/sT)-w+I)/C; if(v>0)(v=-60); dw/dt=(a*(v-El)-w)/tau; v(0)=-70; gl=1; El=-60; sT=1; vT=-45; C=1; a=.5; tau=1; I=25');
   figure; plot(data.time,data.(data.labels{1}))
 end
 
@@ -1292,17 +1292,17 @@ end
 % 4. more study/cluster stuff
     % DONE
     
-%% test: 'ic' option in ds.simulateModel()
-data=ds.simulateModel('dv/dt=-v+15*sin(2*pi*t*3)','tspan',[0 10],'ic',10); 
+%% test: 'ic' option in dsSimulate()
+data=dsSimulate('dv/dt=-v+15*sin(2*pi*t*3)','tspan',[0 10],'ic',10); 
 figure; plot(data.time,data.pop1_v)
 
-data=ds.simulateModel('dv[2]/dt=-v+15*sin(2*pi*t*3)','tspan',[0 10],'ic',[10 20]); 
+data=dsSimulate('dv[2]/dt=-v+15*sin(2*pi*t*3)','tspan',[0 10],'ic',[10 20]); 
 figure; plot(data.time,data.pop1_v)
 
-data=ds.simulateModel('dv/dt=-v+15*sin(2*pi*t*3); dw/dt=-w+15*sin(2*pi*t*1);','tspan',[0 10],'ic',[10 20]); 
+data=dsSimulate('dv/dt=-v+15*sin(2*pi*t*3); dw/dt=-w+15*sin(2*pi*t*1);','tspan',[0 10],'ic',[10 20]); 
 figure; plot(data.time,data.pop1_v,'b'); hold on; plot(data.time,data.pop1_w,'r');
 
-data=ds.simulateModel('dv[2]/dt=-v+15*sin(2*pi*t*3); dw[2]/dt=-w+15*sin(2*pi*t*1);','tspan',[0 10],'ic',[10 12 20 22]);
+data=dsSimulate('dv[2]/dt=-v+15*sin(2*pi*t*3); dw[2]/dt=-w+15*sin(2*pi*t*1);','tspan',[0 10],'ic',[10 12 20 22]);
 figure; plot(data.time,data.pop1_v,'b'); hold on; plot(data.time,data.pop1_w,'r');
 
 %% add monitor special cases (eg., lists, keyword "functions")
@@ -1311,31 +1311,31 @@ figure; plot(data.time,data.pop1_v,'b'); hold on; plot(data.time,data.pop1_w,'r'
 
 model=ds.generateModel('dv/dt=@M+10; monitor functions; {iNa3,iK3}@M;');
 model.monitors
-data=ds.simulateModel('dv/dt=@M+10; monitor functions; {iNa3,iK3}@M;');
+data=dsSimulate('dv/dt=@M+10; monitor functions; {iNa3,iK3}@M;');
 data
 figure; plot(data.time,data.pop1_iK3_I)
 
 model=ds.generateModel('dv/dt=@M+10; monitor iNa3.functions; {iNa3,iK3}@M;');
 model.monitors
-data=ds.simulateModel('dv/dt=@M+10; monitor iNa3.functions; {iNa3,iK3}@M;');
+data=dsSimulate('dv/dt=@M+10; monitor iNa3.functions; {iNa3,iK3}@M;');
 data
 figure; plot(data.time,data.pop1_iNa3_aH)
 
 model=ds.generateModel('dv/dt=@M+10; monitor iNa3_functions; {iNa3,iK3}@M;');
 model.monitors
-data=ds.simulateModel('dv/dt=@M+10; monitor iNa3_functions; {iNa3,iK3}@M;');
+data=dsSimulate('dv/dt=@M+10; monitor iNa3_functions; {iNa3,iK3}@M;');
 data
 figure; plot(data.time,data.pop1_iNa3_aH)
 
 model=ds.generateModel('dv/dt=@M+10; monitor iK3.functions; {iNa3,iK3}@M;');
 model.monitors
-data=ds.simulateModel('dv/dt=@M+10; monitor iK3.functions; {iNa3,iK3}@M;');
+data=dsSimulate('dv/dt=@M+10; monitor iK3.functions; {iNa3,iK3}@M;');
 data
 figure; plot(data.time,data.pop1_iK3_aN)
 
 model=ds.generateModel('dv/dt=@M+10; monitor iK3_functions; {iNa3,iK3}@M;');
 model.monitors
-data=ds.simulateModel('dv/dt=@M+10; monitor iK3_functions; {iNa3,iK3}@M;');
+data=dsSimulate('dv/dt=@M+10; monitor iK3_functions; {iNa3,iK3}@M;');
 data
 figure; plot(data.time,data.pop1_iK3_aN)
 
@@ -1349,7 +1349,7 @@ model.monitors
 %% profile study batch ("profile viewer")
 
 % test sim: cluster, 3 sims, compiled
-[data,studyinfo]=ds.simulateModel('dv/dt=(@M+10)/Cm; Cm=1; {iNa,iK}@M; vary(Cm=[1 2 3])',...
+[data,studyinfo]=dsSimulate('dv/dt=(@M+10)/Cm; Cm=1; {iNa,iK}@M; vary(Cm=[1 2 3])',...
   'cluster_flag',1,'compile_flag',1,'study_dir','TestProfileStudy','verbose_flag',1);
 ds.monitorStudy(studyinfo.study_dir);
 run(studyinfo.simulations(1).job_file);
@@ -1418,12 +1418,12 @@ m.parameters
 
 model=ds.generateModel('dv/dt=@M+10; gNa=150; monitor iK3.I, iK3.aN; {iNa3,iK3}@M;');
 model.parameters
-data=ds.simulateModel(model);
+data=dsSimulate(model);
 data
 figure; 
 subplot(1,2,1); plot(data.time,data.pop1_iK3_I)
 model=ds.generateModel('dv/dt=@M+10; gNa=50; monitor iK3.I, iK3.aN; {iNa3,iK3}@M;');
-data=ds.simulateModel(model);
+data=dsSimulate(model);
 subplot(1,2,2); plot(data.time,data.pop1_iK3_I)
 
 s=[];
@@ -1434,7 +1434,7 @@ s.cons.mechanism_list='AMPA@M';
 s.cons.parameters={'g_SYN',1};
 m=ds.generateModel(s);
 m.ODEs.RE_v
-d=ds.simulateModel(m);
+d=dsSimulate(m);
 figure; plot(d.time,d.TC_v,'b',d.time,d.RE_v,'r'); legend('TC','RE')
 
 s=[];
@@ -1443,7 +1443,7 @@ s.cons.source='TC';
 s.cons.target='RE';
 s.cons.mechanism_list='AMPA@M';
 s.cons.parameters={'g_SYN',1};
-d=ds.simulateModel(s);
+d=dsSimulate(s);
 d.model.ODEs.RE_v
 figure; plot(d.time,d.TC_v,'b',d.time,d.RE_v,'r'); legend('TC','RE')
 
@@ -1478,7 +1478,7 @@ if 0
   num_cores=3;
   parpool(num_cores)
   parfor i=1:6
-    ds.simulateModel('dv/dt=@M+10; monitor iNa3_functions; {iNa3,iK3}@M;','solve_file',solve_file);
+    dsSimulate('dv/dt=@M+10; monitor iNa3_functions; {iNa3,iK3}@M;','solve_file',solve_file);
     disp(i);
   end
   delete(gcp)
@@ -1487,10 +1487,10 @@ end
 % ######################################################
 % on SCC: works
 if 0
-  [data,studyinfo]=ds.simulateModel('dv/dt=(@M+10)/Cm; Cm=1; {iNa,iK}@M; vary(Cm=[1 2 3])',...
+  [data,studyinfo]=dsSimulate('dv/dt=(@M+10)/Cm; Cm=1; {iNa,iK}@M; vary(Cm=[1 2 3])',...
     'cluster_flag',1,'compile_flag',1,'sims_per_job',2,'parallel_flag',1,'verbose_flag',1);
   % local test:
-  [data,studyinfo]=ds.simulateModel('dv/dt=(@M+10)/Cm; Cm=1; {iNa,iK}@M; vary(Cm=[1 2 3])',...
+  [data,studyinfo]=dsSimulate('dv/dt=(@M+10)/Cm; Cm=1; {iNa,iK}@M; vary(Cm=[1 2 3])',...
     'cluster_flag',1,'compile_flag',1,'sims_per_job',2,'parallel_flag',1,'verbose_flag',1);
   ds.monitorStudy(studyinfo);
   [s,r]=system(sprintf('cat %s',studyinfo.simulations(1).job_file));
@@ -1503,11 +1503,11 @@ end
 % ######################################################
 
 if 0
-  % on local machine (use recursive call to ds.simulateModel...):
+  % on local machine (use recursive call to dsSimulate...):
   clear data
   parpool(num_cores)
   parfor i=1:6
-    data(i)=ds.simulateModel('dv/dt=@M+10; monitor iNa3_functions; {iNa3,iK3}@M;','solve_file',solve_file);
+    data(i)=dsSimulate('dv/dt=@M+10; monitor iNa3_functions; {iNa3,iK3}@M;','solve_file',solve_file);
     disp(i);
   end
   delete(gcp)
@@ -1519,7 +1519,7 @@ end
 if 0 % todo: debug
   % ######################################################
   parpool(num_cores);
-  data=ds.simulateModel('dv/dt=@M+i;i=0;{iNa,iK}@M;vary(i=[0 10 20])','parallel_flag',1,'verbose_flag',1);
+  data=dsSimulate('dv/dt=@M+i;i=0;{iNa,iK}@M;vary(i=[0 10 20])','parallel_flag',1,'verbose_flag',1);
   ds.plotFR(data);
   delete(gcp);
   % ######################################################
@@ -1530,7 +1530,7 @@ if 0
   matlabpool('open',num_cores);
   solve_file=fullfile(dynasim_path,'solve','solve_ode_20160118232404_080.m');
   parfor i=1:6
-    ds.simulateModel('dv/dt=@M+10; monitor iNa3_functions; {iNa3,iK3}@M;','solve_file',solve_file);%,'verbose_flag',1);
+    dsSimulate('dv/dt=@M+10; monitor iNa3_functions; {iNa3,iK3}@M;','solve_file',solve_file);%,'verbose_flag',1);
     disp(i);
   end
   matlabpool('close');
@@ -1541,10 +1541,10 @@ end
 
 %% Study post-processing
 
-[~,studyinfo]=ds.simulateModel('dv/dt=@M+10; {iNa,iK}@M; vary(gNa=[50 100 200])','save_data_flag',1);
+[~,studyinfo]=dsSimulate('dv/dt=@M+10; {iNa,iK}@M; vary(gNa=[50 100 200])','save_data_flag',1);
 results=AnalyzeStudy(studyinfo,@ds.calcFR);
 
-data=ds.simulateModel('dv/dt=@M+10; {iNa,iK}@M; vary(gNa=[50 100 200])','save_data_flag',1);
+data=dsSimulate('dv/dt=@M+10; {iNa,iK}@M; vary(gNa=[50 100 200])','save_data_flag',1);
 results=AnalyzeStudy(data,@ds.calcFR);
 
 results=AnalyzeStudy('ClusterTestSet2',@ds.calcFR);
@@ -1599,7 +1599,7 @@ end
 
 % todo: consider pulling experiments from remote server as well:
 % eqn='dv/dt=@M+10; ib:{iNa,iK}@M';
-% data=ds.simulateModel(eqn,'experiment','ib:@ds.probeFI');
+% data=dsSimulate(eqn,'experiment','ib:@ds.probeFI');
 
 % todo: update browse_dnsim() for new structures
 
@@ -1607,9 +1607,9 @@ end
 
 % save model to .mat
 % scp files (.mat + mechs) to study_dir on cluster_node (login node)
-% ssh single command: matlab -r "load(modelfile); ds.simulateModel(model,...)"
+% ssh single command: matlab -r "load(modelfile); dsSimulate(model,...)"
 %   - might need helper expect script
-%   - get login credentials from ds.simulateModel options (cluster_user, cluster_host; prompt for password)
+%   - get login credentials from dsSimulate options (cluster_user, cluster_host; prompt for password)
 
 % todo: edit ds.monitorStudy() to check status of cluster jobs from local host
 % (e.g., ssh: matlab -r "ds.monitorStudy(remote_studyinfo_file)"; prompt for login credentials or take as options)
@@ -1618,7 +1618,7 @@ end
 % - fix coder.varsize() for compiling variable population sizes
 % - create example optimization function
 % - create visualizers (BrowseData, BrowseStudy)
-% - further develop analysis stream (AnalyzeStudy, ds.selectData)
+% - further develop analysis stream (AnalyzeStudy, dsSelect)
 
 % minor changes:
 % - rename verbose_flag to verbose_flag_flag (in this script and all functions)
@@ -1636,7 +1636,7 @@ eqns={
   'dy/dt=r*x-y-x*z; y(0)=2';
   'dz/dt=-b*z+x*y; z(0)=.5';
 };
-data=ds.simulateModel(eqns,'tspan',[0 100]);
+data=dsSimulate(eqns,'tspan',[0 100]);
 figure; plot(data.pop1_x,data.pop1_z); 
 xlabel('x'); ylabel('z'); title('Lorenz equations')
 
@@ -1652,7 +1652,7 @@ eqns={
   'dv/dt=(i+gl*(vl-v)+gk*w*(vk-v)+gca*minf(v)*(vca-v))/c';
   'dw/dt=lamw(v)*(winf(v)-w)';
 };
-data=ds.simulateModel(eqns,'tspan',[0 1000],'ic',[-60 .015])
+data=dsSimulate(eqns,'tspan',[0 1000],'ic',[-60 .015])
 data.model.functions
 figure; plot(data.time,data.pop1_v); 
 xlabel('time (ms)'); ylabel('v'); title('Morris-Lecar neuron')
@@ -1671,7 +1671,7 @@ eqns={
   'dw/dt=lamw(v)*(winf(v)-w)';
   'monitor Ica, Ik, v.spikes(0)';
 };
-data=ds.simulateModel(eqns,'tspan',[0 1000],'ic',[-60.899 .014873])
+data=dsSimulate(eqns,'tspan',[0 1000],'ic',[-60.899 .014873])
 data.model.monitors
 data.model.functions
 data.model.functions.pop1_Ica
@@ -1698,7 +1698,7 @@ eqns={
   'dh/dt = aH(v).*(1-h)-bH(v).*h';
   'dn/dt = aN(v).*(1-n)-bN(v).*n';
 };
-data=ds.simulateModel(eqns,'tspan',[0 200],'ic',[-65 .1 .1 0]);
+data=dsSimulate(eqns,'tspan',[0 200],'ic',[-65 .1 .1 0]);
 figure; plot(data.time,data.(data.labels{1}))
 
 % TC-RE network
@@ -1717,7 +1717,7 @@ m.monitors
 % method 2:
 m=sPING_model;
 m.monitors.E_v_spikes='0'; % []
-d=ds.simulateModel(m)
+d=dsSimulate(m)
 
 % adding spike monitor to existing model structure
 sPING_model.monitors.E_v_spikes=[]; % set to threshold (as string; eg, '0')
@@ -1770,10 +1770,10 @@ sPING_model.monitors.E_v_spikes=[]; % set to threshold (as string; eg, '0')
 % ##############################################3
 % the brusselator (a nice chemical oscillator)
 eqns='b=3; a=1; du/dt=a-(b+1)*u+v*u^2; dv/dt=b*u-v*u^2';
-data=ds.simulateModel(eqns,'tspan',[0 100],'ic',[1 1.5]);
+data=dsSimulate(eqns,'tspan',[0 100],'ic',[1 1.5]);
 figure; plot(data.pop1_u,data.pop1_v); xlabel('u'); ylabel('v');
 eqns='b=3; a=1; du/dt=a-(b+1)*u+v*u^2; dv/dt=b*u-v*u^2; u(0)=1; v(0)=1.5';
-data=ds.simulateModel(eqns,'tspan',[0 100],'dt',.01);
+data=dsSimulate(eqns,'tspan',[0 100],'dt',.01);
 figure; plot(data.pop1_u,data.pop1_v); xlabel('u'); ylabel('v');
 % ##############################################3
 % clock model (discontinuous ODE) - a linearly decaying spiral that is kicked out
@@ -1781,7 +1781,7 @@ a=.1;b=1;k=.5; % ...
 % ##############################################3
 % the force duffing equation (error:explodes)
 eqns='a=3e-10;w=1;mu=.25;f(t)=a*cos(w*t); dx/dt=v; dv/dt=mu*v+x*(1-x^2)+f(t)';
-data=ds.simulateModel(eqns,'tspan',[0 200],'ic',[0 0],'dt',.0001);
+data=dsSimulate(eqns,'tspan',[0 200],'ic',[0 0],'dt',.0001);
 figure; plot(data.pop1_x,data.pop1_v); xlabel('x'); ylabel('v');
 % ##############################################3
 % levy flight (error:explodes)
@@ -1790,7 +1790,7 @@ eqns={...
 'dx/dt=x+f(rand)*(-1+2*(rand>.5))';
 'dy/dt=y+f(rand)*(-1+2*(rand>.5))';
 };
-data=ds.simulateModel(eqns,'tspan',[0 2000],'ic',[0 0]);
+data=dsSimulate(eqns,'tspan',[0 2000],'ic',[0 0]);
 figure; plot(data.pop1_x,data.pop1_y); xlabel('x'); ylabel('y');
 % ##############################################3
 % Morris-Lecar model from Ermentrout chapter in Koch & Segev
@@ -1806,7 +1806,7 @@ eqns={...
 'dv/dt=iapp+gl*(vl-v)+gk*w*(vk-v)-ica(v)';
 'dw/dt=lamn(v)*(ninf(v)-w)';
 };
-data=ds.simulateModel(eqns,'tspan',[0 100],'ic',[0 0]);
+data=dsSimulate(eqns,'tspan',[0 100],'ic',[0 0]);
 figure; plot(data.pop1_v,data.pop1_w); xlabel('v'); ylabel('w');
 % ##############################################3
 

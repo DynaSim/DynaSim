@@ -68,10 +68,10 @@ This function is called by:
 0019 <span class="comment">% d2b = ds.xPlt.xPlt2ds(squeeze(ds.ds2xPlt(data2)));</span>
 0020 <span class="comment">% % Make sure 1 is identical</span>
 0021 <span class="comment">% close all;</span>
-0022 <span class="comment">% ds.plotData(data1); ds.plotData(d1);</span>
+0022 <span class="comment">% dsPlot(data1); dsPlot(d1);</span>
 0023 <span class="comment">% % Make sure 2 is identical</span>
-0024 <span class="comment">% ds.plotData(data2); ds.plotData(d2);</span>
-0025 <span class="comment">% ds.plotData(data2); ds.plotData(d2b);</span>
+0024 <span class="comment">% dsPlot(data2); dsPlot(d2);</span>
+0025 <span class="comment">% dsPlot(data2); dsPlot(d2b);</span>
 0026 
 0027 <span class="comment">% If population axis doesn't exist, create it</span>
 0028 
@@ -235,7 +235,7 @@ This function is called by:
 0186 
 0187 <a name="_sub3" href="#_subfunctions" class="code">function labels = get_axis_labels(obj,ax_vals)</a>
 0188     <span class="comment">% This approach preserves the ordering in the original list of labels</span>
-0189     <span class="comment">% (labels_orig). This is important because ds.plotData uses the specific</span>
+0189     <span class="comment">% (labels_orig). This is important because dsPlot uses the specific</span>
 0190     <span class="comment">% ordering in order to tell what the core state variables are.</span>
 0191     <span class="comment">% The current labels are stored in labels_curr. The algorithm is to</span>
 0192     <span class="comment">% 1. Start with labels_orig and figure out which are already</span>

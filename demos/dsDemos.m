@@ -45,7 +45,7 @@ eqns={
   'dy/dt=r*x-y-x*z';
   'dz/dt=-b*z+x*y';
 };
-data=ds.simulateModel(eqns, 'tspan',[0 100], 'ic',[1 2 .5], 'solver','rk4', 'study_dir','demo_lorenz');
+data=dsSimulate(eqns, 'tspan',[0 100], 'ic',[1 2 .5], 'solver','rk4', 'study_dir','demo_lorenz');
 
 % tspan: time limits on integration [ms]
 % ic: initial conditions
@@ -83,7 +83,7 @@ eqns={
   'I(t)=Iapp*(t>ton&t<toff)*(1+.5*rand)'; % define applied input using reserved variables 't' for time and 'dt' for fixed time step of numerical integration
   'monitor I';                            % indicate to store applied input during simulation
 };
-data=ds.simulateModel(eqns, 'tspan',[0 1000], 'study_dir','demo_izhikevich');
+data=dsSimulate(eqns, 'tspan',[0 1000], 'study_dir','demo_izhikevich');
 
 % plot the simulated voltage and monitored input function
 figure;
@@ -128,8 +128,8 @@ vary={
   {P,'a',-.02;P,'b',-1 ; P,'c',-60; P,'d',8;  P,'I',80} % inhibition-induced spiking
   {P,'a',-.026;P,'b',-1; P,'c',-45; P,'d',0;  P,'I',70} % inhibition-induced bursting
   };
-data=ds.simulateModel(eqns, 'tspan',[0 250], 'vary',vary, 'study_dir','demo_izhikevich_vary');
-ds.plotData(data);
+data=dsSimulate(eqns, 'tspan',[0 250], 'vary',vary, 'study_dir','demo_izhikevich_vary');
+dsPlot(data);
 
 % %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% QUICKLY BUILDING LARGE MODELS FROM EXISTING "MECHANISMS"
@@ -158,13 +158,13 @@ eqns={
   'aN(v) = (.1-.01*(v+65))./(exp(1-.1*(v+65))-1)';
   'bN(v) = .125*exp(-(v+65)/80)';
 };
-data=ds.simulateModel(eqns, 'study_dir','demo_hh_1');
+data=dsSimulate(eqns, 'study_dir','demo_hh_1');
 
 figure; plot(data.time,data.(data.labels{1}))
 xlabel('time (ms)'); ylabel('membrane potential (mV)'); title('Hodgkin-Huxley neuron')
 
 % Equivalent Hodgkin-Huxley neuron with predefined mechanisms
-data=ds.simulateModel('dv/dt=10+@current/Cm; Cm=1; v(0)=-65; {iNa,iK}', 'study_dir','demo_hh_2');
+data=dsSimulate('dv/dt=10+@current/Cm; Cm=1; v(0)=-65; {iNa,iK}', 'study_dir','demo_hh_2');
 
 figure; plot(data.time,data.(data.labels{1}))
 xlabel('time (ms)'); ylabel('membrane potential (mV)'); title('Hodgkin-Huxley neuron')
@@ -177,7 +177,7 @@ xlabel('time (ms)'); ylabel('membrane potential (mV)'); title('Hodgkin-Huxley ne
 
 % Example of a bursting neuron model using three active current mechanisms:
 eqns='dv/dt=5+@current; {iNaF,iKDR,iM}; gNaF=100; gKDR=5; gM=1.5; v(0)=-70';
-data=ds.simulateModel(eqns, 'tspan',[0 200], 'study_dir','demo_hh_3');
+data=dsSimulate(eqns, 'tspan',[0 200], 'study_dir','demo_hh_3');
 
 figure; plot(data.time,data.(data.labels{1}))
 xlabel('time (ms)'); ylabel('membrane potential (mV)'); title('Intrinsically Bursting neuron')
@@ -214,10 +214,10 @@ s.connections(2).direction='E->I';
 s.connections(2).mechanism_list={'iAMPA'};
 s.connections(2).parameters={'tauD',2,'gSYN',.1,'netcon',ones(80,20)};
 
-data=ds.simulateModel(s, 'study_dir','demo_sPING_0');
+data=dsSimulate(s, 'study_dir','demo_sPING_0');
 
-ds.plotData(data);
-ds.plotData(data,'variable',{'E_v','E_I_iGABAa_ISYN'});
+dsPlot(data);
+dsPlot(data,'variable',{'E_v','E_I_iGABAa_ISYN'});
 
 % View the connection mechanism file:
 [~,eqnfile]=ds.locateModelFiles('iAMPA.mech'); edit(eqnfile{1});
@@ -229,20 +229,20 @@ ds.plotData(data,'variable',{'E_v','E_I_iGABAa_ISYN'});
 
 %% Save data from a single simulation
 % Example using the previous sPING model:
-data=ds.simulateModel(s,'save_data_flag',1,'study_dir','demo_sPING_1');
+data=dsSimulate(s,'save_data_flag',1,'study_dir','demo_sPING_1');
 
 %% Save data from a set of simulations
 
 % Specify what to vary
 % Tip: use 'vary' Syntax 2 to systematically vary a parameter
 vary={'E','Iapp',[0 10 20]}; % vary the amplitude of tonic input to E-cells
-data=ds.simulateModel(s, 'save_data_flag',1, 'study_dir','demo_sPING_2',...
+data=dsSimulate(s, 'save_data_flag',1, 'study_dir','demo_sPING_2',...
                      'vary',vary);
 
 % load and plot the saved data
 data_from_disk = ds.importData('demo_sPING_2');
-ds.plotData(data_from_disk);
-ds.plotData(data_from_disk,'variable','E_v');
+dsPlot(data_from_disk);
+dsPlot(data_from_disk,'variable','E_v');
 
 % Vary a connection parameter
 vary={'I->E','tauD',[5 10 15]}; % inhibition decay time constant from I to E
@@ -252,12 +252,12 @@ vary={
   'E'   ,'Iapp',[0 10 20];      % amplitude of tonic input to E-cells
   'I->E','tauD',[5 10 15]       % inhibition decay time constant from I to E
   };
-ds.simulateModel(s, 'save_data_flag',1, 'study_dir','demo_sPING_3',...
+dsSimulate(s, 'save_data_flag',1, 'study_dir','demo_sPING_3',...
                 'vary',vary, 'verbose_flag',1);
 data=ds.importData('demo_sPING_3');
-ds.plotData(data);
-ds.plotData(data,'plot_type','rastergram');
-ds.plotData(data,'plot_type','power');
+dsPlot(data);
+dsPlot(data,'plot_type','rastergram');
+dsPlot(data,'plot_type','power');
 ds.plotFR(data); % examine how mean firing rate changes with Iapp and tauD
 
 % %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -269,28 +269,28 @@ ds.plotFR(data); % examine how mean firing rate changes with Iapp and tauD
 % Run three simulations in parallel jobs and save the simulated data
 eqns='dv/dt=@current+I; {iNa,iK}';
 vary={'','I',[0 10 20]};
-ds.simulateModel(eqns, 'save_data_flag',1, 'study_dir','demo_cluster_1',...
+dsSimulate(eqns, 'save_data_flag',1, 'study_dir','demo_cluster_1',...
                    'vary',vary, 'cluster_flag',1, 'overwrite_flag',1, 'verbose_flag',1);
 % tips for checking job status:
 % !qstat -u <YOUR_USERNAME>
 % !cat ~/batchdirs/demo_cluster_1/pbsout/sim_job1.out
 data=ds.importData('demo_cluster_1');
-ds.plotData(data);
+dsPlot(data);
 
 % Repeat but also save plotted data
 eqns='dv/dt=@current+I; {iNa,iK}';
 vary={'','I',[0 10 20]};
-ds.simulateModel(eqns, 'save_data_flag',1, 'study_dir','demo_cluster_2',...
+dsSimulate(eqns, 'save_data_flag',1, 'study_dir','demo_cluster_2',...
                    'vary',vary, 'cluster_flag',1, 'overwrite_flag',1, 'verbose_flag',1,...
-                   'plot_functions',@ds.plotData);
+                   'plot_functions',@dsPlot);
 % !cat ~/batchdirs/demo_cluster_2/pbsout/sim_job1.out
 
 % Save multiple plots and pass custom options to each plotting function
 eqns='dv/dt=@current+I; {iNa,iK}';
 vary={'','I',[0 10 20]};
-ds.simulateModel(eqns, 'save_data_flag',1, 'study_dir','demo_cluster_3',...
+dsSimulate(eqns, 'save_data_flag',1, 'study_dir','demo_cluster_3',...
                    'vary',vary, 'cluster_flag',1, 'overwrite_flag',1, 'verbose_flag',1,...
-                   'plot_functions',{@ds.plotData,@ds.plotData},...
+                   'plot_functions',{@dsPlot,@dsPlot},...
                    'plot_options',{{},{'plot_type','power'}});
 % !cat ~/batchdirs/demo_cluster_3/pbsout/sim_job1.out
  
@@ -308,13 +308,13 @@ ds.simulateModel(eqns, 'save_data_flag',1, 'study_dir','demo_cluster_3',...
 
 % Simulating large models can be sped up significantly by compiling the
 % simulation before running it. DynaSim makes this easy to do using the
-% 'compile_flag' option in ds.simulateModel. Note: compiling the model can 
+% 'compile_flag' option in dsSimulate. Note: compiling the model can 
 % take several seconds to minutes; however, it only compiles the first time
 % it is run and is significantly faster on subsequent runs.
 
-data=ds.simulateModel(s, 'compile_flag',1, 'study_dir','demo_sPING_3_compile');
-ds.plotData(data);
+data=dsSimulate(s, 'compile_flag',1, 'study_dir','demo_sPING_3_compile');
+dsPlot(data);
 
 % Now run again:
-data=ds.simulateModel(s, 'compile_flag',1, 'study_dir','demo_sPING_3_compile');
-ds.plotData(data);
+data=dsSimulate(s, 'compile_flag',1, 'study_dir','demo_sPING_3_compile');
+dsPlot(data);
