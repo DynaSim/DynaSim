@@ -65,6 +65,13 @@ end
 % Convert the incoming DynaSim data structure to an xPlt object
 if ~isa(data,'xPlt')
     [xp,is_image] = All2xPlt(data);
+else
+    xp = data;
+    if iscell(xp.data{1})
+        is_image = 1;
+    else
+        is_image = 0;
+    end
 end
 
 %% Convert varargin to appropriate forms
@@ -148,11 +155,6 @@ handles=[];
 
 
 
-
-% Options overwrite
-if is_image
-    options.force_last = false;
-end
 
 
 % Pull out fields from options struct
@@ -300,7 +302,7 @@ end
 %% If only one cell
 
 % If only 1 cell, move in 2nd cell
-if length(xp2.meta.datainfo(2).values) <= 1
+if length(xp2.meta.datainfo(2).values) <= 1 && ~is_image
     % Move populations axis to the end if it exists
     ax2overlay = xp2.findaxis('populations');
     if isempty(ax2overlay)
