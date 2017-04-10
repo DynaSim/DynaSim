@@ -66,6 +66,12 @@ function [output,modifications] = applyModifications(model,modifications,varargi
 %
 % See also: ds.generateModel, dsSimulate, ds.vary2Modifications
 
+%% localfn output
+if ~nargin
+  output = localfunctions;
+  return
+end
+
 %% auto_gen_test_data_flag argin
 options = ds.checkOptions(varargin,{'auto_gen_test_data_flag',0,{0,1}},false);
 if options.auto_gen_test_data_flag
@@ -75,6 +81,7 @@ if options.auto_gen_test_data_flag
   argin = [{model},{modifications}, varargs];
 end
 
+%%
 % check for modifications
 if isempty(modifications)
   % nothing to do
