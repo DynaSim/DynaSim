@@ -330,17 +330,36 @@ end
 
 %% If doing force overlay, move overlay population to the end
 if ~isempty(force_last)
-    ax_ind = xp2.findaxis(force_last);
-    if isempty(ax_ind)
-        ax_names = xp2.exportAxisNames;
-        error('Requested axis not found. force_last must be one of the following: : %s', sprintf('%s ',ax_names{1:end}));
+    
+    % If it's a stand-alone string, convert to cell array 
+    if ischar(force_last)
+        force_last = {force_last};
     end
     
-    Ndims_per_subplot = 2;
+    % Functionalize this at some point... building list of requested axes
+    ax_names = xp2.exportAxisNames;
+    ax_ind = zeros(1,length(force_last));
+    for i = 1:length(force_last)
+        temp = xp2.findaxis(force_last{i});
+        if isempty(temp)
+            error('Requested axis not found. force_last must be one of the following: : %s', sprintf('%s ',ax_names{1:end}));
+        end
+        ax_ind(i) = temp;
+    end
+    
+    % Dims per subplot should be at least 2 if we're forcing last...
+    % perhaps change this later
+    if isempty(Ndims_per_subplot)
+        Ndims_per_subplot = 2;
+    end
+    if Ndims_per_subplot == 1
+        Ndims_per_subplot = 2;
+    end
     
     others_ind = true(1,ndims(xp2));
     others_ind(ax_ind) = false;
     xp2 = xp2.permute([find(others_ind), ax_ind]);        % Move chosen axis to the back!
+    
 end
 
 
