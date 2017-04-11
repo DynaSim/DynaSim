@@ -58,7 +58,7 @@ if ischar(data)
     % Import plot files
     data_img = ImportPlots(study_dir);
     
-    handles = PlotData2(data_img,varargin{:});
+    [handles, xp] = PlotData2(data_img,varargin{:});
     return;
 end
 
