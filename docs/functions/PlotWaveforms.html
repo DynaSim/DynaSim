@@ -2,8 +2,8 @@
                 "http://www.w3.org/TR/REC-html40/loose.dtd">
 <html>
 <head>
-  <title>Description of PlotWaveforms</title>
-  <meta name="keywords" content="PlotWaveforms">
+  <title>Description of ds.plotWaveforms</title>
+  <meta name="keywords" content="ds.plotWaveforms">
   <meta name="description" content="PLOTWAVEFORMS - plot waveforms in various ways depending on what data was provided.">
   <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
   <meta name="generator" content="m2html &copy; 2005 Guillaume Flandin">
@@ -16,23 +16,23 @@
 <body>
 <a name="_top"></a>
 <!-- menu.html functions -->
-<h1>PlotWaveforms
+<h1>ds.plotWaveforms
 </h1>
 
 <h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
 <div class="box"><strong>PLOTWAVEFORMS - plot waveforms in various ways depending on what data was provided.</strong></div>
 
 <h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
-<div class="box"><strong>function PlotWaveforms(data,varargin) </strong></div>
+<div class="box"><strong>function ds.plotWaveforms(data,varargin) </strong></div>
 
 <h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
 <div class="fragment"><pre class="comment">PLOTWAVEFORMS - plot waveforms in various ways depending on what data was provided.
 
  Usage:
-   PlotWaveforms(data,'option',value)
+   ds.plotWaveforms(data,'option',value)
 
  Inputs:
-   - data: DynaSim data structure (see CheckData)
+   - data: DynaSim data structure (see ds.checkData)
    - options:
      'variable': name of field containing data to plot (default: all pops with
                  state variable of variable in data.labels)
@@ -62,35 +62,35 @@
 
  Examples:
  - Example 1: One cell:
-     data=SimulateModel('dv/dt=@current+10; {iNa,iK}');
-     PlotWaveforms(data); % plot first state variable ('v')
-     PlotWaveforms(data,'variable','*'); % plot all state variables
+     data=dsSimulate('dv/dt=@current+10; {iNa,iK}');
+     ds.plotWaveforms(data); % plot first state variable ('v')
+     ds.plotWaveforms(data,'variable','*'); % plot all state variables
      % plot all variables and time 30-60ms
-     PlotWaveforms(data,'variable','*','time_limits',[30 60]);
+     ds.plotWaveforms(data,'variable','*','time_limits',[30 60]);
 
  - Example 2: One population: with noisy input
-     data=SimulateModel('dv[5]/dt=@current+10*(1+randn(1,Npop)); {iNa,iK}');
-     PlotWaveforms(data);
-     PlotWaveforms(data,'variable','*'); % plot all state variables (all cells)
-     PlotWaveforms(data,'variable','m'); % plot state variable 'm' (all cells)
+     data=dsSimulate('dv[5]/dt=@current+10*(1+randn(1,Npop)); {iNa,iK}');
+     ds.plotWaveforms(data);
+     ds.plotWaveforms(data,'variable','*'); % plot all state variables (all cells)
+     ds.plotWaveforms(data,'variable','m'); % plot state variable 'm' (all cells)
      % plot all variables and time 30-60ms
-     PlotWaveforms(data,'variable','*','time_limits',[30 60]);
+     ds.plotWaveforms(data,'variable','*','time_limits',[30 60]);
 
  - Example 3: One population varying one parameter (input amplitude):
      eqns='dv[5]/dt=@current+amp*(1+randn(1,Npop)); {iNa,iK}';
      vary={'','amp',[0 10 20]};
-     data=SimulateModel(eqns,'vary',vary);
-     PlotWaveforms(data);
-     PlotWaveforms(data,'variable','m');
-     PlotWaveforms(data,'variable','*');
+     data=dsSimulate(eqns,'vary',vary);
+     ds.plotWaveforms(data);
+     ds.plotWaveforms(data,'variable','m');
+     ds.plotWaveforms(data,'variable','*');
 
  - Example 4: One population varying two parameters (input amplitude and
               membrane capacitance):
      eqns='dv[5]/dt=@current/Cm+amp*(1+randn(1,Npop)); {iNa,iK}';
      vary={'','Cm',[1 2]; '','amp',[0 10 20]};
-     data=SimulateModel(eqns,'vary',vary);
-     PlotWaveforms(data);
-     PlotWaveforms(data,'variable','*');
+     data=dsSimulate(eqns,'vary',vary);
+     ds.plotWaveforms(data);
+     ds.plotWaveforms(data,'variable','*');
 
  - Example 5: Two populations: noisy input to E and excitatory connection from E to I
      spec=[];
@@ -100,37 +100,37 @@
      spec.populations(2).equations='dv[2]/dt=@current; {iNa,iK}';
      spec.connections(1).direction='E1-&gt;E2';
      spec.connections(1).mechanism_list='iAMPA';
-     data=SimulateModel(spec);
-     PlotWaveforms(data); % plot first state variable
-     PlotWaveforms(data,'variable','*'); 
+     data=dsSimulate(spec);
+     ds.plotWaveforms(data); % plot first state variable
+     ds.plotWaveforms(data,'variable','*'); 
      % plot monitored synaptic current with post-synaptic voltages:
-     PlotWaveforms(data,'variable',{'E2_v','ISYN'}); 
+     ds.plotWaveforms(data,'variable',{'E2_v','ISYN'}); 
      % plot monitored synaptic current with pre- and post-synaptic voltages:
-     PlotWaveforms(data,'variable',{'v','ISYN'}); 
+     ds.plotWaveforms(data,'variable',{'v','ISYN'}); 
 
  - Example 6: Two populations varying one parameter (input amplitude):
      vary={'E1','amp',[0 10 20]};
-     data=SimulateModel(spec,'vary',vary);
-     PlotWaveforms(data);
-     PlotWaveforms(data,'variable','*');
-     PlotWaveforms(data,'variable','*_iNa_*');
+     data=dsSimulate(spec,'vary',vary);
+     ds.plotWaveforms(data);
+     ds.plotWaveforms(data,'variable','*');
+     ds.plotWaveforms(data,'variable','*_iNa_*');
 
  - Example 7: Two populations varying two parameters (input amplitude and
               synaptic conductance):
      vary={'E1','amp',[0 10 20]; 'E1-&gt;E2','gSYN',[0 .05 .1]};
-     data=SimulateModel(spec,'vary',vary);
-     PlotWaveforms(data,'variable','v');
-     PlotWaveforms(data,'variable','ISYN');
-     PlotWaveforms(data,'variable','E1_v');
-     PlotWaveforms(data,'variable','*');
+     data=dsSimulate(spec,'vary',vary);
+     ds.plotWaveforms(data,'variable','v');
+     ds.plotWaveforms(data,'variable','ISYN');
+     ds.plotWaveforms(data,'variable','E1_v');
+     ds.plotWaveforms(data,'variable','*');
 
- See also: <a href="PlotFR.html" class="code" title="function handles=PlotFR(data,varargin)">PlotFR</a>, <a href="CheckData.html" class="code" title="function data=CheckData(data)">CheckData</a></pre></div>
+ See also: <a href="ds.plotFR.html" class="code" title="function handles=ds.plotFR(data,varargin)">ds.plotFR</a>, <a href="ds.checkData.html" class="code" title="function data=ds.checkData(data)">ds.checkData</a></pre></div>
 
 <!-- crossreference -->
 <h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
 This function calls:
 <ul style="list-style-image:url(../matlabicon.gif)">
-<li><a href="CheckData.html" class="code" title="function data=CheckData(data)">CheckData</a>	CHECKDATA - Standardize data structure and auto-populate missing fields</li><li><a href="CheckOptions.html" class="code" title="function parms = CheckOptions(options, options_schema, strict)">CheckOptions</a>	CHECKOPTIONS - organize key/value pairs in structure with default or user-supplied values according to a schema</li><li><a href="SelectVariables.html" class="code" title="function [variables,pop_names]=SelectVariables(labels,var_strings)">SelectVariables</a>	SELECTVARIABLES - determine what variables to plot</li></ul>
+<li><a href="ds.checkData.html" class="code" title="function data=ds.checkData(data)">ds.checkData</a>	CHECKDATA - Standardize data structure and auto-populate missing fields</li><li><a href="ds.checkOptions.html" class="code" title="function [parms, params_unspecified ] = ds.checkOptions(options, options_schema, strict)">ds.checkOptions</a>	CHECKOPTIONS - organize key/value pairs in structure with default or user-supplied values according to a schema</li><li><a href="ds.selectVariables.html" class="code" title="function [variables,pop_names]=ds.selectVariables(labels,var_strings)">ds.selectVariables</a>	SELECTVARIABLES - determine what variables to plot</li></ul>
 This function is called by:
 <ul style="list-style-image:url(../matlabicon.gif)">
 </ul>
@@ -139,14 +139,14 @@ This function is called by:
 
 
 <h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
-<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function PlotWaveforms(data,varargin)</a>
+<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function ds.plotWaveforms(data,varargin)</a>
 0002 <span class="comment">%PLOTWAVEFORMS - plot waveforms in various ways depending on what data was provided.</span>
 0003 <span class="comment">%</span>
 0004 <span class="comment">% Usage:</span>
-0005 <span class="comment">%   PlotWaveforms(data,'option',value)</span>
+0005 <span class="comment">%   ds.plotWaveforms(data,'option',value)</span>
 0006 <span class="comment">%</span>
 0007 <span class="comment">% Inputs:</span>
-0008 <span class="comment">%   - data: DynaSim data structure (see CheckData)</span>
+0008 <span class="comment">%   - data: DynaSim data structure (see ds.checkData)</span>
 0009 <span class="comment">%   - options:</span>
 0010 <span class="comment">%     'variable': name of field containing data to plot (default: all pops with</span>
 0011 <span class="comment">%                 state variable of variable in data.labels)</span>
@@ -176,35 +176,35 @@ This function is called by:
 0035 <span class="comment">%</span>
 0036 <span class="comment">% Examples:</span>
 0037 <span class="comment">% - Example 1: One cell:</span>
-0038 <span class="comment">%     data=SimulateModel('dv/dt=@current+10; {iNa,iK}');</span>
-0039 <span class="comment">%     PlotWaveforms(data); % plot first state variable ('v')</span>
-0040 <span class="comment">%     PlotWaveforms(data,'variable','*'); % plot all state variables</span>
+0038 <span class="comment">%     data=dsSimulate('dv/dt=@current+10; {iNa,iK}');</span>
+0039 <span class="comment">%     ds.plotWaveforms(data); % plot first state variable ('v')</span>
+0040 <span class="comment">%     ds.plotWaveforms(data,'variable','*'); % plot all state variables</span>
 0041 <span class="comment">%     % plot all variables and time 30-60ms</span>
-0042 <span class="comment">%     PlotWaveforms(data,'variable','*','time_limits',[30 60]);</span>
+0042 <span class="comment">%     ds.plotWaveforms(data,'variable','*','time_limits',[30 60]);</span>
 0043 <span class="comment">%</span>
 0044 <span class="comment">% - Example 2: One population: with noisy input</span>
-0045 <span class="comment">%     data=SimulateModel('dv[5]/dt=@current+10*(1+randn(1,Npop)); {iNa,iK}');</span>
-0046 <span class="comment">%     PlotWaveforms(data);</span>
-0047 <span class="comment">%     PlotWaveforms(data,'variable','*'); % plot all state variables (all cells)</span>
-0048 <span class="comment">%     PlotWaveforms(data,'variable','m'); % plot state variable 'm' (all cells)</span>
+0045 <span class="comment">%     data=dsSimulate('dv[5]/dt=@current+10*(1+randn(1,Npop)); {iNa,iK}');</span>
+0046 <span class="comment">%     ds.plotWaveforms(data);</span>
+0047 <span class="comment">%     ds.plotWaveforms(data,'variable','*'); % plot all state variables (all cells)</span>
+0048 <span class="comment">%     ds.plotWaveforms(data,'variable','m'); % plot state variable 'm' (all cells)</span>
 0049 <span class="comment">%     % plot all variables and time 30-60ms</span>
-0050 <span class="comment">%     PlotWaveforms(data,'variable','*','time_limits',[30 60]);</span>
+0050 <span class="comment">%     ds.plotWaveforms(data,'variable','*','time_limits',[30 60]);</span>
 0051 <span class="comment">%</span>
 0052 <span class="comment">% - Example 3: One population varying one parameter (input amplitude):</span>
 0053 <span class="comment">%     eqns='dv[5]/dt=@current+amp*(1+randn(1,Npop)); {iNa,iK}';</span>
 0054 <span class="comment">%     vary={'','amp',[0 10 20]};</span>
-0055 <span class="comment">%     data=SimulateModel(eqns,'vary',vary);</span>
-0056 <span class="comment">%     PlotWaveforms(data);</span>
-0057 <span class="comment">%     PlotWaveforms(data,'variable','m');</span>
-0058 <span class="comment">%     PlotWaveforms(data,'variable','*');</span>
+0055 <span class="comment">%     data=dsSimulate(eqns,'vary',vary);</span>
+0056 <span class="comment">%     ds.plotWaveforms(data);</span>
+0057 <span class="comment">%     ds.plotWaveforms(data,'variable','m');</span>
+0058 <span class="comment">%     ds.plotWaveforms(data,'variable','*');</span>
 0059 <span class="comment">%</span>
 0060 <span class="comment">% - Example 4: One population varying two parameters (input amplitude and</span>
 0061 <span class="comment">%              membrane capacitance):</span>
 0062 <span class="comment">%     eqns='dv[5]/dt=@current/Cm+amp*(1+randn(1,Npop)); {iNa,iK}';</span>
 0063 <span class="comment">%     vary={'','Cm',[1 2]; '','amp',[0 10 20]};</span>
-0064 <span class="comment">%     data=SimulateModel(eqns,'vary',vary);</span>
-0065 <span class="comment">%     PlotWaveforms(data);</span>
-0066 <span class="comment">%     PlotWaveforms(data,'variable','*');</span>
+0064 <span class="comment">%     data=dsSimulate(eqns,'vary',vary);</span>
+0065 <span class="comment">%     ds.plotWaveforms(data);</span>
+0066 <span class="comment">%     ds.plotWaveforms(data,'variable','*');</span>
 0067 <span class="comment">%</span>
 0068 <span class="comment">% - Example 5: Two populations: noisy input to E and excitatory connection from E to I</span>
 0069 <span class="comment">%     spec=[];</span>
@@ -214,37 +214,37 @@ This function is called by:
 0073 <span class="comment">%     spec.populations(2).equations='dv[2]/dt=@current; {iNa,iK}';</span>
 0074 <span class="comment">%     spec.connections(1).direction='E1-&gt;E2';</span>
 0075 <span class="comment">%     spec.connections(1).mechanism_list='iAMPA';</span>
-0076 <span class="comment">%     data=SimulateModel(spec);</span>
-0077 <span class="comment">%     PlotWaveforms(data); % plot first state variable</span>
-0078 <span class="comment">%     PlotWaveforms(data,'variable','*');</span>
+0076 <span class="comment">%     data=dsSimulate(spec);</span>
+0077 <span class="comment">%     ds.plotWaveforms(data); % plot first state variable</span>
+0078 <span class="comment">%     ds.plotWaveforms(data,'variable','*');</span>
 0079 <span class="comment">%     % plot monitored synaptic current with post-synaptic voltages:</span>
-0080 <span class="comment">%     PlotWaveforms(data,'variable',{'E2_v','ISYN'});</span>
+0080 <span class="comment">%     ds.plotWaveforms(data,'variable',{'E2_v','ISYN'});</span>
 0081 <span class="comment">%     % plot monitored synaptic current with pre- and post-synaptic voltages:</span>
-0082 <span class="comment">%     PlotWaveforms(data,'variable',{'v','ISYN'});</span>
+0082 <span class="comment">%     ds.plotWaveforms(data,'variable',{'v','ISYN'});</span>
 0083 <span class="comment">%</span>
 0084 <span class="comment">% - Example 6: Two populations varying one parameter (input amplitude):</span>
 0085 <span class="comment">%     vary={'E1','amp',[0 10 20]};</span>
-0086 <span class="comment">%     data=SimulateModel(spec,'vary',vary);</span>
-0087 <span class="comment">%     PlotWaveforms(data);</span>
-0088 <span class="comment">%     PlotWaveforms(data,'variable','*');</span>
-0089 <span class="comment">%     PlotWaveforms(data,'variable','*_iNa_*');</span>
+0086 <span class="comment">%     data=dsSimulate(spec,'vary',vary);</span>
+0087 <span class="comment">%     ds.plotWaveforms(data);</span>
+0088 <span class="comment">%     ds.plotWaveforms(data,'variable','*');</span>
+0089 <span class="comment">%     ds.plotWaveforms(data,'variable','*_iNa_*');</span>
 0090 <span class="comment">%</span>
 0091 <span class="comment">% - Example 7: Two populations varying two parameters (input amplitude and</span>
 0092 <span class="comment">%              synaptic conductance):</span>
 0093 <span class="comment">%     vary={'E1','amp',[0 10 20]; 'E1-&gt;E2','gSYN',[0 .05 .1]};</span>
-0094 <span class="comment">%     data=SimulateModel(spec,'vary',vary);</span>
-0095 <span class="comment">%     PlotWaveforms(data,'variable','v');</span>
-0096 <span class="comment">%     PlotWaveforms(data,'variable','ISYN');</span>
-0097 <span class="comment">%     PlotWaveforms(data,'variable','E1_v');</span>
-0098 <span class="comment">%     PlotWaveforms(data,'variable','*');</span>
+0094 <span class="comment">%     data=dsSimulate(spec,'vary',vary);</span>
+0095 <span class="comment">%     ds.plotWaveforms(data,'variable','v');</span>
+0096 <span class="comment">%     ds.plotWaveforms(data,'variable','ISYN');</span>
+0097 <span class="comment">%     ds.plotWaveforms(data,'variable','E1_v');</span>
+0098 <span class="comment">%     ds.plotWaveforms(data,'variable','*');</span>
 0099 <span class="comment">%</span>
-0100 <span class="comment">% See also: PlotFR, CheckData</span>
+0100 <span class="comment">% See also: ds.plotFR, ds.checkData</span>
 0101 
 0102 <span class="comment">% Check inputs</span>
-0103 data=<a href="CheckData.html" class="code" title="function data=CheckData(data)">CheckData</a>(data);
+0103 data=<a href="ds.checkData.html" class="code" title="function data=ds.checkData(data)">ds.checkData</a>(data);
 0104 fields=fieldnames(data);
 0105 
-0106 options=<a href="CheckOptions.html" class="code" title="function parms = CheckOptions(options, options_schema, strict)">CheckOptions</a>(varargin,{<span class="keyword">...</span>
+0106 options=<a href="ds.checkOptions.html" class="code" title="function [parms, params_unspecified ] = ds.checkOptions(options, options_schema, strict)">ds.checkOptions</a>(varargin,{<span class="keyword">...</span>
 0107   <span class="string">'time_limits'</span>,[-inf inf],[],<span class="keyword">...</span>
 0108   <span class="string">'variable'</span>,[],[],<span class="keyword">...</span><span class="comment">        </span>
 0109   <span class="string">'max_num_overlaid'</span>,50,[],<span class="keyword">...</span>
@@ -255,7 +255,7 @@ This function is called by:
 0114 <span class="comment">% todo: add option 'plot_mode' {'trace','image'}</span>
 0115 
 0116 <span class="comment">% variables to plot</span>
-0117 var_fields=<a href="SelectVariables.html" class="code" title="function [variables,pop_names]=SelectVariables(labels,var_strings)">SelectVariables</a>(data(1).labels,options.variable);
+0117 var_fields=<a href="ds.selectVariables.html" class="code" title="function [variables,pop_names]=ds.selectVariables(labels,var_strings)">ds.selectVariables</a>(data(1).labels,options.variable);
 0118 tmp=regexp(var_fields,<span class="string">'_(.+)$'</span>,<span class="string">'tokens'</span>,<span class="string">'once'</span>);
 0119 variables=unique([tmp{:}]);
 0120 
@@ -325,7 +325,7 @@ This function is called by:
 0184       param_cell{j}=unique([data.(varied{j})]);
 0185     <span class="keyword">else</span>
 0186       <span class="comment">% todo: handle sims varying non-numeric model components</span>
-0187       <span class="comment">% (eg, mechanisms) (also in PlotFR)</span>
+0187       <span class="comment">% (eg, mechanisms) (also in ds.plotFR)</span>
 0188     <span class="keyword">end</span>
 0189   <span class="keyword">end</span>
 0190   param_size=cellfun(@length,param_cell);
@@ -545,6 +545,6 @@ This function is called by:
 0404 <span class="comment">%     (nsims&gt;1, num_pops=1, num_vars=1, pop_sizes&gt;=1): num_fig_sets=num_vars, num_figs=ceil(nsims/MRPF), num_rows=min(nsims,MRPF): row r: dat = &lt;data(s=r).(var)(:,1:MTPP),2|vars(these)&gt;</span>
 0405 
 0406 <span class="comment">%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%5</span></pre></div>
-<hr><address>Generated on Mon 27-Feb-2017 14:58:50 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" target="_parent">m2html</a></strong> &copy; 2005</address>
+<hr><address>Generated on Fri 07-Apr-2017 20:01:20 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" target="_parent">m2html</a></strong> &copy; 2005</address>
 </body>
 </html>

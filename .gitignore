@@ -3,4 +3,8 @@
 .DS_Store
 outputs
 models/personal
-_*/
+*.png
+*.mat
+dsVars.txt
+dsConfig.txt
+_ignore

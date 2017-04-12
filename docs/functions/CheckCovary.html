@@ -2,8 +2,8 @@
                 "http://www.w3.org/TR/REC-html40/loose.dtd">
 <html>
 <head>
-  <title>Description of CheckCovary</title>
-  <meta name="keywords" content="CheckCovary">
+  <title>Description of ds.checkCovary</title>
+  <meta name="keywords" content="ds.checkCovary">
   <meta name="description" content="CHECKCOVARY - TODO I assume this checks if any varied parameters are covaried?">
   <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
   <meta name="generator" content="m2html &copy; 2005 Guillaume Flandin">
@@ -16,14 +16,14 @@
 <body>
 <a name="_top"></a>
 <!-- menu.html functions -->
-<h1>CheckCovary
+<h1>ds.checkCovary
 </h1>
 
 <h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
 <div class="box"><strong>CHECKCOVARY - TODO I assume this checks if any varied parameters are covaried?</strong></div>
 
 <h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
-<div class="box"><strong>function [effective_vary_lengths, linked_indices] = CheckCovary(vary_lengths, vary_params) </strong></div>
+<div class="box"><strong>function [effective_vary_lengths, linked_indices] = ds.checkCovary(vary_lengths, vary_params) </strong></div>
 
 <h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
 <div class="fragment"><pre class="comment">CHECKCOVARY - TODO I assume this checks if any varied parameters are covaried?</pre></div>
@@ -32,10 +32,10 @@
 <h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
 This function calls:
 <ul style="list-style-image:url(../matlabicon.gif)">
-<li><a href="IndexToBlocks.html" class="code" title="function blocks = IndexToBlocks(index)">IndexToBlocks</a>	INDEXTOBLOCKS - TODO unclear what this does</li></ul>
+<li><a href="ds.indexToBlocks.html" class="code" title="function blocks = ds.indexToBlocks(index)">ds.indexToBlocks</a>	INDEXTOBLOCKS - TODO unclear what this does</li></ul>
 This function is called by:
 <ul style="list-style-image:url(../matlabicon.gif)">
-<li><a href="PlotData.html" class="code" title="function handles = PlotData(data,varargin)">PlotData</a>	PLOTDATA - plot data in various ways depending on what data was provided and what options are defined.</li></ul>
+<li><a href="dsPlot.html" class="code" title="function handles = dsPlot(data,varargin)">dsPlot</a>	PLOTDATA - plot data in various ways depending on what data was provided and what options are defined.</li></ul>
 <!-- crossreference -->
 
 <h2><a name="_subfunctions"></a>SUBFUNCTIONS <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
@@ -43,92 +43,94 @@ This function is called by:
 <li><a href="#_sub1" class="code">function [linked_indices, non_linked_indices] = find_linked_params(param_indices, vary_params)</a></li></ul>
 
 <h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
-<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function [effective_vary_lengths, linked_indices] = CheckCovary(vary_lengths, vary_params)</a>
+<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function [effective_vary_lengths, linked_indices] = ds.checkCovary(vary_lengths, vary_params)</a>
 0002 <span class="comment">%CHECKCOVARY - TODO I assume this checks if any varied parameters are covaried?</span>
 0003 
 0004 non_singleton_vary_lengths = vary_lengths(vary_lengths &gt; 1);
 0005 
-0006 diff_vary_lengths = diff(non_singleton_vary_lengths);
+0006 non_singleton_vary_params = vary_params(:, vary_lengths &gt; 1);
 0007 
-0008 equal_vary_length_indices = diff_vary_lengths == 0;
+0008 diff_vary_lengths = diff(non_singleton_vary_lengths);
 0009 
-0010 equal_vary_length_blocks = <a href="IndexToBlocks.html" class="code" title="function blocks = IndexToBlocks(index)">IndexToBlocks</a>(equal_vary_length_indices);
+0010 equal_vary_length_indices = diff_vary_lengths == 0;
 0011 
-0012 <span class="keyword">if</span> ~isempty(equal_vary_length_blocks)
+0012 equal_vary_length_blocks = <a href="ds.indexToBlocks.html" class="code" title="function blocks = ds.indexToBlocks(index)">ds.indexToBlocks</a>(equal_vary_length_indices);
 0013 
-0014 equal_vary_length_blocks(:, 2) = equal_vary_length_blocks(:, 2) + 1;
+0014 <span class="keyword">if</span> ~isempty(equal_vary_length_blocks)
 0015 
-0016 <span class="keyword">end</span>
+0016     equal_vary_length_blocks(:, 2) = equal_vary_length_blocks(:, 2) + 1;
 0017 
-0018 no_blocks = size(equal_vary_length_blocks, 1);
+0018 <span class="keyword">end</span>
 0019 
-0020 linked_indices = {};
-0021     
-0022 number_linked_sets = 0;
-0023 
-0024 <span class="keyword">for</span> block = 1:no_blocks
-0025     
-0026     param_indices = equal_vary_length_blocks(block, 1):equal_vary_length_blocks(block, 2);
+0020 no_blocks = size(equal_vary_length_blocks, 1);
+0021 
+0022 linked_indices = {};
+0023     
+0024 number_linked_sets = 0;
+0025 
+0026 <span class="keyword">for</span> block = 1:no_blocks
 0027     
-0028     iteration_number = 1;
+0028     param_indices = equal_vary_length_blocks(block, 1):equal_vary_length_blocks(block, 2);
 0029     
-0030     <span class="keyword">while</span> length(param_indices) &gt; 1
-0031         
-0032         [linked_set, param_indices] = <a href="#_sub1" class="code" title="subfunction [linked_indices, non_linked_indices] = find_linked_params(param_indices, vary_params)">find_linked_params</a>(param_indices, vary_params);
+0030     iteration_number = 1;
+0031     
+0032     <span class="keyword">while</span> length(param_indices) &gt; 1
 0033         
-0034         <span class="keyword">if</span> ~isempty(linked_set)
-0035             
-0036             number_linked_sets = number_linked_sets + 1;
+0034         [linked_set, param_indices] = <a href="#_sub1" class="code" title="subfunction [linked_indices, non_linked_indices] = find_linked_params(param_indices, vary_params)">find_linked_params</a>(param_indices, non_singleton_vary_params);
+0035         
+0036         <span class="keyword">if</span> ~isempty(linked_set)
 0037             
-0038             linked_indices{number_linked_sets} = linked_set;
+0038             number_linked_sets = number_linked_sets + 1;
 0039             
-0040         <span class="keyword">end</span>
-0041         
-0042         iteration_number = iteration_number + 1;
+0040             linked_indices{number_linked_sets} = linked_set;
+0041             
+0042         <span class="keyword">end</span>
 0043         
-0044         <span class="keyword">if</span> iteration_number &gt; 10
-0045             
-0046             <span class="keyword">return</span>
+0044         iteration_number = iteration_number + 1;
+0045         
+0046         <span class="keyword">if</span> iteration_number &gt; 10
 0047             
-0048         <span class="keyword">end</span>
-0049         
-0050     <span class="keyword">end</span>
-0051     
-0052 <span class="keyword">end</span>
-0053 
-0054 effective_vary_lengths = vary_lengths;
+0048             <span class="keyword">return</span>
+0049             
+0050         <span class="keyword">end</span>
+0051         
+0052     <span class="keyword">end</span>
+0053     
+0054 <span class="keyword">end</span>
 0055 
-0056 <span class="keyword">for</span> l = 1:number_linked_sets
-0057     
-0058     effective_vary_lengths(linked_indices{l}(2:end)) = [];
+0056 effective_vary_lengths = non_singleton_vary_lengths;
+0057 
+0058 <span class="keyword">for</span> l = 1:number_linked_sets
 0059     
-0060 <span class="keyword">end</span>
-0061 
+0060     effective_vary_lengths(linked_indices{l}(2:end)) = [];
+0061     
 0062 <span class="keyword">end</span>
 0063 
-0064 <a name="_sub1" href="#_subfunctions" class="code">function [linked_indices, non_linked_indices] = find_linked_params(param_indices, vary_params)</a>
+0064 <span class="keyword">end</span>
 0065 
-0066 param1_index = param_indices(1);
+0066 <a name="_sub1" href="#_subfunctions" class="code">function [linked_indices, non_linked_indices] = find_linked_params(param_indices, vary_params)</a>
 0067 
-0068 params_at_value1 = vary_params(vary_params(:, param1_index) == vary_params(1, param1_index), :);
+0068 param1_index = param_indices(1);
 0069 
-0070 no_values_at_value1 = nan(size(param_indices));
+0070 params_at_value1 = vary_params(vary_params(:, param1_index) == vary_params(1, param1_index), :);
 0071 
-0072 no_values_at_value1(1) = 1;
+0072 no_values_at_value1 = nan(size(param_indices));
 0073 
-0074 <span class="keyword">for</span> p = 2:length(param_indices)
-0075     
-0076     param_index = param_indices(p);
+0074 no_values_at_value1(1) = 1;
+0075 
+0076 <span class="keyword">for</span> p = 2:length(param_indices)
 0077     
-0078     no_values_at_value1(p) = length(unique(params_at_value1(:, param_index)));
+0078     param_index = param_indices(p);
 0079     
-0080 <span class="keyword">end</span>
-0081 
-0082 linked_indices = param_indices(no_values_at_value1 == 1);
+0080     no_values_at_value1(p) = length(unique(params_at_value1(:, param_index)));
+0081     
+0082 <span class="keyword">end</span>
 0083 
-0084 non_linked_indices = param_indices(no_values_at_value1 &gt; 1);
+0084 linked_indices = param_indices(no_values_at_value1 == 1);
 0085 
-0086 <span class="keyword">end</span></pre></div>
-<hr><address>Generated on Mon 27-Feb-2017 14:58:50 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" target="_parent">m2html</a></strong> &copy; 2005</address>
+0086 non_linked_indices = param_indices(no_values_at_value1 &gt; 1);
+0087 
+0088 <span class="keyword">end</span></pre></div>
+<hr><address>Generated on Fri 07-Apr-2017 20:01:20 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" target="_parent">m2html</a></strong> &copy; 2005</address>
 </body>
 </html>

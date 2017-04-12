@@ -2,8 +2,8 @@
                 "http://www.w3.org/TR/REC-html40/loose.dtd">
 <html>
 <head>
-  <title>Description of CollectVariedParams</title>
-  <meta name="keywords" content="CollectVariedParams">
+  <title>Description of ds.collectVariedParams</title>
+  <meta name="keywords" content="ds.collectVariedParams">
   <meta name="description" content="COLLECTVARIEDPARAMS - Gathers info on parameters that have been varied in a batch">
   <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
   <meta name="generator" content="m2html &copy; 2005 Guillaume Flandin">
@@ -16,20 +16,20 @@
 <body>
 <a name="_top"></a>
 <!-- menu.html functions -->
-<h1>CollectVariedParams
+<h1>ds.collectVariedParams
 </h1>
 
 <h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
 <div class="box"><strong>COLLECTVARIEDPARAMS - Gathers info on parameters that have been varied in a batch</strong></div>
 
 <h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
-<div class="box"><strong>function [param_mat,varied,param_cell]=CollectVariedParams(data) </strong></div>
+<div class="box"><strong>function [param_mat,varied,param_cell]=ds.collectVariedParams(data) </strong></div>
 
 <h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
 <div class="fragment"><pre class="comment">COLLECTVARIEDPARAMS - Gathers info on parameters that have been varied in a batch
 
  Usage: [deprecated?]
-   [all_values,param_names,unique_values]=CollectVariedParams(data)
+   [all_values,param_names,unique_values]=ds.collectVariedParams(data)
 
  Inputs:
    - data: DynaSim data structure
@@ -52,11 +52,11 @@ This function is called by:
 
 
 <h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
-<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function [param_mat,varied,param_cell]=CollectVariedParams(data)</a>
+<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function [param_mat,varied,param_cell]=ds.collectVariedParams(data)</a>
 0002 <span class="comment">%COLLECTVARIEDPARAMS - Gathers info on parameters that have been varied in a batch</span>
 0003 <span class="comment">%</span>
 0004 <span class="comment">% Usage: [deprecated?]</span>
-0005 <span class="comment">%   [all_values,param_names,unique_values]=CollectVariedParams(data)</span>
+0005 <span class="comment">%   [all_values,param_names,unique_values]=ds.collectVariedParams(data)</span>
 0006 <span class="comment">%</span>
 0007 <span class="comment">% Inputs:</span>
 0008 <span class="comment">%   - data: DynaSim data structure</span>
@@ -68,7 +68,7 @@ This function is called by:
 0014 
 0015 <span class="comment">% Check inputs</span>
 0016 <span class="keyword">if</span> ~isstruct(data)
-0017   fprintf(<span class="string">'input must be a structure...exiting CollectVariedParams.\n'</span>);
+0017   fprintf(<span class="string">'input must be a structure...exiting ds.collectVariedParams.\n'</span>);
 0018   <span class="keyword">return</span>;
 0019 <span class="keyword">end</span>
 0020 <span class="keyword">if</span> ~isfield(data,<span class="string">'varied'</span>)
@@ -90,9 +90,9 @@ This function is called by:
 0036     param_cell{j}=unique([data.(varied{j})]); <span class="comment">% unique values for each parameter</span>
 0037   <span class="keyword">else</span>
 0038     <span class="comment">% todo: handle sims varying non-numeric model components</span>
-0039     <span class="comment">% (eg, mechanisms) (also in PlotFR and SelectData)</span>
+0039     <span class="comment">% (eg, mechanisms) (also in ds.plotFR and dsSelect)</span>
 0040   <span class="keyword">end</span>
 0041 <span class="keyword">end</span></pre></div>
-<hr><address>Generated on Mon 27-Feb-2017 14:58:50 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" target="_parent">m2html</a></strong> &copy; 2005</address>
+<hr><address>Generated on Fri 07-Apr-2017 20:01:20 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" target="_parent">m2html</a></strong> &copy; 2005</address>
 </body>
 </html>

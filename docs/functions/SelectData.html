@@ -2,8 +2,8 @@
                 "http://www.w3.org/TR/REC-html40/loose.dtd">
 <html>
 <head>
-  <title>Description of SelectData</title>
-  <meta name="keywords" content="SelectData">
+  <title>Description of dsSelect</title>
+  <meta name="keywords" content="dsSelect">
   <meta name="description" content="SELECTDATA -  select subset of data">
   <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
   <meta name="generator" content="m2html &copy; 2005 Guillaume Flandin">
@@ -16,34 +16,34 @@
 <body>
 <a name="_top"></a>
 <!-- menu.html functions -->
-<h1>SelectData
+<h1>dsSelect
 </h1>
 
 <h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
 <div class="box"><strong>SELECTDATA -  select subset of data</strong></div>
 
 <h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
-<div class="box"><strong>function data=SelectData(data,varargin) </strong></div>
+<div class="box"><strong>function data=dsSelect(data,varargin) </strong></div>
 
 <h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
 <div class="fragment"><pre class="comment">SELECTDATA -  select subset of data
 
- Limitation: SelectData currently supports returning value ranges but not
+ Limitation: dsSelect currently supports returning value ranges but not
  non-numeric model components (e.g., mechanism_list modifications).
 
  Usage:
-   data=SelectData(data,'option',value)
+   data=dsSelect(data,'option',value)
 
  Inputs:
-   - data: DNSim data structure (see SimulateModel)
+   - data: DNSim data structure (see dsSimulate)
    - options:
      'time_limits': in units of data.time {[beg,end]}
      'varied': specification of search space subset to retrieve (see NOTE 1)
 
  Notes:
  - NOTE 1: 'varied' can be specified in two ways:
-   - Method 1: a way similar to 'vary' in SimulateModel and
-     Vary2Modifications. However, instead of indicating values for a variable to
+   - Method 1: a way similar to 'vary' in dsSimulate and
+     ds.vary2Modifications. However, instead of indicating values for a variable to
      take, 'varied' involves the specification of a range of values. Syntax:
      vary={object, variable, [low,high]; ...}, where low is the lower bound on
      the range varied and high is the upper bound for the component varied. For
@@ -58,11 +58,11 @@
 
  Examples:
    % return simulated data from 20-80ms
-   data=SelectData(data,'time_limits',[20 80]);
+   data=dsSelect(data,'time_limits',[20 80]);
    % return data sets with gNa set between .3 and .5
-   data=SelectData(data,'varied',{'E','gNa',[.3 .5]});
-   data=SelectData(data,'time_limits',[20 80],'varied',{'E','gNa',[.3 .5]});
-   data=SelectData(data,'roi',{'E_v',[1 4]});
+   data=dsSelect(data,'varied',{'E','gNa',[.3 .5]});
+   data=dsSelect(data,'time_limits',[20 80],'varied',{'E','gNa',[.3 .5]});
+   data=dsSelect(data,'roi',{'E_v',[1 4]});
 
  TODO:
    - Specify subsets to return in terms of ROIs: {'E',1:50;'I',1:10,'F',[]}
@@ -70,40 +70,40 @@
    - Possible format for specifying range_varied:
      {'E','gNa',[.1 .3]; 'I-&gt;E','tauI',[15 25]; 'I','mechanism_list','+iM'}
 
- See also: <a href="SimulateModel.html" class="code" title="function [data,studyinfo]=SimulateModel(model,varargin)">SimulateModel</a>, <a href="Vary2Modifications.html" class="code" title="function modifications_set = Vary2Modifications(vary,model)">Vary2Modifications</a>, <a href="ImportData.html" class="code" title="function [data,studyinfo] = ImportData(file,varargin)">ImportData</a></pre></div>
+ See also: <a href="dsSimulate.html" class="code" title="function [data,studyinfo]=dsSimulate(model,varargin)">dsSimulate</a>, <a href="ds.vary2Modifications.html" class="code" title="function modifications_set = ds.vary2Modifications(vary,model)">ds.vary2Modifications</a>, <a href="ds.importData.html" class="code" title="function [data,studyinfo] = ds.importData(file,varargin)">ds.importData</a></pre></div>
 
 <!-- crossreference -->
 <h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
 This function calls:
 <ul style="list-style-image:url(../matlabicon.gif)">
-<li><a href="CheckData.html" class="code" title="function data=CheckData(data)">CheckData</a>	CHECKDATA - Standardize data structure and auto-populate missing fields</li><li><a href="CheckOptions.html" class="code" title="function parms = CheckOptions(options, options_schema, strict)">CheckOptions</a>	CHECKOPTIONS - organize key/value pairs in structure with default or user-supplied values according to a schema</li></ul>
+<li><a href="ds.checkData.html" class="code" title="function data=ds.checkData(data)">ds.checkData</a>	CHECKDATA - Standardize data structure and auto-populate missing fields</li><li><a href="ds.checkOptions.html" class="code" title="function [parms, params_unspecified ] = ds.checkOptions(options, options_schema, strict)">ds.checkOptions</a>	CHECKOPTIONS - organize key/value pairs in structure with default or user-supplied values according to a schema</li></ul>
 This function is called by:
 <ul style="list-style-image:url(../matlabicon.gif)">
-<li><a href="CalcSpikeSync.html" class="code" title="function stats = CalcSpikeSync(data,varargin)">CalcSpikeSync</a>	CALCSPIKESYNC - Compute spike synchronization between spiketrains</li><li><a href="ImportData.html" class="code" title="function [data,studyinfo] = ImportData(file,varargin)">ImportData</a>	IMPORTDATA - load data into DynaSim formatted data structure.</li></ul>
+<li><a href="ds.calcSpikeSync.html" class="code" title="function stats = ds.calcSpikeSync(data,varargin)">ds.calcSpikeSync</a>	CALCSPIKESYNC - Compute spike synchronization between spiketrains</li><li><a href="ds.importData.html" class="code" title="function [data,studyinfo] = ds.importData(file,varargin)">ds.importData</a>	IMPORTDATA - load data into DynaSim formatted data structure.</li></ul>
 <!-- crossreference -->
 
 
 
 <h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
-<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function data=SelectData(data,varargin)</a>
+<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function data=dsSelect(data,varargin)</a>
 0002 <span class="comment">%SELECTDATA -  select subset of data</span>
 0003 <span class="comment">%</span>
-0004 <span class="comment">% Limitation: SelectData currently supports returning value ranges but not</span>
+0004 <span class="comment">% Limitation: dsSelect currently supports returning value ranges but not</span>
 0005 <span class="comment">% non-numeric model components (e.g., mechanism_list modifications).</span>
 0006 <span class="comment">%</span>
 0007 <span class="comment">% Usage:</span>
-0008 <span class="comment">%   data=SelectData(data,'option',value)</span>
+0008 <span class="comment">%   data=dsSelect(data,'option',value)</span>
 0009 <span class="comment">%</span>
 0010 <span class="comment">% Inputs:</span>
-0011 <span class="comment">%   - data: DNSim data structure (see SimulateModel)</span>
+0011 <span class="comment">%   - data: DNSim data structure (see dsSimulate)</span>
 0012 <span class="comment">%   - options:</span>
 0013 <span class="comment">%     'time_limits': in units of data.time {[beg,end]}</span>
 0014 <span class="comment">%     'varied': specification of search space subset to retrieve (see NOTE 1)</span>
 0015 <span class="comment">%</span>
 0016 <span class="comment">% Notes:</span>
 0017 <span class="comment">% - NOTE 1: 'varied' can be specified in two ways:</span>
-0018 <span class="comment">%   - Method 1: a way similar to 'vary' in SimulateModel and</span>
-0019 <span class="comment">%     Vary2Modifications. However, instead of indicating values for a variable to</span>
+0018 <span class="comment">%   - Method 1: a way similar to 'vary' in dsSimulate and</span>
+0019 <span class="comment">%     ds.vary2Modifications. However, instead of indicating values for a variable to</span>
 0020 <span class="comment">%     take, 'varied' involves the specification of a range of values. Syntax:</span>
 0021 <span class="comment">%     vary={object, variable, [low,high]; ...}, where low is the lower bound on</span>
 0022 <span class="comment">%     the range varied and high is the upper bound for the component varied. For</span>
@@ -118,11 +118,11 @@ This function is called by:
 0031 <span class="comment">%</span>
 0032 <span class="comment">% Examples:</span>
 0033 <span class="comment">%   % return simulated data from 20-80ms</span>
-0034 <span class="comment">%   data=SelectData(data,'time_limits',[20 80]);</span>
+0034 <span class="comment">%   data=dsSelect(data,'time_limits',[20 80]);</span>
 0035 <span class="comment">%   % return data sets with gNa set between .3 and .5</span>
-0036 <span class="comment">%   data=SelectData(data,'varied',{'E','gNa',[.3 .5]});</span>
-0037 <span class="comment">%   data=SelectData(data,'time_limits',[20 80],'varied',{'E','gNa',[.3 .5]});</span>
-0038 <span class="comment">%   data=SelectData(data,'roi',{'E_v',[1 4]});</span>
+0036 <span class="comment">%   data=dsSelect(data,'varied',{'E','gNa',[.3 .5]});</span>
+0037 <span class="comment">%   data=dsSelect(data,'time_limits',[20 80],'varied',{'E','gNa',[.3 .5]});</span>
+0038 <span class="comment">%   data=dsSelect(data,'roi',{'E_v',[1 4]});</span>
 0039 <span class="comment">%</span>
 0040 <span class="comment">% TODO:</span>
 0041 <span class="comment">%   - Specify subsets to return in terms of ROIs: {'E',1:50;'I',1:10,'F',[]}</span>
@@ -130,12 +130,12 @@ This function is called by:
 0043 <span class="comment">%   - Possible format for specifying range_varied:</span>
 0044 <span class="comment">%     {'E','gNa',[.1 .3]; 'I-&gt;E','tauI',[15 25]; 'I','mechanism_list','+iM'}</span>
 0045 <span class="comment">%</span>
-0046 <span class="comment">% See also: SimulateModel, Vary2Modifications, ImportData</span>
+0046 <span class="comment">% See also: dsSimulate, ds.vary2Modifications, ds.importData</span>
 0047 
 0048 <span class="comment">% check inputs</span>
-0049 data=<a href="CheckData.html" class="code" title="function data=CheckData(data)">CheckData</a>(data);
+0049 data=<a href="ds.checkData.html" class="code" title="function data=ds.checkData(data)">ds.checkData</a>(data);
 0050 
-0051 options=<a href="CheckOptions.html" class="code" title="function parms = CheckOptions(options, options_schema, strict)">CheckOptions</a>(varargin,{<span class="keyword">...</span>
+0051 options=<a href="ds.checkOptions.html" class="code" title="function [parms, params_unspecified ] = ds.checkOptions(options, options_schema, strict)">ds.checkOptions</a>(varargin,{<span class="keyword">...</span>
 0052   <span class="string">'time_limits'</span>,[-inf inf],[],<span class="keyword">...</span>
 0053   <span class="string">'varied'</span>,[],[],<span class="keyword">...</span>
 0054   <span class="string">'roi'</span>,[],[],<span class="keyword">...</span>
@@ -144,8 +144,8 @@ This function is called by:
 0057 <span class="comment">% select data sets based on range of varied model components</span>
 0058 <span class="keyword">if</span> ~isempty(options.varied) &amp;&amp; isfield(data,<span class="string">'varied'</span>)
 0059   <span class="keyword">if</span> size(options.varied,2)==3
-0060     <span class="comment">% convert into field name (set in SimulateModel:prepare_varied_metadata)</span>
-0061     <span class="comment">% note: this code is redundant with SimulateModel and AnalyzeData.</span>
+0060     <span class="comment">% convert into field name (set in dsSimulate:prepare_varied_metadata)</span>
+0061     <span class="comment">% note: this code is redundant with dsSimulate and dsAnalyze.</span>
 0062     <span class="comment">% todo: eliminate redundancy</span>
 0063     varied={};
 0064     <span class="keyword">for</span> i=1:size(options.varied,1)
@@ -160,7 +160,7 @@ This function is called by:
 0073     options.varied=cat(2,varied,options.varied(:,3));
 0074   <span class="keyword">end</span>
 0075   <span class="keyword">if</span> size(options.varied,1)&gt;1
-0076     error(<span class="string">'at present, a range on only one varied parameter can be specified per call to SelectData.'</span>);
+0076     error(<span class="string">'at present, a range on only one varied parameter can be specified per call to dsSelect.'</span>);
 0077   <span class="keyword">end</span>
 0078   <span class="keyword">if</span> ~ismember(options.varied{1,1},data(1).varied)
 0079     error(<span class="string">'varied parameter not found in data.varied'</span>);
@@ -176,7 +176,7 @@ This function is called by:
 0089       param_mat(:,j)=[data.(varied{j})]; <span class="comment">% sims x varied</span>
 0090     <span class="keyword">else</span>
 0091       <span class="comment">% todo: handle sims varying non-numeric model components</span>
-0092       <span class="comment">% (eg, mechanisms) (also in PlotData)</span>
+0092       <span class="comment">% (eg, mechanisms) (also in dsPlot)</span>
 0093     <span class="keyword">end</span>
 0094   <span class="keyword">end</span>
 0095   <span class="comment">% find element of 'varied' whose range has been requested</span>
@@ -193,10 +193,10 @@ This function is called by:
 0106   data=data(sel);
 0107 <span class="keyword">end</span>
 0108 
-0109 <span class="comment">% % recursively call SelectData if more than one data set</span>
+0109 <span class="comment">% % recursively call dsSelect if more than one data set</span>
 0110 <span class="comment">% if length(data)&gt;1</span>
 0111 <span class="comment">%   for i=1:length(data)</span>
-0112 <span class="comment">%     data(i)=SelectData(data(i),varargin{:});</span>
+0112 <span class="comment">%     data(i)=dsSelect(data(i),varargin{:});</span>
 0113 <span class="comment">%   end</span>
 0114 <span class="comment">%   return;</span>
 0115 <span class="comment">% end</span>
@@ -229,6 +229,6 @@ This function is called by:
 0142   
 0143 <span class="keyword">end</span>
 0144</pre></div>
-<hr><address>Generated on Mon 27-Feb-2017 14:58:50 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" target="_parent">m2html</a></strong> &copy; 2005</address>
+<hr><address>Generated on Fri 07-Apr-2017 20:01:20 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" target="_parent">m2html</a></strong> &copy; 2005</address>
 </body>
 </html>

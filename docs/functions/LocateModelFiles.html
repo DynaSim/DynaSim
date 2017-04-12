@@ -2,8 +2,8 @@
                 "http://www.w3.org/TR/REC-html40/loose.dtd">
 <html>
 <head>
-  <title>Description of LocateModelFiles</title>
-  <meta name="keywords" content="LocateModelFiles">
+  <title>Description of ds.locateModelFiles</title>
+  <meta name="keywords" content="ds.locateModelFiles">
   <meta name="description" content="LOCATEMODELFILES - locate mechanism files associated with DynaSim specifications.">
   <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
   <meta name="generator" content="m2html &copy; 2005 Guillaume Flandin">
@@ -16,20 +16,20 @@
 <body>
 <a name="_top"></a>
 <!-- menu.html functions -->
-<h1>LocateModelFiles
+<h1>ds.locateModelFiles
 </h1>
 
 <h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
 <div class="box"><strong>LOCATEMODELFILES - locate mechanism files associated with DynaSim specifications.</strong></div>
 
 <h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
-<div class="box"><strong>function [paths,files]=LocateModelFiles(input) </strong></div>
+<div class="box"><strong>function [paths,files]=ds.locateModelFiles(input) </strong></div>
 
 <h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
 <div class="fragment"><pre class="comment">LOCATEMODELFILES - locate mechanism files associated with DynaSim specifications.
 
  Usage:
-   [paths,files]=LocateModelFiles(input)
+   [paths,files]=ds.locateModelFiles(input)
 
  Input: DynaSim specification or model structure or string or cell array of
         strings listing mechanism names or files.
@@ -38,7 +38,7 @@
    - paths: unique paths to mechanism files
    - files: full names of files containing mechanism sub-models
 
- See also (used by): <a href="ParseModelEquations.html" class="code" title="function [model,name_map] = ParseModelEquations(text,varargin)">ParseModelEquations</a>, <a href="CheckHostPaths.html" class="code" title="function [matched,error_message]=CheckHostPaths(studyinfo)">CheckHostPaths</a>, <a href="CreateBatch.html" class="code" title="function studyinfo=CreateBatch(base_model,modifications_set,varargin)">CreateBatch</a></pre></div>
+ See also (used by): <a href="ds.parseModelEquations.html" class="code" title="function [model,name_map] = ds.parseModelEquations(text,varargin)">ds.parseModelEquations</a>, <a href="ds.checkHostPaths.html" class="code" title="function [matched,error_message]=ds.checkHostPaths(studyinfo)">ds.checkHostPaths</a>, <a href="ds.createBatch.html" class="code" title="function studyinfo = ds.createBatch(base_model,modifications_set,varargin)">ds.createBatch</a></pre></div>
 
 <!-- crossreference -->
 <h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
@@ -47,17 +47,17 @@ This function calls:
 </ul>
 This function is called by:
 <ul style="list-style-image:url(../matlabicon.gif)">
-<li><a href="CheckHostPaths.html" class="code" title="function [matched,error_message]=CheckHostPaths(studyinfo)">CheckHostPaths</a>	CHECKHOSTPATHS - Compare paths on host to those set in studyinfo when batch was created</li><li><a href="CheckSpecification.html" class="code" title="function spec=CheckSpecification(specification)">CheckSpecification</a>	CHECKSPECIFICATION - standardize specification structure and auto-populate missing fields</li><li><a href="CreateBatch.html" class="code" title="function studyinfo=CreateBatch(base_model,modifications_set,varargin)">CreateBatch</a>	CREATEBATCH - create and submit jobs to run sets of simulations or analyses.</li><li><a href="ParseModelEquations.html" class="code" title="function [model,name_map] = ParseModelEquations(text,varargin)">ParseModelEquations</a>	PARSEMODELEQUATIONS - parse equations and organize model data in DynaSim model structure</li></ul>
+<li><a href="ds.checkHostPaths.html" class="code" title="function [matched,error_message]=ds.checkHostPaths(studyinfo)">ds.checkHostPaths</a>	CHECKHOSTPATHS - Compare paths on host to those set in studyinfo when batch was created</li><li><a href="ds.checkSpecification.html" class="code" title="function spec=ds.checkSpecification(specification)">ds.checkSpecification</a>	CHECKSPECIFICATION - standardize specification structure and auto-populate missing fields</li><li><a href="ds.createBatch.html" class="code" title="function studyinfo = ds.createBatch(base_model,modifications_set,varargin)">ds.createBatch</a>	CREATEBATCH - create and submit jobs to run sets of simulations or analyses.</li><li><a href="ds.editModelFiles.html" class="code" title="function ds.editModelFiles(files)">ds.editModelFiles</a>	</li><li><a href="ds.parseModelEquations.html" class="code" title="function [model,name_map] = ds.parseModelEquations(text,varargin)">ds.parseModelEquations</a>	PARSEMODELEQUATIONS - parse equations and organize model data in DynaSim model structure</li></ul>
 <!-- crossreference -->
 
 
 
 <h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
-<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function [paths,files]=LocateModelFiles(input)</a>
+<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function [paths,files]=ds.locateModelFiles(input)</a>
 0002 <span class="comment">%LOCATEMODELFILES - locate mechanism files associated with DynaSim specifications.</span>
 0003 <span class="comment">%</span>
 0004 <span class="comment">% Usage:</span>
-0005 <span class="comment">%   [paths,files]=LocateModelFiles(input)</span>
+0005 <span class="comment">%   [paths,files]=ds.locateModelFiles(input)</span>
 0006 <span class="comment">%</span>
 0007 <span class="comment">% Input: DynaSim specification or model structure or string or cell array of</span>
 0008 <span class="comment">%        strings listing mechanism names or files.</span>
@@ -66,7 +66,7 @@ This function is called by:
 0011 <span class="comment">%   - paths: unique paths to mechanism files</span>
 0012 <span class="comment">%   - files: full names of files containing mechanism sub-models</span>
 0013 <span class="comment">%</span>
-0014 <span class="comment">% See also (used by): ParseModelEquations, CheckHostPaths, CreateBatch</span>
+0014 <span class="comment">% See also (used by): ds.parseModelEquations, ds.checkHostPaths, ds.createBatch</span>
 0015 
 0016 <span class="comment">% extract list of mechanisms from input</span>
 0017 <span class="keyword">if</span> ischar(input)
@@ -150,6 +150,6 @@ This function is called by:
 0095 
 0096 <span class="comment">% extract unique paths to mechanism files</span>
 0097 paths=unique(cellfun(@fileparts,files,<span class="string">'uni'</span>,0),<span class="string">'stable'</span>);</pre></div>
-<hr><address>Generated on Mon 27-Feb-2017 14:58:50 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" target="_parent">m2html</a></strong> &copy; 2005</address>
+<hr><address>Generated on Fri 07-Apr-2017 20:01:20 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" target="_parent">m2html</a></strong> &copy; 2005</address>
 </body>
 </html>

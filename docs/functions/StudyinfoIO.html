@@ -2,8 +2,8 @@
                 "http://www.w3.org/TR/REC-html40/loose.dtd">
 <html>
 <head>
-  <title>Description of StudyinfoIO</title>
-  <meta name="keywords" content="StudyinfoIO">
+  <title>Description of ds.studyinfoIO</title>
+  <meta name="keywords" content="ds.studyinfoIO">
   <meta name="description" content="STUDYINFOIO - use lock files to manage concurrent access to a shared studyinfo">
   <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
   <meta name="generator" content="m2html &copy; 2005 Guillaume Flandin">
@@ -16,25 +16,25 @@
 <body>
 <a name="_top"></a>
 <!-- menu.html functions -->
-<h1>StudyinfoIO
+<h1>ds.studyinfoIO
 </h1>
 
 <h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
 <div class="box"><strong>STUDYINFOIO - use lock files to manage concurrent access to a shared studyinfo</strong></div>
 
 <h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
-<div class="box"><strong>function studyinfo=StudyinfoIO(studyinfo,study_file,id,verbose_flag) </strong></div>
+<div class="box"><strong>function studyinfo=ds.studyinfoIO(studyinfo,study_file,id,verbose_flag) </strong></div>
 
 <h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
 <div class="fragment"><pre class="comment">STUDYINFOIO - use lock files to manage concurrent access to a shared studyinfo 
 
- This is an internal helper function called by CheckStudyinfo, SetupStudy,
- TrackStudy, and CreateBatch to prevent busy-file conflicts. file. i.e.,
+ This is an internal helper function called by ds.checkStudyinfo, ds.setupStudy,
+ TrackStudy, and ds.createBatch to prevent busy-file conflicts. file. i.e.,
  serialize read/writes for parallel processes in study batch.
 
  Usage:
-   loading: studyinfo=StudyinfoIO([],study_file,[id,verbose_flag])
-   saving:  StudyinfoIO(studyinfo,[study_file,id,verbose_flag]);
+   loading: studyinfo=ds.studyinfoIO([],study_file,[id,verbose_flag])
+   saving:  ds.studyinfoIO(studyinfo,[study_file,id,verbose_flag]);
 
  Inputs:
    - studyinfo: (empty [] for loading) or (DynaSim studyinfo structure to save)
@@ -45,10 +45,10 @@
 <h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
 This function calls:
 <ul style="list-style-image:url(../matlabicon.gif)">
-<li><a href="DisplayError.html" class="code" title="function DisplayError(err)">DisplayError</a>	DISPLAYERROR - Wrapper to print MATLAB error</li><li><a href="cell2num.html" class="code" title="function m = cell2num(c)">cell2num</a>	CELL2NUM - Takes a cell matrix of strings and converts each cell into a number.</li></ul>
+<li><a href="displayError.html" class="code" title="function displayError(err)">displayError</a>	DISPLAYERROR - Wrapper to print MATLAB error</li></ul>
 This function is called by:
 <ul style="list-style-image:url(../matlabicon.gif)">
-<li><a href="CheckStudyinfo.html" class="code" title="function studyinfo=CheckStudyinfo(studyinfo,varargin)">CheckStudyinfo</a>	CHECKSTUDYINFO - Standardize studyinfo structure and auto-populate missing fields</li><li><a href="CreateBatch.html" class="code" title="function studyinfo=CreateBatch(base_model,modifications_set,varargin)">CreateBatch</a>	CREATEBATCH - create and submit jobs to run sets of simulations or analyses.</li><li><a href="SetupStudy.html" class="code" title="function [studyinfo,options]=SetupStudy(base_model,varargin)">SetupStudy</a>	SETUPSTUDY - Initialize DynaSim studyinfo structure, prepare list of output file names, and create output directories</li><li><a href="UpdateStudy.html" class="code" title="function studyinfo=UpdateStudy(study_dir,varargin)">UpdateStudy</a>	UPDATESTUDY - helper function to keep track of study metadata when anything is saved</li></ul>
+<li><a href="ds.checkStudyinfo.html" class="code" title="function studyinfo=ds.checkStudyinfo(studyinfo,varargin)">ds.checkStudyinfo</a>	CHECKSTUDYINFO - Standardize studyinfo structure and auto-populate missing fields</li><li><a href="ds.createBatch.html" class="code" title="function studyinfo = ds.createBatch(base_model,modifications_set,varargin)">ds.createBatch</a>	CREATEBATCH - create and submit jobs to run sets of simulations or analyses.</li><li><a href="ds.setupStudy.html" class="code" title="function [studyinfo,options]=ds.setupStudy(base_model,varargin)">ds.setupStudy</a>	SETUPSTUDY - Initialize DynaSim studyinfo structure, prepare list of output file names, and create output directories</li><li><a href="ds.updateStudy.html" class="code" title="function studyinfo=ds.updateStudy(study_dir,varargin)">ds.updateStudy</a>	UPDATESTUDY - helper function to keep track of study metadata when anything is saved</li></ul>
 <!-- crossreference -->
 
 <h2><a name="_subfunctions"></a>SUBFUNCTIONS <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
@@ -56,16 +56,16 @@ This function is called by:
 <li><a href="#_sub1" class="code">function id=NextStudyinfoID(study_dir,OS)</a></li></ul>
 
 <h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
-<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function studyinfo=StudyinfoIO(studyinfo,study_file,id,verbose_flag)</a>
+<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function studyinfo=ds.studyinfoIO(studyinfo,study_file,id,verbose_flag)</a>
 0002 <span class="comment">%STUDYINFOIO - use lock files to manage concurrent access to a shared studyinfo</span>
 0003 <span class="comment">%</span>
-0004 <span class="comment">% This is an internal helper function called by CheckStudyinfo, SetupStudy,</span>
-0005 <span class="comment">% TrackStudy, and CreateBatch to prevent busy-file conflicts. file. i.e.,</span>
+0004 <span class="comment">% This is an internal helper function called by ds.checkStudyinfo, ds.setupStudy,</span>
+0005 <span class="comment">% TrackStudy, and ds.createBatch to prevent busy-file conflicts. file. i.e.,</span>
 0006 <span class="comment">% serialize read/writes for parallel processes in study batch.</span>
 0007 <span class="comment">%</span>
 0008 <span class="comment">% Usage:</span>
-0009 <span class="comment">%   loading: studyinfo=StudyinfoIO([],study_file,[id,verbose_flag])</span>
-0010 <span class="comment">%   saving:  StudyinfoIO(studyinfo,[study_file,id,verbose_flag]);</span>
+0009 <span class="comment">%   loading: studyinfo=ds.studyinfoIO([],study_file,[id,verbose_flag])</span>
+0010 <span class="comment">%   saving:  ds.studyinfoIO(studyinfo,[study_file,id,verbose_flag]);</span>
 0011 <span class="comment">%</span>
 0012 <span class="comment">% Inputs:</span>
 0013 <span class="comment">%   - studyinfo: (empty [] for loading) or (DynaSim studyinfo structure to save)</span>
@@ -102,7 +102,7 @@ This function is called by:
 0044       [status,result]=system([<span class="string">'ls '</span> study_dir <span class="string">'/.lock_*'</span>]);
 0045       <span class="keyword">if</span> status==0
 0046         ids=regexp(result,<span class="string">'.lock_\d+_(\d+)'</span>,<span class="string">'tokens'</span>);
-0047         <span class="keyword">if</span> ~isempty(ids), curr_ids=<a href="cell2num.html" class="code" title="function m = cell2num(c)">cell2num</a>([ids{:}]); <span class="keyword">end</span>
+0047         <span class="keyword">if</span> ~isempty(ids), curr_ids=cell2num([ids{:}]); <span class="keyword">end</span>
 0048       <span class="keyword">end</span>
 0049     <span class="keyword">otherwise</span> <span class="comment">% Windows</span>
 0050       <span class="comment">% lock_file format: lock_&lt;timestamp&gt;_&lt;id&gt;</span>
@@ -110,7 +110,7 @@ This function is called by:
 0052       status=~any(find(~cellfun(@isempty,regexp({D.name},<span class="string">'^lock_'</span>))));
 0053       <span class="keyword">if</span> status==0
 0054         ids=regexp({D.name},<span class="string">'lock_\d+_(\d+)'</span>,<span class="string">'tokens'</span>,<span class="string">'once'</span>); 
-0055         <span class="keyword">if</span> ~isempty(ids), curr_ids=<a href="cell2num.html" class="code" title="function m = cell2num(c)">cell2num</a>([ids{:}]); <span class="keyword">end</span>
+0055         <span class="keyword">if</span> ~isempty(ids), curr_ids=cell2num([ids{:}]); <span class="keyword">end</span>
 0056       <span class="keyword">end</span>
 0057   <span class="keyword">end</span>
 0058 <span class="keyword">end</span>
@@ -292,7 +292,7 @@ This function is called by:
 0234   <span class="keyword">end</span>
 0235   delete(lock_file);
 0236   delete(common_lock_file);
-0237   <a href="DisplayError.html" class="code" title="function DisplayError(err)">DisplayError</a>(err);
+0237   <a href="displayError.html" class="code" title="function displayError(err)">displayError</a>(err);
 0238 <span class="keyword">end</span>  
 0239 
 0240 <span class="comment">%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%</span>
@@ -314,7 +314,7 @@ This function is called by:
 0256       <span class="keyword">if</span> ~isempty(ids)
 0257         <span class="comment">% identify the max id</span>
 0258         ids=[ids{:}];
-0259         id=max(<a href="cell2num.html" class="code" title="function m = cell2num(c)">cell2num</a>(ids));
+0259         id=max(cell2num(ids));
 0260       <span class="keyword">end</span>
 0261 <span class="comment">%       % get list of timestamps in lock file names</span>
 0262 <span class="comment">%       timestamps=regexp(result,'.lock_(\d+)_\d+','tokens');</span>
@@ -339,12 +339,12 @@ This function is called by:
 0281         <span class="comment">% identify the next timestamp to process</span>
 0282         timestamps=[timestamps{:}];
 0283         <span class="keyword">if</span> isempty(timestamps), <span class="keyword">return</span>; <span class="keyword">end</span>
-0284         x=<a href="cell2num.html" class="code" title="function m = cell2num(c)">cell2num</a>(timestamps);
+0284         x=cell2num(timestamps);
 0285         timestamp=timestamps{x==min(x)};
 0286         <span class="comment">% get list of locked ids with that timestamp</span>
 0287         ids=regexp({D.name},sprintf(<span class="string">'lock_%s_(\\d+)'</span>,timestamp),<span class="string">'tokens'</span>,<span class="string">'once'</span>);
 0288         <span class="comment">% get max id from lock with min timestamp</span>
-0289         id=max(<a href="cell2num.html" class="code" title="function m = cell2num(c)">cell2num</a>([ids{:}]));
+0289         id=max(cell2num([ids{:}]));
 0290       <span class="keyword">end</span>
 0291     <span class="keyword">end</span>
 0292 <span class="keyword">end</span>
@@ -397,6 +397,6 @@ This function is called by:
 0339   <span class="keyword">end</span>
 0340 <span class="keyword">end</span>
 0341 <span class="comment">%}</span></pre></div>
-<hr><address>Generated on Mon 27-Feb-2017 14:58:50 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" target="_parent">m2html</a></strong> &copy; 2005</address>
+<hr><address>Generated on Fri 07-Apr-2017 20:01:20 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" target="_parent">m2html</a></strong> &copy; 2005</address>
 </body>
 </html>

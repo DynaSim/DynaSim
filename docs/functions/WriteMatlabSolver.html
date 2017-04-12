@@ -2,8 +2,8 @@
                 "http://www.w3.org/TR/REC-html40/loose.dtd">
 <html>
 <head>
-  <title>Description of WriteMatlabSolver</title>
-  <meta name="keywords" content="WriteMatlabSolver">
+  <title>Description of ds.writeMatlabSolver</title>
+  <meta name="keywords" content="ds.writeMatlabSolver">
   <meta name="description" content="WRITEMATLABSOLVER - write m-file that numerically inteegrates the model">
   <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
   <meta name="generator" content="m2html &copy; 2005 Guillaume Flandin">
@@ -16,31 +16,30 @@
 <body>
 <a name="_top"></a>
 <!-- menu.html functions -->
-<h1>WriteMatlabSolver
+<h1>ds.writeMatlabSolver
 </h1>
 
 <h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
 <div class="box"><strong>WRITEMATLABSOLVER - write m-file that numerically inteegrates the model</strong></div>
 
 <h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
-<div class="box"><strong>function data=WriteMatlabSolver(model,varargin) </strong></div>
+<div class="box"><strong>function solve_ode_filepath = ds.writeMatlabSolver(model,varargin) </strong></div>
 
 <h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
 <div class="fragment"><pre class="comment">WRITEMATLABSOLVER - write m-file that numerically inteegrates the model
 
  Usage:
-   outfile=WriteMatlabSolver(model,varargin)
+   filepath = ds.writeMatlabSolver(model,varargin)
 
  Inputs:
-   - model: DynaSim model structure (see GenerateModel)
+   - model: DynaSim model structure (see ds.generateModel)
    - options:
      'tspan'         : units must be consistent with dt and equations
                        {[beg,end]} (default: [0 100])
      'ic'            : initial conditions; this overrides definition in model structure
-     'solver'        : DynaSim and built-in Matlab solvers
-                       {'euler','rk2','rk4','modifiedeuler',
-                       'ode23','ode45','ode15s','ode23s'}
-     'solver_options': options from odeset for use with built-in Matlab solvers
+     'solver'        : built-in Matlab solvers
+                         {'ode23','ode45','ode113','ode15s','ode23s','ode23t','ode23tb'}
+     'matlab_solver_options': options from odeset for use with built-in Matlab solvers
      'dt'            :  time step used for fixed step DSSim solvers (default: 0.01)
      'modifications' : DynaSim modifications structure
      'reduce_function_calls_flag': whether to eliminate internal function
@@ -48,8 +47,6 @@
      'coder_flag'    : whether to compile using coder instead of interpreting
                        Matlab (default: exist('codegen')==6 TODO is this correct?
                        what does this mean?)
-     'disk_flag'     : whether to write to disk during simulation instead of
-                       storing in memory {0 or 1} (default: 0)
      'downsample_factor': downsampling applied during simulation. Only every
                           downsample_factor-time point is stored in memory or
                           written to disk (default: 1)
@@ -57,99 +54,467 @@
                        rng(random_seed)) (default: now)
 
  Outputs:
-   - outfile (solve_ode.m)
+   - filepath (solve_ode.m)
+   - odefun_filepath (solve_ode_odefun.m)
 
- Dependencies: CheckOptions, CheckModel
+ Dependencies: ds.checkOptions, ds.checkModel
 
- See also: <a href="SimulateModel.html" class="code" title="function [data,studyinfo]=SimulateModel(model,varargin)">SimulateModel</a>, <a href="DynaSim2Odefun.html" class="code" title="function odefun=DynaSim2Odefun(model)">DynaSim2Odefun</a></pre></div>
+ See also: <a href="dsSimulate.html" class="code" title="function [data,studyinfo]=dsSimulate(model,varargin)">dsSimulate</a>, <a href="ds.dynasim2odefun.html" class="code" title="function [ODEFUN,IC,elem_names]=ds.dynasim2odefun(model, varargin)">ds.dynasim2odefun</a></pre></div>
 
 <!-- crossreference -->
 <h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
 This function calls:
 <ul style="list-style-image:url(../matlabicon.gif)">
-<li><a href="CheckModel.html" class="code" title="function model=CheckModel(model)">CheckModel</a>	CHECKMODEL - Standardize model structure and auto-populate missing fields</li><li><a href="CheckOptions.html" class="code" title="function parms = CheckOptions(options, options_schema, strict)">CheckOptions</a>	CHECKOPTIONS - organize key/value pairs in structure with default or user-supplied values according to a schema</li></ul>
+<li><a href="ds.applyModifications.html" class="code" title="function [output,modifications]=ds.applyModifications(model,modifications)">ds.applyModifications</a>	APPLYMODIFICATIONS - Apply modifications to DynaSim specification or model structure</li><li><a href="ds.checkModel.html" class="code" title="function model=ds.checkModel(model)">ds.checkModel</a>	CHECKMODEL - Standardize model structure and auto-populate missing fields</li><li><a href="ds.checkOptions.html" class="code" title="function [parms, params_unspecified ] = ds.checkOptions(options, options_schema, strict)">ds.checkOptions</a>	CHECKOPTIONS - organize key/value pairs in structure with default or user-supplied values according to a schema</li><li><a href="ds.checkSolverOptions.html" class="code" title="function options=ds.checkSolverOptions(options)">ds.checkSolverOptions</a>	CHECKSOLVEROPTIONS - standardize simulation options appended to params.mat</li><li><a href="ds.prepareMEX.html" class="code" title="function mexfileOutput = ds.prepareMEX(mfileInput, varargin)">ds.prepareMEX</a>	PREPAREMEX - take an m-file path and compile it using the Matlab coder.</li><li><a href="ds.propagateFunctions.html" class="code" title="function model=ds.propagateFunctions(model)">ds.propagateFunctions</a>	PROPAGATEFUNCTIONS - eliminate internal function calls from model ODEs, ICs, monitors, and conditionals.</li><li><a href="ds.propagateParameters.html" class="code" title="function model=ds.propagateParameters(model,varargin)">ds.propagateParameters</a>	PROPAGATEPARAMETERS - substitute parameter values or prepend parameter names with prefix across all model equations.</li><li><a href="ds.vary2Modifications.html" class="code" title="function modifications_set = ds.vary2Modifications(vary,model)">ds.vary2Modifications</a>	VARY2MODIFICATIONS - convert specification of things to vary into a set of modifications indicating how to vary the desired things.</li><li><a href="ds.dynasim2odefun.html" class="code" title="function [ODEFUN,IC,elem_names]=ds.dynasim2odefun(model, varargin)">ds.dynasim2odefun</a>	Purpose: prepare ODEFUN for use with built-in Matlab solvers.</li></ul>
 This function is called by:
 <ul style="list-style-image:url(../matlabicon.gif)">
-<li><a href="GetSolveFile.html" class="code" title="function solve_file = GetSolveFile(model,studyinfo,varargin)">GetSolveFile</a>	GETSOLVEFILE - helper function that creates or retrieves the desired solver file.</li></ul>
+<li><a href="ds.getSolveFile.html" class="code" title="function solve_file = ds.getSolveFile(model,studyinfo,varargin)">ds.getSolveFile</a>	GETSOLVEFILE - helper function that creates or retrieves the desired solver file.</li></ul>
 <!-- crossreference -->
 
 
 
 <h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
-<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function data=WriteMatlabSolver(model,varargin)</a>
+<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function solve_ode_filepath = ds.writeMatlabSolver(model,varargin)</a>
 0002 <span class="comment">%WRITEMATLABSOLVER - write m-file that numerically inteegrates the model</span>
 0003 <span class="comment">%</span>
 0004 <span class="comment">% Usage:</span>
-0005 <span class="comment">%   outfile=WriteMatlabSolver(model,varargin)</span>
+0005 <span class="comment">%   filepath = ds.writeMatlabSolver(model,varargin)</span>
 0006 <span class="comment">%</span>
 0007 <span class="comment">% Inputs:</span>
-0008 <span class="comment">%   - model: DynaSim model structure (see GenerateModel)</span>
+0008 <span class="comment">%   - model: DynaSim model structure (see ds.generateModel)</span>
 0009 <span class="comment">%   - options:</span>
 0010 <span class="comment">%     'tspan'         : units must be consistent with dt and equations</span>
 0011 <span class="comment">%                       {[beg,end]} (default: [0 100])</span>
 0012 <span class="comment">%     'ic'            : initial conditions; this overrides definition in model structure</span>
-0013 <span class="comment">%     'solver'        : DynaSim and built-in Matlab solvers</span>
-0014 <span class="comment">%                       {'euler','rk2','rk4','modifiedeuler',</span>
-0015 <span class="comment">%                       'ode23','ode45','ode15s','ode23s'}</span>
-0016 <span class="comment">%     'solver_options': options from odeset for use with built-in Matlab solvers</span>
-0017 <span class="comment">%     'dt'            :  time step used for fixed step DSSim solvers (default: 0.01)</span>
-0018 <span class="comment">%     'modifications' : DynaSim modifications structure</span>
-0019 <span class="comment">%     'reduce_function_calls_flag': whether to eliminate internal function</span>
-0020 <span class="comment">%                                   calls {0 or 1} (default: 1)</span>
-0021 <span class="comment">%     'coder_flag'    : whether to compile using coder instead of interpreting</span>
-0022 <span class="comment">%                       Matlab (default: exist('codegen')==6 TODO is this correct?</span>
-0023 <span class="comment">%                       what does this mean?)</span>
-0024 <span class="comment">%     'disk_flag'     : whether to write to disk during simulation instead of</span>
-0025 <span class="comment">%                       storing in memory {0 or 1} (default: 0)</span>
-0026 <span class="comment">%     'downsample_factor': downsampling applied during simulation. Only every</span>
-0027 <span class="comment">%                          downsample_factor-time point is stored in memory or</span>
-0028 <span class="comment">%                          written to disk (default: 1)</span>
-0029 <span class="comment">%     'random_seed'   : seed for random number generator (usage:</span>
-0030 <span class="comment">%                       rng(random_seed)) (default: now)</span>
-0031 <span class="comment">%</span>
-0032 <span class="comment">% Outputs:</span>
-0033 <span class="comment">%   - outfile (solve_ode.m)</span>
+0013 <span class="comment">%     'solver'        : built-in Matlab solvers</span>
+0014 <span class="comment">%                         {'ode23','ode45','ode113','ode15s','ode23s','ode23t','ode23tb'}</span>
+0015 <span class="comment">%     'matlab_solver_options': options from odeset for use with built-in Matlab solvers</span>
+0016 <span class="comment">%     'dt'            :  time step used for fixed step DSSim solvers (default: 0.01)</span>
+0017 <span class="comment">%     'modifications' : DynaSim modifications structure</span>
+0018 <span class="comment">%     'reduce_function_calls_flag': whether to eliminate internal function</span>
+0019 <span class="comment">%                                   calls {0 or 1} (default: 1)</span>
+0020 <span class="comment">%     'coder_flag'    : whether to compile using coder instead of interpreting</span>
+0021 <span class="comment">%                       Matlab (default: exist('codegen')==6 TODO is this correct?</span>
+0022 <span class="comment">%                       what does this mean?)</span>
+0023 <span class="comment">%     'downsample_factor': downsampling applied during simulation. Only every</span>
+0024 <span class="comment">%                          downsample_factor-time point is stored in memory or</span>
+0025 <span class="comment">%                          written to disk (default: 1)</span>
+0026 <span class="comment">%     'random_seed'   : seed for random number generator (usage:</span>
+0027 <span class="comment">%                       rng(random_seed)) (default: now)</span>
+0028 <span class="comment">%</span>
+0029 <span class="comment">% Outputs:</span>
+0030 <span class="comment">%   - filepath (solve_ode.m)</span>
+0031 <span class="comment">%   - odefun_filepath (solve_ode_odefun.m)</span>
+0032 <span class="comment">%</span>
+0033 <span class="comment">% Dependencies: ds.checkOptions, ds.checkModel</span>
 0034 <span class="comment">%</span>
-0035 <span class="comment">% Dependencies: CheckOptions, CheckModel</span>
-0036 <span class="comment">%</span>
-0037 <span class="comment">% See also: SimulateModel, DynaSim2Odefun</span>
-0038 
-0039 <span class="comment">% Check inputs</span>
-0040 options=<a href="CheckOptions.html" class="code" title="function parms = CheckOptions(options, options_schema, strict)">CheckOptions</a>(varargin,{<span class="keyword">...</span>
-0041   <span class="string">'tspan'</span>,[0 100],[],<span class="keyword">...</span><span class="comment">          % [beg,end] (units must be consistent with dt and equations)</span>
-0042   <span class="string">'ic'</span>,[],[],<span class="keyword">...</span><span class="comment">                  % initial conditions (overrides definition in model structure)</span>
-0043   <span class="string">'downsample_factor'</span>,1,[],<span class="keyword">...</span><span class="comment">    % downsampling applied after simulation (only every downsample_factor-time point is returned)</span>
-0044   <span class="string">'random_seed'</span>,<span class="string">'shuffle'</span>,[],<span class="keyword">...</span><span class="comment">        % seed for random number generator (usage: rng(random_seed))</span>
-0045   <span class="string">'solver'</span>,<span class="string">'euler'</span>,{<span class="string">'ode23'</span>,<span class="string">'ode45'</span>},<span class="keyword">...</span><span class="comment"> % DSSim and built-in Matlab solvers</span>
+0035 <span class="comment">% See also: dsSimulate, ds.dynasim2odefun</span>
+0036 
+0037 <span class="comment">% Check inputs</span>
+0038 options=<a href="ds.checkOptions.html" class="code" title="function [parms, params_unspecified ] = ds.checkOptions(options, options_schema, strict)">ds.checkOptions</a>(varargin,{<span class="keyword">...</span>
+0039   <span class="string">'ic'</span>,[],[],<span class="keyword">...</span><span class="comment">                  % initial conditions (overrides definition in model structure)</span>
+0040   <span class="string">'tspan'</span>,[0 100],[],<span class="keyword">...</span><span class="comment">          % [beg,end] (units must be consistent with dt and equations)</span>
+0041   <span class="string">'dt'</span>,.01,[],<span class="keyword">...</span><span class="comment">                 % time step used for fixed step DynaSim solvers</span>
+0042   <span class="string">'downsample_factor'</span>,1,[],<span class="keyword">...</span><span class="comment">    % downsampling applied after simulation (only every downsample_factor-time point is returned)</span>
+0043   <span class="string">'random_seed'</span>,<span class="string">'shuffle'</span>,[],<span class="keyword">...</span><span class="comment">        % seed for random number generator (usage: rng(random_seed))</span>
+0044   <span class="string">'solver'</span>,<span class="string">'ode45'</span>,{<span class="string">'ode23'</span>,<span class="string">'ode45'</span>,<span class="string">'ode113'</span>,<span class="string">'ode15s'</span>,<span class="string">'ode23s'</span>,<span class="string">'ode23t'</span>,<span class="string">'ode23tb'</span>},<span class="keyword">...</span><span class="comment"> % built-in Matlab solvers</span>
+0045   <span class="string">'solver_type'</span>,<span class="string">'matlab'</span>,{<span class="string">'matlab'</span>, <span class="string">'matlab_no_mex'</span>},<span class="keyword">...</span><span class="comment"> % if compile_flag==1, will decide whether to mex solve_file or odefun_file</span>
 0046   <span class="string">'matlab_solver_options'</span>,[],[],<span class="keyword">...</span><span class="comment"> % options from odeset for use with built-in Matlab solvers</span>
-0047   },false);
-0048 
-0049 <span class="comment">% Check inputs</span>
-0050 model=<a href="CheckModel.html" class="code" title="function model=CheckModel(model)">CheckModel</a>(model); 
-0051 
-0052 <span class="comment">% convert matlab solver options from key/value to struct using odeset if necessary</span>
-0053 <span class="keyword">if</span> iscell(options.matlab_solver_options) &amp;&amp; ~isempty(options.matlab_solver_options)
-0054   options.matlab_solver_options=odeset(options.matlab_solver_options{:});
-0055 <span class="keyword">end</span>
-0056 
-0057 <span class="comment">%% 1.0 ...</span>
+0047   <span class="string">'reduce_function_calls_flag'</span>,1,{0,1},<span class="keyword">...</span><span class="comment">   % whether to eliminate internal (anonymous) function calls</span>
+0048   <span class="string">'save_parameters_flag'</span>,1,{0,1},<span class="keyword">...</span>
+0049   <span class="string">'filename'</span>,[],[],<span class="keyword">...</span><span class="comment">         % name of solver file that integrates model</span>
+0050   <span class="string">'fileID'</span>,1,[],<span class="keyword">...</span>
+0051   <span class="string">'compile_flag'</span>,0,{0,1},<span class="keyword">...</span><span class="comment"> % whether to prepare script for being compiled using coder instead of interpreting Matlab</span>
+0052   <span class="string">'verbose_flag'</span>,1,{0,1},<span class="keyword">...</span>
+0053   <span class="string">'one_solve_file_flag'</span>,0,{0,1},<span class="keyword">...</span><span class="comment"> % use only 1 solve file of each type, but can't vary mechs yet</span>
+0054   },false);
+0055 
+0056 <span class="comment">% Check inputs</span>
+0057 model=<a href="ds.checkModel.html" class="code" title="function model=ds.checkModel(model)">ds.checkModel</a>(model); 
 0058 
-0059 odefun=DSSimToOdefun(model);
-0060 
-0061 <span class="comment">% create function that calls feval(@solver,...) and has subfunction</span>
-0062 <span class="comment">% defining odefun (including optional conditionals)...</span>
+0059 <span class="comment">% convert matlab solver options from key/value to struct using odeset if necessary</span>
+0060 <span class="keyword">if</span> iscell(options.matlab_solver_options) &amp;&amp; ~isempty(options.matlab_solver_options)
+0061   options.matlab_solver_options = odeset(options.matlab_solver_options{:});
+0062 <span class="keyword">end</span>
 0063 
-0064 <span class="comment">% evaluate fixed_variables</span>
-0065 <span class="comment">% ...</span>
-0066 <span class="comment">% solve</span>
-0067 <span class="keyword">if</span> ~isempty(options.solver_options)
-0068   [time,data]=feval(parms.solver,odefun,options.tspan,options.ic,options.solver_options);
-0069 <span class="keyword">else</span>
-0070   [time,data]=feval(parms.solver,odefun,options.tspan,options.ic);
-0071 <span class="keyword">end</span>
+0064 <span class="comment">%% 1.0 Get ode_fun</span>
+0065 
+0066 <span class="comment">% create function that calls feval(@solver,...) and has subfunction</span>
+0067 <span class="comment">% defining odefun (including optional conditionals)...</span>
+0068 
+0069 propagatedModel = <a href="ds.propagateParameters.html" class="code" title="function model=ds.propagateParameters(model,varargin)">ds.propagateParameters</a>(<a href="ds.propagateFunctions.html" class="code" title="function model=ds.propagateFunctions(model)">ds.propagateFunctions</a>(model));
+0070 propagatedModel = <a href="ds.propagateParameters.html" class="code" title="function model=ds.propagateParameters(model,varargin)">ds.propagateParameters</a>(propagatedModel, <span class="string">'param_type'</span>, <span class="string">'fixed_variables'</span>);
+0071 [odefun,IC,elem_names] = <a href="ds.dynasim2odefun.html" class="code" title="function [ODEFUN,IC,elem_names]=ds.dynasim2odefun(model, varargin)">ds.dynasim2odefun</a>(propagatedModel, <span class="string">'odefun_output'</span>,<span class="string">'func_body'</span>);
 0072 
 0073 
-0074</pre></div>
-<hr><address>Generated on Mon 27-Feb-2017 14:58:50 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" target="_parent">m2html</a></strong> &copy; 2005</address>
+0074 <span class="comment">%% 2.0 prepare model info</span>
+0075 parameter_prefix=<span class="string">'p.'</span>;<span class="comment">%'pset.p.';</span>
+0076 <span class="comment">% state_variables=model.state_variables;</span>
+0077 
+0078 <span class="comment">% 1.1 eliminate internal (anonymous) function calls from model equations</span>
+0079 <span class="comment">% if options.reduce_function_calls_flag==1</span>
+0080   model=<a href="ds.propagateFunctions.html" class="code" title="function model=ds.propagateFunctions(model)">ds.propagateFunctions</a>(model);
+0081 <span class="comment">% end</span>
+0082 
+0083 <span class="comment">% 1.1 prepare parameters</span>
+0084 <span class="keyword">if</span> options.save_parameters_flag
+0085   <span class="comment">% add parameter struct prefix to parameters in model equations</span>
+0086   model=<a href="ds.propagateParameters.html" class="code" title="function model=ds.propagateParameters(model,varargin)">ds.propagateParameters</a>(model,<span class="string">'action'</span>,<span class="string">'prepend'</span>,<span class="string">'prefix'</span>,parameter_prefix);
+0087   
+0088   <span class="comment">% set and capture numeric seed value</span>
+0089   <span class="keyword">if</span> options.compile_flag==1
+0090     <span class="comment">% todo: make seed string (eg, 'shuffle') from param struct work with coder (options.compile_flag=1)</span>
+0091     <span class="comment">% (currently raises error: &quot;String input must be constant&quot;)</span>
+0092     <span class="comment">% workaround: (shuffle here and get numeric seed for MEX-compatible params.mat)</span>
+0093     rng(options.random_seed);
+0094     options.random_seed=getfield(rng,<span class="string">'Seed'</span>);  <span class="comment">% &lt;-- current active seed</span>
+0095   <span class="keyword">end</span>
+0096   
+0097   <span class="comment">% set parameter file name (save with m-file)</span>
+0098   [fpath,fname,fext]=fileparts(options.filename);
+0099   odefun_filename = [fname <span class="string">'_odefun'</span>];
+0100   param_file_name = fullfile(fpath,<span class="string">'params.mat'</span>);
+0101   
+0102   <span class="comment">% save parameters to disk</span>
+0103   warning(<span class="string">'off'</span>,<span class="string">'catstruct:DuplicatesFound'</span>);
+0104   
+0105   <span class="comment">% make p struct</span>
+0106   p=catstruct(<a href="ds.checkSolverOptions.html" class="code" title="function options=ds.checkSolverOptions(options)">ds.checkSolverOptions</a>(options),model.parameters);
+0107   
+0108   <span class="comment">% add IC to p</span>
+0109   <span class="comment">%   NOTE: will get done again in simulateModel</span>
+0110   <span class="keyword">if</span> isempty(options.ic)
+0111     p.ic = IC;
+0112   <span class="keyword">else</span> <span class="comment">%if overridden from options</span>
+0113     p.ic = options.ic;
+0114   <span class="keyword">end</span>
+0115   
+0116   <span class="comment">% add matlab_solver_options to p</span>
+0117   <span class="keyword">if</span> ~isempty(options.matlab_solver_options)
+0118     p.matlab_solver_options = options.matlab_solver_options;
+0119   <span class="keyword">end</span>
+0120   
+0121   <span class="keyword">if</span> options.one_solve_file_flag
+0122     <span class="comment">% fill p flds that were varied with vectors of length = nSims</span>
+0123     
+0124     vary=<a href="ds.checkOptions.html" class="code" title="function [parms, params_unspecified ] = ds.checkOptions(options, options_schema, strict)">ds.checkOptions</a>(varargin,{<span class="string">'vary'</span>,[],[],},false);
+0125     vary = vary.vary;
+0126 
+0127     mod_set = <a href="ds.vary2Modifications.html" class="code" title="function modifications_set = ds.vary2Modifications(vary,model)">ds.vary2Modifications</a>(vary);
+0128     <span class="comment">% The first 2 cols of modifications_set are idenitical to vary, it just</span>
+0129     <span class="comment">% has the last column distributed out to the number of sims</span>
+0130     
+0131     
+0132     <span class="comment">% Get param names</span>
+0133     iMod = 1;
+0134     <span class="comment">% Split extra entries in first 2 cols of mods, so each row is a single pop and param</span>
+0135     [~, first_mod_set] = <a href="ds.applyModifications.html" class="code" title="function [output,modifications]=ds.applyModifications(model,modifications)">ds.applyModifications</a>([],mod_set{iMod});
+0136 
+0137     <span class="comment">% replace '-&gt;' with '_'</span>
+0138     first_mod_set(:,1) = strrep(first_mod_set(:,1), <span class="string">'-&gt;'</span>, <span class="string">'_'</span>);
+0139 
+0140     <span class="comment">% add col of underscores</span>
+0141     first_mod_set = cat(2,first_mod_set(:,1), repmat({<span class="string">'_'</span>},size(first_mod_set,1), 1), first_mod_set(:,2:end));
+0142     nParamMods = size(first_mod_set, 1);
+0143     
+0144     <span class="comment">% get param names</span>
+0145     mod_params = cell(nParamMods,1);
+0146     <span class="keyword">for</span> iRow = 1:nParamMods
+0147       mod_params{iRow} = [first_mod_set{iRow,1:3}];
+0148 
+0149       <span class="comment">%check if variable in namespace</span>
+0150       <span class="keyword">if</span> ~any(strcmp(model.namespaces(:,2), mod_params{iRow}))
+0151         <span class="comment">% find correct entry based on param and pop</span>
+0152         nsInd = logical(~cellfun(@isempty, strfind(model.namespaces(:,2), [first_mod_set{iRow,1} <span class="string">'_'</span>])) .* <span class="keyword">...</span>
+0153           ~cellfun(@isempty, strfind(model.namespaces(:,2), first_mod_set{iRow,3})));
+0154         
+0155         assert(sum(nsInd) == 1)
+0156         
+0157         <span class="comment">% add mech names using namespace</span>
+0158         mod_params{iRow} = model.namespaces{nsInd,2};
+0159       <span class="keyword">end</span>
+0160     <span class="keyword">end</span>
+0161 
+0162     <span class="comment">% Get param values for each sim</span>
+0163     param_values = nan(nParamMods, length(mod_set));
+0164     <span class="keyword">for</span> iMod = 1:length(mod_set)
+0165       <span class="comment">% Split extra entries in first 2 cols of mods, so each row is a single pop and param</span>
+0166       [~, mod_set{iMod}] = <a href="ds.applyModifications.html" class="code" title="function [output,modifications]=ds.applyModifications(model,modifications)">ds.applyModifications</a>([],mod_set{iMod});
+0167       
+0168       <span class="comment">% Get scalar values as vector</span>
+0169       param_values(:, iMod) = [mod_set{iMod}{:,3}];
+0170     <span class="keyword">end</span>
+0171     
+0172     <span class="comment">% Assign value vectors to params</span>
+0173     <span class="keyword">for</span> iParam = 1:nParamMods
+0174       p.(mod_params{iParam}) = param_values(iParam,:);
+0175     <span class="keyword">end</span>
+0176   <span class="keyword">end</span> <span class="comment">% one_solve_file_flag</span>
+0177   
+0178   
+0179   <span class="keyword">if</span> options.verbose_flag
+0180     fprintf(<span class="string">'saving params.mat\n'</span>);
+0181   <span class="keyword">end</span>
+0182   save(param_file_name,<span class="string">'p'</span>);
+0183 <span class="keyword">else</span>
+0184   <span class="comment">% insert parameter values into model expressions</span>
+0185   model=<a href="ds.propagateParameters.html" class="code" title="function model=ds.propagateParameters(model,varargin)">ds.propagateParameters</a>(model,<span class="string">'action'</span>,<span class="string">'substitute'</span>);
+0186 <span class="keyword">end</span>
+0187 
+0188 <span class="comment">% 1.2 prepare list of outputs (state variables and monitors)</span>
+0189 tmp=cellfun(@(x)[x <span class="string">','</span>],model.state_variables,<span class="string">'uni'</span>,0);
+0190 tmp=[tmp{:}];
+0191 output_string=tmp(1:end-1);
+0192 
+0193 <span class="keyword">if</span> ~isempty(model.monitors)
+0194   tmp=cellfun(@(x)[x <span class="string">','</span>],fieldnames(model.monitors),<span class="string">'uni'</span>,0);
+0195   tmp=[tmp{:}];
+0196   output_string=[output_string <span class="string">','</span> tmp(1:end-1)];
+0197 <span class="keyword">end</span>
+0198 
+0199 <span class="keyword">if</span> ~isempty(model.fixed_variables)
+0200   tmp=cellfun(@(x)[x <span class="string">','</span>],fieldnames(model.fixed_variables),<span class="string">'uni'</span>,0);
+0201   tmp=[tmp{:}];
+0202   output_string=[output_string <span class="string">','</span> tmp(1:end-1)];
+0203 <span class="keyword">end</span>
+0204 
+0205 output_string=[<span class="string">'[T,'</span> output_string <span class="string">']'</span>]; <span class="comment">% state vars, monitors, time vector</span>
+0206 
+0207 <span class="comment">% HACK to get IC to work</span>
+0208 <span class="keyword">if</span> options.downsample_factor == 1
+0209   <span class="keyword">for</span> fieldNameC = fieldnames(model.ICs)'
+0210     model.ICs.(fieldNameC{1}) = regexprep(model.ICs.(fieldNameC{1}), <span class="string">'_t0'</span>, <span class="string">'(1,:)'</span>);
+0211   <span class="keyword">end</span>
+0212 <span class="keyword">end</span>
+0213 
+0214 
+0215 <span class="comment">%% 3.0 write m-file solver</span>
+0216 <span class="comment">% 2.1 create mfile</span>
+0217 <span class="keyword">if</span> ~isempty(options.filename)
+0218   <span class="keyword">if</span> options.verbose_flag
+0219     fprintf(<span class="string">'Creating solver file: %s\n'</span>,options.filename);
+0220   <span class="keyword">end</span>
+0221   
+0222   fid=fopen(options.filename,<span class="string">'wt'</span>);
+0223 <span class="keyword">else</span>
+0224   fid=options.fileID;
+0225 <span class="keyword">end</span>
+0226 
+0227 <span class="comment">% get abs file path</span>
+0228 solve_ode_filepath = fopen(fid);
+0229 
+0230 <span class="keyword">if</span> ~options.one_solve_file_flag
+0231   fprintf(fid,<span class="string">'function %s=solve_ode\n'</span>,output_string);
+0232 <span class="keyword">else</span>
+0233   fprintf(fid,<span class="string">'function %s=solve_ode(simID)\n'</span>,output_string);
+0234 <span class="keyword">end</span>
+0235 
+0236 <span class="comment">% 2.3 load parameters</span>
+0237 <span class="keyword">if</span> options.save_parameters_flag
+0238   fprintf(fid,<span class="string">'%% ------------------------------------------------------------\n'</span>);
+0239   fprintf(fid,<span class="string">'%% Parameters:\n'</span>);
+0240   fprintf(fid,<span class="string">'%% ------------------------------------------------------------\n'</span>);
+0241   fprintf(fid,<span class="string">'params = load(''params.mat'',''p'');\n'</span>);
+0242   
+0243   <span class="keyword">if</span> options.one_solve_file_flag &amp;&amp; options.compile_flag
+0244     fprintf(fid,<span class="string">'pVecs = params.p;\n'</span>);
+0245   <span class="keyword">else</span>
+0246      fprintf(fid,<span class="string">'p = params.p;\n'</span>);
+0247   <span class="keyword">end</span>
+0248 <span class="keyword">end</span>
+0249 
+0250 <span class="keyword">if</span> options.one_solve_file_flag
+0251   <span class="comment">% loop through p and for any vector, take simID index of it (ignores tspan)</span>
+0252   <span class="keyword">if</span> ~options.compile_flag
+0253     fprintf(fid,<span class="string">'\n%% For vector params, select index for this simID\n'</span>);
+0254     fprintf(fid,<span class="string">'flds = fields(rmfield(p,''tspan''));\n'</span>); <span class="comment">% remove tspan</span>
+0255     fprintf(fid,<span class="string">'for fld = flds''\n'</span>);
+0256     fprintf(fid,<span class="string">'  fld = fld{1};\n'</span>);
+0257     fprintf(fid,<span class="string">'  if isnumeric(p.(fld)) &amp;&amp; length(p.(fld)) &gt; 1\n'</span>);
+0258     fprintf(fid,<span class="string">'    p.(fld) = p.(fld)(simID);\n'</span>);
+0259     fprintf(fid,<span class="string">'  end\n'</span>);
+0260     fprintf(fid,<span class="string">'end\n\n'</span>);
+0261   <span class="keyword">else</span> <span class="comment">%compile_flag</span>
+0262     <span class="comment">% slice scalar from vector params</span>
+0263     <span class="keyword">for</span> iParam = 1:nParamMods
+0264       fprintf(fid,<span class="string">'p.%s = pVecs.%s(simID);\n'</span>, mod_params{iParam}, mod_params{iParam});
+0265     <span class="keyword">end</span>
+0266     
+0267     <span class="comment">% take scalar from scalar params</span>
+0268     [~,sharedFlds] = intersect(fields(p), mod_params);
+0269     scalar_params = fields(p);
+0270     scalar_params(sharedFlds) = [];
+0271     nScalarParams = length(scalar_params);
+0272     <span class="keyword">for</span> iParam = 1:nScalarParams
+0273       fprintf(fid,<span class="string">'p.%s = pVecs.%s;\n'</span>, scalar_params{iParam}, scalar_params{iParam});
+0274     <span class="keyword">end</span>
+0275   <span class="keyword">end</span>
+0276 <span class="keyword">end</span>
+0277 
+0278 <span class="comment">% write tspan, dt, and downsample_factor</span>
+0279 <span class="keyword">if</span> options.save_parameters_flag
+0280   fprintf(fid,<span class="string">'downsample_factor = %sdownsample_factor;\n'</span>,parameter_prefix);
+0281   fprintf(fid,<span class="string">'dt = %sdt;\n'</span>,parameter_prefix);
+0282   fprintf(fid,<span class="string">'T = (%stspan(1):downsample_factor*dt:%stspan(2))'';\n'</span>,parameter_prefix,parameter_prefix);
+0283 <span class="keyword">else</span>
+0284   fprintf(fid,<span class="string">'tspan=[%g %g];\ndt = %g;\ndownsample_factor = %g;\n'</span>,options.tspan,options.dt,options.downsample_factor);
+0285   fprintf(fid,<span class="string">'T = (tspan(1):downsample_factor*dt:tspan(2))'';\n'</span>);
+0286 <span class="keyword">end</span>
+0287   <span class="comment">% NOTE: T is different here since we take into account downsampling</span>
+0288 
+0289 <span class="comment">% write calculation of time vector and derived parameters: ntime, nsamp</span>
+0290 <span class="comment">% fprintf(fid,'ntime = length(T);\nnsamp = length(1:downsample_factor*dt:ntime);\n');</span>
+0291 
+0292 <span class="comment">% 2.4 evaluate fixed variables</span>
+0293 <span class="keyword">if</span> ~isempty(model.fixed_variables)
+0294   fprintf(fid,<span class="string">'\n%% ------------------------------------------------------------\n'</span>);
+0295   fprintf(fid,<span class="string">'%% Fixed variables:\n'</span>);
+0296   fprintf(fid,<span class="string">'%% ------------------------------------------------------------\n'</span>);
+0297   names=fieldnames(model.fixed_variables);
+0298   expressions=struct2cell(model.fixed_variables);
+0299   <span class="keyword">for</span> i=1:length(names)
+0300     fprintf(fid,<span class="string">'%s = %s;\n'</span>,names{i},expressions{i});
+0301   <span class="keyword">end</span>
+0302 <span class="keyword">end</span>
+0303 
+0304 <span class="comment">% 2.5 evaluate function handles</span>
+0305 <span class="keyword">if</span> ~isempty(model.functions) &amp;&amp; options.reduce_function_calls_flag==0
+0306   fprintf(fid,<span class="string">'\n%% ------------------------------------------------------------\n'</span>);
+0307   fprintf(fid,<span class="string">'%% Functions:\n'</span>);
+0308   fprintf(fid,<span class="string">'%% ------------------------------------------------------------\n'</span>);
+0309   names=fieldnames(model.functions);
+0310   expressions=struct2cell(model.functions);
+0311   <span class="keyword">for</span> i=1:length(names)
+0312     fprintf(fid,<span class="string">'%s = %s;\n'</span>,names{i},expressions{i});
+0313   <span class="keyword">end</span>
+0314 <span class="keyword">end</span>
+0315 
+0316 <span class="comment">% 2.6 prepare storage</span>
+0317 fprintf(fid,<span class="string">'\n%% ------------------------------------------------------------\n'</span>);
+0318 fprintf(fid,<span class="string">'%% Initial conditions:\n'</span>);
+0319 fprintf(fid,<span class="string">'%% ------------------------------------------------------------\n'</span>);
+0320 
+0321 <span class="comment">% 2.2 set random seed</span>
+0322 fprintf(fid,<span class="string">'%% seed the random number generator\n'</span>);
+0323 <span class="keyword">if</span> options.save_parameters_flag
+0324   fprintf(fid,<span class="string">'rng(%srandom_seed);\n'</span>,parameter_prefix);
+0325 <span class="keyword">else</span>  
+0326   <span class="keyword">if</span> ischar(options.random_seed)
+0327     fprintf(fid,<span class="string">'rng(''%s'');\n'</span>,options.random_seed);
+0328   <span class="keyword">elseif</span> isnumeric(options.random_seed)
+0329     fprintf(fid,<span class="string">'rng(%g);\n'</span>,options.random_seed);
+0330   <span class="keyword">end</span>
+0331 <span class="keyword">end</span>
+0332 
+0333 <span class="comment">%% Numerical integration</span>
+0334 <span class="comment">% write code to do numerical integration</span>
+0335 fprintf(fid,<span class="string">'%% ###########################################################\n'</span>);
+0336 fprintf(fid,<span class="string">'%% Numerical integration:\n'</span>);
+0337 fprintf(fid,<span class="string">'%% ###########################################################\n'</span>);
+0338 
+0339 <span class="keyword">if</span> options.compile_flag &amp;&amp; strcmp(options.solver_type,<span class="string">'matlab_no_mex'</span>)
+0340   odefun_str_name = odefun_filename;
+0341   
+0342   <span class="keyword">if</span> options.compile_flag
+0343     odefun_str_name = [odefun_str_name <span class="string">'_mex'</span>]; <span class="comment">% switch to mex version</span>
+0344   <span class="keyword">end</span>
+0345 <span class="keyword">else</span>
+0346   odefun_str_name = <span class="string">'odefun'</span>;
+0347 <span class="keyword">end</span>
+0348 
+0349 <span class="keyword">if</span> ~isempty(options.matlab_solver_options)
+0350   fprintf(fid,<span class="string">'[T,data] = %s(@%s, T, p.ic, p.matlab_solver_options);\n'</span>, options.solver, odefun_str_name);
+0351 <span class="keyword">else</span>
+0352   fprintf(fid,<span class="string">'[T,data] = %s(@%s, T, p.ic);\n'</span>, options.solver, odefun_str_name);
+0353 <span class="keyword">end</span>
+0354 
+0355 <span class="comment">%% Get vars from odefun output</span>
+0356 fprintf(fid,<span class="string">'\n%%Extract linear data into original state variables\n'</span>);
+0357 
+0358 <span class="comment">% evaluate ICs to get (# elems) per state var and set up generic state var X</span>
+0359 num_vars=length(model.state_variables);
+0360 state_var_index=0;
+0361 <span class="keyword">for</span> i=1:num_vars
+0362   var=model.state_variables{i};
+0363   
+0364   <span class="comment">% check ICs for use of inital state_var value and put in proper starting value</span>
+0365   <span class="keyword">if</span> regexp(model.ICs.(var), <span class="string">'_last'</span>)
+0366     stateVars = regexp(model.ICs.(var), <span class="string">'([\w_]+)_last'</span>, <span class="string">'tokens'</span>);
+0367     model.ICs.(var) = regexprep(model.ICs.(var), <span class="string">'_last'</span>, <span class="string">''</span>);
+0368     
+0369     <span class="keyword">for</span> iSVar = 1:length(stateVars)
+0370       thisSvar = stateVars{iSVar}{1};
+0371       model.ICs.(var) = regexprep(model.ICs.(var), thisSvar, model.ICs.(thisSvar));
+0372     <span class="keyword">end</span>
+0373   <span class="keyword">end</span>
+0374   
+0375   <span class="comment">% evaluate ICs to get (# elems) per state var</span>
+0376   num_elems=length(eval([model.ICs.(var) <span class="string">';'</span>]));
+0377   
+0378   <span class="comment">% set state var indices a variables for generic state vector X</span>
+0379   data_inds = state_var_index + [1,num_elems];
+0380   
+0381   assert(strcmp(elem_names{data_inds(1)}, var)) <span class="comment">%current elem should be same as var</span>
+0382   
+0383   fprintf(fid,<span class="string">'%s = data(:, %i:%i);\n'</span>, var, data_inds(1), data_inds(end));
+0384   
+0385   state_var_index = state_var_index + num_elems;
+0386 <span class="keyword">end</span>
+0387 
+0388 <span class="comment">%% Monitors</span>
+0389 <span class="keyword">if</span> ~isempty(model.monitors)
+0390   fprintf(fid,<span class="string">'\n%%Calculate monitors from params and state vars\n'</span>);
+0391   monitor_names = fields(model.monitors);
+0392   <span class="keyword">for</span> iMon = 1:length(monitor_names)
+0393     thisMonName = monitor_names{iMon};
+0394     thisMonFcn = regexp(model.functions.(thisMonName),<span class="string">'@\([a-zA-Z][\w,]*\)\s*(.*)'</span>,<span class="string">'tokens'</span>,<span class="string">'once'</span>);
+0395     thisMonFcn = thisMonFcn{1};
+0396     fprintf(fid,<span class="string">'%s = %s;\n'</span>, thisMonName, thisMonFcn);
+0397   <span class="keyword">end</span>
+0398 <span class="keyword">end</span>
+0399 
+0400 <span class="comment">%% fprintf end for solve function</span>
+0401 fprintf(fid,<span class="string">'\nend\n\n'</span>);
+0402 
+0403 <span class="comment">%% ODEFUN</span>
+0404 <span class="keyword">if</span> options.compile_flag &amp;&amp; strcmp(options.solver_type,<span class="string">'matlab_no_mex'</span>) <span class="comment">% save ode function as separate m-file for mex compilation</span>
+0405   <span class="comment">%open file</span>
+0406   odefun_filepath = fullfile(fpath, [odefun_filename fext]);
+0407   odefun_fid = fopen(odefun_filepath,<span class="string">'wt'</span>);
+0408   
+0409   <span class="comment">%write to file</span>
+0410   fprintf(odefun_fid,<span class="string">'function dydt = %s(t,X)\n'</span>, odefun_filename);
+0411   fprintf(odefun_fid,[<span class="string">'dydt = [\n\n'</span> odefun <span class="string">'\n]'';\n'</span>]); <span class="comment">% make row into col vector</span>
+0412   fprintf(odefun_fid,<span class="string">'end\n'</span>);
+0413   
+0414   <span class="comment">%close file</span>
+0415   fclose(odefun_fid);
+0416   
+0417   <span class="comment">%% mex compile odefun</span>
+0418   options.codegen_args = {0,IC};
+0419   <a href="ds.prepareMEX.html" class="code" title="function mexfileOutput = ds.prepareMEX(mfileInput, varargin)">ds.prepareMEX</a>(odefun_filepath, options);
+0420   
+0421 <span class="keyword">else</span> <span class="comment">% use subfunction</span>
+0422   fprintf(fid,<span class="string">'\n%% ###########################################################\n'</span>);
+0423   fprintf(fid,<span class="string">'%% SUBFUNCTIONS\n'</span>);
+0424   fprintf(fid,<span class="string">'%% ###########################################################\n\n'</span>);
+0425   
+0426   <span class="comment">% make sub function (no shared variables with main function workspace for max performance)</span>
+0427   fprintf(fid,<span class="string">'function dydt = odefun(t,X)\n'</span>);
+0428   fprintf(fid,[<span class="string">'dydt = [\n\n'</span> odefun <span class="string">'\n]'';\n'</span>]); <span class="comment">% make row into col vector</span>
+0429   fprintf(fid,<span class="string">'end\n'</span>);
+0430 <span class="keyword">end</span>
+0431 
+0432 <span class="keyword">if</span> ~strcmp(solve_ode_filepath,<span class="string">'&quot;stdout&quot;'</span>)
+0433   fclose(fid);
+0434   <span class="comment">% wait for file before continuing to simulation</span>
+0435   <span class="keyword">while</span> ~exist(solve_ode_filepath,<span class="string">'file'</span>)
+0436     pause(.01);
+0437   <span class="keyword">end</span>
+0438 <span class="keyword">end</span>
+0439 
+0440 <span class="keyword">end</span> <span class="comment">%function</span>
+0441 <span class="comment">%% END MAIN FUNC</span></pre></div>
+<hr><address>Generated on Fri 07-Apr-2017 20:01:20 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" target="_parent">m2html</a></strong> &copy; 2005</address>
 </body>
 </html>

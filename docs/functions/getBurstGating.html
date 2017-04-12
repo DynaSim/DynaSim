@@ -27,7 +27,7 @@
 
 <h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
 <div class="fragment"><pre class="comment"> T=0:.01:1000; f=10; w=10; nspk=10; dc=0; Npop=2; minIBI=0; meanIBI=0; [sext,ts,Ptot,Peg]=getBurstGating(T,f,w,nspk,dc,Npop,minIBI,meanIBI,2,1,ones(1,Npop),0,0,inf,0,0,1);
- PlotData(sext)</pre></div>
+ dsPlot(sext)</pre></div>
 
 <!-- crossreference -->
 <h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
@@ -46,7 +46,7 @@ This function is called by:
 <h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
 <div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function [sext,tstart,Ptot,sources_eg]=getBurstGating(T,freq,width,num_spikes,dc,num_targets,minIBI,meanIBI,tau,kick,kernel,shared_sources_flag,onset,offset,ramp_dc_flag,ramp_ac_flag,num_sources)</a>
 0002 <span class="comment">% T=0:.01:1000; f=10; w=10; nspk=10; dc=0; Npop=2; minIBI=0; meanIBI=0; [sext,ts,Ptot,Peg]=getBurstGating(T,f,w,nspk,dc,Npop,minIBI,meanIBI,2,1,ones(1,Npop),0,0,inf,0,0,1);</span>
-0003 <span class="comment">% PlotData(sext)</span>
+0003 <span class="comment">% dsPlot(sext)</span>
 0004 
 0005 <span class="comment">% Poisson-based spike bursts with variable spike synchrony</span>
 0006 <span class="comment">% Bursts can occur periodically or with exponentially-distributed</span>
@@ -255,6 +255,6 @@ This function is called by:
 0209   <span class="keyword">end</span>
 0210 <span class="keyword">end</span>
 0211</pre></div>
-<hr><address>Generated on Mon 27-Feb-2017 14:58:50 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" target="_parent">m2html</a></strong> &copy; 2005</address>
+<hr><address>Generated on Fri 07-Apr-2017 20:01:20 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" target="_parent">m2html</a></strong> &copy; 2005</address>
 </body>
 </html>

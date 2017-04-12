@@ -2,8 +2,8 @@
                 "http://www.w3.org/TR/REC-html40/loose.dtd">
 <html>
 <head>
-  <title>Description of CreateBatch</title>
-  <meta name="keywords" content="CreateBatch">
+  <title>Description of ds.createBatch</title>
+  <meta name="keywords" content="ds.createBatch">
   <meta name="description" content="CREATEBATCH - create and submit jobs to run sets of simulations or analyses.">
   <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
   <meta name="generator" content="m2html &copy; 2005 Guillaume Flandin">
@@ -16,24 +16,24 @@
 <body>
 <a name="_top"></a>
 <!-- menu.html functions -->
-<h1>CreateBatch
+<h1>ds.createBatch
 </h1>
 
 <h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
 <div class="box"><strong>CREATEBATCH - create and submit jobs to run sets of simulations or analyses.</strong></div>
 
 <h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
-<div class="box"><strong>function studyinfo=CreateBatch(base_model,modifications_set,varargin) </strong></div>
+<div class="box"><strong>function studyinfo = ds.createBatch(base_model,modifications_set,varargin) </strong></div>
 
 <h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
 <div class="fragment"><pre class="comment">CREATEBATCH - create and submit jobs to run sets of simulations or analyses.
 
  Usage:
-   studyinfo=CreateBatch(model,varargin)
+   studyinfo=ds.createBatch(model,varargin)
 
  Inputs:
-   - DynaSim model (see GenerateModel)
-   - modifications_set (as returned by Vary2Modifications())
+   - DynaSim model (see ds.generateModel)
+   - modifications_set (as returned by ds.vary2Modifications())
      - options:
        'compile_flag'  : whether to compile simulation using coder instead of
                          interpreting Matlab {0 or 1} (default: 0)
@@ -44,27 +44,27 @@
        'memory_limit'  : memory to allocate per cluster job (default: '8G')
        'batch_dir'     : where to save job scripts
        'qsub_mode'     : whether to use SGE -t array for 1 qsub, mode: 'array'; or
-                         qsub in csh for loop, mode: 'loop'. (default: 'array').
+                         qsub in csh for loop, mode: 'loop'. (default: 'loop').
      - options for parallel computing: (requires Parallel Computing Toolbox)
        - Note: parallel computing has been DISABLED for debugging...
        'parallel_flag' : whether to use parfor to run simulations {0 or 1} (default: 0)
        'num_cores'     : number of cores to specify in the parallel pool
 
  Outputs:
-   - DynaSim studyinfo (see CheckStudyinfo for schema info)
+   - DynaSim studyinfo (see ds.checkStudyinfo for schema info)
 
- Dependencies: SetupStudy, UpdateStudy
+ Dependencies: ds.setupStudy, ds.updateStudy
 
- See also: <a href="GenerateModel.html" class="code" title="function [model,name_map]=GenerateModel(specification,varargin)">GenerateModel</a>, <a href="SimulateModel.html" class="code" title="function [data,studyinfo]=SimulateModel(model,varargin)">SimulateModel</a>, <a href="CheckStudyinfo.html" class="code" title="function studyinfo=CheckStudyinfo(studyinfo,varargin)">CheckStudyinfo</a>, <a href="Vary2Modifications.html" class="code" title="function modifications_set = Vary2Modifications(vary,model)">Vary2Modifications</a></pre></div>
+ See also: <a href="ds.generateModel.html" class="code" title="function [model,name_map]=ds.generateModel(specification,varargin)">ds.generateModel</a>, <a href="dsSimulate.html" class="code" title="function [data,studyinfo]=dsSimulate(model,varargin)">dsSimulate</a>, <a href="ds.checkStudyinfo.html" class="code" title="function studyinfo=ds.checkStudyinfo(studyinfo,varargin)">ds.checkStudyinfo</a>, <a href="ds.vary2Modifications.html" class="code" title="function modifications_set = ds.vary2Modifications(vary,model)">ds.vary2Modifications</a></pre></div>
 
 <!-- crossreference -->
 <h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
 This function calls:
 <ul style="list-style-image:url(../matlabicon.gif)">
-<li><a href="CheckOptions.html" class="code" title="function parms = CheckOptions(options, options_schema, strict)">CheckOptions</a>	CHECKOPTIONS - organize key/value pairs in structure with default or user-supplied values according to a schema</li><li><a href="CheckStudyinfo.html" class="code" title="function studyinfo=CheckStudyinfo(studyinfo,varargin)">CheckStudyinfo</a>	CHECKSTUDYINFO - Standardize studyinfo structure and auto-populate missing fields</li><li><a href="GetSolveFile.html" class="code" title="function solve_file = GetSolveFile(model,studyinfo,varargin)">GetSolveFile</a>	GETSOLVEFILE - helper function that creates or retrieves the desired solver file.</li><li><a href="LocateModelFiles.html" class="code" title="function [paths,files]=LocateModelFiles(input)">LocateModelFiles</a>	LOCATEMODELFILES - locate mechanism files associated with DynaSim specifications.</li><li><a href="MonitorStudy.html" class="code" title="function [studyinfo,study_status]=MonitorStudy(studyinfo,varargin)">MonitorStudy</a>	MONITORSTUDY - display information on study progress.</li><li><a href="SetupStudy.html" class="code" title="function [studyinfo,options]=SetupStudy(base_model,varargin)">SetupStudy</a>	SETUPSTUDY - Initialize DynaSim studyinfo structure, prepare list of output file names, and create output directories</li><li><a href="StudyinfoIO.html" class="code" title="function studyinfo=StudyinfoIO(studyinfo,study_file,id,verbose_flag)">StudyinfoIO</a>	STUDYINFOIO - use lock files to manage concurrent access to a shared studyinfo</li></ul>
+<li><a href="ds.checkOptions.html" class="code" title="function [parms, params_unspecified ] = ds.checkOptions(options, options_schema, strict)">ds.checkOptions</a>	CHECKOPTIONS - organize key/value pairs in structure with default or user-supplied values according to a schema</li><li><a href="ds.checkStudyinfo.html" class="code" title="function studyinfo=ds.checkStudyinfo(studyinfo,varargin)">ds.checkStudyinfo</a>	CHECKSTUDYINFO - Standardize studyinfo structure and auto-populate missing fields</li><li><a href="ds.getSolveFile.html" class="code" title="function solve_file = ds.getSolveFile(model,studyinfo,varargin)">ds.getSolveFile</a>	GETSOLVEFILE - helper function that creates or retrieves the desired solver file.</li><li><a href="ds.locateModelFiles.html" class="code" title="function [paths,files]=ds.locateModelFiles(input)">ds.locateModelFiles</a>	LOCATEMODELFILES - locate mechanism files associated with DynaSim specifications.</li><li><a href="ds.monitorStudy.html" class="code" title="function [studyinfo,study_status]=ds.monitorStudy(studyinfo,varargin)">ds.monitorStudy</a>	MONITORSTUDY - display information on study progress.</li><li><a href="ds.setupStudy.html" class="code" title="function [studyinfo,options]=ds.setupStudy(base_model,varargin)">ds.setupStudy</a>	SETUPSTUDY - Initialize DynaSim studyinfo structure, prepare list of output file names, and create output directories</li><li><a href="ds.studyinfoIO.html" class="code" title="function studyinfo=ds.studyinfoIO(studyinfo,study_file,id,verbose_flag)">ds.studyinfoIO</a>	STUDYINFOIO - use lock files to manage concurrent access to a shared studyinfo</li></ul>
 This function is called by:
 <ul style="list-style-image:url(../matlabicon.gif)">
-<li><a href="SimulateModel.html" class="code" title="function [data,studyinfo]=SimulateModel(model,varargin)">SimulateModel</a>	SIMULATEMODEL -  manage simulation of a DynaSim model.</li></ul>
+<li><a href="dsSimulate.html" class="code" title="function [data,studyinfo]=dsSimulate(model,varargin)">dsSimulate</a>	% data=dsSimulate(model,'option',value,...)</li></ul>
 <!-- crossreference -->
 
 <h2><a name="_subfunctions"></a>SUBFUNCTIONS <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
@@ -72,15 +72,15 @@ This function is called by:
 <li><a href="#_sub1" class="code">function WriteSimJob(sim_ids,job_file)</a></li></ul>
 
 <h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
-<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function studyinfo=CreateBatch(base_model,modifications_set,varargin)</a>
+<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function studyinfo = ds.createBatch(base_model,modifications_set,varargin)</a>
 0002 <span class="comment">%CREATEBATCH - create and submit jobs to run sets of simulations or analyses.</span>
 0003 <span class="comment">%</span>
 0004 <span class="comment">% Usage:</span>
-0005 <span class="comment">%   studyinfo=CreateBatch(model,varargin)</span>
+0005 <span class="comment">%   studyinfo=ds.createBatch(model,varargin)</span>
 0006 <span class="comment">%</span>
 0007 <span class="comment">% Inputs:</span>
-0008 <span class="comment">%   - DynaSim model (see GenerateModel)</span>
-0009 <span class="comment">%   - modifications_set (as returned by Vary2Modifications())</span>
+0008 <span class="comment">%   - DynaSim model (see ds.generateModel)</span>
+0009 <span class="comment">%   - modifications_set (as returned by ds.vary2Modifications())</span>
 0010 <span class="comment">%     - options:</span>
 0011 <span class="comment">%       'compile_flag'  : whether to compile simulation using coder instead of</span>
 0012 <span class="comment">%                         interpreting Matlab {0 or 1} (default: 0)</span>
@@ -91,21 +91,21 @@ This function is called by:
 0017 <span class="comment">%       'memory_limit'  : memory to allocate per cluster job (default: '8G')</span>
 0018 <span class="comment">%       'batch_dir'     : where to save job scripts</span>
 0019 <span class="comment">%       'qsub_mode'     : whether to use SGE -t array for 1 qsub, mode: 'array'; or</span>
-0020 <span class="comment">%                         qsub in csh for loop, mode: 'loop'. (default: 'array').</span>
+0020 <span class="comment">%                         qsub in csh for loop, mode: 'loop'. (default: 'loop').</span>
 0021 <span class="comment">%     - options for parallel computing: (requires Parallel Computing Toolbox)</span>
 0022 <span class="comment">%       - Note: parallel computing has been DISABLED for debugging...</span>
 0023 <span class="comment">%       'parallel_flag' : whether to use parfor to run simulations {0 or 1} (default: 0)</span>
 0024 <span class="comment">%       'num_cores'     : number of cores to specify in the parallel pool</span>
 0025 <span class="comment">%</span>
 0026 <span class="comment">% Outputs:</span>
-0027 <span class="comment">%   - DynaSim studyinfo (see CheckStudyinfo for schema info)</span>
+0027 <span class="comment">%   - DynaSim studyinfo (see ds.checkStudyinfo for schema info)</span>
 0028 <span class="comment">%</span>
-0029 <span class="comment">% Dependencies: SetupStudy, UpdateStudy</span>
+0029 <span class="comment">% Dependencies: ds.setupStudy, ds.updateStudy</span>
 0030 <span class="comment">%</span>
-0031 <span class="comment">% See also: GenerateModel, SimulateModel, CheckStudyinfo, Vary2Modifications</span>
+0031 <span class="comment">% See also: ds.generateModel, dsSimulate, ds.checkStudyinfo, ds.vary2Modifications</span>
 0032 
 0033 <span class="comment">% check inputs</span>
-0034 options=<a href="CheckOptions.html" class="code" title="function parms = CheckOptions(options, options_schema, strict)">CheckOptions</a>(varargin,{<span class="keyword">...</span>
+0034 options=<a href="ds.checkOptions.html" class="code" title="function [parms, params_unspecified ] = ds.checkOptions(options, options_schema, strict)">ds.checkOptions</a>(varargin,{<span class="keyword">...</span>
 0035   <span class="string">'compile_flag'</span>,0,{0,1},<span class="keyword">...</span>
 0036   <span class="string">'parallel_flag'</span>,0,{0,1},<span class="keyword">...</span>
 0037   <span class="string">'num_cores'</span>,4,[],<span class="keyword">...</span><span class="comment"> % # cores for parallel processing (SCC supports 1-12)</span>
@@ -116,385 +116,479 @@ This function is called by:
 0042   <span class="string">'verbose_flag'</span>,0,{0,1},<span class="keyword">...</span>
 0043   <span class="string">'overwrite_flag'</span>,0,{0,1},<span class="keyword">...</span>
 0044   <span class="string">'process_id'</span>,[],[],<span class="keyword">...</span><span class="comment"> % process identifier for loading studyinfo if necessary</span>
-0045   <span class="string">'qsub_mode'</span>,<span class="string">'loop'</span>,[],<span class="keyword">...</span><span class="comment"> % 'loop' (old method) or 'array' (new method)</span>
-0046   },false);
-0047 
-0048 <span class="comment">% Set up studyinfo structure, study directory and output file names</span>
-0049 <span class="comment">%[studyinfo,options.simulator_options]=SetupStudy(base_model,modifications_set,options.simulator_options);</span>
-0050 [studyinfo,options.simulator_options]=<a href="SetupStudy.html" class="code" title="function [studyinfo,options]=SetupStudy(base_model,varargin)">SetupStudy</a>(base_model,<span class="string">'modifications_set'</span>,modifications_set,<span class="string">'simulator_options'</span>,options.simulator_options,<span class="string">'process_id'</span>,options.process_id);
-0051 study_file=fullfile(studyinfo.study_dir,<span class="string">'studyinfo.mat'</span>);
-0052 num_simulations=length(modifications_set);
-0053 
-0054 <span class="comment">% check whether study has already completed</span>
-0055 <span class="comment">% if options.overwrite_flag==0</span>
-0056   [~,s]=<a href="MonitorStudy.html" class="code" title="function [studyinfo,study_status]=MonitorStudy(studyinfo,varargin)">MonitorStudy</a>(studyinfo.study_dir,<span class="string">'verbose_flag'</span>,0,<span class="string">'process_id'</span>,options.process_id);
-0057   <span class="keyword">if</span> s==1 <span class="comment">% study finished</span>
-0058     <span class="keyword">if</span> options.verbose_flag
-0059       fprintf(<span class="string">'Study already finished. Not creating new batch.\n'</span>);
-0060     <span class="keyword">end</span>
-0061     studyinfo=<a href="CheckStudyinfo.html" class="code" title="function studyinfo=CheckStudyinfo(studyinfo,varargin)">CheckStudyinfo</a>(studyinfo.study_dir,<span class="string">'process_id'</span>,options.process_id);
-0062     <span class="keyword">return</span>;
-0063   <span class="keyword">end</span>
-0064 <span class="comment">% end</span>
-0065 
-0066 <span class="keyword">if</span> isa(options.simulator_options.experiment,<span class="string">'function_handle'</span>) &amp;&amp; options.compile_flag
-0067   options.compile_flag=0;
-0068   options.simulator_options.compile_flag=0;
-0069   fprintf(<span class="string">'WARNING: solver compilation is not available for experiments run on the cluster.\n'</span>);
-0070 <span class="keyword">end</span>
-0071 
-0072 <span class="comment">% create base solve_file (m- or MEX-file)</span>
-0073 solve_file=<a href="GetSolveFile.html" class="code" title="function solve_file = GetSolveFile(model,studyinfo,varargin)">GetSolveFile</a>(base_model,studyinfo,options.simulator_options);
-0074 
-0075 <span class="comment">% add appropriate MEX extension if compiled</span>
-0076 <span class="comment">% NOTE: the extension depends on whether a 32-bit or 64-bit machine is used</span>
-0077 <span class="keyword">if</span> options.compile_flag
-0078   <span class="comment">% get directory where solve_file is located and the file name</span>
-0079   [fpath,fname]=fileparts(solve_file);
-0080   <span class="comment">% get list of files in solve directory</span>
-0081   D=dir(fpath);
-0082   <span class="comment">% get extension of files with matching names</span>
-0083   tmp=regexp({D.name},[fname <span class="string">'\.(\w+)$'</span>],<span class="string">'tokens'</span>,<span class="string">'once'</span>);
-0084   tmp=unique([tmp{:}]);
-0085   <span class="comment">% append extension to solve_file</span>
-0086   full_solve_file=[solve_file <span class="string">'.'</span> tmp{1}];
-0087   <span class="comment">% remove '_mex' suffix from solve_file for compatibility with GetSolveFile()</span>
-0088   solve_file=regexp(solve_file,<span class="string">'(.+)_mex$'</span>,<span class="string">'tokens'</span>,<span class="string">'once'</span>);
-0089   solve_file=solve_file{1};
-0090 <span class="keyword">else</span>
-0091   full_solve_file=solve_file;
-0092 <span class="keyword">end</span>
-0093 studyinfo.base_solve_file=solve_file;
-0094 
-0095 <span class="comment">% set name of batch_dir for this study</span>
-0096 <span class="comment">% get study-specific timestamp</span>
-0097 timestamp=datestr(studyinfo.study_id,<span class="string">'yyyymmddHHMMSS'</span>);
-0098 
-0099 <span class="comment">% get home directory of the current user</span>
-0100 [o,home]=system(<span class="string">'echo $HOME'</span>);
-0101 
-0102 <span class="comment">% create batch directory</span>
-0103 [study_dir_path,study_dir_name,study_dir_suffix]=fileparts(studyinfo.study_dir);
-0104 study_dir_name=[study_dir_name study_dir_suffix];
-0105 batch_dir = fullfile(strtrim(home),<span class="string">'batchdirs'</span>,study_dir_name);
-0106 <span class="comment">%batch_dir = fullfile(strtrim(home),'batchdirs',['Batch' timestamp]);</span>
-0107 
-0108 <span class="keyword">if</span> options.verbose_flag
-0109   fprintf(<span class="string">'\nPREPARING BATCH:\n'</span>);
-0110 <span class="keyword">end</span>
-0111 
-0112 <span class="comment">% create batch_dir to hold m-file jobs and more for this study</span>
-0113 <span class="keyword">if</span> ~exist(batch_dir,<span class="string">'dir'</span>)
-0114   <span class="keyword">if</span> options.verbose_flag
-0115     fprintf(<span class="string">'creating batch jobs directory: %s\n'</span>,batch_dir);
-0116   <span class="keyword">end</span>
-0117   mkdir(batch_dir);
-0118 <span class="keyword">end</span>
-0119 <span class="comment">% copy study_file to batchdir</span>
-0120 [success,msg]=copyfile(study_file,batch_dir);
-0121 <span class="keyword">if</span> ~success, error(msg); <span class="keyword">end</span>
-0122 
-0123 <span class="comment">% locate DynaSim toolbox</span>
-0124 dynasim_path=fileparts(fileparts(which(mfilename))); <span class="comment">% root is one level up from directory containing this function</span>
-0125 dynasim_functions=fullfile(dynasim_path,<span class="string">'functions'</span>);
-0126 <span class="comment">% locate mechanism files</span>
-0127 [mech_paths,mech_files]=<a href="LocateModelFiles.html" class="code" title="function [paths,files]=LocateModelFiles(input)">LocateModelFiles</a>(base_model);
-0128 
-0129 <span class="comment">% add paths to studyinfo structure</span>
-0130 studyinfo.paths.dynasim_functions=dynasim_path;
-0131 studyinfo.paths.mechanisms=mech_paths;
-0132 studyinfo.paths.batch_dir=batch_dir;
+0045   <span class="string">'qsub_mode'</span>,<span class="string">'loop'</span>,{<span class="string">'loop'</span>,<span class="string">'array'</span>},<span class="keyword">...</span><span class="comment"> % whether to submit jobs as an array using qsub -t or in a for loop</span>
+0046   <span class="string">'one_solve_file_flag'</span>,0,{0,1},<span class="keyword">...</span><span class="comment"> % use only 1 solve file of each type, but can't vary mechs yet</span>
+0047   <span class="string">'solver'</span>,<span class="string">'rk4'</span>,{<span class="string">'euler'</span>,<span class="string">'rk1'</span>,<span class="string">'rk2'</span>,<span class="string">'rk4'</span>,<span class="string">'modified_euler'</span>,<span class="string">'rungekutta'</span>,<span class="string">'rk'</span>,<span class="string">'ode23'</span>,<span class="string">'ode45'</span>,<span class="keyword">...</span>
+0048     <span class="string">'ode1'</span>,<span class="string">'ode2'</span>,<span class="string">'ode3'</span>,<span class="string">'ode4'</span>,<span class="string">'ode5'</span>,<span class="string">'ode8'</span>,<span class="string">'ode113'</span>,<span class="string">'ode15s'</span>,<span class="string">'ode23s'</span>,<span class="string">'ode23t'</span>,<span class="string">'ode23tb'</span>},<span class="keyword">...</span><span class="comment"> % DynaSim and built-in Matlab solvers</span>
+0049   },false);
+0050 
+0051 <span class="comment">% Set up studyinfo structure, study directory and output file names</span>
+0052 <span class="comment">%[studyinfo,options.simulator_options]=ds.setupStudy(base_model,modifications_set,options.simulator_options);</span>
+0053 [studyinfo,options.simulator_options]=<a href="ds.setupStudy.html" class="code" title="function [studyinfo,options]=ds.setupStudy(base_model,varargin)">ds.setupStudy</a>(base_model,<span class="string">'modifications_set'</span>,modifications_set,<span class="string">'simulator_options'</span>,options.simulator_options,<span class="string">'process_id'</span>,options.process_id);
+0054 study_file=fullfile(studyinfo.study_dir,<span class="string">'studyinfo.mat'</span>);
+0055 num_simulations=length(modifications_set);
+0056 
+0057 <span class="comment">% check whether study has already completed</span>
+0058 <span class="comment">% if options.overwrite_flag==0</span>
+0059   [~,s]=<a href="ds.monitorStudy.html" class="code" title="function [studyinfo,study_status]=ds.monitorStudy(studyinfo,varargin)">ds.monitorStudy</a>(studyinfo.study_dir,<span class="string">'verbose_flag'</span>,0,<span class="string">'process_id'</span>,options.process_id);
+0060   <span class="keyword">if</span> s==1 <span class="comment">% study finished</span>
+0061     <span class="keyword">if</span> options.verbose_flag
+0062       fprintf(<span class="string">'Study already finished. Not creating new batch.\n'</span>);
+0063     <span class="keyword">end</span>
+0064     
+0065     studyinfo=<a href="ds.checkStudyinfo.html" class="code" title="function studyinfo=ds.checkStudyinfo(studyinfo,varargin)">ds.checkStudyinfo</a>(studyinfo.study_dir,<span class="string">'process_id'</span>,options.process_id);
+0066     
+0067     <span class="keyword">return</span>;
+0068   <span class="keyword">end</span>
+0069 <span class="comment">% end</span>
+0070 
+0071 <span class="comment">% Check if attempting to compile Experiment</span>
+0072 <span class="keyword">if</span> isa(options.simulator_options.experiment,<span class="string">'function_handle'</span>) &amp;&amp; options.compile_flag
+0073   options.compile_flag=0;
+0074   options.simulator_options.compile_flag=0;
+0075   wprintf(<span class="string">'solver compilation is not available for experiments run on the cluster.'</span>);
+0076 <span class="keyword">end</span>
+0077 
+0078 <span class="comment">% create base solve_file (m- or MEX-file)</span>
+0079 solve_file = <a href="ds.getSolveFile.html" class="code" title="function solve_file = ds.getSolveFile(model,studyinfo,varargin)">ds.getSolveFile</a>(base_model,studyinfo,options.simulator_options);
+0080 
+0081 <span class="comment">% add appropriate MEX extension if compiled</span>
+0082 <span class="comment">%   NOTE: the extension depends on whether a 32-bit or 64-bit machine is used</span>
+0083 <span class="keyword">if</span> options.compile_flag
+0084   <span class="comment">% get directory where solve_file is located and the file name</span>
+0085   [fpath,fname]=fileparts(solve_file);
+0086   
+0087   <span class="comment">% get list of files in solve directory</span>
+0088   D=dir(fpath);
+0089   
+0090   <span class="comment">% get extension of files with matching names</span>
+0091   tmp=regexp({D.name},[fname <span class="string">'\.(\w+)$'</span>],<span class="string">'tokens'</span>,<span class="string">'once'</span>);
+0092   tmp=unique([tmp{:}]);
+0093   
+0094   <span class="comment">% append extension to solve_file if regular mex (not non supported matlab solver mex)</span>
+0095   <span class="keyword">if</span> ~any(strcmp(options.solver, {<span class="string">'ode113'</span>,<span class="string">'ode15s'</span>,<span class="string">'ode23s'</span>,<span class="string">'ode23t'</span>,<span class="string">'ode23tb'</span>})) <span class="comment">% not mex supported)</span>
+0096     full_solve_file=[solve_file <span class="string">'.'</span> tmp{1}];
+0097   
+0098     <span class="comment">% remove '_mex' suffix from solve_file for compatibility with ds.getSolveFile()</span>
+0099     solve_file=regexp(solve_file,<span class="string">'(.+)_mex$'</span>,<span class="string">'tokens'</span>,<span class="string">'once'</span>);
+0100     solve_file=solve_file{1};
+0101   <span class="keyword">else</span>
+0102     full_solve_file=solve_file;
+0103   <span class="keyword">end</span>
+0104 <span class="keyword">else</span>
+0105   full_solve_file=solve_file;
+0106 <span class="keyword">end</span>
+0107 studyinfo.base_solve_file=solve_file;
+0108 
+0109 <span class="comment">% set name of batch_dir for this study</span>
+0110 <span class="comment">% get study-specific timestamp</span>
+0111 timestamp = datestr(studyinfo.study_id,<span class="string">'yyyymmddHHMMSS'</span>);
+0112 
+0113 <span class="comment">% get home directory of the current user</span>
+0114 [o,home]=system(<span class="string">'echo $HOME'</span>);
+0115 
+0116 <span class="comment">% create batch directory</span>
+0117 [study_dir_path,study_dir_name,study_dir_suffix]=fileparts(studyinfo.study_dir);
+0118 study_dir_name=[study_dir_name study_dir_suffix];
+0119 batch_dir = fullfile(strtrim(home),<span class="string">'batchdirs'</span>,study_dir_name);
+0120 <span class="comment">%batch_dir = fullfile(strtrim(home),'batchdirs',['Batch' timestamp]);</span>
+0121 
+0122 <span class="keyword">if</span> options.verbose_flag
+0123   fprintf(<span class="string">'\nPREPARING BATCH:\n'</span>);
+0124 <span class="keyword">end</span>
+0125 
+0126 <span class="comment">% create batch_dir to hold m-file jobs and more for this study</span>
+0127 <span class="keyword">if</span> ~exist(batch_dir,<span class="string">'dir'</span>)
+0128   <span class="keyword">if</span> options.verbose_flag
+0129     fprintf(<span class="string">'Creating batch jobs directory: %s\n'</span>,batch_dir);
+0130   <span class="keyword">end</span>
+0131   mkdir(batch_dir);
+0132 <span class="keyword">end</span>
 0133 
-0134 <span class="comment">% edit simulator_options so that subsequent single simulations do not create further batches</span>
-0135 options.simulator_options.parallel_flag=0;
-0136 options.simulator_options.cluster_flag=0;
-0137 options.simulator_options.verbose_flag=1; <span class="comment">% turn on verbose for cluster logs (stdout)</span>
-0138 
-0139 <span class="comment">% create jobs (k)</span>
-0140 jobs={};
-0141 skip_sims=[];
-0142 sim_cnt=0;
-0143 num_jobs=ceil(num_simulations/options.sims_per_job);
-0144 
-0145 <span class="keyword">if</span> options.verbose_flag
-0146   fprintf(<span class="string">'creating %g cluster jobs in batch directory for %g simulations...\n'</span>,num_jobs,num_simulations);
-0147 <span class="keyword">end</span>
-0148 
-0149 <span class="keyword">for</span> k=1:num_jobs
-0150   job_file=fullfile(batch_dir,sprintf(<span class="string">'sim_job%g.m'</span>,k));
-0151   sim_ids=sim_cnt+(1:options.sims_per_job);
-0152   sim_ids=sim_ids(sim_ids&lt;=num_simulations);
-0153   sim_cnt=sim_cnt+options.sims_per_job;
-0154   <span class="comment">% only run simulations if data_file does not exist (unless overwrite_flag=1)</span>
-0155   proc_sims=[]; <span class="comment">% simulations to run in this job</span>
-0156   <span class="keyword">for</span> j=1:length(sim_ids)
-0157     <span class="comment">%if ~exist(studyinfo.simulations(sim_ids(j)).data_file,'file') || options.overwrite_flag</span>
-0158     <span class="keyword">if</span> (options.simulator_options.save_data_flag &amp;&amp; ~exist(studyinfo.simulations(sim_ids(j)).data_file,<span class="string">'file'</span>)) || <span class="keyword">...</span>
-0159        (options.simulator_options.save_results_flag &amp;&amp; ~exist(studyinfo.simulations(sim_ids(j)).result_files{1},<span class="string">'file'</span>)) || <span class="keyword">...</span>
-0160        options.overwrite_flag
-0161       proc_sims=[proc_sims sim_ids(j)];
-0162     <span class="keyword">end</span>
-0163   <span class="keyword">end</span>
-0164   <span class="keyword">if</span> isempty(proc_sims)
-0165     skip_sims=[skip_sims sim_ids];
-0166     <span class="keyword">continue</span>; <span class="comment">% skip this job</span>
-0167   <span class="keyword">else</span>
-0168     skip_sims=[skip_sims setdiff(sim_ids,proc_sims)];
-0169   <span class="keyword">end</span>
-0170   <a href="#_sub1" class="code" title="subfunction WriteSimJob(sim_ids,job_file)">WriteSimJob</a>(proc_sims,job_file); <span class="comment">% create job script</span>
-0171   jobs{end+1}=job_file;
-0172   
-0173   <span class="comment">% add job_file to studyinfo</span>
-0174   <span class="keyword">for</span> j=1:length(proc_sims)
-0175     studyinfo.simulations(proc_sims(j)).job_file=job_file;
-0176   <span class="keyword">end</span>
-0177 <span class="keyword">end</span>
-0178 
-0179 <span class="comment">% TODO: have job scripts create lock for each sim; then, check for lock</span>
-0180 <span class="comment">% file in this function and skip simulations if they're already running</span>
-0181 <span class="comment">% (similar to skipping if data_file already exists).</span>
-0182 
-0183 <span class="comment">% exit if there are no simulations to run</span>
-0184 <span class="keyword">if</span> numel(skip_sims)==num_simulations
-0185   <span class="keyword">if</span> options.verbose_flag
-0186     fprintf(<span class="string">'data exists for all simulations in study. nothing to do.\n'</span>);
-0187   <span class="keyword">end</span>
-0188   <span class="keyword">return</span>;
-0189 <span class="keyword">end</span>
-0190 
-0191 <span class="comment">% create script_filename (list of vars or jobs)</span>
-0192 <span class="keyword">if</span> strcmp(options.qsub_mode, <span class="string">'array'</span>)
-0193 <span class="comment">%   script_filename = fullfile(batch_dir,'scriptSource.txt'); % TODO remove temp method</span>
-0194 <span class="keyword">elseif</span> strcmp(options.qsub_mode, <span class="string">'loop'</span>)
-0195   script_filename = fullfile(batch_dir,<span class="string">'scriptSource.txt'</span>);
-0196   <span class="keyword">if</span> options.verbose_flag
-0197     fprintf(<span class="string">'creating file listing jobs in batch directory: %s\n'</span>,script_filename);
-0198   <span class="keyword">end</span>
-0199 <span class="keyword">end</span>
-0200 
-0201 <span class="comment">% write to file</span>
-0202 <span class="keyword">if</span> strcmp(options.qsub_mode, <span class="string">'array'</span>) <span class="comment">% TODO remove temp method</span>
-0203 <span class="comment">%   fprintf(fScript,'#!/bin/csh\n');</span>
-0204 <span class="comment">%   fprintf(fScript,'set TASK_ID_START = %i\n',1);</span>
-0205 <span class="comment">%   fprintf(fScript,'set TASK_ID_END = %i\n',length(jobs));</span>
-0206 <span class="keyword">elseif</span> strcmp(options.qsub_mode, <span class="string">'loop'</span>)
-0207   fScript=fopen(script_filename,<span class="string">'wt'</span>);
-0208   <span class="keyword">for</span> j=1:length(jobs)
-0209     [~,thisFilename]=fileparts(jobs{j});
-0210     fprintf(fScript,<span class="string">'%s\n'</span>,thisFilename);
-0211   <span class="keyword">end</span>
-0212   fclose(fScript);
-0213 <span class="keyword">end</span>
-0214 
-0215 <span class="comment">% copy solve_file to each sim-specific solve sub-directory: &lt;study_dir&gt;/solve/sim&lt;k&gt;/&lt;solve_file&gt;</span>
-0216 <span class="comment">% and set sim-specific studyinfo</span>
-0217 <span class="keyword">if</span> options.verbose_flag
-0218   fprintf(<span class="string">'creating distinct solver sub-directories for %g simulations...\n'</span>,num_simulations);
-0219 <span class="keyword">end</span>
-0220 <span class="comment">%[solve_path,solve_name,solve_ext]=fileparts(solve_file);</span>
-0221 [solve_path,solve_name,solve_ext]=fileparts(full_solve_file);
-0222 
-0223 <span class="comment">% prepare studyinfo with simulation-specific metadata</span>
-0224 <span class="keyword">for</span> sim=1:num_simulations
-0225   <span class="keyword">if</span> ismember(sim,skip_sims)
-0226     <span class="keyword">continue</span>; <span class="comment">% do nothing with this simulation</span>
-0227   <span class="keyword">end</span>
-0228   this_solve_path=fullfile(solve_path,[<span class="string">'sim'</span> num2str(sim)]);
-0229   <span class="keyword">if</span> ~exist(this_solve_path,<span class="string">'dir'</span>)
-0230     <span class="comment">%if options.verbose_flag</span>
-0231     <span class="comment">%  fprintf('creating solver sub-directory for simulation #%g: %s\n',sim,this_solve_path);</span>
-0232     <span class="comment">%end</span>
-0233     mkdir(this_solve_path);
+0134 <span class="comment">% copy study_file to batchdir</span>
+0135 [success,msg]=copyfile(study_file,batch_dir);
+0136 <span class="keyword">if</span> ~success
+0137   error(msg)
+0138 <span class="keyword">end</span>
+0139 
+0140 <span class="comment">% locate DynaSim toolbox</span>
+0141 dynasim_path=fileparts(fileparts(which(mfilename))); <span class="comment">% root is one level up from directory containing this function</span>
+0142 dynasim_functions=fullfile(dynasim_path,<span class="string">'functions'</span>);
+0143 
+0144 <span class="comment">% locate mechanism files</span>
+0145 [mech_paths,mech_files]=<a href="ds.locateModelFiles.html" class="code" title="function [paths,files]=ds.locateModelFiles(input)">ds.locateModelFiles</a>(base_model);
+0146 
+0147 <span class="comment">% add paths to studyinfo structure</span>
+0148 studyinfo.paths.dynasim_functions = dynasim_path;
+0149 studyinfo.paths.mechanisms = mech_paths;
+0150 studyinfo.paths.batch_dir = batch_dir;
+0151 
+0152 <span class="comment">% edit simulator_options so that subsequent single simulations do not create further batches</span>
+0153 options.simulator_options.parallel_flag = 0;
+0154 options.simulator_options.cluster_flag = 0;
+0155 options.simulator_options.verbose_flag = 1; <span class="comment">% turn on verbose for cluster logs (stdout)</span>
+0156 
+0157 <span class="comment">% create jobs (k)</span>
+0158 jobs={};
+0159 skip_sims=[];
+0160 sim_cnt=0;
+0161 num_jobs=ceil(num_simulations/options.sims_per_job);
+0162 
+0163 <span class="keyword">if</span> options.verbose_flag &amp;&amp; ~options.one_solve_file_flag
+0164   fprintf(<span class="string">'Creating %g cluster jobs in batch directory for %g simulations...\n'</span>,num_jobs,num_simulations);
+0165 <span class="keyword">end</span>
+0166 
+0167 <span class="keyword">if</span> ~options.one_solve_file_flag
+0168   <span class="keyword">for</span> k = 1:num_jobs
+0169     job_file=fullfile(batch_dir,sprintf(<span class="string">'sim_job%g.m'</span>,k));
+0170     sim_ids=sim_cnt+(1:options.sims_per_job);
+0171     sim_ids=sim_ids(sim_ids&lt;=num_simulations);
+0172     sim_cnt=sim_cnt+options.sims_per_job;
+0173     
+0174     <span class="comment">% only run simulations if data_file does not exist (unless overwrite_flag=1)</span>
+0175     proc_sims=[]; <span class="comment">% simulations to run in this job</span>
+0176     <span class="keyword">for</span> j=1:length(sim_ids)
+0177       <span class="comment">%if ~exist(studyinfo.simulations(sim_ids(j)).data_file,'file') || options.overwrite_flag</span>
+0178       <span class="keyword">if</span> (options.simulator_options.save_data_flag &amp;&amp; ~exist(studyinfo.simulations(sim_ids(j)).data_file,<span class="string">'file'</span>)) || <span class="keyword">...</span>
+0179           (options.simulator_options.save_results_flag &amp;&amp; ~exist(studyinfo.simulations(sim_ids(j)).result_files{1},<span class="string">'file'</span>)) || <span class="keyword">...</span>
+0180           options.overwrite_flag
+0181         proc_sims=[proc_sims sim_ids(j)];
+0182       <span class="keyword">end</span>
+0183     <span class="keyword">end</span>
+0184     
+0185     <span class="keyword">if</span> isempty(proc_sims)
+0186       skip_sims=[skip_sims sim_ids];
+0187       <span class="keyword">continue</span>; <span class="comment">% skip this job</span>
+0188     <span class="keyword">else</span>
+0189       skip_sims=[skip_sims setdiff(sim_ids,proc_sims)];
+0190     <span class="keyword">end</span>
+0191     
+0192     <a href="#_sub1" class="code" title="subfunction WriteSimJob(sim_ids,job_file)">WriteSimJob</a>(proc_sims,job_file); <span class="comment">% create job script</span>
+0193     
+0194     jobs{end+1}=job_file;
+0195     
+0196     <span class="comment">% add job_file to studyinfo</span>
+0197     <span class="keyword">for</span> j=1:length(proc_sims)
+0198       studyinfo.simulations(proc_sims(j)).job_file=job_file;
+0199     <span class="keyword">end</span>
+0200       
+0201   <span class="keyword">end</span> <span class="comment">%for</span>
+0202 <span class="keyword">else</span> <span class="comment">%one_solve_file_flag</span>
+0203   job_file=fullfile(batch_dir, <span class="string">'sim_job.m'</span>); <span class="comment">%always use this file</span>
+0204   
+0205   <a href="#_sub1" class="code" title="subfunction WriteSimJob(sim_ids,job_file)">WriteSimJob</a>([], job_file); <span class="comment">% create job script</span>
+0206   
+0207   <span class="comment">% TODO: compile job_file</span>
+0208 <span class="comment">%   if options.compile_flag</span>
+0209 <span class="comment">%     job_file = ds.prepareMEX(job_file, options); %compile the job file</span>
+0210 <span class="comment">%   end</span>
+0211   
+0212   <span class="comment">% add job_file to studyinfo</span>
+0213   [studyinfo.simulations.job_file] = deal(job_file); <span class="comment">%same job file for all sims</span>
+0214 <span class="keyword">end</span> <span class="comment">%if</span>
+0215 
+0216 <span class="comment">% TODO: have job scripts create lock for each sim; then, check for lock</span>
+0217 <span class="comment">%   file in this function and skip simulations if they're already running</span>
+0218 <span class="comment">%   (similar to skipping if data_file already exists).</span>
+0219 
+0220 <span class="comment">% exit if there are no simulations to run</span>
+0221 <span class="keyword">if</span> numel(skip_sims)==num_simulations
+0222   <span class="keyword">if</span> options.verbose_flag
+0223     fprintf(<span class="string">'Data exists for all simulations in study. nothing to do.\n'</span>);
+0224   <span class="keyword">end</span>
+0225   
+0226   <span class="keyword">return</span>;
+0227 <span class="keyword">end</span>
+0228 
+0229 <span class="comment">% create script_filename (list of vars or jobs)</span>
+0230 <span class="keyword">if</span> strcmp(options.qsub_mode, <span class="string">'loop'</span>)
+0231   script_filename = fullfile(batch_dir,<span class="string">'scriptlist.txt'</span>);
+0232   <span class="keyword">if</span> options.verbose_flag
+0233     fprintf(<span class="string">'Creating file listing jobs in batch directory: %s\n'</span>,script_filename);
 0234   <span class="keyword">end</span>
-0235   [success,msg]=copyfile(full_solve_file,this_solve_path); <span class="comment">% creates solve sub-directory and copies the base solve file to it</span>
-0236   <span class="keyword">if</span> ~success, error(msg); <span class="keyword">end</span>
-0237   
-0238   <span class="comment">% set studyinfo solve_file to use for this simulation</span>
-0239   this_solve_file=fullfile(this_solve_path,[solve_name solve_ext]);
-0240   studyinfo.simulations(sim).solve_file=this_solve_file;
-0241   studyinfo.simulations(sim).batch_dir=batch_dir;
-0242   studyinfo.simulations(sim).simulator_options=options.simulator_options;
-0243   
-0244   <span class="comment">% set solve_file for this simulation (will be passed to SimulateModel as an option)</span>
-0245   <span class="keyword">if</span> isa(options.simulator_options.experiment,<span class="string">'function_handle'</span>)
-0246     studyinfo.simulations(sim).simulator_options.solve_file=[];
-0247   <span class="keyword">else</span>
-0248     studyinfo.simulations(sim).simulator_options.solve_file=this_solve_file;
-0249   <span class="keyword">end</span>
-0250   
-0251   <span class="comment">% set vary to [] to avoid each sim expanding to a new set</span>
-0252   studyinfo.simulations(sim).simulator_options.vary=[];
-0253   studyinfo.simulations(sim).simulator_options.sim_id=studyinfo.simulations(sim).sim_id;
-0254   studyinfo.simulations(sim).error_log=<span class="string">''</span>;
-0255   <span class="comment">% copy studyinfo to batch_dir for each simulation</span>
-0256   <span class="comment">%this_study_file=fullfile(batch_dir,sprintf('studyinfo_%g.mat',sim));</span>
-0257   <span class="comment">%save(this_study_file,'studyinfo');</span>
-0258 <span class="keyword">end</span>
-0259 <span class="comment">% copy studyinfo file to batch_dir for each simulation</span>
-0260 <span class="keyword">for</span> sim=1:num_simulations
-0261   this_study_file=fullfile(batch_dir,sprintf(<span class="string">'studyinfo_%g.mat'</span>,sim));
-0262   <span class="keyword">if</span> sim==1
-0263     save(this_study_file,<span class="string">'studyinfo'</span>);
-0264     first_study_file=this_study_file;
-0265   <span class="keyword">else</span>
-0266     <span class="comment">% use copyfile() after saving first b/c &gt;10x faster than save()</span>
-0267     [success,msg]=copyfile(first_study_file,this_study_file);
-0268     <span class="keyword">if</span> ~success, error(msg); <span class="keyword">end</span>
-0269   <span class="keyword">end</span>
-0270 <span class="keyword">end</span>
-0271 
-0272 <span class="comment">% update studyinfo on disk</span>
-0273 <a href="StudyinfoIO.html" class="code" title="function studyinfo=StudyinfoIO(studyinfo,study_file,id,verbose_flag)">StudyinfoIO</a>(studyinfo,study_file,options.simulator_options.sim_id,options.verbose_flag);
+0235 <span class="keyword">end</span>
+0236 
+0237 <span class="comment">% write to file</span>
+0238 <span class="keyword">if</span> strcmp(options.qsub_mode, <span class="string">'loop'</span>)
+0239   fScript=fopen(script_filename,<span class="string">'wt'</span>);
+0240   
+0241   <span class="keyword">for</span> j=1:length(jobs)
+0242     [~,thisFilename]=fileparts(jobs{j});
+0243     fprintf(fScript,<span class="string">'%s\n'</span>,thisFilename);
+0244   <span class="keyword">end</span>
+0245   
+0246   fclose(fScript);
+0247 <span class="keyword">end</span>
+0248 
+0249 <span class="keyword">if</span> ~options.one_solve_file_flag
+0250   <span class="comment">% copy solve_file to each sim-specific solve sub-directory: &lt;study_dir&gt;/solve/sim&lt;k&gt;/&lt;solve_file&gt;</span>
+0251   <span class="comment">%   and set sim-specific studyinfo</span>
+0252   <span class="keyword">if</span> options.verbose_flag
+0253     fprintf(<span class="string">'Creating distinct solver sub-directories for %g simulations...\n'</span>,num_simulations);
+0254   <span class="keyword">end</span>
+0255   <span class="comment">%[solve_path,solve_name,solve_ext]=fileparts(solve_file);</span>
+0256   [solve_path,solve_name,solve_ext]=fileparts(full_solve_file);
+0257 
+0258   <span class="comment">% prepare studyinfo with simulation-specific metadata</span>
+0259   <span class="keyword">for</span> sim=1:num_simulations
+0260     <span class="keyword">if</span> ismember(sim,skip_sims)
+0261       <span class="keyword">continue</span>; <span class="comment">% do nothing with this simulation</span>
+0262     <span class="keyword">end</span>
+0263 
+0264     this_solve_path=fullfile(solve_path,[<span class="string">'sim'</span> num2str(sim)]);
+0265 
+0266     <span class="keyword">if</span> ~exist(this_solve_path,<span class="string">'dir'</span>)
+0267       <span class="comment">%if options.verbose_flag</span>
+0268       <span class="comment">%  fprintf('creating solver sub-directory for simulation #%g: %s\n',sim,this_solve_path);</span>
+0269       <span class="comment">%end</span>
+0270       mkdir(this_solve_path);
+0271     <span class="keyword">end</span>
+0272 
+0273     [success,msg]=copyfile(full_solve_file,this_solve_path); <span class="comment">% creates solve sub-directory and copies the base solve file to it</span>
 0274 
-0275 <span class="comment">% TODO: remove old lock files ..</span>
+0275     <span class="keyword">if</span> ~success, error(msg); <span class="keyword">end</span>
 0276 
-0277 <span class="comment">% check for qsub on system</span>
-0278 [status,result]=system(<span class="string">'which qsub'</span>);
-0279 <span class="keyword">if</span> isempty(result)
-0280   [jnk,host] = system(<span class="string">'hostname'</span>);
-0281   fprintf(<span class="string">'qsub not found on host (%s).\n'</span>,strtrim(host));
-0282   fprintf(<span class="string">'Jobs NOT submitted to cluster queue.\n'</span>);
-0283 <span class="keyword">else</span> <span class="comment">% on cluster with qsub</span>
-0284   <span class="comment">% submit jobs (e.g., fScripjobs_memlimit batch_dir 32G)</span>
-0285   <span class="comment">% check status of study</span>
-0286   [~,s]=<a href="MonitorStudy.html" class="code" title="function [studyinfo,study_status]=MonitorStudy(studyinfo,varargin)">MonitorStudy</a>(studyinfo.study_dir,<span class="string">'verbose_flag'</span>,0);
-0287   <span class="keyword">if</span> s~=1 <span class="comment">% study not finished</span>
-0288     <span class="comment">% submit jobs using shell script</span>
-0289     [batch_dir_path,batch_dir_name,batch_suffix]=fileparts(batch_dir);
-0290     batch_dir_name=[batch_dir_name batch_suffix];
-0291     dsFnPath = fileparts(mfilename(<span class="string">'fullpath'</span>));
-0292     <span class="keyword">if</span> options.parallel_flag
-0293       cmd=sprintf(<span class="string">'qmatjobs_pct %s %s %g'</span>,batch_dir_name,options.memory_limit,options.num_cores);
-0294       <span class="comment">%status=system('which qmatjobs_pct');</span>
-0295     <span class="keyword">else</span>
-0296       <span class="keyword">if</span> strcmp(options.qsub_mode, <span class="string">'array'</span>)
-0297         <span class="comment">% TODO: remove old error and output files; put e and o in their own dirs</span>
-0298         
-0299 <span class="comment">%         cmd=sprintf('%s/qmatjobs_memlimit_array %s %s %s',dsFnPath, batch_dir_name, options.memory_limit, dsFnPath); %using csh intermediate</span>
-0300 <span class="comment">%         cmd = sprintf('qsub -V -hard -l ''h_vmem=%s'' -wd %s -N %s_sim_job -t 1-%i -- %s/qmatjob_array %s sim_job',...</span>
-0301 <span class="comment">%           options.memory_limit, batch_dir, batch_dir_name, length(jobs), dsFnPath, batch_dir_name); %no pipe</span>
-0302         cmd = sprintf(<span class="string">'echo ''%s/qmatjob_array %s sim_job'' | qsub -V -hard -l ''h_vmem=%s'' -wd %s -N %s_sim_job -t 1-%i'</span>,<span class="keyword">...</span>
-0303           dsFnPath, batch_dir, options.memory_limit, batch_dir, batch_dir_name, length(jobs)); <span class="comment">%with pipe</span>
-0304       <span class="keyword">elseif</span> strcmp(options.qsub_mode, <span class="string">'loop'</span>)
-0305         cmd=sprintf(<span class="string">'qmatjobs_memlimit_loop %s %s'</span>,batch_dir_name,options.memory_limit);
-0306       <span class="keyword">end</span>
-0307       <span class="comment">%status=system('which qmatjobs_memlimit');</span>
-0308     <span class="keyword">end</span>
-0309     
-0310     <span class="comment">% add shell script to linux path if not already there</span>
-0311     <span class="comment">%if status~=0</span>
-0312       setenv(<span class="string">'PATH'</span>, [getenv(<span class="string">'PATH'</span>) <span class="string">':'</span> dynasim_functions]);
-0313     <span class="comment">%end</span>
-0314     
-0315     <span class="keyword">if</span> options.verbose_flag
-0316       fprintf(<span class="string">'submitting cluster jobs with shell command: &quot;%s&quot;\n'</span>,cmd);
-0317     <span class="keyword">end</span>
-0318     
-0319     [status,result]=system(cmd);
-0320     <span class="keyword">if</span> status
-0321       fprintf(<span class="string">'submit command failed: &quot;%s&quot;\n'</span>,cmd);
-0322       disp(result);
-0323       <span class="keyword">return</span>;
-0324     <span class="keyword">end</span>
-0325     
-0326     <span class="comment">%if options.verbose_flag</span>
-0327       <span class="comment">%fprintf('%g jobs successfully submitted!\ntip: use MonitorStudy(''%s'') or MonitorStudy(studyinfo) to track status of cluster jobs.\n',num_jobs,studyinfo.study_dir);</span>
-0328       fprintf(<span class="string">'%g jobs successfully submitted!\n'</span>,length(jobs));
-0329     <span class="comment">%end</span>
-0330   <span class="keyword">elseif</span> s==1 <span class="comment">% study is finished</span>
-0331     <span class="keyword">if</span> options.verbose_flag
-0332       fprintf(<span class="string">'study already finished. not submitting jobs.\n'</span>);
-0333     <span class="keyword">end</span>
-0334   <span class="keyword">end</span>
-0335 <span class="keyword">end</span>
-0336 
-0337 <span class="comment">%% NESTED FUNCTIONS</span>
-0338   <a name="_sub1" href="#_subfunctions" class="code">function WriteSimJob(sim_ids,job_file)</a>
-0339     <span class="comment">% purpose: write m-file to job_file to run simulations of sim_ids</span>
-0340     
-0341     <span class="comment">% create job file</span>
-0342     fjob=fopen(job_file,<span class="string">'wt'</span>);
-0343     
-0344     <span class="comment">% load studyinfo using helper function to avoid busy file errors</span>
-0345     <span class="comment">%fprintf(fjob,'studyinfo=CheckStudyinfo(''%s'',''process_id'',%g);\n',study_file,sim_ids(1));</span>
-0346     <span class="comment">%fprintf(fjob,'load(''%s'',''studyinfo'');\n',study_file);</span>
-0347     
-0348     <span class="comment">% set IDs of simulations to run</span>
-0349     fprintf(fjob,<span class="string">'SimIDs=[%s]\n'</span>,num2str(sim_ids));
-0350     
-0351     <span class="comment">% loop over and run simulations in this job</span>
-0352     <span class="keyword">if</span> options.parallel_flag
-0353       <span class="comment">% set parallel computing options</span>
-0354       <span class="comment">%fprintf(fjob,'started=0;\npool=gcp(''nocreate'');\n');</span>
-0355       <span class="comment">%fprintf(fjob,'if isempty(pool), parpool(%g); started=1; end\n',options.num_cores);</span>
-0356       fprintf(fjob,<span class="string">'c=parcluster;\nsaveAsProfile(c,''local_%g'');\nparpool(c,%g);\n'</span>,k,options.num_cores);
-0357       <span class="comment">% use parfor loop</span>
-0358       fprintf(fjob,<span class="string">'parfor s=1:length(SimIDs)\n'</span>);
-0359     <span class="keyword">else</span>
-0360       <span class="comment">% use for loop</span>
-0361       fprintf(fjob,<span class="string">'for s=1:length(SimIDs)\n'</span>);
-0362     <span class="keyword">end</span>
-0363     fprintf(fjob,<span class="string">'\tSimID=SimIDs(s);\n'</span>);
-0364     
-0365     <span class="comment">% each job should have try-catch to capture studyinfo.simulations(k).error_log</span>
-0366     fprintf(fjob,<span class="string">'\ttry\n'</span>);
-0367     
-0368     <span class="comment">% load studyinfo for this simulation</span>
-0369     fprintf(fjob,<span class="string">'\t\tload(fullfile(''%s'',sprintf(''studyinfo_%%g.mat'',SimID)),''studyinfo'');\n'</span>,batch_dir);
-0370     
-0371     <span class="comment">% compare paths between compute machine and studyinfo startup</span>
-0372     fprintf(fjob,<span class="string">'\t\t[valid,message]=CheckHostPaths(studyinfo);\n'</span>);
-0373     fprintf(fjob,<span class="string">'\t\tif ~valid\n\t\t  lasterr(message);\n\t\t  for s=1:length(SimIDs), UpdateStudy(studyinfo.study_dir,''sim_id'',SimIDs(s),''status'',''failed''); end\n\t\t  continue;\n\t\tend\n'</span>);
+0277     <span class="comment">% set studyinfo solve_file to use for this simulation</span>
+0278     this_solve_file=fullfile(this_solve_path,[solve_name solve_ext]);
+0279     studyinfo.simulations(sim).solve_file=this_solve_file;
+0280     studyinfo.simulations(sim).batch_dir=batch_dir;
+0281     studyinfo.simulations(sim).simulator_options=options.simulator_options;
+0282 
+0283     <span class="comment">% set solve_file for this simulation (will be passed to dsSimulate as an option)</span>
+0284     <span class="keyword">if</span> isa(options.simulator_options.experiment,<span class="string">'function_handle'</span>)
+0285       studyinfo.simulations(sim).simulator_options.solve_file=[];
+0286     <span class="keyword">else</span>
+0287       studyinfo.simulations(sim).simulator_options.solve_file=this_solve_file;
+0288     <span class="keyword">end</span>
+0289 
+0290     <span class="comment">% set vary to [] to avoid each sim expanding to a new set</span>
+0291     studyinfo.simulations(sim).simulator_options.vary=[];
+0292     studyinfo.simulations(sim).simulator_options.sim_id=studyinfo.simulations(sim).sim_id;
+0293     studyinfo.simulations(sim).error_log=<span class="string">''</span>;
+0294     
+0295     <span class="comment">% copy studyinfo to batch_dir for each simulation</span>
+0296     <span class="comment">%this_study_file=fullfile(batch_dir,sprintf('studyinfo_%g.mat',sim));</span>
+0297     <span class="comment">%save(this_study_file,'studyinfo');</span>
+0298     
+0299     <span class="comment">% copy studyinfo file to batch_dir for each simulation</span>
+0300     <span class="keyword">for</span> sim=1:num_simulations
+0301       this_study_file=fullfile(batch_dir,sprintf(<span class="string">'studyinfo_%g.mat'</span>,sim));
+0302       
+0303       <span class="keyword">if</span> sim==1
+0304         save(this_study_file,<span class="string">'studyinfo'</span>);
+0305         first_study_file=this_study_file;
+0306       <span class="keyword">else</span>
+0307         <span class="comment">% use copyfile() after saving first b/c &gt;10x faster than save()</span>
+0308         [success,msg]=copyfile(first_study_file,this_study_file);
+0309         
+0310         <span class="keyword">if</span> ~success, error(msg); <span class="keyword">end</span>
+0311       <span class="keyword">end</span>
+0312     <span class="keyword">end</span>
+0313 
+0314   <span class="keyword">end</span> <span class="comment">%sim</span>
+0315 <span class="keyword">else</span> <span class="comment">%one_solve_file_flag</span>
+0316   <span class="comment">% set studyinfo solve_file to use for this simulation</span>
+0317   [studyinfo.simulations.solve_file] = deal(full_solve_file);
+0318   [studyinfo.simulations.batch_dir] = deal(batch_dir);
+0319   [studyinfo.simulations.simulator_options] = deal(options.simulator_options);
+0320 
+0321   <span class="comment">% set vary to [] to avoid each sim expanding to a new set</span>
+0322   <span class="keyword">for</span> iSim = 1:num_simulations
+0323     studyinfo.simulations(iSim).simulator_options.vary = [];
+0324     studyinfo.simulations(iSim).simulator_options.sim_id = studyinfo.simulations(iSim).sim_id;
+0325   <span class="keyword">end</span>
+0326   [studyinfo.simulations.error_log] = deal(<span class="string">''</span>);
+0327  
+0328   <span class="comment">% copy studyinfo file to batch_dir since more information now</span>
+0329   batch_study_file = fullfile(batch_dir,<span class="string">'studyinfo.mat'</span>);
+0330   save(batch_study_file,<span class="string">'studyinfo'</span>);
+0331 <span class="keyword">end</span>
+0332 
+0333 <span class="comment">% update studyinfo on disk</span>
+0334 <a href="ds.studyinfoIO.html" class="code" title="function studyinfo=ds.studyinfoIO(studyinfo,study_file,id,verbose_flag)">ds.studyinfoIO</a>(studyinfo,study_file,options.simulator_options.sim_id,options.verbose_flag);
+0335 
+0336 <span class="comment">% TODO: remove old lock files ..</span>
+0337 
+0338 <span class="comment">% check for qsub on system</span>
+0339 [status,result]=system(<span class="string">'which qsub'</span>);
+0340 <span class="keyword">if</span> isempty(result)
+0341   [~,host] = system(<span class="string">'hostname'</span>);
+0342   fprintf(<span class="string">'qsub not found on host (%s).\n'</span>,strtrim(host));
+0343   fprintf(<span class="string">'Jobs NOT submitted to cluster queue.\n'</span>);
+0344 <span class="keyword">else</span> <span class="comment">% on cluster with qsub</span>
+0345   <span class="comment">% submit jobs (e.g., fScripjobs_memlimit batch_dir 32G)</span>
+0346   <span class="comment">% check status of study</span>
+0347   [~,s]=<a href="ds.monitorStudy.html" class="code" title="function [studyinfo,study_status]=ds.monitorStudy(studyinfo,varargin)">ds.monitorStudy</a>(studyinfo.study_dir,<span class="string">'verbose_flag'</span>,0);
+0348   
+0349   <span class="keyword">if</span> s~=1 <span class="comment">% study not finished</span>
+0350     <span class="comment">% submit jobs using shell script</span>
+0351     [batch_dir_path,batch_dir_name,batch_suffix]=fileparts(batch_dir);
+0352     batch_dir_name=[batch_dir_name batch_suffix];
+0353     dsFnPath = fileparts(mfilename(<span class="string">'fullpath'</span>));
+0354     
+0355     <span class="keyword">if</span> options.parallel_flag
+0356       cmd=sprintf(<span class="string">'qmatjobs_pct %s %s %g'</span>,batch_dir_name,options.memory_limit,options.num_cores);
+0357       <span class="comment">%status=system('which qmatjobs_pct');</span>
+0358     <span class="keyword">else</span>
+0359       <span class="keyword">if</span> strcmp(options.qsub_mode, <span class="string">'array'</span>) &amp;&amp; ~options.one_solve_file_flag
+0360         <span class="comment">% TODO: remove old error and output files; put e and o in their own dirs</span>
+0361         cmd = sprintf(<span class="string">'echo ''%s/qmatjob_array %s sim_job'' | qsub -V -hard -l ''h_vmem=%s'' -wd %s -N %s_sim_job -t 1-%i'</span>,<span class="keyword">...</span>
+0362           dsFnPath, batch_dir, options.memory_limit, batch_dir, batch_dir_name, num_jobs);
+0363       <span class="keyword">elseif</span> strcmp(options.qsub_mode, <span class="string">'array'</span>) &amp;&amp; options.one_solve_file_flag
+0364         [~, job_filename] = fileparts(job_file); <span class="comment">%remove path and extension</span>
+0365         cmd = sprintf(<span class="string">'echo ''%s/qmatjob_array_one_file %s %s'' | qsub -V -hard -l ''h_vmem=%s'' -wd %s -N %s_sim_job -t 1-%i:%i'</span>,<span class="keyword">...</span>
+0366           dsFnPath, batch_dir, job_filename, options.memory_limit, batch_dir, batch_dir_name, num_simulations, options.sims_per_job);
+0367         <span class="comment">% NOTE: using num_simulations, not num_jobs, since the job_file will</span>
+0368         <span class="comment">%   determine it's own sims to run</span>
+0369       <span class="keyword">elseif</span> strcmp(options.qsub_mode, <span class="string">'loop'</span>)
+0370         cmd = sprintf(<span class="string">'qmatjobs_memlimit_loop %s %s'</span>,batch_dir_name,options.memory_limit);
+0371       <span class="keyword">end</span>
+0372       <span class="comment">%status=system('which qmatjobs_memlimit');</span>
+0373     <span class="keyword">end</span>
 0374     
-0375     <span class="comment">% simulate model with proper modifications and options</span>
-0376     fprintf(fjob,<span class="string">'\t\tsiminfo=studyinfo.simulations(SimID);\n'</span>);
-0377     fprintf(fjob,<span class="string">'\t\toptions=rmfield(siminfo.simulator_options,{''modifications'',''studyinfo'',''analysis_functions'',''plot_functions'',''sim_id''});\n'</span>);
-0378     fprintf(fjob,<span class="string">'\t\tkeyvals=Options2Keyval(options);\n'</span>);
-0379     fprintf(fjob,<span class="string">'\t\tfprintf(''-----------------------------------------------------\\n'');\n'</span>);
-0380     fprintf(fjob,<span class="string">'\t\tfprintf(''Processing simulation %%g (%%g of %%g in this job)...\\n'',SimID,s,length(SimIDs));\n'</span>);
-0381     fprintf(fjob,<span class="string">'\t\tfprintf(''-----------------------------------------------------\\n'');\n'</span>);
-0382     fprintf(fjob,<span class="string">'\t\tdata=SimulateModel(studyinfo.base_model,''modifications'',siminfo.modifications,''studyinfo'',studyinfo,''sim_id'',SimID,keyvals{:});\n'</span>);
-0383     fprintf(fjob,<span class="string">'\t\tfor i=1:length(siminfo.result_functions)\n'</span>);
-0384     fprintf(fjob,<span class="string">'\t\t\tAnalyzeData(data,siminfo.result_functions{i},''result_file'',siminfo.result_files{i},''save_data_flag'',1,siminfo.result_options{i}{:});\n'</span>);
-0385     fprintf(fjob,<span class="string">'\t\tend\n'</span>);
-0386     
-0387     <span class="comment">% add error handling</span>
-0388     fprintf(fjob,<span class="string">'\tcatch err\n'</span>);
-0389     
-0390     <span class="comment">%fprintf(fjob,'\t\ttry delete(fullfile(studyinfo.study_dir,[''.locked_'' num2str(SimID)])); end\n');</span>
-0391     fprintf(fjob,<span class="string">'\t\tDisplayError(err);\n'</span>);
-0392     fprintf(fjob,<span class="string">'\tend\n'</span>);
+0375     <span class="comment">% add shell script to linux path if not already there</span>
+0376     <span class="comment">%if status~=0</span>
+0377       setenv(<span class="string">'PATH'</span>, [getenv(<span class="string">'PATH'</span>) <span class="string">':'</span> dynasim_functions]);
+0378     <span class="comment">%end</span>
+0379     
+0380     <span class="keyword">if</span> options.verbose_flag
+0381       fprintf(<span class="string">'Submitting cluster jobs with shell command: &quot;%s&quot;\n'</span>,cmd);
+0382     <span class="keyword">end</span>
+0383     
+0384     [status,result]=system(cmd);
+0385     <span class="keyword">if</span> status &gt; 0
+0386       fprintf(<span class="string">'Submit command failed: &quot;%s&quot;\n'</span>,cmd);
+0387       disp(result);
+0388       <span class="keyword">return</span>;
+0389     <span class="keyword">else</span>
+0390       fprintf(<span class="string">'Submit command status: \n'</span>);
+0391       disp(result);
+0392     <span class="keyword">end</span>
 0393     
-0394     <span class="comment">% end loop over simulations in this job</span>
-0395     fprintf(fjob,<span class="string">'end\n'</span>);
-0396     <span class="keyword">if</span> options.parallel_flag
-0397       <span class="comment">%fprintf(fjob,'if started, delete(gcp); end\n');</span>
-0398       fprintf(fjob,<span class="string">'delete(gcp)\n'</span>);
-0399     <span class="keyword">end</span>
-0400     
-0401     <span class="comment">% exit script</span>
-0402     [status,result]=system(<span class="string">'which qsub'</span>);
-0403     <span class="keyword">if</span> ~isempty(result) <span class="comment">% on cluster</span>
-0404       fprintf(fjob,<span class="string">'exit\n'</span>);
-0405     <span class="keyword">end</span>
-0406     
-0407     <span class="comment">% close job file</span>
-0408     fclose(fjob);
-0409   <span class="keyword">end</span>
-0410 
-0411 <span class="keyword">end</span>
-0412 
-0413 <span class="comment">% -------------------</span>
-0414 <span class="comment">% in CreateBatch():</span>
-0415 <span class="comment">% -------------------</span>
-0416 <span class="comment">% create solve_file</span>
-0417 <span class="comment">% for each sim k</span>
-0418 <span class="comment">%   copy to this_solve_file = /solve/sim&lt;k&gt;/solve_file</span>
-0419 <span class="comment">%   set studyinfo.simulations(k).solve_file=this_solve_file</span>
-0420 <span class="comment">% ...</span>
-0421 <span class="comment">% in sim job.m:</span>
-0422 <span class="comment">% SimulateModel(model{k},'solve_file',solve_file{k},...)</span>
-0423 <span class="comment">% where solve_file{k}=studyinfo.simulations(k).solve_file</span></pre></div>
-<hr><address>Generated on Mon 27-Feb-2017 14:58:50 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" target="_parent">m2html</a></strong> &copy; 2005</address>
+0394     <span class="comment">%if options.verbose_flag</span>
+0395       <span class="comment">%fprintf('%g jobs successfully submitted!\ntip: use ds.monitorStudy(''%s'') or ds.monitorStudy(studyinfo) to track status of cluster jobs.\n',num_jobs,studyinfo.study_dir);</span>
+0396       fprintf(<span class="string">'%g jobs successfully submitted!\n'</span>,num_jobs);
+0397     <span class="comment">%end</span>
+0398   <span class="keyword">elseif</span> s==1 <span class="comment">% study is finished</span>
+0399     <span class="keyword">if</span> options.verbose_flag
+0400       fprintf(<span class="string">'Study already finished. not submitting jobs.\n'</span>);
+0401     <span class="keyword">end</span>
+0402   <span class="keyword">end</span>
+0403 <span class="keyword">end</span>
+0404 
+0405 <span class="comment">%% NESTED FUNCTIONS</span>
+0406   <a name="_sub1" href="#_subfunctions" class="code">function WriteSimJob(sim_ids,job_file)</a>
+0407     <span class="comment">% purpose: write m-file to job_file to run simulations of sim_ids</span>
+0408     
+0409     <span class="comment">% create job file</span>
+0410     fjob=fopen(job_file,<span class="string">'wt'</span>);
+0411     
+0412     <span class="comment">% load studyinfo using helper function to avoid busy file errors</span>
+0413     <span class="comment">%fprintf(fjob,'studyinfo=ds.checkStudyinfo(''%s'',''process_id'',%g);\n',study_file,sim_ids(1));</span>
+0414     <span class="comment">%fprintf(fjob,'load(''%s'',''studyinfo'');\n',study_file);</span>
+0415     
+0416     <span class="keyword">if</span> ~options.one_solve_file_flag
+0417       <span class="comment">% function declaration</span>
+0418       fprintf(fjob, <span class="string">'function %s\n\n'</span>, job_file);
+0419       
+0420       <span class="comment">% set IDs of simulations to run</span>
+0421       fprintf(fjob,<span class="string">'SimIDs=[%s]\n'</span>,num2str(sim_ids));
+0422     <span class="keyword">else</span> <span class="comment">%only 1 file</span>
+0423       <span class="comment">% function declaration</span>
+0424       [~, job_filename] = fileparts(job_file); <span class="comment">%remove path and extension</span>
+0425       fprintf(fjob, <span class="string">'function %s(simIDstart, simIDstep, simIDlast)\n\n'</span>, job_filename);
+0426       
+0427       <span class="keyword">if</span> options.compile_flag
+0428         fprintf(fjob, <span class="string">'assert(isa(simIDstart, ''double''));\n'</span>);
+0429         fprintf(fjob, <span class="string">'assert(isa(simIDstep, ''double''));\n'</span>);
+0430         fprintf(fjob, <span class="string">'assert(isa(simIDlast, ''double''));\n'</span>);
+0431       <span class="keyword">end</span>
+0432       
+0433       <span class="comment">% set IDs of simulations to run</span>
+0434       fprintf(fjob,<span class="string">'SimIDs = simIDstart:min(simIDlast,simIDstart+simIDstep-1);\n'</span>);
+0435     <span class="keyword">end</span>
+0436     
+0437     <span class="comment">% loop over and run simulations in this job</span>
+0438     <span class="keyword">if</span> options.parallel_flag
+0439       <span class="comment">% set parallel computing options</span>
+0440       <span class="comment">%fprintf(fjob,'started=0;\npool=gcp(''nocreate'');\n');</span>
+0441       <span class="comment">%fprintf(fjob,'if isempty(pool), parpool(%g); started=1; end\n',options.num_cores);</span>
+0442       fprintf(fjob,<span class="string">'c=parcluster;\nsaveAsProfile(c,''local_%g'');\nparpool(c,%g);\n'</span>,k,options.num_cores);
+0443       
+0444       <span class="comment">% use parfor loop</span>
+0445       fprintf(fjob,<span class="string">'parfor s=1:length(SimIDs)\n'</span>);
+0446     <span class="keyword">else</span>
+0447       <span class="comment">% use for loop</span>
+0448       fprintf(fjob,<span class="string">'for s=1:length(SimIDs)\n'</span>);
+0449     <span class="keyword">end</span>
+0450     
+0451     fprintf(fjob,<span class="string">'\tSimID=SimIDs(s);\n'</span>);
+0452     
+0453     <span class="comment">% each job should have try-catch to capture studyinfo.simulations(k).error_log</span>
+0454     fprintf(fjob,<span class="string">'\ttry\n'</span>);
+0455     
+0456     <span class="comment">% load studyinfo for this simulation</span>
+0457     <span class="keyword">if</span> ~options.one_solve_file_flag
+0458       fprintf(fjob,<span class="string">'\t\tload(fullfile(''%s'',sprintf(''studyinfo_%%g.mat'',SimID)),''studyinfo'');\n'</span>,batch_dir);
+0459     <span class="keyword">else</span>
+0460       fprintf(fjob,<span class="string">'\t\tload(fullfile(''%s'',''studyinfo.mat''),''studyinfo'');\n'</span>,batch_dir);
+0461     <span class="keyword">end</span>
+0462     <span class="comment">% compare paths between compute machine and studyinfo startup</span>
+0463     fprintf(fjob,<span class="string">'\t\t[valid,message]=ds.checkHostPaths(studyinfo);\n'</span>);
+0464     
+0465     <span class="keyword">if</span> ~options.one_solve_file_flag
+0466       fprintf(fjob,<span class="string">'\t\tif ~valid\n\t\t  lasterr(message);\n\t\t  for s=1:length(SimIDs), ds.updateStudy(studyinfo.study_dir,''sim_id'',SimIDs(s),''status'',''failed''); end\n\t\t  continue;\n\t\tend\n'</span>);
+0467     <span class="keyword">end</span>
+0468     
+0469     <span class="comment">% simulate model with proper modifications and options</span>
+0470     fprintf(fjob,<span class="string">'\t\tsiminfo=studyinfo.simulations(SimID);\n'</span>);
+0471     fprintf(fjob,<span class="string">'\t\toptions=rmfield(siminfo.simulator_options,{''modifications'',''studyinfo'',''analysis_functions'',''plot_functions'',''sim_id''});\n'</span>);
+0472     fprintf(fjob,<span class="string">'\t\tkeyvals=ds.options2Keyval(options);\n'</span>);
+0473     fprintf(fjob,<span class="string">'\t\tfprintf(''-----------------------------------------------------\\n'');\n'</span>);
+0474     fprintf(fjob,<span class="string">'\t\tfprintf(''Processing simulation %%g (%%g of %%g in this job)...\\n'',SimID,s,length(SimIDs));\n'</span>);
+0475     fprintf(fjob,<span class="string">'\t\tfprintf(''-----------------------------------------------------\\n'');\n'</span>);
+0476     fprintf(fjob,<span class="string">'\t\tdata=dsSimulate(studyinfo.base_model,''modifications'',siminfo.modifications,''studyinfo'',studyinfo,''sim_id'',SimID,keyvals{:});\n'</span>);
+0477     fprintf(fjob,<span class="string">'\t\tfor i=1:length(siminfo.result_functions)\n'</span>);
+0478     fprintf(fjob,<span class="string">'\t\t\tdsAnalyze(data,siminfo.result_functions{i},''result_file'',siminfo.result_files{i},''save_data_flag'',1,siminfo.result_options{i}{:});\n'</span>);
+0479     fprintf(fjob,<span class="string">'\t\tend\n'</span>);
+0480     
+0481     <span class="comment">% add error handling</span>
+0482     fprintf(fjob,<span class="string">'\tcatch err\n'</span>);
+0483     
+0484     <span class="comment">%fprintf(fjob,'\t\ttry delete(fullfile(studyinfo.study_dir,[''.locked_'' num2str(SimID)])); end\n');</span>
+0485     fprintf(fjob,<span class="string">'\t\tdisplayError(err);\n'</span>);
+0486     fprintf(fjob,<span class="string">'\tend\n'</span>);
+0487     
+0488     <span class="comment">% end loop over simulations in this job</span>
+0489     fprintf(fjob,<span class="string">'end\n'</span>);
+0490     <span class="keyword">if</span> options.parallel_flag
+0491       <span class="comment">%fprintf(fjob,'if started, delete(gcp); end\n');</span>
+0492       fprintf(fjob,<span class="string">'delete(gcp)\n'</span>);
+0493     <span class="keyword">end</span>
+0494     
+0495     <span class="comment">% exit script</span>
+0496     [status,result]=system(<span class="string">'which qsub'</span>);
+0497     <span class="keyword">if</span> ~isempty(result) <span class="comment">% on cluster</span>
+0498       fprintf(fjob,<span class="string">'exit\n'</span>);
+0499     <span class="keyword">end</span>
+0500     
+0501     <span class="comment">% close job file</span>
+0502     fclose(fjob);
+0503   <span class="keyword">end</span> <span class="comment">% WriteSimJob</span>
+0504 
+0505 <span class="keyword">end</span>
+0506 
+0507 <span class="comment">% -------------------</span>
+0508 <span class="comment">% in ds.createBatch():</span>
+0509 <span class="comment">% -------------------</span>
+0510 <span class="comment">% create solve_file</span>
+0511 <span class="comment">% for each sim k</span>
+0512 <span class="comment">%   copy to this_solve_file = /solve/sim&lt;k&gt;/solve_file</span>
+0513 <span class="comment">%   set studyinfo.simulations(k).solve_file=this_solve_file</span>
+0514 <span class="comment">% ...</span>
+0515 <span class="comment">% in sim job.m:</span>
+0516 <span class="comment">% dsSimulate(model{k},'solve_file',solve_file{k},...)</span>
+0517 <span class="comment">% where solve_file{k}=studyinfo.simulations(k).solve_file</span></pre></div>
+<hr><address>Generated on Fri 07-Apr-2017 20:01:20 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" target="_parent">m2html</a></strong> &copy; 2005</address>
 </body>
 </html>

@@ -48,16 +48,16 @@
 
  TODO: annotate figures with data set-specific modifications
 
- See also: <a href="SimulateModel.html" class="code" title="function [data,studyinfo]=SimulateModel(model,varargin)">SimulateModel</a>, <a href="CalcFR.html" class="code" title="function data = CalcFR(data,varargin)">CalcFR</a></pre></div>
+ See also: <a href="dsSimulate.html" class="code" title="function [data,studyinfo]=dsSimulate(model,varargin)">dsSimulate</a>, <a href="ds.calcFR.html" class="code" title="function data = ds.calcFR(data,varargin)">ds.calcFR</a></pre></div>
 
 <!-- crossreference -->
 <h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
 This function calls:
 <ul style="list-style-image:url(../matlabicon.gif)">
-<li><a href="CheckData.html" class="code" title="function data=CheckData(data)">CheckData</a>	CHECKDATA - Standardize data structure and auto-populate missing fields</li><li><a href="CheckOptions.html" class="code" title="function parms = CheckOptions(options, options_schema, strict)">CheckOptions</a>	CHECKOPTIONS - organize key/value pairs in structure with default or user-supplied values according to a schema</li><li><a href="CheckStudyinfo.html" class="code" title="function studyinfo=CheckStudyinfo(studyinfo,varargin)">CheckStudyinfo</a>	CHECKSTUDYINFO - Standardize studyinfo structure and auto-populate missing fields</li><li><a href="ImportData.html" class="code" title="function [data,studyinfo] = ImportData(file,varargin)">ImportData</a>	IMPORTDATA - load data into DynaSim formatted data structure.</li></ul>
+<li><a href="ds.checkData.html" class="code" title="function data=ds.checkData(data)">ds.checkData</a>	CHECKDATA - Standardize data structure and auto-populate missing fields</li><li><a href="ds.checkOptions.html" class="code" title="function [parms, params_unspecified ] = ds.checkOptions(options, options_schema, strict)">ds.checkOptions</a>	CHECKOPTIONS - organize key/value pairs in structure with default or user-supplied values according to a schema</li><li><a href="ds.checkStudyinfo.html" class="code" title="function studyinfo=ds.checkStudyinfo(studyinfo,varargin)">ds.checkStudyinfo</a>	CHECKSTUDYINFO - Standardize studyinfo structure and auto-populate missing fields</li><li><a href="ds.importData.html" class="code" title="function [data,studyinfo] = ds.importData(file,varargin)">ds.importData</a>	IMPORTDATA - load data into DynaSim formatted data structure.</li></ul>
 This function is called by:
 <ul style="list-style-image:url(../matlabicon.gif)">
-<li><a href="CalcACF.html" class="code" title="function data = CalcACF(data,varargin)">CalcACF</a>	CALCACF - Calculate the autocorrelation function.</li><li><a href="CalcFR.html" class="code" title="function data = CalcFR(data,varargin)">CalcFR</a>	CALCFR - Calculate firing rage for DynaSim data</li><li><a href="CalcFRmulti.html" class="code" title="function data = CalcFRmulti(data,varargin)">CalcFRmulti</a>	CALCFRMULTI - extends CalcFR to get SUA and MUA firing rates</li><li><a href="CalcISI.html" class="code" title="function data = CalcISI(data,varargin)">CalcISI</a>	CALCISI - Calculate the interspike interval.</li><li><a href="CalcPower.html" class="code" title="function data = CalcPower(data,varargin)">CalcPower</a>	CALCPOWER - Compute spectral analysis of DynaSim data</li></ul>
+<li><a href="ds.calcACF.html" class="code" title="function data = ds.calcACF(data,varargin)">ds.calcACF</a>	CALCACF - Calculate the autocorrelation function.</li><li><a href="ds.calcFR.html" class="code" title="function data = ds.calcFR(data,varargin)">ds.calcFR</a>	CALCFR - Calculate firing rage for DynaSim data</li><li><a href="ds.calcFRmulti.html" class="code" title="function data = ds.calcFRmulti(data,varargin)">ds.calcFRmulti</a>	CALCFRMULTI - extends ds.calcFR to get SUA and MUA firing rates</li><li><a href="ds.calcISI.html" class="code" title="function data = ds.calcISI(data,varargin)">ds.calcISI</a>	CALCISI - Calculate the interspike interval.</li><li><a href="ds.calcPower.html" class="code" title="function data = ds.calcPower(data,varargin)">ds.calcPower</a>	CALCPOWER - Compute spectral analysis of DynaSim data</li></ul>
 <!-- crossreference -->
 
 
@@ -86,10 +86,10 @@ This function is called by:
 0021 <span class="comment">%</span>
 0022 <span class="comment">% TODO: annotate figures with data set-specific modifications</span>
 0023 <span class="comment">%</span>
-0024 <span class="comment">% See also: SimulateModel, CalcFR</span>
+0024 <span class="comment">% See also: dsSimulate, ds.calcFR</span>
 0025 
 0026 <span class="comment">% check inputs</span>
-0027 options=<a href="CheckOptions.html" class="code" title="function parms = CheckOptions(options, options_schema, strict)">CheckOptions</a>(varargin,{<span class="keyword">...</span>
+0027 options=<a href="ds.checkOptions.html" class="code" title="function [parms, params_unspecified ] = ds.checkOptions(options, options_schema, strict)">ds.checkOptions</a>(varargin,{<span class="keyword">...</span>
 0028   <span class="string">'prefix'</span>,<span class="string">'study_analysis'</span>,[],<span class="keyword">...</span>
 0029   <span class="string">'save_data_flag'</span>,0,{0,1},<span class="keyword">...</span>
 0030   <span class="string">'detailed_names_flag'</span>,0,{0,1},<span class="keyword">...</span>
@@ -100,14 +100,14 @@ This function is called by:
 0035 <span class="comment">% load data if input is not a DynaSim data structure</span>
 0036 <span class="keyword">if</span> ~(isstruct(data) &amp;&amp; isfield(data,<span class="string">'time'</span>))
 0037   <span class="comment">% this is a data file, list of data files, studyinfo structure, study_dir, or studyinfo file</span>
-0038   [data,studyinfo]=<a href="ImportData.html" class="code" title="function [data,studyinfo] = ImportData(file,varargin)">ImportData</a>(data,varargin{:}); <span class="comment">% load all data in study</span>
+0038   [data,studyinfo]=<a href="ds.importData.html" class="code" title="function [data,studyinfo] = ds.importData(file,varargin)">ds.importData</a>(data,varargin{:}); <span class="comment">% load all data in study</span>
 0039 <span class="keyword">else</span>
-0040   studyinfo=<a href="CheckStudyinfo.html" class="code" title="function studyinfo=CheckStudyinfo(studyinfo,varargin)">CheckStudyinfo</a>([]);
+0040   studyinfo=<a href="ds.checkStudyinfo.html" class="code" title="function studyinfo=ds.checkStudyinfo(studyinfo,varargin)">ds.checkStudyinfo</a>([]);
 0041 <span class="keyword">end</span>
 0042 
 0043 <span class="comment">% studyinfo.base_simulator_options (contains study_dir, etc)</span>
-0044 <span class="comment">% CreateBatch</span>
-0045 <span class="comment">% SetupStudy</span>
+0044 <span class="comment">% ds.createBatch</span>
+0045 <span class="comment">% ds.setupStudy</span>
 0046 
 0047 <span class="keyword">if</span> ~iscell(func)
 0048   <span class="comment">% convert func to cell array of function handles</span>
@@ -118,7 +118,7 @@ This function is called by:
 0053     error(<span class="string">'the second argument must be a function handle (or cell array of them) for the desired analysis function.'</span>);
 0054   <span class="keyword">end</span>
 0055 <span class="keyword">end</span>
-0056 data=<a href="CheckData.html" class="code" title="function data=CheckData(data)">CheckData</a>(data);
+0056 data=<a href="ds.checkData.html" class="code" title="function data=ds.checkData(data)">ds.checkData</a>(data);
 0057 
 0058 <span class="comment">% pass each element of data to the analysis function</span>
 0059 <span class="keyword">for</span> i=1:length(data)
@@ -144,6 +144,6 @@ This function is called by:
 0079   <span class="keyword">end</span>
 0080   <span class="comment">% save(outfile,'results','-v7.3');</span>
 0081 <span class="keyword">end</span></pre></div>
-<hr><address>Generated on Mon 27-Feb-2017 14:58:50 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" target="_parent">m2html</a></strong> &copy; 2005</address>
+<hr><address>Generated on Fri 07-Apr-2017 20:01:20 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" target="_parent">m2html</a></strong> &copy; 2005</address>
 </body>
 </html>

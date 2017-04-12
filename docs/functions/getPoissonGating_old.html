@@ -40,25 +40,25 @@
  time=0:.01:1e3; % ms, time vector
  Npop=2;         % size of target population
  s=getPoissonGating(baseline,DC,AC,f,phi,onset,offset,tau,time,Npop);
- PlotData(s,'plot_type','waveform');
- PlotData(s,'plot_type','power');
+ dsPlot(s,'plot_type','waveform');
+ dsPlot(s,'plot_type','power');
  
  % Example 2: single cell with poisson-based AMPA input (lambda=100Hz)
  eqns='dV/dt=@current-s(k,:).*V; s=getPoissonGating(0,100); {iNa,iK}';
- data=SimulateModel(eqns,'tspan',[0 1000]);
- PlotData(data);
+ data=dsSimulate(eqns,'tspan',[0 1000]);
+ dsPlot(data);
  
  % Example 3: parameterized version of Example 2
  eqns='dV/dt=@current-g*s(k,:).*(V-E); s=getPoissonGating(0,DC); {iNa,iK}; g=1; E=0; DC=0';
- data=SimulateModel(eqns,'tspan',[0 500],'vary',{'DC',[0 100 1000];'g',[.01 1]});
- PlotData(data);
+ data=dsSimulate(eqns,'tspan',[0 500],'vary',{'DC',[0 100 1000];'g',[.01 1]});
+ dsPlot(data);
  
  % Example 4: rhythmically-modulated poisson, AMPA synapse, monitoring input
  eqns={'dV/dt=@current+Iampa(V); {iNa,iK}; monitor Iampa';
        'Iampa(V)=-gext*s(k,:).*(V-0); s=getPoissonGating(0,DC,AC,f)';
        'gext=.001; DC=25000; AC=25000; f=5; V(0)=-65'};
- data=SimulateModel(eqns,'tspan',[0 1000]);
- PlotData(data,'variable',{'V','Iampa'});</pre></div>
+ data=dsSimulate(eqns,'tspan',[0 1000]);
+ dsPlot(data,'variable',{'V','Iampa'});</pre></div>
 
 <!-- crossreference -->
 <h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
@@ -88,25 +88,25 @@ This function is called by:
 0013 <span class="comment">% time=0:.01:1e3; % ms, time vector</span>
 0014 <span class="comment">% Npop=2;         % size of target population</span>
 0015 <span class="comment">% s=getPoissonGating(baseline,DC,AC,f,phi,onset,offset,tau,time,Npop);</span>
-0016 <span class="comment">% PlotData(s,'plot_type','waveform');</span>
-0017 <span class="comment">% PlotData(s,'plot_type','power');</span>
+0016 <span class="comment">% dsPlot(s,'plot_type','waveform');</span>
+0017 <span class="comment">% dsPlot(s,'plot_type','power');</span>
 0018 <span class="comment">%</span>
 0019 <span class="comment">% % Example 2: single cell with poisson-based AMPA input (lambda=100Hz)</span>
 0020 <span class="comment">% eqns='dV/dt=@current-s(k,:).*V; s=getPoissonGating(0,100); {iNa,iK}';</span>
-0021 <span class="comment">% data=SimulateModel(eqns,'tspan',[0 1000]);</span>
-0022 <span class="comment">% PlotData(data);</span>
+0021 <span class="comment">% data=dsSimulate(eqns,'tspan',[0 1000]);</span>
+0022 <span class="comment">% dsPlot(data);</span>
 0023 <span class="comment">%</span>
 0024 <span class="comment">% % Example 3: parameterized version of Example 2</span>
 0025 <span class="comment">% eqns='dV/dt=@current-g*s(k,:).*(V-E); s=getPoissonGating(0,DC); {iNa,iK}; g=1; E=0; DC=0';</span>
-0026 <span class="comment">% data=SimulateModel(eqns,'tspan',[0 500],'vary',{'DC',[0 100 1000];'g',[.01 1]});</span>
-0027 <span class="comment">% PlotData(data);</span>
+0026 <span class="comment">% data=dsSimulate(eqns,'tspan',[0 500],'vary',{'DC',[0 100 1000];'g',[.01 1]});</span>
+0027 <span class="comment">% dsPlot(data);</span>
 0028 <span class="comment">%</span>
 0029 <span class="comment">% % Example 4: rhythmically-modulated poisson, AMPA synapse, monitoring input</span>
 0030 <span class="comment">% eqns={'dV/dt=@current+Iampa(V); {iNa,iK}; monitor Iampa';</span>
 0031 <span class="comment">%       'Iampa(V)=-gext*s(k,:).*(V-0); s=getPoissonGating(0,DC,AC,f)';</span>
 0032 <span class="comment">%       'gext=.001; DC=25000; AC=25000; f=5; V(0)=-65'};</span>
-0033 <span class="comment">% data=SimulateModel(eqns,'tspan',[0 1000]);</span>
-0034 <span class="comment">% PlotData(data,'variable',{'V','Iampa'});</span>
+0033 <span class="comment">% data=dsSimulate(eqns,'tspan',[0 1000]);</span>
+0034 <span class="comment">% dsPlot(data,'variable',{'V','Iampa'});</span>
 0035 
 0036 <span class="comment">% default parameters</span>
 0037 <span class="keyword">if</span> nargin&lt;1, baseline=0; <span class="keyword">end</span> <span class="comment">% Hz</span>
@@ -131,6 +131,6 @@ This function is called by:
 0056 consigma=.001; <span class="comment">% not used</span>
 0057 s=<a href="getGenExtPoissonTotalGating.html" class="code" title="function S = getGenExtPoissonTotalGating_jss(tOn,tOff,latency_,freq_,normFreqSigma_,phase_,widthSigma,rate_baseline,rate_dc_,rate_ac_,tau,kick,N,interval,dt,conn,ramp_dc_flag,ramp_ac_flag)">getGenExtPoissonTotalGating</a>(onset,offset,latency,freq/1000,fspread,phase,consigma,baseline/1000,dc/1000,ac/1000,tau,kick,N,interval,dt,kernel',ramp_dc_flag,ramp_ac_flag);
 0058 sext=s';</pre></div>
-<hr><address>Generated on Mon 27-Feb-2017 14:58:50 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" target="_parent">m2html</a></strong> &copy; 2005</address>
+<hr><address>Generated on Fri 07-Apr-2017 20:01:20 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" target="_parent">m2html</a></strong> &copy; 2005</address>
 </body>
 </html>

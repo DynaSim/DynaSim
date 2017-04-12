@@ -2,8 +2,8 @@
                 "http://www.w3.org/TR/REC-html40/loose.dtd">
 <html>
 <head>
-  <title>Description of CompareSolveFiles</title>
-  <meta name="keywords" content="CompareSolveFiles">
+  <title>Description of ds.compareSolveFiles</title>
+  <meta name="keywords" content="ds.compareSolveFiles">
   <meta name="description" content="COMPARESOLVEFILES - look for an equivalent file in same directory">
   <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
   <meta name="generator" content="m2html &copy; 2005 Guillaume Flandin">
@@ -16,22 +16,25 @@
 <body>
 <a name="_top"></a>
 <!-- menu.html functions -->
-<h1>CompareSolveFiles
+<h1>ds.compareSolveFiles
 </h1>
 
 <h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
 <div class="box"><strong>COMPARESOLVEFILES - look for an equivalent file in same directory</strong></div>
 
 <h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
-<div class="box"><strong>function solve_file_m=CompareSolveFiles(solve_file_m) </strong></div>
+<div class="box"><strong>function solve_file_m=ds.compareSolveFiles(solve_file_m,mexpath) </strong></div>
 
 <h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
 <div class="fragment"><pre class="comment">COMPARESOLVEFILES - look for an equivalent file in same directory
 
   - Step 1: compare to other *.m in /solve/
   - Step 2: if match: remove(solve_file); solve_file=match;
+ 
+ If mexpath is specified, then will do a comparison to other files
+ in the mexpath, as opposed to the current solve folder
 
- See also: <a href="GetSolveFile.html" class="code" title="function solve_file = GetSolveFile(model,studyinfo,varargin)">GetSolveFile</a>, <a href="SimulateModel.html" class="code" title="function [data,studyinfo]=SimulateModel(model,varargin)">SimulateModel</a>, <a href="CreateBatch.html" class="code" title="function studyinfo=CreateBatch(base_model,modifications_set,varargin)">CreateBatch</a></pre></div>
+ See also: <a href="ds.getSolveFile.html" class="code" title="function solve_file = ds.getSolveFile(model,studyinfo,varargin)">ds.getSolveFile</a>, <a href="dsSimulate.html" class="code" title="function [data,studyinfo]=dsSimulate(model,varargin)">dsSimulate</a>, <a href="ds.createBatch.html" class="code" title="function studyinfo = ds.createBatch(base_model,modifications_set,varargin)">ds.createBatch</a></pre></div>
 
 <!-- crossreference -->
 <h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
@@ -40,37 +43,57 @@ This function calls:
 </ul>
 This function is called by:
 <ul style="list-style-image:url(../matlabicon.gif)">
-<li><a href="GetSolveFile.html" class="code" title="function solve_file = GetSolveFile(model,studyinfo,varargin)">GetSolveFile</a>	GETSOLVEFILE - helper function that creates or retrieves the desired solver file.</li></ul>
+<li><a href="ds.getSolveFile.html" class="code" title="function solve_file = ds.getSolveFile(model,studyinfo,varargin)">ds.getSolveFile</a>	GETSOLVEFILE - helper function that creates or retrieves the desired solver file.</li></ul>
 <!-- crossreference -->
 
 
 
 <h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
-<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function solve_file_m=CompareSolveFiles(solve_file_m)</a>
+<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function solve_file_m=ds.compareSolveFiles(solve_file_m,mexpath)</a>
 0002 <span class="comment">%COMPARESOLVEFILES - look for an equivalent file in same directory</span>
 0003 <span class="comment">%</span>
 0004 <span class="comment">%  - Step 1: compare to other *.m in /solve/</span>
 0005 <span class="comment">%  - Step 2: if match: remove(solve_file); solve_file=match;</span>
 0006 <span class="comment">%</span>
-0007 <span class="comment">% See also: GetSolveFile, SimulateModel, CreateBatch</span>
-0008 
-0009 [fpath,fname,fext]=fileparts(solve_file_m);
-0010 <span class="comment">% get list of files in where solve_file is located</span>
-0011 D=dir(fpath);
-0012 files={D(~[D.isdir]).name};
-0013 files=files(cellfun(@any,regexp(files,<span class="string">'.m$'</span>)));
-0014 files=setdiff(files,[fname fext]);
-0015 <span class="comment">% compare solve_file_m to each file</span>
-0016 <span class="keyword">for</span> f=1:length(files)
-0017   [~,diffs] = system([<span class="string">'diff '</span> solve_file_m <span class="string">' '</span> fullfile(fpath,files{f})]);
-0018   <span class="keyword">if</span> isempty(diffs)
-0019     <span class="comment">%dbstack</span>
-0020     old_solve_file_m=solve_file_m;
-0021     delete(old_solve_file_m);
-0022     solve_file_m=fullfile(fpath,files{f});
-0023     <span class="keyword">break</span>;
-0024   <span class="keyword">end</span>
-0025 <span class="keyword">end</span></pre></div>
-<hr><address>Generated on Mon 27-Feb-2017 14:58:50 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" target="_parent">m2html</a></strong> &copy; 2005</address>
+0007 <span class="comment">% If mexpath is specified, then will do a comparison to other files</span>
+0008 <span class="comment">% in the mexpath, as opposed to the current solve folder</span>
+0009 <span class="comment">%</span>
+0010 <span class="comment">% See also: ds.getSolveFile, dsSimulate, ds.createBatch</span>
+0011 
+0012 [solvepath,fname,fext]=fileparts(solve_file_m);
+0013 
+0014 <span class="keyword">if</span> nargin &lt; 2
+0015     mexpath = solvepath;
+0016 <span class="keyword">end</span>
+0017 
+0018 <span class="comment">% get list of files in where solve_file is located</span>
+0019 D=dir(mexpath);
+0020 files={D(~[D.isdir]).name};
+0021 files=files(cellfun(@any,regexp(files,<span class="string">'.m$'</span>)));
+0022 files=setdiff(files,[fname fext]);
+0023 
+0024 <span class="comment">% compare solve_file_m to each file</span>
+0025 <span class="keyword">for</span> f=1:length(files)
+0026   [~,diffs] = system([<span class="string">'diff '</span> solve_file_m <span class="string">' '</span> fullfile(mexpath,files{f})]);
+0027   <span class="keyword">if</span> isempty(diffs)
+0028     <span class="comment">%dbstack</span>
+0029     old_solve_file_m=solve_file_m;
+0030     delete(old_solve_file_m);
+0031     
+0032     <span class="keyword">if</span> ~strcmp(mexpath,solvepath)
+0033         <span class="comment">% Copy mex file and solve file from mexpath into solve path</span>
+0034         copyfile(fullfile(mexpath,files{f}),solvepath);
+0035         [~,fname] = fileparts(files{f});
+0036         <span class="keyword">if</span> ~isempty(dir(fullfile(mexpath,[fname <span class="string">'_mex*'</span>])))
+0037             copyfile(fullfile(mexpath,[fname <span class="string">'_mex*'</span>]),solvepath);
+0038         <span class="keyword">end</span>
+0039     <span class="keyword">end</span>
+0040     
+0041     solve_file_m=fullfile(solvepath,files{f});
+0042     <span class="keyword">break</span>;
+0043   <span class="keyword">end</span>
+0044 <span class="keyword">end</span>
+0045 <span class="keyword">end</span></pre></div>
+<hr><address>Generated on Fri 07-Apr-2017 20:01:20 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" target="_parent">m2html</a></strong> &copy; 2005</address>
 </body>
 </html>

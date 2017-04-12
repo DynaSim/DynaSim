@@ -1,0 +1,122 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of ds.xPlt.xPlt2dsImage</title>
+  <meta name="keywords" content="ds.xPlt.xPlt2dsImage">
+  <meta name="description" content="% data=ds.xPlt.xPlt2ds(obj,varargin)">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html &copy; 2005 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="../m2html.css">
+  <script type="text/javascript">
+    if (top.frames.length == 0) { top.location = "../index.html"; };
+  </script>
+</head>
+<body>
+<a name="_top"></a>
+<!-- menu.html functions -->
+<h1>ds.xPlt.xPlt2dsImage
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>% data=ds.xPlt.xPlt2ds(obj,varargin)</strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>function data=ds.xPlt.xPlt2dsImage(obj) </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre class="comment">% data=ds.xPlt.xPlt2ds(obj,varargin)
+ Dependencies:
+   Requires the MDD class, which should be part of DynaSim. If not,
+   get it here https://github.com/davestanley/MDD
+ Author: David Stanley, Boston University, stanleyd@bu.edu</pre></div>
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+This function calls:
+<ul style="list-style-image:url(../matlabicon.gif)">
+</ul>
+This function is called by:
+<ul style="list-style-image:url(../matlabicon.gif)">
+<li><a href="ds.merge.html" class="code" title="function data_merged = ds.mergeData(data1,data2)">ds.merge</a>	Merge two Dynasim structures created from different simulations</li></ul>
+<!-- crossreference -->
+
+
+
+<h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function data=ds.xPlt.xPlt2dsImage(obj)</a>
+0002 <span class="comment">%% data=ds.xPlt.xPlt2ds(obj,varargin)</span>
+0003 <span class="comment">% Dependencies:</span>
+0004 <span class="comment">%   Requires the MDD class, which should be part of DynaSim. If not,</span>
+0005 <span class="comment">%   get it here https://github.com/davestanley/MDD</span>
+0006 <span class="comment">% Author: David Stanley, Boston University, stanleyd@bu.edu</span>
+0007 
+0008 <span class="comment">% This combines the 2D &quot;vary&quot; sweep into a single dimension. It also</span>
+0009 <span class="comment">% combines all populations and variables into a single 1D list. Thus, Axis</span>
+0010 <span class="comment">% 1 is equivalent to Jason's structure array - data(1:9). Axis 4 is</span>
+0011 <span class="comment">% equivalent to the structure fields in Jason's DynaSim structure.</span>
+0012 <span class="comment">%</span>
+0013 <span class="comment">% % % Testing code</span>
+0014 <span class="comment">% load sample_data_dynasim.mat</span>
+0015 <span class="comment">% data1=data;</span>
+0016 <span class="comment">% data2 = data(1);</span>
+0017 <span class="comment">% d1 = ds.xPlt.xPlt2ds(ds.ds2xPlt(data1));</span>
+0018 <span class="comment">% d2 = ds.xPlt.xPlt2ds(ds.ds2xPlt(data2));</span>
+0019 <span class="comment">% d2b = ds.xPlt.xPlt2ds(squeeze(ds.ds2xPlt(data2)));</span>
+0020 <span class="comment">% % Make sure 1 is identical</span>
+0021 <span class="comment">% close all;</span>
+0022 <span class="comment">% dsPlot(data1); dsPlot(d1);</span>
+0023 <span class="comment">% % Make sure 2 is identical</span>
+0024 <span class="comment">% dsPlot(data2); dsPlot(d2);</span>
+0025 <span class="comment">% dsPlot(data2); dsPlot(d2b);</span>
+0026 
+0027 <span class="comment">% Squeeze out populations and variables axes (should remove them if they</span>
+0028 <span class="comment">% are of size 1)</span>
+0029 obj = obj.squeezeRegexp(<span class="string">'populations'</span>);
+0030 obj = obj.squeezeRegexp(<span class="string">'variables'</span>);
+0031 
+0032 <span class="comment">% Find population and variable axes</span>
+0033 <span class="keyword">if</span> ~isempty(obj.findaxis(<span class="string">'populations'</span>)); error(<span class="string">'Populations axis should be empty'</span>); <span class="keyword">end</span>
+0034 <span class="keyword">if</span> ~isempty(obj.findaxis(<span class="string">'variables'</span>)); error(<span class="string">'Variables axis should be empty'</span>); <span class="keyword">end</span>
+0035 
+0036 <span class="comment">% Merge all varieds together</span>
+0037 obj = obj.mergeDims(1:ndims(obj));
+0038 
+0039 <span class="comment">% Get rid of any leftover axes created by mergeDims</span>
+0040 obj = obj.squeezeRegexp(<span class="string">'Dim'</span>);
+0041 
+0042 <span class="comment">% Make sure the &quot;varied&quot; parameters are along dimension 2 (e.g. so it's</span>
+0043 <span class="comment">% 1xNvaried)</span>
+0044 <span class="keyword">if</span> iscolumn(obj.data); obj=obj.transpose; <span class="keyword">end</span>
+0045 
+0046 <span class="comment">% Build DynaSim data structure</span>
+0047 data = struct;
+0048 ax_vals = obj.exportAxisVals;
+0049 ax_names = obj.exportAxisNames;
+0050 varied = obj.axis(2).astruct.premerged_names;
+0051 varied_vals = obj.axis(2).astruct.premerged_values;
+0052 has_varied = 1;
+0053 
+0054 <span class="keyword">for</span> j = 1:size(obj,2)                               <span class="comment">% Loop through varieds</span>
+0055     
+0056     data(j).plot_files = obj.data{j};
+0057     
+0058     <span class="comment">% If there are any varied parameters....</span>
+0059     <span class="keyword">if</span> has_varied
+0060         <span class="comment">% Add list of varied variables</span>
+0061         data(j).varied = varied;
+0062 
+0063         <span class="comment">% Add values of varied variables</span>
+0064         <span class="keyword">for</span> i = 1:length(varied)
+0065             data(j).(varied{i}) = varied_vals{i}(j);
+0066         <span class="keyword">end</span>
+0067     <span class="keyword">end</span>
+0068     
+0069 <span class="keyword">end</span>
+0070 
+0071 
+0072 <span class="keyword">end</span></pre></div>
+<hr><address>Generated on Fri 07-Apr-2017 20:01:20 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" target="_parent">m2html</a></strong> &copy; 2005</address>
+</body>
+</html>

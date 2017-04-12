@@ -2,8 +2,8 @@
                 "http://www.w3.org/TR/REC-html40/loose.dtd">
 <html>
 <head>
-  <title>Description of WriteDynaSimSolver</title>
-  <meta name="keywords" content="WriteDynaSimSolver">
+  <title>Description of ds.writeDynaSimSolver</title>
+  <meta name="keywords" content="ds.writeDynaSimSolver">
   <meta name="description" content="WRITEDYNASIMSOLVER - write m-file that numerically inteegrates the model">
   <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
   <meta name="generator" content="m2html &copy; 2005 Guillaume Flandin">
@@ -16,26 +16,26 @@
 <body>
 <a name="_top"></a>
 <!-- menu.html functions -->
-<h1>WriteDynaSimSolver
+<h1>ds.writeDynaSimSolver
 </h1>
 
 <h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
 <div class="box"><strong>WRITEDYNASIMSOLVER - write m-file that numerically inteegrates the model</strong></div>
 
 <h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
-<div class="box"><strong>function [outfile,options]=WriteDynaSimSolver(model,varargin) </strong></div>
+<div class="box"><strong>function [outfile,options]=ds.writeDynaSimSolver(model,varargin) </strong></div>
 
 <h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
 <div class="fragment"><pre class="comment">WRITEDYNASIMSOLVER - write m-file that numerically inteegrates the model
 
  Usage:
-   solver_file=WriteDynaSimSolver(model,varargin)
+   solver_file=ds.writeDynaSimSolver(model,varargin)
 
  Inputs:
-   - model: DynaSim model structure (see GenerateModel)
+   - model: DynaSim model structure (see ds.generateModel)
    - options:
-     'solver'     : solver for numerical integration (see GetSolveFile)
-                    {'euler','rk2','rk4'} (default: 'rk4')
+     'solver'     : solver for numerical integration (see ds.getSolveFile)
+                    {'euler'/'rk1', 'rk2'/'modified_euler', 'rungekutta'/'rk'/'rk4'} (default: 'rk4')
      'tspan'      : time limits of simulation [begin,end] (default: [0 100]) [ms]
                     - Note: units must be consistent with dt and model equations
      'dt'         : time step used for DynaSim solvers (default: .01) [ms]
@@ -55,52 +55,52 @@
 
  Examples:
    - Example 1: test solver production, display function in standard output
-       model=GenerateModel; % test model
+       model=ds.generateModel; % test model
        without writing anything to disk:
-       WriteDynaSimSolver(model,'fileID',1,'save_parameters_flag',0,'solver','rk4');
-       WriteDynaSimSolver(model,'fileID',1,'save_parameters_flag',1,'solver','rk4');
-       model=PropagateFunctions(model);
-       WriteDynaSimSolver(model,'fileID',1,'save_parameters_flag',0,'solver','rk4');
-       WriteDynaSimSolver(model,'fileID',1,'save_parameters_flag',1,'solver','rk4');
+       ds.writeDynaSimSolver(model,'fileID',1,'save_parameters_flag',0,'solver','rk4');
+       ds.writeDynaSimSolver(model,'fileID',1,'save_parameters_flag',1,'solver','rk4');
+       model=ds.propagateFunctions(model);
+       ds.writeDynaSimSolver(model,'fileID',1,'save_parameters_flag',0,'solver','rk4');
+       ds.writeDynaSimSolver(model,'fileID',1,'save_parameters_flag',1,'solver','rk4');
 
    - Example 2: real-time downsampling
-       WriteDynaSimSolver(model,'downsample_factor',10,'fileID',1,'solver','rk4');
+       ds.writeDynaSimSolver(model,'downsample_factor',10,'fileID',1,'solver','rk4');
 
    - Example 3: real-time writing data to disk (reduce memory demand)
-       WriteDynaSimSolver(model,'disk_flag',1,'fileID',1,'solver','rk4');
+       ds.writeDynaSimSolver(model,'disk_flag',1,'fileID',1,'solver','rk4');
 
    - Example 4: maximally conserve memory: downsample and write to disk
-       WriteDynaSimSolver(model,'disk_flag',1,'downsample_factor',10,'fileID',1,'solver','rk4');
+       ds.writeDynaSimSolver(model,'disk_flag',1,'downsample_factor',10,'fileID',1,'solver','rk4');
 
  More Examples:
-     WriteDynaSimSolver(model,'solver','euler');
-     WriteDynaSimSolver(model,'solver','rk2');
-     WriteDynaSimSolver(model,'solver','rk4');
+     ds.writeDynaSimSolver(model,'solver','euler');
+     ds.writeDynaSimSolver(model,'solver','rk2');
+     ds.writeDynaSimSolver(model,'solver','rk4');
 
-     model=GenerateModel; % test model
-     tic; WriteDynaSimSolver(model,'save_parameters_flag',0,'reduce_function_calls_flag',0,'solver','rk4','filename','solve_ode.m'); v=solve_ode; plot(v); toc
-     tic; WriteDynaSimSolver(model,'save_parameters_flag',1,'reduce_function_calls_flag',0,'solver','rk4','filename','solve_ode.m'); v=solve_ode; plot(v); toc
-     tic; WriteDynaSimSolver(model,'save_parameters_flag',0,'reduce_function_calls_flag',1,'solver','rk4','filename','solve_ode.m'); v=solve_ode; plot(v); toc
-     tic; WriteDynaSimSolver(model,'save_parameters_flag',1,'reduce_function_calls_flag',1,'solver','rk4','filename','solve_ode.m'); v=solve_ode; plot(v); toc
-     tic; WriteDynaSimSolver(model,'save_parameters_flag',1,'reduce_function_calls_flag',1,'solver','rk2','filename','solve_ode.m'); v=solve_ode; plot(v); toc
-     tic; WriteDynaSimSolver(model,'save_parameters_flag',1,'reduce_function_calls_flag',1,'solver','rk1','filename','solve_ode.m'); v=solve_ode; plot(v); toc
-     tic; WriteDynaSimSolver(model,'save_parameters_flag',1,'reduce_function_calls_flag',1,'solver','rk1','filename','solve_ode.m','downsample_factor',10); v=solve_ode; plot(v); toc
-     tic; WriteDynaSimSolver(model,'save_parameters_flag',1,'reduce_function_calls_flag',1,'solver','rk2','filename','solve_ode.m','dt',.001,'downsample_factor',10); v=solve_ode; plot(v); toc
-     tic; WriteDynaSimSolver(model,'save_parameters_flag',1,'reduce_function_calls_flag',1,'solver','rk1','filename','solve_ode.m','dt',.001,'downsample_factor',10); v=solve_ode; plot(v); toc
-     tic; WriteDynaSimSolver(model,'save_parameters_flag',1,'reduce_function_calls_flag',1,'solver','rk1','filename','solve_ode.m','dt',.005,'tspan',[0 200],'downsample_factor',10); v=solve_ode; plot(v); toc
+     model=ds.generateModel; % test model
+     tic; ds.writeDynaSimSolver(model,'save_parameters_flag',0,'reduce_function_calls_flag',0,'solver','rk4','filename','solve_ode.m'); v=solve_ode; plot(v); toc
+     tic; ds.writeDynaSimSolver(model,'save_parameters_flag',1,'reduce_function_calls_flag',0,'solver','rk4','filename','solve_ode.m'); v=solve_ode; plot(v); toc
+     tic; ds.writeDynaSimSolver(model,'save_parameters_flag',0,'reduce_function_calls_flag',1,'solver','rk4','filename','solve_ode.m'); v=solve_ode; plot(v); toc
+     tic; ds.writeDynaSimSolver(model,'save_parameters_flag',1,'reduce_function_calls_flag',1,'solver','rk4','filename','solve_ode.m'); v=solve_ode; plot(v); toc
+     tic; ds.writeDynaSimSolver(model,'save_parameters_flag',1,'reduce_function_calls_flag',1,'solver','rk2','filename','solve_ode.m'); v=solve_ode; plot(v); toc
+     tic; ds.writeDynaSimSolver(model,'save_parameters_flag',1,'reduce_function_calls_flag',1,'solver','rk1','filename','solve_ode.m'); v=solve_ode; plot(v); toc
+     tic; ds.writeDynaSimSolver(model,'save_parameters_flag',1,'reduce_function_calls_flag',1,'solver','rk1','filename','solve_ode.m','downsample_factor',10); v=solve_ode; plot(v); toc
+     tic; ds.writeDynaSimSolver(model,'save_parameters_flag',1,'reduce_function_calls_flag',1,'solver','rk2','filename','solve_ode.m','dt',.001,'downsample_factor',10); v=solve_ode; plot(v); toc
+     tic; ds.writeDynaSimSolver(model,'save_parameters_flag',1,'reduce_function_calls_flag',1,'solver','rk1','filename','solve_ode.m','dt',.001,'downsample_factor',10); v=solve_ode; plot(v); toc
+     tic; ds.writeDynaSimSolver(model,'save_parameters_flag',1,'reduce_function_calls_flag',1,'solver','rk1','filename','solve_ode.m','dt',.005,'tspan',[0 200],'downsample_factor',10); v=solve_ode; plot(v); toc
 
- Dependencies: CheckOptions, CheckModel
+ Dependencies: ds.checkOptions, ds.checkModel
 
- See also: <a href="GetSolveFile.html" class="code" title="function solve_file = GetSolveFile(model,studyinfo,varargin)">GetSolveFile</a>, <a href="SimulateModel.html" class="code" title="function [data,studyinfo]=SimulateModel(model,varargin)">SimulateModel</a>, <a href="WriteMatlabSolver.html" class="code" title="function data=WriteMatlabSolver(model,varargin)">WriteMatlabSolver</a></pre></div>
+ See also: <a href="ds.getSolveFile.html" class="code" title="function solve_file = ds.getSolveFile(model,studyinfo,varargin)">ds.getSolveFile</a>, <a href="dsSimulate.html" class="code" title="function [data,studyinfo]=dsSimulate(model,varargin)">dsSimulate</a>, <a href="ds.writeMatlabSolver.html" class="code" title="function solve_ode_filepath = ds.writeMatlabSolver(model,varargin)">ds.writeMatlabSolver</a></pre></div>
 
 <!-- crossreference -->
 <h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
 This function calls:
 <ul style="list-style-image:url(../matlabicon.gif)">
-<li><a href="CheckModel.html" class="code" title="function model=CheckModel(model)">CheckModel</a>	CHECKMODEL - Standardize model structure and auto-populate missing fields</li><li><a href="CheckOptions.html" class="code" title="function parms = CheckOptions(options, options_schema, strict)">CheckOptions</a>	CHECKOPTIONS - organize key/value pairs in structure with default or user-supplied values according to a schema</li><li><a href="CheckSolverOptions.html" class="code" title="function options=CheckSolverOptions(options)">CheckSolverOptions</a>	CHECKSOLVEROPTIONS - standardize simulation options appended to params.mat</li><li><a href="GetOutputCounts.html" class="code" title="function [state_var_counts,monitor_counts]=GetOutputCounts(model)">GetOutputCounts</a>	GETOUTPUTCOUNTS - determine how many copies of each state variable and monitor will be produced by simulating the model.</li><li><a href="PropagateFunctions.html" class="code" title="function model=PropagateFunctions(model)">PropagateFunctions</a>	PROPAGATEFUNCTIONS - eliminate internal function calls from model ODEs, ICs, monitors, and conditionals.</li><li><a href="PropagateParameters.html" class="code" title="function model=PropagateParameters(model,varargin)">PropagateParameters</a>	PROPAGATEPARAMETERS - substitute parameter values or prepend parameter names with prefix across all model equations.</li><li><a href="dynasim_strrep.html" class="code" title="function str=dynasim_strrep(str,oldstr,newstr,lpad,rpad)">dynasim_strrep</a>	DYNASIM_STRREP - replace full words by new character strings, ignoring matches that appear as sub-strings.</li></ul>
+<li><a href="ds.applyModifications.html" class="code" title="function [output,modifications]=ds.applyModifications(model,modifications)">ds.applyModifications</a>	APPLYMODIFICATIONS - Apply modifications to DynaSim specification or model structure</li><li><a href="ds.checkModel.html" class="code" title="function model=ds.checkModel(model)">ds.checkModel</a>	CHECKMODEL - Standardize model structure and auto-populate missing fields</li><li><a href="ds.checkOptions.html" class="code" title="function [parms, params_unspecified ] = ds.checkOptions(options, options_schema, strict)">ds.checkOptions</a>	CHECKOPTIONS - organize key/value pairs in structure with default or user-supplied values according to a schema</li><li><a href="ds.checkSolverOptions.html" class="code" title="function options=ds.checkSolverOptions(options)">ds.checkSolverOptions</a>	CHECKSOLVEROPTIONS - standardize simulation options appended to params.mat</li><li><a href="ds.getOutputCounts.html" class="code" title="function [state_var_counts,monitor_counts]=ds.getOutputCounts(model)">ds.getOutputCounts</a>	GETOUTPUTCOUNTS - determine how many copies of each state variable and monitor will be produced by simulating the model.</li><li><a href="ds.propagateFunctions.html" class="code" title="function model=ds.propagateFunctions(model)">ds.propagateFunctions</a>	PROPAGATEFUNCTIONS - eliminate internal function calls from model ODEs, ICs, monitors, and conditionals.</li><li><a href="ds.propagateParameters.html" class="code" title="function model=ds.propagateParameters(model,varargin)">ds.propagateParameters</a>	PROPAGATEPARAMETERS - substitute parameter values or prepend parameter names with prefix across all model equations.</li><li><a href="ds.vary2Modifications.html" class="code" title="function modifications_set = ds.vary2Modifications(vary,model)">ds.vary2Modifications</a>	VARY2MODIFICATIONS - convert specification of things to vary into a set of modifications indicating how to vary the desired things.</li></ul>
 This function is called by:
 <ul style="list-style-image:url(../matlabicon.gif)">
-<li><a href="GetSolveFile.html" class="code" title="function solve_file = GetSolveFile(model,studyinfo,varargin)">GetSolveFile</a>	GETSOLVEFILE - helper function that creates or retrieves the desired solver file.</li></ul>
+<li><a href="ds.getSolveFile.html" class="code" title="function solve_file = ds.getSolveFile(model,studyinfo,varargin)">ds.getSolveFile</a>	GETSOLVEFILE - helper function that creates or retrieves the desired solver file.</li></ul>
 <!-- crossreference -->
 
 <h2><a name="_subfunctions"></a>SUBFUNCTIONS <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
@@ -108,17 +108,17 @@ This function is called by:
 <li><a href="#_sub1" class="code">function update_vars(index_nexts_)</a></li><li><a href="#_sub2" class="code">function print_k(fid,odes_k,suffix_k,state_variables,nvals_per_var)</a></li><li><a href="#_sub3" class="code">function odes_out=update_odes(odes,suffix_k,increment,state_variables,index_lasts)</a></li><li><a href="#_sub4" class="code">function print_var_update(fid,index_nexts,index_lasts,update_term,state_variables)</a></li><li><a href="#_sub5" class="code">function print_var_update_last(fid,index_nexts,state_variables)</a></li><li><a href="#_sub6" class="code">function print_conditional_update(fid,conditionals,index_nexts,state_variables)</a></li><li><a href="#_sub7" class="code">function print_monitor_update(fid,monitors,index_nexts,state_variables,index_lasts)</a></li></ul>
 
 <h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
-<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function [outfile,options]=WriteDynaSimSolver(model,varargin)</a>
+<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function [outfile,options]=ds.writeDynaSimSolver(model,varargin)</a>
 0002 <span class="comment">%WRITEDYNASIMSOLVER - write m-file that numerically inteegrates the model</span>
 0003 <span class="comment">%</span>
 0004 <span class="comment">% Usage:</span>
-0005 <span class="comment">%   solver_file=WriteDynaSimSolver(model,varargin)</span>
+0005 <span class="comment">%   solver_file=ds.writeDynaSimSolver(model,varargin)</span>
 0006 <span class="comment">%</span>
 0007 <span class="comment">% Inputs:</span>
-0008 <span class="comment">%   - model: DynaSim model structure (see GenerateModel)</span>
+0008 <span class="comment">%   - model: DynaSim model structure (see ds.generateModel)</span>
 0009 <span class="comment">%   - options:</span>
-0010 <span class="comment">%     'solver'     : solver for numerical integration (see GetSolveFile)</span>
-0011 <span class="comment">%                    {'euler','rk2','rk4'} (default: 'rk4')</span>
+0010 <span class="comment">%     'solver'     : solver for numerical integration (see ds.getSolveFile)</span>
+0011 <span class="comment">%                    {'euler'/'rk1', 'rk2'/'modified_euler', 'rungekutta'/'rk'/'rk4'} (default: 'rk4')</span>
 0012 <span class="comment">%     'tspan'      : time limits of simulation [begin,end] (default: [0 100]) [ms]</span>
 0013 <span class="comment">%                    - Note: units must be consistent with dt and model equations</span>
 0014 <span class="comment">%     'dt'         : time step used for DynaSim solvers (default: .01) [ms]</span>
@@ -138,701 +138,887 @@ This function is called by:
 0028 <span class="comment">%</span>
 0029 <span class="comment">% Examples:</span>
 0030 <span class="comment">%   - Example 1: test solver production, display function in standard output</span>
-0031 <span class="comment">%       model=GenerateModel; % test model</span>
+0031 <span class="comment">%       model=ds.generateModel; % test model</span>
 0032 <span class="comment">%       without writing anything to disk:</span>
-0033 <span class="comment">%       WriteDynaSimSolver(model,'fileID',1,'save_parameters_flag',0,'solver','rk4');</span>
-0034 <span class="comment">%       WriteDynaSimSolver(model,'fileID',1,'save_parameters_flag',1,'solver','rk4');</span>
-0035 <span class="comment">%       model=PropagateFunctions(model);</span>
-0036 <span class="comment">%       WriteDynaSimSolver(model,'fileID',1,'save_parameters_flag',0,'solver','rk4');</span>
-0037 <span class="comment">%       WriteDynaSimSolver(model,'fileID',1,'save_parameters_flag',1,'solver','rk4');</span>
+0033 <span class="comment">%       ds.writeDynaSimSolver(model,'fileID',1,'save_parameters_flag',0,'solver','rk4');</span>
+0034 <span class="comment">%       ds.writeDynaSimSolver(model,'fileID',1,'save_parameters_flag',1,'solver','rk4');</span>
+0035 <span class="comment">%       model=ds.propagateFunctions(model);</span>
+0036 <span class="comment">%       ds.writeDynaSimSolver(model,'fileID',1,'save_parameters_flag',0,'solver','rk4');</span>
+0037 <span class="comment">%       ds.writeDynaSimSolver(model,'fileID',1,'save_parameters_flag',1,'solver','rk4');</span>
 0038 <span class="comment">%</span>
 0039 <span class="comment">%   - Example 2: real-time downsampling</span>
-0040 <span class="comment">%       WriteDynaSimSolver(model,'downsample_factor',10,'fileID',1,'solver','rk4');</span>
+0040 <span class="comment">%       ds.writeDynaSimSolver(model,'downsample_factor',10,'fileID',1,'solver','rk4');</span>
 0041 <span class="comment">%</span>
 0042 <span class="comment">%   - Example 3: real-time writing data to disk (reduce memory demand)</span>
-0043 <span class="comment">%       WriteDynaSimSolver(model,'disk_flag',1,'fileID',1,'solver','rk4');</span>
+0043 <span class="comment">%       ds.writeDynaSimSolver(model,'disk_flag',1,'fileID',1,'solver','rk4');</span>
 0044 <span class="comment">%</span>
 0045 <span class="comment">%   - Example 4: maximally conserve memory: downsample and write to disk</span>
-0046 <span class="comment">%       WriteDynaSimSolver(model,'disk_flag',1,'downsample_factor',10,'fileID',1,'solver','rk4');</span>
+0046 <span class="comment">%       ds.writeDynaSimSolver(model,'disk_flag',1,'downsample_factor',10,'fileID',1,'solver','rk4');</span>
 0047 <span class="comment">%</span>
 0048 <span class="comment">% More Examples:</span>
-0049 <span class="comment">%     WriteDynaSimSolver(model,'solver','euler');</span>
-0050 <span class="comment">%     WriteDynaSimSolver(model,'solver','rk2');</span>
-0051 <span class="comment">%     WriteDynaSimSolver(model,'solver','rk4');</span>
+0049 <span class="comment">%     ds.writeDynaSimSolver(model,'solver','euler');</span>
+0050 <span class="comment">%     ds.writeDynaSimSolver(model,'solver','rk2');</span>
+0051 <span class="comment">%     ds.writeDynaSimSolver(model,'solver','rk4');</span>
 0052 <span class="comment">%</span>
-0053 <span class="comment">%     model=GenerateModel; % test model</span>
-0054 <span class="comment">%     tic; WriteDynaSimSolver(model,'save_parameters_flag',0,'reduce_function_calls_flag',0,'solver','rk4','filename','solve_ode.m'); v=solve_ode; plot(v); toc</span>
-0055 <span class="comment">%     tic; WriteDynaSimSolver(model,'save_parameters_flag',1,'reduce_function_calls_flag',0,'solver','rk4','filename','solve_ode.m'); v=solve_ode; plot(v); toc</span>
-0056 <span class="comment">%     tic; WriteDynaSimSolver(model,'save_parameters_flag',0,'reduce_function_calls_flag',1,'solver','rk4','filename','solve_ode.m'); v=solve_ode; plot(v); toc</span>
-0057 <span class="comment">%     tic; WriteDynaSimSolver(model,'save_parameters_flag',1,'reduce_function_calls_flag',1,'solver','rk4','filename','solve_ode.m'); v=solve_ode; plot(v); toc</span>
-0058 <span class="comment">%     tic; WriteDynaSimSolver(model,'save_parameters_flag',1,'reduce_function_calls_flag',1,'solver','rk2','filename','solve_ode.m'); v=solve_ode; plot(v); toc</span>
-0059 <span class="comment">%     tic; WriteDynaSimSolver(model,'save_parameters_flag',1,'reduce_function_calls_flag',1,'solver','rk1','filename','solve_ode.m'); v=solve_ode; plot(v); toc</span>
-0060 <span class="comment">%     tic; WriteDynaSimSolver(model,'save_parameters_flag',1,'reduce_function_calls_flag',1,'solver','rk1','filename','solve_ode.m','downsample_factor',10); v=solve_ode; plot(v); toc</span>
-0061 <span class="comment">%     tic; WriteDynaSimSolver(model,'save_parameters_flag',1,'reduce_function_calls_flag',1,'solver','rk2','filename','solve_ode.m','dt',.001,'downsample_factor',10); v=solve_ode; plot(v); toc</span>
-0062 <span class="comment">%     tic; WriteDynaSimSolver(model,'save_parameters_flag',1,'reduce_function_calls_flag',1,'solver','rk1','filename','solve_ode.m','dt',.001,'downsample_factor',10); v=solve_ode; plot(v); toc</span>
-0063 <span class="comment">%     tic; WriteDynaSimSolver(model,'save_parameters_flag',1,'reduce_function_calls_flag',1,'solver','rk1','filename','solve_ode.m','dt',.005,'tspan',[0 200],'downsample_factor',10); v=solve_ode; plot(v); toc</span>
+0053 <span class="comment">%     model=ds.generateModel; % test model</span>
+0054 <span class="comment">%     tic; ds.writeDynaSimSolver(model,'save_parameters_flag',0,'reduce_function_calls_flag',0,'solver','rk4','filename','solve_ode.m'); v=solve_ode; plot(v); toc</span>
+0055 <span class="comment">%     tic; ds.writeDynaSimSolver(model,'save_parameters_flag',1,'reduce_function_calls_flag',0,'solver','rk4','filename','solve_ode.m'); v=solve_ode; plot(v); toc</span>
+0056 <span class="comment">%     tic; ds.writeDynaSimSolver(model,'save_parameters_flag',0,'reduce_function_calls_flag',1,'solver','rk4','filename','solve_ode.m'); v=solve_ode; plot(v); toc</span>
+0057 <span class="comment">%     tic; ds.writeDynaSimSolver(model,'save_parameters_flag',1,'reduce_function_calls_flag',1,'solver','rk4','filename','solve_ode.m'); v=solve_ode; plot(v); toc</span>
+0058 <span class="comment">%     tic; ds.writeDynaSimSolver(model,'save_parameters_flag',1,'reduce_function_calls_flag',1,'solver','rk2','filename','solve_ode.m'); v=solve_ode; plot(v); toc</span>
+0059 <span class="comment">%     tic; ds.writeDynaSimSolver(model,'save_parameters_flag',1,'reduce_function_calls_flag',1,'solver','rk1','filename','solve_ode.m'); v=solve_ode; plot(v); toc</span>
+0060 <span class="comment">%     tic; ds.writeDynaSimSolver(model,'save_parameters_flag',1,'reduce_function_calls_flag',1,'solver','rk1','filename','solve_ode.m','downsample_factor',10); v=solve_ode; plot(v); toc</span>
+0061 <span class="comment">%     tic; ds.writeDynaSimSolver(model,'save_parameters_flag',1,'reduce_function_calls_flag',1,'solver','rk2','filename','solve_ode.m','dt',.001,'downsample_factor',10); v=solve_ode; plot(v); toc</span>
+0062 <span class="comment">%     tic; ds.writeDynaSimSolver(model,'save_parameters_flag',1,'reduce_function_calls_flag',1,'solver','rk1','filename','solve_ode.m','dt',.001,'downsample_factor',10); v=solve_ode; plot(v); toc</span>
+0063 <span class="comment">%     tic; ds.writeDynaSimSolver(model,'save_parameters_flag',1,'reduce_function_calls_flag',1,'solver','rk1','filename','solve_ode.m','dt',.005,'tspan',[0 200],'downsample_factor',10); v=solve_ode; plot(v); toc</span>
 0064 <span class="comment">%</span>
-0065 <span class="comment">% Dependencies: CheckOptions, CheckModel</span>
+0065 <span class="comment">% Dependencies: ds.checkOptions, ds.checkModel</span>
 0066 <span class="comment">%</span>
-0067 <span class="comment">% See also: GetSolveFile, SimulateModel, WriteMatlabSolver</span>
+0067 <span class="comment">% See also: ds.getSolveFile, dsSimulate, ds.writeMatlabSolver</span>
 0068 
 0069 <span class="comment">% Check inputs</span>
-0070 options=<a href="CheckOptions.html" class="code" title="function parms = CheckOptions(options, options_schema, strict)">CheckOptions</a>(varargin,{<span class="keyword">...</span>
+0070 options=<a href="ds.checkOptions.html" class="code" title="function [parms, params_unspecified ] = ds.checkOptions(options, options_schema, strict)">ds.checkOptions</a>(varargin,{<span class="keyword">...</span>
 0071   <span class="string">'tspan'</span>,[0 100],[],<span class="keyword">...</span><span class="comment">          % [beg,end] (units must be consistent with dt and equations)</span>
 0072   <span class="string">'downsample_factor'</span>,1,[],<span class="keyword">...</span><span class="comment">    % downsampling applied during simulation (only every downsample_factor-time point is stored in memory or written to disk)</span>
-0073   <span class="string">'random_seed'</span>,<span class="string">'shuffle'</span>,[],<span class="keyword">...</span><span class="comment">        % seed for random number generator (usage: rng(random_seed))</span>
-0074   <span class="string">'solver'</span>,<span class="string">'rk4'</span>,{<span class="string">'euler'</span>,<span class="string">'rk1'</span>,<span class="string">'rk2'</span>,<span class="string">'rk4'</span>,<span class="string">'modified_euler'</span>,<span class="string">'rungekutta'</span>,<span class="string">'rk'</span>},<span class="keyword">...</span><span class="comment"> % DynaSim and built-in Matlab solvers</span>
-0075   <span class="string">'disk_flag'</span>,0,{0,1},<span class="keyword">...</span><span class="comment">            % whether to write to disk during simulation instead of storing in memory</span>
-0076   <span class="string">'dt'</span>,.01,[],<span class="keyword">...</span><span class="comment">                 % time step used for fixed step DynaSim solvers</span>
+0073   <span class="string">'dt'</span>,.01,[],<span class="keyword">...</span><span class="comment">                 % time step used for fixed step DynaSim solvers</span>
+0074   <span class="string">'random_seed'</span>,<span class="string">'shuffle'</span>,[],<span class="keyword">...</span><span class="comment">        % seed for random number generator (usage: rng(random_seed))</span>
+0075   <span class="string">'solver'</span>,<span class="string">'rk4'</span>,{<span class="string">'euler'</span>,<span class="string">'rk1'</span>,<span class="string">'rk2'</span>,<span class="string">'rk4'</span>,<span class="string">'modified_euler'</span>,<span class="string">'rungekutta'</span>,<span class="string">'rk'</span>},<span class="keyword">...</span><span class="comment"> % DynaSim solvers</span>
+0076   <span class="string">'disk_flag'</span>,0,{0,1},<span class="keyword">...</span><span class="comment">            % whether to write to disk during simulation instead of storing in memory</span>
 0077   <span class="string">'reduce_function_calls_flag'</span>,1,{0,1},<span class="keyword">...</span><span class="comment">   % whether to eliminate internal (anonymous) function calls</span>
 0078   <span class="string">'save_parameters_flag'</span>,1,{0,1},<span class="keyword">...</span>
 0079   <span class="string">'filename'</span>,[],[],<span class="keyword">...</span><span class="comment">         % name of solver file that integrates model</span>
 0080   <span class="string">'data_file'</span>,<span class="string">'data.csv'</span>,[],<span class="keyword">...</span><span class="comment"> % name of data file if disk_flag=1</span>
 0081   <span class="string">'fileID'</span>,1,[],<span class="keyword">...</span>
-0082   <span class="string">'compile_flag'</span>,exist(<span class="string">'codegen'</span>)==6,{0,1},<span class="keyword">...</span><span class="comment"> % whether to prepare script for being compiled using coder instead of interpreting Matlab</span>
+0082   <span class="string">'compile_flag'</span>,0,{0,1},<span class="keyword">...</span><span class="comment"> % whether to prepare script for being compiled using coder instead of interpreting Matlab</span>
 0083   <span class="string">'verbose_flag'</span>,1,{0,1},<span class="keyword">...</span>
-0084   },false);
-0085 model=<a href="CheckModel.html" class="code" title="function model=CheckModel(model)">CheckModel</a>(model); 
-0086 separator=<span class="string">','</span>; <span class="comment">% ',', '\\t'</span>
-0087 
-0088 <span class="comment">%% 1.0 prepare model info</span>
-0089 parameter_prefix=<span class="string">'p.'</span>;<span class="comment">%'pset.p.';</span>
-0090 state_variables=model.state_variables;
-0091 
-0092 <span class="comment">% 1.1 eliminate internal (anonymous) function calls from model equations</span>
-0093 <span class="keyword">if</span> options.reduce_function_calls_flag==1
-0094   model=<a href="PropagateFunctions.html" class="code" title="function model=PropagateFunctions(model)">PropagateFunctions</a>(model);
-0095 <span class="keyword">end</span>
-0096 
-0097 <span class="comment">% 1.1 prepare parameters</span>
-0098 <span class="keyword">if</span> options.save_parameters_flag
-0099   <span class="comment">% add parameter struct prefix to parameters in model equations</span>
-0100   model=<a href="PropagateParameters.html" class="code" title="function model=PropagateParameters(model,varargin)">PropagateParameters</a>(model,<span class="string">'action'</span>,<span class="string">'prepend'</span>,<span class="string">'prefix'</span>,parameter_prefix);
-0101   <span class="comment">% set and capture numeric seed value</span>
-0102   <span class="keyword">if</span> options.compile_flag==1
-0103     <span class="comment">% todo: make seed string (eg, 'shuffle') from param struct work with coder (options.compile_flag=1)</span>
-0104     <span class="comment">% (currently raises error: &quot;String input must be constant&quot;)</span>
-0105     <span class="comment">% workaround: (shuffle here and get numeric seed for MEX-compatible params.mat)</span>
-0106     rng(options.random_seed);
-0107     options.random_seed=getfield(rng,<span class="string">'Seed'</span>);  <span class="comment">% &lt;-- current active seed</span>
-0108   <span class="keyword">end</span>
-0109   <span class="comment">% set parameter file name (save with m-file)</span>
-0110   [fpath,fname,fext]=fileparts(options.filename);
-0111   param_file_name = fullfile(fpath,<span class="string">'params.mat'</span>);
-0112   <span class="comment">% save parameters to disk</span>
-0113   warning(<span class="string">'off'</span>,<span class="string">'catstruct:DuplicatesFound'</span>);
-0114   p=catstruct(<a href="CheckSolverOptions.html" class="code" title="function options=CheckSolverOptions(options)">CheckSolverOptions</a>(options),model.parameters);
-0115   <span class="keyword">if</span> options.verbose_flag
-0116     fprintf(<span class="string">'saving params.mat\n'</span>);
-0117   <span class="keyword">end</span>
-0118   save(param_file_name,<span class="string">'p'</span>);
-0119 <span class="keyword">else</span>
-0120   <span class="comment">% insert parameter values into model expressions</span>
-0121   model=<a href="PropagateParameters.html" class="code" title="function model=PropagateParameters(model,varargin)">PropagateParameters</a>(model,<span class="string">'action'</span>,<span class="string">'substitute'</span>);
-0122 <span class="keyword">end</span>
-0123 
-0124 <span class="comment">% 1.2 prepare list of outputs (state variables and monitors)</span>
-0125 tmp=cellfun(@(x)[x <span class="string">','</span>],model.state_variables,<span class="string">'uni'</span>,0);
-0126 tmp=[tmp{:}];
-0127 output_string=tmp(1:end-1);
-0128 <span class="keyword">if</span> ~isempty(model.monitors)
-0129   tmp=cellfun(@(x)[x <span class="string">','</span>],fieldnames(model.monitors),<span class="string">'uni'</span>,0);
-0130   tmp=[tmp{:}];
-0131   output_string=[output_string <span class="string">','</span> tmp(1:end-1)];
-0132 <span class="keyword">end</span>
-0133 <span class="keyword">if</span> ~isempty(model.fixed_variables)
-0134   tmp=cellfun(@(x)[x <span class="string">','</span>],fieldnames(model.fixed_variables),<span class="string">'uni'</span>,0);
-0135   tmp=[tmp{:}];
-0136   output_string=[output_string <span class="string">','</span> tmp(1:end-1)];
-0137 <span class="keyword">end</span>  
-0138 output_string=[<span class="string">'[T,'</span> output_string <span class="string">']'</span>]; <span class="comment">% state vars, monitors, time vector</span>
-0139 
-0140 <span class="comment">% HACK to get IC to work</span>
-0141 <span class="keyword">if</span> options.downsample_factor == 1
-0142   <span class="keyword">for</span> fieldNameC = fieldnames(model.ICs)'
-0143     model.ICs.(fieldNameC{1}) = regexprep(model.ICs.(fieldNameC{1}), <span class="string">'_last'</span>, <span class="string">'(1,:)'</span>);
-0144   <span class="keyword">end</span>
-0145 <span class="keyword">end</span>
-0146 
-0147 <span class="comment">%% 2.0 write m-file solver</span>
-0148 <span class="comment">% 2.1 create mfile</span>
-0149 <span class="keyword">if</span> ~isempty(options.filename)
-0150   <span class="keyword">if</span> options.verbose_flag
-0151     fprintf(<span class="string">'creating solver file: %s\n'</span>,options.filename);
-0152   <span class="keyword">end</span>
-0153   fid=fopen(options.filename,<span class="string">'wt'</span>);
-0154 <span class="keyword">else</span>
-0155   fid=options.fileID;
-0156 <span class="keyword">end</span>
-0157 outfile=fopen(fid);
-0158 
-0159 <span class="keyword">if</span> options.disk_flag==1
-0160   fprintf(fid,<span class="string">'function data_file=solve_ode\n'</span>);
-0161   <span class="comment">% create output data file</span>
-0162   fprintf(fid,<span class="string">'%% ------------------------------------------------------------\n'</span>);
-0163   fprintf(fid,<span class="string">'%% Open output data file:\n'</span>);
-0164   fprintf(fid,<span class="string">'data_file=''%s'';\n'</span>,options.data_file);
-0165   <span class="comment">%fprintf(fid,'fileID=fopen(data_file,''wt'');\n'); % &lt;-- 'wt' does not</span>
-0166   <span class="comment">% compile in linux. 't' may be necessary on PC. may need to look into this</span>
-0167   fprintf(fid,<span class="string">'fileID=fopen(data_file,''w'');\n'</span>);
-0168   <span class="comment">% write headers</span>
-0169   [state_var_counts,monitor_counts]=<a href="GetOutputCounts.html" class="code" title="function [state_var_counts,monitor_counts]=GetOutputCounts(model)">GetOutputCounts</a>(model);
-0170   fprintf(fid,<span class="string">'fprintf(fileID,''time%s'');\n'</span>,separator);
-0171   <span class="keyword">if</span> ~isempty(model.state_variables)
-0172     <span class="keyword">for</span> i=1:length(model.state_variables)
-0173       fprintf(fid,<span class="string">'for i=1:%g, fprintf(fileID,''%s%s''); end\n'</span>,state_var_counts(i),model.state_variables{i},separator);    
+0084   <span class="string">'one_solve_file_flag'</span>,0,{0,1},<span class="keyword">...</span><span class="comment"> % use only 1 solve file of each type, but can't vary mechs yet</span>
+0085   },false);
+0086 model=<a href="ds.checkModel.html" class="code" title="function model=ds.checkModel(model)">ds.checkModel</a>(model);
+0087 separator=<span class="string">','</span>; <span class="comment">% ',', '\\t'</span>
+0088 
+0089 <span class="comment">%% 1.0 prepare model info</span>
+0090 parameter_prefix=<span class="string">'p.'</span>;<span class="comment">%'pset.p.';</span>
+0091 state_variables=model.state_variables;
+0092 
+0093 <span class="comment">% 1.1 eliminate internal (anonymous) function calls from model equations</span>
+0094 <span class="keyword">if</span> options.reduce_function_calls_flag==1
+0095   model=<a href="ds.propagateFunctions.html" class="code" title="function model=ds.propagateFunctions(model)">ds.propagateFunctions</a>(model);
+0096 <span class="keyword">end</span>
+0097 
+0098 <span class="comment">% 1.1 prepare parameters</span>
+0099 <span class="keyword">if</span> options.save_parameters_flag
+0100   <span class="comment">% add parameter struct prefix to parameters in model equations</span>
+0101   model=<a href="ds.propagateParameters.html" class="code" title="function model=ds.propagateParameters(model,varargin)">ds.propagateParameters</a>(model,<span class="string">'action'</span>,<span class="string">'prepend'</span>, <span class="string">'prefix'</span>,parameter_prefix);
+0102   
+0103   <span class="comment">% set and capture numeric seed value</span>
+0104   <span class="keyword">if</span> options.compile_flag==1
+0105     <span class="comment">% todo: make seed string (eg, 'shuffle') from param struct work with coder (options.compile_flag=1)</span>
+0106     <span class="comment">% (currently raises error: &quot;String input must be constant&quot;)</span>
+0107     <span class="comment">% workaround: (shuffle here and get numeric seed for MEX-compatible params.mat)</span>
+0108     rng(options.random_seed);
+0109     options.random_seed=getfield(rng,<span class="string">'Seed'</span>);  <span class="comment">% &lt;-- current active seed</span>
+0110   <span class="keyword">end</span>
+0111   
+0112   <span class="comment">% set parameter file name (save with m-file)</span>
+0113   [fpath,fname,fext]=fileparts(options.filename);
+0114   param_file_path = fullfile(fpath,<span class="string">'params.mat'</span>);
+0115   
+0116   <span class="comment">% save parameters to disk</span>
+0117   warning(<span class="string">'off'</span>,<span class="string">'catstruct:DuplicatesFound'</span>);
+0118   p = catstruct(<a href="ds.checkSolverOptions.html" class="code" title="function options=ds.checkSolverOptions(options)">ds.checkSolverOptions</a>(options),model.parameters);
+0119   
+0120   <span class="keyword">if</span> options.one_solve_file_flag
+0121     <span class="comment">% fill p flds that were varied with vectors of length = nSims</span>
+0122     
+0123     vary=<a href="ds.checkOptions.html" class="code" title="function [parms, params_unspecified ] = ds.checkOptions(options, options_schema, strict)">ds.checkOptions</a>(varargin,{<span class="string">'vary'</span>,[],[],},false);
+0124     vary = vary.vary;
+0125 
+0126     mod_set = <a href="ds.vary2Modifications.html" class="code" title="function modifications_set = ds.vary2Modifications(vary,model)">ds.vary2Modifications</a>(vary);
+0127     <span class="comment">% The first 2 cols of modifications_set are idenitical to vary, it just</span>
+0128     <span class="comment">% has the last column distributed out to the number of sims</span>
+0129     
+0130     
+0131     <span class="comment">% Get param names</span>
+0132     iMod = 1;
+0133     <span class="comment">% Split extra entries in first 2 cols of mods, so each row is a single pop and param</span>
+0134     [~, first_mod_set] = <a href="ds.applyModifications.html" class="code" title="function [output,modifications]=ds.applyModifications(model,modifications)">ds.applyModifications</a>([],mod_set{iMod});
+0135 
+0136     <span class="comment">% replace '-&gt;' with '_'</span>
+0137     first_mod_set(:,1) = strrep(first_mod_set(:,1), <span class="string">'-&gt;'</span>, <span class="string">'_'</span>);
+0138 
+0139     <span class="comment">% add col of underscores</span>
+0140     first_mod_set = cat(2,first_mod_set(:,1), repmat({<span class="string">'_'</span>},size(first_mod_set,1), 1), first_mod_set(:,2:end));
+0141     nParamMods = size(first_mod_set, 1);
+0142     
+0143     <span class="comment">% get param names</span>
+0144     mod_params = cell(nParamMods,1);
+0145     <span class="keyword">for</span> iRow = 1:nParamMods
+0146       mod_params{iRow} = [first_mod_set{iRow,1:3}];
+0147 
+0148       <span class="comment">%check if variable in namespace</span>
+0149       <span class="keyword">if</span> ~any(strcmp(model.namespaces(:,2), mod_params{iRow}))
+0150         <span class="comment">% find correct entry based on param and pop</span>
+0151         nsInd = logical(~cellfun(@isempty, strfind(model.namespaces(:,2), [first_mod_set{iRow,1} <span class="string">'_'</span>])) .* <span class="keyword">...</span>
+0152           ~cellfun(@isempty, strfind(model.namespaces(:,2), first_mod_set{iRow,3})));
+0153         
+0154         assert(sum(nsInd) == 1)
+0155         
+0156         <span class="comment">% add mech names using namespace</span>
+0157         mod_params{iRow} = model.namespaces{nsInd,2};
+0158       <span class="keyword">end</span>
+0159     <span class="keyword">end</span>
+0160 
+0161     <span class="comment">% Get param values for each sim</span>
+0162     param_values = nan(nParamMods, length(mod_set));
+0163     <span class="keyword">for</span> iMod = 1:length(mod_set)
+0164       <span class="comment">% Split extra entries in first 2 cols of mods, so each row is a single pop and param</span>
+0165       [~, mod_set{iMod}] = <a href="ds.applyModifications.html" class="code" title="function [output,modifications]=ds.applyModifications(model,modifications)">ds.applyModifications</a>([],mod_set{iMod});
+0166       
+0167       <span class="comment">% Get scalar values as vector</span>
+0168       param_values(:, iMod) = [mod_set{iMod}{:,3}];
+0169     <span class="keyword">end</span>
+0170     
+0171     <span class="comment">% Assign value vectors to params</span>
+0172     <span class="keyword">for</span> iParam = 1:nParamMods
+0173       p.(mod_params{iParam}) = param_values(iParam,:);
 0174     <span class="keyword">end</span>
-0175   <span class="keyword">end</span>
-0176   <span class="keyword">if</span> ~isempty(model.monitors)
-0177     monitor_names=fieldnames(model.monitors);
-0178     <span class="keyword">for</span> i=1:length(monitor_names)
-0179       fprintf(fid,<span class="string">'for i=1:%g, fprintf(fileID,''%s%s''); end\n'</span>,monitor_counts(i),monitor_names{i},separator);    
-0180     <span class="keyword">end</span>
-0181   <span class="keyword">end</span>
-0182   fprintf(fid,<span class="string">'fprintf(fileID,''\\n'');\n'</span>);
-0183 <span class="keyword">else</span>
-0184   fprintf(fid,<span class="string">'function %s=solve_ode\n'</span>,output_string);
-0185 <span class="keyword">end</span>
-0186 
-0187 <span class="comment">% 2.3 load parameters</span>
-0188 <span class="keyword">if</span> options.save_parameters_flag
-0189   fprintf(fid,<span class="string">'%% ------------------------------------------------------------\n'</span>);
-0190   fprintf(fid,<span class="string">'%% Parameters:\n'</span>);
-0191   fprintf(fid,<span class="string">'%% ------------------------------------------------------------\n'</span>);
-0192   fprintf(fid,<span class="string">'p=load(''params.mat'',''p''); p=p.p;\n'</span>);
-0193 <span class="keyword">end</span>
-0194 
-0195 <span class="comment">% write tspan, dt, and downsample_factor</span>
-0196 <span class="keyword">if</span> options.save_parameters_flag
-0197   fprintf(fid,<span class="string">'downsample_factor=%sdownsample_factor;\n'</span>,parameter_prefix);
-0198   fprintf(fid,<span class="string">'dt=%sdt;\n'</span>,parameter_prefix);
-0199   fprintf(fid,<span class="string">'T=(%stspan(1):dt:%stspan(2))'';\n'</span>,parameter_prefix,parameter_prefix);
-0200 <span class="keyword">else</span>
-0201   fprintf(fid,<span class="string">'tspan=[%g %g];\ndt=%g;\ndownsample_factor=%g;\n'</span>,options.tspan,options.dt,options.downsample_factor);
-0202   fprintf(fid,<span class="string">'T=(tspan(1):dt:tspan(2))'';\n'</span>);
-0203 <span class="keyword">end</span>
-0204 <span class="comment">% write calculation of time vector and derived parameters: ntime, nsamp</span>
-0205 fprintf(fid,<span class="string">'ntime=length(T);\nnsamp=length(1:downsample_factor:ntime);\n'</span>);
-0206 
-0207 <span class="comment">% 2.4 evaluate fixed variables</span>
-0208 <span class="keyword">if</span> ~isempty(model.fixed_variables)
-0209   fprintf(fid,<span class="string">'%% ------------------------------------------------------------\n'</span>);
-0210   fprintf(fid,<span class="string">'%% Fixed variables:\n'</span>);
-0211   fprintf(fid,<span class="string">'%% ------------------------------------------------------------\n'</span>);
-0212   names=fieldnames(model.fixed_variables);
-0213   expressions=struct2cell(model.fixed_variables);
-0214   <span class="keyword">for</span> i=1:length(names)
-0215     fprintf(fid,<span class="string">'%s = %s;\n'</span>,names{i},expressions{i});
-0216   <span class="keyword">end</span>
-0217 <span class="keyword">end</span>
-0218 
-0219 <span class="comment">% 2.5 evaluate function handles</span>
-0220 <span class="keyword">if</span> ~isempty(model.functions) &amp;&amp; options.reduce_function_calls_flag==0
-0221   fprintf(fid,<span class="string">'%% ------------------------------------------------------------\n'</span>);
-0222   fprintf(fid,<span class="string">'%% Functions:\n'</span>);
-0223   fprintf(fid,<span class="string">'%% ------------------------------------------------------------\n'</span>);
-0224   names=fieldnames(model.functions);
-0225   expressions=struct2cell(model.functions);
-0226   <span class="keyword">for</span> i=1:length(names)
-0227     fprintf(fid,<span class="string">'%s = %s;\n'</span>,names{i},expressions{i});
-0228   <span class="keyword">end</span>
-0229 <span class="keyword">end</span>
-0230 
-0231 <span class="comment">% 2.6 prepare storage</span>
-0232 fprintf(fid,<span class="string">'%% ------------------------------------------------------------\n'</span>);
-0233 fprintf(fid,<span class="string">'%% Initial conditions:\n'</span>);
-0234 fprintf(fid,<span class="string">'%% ------------------------------------------------------------\n'</span>);
-0235 <span class="comment">% 2.2 set random seed</span>
-0236 fprintf(fid,<span class="string">'%% seed the random number generator\n'</span>);
-0237 <span class="keyword">if</span> options.save_parameters_flag
-0238   fprintf(fid,<span class="string">'rng(%srandom_seed);\n'</span>,parameter_prefix);
-0239 <span class="keyword">else</span>  
-0240   <span class="keyword">if</span> ischar(options.random_seed)
-0241     fprintf(fid,<span class="string">'rng(''%s'');\n'</span>,options.random_seed);
-0242   <span class="keyword">elseif</span> isnumeric(options.random_seed)
-0243     fprintf(fid,<span class="string">'rng(%g);\n'</span>,options.random_seed);
-0244   <span class="keyword">end</span>
-0245 <span class="keyword">end</span>
-0246 <span class="comment">% initialize time</span>
-0247 fprintf(fid,<span class="string">'t=0; k=1;\n'</span>);
-0248 
-0249 <span class="comment">% todo: get coder varsize working with new format:</span>
-0250 
-0251 <span class="comment">% prepare for compilation</span>
-0252 <span class="comment">% if options.compile_flag==1</span>
-0253 <span class="comment">%   for i = 1:length(state_variables)</span>
-0254 <span class="comment">%     %fprintf(fid,'coder.varsize(''%s'',[1e4,1],[true,false]);\n',state_variables{i}); % population size up to 1e4 for variable initial conditions</span>
-0255 <span class="comment">%     fprintf(fid,'coder.varsize(''%s'',[1e8,1e4],[true,true]);\n',state_variables{i}); % population size up to 1e4 for variable initial conditions</span>
-0256 <span class="comment">%   end</span>
-0257 <span class="comment">% end</span>
-0258 
-0259 <span class="comment">% preallocate and initialize matrices to store results</span>
-0260 <span class="keyword">if</span> options.disk_flag==1
-0261   <span class="comment">% add time zero to output data file</span>
-0262   fprintf(fid,<span class="string">'fprintf(fileID,''0%s'');\n'</span>,separator);
-0263 <span class="keyword">end</span>
-0264 fprintf(fid,<span class="string">'\n%% STATE_VARIABLES:\n'</span>);
-0265 <span class="comment">% STATE_VARIABLES</span>
-0266 nvals_per_var=zeros(1,length(state_variables));
-0267 IC_expressions=struct2cell(model.ICs);
-0268 <span class="keyword">for</span> i=1:length(state_variables)
-0269   <span class="comment">% initialize var_last</span>
-0270   <span class="keyword">if</span> options.downsample_factor&gt;1 || options.disk_flag==1
-0271     <span class="comment">% set var_last=IC;</span>
-0272     fprintf(fid,<span class="string">'%s_last = %s;\n'</span>,state_variables{i},IC_expressions{i});
-0273   <span class="keyword">end</span>
-0274   <span class="keyword">if</span> options.disk_flag==1
-0275     <span class="comment">% print var_last</span>
-0276     var_last=sprintf(<span class="string">'%s_last'</span>,state_variables{i});
-0277     fprintf(fid,<span class="string">'for i=1:numel(%s), fprintf(fileID,''%%g%s'',%s(i)); end\n'</span>,var_last,separator,var_last);
-0278   <span class="keyword">else</span>
-0279     <span class="comment">% preallocate state variables</span>
-0280     parts=regexp(state_variables{i},<span class="string">'_'</span>,<span class="string">'split'</span>);
-0281     <span class="keyword">if</span> numel(parts)==4 <span class="comment">% has connection mechanism namespace: target_source_mechanism</span>
-0282       <span class="comment">% state variables defined in connection mechanisms are assumed to</span>
-0283       <span class="comment">% have dimensionality of the source population</span>
-0284       part=parts{2};
-0285     <span class="keyword">else</span> <span class="comment">% has intrinsic mechanism or population namespace: target_mechanism</span>
-0286       <span class="comment">% state variables defined in intrinsic mechanisms or population</span>
-0287       <span class="comment">% equations have dimensionality of the target population</span>
-0288       part=parts{1};
-0289     <span class="keyword">end</span>
-0290     <span class="keyword">if</span> options.save_parameters_flag
-0291       fprintf(fid,<span class="string">'%s = zeros(nsamp,%s%s_Npop);\n'</span>,state_variables{i},parameter_prefix,part);
-0292     <span class="keyword">else</span>
-0293       fprintf(fid,<span class="string">'%s = zeros(nsamp,%g);\n'</span>,state_variables{i},model.parameters.([part <span class="string">'_Npop'</span>]));
-0294     <span class="keyword">end</span>
-0295     nvals_per_var(i)=model.parameters.([part <span class="string">'_Npop'</span>]);
-0296     <span class="comment">% initialize state variables</span>
-0297     <span class="keyword">if</span> options.downsample_factor==1
-0298       <span class="comment">% set var(1,:)=IC;</span>
-0299       fprintf(fid,<span class="string">'  %s(1,:) = %s;\n'</span>,state_variables{i},IC_expressions{i});
-0300     <span class="keyword">else</span>
-0301       <span class="comment">% set var(1,:)=var_last;</span>
-0302       fprintf(fid,<span class="string">'  %s(1,:) = %s_last;\n'</span>,state_variables{i},state_variables{i});      
+0175   <span class="keyword">end</span> <span class="comment">% one_solve_file_flag</span>
+0176   
+0177   <span class="keyword">if</span> options.verbose_flag
+0178     fprintf(<span class="string">'Saving params.mat\n'</span>);
+0179   <span class="keyword">end</span>
+0180   save(param_file_path,<span class="string">'p'</span>);
+0181 <span class="keyword">else</span>
+0182   <span class="comment">% insert parameter values into model expressions</span>
+0183   model=<a href="ds.propagateParameters.html" class="code" title="function model=ds.propagateParameters(model,varargin)">ds.propagateParameters</a>(model,<span class="string">'action'</span>,<span class="string">'substitute'</span>);
+0184 <span class="keyword">end</span>
+0185 
+0186 <span class="comment">% 1.2 prepare list of outputs (state variables and monitors)</span>
+0187 tmp=cellfun(@(x)[x <span class="string">','</span>],model.state_variables,<span class="string">'uni'</span>,0);
+0188 tmp=[tmp{:}];
+0189 output_string=tmp(1:end-1);
+0190 
+0191 <span class="keyword">if</span> ~isempty(model.monitors)
+0192   tmp=cellfun(@(x)[x <span class="string">','</span>],fieldnames(model.monitors),<span class="string">'uni'</span>,0);
+0193   tmp=[tmp{:}];
+0194   output_string=[output_string <span class="string">','</span> tmp(1:end-1)];
+0195 <span class="keyword">end</span>
+0196 
+0197 <span class="keyword">if</span> ~isempty(model.fixed_variables)
+0198   tmp=cellfun(@(x)[x <span class="string">','</span>],fieldnames(model.fixed_variables),<span class="string">'uni'</span>,0);
+0199   tmp=[tmp{:}];
+0200   output_string=[output_string <span class="string">','</span> tmp(1:end-1)];
+0201 <span class="keyword">end</span>
+0202 
+0203 output_string=[<span class="string">'[T,'</span> output_string <span class="string">']'</span>]; <span class="comment">% state vars, monitors, time vector</span>
+0204 
+0205 <span class="comment">% HACK to get IC to work</span>
+0206 <span class="keyword">if</span> options.downsample_factor == 1
+0207   <span class="keyword">for</span> fieldNameC = fieldnames(model.ICs)'
+0208     model.ICs.(fieldNameC{1}) = regexprep(model.ICs.(fieldNameC{1}), <span class="string">'_last'</span>, <span class="string">'(1,:)'</span>);
+0209   <span class="keyword">end</span>
+0210 <span class="keyword">end</span>
+0211 
+0212 <span class="comment">%% 2.0 write m-file solver</span>
+0213 <span class="comment">% 2.1 create mfile</span>
+0214 <span class="keyword">if</span> ~isempty(options.filename)
+0215   <span class="keyword">if</span> options.verbose_flag
+0216     fprintf(<span class="string">'Creating solver file: %s\n'</span>,options.filename);
+0217   <span class="keyword">end</span>
+0218   
+0219   fid=fopen(options.filename,<span class="string">'wt'</span>);
+0220 <span class="keyword">else</span>
+0221   fid=options.fileID;
+0222 <span class="keyword">end</span>
+0223 
+0224 outfile=fopen(fid);
+0225 
+0226 <span class="keyword">if</span> options.disk_flag==1
+0227   <span class="keyword">if</span> ~options.one_solve_file_flag
+0228     fprintf(fid,<span class="string">'function data_file=solve_ode\n'</span>);
+0229   <span class="keyword">else</span>
+0230     fprintf(fid,<span class="string">'function data_file=solve_ode(simID)\n'</span>);
+0231     <span class="keyword">if</span> options.compile_flag
+0232       fprintf(fid, <span class="string">'assert(isa(simID, ''double''));\n'</span>);
+0233     <span class="keyword">end</span>
+0234   <span class="keyword">end</span>
+0235   
+0236   <span class="comment">% create output data file</span>
+0237   fprintf(fid,<span class="string">'%% ------------------------------------------------------------\n'</span>);
+0238   fprintf(fid,<span class="string">'%% Open output data file:\n'</span>);
+0239   fprintf(fid,<span class="string">'data_file=''%s'';\n'</span>,options.data_file);
+0240   
+0241   <span class="comment">%fprintf(fid,'fileID=fopen(data_file,''wt'');\n'); % &lt;-- 'wt' does not</span>
+0242     <span class="comment">% compile in linux. 't' may be necessary on PC. may need to look into this</span>
+0243   fprintf(fid,<span class="string">'fileID=fopen(data_file,''w'');\n'</span>);
+0244   
+0245   <span class="comment">% write headers</span>
+0246   [state_var_counts,monitor_counts]=<a href="ds.getOutputCounts.html" class="code" title="function [state_var_counts,monitor_counts]=ds.getOutputCounts(model)">ds.getOutputCounts</a>(model);
+0247   fprintf(fid,<span class="string">'fprintf(fileID,''time%s'');\n'</span>,separator);
+0248   
+0249   <span class="keyword">if</span> ~isempty(model.state_variables)
+0250     <span class="keyword">for</span> i=1:length(model.state_variables)
+0251       fprintf(fid,<span class="string">'for i=1:%g, fprintf(fileID,''%s%s''); end\n'</span>,state_var_counts(i),model.state_variables{i},separator);
+0252     <span class="keyword">end</span>
+0253   <span class="keyword">end</span>
+0254   
+0255   <span class="keyword">if</span> ~isempty(model.monitors)
+0256     monitor_names=fieldnames(model.monitors);
+0257     <span class="keyword">for</span> i=1:length(monitor_names)
+0258       fprintf(fid,<span class="string">'for i=1:%g, fprintf(fileID,''%s%s''); end\n'</span>,monitor_counts(i),monitor_names{i},separator);
+0259     <span class="keyword">end</span>
+0260   <span class="keyword">end</span>
+0261   
+0262   fprintf(fid,<span class="string">'fprintf(fileID,''\\n'');\n'</span>);
+0263 <span class="keyword">else</span> <span class="comment">%options.disk_flag==0</span>
+0264   <span class="keyword">if</span> ~options.one_solve_file_flag
+0265     fprintf(fid,<span class="string">'function %s=solve_ode\n'</span>,output_string);
+0266   <span class="keyword">else</span>
+0267     fprintf(fid,<span class="string">'function %s=solve_ode(simID)\n'</span>,output_string);
+0268     <span class="keyword">if</span> options.compile_flag
+0269       fprintf(fid, <span class="string">'assert(isa(simID, ''double''));\n'</span>);
+0270     <span class="keyword">end</span>
+0271   <span class="keyword">end</span>
+0272 <span class="keyword">end</span>
+0273 
+0274 <span class="comment">% 2.3 load parameters</span>
+0275 <span class="keyword">if</span> options.save_parameters_flag
+0276   fprintf(fid,<span class="string">'%% ------------------------------------------------------------\n'</span>);
+0277   fprintf(fid,<span class="string">'%% Parameters:\n'</span>);
+0278   fprintf(fid,<span class="string">'%% ------------------------------------------------------------\n'</span>);
+0279   fprintf(fid,<span class="string">'params = load(''params.mat'',''p'');\n'</span>);
+0280   
+0281   <span class="keyword">if</span> options.one_solve_file_flag &amp;&amp; options.compile_flag
+0282     fprintf(fid,<span class="string">'pVecs = params.p;\n'</span>);
+0283   <span class="keyword">else</span>
+0284      fprintf(fid,<span class="string">'p = params.p;\n'</span>);
+0285   <span class="keyword">end</span>
+0286 <span class="keyword">end</span>
+0287 
+0288 <span class="keyword">if</span> options.one_solve_file_flag
+0289   <span class="comment">% loop through p and for any vector, take simID index of it (ignores tspan)</span>
+0290   <span class="keyword">if</span> ~options.compile_flag
+0291     fprintf(fid,<span class="string">'\n%% For vector params, select index for this simID\n'</span>);
+0292     fprintf(fid,<span class="string">'flds = fields(rmfield(p,''tspan''));\n'</span>); <span class="comment">% remove tspan</span>
+0293     fprintf(fid,<span class="string">'for fld = flds''\n'</span>);
+0294     fprintf(fid,<span class="string">'  fld = fld{1};\n'</span>);
+0295     fprintf(fid,<span class="string">'  if isnumeric(p.(fld)) &amp;&amp; length(p.(fld)) &gt; 1\n'</span>);
+0296     fprintf(fid,<span class="string">'    p.(fld) = p.(fld)(simID);\n'</span>);
+0297     fprintf(fid,<span class="string">'  end\n'</span>);
+0298     fprintf(fid,<span class="string">'end\n\n'</span>);
+0299   <span class="keyword">else</span> <span class="comment">%compile_flag</span>
+0300     <span class="comment">% slice scalar from vector params</span>
+0301     <span class="keyword">for</span> iParam = 1:nParamMods
+0302       fprintf(fid,<span class="string">'p.%s = pVecs.%s(simID);\n'</span>, mod_params{iParam}, mod_params{iParam});
 0303     <span class="keyword">end</span>
-0304   <span class="keyword">end</span>
-0305 <span class="keyword">end</span>
-0306 <span class="keyword">if</span> ~isempty(model.monitors)
-0307   fprintf(fid,<span class="string">'\n%% MONITORS:\n'</span>);
-0308   <span class="comment">% MONITORS</span>
-0309   monitor_names=fieldnames(model.monitors);
-0310   monitor_expression=struct2cell(model.monitors);
-0311   <span class="keyword">for</span> i=1:length(monitor_names)
-0312     <span class="keyword">if</span> ~isempty(regexp(monitor_names{i},<span class="string">'_spikes$'</span>,<span class="string">'once'</span>))
-0313     <span class="comment">% set expression if monitoring spikes</span>
-0314       <span class="keyword">if</span> options.disk_flag==1
-0315         error(<span class="string">'spike monitoring is not supported for writing data to disk at this time.'</span>);
-0316         <span class="comment">% todo: add support for spike monitoring with data written to</span>
-0317         <span class="comment">% disk. approach: load data at end of simulation and do post-hoc</span>
-0318         <span class="comment">% spike finding. if saving *.mat, use matfile() to load only the</span>
-0319         <span class="comment">% variables in which to search. add spikes to output data file.</span>
-0320       <span class="keyword">end</span>
-0321       <span class="keyword">if</span> isempty(monitor_expression{i})
-0322         spike_threshold=0;
-0323       <span class="keyword">elseif</span> isempty(regexp(monitor_expression{i},<span class="string">'[^\d]'</span>,<span class="string">'once'</span>))
-0324         spike_threshold=str2num(monitor_expression{i});
-0325         monitor_expression{i}=[];
-0326       <span class="keyword">else</span>
-0327         spike_threshold=monitor_expression{i};
-0328         monitor_expression{i}=[];
-0329       <span class="keyword">end</span>
-0330       <span class="comment">% approach: add conditional check for upward threshold crossing</span>
-0331       var_spikes=regexp(monitor_names{i},<span class="string">'(.*)_spikes$'</span>,<span class="string">'tokens'</span>,<span class="string">'once'</span>);
-0332       var_spikes=var_spikes{1}; <span class="comment">% variable to monitor</span>
-0333       <span class="keyword">if</span> ismember(var_spikes,model.state_variables)
-0334         model.conditionals(end+1).namespace=<span class="string">'spike_monitor'</span>;
-0335         <span class="keyword">if</span> isnumeric(spike_threshold)
-0336           model.conditionals(end).condition=<span class="keyword">...</span>
-0337             sprintf(<span class="string">'%s(n,:)&gt;=%g&amp;%s(n-1,:)&lt;%g'</span>,var_spikes,spike_threshold,var_spikes,spike_threshold);
-0338         <span class="keyword">else</span>
-0339           model.conditionals(end).condition=<span class="keyword">...</span>
-0340             sprintf(<span class="string">'%s(n,:)&gt;=%s&amp;%s(n-1,:)&lt;%s'</span>,var_spikes,spike_threshold,var_spikes,spike_threshold);
-0341         <span class="keyword">end</span>
-0342         model.conditionals(end).action=sprintf(<span class="string">'%s(n,conditional_test)=1'</span>,monitor_names{i});
-0343         model.conditionals(end).else=[];
-0344         <span class="comment">% move spike monitor to first position (ie.., to evaluate before other conditionals)</span>
-0345         model.conditionals=model.conditionals([length(model.conditionals) 1:length(model.conditionals)-1]);
-0346         <span class="comment">% remove from monitor list</span>
-0347         model.monitors=rmfield(model.monitors,monitor_names{i});
-0348       <span class="keyword">end</span>      
-0349     <span class="keyword">elseif</span> isempty(monitor_expression{i}) &amp;&amp; isfield(model.functions,monitor_names{i})
-0350     <span class="comment">% set expression if monitoring function referenced by name</span>
-0351       tmp=regexp(model.functions.(monitor_names{i}),<span class="string">'@\([a-zA-Z][\w,]*\)\s*(.*)'</span>,<span class="string">'tokens'</span>,<span class="string">'once'</span>);
-0352       monitor_expression{i}=tmp{1};
-0353       model.monitors.(monitor_names{i})=tmp{1};
-0354     <span class="keyword">end</span>
-0355     <span class="comment">% initialize mon_last</span>
-0356     <span class="keyword">if</span> options.downsample_factor&gt;1 || options.disk_flag==1
-0357       <span class="comment">% set mon_last=f(IC);</span>
-0358       tmp=cell2struct({monitor_expression{i}},{monitor_names{i}},1);
-0359       <a href="#_sub7" class="code" title="subfunction print_monitor_update(fid,monitors,index_nexts,state_variables,index_lasts)">print_monitor_update</a>(fid,tmp,<span class="string">'_last'</span>,state_variables,<span class="string">'_last'</span>);
-0360     <span class="keyword">end</span>
-0361     <span class="keyword">if</span> options.disk_flag==1
-0362       <span class="comment">% print mon_last</span>
-0363       mon_last=sprintf(<span class="string">'%s_last'</span>,monitor_names{i});
-0364       fprintf(fid,<span class="string">'for i=1:numel(%s), fprintf(fileID,''%%g%s'',%s(i)); end\n'</span>,mon_last,separator,mon_last);
-0365     <span class="keyword">else</span>
-0366       <span class="comment">% preallocate monitors</span>
-0367       parts=regexp(monitor_names{i},<span class="string">'_'</span>,<span class="string">'split'</span>);
-0368       <span class="keyword">if</span> options.save_parameters_flag
-0369         fprintf(fid,<span class="string">'%s = zeros(nsamp,%s%s_Npop);\n'</span>,monitor_names{i},parameter_prefix,parts{1});
-0370       <span class="keyword">else</span>
-0371         fprintf(fid,<span class="string">'%s = zeros(nsamp,%g);\n'</span>,monitor_names{i},model.parameters.([parts{1} <span class="string">'_Npop'</span>]));
-0372       <span class="keyword">end</span>    
-0373       <span class="keyword">if</span> isempty(monitor_expression{i})
-0374         <span class="keyword">continue</span>;
-0375       <span class="keyword">end</span>
-0376       <span class="comment">% initialize monitors</span>
-0377       <span class="keyword">if</span> options.downsample_factor==1
-0378         <span class="comment">% set mon(1,:)=f(IC);</span>
-0379         tmp=cell2struct({monitor_expression{i}},{monitor_names{i}},1);
-0380         <a href="#_sub7" class="code" title="subfunction print_monitor_update(fid,monitors,index_nexts,state_variables,index_lasts)">print_monitor_update</a>(fid,tmp,<span class="string">'(1,:)'</span>,state_variables,<span class="string">'(1,:)'</span>);
-0381       <span class="keyword">else</span>
-0382         <span class="comment">% set mon(1,:)=mon_last;</span>
-0383         tmp=cell2struct({monitor_expression{i}},{monitor_names{i}},1);
-0384         <a href="#_sub7" class="code" title="subfunction print_monitor_update(fid,monitors,index_nexts,state_variables,index_lasts)">print_monitor_update</a>(fid,tmp,<span class="string">'(1,:)'</span>,state_variables,<span class="string">'_last'</span>);
-0385       <span class="keyword">end</span>
-0386     <span class="keyword">end</span>
-0387   <span class="keyword">end</span>
-0388 <span class="keyword">end</span>
-0389 <span class="keyword">if</span> options.disk_flag==1
-0390   <span class="comment">% go to new line for next time point</span>
-0391   fprintf(fid,<span class="string">'fprintf(fileID,''\\n'');\n'</span>);
-0392 <span class="keyword">end</span>
-0393 
-0394 <span class="comment">% determine how to index each state variable based on how often state</span>
-0395 <span class="comment">% variables are stored, whether they are written to disk or stored in</span>
-0396 <span class="comment">% memory, and whether the state variable matrix is one- or two-dimensional</span>
-0397 index_lasts=cell(1,length(state_variables));
-0398 index_nexts=cell(1,length(state_variables));
-0399 index_temps=repmat({<span class="string">'_last'</span>},[1 length(state_variables)]);
-0400 <span class="keyword">for</span> i=1:length(state_variables)
-0401   <span class="keyword">if</span> options.downsample_factor==1 &amp;&amp; options.disk_flag==0
-0402     <span class="comment">% store state directly into state variables on each integration step</span>
-0403     <span class="keyword">if</span> nvals_per_var(i)&gt;1 <span class="comment">% use full 2D matrix indexing</span>
-0404       index_lasts{i}=<span class="string">'(n-1,:)'</span>;
-0405       index_nexts{i}=<span class="string">'(n,:)'</span>;
-0406     <span class="keyword">else</span> <span class="comment">% use more concise 1D indexing because it is much faster for some Matlab-specific reason...</span>
-0407       index_lasts{i}=<span class="string">'(n-1)'</span>;
-0408       index_nexts{i}=<span class="string">'(n)'</span>;
-0409     <span class="keyword">end</span>  
-0410   <span class="keyword">elseif</span> options.downsample_factor&gt;1 &amp;&amp; options.disk_flag==0
-0411     <span class="comment">% store state in var_last then update state variables on each downsample_factor integration step</span>
-0412     index_lasts{i}=<span class="string">'_last'</span>;
-0413     <span class="keyword">if</span> nvals_per_var(i)&gt;1
-0414       index_nexts{i}=<span class="string">'(n,:)'</span>;
-0415     <span class="keyword">else</span>
-0416       index_nexts{i}=<span class="string">'(n)'</span>;
-0417     <span class="keyword">end</span>
-0418   <span class="keyword">elseif</span> options.disk_flag==1
-0419     <span class="comment">% always store state in var_last and write on each downsample_factor integration step</span>
-0420       index_lasts{i}=<span class="string">'_last'</span>;
-0421       index_nexts{i}=<span class="string">'_last'</span>;  
-0422   <span class="keyword">end</span>
-0423 <span class="keyword">end</span>
-0424 
-0425 <span class="comment">% add index to state variables in ODEs</span>
-0426 odes = struct2cell(model.ODEs);
-0427 <span class="keyword">for</span> i=1:length(odes)
-0428   <span class="keyword">for</span> j=1:length(state_variables)
-0429     odes{i}=<a href="dynasim_strrep.html" class="code" title="function str=dynasim_strrep(str,oldstr,newstr,lpad,rpad)">dynasim_strrep</a>(odes{i},state_variables{j},[state_variables{j} index_lasts{j}]);
-0430   <span class="keyword">end</span>
-0431 <span class="keyword">end</span>
-0432 
-0433 <span class="comment">% write code to do numerical integration</span>
-0434 fprintf(fid,<span class="string">'%% ###########################################################\n'</span>);
-0435 fprintf(fid,<span class="string">'%% Numerical integration:\n'</span>);
-0436 fprintf(fid,<span class="string">'%% ###########################################################\n'</span>);
-0437 fprintf(fid,<span class="string">'n=2;\n'</span>);
-0438 fprintf(fid,<span class="string">'for k=2:ntime\n'</span>); <span class="comment">% time index</span>
-0439 fprintf(fid,<span class="string">'  t=T(k-1);\n'</span>);
-0440 <span class="keyword">if</span> options.downsample_factor==1 &amp;&amp; options.disk_flag==0 <span class="comment">% store every time point, do not use var_last</span>
-0441   <span class="comment">% update_vars;      % var(:,k-1)-&gt;var(k,:) or var(k-1)-&gt;var(k)</span>
-0442   <a href="#_sub1" class="code" title="subfunction update_vars(index_nexts_)">update_vars</a>(index_nexts);
-0443   <span class="comment">% conditionals;     % var(k,:)-&gt;var(k,:) or var(k)-&gt;var(k)</span>
-0444   <a href="#_sub6" class="code" title="subfunction print_conditional_update(fid,conditionals,index_nexts,state_variables)">print_conditional_update</a>(fid,model.conditionals,index_nexts,state_variables)
-0445   <span class="comment">% update_monitors;  % mon(:,k-1)-&gt;mon(k,:) or mon(k-1)-&gt;mon(k)</span>
-0446   <a href="#_sub7" class="code" title="subfunction print_monitor_update(fid,monitors,index_nexts,state_variables,index_lasts)">print_monitor_update</a>(fid,model.monitors,index_nexts,state_variables);
-0447   fprintf(fid,<span class="string">'  n=n+1;\n'</span>);
-0448 <span class="keyword">else</span> <span class="comment">% store every downsample_factor time point in memory or on disk</span>
-0449   <span class="comment">% update_vars;      % var_last-&gt;var_last</span>
-0450   <a href="#_sub1" class="code" title="subfunction update_vars(index_nexts_)">update_vars</a>(index_temps);
-0451   <span class="comment">% conditionals;     % var_last-&gt;var_last</span>
-0452   <a href="#_sub6" class="code" title="subfunction print_conditional_update(fid,conditionals,index_nexts,state_variables)">print_conditional_update</a>(fid,model.conditionals,index_temps,state_variables);
-0453   <span class="comment">% check if it is time to store data</span>
-0454   fprintf(fid,<span class="string">'if mod(k,downsample_factor)==0 %% store this time point\n'</span>);
-0455   <span class="keyword">if</span> options.disk_flag==1 <span class="comment">% write to disk</span>
-0456     fprintf(fid,<span class="string">'  %% ------------------------------------------------------------\n'</span>);
-0457     fprintf(fid,<span class="string">'  %% Write state variables and monitors to disk:\n'</span>);
-0458     fprintf(fid,<span class="string">'  %% ------------------------------------------------------------\n'</span>);
-0459     <span class="comment">% print current time point to data file</span>
-0460     fprintf(fid,<span class="string">'  fprintf(fileID,''%%g%s'',T(k));\n'</span>,separator);  
-0461     <span class="comment">% print state variables</span>
-0462     <span class="keyword">for</span> i=1:length(state_variables)
-0463       var_last=sprintf(<span class="string">'%s_last'</span>,state_variables{i});
-0464       fprintf(fid,<span class="string">'  for i=1:numel(%s), fprintf(fileID,''%%g%s'',%s(i)); end\n'</span>,var_last,separator,var_last);
-0465     <span class="keyword">end</span>
-0466     <span class="comment">% print monitors</span>
-0467     <span class="keyword">if</span> ~isempty(model.monitors)
-0468       <span class="keyword">for</span> i=1:length(monitor_names)
-0469           mon_last=sprintf(<span class="string">'%s_last'</span>,monitor_names{i});
-0470           fprintf(fid,<span class="string">'  for i=1:numel(%s), fprintf(fileID,''%%g%s'',%s(i)); end\n'</span>,mon_last,separator,mon_last);
-0471       <span class="keyword">end</span>
-0472     <span class="keyword">end</span>
-0473     fprintf(fid,<span class="string">'  fprintf(fileID,''\\n'');\n'</span>);
-0474   <span class="keyword">else</span>            <span class="comment">% store in memory</span>
-0475     <span class="comment">% update_vars;    % var_last -&gt; var(n,:) or var(n)</span>
-0476     <a href="#_sub5" class="code" title="subfunction print_var_update_last(fid,index_nexts,state_variables)">print_var_update_last</a>(fid,index_nexts,state_variables)
-0477     <span class="comment">% update_monitors;% f(var_last) -&gt; mon(n,:) or mon(n)</span>
-0478     <a href="#_sub7" class="code" title="subfunction print_monitor_update(fid,monitors,index_nexts,state_variables,index_lasts)">print_monitor_update</a>(fid,model.monitors,index_nexts,state_variables);
-0479   <span class="keyword">end</span>
-0480   fprintf(fid,<span class="string">'  n=n+1;\n'</span>);
-0481   fprintf(fid,<span class="string">'end\n'</span>);
-0482 <span class="keyword">end</span>
-0483 fprintf(fid,<span class="string">'end\n'</span>);
-0484 fprintf(fid,<span class="string">'T=T(1:downsample_factor:ntime);\n'</span>);
-0485 
-0486 <span class="comment">% cleanup</span>
-0487 <span class="keyword">if</span> options.disk_flag==1
-0488   fprintf(fid,<span class="string">'%% ------------------------------------------------------------\n'</span>);
-0489   fprintf(fid,<span class="string">'%% Close output data file:\n'</span>);
-0490   fprintf(fid,<span class="string">'fclose(fileID);\n'</span>);
-0491   fprintf(fid,<span class="string">'%% ------------------------------------------------------------\n'</span>);
-0492 <span class="keyword">end</span>
-0493 <span class="keyword">if</span> ~strcmp(outfile,<span class="string">'&quot;stdout&quot;'</span>)
-0494   fclose(fid);
-0495   <span class="comment">% wait for file before continuing to simulation</span>
-0496   <span class="keyword">while</span> ~exist(outfile,<span class="string">'file'</span>)
-0497     pause(.01);
-0498   <span class="keyword">end</span>
-0499 <span class="keyword">end</span>
-0500 
-0501   <span class="comment">% ########################################</span>
-0502   <span class="comment">% NESTED FUNCTIONS</span>
-0503   <span class="comment">% ########################################</span>
-0504   <a name="_sub1" href="#_subfunctions" class="code">function update_vars(index_nexts_)</a>
-0505     <span class="keyword">switch</span> options.solver
-0506       <span class="keyword">case</span> {<span class="string">'euler'</span>,<span class="string">'rk1'</span>}
-0507         <a href="#_sub2" class="code" title="subfunction print_k(fid,odes_k,suffix_k,state_variables,nvals_per_var)">print_k</a>(fid,odes,<span class="string">'_k1'</span>,state_variables);                              <span class="comment">% write k1 using model.ODEs</span>
-0508         <span class="comment">% write update for state variables</span>
-0509         <a href="#_sub4" class="code" title="subfunction print_var_update(fid,index_nexts,index_lasts,update_term,state_variables)">print_var_update</a>(fid,index_nexts_,index_lasts,<span class="keyword">...</span>
-0510           <span class="string">'dt*%s_k1'</span>,state_variables);
-0511       <span class="keyword">case</span> {<span class="string">'rk2'</span>,<span class="string">'modified_euler'</span>}
-0512         <a href="#_sub2" class="code" title="subfunction print_k(fid,odes_k,suffix_k,state_variables,nvals_per_var)">print_k</a>(fid,odes,<span class="string">'_k1'</span>,state_variables);                              <span class="comment">% write k1 using model.ODEs</span>
-0513         odes_k2=<a href="#_sub3" class="code" title="subfunction odes_out=update_odes(odes,suffix_k,increment,state_variables,index_lasts)">update_odes</a>(odes,<span class="string">'_k1'</span>,<span class="string">'.5*dt'</span>,state_variables,index_lasts);   <span class="comment">% F(*,yn+dt*k1/2)</span>
-0514         fprintf(fid,<span class="string">'  t=t+.5*dt;\n'</span>);                                          <span class="comment">% update t before writing k2</span>
-0515         <a href="#_sub2" class="code" title="subfunction print_k(fid,odes_k,suffix_k,state_variables,nvals_per_var)">print_k</a>(fid,odes_k2,<span class="string">'_k2'</span>,state_variables);                           <span class="comment">% write k2 using odes_k2</span>
-0516         <span class="comment">% write update for state variables</span>
-0517         <a href="#_sub4" class="code" title="subfunction print_var_update(fid,index_nexts,index_lasts,update_term,state_variables)">print_var_update</a>(fid,index_nexts_,index_lasts,<span class="keyword">...</span>
-0518           <span class="string">'dt*%s_k2'</span>,state_variables);
-0519       <span class="keyword">case</span> {<span class="string">'rk4'</span>,<span class="string">'rungekutta'</span>,<span class="string">'rk'</span>}
-0520         <a href="#_sub2" class="code" title="subfunction print_k(fid,odes_k,suffix_k,state_variables,nvals_per_var)">print_k</a>(fid,odes,<span class="string">'_k1'</span>,state_variables);                              <span class="comment">% write k1 using model.ODEs</span>
-0521         odes_k2=<a href="#_sub3" class="code" title="subfunction odes_out=update_odes(odes,suffix_k,increment,state_variables,index_lasts)">update_odes</a>(odes,<span class="string">'_k1'</span>,<span class="string">'.5*dt'</span>,state_variables,index_lasts);   <span class="comment">% F(*,yn+dt*k1/2)</span>
-0522         fprintf(fid,<span class="string">'  t=t+.5*dt;\n'</span>);                                          <span class="comment">% update t before writing k2</span>
-0523         <a href="#_sub2" class="code" title="subfunction print_k(fid,odes_k,suffix_k,state_variables,nvals_per_var)">print_k</a>(fid,odes_k2,<span class="string">'_k2'</span>,state_variables);                           <span class="comment">% write k2 using odes_k2</span>
-0524         odes_k3=<a href="#_sub3" class="code" title="subfunction odes_out=update_odes(odes,suffix_k,increment,state_variables,index_lasts)">update_odes</a>(odes,<span class="string">'_k2'</span>,<span class="string">'.5*dt'</span>,state_variables,index_lasts);   <span class="comment">% F(*,yn+dt*k2/2)</span>
-0525         <a href="#_sub2" class="code" title="subfunction print_k(fid,odes_k,suffix_k,state_variables,nvals_per_var)">print_k</a>(fid,odes_k3,<span class="string">'_k3'</span>,state_variables);                           <span class="comment">% write k3 using odes_k3</span>
-0526         odes_k4=<a href="#_sub3" class="code" title="subfunction odes_out=update_odes(odes,suffix_k,increment,state_variables,index_lasts)">update_odes</a>(odes,<span class="string">'_k3'</span>,<span class="string">'dt'</span>,state_variables,index_lasts);      <span class="comment">% F(*,yn+dt*k3)</span>
-0527         fprintf(fid,<span class="string">'  t=t+.5*dt;\n'</span>);                                          <span class="comment">% update t before writing k4</span>
-0528         <a href="#_sub2" class="code" title="subfunction print_k(fid,odes_k,suffix_k,state_variables,nvals_per_var)">print_k</a>(fid,odes_k4,<span class="string">'_k4'</span>,state_variables);                           <span class="comment">% write k4 using odes_k4</span>
-0529         <span class="comment">% write update for state variables</span>
-0530         <a href="#_sub4" class="code" title="subfunction print_var_update(fid,index_nexts,index_lasts,update_term,state_variables)">print_var_update</a>(fid,index_nexts_,index_lasts,<span class="keyword">...</span>
-0531           <span class="string">'(dt/6)*(%s_k1+2*(%s_k2+%s_k3)+%s_k4)'</span>,state_variables);
-0532     <span class="keyword">end</span>
-0533   <span class="keyword">end</span>
-0534 
-0535 <span class="keyword">end</span>
-0536 <span class="comment">% ########################################</span>
-0537 <span class="comment">%% SUBFUNCTIONS</span>
-0538 <span class="comment">% ########################################</span>
-0539 
-0540 <a name="_sub2" href="#_subfunctions" class="code">function print_k(fid,odes_k,suffix_k,state_variables,nvals_per_var)</a>
-0541   <span class="comment">% purpose: write auxiliary calculations (k1-k4) for runge-kutta</span>
-0542   <span class="keyword">for</span> i=1:length(odes_k)
-0543     fprintf(fid,<span class="string">'  %s%s=%s;\n'</span>,state_variables{i},suffix_k,odes_k{i});
-0544   <span class="keyword">end</span>
-0545 <span class="keyword">end</span>
-0546 
-0547 <a name="_sub3" href="#_subfunctions" class="code">function odes_out=update_odes(odes,suffix_k,increment,state_variables,index_lasts)</a>
-0548   <span class="comment">% purpose: update expressions for axiliary calculations (k1-k4)</span>
-0549   odes_out=odes;
-0550   <span class="keyword">for</span> i=1:length(odes)
-0551     <span class="keyword">for</span> j=1:length(odes)
-0552       odes_out{i}=<a href="dynasim_strrep.html" class="code" title="function str=dynasim_strrep(str,oldstr,newstr,lpad,rpad)">dynasim_strrep</a>(odes_out{i},[state_variables{j} index_lasts{j}],sprintf(<span class="string">'(%s%s+%s*%s%s)'</span>,state_variables{j},index_lasts{j},increment,state_variables{j},suffix_k),<span class="string">'('</span>,<span class="string">')'</span>);    
-0553     <span class="keyword">end</span>
-0554   <span class="keyword">end</span>
-0555 <span class="keyword">end</span>
-0556 
-0557 <a name="_sub4" href="#_subfunctions" class="code">function print_var_update(fid,index_nexts,index_lasts,update_term,state_variables)</a>
-0558   <span class="comment">% purpose: write statements to update state variables according to their dynamics</span>
-0559   <span class="comment">% example:</span>
-0560   <span class="comment">% update_term='(dt/6)*(%s_k1+2*(%s_k2+%s_k3)+%s_k4)';</span>
-0561   <span class="comment">% state_variable='A_v';</span>
-0562   <span class="keyword">if</span> ~isempty(state_variables)
-0563     fprintf(fid,<span class="string">'  %% ------------------------------------------------------------\n'</span>);
-0564     fprintf(fid,<span class="string">'  %% Update state variables:\n'</span>);
-0565     fprintf(fid,<span class="string">'  %% ------------------------------------------------------------\n'</span>);
-0566   <span class="keyword">else</span>
-0567     <span class="keyword">return</span>;
-0568   <span class="keyword">end</span>
-0569   <span class="keyword">for</span> i=1:length(state_variables)
-0570     this_update_term=strrep(update_term,<span class="string">'%s'</span>,state_variables{i});
-0571     this_update_expression=sprintf(<span class="string">'%s%s=%s%s+%s;'</span>,state_variables{i},index_nexts{i},state_variables{i},index_lasts{i},this_update_term);
-0572     fprintf(fid,<span class="string">'  %s\n'</span>,this_update_expression);
-0573   <span class="keyword">end</span>
-0574 <span class="keyword">end</span>
-0575 
-0576 <a name="_sub5" href="#_subfunctions" class="code">function print_var_update_last(fid,index_nexts,state_variables)</a>
-0577   <span class="keyword">if</span> ~isempty(state_variables)
-0578     fprintf(fid,<span class="string">'  %% ------------------------------------------------------------\n'</span>);
-0579     fprintf(fid,<span class="string">'  %% Store state variables:\n'</span>);
-0580     fprintf(fid,<span class="string">'  %% ------------------------------------------------------------\n'</span>);
-0581   <span class="keyword">else</span>
-0582     <span class="keyword">return</span>;
-0583   <span class="keyword">end</span>
-0584   <span class="keyword">for</span> i=1:length(state_variables)
-0585     this_update_expression=sprintf(<span class="string">'%s%s=%s_last;\n'</span>,state_variables{i},index_nexts{i},state_variables{i});
-0586     fprintf(fid,<span class="string">'  %s'</span>,this_update_expression);
-0587   <span class="keyword">end</span>
-0588 <span class="keyword">end</span>
-0589 
-0590 <a name="_sub6" href="#_subfunctions" class="code">function print_conditional_update(fid,conditionals,index_nexts,state_variables)</a>
-0591   <span class="comment">% purpose: write statements to perform conditional actions (that may</span>
-0592   <span class="comment">% include updating state variables).</span>
-0593   <span class="keyword">if</span> ~isempty(conditionals)
-0594     fprintf(fid,<span class="string">'  %% ------------------------------------------------------------\n'</span>);
-0595     fprintf(fid,<span class="string">'  %% Conditional actions:\n'</span>);
-0596     fprintf(fid,<span class="string">'  %% ------------------------------------------------------------\n'</span>);
-0597   <span class="keyword">else</span>
-0598     <span class="keyword">return</span>;
-0599   <span class="keyword">end</span>
-0600   <span class="keyword">switch</span> index_nexts{1}(1)
-0601     <span class="keyword">case</span> <span class="string">'('</span>
-0602       action_index=<span class="string">'(n,conditional_test)'</span>;
-0603     <span class="keyword">case</span> <span class="string">'_'</span>
-0604       action_index=<span class="string">'_last(conditional_test)'</span>;    
-0605   <span class="keyword">end</span>
-0606   <span class="keyword">for</span> i=1:length(conditionals)
-0607     condition=conditionals(i).condition;
-0608     action=conditionals(i).action;
-0609     elseaction=conditionals(i).else;
-0610     <span class="comment">% add indexes to state variables in conditional actions</span>
-0611     <span class="keyword">for</span> j=1:length(state_variables)
-0612       <span class="keyword">if</span> strcmp(<span class="string">'spike_monitor'</span>,conditionals(i).namespace)
-0613         <span class="comment">% do nothing if spike_monitor</span>
-0614       <span class="keyword">else</span>
-0615         condition=<a href="dynasim_strrep.html" class="code" title="function str=dynasim_strrep(str,oldstr,newstr,lpad,rpad)">dynasim_strrep</a>(condition,state_variables{j},[state_variables{j} index_nexts{j}]);
-0616       <span class="keyword">end</span>
-0617       action=<a href="dynasim_strrep.html" class="code" title="function str=dynasim_strrep(str,oldstr,newstr,lpad,rpad)">dynasim_strrep</a>(action,state_variables{j},[state_variables{j} action_index]);
-0618       <span class="keyword">if</span> ~isempty(elseaction)
-0619         elseaction=<a href="dynasim_strrep.html" class="code" title="function str=dynasim_strrep(str,oldstr,newstr,lpad,rpad)">dynasim_strrep</a>(elseaction,state_variables{j},[state_variables{j} action_index]);
-0620       <span class="keyword">end</span>
-0621     <span class="keyword">end</span>
-0622     <span class="comment">% write conditional to solver function</span>
-0623     fprintf(fid,<span class="string">'  conditional_test=(%s);\n'</span>,condition);
-0624     action=<a href="dynasim_strrep.html" class="code" title="function str=dynasim_strrep(str,oldstr,newstr,lpad,rpad)">dynasim_strrep</a>(action,<span class="string">'\(n,:'</span>,<span class="string">'(n,conditional_test'</span>);
-0625     fprintf(fid,<span class="string">'  if any(conditional_test), %s; '</span>,action);
-0626     <span class="keyword">if</span> ~isempty(elseaction)
-0627       elseaction=<a href="dynasim_strrep.html" class="code" title="function str=dynasim_strrep(str,oldstr,newstr,lpad,rpad)">dynasim_strrep</a>(elseaction,<span class="string">'(n,:'</span>,<span class="string">'(n,conditional_test'</span>);
-0628       fprintf(<span class="string">'else %s; '</span>,elseaction);
-0629     <span class="keyword">end</span>
-0630     fprintf(fid,<span class="string">'end\n'</span>);  
-0631   <span class="keyword">end</span>
-0632 <span class="keyword">end</span>
-0633 
-0634 <a name="_sub7" href="#_subfunctions" class="code">function print_monitor_update(fid,monitors,index_nexts,state_variables,index_lasts)</a>
-0635   <span class="keyword">if</span> ~isempty(monitors) &amp;&amp; iscell(index_nexts) <span class="comment">% being called from within the integrator loop</span>
-0636     fprintf(fid,<span class="string">'  %% ------------------------------------------------------------\n'</span>);
-0637     fprintf(fid,<span class="string">'  %% Update monitors:\n'</span>);
-0638     fprintf(fid,<span class="string">'  %% ------------------------------------------------------------\n'</span>);
-0639   <span class="keyword">end</span>
-0640   <span class="keyword">if</span> nargin&lt;5, index_lasts=index_nexts; <span class="keyword">end</span>
-0641   <span class="comment">% account for inputs from monitor initialization</span>
-0642   <span class="keyword">if</span> ~iscell(index_nexts), index_nexts={index_nexts}; <span class="keyword">end</span>
-0643   <span class="keyword">if</span> ~iscell(index_lasts), index_lasts={index_lasts}; <span class="keyword">end</span>
-0644   <span class="keyword">if</span> length(index_lasts)~=length(state_variables)
-0645     index_lasts=repmat(index_lasts,[1 length(state_variables)]); 
-0646   <span class="keyword">end</span>
-0647   <span class="keyword">if</span> isequal(index_nexts{1},<span class="string">'(1,:)'</span>)
-0648     monitor_index=<span class="string">'(1,:)'</span>;
-0649   <span class="keyword">else</span>
-0650     <span class="keyword">switch</span> index_nexts{1}(1)
-0651       <span class="keyword">case</span> <span class="string">'('</span>
-0652         monitor_index=<span class="string">'(n,:)'</span>;
-0653       <span class="keyword">case</span> <span class="string">'_'</span>
-0654         monitor_index=<span class="string">'_last'</span>;    
-0655     <span class="keyword">end</span>  
-0656   <span class="keyword">end</span>
-0657   <span class="comment">% purpose: write statements to update monitors given current state variables</span>
-0658   <span class="comment">% note: only run this every time a point is recorded (not necessarily on</span>
-0659   <span class="comment">% every step of the integration).</span>
-0660   <span class="keyword">if</span> isempty(monitors)
-0661     <span class="keyword">return</span>;
-0662   <span class="keyword">end</span>
-0663   monitor_name=fieldnames(monitors);
-0664   monitor_expression=struct2cell(monitors);
-0665   <span class="comment">% add indexes to state variables in monitors</span>
-0666   <span class="keyword">for</span> i=1:length(monitor_name)
-0667     <span class="keyword">for</span> j=1:length(state_variables)
-0668       <span class="comment">%monitor_expression{i}=dynasim_strrep(monitor_expression{i},state_variables{j},[state_variables{j} index_lasts{j}]);</span>
-0669       monitor_expression{i}=<a href="dynasim_strrep.html" class="code" title="function str=dynasim_strrep(str,oldstr,newstr,lpad,rpad)">dynasim_strrep</a>(monitor_expression{i},state_variables{j},[state_variables{j} monitor_index]);
-0670     <span class="keyword">end</span>
-0671     <span class="comment">% write monitors to solver function</span>
-0672     fprintf(fid,<span class="string">'  %s%s=%s;\n'</span>,monitor_name{i},monitor_index,monitor_expression{i});
-0673   <span class="keyword">end</span>
-0674 <span class="keyword">end</span>
-0675 
-0676 
-0677 <span class="comment">%{</span>
-0678 PSEUDOCODE:
-0679 <span class="comment">% --------------------------------------------------------------------------------</span>
-0680 <span class="comment">% setup (parameters, fixed_variables, functions)</span>
-0681 <span class="comment">% preallocation and initial conditions</span>
-0682 <span class="keyword">if</span> downsample_factor&gt;1 || disk_flag==1
-0683   <span class="comment">% var_last=IC;</span>
-0684   <span class="comment">% mon_last=f(IC);</span>
-0685 <span class="keyword">end</span>
-0686 <span class="keyword">if</span> disk_flag==1
-0687   fid=fopen(options.filename,<span class="string">'wt'</span>);
-0688   <span class="comment">% print var_last</span>
-0689   <span class="comment">% print mon_last</span>
-0690 <span class="keyword">else</span>
-0691   <span class="comment">% var=zeros(npop,nsamp);</span>
-0692   <span class="comment">% mon=zeros(npop,nsamp);</span>
-0693   <span class="keyword">if</span> downsample_factor==1
-0694     <span class="comment">% var(1,:)=IC;</span>
-0695     <span class="comment">% mon(1,:)=f(IC);</span>
-0696   <span class="keyword">else</span>
-0697     <span class="comment">% var(1,:)=var_last;</span>
-0698     <span class="comment">% mon(1,:)=mon_last;</span>
-0699   <span class="keyword">end</span>
-0700 <span class="keyword">end</span>  
-0701 
-0702 <span class="comment">% numerical integration</span>
-0703 <span class="comment">% n=1; % storage index</span>
-0704 <span class="comment">% for k=2:ntime % time index</span>
-0705   <span class="keyword">if</span> downsample_factor==1 &amp;&amp; disk_flag==0 <span class="comment">% do not use var_last</span>
-0706     <span class="comment">% update_vars;      % var(:,k-1)-&gt;var(k,:) or var(k-1)-&gt;var(k)</span>
-0707     <span class="comment">% conditionals;     % var(k,:)-&gt;var(k,:) or var(k)-&gt;var(k)</span>
-0708     <span class="comment">% update_monitors;  % mon(:,k-1)-&gt;mon(k,:) or mon(k-1)-&gt;mon(k)</span>
-0709   <span class="keyword">else</span> <span class="comment">% downsample_factor&gt;1 and/or disk_flag==1</span>
-0710     <span class="comment">% update_vars;      % var_last-&gt;var_last</span>
-0711     <span class="comment">% conditionals;     % var_last-&gt;var_last</span>
-0712     <span class="keyword">if</span> mod(t,downsample_factor)==0 <span class="comment">% store this time point</span>
-0713       <span class="keyword">if</span> disk_flag==1 <span class="comment">% write to disk</span>
-0714         <span class="comment">% write_vars;     % print: var_last</span>
-0715         <span class="comment">% write_monitors; % print: mon=f(var_last)</span>
-0716       <span class="keyword">else</span>            <span class="comment">% store in memory</span>
-0717         <span class="comment">% update_vars;    % var_last -&gt; var(n,:) or var(n)</span>
-0718         <span class="comment">% update_monitors;% f(var_last) -&gt; mon(n,:) or mon(n)</span>
-0719       <span class="keyword">end</span>
-0720       <span class="comment">% n=n+1;</span>
-0721     <span class="keyword">end</span>
-0722   <span class="keyword">end</span>
-0723 <span class="comment">% end</span>
-0724 <span class="comment">% --------------------------------------------------------------------------------</span>
-0725 <span class="comment">%}</span></pre></div>
-<hr><address>Generated on Mon 27-Feb-2017 14:58:50 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" target="_parent">m2html</a></strong> &copy; 2005</address>
+0304     
+0305     <span class="comment">% take scalar from scalar params</span>
+0306     [~,sharedFlds] = intersect(fields(p), mod_params);
+0307     scalar_params = fields(p);
+0308     scalar_params(sharedFlds) = [];
+0309     nScalarParams = length(scalar_params);
+0310     <span class="keyword">for</span> iParam = 1:nScalarParams
+0311       fprintf(fid,<span class="string">'p.%s = pVecs.%s;\n'</span>, scalar_params{iParam}, scalar_params{iParam});
+0312     <span class="keyword">end</span>
+0313   <span class="keyword">end</span>
+0314 <span class="keyword">end</span>
+0315 
+0316 <span class="comment">% write tspan, dt, and downsample_factor</span>
+0317 <span class="keyword">if</span> options.save_parameters_flag
+0318   fprintf(fid,<span class="string">'downsample_factor=%sdownsample_factor;\n'</span>,parameter_prefix);
+0319   fprintf(fid,<span class="string">'dt=%sdt;\n'</span>,parameter_prefix);
+0320   fprintf(fid,<span class="string">'T=(%stspan(1):dt:%stspan(2))'';\n'</span>,parameter_prefix,parameter_prefix);
+0321 <span class="keyword">else</span>
+0322   fprintf(fid,<span class="string">'tspan=[%g %g];\ndt=%g;\ndownsample_factor=%g;\n'</span>,options.tspan,options.dt,options.downsample_factor);
+0323   fprintf(fid,<span class="string">'T=(tspan(1):dt:tspan(2))'';\n'</span>);
+0324 <span class="keyword">end</span>
+0325 
+0326 <span class="comment">% write calculation of time vector and derived parameters: ntime, nsamp</span>
+0327 fprintf(fid,<span class="string">'ntime=length(T);\nnsamp=length(1:downsample_factor:ntime);\n'</span>);
+0328 
+0329 <span class="comment">% 2.4 evaluate fixed variables</span>
+0330 <span class="keyword">if</span> ~isempty(model.fixed_variables)
+0331   fprintf(fid,<span class="string">'%% ------------------------------------------------------------\n'</span>);
+0332   fprintf(fid,<span class="string">'%% Fixed variables:\n'</span>);
+0333   fprintf(fid,<span class="string">'%% ------------------------------------------------------------\n'</span>);
+0334   names=fieldnames(model.fixed_variables);
+0335   expressions=struct2cell(model.fixed_variables);
+0336   <span class="keyword">for</span> i=1:length(names)
+0337     fprintf(fid,<span class="string">'%s = %s;\n'</span>,names{i},expressions{i});
+0338   <span class="keyword">end</span>
+0339 <span class="keyword">end</span>
+0340 
+0341 <span class="comment">% 2.5 evaluate function handles</span>
+0342 <span class="keyword">if</span> ~isempty(model.functions) &amp;&amp; options.reduce_function_calls_flag==0
+0343   fprintf(fid,<span class="string">'%% ------------------------------------------------------------\n'</span>);
+0344   fprintf(fid,<span class="string">'%% Functions:\n'</span>);
+0345   fprintf(fid,<span class="string">'%% ------------------------------------------------------------\n'</span>);
+0346   names=fieldnames(model.functions);
+0347   expressions=struct2cell(model.functions);
+0348   <span class="keyword">for</span> i=1:length(names)
+0349     fprintf(fid,<span class="string">'%s = %s;\n'</span>,names{i},expressions{i});
+0350   <span class="keyword">end</span>
+0351 <span class="keyword">end</span>
+0352 
+0353 <span class="comment">% 2.6 prepare storage</span>
+0354 fprintf(fid,<span class="string">'%% ------------------------------------------------------------\n'</span>);
+0355 fprintf(fid,<span class="string">'%% Initial conditions:\n'</span>);
+0356 fprintf(fid,<span class="string">'%% ------------------------------------------------------------\n'</span>);
+0357 
+0358 <span class="comment">% 2.2 set random seed</span>
+0359 fprintf(fid,<span class="string">'%% seed the random number generator\n'</span>);
+0360 <span class="keyword">if</span> options.save_parameters_flag
+0361   fprintf(fid,<span class="string">'rng(%srandom_seed);\n'</span>,parameter_prefix);
+0362 <span class="keyword">else</span>
+0363   <span class="keyword">if</span> ischar(options.random_seed)
+0364     fprintf(fid,<span class="string">'rng(''%s'');\n'</span>,options.random_seed);
+0365   <span class="keyword">elseif</span> isnumeric(options.random_seed)
+0366     fprintf(fid,<span class="string">'rng(%g);\n'</span>,options.random_seed);
+0367   <span class="keyword">end</span>
+0368 <span class="keyword">end</span>
+0369 
+0370 <span class="comment">% initialize time</span>
+0371 fprintf(fid,<span class="string">'t=0; k=1;\n'</span>);
+0372 
+0373 <span class="comment">% todo: get coder varsize working with new format:</span>
+0374 
+0375 <span class="comment">% prepare for compilation</span>
+0376 <span class="comment">% if options.compile_flag==1</span>
+0377 <span class="comment">%   for i = 1:length(state_variables)</span>
+0378 <span class="comment">%     %fprintf(fid,'coder.varsize(''%s'',[1e4,1],[true,false]);\n',state_variables{i}); % population size up to 1e4 for variable initial conditions</span>
+0379 <span class="comment">%     fprintf(fid,'coder.varsize(''%s'',[1e8,1e4],[true,true]);\n',state_variables{i}); % population size up to 1e4 for variable initial conditions</span>
+0380 <span class="comment">%   end</span>
+0381 <span class="comment">% end</span>
+0382 
+0383 <span class="comment">% preallocate and initialize matrices to store results</span>
+0384 <span class="keyword">if</span> options.disk_flag==1
+0385   <span class="comment">% add time zero to output data file</span>
+0386   fprintf(fid,<span class="string">'fprintf(fileID,''0%s'');\n'</span>,separator);
+0387 <span class="keyword">end</span>
+0388 
+0389 <span class="comment">%% STATE_VARIABLES</span>
+0390 fprintf(fid,<span class="string">'\n%% STATE_VARIABLES:\n'</span>);
+0391 nvals_per_var=zeros(1,length(state_variables));
+0392 IC_expressions=struct2cell(model.ICs);
+0393 <span class="keyword">for</span> i=1:length(state_variables)
+0394   <span class="comment">% initialize var_last</span>
+0395   <span class="keyword">if</span> options.downsample_factor&gt;1 || options.disk_flag==1
+0396     <span class="comment">% set var_last=IC;</span>
+0397     fprintf(fid,<span class="string">'%s_last = %s;\n'</span>,state_variables{i},IC_expressions{i});
+0398   <span class="keyword">end</span>
+0399   
+0400   <span class="keyword">if</span> options.disk_flag==1
+0401     <span class="comment">% print var_last</span>
+0402     var_last=sprintf(<span class="string">'%s_last'</span>,state_variables{i});
+0403     fprintf(fid,<span class="string">'for i=1:numel(%s), fprintf(fileID,''%%g%s'',%s(i)); end\n'</span>,var_last,separator,var_last);
+0404   <span class="keyword">else</span>
+0405     <span class="comment">% preallocate state variables</span>
+0406     parts=regexp(state_variables{i},<span class="string">'_'</span>,<span class="string">'split'</span>);
+0407     
+0408     <span class="keyword">if</span> numel(parts)==4 <span class="comment">% has connection mechanism namespace: target_source_mechanism</span>
+0409       <span class="comment">% state variables defined in connection mechanisms are assumed to</span>
+0410       <span class="comment">% have dimensionality of the source population</span>
+0411       part=parts{2};
+0412     <span class="keyword">else</span> <span class="comment">% has intrinsic mechanism or population namespace: target_mechanism</span>
+0413       <span class="comment">% state variables defined in intrinsic mechanisms or population</span>
+0414       <span class="comment">% equations have dimensionality of the target population</span>
+0415       part=parts{1};
+0416     <span class="keyword">end</span>
+0417     
+0418     <span class="keyword">if</span> options.save_parameters_flag
+0419       fprintf(fid,<span class="string">'%s = zeros(nsamp,%s%s_Npop);\n'</span>,state_variables{i},parameter_prefix,part);
+0420     <span class="keyword">else</span>
+0421       fprintf(fid,<span class="string">'%s = zeros(nsamp,%g);\n'</span>,state_variables{i},model.parameters.([part <span class="string">'_Npop'</span>]));
+0422     <span class="keyword">end</span>
+0423     nvals_per_var(i)=model.parameters.([part <span class="string">'_Npop'</span>]);
+0424     
+0425     <span class="comment">% initialize state variables</span>
+0426     <span class="keyword">if</span> options.downsample_factor==1
+0427       <span class="comment">% set var(1,:)=IC;</span>
+0428       fprintf(fid,<span class="string">'  %s(1,:) = %s;\n'</span>,state_variables{i},IC_expressions{i});
+0429     <span class="keyword">else</span>
+0430       <span class="comment">% set var(1,:)=var_last;</span>
+0431       fprintf(fid,<span class="string">'  %s(1,:) = %s_last;\n'</span>,state_variables{i},state_variables{i});
+0432     <span class="keyword">end</span>
+0433   <span class="keyword">end</span> <span class="comment">%disk_flag</span>
+0434 <span class="keyword">end</span> <span class="comment">%state_variables</span>
+0435 
+0436 <span class="comment">%% MONITORS</span>
+0437 <span class="keyword">if</span> ~isempty(model.monitors)
+0438   fprintf(fid,<span class="string">'\n%% MONITORS:\n'</span>);
+0439   
+0440   monitor_names=fieldnames(model.monitors);
+0441   monitor_expression=struct2cell(model.monitors);
+0442   
+0443   <span class="keyword">for</span> i=1:length(monitor_names)
+0444     <span class="keyword">if</span> ~isempty(regexp(monitor_names{i},<span class="string">'_spikes$'</span>,<span class="string">'once'</span>))
+0445     <span class="comment">% set expression if monitoring spikes</span>
+0446       <span class="keyword">if</span> options.disk_flag==1
+0447         error(<span class="string">'spike monitoring is not supported for writing data to disk at this time.'</span>);
+0448         <span class="comment">% todo: add support for spike monitoring with data written to</span>
+0449         <span class="comment">% disk. approach: load data at end of simulation and do post-hoc</span>
+0450         <span class="comment">% spike finding. if saving *.mat, use matfile() to load only the</span>
+0451         <span class="comment">% variables in which to search. add spikes to output data file.</span>
+0452       <span class="keyword">end</span>
+0453       
+0454       <span class="keyword">if</span> isempty(monitor_expression{i})
+0455         spike_threshold=0;
+0456       <span class="keyword">elseif</span> isempty(regexp(monitor_expression{i},<span class="string">'[^\d]'</span>,<span class="string">'once'</span>))
+0457         spike_threshold=str2num(monitor_expression{i});
+0458         monitor_expression{i}=[];
+0459       <span class="keyword">else</span>
+0460         spike_threshold=monitor_expression{i};
+0461         monitor_expression{i}=[];
+0462       <span class="keyword">end</span>
+0463       
+0464       <span class="comment">% approach: add conditional check for upward threshold crossing</span>
+0465       var_spikes=regexp(monitor_names{i},<span class="string">'(.*)_spikes$'</span>,<span class="string">'tokens'</span>,<span class="string">'once'</span>);
+0466       var_spikes=var_spikes{1}; <span class="comment">% variable to monitor</span>
+0467       
+0468       <span class="keyword">if</span> ismember(var_spikes,model.state_variables)
+0469         model.conditionals(end+1).namespace=<span class="string">'spike_monitor'</span>;
+0470         
+0471         <span class="keyword">if</span> isnumeric(spike_threshold)
+0472           model.conditionals(end).condition=<span class="keyword">...</span>
+0473             sprintf(<span class="string">'%s(n,:)&gt;=%g&amp;%s(n-1,:)&lt;%g'</span>,var_spikes,spike_threshold,var_spikes,spike_threshold);
+0474         <span class="keyword">else</span>
+0475           model.conditionals(end).condition=<span class="keyword">...</span>
+0476             sprintf(<span class="string">'%s(n,:)&gt;=%s&amp;%s(n-1,:)&lt;%s'</span>,var_spikes,spike_threshold,var_spikes,spike_threshold);
+0477         <span class="keyword">end</span>
+0478         
+0479         model.conditionals(end).action=sprintf(<span class="string">'%s(n,conditional_test)=1'</span>,monitor_names{i});
+0480         model.conditionals(end).else=[];
+0481         <span class="comment">% move spike monitor to first position (ie.., to evaluate before other conditionals)</span>
+0482         model.conditionals=model.conditionals([length(model.conditionals) 1:length(model.conditionals)-1]);
+0483         <span class="comment">% remove from monitor list</span>
+0484         model.monitors=rmfield(model.monitors,monitor_names{i});
+0485       <span class="keyword">end</span>
+0486     <span class="keyword">elseif</span> isempty(monitor_expression{i}) &amp;&amp; isfield(model.functions,monitor_names{i})
+0487     <span class="comment">% set expression if monitoring function referenced by name</span>
+0488       tmp=regexp(model.functions.(monitor_names{i}),<span class="string">'@\([a-zA-Z][\w,]*\)\s*(.*)'</span>,<span class="string">'tokens'</span>,<span class="string">'once'</span>);
+0489       monitor_expression{i}=tmp{1};
+0490       model.monitors.(monitor_names{i})=tmp{1};
+0491     <span class="keyword">end</span>
+0492     
+0493     <span class="comment">% initialize mon_last</span>
+0494     <span class="keyword">if</span> options.downsample_factor&gt;1 || options.disk_flag==1
+0495       <span class="comment">% set mon_last=f(IC);</span>
+0496       tmp=cell2struct({monitor_expression{i}},{monitor_names{i}},1);
+0497       <a href="#_sub7" class="code" title="subfunction print_monitor_update(fid,monitors,index_nexts,state_variables,index_lasts)">print_monitor_update</a>(fid,tmp,<span class="string">'_last'</span>,state_variables,<span class="string">'_last'</span>);
+0498     <span class="keyword">end</span>
+0499     
+0500     <span class="keyword">if</span> options.disk_flag==1
+0501       <span class="comment">% print mon_last</span>
+0502       mon_last=sprintf(<span class="string">'%s_last'</span>,monitor_names{i});
+0503       fprintf(fid,<span class="string">'for i=1:numel(%s), fprintf(fileID,''%%g%s'',%s(i)); end\n'</span>,mon_last,separator,mon_last);
+0504     <span class="keyword">else</span>
+0505       <span class="comment">% preallocate monitors</span>
+0506       parts=regexp(monitor_names{i},<span class="string">'_'</span>,<span class="string">'split'</span>);
+0507       <span class="keyword">if</span> options.save_parameters_flag
+0508         fprintf(fid,<span class="string">'%s = zeros(nsamp,%s%s_Npop);\n'</span>,monitor_names{i},parameter_prefix,parts{1});
+0509       <span class="keyword">else</span>
+0510         fprintf(fid,<span class="string">'%s = zeros(nsamp,%g);\n'</span>,monitor_names{i},model.parameters.([parts{1} <span class="string">'_Npop'</span>]));
+0511       <span class="keyword">end</span>
+0512       
+0513       <span class="keyword">if</span> isempty(monitor_expression{i})
+0514         <span class="keyword">continue</span>;
+0515       <span class="keyword">end</span>
+0516       
+0517       <span class="comment">% initialize monitors</span>
+0518       <span class="keyword">if</span> options.downsample_factor==1
+0519         <span class="comment">% set mon(1,:)=f(IC);</span>
+0520         tmp=cell2struct({monitor_expression{i}},{monitor_names{i}},1);
+0521         <a href="#_sub7" class="code" title="subfunction print_monitor_update(fid,monitors,index_nexts,state_variables,index_lasts)">print_monitor_update</a>(fid,tmp,<span class="string">'(1,:)'</span>,state_variables,<span class="string">'(1,:)'</span>);
+0522       <span class="keyword">else</span>
+0523         <span class="comment">% set mon(1,:)=mon_last;</span>
+0524         tmp=cell2struct({monitor_expression{i}},{monitor_names{i}},1);
+0525         <a href="#_sub7" class="code" title="subfunction print_monitor_update(fid,monitors,index_nexts,state_variables,index_lasts)">print_monitor_update</a>(fid,tmp,<span class="string">'(1,:)'</span>,state_variables,<span class="string">'_last'</span>);
+0526       <span class="keyword">end</span>
+0527     <span class="keyword">end</span> <span class="comment">%disk_flag</span>
+0528   <span class="keyword">end</span> <span class="comment">%monitor_names</span>
+0529 <span class="keyword">end</span> <span class="comment">%monitors</span>
+0530 
+0531 <span class="keyword">if</span> options.disk_flag==1
+0532   <span class="comment">% go to new line for next time point</span>
+0533   fprintf(fid,<span class="string">'fprintf(fileID,''\\n'');\n'</span>);
+0534 <span class="keyword">end</span>
+0535 
+0536 <span class="comment">% determine how to index each state variable based on how often state</span>
+0537 <span class="comment">% variables are stored, whether they are written to disk or stored in</span>
+0538 <span class="comment">% memory, and whether the state variable matrix is one- or two-dimensional</span>
+0539 index_lasts=cell(1,length(state_variables));
+0540 index_nexts=cell(1,length(state_variables));
+0541 index_temps=repmat({<span class="string">'_last'</span>},[1 length(state_variables)]);
+0542 <span class="keyword">for</span> i=1:length(state_variables)
+0543   <span class="keyword">if</span> options.downsample_factor==1 &amp;&amp; options.disk_flag==0
+0544     <span class="comment">% store state directly into state variables on each integration step</span>
+0545     <span class="keyword">if</span> nvals_per_var(i)&gt;1 <span class="comment">% use full 2D matrix indexing</span>
+0546       index_lasts{i}=<span class="string">'(n-1,:)'</span>;
+0547       index_nexts{i}=<span class="string">'(n,:)'</span>;
+0548     <span class="keyword">else</span> <span class="comment">% use more concise 1D indexing because it is much faster for some Matlab-specific reason...</span>
+0549       index_lasts{i}=<span class="string">'(n-1)'</span>;
+0550       index_nexts{i}=<span class="string">'(n)'</span>;
+0551     <span class="keyword">end</span>
+0552   <span class="keyword">elseif</span> options.downsample_factor&gt;1 &amp;&amp; options.disk_flag==0
+0553     <span class="comment">% store state in var_last then update state variables on each downsample_factor integration step</span>
+0554     index_lasts{i}=<span class="string">'_last'</span>;
+0555     <span class="keyword">if</span> nvals_per_var(i)&gt;1
+0556       index_nexts{i}=<span class="string">'(n,:)'</span>;
+0557     <span class="keyword">else</span>
+0558       index_nexts{i}=<span class="string">'(n)'</span>;
+0559     <span class="keyword">end</span>
+0560   <span class="keyword">elseif</span> options.disk_flag==1
+0561     <span class="comment">% always store state in var_last and write on each downsample_factor integration step</span>
+0562       index_lasts{i}=<span class="string">'_last'</span>;
+0563       index_nexts{i}=<span class="string">'_last'</span>;
+0564   <span class="keyword">end</span>
+0565 <span class="keyword">end</span>
+0566 
+0567 <span class="comment">% add index to state variables in ODEs</span>
+0568 odes = struct2cell(model.ODEs);
+0569 <span class="keyword">for</span> i=1:length(odes)
+0570   <span class="keyword">for</span> j=1:length(state_variables)
+0571     odes{i}=ds.strrep(odes{i},state_variables{j},[state_variables{j} index_lasts{j}]);
+0572   <span class="keyword">end</span>
+0573 <span class="keyword">end</span>
+0574 
+0575 <span class="comment">%% Numerical integration</span>
+0576 <span class="comment">% write code to do numerical integration</span>
+0577 fprintf(fid,<span class="string">'%% ###########################################################\n'</span>);
+0578 fprintf(fid,<span class="string">'%% Numerical integration:\n'</span>);
+0579 fprintf(fid,<span class="string">'%% ###########################################################\n'</span>);
+0580 fprintf(fid,<span class="string">'n=2;\n'</span>);
+0581 fprintf(fid,<span class="string">'for k=2:ntime\n'</span>); <span class="comment">% time index</span>
+0582 fprintf(fid,<span class="string">'  t=T(k-1);\n'</span>);
+0583 <span class="keyword">if</span> options.downsample_factor==1 &amp;&amp; options.disk_flag==0 <span class="comment">% store every time point, do not use var_last</span>
+0584   <span class="comment">% update_vars;      % var(:,k-1)-&gt;var(k,:) or var(k-1)-&gt;var(k)</span>
+0585   <a href="#_sub1" class="code" title="subfunction update_vars(index_nexts_)">update_vars</a>(index_nexts);
+0586   
+0587   <span class="comment">% conditionals;     % var(k,:)-&gt;var(k,:) or var(k)-&gt;var(k)</span>
+0588   <a href="#_sub6" class="code" title="subfunction print_conditional_update(fid,conditionals,index_nexts,state_variables)">print_conditional_update</a>(fid,model.conditionals,index_nexts,state_variables)
+0589   
+0590   <span class="comment">% update_monitors;  % mon(:,k-1)-&gt;mon(k,:) or mon(k-1)-&gt;mon(k)</span>
+0591   <a href="#_sub7" class="code" title="subfunction print_monitor_update(fid,monitors,index_nexts,state_variables,index_lasts)">print_monitor_update</a>(fid,model.monitors,index_nexts,state_variables);
+0592   
+0593   fprintf(fid,<span class="string">'  n=n+1;\n'</span>);
+0594 <span class="keyword">else</span> <span class="comment">% store every downsample_factor time point in memory or on disk</span>
+0595   <span class="comment">% update_vars;      % var_last-&gt;var_last</span>
+0596   <a href="#_sub1" class="code" title="subfunction update_vars(index_nexts_)">update_vars</a>(index_temps);
+0597   
+0598   <span class="comment">% conditionals;     % var_last-&gt;var_last</span>
+0599   <a href="#_sub6" class="code" title="subfunction print_conditional_update(fid,conditionals,index_nexts,state_variables)">print_conditional_update</a>(fid,model.conditionals,index_temps,state_variables);
+0600   
+0601   <span class="comment">% check if it is time to store data</span>
+0602   fprintf(fid,<span class="string">'if mod(k,downsample_factor)==0 %% store this time point\n'</span>);
+0603   
+0604   <span class="keyword">if</span> options.disk_flag==1 <span class="comment">% write to disk</span>
+0605     fprintf(fid,<span class="string">'  %% ------------------------------------------------------------\n'</span>);
+0606     fprintf(fid,<span class="string">'  %% Write state variables and monitors to disk:\n'</span>);
+0607     fprintf(fid,<span class="string">'  %% ------------------------------------------------------------\n'</span>);
+0608     
+0609     <span class="comment">% print current time point to data file</span>
+0610     fprintf(fid,<span class="string">'  fprintf(fileID,''%%g%s'',T(k));\n'</span>,separator);
+0611     
+0612     <span class="comment">% print state variables</span>
+0613     <span class="keyword">for</span> i=1:length(state_variables)
+0614       var_last=sprintf(<span class="string">'%s_last'</span>,state_variables{i});
+0615       fprintf(fid,<span class="string">'  for i=1:numel(%s), fprintf(fileID,''%%g%s'',%s(i)); end\n'</span>,var_last,separator,var_last);
+0616     <span class="keyword">end</span>
+0617     
+0618     <span class="comment">% print monitors</span>
+0619     <span class="keyword">if</span> ~isempty(model.monitors)
+0620       <span class="keyword">for</span> i=1:length(monitor_names)
+0621           mon_last=sprintf(<span class="string">'%s_last'</span>,monitor_names{i});
+0622           fprintf(fid,<span class="string">'  for i=1:numel(%s), fprintf(fileID,''%%g%s'',%s(i)); end\n'</span>,mon_last,separator,mon_last);
+0623       <span class="keyword">end</span>
+0624     <span class="keyword">end</span>
+0625     
+0626     fprintf(fid,<span class="string">'  fprintf(fileID,''\\n'');\n'</span>);
+0627   <span class="keyword">else</span>            <span class="comment">% store in memory</span>
+0628     <span class="comment">% update_vars;    % var_last -&gt; var(n,:) or var(n)</span>
+0629     <a href="#_sub5" class="code" title="subfunction print_var_update_last(fid,index_nexts,state_variables)">print_var_update_last</a>(fid,index_nexts,state_variables)
+0630     <span class="comment">% update_monitors;% f(var_last) -&gt; mon(n,:) or mon(n)</span>
+0631     <a href="#_sub7" class="code" title="subfunction print_monitor_update(fid,monitors,index_nexts,state_variables,index_lasts)">print_monitor_update</a>(fid,model.monitors,index_nexts,state_variables);
+0632   <span class="keyword">end</span> <span class="comment">%disk_flag</span>
+0633   
+0634   fprintf(fid,<span class="string">'  n=n+1;\n'</span>);
+0635   fprintf(fid,<span class="string">'end\n'</span>);
+0636 <span class="keyword">end</span>
+0637 
+0638 fprintf(fid,<span class="string">'end\n'</span>);
+0639 fprintf(fid,<span class="string">'T=T(1:downsample_factor:ntime);\n'</span>);
+0640 
+0641 <span class="comment">% cleanup</span>
+0642 <span class="keyword">if</span> options.disk_flag==1
+0643   fprintf(fid,<span class="string">'%% ------------------------------------------------------------\n'</span>);
+0644   fprintf(fid,<span class="string">'%% Close output data file:\n'</span>);
+0645   fprintf(fid,<span class="string">'fclose(fileID);\n'</span>);
+0646   fprintf(fid,<span class="string">'%% ------------------------------------------------------------\n'</span>);
+0647 <span class="keyword">end</span>
+0648 
+0649 <span class="keyword">if</span> ~strcmp(outfile,<span class="string">'&quot;stdout&quot;'</span>)
+0650   fclose(fid);
+0651   <span class="comment">% wait for file before continuing to simulation</span>
+0652   <span class="keyword">while</span> ~exist(outfile,<span class="string">'file'</span>)
+0653     pause(.01);
+0654   <span class="keyword">end</span>
+0655 <span class="keyword">end</span>
+0656 
+0657   <span class="comment">% ########################################</span>
+0658   <span class="comment">% NESTED FUNCTIONS</span>
+0659   <span class="comment">% ########################################</span>
+0660   <a name="_sub1" href="#_subfunctions" class="code">function update_vars(index_nexts_)</a>
+0661     <span class="keyword">switch</span> options.solver
+0662       <span class="keyword">case</span> {<span class="string">'euler'</span>,<span class="string">'rk1'</span>}
+0663         <a href="#_sub2" class="code" title="subfunction print_k(fid,odes_k,suffix_k,state_variables,nvals_per_var)">print_k</a>(fid,odes,<span class="string">'_k1'</span>,state_variables);                              <span class="comment">% write k1 using model.ODEs</span>
+0664         
+0665         <span class="comment">% write update for state variables</span>
+0666         <a href="#_sub4" class="code" title="subfunction print_var_update(fid,index_nexts,index_lasts,update_term,state_variables)">print_var_update</a>(fid,index_nexts_,index_lasts,<span class="keyword">...</span>
+0667           <span class="string">'dt*%s_k1'</span>,state_variables);
+0668       <span class="keyword">case</span> {<span class="string">'rk2'</span>,<span class="string">'modified_euler'</span>}
+0669         <a href="#_sub2" class="code" title="subfunction print_k(fid,odes_k,suffix_k,state_variables,nvals_per_var)">print_k</a>(fid,odes,<span class="string">'_k1'</span>,state_variables);                              <span class="comment">% write k1 using model.ODEs</span>
+0670         
+0671         odes_k2=<a href="#_sub3" class="code" title="subfunction odes_out=update_odes(odes,suffix_k,increment,state_variables,index_lasts)">update_odes</a>(odes,<span class="string">'_k1'</span>,<span class="string">'.5*dt'</span>,state_variables,index_lasts);   <span class="comment">% F(*,yn+dt*k1/2)</span>
+0672         fprintf(fid,<span class="string">'  t=t+.5*dt;\n'</span>);                                          <span class="comment">% update t before writing k2</span>
+0673         <a href="#_sub2" class="code" title="subfunction print_k(fid,odes_k,suffix_k,state_variables,nvals_per_var)">print_k</a>(fid,odes_k2,<span class="string">'_k2'</span>,state_variables);                           <span class="comment">% write k2 using odes_k2</span>
+0674         
+0675         <span class="comment">% write update for state variables</span>
+0676         <a href="#_sub4" class="code" title="subfunction print_var_update(fid,index_nexts,index_lasts,update_term,state_variables)">print_var_update</a>(fid,index_nexts_,index_lasts,<span class="keyword">...</span>
+0677           <span class="string">'dt*%s_k2'</span>,state_variables);
+0678       <span class="keyword">case</span> {<span class="string">'rk4'</span>,<span class="string">'rungekutta'</span>,<span class="string">'rk'</span>}
+0679         <a href="#_sub2" class="code" title="subfunction print_k(fid,odes_k,suffix_k,state_variables,nvals_per_var)">print_k</a>(fid,odes,<span class="string">'_k1'</span>,state_variables);                              <span class="comment">% write k1 using model.ODEs</span>
+0680         
+0681         odes_k2=<a href="#_sub3" class="code" title="subfunction odes_out=update_odes(odes,suffix_k,increment,state_variables,index_lasts)">update_odes</a>(odes,<span class="string">'_k1'</span>,<span class="string">'.5*dt'</span>,state_variables,index_lasts);   <span class="comment">% F(*,yn+dt*k1/2)</span>
+0682         fprintf(fid,<span class="string">'  t=t+.5*dt;\n'</span>);                                          <span class="comment">% update t before writing k2</span>
+0683         <a href="#_sub2" class="code" title="subfunction print_k(fid,odes_k,suffix_k,state_variables,nvals_per_var)">print_k</a>(fid,odes_k2,<span class="string">'_k2'</span>,state_variables);                           <span class="comment">% write k2 using odes_k2</span>
+0684         
+0685         odes_k3=<a href="#_sub3" class="code" title="subfunction odes_out=update_odes(odes,suffix_k,increment,state_variables,index_lasts)">update_odes</a>(odes,<span class="string">'_k2'</span>,<span class="string">'.5*dt'</span>,state_variables,index_lasts);   <span class="comment">% F(*,yn+dt*k2/2)</span>
+0686         <a href="#_sub2" class="code" title="subfunction print_k(fid,odes_k,suffix_k,state_variables,nvals_per_var)">print_k</a>(fid,odes_k3,<span class="string">'_k3'</span>,state_variables);                           <span class="comment">% write k3 using odes_k3</span>
+0687         
+0688         odes_k4=<a href="#_sub3" class="code" title="subfunction odes_out=update_odes(odes,suffix_k,increment,state_variables,index_lasts)">update_odes</a>(odes,<span class="string">'_k3'</span>,<span class="string">'dt'</span>,state_variables,index_lasts);      <span class="comment">% F(*,yn+dt*k3)</span>
+0689         fprintf(fid,<span class="string">'  t=t+.5*dt;\n'</span>);                                          <span class="comment">% update t before writing k4</span>
+0690         <a href="#_sub2" class="code" title="subfunction print_k(fid,odes_k,suffix_k,state_variables,nvals_per_var)">print_k</a>(fid,odes_k4,<span class="string">'_k4'</span>,state_variables);                           <span class="comment">% write k4 using odes_k4</span>
+0691         
+0692         <span class="comment">% write update for state variables</span>
+0693         <a href="#_sub4" class="code" title="subfunction print_var_update(fid,index_nexts,index_lasts,update_term,state_variables)">print_var_update</a>(fid,index_nexts_,index_lasts,<span class="keyword">...</span>
+0694           <span class="string">'(dt/6)*(%s_k1+2*(%s_k2+%s_k3)+%s_k4)'</span>,state_variables);
+0695     <span class="keyword">end</span>
+0696   <span class="keyword">end</span>
+0697 
+0698 <span class="keyword">end</span> <span class="comment">%main</span>
+0699 
+0700 
+0701 <span class="comment">% ########################################</span>
+0702 <span class="comment">%% SUBFUNCTIONS</span>
+0703 <span class="comment">% ########################################</span>
+0704 
+0705 <a name="_sub2" href="#_subfunctions" class="code">function print_k(fid,odes_k,suffix_k,state_variables,nvals_per_var)</a>
+0706   <span class="comment">% purpose: write auxiliary calculations (k1-k4) for runge-kutta</span>
+0707   <span class="keyword">for</span> i=1:length(odes_k)
+0708     fprintf(fid,<span class="string">'  %s%s=%s;\n'</span>,state_variables{i},suffix_k,odes_k{i});
+0709   <span class="keyword">end</span>
+0710 <span class="keyword">end</span>
+0711 
+0712 <a name="_sub3" href="#_subfunctions" class="code">function odes_out=update_odes(odes,suffix_k,increment,state_variables,index_lasts)</a>
+0713   <span class="comment">% purpose: update expressions for axiliary calculations (k1-k4)</span>
+0714   odes_out=odes;
+0715   <span class="keyword">for</span> i=1:length(odes)
+0716     <span class="keyword">for</span> j=1:length(odes)
+0717       odes_out{i}=ds.strrep(odes_out{i},[state_variables{j} index_lasts{j}],sprintf(<span class="string">'(%s%s+%s*%s%s)'</span>,state_variables{j},index_lasts{j},increment,state_variables{j},suffix_k),<span class="string">'('</span>,<span class="string">')'</span>);
+0718     <span class="keyword">end</span>
+0719   <span class="keyword">end</span>
+0720 <span class="keyword">end</span>
+0721 
+0722 <a name="_sub4" href="#_subfunctions" class="code">function print_var_update(fid,index_nexts,index_lasts,update_term,state_variables)</a>
+0723   <span class="comment">% purpose: write statements to update state variables according to their dynamics</span>
+0724   <span class="comment">% example:</span>
+0725   <span class="comment">%   update_term='(dt/6)*(%s_k1+2*(%s_k2+%s_k3)+%s_k4)';</span>
+0726   <span class="comment">%   state_variable='A_v';</span>
+0727   
+0728   <span class="keyword">if</span> ~isempty(state_variables)
+0729     fprintf(fid,<span class="string">'  %% ------------------------------------------------------------\n'</span>);
+0730     fprintf(fid,<span class="string">'  %% Update state variables:\n'</span>);
+0731     fprintf(fid,<span class="string">'  %% ------------------------------------------------------------\n'</span>);
+0732   <span class="keyword">else</span>
+0733     <span class="keyword">return</span>;
+0734   <span class="keyword">end</span>
+0735   
+0736   <span class="keyword">for</span> i=1:length(state_variables)
+0737     this_update_term=strrep(update_term,<span class="string">'%s'</span>,state_variables{i});
+0738     this_update_expression=sprintf(<span class="string">'%s%s=%s%s+%s;'</span>,state_variables{i},index_nexts{i},state_variables{i},index_lasts{i},this_update_term);
+0739     fprintf(fid,<span class="string">'  %s\n'</span>,this_update_expression);
+0740   <span class="keyword">end</span>
+0741 <span class="keyword">end</span>
+0742 
+0743 <a name="_sub5" href="#_subfunctions" class="code">function print_var_update_last(fid,index_nexts,state_variables)</a>
+0744   <span class="keyword">if</span> ~isempty(state_variables)
+0745     fprintf(fid,<span class="string">'  %% ------------------------------------------------------------\n'</span>);
+0746     fprintf(fid,<span class="string">'  %% Store state variables:\n'</span>);
+0747     fprintf(fid,<span class="string">'  %% ------------------------------------------------------------\n'</span>);
+0748   <span class="keyword">else</span>
+0749     <span class="keyword">return</span>;
+0750   <span class="keyword">end</span>
+0751   
+0752   <span class="keyword">for</span> i=1:length(state_variables)
+0753     this_update_expression=sprintf(<span class="string">'%s%s=%s_last;\n'</span>,state_variables{i},index_nexts{i},state_variables{i});
+0754     fprintf(fid,<span class="string">'  %s'</span>,this_update_expression);
+0755   <span class="keyword">end</span>
+0756 <span class="keyword">end</span>
+0757 
+0758 <a name="_sub6" href="#_subfunctions" class="code">function print_conditional_update(fid,conditionals,index_nexts,state_variables)</a>
+0759   <span class="comment">% purpose: write statements to perform conditional actions (that may</span>
+0760   <span class="comment">%   include updating state variables).</span>
+0761   <span class="keyword">if</span> ~isempty(conditionals)
+0762     fprintf(fid,<span class="string">'  %% ------------------------------------------------------------\n'</span>);
+0763     fprintf(fid,<span class="string">'  %% Conditional actions:\n'</span>);
+0764     fprintf(fid,<span class="string">'  %% ------------------------------------------------------------\n'</span>);
+0765   <span class="keyword">else</span>
+0766     <span class="keyword">return</span>;
+0767   <span class="keyword">end</span>
+0768   
+0769   <span class="keyword">switch</span> index_nexts{1}(1)
+0770     <span class="keyword">case</span> <span class="string">'('</span>
+0771       action_index=<span class="string">'(n,conditional_test)'</span>;
+0772     <span class="keyword">case</span> <span class="string">'_'</span>
+0773       action_index=<span class="string">'_last(conditional_test)'</span>;
+0774   <span class="keyword">end</span>
+0775   
+0776   <span class="keyword">for</span> i=1:length(conditionals)
+0777     condition=conditionals(i).condition;
+0778     action=conditionals(i).action;
+0779     elseaction=conditionals(i).else;
+0780     
+0781     <span class="comment">% add indexes to state variables in conditional actions</span>
+0782     <span class="keyword">for</span> j=1:length(state_variables)
+0783       <span class="keyword">if</span> strcmp(<span class="string">'spike_monitor'</span>,conditionals(i).namespace)
+0784         <span class="comment">% do nothing if spike_monitor</span>
+0785       <span class="keyword">else</span>
+0786         condition=ds.strrep(condition,state_variables{j},[state_variables{j} index_nexts{j}]);
+0787       <span class="keyword">end</span>
+0788       
+0789       action=ds.strrep(action,state_variables{j},[state_variables{j} action_index]);
+0790       
+0791       <span class="keyword">if</span> ~isempty(elseaction)
+0792         elseaction=ds.strrep(elseaction,state_variables{j},[state_variables{j} action_index]);
+0793       <span class="keyword">end</span>
+0794     <span class="keyword">end</span>
+0795     
+0796     <span class="comment">% write conditional to solver function</span>
+0797     fprintf(fid,<span class="string">'  conditional_test=(%s);\n'</span>,condition);
+0798     action=ds.strrep(action,<span class="string">'\(n,:'</span>,<span class="string">'(n,conditional_test'</span>);
+0799     fprintf(fid,<span class="string">'  if any(conditional_test), %s; '</span>,action);
+0800     
+0801     <span class="keyword">if</span> ~isempty(elseaction)
+0802       elseaction=ds.strrep(elseaction,<span class="string">'(n,:'</span>,<span class="string">'(n,conditional_test'</span>);
+0803       fprintf(<span class="string">'else %s; '</span>,elseaction);
+0804     <span class="keyword">end</span>
+0805     
+0806     fprintf(fid,<span class="string">'end\n'</span>);
+0807   <span class="keyword">end</span>
+0808 <span class="keyword">end</span>
+0809 
+0810 <a name="_sub7" href="#_subfunctions" class="code">function print_monitor_update(fid,monitors,index_nexts,state_variables,index_lasts)</a>
+0811   <span class="keyword">if</span> ~isempty(monitors) &amp;&amp; iscell(index_nexts) <span class="comment">% being called from within the integrator loop</span>
+0812     fprintf(fid,<span class="string">'  %% ------------------------------------------------------------\n'</span>);
+0813     fprintf(fid,<span class="string">'  %% Update monitors:\n'</span>);
+0814     fprintf(fid,<span class="string">'  %% ------------------------------------------------------------\n'</span>);
+0815   <span class="keyword">end</span>
+0816   
+0817   <span class="keyword">if</span> nargin&lt;5, index_lasts=index_nexts; <span class="keyword">end</span>
+0818   
+0819   <span class="comment">% account for inputs from monitor initialization</span>
+0820   
+0821   <span class="keyword">if</span> ~iscell(index_nexts), index_nexts={index_nexts}; <span class="keyword">end</span>
+0822   
+0823   <span class="keyword">if</span> ~iscell(index_lasts), index_lasts={index_lasts}; <span class="keyword">end</span>
+0824   
+0825   <span class="keyword">if</span> length(index_lasts)~=length(state_variables)
+0826     index_lasts=repmat(index_lasts,[1 length(state_variables)]);
+0827   <span class="keyword">end</span>
+0828   
+0829   <span class="keyword">if</span> isequal(index_nexts{1},<span class="string">'(1,:)'</span>)
+0830     monitor_index=<span class="string">'(1,:)'</span>;
+0831   <span class="keyword">else</span>
+0832     <span class="keyword">switch</span> index_nexts{1}(1)
+0833       <span class="keyword">case</span> <span class="string">'('</span>
+0834         monitor_index=<span class="string">'(n,:)'</span>;
+0835       <span class="keyword">case</span> <span class="string">'_'</span>
+0836         monitor_index=<span class="string">'_last'</span>;
+0837     <span class="keyword">end</span>
+0838   <span class="keyword">end</span>
+0839   
+0840   <span class="comment">% purpose: write statements to update monitors given current state variables</span>
+0841   <span class="comment">%   note: only run this every time a point is recorded (not necessarily on</span>
+0842   <span class="comment">%   every step of the integration).</span>
+0843   <span class="keyword">if</span> isempty(monitors)
+0844     <span class="keyword">return</span>;
+0845   <span class="keyword">end</span>
+0846   
+0847   monitor_name=fieldnames(monitors);
+0848   monitor_expression=struct2cell(monitors);
+0849   
+0850   <span class="comment">% add indexes to state variables in monitors</span>
+0851   <span class="keyword">for</span> i=1:length(monitor_name)
+0852     <span class="keyword">for</span> j=1:length(state_variables)
+0853       <span class="comment">%monitor_expression{i}=ds.strrep(monitor_expression{i},state_variables{j},[state_variables{j} index_lasts{j}]);</span>
+0854       monitor_expression{i}=ds.strrep(monitor_expression{i},state_variables{j},[state_variables{j} monitor_index]);
+0855     <span class="keyword">end</span>
+0856     
+0857     <span class="comment">% write monitors to solver function</span>
+0858     fprintf(fid,<span class="string">'  %s%s=%s;\n'</span>,monitor_name{i},monitor_index,monitor_expression{i});
+0859   <span class="keyword">end</span>
+0860 <span class="keyword">end</span>
+0861 
+0862 
+0863 <span class="comment">%{</span>
+0864 PSEUDOCODE:
+0865 <span class="comment">% --------------------------------------------------------------------------------</span>
+0866 <span class="comment">% setup (parameters, fixed_variables, functions)</span>
+0867 <span class="comment">% preallocation and initial conditions</span>
+0868 <span class="keyword">if</span> downsample_factor&gt;1 || disk_flag==1
+0869   <span class="comment">% var_last=IC;</span>
+0870   <span class="comment">% mon_last=f(IC);</span>
+0871 <span class="keyword">end</span>
+0872 <span class="keyword">if</span> disk_flag==1
+0873   fid=fopen(options.filename,<span class="string">'wt'</span>);
+0874   <span class="comment">% print var_last</span>
+0875   <span class="comment">% print mon_last</span>
+0876 <span class="keyword">else</span>
+0877   <span class="comment">% var=zeros(npop,nsamp);</span>
+0878   <span class="comment">% mon=zeros(npop,nsamp);</span>
+0879   <span class="keyword">if</span> downsample_factor==1
+0880     <span class="comment">% var(1,:)=IC;</span>
+0881     <span class="comment">% mon(1,:)=f(IC);</span>
+0882   <span class="keyword">else</span>
+0883     <span class="comment">% var(1,:)=var_last;</span>
+0884     <span class="comment">% mon(1,:)=mon_last;</span>
+0885   <span class="keyword">end</span>
+0886 <span class="keyword">end</span>
+0887 
+0888 <span class="comment">% numerical integration</span>
+0889 <span class="comment">% n=1; % storage index</span>
+0890 <span class="comment">% for k=2:ntime % time index</span>
+0891   <span class="keyword">if</span> downsample_factor==1 &amp;&amp; disk_flag==0 <span class="comment">% do not use var_last</span>
+0892     <span class="comment">% update_vars;      % var(:,k-1)-&gt;var(k,:) or var(k-1)-&gt;var(k)</span>
+0893     <span class="comment">% conditionals;     % var(k,:)-&gt;var(k,:) or var(k)-&gt;var(k)</span>
+0894     <span class="comment">% update_monitors;  % mon(:,k-1)-&gt;mon(k,:) or mon(k-1)-&gt;mon(k)</span>
+0895   <span class="keyword">else</span> <span class="comment">% downsample_factor&gt;1 and/or disk_flag==1</span>
+0896     <span class="comment">% update_vars;      % var_last-&gt;var_last</span>
+0897     <span class="comment">% conditionals;     % var_last-&gt;var_last</span>
+0898     <span class="keyword">if</span> mod(t,downsample_factor)==0 <span class="comment">% store this time point</span>
+0899       <span class="keyword">if</span> disk_flag==1 <span class="comment">% write to disk</span>
+0900         <span class="comment">% write_vars;     % print: var_last</span>
+0901         <span class="comment">% write_monitors; % print: mon=f(var_last)</span>
+0902       <span class="keyword">else</span>            <span class="comment">% store in memory</span>
+0903         <span class="comment">% update_vars;    % var_last -&gt; var(n,:) or var(n)</span>
+0904         <span class="comment">% update_monitors;% f(var_last) -&gt; mon(n,:) or mon(n)</span>
+0905       <span class="keyword">end</span>
+0906       <span class="comment">% n=n+1;</span>
+0907     <span class="keyword">end</span>
+0908   <span class="keyword">end</span>
+0909 <span class="comment">% end</span>
+0910 <span class="comment">% --------------------------------------------------------------------------------</span>
+0911 <span class="comment">%}</span></pre></div>
+<hr><address>Generated on Fri 07-Apr-2017 20:01:20 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" target="_parent">m2html</a></strong> &copy; 2005</address>
 </body>
 </html>

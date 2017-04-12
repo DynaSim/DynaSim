@@ -2,8 +2,8 @@
                 "http://www.w3.org/TR/REC-html40/loose.dtd">
 <html>
 <head>
-  <title>Description of CheckHostPaths</title>
-  <meta name="keywords" content="CheckHostPaths">
+  <title>Description of ds.checkHostPaths</title>
+  <meta name="keywords" content="ds.checkHostPaths">
   <meta name="description" content="CHECKHOSTPATHS - Compare paths on host to those set in studyinfo when batch was created">
   <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
   <meta name="generator" content="m2html &copy; 2005 Guillaume Flandin">
@@ -16,27 +16,27 @@
 <body>
 <a name="_top"></a>
 <!-- menu.html functions -->
-<h1>CheckHostPaths
+<h1>ds.checkHostPaths
 </h1>
 
 <h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
 <div class="box"><strong>CHECKHOSTPATHS - Compare paths on host to those set in studyinfo when batch was created</strong></div>
 
 <h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
-<div class="box"><strong>function [matched,error_message]=CheckHostPaths(studyinfo) </strong></div>
+<div class="box"><strong>function [matched,error_message]=ds.checkHostPaths(studyinfo) </strong></div>
 
 <h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
 <div class="fragment"><pre class="comment">CHECKHOSTPATHS - Compare paths on host to those set in studyinfo when batch was created
 
- Call CheckHostPaths() in job.m before first simulation to make sure the
+ Call ds.checkHostPaths() in job.m before first simulation to make sure the
  paths on the compute matchine match those in studyinfo created when the
  study was began.
 
  If paths do not match, an informative error message is added to
- .error_log (see CreateBatch() or any jobX.m script).
+ .error_log (see ds.createBatch() or any jobX.m script).
 
  Usage:
-   CheckHostPaths(studyinfo)
+   ds.checkHostPaths(studyinfo)
 
  Inputs:
    - studyinfo: DynaSim studyinfo structure
@@ -52,7 +52,7 @@
 <h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
 This function calls:
 <ul style="list-style-image:url(../matlabicon.gif)">
-<li><a href="LocateModelFiles.html" class="code" title="function [paths,files]=LocateModelFiles(input)">LocateModelFiles</a>	LOCATEMODELFILES - locate mechanism files associated with DynaSim specifications.</li></ul>
+<li><a href="ds.locateModelFiles.html" class="code" title="function [paths,files]=ds.locateModelFiles(input)">ds.locateModelFiles</a>	LOCATEMODELFILES - locate mechanism files associated with DynaSim specifications.</li></ul>
 This function is called by:
 <ul style="list-style-image:url(../matlabicon.gif)">
 </ul>
@@ -61,18 +61,18 @@ This function is called by:
 
 
 <h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
-<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function [matched,error_message]=CheckHostPaths(studyinfo)</a>
+<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function [matched,error_message]=ds.checkHostPaths(studyinfo)</a>
 0002 <span class="comment">%CHECKHOSTPATHS - Compare paths on host to those set in studyinfo when batch was created</span>
 0003 <span class="comment">%</span>
-0004 <span class="comment">% Call CheckHostPaths() in job.m before first simulation to make sure the</span>
+0004 <span class="comment">% Call ds.checkHostPaths() in job.m before first simulation to make sure the</span>
 0005 <span class="comment">% paths on the compute matchine match those in studyinfo created when the</span>
 0006 <span class="comment">% study was began.</span>
 0007 <span class="comment">%</span>
 0008 <span class="comment">% If paths do not match, an informative error message is added to</span>
-0009 <span class="comment">% .error_log (see CreateBatch() or any jobX.m script).</span>
+0009 <span class="comment">% .error_log (see ds.createBatch() or any jobX.m script).</span>
 0010 <span class="comment">%</span>
 0011 <span class="comment">% Usage:</span>
-0012 <span class="comment">%   CheckHostPaths(studyinfo)</span>
+0012 <span class="comment">%   ds.checkHostPaths(studyinfo)</span>
 0013 <span class="comment">%</span>
 0014 <span class="comment">% Inputs:</span>
 0015 <span class="comment">%   - studyinfo: DynaSim studyinfo structure</span>
@@ -91,7 +91,7 @@ This function is called by:
 0028 dynasim_path=fileparts(fileparts(which(mfilename))); <span class="comment">% root is one level up from directory containing this function</span>
 0029 
 0030 <span class="comment">% locate mechanism files</span>
-0031 [mech_paths,mech_files]=<a href="LocateModelFiles.html" class="code" title="function [paths,files]=LocateModelFiles(input)">LocateModelFiles</a>(studyinfo.base_model);
+0031 [mech_paths,mech_files]=<a href="ds.locateModelFiles.html" class="code" title="function [paths,files]=ds.locateModelFiles(input)">ds.locateModelFiles</a>(studyinfo.base_model);
 0032 
 0033 <span class="comment">% compare DynaSim toolbox paths</span>
 0034 <span class="keyword">if</span> ~isequal(dynasim_path,studyinfo.paths.dynasim_functions)
@@ -104,6 +104,6 @@ This function is called by:
 0041   matched=0; mech_paths, studyinfo.paths.mechanisms
 0042   error_message=sprintf(<span class="string">'%sPath changed to model files (expected: %s, found: %s). '</span>,error_message,[studyinfo.paths.mechanisms{:}],[mech_paths{:}]);
 0043 <span class="keyword">end</span></pre></div>
-<hr><address>Generated on Mon 27-Feb-2017 14:58:50 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" target="_parent">m2html</a></strong> &copy; 2005</address>
+<hr><address>Generated on Fri 07-Apr-2017 20:01:20 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" target="_parent">m2html</a></strong> &copy; 2005</address>
 </body>
 </html>

@@ -2,8 +2,8 @@
                 "http://www.w3.org/TR/REC-html40/loose.dtd">
 <html>
 <head>
-  <title>Description of CheckStudyinfo</title>
-  <meta name="keywords" content="CheckStudyinfo">
+  <title>Description of ds.checkStudyinfo</title>
+  <meta name="keywords" content="ds.checkStudyinfo">
   <meta name="description" content="CHECKSTUDYINFO - Standardize studyinfo structure and auto-populate missing fields">
   <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
   <meta name="generator" content="m2html &copy; 2005 Guillaume Flandin">
@@ -16,20 +16,20 @@
 <body>
 <a name="_top"></a>
 <!-- menu.html functions -->
-<h1>CheckStudyinfo
+<h1>ds.checkStudyinfo
 </h1>
 
 <h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
 <div class="box"><strong>CHECKSTUDYINFO - Standardize studyinfo structure and auto-populate missing fields</strong></div>
 
 <h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
-<div class="box"><strong>function studyinfo=CheckStudyinfo(studyinfo,varargin) </strong></div>
+<div class="box"><strong>function studyinfo=ds.checkStudyinfo(studyinfo,varargin) </strong></div>
 
 <h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
 <div class="fragment"><pre class="comment">CHECKSTUDYINFO - Standardize studyinfo structure and auto-populate missing fields
 
  Usage:
-   studyinfo=CheckStudyinfo(studyinfo)
+   studyinfo=ds.checkStudyinfo(studyinfo)
 
  Input: DynaSim studyinfo structure
 
@@ -99,31 +99,31 @@
 
  Examples:
  - Example 1: obtain empty studyinfo structure with all fields
-     studyinfo=CheckStudyinfo([])
+     studyinfo=ds.checkStudyinfo([])
 
  - Example 2: standardize existing studyinfo
-     studyinfo=CheckStudyinfo(studyinfo)
+     studyinfo=ds.checkStudyinfo(studyinfo)
 
- See also: <a href="SetupStudy.html" class="code" title="function [studyinfo,options]=SetupStudy(base_model,varargin)">SetupStudy</a>, <a href="SimulateModel.html" class="code" title="function [data,studyinfo]=SimulateModel(model,varargin)">SimulateModel</a>, <a href="CreateBatch.html" class="code" title="function studyinfo=CreateBatch(base_model,modifications_set,varargin)">CreateBatch</a>, <a href="ImportData.html" class="code" title="function [data,studyinfo] = ImportData(file,varargin)">ImportData</a>, <a href="AnalyzeStudy.html" class="code" title="function [results,studyinfo]=AnalyzeStudy(data,func,varargin)">AnalyzeStudy</a></pre></div>
+ See also: <a href="ds.setupStudy.html" class="code" title="function [studyinfo,options]=ds.setupStudy(base_model,varargin)">ds.setupStudy</a>, <a href="dsSimulate.html" class="code" title="function [data,studyinfo]=dsSimulate(model,varargin)">dsSimulate</a>, <a href="ds.createBatch.html" class="code" title="function studyinfo = ds.createBatch(base_model,modifications_set,varargin)">ds.createBatch</a>, <a href="ds.importData.html" class="code" title="function [data,studyinfo] = ds.importData(file,varargin)">ds.importData</a>, <a href="AnalyzeStudy.html" class="code" title="function [results,studyinfo]=AnalyzeStudy(data,func,varargin)">AnalyzeStudy</a></pre></div>
 
 <!-- crossreference -->
 <h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
 This function calls:
 <ul style="list-style-image:url(../matlabicon.gif)">
-<li><a href="CheckOptions.html" class="code" title="function parms = CheckOptions(options, options_schema, strict)">CheckOptions</a>	CHECKOPTIONS - organize key/value pairs in structure with default or user-supplied values according to a schema</li><li><a href="StudyinfoIO.html" class="code" title="function studyinfo=StudyinfoIO(studyinfo,study_file,id,verbose_flag)">StudyinfoIO</a>	STUDYINFOIO - use lock files to manage concurrent access to a shared studyinfo</li></ul>
+<li><a href="ds.checkOptions.html" class="code" title="function [parms, params_unspecified ] = ds.checkOptions(options, options_schema, strict)">ds.checkOptions</a>	CHECKOPTIONS - organize key/value pairs in structure with default or user-supplied values according to a schema</li><li><a href="ds.studyinfoIO.html" class="code" title="function studyinfo=ds.studyinfoIO(studyinfo,study_file,id,verbose_flag)">ds.studyinfoIO</a>	STUDYINFOIO - use lock files to manage concurrent access to a shared studyinfo</li></ul>
 This function is called by:
 <ul style="list-style-image:url(../matlabicon.gif)">
-<li><a href="AnalyzeStudy.html" class="code" title="function [results,studyinfo]=AnalyzeStudy(data,func,varargin)">AnalyzeStudy</a>	ANALYZESTUDY - Apply an analysis function to DynaSim data, optionally saving data</li><li><a href="CreateBatch.html" class="code" title="function studyinfo=CreateBatch(base_model,modifications_set,varargin)">CreateBatch</a>	CREATEBATCH - create and submit jobs to run sets of simulations or analyses.</li><li><a href="ImportData.html" class="code" title="function [data,studyinfo] = ImportData(file,varargin)">ImportData</a>	IMPORTDATA - load data into DynaSim formatted data structure.</li><li><a href="ImportPlots.html" class="code" title="function [data,studyinfo] = ImportPlots(file,varargin)">ImportPlots</a>	IMPORTPLOTS - load info about saved images (generated by SimulateMode or AnalyzeData) alongwith corresponding varied model components.</li><li><a href="ImportResults.html" class="code" title="function results = ImportResults(studyinfo,func)">ImportResults</a>	IMPORTRESULTS - Import analysis result of a simulation</li><li><a href="MonitorStudy.html" class="code" title="function [studyinfo,study_status]=MonitorStudy(studyinfo,varargin)">MonitorStudy</a>	MONITORSTUDY - display information on study progress.</li><li><a href="SetupStudy.html" class="code" title="function [studyinfo,options]=SetupStudy(base_model,varargin)">SetupStudy</a>	SETUPSTUDY - Initialize DynaSim studyinfo structure, prepare list of output file names, and create output directories</li><li><a href="UpdateStudy.html" class="code" title="function studyinfo=UpdateStudy(study_dir,varargin)">UpdateStudy</a>	UPDATESTUDY - helper function to keep track of study metadata when anything is saved</li></ul>
+<li><a href="AnalyzeStudy.html" class="code" title="function [results,studyinfo]=AnalyzeStudy(data,func,varargin)">AnalyzeStudy</a>	ANALYZESTUDY - Apply an analysis function to DynaSim data, optionally saving data</li><li><a href="ds.createBatch.html" class="code" title="function studyinfo = ds.createBatch(base_model,modifications_set,varargin)">ds.createBatch</a>	CREATEBATCH - create and submit jobs to run sets of simulations or analyses.</li><li><a href="ds.importData.html" class="code" title="function [data,studyinfo] = ds.importData(file,varargin)">ds.importData</a>	IMPORTDATA - load data into DynaSim formatted data structure.</li><li><a href="ds.importPlots.html" class="code" title="function [data,studyinfo] = ds.importPlots(file,varargin)">ds.importPlots</a>	IMPORTPLOTS - load info about saved images (generated by SimulateMode or dsAnalyze) alongwith corresponding varied model components.</li><li><a href="ds.importResults.html" class="code" title="function results = ds.importResults(studyinfo,func)">ds.importResults</a>	IMPORTRESULTS - Import analysis result of a simulation</li><li><a href="ds.monitorStudy.html" class="code" title="function [studyinfo,study_status]=ds.monitorStudy(studyinfo,varargin)">ds.monitorStudy</a>	MONITORSTUDY - display information on study progress.</li><li><a href="ds.setupStudy.html" class="code" title="function [studyinfo,options]=ds.setupStudy(base_model,varargin)">ds.setupStudy</a>	SETUPSTUDY - Initialize DynaSim studyinfo structure, prepare list of output file names, and create output directories</li><li><a href="ds.updateStudy.html" class="code" title="function studyinfo=ds.updateStudy(study_dir,varargin)">ds.updateStudy</a>	UPDATESTUDY - helper function to keep track of study metadata when anything is saved</li></ul>
 <!-- crossreference -->
 
 
 
 <h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
-<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function studyinfo=CheckStudyinfo(studyinfo,varargin)</a>
+<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function studyinfo=ds.checkStudyinfo(studyinfo,varargin)</a>
 0002 <span class="comment">%CHECKSTUDYINFO - Standardize studyinfo structure and auto-populate missing fields</span>
 0003 <span class="comment">%</span>
 0004 <span class="comment">% Usage:</span>
-0005 <span class="comment">%   studyinfo=CheckStudyinfo(studyinfo)</span>
+0005 <span class="comment">%   studyinfo=ds.checkStudyinfo(studyinfo)</span>
 0006 <span class="comment">%</span>
 0007 <span class="comment">% Input: DynaSim studyinfo structure</span>
 0008 <span class="comment">%</span>
@@ -193,14 +193,14 @@ This function is called by:
 0072 <span class="comment">%</span>
 0073 <span class="comment">% Examples:</span>
 0074 <span class="comment">% - Example 1: obtain empty studyinfo structure with all fields</span>
-0075 <span class="comment">%     studyinfo=CheckStudyinfo([])</span>
+0075 <span class="comment">%     studyinfo=ds.checkStudyinfo([])</span>
 0076 <span class="comment">%</span>
 0077 <span class="comment">% - Example 2: standardize existing studyinfo</span>
-0078 <span class="comment">%     studyinfo=CheckStudyinfo(studyinfo)</span>
+0078 <span class="comment">%     studyinfo=ds.checkStudyinfo(studyinfo)</span>
 0079 <span class="comment">%</span>
-0080 <span class="comment">% See also: SetupStudy, SimulateModel, CreateBatch, ImportData, AnalyzeStudy</span>
+0080 <span class="comment">% See also: ds.setupStudy, dsSimulate, ds.createBatch, ds.importData, AnalyzeStudy</span>
 0081 
-0082 options=<a href="CheckOptions.html" class="code" title="function parms = CheckOptions(options, options_schema, strict)">CheckOptions</a>(varargin,{<span class="keyword">...</span>
+0082 options=<a href="ds.checkOptions.html" class="code" title="function [parms, params_unspecified ] = ds.checkOptions(options, options_schema, strict)">ds.checkOptions</a>(varargin,{<span class="keyword">...</span>
 0083   <span class="string">'verbose_flag'</span>,0,{0,1},<span class="keyword">...</span>
 0084   <span class="string">'process_id'</span>,[],[],<span class="keyword">...</span><span class="comment"> % process identifier for loading studyinfo if necessary</span>
 0085   },false);
@@ -228,7 +228,7 @@ This function is called by:
 0107 <span class="comment">% check if studyinfo.mat was provided (or derived from input study_dir)</span>
 0108 <span class="keyword">if</span> ischar(studyinfo) &amp;&amp; exist(studyinfo,<span class="string">'file'</span>)
 0109   study_dir=fileparts(studyinfo);
-0110   studyinfo=<a href="StudyinfoIO.html" class="code" title="function studyinfo=StudyinfoIO(studyinfo,study_file,id,verbose_flag)">StudyinfoIO</a>([],study_dir,options.process_id,options.verbose_flag);
+0110   studyinfo=<a href="ds.studyinfoIO.html" class="code" title="function studyinfo=ds.studyinfoIO(studyinfo,study_file,id,verbose_flag)">ds.studyinfoIO</a>([],study_dir,options.process_id,options.verbose_flag);
 0111 <span class="keyword">elseif</span> isnumeric(studyinfo) &amp;&amp; isempty(studyinfo) <span class="comment">% [], created dummy studyinfo</span>
 0112   <span class="comment">% set some default studyinfo fields</span>
 0113   studyinfo.time_created=datestr(now);
@@ -269,7 +269,7 @@ This function is called by:
 0148 <span class="keyword">end</span>
 0149 <span class="keyword">if</span> ~isfield(studyinfo,<span class="string">'dynasim_hash'</span>)
 0150   <span class="comment">% get path to the running m-file</span>
-0151   [fpath,fname]=fileparts(which(mfilename));<span class="comment">%which('SimulateModel.m');</span>
+0151   [fpath,fname]=fileparts(which(mfilename));<span class="comment">%which('dsSimulate.m');</span>
 0152   <span class="comment">% get path one step up from functions directory containing this m-file</span>
 0153   [fpath,fname]=fileparts(fpath);
 0154   <span class="comment">% record current directory</span>
@@ -374,6 +374,6 @@ This function is called by:
 0253 <span class="keyword">end</span>
 0254 
 0255</pre></div>
-<hr><address>Generated on Mon 27-Feb-2017 14:58:50 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" target="_parent">m2html</a></strong> &copy; 2005</address>
+<hr><address>Generated on Fri 07-Apr-2017 20:01:20 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" target="_parent">m2html</a></strong> &copy; 2005</address>
 </body>
 </html>
