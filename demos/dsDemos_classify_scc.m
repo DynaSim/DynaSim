@@ -14,14 +14,22 @@ at the end of the help section to browse through related help documentation.
 
 % Get ready...
 
-% Set path to your copy of the DynaSim toolbox
-dynasim_path = '..';
-
-% add DynaSim toolbox to Matlab path
-addpath(genpath(dynasim_path)); % comment this out if already in path
+% Add DynaSim to path if it's not already there
+if exist('setupDynaSimPath','file')
+    setupDynaSimPath;
+else
+    error('Add the DynaSim folder to the MATLAB path - e.g. run addpath(genpath(DynaSimPath))');
+end
 
 % Set where to save outputs
-study_dir = fullfile(pwd, 'outputs', 'demo_sPING_classify');
+output_directory = ds.getConfig('demos_path');
+
+% move to root directory where outputs will be saved
+mkdirSilent(output_directory);
+cd(output_directory);
+
+% Set where to save outputs
+study_dir = 'demo_sPING_classify_scc';
 
 % Here we go!
 
@@ -49,7 +57,6 @@ s.populations(2).name='I';
 s.populations(2).size=20;
 s.populations(2).equations=eqns;
 s.populations(2).mechanism_list={'iNa','iK'};
-s.populations(2).parameters={'Iapp',0,'gNa',120,'gK',36,'noise',40};
 
 % synapses
 s.connections(1).direction='I->E';
@@ -65,45 +72,37 @@ s.connections(2).parameters={'tauD',2, 'gSYN',1, 'prob_cxn',1};
 % How to: set 'save_data_flag' to 1 and (optionally) 'study_dir' to /path/to/outputs
 
 %% Save data from a set of simulations
-time_end = 500;
+time_end = 1000;
 dt = 0.01;
 
 % Specify what to vary
 % Tip: use 'vary' Syntax to to systematically vary a parameter
 vary={
-  'E',     'Iapp',  [0:0.5:1];
-  'I',     'Iapp',  [0:0.5:1];
-%   '(E,I)', 'Noise', [0:10:30];
-%   'E',     'prob_cxn', [1, 0.5, .1];
-%   'I',     'prob_cxn', [1, 0.5, .1];
-  'E',     'gSYN', [1, 0.5];
-  'I',     'gSYN', [1, 0.5];
+  'E',     'Iapp',  [0:.5:1];
+  'I',     'Iapp',  [0:.5:1];
+%   '(E,I)', 'Noise', [0:25:50];
+  'E->I',     'prob_cxn', [1, 0.5, .1];
+  'I->E',     'prob_cxn', [1, 0.5, .1];
+  'E',     'gSYN', [1, 0.5, .1];
+  'I',     'gSYN', [1, 0.5, .1];
   }; % vary the amplitude of tonic input to E-cells
 
-% if exist(study_dir,'dir')
-%   rmdir(study_dir,'s')
-% end
+if exist(study_dir,'dir')
+  rmdir(study_dir,'s')
+end
 
-data=SimulateModel(s,'save_data_flag',0, 'save_results_flag',1, 'overwrite_flag',0, 'study_dir',study_dir, 'compile_flag',1,...
-  'vary',vary, 'solver','euler', 'dt',0.01, 'verbose_flag',1, 'tspan', [0 time_end], 'downsample_factor',1/dt,...
-  'analysis_functions',{@classifyEI},...
-  'plot_functions',{@PlotData,@PlotData},...
+data = dsSimulate(s,'save_data_flag',0, 'save_results_flag',1, 'overwrite_flag',1, 'study_dir',study_dir,...
+  'vary',vary, 'solver','euler', 'dt',dt, 'verbose_flag',1, 'tspan', [0 time_end], 'downsample_factor',1/dt,...
+  'analysis_functions',{@dsClassifyEI},...
+  'plot_functions',{@dsPlotData,@dsPlotData,@dsPlotData},...
   'plot_options',{
-    {'varied_filename_flag', 1, 'format', 'jpg', 'visible', 'off'},...
-    {'plot_type','rastergram','varied_filename_flag', 1, 'format', 'jpg', 'visible', 'off'},...
-  });
+    {'varied_filename_flag', 0, 'format', 'jpg', 'visible', 'off'},...
+    {'plot_type','rastergram','varied_filename_flag', 0, 'format', 'jpg', 'visible', 'off'},...
+    {'plot_type','power', 'xlim',[0 100], 'varied_filename_flag',0, 'format','jpg', 'visible','off'},...
+  },...
+  'cluster_flag',1, 'qsub_mode','array');
 
 %% load and plot the saved data
-study_dir = fullfile(pwd, 'outputs', 'demo_sPING_classify');
-% if ~exist('data','var')
-%   data=ImportData('demo_sPING_classify');
-% end
-% PlotData(data);
-% PlotData(data,'plot_type','rastergram');
 
-% xAxisVaryParamInd = 2;
-% yAxisVaryParamInd = 1;
-% PlotClass(study_dir, xAxisVaryParamInd, yAxisVaryParamInd);
-
-% gvRunDS(study_dir, struct('overwrite',1))
-gvRunDS(study_dir, struct('overwrite',0))
+% Run this after sims finish
+% gvRun(study_dir)
