@@ -121,7 +121,7 @@ end
 % Lastly, update population sizes (data(i).model.specification.populations(j).size)
 data = add_pop_sizes(data,obj,num_pops,pop_names);
 
-data = ds.checkData(data);
+data = ds.checkData(data, varargin{:});
 
 
 end

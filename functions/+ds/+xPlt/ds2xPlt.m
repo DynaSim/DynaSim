@@ -1,7 +1,7 @@
 function xp = ds2xPlt(data)
     % Convert DynaSim data structure to xp format
 
-    data = ds.checkData(data);
+    data = ds.checkData(data, varargin{:});
     
     % Extract the data in a linear table format
     [data_table,column_titles,time] = ds.data2Table (data);

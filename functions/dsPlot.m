@@ -147,7 +147,7 @@ function handles = dsPlot(data,varargin)
 % See also: ds.calcFR, ds.calcPower, ds.plotWaveforms, ds.checkData
 
 % Check inputs
-data=ds.checkData(data);
+data=ds.checkData(data, varargin{:});
   % note: calling ds.checkData() at beginning enables analysis/plotting functions to
   % accept data matrix [time x cells] in addition to DynaSim data structure.
 
@@ -240,7 +240,7 @@ options=ds.checkOptions(varargin,{...
   'yscale','linear',{'linear','log','log10','log2'},...
   'visible','on',{'on','off'},...
   },false);
-data=ds.checkData(data);
+data=ds.checkData(data, varargin{:});
 handles=[];
 
 lock_gca = options.lock_gca;

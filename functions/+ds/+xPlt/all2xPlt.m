@@ -3,7 +3,7 @@ function [xp,is_image] = all2xPlt(data)
 if ~isfield(data,'plot_files')      % Standard DynaSim data structure
 
     % Check inputs
-    data=ds.checkData(data);
+    data=ds.checkData(data, varargin{:});
       % note: calling ds.checkData() at beginning enables analysis/plotting functions to
       % accept data matrix [time x cells] in addition to DynaSim data structure.
 

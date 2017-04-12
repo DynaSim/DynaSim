@@ -13,7 +13,7 @@ function data_out = cropData(data,inds)
 
 %% 1.0 Check inputs
 
-data = ds.checkData(data);
+data = ds.checkData(data, varargin{:});
 % note: calling ds.checkData() at beginning enables analysis function to
 % accept data matrix [time x cells] in addition to DynaSim data structure.
 

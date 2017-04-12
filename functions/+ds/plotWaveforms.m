@@ -100,7 +100,7 @@ function plotWaveforms(data,varargin)
 % See also: ds.plotFR, ds.checkData
 
 % Check inputs
-data=ds.checkData(data);
+data=ds.checkData(data, varargin{:});
 fields=fieldnames(data);
 
 options=ds.checkOptions(varargin,{...

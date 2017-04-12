@@ -1,4 +1,4 @@
-function [output,modifications] = applyModifications(model,modifications,varargin)
+function [output,modifications] = applyModifications(model, modifications, varargin)
 %APPLYMODIFICATIONS - Apply modifications to DynaSim specification or model structure
 %
 % ds.applyModifications returns the same kind of structure with
@@ -78,7 +78,7 @@ if options.auto_gen_test_data_flag
   % specific to this function
   varargs = varargin;
   varargs{find(strcmp(varargs, 'auto_gen_test_data_flag'))+1} = 0;
-  argin = [{model},{modifications}, varargs];
+  argin = [{model},{modifications}, varargs]; % specific to this function
 end
 
 %%
@@ -119,8 +119,7 @@ end
 
 %% auto_gen_test_data_flag argout
 if options.auto_gen_test_data_flag
-  % specific to this function
-  argout = {output, modifications};
+  argout = {output, modifications}; % specific to this function
   
   ds.saveAutoGenTestData(argin, argout);
 end
@@ -208,8 +207,7 @@ end
 
 %% auto_gen_test_data_flag argout
 if options.auto_gen_test_data_flag
-  % specific to this function
-  argout = {modifications};
+  argout = {modifications}; % specific to this function
   
   ds.saveAutoGenTestDataLocalFn(argin, argout); % localfn
 end

@@ -22,7 +22,7 @@ if nargin < 2
     opts = struct;
 end
 
-data = ds.checkData(data);
+data = ds.checkData(data, varargin{:});
 % note: calling ds.checkData() at beginning enables analysis function to
 % accept data matrix [time x cells] in addition to DynaSim data structure.
 

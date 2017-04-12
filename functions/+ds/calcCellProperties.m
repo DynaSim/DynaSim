@@ -117,7 +117,7 @@ options=ds.checkOptions(varargin,{...
   'equivalent_cells_flag',0,[],... % if true, only process one cell per pop
   },false);
 
-data=ds.checkData(data);
+data=ds.checkData(data, varargin{:});
 model=data(1).model;
 time=data(1).time;
 num_times=length(time);

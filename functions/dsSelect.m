@@ -46,7 +46,7 @@ function data = dsSelect(data,varargin)
 % See also: dsSimulate, ds.vary2Modifications, ds.importData
 
 % check inputs
-data=ds.checkData(data);
+data=ds.checkData(data, varargin{:});
 
 options=ds.checkOptions(varargin,{...
   'time_limits',[-inf inf],[],...

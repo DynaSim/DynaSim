@@ -25,7 +25,7 @@ function handles = plotFR(data,varargin)
 %
 % See also: ds.calcFR, dsSimulate, ds.checkData
 
-data=ds.checkData(data);
+data=ds.checkData(data, varargin{:});
 fields=fieldnames(data);
 handles=[];
 

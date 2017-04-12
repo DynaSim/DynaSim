@@ -53,7 +53,7 @@ for i=1:length(func)
     error('the second argument must be a function handle (or cell array of them) for the desired analysis function.');
   end
 end
-data=ds.checkData(data);
+data=ds.checkData(data, varargin{:});
 
 % pass each element of data to the analysis function
 for i=1:length(data)

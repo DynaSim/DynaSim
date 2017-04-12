@@ -34,7 +34,7 @@ options=ds.checkOptions(varargin,{...
   'maxlag_time',10,[],... % ms, max lag time for cross correlation
   'time_limits',[100 inf],[],... % time limits for spectral analysis
   },false);
-data=ds.checkData(data);
+data=ds.checkData(data, varargin{:});
 
 if numel(data)>1
   error('ds.calcSpikeSync currently only supports one data set at a time');

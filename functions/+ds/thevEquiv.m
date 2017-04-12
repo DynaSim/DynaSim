@@ -42,7 +42,7 @@ function data = thevEquiv(data, fields_currents, field_voltage, reversals_list, 
         output_field_name = strcat(prefix,output_field_name);
     end
     
-    data = ds.checkData(data);
+    data = ds.checkData(data, varargin{:});
     % note: calling ds.checkData() at beginning enables analysis function to
     % accept data matrix [time x cells] in addition to DynaSim data structure.
 

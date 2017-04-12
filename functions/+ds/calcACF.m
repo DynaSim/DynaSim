@@ -51,7 +51,7 @@ options=ds.checkOptions(varargin,{...
   'output_suffix','',[],...
   },false);
 
-data = ds.checkData(data);
+data = ds.checkData(data, varargin{:});
 % note: calling ds.checkData() at beginning enables analysis function to
 % accept data matrix [time x cells] in addition to DynaSim data structure.
 
