@@ -138,14 +138,14 @@ if ~success
 end
 
 % locate DynaSim toolbox
-dynasim_path=fileparts(fileparts(which(mfilename))); % root is one level up from directory containing this function
+dynasim_path = ds.getRootPath(); % root is one level up from directory containing this function
 dynasim_functions=fullfile(dynasim_path,'functions');
 
 % locate mechanism files
 [mech_paths,mech_files]=ds.locateModelFiles(base_model);
 
 % add paths to studyinfo structure
-studyinfo.paths.dynasim_functions = dynasim_path;
+studyinfo.paths.dynasim_functions = dynasim_functions;
 studyinfo.paths.mechanisms = mech_paths;
 studyinfo.paths.batch_dir = batch_dir;
 
@@ -374,7 +374,7 @@ else % on cluster with qsub
     
     % add shell script to linux path if not already there
     %if status~=0
-      setenv('PATH', [getenv('PATH') ':' dynasim_functions]);
+      setenv('PATH', [getenv('PATH') ':' dynasim_functions ':' fullfile(dynasim_functions, '+ds')]);
     %end
     
     if options.verbose_flag

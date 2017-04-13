@@ -25,13 +25,13 @@ matched=1;
 error_message='';
 
 % locate DynaSim toolbox
-dynasim_path=fileparts(fileparts(which(mfilename))); % root is one level up from directory containing this function
+dynasim_path = ds.getRootPath(); % root is one level up from directory containing this function
 
 % locate mechanism files
 [mech_paths,mech_files]=ds.locateModelFiles(studyinfo.base_model);
 
 % compare DynaSim toolbox paths
-if ~isequal(dynasim_path,studyinfo.paths.dynasim_functions)
+if ~isequal(dynasim_path, studyinfo.paths.dynasim_functions)
   matched=0;
   error_message=sprintf('%sPath changed to DynaSim functions (expected: %s, found: %s). ',error_message,studyinfo.paths.dynasim_functions,dynasim_path);
 end
@@ -40,4 +40,4 @@ end
 if ~isequal(unique(mech_paths),unique(studyinfo.paths.mechanisms))
   matched=0; mech_paths, studyinfo.paths.mechanisms
   error_message=sprintf('%sPath changed to model files (expected: %s, found: %s). ',error_message,[studyinfo.paths.mechanisms{:}],[mech_paths{:}]);
-end  
+end

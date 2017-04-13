@@ -147,14 +147,10 @@ if ~isfield(studyinfo,'matlab_version')
   studyinfo.matlab_version=version;
 end
 if ~isfield(studyinfo,'dynasim_hash')
-  % get path to the running m-file
-  [fpath,fname]=fileparts(which(mfilename));%which('dsSimulate.m');
-  % get path one step up from functions directory containing this m-file
-  [fpath,fname]=fileparts(fpath);
   % record current directory
   cwd=pwd;
   % move to dynasim directory
-  cd(fpath);
+  cd(ds.getRootPath());
   % get git hash
   [a,b]=system('git rev-parse HEAD');
   studyinfo.dynasim_hash=strtrim(b);
@@ -175,52 +171,52 @@ elseif isstruct(studyinfo.simulations)
   % standardize simulations substructure
   if ~isfield(studyinfo.simulations,'sim_id')
     studyinfo.simulations.sim_id=1;
-  end  
+  end
   if ~isfield(studyinfo.simulations,'modifications')
     studyinfo.simulations.modifications={};
-  end  
+  end
   if ~isfield(studyinfo.simulations,'stop_time')
     studyinfo.simulations.stop_time=[];
-  end  
+  end
   if ~isfield(studyinfo.simulations,'duration')
     studyinfo.simulations.duration=[];
-  end  
+  end
   if ~isfield(studyinfo.simulations,'status')
     studyinfo.simulations.status='';
-  end  
+  end
   if ~isfield(studyinfo.simulations,'data_file')
     studyinfo.simulations.data_file={};
-  end  
+  end
   if ~isfield(studyinfo.simulations,'batch_dir')
     studyinfo.simulations.batch_dir=[];
-  end  
+  end
   if ~isfield(studyinfo.simulations,'job_file')
     studyinfo.simulations.job_file=[];
-  end  
+  end
   if ~isfield(studyinfo.simulations,'error_log')
     studyinfo.simulations.error_log='';
-  end  
+  end
   if ~isfield(studyinfo.simulations,'machine_info')
     studyinfo.simulations.machine_info=[];
-  end  
+  end
   if ~isfield(studyinfo.simulations,'modified_model_file')
     studyinfo.simulations.modified_model_file=[];
-  end  
+  end
   if ~isfield(studyinfo.simulations,'simulator_options')
     studyinfo.simulations.simulator_options=[];
-  end  
+  end
   if ~isfield(studyinfo.simulations,'solve_file')
     studyinfo.simulations.solve_file='';
-  end  
+  end
   if ~isfield(studyinfo.simulations,'result_files')
     studyinfo.simulations.result_files={};
-  end  
+  end
   if ~isfield(studyinfo.simulations,'result_functions')
     studyinfo.simulations.result_functions={};
-  end  
+  end
   if ~isfield(studyinfo.simulations,'result_options')
     studyinfo.simulations.result_options={};
-  end    
+  end
 end
 % check substructure studyinfo.analysis:
 if ~isfield(studyinfo,'analysis')
@@ -229,7 +225,7 @@ elseif isstruct(studyinfo.analysis)
   % standardize analysis substructure
   if ~isfield(studyinfo.analysis,'analysis_id')
     % ...
-  end  
+  end
   % ...
 end
 
