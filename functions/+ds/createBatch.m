@@ -413,15 +413,16 @@ end
     %fprintf(fjob,'studyinfo=ds.checkStudyinfo(''%s'',''process_id'',%g);\n',study_file,sim_ids(1));
     %fprintf(fjob,'load(''%s'',''studyinfo'');\n',study_file);
     
+    [~, job_filename] = fileparts(job_file); %remove path and extension
+    
     if ~options.one_solve_file_flag
       % function declaration
-      fprintf(fjob, 'function %s\n\n', job_file);
+      fprintf(fjob, 'function %s\n\n', job_filename);
       
       % set IDs of simulations to run
       fprintf(fjob,'SimIDs=[%s]\n',num2str(sim_ids));
     else %only 1 file
       % function declaration
-      [~, job_filename] = fileparts(job_file); %remove path and extension
       fprintf(fjob, 'function %s(simIDstart, simIDstep, simIDlast)\n\n', job_filename);
       
       if options.compile_flag
