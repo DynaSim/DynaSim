@@ -10,7 +10,7 @@ else
     [~, host_name]=system('echo $HOSTNAME');
     home_path= getenv('HOME');
 end
-host_name = strip(host_name); % remove whitespace from host_name
+host_name = strtrim(host_name); % remove whitespace from host_name
 
 docs_path = fullfile(home_path, 'Documents');
 
