@@ -449,13 +449,12 @@ else
     switch plot_type
         case 'waveform'
             % Is data
-            if isempty(plot_handle)
-                data_plothandle = @xp1D_matrix_plot;
-            else
-                data_plothandle = plot_handle;
-            end
+            data_plothandle = @xp1D_matrix_plot;
+            if ~isempty(plot_handle); data_plothandle = plot_handle; end
+            
         case 'imagesc'
             data_plothandle = @xp_matrix_imagesc;
+            if ~isempty(plot_handle); data_plothandle = plot_handle; end
             % Disable legend when using imagesc
             subplot_options.legend1 = [];
             % Add time information
@@ -480,6 +479,7 @@ else
             % Setup call to xp_PlotData
             plot_options.args = {plot_options.args{:}, 'plot_type',plot_type};
             data_plothandle = @xp_PlotData;
+            if ~isempty(plot_handle); data_plothandle = plot_handle; end
             
             if any(strcmp(plot_type,{'rastergram','raster'}))
                 % Move populations axis to the end of xp2. This ensures
@@ -506,6 +506,7 @@ else
             % Setup call to xp_PlotFR2
             plot_options.args = {plot_options.args{:}, 'plot_type',plot_type};
             data_plothandle = @xp_PlotFR2;
+            if ~isempty(plot_handle); data_plothandle = plot_handle; end
     end
 end
 
