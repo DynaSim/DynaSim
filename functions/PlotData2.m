@@ -58,7 +58,7 @@ if ischar(data)
     % Import plot files
     data_img = ImportPlots(study_dir);
     
-    handles = PlotData2(data_img,varargin{:});
+    [handles, xp] = PlotData2(data_img,varargin{:});
     return;
 end
 
@@ -136,7 +136,7 @@ end
   'crop_range',[],[],...
   'lock_axes',true,[false true],...
   'saved_fignum',[1],[],...
-  'max_num_newfigs',[5],[],...
+  'max_num_newfigs',[10],[],...
   'plot_options',struct,[],...
   'subplot_options',struct,[],...
   'figure_options',struct,[],...
@@ -145,8 +145,11 @@ end
   'visible','on',{'on','off'},...
   'show_colorbar',false,[false true],...
   'save_figures',false,[false true],...
+  'save_figname_prefix',[],[],...
   'save_figname_path',[],[],...
+  'prepend_date_time',true,[false true],...
   'supersize_me',false,[false true],...
+  'save_res',[],[],...
   'Ndims_per_subplot',[],[],...
   'dim_stacking',[],[],...
   'plot_handle',[],[],...
@@ -189,7 +192,10 @@ subplot_options = struct_addDef(subplot_options,'force_rowvect',true);
 figure_options = struct_addDef(figure_options,'visible',options.visible);
 figure_options = struct_addDef(figure_options,'save_figures',options.save_figures);
 figure_options = struct_addDef(figure_options,'save_figname_path',options.save_figname_path);
+figure_options = struct_addDef(figure_options,'save_figname_prefix',options.save_figname_prefix);
+figure_options = struct_addDef(figure_options,'prepend_date_time',options.prepend_date_time);
 figure_options = struct_addDef(figure_options,'supersize_me',options.supersize_me);
+figure_options = struct_addDef(figure_options,'save_res',options.save_res);
 figure_options = struct_addDef(figure_options,'max_num_newfigs',options.max_num_newfigs);
 figure_options = struct_addDef(figure_options,'figwidth',options.figwidth);
 figure_options = struct_addDef(figure_options,'figheight',options.figheight);
@@ -399,6 +405,13 @@ if ~isempty(crop_range) &&  all(cellfun(@isnumeric,xp2.data(:))) && ~is_image
         if ~isempty(xp2.data{i}); xp2.data{i} = xp2.data{i}(ind,:); end
     end
     xp2.meta.datainfo(1).values = t_temp(ind);
+    
+    % Also crop DynaSim metadata info about time.
+    t_temp2 = xp2.meta.dynasim.time;
+    ind = (t_temp2 > crop_range(1) & t_temp2 <= crop_range(2));
+    t_temp2 = t_temp2(ind);
+    xp2.meta.dynasim.time = t_temp2;
+    
 end
 
 
@@ -447,13 +460,12 @@ else
     switch plot_type
         case 'waveform'
             % Is data
-            if isempty(plot_handle)
-                data_plothandle = @xp1D_matrix_plot;
-            else
-                data_plothandle = plot_handle;
-            end
+            data_plothandle = @xp1D_matrix_plot;
+            if ~isempty(plot_handle); data_plothandle = plot_handle; end
+            
         case 'imagesc'
             data_plothandle = @xp_matrix_imagesc;
+            if ~isempty(plot_handle); data_plothandle = plot_handle; end
             % Disable legend when using imagesc
             subplot_options.legend1 = [];
             % Add time information
@@ -478,6 +490,7 @@ else
             % Setup call to xp_PlotData
             plot_options.args = {plot_options.args{:}, 'plot_type',plot_type};
             data_plothandle = @xp_PlotData;
+            if ~isempty(plot_handle); data_plothandle = plot_handle; end
             
             if any(strcmp(plot_type,{'rastergram','raster'}))
                 % Move populations axis to the end of xp2. This ensures
@@ -504,6 +517,7 @@ else
             % Setup call to xp_PlotFR2
             plot_options.args = {plot_options.args{:}, 'plot_type',plot_type};
             data_plothandle = @xp_PlotFR2;
+            if ~isempty(plot_handle); data_plothandle = plot_handle; end
     end
 end
 
