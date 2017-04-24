@@ -382,7 +382,7 @@ figure; plot(data.time,data.E_y,'b-',data.time,data.I_y,'r-')
 % simulate with data stored on disk: method 1
 m=ds.generateModel(s);
 ds.writeDynaSimSolver(m,'disk_flag',1,'filename','solve_ode.m','datafile','data.csv');
-solve_ode; data=ds.importData('data.csv');
+solve_ode; data=dsImport('data.csv');
 
 % simulate with data stored on disk: method 2
 data=dsSimulate(s,'tspan',[0 100],'disk_flag',1,'downsample_factor',10);
@@ -1031,7 +1031,7 @@ studyinfo.simulations
 run(studyinfo.simulations.job_file);
 load(fullfile(studyinfo.study_dir,'studyinfo.mat'),'studyinfo');
 studyinfo.simulations
-data=ds.importData(studyinfo.simulations.data_file);%load(studyinfo.simulations.data_file,'data')
+data=dsImport(studyinfo.simulations.data_file);%load(studyinfo.simulations.data_file,'data')
 figure; plot(data.time,data.(data.labels{1}))
 ds.plotFR(data)
 
@@ -1056,7 +1056,7 @@ if isempty(data) % will not be empty if study is ran again after completion
   run(studyinfo.simulations(1).job_file);
   run(studyinfo.simulations(2).job_file);
   run(studyinfo.simulations(3).job_file);
-  data=ds.importData(studyinfo);
+  data=dsImport(studyinfo);
 end
 ds.monitorStudy(studyinfo);
 ds.plotFR(data);
@@ -1149,7 +1149,7 @@ run(studyinfo.simulations(2).job_file);
 ds.monitorStudy(studyinfo.study_dir);
 run(studyinfo.simulations(3).job_file);
 ds.monitorStudy(studyinfo.study_dir);
-data=ds.importData('TestDiskClusterSet');
+data=dsImport('TestDiskClusterSet');
 ds.plotFR(data);
 
 % test sim: cluster, 3 sims, compiled, save csv
@@ -1162,21 +1162,21 @@ run(studyinfo.simulations(2).job_file);
 ds.monitorStudy(studyinfo.study_dir);
 run(studyinfo.simulations(3).job_file);
 ds.monitorStudy(studyinfo.study_dir);
-data=ds.importData('TestDiskClusterSetMEX');
+data=dsImport('TestDiskClusterSetMEX');
 ds.plotFR(data);
 
 % test sim: local, 3 sims, not compiled, save csv
 [data,studyinfo]=dsSimulate('dv/dt=(@M+10)/Cm; Cm=1; {iNa,iK}@M; vary(Cm=[1 2 3])',...
   'cluster_flag',0,'disk_flag',1,'compile_flag',0,'study_dir','TestDiskLocalSet','verbose_flag',1);
 ds.plotFR(data);
-data2=ds.importData('TestDiskLocalSet');
+data2=dsImport('TestDiskLocalSet');
 ds.plotFR(data2);
 
 % test sim: local, 3 sims, compiled, save csv
 [data,studyinfo]=dsSimulate('dv/dt=(@M+10)/Cm; Cm=1; {iNa,iK}@M; vary(Cm=[1 2 3])',...
   'cluster_flag',0,'disk_flag',1,'compile_flag',1,'study_dir','TestDiskLocalSetMEX','verbose_flag',1);
 ds.plotFR(data);
-data2=ds.importData('TestDiskLocalSetMEX');
+data2=dsImport('TestDiskLocalSetMEX');
 ds.plotFR(data2);
 
 %% troubleshooting
@@ -1208,7 +1208,7 @@ if 1 % todo -- DONE: FIX: data sets returned are identical and only reflect the 
   ds.monitorStudy(studyinfo.study_dir);
   run(studyinfo.simulations(2).job_file);
   ds.monitorStudy(studyinfo.study_dir);
-  data=ds.importData('Test4');
+  data=dsImport('Test4');
   ds.plotFR(data);
   % should look like this:
   [data,studyinfo]=dsSimulate('dv/dt=(@M+10)/Cm; Cm=1; {iNa,iK}@M; vary(gNa=[100 200])',...
@@ -1222,7 +1222,7 @@ if 1 % todo -- DONE: FIX: data sets returned are identical and only reflect the 
   ds.monitorStudy(studyinfo.study_dir);
   run(studyinfo.simulations(2).job_file);
   ds.monitorStudy(studyinfo.study_dir);
-  data=ds.importData('Test4b');
+  data=dsImport('Test4b');
   ds.plotFR(data);
 end  
 
@@ -1366,7 +1366,7 @@ studyinfo=ds.monitorStudy(studyinfo.study_dir);
 % DONE
 
 %% other study/cluster stuff
-% - fix setting 'varied' for batch sims (see notes in ds.importData())
+% - fix setting 'varied' for batch sims (see notes in dsImport())
   % DONE
 % - troubleshoot issue at line 1103 (see above)
   % DONE
@@ -1464,7 +1464,7 @@ figure; plot(d.time,d.TC_v,'b',d.time,d.RE_v,'r'); legend('TC','RE')
 %% add HDF-style loading of partial data sets
 % ref: http://www.mathworks.com/help/matlab/import_export/load-parts-of-variables-from-mat-files.html
 ds.exportData(data(1),'filename','data.mat');
-data=ds.importData('data.mat','toilim',[50 100],'variables','pop1_v')
+data=dsImport('data.mat','toilim',[50 100],'variables','pop1_v')
 
 %% add parallel computing (parallel_flag=1) -- for DynaSim paper
 % ref: http://www.bu.edu/tech/support/research/training-consulting/online-tutorials/matlab-pct/run-batch-on-scc

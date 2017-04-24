@@ -31,7 +31,7 @@ if ~exist(study_dir,'dir')
 end
 
 % Load data in traditional DynaSim format
-data=ds.importData(study_dir);
+data=dsImport(study_dir);
 
 
 

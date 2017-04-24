@@ -23,7 +23,7 @@ if ~exist(study_dir,'dir')
 end
 
 % Load data in traditional DynaSim format
-data=ds.importData(study_dir);
+data=dsImport(study_dir);
 
 % % Import saved plots from huge sweep of images
 % data_3D_plots = ds.importPlots(fullfile(output_directory,'demo_sPING_3b_3D'));
@@ -169,7 +169,7 @@ if ~exist(study_dir2,'dir')
 end
 
 % Load data in traditional DynaSim format
-data_sim2=ds.importData(study_dir2);
+data_sim2=dsImport(study_dir2);
 
 % Test plot of new data
 dsPlot2(data_sim2);

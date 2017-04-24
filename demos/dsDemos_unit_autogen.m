@@ -1,6 +1,4 @@
-% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% DynaSim Demos
-% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %{
 Download DynaSim toolbox from https://github.com/dynasim/dynasim.
   or, download using git: git clone https://github.com/dynasim/dynasim.git
@@ -12,18 +10,18 @@ by entering "help FUNCTION_NAME" in the command window. Use the "See also" list
 at the end of the help section to browse through related help documentation.
 %}
 
-% Add DynaSim to path if it's not already there
-if exist('setupDynaSimPath','file')
-    setupDynaSimPath;
-else
-    error('Add the DynaSim folder to the MATLAB path - e.g. run addpath(genpath(DynaSimPath))');
-end
+% % Add DynaSim to path if it's not already there
+% if exist('setupDynaSimPath','file')
+%     setupDynaSimPath;
+% else
+%     error('Add the DynaSim folder to the MATLAB path - e.g. run addpath(genpath(DynaSimPath))');
+% end
 
 % Set where to save outputs
 output_directory = ds.getConfig('demos_path');
 
 % move to root directory where outputs will be saved
-mkdirSilent(output_directory);
+% mkdirSilent(output_directory);
 cd(output_directory);
 
 % Here we go!
@@ -39,7 +37,8 @@ eqns={
   'dy/dt=r*x-y-x*z';
   'dz/dt=-b*z+x*y';
 };
-data=dsSimulate(eqns, 'tspan',[0 100], 'ic',[1 2 .5], 'solver','rk4', 'study_dir','demo_lorenz', 'auto_gen_test_data_flag',1);
+data=dsSimulate(eqns, 'tspan',[0 100], 'ic',[1 2 .5], 'solver','rk4', 'study_dir','demo_lorenz', 'auto_gen_test_data_flag',1, 'random_seed', 1);
+dsPlot(data, 'auto_gen_test_data_flag', 1, 'visible', 'off'); close gcf
 
 %% Izhikevich neuron with noisy drive
 eqns={
@@ -51,7 +50,8 @@ eqns={
   'I(t)=Iapp*(t>ton&t<toff)*(1+.5*rand)'; % define applied input using reserved variables 't' for time and 'dt' for fixed time step of numerical integration
   'monitor I';                            % indicate to store applied input during simulation
 };
-data=dsSimulate(eqns, 'tspan',[0 1000], 'study_dir','demo_izhikevich', 'auto_gen_test_data_flag',1);
+data=dsSimulate(eqns, 'tspan',[0 1000], 'study_dir','demo_izhikevich', 'auto_gen_test_data_flag',1, 'random_seed', 1);
+dsPlot(data, 'auto_gen_test_data_flag', 1, 'visible', 'off'); close gcf
 
 % %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% RUNNING SETS OF SIMULATIONS
@@ -74,7 +74,14 @@ vary={
   {P,'a',-.02;P,'b',-1 ; P,'c',-60; P,'d',8;  P,'I',80} % inhibition-induced spiking
   {P,'a',-.026;P,'b',-1; P,'c',-45; P,'d',0;  P,'I',70} % inhibition-induced bursting
   };
-data=dsSimulate(eqns, 'tspan',[0 250], 'vary',vary, 'study_dir','demo_izhikevich_vary', 'auto_gen_test_data_flag',1);
+
+data=dsSimulate(eqns, 'tspan',[0 250], 'vary',vary, 'study_dir','demo_izhikevich_vary', 'auto_gen_test_data_flag',1, 'random_seed', 1);
+
+% TODO: fix dsPlot bug
+% dsPlot(data, 'auto_gen_test_data_flag', 1, 'visible', 'off'); close gcf
+
+%% parfor
+data=dsSimulate(eqns, 'tspan',[0 250], 'vary',vary, 'study_dir','demo_izhikevich_vary_parfor', 'parallel_flag',1, 'auto_gen_test_data_flag',1, 'random_seed', 1);
 
 % %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% QUICKLY BUILDING LARGE MODELS FROM EXISTING "MECHANISMS"
@@ -103,14 +110,18 @@ eqns={
   'aN(v) = (.1-.01*(v+65))./(exp(1-.1*(v+65))-1)';
   'bN(v) = .125*exp(-(v+65)/80)';
 };
-data=dsSimulate(eqns, 'study_dir','demo_hh_1', 'auto_gen_test_data_flag',1);
+data=dsSimulate(eqns, 'study_dir','demo_hh_1', 'auto_gen_test_data_flag',1, 'random_seed', 1);
+
+dsPlot(data, 'auto_gen_test_data_flag', 1, 'visible', 'off'); close gcf
 
 % Equivalent Hodgkin-Huxley neuron with predefined mechanisms
-data=dsSimulate('dv/dt=10+@current/Cm; Cm=1; v(0)=-65; {iNa,iK}', 'study_dir','demo_hh_2', 'auto_gen_test_data_flag',1);
+data=dsSimulate('dv/dt=10+@current/Cm; Cm=1; v(0)=-65; {iNa,iK}', 'study_dir','demo_hh_2', 'auto_gen_test_data_flag',1, 'random_seed', 1);
 
 % Example of a bursting neuron model using three active current mechanisms:
 eqns='dv/dt=5+@current; {iNaF,iKDR,iM}; gNaF=100; gKDR=5; gM=1.5; v(0)=-70';
-data=dsSimulate(eqns, 'tspan',[0 200], 'study_dir','demo_hh_3', 'auto_gen_test_data_flag',1);
+data=dsSimulate(eqns, 'tspan',[0 200], 'study_dir','demo_hh_3', 'auto_gen_test_data_flag',1, 'random_seed', 1);
+dsPlot(data, 'auto_gen_test_data_flag', 1, 'visible', 'off'); close gcf
+
 % %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% BUILDING LARGE MODELS WITH MULTIPLE POPULATIONS AND CONNECTIONS
 % %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -142,7 +153,9 @@ s.connections(1).parameters={'tauD',10,'gSYN',.1,'netcon','ones(N_pre,N_post)'};
 s.connections(2).direction='E->I';
 s.connections(2).mechanism_list={'iAMPA'};
 s.connections(2).parameters={'tauD',2,'gSYN',.1,'netcon',ones(80,20)};
-data=dsSimulate(s, 'study_dir','demo_sPING_0', 'auto_gen_test_data_flag',1);
+data=dsSimulate(s, 'study_dir','demo_sPING_0', 'auto_gen_test_data_flag',1, 'random_seed', 1);
+
+dsPlot(data, 'auto_gen_test_data_flag', 1, 'visible', 'off'); close gcf
 
 % %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% SAVING SIMULATED DATA
@@ -151,7 +164,7 @@ data=dsSimulate(s, 'study_dir','demo_sPING_0', 'auto_gen_test_data_flag',1);
 
 %% Save data from a single simulation
 % Example using the previous sPING model:
-data=dsSimulate(s, 'save_data_flag',1, 'study_dir','demo_sPING_1', 'auto_gen_test_data_flag',1);
+data=dsSimulate(s, 'save_data_flag',1, 'study_dir','demo_sPING_1', 'auto_gen_test_data_flag',1, 'random_seed', 1);
 
 %% Save data from a set of simulations
 
@@ -159,10 +172,10 @@ data=dsSimulate(s, 'save_data_flag',1, 'study_dir','demo_sPING_1', 'auto_gen_tes
 % Tip: use 'vary' Syntax 2 to systematically vary a parameter
 vary={'E','Iapp',[0 10 20]}; % vary the amplitude of tonic input to E-cells
 data=dsSimulate(s, 'save_data_flag',1, 'study_dir','demo_sPING_2',...
-                     'vary',vary, 'auto_gen_test_data_flag',1);
+                     'vary',vary, 'auto_gen_test_data_flag',1, 'random_seed', 1);
 
 % load and plot the saved data
-data_from_disk = ds.importData('demo_sPING_2', 'auto_gen_test_data_flag',1);
+data_from_disk = dsImport('demo_sPING_2', 'auto_gen_test_data_flag',1);
 % dsPlot(data_from_disk);
 % dsPlot(data_from_disk,'variable','E_v');
 
@@ -175,8 +188,8 @@ vary={
   'I->E','tauD',[5 10 15]       % inhibition decay time constant from I to E
   };
 dsSimulate(s, 'save_data_flag',1, 'study_dir','demo_sPING_3',...
-                'vary',vary, 'verbose_flag',1, 'auto_gen_test_data_flag',1);
-data=ds.importData('demo_sPING_3', 'auto_gen_test_data_flag',1);
+                'vary',vary, 'verbose_flag',1, 'auto_gen_test_data_flag',1, 'random_seed', 1);
+data=dsImport('demo_sPING_3', 'auto_gen_test_data_flag',1);
 % dsPlot(data);
 % dsPlot(data,'plot_type','rastergram');
 % dsPlot(data,'plot_type','power');
@@ -194,7 +207,7 @@ data=ds.importData('demo_sPING_3', 'auto_gen_test_data_flag',1);
 % % tips for checking job status:
 % % !qstat -u <YOUR_USERNAME>
 % % !cat ~/batchdirs/demo_cluster_1/pbsout/sim_job1.out
-% data=ds.importData('demo_cluster_1');
+% data=dsImport('demo_cluster_1');
 % dsPlot(data);
 % 
 % % Repeat but also save plotted data
@@ -223,5 +236,5 @@ data=ds.importData('demo_sPING_3', 'auto_gen_test_data_flag',1);
 % take several seconds to minutes; however, it only compiles the first time
 % it is run and is significantly faster on subsequent runs.
 
-data=dsSimulate(s,'compile_flag',1, 'study_dir','demo_sPING_3_compile_1', 'auto_gen_test_data_flag',1);
+data=dsSimulate(s,'compile_flag',1, 'study_dir','demo_sPING_3_compile_1', 'auto_gen_test_data_flag',1, 'random_seed', 1);
 % dsPlot(data);

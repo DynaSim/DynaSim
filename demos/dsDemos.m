@@ -240,7 +240,7 @@ data=dsSimulate(s, 'save_data_flag',1, 'study_dir','demo_sPING_2',...
                      'vary',vary);
 
 % load and plot the saved data
-data_from_disk = ds.importData('demo_sPING_2');
+data_from_disk = dsImport('demo_sPING_2');
 dsPlot(data_from_disk);
 dsPlot(data_from_disk,'variable','E_v');
 
@@ -254,7 +254,7 @@ vary={
   };
 dsSimulate(s, 'save_data_flag',1, 'study_dir','demo_sPING_3',...
                 'vary',vary, 'verbose_flag',1);
-data=ds.importData('demo_sPING_3');
+data=dsImport('demo_sPING_3');
 dsPlot(data);
 dsPlot(data,'plot_type','rastergram');
 dsPlot(data,'plot_type','power');
@@ -274,7 +274,7 @@ dsSimulate(eqns, 'save_data_flag',1, 'study_dir','demo_cluster_1',...
 % tips for checking job status:
 % !qstat -u <YOUR_USERNAME>
 % !cat ~/batchdirs/demo_cluster_1/pbsout/sim_job1.out
-data=ds.importData('demo_cluster_1');
+data=dsImport('demo_cluster_1');
 dsPlot(data);
 
 % Repeat but also save plotted data

@@ -720,12 +720,12 @@ studyinfo.simulations(1).modified_model_file
 
 % loading data saved to disk
 % load one data set from data file name
-data=ds.importData(studyinfo.simulations(2).data_file);
+data=dsImport(studyinfo.simulations(2).data_file);
 ds.plotFR(data,'bin_size',30,'bin_shift',10);
 % equivalent ways to load all data sets associated with studyinfo structure
-data=ds.importData(studyinfo);
-data=ds.importData(study_dir);
-data=ds.importData('study_HH_varyI');
+data=dsImport(studyinfo);
+data=dsImport(study_dir);
+data=dsImport('study_HH_varyI');
 ds.plotFR(data);
 
 % re-running the simulation loads data if it already exists (see log)
@@ -762,11 +762,11 @@ if 0
   % machine will not end with the exit command. So, if you run this on a
   % cluster, it will close Matlab when the job finishes.
   run(studyinfo.simulations(1).job_file);
-  data=ds.importData(studyinfo) % 1 data set
+  data=dsImport(studyinfo) % 1 data set
   run(studyinfo.simulations(2).job_file);
-  data=ds.importData(studyinfo) % 2 data sets
+  data=dsImport(studyinfo) % 2 data sets
   run(studyinfo.simulations(3).job_file);
-  data=ds.importData(studyinfo) % 3 data sets
+  data=dsImport(studyinfo) % 3 data sets
   ds.plotFR(data);
 end
 
@@ -782,9 +782,9 @@ vary={'','I',[0:10:50]};
 
 if 0 % manually run the simulation jobs (see caution above)
   run(studyinfo.simulations(1).job_file);
-  data=ds.importData(studyinfo) % 3 data sets
+  data=dsImport(studyinfo) % 3 data sets
   run(studyinfo.simulations(4).job_file);
-  data=ds.importData(studyinfo) % 6 data sets
+  data=dsImport(studyinfo) % 6 data sets
   ds.plotFR(data);
 end
 

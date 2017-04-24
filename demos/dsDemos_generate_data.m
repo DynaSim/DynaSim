@@ -72,7 +72,7 @@ dsSimulate(s,'save_data_flag',1,'study_dir',study_dir,...
 %% Load the data
 
 % Load data in traditional DynaSim format
-data=ds.importData(study_dir);
+data=dsImport(study_dir);
 
 % Import plot files
 data_img = ds.importPlots(study_dir);
