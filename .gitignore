@@ -8,3 +8,4 @@ models/personal
 dsVars.txt
 dsConfig.txt
 _ignore
+functions/+ds/+unit/testData/
