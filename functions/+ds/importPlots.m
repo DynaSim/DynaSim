@@ -4,7 +4,7 @@ function [data,studyinfo] = importPlots(file,varargin)
 % This command only loads the paths to the image files, not the actual images.
 %
 % Usage:
-%   [data,studyinfo]=ds.importData(data_file)
+%   [data,studyinfo]=dsImport(data_file)
 %   data=ds.importPlots(data_file)
 %
 % Inputs:
@@ -40,7 +40,7 @@ end
 if isstruct(file) && isfield(file,'study_dir')
   % "file" is a studyinfo structure.
   % retrieve most up-to-date studyinfo structure from studyinfo.mat file
-  studyinfo = ds.checkStudyinfo(file.study_dir,'process_id',options.process_id);
+  studyinfo = ds.checkStudyinfo(file.study_dir,'process_id',options.process_id, varargin{:});
   
   % compare simIDs to sim_id
   if ~isempty(options.simIDs)

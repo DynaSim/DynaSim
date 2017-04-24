@@ -1,4 +1,4 @@
-function data = calcISI(data,varargin)
+function data = calcISI(data, varargin)
 %CALCISI - Calculate the interspike interval.
 %
 % Usage:
@@ -44,7 +44,15 @@ options=ds.checkOptions(varargin,{...
   'threshold',1e-5,[],... % slightly above zero in case variable is point process *_spikes {0,1}
   'exclude_data_flag',0,{0,1},...
   'output_suffix','',[],...
+  'auto_gen_test_data_flag',0,{0,1},...
   },false);
+
+%% auto_gen_test_data_flag argin
+if options.auto_gen_test_data_flag
+  varargs = varargin;
+  varargs{find(strcmp(varargs, 'auto_gen_test_data_flag'))+1} = 0;
+  argin = [{data}, varargs]; % specific to this function
+end
 
 data = ds.checkData(data, varargin{:});
 % note: calling ds.checkData() at beginning enables analysis function to
@@ -77,7 +85,7 @@ if isempty(options.variable)
 end
 
 %% 2.0 set list of variables to process as cell array of strings
-options.variable=ds.selectVariables(data(1).labels,options.variable);
+options.variable=ds.selectVariables(data(1).labels,options.variable, varargin{:});
 
 %% 3.0 calculate ISIs for each variable
 if ~isfield(data,'results')
@@ -128,4 +136,11 @@ if options.exclude_data_flag
   for l=1:length(data.labels)
     data=rmfield(data,data.labels{l});
   end
+end
+
+%% auto_gen_test_data_flag argout
+if options.auto_gen_test_data_flag
+  argout = {data}; % specific to this function
+  
+  ds.unit.saveAutoGenTestData(argin, argout);
 end

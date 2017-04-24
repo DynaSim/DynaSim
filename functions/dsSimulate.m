@@ -442,7 +442,7 @@ end
 [model,options]=extract_vary_statement(model,options);
 
 % check/standardize model
-model=ds.checkModel(model); % handles conversion when input is a string w/ equations or a DynaSim specification structure
+model=ds.checkModel(model, varargin{:}); % handles conversion when input is a string w/ equations or a DynaSim specification structure
 
 % 1.1 apply modifications before simulation and optional further variation across simulations
 if ~isempty(options.modifications)
@@ -511,7 +511,7 @@ if options.cluster_flag==1
 %         fprintf('Study already finished. Importing data...\n');
 %       end
 %       studyinfo=ds.checkStudyinfo(studyinfo.study_dir,'process_id',options.sim_id);
-%       data=ds.importData(studyinfo,'process_id',options.sim_id);
+%       data=dsImport(studyinfo,'process_id',options.sim_id);
 %     end
   %end
   return;
@@ -574,10 +574,10 @@ end
 
 % put solver blocks in try statement to catch and handle errors/cleanup
 cwd=pwd; % record current directory
+
 try
-  
-  % functions:          outputs:
-  % ds.writeDynaSimSolver    m-file for DynaSim solver
+  % functions:             outputs:
+  % ds.writeDynaSimSolver  m-file for DynaSim solver
   % ds.writeMatlabSolver   m-file for Matlab solver (including @odefun)
   % ds.prepareMEX          mex-file for m-file
 
@@ -606,7 +606,7 @@ try
           % note: this is important, should always display
           fprintf('loading data from %s\n',data_file);
         end
-        tmpdata=ds.importData(data_file,'process_id',sim_id);
+        tmpdata=dsImport(data_file,'process_id',sim_id);
         update_data; % concatenate data structures across simulations
         continue; % skip to next simulation
       end
@@ -687,7 +687,7 @@ try
       if matlabSolverBool
         % add IC to p for use in matlab solver
         if isempty(options.ic)
-          [~, p.ic]=ds.dynasim2odefun(ds.propagateParameters(ds.propagateFunctions(model)), 'odefun_output','func_body');
+          [~, p.ic]=ds.dynasim2odefun(ds.propagateParameters(ds.propagateFunctions(model)), 'odefun_output','func_body', varargin{:}, varargin{:}, varargin{:});
         else
           p.ic = options.ic;
         end
@@ -714,7 +714,7 @@ try
         duration=toc(sim_start_time);
         
         if nargout>0 || options.save_data_flag
-          tmpdata=ds.importData(csv_data_file,'process_id',sim_id); % eg, data.csv
+          tmpdata=dsImport(csv_data_file,'process_id',sim_id); % eg, data.csv
         end
       else                  % ### data stored in memory during simulation ###
         % create list of output variables to capture

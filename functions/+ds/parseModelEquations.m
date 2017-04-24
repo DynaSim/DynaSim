@@ -41,6 +41,14 @@ function [model,name_map] = parseModelEquations(text,varargin)
 %
 % See also: ds.classifyEquation, ds.generateModel, ds.locateModelFiles
 
+%% auto_gen_test_data_flag argin
+options = ds.checkOptions(varargin,{'auto_gen_test_data_flag',0,{0,1}},false);
+if options.auto_gen_test_data_flag
+  varargs = varargin;
+  varargs{find(strcmp(varargs, 'auto_gen_test_data_flag'))+1} = 0;
+  argin = [{text}, varargs]; % specific to this function
+end
+
 model=[];
 name_map={};
 
@@ -347,8 +355,17 @@ for index=1:length(text) % loop over lines of text
   end
 end
 
+%% auto_gen_test_data_flag argout
+if options.auto_gen_test_data_flag
+  argout = {model, name_map}; % specific to this function
+  
+  ds.unit.saveAutoGenTestData(argin, argout);
+end
 
-%% subfunctions
+end % main fn
+
+
+%% local functions
 function [line,comment]=remove_comment(line)
 % purpose: split line into model content and comment
 index=find(line=='%',1,'first');
@@ -362,4 +379,6 @@ if isempty(index) % no comment found
 else % split line into comment and non-comment line sections
   comment=line(index:end);
   line=line(1:index-1);
+end
+
 end

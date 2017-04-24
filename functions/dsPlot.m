@@ -148,83 +148,10 @@ function handles = dsPlot(data,varargin)
 
 % Check inputs
 data=ds.checkData(data, varargin{:});
-  % note: calling ds.checkData() at beginning enables analysis/plotting functions to
-  % accept data matrix [time x cells] in addition to DynaSim data structure.
+  % NOTE: calling ds.checkData() at beginning enables analysis/plotting functions to
+  %       accept data matrix [time x cells] in addition to DynaSim data structure.
 
-fields=fieldnames(data);
-
-if any(strcmp(fields, 'varied'))
-    
-    vary_labels = data(1).varied; % data(1).simulator_options.vary;
-    
-    no_vary_labels = length(vary_labels);
-    
-    vary_params = nan(length(data), no_vary_labels);
-    
-    vary_vectors = cell(no_vary_labels, 1);
-    
-    vary_lengths = nan(no_vary_labels, 1);
-    
-    for v = 1:no_vary_labels
-        
-        vary_params(:, v) = [data.(vary_labels{v})];
-        
-        vary_vectors{v} = unique(vary_params(:, v));
-        
-        vary_lengths(v) = length(vary_vectors{v});
-        
-    end
-    
-    [effective_vary_lengths, ~] = ds.checkCovary(vary_lengths, vary_params);
-    
-    dimensions_varied = sum(effective_vary_lengths > 1);
-    
-    if dimensions_varied > 2
-        
-        no_figures = prod(effective_vary_lengths(3:end));
-        
-        data = reshape(data, prod(effective_vary_lengths(3:end)), prod(effective_vary_lengths([1 2])));
-        
-        figure_params = nan(no_vary_labels - 2, 1);
-        
-        vary_lengths_cp = cumprod(vary_lengths);
-        
-        for f = 1:no_figures
-            
-            figure_params(1) = vary_vectors{3}(mod(f - 1, vary_lengths(3)) + 1);
-            
-            for v = 4:no_vary_labels
-                
-                figure_params(v - 2) = vary_vectors{v}(ceil(f/vary_lengths_cp(v - 3)));
-                
-            end
-            
-            vary_title = '';
-            
-            for v = 1:(no_vary_labels - 2)
-                
-                vary_title = [vary_title, sprintf('%s = %f ', vary_labels{v + 2}, figure_params(v))];
-                
-            end
-            
-            handles = dsPlot(data(f, :), varargin{:});
-            
-            for h = 1:length(handles)
-                
-                % figure(handles(h))
-                
-                mtit(handles(h), vary_title, 'FontSize', 14, 'yoff', .2)
-                
-            end
-            
-        end
-        
-        return
-        
-    end
-    
-end
-
+% get options
 options=ds.checkOptions(varargin,{...
   'time_limits',[-inf inf],[],...
   'variable',[],[],...
@@ -239,16 +166,80 @@ options=ds.checkOptions(varargin,{...
   'lock_gca',[false],[false, true],...
   'yscale','linear',{'linear','log','log10','log2'},...
   'visible','on',{'on','off'},...
+  'auto_gen_test_data_flag',0,{0,1},...
   },false);
+
+%% auto_gen_test_data_flag argin
+if options.auto_gen_test_data_flag
+  varargs = varargin;
+  varargs{find(strcmp(varargs, 'auto_gen_test_data_flag'))+1} = 0;
+  argin = [{data}, varargs]; % specific to this function
+end
+
+
+%% varied fields
+fields=fieldnames(data);
+if any(strcmp(fields, 'varied'))
+  % get varied labels
+  vary_labels = data(1).varied; % data(1).simulator_options.vary;
+  no_vary_labels = length(vary_labels);
+  vary_params = nan(length(data), no_vary_labels);
+  vary_vectors = cell(no_vary_labels, 1);
+  vary_lengths = nan(no_vary_labels, 1);
+  
+  % get varied params
+  for v = 1:no_vary_labels
+    vary_params(:, v) = [data.(vary_labels{v})];
+    vary_vectors{v} = unique(vary_params(:, v));
+    vary_lengths(v) = length(vary_vectors{v});
+  end
+  
+  [effective_vary_lengths, ~] = ds.checkCovary(vary_lengths, vary_params, varargin{:});
+  
+  dimensions_varied = sum(effective_vary_lengths > 1);
+  
+  if dimensions_varied > 2
+    no_figures = prod(effective_vary_lengths(3:end));
+    
+    data = reshape(data, prod(effective_vary_lengths(3:end)), prod(effective_vary_lengths([1 2])));
+    
+    figure_params = nan(no_vary_labels - 2, 1);
+    
+    vary_lengths_cp = cumprod(vary_lengths);
+    
+    for f = 1:no_figures
+      figure_params(1) = vary_vectors{3}(mod(f - 1, vary_lengths(3)) + 1);
+      
+      for v = 4:no_vary_labels
+        figure_params(v - 2) = vary_vectors{v}(ceil(f/vary_lengths_cp(v - 3)));
+      end
+      
+      vary_title = '';
+      
+      for v = 1:(no_vary_labels - 2)
+        vary_title = [vary_title, sprintf('%s = %f ', vary_labels{v + 2}, figure_params(v))];
+      end
+      
+      handles = dsPlot(data(f, :), varargin{:});
+      for h = 1:length(handles)
+        % figure(handles(h))
+        mtit(handles(h), vary_title, 'FontSize', 14, 'yoff', .2)
+      end
+      
+    end % no_figures
+    return
+  end % dimensions_varied
+end
+
 data=ds.checkData(data, varargin{:});
 handles=[];
 
 lock_gca = options.lock_gca;
 
-% todo: add option 'plot_mode' {'trace','image'}
+% TODO: add option 'plot_mode' {'trace','image'}
 
 % variables to plot
-var_fields=ds.selectVariables(data(1).labels,options.variable);
+var_fields=ds.selectVariables(data(1).labels,options.variable, varargin{:});
 tmp=regexp(var_fields,'_(.+)$','tokens','once');
 variables=unique([tmp{:}]);
 
@@ -365,7 +356,7 @@ if num_sims>1 && isfield(data,'varied')
       param_mat(:,j)=[data.(varied{j})]; % values for each simulation
       param_cell{j}=unique([data.(varied{j})]); % unique values for each parameter
     else
-      % todo: handle sims varying non-numeric model components 
+      % TODO: handle sims varying non-numeric model components 
       % (eg, mechanisms) (also in ds.plotFR and dsSelect)
     end
   end
@@ -864,6 +855,13 @@ for figset=1:num_fig_sets
     
   end % end loop over figures in this set
 end % end loop over figure sets
+
+%% auto_gen_test_data_flag argout
+if options.auto_gen_test_data_flag
+  argout = {handles}; % specific to this function
+
+  ds.unit.saveAutoGenTestDir(argin, argout);
+end
 
 % 1 sim, 1 pop, 1 var (X)
 % 	N=1		one fig, one row (plot var X)

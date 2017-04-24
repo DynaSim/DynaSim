@@ -43,7 +43,7 @@ function data = dsSelect(data,varargin)
 %   - Possible format for specifying range_varied:
 %     {'E','gNa',[.1 .3]; 'I->E','tauI',[15 25]; 'I','mechanism_list','+iM'}
 %
-% See also: dsSimulate, ds.vary2Modifications, ds.importData
+% See also: dsSimulate, ds.vary2Modifications, dsImport
 
 % check inputs
 data=ds.checkData(data, varargin{:});
@@ -58,8 +58,8 @@ options=ds.checkOptions(varargin,{...
 if ~isempty(options.varied) && isfield(data,'varied')
   if size(options.varied,2)==3
     % convert into field name (set in dsSimulate:prepare_varied_metadata)
-    % note: this code is redundant with dsSimulate and dsAnalyze.
-    % todo: eliminate redundancy
+    % NOTE: this code is redundant with dsSimulate and dsAnalyze.
+    % TODO: eliminate redundancy
     varied={};
     for i=1:size(options.varied,1)
       % prepare valid field name for thing varied:
@@ -69,7 +69,7 @@ if ~isempty(options.varied) && isfield(data,'varied')
       % remove brackets and parentheses
       fld=regexprep(fld,'[\[\]\(\)\{\}]','');
       varied{end+1,1}=fld;
-    end    
+    end
     options.varied=cat(2,varied,options.varied(:,3));
   end
   if size(options.varied,1)>1
@@ -88,13 +88,13 @@ if ~isempty(options.varied) && isfield(data,'varied')
     if isnumeric(data(1).(varied{j}))
       param_mat(:,j)=[data.(varied{j})]; % sims x varied
     else
-      % todo: handle sims varying non-numeric model components 
+      % TODO: handle sims varying non-numeric model components 
       % (eg, mechanisms) (also in dsPlot)
     end
   end
   % find element of 'varied' whose range has been requested
   desired_param=options.varied{1,1};
-  desired_range=options.varied{1,2};  
+  desired_range=options.varied{1,2};
   index=find(ismember(data(1).varied,desired_param));
   % find simulations with varied values in desired range
   if length(desired_range)==2
@@ -109,7 +109,7 @@ end
 % % recursively call dsSelect if more than one data set
 % if length(data)>1
 %   for i=1:length(data)
-%     data(i)=dsSelect(data(i),varargin{:});
+%     data(i)=dsSelect(data(i));
 %   end
 %   return;
 % end
@@ -132,10 +132,10 @@ for s=1:length(data)
         data(s).(options.roi{i,1})=dat(:,sel);
       end
     end
-  end    
+  end
 end
 
-% todo: select subset from time-varying post-processed results
+% TODO: select subset from time-varying post-processed results
 if isfield(data,'results')
   % get time vectors: time_(*) with * matching matching names in data.results
   % ...

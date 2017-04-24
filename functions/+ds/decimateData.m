@@ -1,4 +1,4 @@
-function data_out = downsampleData(data,ds)
+function data_out = decimateData(data,ds)
 %DOWNSAMPLEDATA - Downsamples DynaSim data structre data
 %
 % Usage:
@@ -9,8 +9,7 @@ function data_out = downsampleData(data,ds)
 %   - ds: number of datapoints to downsample
 %
 % Outputs:
-%   - data_out: data structure all fields replaced by their average valeus
-%               (averaged across neurons).
+%   - data_out: data structure all fields replaced by their decimated values
 %
 % See also: ds.plotFR, ds.analyzeStudy, dsSimulate, ds.checkData, ds.selectVariables
 
@@ -20,14 +19,13 @@ data = ds.checkData(data, varargin{:});
 % note: calling ds.checkData() at beginning enables analysis function to
 % accept data matrix [time x cells] in addition to DynaSim data structure.
 
-%% do the averaging
-
+%% do the decimating
 data_out = data;
 for i = 1:length(data)
     % Identify all fields in data containing simulated output
     labels = data(i).labels;
     
-    % Sweep through these fields and take average
+    % Sweep through these fields and decimate
     for j = 1:length(labels)
         data_out(i).(labels{j}) = data(i).(labels{j})(1:ds:end,:);
     end

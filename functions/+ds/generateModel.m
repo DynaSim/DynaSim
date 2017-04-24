@@ -1,4 +1,4 @@
-function [model,name_map] = generateModel(specification,varargin)
+function [model,name_map] = generateModel(specification, varargin)
 %GENERATEMODEL - Parse DynaSim specification and organize model data in DynaSim model structure
 %
 % Usage:
@@ -129,7 +129,15 @@ end
 options=ds.checkOptions(varargin,{...
   'modifications',[],[],...
   'open_link_flag',0,{0,1},...
+  'auto_gen_test_data_flag',0,{0,1},...
   },false);
+
+if options.auto_gen_test_data_flag
+  varargs = varargin;
+  varargs{find(strcmp(varargs, 'auto_gen_test_data_flag'))+1} = 0;
+  argin = [{specification}, varargs]; % specific to this function
+end
+
 % check if a model
 if isfield(specification,'state_variables')
   % do nothing
@@ -142,7 +150,7 @@ if isfield(specification,'state_variables')
 %   end
 end
 % standardize specification
-specification=ds.checkSpecification(specification); % standardize & auto-populate as needed
+specification=ds.checkSpecification(specification, varargin{:}); % standardize & auto-populate as needed
 
 % Apply modifications to specification before generating model
 if ~isempty(options.modifications)
@@ -205,7 +213,7 @@ for i=1:npops
     end
     
     tmpmodel.linkers=[]; % remove old linkers from original model construction
-    model=ds.combineModels(model,tmpmodel);
+    model=ds.combineModels(model,tmpmodel, varargin{:});
     name_map=cat(1,name_map,tmpmodel.namespaces);
     continue;
   end
@@ -225,7 +233,7 @@ for i=1:npops
   % parse population equations
   if ~isempty(equations)
     [tmpmodel,tmpmap]=ds.importModel(equations,'namespace',PopScope,'ic_pop',specification.populations(i).name,'user_parameters',parameters);
-    model=ds.combineModels(model,tmpmodel);
+    model=ds.combineModels(model,tmpmodel, varargin{:});
     name_map=cat(1,name_map,tmpmap);
   end
   
@@ -269,7 +277,7 @@ for i=1:npops
     end
     
     % combine sub-model with other sub-models
-    model=ds.combineModels(model,tmpmodel);
+    model=ds.combineModels(model,tmpmodel, varargin{:});
     name_map=cat(1,name_map,tmpmap);
     linker_pops=cat(2,linker_pops,repmat({specification.populations(i).name},[1 length(tmpmodel.linkers)]));
   end
@@ -314,7 +322,7 @@ for i=1:ncons
       tmpmodel.linkers(1).target=['@' new_linker];
     end
     
-    model=ds.combineModels(model,tmpmodel);
+    model=ds.combineModels(model,tmpmodel, varargin{:});
     name_map=cat(1,name_map,tmpmap);
     
     % link this mechanism to the target population
@@ -476,7 +484,7 @@ end
 
 %% 2.0 propagate namespaces through variable and function names
 %      i.e., to establish uniqueness of names by adding namespace/namespace prefixes)
-model = ds.propagateNamespaces(model,name_map);
+model = ds.propagateNamespaces(model,name_map, varargin{:});
 
 %% 3.0 expand population equations according to mechanism linkers
 % purpose: expand population equations according to linkers
@@ -658,9 +666,17 @@ model.parameters = cell2struct(c,f,1);
 model.specification = specification; % store specification to enable modifications to be applied later
 model.namespaces = name_map; % store name_map for transparency
 
-model=ds.checkModel(model);
+model=ds.checkModel(model, varargin{:});
 
+%% auto_gen_test_data_flag argout
+if options.auto_gen_test_data_flag
+  argout = {model, name_map}; % specific to this function
+  
+  ds.unit.saveAutoGenTestData(argin, argout);
 end
+
+end % main function
+
 
 %% SUBFUNCTIONS
 function str=linker_strrep(str,oldstr,newstr,operator)

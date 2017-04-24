@@ -1,4 +1,4 @@
-function [variables,pop_names] = selectVariables(labels,var_strings)
+function [variables,pop_names] = selectVariables(labels,var_strings, varargin)
 %SELECTVARIABLES - determine what variables to plot
 %
 % Usage:
@@ -21,9 +21,18 @@ function [variables,pop_names] = selectVariables(labels,var_strings)
 %   var_strings='pop1_*';
 %   var_strings='pop2_*';
 
+%% auto_gen_test_data_flag argin
+options = ds.checkOptions(varargin,{'auto_gen_test_data_flag',0,{0,1}},false);
+if options.auto_gen_test_data_flag
+  varargs = varargin;
+  varargs{find(strcmp(varargs, 'auto_gen_test_data_flag'))+1} = 0;
+  argin = [{labels}, {var_strings}, varargs]; % specific to this function
+end
+
 if nargin<2
   var_strings=[];
 end
+
 if isempty(var_strings)
   % set default: all pops with state variable of first element of labels
   var=regexp(labels{1},'_.*$','match');
@@ -36,6 +45,7 @@ if isempty(var_strings)
 elseif ~iscell(var_strings)
   var_strings={var_strings};
 end
+
 % loop over cell array of variable indicators
 variables={};
 for i=1:length(var_strings)
@@ -54,10 +64,20 @@ for i=1:length(var_strings)
   matches=regexp(labels,['^' varstr '$'],'match');
   variables=cat(2,variables,matches{:});
 end
-if nargout>1
+
+% if nargout>1
   pop_names={};
   for i=1:length(variables)
     name=regexp(variables{i},'^([a-zA-Z0-9]+)_','tokens','once');
     pop_names{end+1}=name{1};
   end
+% end
+
+%% auto_gen_test_data_flag argout
+if options.auto_gen_test_data_flag
+  argout = {variables, pop_names}; % specific to this function
+  
+  ds.unit.saveAutoGenTestData(argin, argout);
+end
+
 end

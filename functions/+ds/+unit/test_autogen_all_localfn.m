@@ -22,7 +22,7 @@ classdef test_autogen_all_localfn < matlab.unittest.TestCase
       
       % Get local function handles from fn
       fnHandle = str2func(fnName);
-      localFnHandles = feval(fnHandle,[]);
+      localFnHandles = feval(fnHandle);
       localFnStrs = cellfun(@func2str,localFnHandles, 'uni',false);
       
       % Get this local fn handle

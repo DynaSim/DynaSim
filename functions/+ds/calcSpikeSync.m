@@ -1,4 +1,4 @@
-function stats = calcSpikeSync(data,varargin)
+function stats = calcSpikeSync(data, varargin)
 %CALCSPIKESYNC - Compute spike synchronization between spiketrains
 %
 % Usage:
@@ -27,13 +27,22 @@ function stats = calcSpikeSync(data,varargin)
 
 %% 1.0 Check inputs
 options=ds.checkOptions(varargin,{...
-  'ROI_pairs',[],[],...    
+  'ROI_pairs',[],[],...
   'spike_threshold',0,[],... % threshold for spike detection
   'kernel_width',1,[],... % ms, width of gaussian for kernel regression
   'Ts',1,[],...           % ms, set to this effective time step for rate process before regression
   'maxlag_time',10,[],... % ms, max lag time for cross correlation
   'time_limits',[100 inf],[],... % time limits for spectral analysis
+  'auto_gen_test_data_flag',0,{0,1},...
   },false);
+
+%% auto_gen_test_data_flag argin
+if options.auto_gen_test_data_flag
+  varargs = varargin;
+  varargs{find(strcmp(varargs, 'auto_gen_test_data_flag'))+1} = 0;
+  argin = [{data}, varargs]; % specific to this function
+end
+
 data=ds.checkData(data, varargin{:});
 
 if numel(data)>1
@@ -92,7 +101,7 @@ for i=1:npairs
     a=roi2(1);
     b=roi2(2);
   end
-  ROI2{i}=a:b;    
+  ROI2{i}=a:b;
 end
 if ~isempty(exclude)
   options.ROI_pairs(exclude,:)=[];
@@ -185,7 +194,7 @@ for pair=1:npairs
   end
   th=99;
   tmp=nspiked1.*nspiked2;
-  rm=tmp>prctile(tmp,th); 
+  rm=tmp>prctile(tmp,th);
   tmp(rm)=0;
   ncoactive=sum(tmp)/(sum(nspiked1(~rm))*sum(nspiked2(~rm)));
     
@@ -198,7 +207,7 @@ for pair=1:npairs
     end
   else
     time=0:Ts:max(t)+Ts;
-    time=time(nearest(time,min(t))):Ts:time(nearest(time,max(t)));    
+    time=time(nearest(time,min(t))):Ts:time(nearest(time,max(t)));
   end
   if equal_rois
     r2=r1;
@@ -208,7 +217,7 @@ for pair=1:npairs
       for i=1:n2
         [ri,time]=ds.nwGaussKernelRegr(t,raster2,i,kwidth,Ts);
         r2(:,i)=ri;
-      end  
+      end
     end
   end
 
@@ -235,8 +244,8 @@ for pair=1:npairs
   num_spikes2=size(raster2,1);
   dN=num_spikes1-num_spikes2;
   dNsumN=dN/(num_spikes1+num_spikes2);
-  minN=min(num_spikes1,num_spikes2);  
-  maxN=max(num_spikes1,num_spikes2);  
+  minN=min(num_spikes1,num_spikes2);
+  maxN=max(num_spikes1,num_spikes2);
   
   % spectral analysis
   dat=dsSelect(data,'roi',{var1,roi1});
@@ -250,8 +259,8 @@ for pair=1:npairs
   dat=ds.calcPower(dat,'time_limits',options.time_limits);
   Power_MUA2=dat.([var2 '_Power_MUA']);
   Power_SUA2=dat.([var2 '_Power_SUA']);
-  Power_SUA2.Pxx_mu=nanmean(Power_SUA2.Pxx,2);   
-  Power_SUA2.Pxx_sd=nanstd(Power_SUA2.Pxx,[],2);   
+  Power_SUA2.Pxx_mu=nanmean(Power_SUA2.Pxx,2);
+  Power_SUA2.Pxx_sd=nanstd(Power_SUA2.Pxx,[],2);
   
   % store measures
   stats.pairs(cnt).raster1=raster1;
@@ -303,3 +312,10 @@ stats.options=options;
 % calculate instantaneous population firing rate
 % pop=unique(raster(:,2));
 % [inst_pop_rate,time]=ds.nwGaussKernelRegr(t,raster,pop,kwidth,Ts);
+
+%% auto_gen_test_data_flag argout
+if options.auto_gen_test_data_flag
+  argout = {stats};
+  
+  ds.unit.saveAutoGenTestData(argin, argout);
+end

@@ -1,4 +1,4 @@
-function [matched,error_message] = checkHostPaths(studyinfo)
+function [matched,error_message] = checkHostPaths(studyinfo, varargin)
 %CHECKHOSTPATHS - Compare paths on host to those set in studyinfo when batch was created
 %
 % Call ds.checkHostPaths() in job.m before first simulation to make sure the
@@ -21,6 +21,14 @@ function [matched,error_message] = checkHostPaths(studyinfo)
 % - path to DynaSim functions
 % - path to model files
 
+%% auto_gen_test_data_flag argin
+options = ds.checkOptions(varargin,{'auto_gen_test_data_flag',0,{0,1}},false);
+if options.auto_gen_test_data_flag
+  varargs = varargin;
+  varargs{find(strcmp(varargs, 'auto_gen_test_data_flag'))+1} = 0;
+  argin = [{studyinfo}, varargs]; % specific to this function
+end
+
 matched=1;
 error_message='';
 
@@ -40,4 +48,11 @@ end
 if ~isequal(unique(mech_paths),unique(studyinfo.paths.mechanisms))
   matched=0; mech_paths, studyinfo.paths.mechanisms
   error_message=sprintf('%sPath changed to model files (expected: %s, found: %s). ',error_message,[studyinfo.paths.mechanisms{:}],[mech_paths{:}]);
+end
+
+%% auto_gen_test_data_flag argout
+if options.auto_gen_test_data_flag
+  argout = {matched, error_message}; % specific to this function
+  
+  ds.unit.saveAutoGenTestData(argin, argout);
 end

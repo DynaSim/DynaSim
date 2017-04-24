@@ -25,9 +25,10 @@ if options.verbose_flag
 end
 
 if options.save_data_flag || options.save_results_flag || options.parallel_flag
-                                                            % If in parallel mode, need to calculate
-                                                            % studyinfo regardless of whether or not
-                                                            % are saving data.
+  % If in parallel mode, need to calculate
+  % studyinfo regardless of whether or not
+  % are saving data.
+  
   % set default study_dir if necessary
   if isempty(options.study_dir)
     % format: <study_dir> = <project_dir>/<prefix>_<timestamp>
@@ -60,7 +61,7 @@ if options.save_data_flag || options.save_results_flag || options.parallel_flag
   % initialize studyinfo if not already initialized
   if ischar(options.study_dir) && isdir(options.study_dir) && exist(fullfile(options.study_dir,'studyinfo.mat'),'file')
     % studyinfo file already exists
-    studyinfo=ds.checkStudyinfo(options.study_dir,'process_id',process_id);
+    studyinfo=ds.checkStudyinfo(options.study_dir,'process_id',process_id, varargin{:});
     orig_studyinfo=studyinfo;
   else
     orig_studyinfo=[];
@@ -74,7 +75,7 @@ if options.save_data_flag || options.save_results_flag || options.parallel_flag
       studyinfo=[];
     end
     
-    studyinfo=ds.checkStudyinfo(studyinfo,'process_id',process_id); % auto-fill all fields
+    studyinfo=ds.checkStudyinfo(studyinfo,'process_id',process_id, varargin{:}); % auto-fill all fields
   end
   
   % set basic metadata for this study
@@ -154,7 +155,7 @@ if options.save_data_flag || options.save_results_flag || options.parallel_flag
       for kk=1:length(options.plot_functions)
         studyinfo.simulations(k).result_functions{end+1}=options.plot_functions{kk};
         studyinfo.simulations(k).result_options{end+1}=options.plot_options{kk};
-        fname=[options.prefix '_sim' num2str(k) '_plot' num2str(kk) '_' func2str(options.plot_functions{kk})]; 
+        fname=[options.prefix '_sim' num2str(k) '_plot' num2str(kk) '_' func2str(options.plot_functions{kk})];
         % note: extension will depend on output format (jpg,png,eps,svg)
         % and be set in dsAnalyze().
         studyinfo.simulations(k).result_files{end+1}=fullfile(plot_dir,fname);

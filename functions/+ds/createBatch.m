@@ -62,7 +62,7 @@ num_simulations=length(modifications_set);
       fprintf('Study already finished. Not creating new batch.\n');
     end
     
-    studyinfo=ds.checkStudyinfo(studyinfo.study_dir,'process_id',options.process_id);
+    studyinfo=ds.checkStudyinfo(studyinfo.study_dir,'process_id',options.process_id, varargin{:});
     
     return;
   end
@@ -410,7 +410,7 @@ end
     fjob=fopen(job_file,'wt');
     
     % load studyinfo using helper function to avoid busy file errors
-    %fprintf(fjob,'studyinfo=ds.checkStudyinfo(''%s'',''process_id'',%g);\n',study_file,sim_ids(1));
+    %fprintf(fjob,'studyinfo=ds.checkStudyinfo(''%s'',''process_id'',%g);\n',study_file,sim_ids(1), varargin{:});
     %fprintf(fjob,'load(''%s'',''studyinfo'');\n',study_file);
     
     [~, job_filename] = fileparts(job_file); %remove path and extension

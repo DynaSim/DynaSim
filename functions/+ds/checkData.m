@@ -2,7 +2,7 @@ function data = checkData(data, varargin)
 %CHECKDATA - Standardize data structure and auto-populate missing fields
 %
 % Usage:
-%   data=ds.checkData(data, varargin{:})
+%   data=ds.checkData(data)
 %
 % Input: DynaSim data structure, data matrix [time x cells], or cell array of data matrices
 %
@@ -17,12 +17,11 @@ function data = checkData(data, varargin)
 %     [data.varied]         : list of varied model components
 %     [data.results]        : list of derived data sets created by post-processing
 %
-% See also: dsSimulate, ds.importData, ds.exportData
+% See also: dsSimulate, dsImport, ds.exportData
 
 %% auto_gen_test_data_flag argin
 options = ds.checkOptions(varargin,{'auto_gen_test_data_flag',0,{0,1}},false);
 if options.auto_gen_test_data_flag
-  % specific to this function
   varargs = varargin;
   varargs{find(strcmp(varargs, 'auto_gen_test_data_flag'))+1} = 0;
   argin = [{data}, varargs]; % specific to this function
@@ -107,7 +106,7 @@ data=orderfields(data,{'labels','time',fields{:}});
 if options.auto_gen_test_data_flag
   argout = {data}; % specific to this function
   
-  ds.saveAutoGenTestData(argin, argout);
+  ds.unit.saveAutoGenTestData(argin, argout);
 end
 
 end %fn

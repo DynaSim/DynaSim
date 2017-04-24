@@ -1,4 +1,4 @@
-function spec = checkSpecification(specification)
+function spec = checkSpecification(specification, varargin)
 %CHECKSPECIFICATION - standardize specification structure and auto-populate missing fields
 %
 % Usage:
@@ -104,6 +104,20 @@ function spec = checkSpecification(specification)
 %
 % See also: ds.generateModel, ds.checkModel
 
+%% localfn output
+if ~nargin
+  spec = localfunctions;
+  return
+end
+
+%% auto_gen_test_data_flag argin
+options = ds.checkOptions(varargin,{'auto_gen_test_data_flag',0,{0,1}},false);
+if options.auto_gen_test_data_flag
+  varargs = varargin;
+  varargs{find(strcmp(varargs, 'auto_gen_test_data_flag'))+1} = 0;
+  argin = [{specification}, varargs]; % specific to this function
+end
+
 % check if input is a string or cell with equations and package in spec structure
 if ischar(specification) || iscell(specification)
   spec.populations.equations=specification;
@@ -115,7 +129,7 @@ else
   error('specification must be a DynaSim specification structure or a string with equations or sub-model filename.');
 end
 
-spec=backward_compatibility(spec);
+spec=backward_compatibility(spec, varargin{:});
 pop_field_order={'name','size','equations','mechanism_list','parameters',...
   'conditionals','monitors','model'};
 con_field_order={'source','target','mechanism_list','parameters'};
@@ -327,7 +341,7 @@ for i=1:length(spec.populations)
     end
     % extract population-level parameters from equations
     eqn=spec.populations(i).equations;
-    p=getfield(ds.parseModelEquations(eqn),'parameters');
+    p=getfield(ds.parseModelEquations(eqn, varargin{:}),'parameters');
     if ~isempty(p)
       param_name=fieldnames(p);
       param_value=struct2cell(p);
@@ -378,7 +392,7 @@ for i=1:length(spec.populations)
     end
   end
   % expand mechanism list if any element is itself a list of mechanisms (eg, {'iCa','{CaBuffer,iCan}'} or '{CaBuffer,iCan}')
-  spec.populations(i).mechanism_list=expand_list(spec.populations(i).mechanism_list);
+  spec.populations(i).mechanism_list=expand_list(spec.populations(i).mechanism_list, varargin{:});
 end
 
 % 2.0 standardize connections
@@ -398,7 +412,7 @@ if ~isempty(spec.connections)
   
   if ~isfield(spec.connections,'parameters')
     spec.connections(1).parameters={};
-  end  
+  end
 end
 for i=1:length(spec.connections)
   if isempty(spec.connections(i).source) && length(spec.populations)==1
@@ -414,7 +428,7 @@ for i=1:length(spec.connections)
   end
   
   % expand mechanism list if any element is itself a list of mechanisms (eg, {'AMPA','{GABAa,GABAb}'} or '{GABAa,GABAb}')
-  spec.connections(i).mechanism_list=expand_list(spec.connections(i).mechanism_list);
+  spec.connections(i).mechanism_list=expand_list(spec.connections(i).mechanism_list, varargin{:});
   
   % parameter cell arrays
   if ~iscell(spec.connections(i).parameters)
@@ -481,7 +495,27 @@ if ~isempty(files)
   end
 end
 
-function list=expand_list(list)
+%% auto_gen_test_data_flag argout
+if options.auto_gen_test_data_flag
+  argout = {spec}; % specific to this function
+  
+  ds.unit.saveAutoGenTestData(argin, argout);
+end
+
+end % main fn
+
+
+%% local fns
+function list = expand_list(list, varargin)
+%% auto_gen_test_data_flag argin
+options = ds.checkOptions(varargin,{'auto_gen_test_data_flag',0,{0,1}},false);
+if options.auto_gen_test_data_flag
+
+  varargs = varargin;
+  varargs{find(strcmp(varargs, 'auto_gen_test_data_flag'))+1} = 0;
+  argin = [{list}, varargs];
+end
+
 % expand mechanism list if any element is itself a list of mechanisms (eg, {'AMPA','{GABAa,GABAb}'} or '{GABAa,GABAb}')
 if isempty(list)
   return;
@@ -496,9 +530,29 @@ if any(~cellfun(@isempty,regexp(list,'[{,}]+')))
   list=mechs;
 end
 
-function spec=backward_compatibility(spec)
+%% auto_gen_test_data_flag argout
+if options.auto_gen_test_data_flag
+  argout = {list};
+  
+  ds.unit.saveAutoGenTestDataLocalFn(argin, argout); % localfn
+end
+
+end
+
+
+function spec = backward_compatibility(spec, varargin)
 % purpose: change name of fields from old to new convention
 % rename "nodes" or "entities" to "populations"
+
+%% auto_gen_test_data_flag argin
+options = ds.checkOptions(varargin,{'auto_gen_test_data_flag',0,{0,1}},false);
+if options.auto_gen_test_data_flag
+
+  varargs = varargin;
+  varargs{find(strcmp(varargs, 'auto_gen_test_data_flag'))+1} = 0;
+  argin = [{spec}, varargs];
+end
+
 if isfield(spec,'nodes')
   spec.populations=spec.nodes;
   spec=rmfield(spec,'nodes');
@@ -584,6 +638,7 @@ if isfield(spec,'connections') && size(spec.connections,1)>1
     end
   end
 end
+
 if isfield(spec,'connections') && isfield(spec.connections,'direction')
   for i=1:length(spec.connections)
     if ischar(spec.connections(i).direction)
@@ -600,4 +655,13 @@ if isfield(spec,'connections') && isfield(spec.connections,'direction')
     end
   end
   spec.connections=rmfield(spec.connections,'direction');
+end
+
+%% auto_gen_test_data_flag argout
+if options.auto_gen_test_data_flag
+  argout = {spec};
+  
+  ds.unit.saveAutoGenTestDataLocalFn(argin, argout); % localfn
+end
+
 end

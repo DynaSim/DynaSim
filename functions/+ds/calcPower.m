@@ -1,4 +1,4 @@
-function data = calcPower(data,varargin)
+function data = calcPower(data, varargin)
 %CALCPOWER - Compute spectral analysis of DynaSim data
 %
 % Usage:
@@ -67,7 +67,15 @@ options=ds.checkOptions(varargin,{...
   'exclude_data_flag',0,{0,1},...
   'timeBandwidthProduct',[],[],... % time-bandwidth product for multi-taper method
   'output_suffix','',[],...
+  'auto_gen_test_data_flag',0,{0,1},...
   },false);
+
+%% auto_gen_test_data_flag argin
+if options.auto_gen_test_data_flag
+  varargs = varargin;
+  varargs{find(strcmp(varargs, 'auto_gen_test_data_flag'))+1} = 0;
+  argin = [{data}, varargs]; % specific to this function
+end
 
 data = ds.checkData(data, varargin{:});
 % note: calling ds.checkData() at beginning enables analysis function to
@@ -101,7 +109,7 @@ NFFT=2^(nextpow2(nsamp-1)-1);%2); % <-- use higher resolution to capture STO fre
 NW = options.timeBandwidthProduct;
 
 %% 2.0 set list of variables to process as cell array of strings
-options.variable=ds.selectVariables(data(1).labels,options.variable);
+options.variable=ds.selectVariables(data(1).labels,options.variable, varargin{:});
 
 %% 3.0 calculate power spectrum for each variable
 if ~isfield(data,'results')
@@ -185,7 +193,7 @@ for v=1:length(options.variable)
     Pxx(:,i)=tmpPxx;
   end
   % -----------------------------------------------------
-  % Repeat spectral estimate for MUA: 
+  % Repeat spectral estimate for MUA:
   if ncells==1
     % same as SUA
     Pxx_mean=Pxx;
@@ -289,4 +297,11 @@ for v=1:length(options.variable)
 %     data.results{end+1}=[var '_Pxx_mean_Pxx_PeakArea'];
 %   end
   
+end
+
+%% auto_gen_test_data_flag argout
+if options.auto_gen_test_data_flag
+  argout = {data}; % specific to this function
+  
+  ds.unit.saveAutoGenTestData(argin, argout);
 end

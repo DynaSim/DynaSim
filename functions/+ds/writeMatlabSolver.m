@@ -54,7 +54,7 @@ options=ds.checkOptions(varargin,{...
   },false);
 
 % Check inputs
-model=ds.checkModel(model);
+model=ds.checkModel(model, varargin{:});
 
 % convert matlab solver options from key/value to struct using odeset if necessary
 if iscell(options.matlab_solver_options) && ~isempty(options.matlab_solver_options)
@@ -66,9 +66,9 @@ end
 % create function that calls feval(@solver,...) and has subfunction
 % defining odefun (including optional conditionals)...
 
-propagatedModel = ds.propagateParameters(ds.propagateFunctions(model));
-propagatedModel = ds.propagateParameters(propagatedModel, 'param_type', 'fixed_variables');
-[odefun,IC,elem_names] = ds.dynasim2odefun(propagatedModel, 'odefun_output','func_body');
+propagatedModel = ds.propagateParameters(ds.propagateFunctions(model), varargin{:}, varargin{:});
+propagatedModel = ds.propagateParameters(propagatedModel, 'param_type', 'fixed_variables', varargin{:});
+[odefun,IC,elem_names] = ds.dynasim2odefun(propagatedModel, 'odefun_output','func_body', varargin{:});
 
 
 %% 2.0 prepare model info
@@ -77,13 +77,13 @@ parameter_prefix='p.';%'pset.p.';
 
 % 1.1 eliminate internal (anonymous) function calls from model equations
 % if options.reduce_function_calls_flag==1
-  model=ds.propagateFunctions(model);
+  model=ds.propagateFunctions(model, varargin{:});
 % end
 
 % 1.1 prepare parameters
 if options.save_parameters_flag
   % add parameter struct prefix to parameters in model equations
-  model=ds.propagateParameters(model,'action','prepend','prefix',parameter_prefix);
+  model=ds.propagateParameters(model,'action','prepend','prop_prefix',parameter_prefix, varargin{:});
   
   % set and capture numeric seed value
   if options.compile_flag==1
@@ -182,7 +182,7 @@ if options.save_parameters_flag
   save(param_file_name,'p');
 else
   % insert parameter values into model expressions
-  model=ds.propagateParameters(model,'action','substitute');
+  model=ds.propagateParameters(model,'action','substitute', varargin{:});
 end
 
 % 1.2 prepare list of outputs (state variables and monitors)

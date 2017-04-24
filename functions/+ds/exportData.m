@@ -11,7 +11,7 @@ function exportData(data,varargin)
 %     'format'      : mat. todo: csv, HDF. (default: 'mat')
 %     'verbose_flag': whether to print log info (default: 0)
 % 
-% See also: ds.importData, ds.checkData, dsSimulate
+% See also: dsImport, ds.checkData, dsSimulate
 
 options=ds.checkOptions(varargin,{...
   'filename','data.mat',[],... % name of output data file

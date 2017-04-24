@@ -25,10 +25,10 @@ options=ds.checkOptions(varargin,{...
   },false);
 if isstruct(studyinfo) && isfield(studyinfo,'study_dir')
   % retrieve most up-to-date studyinfo structure from studyinfo.mat file
-  studyinfo=ds.checkStudyinfo(studyinfo.study_dir,'process_id',options.process_id);
+  studyinfo=ds.checkStudyinfo(studyinfo.study_dir,'process_id',options.process_id, varargin{:});
 else
   % process the provided studyinfo structure
-  studyinfo=ds.checkStudyinfo(studyinfo,'process_id',options.process_id);
+  studyinfo=ds.checkStudyinfo(studyinfo,'process_id',options.process_id, varargin{:});
 end
 
 % Check status of study
@@ -122,7 +122,7 @@ if options.verbose_flag
         fprintf('  Simulation %g (%s):\n',siminfo.sim_id,siminfo.status);
       end
       try fprintf('    Host name: %s\n',siminfo.machine_info.host_name); end
-      fprintf('    Start time: %s\n',siminfo.start_time);  
+      fprintf('    Start time: %s\n',siminfo.start_time);
       fprintf('    Error log: %s\n',siminfo.error_log);
     end
   end
@@ -135,7 +135,7 @@ else
     for i=1:num_uniq_errors
       % do nothing if there is no error message
       if isempty(uniq_errors{i})
-        continue; 
+        continue;
       end
       % get list of simulations with this error
       matches=strcmp(uniq_errors{i},errors);
@@ -160,7 +160,7 @@ if ~isempty(studyinfo.paths)
       end
     end
   end
-  if isfield(studyinfo.paths,'dynasim_functions')  
+  if isfield(studyinfo.paths,'dynasim_functions')
     fprintf('  DynaSim functions: %s\n',studyinfo.paths.dynasim_functions);
   end
   if isfield(studyinfo.paths,'batch_dir')

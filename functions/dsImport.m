@@ -1,9 +1,9 @@
-function [data,studyinfo] = importData(file,varargin)
-%IMPORTDATA - load data into DynaSim formatted data structure.
+function [data,studyinfo] = dsImport(file,varargin)
+%DSIMPORT - load data into DynaSim formatted data structure.
 %
 % Usage:
-%   [data,studyinfo]=ds.importData(data_file)
-%   data=ds.importData(data_file)
+%   [data,studyinfo]=dsImport(data_file)
+%   data=dsImport(data_file)
 %
 % Inputs:
 %   - data_file data file name in accepted format (csv, mat, ...), or also
@@ -37,17 +37,17 @@ function [data,studyinfo] = importData(file,varargin)
 %   cells are sequential columns with same header repeated for each cell.
 %
 %   - NOTE 2: DynaSim data exported to MAT-files are HDF-compatible. To obtain
-%   partial data sets without having to load the entire file, use ds.importData
+%   partial data sets without having to load the entire file, use dsImport
 %   with options 'time_limits' and/or 'variables'. Alternatively, the entire
-%   data set can be loaded using ds.importData with default options, then subsets
+%   data set can be loaded using dsImport with default options, then subsets
 %   extracted using dsSelect with appropriate options.
 %
 % Examples:
 %   - Example 1: full data set
-%       data=ds.importData('data.mat'); % load single data set
-%       data=ds.importData(studyinfo); % load all data sets in studyinfo.study_dir
+%       data=dsImport('data.mat'); % load single data set
+%       data=dsImport(studyinfo); % load all data sets in studyinfo.study_dir
 %   - Example 2: partial data set with HDF-style loading
-%       data=ds.importData('data.mat','variables','pop1_v','time_limits',[1000 4000])
+%       data=dsImport('data.mat','variables','pop1_v','time_limits',[1000 4000])
 %
 % TODO:
 % - specify subsets to return in terms of varied parameters, time_limits, ROIs,
@@ -65,7 +65,15 @@ options=ds.checkOptions(varargin,{...
   'time_limits',[],[],...
   'variables',[],[],...
   'simIDs',[],[],...
+  'auto_gen_test_data_flag',0,{0,1},...
   },false);
+  
+%% auto_gen_test_data_flag argin
+if options.auto_gen_test_data_flag
+  varargs = varargin;
+  varargs{find(strcmp(varargs, 'auto_gen_test_data_flag'))+1} = 0;
+  argin = [{file}, varargs]; % specific to this function
+end
 
 if ischar(options.variables)
   options.variables = {options.variables};
@@ -81,7 +89,7 @@ end
 if isstruct(file) && isfield(file,'study_dir')
   % "file" is a studyinfo structure.
   % retrieve most up-to-date studyinfo structure from studyinfo.mat file
-  studyinfo = ds.checkStudyinfo(file.study_dir,'process_id',options.process_id);
+  studyinfo = ds.checkStudyinfo(file.study_dir,'process_id',options.process_id, varargin{:});
   
   % compare simIDs to sim_id
   if ~isempty(options.simIDs)
@@ -115,7 +123,7 @@ if isstruct(file) && isfield(file,'study_dir')
   
   for i = 1:num_files
     fprintf('loading file %g/%g: %s\n',i,num_files,data_files{i});
-    tmp_data=ds.importData(data_files{i},keyvals{:});
+    tmp_data=dsImport(data_files{i},keyvals{:});
     num_sets_per_file=length(tmp_data);
     if ~isfield(tmp_data,'varied')
     % add varied info
@@ -163,7 +171,7 @@ if iscellstr(file)
   
   % load each data set recursively
   for i=1:length(data_files)
-    tmp_data=ds.importData(data_files{i},keyvals{:});
+    tmp_data=dsImport(data_files{i},keyvals{:});
     % store this data
     if i==1
       % preallocate full data matrix based on first data file
@@ -258,6 +266,15 @@ if ischar(file)
         data=dsSelect(data,varargin{:}); % todo: create dsSelect()
       end
     otherwise
-      error('file type not recognized. ds.importData currently supports DynaSim data structure in MAT file, data values in CSV file.');
+      error('file type not recognized. dsImport currently supports DynaSim data structure in MAT file, data values in CSV file.');
   end
 end
+
+%% auto_gen_test_data_flag argout
+if options.auto_gen_test_data_flag
+  argout = {data, studyinfo}; % specific to this function
+  
+  ds.unit.saveAutoGenTestData(argin, argout);
+end
+
+end % main fn

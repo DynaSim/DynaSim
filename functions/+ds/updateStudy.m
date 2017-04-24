@@ -43,7 +43,7 @@ options=ds.checkOptions(varargin,{...
 %   'project_id',[],[],... % unique identifier of parent project
 
 % load most recent version of studyinfo structure from file
-studyinfo=ds.checkStudyinfo(study_dir,'process_id',options.process_id);
+studyinfo=ds.checkStudyinfo(study_dir,'process_id',options.process_id, varargin{:});
 already_finished = all(strcmp('finished',{studyinfo.simulations.status}));
 
 % track status of simulations and analyses
@@ -91,7 +91,7 @@ if ~isempty(options.status) && ~isempty(studyinfo.simulations)
        CPU_type            = textscan(cpuinfo{1}{1}, '%*s %s', 1, 'delimiter' , ':'); % Parses line that includes CPU type.
        CPU_type            = [strrep(CPU_type{1}{1},'  ','') ];    % ## Look for better way for this: collapse all repeated white space stretches to single spaces.
        CPU_cache           = textscan(cpuinfo{2}{1}, '%*s %s', 1, 'delimiter' , ':'); % Parses line that includes the cache info
-       CPU_cache           = [CPU_cache{1}{1} ];                                      % Takes the cache info out of the cell array.           
+       CPU_cache           = [CPU_cache{1}{1} ];                                      % Takes the cache info out of the cell array.
        machine_info.host_name=strtrim(computername);
        machine_info.total_memory=total_memory;
        machine_info.CPU_type=CPU_type;
@@ -168,12 +168,12 @@ if all(strcmp('finished',{studyinfo.simulations.status}))
   if ~already_finished % this is the first time the study has completed
     if 0
       % cleanup batch directory
-      batch_dirs=unique({studyinfo.simulations.batch_dir});      
+      batch_dirs=unique({studyinfo.simulations.batch_dir});
       log_dir=fullfile(studyinfo.study_dir,'logs');
-      if ~exist(log_dir,'dir')      
+      if ~exist(log_dir,'dir')
         if options.verbose_flag
           fprintf('creating log directory: %s\n',log_dir);
-        end    
+        end
         mkdir(log_dir);
       end
       for i=1:length(batch_dirs)
@@ -211,13 +211,13 @@ if all(strcmp('finished',{studyinfo.simulations.status}))
         end
         sendmail(options.email,sprintf('Analysis report for study: "%s"',studyinfo.study_dir),...
            [10 options.prefix '. Max simulation time: ' sprintf('%0.2f min',max([studyinfo.simulations.duration])/60) '. Browse models (results?) online at infinitebrain.org. Current time: ' datestr(now,31) '  (Automated message from DynaSim (github.com/dynasim/dynasim).)' 10],...
-           {email_attachments{:}});  
+           {email_attachments{:}});
         fprintf('\nreport emailed successfully to: %s\n',options.email);
       catch exception
         fprintf('\nFailed to email report to: %s\n',options.email);
         displayError(exception);
       end
-    end  
+    end
   end
 end
 
@@ -255,7 +255,7 @@ ds.studyinfoIO(studyinfo.simulations(sim_ind),study_dir,options.process_id,optio
 %         CPU_type            = textscan(cpuinfo{1}{1}, '%*s %s', 1, 'delimiter' , ':'); % Parses line that includes CPU type.
 %         CPU_type            = [strrep(CPU_type{1}{1},'  ','') ];    % ## Look for better way for this: collapse all repeated white space stretches to single spaces.
 %         CPU_cache           = textscan(cpuinfo{2}{1}, '%*s %s', 1, 'delimiter' , ':'); % Parses line that includes the cache info
-%         CPU_cache           = [CPU_cache{1}{1} ];                                      % Takes the cache info out of the cell array.           
+%         CPU_cache           = [CPU_cache{1}{1} ];                                      % Takes the cache info out of the cell array.
 %         machine_info.host_name=strtrim(computername);
 %         machine_info.total_memory=total_memory;
 %         machine_info.CPU_type=CPU_type;
@@ -263,6 +263,6 @@ ds.studyinfoIO(studyinfo.simulations(sim_ind),study_dir,options.process_id,optio
 %         machine_info.num_cores=feature('numcores');          % Matlab command to get the number of processor cores on current host machine.
 %         machine_info.operating_system=strtrim(OS);
 %         machine_info.kernel=strtrim(kernel);
-%         machine_info.home_dir=strtrim(home); 
+%         machine_info.home_dir=strtrim(home);
 %         studyinfo.simulations(sim_ind).machine_info=machine_info;
 %        end

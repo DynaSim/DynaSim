@@ -105,7 +105,7 @@ fields=fieldnames(data);
 
 options=ds.checkOptions(varargin,{...
   'time_limits',[-inf inf],[],...
-  'variable',[],[],...        
+  'variable',[],[],...
   'max_num_overlaid',50,[],...
   'max_num_rows',20,[],...
   'plot_mode','trace',{'trace','image'},...
@@ -114,7 +114,7 @@ options=ds.checkOptions(varargin,{...
 % todo: add option 'plot_mode' {'trace','image'}
 
 % variables to plot
-var_fields=ds.selectVariables(data(1).labels,options.variable);
+var_fields=ds.selectVariables(data(1).labels,options.variable, varargin{:});
 tmp=regexp(var_fields,'_(.+)$','tokens','once');
 variables=unique([tmp{:}]);
 
@@ -130,7 +130,7 @@ for i=1:length(pop_names)
   if any(var_inds)
     inds=cellfun(@(x)find(~cellfun(@isempty,regexp(var_fields(var_inds),['_' x '$'],'once'))),variables,'uni',0);
     varsel=~cellfun(@isempty,inds);
-    fldind=[inds{:}];    
+    fldind=[inds{:}];
     pop_indices(end+1)=i;
     pop_var_indices{end+1}=nan(1,length(variables));
     pop_var_indices{end}(varsel)=var_inds(fldind);
@@ -282,7 +282,7 @@ for figset=1:num_fig_sets
         end
         if size(dat,2)>1
           legend_string=cellfun(@(x)['cell ' num2str(x)],num2cell(1:min(size(dat,2),10)),'uni',0);
-        end        
+        end
         if num_sims>1 && isfield(data,'varied')
           % list the parameter varied along the rows first
           str=[row_param_name '=' num2str(row_param_values(row)) ': '];
@@ -311,7 +311,7 @@ for figset=1:num_fig_sets
         if row==num_rows
           xlabel('time (ms)');
         else
-          set(haxes(axis_counter),'XTickLabel',''); 
+          set(haxes(axis_counter),'XTickLabel','');
           %set(haxes(row),'YTickLabel','');
         end
         xlim(options.time_limits);
@@ -333,13 +333,13 @@ for figset=1:num_fig_sets
             text_xpos=xmin+.05*(xmax-xmin);
             text_ypos=ymin+.9*(ymax-ymin);
             text(text_xpos,text_ypos,text_string{row,col});
-          end  
+          end
         end
         if ~isempty(legend_string)
           legend(legend_string);
         end
       end % end loop over subplot columns
-    end % end loop over subplot rows            
+    end % end loop over subplot rows
     % set y-limits to max/min over data in this figure
     if shared_ylims_flag
       if ylims(1)~=ylims(2)

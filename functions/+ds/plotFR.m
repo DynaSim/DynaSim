@@ -31,7 +31,7 @@ handles=[];
 
 % calc firing rates if not already present in data
 if all(cellfun(@isempty,regexp(fields,'.*_FR$')))
-  data=ds.calcFR(data,varargin{:}); % equivalent: data=ds.analyzeStudy(data,@ds.calcFR,varargin{:});
+  data=ds.calcFR(data,varargin{:}); % equivalent: data=ds.analyzeStudy(data,@ds.calcFR);
   fields=fieldnames(data);
 end
 % get list of fields with firing rate data

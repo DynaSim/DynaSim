@@ -1,4 +1,4 @@
-function model = propagateNamespaces(model,map)
+function model = propagateNamespaces(model,map, varargin)
 %PROPAGATENAMESPACES - namespace-establishing namespace substitutions.
 %
 % Usage:
@@ -20,8 +20,16 @@ function model = propagateNamespaces(model,map)
 %
 % See also: ds.generateModel, ds.propagateFunctions, ds.parseModelEquations, ds.getParentNamespace
 
+%% auto_gen_test_data_flag argin
+options = ds.checkOptions(varargin,{'auto_gen_test_data_flag',0,{0,1}},false);
+if options.auto_gen_test_data_flag
+  varargs = varargin;
+  varargs{find(strcmp(varargs, 'auto_gen_test_data_flag'))+1} = 0;
+  argin = [{model}, {map}, varargs]; % specific to this function
+end
+
 % Check model
-model=ds.checkModel(model);
+model=ds.checkModel(model, varargin{:});
 % Check map
 if ~iscell(map) || size(map,2)~=4
   error('map must be a cell array with four columns for (name, namespace_name, namespace, type)');
@@ -109,7 +117,7 @@ function expressions=propagate_namespaces(expressions,namespaces,map,insert_type
     this_namespace=namespaces{i};
     
     % find parent namespaces
-    parent_namespace = ds.getParentNamespace(this_namespace);
+    parent_namespace = ds.getParentNamespace(this_namespace, varargin{:});
     
     % find where this and parent namespaces are in map array
     insert_type_constraint = ismember(map(:,4),insert_types);
@@ -133,7 +141,7 @@ function expressions=propagate_namespaces(expressions,namespaces,map,insert_type
         end
         
         % replace found word in expression by map(names_bar|parent_namespace)
-        expressions{i}=ds.strrep(expressions{i},words{j},new_word);
+        expressions{i}=ds.strrep(expressions{i},words{j},new_word, '', '', varargin{:});
         % check whether new word is defined in model
         % NOTE: this is necessary to account for namespace differences between
         %   user-supplied population parameters that should replace default mechanism-level parameters
@@ -162,10 +170,17 @@ function expressions=propagate_namespaces(expressions,namespaces,map,insert_type
         new_word=map{ind,2};
         
         % replace found word in expression by map(names_bar|this_namespace)
-        expressions{i}=ds.strrep(expressions{i},words{j},new_word);
+        expressions{i}=ds.strrep(expressions{i},words{j},new_word, '', '', varargin{:});
       end
     end
   end
+end
+
+%% auto_gen_test_data_flag argout
+if options.auto_gen_test_data_flag
+  argout = {model}; % specific to this function
+  
+  ds.unit.saveAutoGenTestData(argin, argout);
 end
 
 end

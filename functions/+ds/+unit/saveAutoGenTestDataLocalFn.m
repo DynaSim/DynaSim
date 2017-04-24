@@ -6,6 +6,6 @@ function saveAutoGenTestDataLocalFn(argin, argout)
 %   argin: cell array with input arguments
 %   argout: cell array with output arguments
 
-ds.saveAutoGenTestData(argin, argout, 1);
+ds.unit.saveAutoGenTestData(argin, argout, 1);
 
 end

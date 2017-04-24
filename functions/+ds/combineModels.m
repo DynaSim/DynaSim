@@ -1,4 +1,4 @@
-function model = combineModels(model1,model2)
+function model = combineModels(model1,model2, varargin)
 %COMBINEMODELS - combine subfields in two DynaSim model structures
 %
 % Usage:
@@ -10,9 +10,17 @@ function model = combineModels(model1,model2)
 %
 % See also: ds.checkModel, ds.generateModel
 
+%% auto_gen_test_data_flag argin
+options = ds.checkOptions(varargin,{'auto_gen_test_data_flag',0,{0,1}},false);
+if options.auto_gen_test_data_flag
+  varargs = varargin;
+  varargs{find(strcmp(varargs, 'auto_gen_test_data_flag'))+1} = 0;
+  argin = [{model1}, {model2}, varargs]; % specific to this function
+end
+
 % standardize model structures
-model1=ds.checkModel(model1);
-model2=ds.checkModel(model2);
+model1=ds.checkModel(model1, varargin{:});
+model2=ds.checkModel(model2, varargin{:});
 
 % combine fields from sub-structures
 model.parameters=concatenate_structures(model1.parameters,model2.parameters);
@@ -31,16 +39,25 @@ model.comments=cat(2,model1.comments,model2.comments);
 % combine .specification from model1 and model2 (this is necessary for
 % building a new model from two indepedent models to which connection
 % mechanisms are added...)
-% todo: call something like old combine_models() function from old DynaSim
+% TODO: call something like old combine_models() function from old DynaSim
 % ...
 
 % standardize resulting model
 % model=ds.checkModel(model);
-  % note: if this call to ds.checkModel() is uncommented-out, the changes noted
+  % NOTE: if this call to ds.checkModel() is uncommented-out, the changes noted
   % in ds.checkModel() should also be made...
 
 % reorder fields according to first input
 model=orderfields(model,model1);
+
+%% auto_gen_test_data_flag argout
+if options.auto_gen_test_data_flag
+  argout = {model}; % specific to this function
+  
+  ds.unit.saveAutoGenTestData(argin, argout);
+end
+
+end
 
 % SUBFUNCTIONS
 function out=concatenate_structures(a,b)
@@ -52,4 +69,5 @@ elseif isempty(a) && isempty(b)
   out=a;
 elseif ~isempty(a) && ~isempty(b)
   out=catstruct(a,b);
+end
 end

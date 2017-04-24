@@ -16,7 +16,7 @@ function [inst_rate,time] = nwGaussKernelRegr(time,raster,pop,kwidth,Ts)
     iter_dt=(spktimes(i)==time);
     spkinds=(spktimes(i)==raster(:,1));
     cumSpikesPop_dt(iter_dt)=sum(ismember(raster(spkinds,2),pop));
-  end    
+  end
 % --------------------------------------------
   interval = time(end)-time(1);
   ncells = length(pop);

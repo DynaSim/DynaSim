@@ -188,12 +188,12 @@ elseif ischar(item)
   else
     operator=operator{1};
   end
-  if any(regexp(item,'^[\+-]?\[.+\]$')) 
+  if any(regexp(item,'^[\+-]?\[.+\]$'))
     % []
     list=elems;
     % add operator back for adding/removing mechanisms from mechanism_list
     list=cellfun(@(x)[operator x],list,'uni',0);
-  elseif any(regexp(item,'^[\+-]?\{.+\}$')) 
+  elseif any(regexp(item,'^[\+-]?\{.+\}$'))
     % {}
     list=getcombos(elems);
     for i=1:length(list)
