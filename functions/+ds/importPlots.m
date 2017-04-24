@@ -69,7 +69,7 @@ if isstruct(file) && isfield(file,'study_dir')
   end
   
   % Keep only successful files
-  success = cellfun(@(x) ~isempty(ls([x '*'])),result_firsts);
+  success = cellfun(@(x) ~isempty(dir([x '*'])),result_firsts);
   sim_info = sim_info(success);
 
     for i = 1:length(sim_info)

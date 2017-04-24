@@ -107,17 +107,16 @@ dsPlot2(data,'do_mean',1,'varied1',1:3,'varied2',2:3)
 % ... or by looking at only the 1st cell in each population
 dsPlot2(data,'max_num_overlaid',1,'varied1',1:3,'varied2',2:3)
 
-% Turning this overlay off splits up the figures
-dsPlot2(data,'max_num_overlaid',1,'varied1',1:3,'varied2',2:3,'force_overlay','none')
-
 close all;
 
 % Overlays can also be doubly stacked. Note that both E and I cells are
 % shown on a single plot.
-dsPlot2(data,'max_num_overlaid',5,'force_overlay','populations');
+
+dsPlot2(data,'max_num_overlaid',5,'force_last','populations');
 
 % However, these can be messy, so the groups can be shifted up or down
-dsPlot2(data,'max_num_overlaid',5,'force_overlay','populations','do_overlay_shift',true);
+dsPlot2(data,'max_num_overlaid',5,'force_last','populations','do_overlay_shift',true);
+
     % Variables are stacked from top to bottom, so E cells are on top and I
     % cells underneath
 
@@ -125,17 +124,19 @@ dsPlot2(data,'max_num_overlaid',5,'force_overlay','populations','do_overlay_shif
 % This is accomplished by setting the axis "varied1", which corresponds to
 % the injected current, to be the variable that is rastered across the
 % overlays.
+
 dsPlot2(data,'do_mean',0,'varied1',1:3,'varied2',2:3,...
-    'force_overlay','varied1','do_overlay_shift',1,'overlay_shift_val',100);
+    'force_last','varied1','do_overlay_shift',1,'overlay_shift_val',100);
 
 
 % Variables with very different units can be compared side-by-side by
 % taking the z-score first. In this case we compare E cell membrane voltage
 % to its inhibitory synaptic input.
-dsPlot2(data,'population','E','variable','v|I_iGABAa_s','force_overlay','variables','do_overlay_shift',true,'overlay_shift_val',3,'do_zscore',true,'do_zoom',1);
+
+dsPlot2(data,'population','E','variable','v|I_iGABAa_s','force_last','variables','do_overlay_shift',true,'overlay_shift_val',3,'do_zscore',true,'do_zoom',1);
 
 % % Double stack overlays
-% dsPlot2(data,'population','E','variable','iNa_m|I_iGABAa_s','force_overlay','variables','do_overlay_shift',true);
+% dsPlot2(data,'population','E','variable','iNa_m|I_iGABAa_s','force_last','variables','do_overlay_shift',true);
 % dsPlot2(data,'population','I','variable','v');
 
 
@@ -189,7 +190,3 @@ dsPlot2(data_img_sim2);
 % Merge
 data_img_merged = ds.mergeData(data_img,data_img_sim2);
 dsPlot2(data_img_merged);
-
-
-
-

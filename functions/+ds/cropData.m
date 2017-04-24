@@ -26,7 +26,9 @@ for i = 1:length(data)
 
     % Sweep through these fields and take average
     for j = 1:length(labels)
-        data_out(i).(labels{j}) = data(i).(labels{j})(inds,:);
+        if ~isempty(data(i).(labels{j}))
+            data_out(i).(labels{j}) = data(i).(labels{j})(inds,:);
+        end
     end
 end
 

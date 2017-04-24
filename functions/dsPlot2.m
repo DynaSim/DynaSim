@@ -24,7 +24,7 @@ function [handles,xp] = dsPlot2(data,varargin)
 %     'max_num_overlaid' - maximum # of waveforms to overlay per plot
 %     'do_mean' - {false, true} - Turn on/off averaging across all units
 %                 in a population
-%     'force_overlay' - {'none', 'populations' (default), 'variables', 'varied1' ... 'variedN'}
+%     'force_last' - {'none', 'populations' (default), 'variables', 'varied1' ... 'variedN'}
 %                       If there is only one cell in a population, this forces
 %                       dsPlot2 to add other information to the overlay.
 %     'xlims' - [XMIN XMAX], x-axis limits (default: all data)
@@ -58,13 +58,20 @@ if ischar(data)
     % Import plot files
     data_img = ds.importPlots(study_dir);
     
-    handles = dsPlot2(data_img,varargin{:});
+    [handles, xp] = dsPlot2(data_img,varargin{:});
     return;
 end
 
 % Convert the incoming DynaSim data structure to an xPlt object
 if ~isa(data,'xPlt')
     [xp,is_image] = ds.xPlt.all2xPlt(data);
+else
+    xp = data;
+    if iscell(xp.data{1})
+        is_image = 1;
+    else
+        is_image = 0;
+    end
 end
 
 %% Convert varargin to appropriate forms
@@ -111,12 +118,12 @@ end
 
 %% Parse varargin and set up defaults
 [options, options_extras0] = ds.checkOptions(myargin,{...
-  'population',[],[],...        
-  'variable',[],[],...        
+  'population',[],[],...
+  'variable',[],[],...
   'num_embedded_subplots',2,{1,2,3,4},...
   'max_num_overlaid',50,[],...
   'do_mean',false,[false true],...
-  'force_overlay',[],[],...
+  'force_last',[],[],...
   'do_overlay_shift',false,[false true],...
   'overlay_shift_val',[],[],...
   'do_zscore',[false],[false true],...
@@ -129,7 +136,7 @@ end
   'crop_range',[],[],...
   'lock_axes',true,[false true],...
   'saved_fignum',[1],[],...
-  'max_num_newfigs',[5],[],...
+  'max_num_newfigs',[10],[],...
   'plot_options',struct,[],...
   'subplot_options',struct,[],...
   'figure_options',struct,[],...
@@ -138,28 +145,20 @@ end
   'visible','on',{'on','off'},...
   'show_colorbar',false,[false true],...
   'save_figures',false,[false true],...
+  'save_figname_prefix',[],[],...
   'save_figname_path',[],[],...
+  'prepend_date_time',true,[false true],...
   'supersize_me',false,[false true],...
-  'Ndims_pass_to_data',1,[],...
+  'save_res',[],[],...
+  'Ndims_per_subplot',[],[],...
   'dim_stacking',[],[],...
+  'plot_handle',[],[],...
   },false);
 handles=[];
 
 
 
 
-% Options overwrite
-if is_image
-    options.force_overlay = 'none';
-end
-
-% Clause to fix things incase user sets force_overlay to zero!
-if isnumeric(options.force_overlay) && ~isempty(options.force_overlay)
-    warning('force overlay should be either "none" or the name the name of an axis {populations, variables, varied1, ... variedN}');
-    if options.force_overlay == 0
-        options.force_overlay = 'none';
-    end
-end
 
 % Pull out fields from options struct
 plot_type = options.plot_type;
@@ -168,10 +167,11 @@ subplot_options = options.subplot_options;
 figure_options = options.figure_options;
 num_embedded_subplots = options.num_embedded_subplots;
 do_mean = options.do_mean;
-force_overlay = options.force_overlay;
+force_last = options.force_last;
 crop_range = options.crop_range;
 lock_axes = options.lock_axes;
-Ndims_pass_to_data = options.Ndims_pass_to_data;
+Ndims_per_subplot = options.Ndims_per_subplot;
+plot_handle = options.plot_handle;
 
 % Add default options to structures
 % Plot_options
@@ -181,7 +181,7 @@ Ndims_pass_to_data = options.Ndims_pass_to_data;
     plot_options = struct_addDef(plot_options,'zlims',options.zlims);
 % Used when running xp_plotimage
     plot_options = struct_addDef(plot_options,'saved_fignum',options.saved_fignum);
-% Used when running xp_dsPlot or xp_ds.plotFR2
+% Used when running xp_PlotData or xp_PlotFR2
     plot_options = struct_addDef(plot_options,'args',{});
 
 % Subplot_options
@@ -192,7 +192,10 @@ subplot_options = struct_addDef(subplot_options,'force_rowvect',true);
 figure_options = struct_addDef(figure_options,'visible',options.visible);
 figure_options = struct_addDef(figure_options,'save_figures',options.save_figures);
 figure_options = struct_addDef(figure_options,'save_figname_path',options.save_figname_path);
+figure_options = struct_addDef(figure_options,'save_figname_prefix',options.save_figname_prefix);
+figure_options = struct_addDef(figure_options,'prepend_date_time',options.prepend_date_time);
 figure_options = struct_addDef(figure_options,'supersize_me',options.supersize_me);
+figure_options = struct_addDef(figure_options,'save_res',options.save_res);
 figure_options = struct_addDef(figure_options,'max_num_newfigs',options.max_num_newfigs);
 figure_options = struct_addDef(figure_options,'figwidth',options.figwidth);
 figure_options = struct_addDef(figure_options,'figheight',options.figheight);
@@ -276,7 +279,7 @@ if strcmp(chosen_vars,'all'); chosen_vars = ':'; end
 if strcmp(chosen_pop,'all'); chosen_pop = ':'; end
 
 % Select out chosen data
-chosen_all = {};                     
+chosen_all = {};
 if ~isempty(ax_ind_varied); chosen_all = [chosen_varied,chosen_all]; end
 if ~isempty(xp.findaxis('populations')); chosen_all = [chosen_pop,chosen_all]; end
 if ~isempty(xp.findaxis('variables')); chosen_all = [chosen_vars,chosen_all]; end
@@ -286,26 +289,35 @@ if ndims(xp) == 2 && ~isempty(strfind(xp.axis(2).name,'Dim')) && length(chosen_a
 end
 xp2 = xp(chosen_all{:});
 
-%% Set up force overlay
-% Assign default value to force_overlay
-if isempty(force_overlay) 
-    if length(xp2.meta.datainfo(2).values) <= 1 && ~isempty(xp2.findaxis('populations'))
-        force_overlay = 'populations';
-    else
-        force_overlay = 'none';
+
+%% Squeeze out unused dimensions
+% Squeeze to eliminate superfluous dimensions
+xp2 = xp2.squeeze;
+Nd = ndims(xp2);
+
+% Rearrange dimensions of xp2 for stacking
+if ~isempty(options.dim_stacking)
+    ax_names = xp2.exportAxisNames;
+    if length(options.dim_stacking) ~= length(ax_names) -1
+        error('Incorrect number of dimensions specified. dim_stacking must be some permutation of the following: %s', sprintf('%s ',ax_names{1:end}));
     end
+    xp2.permute(options.dim_stacking);
 end
 
-if ~strcmpi(force_overlay,'none')
-    ax_num = xp2.findaxis(force_overlay);
-    if length(ax_num) > 1; error('force_overlay: Ambiguous axis specified. Can only pack at most 1 axis');
-    elseif isempty(ax_num)
-        error('force_overlay: Cannot find requested axis');
+
+%% If only one cell
+
+% If only 1 cell, move in 2nd cell
+if length(xp2.meta.datainfo(2).values) <= 1 && ~is_image
+    % Move populations axis to the end if it exists
+    ax2overlay = xp2.findaxis('populations');
+    if isempty(ax2overlay)
+        ax2overlay = xp2.ndims;     % If can't find populations, use last axis on the stack
     end
     
     % Save variables associated with this axis
-    packed_vars = xp2.axis(ax_num).values;
-    packed_name = xp2.axis(ax_num).name;
+    packed_vars = xp2.axis(ax2overlay).values;
+    packed_name = xp2.axis(ax2overlay).name;
     
     % Add <average> symbols if necessary to packed_vars
     cellnames = xp2.meta.datainfo(2).values;
@@ -315,28 +327,49 @@ if ~strcmpi(force_overlay,'none')
         packed_vars = cellfunu(@(s) ['<' s '>'], packed_vars);
     end
     
-    % Add this new info to datainfo
-    % If there is still more than 1 cell present, bump this data down a
-    % dimension.
-    only_one_cell = length(xp2.meta.datainfo(2).values) == 1;
-    if ~only_one_cell
-        xp2.meta.datainfo(end+1) = xp2.meta.datainfo(end);
-    end
-    xp2.meta.datainfo(end).name = packed_name;
-    xp2.meta.datainfo(end).values = packed_vars(:)';
+    xp2.meta.datainfo(2).name = packed_name;
+    xp2.meta.datainfo(2).values = packed_vars(:)';
     
-    
-    % Pack the dimension into the first empty dimension
-    xp2 = xp2.packDim(force_overlay);
-    if only_one_cell
-        xp2.data = cellfunu(@squeeze,xp2.data);
-        % Note: This can cause some errors when unpacking the data later. The 
-        % specific scenario is when running in rastergram mode & having only
-        % 1 cell. For example, 
-        % close all; d = data_mat_pops; dsPlot2(d,'plot_type','rastergram','do_mean',1);
-    end
-
+    xp2 = xp2.packDim(ax2overlay,2);
+    xp2 = xp2.squeezeRegexp('Dim');
 end
+
+
+
+%% If doing force overlay, move overlay population to the end
+if ~isempty(force_last)
+    
+    % If it's a stand-alone string, convert to cell array 
+    if ischar(force_last)
+        force_last = {force_last};
+    end
+    
+    % Functionalize this at some point... building list of requested axes
+    ax_names = xp2.exportAxisNames;
+    ax_ind = zeros(1,length(force_last));
+    for i = 1:length(force_last)
+        temp = xp2.findaxis(force_last{i});
+        if isempty(temp)
+            error('Requested axis not found. force_last must be one of the following: : %s', sprintf('%s ',ax_names{1:end}));
+        end
+        ax_ind(i) = temp;
+    end
+    
+    % Dims per subplot should be at least 2 if we're forcing last...
+    % perhaps change this later
+    if isempty(Ndims_per_subplot)
+        Ndims_per_subplot = 2;
+    end
+    if Ndims_per_subplot == 1
+        Ndims_per_subplot = 2;
+    end
+    
+    others_ind = true(1,ndims(xp2));
+    others_ind(ax_ind) = false;
+    xp2 = xp2.permute([find(others_ind), ax_ind]);        % Move chosen axis to the back!
+    
+end
+
 
 %% Set up do z-score & overlay shift
 if options.do_zscore && all(cellfun(@isnumeric,xp2.data(:))) && ~is_image
@@ -348,28 +381,19 @@ if options.do_zscore && all(cellfun(@isnumeric,xp2.data(:))) && ~is_image
 end
 
 % Shift the overlay by a certain amount
-if options.do_overlay_shift && all(cellfun(@isnumeric,xp2.data(:))) && ~is_image
-    mydata = xp2.data;
-    for i = 1:numel(mydata)
-        mydata{i} = do_shift_lastdim (mydata{i},options.overlay_shift_val);
+if ~isempty(Ndims_per_subplot)
+    if options.do_overlay_shift && all(cellfun(@isnumeric,xp2.data(:))) && ~is_image
+        Nd = ndims(xp2);
+        xp2 = xp2.packDim(Nd);
+        mydata = xp2.data;
+        for i = 1:numel(mydata)
+            mydata{i} = do_shift_lastdim (mydata{i},options.overlay_shift_val);
+        end
+        xp2.data = mydata;
+        xp2 = xp2.unpackDim(3,Nd);
+        xp2 = xp2.squeezeRegexp('Dim');
     end
-    xp2.data = mydata;
 end
-
-%% Squeeze out unused dimensions
-% Squeeze to eliminate superfluous dimensions
-xp2 = xp2.squeeze;
-Nd = ndims(xp2);
-
-% Rearrange dimensions of xp2 for stacking
-if ~isempty(options.dim_stacking)
-    ax_names = xp2.exportAxisNames;
-    if length(options.dim_stacking) ~= length(ax_names) -1
-        error('Incorrect number of dimensions specified. dim_stacking must be some permutation of the following: %s', sprintf('%s ',ax_names{1:end-1}));
-    end
-    xp2.permute(options.dim_stacking);
-end
-
 
 %% Crop data
 % This is inserted here because apparently the operation is slow and it's
@@ -381,6 +405,13 @@ if ~isempty(crop_range) &&  all(cellfun(@isnumeric,xp2.data(:))) && ~is_image
         if ~isempty(xp2.data{i}); xp2.data{i} = xp2.data{i}(ind,:); end
     end
     xp2.meta.datainfo(1).values = t_temp(ind);
+    
+    % Also crop DynaSim metadata info about time.
+    t_temp2 = xp2.meta.dynasim.time;
+    ind = (t_temp2 > crop_range(1) & t_temp2 <= crop_range(2));
+    t_temp2 = t_temp2(ind);
+    xp2.meta.dynasim.time = t_temp2;
+    
 end
 
 
@@ -429,9 +460,12 @@ else
     switch plot_type
         case 'waveform'
             % Is data
-            data_plothandle = @xp_matrix_advancedplot3D;
+            data_plothandle = @xp1D_matrix_plot;
+            if ~isempty(plot_handle); data_plothandle = plot_handle; end
+            
         case 'imagesc'
             data_plothandle = @xp_matrix_imagesc;
+            if ~isempty(plot_handle); data_plothandle = plot_handle; end
             % Disable legend when using imagesc
             subplot_options.legend1 = [];
             % Add time information
@@ -440,12 +474,12 @@ else
             if lock_axes
                 % If axes are locked, only need to show 1 colorbar across
                 % all subplots
-                subplot_options.do_colorbar = options.show_colorbar;         
+                subplot_options.do_colorbar = options.show_colorbar;
                 plot_options.do_colorbar = false;
-%                 subplot_options.do_colorbar = false;         
+%                 subplot_options.do_colorbar = false;
 %                 plot_options.do_colorbar = true;
             else
-                subplot_options.do_colorbar = false;         
+                subplot_options.do_colorbar = false;
                 plot_options.do_colorbar = options.show_colorbar;
             end
             
@@ -453,9 +487,10 @@ else
             % Disable legend when using dsPlot
             subplot_options.legend1 = [];
             
-            % Setup call to xp_dsPlot
+            % Setup call to xp_PlotData
             plot_options.args = {plot_options.args{:}, 'plot_type',plot_type};
-            data_plothandle = @xp_dsPlot;
+            data_plothandle = @xp_PlotData;
+            if ~isempty(plot_handle); data_plothandle = plot_handle; end
             
             if any(strcmp(plot_type,{'rastergram','raster'}))
                 % Move populations axis to the end of xp2. This ensures
@@ -465,9 +500,10 @@ else
                 ind_rest = ~ind_pop;
                 order = [find(ind_rest) find(ind_pop)];
                 xp2 = xp2.permute(order);
-                Ndims_pass_to_data = 2;                 % Overwrite Ndims_pass_to_data to 2. This ensures
-                                                        % that multiple populations can be stacked in a
-                                                        % single subplot.
+                if isempty(Ndims_per_subplot)
+                    Ndims_per_subplot = 2;                 % Overwrite Ndims_per_subplot to 2. This ensures
+                end                                        % that multiple populations can be stacked in a
+                                                           % single subplot.
             end
             
         case {'heatmapFR','heatmap_sortedFR','meanFR','meanFRdens'}
@@ -478,10 +514,17 @@ else
                 plot_type = strrep(plot_type,'FR','');
             end
             
-            % Setup call to xp_ds.plotFR2
+            % Setup call to xp_PlotFR2
             plot_options.args = {plot_options.args{:}, 'plot_type',plot_type};
-            data_plothandle = @xp_ds.plotFR2;
+            data_plothandle = @xp_PlotFR2;
+            if ~isempty(plot_handle); data_plothandle = plot_handle; end
     end
+end
+
+
+% If Ndims_per_subplot has not been set yet, set it now!
+if isempty(Ndims_per_subplot)
+    Ndims_per_subplot = 1;
 end
 
 %% Prepare plotting structure depending on number of embedded subplots
@@ -491,19 +534,19 @@ switch num_embedded_subplots
     case 1
         % Ordering of axis handles
         function_handles = {@xp_handles_newfig, @xp_subplot_grid,data_plothandle};   % Specifies the handles of the plotting functions
-        dims_per_function_handle = [1,1,Ndims_pass_to_data];
+        dims_per_function_handle = [1,1,Ndims_per_subplot];
         function_args = {{figure_options},{subplot_options},{plot_options}};
         
     case 2
         % Ordering of axis handles
         function_handles = {@xp_handles_newfig, @xp_subplot_grid,data_plothandle};   % Specifies the handles of the plotting functions
-        dims_per_function_handle = [1,2,Ndims_pass_to_data];
+        dims_per_function_handle = [1,2,Ndims_per_subplot];
         function_args = {{figure_options},{subplot_options},{plot_options}};
         
     case 3
         % Ordering of axis handles
         function_handles = {@xp_handles_newfig, @xp_subplot_grid, @xp_subplot_grid,data_plothandle};   % Specifies the handles of the plotting functions
-        dims_per_function_handle = [1,2,1,Ndims_pass_to_data];
+        dims_per_function_handle = [1,2,1,Ndims_per_subplot];
         subplot_options2 = subplot_options;
         subplot_options2.legend1 = [];
         subplot_options.display_mode = 1;
@@ -511,7 +554,7 @@ switch num_embedded_subplots
     case 4
         % Ordering of axis handles
         function_handles = {@xp_handles_newfig, @xp_subplot_grid, @xp_subplot_grid,data_plothandle};   % Specifies the handles of the plotting functions
-        dims_per_function_handle = [1,2,2,Ndims_pass_to_data];
+        dims_per_function_handle = [1,2,2,Ndims_per_subplot];
         subplot_options2 = subplot_options;
         subplot_options2.legend1 = [];
         subplot_options.display_mode = 1;

@@ -100,7 +100,11 @@ for j = 1:size(obj,2)                               % Loop through varieds
 
         % Add values of varied variables
         for i = 1:length(varied)
-            data(j).(varied{i}) = varied_vals{i}(j);
+            if isnumeric(varied_vals{i}(j))
+                data(j).(varied{i}) = varied_vals{i}(j);
+            else
+                data(j).(varied{i}) = varied_vals{i}{j};
+            end
         end
     end
     
