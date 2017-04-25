@@ -262,7 +262,7 @@ options=ds.checkOptions(varargin,{...
   'plot_options',[],[],...
   'debug_flag',0,{0,1},...
   'optimize_big_vary',0,{0,1},...
-  'mexpath',fullfile(pwd,'mexes'),[],... % Directory to search for pre-compiled solve files (solve*_mex*)
+  'mex_dir','mex',[],... % Directory to search for pre-compiled solve files (solve*_mex*). Can be relative to 'study_dir' or absolute path.
   },false);
 % more options: remove_solve_dir, remove_batch_dir, post_downsample_factor
 
@@ -309,12 +309,6 @@ end
 % convert matlab solver options from key/value to struct using odeset if necessary
 if iscell(options.matlab_solver_options)
   options.matlab_solver_options = odeset(options.matlab_solver_options{:});
-end
-
-% Create mexpath if it does not yet exist
-mexpath = options.mexpath;
-if ~exist(mexpath,'dir') && options.compile_flag
-    mkdir(mexpath);
 end
 
 %% Non-Batch Checks
@@ -521,10 +515,27 @@ end
     % TODO: debug local parallel sims, doesn't seem to be working right...
     % (however SCC cluster+parallel works)
 if options.parallel_flag==1
-
   % prepare studyinfo
   [studyinfo,options]=ds.setupStudy(model,'simulator_options',options,'modifications_set',modifications_set);
 
+  if options.compile_flag
+    % Ensure mex_dir is absolute
+    if (ispc && options.mex_dir(2) == ':') || (~ispc && options.mex_dir(1) == filesep)
+      relMexPath = false;
+    else
+      relMexPath = true;
+    end
+
+    if relMexPath % then make absolute by prepending study_dir
+      options.mex_dir = fullfile(studyinfo.study_dir, options.mex_dir);
+    end
+
+    % Create mex_dir if it does not yet exist
+    if ~exist(options.mex_dir,'dir') && ~options.cluster_flag
+        mkdir(options.mex_dir);
+    end
+  end
+  
   % prepare options
   options_temp= rmfield(options,{'vary','modifications','solve_file','parallel_flag','studyinfo'});
   keyvals=ds.options2Keyval(options_temp);
@@ -570,6 +581,28 @@ if isempty(options.studyinfo)
   [studyinfo,options] = ds.setupStudy(model,'modifications_set',modifications_set,'simulator_options',options,'process_id',options.sim_id);
 else
   studyinfo=options.studyinfo;
+end
+
+if options.compile_flag
+  % Ensure mex_dir is absolute
+  if (ispc && options.mex_dir(2) == ':') || (~ispc && options.mex_dir(1) == filesep)
+    relMexPath = false;
+  else
+    relMexPath = true;
+  end
+
+  if relMexPath % then make absolute by prepending study_dir
+    if ~isempty(studyinfo)
+    options.mex_dir = fullfile(studyinfo.study_dir, options.mex_dir);
+    else
+      options.mex_dir = fullfile(options.study_dir, options.mex_dir);
+    end
+  end
+
+  % Create mex_dir if it does not yet exist
+  if ~exist(options.mex_dir,'dir') && ~options.cluster_flag
+      mkdir(options.mex_dir);
+  end
 end
 
 % put solver blocks in try statement to catch and handle errors/cleanup
@@ -939,6 +972,7 @@ end
     switch status
       case 'success'
         % ...
+        % TODO: consider removing solve folder if nothing being saved
       case 'error'
         % ... error logs
     end

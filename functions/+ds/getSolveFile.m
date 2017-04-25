@@ -47,8 +47,8 @@ options=ds.checkOptions(varargin,{...
   'study_dir',[],[],... % study directory
   'verbose_flag',0,{0,1},...
   'parallel_flag',0,{0,1},...     % whether to run simulations in parallel (using parfor)
-  'compile_flag',0,{0,1},... % exist('codegen')==6, whether to compile using coder instead of interpreting Matlab  
-  'mexpath',[],[],... % Directory to search for pre-compiled solve files (solve*_mex*)
+  'compile_flag',0,{0,1},... % exist('codegen')==6, whether to compile using coder instead of interpreting Matlab
+  'mex_dir',[],[],... % Directory to search for pre-compiled solve files (solve*_mex*)
   },false);
   
 if ~isempty(opts)
@@ -160,7 +160,7 @@ if ~exist(solve_file,'file')
   end
   solve_file=ds.compareSolveFiles(solve_file_m);               % First search in local solve folder...
   if options.compile_flag
-    solve_file=ds.compareSolveFiles(solve_file,options.mexpath); % Then search in mexpath (if it exists and if compile_flag==1).
+    solve_file=ds.compareSolveFiles(solve_file,options.mex_dir); % Then search in mex_dir (if it exists and if compile_flag==1).
   end
 else
   if options.verbose_flag

@@ -17,10 +17,10 @@ end
 
 options=ds.checkOptions(keyvals,{...
   'verbose_flag',0,{0,1},... % set verbose to 1 by default
-  'mexpath',[],[],... % Directory to search for pre-compiled solve files (solve*_mex*)
+  'mex_dir',[],[],... % Directory to search for pre-compiled solve files (solve*_mex*)
   },false);
 
-mexpath = options.mexpath;
+mex_dir = options.mex_dir;
 
 % make mex name from solve_file
 [fpath,fname] = fileparts(mfileInput);
@@ -54,25 +54,25 @@ else % mex file exists
   end
 end %if
 
-% If mexpath is specified, back up the newly compiled mex files to this
+% If mex_dir is specified, back up the newly compiled mex files to this
 % folder
-if ~isempty(mexpath)
+if ~isempty(mex_dir)
     [~,solvefile] = fileparts2(mfileInput);
     [~,mexfile] = fileparts2(mexfileOutput);
     
-    if isempty(dir(fullfile(mexpath,[solvefile '.m'])))
-        fprintf('Solve file %s does not yet exist in mexpath %s. Copying... \n',solvefile,mexpath);
-        if ~exist(mexpath,'dir'); error('Cannot find %s! Make sure it exists and is specified as an *absolute* path',mexpath); end
-        copyfile(mfileInput,mexpath);
+    if isempty(dir(fullfile(mex_dir,[solvefile '.m'])))
+        fprintf('Solve file %s does not yet exist in mex_dir %s. Copying... \n',solvefile,mex_dir);
+        if ~exist(mex_dir,'dir'); error('Cannot find %s! Make sure it exists and is specified as an *absolute* path',mex_dir); end
+        copyfile(mfileInput,mex_dir);
     end
-    if isempty(dir(fullfile(mexpath,[mexfile '*'])))
-        fprintf('Mex file %s does not yet exist in mexpath %s. Copying... \n',mexfile,mexpath);
-        if ~exist(mexpath,'dir'); error('Cannot find %s! Make sure it exists and is specified as an *absolute* path',mexpath); end
-        copyfile([mexfileOutput,'*'],mexpath);
+    if isempty(dir(fullfile(mex_dir,[mexfile '*'])))
+        fprintf('Mex file %s does not yet exist in mex_dir %s. Copying... \n',mexfile,mex_dir);
+        if ~exist(mex_dir,'dir'); error('Cannot find %s! Make sure it exists and is specified as an *absolute* path',mex_dir); end
+        copyfile([mexfileOutput,'*'],mex_dir);
     end
 end
 
-end
+end % main fn
 
 %% Subfunctions
 function makeMex(file, options)
