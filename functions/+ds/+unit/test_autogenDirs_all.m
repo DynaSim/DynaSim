@@ -12,9 +12,11 @@ classdef test_autogenDirs_all < matlab.unittest.TestCase
       dataDirPath = fullfile(testCase.testDataPath, 'autogenDirs', dataDirName);
       
       % Make Temp Folder
-      import matlab.unittest.fixtures.TemporaryFolderFixture
-      tempDirFixture = testCase.applyFixture(TemporaryFolderFixture('WithSuffix', ['_' dataDirName]));
+      import matlab.unittest.fixtures.WorkingFolderFixture
+      tempDirFixture = testCase.applyFixture(WorkingFolderFixture('WithSuffix', ['_' dataDirName]));
       tempDirPath = tempDirFixture.Folder;
+%       tempOutputDir = fullfile(tempDirPath, 'output');
+%       mkdirSilent(tempOutputDir);
       
       args = load(fullfile(dataDirPath, 'args.mat'));
       expectedOut = args.argout;
@@ -22,14 +24,12 @@ classdef test_autogenDirs_all < matlab.unittest.TestCase
       fnName = strsplit(dataDirName,'_autogen_');
       fh = str2func(fnName{1});
       
-      % TODO: use tempDirPath for actual outputs
+      [testOut{1:length(expectedOut)}] = feval(fh, args.argin{:});
       
-      [actualOut{1:length(expectedOut)}] = feval(fh, args.argin{:});
-      
-      % actualOut fig handles
+      % testOut fig handles
       % TODO: generalize fig handle checking
-      if all(isValidFigHandle(actualOut{1}))
-        handles = actualOut{1};
+      if all(isValidFigHandle(testOut{1}))
+        handles = testOut{1};
         
         ds.unit.save_figHandles( handles, tempDirPath )
         
@@ -38,37 +38,46 @@ classdef test_autogenDirs_all < matlab.unittest.TestCase
       
       % test output args
       for ind = 1:length(expectedOut)
-        testCase.verifyEqual(expectedOut{ind}, actualOut{ind});
+        testCase.verifyEqual(testOut{ind}, expectedOut{ind});
       end
       
       % test output files
-      outputDir = fullfile(dataDirPath, 'output');
-      if exist(outputDir, 'dir')
-        expectedOutputFiles = lscell(outputDir);
-        actualOutputFiles = lscell(tempDirPath);
+      expectedOutputDir = fullfile(dataDirPath, 'output');
+      if exist(expectedOutputDir, 'dir')
+        expectedOutputFiles = rls(expectedOutputDir);
+        expectedOutputFiles(1) = []; % remove 'output' reference
+        testOutputFiles = rls(tempDirPath);
+        testOutputFiles(1) = []; % remove parent folder reference
         
         % test same num files
-        testCase.assertLength(length(actualOutputFiles), length(expectedOutputFiles));
+        testCase.assertLength(testOutputFiles, length(expectedOutputFiles));
         
         % test each file
         for iFile = 1:length(expectedOutputFiles)
-          thisExpectedOutputFilePath = fullfile(outputDir, expectedOutputFiles{iFile});
+%           thisExpectedOutputFilePath = fullfile(expectedOutputDir, expectedOutputFiles{iFile});
+          thisExpectedOutputFilePath = expectedOutputFiles{iFile};
           
-          thisActualOutputFilePath = fullfile(tempDirPath, actualOutputFiles{iFile});
-          [~,~,ext] = fileparts2(thisActualOutputFilePath);
+%           thistestOutputFilePath = fullfile(tempDirPath, testOutputFiles{iFile});
+          thistestOutputFilePath = testOutputFiles{iFile};
+          
+          [~,~,ext] = fileparts2(thistestOutputFilePath);
           switch ext
+            case '' % dir
+              continue
             case '.fig'
               % compareFigFiles 
-%               testCase.verifyTrue( ~any(cellfun(@isempty, compareFigFiles(actualOutputFiles{iFile}, expectedOutputFiles{iFile}))) );
-              testCase.verifyEmpty( compareFigFiles(thisActualOutputFilePath, thisExpectedOutputFilePath, true) );
+%               testCase.verifyTrue( ~any(cellfun(@isempty, compareFigFiles(testOutputFiles{iFile}, expectedOutputFiles{iFile}))) );
+              testCase.verifyEmpty( compareFigFiles(thistestOutputFilePath, thisExpectedOutputFilePath, true) );
             case '.mat'
               % compare loaded structs
-              thisActual = load(thisActualOutputFilePath);
+              thistest = load(thistestOutputFilePath);
               thisExpected = load(thisExpectedOutputFilePath);
-              testCase.verifyEqual(thisActual, thisExpected);
+              testCase.verifyEqual(thistest, thisExpected);
+            case '.mex4unittest'
+              continue % skip testing of mex files
             otherwise
               % do diff
-              testCase.verifyFalse( logical(system(sprintf('diff %s %s', thisActualOutputFilePath, thisExpectedOutputFilePath))) );
+              testCase.verifyFalse( logical(system(sprintf('diff -qr %s %s', thistestOutputFilePath, thisExpectedOutputFilePath))) );
           end
         end
       end

@@ -28,10 +28,10 @@ classdef test_autogen_all_localfn < matlab.unittest.TestCase
       % Get this local fn handle
       localFnHandle = localFnHandles{strcmp(localFnStrs, localfFnName)};
       
-      [actualOut{1:length(expectedOut)}] = feval(localFnHandle, args.argin{:});
+      [testOut{1:length(expectedOut)}] = feval(localFnHandle, args.argin{:});
       
       for ind = 1:length(expectedOut)
-        testCase.verifyEqual(expectedOut{ind}, actualOut{ind});
+        testCase.verifyEqual(testOut{ind}, expectedOut{ind});
       end
       
     end

@@ -49,6 +49,8 @@ options=ds.checkOptions(varargin,{...
   'parallel_flag',0,{0,1},...     % whether to run simulations in parallel (using parfor)
   'compile_flag',0,{0,1},... % exist('codegen')==6, whether to compile using coder instead of interpreting Matlab
   'mex_dir',[],[],... % Directory to search for pre-compiled solve files (solve*_mex*)
+  'auto_gen_test_data_flag',0,{0,1},...
+  'unit_test_flag',0,{0,1},...
   },false);
   
 if ~isempty(opts)
@@ -97,6 +99,8 @@ if ~isempty(options.solve_file)
 elseif isfield(studyinfo,'solve_file')
   % use study-associated solve_file
   solve_file=studyinfo.solve_file;
+elseif options.auto_gen_test_data_flag || options.unit_test_flag
+  solve_file='solve_ode.m';
 else
   % set default solve_file name
   solve_file=['solve_ode_' datestr(now,'yyyymmddHHMMSS_FFF') '.m'];
@@ -113,9 +117,7 @@ if isempty(fpath)
   end
   
   % convert relative path to absolute path
-  if ~strcmp('/',solve_file(1)) && ~strcmp('\',solve_file(1))
-    solve_file=fullfile(pwd,solve_file);
-  end
+  solve_file = getAbsolutePath(solve_file);
 end
 [fpath,fname,fext]=fileparts(solve_file);
 

@@ -7,12 +7,12 @@ function mexfileOutput = prepareMEX(mfileInput, varargin)
 args = varargin;
 
 if isstruct(args{1})
-    % User specified an options structure
-    keyvals = ds.options2Keyval(args{1});
-    % Convert it to keyvalues and prepend
-    keyvals = horzcat(keyvals,args(2:end));
+  % User specified an options structure
+  keyvals = ds.options2Keyval(args{1});
+  % Convert it to keyvalues and prepend
+  keyvals = horzcat(keyvals,args(2:end));
 else
-    keyvals = args;
+  keyvals = args;
 end
 
 options=ds.checkOptions(keyvals,{...
@@ -31,16 +31,16 @@ if ~exist(mexfileOutput,'file')
     fprintf('Compiling file: %s\n',mfileInput);
     fprintf('            to: %s\n',mexfileOutput);
   end
-
+  
   compile_start_time=tic;
   
   makeMex(mfileInput, options); % mex-file solver for solve file
-
+  
   if options.verbose_flag
     fprintf('\tMEX generation complete!\n\tElapsed time: %g seconds.\n',toc(compile_start_time));
     %toc;
   end
-
+  
   codemex_dir=fullfile(fileparts(mexfileOutput),'codemex');
   if exist(codemex_dir,'dir')
     if options.verbose_flag
@@ -54,22 +54,26 @@ else % mex file exists
   end
 end %if
 
-% If mex_dir is specified, back up the newly compiled mex files to this
-% folder
+% If mex_dir is specified, back up the newly compiled mex files to this folder
 if ~isempty(mex_dir)
-    [~,solvefile] = fileparts2(mfileInput);
-    [~,mexfile] = fileparts2(mexfileOutput);
-    
-    if isempty(dir(fullfile(mex_dir,[solvefile '.m'])))
-        fprintf('Solve file %s does not yet exist in mex_dir %s. Copying... \n',solvefile,mex_dir);
-        if ~exist(mex_dir,'dir'); error('Cannot find %s! Make sure it exists and is specified as an *absolute* path',mex_dir); end
-        copyfile(mfileInput,mex_dir);
+  [~,solvefile] = fileparts2(mfileInput);
+  [~,mexfile] = fileparts2(mexfileOutput);
+  
+  if isempty(dir(fullfile(mex_dir,[solvefile '.m'])))
+    if options.verbose_flag
+      fprintf('Solve file %s does not yet exist in mex_dir %s. Copying... \n',solvefile,mex_dir);
     end
-    if isempty(dir(fullfile(mex_dir,[mexfile '*'])))
-        fprintf('Mex file %s does not yet exist in mex_dir %s. Copying... \n',mexfile,mex_dir);
-        if ~exist(mex_dir,'dir'); error('Cannot find %s! Make sure it exists and is specified as an *absolute* path',mex_dir); end
-        copyfile([mexfileOutput,'*'],mex_dir);
+    if ~exist(mex_dir,'dir'); error('Cannot find %s! Make sure it exists and is specified as an *absolute* path',mex_dir); end
+    copyfile(mfileInput,mex_dir);
+  end
+  
+  if isempty(dir(fullfile(mex_dir,[mexfile '*'])))
+    if options.verbose_flag
+      fprintf('Mex file %s does not yet exist in mex_dir %s. Copying... \n',mexfile,mex_dir);
     end
+    if ~exist(mex_dir,'dir'); error('Cannot find %s! Make sure it exists and is specified as an *absolute* path',mex_dir); end
+    copyfile([mexfileOutput,'*'],mex_dir);
+  end
 end
 
 end % main fn

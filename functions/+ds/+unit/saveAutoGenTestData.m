@@ -19,7 +19,7 @@ else
 end
 
 % check package namespace
-if ~isfunction(fnNameStack)
+if ~isfunction(fnNameStack) || strcmp(fnNameStack, 'strrep')
   if isfunction(['ds.' fnNameStack])
     fnName = ['ds.' fnName];
   elseif isfunction(['ds.unit.' fnNameStack])

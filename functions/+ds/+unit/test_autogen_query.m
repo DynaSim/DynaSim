@@ -19,10 +19,10 @@ classdef test_autogen_query < matlab.unittest.TestCase
       
       fh = str2func(fnName{1});
       
-      [actualOut{1:length(expectedOut)}] = feval(fh, args.argin{:});
+      [testOut{1:length(expectedOut)}] = feval(fh, args.argin{:});
       
       for ind = 1:length(expectedOut)
-        testCase.verifyEqual(expectedOut{ind}, actualOut{ind});
+        testCase.verifyEqual(testOut{ind}, expectedOut{ind});
       end
       
     end

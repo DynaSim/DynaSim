@@ -31,18 +31,24 @@ if options.save_data_flag || options.save_results_flag || options.parallel_flag
   
   % set default study_dir if necessary
   if isempty(options.study_dir)
-    % format: <study_dir> = <project_dir>/<prefix>_<timestamp>
-    options.study_dir=fullfile(options.project_dir,[options.prefix '_' datestr(now,'yyyymmddHHMMSS')]);
-  end
-  
-  % create study_dir if it doesn't exist
-  if ~isdir(fullfile('.',options.study_dir))
-    fprintf('creating study directory: %s\n',options.study_dir);
-    mkdir(options.study_dir);
+    if ~options.auto_gen_test_data_flag && ~options.unit_test_flag
+      % format: <study_dir> = <project_dir>/<prefix>_<timestamp>
+      options.study_dir=fullfile(options.project_dir,[options.prefix '_' datestr(now,'yyyymmddHHMMSS')]);
+    else
+      options.study_dir=fullfile(options.project_dir,[options.prefix '_unitTest']);
+    end
   end
   
   % make sure we have the full path and access rights
   options.study_dir = getAbsolutePath(options.study_dir);
+  
+  % create study_dir if it doesn't exist
+  if ~isdir(options.study_dir)
+    if options.verbose_flag
+      fprintf('Creating study directory: %s\n',options.study_dir);
+    end
+    mkdir(options.study_dir);
+  end
   
   % set solve_file name for this study
   if isempty(options.solve_file)
@@ -97,7 +103,7 @@ if options.save_data_flag || options.save_results_flag || options.parallel_flag
   % create study_dir if it doesn't exist
   if ~isdir(options.study_dir)
     if options.verbose_flag
-      fprintf('creating study directory: %s\n',options.study_dir);
+      fprintf('Creating study directory: %s\n',options.study_dir);
     end
     mkdir(options.study_dir);
   end
@@ -115,7 +121,7 @@ if options.save_data_flag || options.save_results_flag || options.parallel_flag
   data_dir=fullfile(options.study_dir,'data');
   if ~isdir(data_dir)
     if options.verbose_flag
-      fprintf('creating data directory: %s\n',data_dir);
+      fprintf('Creating data directory: %s\n',data_dir);
     end
     mkdir(data_dir);
   end
@@ -125,7 +131,7 @@ if options.save_data_flag || options.save_results_flag || options.parallel_flag
     plot_dir=fullfile(options.study_dir,'plots');
     if ~isdir(plot_dir)
       if options.verbose_flag
-        fprintf('creating plot directory: %s\n',plot_dir);
+        fprintf('Creating plot directory: %s\n',plot_dir);
       end
       mkdir(plot_dir);
     end
@@ -183,7 +189,7 @@ else
   
   if ~isdir(options.study_dir) % in case user provides different location to save solvers
     if options.verbose_flag
-      fprintf('creating study directory: %s\n',options.study_dir);
+      fprintf('Creating study directory: %s\n',options.study_dir);
     end
     mkdir(options.study_dir);
   end

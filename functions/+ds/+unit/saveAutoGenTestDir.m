@@ -1,4 +1,4 @@
-function saveAutoGenTestDir(argin, argout, dirin, localFn_flag)
+function saveAutoGenTestDir(argin, argout, dirIn, dirOut, localFn_flag)
 % Inputs:
 %   argin: cell array with input arguments
 %   argout: cell array with output arguments
@@ -20,9 +20,13 @@ else
 end
 
 % check package namespace
-if ~isfunction(fnNameStack)
+if ~isfunction(fnNameStack) || strcmp(fnNameStack, 'strrep')
   if isfunction(['ds.' fnNameStack])
     fnName = ['ds.' fnName];
+  elseif isfunction(['ds.unit.' fnNameStack])
+    fnName = ['ds.unit.' fnName];
+  elseif isfunction(['ds.xPlt.' fnNameStack])
+    fnName = ['ds.xPlt.' fnName];
   end
 end
 
@@ -33,8 +37,30 @@ testDirName = sprintf('%s_autogen_%s', fnName, hash);
 testFileDir = fullfile(ds.getConfig('ds_testData_path'), 'autogenDirs_newSave', testDirName);
 mkdirSilent(testFileDir);
 
-% argout fig handles
-% TODO: generalize fig handle checking
+% args file
+testFileName = 'args.mat';
+testFilePath = fullfile(testFileDir, testFileName);
+save(testFilePath, 'argin', 'argout')
+
+% output dir
+if exist('dirOut', 'var') && ~isempty(dirOut)
+  testOutputDir = fullfile(testFileDir, 'output');
+  mkdirSilent(testOutputDir);
+  
+  studyDirInd = find(strcmp(argin, 'study_dir'));
+  if ~isempty(studyDirInd) % if study_dir defined in argin
+    studyDir = argin{studyDirInd+1};
+    testOutputStudyDir = fullfile(testOutputDir,studyDir);
+    mkdirSilent(testOutputStudyDir);
+    
+    copyfile(dirOut, testOutputStudyDir);
+  else
+    copyfile(dirOut, testOutputDir);
+  end
+end
+
+% argout fig handles to output dir
+% 	TODO: generalize fig handle checking
 if all(isValidFigHandle(argout{1}))
   handles = argout{1};
   testOutputDir = fullfile(testFileDir, 'output');
@@ -43,16 +69,12 @@ if all(isValidFigHandle(argout{1}))
   ds.unit.save_figHandles( handles, testOutputDir )
 end
 
-% args file
-testFileName = 'args.mat';
-testFilePath = fullfile(testFileDir, testFileName);
-save(testFilePath, 'argin', 'argout')
-
 % input dir
-if exist('dirin', 'var')
+if exist('dirIn', 'var') && ~isempty(dirIn)
   testInputDir = fullfile(testFileDir, 'input');
   mkdirSilent(testInputDir);
-  copyfile(dirin, testInputDir)
+  
+  copyfile(dirIn, testInputDir);
 end
 
 end
