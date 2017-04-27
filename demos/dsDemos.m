@@ -131,6 +131,9 @@ vary={
 data=dsSimulate(eqns, 'tspan',[0 250], 'vary',vary, 'study_dir','demo_izhikevich_vary');
 dsPlot(data);
 
+% Do the same simulation, but using parfor in order to speed up larger computations
+data=dsSimulate(eqns, 'tspan',[0 250], 'vary',vary, 'study_dir','demo_izhikevich_vary_parallel', 'parallel_flag',1);
+
 % %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% QUICKLY BUILDING LARGE MODELS FROM EXISTING "MECHANISMS"
 % %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -186,7 +189,7 @@ xlabel('time (ms)'); ylabel('membrane potential (mV)'); title('Intrinsically Bur
 %% BUILDING LARGE MODELS WITH MULTIPLE POPULATIONS AND CONNECTIONS
 % %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-%% Sparse Pyramidal-Interneuron-Network-Gamma (sPING)
+%% Setup Sparse Pyramidal-Interneuron-Network-Gamma (sPING)
 
 % define equations of cell model (same for E and I populations)
 eqns={
@@ -214,6 +217,7 @@ s.connections(2).direction='E->I';
 s.connections(2).mechanism_list={'iAMPA'};
 s.connections(2).parameters={'tauD',2,'gSYN',.1,'netcon',ones(80,20)};
 
+%% Simulate Sparse Pyramidal-Interneuron-Network-Gamma (sPING)
 data=dsSimulate(s, 'study_dir','demo_sPING_0');
 
 dsPlot(data);
@@ -317,4 +321,9 @@ dsPlot(data);
 
 % Now run again:
 data=dsSimulate(s, 'compile_flag',1, 'study_dir','demo_sPING_3_compile');
+dsPlot(data);
+
+% Combine compilation and parallelization to maxmize computatinal speed locally
+vary={'','I',0:2:14};
+data=dsSimulate(s, 'compile_flag',1, 'parallel_flag',1, 'vary', vary, 'study_dir','demo_sPING_3_compile_parallel');
 dsPlot(data);
