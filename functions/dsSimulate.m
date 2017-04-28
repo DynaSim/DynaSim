@@ -848,7 +848,7 @@ try
       if matlabSolverBool
         % add IC to p for use in matlab solver
         if isempty(options.ic)
-          [~, p.ic]=ds.dynasim2odefun(ds.propagateParameters(ds.propagateFunctions(model)), 'odefun_output','func_body', varargin{:}, varargin{:}, varargin{:});
+          [~, p.ic]=ds.dynasim2odefun(  ds.propagateParameters( ds.propagateFunctions(model, varargin{:}), varargin{:} ), 'odefun_output','func_body', varargin{:}  );
         else
           p.ic = options.ic;
         end

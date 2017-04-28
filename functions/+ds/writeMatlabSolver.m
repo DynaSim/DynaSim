@@ -66,7 +66,7 @@ end
 % create function that calls feval(@solver,...) and has subfunction
 % defining odefun (including optional conditionals)...
 
-propagatedModel = ds.propagateParameters(ds.propagateFunctions(model), varargin{:}, varargin{:});
+propagatedModel = ds.propagateParameters( ds.propagateFunctions(model, varargin{:}), varargin{:} );
 propagatedModel = ds.propagateParameters(propagatedModel, 'param_type', 'fixed_variables', varargin{:});
 [odefun,IC,elem_names] = ds.dynasim2odefun(propagatedModel, 'odefun_output','func_body', varargin{:});
 

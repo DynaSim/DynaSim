@@ -66,7 +66,7 @@ for type_index=1:length(target_types)
       % update expressions of this type
       switch options.action
         case 'substitute'
-          expressions{i}=insert_parameters(expressions{i},parameters,[], varargin{:});
+          expressions{i}=insert_parameters(expressions{i},parameters, [],[], varargin{:});
         case 'prepend'
           expressions{i}=insert_parameters(expressions{i},parameters, 'prop_prefix',options.prop_prefix, varargin{:});
         case 'postpend'
@@ -96,7 +96,7 @@ if ~isempty(model.conditionals)
       % update expressions of this type
       switch options.action
         case 'substitute'
-          expressions{i}=insert_parameters(expressions{i},parameters,[], varargin{:});
+          expressions{i}=insert_parameters(expressions{i},parameters, [],[], varargin{:});
         case 'prepend'
           expressions{i}=insert_parameters(expressions{i},parameters, 'prop_prefix',options.prop_prefix, varargin{:});
         case 'postpend'

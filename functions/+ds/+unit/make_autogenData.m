@@ -1,5 +1,7 @@
 %% Make DynaSim Autogen Files
 
+warning('off','MATLAB:lang:cannotClearExecutingFunction');
+
 % Set where to save outputs
 output_directory = fullfile(ds.getConfig('ds_data_path'), 'autoGenSave_temp');
 
@@ -275,3 +277,5 @@ dsSimulate(eqns,'vary',vary, 'study_dir',study_dir,'save_data_flag',1,...
 %% Remove output_directory
 fprintf('Removing temporary output_directory: %s\n', output_directory)
 rmdir(output_directory, 's')
+
+fprintf('\nDone making autogen data.\n\n')
