@@ -6,6 +6,7 @@ function mexfileOutput = prepareMEX(mfileInput, varargin)
 % Input args
 args = varargin;
 
+% TODO: this block may be unnecesary since checkOptions can handle a struct
 if isstruct(args{1})
   % User specified an options structure
   keyvals = ds.options2Keyval(args{1});
@@ -18,6 +19,7 @@ end
 options=ds.checkOptions(keyvals,{...
   'verbose_flag',0,{0,1},... % set verbose to 1 by default
   'mex_dir',[],[],... % Directory to search for pre-compiled solve files (solve*_mex*)
+  'codegen_args',[],[],...
   },false);
 
 mex_dir = options.mex_dir;
@@ -87,10 +89,11 @@ cfg = coder.config('mex');
 cfg.DynamicMemoryAllocation = 'AllVariableSizeArrays';
 
 % Generate MEX function
-if ~isfield(options, 'codegen_args')
+if isempty(options.codegen_args)
   eval(sprintf('codegen -d codemex -config cfg %s',file));
 else % codegen_args specified
   eval(sprintf('codegen -args %s -d codemex -config cfg %s', 'options.codegen_args', file));
 end
+% TODO: convert eval to feval or call to codegen
 
 end

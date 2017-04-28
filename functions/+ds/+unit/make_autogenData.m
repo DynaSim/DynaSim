@@ -2,6 +2,8 @@
 
 warning('off','MATLAB:lang:cannotClearExecutingFunction');
 
+cwd = pwd;
+
 % Set where to save outputs
 output_directory = fullfile(ds.getConfig('ds_data_path'), 'autoGenSave_temp');
 
@@ -201,7 +203,7 @@ eqns='dv/dt=@current+I; {iNa,iK}';
 vary={'','I',[0 10 20]};
 dsSimulate(eqns,'save_data_flag',1,'study_dir','demo_cluster_1_loop',...
                    'vary',vary,'cluster_flag',1, autogenOptions{:});
-                 
+
 % Array mode
 eqns='dv/dt=@current+I; {iNa,iK}';
 vary={'','I',[0 10 20]};
@@ -241,27 +243,27 @@ vary={'','I',[0 10 20]};
 
 % od45
 data = dsSimulate(eqns,'save_data_flag',1,'study_dir','demo_cluster_1_ml_solver_ode45',...
-                   'vary',vary,'cluster_flag',0,'overwrite_flag',1,'verbose_flag',1,...
+                   'vary',vary,'cluster_flag',0,'overwrite_flag',1,...
                    'dt',0.01, 'downsample_factor',100,'solver','ode45',...
-                    'matlab_solver_options', {'InitialStep', 0.01}, 'compile_flag',0);
+                    'matlab_solver_options', {'InitialStep', 0.01}, 'compile_flag',0, autogenOptions{:});
   
 % ode45 compiled
 data = dsSimulate(eqns,'save_data_flag',1,'study_dir','demo_cluster_1_ml_solver_ode45_compiled',...
-                   'vary',vary,'cluster_flag',0,'overwrite_flag',1,'verbose_flag',1,...
+                   'vary',vary,'cluster_flag',0,'overwrite_flag',1,...
                    'dt',0.01, 'downsample_factor',100,'solver','ode45',...
-                    'matlab_solver_options', {'InitialStep', 0.01}, 'compile_flag',1);
+                    'matlab_solver_options', {'InitialStep', 0.01}, 'compile_flag',1, autogenOptions{:});
                
 % ode23
 data = dsSimulate(eqns,'save_data_flag',1,'study_dir','demo_cluster_1_ml_solver_ode23s',...
-                   'vary',vary,'cluster_flag',0,'overwrite_flag',1,'verbose_flag',1,...
+                   'vary',vary,'cluster_flag',0,'overwrite_flag',1,...
                    'dt',0.01, 'downsample_factor',100,'solver','ode23s',...
-                    'matlab_solver_options', {'InitialStep', 0.01}, 'compile_flag',0);
+                    'matlab_solver_options', {'InitialStep', 0.01}, 'compile_flag',0, autogenOptions{:});
                   
 % ode23 compiled
 data = dsSimulate(eqns,'save_data_flag',1,'study_dir','demo_cluster_1_ml_solver_ode23s_compiled',...
-                   'vary',vary,'cluster_flag',0,'overwrite_flag',1,'verbose_flag',1,...
+                   'vary',vary,'cluster_flag',0,'overwrite_flag',1,...
                    'dt',0.01, 'downsample_factor',100,'solver','ode23s',...
-                    'matlab_solver_options', {'InitialStep', 0.01}, 'compile_flag',1);
+                    'matlab_solver_options', {'InitialStep', 0.01}, 'compile_flag',1, autogenOptions{:});
 
 %% one file mode
 study_dir=fullfile('.', 'study_HH_varyI_one_file');
@@ -275,6 +277,8 @@ dsSimulate(eqns,'vary',vary, 'study_dir',study_dir,'save_data_flag',1,...
   autogenOptions{:});
 
 %% Remove output_directory
+cd(cwd)
+
 fprintf('Removing temporary output_directory: %s\n', output_directory)
 rmdir(output_directory, 's')
 
