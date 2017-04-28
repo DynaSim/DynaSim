@@ -938,17 +938,24 @@ try
       
       % add metadata to tmpdata
       tmpdata.simulator_options=options; % store simulator controls
+      
       if options.store_model_flag==1  % optionally store the simulated model
         tmpdata.model=model;
       end
     end
     
     tmpdata = prepare_varied_metadata(tmpdata);
+    
+    if (options.auto_gen_test_data_flag || options.unit_test_flag) && isfield(tmpdata, 'simulator_options')
+      tmpdata= rmfield(tmpdata, 'simulator_options');
+    end
+    
     % save single data set and update studyinfo
     if options.save_data_flag
       ds.exportData(tmpdata,'filename',data_file,'format','mat','verbose_flag',options.verbose_flag);
       %studyinfo=ds.updateStudy(studyinfo.study_dir,'process_id',sim_id,'status','finished','duration',duration,'solve_file',options.solve_file,'email',options.email,'verbose_flag',options.verbose_flag,'model',model,'simulator_options',options);
     end
+    
     % do post-simulation analysis and plotting
     if ~isempty(options.analysis_functions) || ~isempty(options.plot_functions)
       if options.save_data_flag || options.save_results_flag
