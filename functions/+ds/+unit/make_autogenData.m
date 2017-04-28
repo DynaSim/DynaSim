@@ -129,9 +129,35 @@ s.connections(1).parameters={'tauD',10,'gSYN',.1,'netcon','ones(N_pre,N_post)'};
 s.connections(2).direction='E->I';
 s.connections(2).mechanism_list={'iAMPA'};
 s.connections(2).parameters={'tauD',2,'gSYN',.1,'netcon',ones(80,20)};
-data=dsSimulate(s, 'study_dir','demo_sPING_0', autogenOptions{:});
 
+data=dsSimulate(s, 'study_dir','demo_sPING_0', autogenOptions{:});
 dsPlot(data, autogenOptions{:}); close all
+
+%% Covary
+% Vary two parameters (run a simulation for all combinations of values)
+vary={'(E,I)','(EK1,EK2)',[-80 -60]};
+%       This sets modifications:
+%           * E_EK1, E_EK2, I_EK1, I_EK2 = -80
+%           * E_EK1, E_EK2, I_EK1, I_EK2 = -60
+data = dsSimulate(s, 'study_dir','demo_sPING_covary1', 'vary',vary, autogenOptions{:});
+              
+vary={'(E,I)','(EK1,EK2)',[-80 -60; -85 -65]};
+%       This sets modifications:
+%           * E_EK1, I_EK1 = -80 and E_EK2, I_EK2 = -85
+%           * E_EK1, I_EK1 = -60 and E_EK2, I_EK2 = -65
+data = dsSimulate(s, 'study_dir','demo_sPING_covary2', 'vary',vary, autogenOptions{:});
+              
+vary={'(E,I)','(EK1,EK2)',cat(3,[-80 -60], [-85 -65])};
+%       This sets modifications:
+%           * E_EK1, E_EK2 = -80 and I_EK1, I_EK2 = -85
+%           * E_EK1, E_EK2 = -60 and I_EK1, I_EK2 = -65
+data = dsSimulate(s,'study_dir','demo_sPING_covary3', 'vary',vary, autogenOptions{:});
+              
+vary={'(E,I)','(EK1,EK2)',cat(3, [-75 -55; -80 -60], [-85 -65; -90 -70])};
+%       This sets modifications:
+%           * E_EK1 = -75, E_EK2 = -80, I_EK1 = -85, I_EK2 = -90.
+%           * E_EK1 = -55, E_EK2 = -60, I_EK1 = -65, I_EK2 = -70.
+data = dsSimulate(s,'study_dir','demo_sPING_covary4', 'vary',vary, autogenOptions{:});
 
 
 %% SAVING SIMULATED DATA
@@ -149,7 +175,7 @@ data=dsSimulate(s, 'save_data_flag',1, 'study_dir','demo_sPING_2',...
                      'vary',vary, autogenOptions{:});
 
 % load and plot the saved data
-data_from_disk = dsImport('demo_sPING_2', 'auto_gen_test_data_flag',1);
+% data_from_disk = dsImport('demo_sPING_2', 'auto_gen_test_data_flag',1);
 % dsPlot(data_from_disk, autogenOptions{:}); close all
 % dsPlot(data_from_disk,'variable','E_v', autogenOptions{:}); close all
 
@@ -158,9 +184,9 @@ vary={
   'E'   ,'Iapp',[0 10 20];      % amplitude of tonic input to E-cells
   'I->E','tauD',[5 10 15]       % inhibition decay time constant from I to E
   };
-dsSimulate(s, 'save_data_flag',1, 'study_dir','demo_sPING_3',...
+data=dsSimulate(s, 'save_data_flag',1, 'study_dir','demo_sPING_3',...
                 'vary',vary, 'verbose_flag',1, autogenOptions{:});
-data=dsImport('demo_sPING_3', autogenOptions{:});
+% data=dsImport('demo_sPING_3', autogenOptions{:});
 dsPlot(data, autogenOptions{:}); close all
 dsPlot(data,'plot_type','rastergram', autogenOptions{:}); close all
 dsPlot(data,'plot_type','power', autogenOptions{:}); close all
@@ -196,7 +222,7 @@ dsSimulate(eqns,'save_data_flag',1,'study_dir','demo_cluster_3',...
                    'plot_functions',{@dsPlot,@dsPlot},...
                    'plot_options',{{},{'plot_type','power'}});
 
-%% MORE FEATURES
+%% Compilation
 
 % Compile
 data=dsSimulate(s,'compile_flag',1, 'study_dir','demo_sPING_3_compile', autogenOptions{:});
@@ -205,6 +231,46 @@ data=dsSimulate(s,'compile_flag',1, 'study_dir','demo_sPING_3_compile', autogenO
 vary={'','I',0:2:14};
 data=dsSimulate(s, 'compile_flag',1, 'parallel_flag',1, 'vary', vary, 'study_dir','demo_sPING_3_compile_parallel', autogenOptions{:});
 dsPlot(data, autogenOptions{:}); close all
+
+%% Matlab Solvers
+% Run three simulations in parallel jobs and save the simulated data
+eqns='dv/dt=@current+I; {iNa,iK}';
+vary={'','I',[0 10 20]};
+
+% od45
+data = dsSimulate(eqns,'save_data_flag',1,'study_dir','demo_cluster_1_ml_solver_ode45',...
+                   'vary',vary,'cluster_flag',0,'overwrite_flag',1,'verbose_flag',1,...
+                   'dt',0.01, 'downsample_factor',100,'solver','ode45',...
+                    'matlab_solver_options', {'InitialStep', 0.01}, 'compile_flag',0);
+  
+% ode45 compiled
+data = dsSimulate(eqns,'save_data_flag',1,'study_dir','demo_cluster_1_ml_solver_ode45_compiled',...
+                   'vary',vary,'cluster_flag',0,'overwrite_flag',1,'verbose_flag',1,...
+                   'dt',0.01, 'downsample_factor',100,'solver','ode45',...
+                    'matlab_solver_options', {'InitialStep', 0.01}, 'compile_flag',1);
+               
+% ode23
+data = dsSimulate(eqns,'save_data_flag',1,'study_dir','demo_cluster_1_ml_solver_ode23s',...
+                   'vary',vary,'cluster_flag',0,'overwrite_flag',1,'verbose_flag',1,...
+                   'dt',0.01, 'downsample_factor',100,'solver','ode23s',...
+                    'matlab_solver_options', {'InitialStep', 0.01}, 'compile_flag',0);
+                  
+% ode23 compiled
+data = dsSimulate(eqns,'save_data_flag',1,'study_dir','demo_cluster_1_ml_solver_ode23s_compiled',...
+                   'vary',vary,'cluster_flag',0,'overwrite_flag',1,'verbose_flag',1,...
+                   'dt',0.01, 'downsample_factor',100,'solver','ode23s',...
+                    'matlab_solver_options', {'InitialStep', 0.01}, 'compile_flag',1);
+
+%% one file mode
+study_dir=fullfile('.', 'study_HH_varyI_one_file');
+eqns='dv/dt=@current+I; {iNa,iK}';
+vary={'','I',[0:10:30]};
+
+dsSimulate(eqns,'vary',vary, 'study_dir',study_dir,'save_data_flag',1,...
+  'cluster_flag',1, 'qsub_mode','array', 'one_solve_file_flag',1,...
+  'tspan',[0 500], 'dt',0.01, 'solver','euler', 'downsample_factor', 100,...
+  'plot_functions',{@dsPlot}, 'plot_options',{{'format', 'jpg', 'visible', 'off'}},...
+  autogenOptions{:});
 
 %% Remove output_directory
 fprintf('Removing temporary output_directory: %s\n', output_directory)
