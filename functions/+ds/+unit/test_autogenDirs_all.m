@@ -1,6 +1,6 @@
 classdef test_autogenDirs_all < matlab.unittest.TestCase
   properties
-    testDataPath = ds.getConfig('ds_testData_path');
+    unitTestDataPath = ds.getConfig('ds_unitTestData_path');
   end
   
   properties (TestParameter)
@@ -9,7 +9,7 @@ classdef test_autogenDirs_all < matlab.unittest.TestCase
   
   methods (Test,  TestTags = {'autogen'})
     function testCellIn(testCase, dataDirName)
-      dataDirPath = fullfile(testCase.testDataPath, 'autogenDirs', dataDirName);
+      dataDirPath = fullfile(testCase.unitTestDataPath, 'autogenDirs', dataDirName);
       
       % Make Temp Folder
       import matlab.unittest.fixtures.WorkingFolderFixture

@@ -1,6 +1,6 @@
 classdef test_autogen_all < matlab.unittest.TestCase
   properties
-    testDataPath = ds.getConfig('ds_testData_path');
+    unitTestDataPath = ds.getConfig('ds_unitTestData_path');
   end
   
   properties (TestParameter)
@@ -9,7 +9,7 @@ classdef test_autogen_all < matlab.unittest.TestCase
   
   methods (Test,  TestTags = {'autogen'})
     function testCellIn(testCase, dataFileName)
-      args = load(fullfile(testCase.testDataPath, 'autogen', dataFileName));
+      args = load(fullfile(testCase.unitTestDataPath, 'autogen', dataFileName));
       expectedOut = args.argout;
       
       [~,filename] = fileparts2(dataFileName);

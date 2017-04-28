@@ -8,5 +8,5 @@ models/personal
 dsVars.txt
 dsConfig.txt
 _ignore
-functions/+ds/+unit/testData/
+unitTestData/
 docs/offline_docs

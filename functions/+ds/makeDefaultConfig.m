@@ -22,7 +22,7 @@ ds_root_path = fileparts(fileparts(which('dsSimulate')));
 
 demos_zips_path = fullfile(ds_root_path, 'demos','demo_zips');
 
-ds_testData_path = fullfile(ds_root_path, 'functions', '+ds', '+unit', 'testData');
+ds_unitTestData_path = fullfile(ds_root_path, 'unitTestData');
 
 %% Write vars to disk
 vars = who; % get all vars
