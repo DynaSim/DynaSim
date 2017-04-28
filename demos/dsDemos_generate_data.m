@@ -97,7 +97,7 @@ end
 
 xp.data = mydata;
 
-data = ds.xPlt.xPlt2ds(xp);
+data = ds.xPlt2ds(xp);
 
 %% Package up the data
 

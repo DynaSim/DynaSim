@@ -25,8 +25,6 @@ if ~isfunction(fnNameStack) || strcmp(fnNameStack, 'strrep')
     fnName = ['ds.' fnName];
   elseif isfunction(['ds.unit.' fnNameStack])
     fnName = ['ds.unit.' fnName];
-  elseif isfunction(['ds.xPlt.' fnNameStack])
-    fnName = ['ds.xPlt.' fnName];
   end
 end
 

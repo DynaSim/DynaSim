@@ -1,5 +1,5 @@
 function data = xPlt2dsImage(obj)
-%% data=ds.xPlt.xPlt2ds(obj,varargin)
+%% data=xPlt2ds(obj,varargin)
 % Dependencies:
 %   Requires the MDD class, which should be part of DynaSim. If not,
 %   get it here https://github.com/davestanley/MDD
@@ -14,9 +14,9 @@ function data = xPlt2dsImage(obj)
 % load sample_data_dynasim.mat
 % data1=data;
 % data2 = data(1);
-% d1 = ds.xPlt.xPlt2ds(ds.ds2xPlt(data1));
-% d2 = ds.xPlt.xPlt2ds(ds.ds2xPlt(data2));
-% d2b = ds.xPlt.xPlt2ds(squeeze(ds.ds2xPlt(data2)));
+% d1 = xPlt2ds(ds.ds2xPlt(data1));
+% d2 = xPlt2ds(ds.ds2xPlt(data2));
+% d2b = xPlt2ds(squeeze(ds.ds2xPlt(data2)));
 % % Make sure 1 is identical
 % close all; 
 % dsPlot(data1); dsPlot(d1);
