@@ -64,7 +64,7 @@ end
 
 % Convert the incoming DynaSim data structure to an xPlt object
 if ~isa(data,'xPlt')
-    [xp,is_image] = ds.xPlt.all2xPlt(data);
+    [xp,is_image] = ds.all2xPlt(data);
 else
     xp = data;
     if iscell(xp.data{1})
@@ -611,7 +611,7 @@ function var_out = getdefaultstatevar(xp)
         return;
     end
     
-    vars_from_labels = ds.xPlt.get_variables_from_meta(xp);
+    vars_from_labels = ds.get_variables_from_meta(xp);
     if ~isempty(vars_from_labels)
         vars_from_labels = vars_from_labels(1);   % Best guess at default state variable. Usually its the 1st entry in labels
     end

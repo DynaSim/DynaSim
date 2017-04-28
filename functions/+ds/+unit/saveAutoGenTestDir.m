@@ -25,8 +25,6 @@ if ~isfunction(fnNameStack) || strcmp(fnNameStack, 'strrep')
     fnName = ['ds.' fnName];
   elseif isfunction(['ds.unit.' fnNameStack])
     fnName = ['ds.unit.' fnName];
-  elseif isfunction(['ds.xPlt.' fnNameStack])
-    fnName = ['ds.xPlt.' fnName];
   end
 end
 
@@ -34,7 +32,7 @@ hash = DataHash(argin);
 
 % test dir
 testDirName = sprintf('%s_autogen_%s', fnName, hash);
-testFileDir = fullfile(ds.getConfig('ds_testData_path'), 'autogenDirs_newSave', testDirName);
+testFileDir = fullfile(ds.getConfig('ds_unitTestData_path'), 'autogenDirs_newSave', testDirName);
 mkdirSilent(testFileDir);
 
 % args file
