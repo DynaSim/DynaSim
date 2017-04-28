@@ -272,7 +272,7 @@ xp3.getaxisinfo
 xp4 = xp(:,3,'E','v');
 xp4.getaxisinfo
 
-xp5 = mergeData(xp3,xp4);
+xp5 = merge(xp3,xp4);
 
 dimensions = {[1,2],0};
 figl; recursivePlot(xp5,{@xp_subplot_grid,@xp_matrix_imagesc},dimensions);
