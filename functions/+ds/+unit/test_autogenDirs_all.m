@@ -67,7 +67,7 @@ classdef test_autogenDirs_all < matlab.unittest.TestCase
             case '.fig'
               % compareFigFiles 
 %               testCase.verifyTrue( ~any(cellfun(@isempty, compareFigFiles(testOutputFiles{iFile}, expectedOutputFiles{iFile}))) );
-              testCase.verifyEmpty( compareFigFiles(thistestOutputFilePath, thisExpectedOutputFilePath, true) );
+              testCase.verifyEmpty( compareFigFiles2(thistestOutputFilePath, thisExpectedOutputFilePath, true) );
             case '.mat'
               % compare loaded structs
               thistest = load(thistestOutputFilePath);
