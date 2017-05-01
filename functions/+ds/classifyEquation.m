@@ -38,7 +38,7 @@ function classes = classifyEquation(string,delimiter, varargin)
 
 %% localfn output
 if ~nargin
-  output = localfunctions;
+  output = localfunctions; % output var name specific to this fn
   return
 end
 

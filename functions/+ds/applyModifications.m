@@ -68,7 +68,7 @@ function [output,modifications] = applyModifications(model, modifications, varar
 
 %% localfn output
 if ~nargin
-  output = localfunctions;
+  output = localfunctions; % output var name specific to this fn
   return
 end
 

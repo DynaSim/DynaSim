@@ -4,7 +4,7 @@ function [effective_vary_lengths, linked_indices] = checkCovary(vary_lengths, va
 
 %% localfn output
 if ~nargin
-  effective_vary_lengths = localfunctions;
+  effective_vary_lengths = localfunctions; % output var name specific to this fn
   return
 end
 

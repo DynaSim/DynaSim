@@ -106,7 +106,7 @@ function spec = checkSpecification(specification, varargin)
 
 %% localfn output
 if ~nargin
-  spec = localfunctions;
+  spec = localfunctions; % output var name specific to this fn
   return
 end
 

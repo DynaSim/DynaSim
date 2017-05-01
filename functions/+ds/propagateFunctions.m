@@ -12,7 +12,7 @@ function model = propagateFunctions(model, varargin)
 
 %% localfn output
 if ~nargin
-  output = localfunctions;
+  model = localfunctions; % output var name specific to this fn
   return
 end
 

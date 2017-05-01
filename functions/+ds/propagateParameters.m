@@ -15,6 +15,12 @@ function model = propagateParameters(model,varargin)
 %
 % See also: ds.propagateFunctions, ds.writeDynaSimSolver
 
+%% localfn output
+if ~nargin
+  model = localfunctions; % output var name specific to this fn
+  return
+end
+
 % Check inputs
 model=ds.checkModel(model, varargin{:});
 if ~isstruct(model.parameters)
