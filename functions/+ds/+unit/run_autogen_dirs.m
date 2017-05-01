@@ -8,4 +8,4 @@ if ~exist(finalDir, 'dir')
 end
 
 %% Run tests
-result = runtests('ds.unit.test_autogenDirs_all');
+result = runtests('ds.unit.test_autogenDirs_all', 'UseParallel', true);
