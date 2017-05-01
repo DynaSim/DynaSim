@@ -1,4 +1,4 @@
-function poplabels = ds.get_populations_from_meta(xp)
+function poplabels = get_populations_from_meta(xp)
     poplabels = {};
     if ~isempty(xp.meta.dynasim)
         if ~isempty(xp.meta.dynasim.labels)

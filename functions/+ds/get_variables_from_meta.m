@@ -1,4 +1,4 @@
-function varlabels = ds.get_variables_from_meta(xp)
+function varlabels = get_variables_from_meta(xp)
     varlabels = {};
     if ~isempty(xp.meta.dynasim)
         if ~isempty(xp.meta.dynasim.labels)
