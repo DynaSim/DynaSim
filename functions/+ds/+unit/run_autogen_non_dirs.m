@@ -1,4 +1,4 @@
-%% Run non-dir autogen tests
+%% Run non-dir non-local autogen tests
 
 %% Rename autogen_newSave to autogen
 finalDir = fullfile(ds.getConfig('ds_unitTestData_path'), 'autogen');

@@ -2,8 +2,10 @@
 % excluding query tests
 
 import matlab.unittest.TestSuite
+import matlab.unittest.TestRunner
 import matlab.unittest.selectors.HasTag
 import matlab.unittest.plugins.CodeCoveragePlugin
+import edu.stanford.covert.test.Coverage
 
 %% Make Test Suite
 fullSuite = TestSuite.fromPackage('ds.unit');
@@ -20,4 +22,11 @@ result = runner.run(fullSuite); % runner for code coverage
 
 %% Run Test Suite in Parallel
 % runner = matlab.unittest.TestRunner.withTextOutput;
-% result = runInParallel(runner,fullSuite); % runner in parallel, no code covereage
+% result = runInParallel(runner,fullSuite); % runner in parallel, no code coverage
+
+%% XML Coverage Output
+testCoverageDir = fullfile(ds.getConfig('ds_root_path'), 'testCoverage');
+mkdirSilent(testCoverageDir)
+reportPath = fullfile(testCoverageDir, 'dsAllTestCoverage.xml');
+report = Coverage( fullfile(ds.getConfig('ds_root_path'), 'functions') );
+report.exportXML(reportPath);

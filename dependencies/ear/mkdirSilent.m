@@ -1,8 +1,5 @@
-function varargout = mkdirSilent (output_path,varargin)
-% Deletes folder contents then recreates
-
-%     fprintf(['Deleting all data in folder: \n' output_path '.\nPress any key to continue or CTRL-C to abort.\n']);
-%     pause
+function varargout = mkdirSilent(output_path,varargin)
+% makes dir if doesn't exist, otherwise does nothing
 
 suppress_output = 1;
 
