@@ -28,6 +28,7 @@ fullSuite = fullSuite.selectIf(HasTag('autogen'));
 
 %% code coverage runner
 runner = TestRunner.withTextOutput;
+runner.addPlugin(CodeCoveragePlugin.forFolder(fullfile(ds.getConfig('ds_root_path'), 'functions')))
 runner.addPlugin(CodeCoveragePlugin.forPackage('ds'))
 
 %% Run Test Suite
