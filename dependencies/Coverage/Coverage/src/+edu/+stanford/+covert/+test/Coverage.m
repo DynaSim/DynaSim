@@ -53,6 +53,7 @@ classdef Coverage
                 end
                 
                 if numel(basePath) > numel(sources{i,1}) || ~strcmp(sources{i,1}(1:numel(basePath)), basePath)
+                    fprintf('Base Path:%s\nSource path:%s\n', basePath, sources{i,1})
                     throw(MException('Coverage:invalidPath', 'source path must be contained within base path'));
                 end
             end
