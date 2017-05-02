@@ -51,13 +51,13 @@ coverPercent = report.stats.lineRate;
 if isnan(coverPercent)
   coverPercent = 0;
 end
-coverPercentStr = sprintf('%.f', coverPercent);
+coverPercentStr = sprintf('%.f', coverPercent)
 
 %% make coverage svg
 filePath = '/home/erik/Dropbox/research/dsJenkinsBadge/coverage.svg';
 if exist(filePath, 'file')
   delete(filePath);
 end
-system(['python /home/erik/Dropbox/Programming/Python/universal_coverage_badge/__main__.py -percent ' coverPercentStr ' -o ' filePath])
+system(['python /home/erik/Dropbox/Programming/Python/universal_coverage_badge/__main__.py -percent ' coverPercentStr ' -o ' filePath]);
 
 exit(any([results.Failed]));
