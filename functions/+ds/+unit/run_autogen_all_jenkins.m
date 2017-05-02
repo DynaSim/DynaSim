@@ -35,6 +35,7 @@ try
 
   %% XML Coverage Output
   [~,ws] = system('echo $WORKSPACE');
+  ws = strtrim(ws);
   testCoverageDir = fullfile(ws, 'testCoverage');
   mkdirSilent(testCoverageDir)
   reportPath = fullfile(testCoverageDir, 'dsAllAutogenTestCoverageJenkins.xml');
