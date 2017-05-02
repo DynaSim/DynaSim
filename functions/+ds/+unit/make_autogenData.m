@@ -30,7 +30,7 @@ dsPlot(data, autogenOptions{:}); close gcf
 
 %% Izhikevich neuron with noisy drive
 eqns={
-  'C=100; vr=-60; vt=-40; k=.7; Iapp=70; ton=200; toff=800';
+  'C=100; vr=-60; vt=-40; k=.7; Iapp=70; ton=10; toff=20';
   'a=.03; b=-2; c=-50; d=100; vpeak=35';
   'dv/dt=(k*(v-vr)*(v-vt)-u+I(t))/C; v(0)=vr';
   'du/dt=a*(b*(v-vr)-u); u(0)=0';
@@ -132,7 +132,7 @@ s.connections(1).mechanism_list={'iGABAa'};
 s.connections(1).parameters={'tauD',10,'gSYN',.1,'netcon','ones(N_pre,N_post)'};
 s.connections(2).direction='E->I';
 s.connections(2).mechanism_list={'iAMPA'};
-s.connections(2).parameters={'tauD',2,'gSYN',.1,'netcon',ones(80,20)};
+s.connections(2).parameters={'tauD',2,'gSYN',.1,'netcon',ones(8,2)};
 
 data=dsSimulate(s, 'study_dir','demo_sPING_0', autogenOptions{:});
 dsPlot(data, autogenOptions{:}); close all
