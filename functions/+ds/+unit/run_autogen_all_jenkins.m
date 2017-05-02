@@ -9,6 +9,9 @@ import matlab.unittest.plugins.CodeCoveragePlugin
 import edu.stanford.covert.test.Coverage
 
 fprintf('Running from dir:%s\n',pwd);
+[~,ws] = system('echo $WORKSPACE');
+ws = strtrim(ws);
+fprintf('Workspace:%s\n',ws);
 
 %% Make Default Config
 ds.makeDefaultConfigJenkins;
@@ -34,8 +37,6 @@ try
   display(results);
 
   %% XML Coverage Output
-  [~,ws] = system('echo $WORKSPACE');
-  ws = strtrim(ws);
   testCoverageDir = fullfile(ws, 'testCoverage');
   mkdirSilent(testCoverageDir)
   reportPath = fullfile(testCoverageDir, 'dsAllAutogenTestCoverageJenkins.xml');
