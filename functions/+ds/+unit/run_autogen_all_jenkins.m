@@ -40,7 +40,7 @@ try
   testCoverageDir = fullfile(ws, 'testCoverage');
   mkdirSilent(testCoverageDir)
   reportPath = fullfile(testCoverageDir, 'dsAllAutogenTestCoverageJenkins.xml');
-  report = Coverage( fullfile(ws, 'functions') );
+  report = Coverage( fullfile(ws, 'functions'), ws );
   report.exportXML(reportPath);
 catch e
   disp(getReport(e,'extended'))
