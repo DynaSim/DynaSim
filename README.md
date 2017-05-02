@@ -1,6 +1,7 @@
 # DynaSim
 
-[![Build Status](https://www.dropbox.com/s/ncjgzvrwdd50p6o/icon.svg?dl=0)](https://www.dropbox.com/s/ncjgzvrwdd50p6o/icon.svg?dl=0)
+[![Build Status](https://www.dropbox.com/s/ncjgzvrwdd50p6o/icon.svg?dl=1)](https://www.dropbox.com/s/ncjgzvrwdd50p6o/icon.svg?dl=1)
+
 
 [![Join the chat at https://gitter.im/DynaSim/DynaSim](https://badges.gitter.im/DynaSim/DynaSim.svg)](https://gitter.im/DynaSim/DynaSim?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
