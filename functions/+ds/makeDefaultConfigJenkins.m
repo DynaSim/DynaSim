@@ -35,7 +35,7 @@ fid = fopen(fullfile(ds_temp_root_path, 'dsConfig.txt'), 'w');
 for thisVar = vars(:)'
   thisVar = thisVar{1};
   
-  fprintf(fid, '%s = %s\r\n', thisVar,eval(thisVar));
+  fprintf(fid, '%s = "%s"\r\n', thisVar,eval(thisVar));
 end
 
 fclose(fid);
