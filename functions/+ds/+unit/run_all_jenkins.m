@@ -41,23 +41,24 @@ try
   reportPath = fullfile(testCoverageDir, 'dsAllTestCoverageJenkins.xml');
   report = Coverage( fullfile(ws, 'functions'), ws );
   report.exportXML(reportPath);
+  
+  %% get coverage percentage
+  coverPercent = report.stats.lineRate;
+  if isnan(coverPercent)
+    coverPercent = 0;
+  end
+  coverPercentStr = sprintf('%.f', coverPercent);
+  fprintf('Test Coverage (%% of code lines): %s\n', coverPercentStr);
+
+  %% make coverage svg
+  filePath = '/home/erik/Dropbox/research/dsJenkinsBadge/coverage.svg';
+  if exist(filePath, 'file')
+    delete(filePath);
+  end
+  system(['python /home/erik/Dropbox/Programming/Python/universal_coverage_badge/__main__.py -percent ' coverPercentStr ' -o ' filePath]);
 catch e
   disp(getReport(e,'extended'))
   exit(1);
 end
-
-%% get coverage percentage
-coverPercent = report.stats.lineRate;
-if isnan(coverPercent)
-  coverPercent = 0;
-end
-coverPercentStr = sprintf('%.f', coverPercent)
-
-%% make coverage svg
-filePath = '/home/erik/Dropbox/research/dsJenkinsBadge/coverage.svg';
-if exist(filePath, 'file')
-  delete(filePath);
-end
-system(['python /home/erik/Dropbox/Programming/Python/universal_coverage_badge/__main__.py -percent ' coverPercentStr ' -o ' filePath]);
 
 exit(any([results.Failed]));
