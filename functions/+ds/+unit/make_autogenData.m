@@ -38,7 +38,7 @@ eqns={
   'I(t)=Iapp*(t>ton&t<toff)*(1+.5*rand)'; % define applied input using reserved variables 't' for time and 'dt' for fixed time step of numerical integration
   'monitor I';                            % indicate to store applied input during simulation
 };
-data=dsSimulate(eqns, 'tspan',[0 1000], 'study_dir','demo_izhikevich', autogenOptions{:});
+data=dsSimulate(eqns, 'tspan',[0 100], 'study_dir','demo_izhikevich', autogenOptions{:});
 dsPlot(data, autogenOptions{:}); close gcf
 
 %% RUNNING SETS OF Izhikevich SIMULATIONS
@@ -61,21 +61,21 @@ vary={
   };
 
 %% normal
-data=dsSimulate(eqns, 'tspan',[0 250], 'vary',vary, 'study_dir','demo_izhikevich_vary', autogenOptions{:});
+data=dsSimulate(eqns, 'tspan',[0 100], 'vary',vary, 'study_dir','demo_izhikevich_vary', autogenOptions{:});
 
 % TODO: fix dsPlot bug
 % dsPlot(data, autogenOptions{:}); close gcf
 
 %% parfor
-data=dsSimulate(eqns, 'tspan',[0 250], 'vary',vary, 'study_dir','demo_izhikevich_vary_parfor',...
+data=dsSimulate(eqns, 'tspan',[0 100], 'vary',vary, 'study_dir','demo_izhikevich_vary_parfor',...
   'parallel_flag',1, autogenOptions{:});
 
 %% parfor compile
-data=dsSimulate(eqns, 'tspan',[0 250], 'vary',vary, 'study_dir','demo_izhikevich_vary_parfor_compile',...
+data=dsSimulate(eqns, 'tspan',[0 100], 'vary',vary, 'study_dir','demo_izhikevich_vary_parfor_compile',...
   'parallel_flag',1, 'compile_flag',1, autogenOptions{:});
 
 %% compile
-data=dsSimulate(eqns, 'tspan',[0 250], 'vary',vary, 'study_dir','demo_izhikevich_vary_compile',...
+data=dsSimulate(eqns, 'tspan',[0 100], 'vary',vary, 'study_dir','demo_izhikevich_vary_compile',...
   'compile_flag',1, autogenOptions{:});
 
 %% Hodgkin-Huxley neuron equations (without predefined mechanisms)
@@ -103,7 +103,7 @@ data=dsSimulate('dv/dt=10+@current/Cm; Cm=1; v(0)=-65; {iNa,iK}', 'study_dir','d
 
 % Example of a bursting neuron model using three active current mechanisms:
 eqns='dv/dt=5+@current; {iNaF,iKDR,iM}; gNaF=100; gKDR=5; gM=1.5; v(0)=-70';
-data=dsSimulate(eqns, 'tspan',[0 200], 'study_dir','demo_hh_3', autogenOptions{:});
+data=dsSimulate(eqns, 'tspan',[0 100], 'study_dir','demo_hh_3', autogenOptions{:});
 dsPlot(data, autogenOptions{:}); close gcf
 
 %% Sparse Pyramidal-Interneuron-Network-Gamma (sPING)
@@ -118,12 +118,12 @@ eqns={
 % create DynaSim specification structure
 s=[];
 s.populations(1).name='E';
-s.populations(1).size=80;
+s.populations(1).size=8;
 s.populations(1).equations=eqns;
 s.populations(1).mechanism_list={'iNa','iK'};
 s.populations(1).parameters={'Iapp',5,'gNa',120,'gK',36,'noise',40};
 s.populations(2).name='I';
-s.populations(2).size=20;
+s.populations(2).size=2;
 s.populations(2).equations=eqns;
 s.populations(2).mechanism_list={'iNa','iK'};
 s.populations(2).parameters={'Iapp',0,'gNa',120,'gK',36,'noise',40};
@@ -272,7 +272,7 @@ vary={'','I',[0:10:30]};
 
 dsSimulate(eqns,'vary',vary, 'study_dir',study_dir,'save_data_flag',1,...
   'cluster_flag',1, 'qsub_mode','array', 'one_solve_file_flag',1,...
-  'tspan',[0 500], 'dt',0.01, 'solver','euler', 'downsample_factor', 100,...
+  'tspan',[0 100], 'dt',0.01, 'solver','euler', 'downsample_factor', 100,...
   'plot_functions',{@dsPlot}, 'plot_options',{{'format', 'jpg', 'visible', 'off'}},...
   autogenOptions{:});
 
