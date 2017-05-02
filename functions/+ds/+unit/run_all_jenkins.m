@@ -1,6 +1,5 @@
-%% Run all autogen tests
-% result_localfn = runtests('ds.unit.test_autogen_all_localfn');
-% result = runtests('ds.unit.test_autogen_all');
+%% Run all tests
+% excluding query tests
 
 import matlab.unittest.TestSuite
 import matlab.unittest.TestRunner
@@ -20,11 +19,10 @@ ds.makeDefaultConfigJenkins;
 %% Make Test Suite
 fullSuite = TestSuite.fromPackage('ds.unit');
 fullSuite = fullSuite.selectIf(~HasTag('query'));
-fullSuite = fullSuite.selectIf(HasTag('autogen'));
 
 %% code coverage runner
 % runner = TestRunner.withTextOutput;
-% runner.addPlugin(CodeCoveragePlugin.forFolder(fullfile(ds_root_path, 'functions')))
+% runner.addPlugin(CodeCoveragePlugin.forFolder(fullfile(ds.getConfig('ds_root_path'), 'functions')))
 % runner.addPlugin(CodeCoveragePlugin.forPackage('ds'))
 
 %% Run Test Suite
@@ -40,7 +38,7 @@ try
   %% XML Coverage Output
   testCoverageDir = fullfile(ws, 'testCoverage');
   mkdirSilent(testCoverageDir)
-  reportPath = fullfile(testCoverageDir, 'dsAllAutogenTestCoverageJenkins.xml');
+  reportPath = fullfile(testCoverageDir, 'dsAllTestCoverageJenkins.xml');
   report = Coverage( fullfile(ws, 'functions'), ws );
   report.exportXML(reportPath);
 catch e
