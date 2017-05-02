@@ -8,19 +8,8 @@ import matlab.unittest.selectors.HasTag
 import matlab.unittest.plugins.CodeCoveragePlugin
 import edu.stanford.covert.test.Coverage
 
-%% Rename autogen_newSave to autogen
-finalDir = fullfile(ds.getConfig('ds_unitTestData_path'), 'autogen');
-if ~exist(finalDir, 'dir')
-  newDir = fullfile(ds.getConfig('ds_unitTestData_path'), 'autogen_newSave');
-  movefile(newDir, finalDir);
-end
-
-%% Rename autogenDirs_newSave to autogenDirs
-finalDir = fullfile(ds.getConfig('ds_unitTestData_path'), 'autogenDirs');
-newDir = fullfile(ds.getConfig('ds_unitTestData_path'), 'autogenDirs_newSave');
-if ~exist(finalDir, 'dir') && exist(newDir, 'dir')
-  movefile(newDir, finalDir);
-end
+%% Make Default Config
+ds.makeDefaultConfigJenkins;
 
 %% Make Test Suite
 fullSuite = TestSuite.fromPackage('ds.unit');
@@ -29,7 +18,7 @@ fullSuite = fullSuite.selectIf(HasTag('autogen'));
 
 %% code coverage runner
 % runner = TestRunner.withTextOutput;
-% runner.addPlugin(CodeCoveragePlugin.forFolder(fullfile(ds.getConfig('ds_root_path'), 'functions')))
+% runner.addPlugin(CodeCoveragePlugin.forFolder(fullfile(ds_root_path, 'functions')))
 % runner.addPlugin(CodeCoveragePlugin.forPackage('ds'))
 
 %% Run Test Suite
@@ -43,10 +32,10 @@ try
   display(results);
 
   %% XML Coverage Output
-  testCoverageDir = fullfile(ds.getConfig('ds_root_path'), 'testCoverage');
+  testCoverageDir = fullfile(pwd, 'testCoverage');
   mkdirSilent(testCoverageDir)
   reportPath = fullfile(testCoverageDir, 'dsAllAutogenTestCoverageJenkins.xml');
-  report = Coverage( fullfile(ds.getConfig('ds_root_path'), 'functions') );
+  report = Coverage( fullfile(pwd, 'functions') );
   report.exportXML(reportPath);
 catch e
   disp(getReport(e,'extended'))
