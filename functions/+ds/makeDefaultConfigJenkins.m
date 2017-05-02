@@ -20,8 +20,7 @@ demos_path = fullfile(ds_data_path, 'demos');
 
 ds_temp_root_path = fileparts(fileparts(which('dsSimulate')));
 
-[~,ds_root_path] = system('echo $ds');
-ds_root_path = strip(ds_root_path);
+ds_root_path = getPath('ds');
 
 demos_zips_path = fullfile(ds_root_path, 'demos','demo_zips');
 
