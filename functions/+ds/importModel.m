@@ -50,7 +50,7 @@ end
 %% 2.0 Convert to DynaSim model structure
 % if DynaSim .mech, .eqns, .txt:
   % parse model equations
-  [model,map]=ds.parseModelEquations(source,'namespace',options.namespace);
+  [model,map]=ds.parseModelEquations(source,'namespace',options.namespace, varargin{:});
   
 % if DynaSim .mat: load MAT-file
 % ... load(source) ...
@@ -193,7 +193,7 @@ mget(f,modelfile,target);
 % parse mechanism file
 tempfile = fullfile(target,modelfile);
 source=tempfile;
-[model,map]=ds.parseModelEquations(source);
+[model,map]=ds.parseModelEquations(source, varargin{:});
 % if isequal(ext,'.json')
 %   [spec,jsonspec] = json2spec(tempfile);
 %   spec.model_uid=ModelID;

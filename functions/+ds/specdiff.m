@@ -103,7 +103,6 @@ clear val1 val2 pop_name1 pop_name2 propert1 property2
 % Build specs structure. 
 % Connection name x entry x spec1 or spec2
 if ~isempty(val)
-    
     nd = nDDict;
     nd = nd.importLinearData(val,pop_names,properties,specID);
     nd.axis(1).name = 'Connections';
@@ -118,15 +117,13 @@ if ~isempty(val)
     if nargout > 1; conn_diff = return_comparison(nd); end
     
 else
-    
-    conn_diff = struct();
-    
+    conn_diff = struct(); 
 end
 
+end % naub fn
 
-end
 
-
+%% Local Fn
 function [val,pop_name,properties] = extract_pop_lists(s)
     % This function builds a huge table describing the properties of all of
     % the mechanisms in each population
@@ -181,7 +178,6 @@ end
 
 
 function out = mycompare(x,y)
-
     if isempty(x) && isempty(y)
         out = -3;                   % Missing from both
     elseif isempty(x) && ~isempty(y)
@@ -211,7 +207,6 @@ end
 
 
 function fprintf_cells(string,cells2print)
-
     if ~isempty(cells2print)
         cells2print = cellfunu(@(x) [x ' '], cells2print);
         fprintf([string ' ' cells2print{:} '\n']);
@@ -237,7 +232,6 @@ end
 
 
 function run_comparison(nd)
-
     % Now, we start doing the actual comparison between the two specs. This
     % first section looks at the populations in both spec1 and spec2, and
     % identifies those that mutually present. 

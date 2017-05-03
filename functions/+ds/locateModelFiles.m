@@ -50,7 +50,7 @@ elseif isstruct(input)
     m={input.connections.mechanism_list};
     m=unique([m{:}],'stable');
     mechanism_list=cat(2,mechanism_list,m);
-  end  
+  end
 end
 
 % remove @ pointers from mechanism identifiers

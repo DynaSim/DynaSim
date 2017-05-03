@@ -10,7 +10,7 @@ function varOutput = getConfig(query)
   end
   
   fid = fopen(dsVarsFile);
-  dsVars = textscan(fid, '%s = %s');
+  dsVars = textscan(fid, '%s = %q');
   fclose(fid);
   
   varCell = dsVars{2}(~cellfun(@isempty,strfind(dsVars{1}, query)));
@@ -19,7 +19,7 @@ function varOutput = getConfig(query)
     varOutput = varCell{1}; % eval variable string as variable
   else
     varOutput = [];
-    if isempty(varOutput); warning('Requested path not found. dsVars.txt is possibly corrupt. Try deleting dsVars.txt and running ds.makeDefaultConfig()');
+    if isempty(varOutput); warning('Requested path not found. dsConfig.txt is possibly corrupt. Try deleting dsConfig.txt and running ds.makeDefaultConfig()');
   end
     
 end

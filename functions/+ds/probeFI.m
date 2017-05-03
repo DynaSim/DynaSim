@@ -20,7 +20,7 @@ options=ds.checkOptions(varargin,{...
   'onset',0,[],...
   },false);
 
-model=ds.checkModel(model);
+model=ds.checkModel(model, varargin{:});
 
 npops=length(model.specification.populations);
 modifications=cell(npops,3);

@@ -1,4 +1,4 @@
-function parent = getParentNamespace(namespace)
+function parent = getParentNamespace(namespace, varargin)
 %GETPARENTNAMESPACE - determine parent namespace from namespace specified in namespace
 %
 % Usage:
@@ -20,6 +20,16 @@ function parent = getParentNamespace(namespace)
 %
 % See also: ds.propagateNamespaces
 
+%% auto_gen_test_data_flag argin
+options = ds.checkOptions(varargin,{'auto_gen_test_data_flag',0,{0,1}},false);
+if options.auto_gen_test_data_flag
+  varargs = varargin;
+  varargs{find(strcmp(varargs, 'auto_gen_test_data_flag'))+1} = 0;
+  varargs(end+1:end+2) = {'unit_test_flag',1};
+  argin = [{namespace}, varargs]; % specific to this function
+end
+
+
 if isempty(namespace) && isnumeric(namespace)
   namespace='';
 end
@@ -31,6 +41,7 @@ if ~isempty(namespace)
 else
   parts=[];
 end
+
 switch length(parts)
   case 0                          % ''
     parent='global';
@@ -49,4 +60,11 @@ switch length(parts)
     for i=1:length(parts)-1
       parent=[parent parts{i} '_'];
     end
+end
+
+%% auto_gen_test_data_flag argout
+if options.auto_gen_test_data_flag
+  argout = {parent}; % specific to this function
+  
+  ds.unit.saveAutoGenTestData(argin, argout);
 end

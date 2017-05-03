@@ -11,7 +11,7 @@ function keyval = options2Keyval(options)
 
 % Grab the field names
 fields = fieldnames(options);
-keyval   = {};
+keyval = {};
 
 % Loop over the field names, grab the value, and append both to the output
 % list of key/value pairs

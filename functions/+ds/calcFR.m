@@ -1,4 +1,4 @@
-function data = calcFR(data,varargin)
+function data = calcFR(data, varargin)
 %CALCFR - Calculate firing rage for DynaSim data
 %
 % Usage:
@@ -46,11 +46,20 @@ options=ds.checkOptions(varargin,{...
   'variable',[],[],...
   'time_limits',[-inf inf],[],...
   'threshold',1e-5,[],... % slightly above zero in case variable is point process *_spikes {0,1}
-  'bin_size',.05,[],... 
+  'bin_size',.05,[],...
   'bin_shift',.01,[],...
   'exclude_data_flag',0,{0,1},...
   'output_suffix','',[],...
+  'auto_gen_test_data_flag',0,{0,1},...
   },false);
+
+%% auto_gen_test_data_flag argin
+if options.auto_gen_test_data_flag
+  varargs = varargin;
+  varargs{find(strcmp(varargs, 'auto_gen_test_data_flag'))+1} = 0;
+  varargs(end+1:end+2) = {'unit_test_flag',1};
+  argin = [{data}, varargs]; % specific to this function
+end
 
 data = ds.checkData(data, varargin{:});
 % note: calling ds.checkData() at beginning enables analysis function to
@@ -108,7 +117,7 @@ else
 end
 
 %% 2.0 set list of variables to process as cell array of strings
-options.variable=ds.selectVariables(data(1).labels,options.variable);
+options.variable=ds.selectVariables(data(1).labels,options.variable, varargin{:});
 
 %% 3.0 calculate firing rates for each variable
 if ~isfield(data,'results')
@@ -165,7 +174,7 @@ for v=1:length(options.variable)
   % add firing rates to data structure
   data.([var '_FR' options.output_suffix])=FR;
   data.([var '_spike_times' options.output_suffix])=spike_times;
-  if ~ismember([var '_FR'],data.results)  
+  if ~ismember([var '_FR'],data.results)
     data.results{end+1}=[var '_FR' options.output_suffix];
     data.results{end+1}=[var '_spike_times' options.output_suffix];
   end
@@ -179,4 +188,11 @@ if options.exclude_data_flag
   for l=1:length(data.labels)
     data=rmfield(data,data.labels{l});
   end
+end
+
+%% auto_gen_test_data_flag argout
+if options.auto_gen_test_data_flag
+  argout = {data}; % specific to this function
+  
+  ds.unit.saveAutoGenTestData(argin, argout);
 end

@@ -27,6 +27,7 @@ classdef template < matlab.unittest.TestCase
   %% Test Method Block
 %   methods (Test,  TestTags = {'Tag'})
 %     function test1(testCase)
+%       testCase.verifyEqual(testOut, expectedOut);
 %     end
     
 %     function parametricTest1(testCase, type, level)

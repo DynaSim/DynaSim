@@ -50,7 +50,7 @@ options=ds.checkOptions(varargin,{...
   'remove_connections_flag',1,[],...
   },false);
 
-model=ds.checkModel(model);
+model=ds.checkModel(model, varargin{:});
 
 % check that amplitude=0 is present (for RMP calculation)
 if ~ismember(0,options.amplitudes)

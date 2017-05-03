@@ -52,7 +52,7 @@ end
 
 % load data if input is not a DynaSim data structure
 if ~(isstruct(data) && isfield(data,'time'))
-  data=ds.importData(data,varargin{:}); % load data
+  data=dsImport(data,varargin{:}); % load data
 end
 
 % confirm function handle

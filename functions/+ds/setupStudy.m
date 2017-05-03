@@ -25,23 +25,30 @@ if options.verbose_flag
 end
 
 if options.save_data_flag || options.save_results_flag || options.parallel_flag
-                                                            % If in parallel mode, need to calculate
-                                                            % studyinfo regardless of whether or not
-                                                            % are saving data.
+  % If in parallel mode, need to calculate
+  % studyinfo regardless of whether or not
+  % are saving data.
+  
   % set default study_dir if necessary
   if isempty(options.study_dir)
-    % format: <study_dir> = <project_dir>/<prefix>_<timestamp>
-    options.study_dir=fullfile(options.project_dir,[options.prefix '_' datestr(now,'yyyymmddHHMMSS')]);
-  end
-  
-  % create study_dir if it doesn't exist
-  if ~isdir(fullfile('.',options.study_dir))
-    fprintf('creating study directory: %s\n',options.study_dir);
-    mkdir(options.study_dir);
+    if ~options.auto_gen_test_data_flag && ~options.unit_test_flag
+      % format: <study_dir> = <project_dir>/<prefix>_<timestamp>
+      options.study_dir=fullfile(options.project_dir,[options.prefix '_' datestr(now,'yyyymmddHHMMSS')]);
+    else
+      options.study_dir=fullfile(options.project_dir,[options.prefix '_unitTest']);
+    end
   end
   
   % make sure we have the full path and access rights
   options.study_dir = getAbsolutePath(options.study_dir);
+  
+  % create study_dir if it doesn't exist
+  if ~isdir(options.study_dir)
+    if options.verbose_flag
+      fprintf('Creating study directory: %s\n',options.study_dir);
+    end
+    mkdir(options.study_dir);
+  end
   
   % set solve_file name for this study
   if isempty(options.solve_file)
@@ -60,7 +67,7 @@ if options.save_data_flag || options.save_results_flag || options.parallel_flag
   % initialize studyinfo if not already initialized
   if ischar(options.study_dir) && isdir(options.study_dir) && exist(fullfile(options.study_dir,'studyinfo.mat'),'file')
     % studyinfo file already exists
-    studyinfo=ds.checkStudyinfo(options.study_dir,'process_id',process_id);
+    studyinfo=ds.checkStudyinfo(options.study_dir,'process_id',process_id, varargin{:});
     orig_studyinfo=studyinfo;
   else
     orig_studyinfo=[];
@@ -74,7 +81,7 @@ if options.save_data_flag || options.save_results_flag || options.parallel_flag
       studyinfo=[];
     end
     
-    studyinfo=ds.checkStudyinfo(studyinfo,'process_id',process_id); % auto-fill all fields
+    studyinfo=ds.checkStudyinfo(studyinfo,'process_id',process_id, varargin{:}); % auto-fill all fields
   end
   
   % set basic metadata for this study
@@ -96,7 +103,7 @@ if options.save_data_flag || options.save_results_flag || options.parallel_flag
   % create study_dir if it doesn't exist
   if ~isdir(options.study_dir)
     if options.verbose_flag
-      fprintf('creating study directory: %s\n',options.study_dir);
+      fprintf('Creating study directory: %s\n',options.study_dir);
     end
     mkdir(options.study_dir);
   end
@@ -114,7 +121,7 @@ if options.save_data_flag || options.save_results_flag || options.parallel_flag
   data_dir=fullfile(options.study_dir,'data');
   if ~isdir(data_dir)
     if options.verbose_flag
-      fprintf('creating data directory: %s\n',data_dir);
+      fprintf('Creating data directory: %s\n',data_dir);
     end
     mkdir(data_dir);
   end
@@ -124,7 +131,7 @@ if options.save_data_flag || options.save_results_flag || options.parallel_flag
     plot_dir=fullfile(options.study_dir,'plots');
     if ~isdir(plot_dir)
       if options.verbose_flag
-        fprintf('creating plot directory: %s\n',plot_dir);
+        fprintf('Creating plot directory: %s\n',plot_dir);
       end
       mkdir(plot_dir);
     end
@@ -154,7 +161,7 @@ if options.save_data_flag || options.save_results_flag || options.parallel_flag
       for kk=1:length(options.plot_functions)
         studyinfo.simulations(k).result_functions{end+1}=options.plot_functions{kk};
         studyinfo.simulations(k).result_options{end+1}=options.plot_options{kk};
-        fname=[options.prefix '_sim' num2str(k) '_plot' num2str(kk) '_' func2str(options.plot_functions{kk})]; 
+        fname=[options.prefix '_sim' num2str(k) '_plot' num2str(kk) '_' func2str(options.plot_functions{kk})];
         % note: extension will depend on output format (jpg,png,eps,svg)
         % and be set in dsAnalyze().
         studyinfo.simulations(k).result_files{end+1}=fullfile(plot_dir,fname);
@@ -182,7 +189,7 @@ else
   
   if ~isdir(options.study_dir) % in case user provides different location to save solvers
     if options.verbose_flag
-      fprintf('creating study directory: %s\n',options.study_dir);
+      fprintf('Creating study directory: %s\n',options.study_dir);
     end
     mkdir(options.study_dir);
   end

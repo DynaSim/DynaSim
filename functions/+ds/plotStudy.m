@@ -31,7 +31,7 @@ function [handles, hsp, h2] = plotStudy(data,myplot_handle,varargin)
 % Dependencies:
 %     Uses subplot_grid.
 
-% data=ds.checkData(data, varargin{:});
+% data=ds.checkData(data);
 handles=[];
 
 options=ds.checkOptions(varargin,{...

@@ -26,7 +26,7 @@ end
 
 if isstruct(studyinfo) && isfield(studyinfo,'study_dir')
   % retrieve most up-to-date studyinfo structure from studyinfo.mat file
-  studyinfo=ds.checkStudyinfo(studyinfo.study_dir);
+  studyinfo=ds.checkStudyinfo(studyinfo.study_dir, varargin{:});
   if exist('study_dir','var')
     studyinfo.study_dir=study_dir;
   end

@@ -1,4 +1,4 @@
-function model = checkModel(model)
+function model = checkModel(model, varargin)
 %CHECKMODEL - Standardize model structure and auto-populate missing fields
 %
 % Usage:
@@ -67,6 +67,15 @@ function model = checkModel(model)
 %
 % see also: ds.generateModel, ds.checkSpecification, ds.checkData
 
+%% auto_gen_test_data_flag argin
+options = ds.checkOptions(varargin,{'auto_gen_test_data_flag',0,{0,1}},false);
+if options.auto_gen_test_data_flag
+  varargs = varargin;
+  varargs{find(strcmp(varargs, 'auto_gen_test_data_flag'))+1} = 0;
+  varargs(end+1:end+2) = {'unit_test_flag',1};
+  argin = [{model}, varargs]; % specific to this function
+end
+
 field_order={'parameters','fixed_variables','functions','monitors',...
   'state_variables','ODEs','ICs','conditionals','linkers','comments',...
   'specification','namespaces'};
@@ -91,6 +100,13 @@ end
 
 % check back compatibility
 model=backward_compatibility(model);
+
+%% auto_gen_test_data_flag argout
+if options.auto_gen_test_data_flag
+  argout = {model}; % specific to this function
+  
+  ds.unit.saveAutoGenTestData(argin, argout);
+end
 
 % % auto-populate missing data
 % for i=1:length(field_order)
@@ -126,7 +142,7 @@ for type_index=1:length(target_types)
     expressions=struct2cell(s);
     % loop over target expressions from which to eliminate internal function calls
     updated=0;
-    for i=1:length(expressions)    
+    for i=1:length(expressions)
       if isempty(expressions{i})
         continue;
       end
@@ -144,7 +160,7 @@ for type_index=1:length(target_types)
         if ~isempty(regexp(expressions{i},'\((\w+_)?Npost,1\)','once'))
           expressions{i}=regexprep(expressions{i},'\((\w+_)Npost,1\)','\(1,$Npost\)');
         end
-      end      
+      end
     end
     if updated
       % update model with expressions that have parameter values in them

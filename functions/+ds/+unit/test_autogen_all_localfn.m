@@ -1,6 +1,6 @@
 classdef test_autogen_all_localfn < matlab.unittest.TestCase
   properties
-    testDataPath = ds.getConfig('ds_testData_path');
+    unitTestDataPath = ds.getConfig('ds_unitTestData_path');
   end
   
   properties (TestParameter)
@@ -9,7 +9,7 @@ classdef test_autogen_all_localfn < matlab.unittest.TestCase
   
   methods (Test,  TestTags = {'autogen'})
     function testCellIn(testCase, dataFileName)
-      args = load(fullfile(testCase.testDataPath, 'autogen', dataFileName));
+      args = load(fullfile(testCase.unitTestDataPath, 'autogen', dataFileName));
       expectedOut = args.argout;
       
       % get fn and local fn names
@@ -22,16 +22,16 @@ classdef test_autogen_all_localfn < matlab.unittest.TestCase
       
       % Get local function handles from fn
       fnHandle = str2func(fnName);
-      localFnHandles = feval(fnHandle,[]);
+      localFnHandles = feval(fnHandle);
       localFnStrs = cellfun(@func2str,localFnHandles, 'uni',false);
       
       % Get this local fn handle
       localFnHandle = localFnHandles{strcmp(localFnStrs, localfFnName)};
       
-      [actualOut{1:length(expectedOut)}] = feval(localFnHandle, args.argin{:});
+      [testOut{1:length(expectedOut)}] = feval(localFnHandle, args.argin{:});
       
       for ind = 1:length(expectedOut)
-        testCase.verifyEqual(expectedOut{ind}, actualOut{ind});
+        testCase.verifyEqual(testOut{ind}, expectedOut{ind});
       end
       
     end

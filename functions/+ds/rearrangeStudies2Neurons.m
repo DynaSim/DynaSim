@@ -36,7 +36,7 @@ data = ds.checkData(data, varargin{:});
 
 %% Average all cells together if necessary
 
-data = ds.calcAverages(data);
+data = ds.calcAverages(data, varargin{:});
 
 %% Compress data structure array into a single structure
 

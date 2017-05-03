@@ -23,28 +23,28 @@ function [output,modifications] = applyModifications(model, modifications, varar
 % Examples:
 %   - modifying population size and parameters:
 %       modifications={'E','size',5; 'E','gNa',120};
-%       model=ds.applyModifications(model,modifications,varargin{:});
+%       model=ds.applyModifications(model,modifications);
 %
 %   - modifying mechanism_list:
 %       m=ds.applyModifications('dv/dt=10+@current; {iNa,iK}',...
-%                            {'pop1','mechanism_list','-iNa'},varargin{:});
+%                            {'pop1','mechanism_list','-iNa'});
 %       m.populations.mechanism_list
 %       m=ds.applyModifications('dv/dt=10+@current; {iNa,iK}',...
-%                            {'pop1','mechanism_list','+iCa'},varargin{:});
+%                            {'pop1','mechanism_list','+iCa'});
 %       m.populations.mechanism_list
 %       m=ds.applyModifications('dv/dt=10+@current; {iNa,iK}',...
-%                            {'pop1','mechanism_list','+(iCa,iCan,CaBuffer)'},varargin{:});
+%                            {'pop1','mechanism_list','+(iCa,iCan,CaBuffer)'});
 %       m.populations.mechanism_list
 %
 %   - modifying equations (using special "cat()" operator or direct substitution)
 %       m=ds.applyModifications('dv/dt=10+@current; {iNa,iK}',...
-%                            {'pop1','equations','cat(dv/dt,+I)'},varargin{:});
+%                            {'pop1','equations','cat(dv/dt,+I)'});
 %       m.populations.equations
 %       m=ds.applyModifications('dv/dt=I(t)+@current; I(t)=10; {iNa,iK}',...
-%                            {'pop1','equations','cat(I(t),+sin(2*pi*t))'},varargin{:});
+%                            {'pop1','equations','cat(I(t),+sin(2*pi*t))'});
 %       m.populations.equations
 %       m=ds.applyModifications('dv/dt=I(t)+@current; I(t)=10; {iNa,iK}',...
-%                            {'pop1','equations','dv/dt=10+@current'},varargin{:});
+%                            {'pop1','equations','dv/dt=10+@current'});
 %       m.populations.equations
 %       m.populations.mechanism_list
 %
@@ -55,29 +55,29 @@ function [output,modifications] = applyModifications(model, modifications, varar
 %       similarly: 'FUNCTIONn' and 'FUNCTION'
 %
 %       m=ds.applyModifications('dv/dt=10+@current; {iNa,iK}',...
-%                            {'pop1','equations','cat(ODE,+I)'},varargin{:});
+%                            {'pop1','equations','cat(ODE,+I)'});
 %       m.populations.equations
 %       m=ds.applyModifications('dv/dt=10+@current; du/dt=-u; {iNa,iK}',...
-%                            {'pop1','equations','cat(ODE2,+I)'},varargin{:});
+%                            {'pop1','equations','cat(ODE2,+I)'});
 %       m.populations.equations
 %       m=ds.applyModifications('dv/dt=I(t)+@current; I(t)=10; {iNa,iK}',...
-%                            {'pop1','equations','cat(FUNCTION,+sin(2*pi*t))'},varargin{:});
+%                            {'pop1','equations','cat(FUNCTION,+sin(2*pi*t))'});
 %       m.populations.equations
 %
 % See also: ds.generateModel, dsSimulate, ds.vary2Modifications
 
 %% localfn output
 if ~nargin
-  output = localfunctions;
+  output = localfunctions; % output var name specific to this fn
   return
 end
 
 %% auto_gen_test_data_flag argin
 options = ds.checkOptions(varargin,{'auto_gen_test_data_flag',0,{0,1}},false);
 if options.auto_gen_test_data_flag
-  % specific to this function
   varargs = varargin;
   varargs{find(strcmp(varargs, 'auto_gen_test_data_flag'))+1} = 0;
+  varargs(end+1:end+2) = {'unit_test_flag',1};
   argin = [{model},{modifications}, varargs]; % specific to this function
 end
 
@@ -98,9 +98,9 @@ end
 
 % check specification
 if ismodel
-  specification=ds.checkSpecification(model.specification);
+  specification=ds.checkSpecification(model.specification, varargin{:});
 else
-  specification=ds.checkSpecification(model);
+  specification=ds.checkSpecification(model, varargin{:});
 end
 
 % update specification with whatever is in modifications
@@ -121,7 +121,7 @@ end
 if options.auto_gen_test_data_flag
   argout = {output, modifications}; % specific to this function
   
-  ds.saveAutoGenTestData(argin, argout);
+  ds.unit.saveAutoGenTestData(argin, argout);
 end
 
 end
@@ -136,10 +136,10 @@ function modifications = standardize_modifications(modifications,specification, 
 %% auto_gen_test_data_flag argin
 options = ds.checkOptions(varargin,{'auto_gen_test_data_flag',0,{0,1}},false);
 if options.auto_gen_test_data_flag
-  % specific to this function
   varargs = varargin;
   varargs{find(strcmp(varargs, 'auto_gen_test_data_flag'))+1} = 0;
-  argin = [{modifications},{specification}, varargs];
+  varargs(end+1:end+2) = {'unit_test_flag',1};
+  argin = [{modifications},{specification}, varargs]; % specific to this function
 end
 
 if isstruct(modifications)
@@ -209,7 +209,7 @@ end
 if options.auto_gen_test_data_flag
   argout = {modifications}; % specific to this function
   
-  ds.saveAutoGenTestDataLocalFn(argin, argout); % localfn
+  ds.unit.saveAutoGenTestDataLocalFn(argin, argout); % localfn
 end
 
 end
@@ -219,10 +219,10 @@ function spec = modify_specification(spec,mods, varargin)
 %% auto_gen_test_data_flag argin
 options = ds.checkOptions(varargin,{'auto_gen_test_data_flag',0,{0,1}},false);
 if options.auto_gen_test_data_flag
-  % specific to this function
   varargs = varargin;
   varargs{find(strcmp(varargs, 'auto_gen_test_data_flag'))+1} = 0;
-  argin = [{spec},{mods}, varargs];
+  varargs(end+1:end+2) = {'unit_test_flag',1};
+  argin = [{spec},{mods}, varargs]; % specific to this function
 end
 
 precision=8; % number of digits allowed for user-supplied values
@@ -381,10 +381,9 @@ end
 
 %% auto_gen_test_data_flag argout
 if options.auto_gen_test_data_flag
-  % specific to this function
-  argout = {spec};
+  argout = {spec}; % specific to this function
   
-  ds.saveAutoGenTestDataLocalFn(argin, argout); % localfn
+  ds.unit.saveAutoGenTestDataLocalFn(argin, argout); % localfn
 end
 
 end

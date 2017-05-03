@@ -44,7 +44,15 @@ function [ODEFUN,IC,elem_names] = dynasim2odefun(model, varargin)
 
 options=ds.checkOptions(varargin,{...
   'odefun_output','func_handle',{'func_handle','anonymous_func_string','func_body'},...
+  'auto_gen_test_data_flag',0,{0,1},...
   },false);
+  
+if options.auto_gen_test_data_flag
+  varargs = varargin;
+  varargs{find(strcmp(varargs, 'auto_gen_test_data_flag'))+1} = 0;
+  varargs(end+1:end+2) = {'unit_test_flag',1};
+  argin = [{model}, varargs]; % specific to this function
+end
 
 % evaluate params -> fixed_vars -> funcs
 types={'parameters','fixed_variables','functions'};
@@ -109,7 +117,7 @@ ODEs=[ODEs{:}]; % concatenate ODEs into a single string
 
 % substitute in generic state vector X
 for i=1:num_vars
-  ODEs=ds.strrep(ODEs,old_vars{i},new_vars{i});
+  ODEs=ds.strrep(ODEs,old_vars{i},new_vars{i}, '','', varargin{:});
 end
 
 % prepare outputs (function handle string, ICs, and element names for
@@ -131,3 +139,10 @@ switch options.odefun_output
 end
 
 IC=cat(2,all_ICs{:})';
+
+%% auto_gen_test_data_flag argout
+if options.auto_gen_test_data_flag
+  argout = {ODEFUN, IC, elem_names}; % specific to this function
+  
+  ds.unit.saveAutoGenTestData(argin, argout);
+end

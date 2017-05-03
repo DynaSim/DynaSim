@@ -1,4 +1,4 @@
-function studyinfo = createBatch(base_model,modifications_set,varargin)
+function [studyinfo, cmd] = createBatch(base_model,modifications_set,varargin)
 %CREATEBATCH - create and submit jobs to run sets of simulations or analyses.
 %
 % Usage:
@@ -46,8 +46,19 @@ options=ds.checkOptions(varargin,{...
   'one_solve_file_flag',0,{0,1},... % use only 1 solve file of each type, but can't vary mechs yet
   'solver','rk4',{'euler','rk1','rk2','rk4','modified_euler','rungekutta','rk','ode23','ode45',...
     'ode1','ode2','ode3','ode4','ode5','ode8','ode113','ode15s','ode23s','ode23t','ode23tb'},... % DynaSim and built-in Matlab solvers
+  'auto_gen_test_data_flag',0,{0,1},...
+  'unit_test_flag',0,{0,1},...
   },false);
 
+%% auto_gen_test_data_flag argin
+if options.auto_gen_test_data_flag
+  varargs = varargin;
+  varargs{find(strcmp(varargs, 'auto_gen_test_data_flag'))+1} = 0;
+  varargs(end+1:end+2) = {'unit_test_flag',1};
+  argin = [{base_model},{modifications_set}, varargs]; % specific to this function
+end
+
+%% main fn
 % Set up studyinfo structure, study directory and output file names
 %[studyinfo,options.simulator_options]=ds.setupStudy(base_model,modifications_set,options.simulator_options);
 [studyinfo,options.simulator_options]=ds.setupStudy(base_model,'modifications_set',modifications_set,'simulator_options',options.simulator_options,'process_id',options.process_id);
@@ -62,7 +73,7 @@ num_simulations=length(modifications_set);
       fprintf('Study already finished. Not creating new batch.\n');
     end
     
-    studyinfo=ds.checkStudyinfo(studyinfo.study_dir,'process_id',options.process_id);
+    studyinfo=ds.checkStudyinfo(studyinfo.study_dir,'process_id',options.process_id, varargin{:});
     
     return;
   end
@@ -108,7 +119,7 @@ studyinfo.base_solve_file=solve_file;
 
 % set name of batch_dir for this study
 % get study-specific timestamp
-timestamp = datestr(studyinfo.study_id,'yyyymmddHHMMSS');
+% timestamp = datestr(studyinfo.study_id,'yyyymmddHHMMSS');
 
 % get home directory of the current user
 [o,home]=system('echo $HOME');
@@ -116,8 +127,13 @@ timestamp = datestr(studyinfo.study_id,'yyyymmddHHMMSS');
 % create batch directory
 [study_dir_path,study_dir_name,study_dir_suffix]=fileparts(studyinfo.study_dir);
 study_dir_name=[study_dir_name study_dir_suffix];
-batch_dir = fullfile(strtrim(home),'batchdirs',study_dir_name);
-%batch_dir = fullfile(strtrim(home),'batchdirs',['Batch' timestamp]);
+if ~options.auto_gen_test_data_flag && ~options.unit_test_flag
+  batch_dir = fullfile(strtrim(home),'batchdirs',study_dir_name);
+  %batch_dir = fullfile(strtrim(home),'batchdirs',['Batch' timestamp]);
+else
+  [~, rel_study_dir] = fileparts(studyinfo.study_dir);
+  batch_dir = fullfile(rel_study_dir,'batchdirs',study_dir_name);
+end
 
 if options.verbose_flag
   fprintf('\nPREPARING BATCH:\n');
@@ -337,6 +353,12 @@ ds.studyinfoIO(studyinfo,study_file,options.simulator_options.sim_id,options.ver
 
 % check for qsub on system
 [status,result]=system('which qsub');
+
+if options.auto_gen_test_data_flag || options.unit_test_flag
+  status = 0;
+  result = 1;
+end
+
 if isempty(result)
   [~,host] = system('hostname');
   fprintf('qsub not found on host (%s).\n',strtrim(host));
@@ -348,9 +370,18 @@ else % on cluster with qsub
   
   if s~=1 % study not finished
     % submit jobs using shell script
+    if options.auto_gen_test_data_flag || options.unit_test_flag
+      batch_dir = rel_study_dir;
+    end
+    
     [batch_dir_path,batch_dir_name,batch_suffix]=fileparts(batch_dir);
     batch_dir_name=[batch_dir_name batch_suffix];
-    dsFnPath = fileparts(mfilename('fullpath'));
+    
+    if ~options.auto_gen_test_data_flag && ~options.unit_test_flag
+      dsFnPath = fileparts(mfilename('fullpath'));
+    else
+      dsFnPath = 'dsFnPath';
+    end
     
     if options.parallel_flag
       cmd=sprintf('qmatjobs_pct %s %s %g',batch_dir_name,options.memory_limit,options.num_cores);
@@ -381,26 +412,57 @@ else % on cluster with qsub
       fprintf('Submitting cluster jobs with shell command: "%s"\n',cmd);
     end
     
-    [status,result]=system(cmd);
-    if status > 0
-      fprintf('Submit command failed: "%s"\n',cmd);
-      disp(result);
-      return;
-    else
-      fprintf('Submit command status: \n');
-      disp(result);
+    if ~options.auto_gen_test_data_flag && ~options.unit_test_flag
+      [status,result]=system(cmd);
     end
     
-    %if options.verbose_flag
+    if status > 0
+      if options.verbose_flag
+        fprintf('Submit command failed: "%s"\n',cmd);
+        disp(result);
+      end
+      return;
+    else
+      if options.verbose_flag
+        fprintf('Submit command status: \n');
+        disp(result);
+      end
+    end
+    
+    if options.verbose_flag
       %fprintf('%g jobs successfully submitted!\ntip: use ds.monitorStudy(''%s'') or ds.monitorStudy(studyinfo) to track status of cluster jobs.\n',num_jobs,studyinfo.study_dir);
       fprintf('%g jobs successfully submitted!\n',num_jobs);
-    %end
+    end
   elseif s==1 % study is finished
     if options.verbose_flag
       fprintf('Study already finished. not submitting jobs.\n');
     end
   end
 end
+
+%% auto_gen_test_data_flag argout
+if options.auto_gen_test_data_flag
+  dirIn = studyinfo.study_dir;
+  removeStudyinfo()
+  
+  if ~isempty(studyinfo)
+    studyinfo = [];
+  end
+  argout = {studyinfo, cmd}; % specific to this function
+
+  ds.unit.saveAutoGenTestDir(argin, argout, [], dirIn);
+end
+
+%% unit test
+if options.unit_test_flag
+  % remove fields that cause issues in unit testing
+  removeStudyinfo()
+  if ~isempty(studyinfo)
+    studyinfo = [];
+  end
+end
+
+
 
 %% NESTED FUNCTIONS
   function WriteSimJob(sim_ids,job_file)
@@ -410,18 +472,19 @@ end
     fjob=fopen(job_file,'wt');
     
     % load studyinfo using helper function to avoid busy file errors
-    %fprintf(fjob,'studyinfo=ds.checkStudyinfo(''%s'',''process_id'',%g);\n',study_file,sim_ids(1));
+    %fprintf(fjob,'studyinfo=ds.checkStudyinfo(''%s'',''process_id'',%g);\n',study_file,sim_ids(1), varargin{:});
     %fprintf(fjob,'load(''%s'',''studyinfo'');\n',study_file);
+    
+    [~, job_filename] = fileparts(job_file); %remove path and extension
     
     if ~options.one_solve_file_flag
       % function declaration
-      fprintf(fjob, 'function %s\n\n', job_file);
+      fprintf(fjob, 'function %s\n\n', job_filename);
       
       % set IDs of simulations to run
       fprintf(fjob,'SimIDs=[%s]\n',num2str(sim_ids));
     else %only 1 file
       % function declaration
-      [~, job_filename] = fileparts(job_file); %remove path and extension
       fprintf(fjob, 'function %s(simIDstart, simIDstep, simIDlast)\n\n', job_filename);
       
       if options.compile_flag
@@ -502,7 +565,19 @@ end
     fclose(fjob);
   end % WriteSimJob
 
-end
+  function removeStudyinfo()
+    % Problem: studyinfo files have many timestamps and absolute paths
+    % Solution: remove studyinfo files
+    
+    studyDirFiles = rls(studyinfo.study_dir);
+    studyinfoFiles = studyDirFiles(~cellfun(@isempty, strfind(studyDirFiles, 'studyinfo')));
+    for k = 1:length(studyinfoFiles)
+      thisFile = studyinfoFiles{k};
+      delete(thisFile)
+    end
+  end
+
+end % main fn
 
 % -------------------
 % in ds.createBatch():

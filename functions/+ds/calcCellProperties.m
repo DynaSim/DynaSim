@@ -1,4 +1,4 @@
-function stats = calcCellProperties(data,varargin)
+function stats = calcCellProperties(data, varargin)
 %CALCCELLPROPERTIES - calculates the intrinsic electrophysiological properties of all cells in one or more populations
 %
 % This is designed to be used in conjunction with the experiment
@@ -115,7 +115,16 @@ options=ds.checkOptions(varargin,{...
   'skip_time',10,[],... % time [ms] to exclude from detection
   'plot_flag',0,{0,1},...
   'equivalent_cells_flag',0,[],... % if true, only process one cell per pop
+  'auto_gen_test_data_flag',0,{0,1},...
   },false);
+
+%% auto_gen_test_data_flag argin
+if options.auto_gen_test_data_flag
+  varargs = varargin;
+  varargs{find(strcmp(varargs, 'auto_gen_test_data_flag'))+1} = 0;
+  varargs(end+1:end+2) = {'unit_test_flag',1};
+  argin = [{data}, varargs]; % specific to this function
+end
 
 data=ds.checkData(data, varargin{:});
 model=data(1).model;
@@ -152,7 +161,7 @@ data=data(I);
 num_steps=length(amplitudes);
 
 % get list of variables to analyze
-[vars,vars_pop]=ds.selectVariables(data(1).labels);
+[vars,vars_pop]=ds.selectVariables(data(1).labels, varargin{:});
 
 % assume only one variable per population
 if length(unique(vars_pop))>num_pops
@@ -211,7 +220,7 @@ for p=1:num_pops
   stats.(pop).Ih_abssag=nan(1,num_cells);
   stats.(pop).hump    =nan(1,num_cells);
   stats.(pop).AHP_amp =nan(1,num_cells);
-  stats.(pop).AHP_dur =nan(1,num_cells);  
+  stats.(pop).AHP_dur =nan(1,num_cells);
   stats.(pop).AHP_time2trough=nan(1,num_cells);
   % determine whether cells are spiking or not on each step
   spike_times=cell(num_steps,num_cells);
@@ -252,13 +261,13 @@ for p=1:num_pops
       abssag=abssag+(Vend-Vmin);
       %figure; plot(time,V); line(xlim,[Vmin Vmin]); line(xlim,[Vend Vend]); line(xlim,[bl bl]);
     end
-    stats.(pop).Ih_relsag(c)=sag/length(step_sel);      
+    stats.(pop).Ih_relsag(c)=sag/length(step_sel);
     stats.(pop).Ih_abssag(c)=abssag/length(step_sel);
 
     % 3) calculate hump (avg over repetitions) From last subthreshold step
     % Hump = (Vmax-Vend)/|RMP-Vend|
     %     where Vmax=(max voltage during depolarizing step preceding spike)
-    %           Vend=(V at end of step)  
+    %           Vend=(V at end of step)
     step_sel=max(1,find(num_spikes>0,1,'first')-1);
     if ~isempty(step_sel)
       V=data(step_sel).(this_var)(:,c);
@@ -272,7 +281,7 @@ for p=1:num_pops
     % Rin = Input resistence (I/V slope) [4]
     % taum = Membrane time constant: time for voltage relaxation to (1/e)Vmax
     %   where Vmax=max deflection from baseline on hyperpolarizing steps
-    %   note: avg taum's over small drives that keep active currents silent (eg, 5-15pA)  
+    %   note: avg taum's over small drives that keep active currents silent (eg, 5-15pA)
     step_sel=find(num_spikes==0 & amplitudes'<0);
     amps=amplitudes(step_sel);
     uamps=unique(amps);
@@ -446,7 +455,7 @@ for p=1:num_pops
 
     % 10) calculate (FRmax,AR24) From last suprathreshold T sec step
     % FRmax (steprate?): (# spikes)/T
-    % AR24 = ISI(2)/ISI(4)  
+    % AR24 = ISI(2)/ISI(4)
     step_sel=find(num_spikes>4,1,'last');
     if any(step_sel)
       spikes=spike_times{step_sel,c};
@@ -464,7 +473,7 @@ for p=1:num_pops
       ISIs=diff(spikes)/1000;
       stats.(pop).AR23(c)=ISIs(2)/ISIs(3);
       stats.(pop).AR13(c)=ISIs(1)/ISIs(3);
-    end    
+    end
 
     % 11) calculate AP morphology From first spike of first suprathreshold step with at least two spikes
     step_sel=find(num_spikes>0,1,'first');
@@ -489,7 +498,7 @@ for p=1:num_pops
       dVdt=diff(V)/(t(2)-t(1));
       dVdt=smooth(dVdt,round(1/(t(2)-t(1)))); % 1ms smoothing
       thresh_ind=find(dVdt>20,1,'first');%crossing(dVdt,t,10);
-      Vthresh=V(thresh_ind(1));      
+      Vthresh=V(thresh_ind(1));
       % APamp = (Vpeak-Vthresh)
       [pk,loc]=findpeaks(V,'NPeaks',1);
       Vpeak=V(loc);%max(V);
@@ -609,7 +618,7 @@ for p=1:num_pops
   % store means in stats structure
   stats.([this_var '_mean_per_amp'])=squeeze(means);
   stats.([this_var '_pop_mean_per_amp'])=nanmean(means,3);
-  stats.([this_var '_pop_mean_per_time'])=nanmean(X,3);  
+  stats.([this_var '_pop_mean_per_time'])=nanmean(X,3);
 end
 
 if options.plot_flag
@@ -628,11 +637,16 @@ if options.plot_flag
   xlabel('amplitude'); ylabel(['<' strrep(vars{v},'_','\_') ', time>']);
 end
 
+%% auto_gen_test_data_flag argout
+if options.auto_gen_test_data_flag
+  argout = {stats}; % specific to this function
+  
+  ds.unit.saveAutoGenTestData(argin, argout);
+end
 
-  
-  
-  
-  
+end
+
+
 % check how Tallie calculated:
 % - threshrate (mean spike rate on tonic depol just above threshold)
 % - steprate (mean spike rate on final? step depol)
@@ -668,6 +682,3 @@ end
 % Measures from [2]:
 % FR: calculate from total spikes elicited by 1sec current injection at 140pA (see [2])
 % AR24: Adaptation ratio: ratio of inst. freq of 2nd and 4th spike intervals in train (see [2])
-
-  
-  

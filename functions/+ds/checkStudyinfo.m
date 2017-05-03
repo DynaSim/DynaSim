@@ -1,4 +1,4 @@
-function studyinfo = checkStudyinfo(studyinfo,varargin)
+function studyinfo = checkStudyinfo(studyinfo, varargin)
 %CHECKSTUDYINFO - Standardize studyinfo structure and auto-populate missing fields
 %
 % Usage:
@@ -77,12 +77,20 @@ function studyinfo = checkStudyinfo(studyinfo,varargin)
 % - Example 2: standardize existing studyinfo
 %     studyinfo=ds.checkStudyinfo(studyinfo)
 %
-% See also: ds.setupStudy, dsSimulate, ds.createBatch, ds.importData, ds.analyzeStudy
+% See also: ds.setupStudy, dsSimulate, ds.createBatch, dsImport, ds.analyzeStudy
 
 options=ds.checkOptions(varargin,{...
   'verbose_flag',0,{0,1},...
   'process_id',[],[],... % process identifier for loading studyinfo if necessary
+  'auto_gen_test_data_flag',0,{0,1},...
   },false);
+
+if options.auto_gen_test_data_flag
+  varargs = varargin;
+  varargs{find(strcmp(varargs, 'auto_gen_test_data_flag'))+1} = 0;
+  varargs(end+1:end+2) = {'unit_test_flag',1};
+  argin = [{studyinfo}, varargs]; % specific to this function
+end
 
 studyinfo_field_order={'study_id','study_dir','time_created','last_modified',...
   'base_model','base_simulator_options','base_solve_file','simulations','base_data_files',...
@@ -99,11 +107,13 @@ analysis_field_order={'analysis_id','function','analysis_options','stop_time','d
 % check if input is string with filename, studyinfo structure, or []
 % prepare studyinfo structure for standardization
 study_dir=pwd;
+
 % check if study_dir was provided
 if ischar(studyinfo) && isdir(studyinfo)
   study_dir=studyinfo;
   studyinfo=fullfile(study_dir,['studyinfo.mat']);
 end
+
 % check if studyinfo.mat was provided (or derived from input study_dir)
 if ischar(studyinfo) && exist(studyinfo,'file')
   study_dir=fileparts(studyinfo);
@@ -218,6 +228,7 @@ elseif isstruct(studyinfo.simulations)
     studyinfo.simulations.result_options={};
   end
 end
+
 % check substructure studyinfo.analysis:
 if ~isfield(studyinfo,'analysis')
   studyinfo.analysis=[];
@@ -233,17 +244,27 @@ end
 % remove extra fields
 otherfields=setdiff(fieldnames(studyinfo),studyinfo_field_order);
 studyinfo=rmfield(studyinfo,otherfields);
+
 % sort standardized fields
 studyinfo=orderfields(studyinfo,studyinfo_field_order);
+
 % repeat for studyinfo.simulations
 if isstruct(studyinfo.simulations)
   otherfields=setdiff(fieldnames(studyinfo.simulations),sim_field_order);
   studyinfo.simulations=rmfield(studyinfo.simulations,otherfields);
   studyinfo.simulations=orderfields(studyinfo.simulations,sim_field_order);
 end
+
 % repeat for studyinfo.analysis
 if isstruct(studyinfo.analysis)
   otherfields=setdiff(fieldnames(studyinfo.analysis),analysis_field_order);
   studyinfo.analysis=rmfield(studyinfo.analysis,otherfields);
   studyinfo.analysis=orderfields(studyinfo.analysis,analysis_field_order);
+end
+
+%% auto_gen_test_data_flag argout
+if options.auto_gen_test_data_flag
+  argout = {studyinfo}; % specific to this function
+  
+%   ds.unit.saveAutoGenTestData(argin, argout);
 end

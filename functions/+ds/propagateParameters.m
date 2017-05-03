@@ -7,15 +7,22 @@ function model = propagateParameters(model,varargin)
 % Input:
 %   - model: DynaSim model structure
 %   - options:
-%     'action': {'substitute','prepend'} (default: substitute)
-%     'prefix': string prepended to all parameter names if action is 'prepend'
+%     'action': {'substitute','prepend','postpend'} (default: substitute)
+%     'prop_prefix': string prepended to all parameter names if action is 'prepend'
+%     'prop_suffix': string postpended to all parameter names if action is 'postpend'
 %
 % Output: DynaSim model structure with updated parameter in all equations
 %
 % See also: ds.propagateFunctions, ds.writeDynaSimSolver
 
+%% localfn output
+if ~nargin
+  model = localfunctions; % output var name specific to this fn
+  return
+end
+
 % Check inputs
-model=ds.checkModel(model);
+model=ds.checkModel(model, varargin{:});
 if ~isstruct(model.parameters)
   % nothing to do
   return;
@@ -24,10 +31,19 @@ end
 % Check inputs
 options=ds.checkOptions(varargin,{...
   'action','substitute',{'substitute','prepend','postpend'},...
-  'prefix','pset.p.',[],...
-  'suffix','',[],...
-  'param_type','parameters',{'parameters', 'fixed_variables'}
+  'prop_prefix','pset.p.',[],...
+  'prop_suffix','',[],...
+  'param_type','parameters',{'parameters', 'fixed_variables'},...
+  'auto_gen_test_data_flag',0,{0,1},...
   },false);
+
+%% auto_gen_test_data_flag argin
+if options.auto_gen_test_data_flag
+  varargs = varargin;
+  varargs{find(strcmp(varargs, 'auto_gen_test_data_flag'))+1} = 0;
+  varargs(end+1:end+2) = {'unit_test_flag',1};
+  argin = [{model}, varargs]; % specific to this function
+end
 
 parameters=model.(options.param_type);
 if isempty(parameters)
@@ -56,11 +72,11 @@ for type_index=1:length(target_types)
       % update expressions of this type
       switch options.action
         case 'substitute'
-          expressions{i}=insert_parameters(expressions{i},parameters,[]);
+          expressions{i}=insert_parameters(expressions{i},parameters, [],[], varargin{:});
         case 'prepend'
-          expressions{i}=insert_parameters(expressions{i},parameters, 'prefix',options.prefix);
+          expressions{i}=insert_parameters(expressions{i},parameters, 'prop_prefix',options.prop_prefix, varargin{:});
         case 'postpend'
-          expressions{i}=insert_parameters(expressions{i},parameters, 'suffix',options.suffix);
+          expressions{i}=insert_parameters(expressions{i},parameters, 'prop_suffix',options.prop_suffix, varargin{:});
       end
     end
     
@@ -80,83 +96,115 @@ if ~isempty(model.conditionals)
     % loop over conditional expressions from which to eliminate internal function calls
     for i=1:length(expressions)
       if isempty(expressions{i})
-        continue; 
+        continue;
       end
       
       % update expressions of this type
       switch options.action
         case 'substitute'
-          expressions{i}=insert_parameters(expressions{i},parameters,[]);
+          expressions{i}=insert_parameters(expressions{i},parameters, [],[], varargin{:});
         case 'prepend'
-          expressions{i}=insert_parameters(expressions{i},parameters, 'prefix',options.prefix);
+          expressions{i}=insert_parameters(expressions{i},parameters, 'prop_prefix',options.prop_prefix, varargin{:});
         case 'postpend'
-          expressions{i}=insert_parameters(expressions{i},parameters, 'suffix',options.suffix);
-       end
+          expressions{i}=insert_parameters(expressions{i},parameters, 'prop_suffix',options.prop_suffix, varargin{:});
+      end
     end
     [model.conditionals(1:length(model.conditionals)).(type)]=deal(expressions{:});
   end
 end
 
-function expression=insert_parameters(expression,parameters,attachType,attachStr)
-  if isnumeric(expression)
-    % convert to string and return string
-    expression=toString(expression);
-    return;
-  end
+
+%% auto_gen_test_data_flag argout
+if options.auto_gen_test_data_flag
+  argout = {model}; % specific to this function
   
-  allwords=regexp(expression,'[a-zA-Z]+\w*','match');
-  words=unique(allwords);
-  found_parameters=words(ismember(words,fieldnames(parameters)));
-  
-  if ~isempty(found_parameters)
-    % substitute those found into this target expression
-    for ff=1:length(found_parameters)
-      % name of found parameter
-      found_parameter=found_parameters{ff};
+  ds.unit.saveAutoGenTestData(argin, argout);
+end
+
+end % main fn
+
+
+%% Local Fn
+function expression=insert_parameters(expression,parameters,attachType,attachStr, varargin)
+
+%% auto_gen_test_data_flag argin
+options = ds.checkOptions(varargin,{'auto_gen_test_data_flag',0,{0,1}},false);
+if options.auto_gen_test_data_flag
+  varargs = varargin;
+  varargs{find(strcmp(varargs, 'auto_gen_test_data_flag'))+1} = 0;
+  varargs(end+1:end+2) = {'unit_test_flag',1};
+  argin = [{expression}, {parameters}, {attachType}, {attachStr}, varargs]; % specific to this function
+end
+
+if isnumeric(expression)
+  % convert to string and return string
+  expression=toString(expression);
+  return;
+end
+
+allwords=regexp(expression,'[a-zA-Z]+\w*','match');
+words=unique(allwords);
+found_parameters=words(ismember(words,fieldnames(parameters)));
+
+if ~isempty(found_parameters)
+  % substitute those found into this target expression
+  for ff=1:length(found_parameters)
+    % name of found parameter
+    found_parameter=found_parameters{ff};
+    
+    if isempty(attachType) % no prefix given, substitute value instead
+      % found value to replace found parameter name in target
+      found_value=parameters.(found_parameter);
       
-      if isempty(attachType) % no prefix given, substitute value instead
-        % found value to replace found parameter name in target
-        found_value=parameters.(found_parameter);
-        
-        % convert found value into string
-        if isnumeric(found_value)
-          if length(found_value)>1
-            found_value=sprintf('[%s]',num2str(found_value));
-          else
-            found_value=num2str(found_value);
-          end
-        elseif iscell(found_value)
-          if iscellstr(found_value)
-            tmp=cellfun(@(x)['''' x '''' ','] ,found_value,'uni',0);
-          else
-            tmp=cellfun(@(x)[num2str(x) ','] ,found_value,'uni',0);
-          end
-          tmp=[tmp{:}];
-          found_value=sprintf('{%s}',tmp(1:end-1));
-        elseif isa(found_value,'function_handle')
-          found_value=func2str(found_value);
+      % convert found value into string
+      if isnumeric(found_value)
+        if length(found_value)>1
+          found_value=sprintf('[%s]',num2str(found_value));
+        else
+          found_value=num2str(found_value);
         end
-      elseif strcmp(attachType, 'prefix') % prefix provided, substitute prefix_name
-        prefix = attachStr;
-        found_value=[prefix found_parameter];
-      elseif strcmp(attachType, 'suffix') % suffix provided, substitute suffix_name
-        suffix = attachStr;
-        found_value=[found_parameter suffix];
+      elseif iscell(found_value)
+        if iscellstr(found_value)
+          tmp=cellfun(@(x)['''' x '''' ','] ,found_value,'uni',0);
+        else
+          tmp=cellfun(@(x)[num2str(x) ','] ,found_value,'uni',0);
+        end
+        tmp=[tmp{:}];
+        found_value=sprintf('{%s}',tmp(1:end-1));
+      elseif isa(found_value,'function_handle')
+        found_value=func2str(found_value);
       end
-      
-      if ~ischar(found_value)
-        warning('failed to convert parameter ''%s'' to string and substitute into model equations:',found_parameter);
-        found_value
-      else
-        % update expression
-        num_found = length(find(ismember(allwords,found_parameter)));
-        for iter=1:num_found
-          if ~strcmp(attachType, 'suffix')
-            expression=ds.strrep(expression,found_parameter,found_value);
-          else
-            expression=ds.strrep2(expression,found_parameter,found_value);
-          end
+    elseif strcmp(attachType, 'prop_prefix') % prefix provided, substitute prefix_name
+      prefix = attachStr;
+      found_value=[prefix found_parameter];
+    elseif strcmp(attachType, 'prop_suffix') % suffix provided, substitute suffix_name
+      suffix = attachStr;
+      found_value=[found_parameter suffix];
+    end
+    
+    if ~ischar(found_value)
+      warning('failed to convert parameter ''%s'' to string and substitute into model equations:',found_parameter);
+      found_value % TODO: check this
+    else
+      % update expression
+      num_found = length(find(ismember(allwords,found_parameter)));
+      for iter=1:num_found
+        if ~strcmp(attachType, 'suffix')
+          expression=ds.strrep(expression,found_parameter,found_value, '', '', varargin{:});
+        else
+          expression=ds.strrep2(expression,found_parameter,found_value, '', '', varargin{:});
         end
       end
     end
   end
+end
+
+%% auto_gen_test_data_flag argout
+if options.auto_gen_test_data_flag
+  argout = {expression}; % specific to this function
+  
+  ds.unit.saveAutoGenTestDataLocalFn(argin, argout); % localfn
+
+end
+
+end

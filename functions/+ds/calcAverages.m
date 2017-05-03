@@ -1,4 +1,4 @@
-function data_out = calcAverages(data,opts)
+function data_out = calcAverages(data,opts, varargin)
 %CALCAVERAGES - Average fields in a DynaSim data struct across neurons
 %
 % Usage:
@@ -16,8 +16,16 @@ function data_out = calcAverages(data,opts)
 %
 % See also: ds.plotFR, ds.analyzeStudy, dsSimulate, ds.checkData, ds.selectVariables
 
-%% 1.0 Check inputs
+%% auto_gen_test_data_flag argin
+options = ds.checkOptions(varargin,{'auto_gen_test_data_flag',0,{0,1}},false);
+if options.auto_gen_test_data_flag
+  varargs = varargin;
+  varargs{find(strcmp(varargs, 'auto_gen_test_data_flag'))+1} = 0;
+  varargs(end+1:end+2) = {'unit_test_flag',1};
+  argin = [{data}, {opts}, varargs]; % specific to this function
+end
 
+%% 1.0 Check inputs
 if nargin < 2
     opts = struct;
 end
@@ -54,6 +62,11 @@ for i = 1:length(data)
     
 end
 
-
+%% auto_gen_test_data_flag argout
+if options.auto_gen_test_data_flag
+  argout = {data_out}; % specific to this function
+  
+  ds.unit.saveAutoGenTestData(argin, argout);
+end
 
 end

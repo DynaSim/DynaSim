@@ -83,7 +83,7 @@ options=ds.checkOptions(varargin,{...
   'verbose_flag',1,{0,1},...
   'one_solve_file_flag',0,{0,1},... % use only 1 solve file of each type, but can't vary mechs yet
   },false);
-model=ds.checkModel(model);
+model=ds.checkModel(model, varargin{:});
 separator=','; % ',', '\\t'
 
 %% 1.0 prepare model info
@@ -92,13 +92,13 @@ state_variables=model.state_variables;
 
 % 1.1 eliminate internal (anonymous) function calls from model equations
 if options.reduce_function_calls_flag==1
-  model=ds.propagateFunctions(model);
+  model=ds.propagateFunctions(model, varargin{:});
 end
 
 % 1.1 prepare parameters
 if options.save_parameters_flag
   % add parameter struct prefix to parameters in model equations
-  model=ds.propagateParameters(model,'action','prepend', 'prefix',parameter_prefix);
+  model=ds.propagateParameters(model,'action','prepend', 'prop_prefix',parameter_prefix, varargin{:});
   
   % set and capture numeric seed value
   if options.compile_flag==1
@@ -180,7 +180,7 @@ if options.save_parameters_flag
   save(param_file_path,'p');
 else
   % insert parameter values into model expressions
-  model=ds.propagateParameters(model,'action','substitute');
+  model=ds.propagateParameters(model,'action','substitute', varargin{:});
 end
 
 % 1.2 prepare list of outputs (state variables and monitors)
@@ -494,7 +494,7 @@ if ~isempty(model.monitors)
     if options.downsample_factor>1 || options.disk_flag==1
       % set mon_last=f(IC);
       tmp=cell2struct({monitor_expression{i}},{monitor_names{i}},1);
-      print_monitor_update(fid,tmp,'_last',state_variables,'_last');
+      print_monitor_update(fid,tmp,'_last',state_variables,'_last', varargin{:});
     end
     
     if options.disk_flag==1
@@ -518,11 +518,11 @@ if ~isempty(model.monitors)
       if options.downsample_factor==1
         % set mon(1,:)=f(IC);
         tmp=cell2struct({monitor_expression{i}},{monitor_names{i}},1);
-        print_monitor_update(fid,tmp,'(1,:)',state_variables,'(1,:)');
+        print_monitor_update(fid,tmp,'(1,:)',state_variables,'(1,:)', varargin{:});
       else
         % set mon(1,:)=mon_last;
         tmp=cell2struct({monitor_expression{i}},{monitor_names{i}},1);
-        print_monitor_update(fid,tmp,'(1,:)',state_variables,'_last');
+        print_monitor_update(fid,tmp,'(1,:)',state_variables,'_last', varargin{:});
       end
     end %disk_flag
   end %monitor_names
@@ -568,7 +568,7 @@ end
 odes = struct2cell(model.ODEs);
 for i=1:length(odes)
   for j=1:length(state_variables)
-    odes{i}=ds.strrep(odes{i},state_variables{j},[state_variables{j} index_lasts{j}]);
+    odes{i}=ds.strrep(odes{i}, state_variables{j}, [state_variables{j} index_lasts{j}], '', '', varargin{:});
   end
 end
 
@@ -582,21 +582,21 @@ fprintf(fid,'for k=2:ntime\n'); % time index
 fprintf(fid,'  t=T(k-1);\n');
 if options.downsample_factor==1 && options.disk_flag==0 % store every time point, do not use var_last
   % update_vars;      % var(:,k-1)->var(k,:) or var(k-1)->var(k)
-  update_vars(index_nexts);
+  update_vars(index_nexts, varargin{:});
   
   % conditionals;     % var(k,:)->var(k,:) or var(k)->var(k)
   print_conditional_update(fid,model.conditionals,index_nexts,state_variables)
   
   % update_monitors;  % mon(:,k-1)->mon(k,:) or mon(k-1)->mon(k)
-  print_monitor_update(fid,model.monitors,index_nexts,state_variables);
+  print_monitor_update(fid,model.monitors,index_nexts,state_variables, [], varargin{:});
   
   fprintf(fid,'  n=n+1;\n');
 else % store every downsample_factor time point in memory or on disk
   % update_vars;      % var_last->var_last
-  update_vars(index_temps);
+  update_vars(index_temps, varargin{:});
   
   % conditionals;     % var_last->var_last
-  print_conditional_update(fid,model.conditionals,index_temps,state_variables);
+  print_conditional_update(fid,model.conditionals,index_temps,state_variables, varargin{:});
   
   % check if it is time to store data
   fprintf(fid,'if mod(k,downsample_factor)==0 %% store this time point\n');
@@ -628,7 +628,7 @@ else % store every downsample_factor time point in memory or on disk
     % update_vars;    % var_last -> var(n,:) or var(n)
     print_var_update_last(fid,index_nexts,state_variables)
     % update_monitors;% f(var_last) -> mon(n,:) or mon(n)
-    print_monitor_update(fid,model.monitors,index_nexts,state_variables);
+    print_monitor_update(fid,model.monitors,index_nexts,state_variables, [], varargin{:});
   end %disk_flag
   
   fprintf(fid,'  n=n+1;\n');
@@ -657,7 +657,7 @@ end
   % ########################################
   % NESTED FUNCTIONS
   % ########################################
-  function update_vars(index_nexts_)
+  function update_vars(index_nexts_, varargin)
     switch options.solver
       case {'euler','rk1'}
         print_k(fid,odes,'_k1',state_variables);                              % write k1 using model.ODEs
@@ -668,7 +668,7 @@ end
       case {'rk2','modified_euler'}
         print_k(fid,odes,'_k1',state_variables);                              % write k1 using model.ODEs
         
-        odes_k2=update_odes(odes,'_k1','.5*dt',state_variables,index_lasts);   % F(*,yn+dt*k1/2)
+        odes_k2=update_odes(odes,'_k1','.5*dt',state_variables,index_lasts, varargin{:});   % F(*,yn+dt*k1/2)
         fprintf(fid,'  t=t+.5*dt;\n');                                          % update t before writing k2
         print_k(fid,odes_k2,'_k2',state_variables);                           % write k2 using odes_k2
         
@@ -678,14 +678,14 @@ end
       case {'rk4','rungekutta','rk'}
         print_k(fid,odes,'_k1',state_variables);                              % write k1 using model.ODEs
         
-        odes_k2=update_odes(odes,'_k1','.5*dt',state_variables,index_lasts);   % F(*,yn+dt*k1/2)
+        odes_k2=update_odes(odes,'_k1','.5*dt',state_variables,index_lasts, varargin{:});   % F(*,yn+dt*k1/2)
         fprintf(fid,'  t=t+.5*dt;\n');                                          % update t before writing k2
         print_k(fid,odes_k2,'_k2',state_variables);                           % write k2 using odes_k2
         
-        odes_k3=update_odes(odes,'_k2','.5*dt',state_variables,index_lasts);   % F(*,yn+dt*k2/2)
+        odes_k3=update_odes(odes,'_k2','.5*dt',state_variables,index_lasts, varargin{:});   % F(*,yn+dt*k2/2)
         print_k(fid,odes_k3,'_k3',state_variables);                           % write k3 using odes_k3
         
-        odes_k4=update_odes(odes,'_k3','dt',state_variables,index_lasts);      % F(*,yn+dt*k3)
+        odes_k4=update_odes(odes,'_k3','dt',state_variables,index_lasts, varargin{:});      % F(*,yn+dt*k3)
         fprintf(fid,'  t=t+.5*dt;\n');                                          % update t before writing k4
         print_k(fid,odes_k4,'_k4',state_variables);                           % write k4 using odes_k4
         
@@ -709,12 +709,12 @@ function print_k(fid,odes_k,suffix_k,state_variables,nvals_per_var)
   end
 end
 
-function odes_out=update_odes(odes,suffix_k,increment,state_variables,index_lasts)
+function odes_out=update_odes(odes,suffix_k,increment,state_variables,index_lasts, varargin)
   % purpose: update expressions for axiliary calculations (k1-k4)
   odes_out=odes;
   for i=1:length(odes)
     for j=1:length(odes)
-      odes_out{i}=ds.strrep(odes_out{i},[state_variables{j} index_lasts{j}],sprintf('(%s%s+%s*%s%s)',state_variables{j},index_lasts{j},increment,state_variables{j},suffix_k),'(',')');
+      odes_out{i}=ds.strrep(odes_out{i}, [state_variables{j} index_lasts{j}], sprintf('(%s%s+%s*%s%s)', state_variables{j}, index_lasts{j}, increment, state_variables{j}, suffix_k), '(',')', varargin{:});
     end
   end
 end
@@ -755,7 +755,7 @@ function print_var_update_last(fid,index_nexts,state_variables)
   end
 end
 
-function print_conditional_update(fid,conditionals,index_nexts,state_variables)
+function print_conditional_update(fid,conditionals,index_nexts,state_variables, varargin)
   % purpose: write statements to perform conditional actions (that may
   %   include updating state variables).
   if ~isempty(conditionals)
@@ -783,23 +783,23 @@ function print_conditional_update(fid,conditionals,index_nexts,state_variables)
       if strcmp('spike_monitor',conditionals(i).namespace)
         % do nothing if spike_monitor
       else
-        condition=ds.strrep(condition,state_variables{j},[state_variables{j} index_nexts{j}]);
+        condition=ds.strrep(condition, state_variables{j}, [state_variables{j} index_nexts{j}], '', '', varargin{:});
       end
       
-      action=ds.strrep(action,state_variables{j},[state_variables{j} action_index]);
+      action=ds.strrep(action, state_variables{j}, [state_variables{j} action_index], '', '', varargin{:});
       
       if ~isempty(elseaction)
-        elseaction=ds.strrep(elseaction,state_variables{j},[state_variables{j} action_index]);
+        elseaction=ds.strrep(elseaction, state_variables{j}, [state_variables{j} action_index], '', '', varargin{:});
       end
     end
     
     % write conditional to solver function
     fprintf(fid,'  conditional_test=(%s);\n',condition);
-    action=ds.strrep(action,'\(n,:','(n,conditional_test');
+    action=ds.strrep(action, '\(n,:', '(n,conditional_test', '', '', varargin{:});
     fprintf(fid,'  if any(conditional_test), %s; ',action);
     
     if ~isempty(elseaction)
-      elseaction=ds.strrep(elseaction,'(n,:','(n,conditional_test');
+      elseaction=ds.strrep(elseaction, '(n,:', '(n,conditional_test', '', '', varargin{:});
       fprintf('else %s; ',elseaction);
     end
     
@@ -807,14 +807,16 @@ function print_conditional_update(fid,conditionals,index_nexts,state_variables)
   end
 end
 
-function print_monitor_update(fid,monitors,index_nexts,state_variables,index_lasts)
+function print_monitor_update(fid,monitors,index_nexts,state_variables,index_lasts, varargin)
   if ~isempty(monitors) && iscell(index_nexts) % being called from within the integrator loop
     fprintf(fid,'  %% ------------------------------------------------------------\n');
     fprintf(fid,'  %% Update monitors:\n');
     fprintf(fid,'  %% ------------------------------------------------------------\n');
   end
   
-  if nargin<5, index_lasts=index_nexts; end
+  if nargin<5 || isempty(index_lasts)
+    index_lasts=index_nexts;
+  end
   
   % account for inputs from monitor initialization
   
@@ -850,8 +852,8 @@ function print_monitor_update(fid,monitors,index_nexts,state_variables,index_las
   % add indexes to state variables in monitors
   for i=1:length(monitor_name)
     for j=1:length(state_variables)
-      %monitor_expression{i}=ds.strrep(monitor_expression{i},state_variables{j},[state_variables{j} index_lasts{j}]);
-      monitor_expression{i}=ds.strrep(monitor_expression{i},state_variables{j},[state_variables{j} monitor_index]);
+      %monitor_expression{i}=ds.strrep(monitor_expression{i}, state_variables{j}, [state_variables{j} index_lasts{j}], '', '', varargin{:});
+      monitor_expression{i}=ds.strrep(monitor_expression{i}, state_variables{j}, [state_variables{j} monitor_index], '', '', varargin{:});
     end
     
     % write monitors to solver function

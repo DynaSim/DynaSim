@@ -22,7 +22,7 @@ function data = importCSV(file)
 %   column. if a population has more than one cell, different cells are
 %   sequential columns with same header repeated for each cell.
 %
-% See also: ds.importData
+% See also: dsImport
 
 % check inputs
 if ~exist(file,'file')

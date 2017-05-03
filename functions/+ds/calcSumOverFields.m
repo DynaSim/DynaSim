@@ -1,4 +1,4 @@
-function data = calcSumOverFields(data, fields, output_field_name)
+function data = calcSumOverFields(data, fields, output_field_name, varargin)
 %CALCSUMOVERFIELDS - Creates a new field in data that is the sum of a bunch of other fields
 %
 % These fields are specified by the "fields" cell array. Stores the output in
@@ -12,6 +12,15 @@ function data = calcSumOverFields(data, fields, output_field_name)
 %
 % Outputs:
 %   - data: data structure containing summed data
+
+%% auto_gen_test_data_flag argin
+options = ds.checkOptions(varargin,{'auto_gen_test_data_flag',0,{0,1}},false);
+if options.auto_gen_test_data_flag
+  varargs = varargin;
+  varargs{find(strcmp(varargs, 'auto_gen_test_data_flag'))+1} = 0;
+  varargs(end+1:end+2) = {'unit_test_flag',1};
+  argin = [{data}, {fields}, {output_field_name}, varargs]; % specific to this function
+end
 
 if nargin < 3
     % Default field name
@@ -44,6 +53,13 @@ for i = 1:length(data)
     end
     data(i).(output_field_name) = sumfields;
     data(i).labels(end:end+1) = {output_field_name, data(i).labels{end}};   % Store new label as 2nd last entry (so time is always last; not sure if this is important...
+end
+
+%% auto_gen_test_data_flag argout
+if options.auto_gen_test_data_flag
+  argout = {data}; % specific to this function
+  
+  ds.unit.saveAutoGenTestData(argin, argout);
 end
 
 end
