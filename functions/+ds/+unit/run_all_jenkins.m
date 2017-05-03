@@ -7,14 +7,16 @@ import matlab.unittest.selectors.HasTag
 import matlab.unittest.plugins.CodeCoveragePlugin
 import edu.stanford.covert.test.Coverage
 
-%% remove ds path
-rmPathVar('ds');
-
 %% workspace
 fprintf('Running from dir:%s\n',pwd);
 [~,ws] = system('echo $WORKSPACE');
 ws = strtrim(ws);
 fprintf('Workspace:%s\n',ws);
+
+%% fix paths
+fprintf('Fixing paths.\n');
+rmPathVar('ds');
+addpath(genpath(ws));
 
 %% Make Default Config
 ds.makeDefaultConfigJenkins;
