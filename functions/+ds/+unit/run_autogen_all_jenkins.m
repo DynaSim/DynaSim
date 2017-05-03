@@ -8,6 +8,9 @@ import matlab.unittest.selectors.HasTag
 import matlab.unittest.plugins.CodeCoveragePlugin
 import edu.stanford.covert.test.Coverage
 
+%% remove ds path
+rmPathVar('ds')
+
 %% workspace
 fprintf('Running from dir:%s\n',pwd);
 [~,ws] = system('echo $WORKSPACE');
