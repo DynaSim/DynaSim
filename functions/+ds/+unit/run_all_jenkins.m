@@ -52,10 +52,7 @@ try
 
   %% make coverage svg
   filePath = '/home/erik/Dropbox/research/dsJenkinsBadge/coverage.svg';
-  if exist(filePath, 'file')
-    delete(filePath);
-  end
-  system(['python /home/erik/Dropbox/Programming/Python/universal_coverage_badge/__main__.py -percent ' coverPercentStr ' -o ' filePath]);
+  system(['python /home/erik/Dropbox/Programming/Python/universal_coverage_badge/__main__.py -percent ' coverPercentStr ' -o ' filePath ' -f True']);
 catch e
   disp(getReport(e,'extended'))
   exit(1);
