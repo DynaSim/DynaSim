@@ -9,7 +9,7 @@ import matlab.unittest.plugins.CodeCoveragePlugin
 import edu.stanford.covert.test.Coverage
 
 %% remove ds path
-rmPathVar('ds')
+rmPathVar('ds');
 
 %% workspace
 fprintf('Running from dir:%s\n',pwd);
@@ -67,11 +67,11 @@ try
     coverPercent = 0;
   end
   coverPercentStr = sprintf('%.f', coverPercent);
-  fprintf('Test Coverage (%% of code lines): %s\n', coverPercentStr)
+  fprintf('Test Coverage (%% of code lines): %s\n', coverPercentStr);
 
   %% make coverage svg
   filePath = '/home/erik/Dropbox/research/dsJenkinsBadge/coverage.svg';
-  system(['python /home/erik/Dropbox/Programming/Python/universal_coverage_badge/__main__.py -percent ' coverPercentStr ' -o ' filePath ' -f True]);
+  system(['python /home/erik/Dropbox/Programming/Python/universal_coverage_badge/__main__.py -percent ' coverPercentStr ' -o ' filePath ' -f True']);
 catch e
   disp(getReport(e,'extended'))
   exit(1);

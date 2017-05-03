@@ -8,7 +8,7 @@ import matlab.unittest.plugins.CodeCoveragePlugin
 import edu.stanford.covert.test.Coverage
 
 %% remove ds path
-rmPathVar('ds')
+rmPathVar('ds');
 
 %% workspace
 fprintf('Running from dir:%s\n',pwd);
