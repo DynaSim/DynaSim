@@ -1,4 +1,4 @@
-function results = importResults(studyinfo,func)
+function results = importResults(studyinfo,func, varargin)
 %IMPORTRESULTS - Import analysis result of a simulation
 %
 % Usage:
