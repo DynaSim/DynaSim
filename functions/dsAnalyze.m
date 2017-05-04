@@ -100,10 +100,9 @@ if isempty(studyinfo)
   studyinfoBool = false;
 else
   studyinfoBool = true;
-end
-
-if ~isfield(studyinfo,'study_dir') || isempty(studyinfo.study_dir) || ~isdir(studyinfo.study_dir)
-  studyinfo.study_dir = pwd;
+  if ~isfield(studyinfo,'study_dir') || isempty(studyinfo.study_dir) || ~isdir(studyinfo.study_dir)
+    studyinfo.study_dir = pwd;
+  end
 end
 
 % Data at this point:
