@@ -347,7 +347,7 @@ if isempty(options.sim_id) % not in part of a batch sim
     options.compile_flag = 1;
     options.downsample_factor = max(1/options.dt, options.downsample_factor); % at most 1000Hz sampling
     options.one_solve_file_flag = 1;
-    options.sims_per_job = 2;
+    options.sims_per_job = max(2, options.sims_per_job);
   end
 
   % check for one_solve_file_flag

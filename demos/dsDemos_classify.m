@@ -28,16 +28,14 @@ output_directory = ds.getConfig('demos_path');
 mkdirSilent(output_directory);
 cd(output_directory);
 
-% Set where to save outputs
-study_dir = 'demo_sPING_classify';
-
 % Here we go!
 
 % %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%% BUILDING LARGE MODELS WITH MULTIPLE POPULATIONS AND CONNECTIONS
+%% Sparse Pyramidal-Interneuron-Network-Gamma (sPING)
 % %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-%% Sparse Pyramidal-Interneuron-Network-Gamma (sPING)
+% Set where to save outputs
+study_dir = 'demo_sPING_classify';
 
 % define equations of cell model (same for E and I populations)
 eqns={
@@ -49,12 +47,12 @@ eqns={
 s=[];
 % neural pops
 s.populations(1).name='E';
-s.populations(1).size=80;
+s.populations(1).size=8;
 s.populations(1).equations=eqns;
 s.populations(1).mechanism_list={'iNa','iK'};
 s.populations(1).parameters={'Iapp',0,'gNa',120,'gK',36,'noise',40};
 s.populations(2).name='I';
-s.populations(2).size=20;
+s.populations(2).size=2;
 s.populations(2).equations=eqns;
 s.populations(2).mechanism_list={'iNa','iK'};
 s.populations(2).parameters={'Iapp',0,'gNa',120,'gK',36,'noise',40};
@@ -67,34 +65,28 @@ s.connections(2).direction='E->I';
 s.connections(2).mechanism_list={'iAMPAScaled'};
 s.connections(2).parameters={'tauD',2, 'gSYN',1, 'prob_cxn',1};
 
-% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%% SAVING SIMULATED DATA
-% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% How to: set 'save_data_flag' to 1 and (optionally) 'study_dir' to /path/to/outputs
-
-%% Save data from a set of simulations
+% sim parameters
 time_end = 500;
 dt = 0.01;
 
 % Specify what to vary
-% Tip: use 'vary' Syntax to to systematically vary a parameter
 vary={
   'E',     'Iapp',  [0:0.5:1];
   'I',     'Iapp',  [0:0.5:1];
-%   '(E,I)', 'Noise', [0:10:30];
+  '(E,I)', 'noise', [0:10:30];
 %   'E',     'prob_cxn', [1, 0.5, .1];
 %   'I',     'prob_cxn', [1, 0.5, .1];
-  'E',     'gSYN', [1, 0.5];
-  'I',     'gSYN', [1, 0.5];
+  'E->I',     'gSYN', [1, 0.5];
+  'I->E',     'gSYN', [1, 0.5];
   }; % vary the amplitude of tonic input to E-cells
 
 % if exist(study_dir,'dir')
 %   rmdir(study_dir,'s')
 % end
 
-data = dsSimulate(s,'save_data_flag',0, 'save_results_flag',1, 'overwrite_flag',0, 'study_dir',study_dir, 'compile_flag',1,...
-  'vary',vary, 'solver','euler', 'dt',0.01, 'verbose_flag',1, 'tspan', [0 time_end], 'downsample_factor',1/dt,...
-  'analysis_functions',{@dsClassifyEI},...
+dsSimulate(s,'save_data_flag',1, 'save_results_flag',1, 'overwrite_flag',1, 'study_dir',study_dir, 'compile_flag',1,...
+  'vary',vary, 'solver','euler', 'dt',0.01, 'verbose_flag',1, 'tspan', [0 time_end], 'downsample_factor',1/dt, 'parallel_flag',1,...
+  'analysis_functions',{@classifyEI},...
   'plot_functions',{@dsPlot,@dsPlot},...
   'plot_options',{
     {'varied_filename_flag', 1, 'format', 'jpg', 'visible', 'off'},...
@@ -102,7 +94,7 @@ data = dsSimulate(s,'save_data_flag',0, 'save_results_flag',1, 'overwrite_flag',
   });
 
 %% load and plot the saved data
-study_dir = 'demo_sPING_classify';
+% study_dir = 'demo_sPING_classify';
 % if ~exist('data','var')
 %   data=ImportData('demo_sPING_classify');
 % end
@@ -114,4 +106,55 @@ study_dir = 'demo_sPING_classify';
 % PlotClass(study_dir, xAxisVaryParamInd, yAxisVaryParamInd);
 
 % gvRunDS(study_dir, struct('overwrite',1))
-gvRunDS(study_dir, struct('overwrite',0))
+% gvRunDS(study_dir, struct('overwrite',0))
+
+
+% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% Izhikevich neuron with noisy drive
+% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+% Izhikevich study of neuro-computational properties (using Syntax 1)
+% based on: http://www.izhikevich.org/publications/izhikevich.m
+
+% Set where to save outputs
+study_dir = 'demo_izhikevich_classify';
+
+% define equations of cell model
+eqns={
+  'a=.02; b=.2; c=-65; d=6; I=14';
+  'dV/dt=.04*V^2+5*V+140-u+I; V(0)=-70';
+  'du/dt=a*(b*V-u); u(0)=-20';
+  'if(V>=30)(V=c;u=u+d)';
+  };
+
+% create DynaSim specification structure
+s=[];
+s.populations(1).name = 'pop1';
+s.populations(1).size = 1;
+s.populations(1).equations = eqns;
+
+% sim parameters
+time_end = 500;
+dt = 0.01;
+
+% Specify what to vary
+P='pop1'; % name of population
+vary={
+  {P,'a',.02; P,'b',.2 ; P,'c',-50; P,'d',2;  P,'I',15} % tonic bursting
+  {P,'a',.01; P,'b',.2 ; P,'c',-65; P,'d',8;  P,'I',30} % spike frequency adaptation
+  {P,'a',.02; P,'b',.2 ; P,'c',-65; P,'d',6;  P,'I',7}  % spike latency
+  {P,'a',.03; P,'b',.25; P,'c',-52; P,'d',0;  P,'I',0}  % rebound burst
+  {P,'a',1;   P,'b',1.5; P,'c',-60; P,'d',0;  P,'I',-65}% bistability
+  {P,'a',.02; P,'b',1  ; P,'c',-55; P,'d',4;  P,'I',1}  % accomodation
+  {P,'a',-.02;P,'b',-1 ; P,'c',-60; P,'d',8;  P,'I',80} % inhibition-induced spiking
+  {P,'a',-.026;P,'b',-1; P,'c',-45; P,'d',0;  P,'I',70} % inhibition-induced bursting
+  };
+
+dsSimulate(s,'save_data_flag',1, 'save_results_flag',1, 'overwrite_flag',1, 'study_dir',study_dir, 'compile_flag',0,...
+  'vary',vary, 'solver','euler', 'dt',0.01, 'verbose_flag',1, 'tspan', [0 time_end], 'downsample_factor',1/dt, 'parallel_flag',1,...
+  'analysis_functions',{@classifyPop1, @calcFRcellOut},...
+  'analysis_options',{{},{'variable','*_V', 'bin_size',.99}},...
+  'plot_functions',{@dsPlot},...
+  'plot_options',{
+    {'varied_filename_flag', 1, 'format', 'jpg', 'visible', 'off'},...
+  });

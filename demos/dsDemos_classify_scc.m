@@ -72,7 +72,7 @@ s.connections(2).parameters={'tauD',2, 'gSYN',1, 'prob_cxn',1};
 % How to: set 'save_data_flag' to 1 and (optionally) 'study_dir' to /path/to/outputs
 
 %% Save data from a set of simulations
-time_end = 1000;
+time_end = 500;
 dt = 0.01;
 
 % Specify what to vary
@@ -80,7 +80,7 @@ dt = 0.01;
 vary={
   'E',     'Iapp',  [0:.5:1];
   'I',     'Iapp',  [0:.5:1];
-%   '(E,I)', 'Noise', [0:25:50];
+%   '(E,I)', 'noise', [0:25:50];
   'E->I',     'prob_cxn', [1, 0.5, .1];
   'I->E',     'prob_cxn', [1, 0.5, .1];
   'E',     'gSYN', [1, 0.5, .1];
@@ -93,14 +93,15 @@ end
 
 data = dsSimulate(s,'save_data_flag',0, 'save_results_flag',1, 'overwrite_flag',1, 'study_dir',study_dir,...
   'vary',vary, 'solver','euler', 'dt',dt, 'verbose_flag',1, 'tspan', [0 time_end], 'downsample_factor',1/dt,...
-  'analysis_functions',{@dsClassifyEI},...
+  'analysis_functions',{@classifyPop1, @calcFRcellOut},...
+  'analysis_options',{{},{'variable','*_V', 'bin_size',.99}},...
   'plot_functions',{@dsPlotData,@dsPlotData,@dsPlotData},...
   'plot_options',{
     {'varied_filename_flag', 0, 'format', 'jpg', 'visible', 'off'},...
     {'plot_type','rastergram','varied_filename_flag', 0, 'format', 'jpg', 'visible', 'off'},...
     {'plot_type','power', 'xlim',[0 100], 'varied_filename_flag',0, 'format','jpg', 'visible','off'},...
   },...
-  'cluster_flag',1, 'qsub_mode','array');
+  'cluster_flag',1, 'qsub_mode','array', 'optimize_big_vary',1, 'sims_per_job',20);
 
 %% load and plot the saved data
 
