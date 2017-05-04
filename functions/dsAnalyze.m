@@ -476,14 +476,14 @@ end
 
 function result = evalFnWithArgs(fInd, data, func, options, varargin)
 if isempty(options.function_options)
-  % parfor dInd = 1:length(data)
-    result = feval(func,data,varargin{:}); % result(dInd) = feval(func,data(dInd),varargin{:});
-  % end
+  parfor dInd = 1:length(data)
+    result(dInd) = feval(func,data(dInd),varargin{:});
+  end
 else
   function_options = options.function_options{fInd};
-  % parfor dInd = 1:length(data)
-    result = feval(func, data, function_options{:}); % result(dInd) = feval(func,data(dInd),function_options{:});
-  % end
+  parfor dInd = 1:length(data)
+    result(dInd) = feval(func,data(dInd),function_options{:});
+  end
 end
 end
 
