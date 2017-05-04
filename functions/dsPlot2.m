@@ -156,10 +156,6 @@ end
   },false);
 handles=[];
 
-
-
-
-
 % Pull out fields from options struct
 plot_type = options.plot_type;
 plot_options = options.plot_options;
@@ -200,9 +196,6 @@ figure_options = struct_addDef(figure_options,'max_num_newfigs',options.max_num_
 figure_options = struct_addDef(figure_options,'figwidth',options.figwidth);
 figure_options = struct_addDef(figure_options,'figheight',options.figheight);
 
-
-
-
 %% Pre-process raw data contained in xp.data (mean + downsample)
 % % Note: these options don't work if data are images
 % Apply max overlaid
@@ -224,7 +217,6 @@ if any(strcmp(options.plot_type,{'waveform','power'})) && all(cellfun(@isnumeric
     cell_names_str = cellfunu(@(s) ['Cell ' num2str(s)], num2cell(cell_names));
     xp.meta.datainfo(2).values = cell_names_str;
 end
-
 
 % Average across cells if necessary
 if do_mean && ~is_image
@@ -334,8 +326,6 @@ if length(xp2.meta.datainfo(2).values) <= 1 && ~is_image
     xp2 = xp2.squeezeRegexp('Dim');
 end
 
-
-
 %% If doing force overlay, move overlay population to the end
 if ~isempty(force_last)
     
@@ -369,7 +359,6 @@ if ~isempty(force_last)
     xp2 = xp2.permute([find(others_ind), ax_ind]);        % Move chosen axis to the back!
     
 end
-
 
 %% Set up do z-score & overlay shift
 if options.do_zscore && all(cellfun(@isnumeric,xp2.data(:))) && ~is_image
@@ -414,12 +403,9 @@ if ~isempty(crop_range) &&  all(cellfun(@isnumeric,xp2.data(:))) && ~is_image
     
 end
 
-
-
 %% Set up legend entries and axis limits
 % Set up legend entries
 subplot_options.legend1 = setup_legends(xp2);
-
 
 % Get axis lims
 if isempty(plot_options.xlims) && lock_axes && ~is_image
@@ -521,7 +507,6 @@ else
     end
 end
 
-
 % If Ndims_per_subplot has not been set yet, set it now!
 if isempty(Ndims_per_subplot)
     Ndims_per_subplot = 1;
@@ -561,7 +546,6 @@ switch num_embedded_subplots
         function_args = {{figure_options},{subplot_options2},{subplot_options},{plot_options}};
 end
 
-
 %% Auto trim dimensions as needed
 % Linearize dimensions of xp2 that are in excess of the total number we can
 % plot
@@ -579,7 +563,6 @@ available_dims = ~cellfun(@isempty,dimensions);
 function_handles = function_handles(available_dims);
 dimensions = dimensions(available_dims);
 function_args = function_args(available_dims);
-
 
 %% Run the plots!
 % Open new figure if necessary & plot the data
@@ -707,8 +690,6 @@ function dimensions = get_dimensions(ax_names,dims_per_function_handle)
     
 end
 
-
-
 function xp2 = reduce_dims(xp2,maxNplotdims)
     Nd = ndims(xp2);
     if Nd > maxNplotdims 
@@ -728,7 +709,6 @@ function varied_names = only_varieds(xp)
     findaxis_varied(xp); % This function will return an error if they are missing!
     
 end
-
 
 function varied_names = only_varieds_old_deleteme(all_names)
     warning('update this command or possibly merge with findaxis_varied');
