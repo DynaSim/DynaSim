@@ -120,7 +120,6 @@ end
 % convert func to handle if not a cell array
 [funcIn, nFunc] = parseFuncIn(funcIn);
 
-<<<<<<< HEAD:functions/AnalyzeData.m
 % check if postSim
 postSimBool = studyinfoBool || (length(data) > 1); % since length(data)==1 and no studyinfo with SimulateModel call
 
@@ -143,7 +142,7 @@ for fInd = 1:nFunc % loop over function inputs
   tstart = tic;
 
   %% Eval func
-  if length(data)==1 || (postSimBool && options.load_all_data_flag)% Don't need to add check on load_all_data_flag, since if false data is empty.
+  if length(data)==1 || postSimBool % Don't need to add check on load_all_data_flag, since if false data is empty.
     result = evalFnWithArgs(fInd, data, func, options, varargin);
   else
     result = [];
