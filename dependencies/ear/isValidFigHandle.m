@@ -13,6 +13,11 @@ function validBool = isValidFigHandle(h)
 try
   if ischar(h) %string input
     validBool = evalin('caller', ['isvalid(' h ')']) || evalin('caller', ['isgraphics(' h ')']);
+  elseif ismatrix(h)
+    validBool = zeros(1,length(h));
+    for iH = 1:length(h)
+      validBool(iH) = h(iH);
+    end
   else
     validBool = isvalid(h) || isgraphics(h);
   end

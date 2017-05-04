@@ -1,0 +1,27 @@
+#!/bin/csh
+#$ -o pbsout/${SGE_TASK_ID}.out
+#$ -e pbsout/${SGE_TASK_ID}.err
+
+# $1 is absolute path to working dir
+# $2 = 'sim_job', the job name prefix
+
+cd $1
+echo "command = " $2${SGE_TASK_ID}
+echo "cwd = " `pwd`
+echo "HOSTNAME = " $HOSTNAME
+echo "JOB_NAME = " $JOB_ID
+echo "JOB_NAME = " $JOB_NAME
+
+if (-e pbsout/${SGE_TASK_ID}.out) then
+  rm -f pbsout/${SGE_TASK_ID}.out
+endif
+if (-e pbsout/${SGE_TASK_ID}.err) then
+  rm -f pbsout/${SGE_TASK_ID}.err
+endif
+
+#mat -r "$2"
+#/usr/local/bin/matlab -nojvm -nosplash -r "$2${SGE_TASK_ID}"
+#matlab -nodisplay -singleCompThread -r "$2${SGE_TASK_ID}"
+#/usr/local/apps/matlab-2014b/bin/matlab -nojvm -nosplash -r "$2${SGE_TASK_ID}"
+/usr/local/apps/matlab-2014b/bin/matlab -nodisplay -singleCompThread -r "$2${SGE_TASK_ID}" -logfile "logs/$2${SGE_TASK_ID}.log"
+echo "finished"
