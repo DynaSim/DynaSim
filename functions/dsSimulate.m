@@ -260,10 +260,10 @@ options=ds.checkOptions(varargin,{...
   'analysis_options',[],[],...
   'plot_functions',[],[],...
   'plot_options',[],[],...
-  'debug_flag',0,{0,1},...
   'optimize_big_vary',0,{0,1},...
   'mex_dir','mex',[],... % Directory to search for pre-compiled solve files (solve*_mex*). Can be relative to 'study_dir' or absolute path.
   'in_parfor_loop_flag',0,{0,1},... % if inside parfor loop
+  'debug_flag',0,{0,1},...
   'auto_gen_test_data_flag',0,{0,1},...
   'unit_test_flag',0,{0,1},...
   },false);
@@ -351,10 +351,17 @@ if isempty(options.sim_id) % not in part of a batch sim
   end
 
   % check for one_solve_file_flag
-  if options.one_solve_file_flag && ~options.cluster_flag
+  if options.one_solve_file_flag && ~options.cluster_flag && ~options.parallel_flag
     % One file flag only for cluster
-    fprintf('Since cluster_flag==0, setting options.one_solve_file_flag=0\n')
+    fprintf('Since cluster_flag==0 and parallel_flag==0, setting options.one_solve_file_flag=0\n')
     options.one_solve_file_flag = 0;
+    % TODO: this is a temp setting until iss_90 is fully implemented
+  end
+  
+  if options.one_solve_file_flag && options.cluster_flag && options.parallel_flag
+    % One file flag can't do parallel_flag
+    fprintf('Since cluster_flag==1 and one_solve_file_flag==1, setting options.parallel_flag=0\n')
+    options.parallel_flag = 0;
     % TODO: this is a temp setting until iss_90 is fully implemented
   end
 
@@ -369,13 +376,6 @@ if isempty(options.sim_id) % not in part of a batch sim
     % One file flag needs array mode
     fprintf('Since one_solve_file_flag==1, setting options.qsub_mode=''array''\n')
     options.qsub_mode = 'array';
-    % TODO: this is a temp setting until iss_90 is fully implemented
-  end
-
-  if options.one_solve_file_flag && options.parallel_flag
-    % One file flag can't do parallel_flag
-    fprintf('Since one_solve_file_flag==1, setting options.parallel_flag=0\n')
-    options.parallel_flag = 0;
     % TODO: this is a temp setting until iss_90 is fully implemented
   end
 
@@ -592,6 +592,7 @@ end
 % 1.3.2 manage parallel computing on local machine
     % TODO: debug local parallel sims, doesn't seem to be working right...
     % (however SCC cluster+parallel works)
+
 if options.parallel_flag
   % prepare studyinfo
   [studyinfo,options]=ds.setupStudy(model,'simulator_options',options,'modifications_set',modifications_set);
@@ -634,11 +635,18 @@ if options.parallel_flag
 %   system('find * -name "core*"','-echo');
  
   clear data
-  
-  parfor sim=1:length(modifications_set)
-    %data(sim)=dsSimulate(model,'modifications',modifications_set{sim},'solve_file',solve_file,keyvals{:});       % Original parfor code
-    data(sim)=dsSimulate(model,'modifications',modifications_set{sim},keyvals{:},'studyinfo',studyinfo,'sim_id',sim, 'in_parfor_loop_flag', 1);  % My modification; now specifies a separate study directory for each sim
-    %disp(sim);
+  if ~options.debug_flag
+    parfor sim=1:length(modifications_set)
+      %data(sim)=dsSimulate(model,'modifications',modifications_set{sim},'solve_file',solve_file,keyvals{:});       % Original parfor code
+      data(sim)=dsSimulate(model,'modifications',modifications_set{sim},keyvals{:},'studyinfo',studyinfo,'sim_id',sim, 'in_parfor_loop_flag', 1);  % My modification; now specifies a separate study directory for each sim
+      %disp(sim);
+    end
+  else
+    for sim=1:length(modifications_set)
+      %data(sim)=dsSimulate(model,'modifications',modifications_set{sim},'solve_file',solve_file,keyvals{:});       % Original parfor code
+      data(sim)=dsSimulate(model,'modifications',modifications_set{sim},keyvals{:},'studyinfo',studyinfo,'sim_id',sim, 'in_parfor_loop_flag', 1);  % My modification; now specifies a separate study directory for each sim
+      %disp(sim);
+    end
   end
 
   
@@ -1008,10 +1016,6 @@ catch err % error handling
     data=studyinfo;
   end
   cleanup('error');
-  
-  if options.debug_flag
-    keyboard
-  end
   
   rethrow(err)
 end
