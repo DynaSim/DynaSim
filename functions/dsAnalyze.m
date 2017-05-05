@@ -1,4 +1,4 @@
-function result = dsAnalyze(data,func,varargin)
+function result = dsAnalyze(src,funcIn,varargin)
 %DSANALYZE - Apply an analysis function to DynaSim data, optionally saving data
 %
 % Pass a single DynaSim data structure or an array of data structures to a
@@ -90,7 +90,7 @@ end
 % end
 
 %% Parse src.
-[data, studyinfo] = parseSrc(src, options, varargin);
+[data, studyinfo] = parseSrc(src, options, varargin{:});
 % Data at this point:
 %   - 'data' as single struct or struct array, or empty
 %   - 'studyinfo' struct or empty
@@ -143,7 +143,7 @@ for fInd = 1:nFunc % loop over function inputs
 
   %% Eval func
   if length(data)==1 || postSimBool % Don't need to add check on load_all_data_flag, since if false data is empty.
-    result = evalFnWithArgs(fInd, data, func, options, varargin);
+    result = evalFnWithArgs(fInd, data, func, options, varargin{:});
   else
     result = [];
   end
@@ -151,7 +151,7 @@ for fInd = 1:nFunc % loop over function inputs
 
 
   % calc nResults
-  if ~isempty(results)
+  if ~isempty(result)
     nResults = length(result);
   elseif ~isempty(data)
     nResults = length(data);
@@ -235,7 +235,7 @@ for fInd = 1:nFunc % loop over function inputs
         if ~options.xUnit
           switch extension
             case '.svg'
-              plot2svg(fpath,thisResult);
+              plot2svg(fPath,thisResult);
             case '.jpg'
               print(thisResult,fPath,'-djpeg');
             case '.eps'
@@ -350,14 +350,14 @@ if isstruct(src) && isfield(src,'time') % data struct (single or array)
   studyinfo = [];
 elseif ischar(src) %string input
   if options.load_all_data_flag % load data
-    [data,studyinfo] = ImportData(src, varargin{:});
+    [data,studyinfo] = dsImport(src, varargin{:});
   else % only load studyinfo
     data = [];
-    studyinfo = CheckStudyinfo(src);
+    studyinfo = ds.checkStudyinfo(src);
   end
 
   % update study_dir
-  if exist(src,'file') && strfind(src, 'studyinfo') %studyinfo.mat
+  if exist(src, 'file') && ~isempty(strfind(src, 'studyinfo')) %studyinfo.mat
     studyinfo.study_dir = fileparts2(src);
   elseif isdir(src) % study_dir
     studyinfo.study_dir = src;
@@ -474,12 +474,12 @@ end
 
 function result = evalFnWithArgs(fInd, data, func, options, varargin)
 if isempty(options.function_options)
-  parfor dInd = 1:length(data)
+  for dInd = 1:length(data)
     result(dInd) = feval(func,data(dInd),varargin{:});
   end
 else
   function_options = options.function_options{fInd};
-  parfor dInd = 1:length(data)
+  for dInd = 1:length(data)
     result(dInd) = feval(func,data(dInd),function_options{:});
   end
 end
