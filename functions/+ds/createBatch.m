@@ -72,9 +72,9 @@ num_simulations=length(modifications_set);
     if options.verbose_flag
       fprintf('Study already finished. Not creating new batch.\n');
     end
-    
+
     studyinfo=ds.checkStudyinfo(studyinfo.study_dir,'process_id',options.process_id, varargin{:});
-    
+
     return;
   end
 % end
@@ -93,19 +93,19 @@ solve_file = ds.getSolveFile(base_model,studyinfo,options.simulator_options);
 %   NOTE: the extension depends on whether a 32-bit or 64-bit machine is used
 if options.compile_flag
   % get directory where solve_file is located and the file name
-  [fpath,fname]=fileparts(solve_file);
-  
+  [fpath,fname]=fileparts2(solve_file);
+
   % get list of files in solve directory
   D=dir(fpath);
-  
+
   % get extension of files with matching names
   tmp=regexp({D.name},[fname '\.(\w+)$'],'tokens','once');
   tmp=unique([tmp{:}]);
-  
+
   % append extension to solve_file if regular mex (not non supported matlab solver mex)
   if ~any(strcmp(options.solver, {'ode113','ode15s','ode23s','ode23t','ode23tb'})) % not mex supported)
     full_solve_file=[solve_file '.' tmp{1}];
-  
+
     % remove '_mex' suffix from solve_file for compatibility with ds.getSolveFile()
     solve_file=regexp(solve_file,'(.+)_mex$','tokens','once');
     solve_file=solve_file{1};
@@ -125,7 +125,7 @@ studyinfo.base_solve_file=solve_file;
 [o,home]=system('echo $HOME');
 
 % create batch directory
-[study_dir_path,study_dir_name,study_dir_suffix]=fileparts(studyinfo.study_dir);
+[study_dir_path,study_dir_name,study_dir_suffix]=fileparts2(studyinfo.study_dir);
 study_dir_name=[study_dir_name study_dir_suffix];
 if ~options.auto_gen_test_data_flag && ~options.unit_test_flag
   batch_dir = fullfile(strtrim(home),'batchdirs',study_dir_name);
@@ -186,7 +186,7 @@ if ~options.one_solve_file_flag
     sim_ids=sim_cnt+(1:options.sims_per_job);
     sim_ids=sim_ids(sim_ids<=num_simulations);
     sim_cnt=sim_cnt+options.sims_per_job;
-    
+
     % only run simulations if data_file does not exist (unless overwrite_flag=1)
     proc_sims=[]; % simulations to run in this job
     for j=1:length(sim_ids)
@@ -197,34 +197,34 @@ if ~options.one_solve_file_flag
         proc_sims=[proc_sims sim_ids(j)];
       end
     end
-    
+
     if isempty(proc_sims)
       skip_sims=[skip_sims sim_ids];
       continue; % skip this job
     else
       skip_sims=[skip_sims setdiff(sim_ids,proc_sims)];
     end
-    
+
     WriteSimJob(proc_sims,job_file); % create job script
-    
+
     jobs{end+1}=job_file;
-    
+
     % add job_file to studyinfo
     for j=1:length(proc_sims)
       studyinfo.simulations(proc_sims(j)).job_file=job_file;
     end
-      
+
   end %for
 else %one_solve_file_flag
   job_file=fullfile(batch_dir, 'sim_job.m'); %always use this file
-  
+
   WriteSimJob([], job_file); % create job script
-  
+
   % TODO: compile job_file
 %   if options.compile_flag
 %     job_file = ds.prepareMEX(job_file, options); %compile the job file
 %   end
-  
+
   % add job_file to studyinfo
   [studyinfo.simulations.job_file] = deal(job_file); %same job file for all sims
 end %if
@@ -238,7 +238,7 @@ if numel(skip_sims)==num_simulations
   if options.verbose_flag
     fprintf('Data exists for all simulations in study. nothing to do.\n');
   end
-  
+
   return;
 end
 
@@ -253,12 +253,12 @@ end
 % write to file
 if strcmp(options.qsub_mode, 'loop')
   fScript=fopen(script_filename,'wt');
-  
+
   for j=1:length(jobs)
-    [~,thisFilename]=fileparts(jobs{j});
+    [~,thisFilename]=fileparts2(jobs{j});
     fprintf(fScript,'%s\n',thisFilename);
   end
-  
+
   fclose(fScript);
 end
 
@@ -268,8 +268,8 @@ if ~options.one_solve_file_flag
   if options.verbose_flag
     fprintf('Creating distinct solver sub-directories for %g simulations...\n',num_simulations);
   end
-  %[solve_path,solve_name,solve_ext]=fileparts(solve_file);
-  [solve_path,solve_name,solve_ext]=fileparts(full_solve_file);
+  %[solve_path,solve_name,solve_ext]=fileparts2(solve_file);
+  [solve_path,solve_name,solve_ext]=fileparts2(full_solve_file);
 
   % prepare studyinfo with simulation-specific metadata
   for sim=1:num_simulations
@@ -307,22 +307,22 @@ if ~options.one_solve_file_flag
     studyinfo.simulations(sim).simulator_options.vary=[];
     studyinfo.simulations(sim).simulator_options.sim_id=studyinfo.simulations(sim).sim_id;
     studyinfo.simulations(sim).error_log='';
-    
+
     % copy studyinfo to batch_dir for each simulation
     %this_study_file=fullfile(batch_dir,sprintf('studyinfo_%g.mat',sim));
     %save(this_study_file,'studyinfo');
-    
+
     % copy studyinfo file to batch_dir for each simulation
     for sim=1:num_simulations
       this_study_file=fullfile(batch_dir,sprintf('studyinfo_%g.mat',sim));
-      
+
       if sim==1
         save(this_study_file,'studyinfo');
         first_study_file=this_study_file;
       else
         % use copyfile() after saving first b/c >10x faster than save()
         [success,msg]=copyfile(first_study_file,this_study_file);
-        
+
         if ~success, error(msg); end
       end
     end
@@ -340,7 +340,7 @@ else %one_solve_file_flag
     studyinfo.simulations(iSim).simulator_options.sim_id = studyinfo.simulations(iSim).sim_id;
   end
   [studyinfo.simulations.error_log] = deal('');
- 
+
   % copy studyinfo file to batch_dir since more information now
   batch_study_file = fullfile(batch_dir,'studyinfo.mat');
   save(batch_study_file,'studyinfo');
@@ -367,22 +367,22 @@ else % on cluster with qsub
   % submit jobs (e.g., fScripjobs_memlimit batch_dir 32G)
   % check status of study
   [~,s]=ds.monitorStudy(studyinfo.study_dir,'verbose_flag',0);
-  
+
   if s~=1 % study not finished
     % submit jobs using shell script
     if options.auto_gen_test_data_flag || options.unit_test_flag
       batch_dir = rel_study_dir;
     end
-    
+
     [batch_dir_path,batch_dir_name,batch_suffix]=fileparts(batch_dir);
     batch_dir_name=[batch_dir_name batch_suffix];
-    
+
     if ~options.auto_gen_test_data_flag && ~options.unit_test_flag
       dsFnPath = fileparts(mfilename('fullpath'));
     else
       dsFnPath = 'dsFnPath';
     end
-    
+
     if options.parallel_flag
       cmd=sprintf('qmatjobs_pct %s %s %g',batch_dir_name,options.memory_limit,options.num_cores);
       %status=system('which qmatjobs_pct');
@@ -392,7 +392,7 @@ else % on cluster with qsub
         cmd = sprintf('echo ''%s/qmatjob_array %s sim_job'' | qsub -V -hard -l ''h_vmem=%s'' -wd %s -N %s_sim_job -t 1-%i',...
           dsFnPath, batch_dir, options.memory_limit, batch_dir, batch_dir_name, num_jobs);
       elseif strcmp(options.qsub_mode, 'array') && options.one_solve_file_flag
-        [~, job_filename] = fileparts(job_file); %remove path and extension
+        [~, job_filename] = fileparts2(job_file); %remove path and extension
         cmd = sprintf('echo ''%s/qmatjob_array_one_file %s %s'' | qsub -V -hard -l ''h_vmem=%s'' -wd %s -N %s_sim_job -t 1-%i:%i',...
           dsFnPath, batch_dir, job_filename, options.memory_limit, batch_dir, batch_dir_name, num_simulations, options.sims_per_job);
         % NOTE: using num_simulations, not num_jobs, since the job_file will
@@ -402,20 +402,20 @@ else % on cluster with qsub
       end
       %status=system('which qmatjobs_memlimit');
     end
-    
+
     % add shell script to linux path if not already there
     %if status~=0
       setenv('PATH', [getenv('PATH') ':' dynasim_functions ':' fullfile(dynasim_functions, '+ds')]);
     %end
-    
+
     if options.verbose_flag
       fprintf('Submitting cluster jobs with shell command: "%s"\n',cmd);
     end
-    
+
     if ~options.auto_gen_test_data_flag && ~options.unit_test_flag
       [status,result]=system(cmd);
     end
-    
+
     if status > 0
       if options.verbose_flag
         fprintf('Submit command failed: "%s"\n',cmd);
@@ -428,7 +428,7 @@ else % on cluster with qsub
         disp(result);
       end
     end
-    
+
     if options.verbose_flag
       %fprintf('%g jobs successfully submitted!\ntip: use ds.monitorStudy(''%s'') or ds.monitorStudy(studyinfo) to track status of cluster jobs.\n',num_jobs,studyinfo.study_dir);
       fprintf('%g jobs successfully submitted!\n',num_jobs);
@@ -444,7 +444,7 @@ end
 if options.auto_gen_test_data_flag
   dirIn = studyinfo.study_dir;
   removeStudyinfo()
-  
+
   if ~isempty(studyinfo)
     studyinfo = [];
   end
@@ -467,55 +467,55 @@ end
 %% NESTED FUNCTIONS
   function WriteSimJob(sim_ids,job_file)
     % purpose: write m-file to job_file to run simulations of sim_ids
-    
+
     % create job file
     fjob=fopen(job_file,'wt');
-    
+
     % load studyinfo using helper function to avoid busy file errors
     %fprintf(fjob,'studyinfo=ds.checkStudyinfo(''%s'',''process_id'',%g);\n',study_file,sim_ids(1), varargin{:});
     %fprintf(fjob,'load(''%s'',''studyinfo'');\n',study_file);
-    
+
     [~, job_filename] = fileparts(job_file); %remove path and extension
-    
+
     if ~options.one_solve_file_flag
       % function declaration
       fprintf(fjob, 'function %s\n\n', job_filename);
-      
+
       % set IDs of simulations to run
       fprintf(fjob,'SimIDs=[%s]\n',num2str(sim_ids));
     else %only 1 file
       % function declaration
       fprintf(fjob, 'function %s(simIDstart, simIDstep, simIDlast)\n\n', job_filename);
-      
+
       if options.compile_flag
         fprintf(fjob, 'assert(isa(simIDstart, ''double''));\n');
         fprintf(fjob, 'assert(isa(simIDstep, ''double''));\n');
         fprintf(fjob, 'assert(isa(simIDlast, ''double''));\n');
       end
-      
+
       % set IDs of simulations to run
       fprintf(fjob,'SimIDs = simIDstart:min(simIDlast,simIDstart+simIDstep-1);\n');
     end
-    
+
     % loop over and run simulations in this job
     if options.parallel_flag
       % set parallel computing options
       %fprintf(fjob,'started=0;\npool=gcp(''nocreate'');\n');
       %fprintf(fjob,'if isempty(pool), parpool(%g); started=1; end\n',options.num_cores);
       fprintf(fjob,'c=parcluster;\nsaveAsProfile(c,''local_%g'');\nparpool(c,%g);\n',k,options.num_cores);
-      
+
       % use parfor loop
       fprintf(fjob,'parfor s=1:length(SimIDs)\n');
     else
       % use for loop
       fprintf(fjob,'for s=1:length(SimIDs)\n');
     end
-    
+
     fprintf(fjob,'\tSimID=SimIDs(s);\n');
-    
+
     % each job should have try-catch to capture studyinfo.simulations(k).error_log
     fprintf(fjob,'\ttry\n');
-    
+
     % load studyinfo for this simulation
     if ~options.one_solve_file_flag
       fprintf(fjob,'\t\tload(fullfile(''%s'',sprintf(''studyinfo_%%g.mat'',SimID)),''studyinfo'');\n',batch_dir);
@@ -524,11 +524,11 @@ end
     end
     % compare paths between compute machine and studyinfo startup
     fprintf(fjob,'\t\t[valid,message]=ds.checkHostPaths(studyinfo);\n');
-    
+
     if ~options.one_solve_file_flag
       fprintf(fjob,'\t\tif ~valid\n\t\t  lasterr(message);\n\t\t  for s=1:length(SimIDs), ds.updateStudy(studyinfo.study_dir,''sim_id'',SimIDs(s),''status'',''failed''); end\n\t\t  continue;\n\t\tend\n');
     end
-    
+
     % simulate model with proper modifications and options
     fprintf(fjob,'\t\tsiminfo=studyinfo.simulations(SimID);\n');
     fprintf(fjob,'\t\toptions=rmfield(siminfo.simulator_options,{''modifications'',''studyinfo'',''analysis_functions'',''plot_functions'',''sim_id''});\n');
@@ -540,27 +540,27 @@ end
     fprintf(fjob,'\t\tfor i=1:length(siminfo.result_functions)\n');
     fprintf(fjob,'\t\t\tdsAnalyze(data,siminfo.result_functions{i},''result_file'',siminfo.result_files{i},''save_data_flag'',1,siminfo.result_options{i}{:});\n');
     fprintf(fjob,'\t\tend\n');
-    
+
     % add error handling
     fprintf(fjob,'\tcatch err\n');
-    
+
     %fprintf(fjob,'\t\ttry delete(fullfile(studyinfo.study_dir,[''.locked_'' num2str(SimID)])); end\n');
     fprintf(fjob,'\t\tdisplayError(err);\n');
     fprintf(fjob,'\tend\n');
-    
+
     % end loop over simulations in this job
     fprintf(fjob,'end\n');
     if options.parallel_flag
       %fprintf(fjob,'if started, delete(gcp); end\n');
       fprintf(fjob,'delete(gcp)\n');
     end
-    
+
     % exit script
     [status,result]=system('which qsub');
     if ~isempty(result) % on cluster
       fprintf(fjob,'exit\n');
     end
-    
+
     % close job file
     fclose(fjob);
   end % WriteSimJob
@@ -568,7 +568,7 @@ end
   function removeStudyinfo()
     % Problem: studyinfo files have many timestamps and absolute paths
     % Solution: remove studyinfo files
-    
+
     studyDirFiles = rls(studyinfo.study_dir);
     studyinfoFiles = studyDirFiles(~cellfun(@isempty, strfind(studyDirFiles, 'studyinfo')));
     for k = 1:length(studyinfoFiles)
