@@ -1,4 +1,4 @@
-function [data,studyinfo] = dsSimulate(model,varargin)
+function [data,studyinfo,result] = dsSimulate(model,varargin)
 %% data=dsSimulate(model,'option',value,...)
 % Purpose: manage simulation of a DynaSim model. This high-level function 
 % offers many options to control the number of simulations, how the model is 
@@ -513,7 +513,7 @@ if options.one_solve_file_flag && is_varied_mech_list()
 end
 
 % 1.3 check for parallel simulations
-% 1.3.1 manage cluster computing
+%% 1.3.1 manage cluster computing
 % whether to write jobs for distributed processing on cluster
 if options.cluster_flag
   % add to model any parameters in 'vary' not explicit in current model
@@ -589,7 +589,7 @@ if options.cluster_flag
   return;
 end
 
-% 1.3.2 manage parallel computing on local machine
+%% 1.3.2 manage parallel computing on local machine
     % TODO: debug local parallel sims, doesn't seem to be working right...
     % (however SCC cluster+parallel works)
 if options.parallel_flag
@@ -703,7 +703,7 @@ if options.parallel_flag
   return
 end %parallel_flag
 
-% 1.4 prepare study_dir and studyinfo if saving data
+%% 1.4 prepare study_dir and studyinfo if saving data
 if isempty(options.studyinfo)
   [studyinfo,options] = ds.setupStudy(model,'modifications_set',modifications_set,'simulator_options',options,'process_id',options.sim_id);
 else % in parfor loop and/or cluster job
@@ -962,18 +962,18 @@ try
         % do analysis and plotting while saving results
         siminfo=studyinfo.simulations(sim_ind);
         for f=1:length(siminfo.result_functions)
-          result=dsAnalyze(tmpdata,siminfo.result_functions{f},'result_file',siminfo.result_files{f},'save_data_flag',1,'save_results_flag',1,siminfo.result_options{f}{:});
+          tmpresult=dsAnalyze(tmpdata,siminfo.result_functions{f},'result_file',siminfo.result_files{f},'save_data_flag',1,'save_results_flag',1,siminfo.result_options{f}{:});
           
           % since the plots are saved, close all generated figures
-          if all(ishandle(result))
-            close(result);
+          if all(ishandle(tmpresult))
+            close(tmpresult);
           end
         end
       else
         % do analysis and plotting without saving results
-        if ~isempty(options.analysis_functions)
+        if ~isempty(options.analysis_functions) && nargout > 2
           for f=1:length(options.analysis_functions)
-            tmpdata=dsAnalyze(tmpdata,options.analysis_functions{f},'result_file',[],'save_data_flag',0,'save_results_flag',options.save_results_flag,options.analysis_options{f}{:});
+            tmpresult=dsAnalyze(tmpdata,options.analysis_functions{f},'result_file',[],'save_data_flag',0,'save_results_flag',options.save_results_flag,options.analysis_options{f}{:});
           end
         end
         
@@ -987,6 +987,10 @@ try
     
     if nargout>0
       update_data; % concatenate data structures across simulations
+    end
+    
+    if nargout>2
+      update_result; % concatenate result structures across simulations
     end
   end % end loop over sims
   
@@ -1067,7 +1071,7 @@ end % in_parfor_loop_flag
 
 
 
-% -------------------------
+%% -------------------------
 % NESTED FUNCTIONS
 % -------------------------
   function update_data
@@ -1080,6 +1084,19 @@ end % in_parfor_loop_flag
       inds=data_index+(1:length(tmpdata)); % support multiple data sets returned by experiments
       data(inds)=tmpdata;
       data_index=inds(end);
+    end
+  end
+
+  function update_result
+    % store tmpdata
+    if sim==1
+      % replicate first data set as preallocation for all
+      result=repmat(tmpresult,[1 length(modifications_set)]);
+      result_index=length(tmpresult);
+    else
+      inds=data_index+(1:length(tmpresult)); % support multiple data sets returned by experiments
+      result(inds)=tmpresult;
+      result_index=inds(end);
     end
   end
 
