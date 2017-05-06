@@ -242,7 +242,7 @@ clc
 xp4 = xp(1:2,1:2,:,6:7);
 xp4.getaxisinfo
 
-dimensions = {'populations',{'E_Iapp','I_E_tauD'},'variables',0};       % Note - we can also use a mixture of strings and index locations to specify dimensions
+dimensions = {'populations',{'E_Iapp','I_E_tauD'},'variables',0};       % Note - we can also use a mixture of strings and index locations to specify dimensions. Dimension "0" corresponds to data.
 
 % Note that here we will supply a function argument. This tells the second
 % subplot command to write its output to the axis as an RGB image, rather than
