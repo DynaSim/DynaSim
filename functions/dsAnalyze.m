@@ -11,7 +11,7 @@ function result = dsAnalyze(src,funcIn,varargin)
 %   result = AnalyzeData(study_dir,func,'option1',value1,...) % pass study_dir containing studyinfo.mat
 %
 % Inputs:
-%   - First inputs/argument:
+%   - First input/argument:
 %     - data: DynaSim data structure or data file path (s)
 %     - studyinfo: DynaSim studyinfo structure or path to studyinfo
 %     - study_dir: DynaSim study directory containing studyinfo.mat
@@ -47,7 +47,13 @@ function result = dsAnalyze(src,funcIn,varargin)
 %   - studyinfo with load_all_data_flag==0
 %   - studyinfo with load_all_data_flag==1
 
-% check inputs
+%% localfn output
+if ~nargin
+  output = localfunctions; % output var name specific to this fn
+  return
+end
+
+%% Check inputs
 options=ds.checkOptions(varargin,{...
   'result_file','result',[],...
   'save_results_flag',0,{0,1},...
@@ -58,18 +64,17 @@ options=ds.checkOptions(varargin,{...
   'function_options',{},[],...
   'simIDs',[],[],...
   'load_all_data_flag',0,{0,1},...
-  'xUnit',0,{0,1},...
+  'auto_gen_test_data_flag',0,{0,1},...
+  'unit_test_flag',0,{0,1},...
   },false);
 
-%% Setup unit testing
-if options.xUnit
-  fPaths = {};
-  % shortcut for localfunction testing
-  if isempty(src) && isempty(funcIn)
-    result = struct('result',[], 'fPaths',fPaths, 'localfunctions',localfunctions);
-    return
-  end
-  options.result_file = ds.nameFromVaried(data, prefix, options.result_file);
+%% auto_gen_test_data_flag argin
+options = ds.checkOptions(varargin,{'auto_gen_test_data_flag',0,{0,1}},false);
+if options.auto_gen_test_data_flag
+  varargs = varargin;
+  varargs{find(strcmp(varargs, 'auto_gen_test_data_flag'))+1} = 0;
+  varargs(end+1:end+2) = {'unit_test_flag',1};
+  argin = [{src},{funcIn}, varargs]; % specific to this function
 end
 
 
@@ -134,7 +139,7 @@ for fInd = 1:nFunc % loop over function inputs
 
   % change result_file if varied_filename_flag
   if options.varied_filename_flag && isfield(data, 'varied')
-    options.result_file = filenameFromVaried(options.result_file, func, data, plotFnBool, options);
+    options.result_file = filenameFromVaried(options.result_file, func, data, plotFnBool, options, varargin{:});
   end
 
   % do analysis
@@ -204,7 +209,7 @@ for fInd = 1:nFunc % loop over function inputs
 
           % change result_file if varied_filename_flag
           if options.varied_filename_flag && isfield(data, 'varied')
-            fname = filenameFromVaried(fname, func, data, plotFnBool, options);
+            fname = filenameFromVaried(fname, func, data, plotFnBool, options, varargin{:});
           end % varied_filename_flag
 
           % make fPath
@@ -232,21 +237,17 @@ for fInd = 1:nFunc % loop over function inputs
         set(thisResult, 'PaperPositionMode','auto');
         fprintf('\t\tSaving plot: %s\n',fname);
 
-        if ~options.xUnit
-          switch extension
-            case '.svg'
-              plot2svg(fPath,thisResult);
-            case '.jpg'
-              print(thisResult,fPath,'-djpeg');
-            case '.eps'
-              print(thisResult,fPath,'-depsc');
-            case '.png'
-              print(thisResult,fPath,'-dpng');
-            case '.fig'
-              savefig(thisResult,fPath);
-          end
-        else
-          fPaths{end+1} = fPath;
+        switch extension
+          case '.svg'
+            plot2svg(fPath,thisResult);
+          case '.jpg'
+            print(thisResult,fPath,'-djpeg');
+          case '.eps'
+            print(thisResult,fPath,'-depsc');
+          case '.png'
+            print(thisResult,fPath,'-dpng');
+          case '.fig'
+            savefig(thisResult,fPath);
         end
 
         if nResults > 1
@@ -257,7 +258,7 @@ for fInd = 1:nFunc % loop over function inputs
   else % analysis function returned derived data
     %% Analysis Function
     if isstruct(result)
-      result = add_modifications(result, data);
+      result = add_modifications(result, data, varargin{:});
 
       for iResult = 1:length(result)
         % add options to result structure
@@ -299,7 +300,7 @@ for fInd = 1:nFunc % loop over function inputs
 
           % change result_file if varied_filename_flag
           if options.varied_filename_flag && isfield(data, 'varied')
-            fname = filenameFromVaried(fname, func, data, plotFnBool, options);
+            fname = filenameFromVaried(fname, func, data, plotFnBool, options, varargin{:});
           end % varied_filename_flag
 
           % make fPath
@@ -310,11 +311,7 @@ for fInd = 1:nFunc % loop over function inputs
           fPath = fullfile(fDir,fname);
 
           fprintf('\t\tSaving derived data: %s\n', fPath);
-          if ~options.xUnit
-            save(fPath,'result','-v7.3');
-          else
-            fPaths{end+1} = fname;
-          end
+          save(fPath,'result','-v7.3');
         end %iResult
       else % ~studyinfoBool, whether 1 or array of struct
         fname = options.result_file;
@@ -325,26 +322,38 @@ for fInd = 1:nFunc % loop over function inputs
         end
 
         fprintf('\t\tSaving derived data: %s\n', fname);
-        if ~options.xUnit
-          save(fname,'result','-v7.3');
-        else
-          fPaths{end+1} = fname;
-        end
+        save(fname,'result','-v7.3');
       end % scenarios
     end % save_results_flag
   end % ishandle(result)
 end % fInd
 
-%% Unit Testing
-if options.xUnit
-  result = struct('result',result, 'fPaths',fPaths, 'localfunctions',localfunctions);
+%% auto_gen_test_data_flag argout
+if options.auto_gen_test_data_flag
+  argout = {result}; % specific to this function
+  
+  %ds.unit.saveAutoGenTestData(argin, argout); % TODO: check if needs to be saveAutoGenTestDir
 end
 
 end %main fn
 
 
+
+
 %% Local functions
+
 function [data, studyinfo] = parseSrc(src, options, varargin)
+
+%% auto_gen_test_data_flag argin
+options = ds.checkOptions(varargin,{'auto_gen_test_data_flag',0,{0,1}},false);
+if options.auto_gen_test_data_flag
+  varargs = varargin;
+  varargs{find(strcmp(varargs, 'auto_gen_test_data_flag'))+1} = 0;
+  varargs(end+1:end+2) = {'unit_test_flag',1};
+  argin = [{src},{options}, varargs]; % specific to this function
+end
+
+
 if isstruct(src) && isfield(src,'time') % data struct (single or array)
   data = src; % if length==1,then likely from SimulateModel call
   studyinfo = [];
@@ -407,6 +416,14 @@ end
 % if ~exist('studyinfo','var')
 %   studyinfo = [];
 % end
+
+%% auto_gen_test_data_flag argout
+if options.auto_gen_test_data_flag
+  argout = {data, studyinfo}; % specific to this function
+  
+  %ds.unit.saveAutoGenTestDataLocalFn(argin, argout); % localfn
+end
+
 end
 
 
@@ -445,9 +462,18 @@ end
 end
 
 
-function filename = filenameFromVaried(filename, func, data, plotFnBool, options)
+function filename = filenameFromVaried(filename, func, data, plotFnBool, options, varargin)
 % NOTE: inputs are odd since called from different sources with different
 %       states.
+
+%% auto_gen_test_data_flag argin
+options = ds.checkOptions(varargin,{'auto_gen_test_data_flag',0,{0,1}},false);
+if options.auto_gen_test_data_flag
+  varargs = varargin;
+  varargs{find(strcmp(varargs, 'auto_gen_test_data_flag'))+1} = 0;
+  varargs(end+1:end+2) = {'unit_test_flag',1};
+  argin = [{filename}, {func}, {data}, {plotFnBool}, {options}, varargs]; % specific to this function
+end
 
 if isfield(options, 'save_prefix') && ~isempty(options.save_prefix)
   prefix = options.save_prefix;
@@ -469,6 +495,14 @@ else
 end
 
 filename = nameFromVaried(data, prefix, filename);
+
+%% auto_gen_test_data_flag argout
+if options.auto_gen_test_data_flag
+  argout = {filename}; % specific to this function
+  
+  %ds.unit.saveAutoGenTestDataLocalFn(argin, argout); % localfn
+end
+
 end
 
 
@@ -484,6 +518,7 @@ else
   end
 end
 end
+
 
 function data = loadDataFromSingleSim(simID, options, varargin)
 % check if iResult in options.simIDs
@@ -508,41 +543,59 @@ end
 data = ImportData(src, varinputs{:}); % load data
 end
 
-function result = add_modifications(result, data)
-  % add modifications to result structure, excluding modifications made
-  % within experiments. note: while this nested function is similar to
-  % prepare_varied_metadata in SimulateModel, the data structure contains
-  % all modifications (those within and across experiments; listed in 'varied').
-  % the result structure collapses data sets from an experiment into a single
-  % result; thus, each result corresponds to modifications across
-  % experiments but not within them; those modifications are stored in
-  % the simulator options.
-  if ~isempty(data(1).simulator_options.modifications)
-    varied = {};
-    mods = data(1).simulator_options.modifications;
-    for ii = 1:length(result)
-      for jj = 1:size(mods,1)
-        % prepare valid field name for thing varied:
-        fld = [mods{jj,1} '_' mods{jj,2}];
 
-        % convert arrows and periods to underscores
-        fld = regexprep(fld,'(->)|(<-)|(-)|(\.)','_');
+function result = add_modifications(result, data, varargin)
+% add modifications to result structure, excluding modifications made
+% within experiments. note: while this nested function is similar to
+% prepare_varied_metadata in SimulateModel, the data structure contains
+% all modifications (those within and across experiments; listed in 'varied').
+% the result structure collapses data sets from an experiment into a single
+% result; thus, each result corresponds to modifications across
+% experiments but not within them; those modifications are stored in
+% the simulator options.
 
-        % remove brackets and parentheses
-        fld = regexprep(fld,'[\[\]\(\)\{\}]','');
-        result(ii).(fld) = mods{jj,3};
-        varied{end+1} = fld;
-      end
-      result(ii).varied = varied;
-      result(ii).modifications = mods;
+%% auto_gen_test_data_flag argin
+options = ds.checkOptions(varargin,{'auto_gen_test_data_flag',0,{0,1}},false);
+if options.auto_gen_test_data_flag
+  varargs = varargin;
+  varargs{find(strcmp(varargs, 'auto_gen_test_data_flag'))+1} = 0;
+  varargs(end+1:end+2) = {'unit_test_flag',1};
+  argin = [{result}, {data}, varargs]; % specific to this function
+end
+
+if ~isempty(data(1).simulator_options.modifications)
+  varied = {};
+  mods = data(1).simulator_options.modifications;
+  for ii = 1:length(result)
+    for jj = 1:size(mods,1)
+      % prepare valid field name for thing varied:
+      fld = [mods{jj,1} '_' mods{jj,2}];
+      
+      % convert arrows and periods to underscores
+      fld = regexprep(fld,'(->)|(<-)|(-)|(\.)','_');
+      
+      % remove brackets and parentheses
+      fld = regexprep(fld,'[\[\]\(\)\{\}]','');
+      result(ii).(fld) = mods{jj,3};
+      varied{end+1} = fld;
     end
-  elseif isfield(data,'varied') && length(data) == 1
-    % add 'varied' info from data to result structure
-    for ii = 1:length(result)
-      result(ii).varied = data(1).varied;
-      for jj = 1:length(data(1).varied)
-        result(ii).(data(1).varied{jj}) = data(1).(data(1).varied{jj});
-      end
+    result(ii).varied = varied;
+    result(ii).modifications = mods;
+  end
+elseif isfield(data,'varied') && length(data) == 1
+  % add 'varied' info from data to result structure
+  for ii = 1:length(result)
+    result(ii).varied = data(1).varied;
+    for jj = 1:length(data(1).varied)
+      result(ii).(data(1).varied{jj}) = data(1).(data(1).varied{jj});
     end
   end
+end
+
+%% auto_gen_test_data_flag argout
+if options.auto_gen_test_data_flag
+  argout = {result}; % specific to this function
+  
+  %ds.unit.saveAutoGenTestDataLocalFn(argin, argout); % localfn
+end
 end % add_modifications
