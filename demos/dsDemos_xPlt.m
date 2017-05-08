@@ -47,9 +47,9 @@ ds.previewTable(data_table,column_titles);
 
 % Import the linear data into an xPlt object
 xp = xPlt;
-X = data_table{1};                          % X holds the data that will populate the multidimensional array. Must be numeric or cell array.
-axislabels = data_table(2:end);             % Each entry in X has an associated set of axis labels, which will define its location in multidimensional space. **Must be numeric or cell array of chars only**
-xp = xp.importLinearData(X,axislabels{:});
+data_column = data_table{1};                          % X holds the data that will populate the multidimensional array. Must be numeric or cell array.
+axis_val_columns = data_table(2:end);                 % Each entry in X has an associated set of axis labels, which will define its location in multidimensional space. **Must be numeric or cell array of chars only**
+xp = xp.importDataTable(data_column,axis_val_columns);
 xp = xp.importAxisNames(column_titles(2:end));  % There should be 1 axis name for every axis, of type char.
 
 % xp.meta stores meta data for use by the user as they see fit.
@@ -124,8 +124,8 @@ disp(data_table{1}{2})
 
 % Import the linear data into an xPlt object
 xp_img = xPlt;
-X = data_table{1}; axislabels = data_table(2:end);
-xp_img = xp_img.importLinearData(X, axislabels{:});
+data_column = data_table{1}; axis_val_columns = data_table(2:end);
+xp_img = xp_img.importDataTable(data_column, axis_val_columns);
 xp_img = xp_img.importAxisNames(column_titles(2:end));
 
 %% Plot the saved .png images

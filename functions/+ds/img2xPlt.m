@@ -11,7 +11,7 @@ function xp = img2xPlt(data_img)
     % Import the linear data into an xPlt object
     xp = xPlt;
     X = data_table{1}; axislabels = data_table(2:end);
-    xp = xp.importLinearData(X, axislabels{:});
+    xp = xp.importDataTable(X, axislabels);
     xp = xp.importAxisNames(column_titles(2:end));
 
     % Squeeze out any empty dims that might have been introduced by the

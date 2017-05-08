@@ -62,7 +62,7 @@ clear val1 val2 pop_name1 pop_name2 propert1 property2
 % Build specs structure. 
 % population name x entry x spec1 or spec2
 nd = nDDict;
-nd = nd.importLinearData(val,pop_names,properties,specID);
+nd = nd.importDataTable(val,{pop_names,properties,specID});
 nd.axis(1).name = 'Populations';
 nd.axis(2).name = 'Properties';
 nd.axis(3).name = 'SpecID';
@@ -104,7 +104,7 @@ clear val1 val2 pop_name1 pop_name2 propert1 property2
 % Connection name x entry x spec1 or spec2
 if ~isempty(val)
     nd = nDDict;
-    nd = nd.importLinearData(val,pop_names,properties,specID);
+    nd = nd.importDataTable(val,{pop_names,properties,specID});
     nd.axis(1).name = 'Connections';
     nd.axis(2).name = 'Properties';
     nd.axis(3).name = 'SpecID';

@@ -123,7 +123,7 @@ disp(data_table{1}{2})
 % Import the linear data into an xPlt object
 xp_img = xPlt;
 X = data_table{1}; axislabels = data_table(2:end);
-xp_img = xp_img.importLinearData(X, axislabels{:});
+xp_img = xp_img.importDataTable(X, axislabels);
 xp_img = xp_img.importAxisNames(column_titles(2:end));
 
 

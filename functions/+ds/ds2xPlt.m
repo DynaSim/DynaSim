@@ -15,7 +15,7 @@ function xp = ds2xPlt(data)
     xp = xPlt;
     X = data_table{1};                          % X holds the data that will populate the multidimensional array. Must be numeric or cell array.
     axislabels = data_table(2:end);             % Each entry in X has an associated set of axis labels, which will define its location in multidimensional space. **Must be numeric or cell array of chars only**
-    xp = xp.importLinearData(X,axislabels{:});
+    xp = xp.importDataTable(X,axislabels);
     xp = xp.importAxisNames(column_titles(2:end));  % There should be 1 axis name for every axis, of type char.
 
     % Store metadata info
