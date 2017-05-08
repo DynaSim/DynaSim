@@ -43,7 +43,7 @@ data=dsImport(study_dir);
 % Preview the contents of this table
 %     Note: We cannot make this one big cell array since we want to allow
 %     axis labels to be either strings or numerics.
-ds.previewTable(data_table,column_titles);
+previewTable(data_table,column_titles);
 
 % Import the linear data into an xPlt object
 xp = xPlt;
@@ -114,7 +114,7 @@ data_img = ds.importPlots(study_dir);
 [data_table,column_titles] = ds.dataField2Table (data_img,'plot_files');
 
 % Preview the contents of this table
-ds.previewTable(data_table,column_titles);
+previewTable(data_table,column_titles);
 
 % The entries in the first column contain the paths to the figure files.
 % There can be multiple figures associated with each simulation, which is
