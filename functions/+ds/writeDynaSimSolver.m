@@ -110,7 +110,7 @@ if options.save_parameters_flag
   end
   
   % set parameter file name (save with m-file)
-  [fpath,fname,fext]=fileparts(options.filename);
+  [fpath,fname,fext]=fileparts2(options.filename);
   param_file_path = fullfile(fpath,'params.mat');
   
   % save parameters to disk

@@ -102,7 +102,7 @@ function [data_table,column_titles,time] = data2Table(data,verbose_flag)
     column_titles = {'data',ax_names{:}};
     
     if verbose_flag
-        ds.previewTable(data_table,column_titles);
+        previewTable(data_table,column_titles);
     end
     
 end

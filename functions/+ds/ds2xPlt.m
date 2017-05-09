@@ -1,4 +1,4 @@
-function xp = ds2xPlt(data, varargin)
+function xp = ds2xPlt(data)
     % Convert DynaSim data structure to xp format
 
     data = ds.checkData(data, varargin{:});
@@ -9,13 +9,13 @@ function xp = ds2xPlt(data, varargin)
     % % Preview the contents of this table
     % %     Note: We cannot make this one big cell array since we want to allow
     % %     axis labels to be either strings or numerics.
-    % ds.previewTable(data_table,column_titles);
+    % previewTable(data_table,column_titles);
 
     % Import the linear data into an xPlt object
     xp = xPlt;
     X = data_table{1};                          % X holds the data that will populate the multidimensional array. Must be numeric or cell array.
     axislabels = data_table(2:end);             % Each entry in X has an associated set of axis labels, which will define its location in multidimensional space. **Must be numeric or cell array of chars only**
-    xp = xp.importLinearData(X,axislabels{:});
+    xp = xp.importDataTable(X,axislabels);
     xp = xp.importAxisNames(column_titles(2:end));  % There should be 1 axis name for every axis, of type char.
 
     % Store metadata info
