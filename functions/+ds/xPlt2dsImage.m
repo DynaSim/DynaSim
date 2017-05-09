@@ -47,8 +47,8 @@ if iscolumn(obj.data); obj=obj.transpose; end
 data = struct;
 ax_vals = obj.exportAxisVals;
 ax_names = obj.exportAxisNames;
-varied = obj.axis(2).astruct.premerged_names;
-varied_vals = obj.axis(2).astruct.premerged_values;
+varied = obj.axis(2).axismeta.premerged_names;
+varied_vals = obj.axis(2).axismeta.premerged_values;
 has_varied = 1;
 
 for j = 1:size(obj,2)                               % Loop through varieds

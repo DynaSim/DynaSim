@@ -82,8 +82,8 @@ data = struct;
 ax_vals = obj.exportAxisVals;
 ax_names = obj.exportAxisNames;
 if has_varied
-    varied = obj.axis(2).astruct.premerged_names;
-    varied_vals = obj.axis(2).astruct.premerged_values;
+    varied = obj.axis(2).axismeta.premerged_names;
+    varied_vals = obj.axis(2).axismeta.premerged_values;
 end
 
 for j = 1:size(obj,2)                               % Loop through varieds
