@@ -88,7 +88,7 @@ close all;
 % Pull out a 2D subset of the data
 clc
 xp4 = xp(:,:,'E','v');
-xp4.getaxisinfo
+xp4.printAxisInfo
 
 % Set up plotting arguments
 function_handles = {@xp_subplot_grid,@xp_matrix_basicplot};   % Specifies the handles of the plotting functions
@@ -150,7 +150,7 @@ figl; recursivePlot(xp_img,{@xp_subplot_grid,@xp_plotimage},dimensions,func_argu
 xp2 = xp.mergeDims([3,4]);
 xp2 = xp2.mergeDims([1,2]);
 xp3 = squeeze(xp2); % Squeeze out the empty dimensions.
-xp3.getaxisinfo;
+xp3.printAxisInfo;
 
 
 % Note that the variable names are not sorted the same was as in Jason's

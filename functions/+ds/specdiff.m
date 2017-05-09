@@ -68,7 +68,7 @@ nd.axis(2).name = 'Properties';
 nd.axis(3).name = 'SpecID';
 
 if debug_mode
-    nd.getaxisinfo
+    nd.printAxisInfo
 end
 
 if verbose; run_comparison(nd); end
@@ -110,7 +110,7 @@ if ~isempty(val)
     nd.axis(3).name = 'SpecID';
     
     if debug_mode
-        nd.getaxisinfo
+        nd.printAxisInfo
     end
     
     if verbose; run_comparison(nd); end
