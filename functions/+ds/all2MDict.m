@@ -1,4 +1,4 @@
-function [xp,is_image] = all2MDict(data)
+function [xp,is_image] = all2MDict(data,varargin)
 
 if ~isfield(data,'plot_files')      % Standard DynaSim data structure
 

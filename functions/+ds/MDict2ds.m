@@ -1,4 +1,4 @@
-function data = MDict2ds(obj)
+function data = MDict2ds(obj,varargin)
 %% data=MDict2ds(obj,varargin)
 % Dependencies:
 %   Requires the MDD class, which should be part of DynaSim. If not,
@@ -142,7 +142,7 @@ function data = add_pop_sizes(data,obj,num_pops,pop_names)
     % num_pops = size(obj,1);
     for i = 1:length(data)
         for j = 1:num_pops
-            obj_temp = obj(['^' pop_names{j}],i);   % ^ is regexp for begins with
+            obj_temp = obj(['/^' pop_names{j} '/'],i);   % ^ is regexp for begins with
 
             % Get list of sizes of all variables in this population
             pop_sz = cellfun(@(x) size(x,2),obj_temp.data);
