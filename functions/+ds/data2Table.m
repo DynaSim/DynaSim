@@ -1,6 +1,6 @@
 function [data_table,column_titles,time] = data2Table(data,verbose_flag)
     % Converts DynaSim structure to 1D cell array format. Later can use to
-    % import to xPlt
+    % import to MDict
     
     if nargin < 2
         verbose_flag = 0;
