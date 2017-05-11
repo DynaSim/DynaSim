@@ -1,4 +1,4 @@
-function xp = ds2xPlt(data)
+function xp = ds2MDict(data)
     % Convert DynaSim data structure to xp format
 
     data = ds.checkData(data, varargin{:});
@@ -11,8 +11,8 @@ function xp = ds2xPlt(data)
     % %     axis labels to be either strings or numerics.
     % previewTable(data_table,column_titles);
 
-    % Import the linear data into an xPlt object
-    xp = xPlt;
+    % Import the linear data into an MDict object
+    xp = MDict;
     X = data_table{1};                          % X holds the data that will populate the multidimensional array. Must be numeric or cell array.
     axislabels = data_table(2:end);             % Each entry in X has an associated set of axis labels, which will define its location in multidimensional space. **Must be numeric or cell array of chars only**
     xp = xp.importDataTable(X,axislabels);
@@ -20,7 +20,7 @@ function xp = ds2xPlt(data)
 
     % Store metadata info
     meta = struct;
-    meta.datainfo(1:2) = nDDictAxis;
+    meta.datainfo(1:2) = MDictAxis;
     meta.datainfo(1).name = 'time(ms)';
     meta.datainfo(1).values = time;
     meta.datainfo(2).name = 'cells';

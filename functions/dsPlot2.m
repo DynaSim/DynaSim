@@ -40,8 +40,8 @@ function [handles,xp] = dsPlot2(data,varargin)
 % Outputs:
 %   handles: graphic handles to figures
 % 
-% See also: ds.calcFR, ds.calcPower, ds.plotWaveforms, ds.checkData, dsPlot, xPlt,
-%           nDDict
+% See also: ds.calcFR, ds.calcPower, ds.plotWaveforms, ds.checkData, dsPlot, MDict,
+%           MDict
 
 %% Set Master parameters
   
@@ -62,9 +62,9 @@ if ischar(data)
     return;
 end
 
-% Convert the incoming DynaSim data structure to an xPlt object
-if ~isa(data,'xPlt')
-    [xp,is_image] = ds.all2xPlt(data);
+% Convert the incoming DynaSim data structure to an MDict object
+if ~isa(data,'MDict')
+    [xp,is_image] = ds.all2MDict(data);
 else
     xp = data;
     if iscell(xp.data{1})
@@ -570,7 +570,7 @@ if ~isequal(@xp_handles_newfig, function_handles{1})
     % Cheap hack to force it to create a new figure using our desired
     % parameters for instances when it wouldn't normally call
     % xp_handles_newfig.
-    xp3 = xPlt;
+    xp3 = MDict;
     fhandle = @() recursivePlot(xp2,function_handles,dimensions,function_args);
     xp3 = xp3.importData({fhandle});
     handles = xp_handles_newfig(xp3,figure_options);
