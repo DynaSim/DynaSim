@@ -81,8 +81,8 @@ data_img = ds.importPlots(study_dir);
 %% Downsample number of cells if necessary
 % (For saving space)
 
-% Convert to MDict object
-xp = ds.ds2MDict(data);
+% Convert to MDD object
+xp = ds.ds2MDD(data);
 
 % Num_cells_to_keep = 20;
 downsample_factor = 2;
@@ -97,7 +97,7 @@ end
 
 xp.data = mydata;
 
-data = ds.MDict2ds(xp);
+data = ds.MDD2ds(xp);
 
 %% Package up the data
 
@@ -120,8 +120,8 @@ previewTable(data_table,column_titles);
 disp(data_table{1}{1})
 disp(data_table{1}{2})
 
-% Import the linear data into an MDict object
-xp_img = MDict;
+% Import the linear data into an MDD object
+xp_img = MDD;
 X = data_table{1}; axislabels = data_table(2:end);
 xp_img = xp_img.importDataTable(X, axislabels);
 xp_img = xp_img.importAxisNames(column_titles(2:end));

@@ -23,8 +23,8 @@ if nargin < 3
 end
 
 
-if ~exist('MDict','class')
-    fprintf('This function requires the class MDict. Make sure this is in your MATLAB path.\n');
+if ~exist('MDD','class')
+    fprintf('This function requires the class MDD. Make sure this is in your MATLAB path.\n');
     fprintf('It can be downloaded from the following links: \n.');
     fprintf('1. https://github.com/davestanley/nDDims \n');
     fprintf('2. https://www.mathworks.com/matlabcentral/fileexchange/61656-multidimensional-dictionaries\n');
@@ -61,7 +61,7 @@ clear val1 val2 pop_name1 pop_name2 propert1 property2
 
 % Build specs structure. 
 % population name x entry x spec1 or spec2
-nd = MDict;
+nd = MDD;
 nd = nd.importDataTable(val,{pop_names,properties,specID});
 nd.axis(1).name = 'Populations';
 nd.axis(2).name = 'Properties';
@@ -103,7 +103,7 @@ clear val1 val2 pop_name1 pop_name2 propert1 property2
 % Build specs structure. 
 % Connection name x entry x spec1 or spec2
 if ~isempty(val)
-    nd = MDict;
+    nd = MDD;
     nd = nd.importDataTable(val,{pop_names,properties,specID});
     nd.axis(1).name = 'Connections';
     nd.axis(2).name = 'Properties';

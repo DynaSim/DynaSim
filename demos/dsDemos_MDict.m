@@ -1,4 +1,4 @@
-%% % % % % % % % % % % % % % % DEMO - Using MDict with DynaSim % % % % % %
+%% % % % % % % % % % % % % % % DEMO - Using MDD with DynaSim % % % % % %
 % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % 
 
 %% Set up paths 
@@ -35,7 +35,7 @@ data=dsImport(study_dir);
 
 
 
-%% Convert it into an MDict object
+%% Convert it into an MDD object
 
 % Extract the data in a linear table format
 [data_table,column_titles,time] = ds.data2Table (data);
@@ -45,8 +45,8 @@ data=dsImport(study_dir);
 %     axis labels to be either strings or numerics.
 previewTable(data_table,column_titles);
 
-% Import the linear data into an MDict object
-xp = MDict;
+% Import the linear data into an MDD object
+xp = MDD;
 data_column = data_table{1};                          % X holds the data that will populate the multidimensional array. Must be numeric or cell array.
 axis_val_columns = data_table(2:end);                 % Each entry in X has an associated set of axis labels, which will define its location in multidimensional space. **Must be numeric or cell array of chars only**
 xp = xp.importDataTable(data_column,axis_val_columns);
@@ -56,9 +56,9 @@ xp = xp.importAxisNames(column_titles(2:end));  % There should be 1 axis name fo
 % Here we will add some custom info to xp.metadata. This can be whatever
 % you want. Here, I will use this to provide information about what is
 % stored in each of the matrices in the xp.data cell array. (Alternatively,
-% we could also make each of these matrices an MDict object!)
+% we could also make each of these matrices an MDD object!)
 meta = struct;
-meta.datainfo(1:2) = MDictAxis;
+meta.datainfo(1:2) = MDDAxis;
 meta.datainfo(1).name = 'time(ms)';
 meta.datainfo(1).values = time;
 meta.datainfo(2).name = 'cells';
@@ -71,13 +71,13 @@ meta.dynasim.varied = data.varied;
 xp.meta = meta;
 clear meta
 
-%% Take the full MDict tutorial
+%% Take the full MDD tutorial
 % Run the following code to be re-directed to a more indepth tutorial on
-% using MDict. Otherwise, continue onward to a few plotting examples.
+% using MDD. Otherwise, continue onward to a few plotting examples.
 
-str = which('tutorial_MDict');
+str = which('tutorial_MDD');
 cd(fileparts(str))
-edit tutorial_MDict.m
+edit tutorial_MDD.m
 
 %% Plot 2D data
 % Tip: don't try to understand what recursivePlot is doing - instead, try
@@ -122,8 +122,8 @@ previewTable(data_table,column_titles);
 disp(data_table{1}{1})
 disp(data_table{1}{2})
 
-% Import the linear data into an MDict object
-xp_img = MDict;
+% Import the linear data into an MDD object
+xp_img = MDD;
 data_column = data_table{1}; axis_val_columns = data_table(2:end);
 xp_img = xp_img.importDataTable(data_column, axis_val_columns);
 xp_img = xp_img.importAxisNames(column_titles(2:end));

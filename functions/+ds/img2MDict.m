@@ -1,4 +1,4 @@
-function xp = img2MDict(data_img)
+function xp = img2MDD(data_img)
     % Load into DynaSim structure
     [data_table,column_titles] = ds.dataField2Table (data_img,'plot_files');
 
@@ -8,8 +8,8 @@ function xp = img2MDict(data_img)
     %disp(data_table{1}{1})
     %disp(data_table{1}{2})
 
-    % Import the linear data into an MDict object
-    xp = MDict;
+    % Import the linear data into an MDD object
+    xp = MDD;
     X = data_table{1}; axislabels = data_table(2:end);
     xp = xp.importDataTable(X, axislabels);
     xp = xp.importAxisNames(column_titles(2:end));
@@ -23,7 +23,7 @@ function xp = img2MDict(data_img)
     % Set up metadata
     % Store metadata info (putting random info in here for time being)
     meta = struct;
-    meta.datainfo(1:2) = MDictAxis;
+    meta.datainfo(1:2) = MDDAxis;
     meta.datainfo(1).name = 'time(ms)';
     meta.datainfo(1).values = 1:10;
     meta.datainfo(2).name = 'cells';
