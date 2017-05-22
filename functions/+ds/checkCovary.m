@@ -20,6 +20,8 @@ end
 non_singleton_vary_lengths = vary_lengths(vary_lengths > 1);
 
 non_singleton_vary_params = vary_params(:, vary_lengths > 1);
+    
+param_indices = 1:length(non_singleton_vary_lengths);
 
 linked_indices = {};
 
@@ -48,7 +50,7 @@ for l = 1:number_linked_sets
   marked_for_removal(linked_indices{l}(2:end)) = 1;
 end
 
-effective_vary_lengths(marked_for_removal) = [];
+effective_vary_lengths(logical(marked_for_removal)) = [];
 
 %% auto_gen_test_data_flag argout
 if options.auto_gen_test_data_flag
