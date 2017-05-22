@@ -195,33 +195,39 @@ if any(strcmp(fields, 'varied'))
     vary_lengths(v) = length(vary_vectors{v});
   end
 
-  [effective_vary_lengths, ~] = ds.checkCovary2(vary_lengths, vary_params, varargin{:});
+  [effective_vary_indices, ~] = ds.checkCovary2(vary_lengths, length(data), varargin{:});
 
-  dimensions_varied = sum(effective_vary_lengths > 1);
+  dimensions_varied = sum(effective_vary_indices);
+  vary_params = vary_params(:, effective_vary_indices);
+  vary_vectors = vary_vectors(effective_vary_indices);
+  vary_lengths = vary_lengths(effective_vary_indices);
 
   if dimensions_varied > 2
-    no_figures = prod(effective_vary_lengths(3:end));
+    no_figures = prod(vary_lengths(3:end));
 
-    data = reshape(data, prod(effective_vary_lengths(3:end)), prod(effective_vary_lengths([1 2])));
-
-    figure_params = nan(no_vary_labels - 2, 1);
+    figure_params = nan(dimensions_varied - 2, 1);
 
     vary_lengths_cp = cumprod(vary_lengths);
 
     for f = 1:no_figures
       figure_params(1) = vary_vectors{3}(mod(f - 1, vary_lengths(3)) + 1);
 
-      for v = 4:no_vary_labels
+      for v = 4:dimensions_varied
         figure_params(v - 2) = vary_vectors{v}(ceil(f/vary_lengths_cp(v - 3)));
+      end
+      
+      figure_data_index = ones(size(vary_params, 1), 1);
+      for v = 3:dimensions_varied
+        figure_data_index = figure_data_index & vary_params(:, v) == figure_params(v - 2);
       end
 
       vary_title = '';
 
-      for v = 1:(no_vary_labels - 2)
+      for v = 1:(dimensions_varied - 2)
         vary_title = [vary_title, sprintf('%s = %f ', vary_labels{v + 2}, figure_params(v))];
       end
-
-      handles = dsPlot(data(f, :), varargin{:});
+      
+      handles = dsPlot(data(figure_data_index), varargin{:});
       for h = 1:length(handles)
         % figure(handles(h))
         mtit(handles(h), vary_title, 'FontSize', 14, 'yoff', .2)
