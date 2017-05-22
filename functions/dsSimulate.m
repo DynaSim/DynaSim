@@ -1118,6 +1118,9 @@ end % in_parfor_loop_flag
         % remove brackets and parentheses
         fld=regexprep(fld,'[\[\]\(\)\{\}]','');
         
+        % remove spaces
+        fld=regexprep(fld,'[\ ]','');
+        
         for j=1:length(tmpdata)
           tmpdata(j).(fld)=mods{ii,3};
         end
