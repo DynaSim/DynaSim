@@ -195,7 +195,7 @@ if any(strcmp(fields, 'varied'))
     vary_lengths(v) = length(vary_vectors{v});
   end
 
-  [effective_vary_indices, ~] = ds.checkCovary2(vary_lengths, vary_params, varargin{:});
+  [effective_vary_indices, ~] = ds.checkCovary(vary_lengths, vary_params, varargin{:});
 
   if prod(vary_lengths(effective_vary_indices)) == length(data)
       
