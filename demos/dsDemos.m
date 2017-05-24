@@ -324,6 +324,6 @@ data=dsSimulate(s, 'compile_flag',1, 'study_dir','demo_sPING_3_compile');
 dsPlot(data);
 
 % Combine compilation and parallelization to maxmize computatinal speed locally
-vary={'','I',0:2:14};
+vary={'E','Iapp',[0 10 20]};
 data=dsSimulate(s, 'compile_flag',1, 'parallel_flag',1, 'vary', vary, 'study_dir','demo_sPING_3_compile_parallel');
 dsPlot(data);

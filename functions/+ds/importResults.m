@@ -1,4 +1,4 @@
-function results = importResults(studyinfo,func)
+function results = importResults(studyinfo,func, varargin)
 %IMPORTRESULTS - Import analysis result of a simulation
 %
 % Usage:
@@ -33,7 +33,7 @@ if isstruct(studyinfo) && isfield(studyinfo,'study_dir')
   
   % get list of data_files from studyinfo
   result_functions=studyinfo.simulations(1).result_functions;
-  matches=cellfun(@(x)isequal(x,func),result_functions);
+  matches=cellfun(@(x) strcmp(func2str(x), func2str(func)),result_functions);
   if ~any(matches)
     wprintf('Didnt find match for result function parameter')
     return

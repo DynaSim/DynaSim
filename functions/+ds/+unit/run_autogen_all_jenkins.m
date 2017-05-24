@@ -14,8 +14,27 @@ fprintf('Running from dir:%s\n',pwd);
 ws = strtrim(ws);
 fprintf('Workspace:%s\n',ws);
 
+%% fix paths
+fprintf('Fixing paths.\n');
+rmPathVar('ds');
+addpath(genpath(ws));
+
 %% Make Default Config
 ds.makeDefaultConfigJenkins;
+
+%% Rename autogen_newSave to autogen
+finalDir = fullfile(ds.getConfig('ds_unitTestData_path'), 'autogen');
+if ~exist(finalDir, 'dir')
+  newDir = fullfile(ds.getConfig('ds_unitTestData_path'), 'autogen_newSave');
+  movefile(newDir, finalDir);
+end
+
+%% Rename autogenDirs_newSave to autogenDirs
+finalDir = fullfile(ds.getConfig('ds_unitTestData_path'), 'autogenDirs');
+newDir = fullfile(ds.getConfig('ds_unitTestData_path'), 'autogenDirs_newSave');
+if ~exist(finalDir, 'dir') && exist(newDir, 'dir')
+  movefile(newDir, finalDir);
+end
 
 %% Make Test Suite
 fullSuite = TestSuite.fromPackage('ds.unit');
@@ -39,27 +58,25 @@ try
 
   %% XML Coverage Output
   testCoverageDir = fullfile(ws, 'testCoverage');
-  mkdirSilent(testCoverageDir)
+  mkdirSilent(testCoverageDir);
   reportPath = fullfile(testCoverageDir, 'dsAllAutogenTestCoverageJenkins.xml');
   report = Coverage( fullfile(ws, 'functions'), ws );
   report.exportXML(reportPath);
+
+  %% get coverage percentage
+  coverPercent = report.stats.lineRate;
+  if isnan(coverPercent)
+    coverPercent = 0;
+  end
+  coverPercentStr = sprintf('%.f', coverPercent);
+  fprintf('Test Coverage (%% of code lines): %s\n', coverPercentStr);
+
+  %% make coverage svg
+  filePath = '/home/erik/Dropbox/research/dsJenkinsBadge/coverage.svg';
+  system(['python /home/erik/Dropbox/Programming/Python/universal_coverage_badge/__main__.py -percent ' coverPercentStr ' -o ' filePath ' -f True']);
 catch e
   disp(getReport(e,'extended'))
   exit(1);
 end
-
-%% get coverage percentage
-coverPercent = report.stats.lineRate;
-if isnan(coverPercent)
-  coverPercent = 0;
-end
-coverPercentStr = sprintf('%.f', coverPercent);
-
-%% make coverage svg
-filePath = '/home/erik/Dropbox/research/dsJenkinsBadge/coverage.svg';
-if exist(filePath, 'file')
-  delete(filePath);
-end
-system(['python /home/erik/Dropbox/Programming/Python/universal_coverage_badge/__main__.py -percent ' coverPercentStr ' -o ' filePath])
 
 exit(any([results.Failed]));

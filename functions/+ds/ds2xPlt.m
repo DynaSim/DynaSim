@@ -1,4 +1,4 @@
-function xp = ds2xPlt(data)
+function xp = ds2xPlt(data, varargin)
     % Convert DynaSim data structure to xp format
 
     data = ds.checkData(data, varargin{:});
