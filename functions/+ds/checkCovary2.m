@@ -1,4 +1,4 @@
-function [effective_vary_indices, linked_indices] = checkCovary2(vary_lengths, vary_params, data_length, varargin)
+function [effective_vary_indices, linked_indices] = checkCovary2(vary_lengths, vary_params, varargin)
   %CHECKCOVARY - TODO I assume this checks if any varied parameters are covaried?
  
   %% localfn output
@@ -15,6 +15,9 @@ function [effective_vary_indices, linked_indices] = checkCovary2(vary_lengths, v
       varargs(end+1:end+2) = {'unit_test_flag',1};
       argin = [{vary_lengths}, {data_length}, varargs]; % specific to this function
   end
+  
+  %% Function start.
+  data_length = size(vary_params, 1);
 
   % Remove any vary statements used to set parameter values.
   non_singleton_vary_lengths = vary_lengths(vary_lengths > 1);
