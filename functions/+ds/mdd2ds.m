@@ -1,5 +1,5 @@
-function data = xPlt2ds(obj)
-%% data=xPlt2ds(obj,varargin)
+function data = MDD2ds(obj,varargin)
+%% data=MDD2ds(obj,varargin)
 % Dependencies:
 %   Requires the MDD class, which should be part of DynaSim. If not,
 %   get it here https://github.com/davestanley/MDD
@@ -14,9 +14,9 @@ function data = xPlt2ds(obj)
 % load sample_data_dynasim.mat
 % data1=data;
 % data2 = data(1);
-% d1 = xPlt2ds(ds.ds2xPlt(data1));
-% d2 = xPlt2ds(ds.ds2xPlt(data2));
-% d2b = xPlt2ds(squeeze(ds.ds2xPlt(data2)));
+% d1 = MDD2ds(ds.ds2MDD(data1));
+% d2 = MDD2ds(ds.ds2MDD(data2));
+% d2b = MDD2ds(squeeze(ds.ds2MDD(data2)));
 % % Make sure 1 is identical
 % close all; 
 % dsPlot(data1); dsPlot(d1);
@@ -82,8 +82,8 @@ data = struct;
 ax_vals = obj.exportAxisVals;
 ax_names = obj.exportAxisNames;
 if has_varied
-    varied = obj.axis(2).astruct.premerged_names;
-    varied_vals = obj.axis(2).astruct.premerged_values;
+    varied = obj.axis(2).axismeta.premerged_names;
+    varied_vals = obj.axis(2).axismeta.premerged_values;
 end
 
 for j = 1:size(obj,2)                               % Loop through varieds
@@ -142,7 +142,7 @@ function data = add_pop_sizes(data,obj,num_pops,pop_names)
     % num_pops = size(obj,1);
     for i = 1:length(data)
         for j = 1:num_pops
-            obj_temp = obj(['^' pop_names{j}],i);   % ^ is regexp for begins with
+            obj_temp = obj(['/^' pop_names{j} '/'],i);   % ^ is regexp for begins with
 
             % Get list of sizes of all variables in this population
             pop_sz = cellfun(@(x) size(x,2),obj_temp.data);

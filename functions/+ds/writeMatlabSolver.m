@@ -95,7 +95,7 @@ if options.save_parameters_flag
   end
   
   % set parameter file name (save with m-file)
-  [fpath,fname,fext]=fileparts(options.filename);
+  [fpath,fname,fext]=fileparts2(options.filename);
   odefun_filename = [fname '_odefun'];
   param_file_name = fullfile(fpath,'params.mat');
   

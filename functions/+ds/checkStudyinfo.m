@@ -111,12 +111,12 @@ study_dir=pwd;
 % check if study_dir was provided
 if ischar(studyinfo) && isdir(studyinfo)
   study_dir=studyinfo;
-  studyinfo=fullfile(study_dir,['studyinfo.mat']);
+  studyinfo=fullfile(study_dir,'studyinfo.mat');
 end
 
 % check if studyinfo.mat was provided (or derived from input study_dir)
 if ischar(studyinfo) && exist(studyinfo,'file')
-  study_dir=fileparts(studyinfo);
+  study_dir=fileparts2(studyinfo);
   studyinfo=ds.studyinfoIO([],study_dir,options.process_id,options.verbose_flag);
 elseif isnumeric(studyinfo) && isempty(studyinfo) % [], created dummy studyinfo
   % set some default studyinfo fields
@@ -265,6 +265,6 @@ end
 %% auto_gen_test_data_flag argout
 if options.auto_gen_test_data_flag
   argout = {studyinfo}; % specific to this function
-  
+
 %   ds.unit.saveAutoGenTestData(argin, argout);
 end

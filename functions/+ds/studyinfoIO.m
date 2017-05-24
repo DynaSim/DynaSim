@@ -22,7 +22,7 @@ if nargin<2 || isempty(study_file)
 elseif isdir(study_file)
   study_file=fullfile(study_file,'studyinfo.mat');
 end
-study_dir=fileparts(study_file);
+study_dir=fileparts2(study_file);
 if nargin<1, studyinfo=[]; end
 
 % determine operating system
@@ -44,7 +44,7 @@ if isempty(id)
       [status,result]=system(['ls ' study_dir '/.lock_*']);
       if status==0
         ids=regexp(result,'.lock_\d+_(\d+)','tokens');
-        if ~isempty(ids), curr_ids=cell2num([ids{:}]); end
+        if ~isempty(ids), curr_ids=cellstr2num([ids{:}]); end
       end
     otherwise % Windows
       % lock_file format: lock_<timestamp>_<id>
@@ -52,7 +52,7 @@ if isempty(id)
       status=~any(find(~cellfun(@isempty,regexp({D.name},'^lock_'))));
       if status==0
         ids=regexp({D.name},'lock_\d+_(\d+)','tokens','once'); 
-        if ~isempty(ids), curr_ids=cell2num([ids{:}]); end
+        if ~isempty(ids), curr_ids=cellstr2num([ids{:}]); end
       end
   end
 end
@@ -256,19 +256,19 @@ switch OS
       if ~isempty(ids)
         % identify the max id
         ids=[ids{:}];
-        id=max(cell2num(ids));
+        id=max(cellstr2num(ids));
       end
 %       % get list of timestamps in lock file names
 %       timestamps=regexp(result,'.lock_(\d+)_\d+','tokens');
 %       if ~isempty(timestamps)
 %         % identify the next timestamp to process
 %         timestamps=[timestamps{:}];
-%         x=cell2num(timestamps);
+%         x=cellstr2num(timestamps);
 %         timestamp=timestamps{x==min(x)};
 %         % get list of locked ids with that timestamp
 %         ids=regexp(result,sprintf('.lock_%s_(\\d+)',timestamp),'tokens');
 %         % get max id from lock with min timestamp
-%         id=max(cell2num([ids{:}]));
+%         id=max(cellstr2num([ids{:}]));
 %       end
     end
   otherwise % Windows
@@ -281,12 +281,12 @@ switch OS
         % identify the next timestamp to process
         timestamps=[timestamps{:}];
         if isempty(timestamps), return; end
-        x=cell2num(timestamps);
+        x=cellstr2num(timestamps);
         timestamp=timestamps{x==min(x)};
         % get list of locked ids with that timestamp
         ids=regexp({D.name},sprintf('lock_%s_(\\d+)',timestamp),'tokens','once');
         % get max id from lock with min timestamp
-        id=max(cell2num([ids{:}]));
+        id=max(cellstr2num([ids{:}]));
       end
     end
 end

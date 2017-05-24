@@ -23,8 +23,8 @@ if nargin < 3
 end
 
 
-if ~exist('nDDict','class')
-    fprintf('This function requires the class nDDict. Make sure this is in your MATLAB path.\n');
+if ~exist('MDD','class')
+    fprintf('This function requires the class MDD. Make sure this is in your MATLAB path.\n');
     fprintf('It can be downloaded from the following links: \n.');
     fprintf('1. https://github.com/davestanley/nDDims \n');
     fprintf('2. https://www.mathworks.com/matlabcentral/fileexchange/61656-multidimensional-dictionaries\n');
@@ -61,14 +61,14 @@ clear val1 val2 pop_name1 pop_name2 propert1 property2
 
 % Build specs structure. 
 % population name x entry x spec1 or spec2
-nd = nDDict;
-nd = nd.importLinearData(val,pop_names,properties,specID);
+nd = MDD;
+nd = nd.importDataTable(val,{pop_names,properties,specID});
 nd.axis(1).name = 'Populations';
 nd.axis(2).name = 'Properties';
 nd.axis(3).name = 'SpecID';
 
 if debug_mode
-    nd.getaxisinfo
+    nd.printAxisInfo
 end
 
 if verbose; run_comparison(nd); end
@@ -103,14 +103,14 @@ clear val1 val2 pop_name1 pop_name2 propert1 property2
 % Build specs structure. 
 % Connection name x entry x spec1 or spec2
 if ~isempty(val)
-    nd = nDDict;
-    nd = nd.importLinearData(val,pop_names,properties,specID);
+    nd = MDD;
+    nd = nd.importDataTable(val,{pop_names,properties,specID});
     nd.axis(1).name = 'Connections';
     nd.axis(2).name = 'Properties';
     nd.axis(3).name = 'SpecID';
     
     if debug_mode
-        nd.getaxisinfo
+        nd.printAxisInfo
     end
     
     if verbose; run_comparison(nd); end

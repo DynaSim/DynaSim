@@ -12,7 +12,7 @@ function new_result_file = nameFromVaried(data, file_type, old_result_file)
 % Outputs:
 %   - new_result_file: where to save result, based on file_type and data.varied
 
-pathstr = fileparts(old_result_file);
+pathstr = fileparts2(old_result_file);
 
 fileName = file_type;
 
