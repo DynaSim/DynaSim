@@ -195,12 +195,20 @@ if any(strcmp(fields, 'varied'))
     vary_lengths(v) = length(vary_vectors{v});
   end
 
-  [effective_vary_indices, ~] = ds.checkCovary2(vary_lengths, length(data), varargin{:});
+  [effective_vary_indices, ~] = ds.checkCovary2(vary_lengths, vary_params, length(data), varargin{:});
 
-  dimensions_varied = sum(effective_vary_indices);
-  vary_params = vary_params(:, effective_vary_indices);
-  vary_vectors = vary_vectors(effective_vary_indices);
-  vary_lengths = vary_lengths(effective_vary_indices);
+  if prod(vary_lengths(effective_vary_indices)) == length(data)
+      
+      dimensions_varied = sum(effective_vary_indices);
+      vary_params = vary_params(:, effective_vary_indices);
+      vary_vectors = vary_vectors(effective_vary_indices);
+      vary_lengths = vary_lengths(effective_vary_indices);
+      
+  else
+     
+      warning(' unable to determine which parameters are covaried. Data will be plotted as a lattice.')
+      
+  end
 
   if dimensions_varied > 2
     no_figures = prod(vary_lengths(3:end));
