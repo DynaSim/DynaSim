@@ -1,4 +1,4 @@
-function [xp,is_image] = all2MDD(data,varargin)
+function [xp,is_image] = all2mdd(data,varargin)
 
 if ~isfield(data,'plot_files')      % Standard DynaSim data structure
 
@@ -9,7 +9,7 @@ if ~isfield(data,'plot_files')      % Standard DynaSim data structure
 
 
     % Convert input data to MDD
-    xp = ds.ds2MDD(data);
+    xp = ds.ds2mdd(data);
     is_image = 0;
 else                            % Structure of links to plots
 
