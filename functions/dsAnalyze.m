@@ -563,6 +563,8 @@ if options.auto_gen_test_data_flag
   argin = [{result}, {data}, varargs]; % specific to this function
 end
 
+% #todo: The function ds.modifications2Vary implements this functionality.
+% Consider using it here.
 if ~isempty(data(1).simulator_options.modifications)
   varied = {};
   mods = data(1).simulator_options.modifications;
