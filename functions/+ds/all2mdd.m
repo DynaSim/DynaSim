@@ -15,7 +15,7 @@ else                            % Structure of links to plots
 
     % Convert input data to MDD
     data_img=data;
-    xp = ds.img2MDD(data_img);
+    xp = ds.img2mdd(data_img);
     
     is_image = 1;
 

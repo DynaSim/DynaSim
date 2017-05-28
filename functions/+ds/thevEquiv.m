@@ -1,4 +1,4 @@
-function data = thevEquiv(data, fields_currents, field_voltage, reversals_list, output_field_name)
+function data = thevEquiv(data, fields_currents, field_voltage, reversals_list, output_field_name,varargin)
 % Calculates the Th�venin equivalent voltage and conductance for a
 % given set of M specified ionic channels.
 % Inputs:
