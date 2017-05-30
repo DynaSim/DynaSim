@@ -68,13 +68,14 @@ function [effective_vary_indices, linked_indices] = checkCovary(vary_lengths, va
     % If a certain parameter is not involved in any "full rank" product,
     % consider it linked.
     index = 1;
-    non_participating_parameters = find(sum(full_rank_participation, 1) == 0);
+    non_participating_parameters = find(all(full_rank_participation == 0, 1));
     if ~isempty(non_participating_parameters)
         linked_indices{index} = [0 non_participating_parameters];
         index = index + 1;
     end
 
     if no_full_rank_choices > 1
+        %%
         % If more than one combination of varied parameters describes the total
         % data length, we have to figure out which of these varied
         % parameters is co-varied.
@@ -130,7 +131,22 @@ end
 
 param1_index = param_indices(1);
 
-params_at_value1 = vary_params(vary_params(:, param1_index) == vary_params(1, param1_index), :);
+if iscellstr(vary_params)
+    params_at_value1 = vary_params(strcmp(vary_params(:, param1_index),vary_params(1, param1_index)), :);
+    
+%params_at_value1 = vary_params(cellfun(@(x) isequal(x, vary_params(1, param1_index)),vary_params(:, param1_index)), :);
+elseif isnumeric(vary_params)
+    params_at_value1 = vary_params(vary_params(:, param1_index) == vary_params(1, param1_index), :);
+elseif iscellnum(vary_params)
+    vary_params2 = cell2mat(vary_params);
+    params_at_value1 = vary_params(vary_params2(:, param1_index) == vary_params2(1, param1_index), :);
+else
+    try
+        params_at_value1 = vary_params(vary_params(:, param1_index) == vary_params(1, param1_index), :);
+    catch
+        error('case not implemented. vary_params must all cell array of chars of all numeric');
+    end
+end
 
 no_values_at_value1 = nan(size(param_indices));
 
