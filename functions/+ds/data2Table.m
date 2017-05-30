@@ -1,9 +1,13 @@
-function [data_table,column_titles,time] = data2Table(data,verbose_flag)
+function [data_table,column_titles,time] = data2Table(data,verbose_flag,maxrows)
     % Converts DynaSim structure to 1D cell array format. Later can use to
     % import to MDD
     
     if nargin < 2
         verbose_flag = 0;
+    end
+    
+    if nargin < 3
+        maxrows = 10;
     end
 
     ds.checkData(data);            % Makes sure it's a valid DynaSim Data structure
@@ -102,7 +106,7 @@ function [data_table,column_titles,time] = data2Table(data,verbose_flag)
     column_titles = {'data',ax_names{:}};
     
     if verbose_flag
-        previewTable(data_table,column_titles);
+        previewTable(data_table,column_titles,maxrows);
     end
     
 end

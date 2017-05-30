@@ -179,6 +179,13 @@ end
 
 
 %% varied fields
+
+% Make sure there is no empty
+labels = data(1).labels;
+inds = arrayfun(@(s) ~isempty(s.(labels{1})),data);
+data = data(inds);
+
+
 fields=fieldnames(data);
 if any(strcmp(fields, 'varied'))
   % get varied labels

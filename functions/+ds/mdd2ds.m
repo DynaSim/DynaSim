@@ -1,4 +1,4 @@
-function data = MDD2ds(obj,varargin)
+function data = mdd2ds(obj,varargin)
 %% data=MDD2ds(obj,varargin)
 % Dependencies:
 %   Requires the MDD class, which should be part of DynaSim. If not,
