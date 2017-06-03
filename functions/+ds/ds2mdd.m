@@ -16,18 +16,23 @@ function xp = ds2mdd(data,merge_covaried_axes,varargin)
         inds = arrayfun(@(s) ~isempty(s.(labels{1})),data);
         data = data(inds);
         
+
+        
         % Identified covaried axes (note; this will fail if 
-        [~,linked_inds] = ds.checkCovaryWrapper(data,varargin{:});
+        [Abasis,Abasisi, Asubs] = ds.getLinearIndependentDs(data);
+        
+        gt1 = cellfun(@(x) length(x) > 1, Asubs);  % Identified all linked indices with at least 2 varieds
+        Asubs = Asubs(gt1);                  % Only perform the merge if there are at least 2 varieds to merge!
         
         
 
         % Merge eached linked_ind into a single varied statement
         vary_labels = data(1).varied; % data(1).simulator_options.vary;
-        Nlinked = length(linked_inds);
+        Nlinked = length(Asubs);
         variedname_merged = cell(1,Nlinked);
         varied_vals = cell(1,Nlinked);
         for j = 1:Nlinked
-            [data, variedname_merged{j}, varied_vals{j} ] = ds.mergeDataVarieds(data,vary_labels(linked_inds{j}));
+            [data, variedname_merged{j}, varied_vals{j} ] = ds.mergeDataVarieds(data,vary_labels(Asubs{j}));
         end
     end
     
@@ -75,7 +80,7 @@ function xp = ds2mdd(data,merge_covaried_axes,varargin)
     if merge_covaried_axes
         for j = 1:length(variedname_merged)
             ax_ind = xp.findaxis(variedname_merged{j});
-            xp.axis(ax_ind).axismeta.premerged_names = vary_labels(linked_inds{j});
+            xp.axis(ax_ind).axismeta.premerged_names = vary_labels(Asubs{j});
             
             var = varied_vals{j};
             var2 = convert_cell2D_to_nested1D(var);
