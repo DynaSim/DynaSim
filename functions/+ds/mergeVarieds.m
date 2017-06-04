@@ -1,6 +1,6 @@
 
-function [data_new, variedname_merged, varied_vals ] = mergeDataVarieds(data,varied_fields)
-    % [data_new, variedname_merged, varied_vals ] = mergeDataVarieds(data,varied_fields)
+function [data_new, variedname_merged, varied_vals ] = mergeVarieds(data,varied_fields)
+    % [data_new, variedname_merged, varied_vals ] = mergeVarieds(data,varied_fields)
     %
     % Purpose: This function takes in the current DynaSim datastructure, data, and
     % returns data_new. data_new is the same as the original, except the
@@ -8,7 +8,7 @@ function [data_new, variedname_merged, varied_vals ] = mergeDataVarieds(data,var
     % for 
     %
     % Usage:
-    %   [data_new, variedname_merged, varied_vals ] = mergeDataVarieds(data,varied_fields)
+    %   [data_new, variedname_merged, varied_vals ] = mergeVarieds(data,varied_fields)
     %
     % Inputs:
     %   data: DynaSim data structure
@@ -28,7 +28,7 @@ function [data_new, variedname_merged, varied_vals ] = mergeDataVarieds(data,var
     %
     % Author: David Stanley, Boston University, 2017
     %
-    % See also: unmergeDataVarieds, modifications2Vary, vary2Modifications
+    % See also: unmergeVarieds, modifications2Vary, vary2Modifications
     % 
 
     varied_vals = cell(length(data),length(varied_fields));
