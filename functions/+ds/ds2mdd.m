@@ -32,8 +32,10 @@ function xp = ds2mdd(data,merge_covaried_axes,varargin)
         variedname_merged = cell(1,Nlinked);
         varied_vals = cell(1,Nlinked);
         for j = 1:Nlinked
-            [data, variedname_merged{j}, varied_vals{j} ] = ds.mergeDataVarieds(data,vary_labels(Asubs{j}));
+            [data, variedname_merged{j}, varied_vals{j} ] = ds.mergeVarieds(data,vary_labels(Asubs{j}));
         end
+        
+
     end
     
 % % % % % % % % % % % % % % %     
