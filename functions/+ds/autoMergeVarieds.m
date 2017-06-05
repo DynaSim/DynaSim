@@ -23,7 +23,7 @@ if options.auto_gen_test_data_flag
 end
 
     maxiter = 10000;
-    success_thresh = 0.999;
+    success_thresh = 0.5;
     variedname_merged = {};
     varied_vals = {};
     if nargin < 3; verbose_on = false; end
