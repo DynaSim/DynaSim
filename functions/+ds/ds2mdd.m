@@ -1,9 +1,13 @@
-function xp = ds2mdd(data,merge_covaried_axes,varargin)
+function xp = ds2mdd(data,merge_covaried_axes,merge_sparse_axes,varargin)
     % Convert DynaSim data structure to xp format
     
     
     if nargin < 2
         merge_covaried_axes = true;
+    end
+    
+    if nargin < 3
+        merge_sparse_axes = true;
     end
 
     data = ds.checkData(data, varargin{:});
@@ -35,7 +39,13 @@ function xp = ds2mdd(data,merge_covaried_axes,varargin)
             [data, variedname_merged{j}, varied_vals{j} ] = ds.mergeVarieds(data,vary_labels(Asubs{j}));
         end
         
-
+        % Automerge any additional dimensions based on analysis of
+        % sparseness
+        
+    end
+    
+    if merge_sparse_axes
+        [data] = ds.autoMergeVarieds(data);
     end
     
 % % % % % % % % % % % % % % %     
