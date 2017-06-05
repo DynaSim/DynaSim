@@ -13,7 +13,7 @@ function xp = ds2mdd(data,merge_covaried_axes,merge_sparse_axes,varargin)
     data = ds.checkData(data, varargin{:});
     
 % % % % % % % % % % % % % % %     
-    if merge_covaried_axes
+    if merge_covaried_axes && isfield(data(1),'varied')
         % Remove any data in data(1...N) that is empty (e.g. skipped by
         % the simulator)
         labels = data(1).labels;
@@ -44,7 +44,7 @@ function xp = ds2mdd(data,merge_covaried_axes,merge_sparse_axes,varargin)
         
     end
     
-    if merge_sparse_axes
+    if merge_sparse_axes && isfield(data(1),'varied')
         [data] = ds.autoMergeVarieds(data);
     end
     
@@ -89,7 +89,7 @@ function xp = ds2mdd(data,merge_covaried_axes,merge_sparse_axes,varargin)
     
     
     % Adding pre-merged info so we can un-merge it later if needed!
-    if merge_covaried_axes
+    if merge_covaried_axes && isfield(data(1),'varied')
         for j = 1:length(variedname_merged)
             ax_ind = xp.findaxis(variedname_merged{j});
             xp.axis(ax_ind).axismeta.premerged_names = vary_labels(Asubs{j});
