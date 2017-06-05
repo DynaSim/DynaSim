@@ -32,12 +32,6 @@ end
 % Add in section for pre-screening for linearly depndence as well
 % % % % % % % % % % % % 
 
-% First, remove any data in data(1...N) that is empty (e.g. skipped by
-% the simulator.
-labels = data(1).labels;
-inds = arrayfun(@(s) ~isempty(s.(labels{1})),data);
-data = data(inds);
-
 % Build vary_parms - cell array of varied params (sims x parameters)
 N = length(data);
 vary_labels = data(1).varied; % data(1).simulator_options.vary;

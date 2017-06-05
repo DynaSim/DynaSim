@@ -1,21 +1,17 @@
-function xp = img2mdd(data_img,merge_covaried_axes,merge_sparse_axes,varargin))
+function xp = img2mdd(data_img,merge_covaried_axes,merge_sparse_axes,varargin)
 
   
     if nargin < 2
-        merge_covaried_axes = true;
+        merge_covaried_axes = false;
     end
     
     if nargin < 3
-        merge_sparse_axes = true;
+        merge_sparse_axes = false;
     end
 
 % % % % % % % % % % % % % % %     
     if merge_covaried_axes && isfield(data_img(1),'varied')
-        % Remove any data in data(1...N) that is empty (e.g. skipped by
-        % the simulator)
-        labels = data_img(1).labels;
-        inds = arrayfun(@(s) ~isempty(s.(labels{1})),data_img);
-        data_img = data_img(inds);
+
         
 
         
