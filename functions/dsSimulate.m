@@ -1029,7 +1029,7 @@ end % in_parfor_loop_flag
         end
       end
       
-      tmpdata = prepare_varied_metadata(tmpdata);
+      tmpdata = ds.modifications2Vary(tmpdata,options.modifications,options,modifications_set,sim);
       
       if (options.auto_gen_test_data_flag || options.unit_test_flag) && isfield(tmpdata, 'simulator_options')
         tmpdata= rmfield(tmpdata, 'simulator_options');
@@ -1108,65 +1108,6 @@ end % in_parfor_loop_flag
     end
   end
 
-  function tmpdata = prepare_varied_metadata(tmpdata)
-    % add things varied to tmpdata
-    mods={};
-    if ~isempty(options.modifications)
-      mods=cat(1,mods,expand_modifications(options.modifications));
-    end
-    
-    if ~isempty(modifications_set{sim})
-      tmp_mods=expand_modifications(modifications_set{sim});
-      mods=cat(1,mods,tmp_mods);
-    end
-    
-    if isa(options.experiment,'function_handle')
-      for j=1:length(tmpdata)
-        tmpdata(j).simulator_options.modifications=mods;
-      end
-    end
-    
-    if ~isempty(mods)
-      if isfield(tmpdata,'varied')
-        varied=tmpdata(1).varied;
-      else
-        varied={};
-      end
-      
-      for ii=1:size(mods,1)
-        % prepare valid field name for thing varied:
-        fld=[mods{ii,1} '_' mods{ii,2}];
-        
-        % convert arrows and periods to underscores
-        fld=regexprep(fld,'(->)|(<-)|(-)|(\.)','_');
-        
-        % remove brackets and parentheses
-        fld=regexprep(fld,'[\[\]\(\)\{\}]','');
-        
-        for j=1:length(tmpdata)
-          tmpdata(j).(fld)=mods{ii,3};
-        end
-        
-        if ~ismember(fld,varied)
-          varied{end+1}=fld;
-        end
-      end
-      
-      for j=1:length(tmpdata)
-        tmpdata(j).varied=varied;
-      end
-    end
-    % convert tmpdata to single precision
-    if strcmp(options.precision,'single')
-      for j=1:length(tmpdata)
-        for k=1:length(tmpdata(j).labels)
-          fld=tmpdata(j).labels{k};
-          tmpdata(j).(fld)=single(tmpdata(j).(fld));
-        end
-      end
-    end
-  end
-
   function cleanup(status)
     % remove temporary files and optionally store info for debugging
     % ...
@@ -1240,35 +1181,6 @@ end %main fn
 
 
 %% Subfunctions
-
-function modifications=expand_modifications(mods)
-% purpose: expand simultaneous modifications into larger list
-modifications={};
-for i=1:size(mods,1)
-  % get object list without grouping symbols: ()[]{}
-  objects=regexp(mods{i,1},'[^\(\)\[\]\{\},]+','match');
-  variables=regexp(mods{i,2},'[^\(\)\[\]\{\},]+','match');
-  
-  for j=1:length(objects)
-    for k=1:length(variables)
-      thisMod = mods{i,3};
-      
-      if all(size(thisMod) == [1,1]) %same val for each obj and var
-        modifications(end+1,1:3)={objects{j},variables{k},thisMod};
-      elseif (size(thisMod,1) > 1) && (size(thisMod,2) == 1) %same val for each obj, diff for each var
-        modifications(end+1,1:3)={objects{j},variables{k},thisMod(k)};
-      elseif (size(thisMod,1) == 1) && (size(thisMod,2) > 1) %same val for each var, diff for each obj
-        modifications(end+1,1:3)={objects{j},variables{k},thisMod(j)};
-      elseif (size(thisMod,1) > 1) && (size(thisMod,2) > 1) %diff val for each var and obj
-        modifications(end+1,1:3)={objects{j},variables{k},thisMod(k,j)};
-      else
-        error('Unknown modification type (likely due to excess dims)')
-      end %if
-    end %k
-  end %j
-end %i
-end  %fun
-
 function [model,options]=extract_vary_statement(model,options)
 % Purpose: extract vary statement, remove from model, and set options.vary
 if ischar(model) && any(regexp(model,';\s*vary\(.*\)','once'))

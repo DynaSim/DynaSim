@@ -179,6 +179,13 @@ end
 
 
 %% varied fields
+
+% Make sure there is no empty
+labels = data(1).labels;
+inds = arrayfun(@(s) ~isempty(s.(labels{1})),data);
+data = data(inds);
+
+
 fields=fieldnames(data);
 if any(strcmp(fields, 'varied'))
   % get varied labels
@@ -187,46 +194,60 @@ if any(strcmp(fields, 'varied'))
   vary_params = nan(length(data), no_vary_labels);
   vary_vectors = cell(no_vary_labels, 1);
   vary_lengths = nan(no_vary_labels, 1);
-  
+
   % get varied params
   for v = 1:no_vary_labels
     vary_params(:, v) = [data.(vary_labels{v})];
     vary_vectors{v} = unique(vary_params(:, v));
     vary_lengths(v) = length(vary_vectors{v});
   end
-  
-  [effective_vary_lengths, ~] = ds.checkCovary(vary_lengths, vary_params, varargin{:});
-  
-  dimensions_varied = sum(effective_vary_lengths > 1);
-  
+
+  [effective_vary_indices, ~] = ds.checkCovary(vary_lengths, vary_params, varargin{:});
+
+  if prod(vary_lengths(effective_vary_indices)) == length(data)
+      
+      dimensions_varied = sum(effective_vary_indices);
+      vary_params = vary_params(:, effective_vary_indices);
+      vary_vectors = vary_vectors(effective_vary_indices);
+      vary_lengths = vary_lengths(effective_vary_indices);
+      
+  else
+     
+      warning('unable to determine which parameters are covaried. Data will be plotted as a lattice.')
+      
+  end
+
   if dimensions_varied > 2
-    no_figures = prod(effective_vary_lengths(3:end));
-    
-    data = reshape(data, prod(effective_vary_lengths(3:end)), prod(effective_vary_lengths([1 2])));
-    
-    figure_params = nan(no_vary_labels - 2, 1);
-    
+    no_figures = prod(vary_lengths(3:end));
+
+    figure_params = nan(dimensions_varied - 2, 1);
+
     vary_lengths_cp = cumprod(vary_lengths);
-    
+
     for f = 1:no_figures
       figure_params(1) = vary_vectors{3}(mod(f - 1, vary_lengths(3)) + 1);
-      
-      for v = 4:no_vary_labels
+
+      for v = 4:dimensions_varied
         figure_params(v - 2) = vary_vectors{v}(ceil(f/vary_lengths_cp(v - 3)));
       end
       
+      figure_data_index = ones(size(vary_params, 1), 1);
+      for v = 3:dimensions_varied
+        figure_data_index = figure_data_index & vary_params(:, v) == figure_params(v - 2);
+      end
+
       vary_title = '';
-      
-      for v = 1:(no_vary_labels - 2)
+
+      for v = 1:(dimensions_varied - 2)
         vary_title = [vary_title, sprintf('%s = %f ', vary_labels{v + 2}, figure_params(v))];
       end
       
-      handles = dsPlot(data(f, :), varargin{:});
+      handles = dsPlot(data(figure_data_index), varargin{:});
       for h = 1:length(handles)
         % figure(handles(h))
         mtit(handles(h), vary_title, 'FontSize', 14, 'yoff', .2)
       end
-      
+
     end % no_figures
     return
   end % dimensions_varied
@@ -357,7 +378,7 @@ if num_sims>1 && isfield(data,'varied')
       param_mat(:,j)=[data.(varied{j})]; % values for each simulation
       param_cell{j}=unique([data.(varied{j})]); % unique values for each parameter
     else
-      % TODO: handle sims varying non-numeric model components 
+      % TODO: handle sims varying non-numeric model components
       % (eg, mechanisms) (also in ds.plotFR and dsSelect)
     end
   end
@@ -403,7 +424,7 @@ for figset=1:num_fig_sets
         handles = gcf;
         haxes = gca;
     end
-    
+
     axis_counter=0;
     AuxData=[];
     vlines=[];
@@ -423,7 +444,7 @@ for figset=1:num_fig_sets
         % #################################################################
         % what to plot
         % -----------------------------------------------------------------
-        
+
         if num_sims==1 && num_pops==1 && num_vars==1 && ~lock_gca
         % -----------------------------------------------------------------
           % one cell per row: dat = data(s=1).(var)(:,c=r) where var=vars{v=1}
@@ -446,7 +467,7 @@ for figset=1:num_fig_sets
           if num_rows>1
             text_string{row,col}=sprintf('cell %g',row);
           end
-          
+
         elseif num_sims==1 && num_pops==1 && num_vars==1 && lock_gca
           % one population per row: dat = data(s=1).(var)(:,1:MTPP) where var=vars{v=r}
           var=var_fields{1};
@@ -531,7 +552,7 @@ for figset=1:num_fig_sets
                 allspikes{k}=data(sim_index).([var_fields{k} '_spike_times']);
               end
               var=['<' variables{1} '>'];
-              
+
           end
         % -----------------------------------------------------------------
         elseif num_sims==1 && num_pops>1 && num_vars>1
@@ -624,7 +645,7 @@ for figset=1:num_fig_sets
                 allspikes{k}=data(sim_index).([var_fields{k} '_spike_times']);
               end
               var=['<' variables{1} '>'];
-              
+
           end
         % -----------------------------------------------------------------
         elseif num_sims>1 && num_pops>1 && num_vars>1
@@ -675,7 +696,7 @@ for figset=1:num_fig_sets
         if size(dat,2)>1
           legend_strings=cellfun(@(x)['cell ' num2str(x)],num2cell(1:min(size(dat,2),max_legend_entries)),'uni',0);
         end
-        
+
         if isfield(data,'varied')
           if num_sims>1
             % list the parameter varied along the rows first
@@ -850,10 +871,10 @@ for figset=1:num_fig_sets
         end
       end
     end
-    
+
     %link x axes
     linkaxes(haxes, 'x')
-    
+
   end % end loop over figures in this set
 end % end loop over figure sets
 

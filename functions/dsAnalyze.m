@@ -66,10 +66,10 @@ options=ds.checkOptions(varargin,{...
   'load_all_data_flag',0,{0,1},...
   'auto_gen_test_data_flag',0,{0,1},...
   'unit_test_flag',0,{0,1},...
+  'auto_gen_test_data_flag',0,{0,1},...
   },false);
 
 %% auto_gen_test_data_flag argin
-options = ds.checkOptions(varargin,{'auto_gen_test_data_flag',0,{0,1}},false);
 if options.auto_gen_test_data_flag
   varargs = varargin;
   varargs{find(strcmp(varargs, 'auto_gen_test_data_flag'))+1} = 0;
@@ -563,6 +563,8 @@ if options.auto_gen_test_data_flag
   argin = [{result}, {data}, varargs]; % specific to this function
 end
 
+% #todo: The function ds.modifications2Vary implements this functionality.
+% Consider using it here.
 if ~isempty(data(1).simulator_options.modifications)
   varied = {};
   mods = data(1).simulator_options.modifications;

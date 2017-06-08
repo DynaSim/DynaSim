@@ -64,7 +64,7 @@ end
 
 % Convert the incoming DynaSim data structure to an MDD object
 if ~isa(data,'MDD')
-    [xp,is_image] = ds.all2MDD(data);
+    [xp,is_image] = ds.all2mdd(data);
 else
     xp = data;
     if iscell(xp.data{1})

@@ -1,7 +1,54 @@
-function xp = ds2MDD(data,varargin)
+function xp = ds2mdd(data,merge_covaried_axes,merge_sparse_axes,varargin)
     % Convert DynaSim data structure to xp format
+    
+    
+    if nargin < 2
+        merge_covaried_axes = false;
+    end
+    
+    if nargin < 3
+        merge_sparse_axes = false;
+    end
 
     data = ds.checkData(data, varargin{:});
+    
+% % % % % % % % % % % % % % %     
+    if merge_covaried_axes && isfield(data(1),'varied')
+        % Remove any data in data(1...N) that is empty (e.g. skipped by
+        % the simulator)
+        labels = data(1).labels;
+        inds = arrayfun(@(s) ~isempty(s.(labels{1})),data);
+        data = data(inds);
+        
+
+        
+        % Identified covaried axes (note; this will fail if 
+        [Abasis,Abasisi, Asubs] = ds.getLinearIndependentDs(data);
+        
+        gt1 = cellfun(@(x) length(x) > 1, Asubs);  % Identified all linked indices with at least 2 varieds
+        Asubs = Asubs(gt1);                  % Only perform the merge if there are at least 2 varieds to merge!
+        
+        
+
+        % Merge eached linked_ind into a single varied statement
+        vary_labels = data(1).varied; % data(1).simulator_options.vary;
+        Nlinked = length(Asubs);
+        variedname_merged = cell(1,Nlinked);
+        varied_vals = cell(1,Nlinked);
+        for j = 1:Nlinked
+            [data, variedname_merged{j}, varied_vals{j} ] = ds.mergeVarieds(data,vary_labels(Asubs{j}));
+        end
+        
+        % Automerge any additional dimensions based on analysis of
+        % sparseness
+        
+    end
+    
+    if merge_sparse_axes && isfield(data(1),'varied')
+        [data] = ds.autoMergeVarieds(data);
+    end
+    
+% % % % % % % % % % % % % % %     
     
     % Extract the data in a linear table format
     [data_table,column_titles,time] = ds.data2Table (data);
@@ -39,4 +86,25 @@ function xp = ds2MDD(data,varargin)
     end
     xp.meta = meta;
     clear meta
+    
+    
+    % Adding pre-merged info so we can un-merge it later if needed!
+    if merge_covaried_axes && isfield(data(1),'varied')
+        for j = 1:length(variedname_merged)
+            ax_ind = xp.findaxis(variedname_merged{j});
+            xp.axis(ax_ind).axismeta.premerged_names = vary_labels(Asubs{j});
+            
+            var = varied_vals{j};
+            var2 = convert_cell2D_to_nested1D(var);
+            xp.axis(ax_ind).axismeta.premerged_values = var2;
+            
+        end
+    end
 end
+
+function var2 = convert_cell2D_to_nested1D(var)
+    for k = 1:size(var,2)
+        var2{k} = cell2mat(var(:,k));
+    end
+end
+
