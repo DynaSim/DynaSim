@@ -125,13 +125,23 @@ studyinfo.base_solve_file=solve_file;
 [o,home]=system('echo $HOME');
 
 % create batch directory
-[study_dir_path,study_dir_name,study_dir_suffix]=fileparts2(studyinfo.study_dir);
+study_dir_full_path = fileparts2(studyinfo.study_dir); % convert to path with closing slash
+[study_dir_path, study_dir_name, study_dir_suffix] = fileparts(study_dir_full_path); % get final directory
 study_dir_name=[study_dir_name study_dir_suffix];
+
 if ~options.auto_gen_test_data_flag && ~options.unit_test_flag
-  batch_dir = fullfile(strtrim(home),'batchdirs',study_dir_name);
+  main_batch_dir = fullfile(strtrim(home),'batchdirs');
+  
+  % create main batch_dir
+  if ~exist(main_batch_dir,'dir')
+    mkdir(main_batch_dir);
+  end
+
+  batch_dir = fullfile(main_batch_dir,study_dir_name);
   %batch_dir = fullfile(strtrim(home),'batchdirs',['Batch' timestamp]);
 else
-  [~, rel_study_dir] = fileparts(studyinfo.study_dir);
+  study_dir = fileparts2(studyinfo.study_dir);
+  [~, rel_study_dir] = fileparts(study_dir);
   batch_dir = fullfile(rel_study_dir,'batchdirs',study_dir_name);
 end
 
