@@ -3,7 +3,7 @@ function [effective_vary_indices, linked_indices] = checkCovary(vary_lengths, va
  
   %% localfn output
   if ~nargin
-      effective_vary_lengths = localfunctions; % output var name specific to this fn
+      effective_vary_indices = localfunctions; % output var name specific to this fn
       return
   end
   
@@ -20,8 +20,9 @@ function [effective_vary_indices, linked_indices] = checkCovary(vary_lengths, va
   data_length = size(vary_params, 1);
 
   % Remove any vary statements used to set parameter values.
-  non_singleton_vary_lengths = vary_lengths(vary_lengths > 1);
-  non_singleton_vary_params = vary_params(:, vary_lengths > 1);
+  non_singleton_vary_indices = vary_lengths > 1;
+  non_singleton_vary_lengths = vary_lengths(non_singleton_vary_indices);
+  non_singleton_vary_params = vary_params(:, non_singleton_vary_indices);
   n_varied = length(non_singleton_vary_lengths);
 
   %% Check all combinations of varied parameters to see if the product of the number
@@ -107,7 +108,11 @@ function [effective_vary_indices, linked_indices] = checkCovary(vary_lengths, va
   end
   % effective_vary_lengths = non_singleton_vary_lengths;
   % effective_vary_lengths(logical(marked_for_removal)) = [];
-  effective_vary_indices = ~logical(marked_for_removal);
+  effective_non_singleton_vary_indices = ~marked_for_removal;
+  
+  effective_vary_indices = false(size(vary_lengths));
+  
+  effective_vary_indices(non_singleton_vary_indices) = logical(effective_non_singleton_vary_indices);
   
   %% auto_gen_test_data_flag argout
   if options.auto_gen_test_data_flag
