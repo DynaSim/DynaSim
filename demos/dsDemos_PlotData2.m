@@ -112,10 +112,10 @@ close all;
 % Overlays can also be doubly stacked. Note that both E and I cells are
 % shown on a single plot.
 
-dsPlot2(data,'max_num_overlaid',5,'force_last','populations');
+dsPlot2(data,'max_num_overlaid',5,'force_last','populations','Ndims_per_subplot',2);
 
 % However, these can be messy, so the groups can be shifted up or down
-dsPlot2(data,'max_num_overlaid',5,'force_last','populations','do_overlay_shift',true);
+dsPlot2(data,'max_num_overlaid',5,'force_last','populations','do_overlay_shift',true,'Ndims_per_subplot',2);
 
     % Variables are stacked from top to bottom, so E cells are on top and I
     % cells underneath
@@ -126,14 +126,14 @@ dsPlot2(data,'max_num_overlaid',5,'force_last','populations','do_overlay_shift',
 % overlays.
 
 dsPlot2(data,'do_mean',0,'varied1',1:3,'varied2',2:3,...
-    'force_last','varied1','do_overlay_shift',1,'overlay_shift_val',100);
+    'force_last','varied1','do_overlay_shift',1,'overlay_shift_val',100,'Ndims_per_subplot',2);
 
 
 % Variables with very different units can be compared side-by-side by
 % taking the z-score first. In this case we compare E cell membrane voltage
 % to its inhibitory synaptic input.
 
-dsPlot2(data,'population','E','variable','v|I_iGABAa_s','force_last','variables','do_overlay_shift',true,'overlay_shift_val',3,'do_zscore',true,'do_zoom',1);
+dsPlot2(data,'population','E','variable','v|I_iGABAa_s','force_last','variables','do_overlay_shift',true,'overlay_shift_val',3,'do_zscore',true,'do_zoom',1,'Ndims_per_subplot',2);
 
 % % Double stack overlays
 % dsPlot2(data,'population','E','variable','iNa_m|I_iGABAa_s','force_last','variables','do_overlay_shift',true);

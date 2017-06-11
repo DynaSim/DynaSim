@@ -317,14 +317,16 @@ if ~isempty(force_last)
         ax_ind(i) = temp;
     end
     
-    % Dims per subplot should be at least 2 if we're forcing last...
-    % perhaps change this later
-    if isempty(Ndims_per_subplot)
-        Ndims_per_subplot = 2;
-    end
-    if Ndims_per_subplot == 1
-        Ndims_per_subplot = 2;
-    end
+%     % % Note: I am disabling this for now, because it is messing up
+%     certain plotting options. % %
+%     % Dims per subplot should be at least 2 if we're forcing last...
+%     % perhaps change this later
+%     if isempty(Ndims_per_subplot)
+%         Ndims_per_subplot = 2;
+%     end
+%     if Ndims_per_subplot == 1
+%         Ndims_per_subplot = 2;
+%     end
     
     others_ind = true(1,ndims(xp2));
     others_ind(ax_ind) = false;
