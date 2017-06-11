@@ -297,34 +297,6 @@ if ~isempty(options.dim_stacking)
 end
 
 
-%% If only one cell
-
-% If only 1 cell, move in 2nd cell
-if length(xp2.meta.datainfo(2).values) <= 1 && ~is_image
-    % Move populations axis to the end if it exists
-    ax2overlay = xp2.findaxis('populations');
-    if isempty(ax2overlay)
-        ax2overlay = xp2.ndims;     % If can't find populations, use last axis on the stack
-    end
-    
-    % Save variables associated with this axis
-    packed_vars = xp2.axis(ax2overlay).values;
-    packed_name = xp2.axis(ax2overlay).name;
-    
-    % Add <average> symbols if necessary to packed_vars
-    cellnames = xp2.meta.datainfo(2).values;
-    temp = cellfun(@isempty,strfind(cellnames,'<'));    % Check if originals were averages!
-    if any(~temp)
-        if isnumeric(packed_vars); packed_vars = cellfunu(@(s) [strrep(packed_name,'_',' ') ' ' num2str(s)],num2cell(packed_vars)); end
-        packed_vars = cellfunu(@(s) ['<' s '>'], packed_vars);
-    end
-    
-    xp2.meta.datainfo(2).name = packed_name;
-    xp2.meta.datainfo(2).values = packed_vars(:)';
-    
-    xp2 = xp2.packDim(ax2overlay,2);
-    xp2 = xp2.squeezeRegexp('Dim');
-end
 
 %% If doing force overlay, move overlay population to the end
 if ~isempty(force_last)
@@ -358,6 +330,41 @@ if ~isempty(force_last)
     others_ind(ax_ind) = false;
     xp2 = xp2.permute([find(others_ind), ax_ind]);        % Move chosen axis to the back!
     
+end
+
+
+%% If only one cell
+
+% If only 1 cell, move in 2nd cell
+if length(xp2.meta.datainfo(2).values) <= 1 && ~is_image
+    % Move populations axis to the end if it exists
+    
+    ax2overlay = [];
+    if isempty(force_last) && isempty(options.dim_stacking)
+        ax2overlay = xp2.findaxis('populations');           % If force_last or dim_stacking isn't specified, then choose populations
+    end
+    
+    if isempty(ax2overlay)
+        ax2overlay = xp2.ndims;     % If can't find populations, use last axis on the stack
+    end
+    
+    % Save variables associated with this axis
+    packed_vars = xp2.axis(ax2overlay).values;
+    packed_name = xp2.axis(ax2overlay).name;
+    
+    % Add <average> symbols if necessary to packed_vars
+    cellnames = xp2.meta.datainfo(2).values;
+    temp = cellfun(@isempty,strfind(cellnames,'<'));    % Check if originals were averages!
+    if any(~temp)
+        if isnumeric(packed_vars); packed_vars = cellfunu(@(s) [strrep(packed_name,'_',' ') ' ' num2str(s)],num2cell(packed_vars)); end
+        packed_vars = cellfunu(@(s) ['<' s '>'], packed_vars);
+    end
+    
+    xp2.meta.datainfo(2).name = packed_name;
+    xp2.meta.datainfo(2).values = packed_vars(:)';
+    
+    xp2 = xp2.packDim(ax2overlay,2);
+    xp2 = xp2.squeezeRegexp('Dim');
 end
 
 %% Set up do z-score & overlay shift
@@ -448,7 +455,6 @@ else
             % Is data
             data_plothandle = @xp1D_matrix_plot;
             if ~isempty(plot_handle); data_plothandle = plot_handle; end
-            
         case 'imagesc'
             data_plothandle = @xp_matrix_imagesc;
             if ~isempty(plot_handle); data_plothandle = plot_handle; end
