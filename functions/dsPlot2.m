@@ -490,7 +490,7 @@ else
             data_plothandle = @xp_PlotData;
             if ~isempty(plot_handle); data_plothandle = plot_handle; end
             
-            if any(strcmp(plot_type,{'rastergram','raster'}))
+            if any(strcmp(plot_type,{'rastergram','raster'})) && isempty(force_last) && isempty(options.dim_stacking)
                 % Move populations axis to the end of xp2. This ensures
                 ax_names = xp2.exportAxisNames;
                 ind_pop = false(1,length(ax_names));

@@ -1,5 +1,7 @@
 %% % % % % % % % dsPlot2 tutorial % % % % % % % %
 % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % 
+% Catch to prevent people from running entire script (F5)
+error('Do not F5. This script is not meant to be run in its entirety.');
 
 %% Set up paths 
 % Get ready...
