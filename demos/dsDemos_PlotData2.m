@@ -89,7 +89,7 @@ dsPlot2(data,'num_embedded_subplots',4,'do_zoom',1,'max_num_overlaid',10);  % Ne
 % address this by producing single figures occupying very large canvases,
 % which can be zoomed to a high level of detail.
 % % (2 vars, 2 pops, varied1, varied2: Ndims = 4)
-dsPlot2(data,'max_num_overlaid',3,'num_embedded_subplots',4,'population','all','variable','v|iNa_h','varied1',2:3,'lock_axes',false);
+dsPlot2(data,'max_num_overlaid',3,'num_embedded_subplots',4,'population','all','variable','/v|iNa_h/','varied1',2:3,'lock_axes',false);
 
 
 %% Modifying overlaid traces
@@ -133,10 +133,10 @@ dsPlot2(data,'do_mean',0,'varied1',1:3,'varied2',2:3,...
 % taking the z-score first. In this case we compare E cell membrane voltage
 % to its inhibitory synaptic input.
 
-dsPlot2(data,'population','E','variable','v|I_iGABAa_s','force_last','variables','do_overlay_shift',true,'overlay_shift_val',3,'do_zscore',true,'do_zoom',1,'Ndims_per_subplot',2);
+dsPlot2(data,'population','E','variable','/v|I_iGABAa_s/','force_last','variables','do_overlay_shift',true,'overlay_shift_val',3,'do_zscore',true,'do_zoom',1,'Ndims_per_subplot',2);
 
 % % Double stack overlays
-% dsPlot2(data,'population','E','variable','iNa_m|I_iGABAa_s','force_last','variables','do_overlay_shift',true);
+% dsPlot2(data,'population','E','variable','/iNa_m|I_iGABAa_s/','force_last','variables','do_overlay_shift',true);
 % dsPlot2(data,'population','I','variable','v');
 
 
