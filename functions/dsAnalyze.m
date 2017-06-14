@@ -512,12 +512,12 @@ end
 
 function result = evalFnWithArgs(fInd, data, func, options, varargin)
 if isempty(options.function_options)
-  for dInd = 1:length(data)
+  parfor dInd = 1:length(data)
     result(dInd) = feval(func,data(dInd),varargin{:});
   end
 else
   function_options = options.function_options{fInd};
-  for dInd = 1:length(data)
+  parfor dInd = 1:length(data)
     result(dInd) = feval(func,data(dInd),function_options{:});
   end
 end
