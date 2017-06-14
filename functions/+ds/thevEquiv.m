@@ -63,8 +63,8 @@ function data = thevEquiv(data, fields_currents, field_voltage, reversals_list, 
         on2 = strcat(output_field_name,'_gTH');
         data(i).(on1) = ETH;
         data(i).(on2) = gTH;
-        if all(strcmp(data(i).labels,on1)) == false; data(i).labels(end+1) = {on1}; end
-        if all(strcmp(data(i).labels,on2)) == false; data(i).labels(end+1) = {on2}; end
+        if all(strcmp(data(i).labels,on1) == false); data(i).labels(end+1) = {on1}; end
+        if all(strcmp(data(i).labels,on2) == false); data(i).labels(end+1) = {on2}; end
 
     end
 
