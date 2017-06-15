@@ -491,13 +491,17 @@ else
             if ~isempty(plot_handle); data_plothandle = plot_handle; end
             
             if any(strcmp(plot_type,{'rastergram','raster'})) && isempty(force_last) && isempty(options.dim_stacking)
-                % Move populations axis to the end of xp2. This ensures
+                % Move populations axis to the end of xp2. (Only do this if
+                % we're not already overwriting dims stacking order).
                 ax_names = xp2.exportAxisNames;
                 ind_pop = false(1,length(ax_names));
                 ind_pop(xp2.findaxis('populations')) = true;
                 ind_rest = ~ind_pop;
                 order = [find(ind_rest) find(ind_pop)];
                 xp2 = xp2.permute(order);
+            end
+            if any(strcmp(plot_type,{'rastergram','raster'})) 
+                % Force Ndims_per_subplot to 2 fro rastergram.
                 if isempty(Ndims_per_subplot)
                     Ndims_per_subplot = 2;                 % Overwrite Ndims_per_subplot to 2. This ensures
                 end                                        % that multiple populations can be stacked in a
