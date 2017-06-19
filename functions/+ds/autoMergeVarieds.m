@@ -15,7 +15,7 @@ function [data, variedname_merged, varied_vals ] = autoMergeVarieds(data,strateg
 % % % % % % % % % % % % % % % % % % % % % 
 
 % auto_gen_test_data_flag argin
-options = ds.checkOptions(varargin,{'auto_gen_test_data_flag',0,{0,1}},false);
+options = dsCheckOptions(varargin,{'auto_gen_test_data_flag',0,{0,1}},false);
 if options.auto_gen_test_data_flag
     varargs = varargin;
     varargs{find(strcmp(varargs, 'auto_gen_test_data_flag'))+1} = 0;
@@ -62,14 +62,14 @@ Nlinked = length(cols_list);
 variedname_merged = cell(1,Nlinked);
 varied_vals = cell(1,Nlinked);
 for j = 1:Nlinked
-    [data, variedname_merged{j}, varied_vals{j} ] = ds.mergeVarieds(data,vary_labels(cols_list{j}));
+    [data, variedname_merged{j}, varied_vals{j} ] = dsMergeVarieds(data,vary_labels(cols_list{j}));
 end
 
 % auto_gen_test_data_flag argout
 if options.auto_gen_test_data_flag
     argout = {linked_indices, non_linked_indices}; % specific to this function
     
-    ds.unit.saveAutoGenTestDataLocalFn(argin, argout); % localfn
+    dsUnitSaveAutoGenTestDataLocalFn(argin, argout); % localfn
 end
 
 

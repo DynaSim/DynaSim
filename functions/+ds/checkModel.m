@@ -2,7 +2,7 @@ function model = checkModel(model, varargin)
 %CHECKMODEL - Standardize model structure and auto-populate missing fields
 %
 % Usage:
-%   model=ds.checkModel(model)
+%   model=dsCheckModel(model)
 %
 % Input: DynaSim model structure or equations
 %
@@ -28,7 +28,7 @@ function model = checkModel(model, varargin)
 %       .expression: string giving the expression to insert
 %       .operation : string giving the operation to use to insert expression
 %     model.comments{i}     : cell array of comments found in model files
-%     model.specification   : specification used to generate the model (see ds.checkSpecification)
+%     model.specification   : specification used to generate the model (see dsCheckSpecification)
 %     model.namespaces      : (see NOTE 3)
 %
 %   - NOTE 1: "action" may include multiple statements separated by semicolons.
@@ -60,15 +60,15 @@ function model = checkModel(model, varargin)
 %
 % Examples:
 % - Example 1: obtain empty model structure with all fields
-%     model=ds.checkModel([])
+%     model=dsCheckModel([])
 %
 % - Example 2: standardize existing model
-%     model=ds.checkModel(model)
+%     model=dsCheckModel(model)
 %
-% see also: ds.generateModel, ds.checkSpecification, ds.checkData
+% see also: dsGenerateModel, dsCheckSpecification, dsCheckData
 
 %% auto_gen_test_data_flag argin
-options = ds.checkOptions(varargin,{'auto_gen_test_data_flag',0,{0,1}},false);
+options = dsCheckOptions(varargin,{'auto_gen_test_data_flag',0,{0,1}},false);
 if options.auto_gen_test_data_flag
   varargs = varargin;
   varargs{find(strcmp(varargs, 'auto_gen_test_data_flag'))+1} = 0;
@@ -90,12 +90,12 @@ end
 
 % % check if input is string with name of file containing model
 % if ischar(model) && exist(model,'file')
-%   model=ds.importModel(model);
+%   model=dsImportModel(model);
 % end
 
 % check if input is string or cell with equations or spec struct and convert to model structure
 if ischar(model) || iscell(model) || ~isfield(model,'state_variables')
-  model=ds.generateModel(model);
+  model=dsGenerateModel(model);
 end
 
 % check back compatibility
@@ -105,7 +105,7 @@ model=backward_compatibility(model);
 if options.auto_gen_test_data_flag
   argout = {model}; % specific to this function
   
-  ds.unit.saveAutoGenTestData(argin, argout);
+  dsUnitSaveAutoGenTestData(argin, argout);
 end
 
 % % auto-populate missing data
@@ -120,8 +120,8 @@ end
 
 % note: auto-populating and standardization of field order may not be
 % necessary or beneficial for DynaSim model structures. It only adds extra
-% time... if the above is uncommented-out, then ds.combineModels() should also
-% be edited by uncommenting-out the call to ds.checkModel() and commenting-out
+% time... if the above is uncommented-out, then dsCombineModels() should also
+% be edited by uncommenting-out the call to dsCheckModel() and commenting-out
 % the call to orderfields according to first input (at the end of the
 % function).
 

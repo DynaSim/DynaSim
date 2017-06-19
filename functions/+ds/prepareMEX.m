@@ -1,7 +1,7 @@
 function mexfileOutput = prepareMEX(mfileInput, varargin)
 %PREPAREMEX - take an m-file path and compile it using the Matlab coder.
 %
-% See also: ds.getSolveFile
+% See also: dsGetSolveFile
 
 % Input args
 args = varargin;
@@ -9,14 +9,14 @@ args = varargin;
 % TODO: this block may be unnecesary since checkOptions can handle a struct
 if isstruct(args{1})
   % User specified an options structure
-  keyvals = ds.options2Keyval(args{1});
+  keyvals = dsOptions2Keyval(args{1});
   % Convert it to keyvalues and prepend
   keyvals = horzcat(keyvals,args(2:end));
 else
   keyvals = args;
 end
 
-options=ds.checkOptions(keyvals,{...
+options=dsCheckOptions(keyvals,{...
   'verbose_flag',0,{0,1},... % set verbose to 1 by default
   'mex_dir',[],[],... % Directory to search for pre-compiled solve files (solve*_mex*)
   'codegen_args',[],[],...

@@ -2,7 +2,7 @@ function [studyinfo,study_status] = monitorStudy(studyinfo,varargin)
 %MONITORSTUDY - display information on study progress.
 %
 % Usage:
-%   [studyinfo,status]=ds.monitorStudy(studyinfo,key/value options)
+%   [studyinfo,status]=dsMonitorStudy(studyinfo,key/value options)
 %
 % Inputs:
 %   - studyinfo: DynaSim studyinfo structure, study directory, or studyinfo MAT filename
@@ -16,19 +16,19 @@ function [studyinfo,study_status] = monitorStudy(studyinfo,varargin)
 %       2 (error in study)
 %       -1 (function failed)
 %
-% See also: dsSimulate, ds.createBatch, ds.checkStudyinfo
+% See also: dsSimulate, dsCreateBatch, dsCheckStudyinfo
 
 % Check inputs
-options=ds.checkOptions(varargin,{...
+options=dsCheckOptions(varargin,{...
   'verbose_flag',1,{0,1},...
   'process_id',[],[],... % process identifier for loading studyinfo if necessary
   },false);
 if isstruct(studyinfo) && isfield(studyinfo,'study_dir')
   % retrieve most up-to-date studyinfo structure from studyinfo.mat file
-  studyinfo=ds.checkStudyinfo(studyinfo.study_dir,'process_id',options.process_id, varargin{:});
+  studyinfo=dsCheckStudyinfo(studyinfo.study_dir,'process_id',options.process_id, varargin{:});
 else
   % process the provided studyinfo structure
-  studyinfo=ds.checkStudyinfo(studyinfo,'process_id',options.process_id, varargin{:});
+  studyinfo=dsCheckStudyinfo(studyinfo,'process_id',options.process_id, varargin{:});
 end
 
 % Check status of study

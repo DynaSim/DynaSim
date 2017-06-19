@@ -8,7 +8,7 @@ function [effective_vary_indices, linked_indices] = checkCovary(vary_lengths, va
   end
   
   %% auto_gen_test_data_flag argin
-  options = ds.checkOptions(varargin,{'auto_gen_test_data_flag',0,{0,1}},false);
+  options = dsCheckOptions(varargin,{'auto_gen_test_data_flag',0,{0,1}},false);
   if options.auto_gen_test_data_flag
       varargs = varargin;
       varargs{find(strcmp(varargs, 'auto_gen_test_data_flag'))+1} = 0;
@@ -118,7 +118,7 @@ function [effective_vary_indices, linked_indices] = checkCovary(vary_lengths, va
   if options.auto_gen_test_data_flag
       argout = {effective_vary_lengths, linked_indices}; % specific to this function
       
-      ds.unit.saveAutoGenTestData(argin, argout);
+      dsUnitSaveAutoGenTestData(argin, argout);
   end
 
 end
@@ -126,7 +126,7 @@ end
 function [linked_indices, non_linked_indices] = find_linked_params(param_indices, vary_params, varargin)
 
 %% auto_gen_test_data_flag argin
-options = ds.checkOptions(varargin,{'auto_gen_test_data_flag',0,{0,1}},false);
+options = dsCheckOptions(varargin,{'auto_gen_test_data_flag',0,{0,1}},false);
 if options.auto_gen_test_data_flag
   varargs = varargin;
   varargs{find(strcmp(varargs, 'auto_gen_test_data_flag'))+1} = 0;
@@ -174,7 +174,7 @@ non_linked_indices = param_indices(no_values_at_value1 > 1);
 if options.auto_gen_test_data_flag
   argout = {linked_indices, non_linked_indices}; % specific to this function
   
-  ds.unit.saveAutoGenTestDataLocalFn(argin, argout); % localfn
+  dsUnitSaveAutoGenTestDataLocalFn(argin, argout); % localfn
 end
 
 end

@@ -2,10 +2,10 @@ function data = importCSV(file)
 %IMPORTCSV - load CSV data into DynaSim formatted data structure.
 %
 % Usage:
-%   data=ds.importCSV(csvfile)
+%   data=dsImportCSV(csvfile)
 %
 % Inputs:
-%   - datafile: CSV file organized according to output from ds.writeDynaSimSolver
+%   - datafile: CSV file organized according to output from dsWriteDynaSimSolver
 %
 % Outputs:
 %   - DynaSim data structure:
@@ -16,7 +16,7 @@ function data = importCSV(file)
 %
 % Note:
 %   - CSV file structure assumes CSV file contains data organized according to
-%   output from ds.writeDynaSimSolver: time points along rows; state variables and
+%   output from dsWriteDynaSimSolver: time points along rows; state variables and
 %   monitors are columns; first column is time vector; next columns are state
 %   variables; final columns are monitors. first row has headers for each
 %   column. if a population has more than one cell, different cells are

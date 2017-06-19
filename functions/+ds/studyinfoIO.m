@@ -1,13 +1,13 @@
 function studyinfo = studyinfoIO(studyinfo,study_file,id,verbose_flag)
 %STUDYINFOIO - use lock files to manage concurrent access to a shared studyinfo 
 %
-% This is an internal helper function called by ds.checkStudyinfo, ds.setupStudy,
-% TrackStudy, and ds.createBatch to prevent busy-file conflicts. file. i.e.,
+% This is an internal helper function called by dsCheckStudyinfo, dsSetupStudy,
+% TrackStudy, and dsCreateBatch to prevent busy-file conflicts. file. i.e.,
 % serialize read/writes for parallel processes in study batch.
 %
 % Usage:
-%   loading: studyinfo=ds.studyinfoIO([],study_file,[id,verbose_flag])
-%   saving:  ds.studyinfoIO(studyinfo,[study_file,id,verbose_flag]);
+%   loading: studyinfo=dsStudyinfoIO([],study_file,[id,verbose_flag])
+%   saving:  dsStudyinfoIO(studyinfo,[study_file,id,verbose_flag]);
 %
 % Inputs:
 %   - studyinfo: (empty [] for loading) or (DynaSim studyinfo structure to save)

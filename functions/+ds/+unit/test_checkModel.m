@@ -1,6 +1,6 @@
 classdef test_checkModel < matlab.unittest.TestCase
   properties
-    unitTestDataPath = ds.getConfig('ds_unitTestData_path');
+    unitTestDataPath = dsGetConfig('ds_unitTestData_path');
   end
   
   methods (Test,  TestTags = {'core'})
@@ -9,7 +9,7 @@ classdef test_checkModel < matlab.unittest.TestCase
       expectedOut = load(fullfile(testCase.unitTestDataPath,'checkModel_testCellIn'));
       expectedOut = expectedOut.model;
       
-      testCase.verifyEqual(expectedOut, ds.checkModel(argin{:}) );
+      testCase.verifyEqual(expectedOut, dsCheckModel(argin{:}) );
     end
   end
   

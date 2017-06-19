@@ -2,16 +2,16 @@ function model = combineModels(model1,model2, varargin)
 %COMBINEMODELS - combine subfields in two DynaSim model structures
 %
 % Usage:
-%   model=ds.combineModels(model1,model2)
+%   model=dsCombineModels(model1,model2)
 %
 % Inputs: two models to be combined
 %
 % Output: DynaSim model with fields combined from both models
 %
-% See also: ds.checkModel, ds.generateModel
+% See also: dsCheckModel, dsGenerateModel
 
 %% auto_gen_test_data_flag argin
-options = ds.checkOptions(varargin,{'auto_gen_test_data_flag',0,{0,1}},false);
+options = dsCheckOptions(varargin,{'auto_gen_test_data_flag',0,{0,1}},false);
 if options.auto_gen_test_data_flag
   varargs = varargin;
   varargs{find(strcmp(varargs, 'auto_gen_test_data_flag'))+1} = 0;
@@ -20,8 +20,8 @@ if options.auto_gen_test_data_flag
 end
 
 % standardize model structures
-model1=ds.checkModel(model1, varargin{:});
-model2=ds.checkModel(model2, varargin{:});
+model1=dsCheckModel(model1, varargin{:});
+model2=dsCheckModel(model2, varargin{:});
 
 % combine fields from sub-structures
 model.parameters=concatenate_structures(model1.parameters,model2.parameters);
@@ -44,9 +44,9 @@ model.comments=cat(2,model1.comments,model2.comments);
 % ...
 
 % standardize resulting model
-% model=ds.checkModel(model);
-  % NOTE: if this call to ds.checkModel() is uncommented-out, the changes noted
-  % in ds.checkModel() should also be made...
+% model=dsCheckModel(model);
+  % NOTE: if this call to dsCheckModel() is uncommented-out, the changes noted
+  % in dsCheckModel() should also be made...
 
 % reorder fields according to first input
 model=orderfields(model,model1);
@@ -55,7 +55,7 @@ model=orderfields(model,model1);
 if options.auto_gen_test_data_flag
   argout = {model}; % specific to this function
   
-  ds.unit.saveAutoGenTestData(argin, argout);
+  dsUnitSaveAutoGenTestData(argin, argout);
 end
 
 end

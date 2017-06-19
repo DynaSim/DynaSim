@@ -1,11 +1,11 @@
 function [handles,xp] = dsPlot2(data,varargin)
 %% handles=dsPlot(data,'option',value)
 % Purpose: plot data in various ways depending on what data was provided
-% and what options are defined. this function is wrapped by ds.plotWaveforms,
+% and what options are defined. this function is wrapped by dsPlotWaveforms,
 % PlotPower, ... to provide a single function for organizing and displaying
 % data.
 % Inputs:
-%   data: DynaSim data structure (see ds.checkData)
+%   data: DynaSim data structure (see dsCheckData)
 %   Accepts the following name/value pairs:
 %     'plot_type' {'waveform' (default),'rastergram','rates','power'} - what to plot
 %     'population' - name of population to plot (default: 'all'); accepts
@@ -35,18 +35,18 @@ function [handles,xp] = dsPlot2(data,varargin)
 %     'yscale' {'linear','log','log10'}, whether to plot linear or log scale
 %     'visible' {'on','off'}
 %     NOTE: analysis options available depending on plot_type
-%       see see ds.calcFR options for plot_type 'rastergram' or 'rates'
-%       see ds.calcPower options for plot_type 'power'
+%       see see dsCalcFR options for plot_type 'rastergram' or 'rates'
+%       see dsCalcPower options for plot_type 'power'
 % Outputs:
 %   handles: graphic handles to figures
 % 
-% See also: ds.calcFR, ds.calcPower, ds.plotWaveforms, ds.checkData, dsPlot, MDD,
+% See also: dsCalcFR, dsCalcPower, dsPlotWaveforms, dsCheckData, dsPlot, MDD,
 %           MDD
 
 %% Set Master parameters
   
 % Flag for returning error if the user specifies name/value pairs that are not in the
-% ds.checkOptions list
+% dsCheckOptions list
 strict_mode = 0;        % Should be set to zero for this to work within simulate model
 
 %% Convert data input to appropriate form
@@ -56,7 +56,7 @@ if ischar(data)
     study_dir = data;
     
     % Import plot files
-    data_img = ds.importPlots(study_dir);
+    data_img = dsImportPlots(study_dir);
     
     [handles, xp] = dsPlot2(data_img,varargin{:});
     return;
@@ -64,7 +64,7 @@ end
 
 % Convert the incoming DynaSim data structure to an MDD object
 if ~isa(data,'MDD')
-    [xp,is_image] = ds.all2mdd(data);
+    [xp,is_image] = dsAll2mdd(data);
 else
     xp = data;
     if iscell(xp.data{1})
@@ -117,7 +117,7 @@ end
 % end
 
 %% Parse varargin and set up defaults
-[options, options_extras0] = ds.checkOptions(myargin,{...
+[options, options_extras0] = dsCheckOptions(myargin,{...
   'population',[],[],...
   'variable',[],[],...
   'num_embedded_subplots',2,{1,2,3,4},...
@@ -509,7 +509,7 @@ else
             end
             
         case {'heatmapFR','heatmap_sortedFR','meanFR','meanFRdens'}
-            % Disable legend when using ds.plotFR2
+            % Disable legend when using dsPlotFR2
             subplot_options.legend1 = [];
             % Remove FR suffix from heatmap and heatmap_sorted plot types
             if any(strcmp(plot_type,{'heatmapFR','heatmap_sortedFR'}))
@@ -610,7 +610,7 @@ function var_out = getdefaultstatevar(xp)
         return;
     end
     
-    vars_from_labels = ds.get_variables_from_meta(xp);
+    vars_from_labels = dsGet_variables_from_meta(xp);
     if ~isempty(vars_from_labels)
         vars_from_labels = vars_from_labels(1);   % Best guess at default state variable. Usually its the 1st entry in labels
     end

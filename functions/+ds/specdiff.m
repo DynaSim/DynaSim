@@ -1,8 +1,8 @@
 function [pop_diff,conn_diff] = specDiff(spec1,spec2,verbose)
-%ds.specDiff - Scans two DynaSim specs for differences
+%dsSpecDiff - Scans two DynaSim specs for differences
 %
 % Usage:
-%   [pop_diff,conn_diff] = ds.specDiff(spec1,spec2)
+%   [pop_diff,conn_diff] = dsSpecDiff(spec1,spec2)
 %
 % Inputs:
 %    - spec1, spec2        : DynaSim model specifications to be compared

@@ -13,7 +13,7 @@ function model = propagateParameters(model,varargin)
 %
 % Output: DynaSim model structure with updated parameter in all equations
 %
-% See also: ds.propagateFunctions, ds.writeDynaSimSolver
+% See also: dsPropagateFunctions, dsWriteDynaSimSolver
 
 %% localfn output
 if ~nargin
@@ -22,14 +22,14 @@ if ~nargin
 end
 
 % Check inputs
-model=ds.checkModel(model, varargin{:});
+model=dsCheckModel(model, varargin{:});
 if ~isstruct(model.parameters)
   % nothing to do
   return;
 end
 
 % Check inputs
-options=ds.checkOptions(varargin,{...
+options=dsCheckOptions(varargin,{...
   'action','substitute',{'substitute','prepend','postpend'},...
   'prop_prefix','pset.p.',[],...
   'prop_suffix','',[],...
@@ -118,7 +118,7 @@ end
 if options.auto_gen_test_data_flag
   argout = {model}; % specific to this function
   
-  ds.unit.saveAutoGenTestData(argin, argout);
+  dsUnitSaveAutoGenTestData(argin, argout);
 end
 
 end % main fn
@@ -128,7 +128,7 @@ end % main fn
 function expression=insert_parameters(expression,parameters,attachType,attachStr, varargin)
 
 %% auto_gen_test_data_flag argin
-options = ds.checkOptions(varargin,{'auto_gen_test_data_flag',0,{0,1}},false);
+options = dsCheckOptions(varargin,{'auto_gen_test_data_flag',0,{0,1}},false);
 if options.auto_gen_test_data_flag
   varargs = varargin;
   varargs{find(strcmp(varargs, 'auto_gen_test_data_flag'))+1} = 0;
@@ -190,9 +190,9 @@ if ~isempty(found_parameters)
       num_found = length(find(ismember(allwords,found_parameter)));
       for iter=1:num_found
         if ~strcmp(attachType, 'suffix')
-          expression=ds.strrep(expression,found_parameter,found_value, '', '', varargin{:});
+          expression=dsStrrep(expression,found_parameter,found_value, '', '', varargin{:});
         else
-          expression=ds.strrep2(expression,found_parameter,found_value, '', '', varargin{:});
+          expression=dsStrrep2(expression,found_parameter,found_value, '', '', varargin{:});
         end
       end
     end
@@ -203,7 +203,7 @@ end
 if options.auto_gen_test_data_flag
   argout = {expression}; % specific to this function
   
-  ds.unit.saveAutoGenTestDataLocalFn(argin, argout); % localfn
+  dsUnitSaveAutoGenTestDataLocalFn(argin, argout); % localfn
 
 end
 

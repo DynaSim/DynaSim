@@ -16,7 +16,7 @@ function xp = img2mdd(data_img,merge_covaried_axes,merge_sparse_axes,varargin)
 
         
         % Identified covaried axes (note; this will fail if 
-        [Abasis,Abasisi, Asubs] = ds.getLinearIndependentDs(data_img);
+        [Abasis,Abasisi, Asubs] = dsGetLinearIndependentDs(data_img);
         
         gt1 = cellfun(@(x) length(x) > 1, Asubs);  % Identified all linked indices with at least 2 varieds
         Asubs = Asubs(gt1);                  % Only perform the merge if there are at least 2 varieds to merge!
@@ -29,7 +29,7 @@ function xp = img2mdd(data_img,merge_covaried_axes,merge_sparse_axes,varargin)
         variedname_merged = cell(1,Nlinked);
         varied_vals = cell(1,Nlinked);
         for j = 1:Nlinked
-            [data_img, variedname_merged{j}, varied_vals{j} ] = ds.mergeVarieds(data_img,vary_labels(Asubs{j}));
+            [data_img, variedname_merged{j}, varied_vals{j} ] = dsMergeVarieds(data_img,vary_labels(Asubs{j}));
         end
         
         % Automerge any additional dimensions based on analysis of
@@ -38,14 +38,14 @@ function xp = img2mdd(data_img,merge_covaried_axes,merge_sparse_axes,varargin)
     end
     
     if merge_sparse_axes && isfield(data_img(1),'varied')
-        [data_img] = ds.autoMergeVarieds(data_img);
+        [data_img] = dsAutoMergeVarieds(data_img);
     end
     
 % % % % % % % % % % % % % % %     
 
 
     % Load into DynaSim structure
-    [data_table,column_titles] = ds.dataField2Table (data_img,'plot_files');
+    [data_table,column_titles] = dsDataField2Table (data_img,'plot_files');
 
     % The entries in the first column contain the paths to the figure files.
     % There can be multiple figures associated with each simulation, which is

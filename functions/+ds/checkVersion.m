@@ -1,10 +1,10 @@
 function checkVersion()
-%% ds.checkVersion - checks dynasim version against github
+%% dsCheckVersion - checks dynasim version against github
 
 %% Get current commit SHA
 % keyboard
-ds.getRootPath = fullfile(thisMfileDir(), '..');
-vFile = fullfile(ds.getRootPath, '.ds_version');
+dsGetRootPath = fullfile(thisMfileDir(), '..');
+vFile = fullfile(dsGetRootPath, '.ds_version');
 keyboard
 if exist(vFile, 'file')
   fid = fopen(vFile, 'r');%,'n','UTF-8');
@@ -33,7 +33,7 @@ end
 % 'https://github.com/DynaSim/DynaSim'
 % };
 % 
-% if ds.isDevMode
+% if dsIsDevMode
 %   dependencies = [dependencies, {...
 %     'https://github.com/davestanley/MDD',...
 %     'https://github.com/erikthered12/GIMBL-Vis',...

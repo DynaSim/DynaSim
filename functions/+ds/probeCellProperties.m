@@ -1,10 +1,10 @@
 function data = probeCellProperties(model,varargin)
-% data = ds.probeCellProperties(model,'option1',option1,...)
+% data = dsProbeCellProperties(model,'option1',option1,...)
 % This experiment is designed to probe the intrinsic properties of cells in
 % one or more populations. It removes all connections between cells and 
 % populations and then runs a series of simulations delivering
 % hyperpolarizing and depolarizing pulses. It is designed to be used in
-% conjunction with the analysis function "ds.calcCellProperties" which accepts
+% conjunction with the analysis function "dsCalcCellProperties" which accepts
 % the data array produced by this experiment and returns the
 % electrophysiological properties characterizing each cell's response in
 % the population.
@@ -22,15 +22,15 @@ function data = probeCellProperties(model,varargin)
 % 
 % Example: ...
 % model='dv/dt=(@current-.1*(v+70))/Cm; Cm=1; {iNa,iK}';
-% data=ds.probeCellProperties(model,'verbose_flag',1);
+% data=dsProbeCellProperties(model,'verbose_flag',1);
 % dsPlot(data(1:10));
 % dsPlot(data(11:20));
 % 
 % model='dv/dt=@current-.1*(v+70)+5*randn; {iNa,iK}';
-% data=ds.probeCellProperties(model,'num_repetitions',2);
+% data=dsProbeCellProperties(model,'num_repetitions',2);
 % 
 % Note: this function is based on the DNSim experiment "cell_pulses".
-% See also: ds.calcCellProperties
+% See also: dsCalcCellProperties
 
 % Experiment: input model, produces data sets for all step levels
 % Analysis: input data sets for all step levels, output one stat structure 
@@ -38,7 +38,7 @@ function data = probeCellProperties(model,varargin)
 %           population of the model.
 
 % Check inputs
-options=ds.checkOptions(varargin,{...
+options=dsCheckOptions(varargin,{...
   'target_equation','ODE1',[],...
   'amplitudes',-30:5:180,[],... % pA. typically: 0-500pA (0-.5nA)
   'membrane_area',1500,[],...     % um^2. typically: 1000-2000 um2
@@ -50,7 +50,7 @@ options=ds.checkOptions(varargin,{...
   'remove_connections_flag',1,[],...
   },false);
 
-model=ds.checkModel(model, varargin{:});
+model=dsCheckModel(model, varargin{:});
 
 % check that amplitude=0 is present (for RMP calculation)
 if ~ismember(0,options.amplitudes)
@@ -66,7 +66,7 @@ options.effective_amplitudes=CF*options.amplitudes/options.membrane_area;
 if ~isempty(model.specification.connections) && options.remove_connections_flag
   specification=model.specification;
   specification.connections=[];
-  model=ds.generateModel(specification);
+  model=dsGenerateModel(specification);
 end
 
 % Extract population info
@@ -108,11 +108,11 @@ vary={objects,'TONIC',options.effective_amplitudes;...
       objects,'repetition',1:options.num_repetitions};
 
 % apply modifications to effectively add experimental apparatus to model
-model=ds.applyModifications(model,modifications, varargin{:});
+model=dsApplyModifications(model,modifications, varargin{:});
 
 % execute experimental protocol by varying parameters across simulations
 fprintf('Running experiment: %s\n',mfilename);
-keyvals=ds.removeKeyval(varargin,'tspan');
+keyvals=dsRemoveKeyval(varargin,'tspan');
 data=dsSimulate(model,'vary',vary,'tspan',options.tspan,keyvals{:});
 
 % add options to data

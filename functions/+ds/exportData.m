@@ -2,18 +2,18 @@ function exportData(data,varargin)
 %EXPORTDATA - export DynaSim data structure in various formats.
 %
 % Usage:
-%   ds.exportData(data,varargin)
+%   dsExportData(data,varargin)
 %
 % Inputs:
-%   - data: DynaSim data structure (see ds.checkData)
+%   - data: DynaSim data structure (see dsCheckData)
 %   - options:
 %     'filename'    : name of output data file (default: 'data.mat')
 %     'format'      : mat. todo: csv, HDF. (default: 'mat')
 %     'verbose_flag': whether to print log info (default: 0)
 % 
-% See also: dsImport, ds.checkData, dsSimulate
+% See also: dsImport, dsCheckData, dsSimulate
 
-options=ds.checkOptions(varargin,{...
+options=dsCheckOptions(varargin,{...
   'filename','data.mat',[],... % name of output data file
   'format','mat',[],... % mat. todo: csv, HDF
   'verbose_flag',0,{0,1},... % whether to print log info

@@ -35,7 +35,7 @@ function [data,studyinfo] = dsImport(file,varargin)
 %
 % Notes:
 %   - NOTE 1: CSV file structure assumes CSV file contains data organized
-%   according to output from ds.writeDynaSimSolver: time points along rows; state
+%   according to output from dsWriteDynaSimSolver: time points along rows; state
 %   variables and monitors are columns; first column is time vector; next
 %   columns are state variables; final columns are monitors. first row has
 %   headers for each column. if a population has more than one cell, different
@@ -60,11 +60,11 @@ function [data,studyinfo] = dsImport(file,varargin)
 %   'I->E','tauI',[15 25]; 'I','mechanism_list','+iM'}
 % - achieve by calling function dsSelect() at end of this function.
 
-% See also: dsSimulate, ds.exportData, ds.checkData, dsSelect
+% See also: dsSimulate, dsExportData, dsCheckData, dsSelect
 
 
 % Check inputs
-options=ds.checkOptions(varargin,{...
+options=dsCheckOptions(varargin,{...
   'verbose_flag',1,{0,1},...
   'process_id',[],[],... % process identifier for loading studyinfo if necessary
   'time_limits',[],[],...
@@ -105,7 +105,7 @@ end
 if isstruct(file) && isfield(file,'study_dir')
   % "file" is a studyinfo structure.
   % retrieve most up-to-date studyinfo structure from studyinfo.mat file
-  studyinfo = ds.checkStudyinfo(file.study_dir,'process_id',options.process_id, varargin{:});
+  studyinfo = dsCheckStudyinfo(file.study_dir,'process_id',options.process_id, varargin{:});
 
   % compare simIDs to sim_id
   if ~isempty(options.simIDs)
@@ -135,7 +135,7 @@ if isstruct(file) && isfield(file,'study_dir')
   studyinfo.simulations = studyinfo.simulations(success); % remove missing data
 
   % load each data set recursively
-  keyvals = ds.options2Keyval(options);
+  keyvals = dsOptions2Keyval(options);
   num_files = length(data_files);
 
   for i = 1:num_files
@@ -184,7 +184,7 @@ if iscellstr(file)
   data_files=file;
   success=cellfun(@exist,data_files)==2;
   data_files=data_files(success);
-  keyvals=ds.options2Keyval(options);
+  keyvals=dsOptions2Keyval(options);
 
   % load each data set recursively
   for i=1:length(data_files)
@@ -275,8 +275,8 @@ if ischar(file)
         end
       end
     case '.csv'
-      % assumes CSV file contains data organized according to output from ds.writeDynaSimSolver:
-      data=ds.importCSV(file);
+      % assumes CSV file contains data organized according to output from dsWriteDynaSimSolver:
+      data=dsImportCSV(file);
 
       if ~(isempty(options.time_limits) && isempty(options.variables))
         % limit to select subsets
@@ -291,7 +291,7 @@ end
 if options.auto_gen_test_data_flag
   argout = {data, studyinfo}; % specific to this function
 
-  ds.unit.saveAutoGenTestData(argin, argout);
+  dsUnitSaveAutoGenTestData(argin, argout);
 end
 
 end % main fn

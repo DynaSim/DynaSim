@@ -40,7 +40,7 @@ function [Abasis, Abasisi, Asubs] = getLinearIndependentDs(data,ignore_constant_
 % See also: getLinearIndependent, getLinearIndependentCell, rref, unique
 
 %% auto_gen_test_data_flag argin
-options = ds.checkOptions(varargin,{'auto_gen_test_data_flag',0,{0,1}},false);
+options = dsCheckOptions(varargin,{'auto_gen_test_data_flag',0,{0,1}},false);
 if options.auto_gen_test_data_flag
     varargs = varargin;
     varargs{find(strcmp(varargs, 'auto_gen_test_data_flag'))+1} = 0;
@@ -61,14 +61,14 @@ for i = 1:N
     end
 end
 
-[Abasis, Abasisi, Asubs] = ds.getLinearIndependentCell(vary_params,ignore_constant_shift);
+[Abasis, Abasisi, Asubs] = dsGetLinearIndependentCell(vary_params,ignore_constant_shift);
 
 
 %% auto_gen_test_data_flag argout
 if options.auto_gen_test_data_flag
     argout = {linked_indices, non_linked_indices}; % specific to this function
     
-    ds.unit.saveAutoGenTestDataLocalFn(argin, argout); % localfn
+    dsUnitSaveAutoGenTestDataLocalFn(argin, argout); % localfn
 end
 
 end

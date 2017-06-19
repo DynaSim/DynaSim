@@ -1,10 +1,10 @@
 classdef test_autogenDirs_all < matlab.unittest.TestCase
   properties
-    unitTestDataPath = ds.getConfig('ds_unitTestData_path');
+    unitTestDataPath = dsGetConfig('ds_unitTestData_path');
   end
   
   properties (TestParameter)
-    dataDirName = ds.unit.getAutogenDirs();
+    dataDirName = dsUnitGetAutogenDirs();
   end
   
   methods (Test,  TestTags = {'autogen'})
@@ -31,7 +31,7 @@ classdef test_autogenDirs_all < matlab.unittest.TestCase
       if all(isValidFigHandle(testOut{1}))
         handles = testOut{1};
         
-        ds.unit.save_figHandles( handles, tempDirPath )
+        dsUnitSave_figHandles( handles, tempDirPath )
         
         close all
       end

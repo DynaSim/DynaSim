@@ -13,7 +13,7 @@ function generateDocumentation
 cwd = pwd; % store current working dir
 
 % fprintf('Temporarily changing directory to dynasim root for offline documentation generation.\n\n')
-cd(ds.getConfig('ds_root_path'));
+cd(dsGetConfig('ds_root_path'));
 
 m2html('mfiles',{'functions'},...
        'htmldir','docs/offline_docs',...

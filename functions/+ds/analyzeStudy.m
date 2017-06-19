@@ -1,12 +1,12 @@
 function [results,studyinfo] = analyzeStudy(data,func,varargin)
-%ds.analyzeStudy - Apply an analysis function to DynaSim data, optionally saving data
+%dsAnalyzeStudy - Apply an analysis function to DynaSim data, optionally saving data
 %
 % Apply the same user-specified analysis function to each element of data
 % structure. intended for use with results from simulation studies varying some
 % aspect of the model or inputs.
 %
 % Usage:
-%   [results,studyinfo]=ds.analyzeStudy(data,func,'option1',value1)
+%   [results,studyinfo]=dsAnalyzeStudy(data,func,'option1',value1)
 %
 % Inputs:
 %   - data: DynaSim data structure with one or more elements
@@ -21,10 +21,10 @@ function [results,studyinfo] = analyzeStudy(data,func,varargin)
 %
 % TODO: annotate figures with data set-specific modifications
 %
-% See also: dsSimulate, ds.calcFR
+% See also: dsSimulate, dsCalcFR
 
 % check inputs
-options=ds.checkOptions(varargin,{...
+options=dsCheckOptions(varargin,{...
   'analysis_prefix','study_analysis',[],...
   'save_data_flag',0,{0,1},...
   'detailed_names_flag',0,{0,1},...
@@ -37,12 +37,12 @@ if ~(isstruct(data) && isfield(data,'time'))
   % this is a data file, list of data files, studyinfo structure, study_dir, or studyinfo file
   [data,studyinfo]=dsImport(data,varargin{:}); % load all data in study
 else
-  studyinfo=ds.checkStudyinfo([], varargin{:});
+  studyinfo=dsCheckStudyinfo([], varargin{:});
 end
 
 % studyinfo.base_simulator_options (contains study_dir, etc)
-% ds.createBatch
-% ds.setupStudy
+% dsCreateBatch
+% dsSetupStudy
 
 if ~iscell(func)
   % convert func to cell array of function handles
@@ -53,7 +53,7 @@ for i=1:length(func)
     error('the second argument must be a function handle (or cell array of them) for the desired analysis function.');
   end
 end
-data=ds.checkData(data, varargin{:});
+data=dsCheckData(data, varargin{:});
 
 % pass each element of data to the analysis function
 for i=1:length(data)

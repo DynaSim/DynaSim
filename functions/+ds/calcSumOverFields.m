@@ -5,7 +5,7 @@ function data = calcSumOverFields(data, fields, output_field_name, varargin)
 % "output_field_name." Useful for adding multiple ionic currents together.
 %
 % Inputs:
-%   - data: DynaSim data structure (see ds.checkData)
+%   - data: DynaSim data structure (see dsCheckData)
 %   - fields: cell array of field names. These will be summed and stored in the
 %       field called output_field_name.
 %   - output_field_name: string containing the desired output field name.
@@ -14,7 +14,7 @@ function data = calcSumOverFields(data, fields, output_field_name, varargin)
 %   - data: data structure containing summed data
 
 %% auto_gen_test_data_flag argin
-options = ds.checkOptions(varargin,{'auto_gen_test_data_flag',0,{0,1}},false);
+options = dsCheckOptions(varargin,{'auto_gen_test_data_flag',0,{0,1}},false);
 if options.auto_gen_test_data_flag
   varargs = varargin;
   varargs{find(strcmp(varargs, 'auto_gen_test_data_flag'))+1} = 0;
@@ -41,8 +41,8 @@ if isempty(strfind(output_field_name,'_'))
 
 end
 
-data = ds.checkData(data, varargin{:});
-% note: calling ds.checkData() at beginning enables analysis function to
+data = dsCheckData(data, varargin{:});
+% note: calling dsCheckData() at beginning enables analysis function to
 % accept data matrix [time x cells] in addition to DynaSim data structure.
 
 for i = 1:length(data)
@@ -59,7 +59,7 @@ end
 if options.auto_gen_test_data_flag
   argout = {data}; % specific to this function
   
-  ds.unit.saveAutoGenTestData(argin, argout);
+  dsUnitSaveAutoGenTestData(argin, argout);
 end
 
 end

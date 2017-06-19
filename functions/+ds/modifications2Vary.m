@@ -23,15 +23,15 @@ function data = modifications2Vary(data,modifications,options,modifications_set,
     %   options : Options structure containing experiment OR precision
     %   fields (see dsSimulate)
     %   modifications_set : Additional modifications, produced by
-    %                       ds.vary2Modifications(options.vary,model);
+    %                       dsVary2Modifications(options.vary,model);
     %   sim : simulation number
     %
     % Outputs:
     %   data: DynaSim data structure
     %
     % Examples:
-    %   tmpdata = ds.modifications2Vary(tmpdata,options.modifications,options,modifications_set,sim);
-    %   tmp_data = ds.modifications2Vary(tmp_data,modifications); 
+    %   tmpdata = dsModifications2Vary(tmpdata,options.modifications,options,modifications_set,sim);
+    %   tmp_data = dsModifications2Vary(tmp_data,modifications); 
     % 
     %
     % Author: Dave Stanley; based on prepare_varied_metadata by ??? (Jason

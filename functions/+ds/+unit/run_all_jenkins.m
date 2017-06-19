@@ -19,15 +19,15 @@ rmPathVar('ds');
 addpath(genpath(ws));
 
 %% Make Default Config
-ds.makeDefaultConfigJenkins;
+dsMakeDefaultConfigJenkins;
 
 %% Make Test Suite
-fullSuite = TestSuite.fromPackage('ds.unit');
+fullSuite = TestSuite.fromPackage('dsUnit');
 fullSuite = fullSuite.selectIf(~HasTag('query'));
 
 %% code coverage runner
 % runner = TestRunner.withTextOutput;
-% runner.addPlugin(CodeCoveragePlugin.forFolder(fullfile(ds.getConfig('ds_root_path'), 'functions')))
+% runner.addPlugin(CodeCoveragePlugin.forFolder(fullfile(dsGetConfig('ds_root_path'), 'functions')))
 % runner.addPlugin(CodeCoveragePlugin.forPackage('ds'))
 
 %% Run Test Suite

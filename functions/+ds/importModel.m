@@ -2,7 +2,7 @@ function [model,map] = importModel(source,varargin)
 %IMPORTMODEL - import model from raw equations, other program source, etc.
 %
 % Usage:
-%   [model,map] = ds.importModel(source,'option',value,...)
+%   [model,map] = dsImportModel(source,'option',value,...)
 %
 % Inputs:
 %   - source: [string]
@@ -17,12 +17,12 @@ function [model,map] = importModel(source,varargin)
 %     'user_parameters': cell array of key/value pairs to override model parameters
 %
 % Output:
-%   DynaSim model structure (see ds.generateModel)
+%   DynaSim model structure (see dsGenerateModel)
 %
-% See also: ds.generateModel, ds.checkModel
+% See also: dsGenerateModel, dsCheckModel
 
 % Check inputs
-options=ds.checkOptions(varargin,{...
+options=dsCheckOptions(varargin,{...
   'host','local',[],... % database, eg: infbrain, modeldb
   'namespace',[],[],... % namespace, eg: E, I
   'ic_pop',[],[],... % eg: E, I
@@ -50,7 +50,7 @@ end
 %% 2.0 Convert to DynaSim model structure
 % if DynaSim .mech, .eqns, .txt:
   % parse model equations
-  [model,map]=ds.parseModelEquations(source,'namespace',options.namespace, varargin{:});
+  [model,map]=dsParseModelEquations(source,'namespace',options.namespace, varargin{:});
   
 % if DynaSim .mat: load MAT-file
 % ... load(source) ...
@@ -130,7 +130,7 @@ function modl=add_missing_ICs(modl,popname)
     return;
   end
   Npopstr=[popname '_Npop'];
-  % add default ICs if missing (do not evaluate ICs in ds.generateModel; do that in dsSimulate before saving params.mat)
+  % add default ICs if missing (do not evaluate ICs in dsGenerateModel; do that in dsSimulate before saving params.mat)
   if isstruct(modl.ICs)
     missing_ICs=setdiff(modl.state_variables,fieldnames(modl.ICs));
   else
@@ -193,7 +193,7 @@ mget(f,modelfile,target);
 % parse mechanism file
 tempfile = fullfile(target,modelfile);
 source=tempfile;
-[model,map]=ds.parseModelEquations(source, varargin{:});
+[model,map]=dsParseModelEquations(source, varargin{:});
 % if isequal(ext,'.json')
 %   [spec,jsonspec] = json2spec(tempfile);
 %   spec.model_uid=ModelID;

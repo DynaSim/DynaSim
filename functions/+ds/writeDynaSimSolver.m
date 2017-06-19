@@ -2,12 +2,12 @@ function [outfile,options] = writeDynaSimSolver(model,varargin)
 %WRITEDYNASIMSOLVER - write m-file that numerically inteegrates the model
 %
 % Usage:
-%   solver_file=ds.writeDynaSimSolver(model,varargin)
+%   solver_file=dsWriteDynaSimSolver(model,varargin)
 %
 % Inputs:
-%   - model: DynaSim model structure (see ds.generateModel)
+%   - model: DynaSim model structure (see dsGenerateModel)
 %   - options:
-%     'solver'     : solver for numerical integration (see ds.getSolveFile)
+%     'solver'     : solver for numerical integration (see dsGetSolveFile)
 %                    {'euler'/'rk1', 'rk2'/'modified_euler', 'rungekutta'/'rk'/'rk4'} (default: 'rk4')
 %     'tspan'      : time limits of simulation [begin,end] (default: [0 100]) [ms]
 %                    - Note: units must be consistent with dt and model equations
@@ -28,46 +28,46 @@ function [outfile,options] = writeDynaSimSolver(model,varargin)
 %
 % Examples:
 %   - Example 1: test solver production, display function in standard output
-%       model=ds.generateModel; % test model
+%       model=dsGenerateModel; % test model
 %       without writing anything to disk:
-%       ds.writeDynaSimSolver(model,'fileID',1,'save_parameters_flag',0,'solver','rk4');
-%       ds.writeDynaSimSolver(model,'fileID',1,'save_parameters_flag',1,'solver','rk4');
-%       model=ds.propagateFunctions(model);
-%       ds.writeDynaSimSolver(model,'fileID',1,'save_parameters_flag',0,'solver','rk4');
-%       ds.writeDynaSimSolver(model,'fileID',1,'save_parameters_flag',1,'solver','rk4');
+%       dsWriteDynaSimSolver(model,'fileID',1,'save_parameters_flag',0,'solver','rk4');
+%       dsWriteDynaSimSolver(model,'fileID',1,'save_parameters_flag',1,'solver','rk4');
+%       model=dsPropagateFunctions(model);
+%       dsWriteDynaSimSolver(model,'fileID',1,'save_parameters_flag',0,'solver','rk4');
+%       dsWriteDynaSimSolver(model,'fileID',1,'save_parameters_flag',1,'solver','rk4');
 %
 %   - Example 2: real-time downsampling
-%       ds.writeDynaSimSolver(model,'downsample_factor',10,'fileID',1,'solver','rk4');
+%       dsWriteDynaSimSolver(model,'downsample_factor',10,'fileID',1,'solver','rk4');
 %
 %   - Example 3: real-time writing data to disk (reduce memory demand)
-%       ds.writeDynaSimSolver(model,'disk_flag',1,'fileID',1,'solver','rk4');
+%       dsWriteDynaSimSolver(model,'disk_flag',1,'fileID',1,'solver','rk4');
 %
 %   - Example 4: maximally conserve memory: downsample and write to disk
-%       ds.writeDynaSimSolver(model,'disk_flag',1,'downsample_factor',10,'fileID',1,'solver','rk4');
+%       dsWriteDynaSimSolver(model,'disk_flag',1,'downsample_factor',10,'fileID',1,'solver','rk4');
 %
 % More Examples:
-%     ds.writeDynaSimSolver(model,'solver','euler');
-%     ds.writeDynaSimSolver(model,'solver','rk2');
-%     ds.writeDynaSimSolver(model,'solver','rk4');
+%     dsWriteDynaSimSolver(model,'solver','euler');
+%     dsWriteDynaSimSolver(model,'solver','rk2');
+%     dsWriteDynaSimSolver(model,'solver','rk4');
 %
-%     model=ds.generateModel; % test model
-%     tic; ds.writeDynaSimSolver(model,'save_parameters_flag',0,'reduce_function_calls_flag',0,'solver','rk4','filename','solve_ode.m'); v=solve_ode; plot(v); toc
-%     tic; ds.writeDynaSimSolver(model,'save_parameters_flag',1,'reduce_function_calls_flag',0,'solver','rk4','filename','solve_ode.m'); v=solve_ode; plot(v); toc
-%     tic; ds.writeDynaSimSolver(model,'save_parameters_flag',0,'reduce_function_calls_flag',1,'solver','rk4','filename','solve_ode.m'); v=solve_ode; plot(v); toc
-%     tic; ds.writeDynaSimSolver(model,'save_parameters_flag',1,'reduce_function_calls_flag',1,'solver','rk4','filename','solve_ode.m'); v=solve_ode; plot(v); toc
-%     tic; ds.writeDynaSimSolver(model,'save_parameters_flag',1,'reduce_function_calls_flag',1,'solver','rk2','filename','solve_ode.m'); v=solve_ode; plot(v); toc
-%     tic; ds.writeDynaSimSolver(model,'save_parameters_flag',1,'reduce_function_calls_flag',1,'solver','rk1','filename','solve_ode.m'); v=solve_ode; plot(v); toc
-%     tic; ds.writeDynaSimSolver(model,'save_parameters_flag',1,'reduce_function_calls_flag',1,'solver','rk1','filename','solve_ode.m','downsample_factor',10); v=solve_ode; plot(v); toc
-%     tic; ds.writeDynaSimSolver(model,'save_parameters_flag',1,'reduce_function_calls_flag',1,'solver','rk2','filename','solve_ode.m','dt',.001,'downsample_factor',10); v=solve_ode; plot(v); toc
-%     tic; ds.writeDynaSimSolver(model,'save_parameters_flag',1,'reduce_function_calls_flag',1,'solver','rk1','filename','solve_ode.m','dt',.001,'downsample_factor',10); v=solve_ode; plot(v); toc
-%     tic; ds.writeDynaSimSolver(model,'save_parameters_flag',1,'reduce_function_calls_flag',1,'solver','rk1','filename','solve_ode.m','dt',.005,'tspan',[0 200],'downsample_factor',10); v=solve_ode; plot(v); toc
+%     model=dsGenerateModel; % test model
+%     tic; dsWriteDynaSimSolver(model,'save_parameters_flag',0,'reduce_function_calls_flag',0,'solver','rk4','filename','solve_ode.m'); v=solve_ode; plot(v); toc
+%     tic; dsWriteDynaSimSolver(model,'save_parameters_flag',1,'reduce_function_calls_flag',0,'solver','rk4','filename','solve_ode.m'); v=solve_ode; plot(v); toc
+%     tic; dsWriteDynaSimSolver(model,'save_parameters_flag',0,'reduce_function_calls_flag',1,'solver','rk4','filename','solve_ode.m'); v=solve_ode; plot(v); toc
+%     tic; dsWriteDynaSimSolver(model,'save_parameters_flag',1,'reduce_function_calls_flag',1,'solver','rk4','filename','solve_ode.m'); v=solve_ode; plot(v); toc
+%     tic; dsWriteDynaSimSolver(model,'save_parameters_flag',1,'reduce_function_calls_flag',1,'solver','rk2','filename','solve_ode.m'); v=solve_ode; plot(v); toc
+%     tic; dsWriteDynaSimSolver(model,'save_parameters_flag',1,'reduce_function_calls_flag',1,'solver','rk1','filename','solve_ode.m'); v=solve_ode; plot(v); toc
+%     tic; dsWriteDynaSimSolver(model,'save_parameters_flag',1,'reduce_function_calls_flag',1,'solver','rk1','filename','solve_ode.m','downsample_factor',10); v=solve_ode; plot(v); toc
+%     tic; dsWriteDynaSimSolver(model,'save_parameters_flag',1,'reduce_function_calls_flag',1,'solver','rk2','filename','solve_ode.m','dt',.001,'downsample_factor',10); v=solve_ode; plot(v); toc
+%     tic; dsWriteDynaSimSolver(model,'save_parameters_flag',1,'reduce_function_calls_flag',1,'solver','rk1','filename','solve_ode.m','dt',.001,'downsample_factor',10); v=solve_ode; plot(v); toc
+%     tic; dsWriteDynaSimSolver(model,'save_parameters_flag',1,'reduce_function_calls_flag',1,'solver','rk1','filename','solve_ode.m','dt',.005,'tspan',[0 200],'downsample_factor',10); v=solve_ode; plot(v); toc
 %
-% Dependencies: ds.checkOptions, ds.checkModel
+% Dependencies: dsCheckOptions, dsCheckModel
 %
-% See also: ds.getSolveFile, dsSimulate, ds.writeMatlabSolver
+% See also: dsGetSolveFile, dsSimulate, dsWriteMatlabSolver
 
 % Check inputs
-options=ds.checkOptions(varargin,{...
+options=dsCheckOptions(varargin,{...
   'tspan',[0 100],[],...          % [beg,end] (units must be consistent with dt and equations)
   'downsample_factor',1,[],...    % downsampling applied during simulation (only every downsample_factor-time point is stored in memory or written to disk)
   'dt',.01,[],...                 % time step used for fixed step DynaSim solvers
@@ -83,7 +83,7 @@ options=ds.checkOptions(varargin,{...
   'verbose_flag',1,{0,1},...
   'one_solve_file_flag',0,{0,1},... % use only 1 solve file of each type, but can't vary mechs yet
   },false);
-model=ds.checkModel(model, varargin{:});
+model=dsCheckModel(model, varargin{:});
 separator=','; % ',', '\\t'
 
 %% 1.0 prepare model info
@@ -92,13 +92,13 @@ state_variables=model.state_variables;
 
 % 1.1 eliminate internal (anonymous) function calls from model equations
 if options.reduce_function_calls_flag==1
-  model=ds.propagateFunctions(model, varargin{:});
+  model=dsPropagateFunctions(model, varargin{:});
 end
 
 % 1.1 prepare parameters
 if options.save_parameters_flag
   % add parameter struct prefix to parameters in model equations
-  model=ds.propagateParameters(model,'action','prepend', 'prop_prefix',parameter_prefix, varargin{:});
+  model=dsPropagateParameters(model,'action','prepend', 'prop_prefix',parameter_prefix, varargin{:});
   
   % set and capture numeric seed value
   if options.compile_flag==1
@@ -115,15 +115,15 @@ if options.save_parameters_flag
   
   % save parameters to disk
   warning('off','catstruct:DuplicatesFound');
-  p = catstruct(ds.checkSolverOptions(options),model.parameters);
+  p = catstruct(dsCheckSolverOptions(options),model.parameters);
   
   if options.one_solve_file_flag
     % fill p flds that were varied with vectors of length = nSims
     
-    vary=ds.checkOptions(varargin,{'vary',[],[],},false);
+    vary=dsCheckOptions(varargin,{'vary',[],[],},false);
     vary = vary.vary;
 
-    mod_set = ds.vary2Modifications(vary);
+    mod_set = dsVary2Modifications(vary);
     % The first 2 cols of modifications_set are idenitical to vary, it just
     % has the last column distributed out to the number of sims
     
@@ -131,7 +131,7 @@ if options.save_parameters_flag
     % Get param names
     iMod = 1;
     % Split extra entries in first 2 cols of mods, so each row is a single pop and param
-    [~, first_mod_set] = ds.applyModifications([],mod_set{iMod}, varargin{:});
+    [~, first_mod_set] = dsApplyModifications([],mod_set{iMod}, varargin{:});
 
     % replace '->' with '_'
     first_mod_set(:,1) = strrep(first_mod_set(:,1), '->', '_');
@@ -162,7 +162,7 @@ if options.save_parameters_flag
     param_values = nan(nParamMods, length(mod_set));
     for iMod = 1:length(mod_set)
       % Split extra entries in first 2 cols of mods, so each row is a single pop and param
-      [~, mod_set{iMod}] = ds.applyModifications([],mod_set{iMod}, varargin{:});
+      [~, mod_set{iMod}] = dsApplyModifications([],mod_set{iMod}, varargin{:});
       
       % Get scalar values as vector
       param_values(:, iMod) = [mod_set{iMod}{:,3}];
@@ -180,7 +180,7 @@ if options.save_parameters_flag
   save(param_file_path,'p');
 else
   % insert parameter values into model expressions
-  model=ds.propagateParameters(model,'action','substitute', varargin{:});
+  model=dsPropagateParameters(model,'action','substitute', varargin{:});
 end
 
 % 1.2 prepare list of outputs (state variables and monitors)
@@ -243,7 +243,7 @@ if options.disk_flag==1
   fprintf(fid,'fileID=fopen(data_file,''w'');\n');
   
   % write headers
-  [state_var_counts,monitor_counts]=ds.getOutputCounts(model);
+  [state_var_counts,monitor_counts]=dsGetOutputCounts(model);
   fprintf(fid,'fprintf(fileID,''time%s'');\n',separator);
   
   if ~isempty(model.state_variables)
@@ -568,7 +568,7 @@ end
 odes = struct2cell(model.ODEs);
 for i=1:length(odes)
   for j=1:length(state_variables)
-    odes{i}=ds.strrep(odes{i}, state_variables{j}, [state_variables{j} index_lasts{j}], '', '', varargin{:});
+    odes{i}=dsStrrep(odes{i}, state_variables{j}, [state_variables{j} index_lasts{j}], '', '', varargin{:});
   end
 end
 
@@ -714,7 +714,7 @@ function odes_out=update_odes(odes,suffix_k,increment,state_variables,index_last
   odes_out=odes;
   for i=1:length(odes)
     for j=1:length(odes)
-      odes_out{i}=ds.strrep(odes_out{i}, [state_variables{j} index_lasts{j}], sprintf('(%s%s+%s*%s%s)', state_variables{j}, index_lasts{j}, increment, state_variables{j}, suffix_k), '(',')', varargin{:});
+      odes_out{i}=dsStrrep(odes_out{i}, [state_variables{j} index_lasts{j}], sprintf('(%s%s+%s*%s%s)', state_variables{j}, index_lasts{j}, increment, state_variables{j}, suffix_k), '(',')', varargin{:});
     end
   end
 end
@@ -783,23 +783,23 @@ function print_conditional_update(fid,conditionals,index_nexts,state_variables, 
       if strcmp('spike_monitor',conditionals(i).namespace)
         % do nothing if spike_monitor
       else
-        condition=ds.strrep(condition, state_variables{j}, [state_variables{j} index_nexts{j}], '', '', varargin{:});
+        condition=dsStrrep(condition, state_variables{j}, [state_variables{j} index_nexts{j}], '', '', varargin{:});
       end
       
-      action=ds.strrep(action, state_variables{j}, [state_variables{j} action_index], '', '', varargin{:});
+      action=dsStrrep(action, state_variables{j}, [state_variables{j} action_index], '', '', varargin{:});
       
       if ~isempty(elseaction)
-        elseaction=ds.strrep(elseaction, state_variables{j}, [state_variables{j} action_index], '', '', varargin{:});
+        elseaction=dsStrrep(elseaction, state_variables{j}, [state_variables{j} action_index], '', '', varargin{:});
       end
     end
     
     % write conditional to solver function
     fprintf(fid,'  conditional_test=(%s);\n',condition);
-    action=ds.strrep(action, '\(n,:', '(n,conditional_test', '', '', varargin{:});
+    action=dsStrrep(action, '\(n,:', '(n,conditional_test', '', '', varargin{:});
     fprintf(fid,'  if any(conditional_test), %s; ',action);
     
     if ~isempty(elseaction)
-      elseaction=ds.strrep(elseaction, '(n,:', '(n,conditional_test', '', '', varargin{:});
+      elseaction=dsStrrep(elseaction, '(n,:', '(n,conditional_test', '', '', varargin{:});
       fprintf('else %s; ',elseaction);
     end
     
@@ -852,8 +852,8 @@ function print_monitor_update(fid,monitors,index_nexts,state_variables,index_las
   % add indexes to state variables in monitors
   for i=1:length(monitor_name)
     for j=1:length(state_variables)
-      %monitor_expression{i}=ds.strrep(monitor_expression{i}, state_variables{j}, [state_variables{j} index_lasts{j}], '', '', varargin{:});
-      monitor_expression{i}=ds.strrep(monitor_expression{i}, state_variables{j}, [state_variables{j} monitor_index], '', '', varargin{:});
+      %monitor_expression{i}=dsStrrep(monitor_expression{i}, state_variables{j}, [state_variables{j} index_lasts{j}], '', '', varargin{:});
+      monitor_expression{i}=dsStrrep(monitor_expression{i}, state_variables{j}, [state_variables{j} monitor_index], '', '', varargin{:});
     end
     
     % write monitors to solver function

@@ -10,7 +10,7 @@ function [data_table,column_titles,time] = data2Table(data,verbose_flag,maxrows)
         maxrows = 10;
     end
 
-    ds.checkData(data);            % Makes sure it's a valid DynaSim Data structure
+    dsCheckData(data);            % Makes sure it's a valid DynaSim Data structure
     
     % Extract Time variable
     time = data(1).time;

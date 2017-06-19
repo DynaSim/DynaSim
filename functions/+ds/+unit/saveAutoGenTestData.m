@@ -22,15 +22,15 @@ end
 if ~isfunction(fnNameStack) || strcmp(fnNameStack, 'strrep')
   if isfunction(['ds.' fnNameStack])
     fnName = ['ds.' fnName];
-  elseif isfunction(['ds.unit.' fnNameStack])
-    fnName = ['ds.unit.' fnName];
+  elseif isfunction(['dsUnit.' fnNameStack])
+    fnName = ['dsUnit.' fnName];
   end
 end
 
 hash = DataHash(argin);
 
 testFileName = sprintf('%s_autogen_%s.mat', fnName, hash);
-testFileDir = fullfile(ds.getConfig('ds_unitTestData_path'), 'autogen_newSave');
+testFileDir = fullfile(dsGetConfig('ds_unitTestData_path'), 'autogen_newSave');
 mkdirSilent(testFileDir);
 testFilePath = fullfile(testFileDir, testFileName);
 save(testFilePath, 'argin', 'argout')

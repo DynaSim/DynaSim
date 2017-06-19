@@ -16,7 +16,7 @@ function data_out = rearrangeStudies2Neurons(data)
 %   data_out = RearrangeStudies2Cells(data,'option',value)
 %
 % Inputs:
-%   - data: DynaSim data structure array (see ds.checkData). Length(data) should
+%   - data: DynaSim data structure array (see dsCheckData). Length(data) should
 %           be greater than 1.
 %
 % Outputs:
@@ -26,17 +26,17 @@ function data_out = rearrangeStudies2Neurons(data)
 %   data = RearrangeStudies2Cells(data)
 %   dsPlot(data)
 %
-% See also: ds.calcAverages, ds.analyzeStudy, dsSimulate, ds.checkData, ds.selectVariables
+% See also: dsCalcAverages, dsAnalyzeStudy, dsSimulate, dsCheckData, dsSelectVariables
 
 %% 1.0 Check inputs
 
-data = ds.checkData(data, varargin{:});
-% note: calling ds.checkData() at beginning enables analysis function to
+data = dsCheckData(data, varargin{:});
+% note: calling dsCheckData() at beginning enables analysis function to
 % accept data matrix [time x cells] in addition to DynaSim data structure.
 
 %% Average all cells together if necessary
 
-data = ds.calcAverages(data, varargin{:});
+data = dsCalcAverages(data, varargin{:});
 
 %% Compress data structure array into a single structure
 

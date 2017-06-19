@@ -1,15 +1,15 @@
 function handles = plotFR2(data,varargin)
 %PLOTFR2 - plot spike rates in various ways depending on what data was provided.
 %
-% As with ds.plotFR, but has additional options for controlling output of SimStudy mode.
+% As with dsPlotFR, but has additional options for controlling output of SimStudy mode.
 %
 % Usage:
-%   ds.plotFR2(data,'option',value)
+%   dsPlotFR2(data,'option',value)
 
 %
 % Inputs:
-%   - data: DynaSim data structure (see ds.checkData)
-%   - options: (same as ds.calcFR)
+%   - data: DynaSim data structure (see dsCheckData)
+%   - options: (same as dsCalcFR)
 %     'variable' : name of field containing data on which to calculate firing
 %                  rates (default: *_spikes or first variable in data.labels)
 %     'threshold': scalar threshold value for detecting events (default: 0)
@@ -25,17 +25,17 @@ function handles = plotFR2(data,varargin)
 % 
 %
 % Examples:
-% ds.plotFR(data,'bin_size',30,'bin_shift',10);
+% dsPlotFR(data,'bin_size',30,'bin_shift',10);
 %
 % TODO: add rastergrams
 %
-% See also: ds.calcFR, dsSimulate, ds.checkData
+% See also: dsCalcFR, dsSimulate, dsCheckData
 
-data=ds.checkData(data, varargin{:});
+data=dsCheckData(data, varargin{:});
 fields=fieldnames(data);
 handles=[];
 
-options=ds.checkOptions(varargin,{...
+options=dsCheckOptions(varargin,{...
   'plot_type','heatmap_sorted',{'heatmap','heatmap_sorted','meanFR','meanFRdens','summary'},...
   'variable',[],[],...
   'threshold',1e-5,[],... % slightly above zero in case variable is point process *_spikes {0,1}
@@ -47,12 +47,12 @@ options=ds.checkOptions(varargin,{...
   },false);
 
 lock_gca = options.lock_gca;
-keyvals=ds.options2Keyval(rmfield(options,{'plot_type'}));
+keyvals=dsOptions2Keyval(rmfield(options,{'plot_type'}));
 
 
 % calc firing rates if not already present in data
 if all(cellfun(@isempty,regexp(fields,'.*_FR$')))
-  data=ds.calcFR(data,keyvals{:}); % equivalent: data=ds.analyzeStudy(data,@ds.calcFR);
+  data=dsCalcFR(data,keyvals{:}); % equivalent: data=dsAnalyzeStudy(data,@dsCalcFR);
   fields=fieldnames(data);
 end
 % get list of fields with firing rate data
@@ -283,7 +283,7 @@ end
               param_cell{j}=unique([data.(varied{j})]); % unique values for each parameter
             else
               % todo: handle sims varying non-numeric model components 
-              % (eg, mechanisms) (also in ds.plotFR and dsSelect)
+              % (eg, mechanisms) (also in dsPlotFR and dsSelect)
             end
           end
           param_size=cellfun(@length,param_cell); % number of unique values for each parameter

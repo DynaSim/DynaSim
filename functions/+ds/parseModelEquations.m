@@ -2,7 +2,7 @@ function [model,name_map] = parseModelEquations(text,varargin)
 %PARSEMODELEQUATIONS - parse equations and organize model data in DynaSim model structure
 %
 % Usage:
-%   model = ds.parseModelEquations(STRING,'param',value,...)
+%   model = dsParseModelEquations(STRING,'param',value,...)
 %
 % Inputs:
 %   - STRING (required): one of:
@@ -14,9 +14,9 @@ function [model,name_map] = parseModelEquations(text,varargin)
 %   - user-supplied parameter values: ('key',value): name (key) of parameters to
 %                                     be set and associated user-supplied values
 % Outputs:
-%   - model: DynaSim model structure (see ds.checkModel for details)
+%   - model: DynaSim model structure (see dsCheckModel for details)
 %   - name_map: useful for namespace-specific substitutions across multiple
-%     sub-models, see description in ds.generateModel for more information {name,
+%     sub-models, see description in dsGenerateModel for more information {name,
 %     namespace_name, namespace, type}
 %
 % Notes:
@@ -25,24 +25,24 @@ function [model,name_map] = parseModelEquations(text,varargin)
 %     However, this function does not distinguish between the two.
 %
 % Examples:
-%     model = ds.parseModelEquations('dx/dt=3*a*x; x(0)=0','a',0);
-%     model = ds.parseModelEquations('dx/dt=3*a*x, x(0)=0','a',0,'delimiter',',');
-%     model = ds.parseModelEquations('CalciumPump.mech','namespace','HH');
-%     model = ds.parseModelEquations('LIFneuron.eqns');
-%     model = ds.parseModelEquations('a=2; b=2*a; f(x)=b; dx/dt=f(x); x(0)=0; if(x>1)(x=0); current->f(x); monitor f(x); % comments')
+%     model = dsParseModelEquations('dx/dt=3*a*x; x(0)=0','a',0);
+%     model = dsParseModelEquations('dx/dt=3*a*x, x(0)=0','a',0,'delimiter',',');
+%     model = dsParseModelEquations('CalciumPump.mech','namespace','HH');
+%     model = dsParseModelEquations('LIFneuron.eqns');
+%     model = dsParseModelEquations('a=2; b=2*a; f(x)=b; dx/dt=f(x); x(0)=0; if(x>1)(x=0); current->f(x); monitor f(x); % comments')
 %
 %   - parsing individual sub-models from specification:
 %     equations=specification.populations(1).equations;
-%     [model,map] = ds.parseModelEquations(equations,'namespace','pop')
+%     [model,map] = dsParseModelEquations(equations,'namespace','pop')
 %     population_mechanism=specification.populations(1).mechanism_list{1};
-%     [model,map] = ds.parseModelEquations(population_mechanism,'namespace','pop_mech')
+%     [model,map] = dsParseModelEquations(population_mechanism,'namespace','pop_mech')
 %     connection_mechanism=specification.connections(1).mechanism_list{1};
-%     [model,map] = ds.parseModelEquations(connection_mechanism,'namespace','pop_pop_mech')
+%     [model,map] = dsParseModelEquations(connection_mechanism,'namespace','pop_pop_mech')
 %
-% See also: ds.classifyEquation, ds.generateModel, ds.locateModelFiles
+% See also: dsClassifyEquation, dsGenerateModel, dsLocateModelFiles
 
 %% auto_gen_test_data_flag argin
-options = ds.checkOptions(varargin,{'auto_gen_test_data_flag',0,{0,1}},false);
+options = dsCheckOptions(varargin,{'auto_gen_test_data_flag',0,{0,1}},false);
 if options.auto_gen_test_data_flag
   varargs = varargin;
   varargs{find(strcmp(varargs, 'auto_gen_test_data_flag'))+1} = 0;
@@ -96,7 +96,7 @@ end
 if ischar(text) && ~any(which(text)) && isempty(regexp(text,'[^\w.]','once')) % isempty(regexp(text,'[^\w]','once'))
 
   %if ischar(text) && ~exist(text,'file') && isempty(regexp(text,'[^\w.]','once')) % isempty(regexp(text,'[^\w]','once'))
-  [~,text]=ds.locateModelFiles(text);
+  [~,text]=dsLocateModelFiles(text);
   if iscell(text) && ~isempty(text)
     text=text{1};
   end
@@ -109,8 +109,8 @@ if ischar(text) && exist(text,'file')
     case '.m'
       model=feval(name); % evaluate model-creating function and return model
       return;
-    case '.mat' % todo: uncomment once ds.importModel supports loading .mat
-      %model=ds.importModel(text);
+    case '.mat' % todo: uncomment once dsImportModel supports loading .mat
+      %model=dsImportModel(text);
       %return;
   end
   
@@ -178,7 +178,7 @@ for index=1:length(text) % loop over lines of text
     continue;
   end
   
-  switch ds.classifyEquation(line,delimiter) % classify
+  switch dsClassifyEquation(line,delimiter) % classify
     case 'parameter'        % var=(string or number)
       rhs=regexp(line,'=(.+)$','tokens','once');
       lhs=regexp(line,'^([\w\.]+)\s*=','tokens','once');
@@ -261,7 +261,7 @@ for index=1:length(text) % loop over lines of text
             % check for numeric monitor argument
             arg=regexp(line,[name '\(([-+]*\w+)\)'],'tokens','once');
             %arg=regexp(line,[name '\(([-+]*\d+)\)'],'tokens','once');
-            % set argument as expression (see ds.writeDynaSimSolver() for usage as such)
+            % set argument as expression (see dsWriteDynaSimSolver() for usage as such)
             if ~isempty(arg)
               rhs=arg;
             end
@@ -360,7 +360,7 @@ end
 if options.auto_gen_test_data_flag
   argout = {model, name_map}; % specific to this function
   
-  ds.unit.saveAutoGenTestData(argin, argout);
+  dsUnitSaveAutoGenTestData(argin, argout);
 end
 
 end % main fn

@@ -1,5 +1,5 @@
 function makeDefaultConfig()
-% ds.makeDefaultConfig - write default DS config vars to disk as text file in main DS dir.
+% dsMakeDefaultConfig - write default DS config vars to disk as text file in main DS dir.
 
 %% Get Vars
 % Get home path

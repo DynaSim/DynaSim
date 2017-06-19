@@ -1,11 +1,11 @@
 function study_dir = unzipDemoData(zipfname,overwrite_flag,verbose_flag)
-%ds.unzipDemoData - Unzips demo data (utility function)
+%dsUnzipDemoData - Unzips demo data (utility function)
 %
 % Purpose: Restores demo data to the appropriate folder incase the user
 % deleted it.
 %
 % Usage:
-%   study_dir = ds.unzipDemoData(zipfname,overwrite_flag)
+%   study_dir = dsUnzipDemoData(zipfname,overwrite_flag)
 %
 % Inputs:
 %   zipfname: string with name of zipped file. Can be either full path or
@@ -36,9 +36,9 @@ function study_dir = unzipDemoData(zipfname,overwrite_flag,verbose_flag)
         verbose_flag = 1;
     end
 
-    ds_root_path = ds.getConfig('ds_root_path');
-    demos_path = ds.getConfig('demos_path');
-    demo_zips_path = ds.getConfig('demos_zips_path');
+    ds_root_path = dsGetConfig('ds_root_path');
+    demos_path = dsGetConfig('demos_path');
+    demo_zips_path = dsGetConfig('demos_zips_path');
 
     mkdirSilent(demos_path);
     

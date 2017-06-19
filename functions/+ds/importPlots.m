@@ -5,10 +5,10 @@ function [data,studyinfo] = importPlots(file,varargin)
 %
 % Usage:
 %   [data,studyinfo]=dsImport(data_file)
-%   data=ds.importPlots(data_file)
+%   data=dsImportPlots(data_file)
 %
 % Inputs:
-%   - file: studyinfo structure, study_dir, or studyinfo file (see ds.checkStudyinfo)
+%   - file: studyinfo structure, study_dir, or studyinfo file (see dsCheckStudyinfo)
 %   - options:
 %     'process_id': process identifier for loading studyinfo if necessary
 %
@@ -18,7 +18,7 @@ function [data,studyinfo] = importPlots(file,varargin)
 %     data.plotpath : path of corresponding plot file (png, svg, etc.)
 
 % Check inputs
-options=ds.checkOptions(varargin,{...
+options=dsCheckOptions(varargin,{...
   'verbose_flag',1,{0,1},...
   'process_id',[],[],... % process identifier for loading studyinfo if necessary
   'time_limits',[],[],...
@@ -40,7 +40,7 @@ end
 if isstruct(file) && isfield(file,'study_dir')
   % "file" is a studyinfo structure.
   % retrieve most up-to-date studyinfo structure from studyinfo.mat file
-  studyinfo = ds.checkStudyinfo(file.study_dir,'process_id',options.process_id, varargin{:});
+  studyinfo = dsCheckStudyinfo(file.study_dir,'process_id',options.process_id, varargin{:});
   
   % compare simIDs to sim_id
   if ~isempty(options.simIDs)
@@ -75,9 +75,9 @@ if isstruct(file) && isfield(file,'study_dir')
   tmp_data = struct;
     for i = 1:length(sim_info)
         modifications=sim_info(i).modifications;
-        tmp_data = ds.modifications2Vary(tmp_data,modifications);
+        tmp_data = dsModifications2Vary(tmp_data,modifications);
         if ~isempty(modifications)
-            tmp_data = ds.modifications2Vary(tmp_data,modifications);
+            tmp_data = dsModifications2Vary(tmp_data,modifications);
         end
 
         % Get plot files

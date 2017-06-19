@@ -2,7 +2,7 @@ function [parms, params_unspecified ] = checkOptions(options, options_schema, st
 %CHECKOPTIONS - organize key/value pairs in structure with default or user-supplied values according to a schema
 %
 % Usage:
-%   options = ds.checkOptions(keyvals, options_schema, [strict])
+%   options = dsCheckOptions(keyvals, options_schema, [strict])
 %
 % Inputs:
 %   - keyvals: list of key/value pairs ('option1',value1,'option2',value2,...)
@@ -23,7 +23,7 @@ function [parms, params_unspecified ] = checkOptions(options, options_schema, st
 % Outputs:
 %   - options: structure with options (using default values if not supplied)
 %
-% See also: ds.options2Keyval, ds.checkSpecification, ds.checkModel, ds.checkData
+% See also: dsOptions2Keyval, dsCheckSpecification, dsCheckModel, dsCheckData
 
 
 % Convert cell argument to struct if contains struct (Leave as is if already a struct)

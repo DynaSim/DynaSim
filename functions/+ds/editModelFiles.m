@@ -1,6 +1,6 @@
 function editModelFiles(files)
 
-[~,eqnfiles]= ds.locateModelFiles(files);
+[~,eqnfiles]= dsLocateModelFiles(files);
 
 for file = eqnfiles(:)'
   edit(file{1});

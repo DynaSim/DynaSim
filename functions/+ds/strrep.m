@@ -4,13 +4,13 @@ function str = strrep(str,oldstr,newstr,lpad,rpad, varargin)
 % Note: built-in strrep replaces ALL matches.
 %
 % Examples:
-%   ds.strrep('(v)*(-av)','v','pop1_v')
-%   ds.strrep('v-v^2+vav','v','pop1_v')
-%   ds.strrep('v-v-v','v','pop1_v')
-%   ds.strrep('v-v-v^2','v','pop1_v')
-%   ds.strrep('(v-v-v^2)','v','pop1_v')
-%   ds.strrep('E-pop1_V+1','pop1_V','pop1_V(n-1)')
-%   ds.strrep('v=1; u=u+d','u','u(n,test)')
+%   dsStrrep('(v)*(-av)','v','pop1_v')
+%   dsStrrep('v-v^2+vav','v','pop1_v')
+%   dsStrrep('v-v-v','v','pop1_v')
+%   dsStrrep('v-v-v^2','v','pop1_v')
+%   dsStrrep('(v-v-v^2)','v','pop1_v')
+%   dsStrrep('E-pop1_V+1','pop1_V','pop1_V(n-1)')
+%   dsStrrep('v=1; u=u+d','u','u(n,test)')
 %
 %   'new.old' == dynasim_strrep('old.old','old','new')
 %   'new.old.old' == dynasim_strrep('old.old.old','old','new')
@@ -29,7 +29,7 @@ if isempty(str)
 end
 
 %% auto_gen_test_data_flag argin
-options = ds.checkOptions(varargin,{'auto_gen_test_data_flag',0,{0,1}},false);
+options = dsCheckOptions(varargin,{'auto_gen_test_data_flag',0,{0,1}},false);
 if options.auto_gen_test_data_flag
   varargs = varargin;
   varargs{find(strcmp(varargs, 'auto_gen_test_data_flag'))+1} = 0;
@@ -64,5 +64,5 @@ str=regexprep(str,pat,rep);
 if options.auto_gen_test_data_flag
   argout = {str}; % specific to this function
   
-  ds.unit.saveAutoGenTestData(argin, argout);
+  dsUnitSaveAutoGenTestData(argin, argout);
 end

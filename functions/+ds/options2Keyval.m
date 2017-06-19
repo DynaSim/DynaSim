@@ -2,12 +2,12 @@ function keyval = options2Keyval(options)
 %OPTIONS2KEYVAL - Convert from options structure to a list of key/value pairs.
 %
 % Usage:
-%   keyvals = ds.options2Keyval(options)
+%   keyvals = dsOptions2Keyval(options)
 %
 % Inputs:
 %   - options: options structure to convert
 %
-% See also: ds.checkOptions
+% See also: dsCheckOptions
 
 % Grab the field names
 fields = fieldnames(options);

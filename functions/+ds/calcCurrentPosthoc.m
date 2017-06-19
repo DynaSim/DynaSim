@@ -65,7 +65,7 @@ function data = calcCurrentPosthoc(data, mechanism_prefix, current_equation, add
 %                                                     % ENa and gNa are supplied as additional constants and hence will be recognized
 %                                                     % pop1_v is specified below in "additional fields"
 %     additional_fields = {'pop1_v'};
-%     data2b = ds.calcCurrentPosthoc(data2,mechanism_prefix, current_string, additional_fields, additional_constants, 'INa');
+%     data2b = dsCalcCurrentPosthoc(data2,mechanism_prefix, current_string, additional_fields, additional_constants, 'INa');
 % 
 %     figure; plot(data1.pop1_iNa_INa,data1.pop1_v); xlabel('INa'); ylabel('Vm'); title('Vm vs INa with monitor functions');
 %     figure; plot(data2b.pop1_iNa_INa,data2b.pop1_v); xlabel('INa'); ylabel('Vm'); title('Vm vs INa with posthoc calculation');
@@ -124,7 +124,7 @@ function data = calcCurrentPosthoc(data, mechanism_prefix, current_equation, add
 %                                                       % gSYN and ESYN are supplied as additional constants and hence will be recognized
 %                                                     
 %     additional_fields = {'I_v'};
-%     data2b = ds.calcCurrentPosthoc(data2,mechanism_prefix, current_string, additional_fields, additional_constants, 'ISYN');
+%     data2b = dsCalcCurrentPosthoc(data2,mechanism_prefix, current_string, additional_fields, additional_constants, 'ISYN');
 % 
 %     figure; plot(data1.I_E_iAMPA_ISYN,data1.I_v); xlabel('iAMPA'); ylabel('Vm'); title('Vm vs iAMPA with monitor functions');
 %     figure; plot(data2b.I_E_iAMPA_ISYN,data2b.I_v); xlabel('iAMPA'); ylabel('Vm'); title('Vm vs iAMPA with posthoc calculation');
@@ -148,7 +148,7 @@ if ~nargin
 end
 
 %% auto_gen_test_data_flag argin
-options = ds.checkOptions(varargin,{'auto_gen_test_data_flag',0,{0,1}},false);
+options = dsCheckOptions(varargin,{'auto_gen_test_data_flag',0,{0,1}},false);
 if options.auto_gen_test_data_flag
     % specific to this function
     varargs = varargin;
@@ -228,7 +228,7 @@ if options.auto_gen_test_data_flag
     % specific to this function
     argout = {output, fout2};
     
-    ds.saveAutoGenTestData(argin, argout);
+    dsSaveAutoGenTestData(argin, argout);
 end
 
 end

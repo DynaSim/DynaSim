@@ -2,10 +2,10 @@ function data = calcPower(data, varargin)
 %CALCPOWER - Compute spectral analysis of DynaSim data
 %
 % Usage:
-%   data = ds.calcPower(data,'option',value)
+%   data = dsCalcPower(data,'option',value)
 %
 % Inputs:
-%   - data: DynaSim data structure (see ds.checkData)
+%   - data: DynaSim data structure (see dsCheckData)
 %   - options:
 %     'variable'              : name of field containing data on which to
 %                               calculate firing rates (default: *_spikes or
@@ -40,7 +40,7 @@ function data = calcPower(data, varargin)
 %     - "VARIABLE" can be specified as the name of a variable listed in
 %         data.labels, a cell array of string listing variable names, or as a
 %         regular expression pattern for identifying variables to process. See
-%         ds.selectVariables for more info on supported specifications.
+%         dsSelectVariables for more info on supported specifications.
 %
 % Examples:
 %   s=[];
@@ -49,14 +49,14 @@ function data = calcPower(data, varargin)
 %   s.populations(2).name='I';
 %   s.populations(2).equations='dv/dt=@current+10; {iNa,iK}; v(0)=-65';
 %   data=dsSimulate(s,'tspan',[0 1000]);
-%   data=ds.calcPower(data,'variable','v');
+%   data=dsCalcPower(data,'variable','v');
 %   % Plot the spectrum of the E-cell average population voltage
 %   figure; plot(data.E_v_Power_MUA.frequency,data.E_v_Power_MUA.Pxx);
 %   xlabel('frequency (Hz)'); ylabel('power'); xlim([0 200]);
 %
-% See also: PlotPower, ds.analyzeStudy, dsSimulate, ds.checkData, ds.selectVariables
+% See also: PlotPower, dsAnalyzeStudy, dsSimulate, dsCheckData, dsSelectVariables
 %% 1.0 Check inputs
-options=ds.checkOptions(varargin,{...
+options=dsCheckOptions(varargin,{...
   'variable',[],[],...
   'time_limits',[-inf inf],[],...
   'smooth_factor',5,[],... % number of samples for smoothing the spectrum
@@ -78,13 +78,13 @@ if options.auto_gen_test_data_flag
   argin = [{data}, varargs]; % specific to this function
 end
 
-data = ds.checkData(data, varargin{:});
-% note: calling ds.checkData() at beginning enables analysis function to
+data = dsCheckData(data, varargin{:});
+% note: calling dsCheckData() at beginning enables analysis function to
 % accept data matrix [time x cells] in addition to DynaSim data structure.
 
 if numel(data)>1
-  % use ds.analyzeStudy to recursively call ds.calcPower on each data set
-  data=ds.analyzeStudy(data,@ds.calcPower,varargin{:});
+  % use dsAnalyzeStudy to recursively call dsCalcPower on each data set
+  data=dsAnalyzeStudy(data,@dsCalcPower,varargin{:});
   return;
 end
 
@@ -110,7 +110,7 @@ NFFT=2^(nextpow2(nsamp-1)-1);%2); % <-- use higher resolution to capture STO fre
 NW = options.timeBandwidthProduct;
 
 %% 2.0 set list of variables to process as cell array of strings
-options.variable=ds.selectVariables(data(1).labels,options.variable, varargin{:});
+options.variable=dsSelectVariables(data(1).labels,options.variable, varargin{:});
 
 %% 3.0 calculate power spectrum for each variable
 if ~isfield(data,'results')
@@ -304,5 +304,5 @@ end
 if options.auto_gen_test_data_flag
   argout = {data}; % specific to this function
   
-  ds.unit.saveAutoGenTestData(argin, argout);
+  dsUnitSaveAutoGenTestData(argin, argout);
 end

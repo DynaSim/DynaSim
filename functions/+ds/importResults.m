@@ -2,7 +2,7 @@ function results = importResults(studyinfo,func, varargin)
 %IMPORTRESULTS - Import analysis result of a simulation
 %
 % Usage:
-%   results = ds.importResults(studyinfo,func)
+%   results = dsImportResults(studyinfo,func)
 %
 % Inputs:
 %   - studyinfo: DynaSim studyinfo structure or study_dir
@@ -14,7 +14,7 @@ function results = importResults(studyinfo,func, varargin)
 % TODO:
 %   - This command breaks when "results" are figures e.g. outputs of dsPlot
 %   (dave, Feb 2017). Does not know how to "load" an image, nor does it
-%   recognize the image extensions. I wrote "ds.importPlots" as a way around this,
+%   recognize the image extensions. I wrote "dsImportPlots" as a way around this,
 %   but there might be better solutions for differentiating "plots" from other
 %   "results"
 
@@ -26,7 +26,7 @@ end
 
 if isstruct(studyinfo) && isfield(studyinfo,'study_dir')
   % retrieve most up-to-date studyinfo structure from studyinfo.mat file
-  studyinfo=ds.checkStudyinfo(studyinfo.study_dir, varargin{:});
+  studyinfo=dsCheckStudyinfo(studyinfo.study_dir, varargin{:});
   if exist('study_dir','var')
     studyinfo.study_dir=study_dir;
   end

@@ -16,7 +16,7 @@ else
 end
 
 % Set where to save outputs
-output_directory = ds.getConfig('demos_path');
+output_directory = dsGetConfig('demos_path');
 
 % Set where to save outputs
 study_dir = fullfile(output_directory,'demo_sPING_100cells_3x3');
@@ -27,7 +27,7 @@ mkdirSilent(output_directory);
 
 % Make sure sample data exists; if not copy it into place
 if ~exist(study_dir,'dir')
-    ds.unzipDemoData(study_dir);
+    dsUnzipDemoData(study_dir);
 end
 
 % Load data in traditional DynaSim format
@@ -38,7 +38,7 @@ data=dsImport(study_dir);
 %% Convert it into an MDD object
 
 % Extract the data in a linear table format
-[data_table,column_titles,time] = ds.data2Table (data);
+[data_table,column_titles,time] = dsData2Table (data);
 
 % Preview the contents of this table
 %     Note: We cannot make this one big cell array since we want to allow
@@ -108,10 +108,10 @@ figl; recursivePlot(xp4,function_handles,dimensions,function_arguments);
 close all;
 
 % Import plot files
-data_img = ds.importPlots(study_dir);
+data_img = dsImportPlots(study_dir);
 
 % Load into DynaSim structure
-[data_table,column_titles] = ds.dataField2Table (data_img,'plot_files');
+[data_table,column_titles] = dsDataField2Table (data_img,'plot_files');
 
 % Preview the contents of this table
 previewTable(data_table,column_titles);

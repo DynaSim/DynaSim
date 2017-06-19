@@ -5,7 +5,7 @@ warning('off','MATLAB:lang:cannotClearExecutingFunction');
 cwd = pwd;
 
 % Set where to save outputs
-output_directory = fullfile(ds.getConfig('ds_data_path'), 'autoGenSave_temp');
+output_directory = fullfile(dsGetConfig('ds_data_path'), 'autoGenSave_temp');
 
 % Erase output_directory
 if isdir(output_directory)
@@ -194,7 +194,7 @@ data=dsSimulate(s, 'save_data_flag',1, 'study_dir','demo_sPING_3',...
 dsPlot(data, autogenOptions{:}); close all
 dsPlot(data,'plot_type','rastergram', autogenOptions{:}); close all
 dsPlot(data,'plot_type','power', autogenOptions{:}); close all
-ds.plotFR(data, autogenOptions{:}); close all
+dsPlotFR(data, autogenOptions{:}); close all
 
 %% RUNNING SIMULATIONS ON THE CLUSTER
 

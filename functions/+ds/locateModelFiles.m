@@ -2,7 +2,7 @@ function [paths,files] = locateModelFiles(input)
 %LOCATEMODELFILES - locate mechanism files associated with DynaSim specifications.
 %
 % Usage:
-%   [paths,files]=ds.locateModelFiles(input)
+%   [paths,files]=dsLocateModelFiles(input)
 %
 % Input: DynaSim specification or model structure or string or cell array of
 %        strings listing mechanism names or files.
@@ -11,7 +11,7 @@ function [paths,files] = locateModelFiles(input)
 %   - paths: unique paths to mechanism files
 %   - files: full names of files containing mechanism sub-models
 %
-% See also (used by): ds.parseModelEquations, ds.checkHostPaths, ds.createBatch
+% See also (used by): dsParseModelEquations, dsCheckHostPaths, dsCreateBatch
 
 % extract list of mechanisms from input
 if ischar(input)

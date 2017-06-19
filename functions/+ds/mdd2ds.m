@@ -14,9 +14,9 @@ function data = mdd2ds(obj,varargin)
 % load sample_data_dynasim.mat
 % data1=data;
 % data2 = data(1);
-% d1 = MDD2ds(ds.ds2MDD(data1));
-% d2 = MDD2ds(ds.ds2MDD(data2));
-% d2b = MDD2ds(squeeze(ds.ds2MDD(data2)));
+% d1 = MDD2ds(dsDs2MDD(data1));
+% d2 = MDD2ds(dsDs2MDD(data2));
+% d2b = MDD2ds(squeeze(dsDs2MDD(data2)));
 % % Make sure 1 is identical
 % close all; 
 % dsPlot(data1); dsPlot(d1);
@@ -125,7 +125,7 @@ end
 % Lastly, update population sizes (data(i).model.specification.populations(j).size)
 data = add_pop_sizes(data,obj,num_pops,pop_names);
 
-data = ds.checkData(data, varargin{:});
+data = dsCheckData(data, varargin{:});
 
 
 end
@@ -226,7 +226,7 @@ function out = guess_variable_name(obj)
     % The first population's state variable should always be the 1st one
     % according to DynaSim conventions
 
-    out = ds.get_variables_from_meta(obj);
+    out = dsGet_variables_from_meta(obj);
     out = out{1};
     if isempty(out)
         out = 'v';
@@ -240,7 +240,7 @@ function out = guess_population_name(obj)
     % The first population should always be the 1st label
     % according to DynaSim conventions
     
-    out = ds.get_populations_from_meta(obj);
+    out = dsGet_populations_from_meta(obj);
     out = out{1};
 
     if isempty(out)

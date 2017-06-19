@@ -2,7 +2,7 @@ function classes = classifyEquation(string,delimiter, varargin)
 %CLASSIFYEQUATION - use regular expressions to classify model expressions in STRING
 %
 % Usage:
-% CLASS=ds.classifyEquation(STRING,DELIMITER)
+% CLASS=dsClassifyEquation(STRING,DELIMITER)
 %
 % Inputs:
 %   - STRING
@@ -28,13 +28,13 @@ function classes = classifyEquation(string,delimiter, varargin)
 %   called by user-level functions in DynaSim.
 %
 % Examples:
-%   class=ds.classifyEquation('dx/dt=3*a*x')
-%   classes=ds.classifyEquation('dx/dt=3*a*x; x(0)=0')
-%   classes=ds.classifyEquation('dx/dt=3*a*x, x(0)=0',',')
-%   classes=ds.classifyEquation('a=2; b=2*a; f(x)=b; dx/dt=f(x); x(0)=0; if(x>1)(x=0); current=>f(x); monitor f(x); % comments')
-%   classes=ds.classifyEquation('model.eqns');
+%   class=dsClassifyEquation('dx/dt=3*a*x')
+%   classes=dsClassifyEquation('dx/dt=3*a*x; x(0)=0')
+%   classes=dsClassifyEquation('dx/dt=3*a*x, x(0)=0',',')
+%   classes=dsClassifyEquation('a=2; b=2*a; f(x)=b; dx/dt=f(x); x(0)=0; if(x>1)(x=0); current=>f(x); monitor f(x); % comments')
+%   classes=dsClassifyEquation('model.eqns');
 %
-% See also: ds.parseModelEquations
+% See also: dsParseModelEquations
 
 %% localfn output
 if ~nargin
@@ -43,7 +43,7 @@ if ~nargin
 end
 
 %% auto_gen_test_data_flag argin
-options = ds.checkOptions(varargin,{'auto_gen_test_data_flag',0,{0,1}},false);
+options = dsCheckOptions(varargin,{'auto_gen_test_data_flag',0,{0,1}},false);
 if options.auto_gen_test_data_flag
   varargs = varargin;
   varargs{find(strcmp(varargs, 'auto_gen_test_data_flag'))+1} = 0;
@@ -84,7 +84,7 @@ end
 if options.auto_gen_test_data_flag
   argout = {classes}; % specific to this function
   
-  ds.unit.saveAutoGenTestData(argin, argout);
+  dsUnitSaveAutoGenTestData(argin, argout);
 end
 
 end % main fn
@@ -97,7 +97,7 @@ function class = classify(string, varargin)
 % output: class label (string)
 
 %% auto_gen_test_data_flag argin
-options = ds.checkOptions(varargin,{'auto_gen_test_data_flag',0,{0,1}},false);
+options = dsCheckOptions(varargin,{'auto_gen_test_data_flag',0,{0,1}},false);
 if options.auto_gen_test_data_flag
   varargs = varargin;
   varargs{find(strcmp(varargs, 'auto_gen_test_data_flag'))+1} = 0;
@@ -185,7 +185,7 @@ end
 if options.auto_gen_test_data_flag
   argout = {class}; % specific to this function
   
-  ds.unit.saveAutoGenTestDataLocalFn(argin, argout); % localfn
+  dsUnitSaveAutoGenTestDataLocalFn(argin, argout); % localfn
 end
 
 end %fn

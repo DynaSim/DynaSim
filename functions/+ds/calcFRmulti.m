@@ -1,11 +1,11 @@
 function data = calcFRmulti(data, varargin)
-%CALCFRMULTI - extends ds.calcFR to get SUA and MUA firing rates
+%CALCFRMULTI - extends dsCalcFR to get SUA and MUA firing rates
 %
 % Usage:
-%   data = ds.calcFRmulti(data,'option',value)
+%   data = dsCalcFRmulti(data,'option',value)
 %
 % Inputs:
-%   - data: DynaSim data structure (see ds.checkData)
+%   - data: DynaSim data structure (see dsCheckData)
 %   - options:
 %     'variable'         : name of field containing data on which to calculate
 %                          firing rates (default: *_spikes or first variable in data.labels)
@@ -26,7 +26,7 @@ function data = calcFRmulti(data, varargin)
 % - "variable" can be specified as the name of a variable listed in
 %     data.labels, a cell array of string listing variable names, or as a
 %     regular expression pattern for identifying variables to process.
-%     See ds.selectVariables for more info on supported specifications.
+%     See dsSelectVariables for more info on supported specifications.
 % - DynaSim spike monitor returns spike data in variables *_spikes.
 %   - e.g., `data=dsSimulate('dv/dt=@current+10; {iNa,iK}; monitor v.spikes');`
 %     returns spikes in data.pop1_v_spikes (where 'pop1' is the default
@@ -38,13 +38,13 @@ function data = calcFRmulti(data, varargin)
 %   s.populations(2).name='I';
 %   s.populations(2).equations='dv/dt=@current+10; {iNa,iK}; v(0)=-65';
 %   data=dsSimulate(s);
-%   data=ds.calcFR(data,'variable','*_v');
+%   data=dsCalcFR(data,'variable','*_v');
 %   data % contains firing rates for E and I pops in .E_v_FR_SUA/MUA and .I_v_FR_SUA/MUA.
 %
-% See also: ds.plotFR, ds.analyzeStudy, dsSimulate, ds.checkData, ds.selectVariables
+% See also: dsPlotFR, dsAnalyzeStudy, dsSimulate, dsCheckData, dsSelectVariables
 
 %% 1.0 Check inputs
-options=ds.checkOptions(varargin,{...
+options=dsCheckOptions(varargin,{...
   'variable',[],[],...
   'time_limits',[-inf inf],[],...
   'threshold',1e-5,[],... % slightly above zero in case variable is point process *_spikes {0,1}
@@ -63,13 +63,13 @@ if options.auto_gen_test_data_flag
   argin = [{data}, varargs]; % specific to this function
 end
 
-data = ds.checkData(data, varargin{:});
-% note: calling ds.checkData() at beginning enables analysis function to
+data = dsCheckData(data, varargin{:});
+% note: calling dsCheckData() at beginning enables analysis function to
 % accept data matrix [time x cells] in addition to DynaSim data structure.
 
 if numel(data)>1
-  % use ds.analyzeStudy to recursively call ds.calcFRmulti on each data set
-  data=ds.analyzeStudy(data,@ds.calcFRmulti,varargin{:});
+  % use dsAnalyzeStudy to recursively call dsCalcFRmulti on each data set
+  data=dsAnalyzeStudy(data,@dsCalcFRmulti,varargin{:});
   return;
 end
 
@@ -120,7 +120,7 @@ else
 end
 
 %% 2.0 set list of variables to process as cell array of strings
-options.variable=ds.selectVariables(data(1).labels,options.variable, varargin{:});
+options.variable=dsSelectVariables(data(1).labels,options.variable, varargin{:});
 
 %% 3.0 calculate firing rates for each variable
 if ~isfield(data,'results')
@@ -208,5 +208,5 @@ end
 if options.auto_gen_test_data_flag
   argout = {data}; % specific to this function
   
-  ds.unit.saveAutoGenTestData(argin, argout);
+  dsUnitSaveAutoGenTestData(argin, argout);
 end

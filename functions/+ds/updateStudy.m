@@ -6,7 +6,7 @@ function studyinfo = updateStudy(study_dir,varargin)
 % for simultaneous processes updating studyinfo structure.
 %
 % Usage:
-%   studyinfo=ds.updateStudy(study_dir,varargin)
+%   studyinfo=dsUpdateStudy(study_dir,varargin)
 %
 % Inputs:
 %   - study_dir
@@ -17,17 +17,17 @@ function studyinfo = updateStudy(study_dir,varargin)
 %
 % Notes:
 % - Note: this function is not intended for users. it is an internal function
-%   called by functions like dsSimulate, ds.analyzeStudy, and ds.createBatch.
+%   called by functions like dsSimulate, dsAnalyzeStudy, and dsCreateBatch.
 % - Note: this function should only update metadata stored in the
 %   studyinfo.simulations substructure.
 %
 % TODO: this multiple things in this function should be split up into individual functions
 %
-% See also: ds.checkStudyinfo, ds.setupStudy, dsSimulate, ds.createBatch, ds.analyzeStudy
+% See also: dsCheckStudyinfo, dsSetupStudy, dsSimulate, dsCreateBatch, dsAnalyzeStudy
 
 
 % check inputs
-options=ds.checkOptions(varargin,{...
+options=dsCheckOptions(varargin,{...
   'process_id',[],[],... % identifier for simulation to update
   'status',[],[],... % status of simulation
   'modifications_set',[],[],... % search space
@@ -43,7 +43,7 @@ options=ds.checkOptions(varargin,{...
 %   'project_id',[],[],... % unique identifier of parent project
 
 % load most recent version of studyinfo structure from file
-studyinfo=ds.checkStudyinfo(study_dir,'process_id',options.process_id, varargin{:});
+studyinfo=dsCheckStudyinfo(study_dir,'process_id',options.process_id, varargin{:});
 already_finished = all(strcmp('finished',{studyinfo.simulations.status}));
 
 % track status of simulations and analyses
@@ -225,7 +225,7 @@ end
 % ...
 
 % update studyinfo on disk
-ds.studyinfoIO(studyinfo.simulations(sim_ind),study_dir,options.process_id,options.verbose_flag);
+dsStudyinfoIO(studyinfo.simulations(sim_ind),study_dir,options.process_id,options.verbose_flag);
 
 
 %     case 'started'

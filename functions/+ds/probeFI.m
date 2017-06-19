@@ -1,5 +1,5 @@
 function data = probeFI(model,varargin)
-%% data=ds.probeFI(model,varargin)
+%% data=dsProbeFI(model,varargin)
 % purpose: run experiment delivering varying levels of tonic input to each 
 % population across multiple simulations.
 % inputs:
@@ -8,19 +8,19 @@ function data = probeFI(model,varargin)
 %     target - ...
 %     amplitudes - ...
 %     (any options for dsSimulate)
-%     (any options for ds.calcFR)
+%     (any options for dsCalcFR)
 % outputs:
 %   array of DynaSim data structures for simulations varying inputs
 % 
-% see also: dsSimulate, ds.calcFR
+% see also: dsSimulate, dsCalcFR
 
-options=ds.checkOptions(varargin,{...
+options=dsCheckOptions(varargin,{...
   'target','ODE1',[],...
   'amplitudes',0:2:10,[],...
   'onset',0,[],...
   },false);
 
-model=ds.checkModel(model, varargin{:});
+model=dsCheckModel(model, varargin{:});
 
 npops=length(model.specification.populations);
 modifications=cell(npops,3);
@@ -35,12 +35,12 @@ for i=1:npops
 end
 
 % apply modifications
-model=ds.applyModifications(model,modifications, varargin{:});
+model=dsApplyModifications(model,modifications, varargin{:});
 
 % run simulations varying tonic drives
 data=dsSimulate(model,'vary',vary,varargin{:});
 
-% prepare ds.calcFR options:
+% prepare dsCalcFR options:
 if ~any(cellfun(@(x)isequal(x,'variable'),varargin))
   % default to extract spike events from the first state variable
   var=regexp(model.state_variables{1},'_(\w+)$','tokens','once');
@@ -50,4 +50,4 @@ if ~any(cellfun(@(x)isequal(x,'variable'),varargin))
   end
 end
 % calculate resulting firing rates for each population
-data=ds.calcFR(data,varargin{:});
+data=dsCalcFR(data,varargin{:});

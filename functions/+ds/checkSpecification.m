@@ -2,7 +2,7 @@ function spec = checkSpecification(specification, varargin)
 %CHECKSPECIFICATION - standardize specification structure and auto-populate missing fields
 %
 % Usage:
-%   specification=ds.checkSpecification(specification)
+%   specification=dsCheckSpecification(specification)
 %
 % Input: DynaSim specification structure or equations
 %
@@ -75,10 +75,10 @@ function spec = checkSpecification(specification, varargin)
 %
 % Examples:
 %   - Example 1: obtain empty specification structure with all fields
-%       specification=ds.checkSpecification([]);
+%       specification=dsCheckSpecification([]);
 %
 %   - Example 2: standardize existing specification
-%       specification=ds.checkSpecification(specification)
+%       specification=dsCheckSpecification(specification)
 %
 %   - Example 3: standardize equations in cell array
 %       eqns={
@@ -86,23 +86,23 @@ function spec = checkSpecification(specification, varargin)
 %         'dx/dt=s*(y-x)';
 %         'dy/dt=r*x-y-x*z';
 %         'dz/dt=-b*z+x*y';
-%       specification=ds.checkSpecification(eqns);
+%       specification=dsCheckSpecification(eqns);
 %
 %   - Example 4: standardize equations in character array
 %       eqns='tau=10; R=10; E=-70; dV/dt=(E-V+R*1.55)/tau; if(V>-55)(V=-75)';
-%       specification=ds.checkSpecification(eqns);
+%       specification=dsCheckSpecification(eqns);
 %
 %   - Example 5: standardize specification with compact field names
 %       s.pops.size=10;
 %       s.pops.equations='dv/dt=-v';
 %       s.cons.mechanism_list='iGABAa';
-%       s=ds.checkSpecification(s)
+%       s=dsCheckSpecification(s)
 %
 %   - Example 6: standardize specification with everything in equation string
 %       s.pops.equations='E:dv[10]/dt=@M+I; {iNa,iK}@M; I=10';
-%       s=ds.checkSpecification(s)
+%       s=dsCheckSpecification(s)
 %
-% See also: ds.generateModel, ds.checkModel
+% See also: dsGenerateModel, dsCheckModel
 
 %% localfn output
 if ~nargin
@@ -111,7 +111,7 @@ if ~nargin
 end
 
 %% auto_gen_test_data_flag argin
-options = ds.checkOptions(varargin,{'auto_gen_test_data_flag',0,{0,1}},false);
+options = dsCheckOptions(varargin,{'auto_gen_test_data_flag',0,{0,1}},false);
 if options.auto_gen_test_data_flag
   varargs = varargin;
   varargs{find(strcmp(varargs, 'auto_gen_test_data_flag'))+1} = 0;
@@ -342,7 +342,7 @@ for i=1:length(spec.populations)
     end
     % extract population-level parameters from equations
     eqn=spec.populations(i).equations;
-    p=getfield(ds.parseModelEquations(eqn, varargin{:}),'parameters');
+    p=getfield(dsParseModelEquations(eqn, varargin{:}),'parameters');
     if ~isempty(p)
       param_name=fieldnames(p);
       param_value=struct2cell(p);
@@ -473,7 +473,7 @@ end
 % this is necessary so that regenerated models will use the same mechanism
 % files to recreate the model (e.g., when a cluster job simulates a
 % modified version of an original base model).
-[~,files]=ds.locateModelFiles(spec);
+[~,files]=dsLocateModelFiles(spec);
 if ~isempty(files)
   fnames={};
   for f=1:length(files)
@@ -500,7 +500,7 @@ end
 if options.auto_gen_test_data_flag
   argout = {spec}; % specific to this function
   
-  ds.unit.saveAutoGenTestData(argin, argout);
+  dsUnitSaveAutoGenTestData(argin, argout);
 end
 
 end % main fn
@@ -509,7 +509,7 @@ end % main fn
 %% local fns
 function list = expand_list(list, varargin)
 %% auto_gen_test_data_flag argin
-options = ds.checkOptions(varargin,{'auto_gen_test_data_flag',0,{0,1}},false);
+options = dsCheckOptions(varargin,{'auto_gen_test_data_flag',0,{0,1}},false);
 if options.auto_gen_test_data_flag
   varargs = varargin;
   varargs{find(strcmp(varargs, 'auto_gen_test_data_flag'))+1} = 0;
@@ -535,7 +535,7 @@ end
 if options.auto_gen_test_data_flag
   argout = {list};
   
-  ds.unit.saveAutoGenTestDataLocalFn(argin, argout); % localfn
+  dsUnitSaveAutoGenTestDataLocalFn(argin, argout); % localfn
 end
 
 end
@@ -546,7 +546,7 @@ function spec = backward_compatibility(spec, varargin)
 % rename "nodes" or "entities" to "populations"
 
 %% auto_gen_test_data_flag argin
-options = ds.checkOptions(varargin,{'auto_gen_test_data_flag',0,{0,1}},false);
+options = dsCheckOptions(varargin,{'auto_gen_test_data_flag',0,{0,1}},false);
 if options.auto_gen_test_data_flag
   varargs = varargin;
   varargs{find(strcmp(varargs, 'auto_gen_test_data_flag'))+1} = 0;
@@ -662,7 +662,7 @@ end
 if options.auto_gen_test_data_flag
   argout = {spec};
   
-  ds.unit.saveAutoGenTestDataLocalFn(argin, argout); % localfn
+  dsUnitSaveAutoGenTestDataLocalFn(argin, argout); % localfn
 end
 
 end

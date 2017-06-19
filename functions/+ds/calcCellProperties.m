@@ -2,16 +2,16 @@ function stats = calcCellProperties(data, varargin)
 %CALCCELLPROPERTIES - calculates the intrinsic electrophysiological properties of all cells in one or more populations
 %
 % This is designed to be used in conjunction with the experiment
-% ds.probeCellProperties which removes all connections from a model and produces
+% dsProbeCellProperties which removes all connections from a model and produces
 % a data array of simulated data in response to a series of hyperpolarizing and
 % depolarizing pulses. This function is based on the DNSim experiment
 % "cell_pulses".
 %
 % Usage:
-%   stats = ds.calcCellProperties(data,'option1',option1,...)
+%   stats = dsCalcCellProperties(data,'option1',option1,...)
 %
 % Inputs:
-%   - data: array of DynaSim data structures returned by ds.probeCellProperties
+%   - data: array of DynaSim data structures returned by dsProbeCellProperties
 %
 % Outputs:
 %   - stats.(pop).(measure) [1 x num_cells] (averaged over repetitions)
@@ -104,13 +104,13 @@ function stats = calcCellProperties(data, varargin)
 %     3150-3166.
 %
 % Example:
-%   data = ds.probeCellProperties(model)
-%   stats = ds.calcCellProperties(data)
+%   data = dsProbeCellProperties(model)
+%   stats = dsCalcCellProperties(data)
 %
-% See also: ds.probeCellProperties
+% See also: dsProbeCellProperties
 
 % Check inputs
-options=ds.checkOptions(varargin,{...
+options=dsCheckOptions(varargin,{...
   'spike_threshold',1e-5,[],...
   'skip_time',10,[],... % time [ms] to exclude from detection
   'plot_flag',0,{0,1},...
@@ -126,7 +126,7 @@ if options.auto_gen_test_data_flag
   argin = [{data}, varargs]; % specific to this function
 end
 
-data=ds.checkData(data, varargin{:});
+data=dsCheckData(data, varargin{:});
 model=data(1).model;
 time=data(1).time;
 num_times=length(time);
@@ -161,7 +161,7 @@ data=data(I);
 num_steps=length(amplitudes);
 
 % get list of variables to analyze
-[vars,vars_pop]=ds.selectVariables(data(1).labels, varargin{:});
+[vars,vars_pop]=dsSelectVariables(data(1).labels, varargin{:});
 
 % assume only one variable per population
 if length(unique(vars_pop))>num_pops
@@ -641,7 +641,7 @@ end
 if options.auto_gen_test_data_flag
   argout = {stats}; % specific to this function
   
-  ds.unit.saveAutoGenTestData(argin, argout);
+  dsUnitSaveAutoGenTestData(argin, argout);
 end
 
 end

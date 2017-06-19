@@ -9,10 +9,10 @@ function [handles, hsp, h2] = plotStudy(data,myplot_handle,varargin)
 % results from simulation studies varying some aspect of the model or inputs.
 %
 % Usage:
-%   [handles, h2, hsp] = ds.plotStudy(data,myplot_handle)
+%   [handles, h2, hsp] = dsPlotStudy(data,myplot_handle)
 %
 % Inputs:
-%     - data: DynaSim data structure (see ds.checkData)
+%     - data: DynaSim data structure (see dsCheckData)
 %     - myplot_handle: Handle for plotting function.
 %     - options:
 %       'textfontsize': default text font size of 10
@@ -31,10 +31,10 @@ function [handles, hsp, h2] = plotStudy(data,myplot_handle,varargin)
 % Dependencies:
 %     Uses subplot_grid.
 
-% data=ds.checkData(data);
+% data=dsCheckData(data);
 handles=[];
 
-options=ds.checkOptions(varargin,{...
+options=dsCheckOptions(varargin,{...
   'textfontsize',10,[],...
   'use_subplot_grid',1,{0,1},...
   },false);
@@ -64,7 +64,7 @@ if num_sims>1 && isfield(data,'varied')
       param_cell{j}=unique([data.(varied{j})]); % unique values for each parameter
     else
       % todo: handle sims varying non-numeric model components
-      % (eg, mechanisms) (also in ds.plotFR and dsSelect)
+      % (eg, mechanisms) (also in dsPlotFR and dsSelect)
     end
   end
   

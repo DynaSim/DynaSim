@@ -2,14 +2,14 @@ function [ODEFUN,IC,elem_names] = dynasim2odefun(model, varargin)
 % Purpose: prepare ODEFUN for use with built-in Matlab solvers.
 % 
 % % Example: solve model using ode23
-% [ODEFUN,IC,elem_names]=ds.dynasim2odefun(model);
-% [ODEFUN,IC,elem_names]=ds.dynasim2odefun(ds.propagateParameters(ds.propagateFunctions(model)));
+% [ODEFUN,IC,elem_names]=dsDynasim2odefun(model);
+% [ODEFUN,IC,elem_names]=dsDynasim2odefun(dsPropagateParameters(dsPropagateFunctions(model)));
 % options=odeset('RelTol',1e-2,'AbsTol',1e-4,'InitialStep',.01);
 % [t,y]=ode23(ODEFUN,[0 100],IC,options);
 % figure; plot(t,y); legend(elem_names{:},'Location','EastOutside');
 % 
 % % Example: solve model manually using Euler method:
-% [ODEFUN,IC,elem_names]=ds.dynasim2odefun(model);
+% [ODEFUN,IC,elem_names]=dsDynasim2odefun(model);
 % dt=.01; t=0:dt:100;
 % y=zeros(length(t),length(IC));
 % y(1,:)=IC;
@@ -42,7 +42,7 @@ function [ODEFUN,IC,elem_names] = dynasim2odefun(model, varargin)
 % 4. replace state vars in ODEs by X
 % 5. combine X ODEs into ODEFUN
 
-options=ds.checkOptions(varargin,{...
+options=dsCheckOptions(varargin,{...
   'odefun_output','func_handle',{'func_handle','anonymous_func_string','func_body'},...
   'auto_gen_test_data_flag',0,{0,1},...
   },false);
@@ -117,7 +117,7 @@ ODEs=[ODEs{:}]; % concatenate ODEs into a single string
 
 % substitute in generic state vector X
 for i=1:num_vars
-  ODEs=ds.strrep(ODEs,old_vars{i},new_vars{i}, '','', varargin{:});
+  ODEs=dsStrrep(ODEs,old_vars{i},new_vars{i}, '','', varargin{:});
 end
 
 % prepare outputs (function handle string, ICs, and element names for
@@ -144,5 +144,5 @@ IC=cat(2,all_ICs{:})';
 if options.auto_gen_test_data_flag
   argout = {ODEFUN, IC, elem_names}; % specific to this function
   
-  ds.unit.saveAutoGenTestData(argin, argout);
+  dsUnitSaveAutoGenTestData(argin, argout);
 end

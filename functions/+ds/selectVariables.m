@@ -2,7 +2,7 @@ function [variables,pop_names] = selectVariables(labels,var_strings, varargin)
 %SELECTVARIABLES - determine what variables to plot
 %
 % Usage:
-%   variables=ds.selectVariables(labels,var_strings)
+%   variables=dsSelectVariables(labels,var_strings)
 %
 % Inputs:
 %   - labels: cell array of variable names
@@ -22,7 +22,7 @@ function [variables,pop_names] = selectVariables(labels,var_strings, varargin)
 %   var_strings='pop2_*';
 
 %% auto_gen_test_data_flag argin
-options = ds.checkOptions(varargin,{'auto_gen_test_data_flag',0,{0,1}},false);
+options = dsCheckOptions(varargin,{'auto_gen_test_data_flag',0,{0,1}},false);
 if options.auto_gen_test_data_flag
   varargs = varargin;
   varargs{find(strcmp(varargs, 'auto_gen_test_data_flag'))+1} = 0;
@@ -78,7 +78,7 @@ end
 if options.auto_gen_test_data_flag
   argout = {variables, pop_names}; % specific to this function
   
-  ds.unit.saveAutoGenTestData(argin, argout);
+  dsUnitSaveAutoGenTestData(argin, argout);
 end
 
 end

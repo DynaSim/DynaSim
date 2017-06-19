@@ -2,16 +2,16 @@ function str = strrep2(str,oldstr,newstr,lpad,rpad, varargin)
 %STRREP2 - replace full words by new character strings, WITHOUT ignoring matches that appear as sub-strings.
 %
 % Examples:
-%   ds.strrep2('(v)*(-av)','v','pop1_v')
-%   ds.strrep2('v-v^2+vav','v','pop1_v')
-%   ds.strrep2('v-v-v','v','pop1_v')
-%   ds.strrep2('v-v-v^2','v','pop1_v')
-%   ds.strrep2('(v-v-v^2)','v','pop1_v')
-%   ds.strrep2('E-pop1_V+1','pop1_V','pop1_V(n-1)')
-%   ds.strrep2('v=1; u=u+d','u','u(n,test)')
+%   dsStrrep2('(v)*(-av)','v','pop1_v')
+%   dsStrrep2('v-v^2+vav','v','pop1_v')
+%   dsStrrep2('v-v-v','v','pop1_v')
+%   dsStrrep2('v-v-v^2','v','pop1_v')
+%   dsStrrep2('(v-v-v^2)','v','pop1_v')
+%   dsStrrep2('E-pop1_V+1','pop1_V','pop1_V(n-1)')
+%   dsStrrep2('v=1; u=u+d','u','u(n,test)')
 %
-%   'new.new' == ds.strrep2('old.old','old','new')
-%   'new.new.new' == ds.strrep2('old.old.old','old','new')
+%   'new.new' == dsStrrep2('old.old','old','new')
+%   'new.new.new' == dsStrrep2('old.old.old','old','new')
 
 if nargin<4, lpad=''; end
 if nargin<5, rpad=''; end
@@ -27,7 +27,7 @@ if isempty(str)
 end
 
 %% auto_gen_test_data_flag argin
-options = ds.checkOptions(varargin,{'auto_gen_test_data_flag',0,{0,1}},false);
+options = dsCheckOptions(varargin,{'auto_gen_test_data_flag',0,{0,1}},false);
 if options.auto_gen_test_data_flag
   varargs = varargin;
   varargs{find(strcmp(varargs, 'auto_gen_test_data_flag'))+1} = 0;
@@ -63,5 +63,5 @@ str=regexprep(str,pat,rep);
 if options.auto_gen_test_data_flag
   argout = {str}; % specific to this function
   
-  ds.unit.saveAutoGenTestData(argin, argout);
+  dsUnitSaveAutoGenTestData(argin, argout);
 end

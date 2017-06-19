@@ -8,7 +8,7 @@ function model = propagateFunctions(model, varargin)
 %
 % Output: DynaSim model structure without internal function calls
 %
-% See also: dsSimulate, ds.generateModel, ds.propagateNamespaces
+% See also: dsSimulate, dsGenerateModel, dsPropagateNamespaces
 
 %% localfn output
 if ~nargin
@@ -17,7 +17,7 @@ if ~nargin
 end
 
 %% auto_gen_test_data_flag argin
-options = ds.checkOptions(varargin,{'auto_gen_test_data_flag',0,{0,1}},false);
+options = dsCheckOptions(varargin,{'auto_gen_test_data_flag',0,{0,1}},false);
 if options.auto_gen_test_data_flag
   varargs = varargin;
   varargs{find(strcmp(varargs, 'auto_gen_test_data_flag'))+1} = 0;
@@ -26,7 +26,7 @@ if options.auto_gen_test_data_flag
 end
 
 % Check inputs
-model=ds.checkModel(model, varargin{:});
+model=dsCheckModel(model, varargin{:});
 if ~isstruct(model.functions)
   % nothing to do
   return;
@@ -107,7 +107,7 @@ end
 if options.auto_gen_test_data_flag
   argout = {model}; % specific to this function
   
-  ds.unit.saveAutoGenTestData(argin, argout);
+  dsUnitSaveAutoGenTestData(argin, argout);
 end
 
 end % main fn
@@ -116,7 +116,7 @@ end % main fn
 function [expression,functions_were_found] = insert_functions(expression,functions, varargin)
 
 %% auto_gen_test_data_flag argin
-options = ds.checkOptions(varargin,{'auto_gen_test_data_flag',0,{0,1}},false);
+options = dsCheckOptions(varargin,{'auto_gen_test_data_flag',0,{0,1}},false);
 if options.auto_gen_test_data_flag
   varargs = varargin;
   varargs{find(strcmp(varargs, 'auto_gen_test_data_flag'))+1} = 0;
@@ -178,7 +178,7 @@ if ~isempty(found_functions)
     % prepare found expression with variable names from the target function
     if ~isequal(orig_vars,new_vars)
       for v=1:length(orig_vars)
-        found_expression=ds.strrep(found_expression,orig_vars{v},new_vars{v}, '', '', varargin{:});
+        found_expression=dsStrrep(found_expression,orig_vars{v},new_vars{v}, '', '', varargin{:});
       end
     end
     
@@ -189,7 +189,7 @@ if ~isempty(found_functions)
     newstr=sprintf('(%s)',found_expression);
     
     % update the target function
-    expression=ds.strrep(expression,oldstr,newstr,'(',')', varargin{:});
+    expression=dsStrrep(expression,oldstr,newstr,'(',')', varargin{:});
   end
 end
 
@@ -197,7 +197,7 @@ end
 if options.auto_gen_test_data_flag
   argout = {expression, functions_were_found}; % specific to this function
   
-  ds.unit.saveAutoGenTestDataLocalFn(argin, argout); % localfn
+  dsUnitSaveAutoGenTestDataLocalFn(argin, argout); % localfn
 end
 
 end

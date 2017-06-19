@@ -2,7 +2,7 @@ function studyinfo = checkStudyinfo(studyinfo, varargin)
 %CHECKSTUDYINFO - Standardize studyinfo structure and auto-populate missing fields
 %
 % Usage:
-%   studyinfo=ds.checkStudyinfo(studyinfo)
+%   studyinfo=dsCheckStudyinfo(studyinfo)
 %
 % Input: DynaSim studyinfo structure
 %
@@ -72,14 +72,14 @@ function studyinfo = checkStudyinfo(studyinfo, varargin)
 %
 % Examples:
 % - Example 1: obtain empty studyinfo structure with all fields
-%     studyinfo=ds.checkStudyinfo([])
+%     studyinfo=dsCheckStudyinfo([])
 %
 % - Example 2: standardize existing studyinfo
-%     studyinfo=ds.checkStudyinfo(studyinfo)
+%     studyinfo=dsCheckStudyinfo(studyinfo)
 %
-% See also: ds.setupStudy, dsSimulate, ds.createBatch, dsImport, ds.analyzeStudy
+% See also: dsSetupStudy, dsSimulate, dsCreateBatch, dsImport, dsAnalyzeStudy
 
-options=ds.checkOptions(varargin,{...
+options=dsCheckOptions(varargin,{...
   'verbose_flag',0,{0,1},...
   'process_id',[],[],... % process identifier for loading studyinfo if necessary
   'auto_gen_test_data_flag',0,{0,1},...
@@ -117,7 +117,7 @@ end
 % check if studyinfo.mat was provided (or derived from input study_dir)
 if ischar(studyinfo) && exist(studyinfo,'file')
   study_dir=fileparts2(studyinfo);
-  studyinfo=ds.studyinfoIO([],study_dir,options.process_id,options.verbose_flag);
+  studyinfo=dsStudyinfoIO([],study_dir,options.process_id,options.verbose_flag);
 elseif isnumeric(studyinfo) && isempty(studyinfo) % [], created dummy studyinfo
   % set some default studyinfo fields
   studyinfo.time_created=datestr(now);
@@ -160,7 +160,7 @@ if ~isfield(studyinfo,'dynasim_hash')
   % record current directory
   cwd=pwd;
   % move to dynasim directory
-  cd(ds.getRootPath());
+  cd(dsGetRootPath());
   % get git hash
   [a,b]=system('git rev-parse HEAD');
   studyinfo.dynasim_hash=strtrim(b);
@@ -266,5 +266,5 @@ end
 if options.auto_gen_test_data_flag
   argout = {studyinfo}; % specific to this function
 
-%   ds.unit.saveAutoGenTestData(argin, argout);
+%   dsUnitSaveAutoGenTestData(argin, argout);
 end

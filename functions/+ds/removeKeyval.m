@@ -2,11 +2,11 @@ function keyvals_out = removeKeyval(keyvals,keys)
 %REMOVEKEYVAL - remove keys from keyvals_in.
 %
 % Usage:
-%   keyvals_out = ds.removeKeyval(keyvals_in,keys)
+%   keyvals_out = dsRemoveKeyval(keyvals_in,keys)
 %
 % Examples:
-%   keyvals=ds.removeKeyval({'opt1',1,'opt2',2,'opt3',3},'opt2')
-%   keyvals=ds.removeKeyval({'opt1',1,'opt2',2,'opt3',3},{'opt2','opt1'})
+%   keyvals=dsRemoveKeyval({'opt1',1,'opt2',2,'opt3',3},'opt2')
+%   keyvals=dsRemoveKeyval({'opt1',1,'opt2',2,'opt3',3},{'opt2','opt1'})
 
 keyvals_out=keyvals;
 

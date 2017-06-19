@@ -4,17 +4,17 @@ function [studyinfo,options] = setupStudy(base_model,varargin)
 %
 % TODO: break up this function into smaller functions
 %
-% See also: dsSimulate, ds.updateStudy
+% See also: dsSimulate, dsUpdateStudy
 
 % Check inputs
-opts=ds.checkOptions(varargin,{...
+opts=dsCheckOptions(varargin,{...
   'modifications_set',[],[],... % search space
   'simulator_options',[],[],... % options from dsSimulate
   'process_id',[],[],... % process identifier for loading studyinfo if necessary
   },false);
 
 if isempty(opts.simulator_options)
-  error('ds.setupStudy must be given a simulator_options structure from dsSimulate');
+  error('dsSetupStudy must be given a simulator_options structure from dsSimulate');
 end
 
 modifications_set = opts.modifications_set;
@@ -69,7 +69,7 @@ if options.save_data_flag || options.save_results_flag || options.parallel_flag
   % initialize studyinfo if not already initialized
   if ischar(options.study_dir) && isdir(options.study_dir) && exist(fullfile(options.study_dir,'studyinfo.mat'),'file')
     % studyinfo file already exists
-    studyinfo=ds.checkStudyinfo(options.study_dir,'process_id',process_id, varargin{:});
+    studyinfo=dsCheckStudyinfo(options.study_dir,'process_id',process_id, varargin{:});
     orig_studyinfo=studyinfo;
   else
     orig_studyinfo=[];
@@ -83,7 +83,7 @@ if options.save_data_flag || options.save_results_flag || options.parallel_flag
       studyinfo = [];
     end
 
-    studyinfo=ds.checkStudyinfo(studyinfo,'process_id',process_id, varargin{:}); % auto-fill all fields
+    studyinfo=dsCheckStudyinfo(studyinfo,'process_id',process_id, varargin{:}); % auto-fill all fields
   end
 
   % set basic metadata for this study
@@ -173,7 +173,7 @@ if options.save_data_flag || options.save_results_flag || options.parallel_flag
         studyinfo.simulations(k).result_files{end+1}=fullfile(plot_dir,fname);
       end
 
-      % TODO: add options.detailed_names_flag (see ds.analyzeStudy())
+      % TODO: add options.detailed_names_flag (see dsAnalyzeStudy())
       % ...
     end
   end
@@ -184,7 +184,7 @@ if options.save_data_flag || options.save_results_flag || options.parallel_flag
   if ~isequal(orig_studyinfo,studyinfo)
     % save studyinfo structure to disk
     study_file=fullfile(options.study_dir,'studyinfo.mat');
-    ds.studyinfoIO(studyinfo,study_file,process_id,options.verbose_flag);
+    dsStudyinfoIO(studyinfo,study_file,process_id,options.verbose_flag);
   end
 else
   % set defaults for not saving anything

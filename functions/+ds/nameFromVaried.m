@@ -2,7 +2,7 @@ function new_result_file = nameFromVaried(data, file_type, old_result_file)
 %NAMEFROMVARIED - makes a filename based on the parameters in data.varied.
 %
 % Usage:
-%   new_result_file = ds.nameFromVaried(data, file_type, old_result_file)
+%   new_result_file = dsNameFromVaried(data, file_type, old_result_file)
 %
 % Inputs:
 %   - data: DynaSim data structure (also accepted: data file name)

@@ -1,5 +1,5 @@
 function raster  = computeRaster(t,V,threshold)
-%ds.computeRaster - Use a threshold to find spiketrain for a voltage trace
+%dsComputeRaster - Use a threshold to find spiketrain for a voltage trace
   if nargin<3, threshold=0; end
   dt = t(2)-t(1);
   raster = [];

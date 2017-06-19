@@ -2,10 +2,10 @@ function data = calcISI(data, varargin)
 %CALCISI - Calculate the interspike interval.
 %
 % Usage:
-%   data = ds.calcISI(data,'option',value)
+%   data = dsCalcISI(data,'option',value)
 %
 % Inputs:
-%   - data: DynaSim data structure (see ds.checkData)
+%   - data: DynaSim data structure (see dsCheckData)
 %   - options:
 %     'variable'         : name of field containing data on which to calculate
 %                          ISIs (default: *_spikes or first variable in data.labels)
@@ -20,7 +20,7 @@ function data = calcISI(data, varargin)
 % Notes:
 % - "variable" can be specified as the name of a variable listed in
 %     data.labels, a cell array of string listing variable names, or as a regular
-%     expression pattern for identifying variables to process. See ds.selectVariables
+%     expression pattern for identifying variables to process. See dsSelectVariables
 %     for more info on supported specifications.
 % - DynaSim spike monitor returns spike data in variables *_spikes.
 %   - e.g., `data=dsSimulate('dv/dt=@current+10; {iNa,iK}; monitor v.spikes');`
@@ -33,13 +33,13 @@ function data = calcISI(data, varargin)
 %   s.populations(2).name='I';
 %   s.populations(2).equations='dv/dt=@current+10; {iNa,iK}; v(0)=-65';
 %   data=dsSimulate(s);
-%   data=ds.calcISI(data,'variable','*_v');
+%   data=dsCalcISI(data,'variable','*_v');
 %   data % contains ISIs for E and I pops in .E_v_ISI_SUA/MUA and .I_v_ISI_SUA/MUA
 %
-% See also: ds.plotFR, ds.analyzeStudy, dsSimulate, ds.checkData, ds.selectVariables
+% See also: dsPlotFR, dsAnalyzeStudy, dsSimulate, dsCheckData, dsSelectVariables
 
 %% 1.0 Check inputs
-options=ds.checkOptions(varargin,{...
+options=dsCheckOptions(varargin,{...
   'variable',[],[],...
   'threshold',1e-5,[],... % slightly above zero in case variable is point process *_spikes {0,1}
   'exclude_data_flag',0,{0,1},...
@@ -55,13 +55,13 @@ if options.auto_gen_test_data_flag
   argin = [{data}, varargs]; % specific to this function
 end
 
-data = ds.checkData(data, varargin{:});
-% note: calling ds.checkData() at beginning enables analysis function to
+data = dsCheckData(data, varargin{:});
+% note: calling dsCheckData() at beginning enables analysis function to
 % accept data matrix [time x cells] in addition to DynaSim data structure.
 
 if numel(data)>1
-  % use ds.analyzeStudy to recursively call ds.calcISI on each data set
-  data=ds.analyzeStudy(data,@ds.calcISI,varargin{:});
+  % use dsAnalyzeStudy to recursively call dsCalcISI on each data set
+  data=dsAnalyzeStudy(data,@dsCalcISI,varargin{:});
   return;
 end
 
@@ -86,7 +86,7 @@ if isempty(options.variable)
 end
 
 %% 2.0 set list of variables to process as cell array of strings
-options.variable=ds.selectVariables(data(1).labels,options.variable, varargin{:});
+options.variable=dsSelectVariables(data(1).labels,options.variable, varargin{:});
 
 %% 3.0 calculate ISIs for each variable
 if ~isfield(data,'results')
@@ -143,5 +143,5 @@ end
 if options.auto_gen_test_data_flag
   argout = {data}; % specific to this function
   
-  ds.unit.saveAutoGenTestData(argin, argout);
+  dsUnitSaveAutoGenTestData(argin, argout);
 end

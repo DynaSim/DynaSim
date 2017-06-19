@@ -14,9 +14,9 @@ function data = MDD2dsImage(obj)
 % load sample_data_dynasim.mat
 % data1=data;
 % data2 = data(1);
-% d1 = MDD2ds(ds.ds2MDD(data1));
-% d2 = MDD2ds(ds.ds2MDD(data2));
-% d2b = MDD2ds(squeeze(ds.ds2MDD(data2)));
+% d1 = MDD2ds(dsDs2MDD(data1));
+% d2 = MDD2ds(dsDs2MDD(data2));
+% d2b = MDD2ds(squeeze(dsDs2MDD(data2)));
 % % Make sure 1 is identical
 % close all; 
 % dsPlot(data1); dsPlot(d1);

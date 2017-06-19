@@ -2,7 +2,7 @@ function [param_mat,varied,param_cell] = collectVariedParams(data, varargin)
 %COLLECTVARIEDPARAMS - Gathers info on parameters that have been varied in a batch
 %
 % Usage: [deprecated?]
-%   [all_values,param_names,unique_values]=ds.collectVariedParams(data)
+%   [all_values,param_names,unique_values]=dsCollectVariedParams(data)
 %
 % Inputs:
 %   - data: DynaSim data structure
@@ -14,7 +14,7 @@ function [param_mat,varied,param_cell] = collectVariedParams(data, varargin)
 
 % Check inputs
 %% auto_gen_test_data_flag argin
-options = ds.checkOptions(varargin,{'auto_gen_test_data_flag',0,{0,1}},false);
+options = dsCheckOptions(varargin,{'auto_gen_test_data_flag',0,{0,1}},false);
 if options.auto_gen_test_data_flag
   varargs = varargin;
   varargs{find(strcmp(varargs, 'auto_gen_test_data_flag'))+1} = 0;
@@ -23,7 +23,7 @@ if options.auto_gen_test_data_flag
 end
 
 if ~isstruct(data)
-  fprintf('input must be a structure...exiting ds.collectVariedParams.\n');
+  fprintf('input must be a structure...exiting dsCollectVariedParams.\n');
   return;
 end
 if ~isfield(data,'varied')
@@ -47,7 +47,7 @@ for j=1:num_varied
     param_cell{j}=unique([data.(varied{j})]); % unique values for each parameter
   else
     % TODO: handle sims varying non-numeric model components
-    % (eg, mechanisms) (also in ds.plotFR and dsSelect)
+    % (eg, mechanisms) (also in dsPlotFR and dsSelect)
   end
 end
 
@@ -55,5 +55,5 @@ end
 if options.auto_gen_test_data_flag
   argout = {param_mat, varied, param_cell}; % specific to this function
   
-  ds.unit.saveAutoGenTestData(argin, argout);
+  dsUnitSaveAutoGenTestData(argin, argout);
 end

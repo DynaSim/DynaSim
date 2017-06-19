@@ -1,15 +1,15 @@
 function [matched,error_message] = checkHostPaths(studyinfo, varargin)
 %CHECKHOSTPATHS - Compare paths on host to those set in studyinfo when batch was created
 %
-% Call ds.checkHostPaths() in job.m before first simulation to make sure the
+% Call dsCheckHostPaths() in job.m before first simulation to make sure the
 % paths on the compute matchine match those in studyinfo created when the
 % study was began.
 %
 % If paths do not match, an informative error message is added to
-% .error_log (see ds.createBatch() or any jobX.m script).
+% .error_log (see dsCreateBatch() or any jobX.m script).
 %
 % Usage:
-%   ds.checkHostPaths(studyinfo)
+%   dsCheckHostPaths(studyinfo)
 %
 % Inputs:
 %   - studyinfo: DynaSim studyinfo structure
@@ -22,7 +22,7 @@ function [matched,error_message] = checkHostPaths(studyinfo, varargin)
 % - path to model files
 
 %% auto_gen_test_data_flag argin
-options = ds.checkOptions(varargin,{'auto_gen_test_data_flag',0,{0,1}},false);
+options = dsCheckOptions(varargin,{'auto_gen_test_data_flag',0,{0,1}},false);
 if options.auto_gen_test_data_flag
   varargs = varargin;
   varargs{find(strcmp(varargs, 'auto_gen_test_data_flag'))+1} = 0;
@@ -34,10 +34,10 @@ matched=1;
 error_message='';
 
 % locate DynaSim toolbox
-dynasim_path = ds.getRootPath(); % root is one level up from directory containing this function
+dynasim_path = dsGetRootPath(); % root is one level up from directory containing this function
 
 % locate mechanism files
-[mech_paths,mech_files]=ds.locateModelFiles(studyinfo.base_model);
+[mech_paths,mech_files]=dsLocateModelFiles(studyinfo.base_model);
 
 % compare DynaSim toolbox paths
 if ~isequal(fullfile(dynasim_path,'functions'), studyinfo.paths.dynasim_functions)
@@ -55,5 +55,5 @@ end
 if options.auto_gen_test_data_flag
   argout = {matched, error_message}; % specific to this function
 
-  ds.unit.saveAutoGenTestData(argin, argout);
+  dsUnitSaveAutoGenTestData(argin, argout);
 end

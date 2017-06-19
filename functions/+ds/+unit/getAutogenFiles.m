@@ -14,9 +14,9 @@ if ~exist('query_flag','var')
 end
 
 if ~query_flag
-  files = lscell(fullfile(ds.getConfig('ds_unitTestData_path'), 'autogen'));
+  files = lscell(fullfile(dsGetConfig('ds_unitTestData_path'), 'autogen'));
 else
-  files = lscell(fullfile(ds.getConfig('ds_unitTestData_path'), 'autogen', ['*' evalin('base','query') '*']));
+  files = lscell(fullfile(dsGetConfig('ds_unitTestData_path'), 'autogen', ['*' evalin('base','query') '*']));
 end
 
 if localfn_flag

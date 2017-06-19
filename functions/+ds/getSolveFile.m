@@ -2,13 +2,13 @@ function solve_file = getSolveFile(model,studyinfo,varargin)
 %GETSOLVEFILE - helper function that creates or retrieves the desired solver file.
 %
 % Usage:
-%   solve_file = ds.getSolveFile(model,studyinfo,options)
+%   solve_file = dsGetSolveFile(model,studyinfo,options)
 %
 % Inputs:
-%   - model: DynaSim model structure (see ds.generateModel)
-%   - studyinfo (optional): DynaSim studyinfo structure (see ds.checkStudyinfo)
+%   - model: DynaSim model structure (see dsGenerateModel)
+%   - studyinfo (optional): DynaSim studyinfo structure (see dsCheckStudyinfo)
 %   - options (optional): cell array of key/value pairs or Matlab structure with options
-%     'solver'      : solver for numerical integration (see ds.getSolveFile)
+%     'solver'      : solver for numerical integration (see dsGetSolveFile)
 %                     {'euler','rk2','rk4'} (default: 'rk4')
 %     'disk_flag'   : whether to write to disk during simulation instead of
 %                     storing in memory {0 or 1} (default: 0)
@@ -19,8 +19,8 @@ function solve_file = getSolveFile(model,studyinfo,varargin)
 % Output:
 %   - solver_file: full file name of file solving the system in model
 %
-% See also: ds.writeDynaSimSolver, ds.compareSolveFiles, ds.prepareMEX,
-%           dsSimulate, ds.createBatch
+% See also: dsWriteDynaSimSolver, dsCompareSolveFiles, dsPrepareMEX,
+%           dsSimulate, dsCreateBatch
 
 % Check inputs
 opts=[];
@@ -38,7 +38,7 @@ elseif isstruct(varargin{1}) % user provided an options structure
   varargin={};
 end
 
-options=ds.checkOptions(varargin,{...
+options=dsCheckOptions(varargin,{...
   'solver','rk4',{'euler','rk1','rk2','rk4','modified_euler','rungekutta','rk','ode23','ode45',...
     'ode1','ode2','ode3','ode4','ode5','ode8','ode113','ode15s','ode23s','ode23t','ode23tb'},... % DynaSim and built-in Matlab solvers
   'matlab_solver_options',[],[],... % options from odeset for use with built-in Matlab solvers
@@ -95,7 +95,7 @@ end
 if ~isempty(options.solve_file)
   % use user-provided solve_file
   solve_file=options.solve_file;
-  % note: options.solve_file is used by cluster sim jobs (see ds.createBatch())
+  % note: options.solve_file is used by cluster sim jobs (see dsCreateBatch())
 elseif isfield(studyinfo,'solve_file')
   % use study-associated solve_file
   solve_file=studyinfo.solve_file;
@@ -145,14 +145,14 @@ end
 
 % create solve_file if it doesn't exist
 if ~exist(solve_file,'file')
-  keyvals = ds.options2Keyval(options);
+  keyvals = dsOptions2Keyval(options);
   switch solver_type
     case 'dynasim'  % write DynaSim solver function (solve_ode.m)
-      solve_file_m = ds.writeDynaSimSolver(model,keyvals{:},'filename',solve_file); % create DynaSim solver m-file
+      solve_file_m = dsWriteDynaSimSolver(model,keyvals{:},'filename',solve_file); % create DynaSim solver m-file
     case {'matlab', 'matlab_no_mex'} % prepare model function handle etc for built-in solver (@odefun)
-      solve_file_m = ds.writeMatlabSolver(model,keyvals{:},'filename',solve_file, 'solver_type',solver_type); % create Matlab solver m-file
-                % design: ds.writeMatlabSolver should be very similar to
-                % ds.writeDynaSimSolver except have a subfunction with an odefun
+      solve_file_m = dsWriteMatlabSolver(model,keyvals{:},'filename',solve_file, 'solver_type',solver_type); % create Matlab solver m-file
+                % design: dsWriteMatlabSolver should be very similar to
+                % dsWriteDynaSimSolver except have a subfunction with an odefun
                 % format variation and main function that calls odeset and
                 % feval. 
                 % DynaSimToOdefun(): a function called outside of
@@ -160,9 +160,9 @@ if ~exist(solve_file,'file')
                 % return @odefun with all substitutions. dsSimulate
                 % should be able to handle: dsSimulate(@odefun,'tspan',tspan,'ic',ic)
   end
-  solve_file=ds.compareSolveFiles(solve_file_m);               % First search in local solve folder...
+  solve_file=dsCompareSolveFiles(solve_file_m);               % First search in local solve folder...
   if options.compile_flag
-    solve_file=ds.compareSolveFiles(solve_file,options.mex_dir); % Then search in mex_dir (if it exists and if compile_flag==1).
+    solve_file=dsCompareSolveFiles(solve_file,options.mex_dir); % Then search in mex_dir (if it exists and if compile_flag==1).
   end
 else
   if options.verbose_flag
@@ -174,13 +174,13 @@ end
 % create MEX file if desired and doesn't exist
 
 % NOTE: if using stiff built-in solver, it should only compile the odefun, not
-%   the dynasim solve file. this is called from ds.writeMatlabSolver
+%   the dynasim solve file. this is called from dsWriteMatlabSolver
 
 if options.compile_flag && ~strcmp(solver_type,'matlab_no_mex') % compile solver function
   if options.one_solve_file_flag
     options.codegen_args = {0};
   end
-  solve_file = ds.prepareMEX(solve_file, options);
+  solve_file = dsPrepareMEX(solve_file, options);
 end
 
 %%

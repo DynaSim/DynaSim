@@ -23,8 +23,8 @@ end
 if ~isfunction(fnNameStack) || strcmp(fnNameStack, 'strrep')
   if isfunction(['ds.' fnNameStack])
     fnName = ['ds.' fnName];
-  elseif isfunction(['ds.unit.' fnNameStack])
-    fnName = ['ds.unit.' fnName];
+  elseif isfunction(['dsUnit.' fnNameStack])
+    fnName = ['dsUnit.' fnName];
   end
 end
 
@@ -32,7 +32,7 @@ hash = DataHash(argin);
 
 % test dir
 testDirName = sprintf('%s_autogen_%s', fnName, hash);
-testFileDir = fullfile(ds.getConfig('ds_unitTestData_path'), 'autogenDirs_newSave', testDirName);
+testFileDir = fullfile(dsGetConfig('ds_unitTestData_path'), 'autogenDirs_newSave', testDirName);
 mkdirSilent(testFileDir);
 
 % args file
@@ -64,7 +64,7 @@ if all(isValidFigHandle(argout{1}))
   testOutputDir = fullfile(testFileDir, 'output');
   mkdirSilent(testOutputDir);
   
-  ds.unit.save_figHandles( handles, testOutputDir )
+  dsUnitSave_figHandles( handles, testOutputDir )
 end
 
 % input dir

@@ -2,7 +2,7 @@ function parent = getParentNamespace(namespace, varargin)
 %GETPARENTNAMESPACE - determine parent namespace from namespace specified in namespace
 %
 % Usage:
-%   parent = ds.getParentNamespace(namespace)
+%   parent = dsGetParentNamespace(namespace)
 %
 % Input:
 %   - namespace: current namespace of object
@@ -11,17 +11,17 @@ function parent = getParentNamespace(namespace, varargin)
 %   - parent: parent namespace containing the current namespace
 %
 % Examples:
-%   parent=ds.getParentNamespace('pop')
-%   parent=ds.getParentNamespace('pop_mech')
-%   parent=ds.getParentNamespace('pop_pop')
-%   parent=ds.getParentNamespace('pop_pop_mech')
-%   parent=ds.getParentNamespace('mech')
-%   parent=ds.getParentNamespace('')
+%   parent=dsGetParentNamespace('pop')
+%   parent=dsGetParentNamespace('pop_mech')
+%   parent=dsGetParentNamespace('pop_pop')
+%   parent=dsGetParentNamespace('pop_pop_mech')
+%   parent=dsGetParentNamespace('mech')
+%   parent=dsGetParentNamespace('')
 %
-% See also: ds.propagateNamespaces
+% See also: dsPropagateNamespaces
 
 %% auto_gen_test_data_flag argin
-options = ds.checkOptions(varargin,{'auto_gen_test_data_flag',0,{0,1}},false);
+options = dsCheckOptions(varargin,{'auto_gen_test_data_flag',0,{0,1}},false);
 if options.auto_gen_test_data_flag
   varargs = varargin;
   varargs{find(strcmp(varargs, 'auto_gen_test_data_flag'))+1} = 0;
@@ -66,5 +66,5 @@ end
 if options.auto_gen_test_data_flag
   argout = {parent}; % specific to this function
   
-  ds.unit.saveAutoGenTestData(argin, argout);
+  dsUnitSaveAutoGenTestData(argin, argout);
 end

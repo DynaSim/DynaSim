@@ -2,10 +2,10 @@ function solve_ode_filepath = writeMatlabSolver(model,varargin)
 %WRITEMATLABSOLVER - write m-file that numerically inteegrates the model
 %
 % Usage:
-%   filepath = ds.writeMatlabSolver(model,varargin)
+%   filepath = dsWriteMatlabSolver(model,varargin)
 %
 % Inputs:
-%   - model: DynaSim model structure (see ds.generateModel)
+%   - model: DynaSim model structure (see dsGenerateModel)
 %   - options:
 %     'tspan'         : units must be consistent with dt and equations
 %                       {[beg,end]} (default: [0 100])
@@ -30,12 +30,12 @@ function solve_ode_filepath = writeMatlabSolver(model,varargin)
 %   - filepath (solve_ode.m)
 %   - odefun_filepath (solve_ode_odefun.m)
 %
-% Dependencies: ds.checkOptions, ds.checkModel
+% Dependencies: dsCheckOptions, dsCheckModel
 %
-% See also: dsSimulate, ds.dynasim2odefun
+% See also: dsSimulate, dsDynasim2odefun
 
 % Check inputs
-options=ds.checkOptions(varargin,{...
+options=dsCheckOptions(varargin,{...
   'ic',[],[],...                  % initial conditions (overrides definition in model structure)
   'tspan',[0 100],[],...          % [beg,end] (units must be consistent with dt and equations)
   'dt',.01,[],...                 % time step used for fixed step DynaSim solvers
@@ -54,7 +54,7 @@ options=ds.checkOptions(varargin,{...
   },false);
 
 % Check inputs
-model=ds.checkModel(model, varargin{:});
+model=dsCheckModel(model, varargin{:});
 
 % convert matlab solver options from key/value to struct using odeset if necessary
 if iscell(options.matlab_solver_options) && ~isempty(options.matlab_solver_options)
@@ -66,9 +66,9 @@ end
 % create function that calls feval(@solver,...) and has subfunction
 % defining odefun (including optional conditionals)...
 
-propagatedModel = ds.propagateParameters( ds.propagateFunctions(model, varargin{:}), varargin{:} );
-propagatedModel = ds.propagateParameters(propagatedModel, 'param_type', 'fixed_variables', varargin{:});
-[odefun,IC,elem_names] = ds.dynasim2odefun(propagatedModel, 'odefun_output','func_body', varargin{:});
+propagatedModel = dsPropagateParameters( dsPropagateFunctions(model, varargin{:}), varargin{:} );
+propagatedModel = dsPropagateParameters(propagatedModel, 'param_type', 'fixed_variables', varargin{:});
+[odefun,IC,elem_names] = dsDynasim2odefun(propagatedModel, 'odefun_output','func_body', varargin{:});
 
 
 %% 2.0 prepare model info
@@ -77,13 +77,13 @@ parameter_prefix='p.';%'pset.p.';
 
 % 1.1 eliminate internal (anonymous) function calls from model equations
 % if options.reduce_function_calls_flag==1
-  model=ds.propagateFunctions(model, varargin{:});
+  model=dsPropagateFunctions(model, varargin{:});
 % end
 
 % 1.1 prepare parameters
 if options.save_parameters_flag
   % add parameter struct prefix to parameters in model equations
-  model=ds.propagateParameters(model,'action','prepend','prop_prefix',parameter_prefix, varargin{:});
+  model=dsPropagateParameters(model,'action','prepend','prop_prefix',parameter_prefix, varargin{:});
   
   % set and capture numeric seed value
   if options.compile_flag==1
@@ -103,7 +103,7 @@ if options.save_parameters_flag
   warning('off','catstruct:DuplicatesFound');
   
   % make p struct
-  p=catstruct(ds.checkSolverOptions(options),model.parameters);
+  p=catstruct(dsCheckSolverOptions(options),model.parameters);
   
   % add IC to p
   %   NOTE: will get done again in simulateModel
@@ -121,10 +121,10 @@ if options.save_parameters_flag
   if options.one_solve_file_flag
     % fill p flds that were varied with vectors of length = nSims
     
-    vary=ds.checkOptions(varargin,{'vary',[],[],},false);
+    vary=dsCheckOptions(varargin,{'vary',[],[],},false);
     vary = vary.vary;
 
-    mod_set = ds.vary2Modifications(vary);
+    mod_set = dsVary2Modifications(vary);
     % The first 2 cols of modifications_set are idenitical to vary, it just
     % has the last column distributed out to the number of sims
     
@@ -132,7 +132,7 @@ if options.save_parameters_flag
     % Get param names
     iMod = 1;
     % Split extra entries in first 2 cols of mods, so each row is a single pop and param
-    [~, first_mod_set] = ds.applyModifications([],mod_set{iMod}, varargin{:});
+    [~, first_mod_set] = dsApplyModifications([],mod_set{iMod}, varargin{:});
 
     % replace '->' with '_'
     first_mod_set(:,1) = strrep(first_mod_set(:,1), '->', '_');
@@ -163,7 +163,7 @@ if options.save_parameters_flag
     param_values = nan(nParamMods, length(mod_set));
     for iMod = 1:length(mod_set)
       % Split extra entries in first 2 cols of mods, so each row is a single pop and param
-      [~, mod_set{iMod}] = ds.applyModifications([],mod_set{iMod}, varargin{:});
+      [~, mod_set{iMod}] = dsApplyModifications([],mod_set{iMod}, varargin{:});
       
       % Get scalar values as vector
       param_values(:, iMod) = [mod_set{iMod}{:,3}];
@@ -182,7 +182,7 @@ if options.save_parameters_flag
   save(param_file_name,'p');
 else
   % insert parameter values into model expressions
-  model=ds.propagateParameters(model,'action','substitute', varargin{:});
+  model=dsPropagateParameters(model,'action','substitute', varargin{:});
 end
 
 % 1.2 prepare list of outputs (state variables and monitors)
@@ -416,7 +416,7 @@ if options.compile_flag && strcmp(options.solver_type,'matlab_no_mex') % save od
   
   %% mex compile odefun
   options.codegen_args = {0,IC};
-  ds.prepareMEX(odefun_filepath, options);
+  dsPrepareMEX(odefun_filepath, options);
   
 else % use subfunction
   fprintf(fid,'\n%% ###########################################################\n');

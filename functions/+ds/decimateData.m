@@ -2,21 +2,21 @@ function data_out = decimateData(data,ds)
 %DOWNSAMPLEDATA - Downsamples DynaSim data structre data
 %
 % Usage:
-%   data_out = ds.calcFR(data,'option',value)
+%   data_out = dsCalcFR(data,'option',value)
 %
 % Inputs:
-%   - data: DynaSim data structure (see ds.checkData)
+%   - data: DynaSim data structure (see dsCheckData)
 %   - ds: number of datapoints to downsample
 %
 % Outputs:
 %   - data_out: data structure all fields replaced by their decimated values
 %
-% See also: ds.plotFR, ds.analyzeStudy, dsSimulate, ds.checkData, ds.selectVariables
+% See also: dsPlotFR, dsAnalyzeStudy, dsSimulate, dsCheckData, dsSelectVariables
 
 %% 1.0 Check inputs
 
-data = ds.checkData(data, varargin{:});
-% note: calling ds.checkData() at beginning enables analysis function to
+data = dsCheckData(data, varargin{:});
+% note: calling dsCheckData() at beginning enables analysis function to
 % accept data matrix [time x cells] in addition to DynaSim data structure.
 
 %% do the decimating

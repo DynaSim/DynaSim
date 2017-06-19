@@ -2,10 +2,10 @@ function plotWaveforms(data,varargin)
 %PLOTWAVEFORMS - plot waveforms in various ways depending on what data was provided.
 %
 % Usage:
-%   ds.plotWaveforms(data,'option',value)
+%   dsPlotWaveforms(data,'option',value)
 %
 % Inputs:
-%   - data: DynaSim data structure (see ds.checkData)
+%   - data: DynaSim data structure (see dsCheckData)
 %   - options:
 %     'variable': name of field containing data to plot (default: all pops with
 %                 state variable of variable in data.labels)
@@ -36,34 +36,34 @@ function plotWaveforms(data,varargin)
 % Examples:
 % - Example 1: One cell:
 %     data=dsSimulate('dv/dt=@current+10; {iNa,iK}');
-%     ds.plotWaveforms(data); % plot first state variable ('v')
-%     ds.plotWaveforms(data,'variable','*'); % plot all state variables
+%     dsPlotWaveforms(data); % plot first state variable ('v')
+%     dsPlotWaveforms(data,'variable','*'); % plot all state variables
 %     % plot all variables and time 30-60ms
-%     ds.plotWaveforms(data,'variable','*','time_limits',[30 60]);
+%     dsPlotWaveforms(data,'variable','*','time_limits',[30 60]);
 %
 % - Example 2: One population: with noisy input
 %     data=dsSimulate('dv[5]/dt=@current+10*(1+randn(1,Npop)); {iNa,iK}');
-%     ds.plotWaveforms(data);
-%     ds.plotWaveforms(data,'variable','*'); % plot all state variables (all cells)
-%     ds.plotWaveforms(data,'variable','m'); % plot state variable 'm' (all cells)
+%     dsPlotWaveforms(data);
+%     dsPlotWaveforms(data,'variable','*'); % plot all state variables (all cells)
+%     dsPlotWaveforms(data,'variable','m'); % plot state variable 'm' (all cells)
 %     % plot all variables and time 30-60ms
-%     ds.plotWaveforms(data,'variable','*','time_limits',[30 60]);
+%     dsPlotWaveforms(data,'variable','*','time_limits',[30 60]);
 %
 % - Example 3: One population varying one parameter (input amplitude):
 %     eqns='dv[5]/dt=@current+amp*(1+randn(1,Npop)); {iNa,iK}';
 %     vary={'','amp',[0 10 20]};
 %     data=dsSimulate(eqns,'vary',vary);
-%     ds.plotWaveforms(data);
-%     ds.plotWaveforms(data,'variable','m');
-%     ds.plotWaveforms(data,'variable','*');
+%     dsPlotWaveforms(data);
+%     dsPlotWaveforms(data,'variable','m');
+%     dsPlotWaveforms(data,'variable','*');
 %
 % - Example 4: One population varying two parameters (input amplitude and
 %              membrane capacitance):
 %     eqns='dv[5]/dt=@current/Cm+amp*(1+randn(1,Npop)); {iNa,iK}';
 %     vary={'','Cm',[1 2]; '','amp',[0 10 20]};
 %     data=dsSimulate(eqns,'vary',vary);
-%     ds.plotWaveforms(data);
-%     ds.plotWaveforms(data,'variable','*');
+%     dsPlotWaveforms(data);
+%     dsPlotWaveforms(data,'variable','*');
 %
 % - Example 5: Two populations: noisy input to E and excitatory connection from E to I
 %     spec=[];
@@ -74,36 +74,36 @@ function plotWaveforms(data,varargin)
 %     spec.connections(1).direction='E1->E2';
 %     spec.connections(1).mechanism_list='iAMPA';
 %     data=dsSimulate(spec);
-%     ds.plotWaveforms(data); % plot first state variable
-%     ds.plotWaveforms(data,'variable','*'); 
+%     dsPlotWaveforms(data); % plot first state variable
+%     dsPlotWaveforms(data,'variable','*'); 
 %     % plot monitored synaptic current with post-synaptic voltages:
-%     ds.plotWaveforms(data,'variable',{'E2_v','ISYN'}); 
+%     dsPlotWaveforms(data,'variable',{'E2_v','ISYN'}); 
 %     % plot monitored synaptic current with pre- and post-synaptic voltages:
-%     ds.plotWaveforms(data,'variable',{'v','ISYN'}); 
+%     dsPlotWaveforms(data,'variable',{'v','ISYN'}); 
 %
 % - Example 6: Two populations varying one parameter (input amplitude):
 %     vary={'E1','amp',[0 10 20]};
 %     data=dsSimulate(spec,'vary',vary);
-%     ds.plotWaveforms(data);
-%     ds.plotWaveforms(data,'variable','*');
-%     ds.plotWaveforms(data,'variable','*_iNa_*');
+%     dsPlotWaveforms(data);
+%     dsPlotWaveforms(data,'variable','*');
+%     dsPlotWaveforms(data,'variable','*_iNa_*');
 %
 % - Example 7: Two populations varying two parameters (input amplitude and
 %              synaptic conductance):
 %     vary={'E1','amp',[0 10 20]; 'E1->E2','gSYN',[0 .05 .1]};
 %     data=dsSimulate(spec,'vary',vary);
-%     ds.plotWaveforms(data,'variable','v');
-%     ds.plotWaveforms(data,'variable','ISYN');
-%     ds.plotWaveforms(data,'variable','E1_v');
-%     ds.plotWaveforms(data,'variable','*');
+%     dsPlotWaveforms(data,'variable','v');
+%     dsPlotWaveforms(data,'variable','ISYN');
+%     dsPlotWaveforms(data,'variable','E1_v');
+%     dsPlotWaveforms(data,'variable','*');
 %
-% See also: ds.plotFR, ds.checkData
+% See also: dsPlotFR, dsCheckData
 
 % Check inputs
-data=ds.checkData(data, varargin{:});
+data=dsCheckData(data, varargin{:});
 fields=fieldnames(data);
 
-options=ds.checkOptions(varargin,{...
+options=dsCheckOptions(varargin,{...
   'time_limits',[-inf inf],[],...
   'variable',[],[],...
   'max_num_overlaid',50,[],...
@@ -114,7 +114,7 @@ options=ds.checkOptions(varargin,{...
 % todo: add option 'plot_mode' {'trace','image'}
 
 % variables to plot
-var_fields=ds.selectVariables(data(1).labels,options.variable, varargin{:});
+var_fields=dsSelectVariables(data(1).labels,options.variable, varargin{:});
 tmp=regexp(var_fields,'_(.+)$','tokens','once');
 variables=unique([tmp{:}]);
 
@@ -184,7 +184,7 @@ if num_sims>1 && isfield(data,'varied')
       param_cell{j}=unique([data.(varied{j})]);
     else
       % todo: handle sims varying non-numeric model components 
-      % (eg, mechanisms) (also in ds.plotFR)
+      % (eg, mechanisms) (also in dsPlotFR)
     end
   end
   param_size=cellfun(@length,param_cell);

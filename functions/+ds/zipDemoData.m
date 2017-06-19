@@ -6,7 +6,7 @@ function zipfname = zipDemoData(study_dir)
 % package with DynaSim.
 %
 % Usage:
-%   zipfname = ds.zipDemoData(study_dir)
+%   zipfname = dsZipDemoData(study_dir)
 %
 % Inputs:
 %   study_dir: input 
@@ -15,13 +15,13 @@ function zipfname = zipDemoData(study_dir)
 %   zipfname: string with location of zipped file
 %
 % Examples:
-%   zipfname = ds.zipDemoData('/Users/davestanley/Documents/DynaSimData/demos/demo_sPING_100cells_3x3')
+%   zipfname = dsZipDemoData('/Users/davestanley/Documents/DynaSimData/demos/demo_sPING_100cells_3x3')
 %
-% See also: unds.zipDemoData, demos_generate_data.m (demo script)
+% See also: undsZipDemoData, demos_generate_data.m (demo script)
 
-    ds_root_path = ds.getConfig('ds_root_path');
-    demos_path = ds.getConfig('demos_path');
-    demo_zips_path = ds.getConfig('demos_zips_path');
+    ds_root_path = dsGetConfig('ds_root_path');
+    demos_path = dsGetConfig('demos_path');
+    demo_zips_path = dsGetConfig('demos_zips_path');
 
     mkdirSilent(demo_zips_path);
 

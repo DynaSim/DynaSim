@@ -3,10 +3,10 @@ function varOutput = getConfig(query)
 %
 % Usage: pathOutput = getConfig(pathQueryString)
 
-  dsVarsFile = fullfile(ds.getRootPath(),'dsConfig.txt');
+  dsVarsFile = fullfile(dsGetRootPath(),'dsConfig.txt');
 
   if ~exist(dsVarsFile, 'file')
-    ds.makeDefaultConfig(); % bring all path vars into namespace
+    dsMakeDefaultConfig(); % bring all path vars into namespace
   end
   
   fid = fopen(dsVarsFile);
@@ -19,7 +19,7 @@ function varOutput = getConfig(query)
     varOutput = varCell{1}; % eval variable string as variable
   else
     varOutput = [];
-    if isempty(varOutput); warning('Requested path not found. dsConfig.txt is possibly corrupt. Try deleting dsConfig.txt and running ds.makeDefaultConfig()');
+    if isempty(varOutput); warning('Requested path not found. dsConfig.txt is possibly corrupt. Try deleting dsConfig.txt and running dsMakeDefaultConfig()');
   end
     
 end

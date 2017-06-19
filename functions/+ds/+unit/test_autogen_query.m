@@ -1,10 +1,10 @@
 classdef test_autogen_query < matlab.unittest.TestCase
   properties
-    unitTestDataPath = ds.getConfig('ds_unitTestData_path');
+    unitTestDataPath = dsGetConfig('ds_unitTestData_path');
   end
   
   properties (TestParameter)
-    dataFileName = ds.unit.getAutogenFiles(false, true);
+    dataFileName = dsUnitGetAutogenFiles(false, true);
   end
   
   methods (Test,  TestTags = {'autogen', 'query'})

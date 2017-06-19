@@ -2,10 +2,10 @@ function data_out = cropData(data,inds)
 %CROPDATA - Crops DynaSim data structre
 %
 % Usage:
-%   data_out = ds.cropData(data,'option',value)
+%   data_out = dsCropData(data,'option',value)
 %
 % Inputs:
-%   - data: DynaSim data structure (see ds.checkData)
+%   - data: DynaSim data structure (see dsCheckData)
 %   - inds: data points to retain
 %
 % Outputs:
@@ -13,8 +13,8 @@ function data_out = cropData(data,inds)
 
 %% 1.0 Check inputs
 
-data = ds.checkData(data, varargin{:});
-% note: calling ds.checkData() at beginning enables analysis function to
+data = dsCheckData(data, varargin{:});
+% note: calling dsCheckData() at beginning enables analysis function to
 % accept data matrix [time x cells] in addition to DynaSim data structure.
 
 %% do the cropping

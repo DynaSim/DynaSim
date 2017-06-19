@@ -10,7 +10,7 @@ function xp = ds2mdd(data,merge_covaried_axes,merge_sparse_axes,varargin)
         merge_sparse_axes = false;
     end
 
-    data = ds.checkData(data, varargin{:});
+    data = dsCheckData(data, varargin{:});
     
 % % % % % % % % % % % % % % %     
     if merge_covaried_axes && isfield(data(1),'varied')
@@ -23,7 +23,7 @@ function xp = ds2mdd(data,merge_covaried_axes,merge_sparse_axes,varargin)
 
         
         % Identified covaried axes (note; this will fail if 
-        [Abasis,Abasisi, Asubs] = ds.getLinearIndependentDs(data);
+        [Abasis,Abasisi, Asubs] = dsGetLinearIndependentDs(data);
         
         gt1 = cellfun(@(x) length(x) > 1, Asubs);  % Identified all linked indices with at least 2 varieds
         Asubs = Asubs(gt1);                  % Only perform the merge if there are at least 2 varieds to merge!
@@ -36,7 +36,7 @@ function xp = ds2mdd(data,merge_covaried_axes,merge_sparse_axes,varargin)
         variedname_merged = cell(1,Nlinked);
         varied_vals = cell(1,Nlinked);
         for j = 1:Nlinked
-            [data, variedname_merged{j}, varied_vals{j} ] = ds.mergeVarieds(data,vary_labels(Asubs{j}));
+            [data, variedname_merged{j}, varied_vals{j} ] = dsMergeVarieds(data,vary_labels(Asubs{j}));
         end
         
         % Automerge any additional dimensions based on analysis of
@@ -45,13 +45,13 @@ function xp = ds2mdd(data,merge_covaried_axes,merge_sparse_axes,varargin)
     end
     
     if merge_sparse_axes && isfield(data(1),'varied')
-        [data] = ds.autoMergeVarieds(data);
+        [data] = dsAutoMergeVarieds(data);
     end
     
 % % % % % % % % % % % % % % %     
     
     % Extract the data in a linear table format
-    [data_table,column_titles,time] = ds.data2Table (data);
+    [data_table,column_titles,time] = dsData2Table (data);
 
     % % Preview the contents of this table
     % %     Note: We cannot make this one big cell array since we want to allow

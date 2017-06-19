@@ -6,7 +6,7 @@ function [effective_vary_indices, linked_inds] = checkCovaryWrapper(data,varargi
     % (RS,FS),1:2, data will actually be 1:4 with off-diagonal entries
     % empty).
     % Note: This function is likey no longer used (at least not for dsPlot2
-    % an has been replaced by other functions (see ds.getCovariedDs).
+    % an has been replaced by other functions (see dsGetCovariedDs).
     labels = data(1).labels;
     inds = arrayfun(@(s) ~isempty(s.(labels{1})),data);
     data = data(inds);
@@ -49,6 +49,6 @@ function [effective_vary_indices, linked_inds] = checkCovaryWrapper(data,varargi
     end
 
     % 3. Run checkCovary
-    [effective_vary_indices, linked_inds] = ds.checkCovary(vary_lengths, vary_params, varargin{:});
-    %ds.idCovaried(vary_params);
+    [effective_vary_indices, linked_inds] = dsCheckCovary(vary_lengths, vary_params, varargin{:});
+    %dsIdCovaried(vary_params);
 end

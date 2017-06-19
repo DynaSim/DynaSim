@@ -16,7 +16,7 @@ function data = dsSelect(data,varargin)
 % Notes:
 % - NOTE 1: 'varied' can be specified in two ways:
 %   - Method 1: a way similar to 'vary' in dsSimulate and
-%     ds.vary2Modifications. However, instead of indicating values for a variable to
+%     dsVary2Modifications. However, instead of indicating values for a variable to
 %     take, 'varied' involves the specification of a range of values. Syntax:
 %     vary={object, variable, [low,high]; ...}, where low is the lower bound on
 %     the range varied and high is the upper bound for the component varied. For
@@ -43,12 +43,12 @@ function data = dsSelect(data,varargin)
 %   - Possible format for specifying range_varied:
 %     {'E','gNa',[.1 .3]; 'I->E','tauI',[15 25]; 'I','mechanism_list','+iM'}
 %
-% See also: dsSimulate, ds.vary2Modifications, dsImport
+% See also: dsSimulate, dsVary2Modifications, dsImport
 
 % check inputs
-data=ds.checkData(data, varargin{:});
+data=dsCheckData(data, varargin{:});
 
-options=ds.checkOptions(varargin,{...
+options=dsCheckOptions(varargin,{...
   'time_limits',[-inf inf],[],...
   'varied',[],[],...
   'roi',[],[],...

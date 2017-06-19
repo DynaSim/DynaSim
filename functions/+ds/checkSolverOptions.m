@@ -2,11 +2,11 @@ function options = checkSolverOptions(options)
 %CHECKSOLVEROPTIONS - standardize simulation options appended to params.mat
 %
 % Use this to achieve consistent params.mat whether created by dsSimulate(),
-% ds.writeDynaSimSolver(), or ds.writeMatlabSolver().
+% dsWriteDynaSimSolver(), or dsWriteMatlabSolver().
 
 % standardize and set defaults
-keyvals = ds.options2Keyval(options);
-options=ds.checkOptions(keyvals,{...
+keyvals = dsOptions2Keyval(options);
+options=dsCheckOptions(keyvals,{...
   'tspan',[0 100],[],...          % [beg,end] (units must be consistent with dt and equations)
   'downsample_factor',1,[],...    % downsampling applied during simulation (only every downsample_factor-time point is stored in memory or written to disk)
   'random_seed','shuffle',[],...        % seed for random number generator (usage: rng(random_seed))
@@ -23,7 +23,7 @@ field_order={'tspan','downsample_factor','random_seed','solver','disk_flag',...
   'dt','datafile','compile_flag','verbose_flag','matlab_solver_options'};
 
 if options.compile_flag==1
-  % <-- copied from ds.writeDynaSimSolver.m -->
+  % <-- copied from dsWriteDynaSimSolver.m -->
   % todo: make seed string (eg, 'shuffle') from param struct work with coder (options.compile_flag=1)
   % (currently raises error: "String input must be constant")
   % workaround: (shuffle here and get numeric seed for MEX-compatible params.mat)

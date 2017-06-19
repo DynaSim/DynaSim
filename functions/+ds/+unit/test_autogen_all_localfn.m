@@ -1,10 +1,10 @@
 classdef test_autogen_all_localfn < matlab.unittest.TestCase
   properties
-    unitTestDataPath = ds.getConfig('ds_unitTestData_path');
+    unitTestDataPath = dsGetConfig('ds_unitTestData_path');
   end
   
   properties (TestParameter)
-    dataFileName = ds.unit.getAutogenFiles(true, false);
+    dataFileName = dsUnitGetAutogenFiles(true, false);
   end
   
   methods (Test,  TestTags = {'autogen'})

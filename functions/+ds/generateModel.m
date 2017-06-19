@@ -2,23 +2,23 @@ function [model,name_map] = generateModel(specification, varargin)
 %GENERATEMODEL - Parse DynaSim specification and organize model data in DynaSim model structure
 %
 % Usage:
-%   [model,name_map]=ds.generateModel(specification,'option',value,...)
+%   [model,name_map]=dsGenerateModel(specification,'option',value,...)
 %
 % Inputs:
 %   - specification: one of:
-%     - DynaSim specification structure (see below and ds.checkSpecification for more details)
+%     - DynaSim specification structure (see below and dsCheckSpecification for more details)
 %     - string with name of MAT-file containing DynaSim specification structure
 %     - string with equations
 %     - string with name of file containing equations (.eqns)
 %       note: .eqns files can also be converted into model structure using LoadModel()
 %   - options (with defaults): 'option1',value1,'option2',value2,...
 %     'modifications'  : specify modifications to apply to specification
-%                        before generating the model, see ds.applyModifications
+%                        before generating the model, see dsApplyModifications
 %                        for more details (default?: []).
 %     'open_link_flag' : whether to leave linker identifiers in place (default: 0)
 %
 % Outputs:
-%   - model: DynaSim model structure (see ds.checkModel for more details):
+%   - model: DynaSim model structure (see dsCheckModel for more details):
 %     .parameters      : substructure with model parameters
 %     .fixed_variables : substructure with fixed variable definitions
 %     .functions       : substructure with function definitions
@@ -30,17 +30,17 @@ function [model,name_map] = generateModel(specification, varargin)
 %                             each state variable
 %     .conditionals(i) : structure array with each element indicating
 %                             conditional actions specified in subfields
-%                             "condition","action","else" (see NOTE 1 in ds.checkModel)
+%                             "condition","action","else" (see NOTE 1 in dsCheckModel)
 %     .linkers(i)      : structure array with each element indicating
 %                             an "expression" that should be inserted
 %                             (according to "operation") into any equations
-%                             where the "target" appears. (see NOTE 2 in ds.checkModel)
+%                             where the "target" appears. (see NOTE 2 in dsCheckModel)
 %       .target    : string giving the target where expression should be inserted
 %       .expression: string giving the expression to insert
 %       .operation : string giving the operation to use to insert expression
 %     .comments{i}     : cell array of comments found in model files
 %     .specification   : specification used to generate the model
-%     .namespaces      : (see NOTE 3 in ds.checkModel)
+%     .namespaces      : (see NOTE 3 in dsCheckModel)
 %   - name_map: cell matrix mapping parameter, variable, and function names
 %       between the user-created specification (population equations and mechanism
 %       files) and the full model with automatically generated namespaces. It
@@ -49,13 +49,13 @@ function [model,name_map] = generateModel(specification, varargin)
 %       'functions', or 'monitors') indicating the category to which the named
 %       element belongs.
 %
-% - DynaSim specification structure (see ds.checkSpecification for more details)
+% - DynaSim specification structure (see dsCheckSpecification for more details)
 %   .populations(i) (required): contains info for defining independent population models
 %       .name (default: 'pop1')      : name of population
 %       .size (default: 1)           : number of elements in population (i.e., # cells)
-%       .equations (required)        : string listing equations (see NOTE 1 in ds.checkSpecification)
+%       .equations (required)        : string listing equations (see NOTE 1 in dsCheckSpecification)
 %       .mechanism_list (default: []): cell array listing mechanisms (see NOTE 2
-%                                      in ds.checkSpecification)
+%                                      in dsCheckSpecification)
 %       .parameters (default: [])    : parameters to assign across all equations in
 %         the population. provide as cell array list of key/value pairs
 %         {'param1',value1,'param2',value2,...}
@@ -69,7 +69,7 @@ function [model,name_map] = generateModel(specification, varargin)
 %
 % Examples:
 %   - Example 0:
-%     model=ds.generateModel('db/dt=3')
+%     model=dsGenerateModel('db/dt=3')
 %
 %   - Example 1: Lorenz equations
 %     eqns={
@@ -78,40 +78,40 @@ function [model,name_map] = generateModel(specification, varargin)
 %       'dy/dt=r*x-y-x*z';
 %       'dz/dt=-b*z+x*y';
 %     };
-%     model=ds.generateModel(eqns)
+%     model=dsGenerateModel(eqns)
 %
 %   - Example 2: Leaky integrate-and-fire neuron
-%     model=ds.generateModel('tau=10; R=10; E=-70; dV/dt=(E-V+R*1.55)/tau; if(V>-55)(V=-75)')
+%     model=dsGenerateModel('tau=10; R=10; E=-70; dV/dt=(E-V+R*1.55)/tau; if(V>-55)(V=-75)')
 %
 %   - Example 3: Hodgkin-Huxley neuron with sinusoidal drive
-%     model=ds.generateModel('dv/dt=current+sin(2*pi*t); {iNa,iK}')
+%     model=dsGenerateModel('dv/dt=current+sin(2*pi*t); {iNa,iK}')
 %
 %   - Example 4: HH with self inhibition and sinusoidal drive
 %     specification.populations(1).equations='dv/dt=current+sin(2*pi); v(0)=-65';
 %     specification.populations(1).mechanism_list={'iNa','iK'};
 %     specification.connections(1).mechanism_list={'iGABAa'};
 %     specification.connections(1).parameters={'tauDx',15};
-%     model=ds.generateModel(specification)
+%     model=dsGenerateModel(specification)
 %
 %   - Example 5: using custom mechanism alias in equations (for modularization)
 %     specification.populations(1).equations='dv/dt=@M+sin(2*pi); v(0)=-65';
 %     specification.populations(1).mechanism_list={'iNa@M','iK@M'};
-%     model=ds.generateModel(specification)
+%     model=dsGenerateModel(specification)
 %
 %     or:
 %
 %     specification.populations(1).equations='dv/dt=@M+sin(2*pi); {iNa,iK}@M; v(0)=-65';
-%     model=ds.generateModel(specification)
+%     model=dsGenerateModel(specification)
 %
 %   - Example 6: directly incorporating mechanism models from online repositories:
 %
-%     model=ds.generateModel('dv/dt=@M; {ib:57,iK}@M')
+%     model=dsGenerateModel('dv/dt=@M; {ib:57,iK}@M')
 %
 %     where "ib" is a known alias for the infinitebrain.org repository,
 %     and "57" is the Na+ current at http://infinitebrain.org/models/57.
 %     note: currently not supported on *most* machines...
 %
-% See also: ds.checkSpecification, ds.checkModel, ds.parseModelEquations, dsSimulate
+% See also: dsCheckSpecification, dsCheckModel, dsParseModelEquations, dsSimulate
 
 % Check inputs
 % ------------------------------------------------------
@@ -126,7 +126,7 @@ if nargin==0
 end
 % ------------------------------------------------------
 
-options=ds.checkOptions(varargin,{...
+options=dsCheckOptions(varargin,{...
   'modifications',[],[],...
   'open_link_flag',0,{0,1},...
   'auto_gen_test_data_flag',0,{0,1},...
@@ -151,11 +151,11 @@ if isfield(specification,'state_variables')
 %   end
 end
 % standardize specification
-specification=ds.checkSpecification(specification, varargin{:}); % standardize & auto-populate as needed
+specification=dsCheckSpecification(specification, varargin{:}); % standardize & auto-populate as needed
 
 % Apply modifications to specification before generating model
 if ~isempty(options.modifications)
-  specification=ds.applyModifications(specification,options.modifications, varargin{:});
+  specification=dsApplyModifications(specification,options.modifications, varargin{:});
 end
 
 % specification metadata:
@@ -169,7 +169,7 @@ ncons=length(specification.connections); % number of connections
 %% 1.0 load sub-models, assign namespaces, and combine across all equations and mechanisms in specification
 % [model,name_map]=LoadModelSet(specification) % bug: disrupted subsequent namespace propagation (without raising an error)
 %% 2.0 propagate namespaces through variable and function names
-% model = ds.propagateNamespaces(model,name_map); % this works
+% model = dsPropagateNamespaces(model,name_map); % this works
 %% 3.0 expand population equations according to mechanism linkers
 % model = LinkMechanisms(model,name_map);      % problem: unable to identify linker population from model.linkers; see notes below (3.0) for more details
 % -------------------------------------------------------------------------
@@ -179,9 +179,9 @@ ncons=length(specification.connections); % number of connections
 % (eg, dv/dt=@M; {Na,K}@M w/ Na.mech: @current += I(IN,m,h)).
 %     approach taken below:
 %     - add support for dv/dt=@M; {Na@M,K@M}
-%       have ds.generateModel split mech_name on '@' and replace first
+%       have dsGenerateModel split mech_name on '@' and replace first
 %       linker in mech (e.g., @current) by what follows '@' (e.g., @M)
-%     - then have ds.checkSpecification convert {Na,K}@M into {Na@M,K@M}
+%     - then have dsCheckSpecification convert {Na,K}@M into {Na@M,K@M}
 
 %% 1.0 load sub-models, assign namespaces, and combine across all equations and mechanisms in specification
 model.parameters={};
@@ -207,24 +207,24 @@ for i=1:npops
     % adjust the name if necessary
     if ~strcmp(specification.populations(i).name,tmpname)
       % use the name in the specification
-      tmpmodel=ds.applyModifications(tmpmodel,{tmpname,'name',specification.populations(i).name}, varargin{:});
+      tmpmodel=dsApplyModifications(tmpmodel,{tmpname,'name',specification.populations(i).name}, varargin{:});
     elseif strcmp(tmpname,'pop1') % if default name
       % use default name for this population index
-      tmpmodel=ds.applyModifications(tmpmodel,{tmpname,'name',sprintf('pop%g',i)}, varargin{:});
+      tmpmodel=dsApplyModifications(tmpmodel,{tmpname,'name',sprintf('pop%g',i)}, varargin{:});
     end
     
     tmpmodel.linkers=[]; % remove old linkers from original model construction
-    model=ds.combineModels(model,tmpmodel, varargin{:});
+    model=dsCombineModels(model,tmpmodel, varargin{:});
     name_map=cat(1,name_map,tmpmodel.namespaces);
     continue;
   end
   % construct new population model
   PopScope=specification.populations(i).name;
-    % NOTE: ds.parseModelEquations adds a '_' suffix to the namespace; therefore,
+    % NOTE: dsParseModelEquations adds a '_' suffix to the namespace; therefore,
     % a '_' suffix is added to PopScope when used below for consistency of
     % namespaces/namespaces. (this could be cleaned up by adding '_' to PopScope
     % here, removing it below, and removing the additional '_' from
-    % ds.parseModelEquations).
+    % dsParseModelEquations).
     
   % 1.1.1 parse population equations
   equations=specification.populations(i).equations;
@@ -233,8 +233,8 @@ for i=1:npops
   
   % parse population equations
   if ~isempty(equations)
-    [tmpmodel,tmpmap]=ds.importModel(equations,'namespace',PopScope,'ic_pop',specification.populations(i).name,'user_parameters',parameters);
-    model=ds.combineModels(model,tmpmodel, varargin{:});
+    [tmpmodel,tmpmap]=dsImportModel(equations,'namespace',PopScope,'ic_pop',specification.populations(i).name,'user_parameters',parameters);
+    model=dsCombineModels(model,tmpmodel, varargin{:});
     name_map=cat(1,name_map,tmpmap);
   end
   
@@ -260,7 +260,7 @@ for i=1:npops
     end
 
     % parse mechanism equations
-    [tmpmodel,tmpmap]=ds.importModel(mechanism,'namespace',MechScope,'ic_pop',specification.populations(i).name,'user_parameters',parameters);
+    [tmpmodel,tmpmap]=dsImportModel(mechanism,'namespace',MechScope,'ic_pop',specification.populations(i).name,'user_parameters',parameters);
     % replace 1st linker name by the one in specification
     if ~isempty(new_linker) && ~isempty(tmpmodel.linkers)
       % first try to find 1st linker target starting with @
@@ -278,7 +278,7 @@ for i=1:npops
     end
     
     % combine sub-model with other sub-models
-    model=ds.combineModels(model,tmpmodel, varargin{:});
+    model=dsCombineModels(model,tmpmodel, varargin{:});
     name_map=cat(1,name_map,tmpmap);
     linker_pops=cat(2,linker_pops,repmat({specification.populations(i).name},[1 length(tmpmodel.linkers)]));
   end
@@ -297,8 +297,8 @@ for i=1:ncons
   parameters=specification.connections(i).parameters;
   ConScope=[target '_' source '_'];
     % NOTE: in contrast to PopScope above, ConScope is never passed to
-    % ds.parseModelEquations; thus the '_' should be added here for consistency 
-    % with mechanism namespaces (which are modified by ds.parseModelEquations).
+    % dsParseModelEquations; thus the '_' should be added here for consistency 
+    % with mechanism namespaces (which are modified by dsParseModelEquations).
   for j=1:length(specification.connections(i).mechanism_list)
     mechanism_=specification.connections(i).mechanism_list{j};
     
@@ -313,17 +313,17 @@ for i=1:ncons
     MechScope=[target '_' source '_' MechID];
         % NOTE: must use target_source_mechanism for connection mechanisms
         % to distinguish their parent namespaces from those of population mechanisms
-        % see: ds.getParentNamespace
+        % see: dsGetParentNamespace
     
     % parse model equations
-    [tmpmodel,tmpmap]=ds.importModel(mechanism,'namespace',MechScope,'ic_pop',source,'user_parameters',parameters);
+    [tmpmodel,tmpmap]=dsImportModel(mechanism,'namespace',MechScope,'ic_pop',source,'user_parameters',parameters);
     
     % replace 1st linker name by the one in specification
     if ~isempty(new_linker) && ~isempty(tmpmodel.linkers)
       tmpmodel.linkers(1).target=['@' new_linker];
     end
     
-    model=ds.combineModels(model,tmpmodel, varargin{:});
+    model=dsCombineModels(model,tmpmodel, varargin{:});
     name_map=cat(1,name_map,tmpmap);
     
     % link this mechanism to the target population
@@ -485,7 +485,7 @@ end
 
 %% 2.0 propagate namespaces through variable and function names
 %      i.e., to establish uniqueness of names by adding namespace/namespace prefixes)
-model = ds.propagateNamespaces(model,name_map, varargin{:});
+model = dsPropagateNamespaces(model,name_map, varargin{:});
 
 %% 3.0 expand population equations according to mechanism linkers
 % purpose: expand population equations according to linkers
@@ -519,7 +519,7 @@ for i=1:length(model.linkers)
   operation=model.linkers(i).operation;
   oldstr=model.linkers(i).target;
   newstr=model.linkers(i).expression;
-  switch operation % see ds.classifyEquation and ds.parseModelEquations   % ('((\+=)|(-=)|(\*=)|(/=)|(=>))')
+  switch operation % see dsClassifyEquation and dsParseModelEquations   % ('((\+=)|(-=)|(\*=)|(/=)|(=>))')
     case '+='
       operator='+';
     case '-='
@@ -667,13 +667,13 @@ model.parameters = cell2struct(c,f,1);
 model.specification = specification; % store specification to enable modifications to be applied later
 model.namespaces = name_map; % store name_map for transparency
 
-model=ds.checkModel(model, varargin{:});
+model=dsCheckModel(model, varargin{:});
 
 %% auto_gen_test_data_flag argout
 if options.auto_gen_test_data_flag
   argout = {model, name_map}; % specific to this function
   
-  ds.unit.saveAutoGenTestData(argin, argout);
+  dsUnitSaveAutoGenTestData(argin, argout);
 end
 
 end % main function
@@ -693,7 +693,7 @@ function str=linker_strrep(str,oldstr,newstr,operator)
   
   % check if anything besides a single variable:
   if isempty(regexp(newstr,'[^a-z_A-Z\d]+','once'))
-    str=ds.strrep(str,oldstr,newstr);
+    str=dsStrrep(str,oldstr,newstr);
   else
     % otherwise do substitution with operator and parenthesis
     pat=['([^\w]+)' oldstr '([^\w]+)']; % in the middle

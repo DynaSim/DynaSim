@@ -7,7 +7,7 @@ function solve_file_m = compareSolveFiles(solve_file_m,mexPath)
 % If mexPath is specified, then will do a comparison to other files
 % in the mexPath, as opposed to the current solve folder
 %
-% See also: ds.getSolveFile, dsSimulate, ds.createBatch
+% See also: dsGetSolveFile, dsSimulate, dsCreateBatch
 
 [solvePath,fname,fext]=fileparts(solve_file_m);
 

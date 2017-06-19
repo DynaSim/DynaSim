@@ -2,10 +2,10 @@ function stats = calcSpikeSync(data, varargin)
 %CALCSPIKESYNC - Compute spike synchronization between spiketrains
 %
 % Usage:
-%   stats = ds.calcSpikeSync(data,'option',value)
+%   stats = dsCalcSpikeSync(data,'option',value)
 %
 % Inputs:
-%   - data: DynaSim data structure (see ds.checkData)
+%   - data: DynaSim data structure (see dsCheckData)
 %   - options:
 %     'ROI_pairs'   : {'var1',roi1,'var2',roi2; ...}
 %     'kernel_width': ms, width of gaussian for kernel regression (default: 1)
@@ -26,7 +26,7 @@ function stats = calcSpikeSync(data, varargin)
 %   spike_threshold=[0 .5; 0 .25];
 
 %% 1.0 Check inputs
-options=ds.checkOptions(varargin,{...
+options=dsCheckOptions(varargin,{...
   'ROI_pairs',[],[],...
   'spike_threshold',0,[],... % threshold for spike detection
   'kernel_width',1,[],... % ms, width of gaussian for kernel regression
@@ -44,10 +44,10 @@ if options.auto_gen_test_data_flag
   argin = [{data}, varargs]; % specific to this function
 end
 
-data=ds.checkData(data, varargin{:});
+data=dsCheckData(data, varargin{:});
 
 if numel(data)>1
-  error('ds.calcSpikeSync currently only supports one data set at a time');
+  error('dsCalcSpikeSync currently only supports one data set at a time');
 end
 if isempty(options.ROI_pairs)
   % set default ROIs
@@ -158,11 +158,11 @@ for pair=1:npairs
   nt=length(min(t):Ts:max(t));
 
   % get spike rasters
-  raster1=ds.computeRaster(t,V1,thresholds(pair,1));
+  raster1=dsComputeRaster(t,V1,thresholds(pair,1));
   if equal_rois
     raster2=raster1;
   else
-    raster2=ds.computeRaster(t,V2,thresholds(pair,2));
+    raster2=dsComputeRaster(t,V2,thresholds(pair,2));
   end
   % raster(:,1) -> spike times
   % raster(:,2) -> cell index for each spike
@@ -203,7 +203,7 @@ for pair=1:npairs
   r1=zeros(nt,n1);
   if ~isempty(raster1)
     for i=1:n1
-      [ri,time]=ds.nwGaussKernelRegr(t,raster1,i,kwidth,Ts);
+      [ri,time]=dsNwGaussKernelRegr(t,raster1,i,kwidth,Ts);
       r1(:,i)=ri;
     end
   else
@@ -216,7 +216,7 @@ for pair=1:npairs
     r2=zeros(nt,n2);
     if ~isempty(raster2)
       for i=1:n2
-        [ri,time]=ds.nwGaussKernelRegr(t,raster2,i,kwidth,Ts);
+        [ri,time]=dsNwGaussKernelRegr(t,raster2,i,kwidth,Ts);
         r2(:,i)=ri;
       end
     end
@@ -250,14 +250,14 @@ for pair=1:npairs
   
   % spectral analysis
   dat=dsSelect(data,'roi',{var1,roi1});
-  dat=ds.calcPower(dat,'time_limits',options.time_limits);
+  dat=dsCalcPower(dat,'time_limits',options.time_limits);
   Power_MUA1=dat.([var1 '_Power_MUA']);
   Power_SUA1=dat.([var1 '_Power_SUA']);
   Power_SUA1.Pxx_mu=nanmean(Power_SUA1.Pxx,2);
   Power_SUA1.Pxx_sd=nanstd(Power_SUA1.Pxx,[],2);
 
   dat=dsSelect(data,'roi',{var2,roi2});
-  dat=ds.calcPower(dat,'time_limits',options.time_limits);
+  dat=dsCalcPower(dat,'time_limits',options.time_limits);
   Power_MUA2=dat.([var2 '_Power_MUA']);
   Power_SUA2=dat.([var2 '_Power_SUA']);
   Power_SUA2.Pxx_mu=nanmean(Power_SUA2.Pxx,2);
@@ -312,11 +312,11 @@ stats.options=options;
 
 % calculate instantaneous population firing rate
 % pop=unique(raster(:,2));
-% [inst_pop_rate,time]=ds.nwGaussKernelRegr(t,raster,pop,kwidth,Ts);
+% [inst_pop_rate,time]=dsNwGaussKernelRegr(t,raster,pop,kwidth,Ts);
 
 %% auto_gen_test_data_flag argout
 if options.auto_gen_test_data_flag
   argout = {stats};
   
-  ds.unit.saveAutoGenTestData(argin, argout);
+  dsUnitSaveAutoGenTestData(argin, argout);
 end

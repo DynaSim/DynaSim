@@ -2,11 +2,11 @@ function [studyinfo, cmd] = createBatch(base_model,modifications_set,varargin)
 %CREATEBATCH - create and submit jobs to run sets of simulations or analyses.
 %
 % Usage:
-%   studyinfo=ds.createBatch(model,varargin)
+%   studyinfo=dsCreateBatch(model,varargin)
 %
 % Inputs:
-%   - DynaSim model (see ds.generateModel)
-%   - modifications_set (as returned by ds.vary2Modifications())
+%   - DynaSim model (see dsGenerateModel)
+%   - modifications_set (as returned by dsVary2Modifications())
 %     - options:
 %       'compile_flag'  : whether to compile simulation using coder instead of
 %                         interpreting Matlab {0 or 1} (default: 0)
@@ -24,14 +24,14 @@ function [studyinfo, cmd] = createBatch(base_model,modifications_set,varargin)
 %       'num_cores'     : number of cores to specify in the parallel pool
 %
 % Outputs:
-%   - DynaSim studyinfo (see ds.checkStudyinfo for schema info)
+%   - DynaSim studyinfo (see dsCheckStudyinfo for schema info)
 %
-% Dependencies: ds.setupStudy, ds.updateStudy
+% Dependencies: dsSetupStudy, dsUpdateStudy
 %
-% See also: ds.generateModel, dsSimulate, ds.checkStudyinfo, ds.vary2Modifications
+% See also: dsGenerateModel, dsSimulate, dsCheckStudyinfo, dsVary2Modifications
 
 % check inputs
-options=ds.checkOptions(varargin,{...
+options=dsCheckOptions(varargin,{...
   'compile_flag',0,{0,1},...
   'parallel_flag',0,{0,1},...
   'num_cores',4,[],... % # cores for parallel processing (SCC supports 1-12)
@@ -60,20 +60,20 @@ end
 
 %% main fn
 % Set up studyinfo structure, study directory and output file names
-%[studyinfo,options.simulator_options]=ds.setupStudy(base_model,modifications_set,options.simulator_options);
-[studyinfo,options.simulator_options]=ds.setupStudy(base_model,'modifications_set',modifications_set,'simulator_options',options.simulator_options,'process_id',options.process_id);
+%[studyinfo,options.simulator_options]=dsSetupStudy(base_model,modifications_set,options.simulator_options);
+[studyinfo,options.simulator_options]=dsSetupStudy(base_model,'modifications_set',modifications_set,'simulator_options',options.simulator_options,'process_id',options.process_id);
 study_file=fullfile(studyinfo.study_dir,'studyinfo.mat');
 num_simulations=length(modifications_set);
 
 % check whether study has already completed
 % if options.overwrite_flag==0
-  [~,s]=ds.monitorStudy(studyinfo.study_dir,'verbose_flag',0,'process_id',options.process_id);
+  [~,s]=dsMonitorStudy(studyinfo.study_dir,'verbose_flag',0,'process_id',options.process_id);
   if s==1 % study finished
     if options.verbose_flag
       fprintf('Study already finished. Not creating new batch.\n');
     end
 
-    studyinfo=ds.checkStudyinfo(studyinfo.study_dir,'process_id',options.process_id, varargin{:});
+    studyinfo=dsCheckStudyinfo(studyinfo.study_dir,'process_id',options.process_id, varargin{:});
 
     return;
   end
@@ -87,7 +87,7 @@ if isa(options.simulator_options.experiment,'function_handle') && options.compil
 end
 
 % create base solve_file (m- or MEX-file)
-solve_file = ds.getSolveFile(base_model,studyinfo,options.simulator_options);
+solve_file = dsGetSolveFile(base_model,studyinfo,options.simulator_options);
 
 % add appropriate MEX extension if compiled
 %   NOTE: the extension depends on whether a 32-bit or 64-bit machine is used
@@ -106,7 +106,7 @@ if options.compile_flag
   if ~any(strcmp(options.solver, {'ode113','ode15s','ode23s','ode23t','ode23tb'})) % not mex supported)
     full_solve_file=[solve_file '.' tmp{1}];
 
-    % remove '_mex' suffix from solve_file for compatibility with ds.getSolveFile()
+    % remove '_mex' suffix from solve_file for compatibility with dsGetSolveFile()
     solve_file=regexp(solve_file,'(.+)_mex$','tokens','once');
     solve_file=solve_file{1};
   else
@@ -164,11 +164,11 @@ if ~success
 end
 
 % locate DynaSim toolbox
-dynasim_path = ds.getRootPath(); % root is one level up from directory containing this function
+dynasim_path = dsGetRootPath(); % root is one level up from directory containing this function
 dynasim_functions=fullfile(dynasim_path,'functions');
 
 % locate mechanism files
-[mech_paths,mech_files]=ds.locateModelFiles(base_model);
+[mech_paths,mech_files]=dsLocateModelFiles(base_model);
 
 % add paths to studyinfo structure
 studyinfo.paths.dynasim_functions = dynasim_functions;
@@ -232,7 +232,7 @@ else %one_solve_file_flag
 
   % TODO: compile job_file
 %   if options.compile_flag
-%     job_file = ds.prepareMEX(job_file, options); %compile the job file
+%     job_file = dsPrepareMEX(job_file, options); %compile the job file
 %   end
 
   % add job_file to studyinfo
@@ -357,7 +357,7 @@ else %one_solve_file_flag
 end
 
 % update studyinfo on disk
-ds.studyinfoIO(studyinfo,study_file,options.simulator_options.sim_id,options.verbose_flag);
+dsStudyinfoIO(studyinfo,study_file,options.simulator_options.sim_id,options.verbose_flag);
 
 % TODO: remove old lock files ..
 
@@ -376,7 +376,7 @@ if isempty(result)
 else % on cluster with qsub
   % submit jobs (e.g., fScripjobs_memlimit batch_dir 32G)
   % check status of study
-  [~,s]=ds.monitorStudy(studyinfo.study_dir,'verbose_flag',0);
+  [~,s]=dsMonitorStudy(studyinfo.study_dir,'verbose_flag',0);
 
   if s~=1 % study not finished
     % submit jobs using shell script
@@ -440,7 +440,7 @@ else % on cluster with qsub
     end
 
     if options.verbose_flag
-      %fprintf('%g jobs successfully submitted!\ntip: use ds.monitorStudy(''%s'') or ds.monitorStudy(studyinfo) to track status of cluster jobs.\n',num_jobs,studyinfo.study_dir);
+      %fprintf('%g jobs successfully submitted!\ntip: use dsMonitorStudy(''%s'') or dsMonitorStudy(studyinfo) to track status of cluster jobs.\n',num_jobs,studyinfo.study_dir);
       fprintf('%g jobs successfully submitted!\n',num_jobs);
     end
   elseif s==1 % study is finished
@@ -460,7 +460,7 @@ if options.auto_gen_test_data_flag
   end
   argout = {studyinfo, cmd}; % specific to this function
 
-  ds.unit.saveAutoGenTestDir(argin, argout, [], dirIn);
+  dsUnitSaveAutoGenTestDir(argin, argout, [], dirIn);
 end
 
 %% unit test
@@ -482,7 +482,7 @@ end
     fjob=fopen(job_file,'wt');
 
     % load studyinfo using helper function to avoid busy file errors
-    %fprintf(fjob,'studyinfo=ds.checkStudyinfo(''%s'',''process_id'',%g);\n',study_file,sim_ids(1), varargin{:});
+    %fprintf(fjob,'studyinfo=dsCheckStudyinfo(''%s'',''process_id'',%g);\n',study_file,sim_ids(1), varargin{:});
     %fprintf(fjob,'load(''%s'',''studyinfo'');\n',study_file);
 
     [~, job_filename] = fileparts(job_file); %remove path and extension
@@ -533,16 +533,16 @@ end
       fprintf(fjob,'\t\tload(fullfile(''%s'',''studyinfo.mat''),''studyinfo'');\n',batch_dir);
     end
     % compare paths between compute machine and studyinfo startup
-    fprintf(fjob,'\t\t[valid,message]=ds.checkHostPaths(studyinfo);\n');
+    fprintf(fjob,'\t\t[valid,message]=dsCheckHostPaths(studyinfo);\n');
 
     if ~options.one_solve_file_flag
-      fprintf(fjob,'\t\tif ~valid\n\t\t  lasterr(message);\n\t\t  for s=1:length(SimIDs), ds.updateStudy(studyinfo.study_dir,''sim_id'',SimIDs(s),''status'',''failed''); end\n\t\t  continue;\n\t\tend\n');
+      fprintf(fjob,'\t\tif ~valid\n\t\t  lasterr(message);\n\t\t  for s=1:length(SimIDs), dsUpdateStudy(studyinfo.study_dir,''sim_id'',SimIDs(s),''status'',''failed''); end\n\t\t  continue;\n\t\tend\n');
     end
 
     % simulate model with proper modifications and options
     fprintf(fjob,'\t\tsiminfo=studyinfo.simulations(SimID);\n');
     fprintf(fjob,'\t\toptions=rmfield(siminfo.simulator_options,{''modifications'',''studyinfo'',''analysis_functions'',''plot_functions'',''sim_id''});\n');
-    fprintf(fjob,'\t\tkeyvals=ds.options2Keyval(options);\n');
+    fprintf(fjob,'\t\tkeyvals=dsOptions2Keyval(options);\n');
     fprintf(fjob,'\t\tfprintf(''-----------------------------------------------------\\n'');\n');
     fprintf(fjob,'\t\tfprintf(''Processing simulation %%g (%%g of %%g in this job)...\\n'',SimID,s,length(SimIDs));\n');
     fprintf(fjob,'\t\tfprintf(''-----------------------------------------------------\\n'');\n');
@@ -590,7 +590,7 @@ end
 end % main fn
 
 % -------------------
-% in ds.createBatch():
+% in dsCreateBatch():
 % -------------------
 % create solve_file
 % for each sim k
