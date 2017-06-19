@@ -125,7 +125,7 @@ end % main fn
 
 
 %% Local Fn
-function expression=dsInsert_parameters(expression,parameters,attachType,attachStr, varargin)
+function expression=insert_parameters(expression,parameters,attachType,attachStr, varargin)
 
 %% auto_gen_test_data_flag argin
 options = dsCheckOptions(varargin,{'auto_gen_test_data_flag',0,{0,1}},false);

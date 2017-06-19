@@ -709,7 +709,7 @@ function print_k(fid,odes_k,suffix_k,state_variables,nvals_per_var)
   end
 end
 
-function odes_out=dsUpdate_odes(odes,suffix_k,increment,state_variables,index_lasts, varargin)
+function odes_out=update_odes(odes,suffix_k,increment,state_variables,index_lasts, varargin)
   % purpose: update expressions for axiliary calculations (k1-k4)
   odes_out=odes;
   for i=1:length(odes)

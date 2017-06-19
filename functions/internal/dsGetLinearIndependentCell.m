@@ -149,12 +149,12 @@ end
 %     
 % end
 
-function inds_out = dsConvert_submat_indices_to_fullmat_indices(inds_in,mapping)
+function inds_out = convert_submat_indices_to_fullmat_indices(inds_in,mapping)
     inds_out = mapping(inds_in);
 
 end
 
-function covaried = dsGetLICellOnly(vary_cell)
+function covaried = getLICellOnly(vary_cell)
     
     A = nestCellColumns(vary_cell);
     [C,ia,ic] = uniqueCellGeneralized(A);
@@ -167,7 +167,7 @@ end
 
 
 
-function out = dsNestCellColumns(in)
+function out = nestCellColumns(in)
     if ~ismatrix(in); error('input must be of size NxM'); end
     if ~iscell(in); error('input must be a cell'); end
     

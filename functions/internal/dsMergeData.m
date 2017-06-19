@@ -1,4 +1,3 @@
-
 function data_merged = dsMergeData(data1,data2)
     % MERGEDATA - Merge two Dynasim structures created from different simulations
     

@@ -131,14 +131,14 @@ data = dsCheckData(data, varargin{:});
 end
 
 
-function varied_names = dsOnly_varieds(all_names)
+function varied_names = only_varieds(all_names)
     inds = true(1,length(all_names));
     inds(strcmp(all_names,'populations')) = false;
     inds(strcmp(all_names,'variables')) = false;
     varied_names = all_names(inds);
 end
 
-function data = dsAdd_pop_sizes(data,obj,num_pops,pop_names)
+function data = add_pop_sizes(data,obj,num_pops,pop_names)
     % num_pops = size(obj,1);
     for i = 1:length(data)
         for j = 1:num_pops
@@ -188,7 +188,7 @@ function data = dsAdd_pop_sizes(data,obj,num_pops,pop_names)
 end
 
 
-function labels = dsGet_axis_labels(obj,ax_vals)
+function labels = get_axis_labels(obj,ax_vals)
     % This approach preserves the ordering in the original list of labels
     % (labels_orig). This is important because dsPlot uses the specific
     % ordering in order to tell what the core state variables are.
@@ -222,7 +222,7 @@ function labels = dsGet_axis_labels(obj,ax_vals)
 end
 
 
-function out = dsGuess_variable_name(obj)
+function out = guess_variable_name(obj)
     % The first population's state variable should always be the 1st one
     % according to DynaSim conventions
 
@@ -236,7 +236,7 @@ end
 
 
 
-function out = dsGuess_population_name(obj)
+function out = guess_population_name(obj)
     % The first population should always be the 1st label
     % according to DynaSim conventions
     

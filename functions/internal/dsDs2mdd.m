@@ -102,9 +102,8 @@ function xp = ds2mdd(data,merge_covaried_axes,merge_sparse_axes,varargin)
     end
 end
 
-function var2 = dsConvert_cell2D_to_nested1D(var)
+function var2 = convert_cell2D_to_nested1D(var)
     for k = 1:size(var,2)
         var2{k} = cell2mat(var(:,k));
     end
 end
-

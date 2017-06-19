@@ -177,7 +177,7 @@ end
 
 
 
-function out = dsMycompare(x,y)
+function out = mycompare(x,y)
     if isempty(x) && isempty(y)
         out = -3;                   % Missing from both
     elseif isempty(x) && ~isempty(y)
@@ -323,7 +323,7 @@ function run_comparison(nd)
     end
 end
 
-function s = dsReturn_comparison(nd)
+function s = return_comparison(nd)
 
     sz = size(nd.data);
     Npop = sz(1);

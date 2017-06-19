@@ -126,7 +126,7 @@ end
 
 end
 
-function modifications = dsStandardize_modifications(modifications,specification, varargin)
+function modifications = standardize_modifications(modifications,specification, varargin)
 % convert all modifications into 3-column cell matrix format
 % (namespace,variable,value)
 
@@ -215,7 +215,7 @@ end
 end
 
 
-function spec = dsModify_specification(spec,mods, varargin)
+function spec = modify_specification(spec,mods, varargin)
 %% auto_gen_test_data_flag argin
 options = dsCheckOptions(varargin,{'auto_gen_test_data_flag',0,{0,1}},false);
 if options.auto_gen_test_data_flag
@@ -389,7 +389,7 @@ end
 end
 
 
-function modifications=dsBackward_compatibility(modifications)
+function modifications=backward_compatibility(modifications)
 % convert 2-column specification to 3-column specification with empty object name
 if size(modifications,2)==2
   tmp={};

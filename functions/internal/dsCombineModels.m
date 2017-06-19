@@ -61,7 +61,7 @@ end
 end
 
 % SUBFUNCTIONS
-function out=dsConcatenate_structures(a,b)
+function out=concatenate_structures(a,b)
 if isempty(a) && ~isempty(b)
   out=b;
 elseif ~isempty(a) && isempty(b)

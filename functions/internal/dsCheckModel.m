@@ -126,7 +126,7 @@ end
 % function).
 
 
-function model=dsBackward_compatibility(model)
+function model=backward_compatibility(model)
 % account for change in state variable dimensions:
 % cells used to be along rows in a column; now columns across a row.
 % replace cols (Npop,1) by rows (1,Npop). similar for Npre,Npost

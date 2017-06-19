@@ -108,7 +108,7 @@ end
 
 %% NESTED FUNCTIONS
 % function expressions=propagate_namespaces(expressions,names_full,map,insert_types)
-function expressions=dsPropagate_namespaces(expressions,namespaces,map,insert_types)
+function expressions=propagate_namespaces(expressions,namespaces,map,insert_types)
   % loop over and update expressions for names of this type
   for i=1:length(expressions)
     if isempty(expressions{i})

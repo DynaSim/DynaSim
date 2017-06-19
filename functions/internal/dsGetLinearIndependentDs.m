@@ -1,5 +1,3 @@
-
-
 function [Abasis, Abasisi, Asubs] = dsGetLinearIndependentDs(data,ignore_constant_shift,varargin)
 % [Asubs, Abasis, Abasisi] = getLinearIndependentDs(data,ignore_constant_shift,varargin)
 %

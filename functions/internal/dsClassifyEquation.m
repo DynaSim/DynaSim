@@ -92,7 +92,7 @@ end % main fn
 
 %% local functions
 
-function class = dsClassify(string, varargin)
+function class = classify(string, varargin)
 % input: string containing only one expression
 % output: class label (string)
 

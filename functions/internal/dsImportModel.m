@@ -43,7 +43,7 @@ end
 % download model if source host is known
 switch host
  case {'infbrain','infinitebrain','ib'}
-   source=DownloadModel(ModelID);
+   source=downloadModel(ModelID);
 end
 
 % ------------------------------------------------------------------
@@ -82,7 +82,7 @@ if ~strcmp(host,'local') && exist(source,'file')
 end
 
 % ----------------------------------
-function modl=dsSet_user_parameters(modl,params,namespace)
+function modl=set_user_parameters(modl,params,namespace)
   precision=8; % number of digits allowed for user-supplied values
   if isempty(params) || isempty(modl.parameters)
     return;
@@ -125,7 +125,7 @@ function modl=dsSet_user_parameters(modl,params,namespace)
     end
   end
 % ----------------------------------
-function modl=dsAdd_missing_ICs(modl,popname)
+function modl=add_missing_ICs(modl,popname)
   if isempty(modl.state_variables)
     return;
   end
@@ -151,7 +151,7 @@ function modl=dsAdd_missing_ICs(modl,popname)
     end
   end
 
-function source=DownloadModel(ModelID)
+function source=downloadModel(ModelID)
 % Set path to your MySQL Connector/J JAR
 jarfile = '/usr/share/java/mysql-connector-java.jar';
 javaaddpath(jarfile); % WARNING: this might clear global variables

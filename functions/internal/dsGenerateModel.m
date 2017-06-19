@@ -680,7 +680,7 @@ end % main function
 
 
 %% SUBFUNCTIONS
-function str=dsLinker_strrep(str,oldstr,newstr,operator)
+function str=linker_strrep(str,oldstr,newstr,operator)
   if isempty(str)
     return;
   end

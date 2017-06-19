@@ -109,7 +109,7 @@ function [cols2merge_out] = find_shortest_mergelist(vary_params,success_thresh,m
 
 end
 
-function cols_list = dsSubdivide_ind_list(vary_params,cols_list,success_thresh,maxiter)
+function cols_list = subdivide_ind_list(vary_params,cols_list,success_thresh,maxiter)
 
 %     maxiter = 10000;
 %     success_thresh = 0.999;
@@ -147,7 +147,7 @@ end
 % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % 
 
 
-function vary_params = dsAll2str(vary_params)
+function vary_params = all2str(vary_params)
     % Convert all vary_params from numerics to strings
     for i = 1:numel(vary_params)
         if isnumeric(vary_params{i}); vary_params{i} = num2str(vary_params{i});
@@ -160,7 +160,7 @@ end
 
 
 
-function out = dsMergevary(in,varargin)
+function out = mergevary(in,varargin)
 
     merge_inds_cell = varargin;
     
@@ -183,7 +183,7 @@ function out = dsMergevary(in,varargin)
 end
 
 
-function out = dsMergevary_sub(in,cols2merge)
+function out = mergevary_sub(in,cols2merge)
     if length(cols2merge) < 2; error('Must supply at least 2 cols to merge');
     end
     
@@ -198,7 +198,7 @@ function out = dsMergevary_sub(in,cols2merge)
 end
 
 
-function str_out = dsCat_with_underscores(cellstr_in)
+function str_out = cat_with_underscores(cellstr_in)
     % Takes in a cell array of chars and concatenates them together with
     % underscores separating the original divisions between cells. E.g.
     % {'cat','dog'} becomes 'cat_dog'
@@ -208,7 +208,7 @@ function str_out = dsCat_with_underscores(cellstr_in)
     str_out = horzcat(temp{1:end-1});
 end
 
-function percent_full = dsGetpercentfull(vary_merged)
+function percent_full = getpercentfull(vary_merged)
 
     sz = size(vary_merged);
 

@@ -107,7 +107,7 @@ function data = dsModifications2Vary(data,modifications,options,modifications_se
     end
 end
   
-function modifications=dsExpand_modifications(mods)
+function modifications=expand_modifications(mods)
 % purpose: expand simultaneous modifications into larger list
 modifications={};
 for i=1:size(mods,1)

@@ -140,7 +140,7 @@ for i=1:size(cartprod,1)
   modifications_set{i}=tmp;
 end
 
-function list = dsExpand_vary(specification)
+function list = expand_vary(specification)
 % purpose: get list of modifications for this specification of things to vary.
 % standardize specification
 if length(specification)==2
@@ -168,7 +168,7 @@ for i=1:length(namespace)
   end
 end
 
-function list = dsExpand_elem(item)
+function list = expand_elem(item)
 % return cell array of elements
 if isnumeric(item)
     % checking serves to remove warnings if third condition is always executed
@@ -209,7 +209,7 @@ elseif ischar(item)
   end
 end
 
-function list = dsGetcombos(elems)
+function list = getcombos(elems)
 % purpose: get list of all combinations of one or more input elements
 % example:
 % elems: {A,B,C}

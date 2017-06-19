@@ -507,7 +507,7 @@ end % main fn
 
 
 %% local fns
-function list = dsExpand_list(list, varargin)
+function list = expand_list(list, varargin)
 %% auto_gen_test_data_flag argin
 options = dsCheckOptions(varargin,{'auto_gen_test_data_flag',0,{0,1}},false);
 if options.auto_gen_test_data_flag
@@ -541,7 +541,7 @@ end
 end
 
 
-function spec = dsBackward_compatibility(spec, varargin)
+function spec = backward_compatibility(spec, varargin)
 % purpose: change name of fields from old to new convention
 % rename "nodes" or "entities" to "populations"
 

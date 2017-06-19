@@ -55,7 +55,7 @@ while keep_going
 end
 
 % substitute these updated functions into everything else:
-functions=dsModel.functions;
+functions=model.functions;
 
 %% 2.0 Substitute functions into ODEs, ICs, and monitors (sub-structures)
 target_types={'monitors','ODEs','ICs'};

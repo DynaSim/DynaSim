@@ -1,4 +1,3 @@
-
 function [data_new, variedname_merged, varied_vals ] = dsMergeVarieds(data,varied_fields)
     % [data_new, variedname_merged, varied_vals ] = mergeVarieds(data,varied_fields)
     %
@@ -61,7 +60,7 @@ function [data_new, variedname_merged, varied_vals ] = dsMergeVarieds(data,varie
 
 end
 
-function str_out = dsCat_with_underscores(cellstr_in)
+function str_out = cat_with_underscores(cellstr_in)
 % Takes in a cell array of chars and concatenates them together with
 % underscores separating the original divisions between cells. E.g.
 % {'cat','dog'} becomes 'cat_dog'
