@@ -82,7 +82,7 @@ data_img = dsImportPlots(study_dir);
 % (For saving space)
 
 % Convert to MDD object
-xp = dsDs2MDD(data);
+xp = ds2MDD(data);
 
 % Num_cells_to_keep = 20;
 downsample_factor = 2;
