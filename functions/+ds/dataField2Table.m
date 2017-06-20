@@ -1,6 +1,6 @@
 function [data_table,column_titles] = dataField2Table (data,fieldname,verbose_flag)
     % Converts DynaSim structure to 1D cell array format. Later can use to
-    % import to xPlt. In this case, pulls out a specific field from data,
+    % import to MDD. In this case, pulls out a specific field from data,
     % along with the varied information.
 
     if nargin < 3

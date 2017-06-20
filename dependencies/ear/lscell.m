@@ -19,7 +19,12 @@ end
 if nargin == 0
   dirList = ls;
 else
-  dirList = ls(arg);
+  try
+    dirList = ls(arg);
+  catch % no arg files found
+    dirList = {};
+    return
+  end
 end
 
 if (ismac || isunix)

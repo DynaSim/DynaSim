@@ -2,6 +2,6 @@
 	path = dependencies/gimbl-vis
 	url = https://github.com/erik-roberts/GIMBL-Vis
 
-[submodule "MDD"]
-	path = dependencies/MDD
-	url = https://github.com/davestanley/MDD
+[submodule "dependencies/MDD"]
+	path = dependencies/MDD_SM
+	url = https://github.com/davestanley/MultiDimensionalDictionary.git

@@ -1,5 +1,5 @@
-function data = xPlt2dsImage(obj)
-%% data=xPlt2ds(obj,varargin)
+function data = MDD2dsImage(obj)
+%% data=MDD2ds(obj,varargin)
 % Dependencies:
 %   Requires the MDD class, which should be part of DynaSim. If not,
 %   get it here https://github.com/davestanley/MDD
@@ -14,9 +14,9 @@ function data = xPlt2dsImage(obj)
 % load sample_data_dynasim.mat
 % data1=data;
 % data2 = data(1);
-% d1 = xPlt2ds(ds.ds2xPlt(data1));
-% d2 = xPlt2ds(ds.ds2xPlt(data2));
-% d2b = xPlt2ds(squeeze(ds.ds2xPlt(data2)));
+% d1 = MDD2ds(ds.ds2MDD(data1));
+% d2 = MDD2ds(ds.ds2MDD(data2));
+% d2b = MDD2ds(squeeze(ds.ds2MDD(data2)));
 % % Make sure 1 is identical
 % close all; 
 % dsPlot(data1); dsPlot(d1);
@@ -47,8 +47,8 @@ if iscolumn(obj.data); obj=obj.transpose; end
 data = struct;
 ax_vals = obj.exportAxisVals;
 ax_names = obj.exportAxisNames;
-varied = obj.axis(2).astruct.premerged_names;
-varied_vals = obj.axis(2).astruct.premerged_values;
+varied = obj.axis(2).axismeta.premerged_names;
+varied_vals = obj.axis(2).axismeta.premerged_values;
 has_varied = 1;
 
 for j = 1:size(obj,2)                               % Loop through varieds

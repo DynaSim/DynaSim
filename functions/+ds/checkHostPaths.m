@@ -40,7 +40,7 @@ dynasim_path = ds.getRootPath(); % root is one level up from directory containin
 [mech_paths,mech_files]=ds.locateModelFiles(studyinfo.base_model);
 
 % compare DynaSim toolbox paths
-if ~isequal(dynasim_path, studyinfo.paths.dynasim_functions)
+if ~isequal(fullfile(dynasim_path,'functions'), studyinfo.paths.dynasim_functions)
   matched=0;
   error_message=sprintf('%sPath changed to DynaSim functions (expected: %s, found: %s). ',error_message,studyinfo.paths.dynasim_functions,dynasim_path);
 end

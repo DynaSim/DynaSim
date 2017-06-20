@@ -22,6 +22,7 @@ systems in Matlab or Octave!
 - DynaSim code documentation is [available online
   here](https://dynasim.github.io/DynaSim/), and also [in the docs
   subfolder](https://github.com/DynaSim/DynaSim/tree/master/docs).
+- For more help, check out the [DynaSim wiki](https://github.com/DynaSim/DynaSim/wiki)
 
 ### Mailing lists:
 

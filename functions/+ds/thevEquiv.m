@@ -1,4 +1,4 @@
-function data = thevEquiv(data, fields_currents, field_voltage, reversals_list, output_field_name)
+function data = thevEquiv(data, fields_currents, field_voltage, reversals_list, output_field_name,varargin)
 % Calculates the Th�venin equivalent voltage and conductance for a
 % given set of M specified ionic channels.
 % Inputs:
@@ -63,7 +63,9 @@ function data = thevEquiv(data, fields_currents, field_voltage, reversals_list, 
         on2 = strcat(output_field_name,'_gTH');
         data(i).(on1) = ETH;
         data(i).(on2) = gTH;
-        data(i).labels(end:end+2) = {on1,on2, data(i).labels{end}}; % Store new labels as 2nd and 3rd last entry (so time is always last; not sure if this is important...
+        if all(strcmp(data(i).labels,on1) == false); data(i).labels(end+1) = {on1}; end
+        if all(strcmp(data(i).labels,on2) == false); data(i).labels(end+1) = {on2}; end
+
     end
 
 end
