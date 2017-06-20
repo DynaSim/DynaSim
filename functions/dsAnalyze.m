@@ -467,7 +467,7 @@ function filename = filenameFromVaried(filename, func, data, plotFnBool, options
 %       states.
 
 %% auto_gen_test_data_flag argin
-options = ds.checkOptions(varargin,{'auto_gen_test_data_flag',0,{0,1}},false);
+options = catstruct(options, ds.checkOptions(varargin,{'auto_gen_test_data_flag',0,{0,1}},false));
 if options.auto_gen_test_data_flag
   varargs = varargin;
   varargs{find(strcmp(varargs, 'auto_gen_test_data_flag'))+1} = 0;
