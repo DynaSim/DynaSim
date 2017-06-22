@@ -82,6 +82,7 @@ options=ds.checkOptions(varargin,{...
   'compile_flag',0,{0,1},... % whether to prepare script for being compiled using coder instead of interpreting Matlab
   'verbose_flag',1,{0,1},...
   'one_solve_file_flag',0,{0,1},... % use only 1 solve file of each type, but can't vary mechs yet
+  'benchmark_flag',0,{0,1},...
   },false);
 model=ds.checkModel(model, varargin{:});
 separator=','; % ',', '\\t'
@@ -269,6 +270,11 @@ else %options.disk_flag==0
       fprintf(fid, 'assert(isa(simID, ''double''));\n');
     end
   end
+end
+
+% Benchmark tic
+if options.benchmark_flag
+  fprintf(fid, 'tic;');
 end
 
 % 2.3 load parameters
@@ -645,6 +651,14 @@ if options.disk_flag==1
   fprintf(fid,'fclose(fileID);\n');
   fprintf(fid,'%% ------------------------------------------------------------\n');
 end
+
+%% Benchmark toc
+if options.benchmark_flag
+  fprintf(fid, 'fprintf(''Sim Time: %%g seconds\\n'', toc);');
+end
+
+%% end solve function
+fprintf(fid,'\nend\n\n');
 
 if ~strcmp(outfile,'"stdout"')
   fclose(fid);
