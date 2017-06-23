@@ -408,7 +408,7 @@ else % on cluster with qsub
         % NOTE: using num_simulations, not num_jobs, since the job_file will
         %   determine it's own sims to run
       elseif strcmp(options.qsub_mode, 'loop')
-        cmd = sprintf('qmatjobs_memlimit_loop %s %s',batch_dir_name,options.memory_limit);
+        cmd = sprintf('%s/qmatjobs_memlimit_loop %s %s',dsFnPath, batch_dir_name,options.memory_limit);
       end
       %status=system('which qmatjobs_memlimit');
     end
