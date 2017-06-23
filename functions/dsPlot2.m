@@ -1,11 +1,11 @@
 function [handles,xp] = dsPlot2(data,varargin)
 %% handles=dsPlot(data,'option',value)
 % Purpose: plot data in various ways depending on what data was provided
-% and what options are defined. this function is wrapped by ds.plotWaveforms,
+% and what options are defined. this function is wrapped by dsPlotWaveforms,
 % PlotPower, ... to provide a single function for organizing and displaying
 % data.
 % Inputs:
-%   data: DynaSim data structure (see ds.checkData)
+%   data: DynaSim data structure (see dsCheckData)
 %   Accepts the following name/value pairs:
 %     'plot_type' {'waveform' (default),'rastergram','rates','power'} - what to plot
 %     'population' - name of population to plot (default: 'all'); accepts
@@ -35,18 +35,18 @@ function [handles,xp] = dsPlot2(data,varargin)
 %     'yscale' {'linear','log','log10'}, whether to plot linear or log scale
 %     'visible' {'on','off'}
 %     NOTE: analysis options available depending on plot_type
-%       see see ds.calcFR options for plot_type 'rastergram' or 'rates'
-%       see ds.calcPower options for plot_type 'power'
+%       see see dsCalcFR options for plot_type 'rastergram' or 'rates'
+%       see dsCalcPower options for plot_type 'power'
 % Outputs:
 %   handles: graphic handles to figures
 % 
-% See also: ds.calcFR, ds.calcPower, ds.plotWaveforms, ds.checkData, dsPlot, MDD,
+% See also: dsCalcFR, dsCalcPower, dsPlotWaveforms, dsCheckData, dsPlot, MDD,
 %           MDD
 
 %% Set Master parameters
   
 % Flag for returning error if the user specifies name/value pairs that are not in the
-% ds.checkOptions list
+% dsCheckOptions list
 strict_mode = 0;        % Should be set to zero for this to work within simulate model
 
 %% Convert data input to appropriate form
@@ -56,7 +56,7 @@ if ischar(data)
     study_dir = data;
     
     % Import plot files
-    data_img = ds.importPlots(study_dir);
+    data_img = dsImportPlots(study_dir);
     
     [handles, xp] = dsPlot2(data_img,varargin{:});
     return;
@@ -64,7 +64,7 @@ end
 
 % Convert the incoming DynaSim data structure to an MDD object
 if ~isa(data,'MDD')
-    [xp,is_image] = ds.all2mdd(data);
+    [xp,is_image] = dsAll2mdd(data);
 else
     xp = data;
     if iscell(xp.data{1})
@@ -117,7 +117,7 @@ end
 % end
 
 %% Parse varargin and set up defaults
-[options, options_extras0] = ds.checkOptions(myargin,{...
+[options, options_extras0] = dsCheckOptions(myargin,{...
   'population',[],[],...
   'variable',[],[],...
   'num_embedded_subplots',2,{1,2,3,4},...
@@ -127,7 +127,7 @@ end
   'do_overlay_shift',false,[false true],...
   'overlay_shift_val',[],[],...
   'do_zscore',[false],[false true],...
-  'plot_type','waveform',{'waveform','imagesc','rastergram','raster','power','heatmapFR','heatmap_sortedFR','meanFR','meanFRdens'},...
+  'plot_type','waveform',{'waveform','waveformErr','imagesc','rastergram','raster','power','heatmapFR','heatmap_sortedFR','meanFR','meanFRdens'},...
   'xlims',[],[],...
   'ylims',[],[],...
   'zlims',[],[],...
@@ -179,6 +179,9 @@ plot_handle = options.plot_handle;
     plot_options = struct_addDef(plot_options,'saved_fignum',options.saved_fignum);
 % Used when running xp_PlotData or xp_PlotFR2
     plot_options = struct_addDef(plot_options,'args',{});
+% Used when running waveformErr
+    plot_options = struct_addDef(plot_options,'meanfunc',@(x) mean(x,2));
+    plot_options = struct_addDef(plot_options,'errfunc',@(x) std(x,[],2) ./ (sqrt(size(x,2)) * ones(size(x,1),1)));
 
 % Subplot_options
 subplot_options = struct_addDef(subplot_options,'subplotzoom_enabled',options.do_zoom);
@@ -200,7 +203,7 @@ figure_options = struct_addDef(figure_options,'figheight',options.figheight);
 % % Note: these options don't work if data are images
 % Apply max overlaid
 MTPP = options.max_num_overlaid; % max traces per plot
-if any(strcmp(options.plot_type,{'waveform','power'})) && all(cellfun(@isnumeric,xp.data(:))) && ~do_mean && ~is_image
+if any(strcmp(options.plot_type,{'waveform','waveformErr','power'})) && all(cellfun(@isnumeric,xp.data(:))) && ~do_mean && ~is_image
     mydata = xp.data;
     mydata2 = cell(size(mydata));
     for i = 1:numel(mydata)
@@ -297,12 +300,55 @@ if ~isempty(options.dim_stacking)
 end
 
 
+
+%% If doing force overlay, move overlay population to the end
+if ~isempty(force_last)
+    
+    % If it's a stand-alone string, convert to cell array 
+    if ischar(force_last)
+        force_last = {force_last};
+    end
+    
+    % Functionalize this at some point... building list of requested axes
+    ax_names = xp2.exportAxisNames;
+    ax_ind = zeros(1,length(force_last));
+    for i = 1:length(force_last)
+        temp = xp2.findaxis(force_last{i});
+        if isempty(temp)
+            error('Requested axis not found. force_last must be one of the following: : %s', sprintf('%s ',ax_names{1:end}));
+        end
+        ax_ind(i) = temp;
+    end
+    
+%     % % Note: I am disabling this for now, because it is messing up
+%     certain plotting options. % %
+%     % Dims per subplot should be at least 2 if we're forcing last...
+%     % perhaps change this later
+%     if isempty(Ndims_per_subplot)
+%         Ndims_per_subplot = 2;
+%     end
+%     if Ndims_per_subplot == 1
+%         Ndims_per_subplot = 2;
+%     end
+    
+    others_ind = true(1,ndims(xp2));
+    others_ind(ax_ind) = false;
+    xp2 = xp2.permute([find(others_ind), ax_ind]);        % Move chosen axis to the back!
+    
+end
+
+
 %% If only one cell
 
 % If only 1 cell, move in 2nd cell
 if length(xp2.meta.datainfo(2).values) <= 1 && ~is_image
     % Move populations axis to the end if it exists
-    ax2overlay = xp2.findaxis('populations');
+    
+    ax2overlay = [];
+    if isempty(force_last) && isempty(options.dim_stacking)
+        ax2overlay = xp2.findaxis('populations');           % If force_last or dim_stacking isn't specified, then choose populations
+    end
+    
     if isempty(ax2overlay)
         ax2overlay = xp2.ndims;     % If can't find populations, use last axis on the stack
     end
@@ -326,40 +372,6 @@ if length(xp2.meta.datainfo(2).values) <= 1 && ~is_image
     xp2 = xp2.squeezeRegexp('Dim');
 end
 
-%% If doing force overlay, move overlay population to the end
-if ~isempty(force_last)
-    
-    % If it's a stand-alone string, convert to cell array 
-    if ischar(force_last)
-        force_last = {force_last};
-    end
-    
-    % Functionalize this at some point... building list of requested axes
-    ax_names = xp2.exportAxisNames;
-    ax_ind = zeros(1,length(force_last));
-    for i = 1:length(force_last)
-        temp = xp2.findaxis(force_last{i});
-        if isempty(temp)
-            error('Requested axis not found. force_last must be one of the following: : %s', sprintf('%s ',ax_names{1:end}));
-        end
-        ax_ind(i) = temp;
-    end
-    
-    % Dims per subplot should be at least 2 if we're forcing last...
-    % perhaps change this later
-    if isempty(Ndims_per_subplot)
-        Ndims_per_subplot = 2;
-    end
-    if Ndims_per_subplot == 1
-        Ndims_per_subplot = 2;
-    end
-    
-    others_ind = true(1,ndims(xp2));
-    others_ind(ax_ind) = false;
-    xp2 = xp2.permute([find(others_ind), ax_ind]);        % Move chosen axis to the back!
-    
-end
-
 %% Set up do z-score & overlay shift
 if options.do_zscore && all(cellfun(@isnumeric,xp2.data(:))) && ~is_image
     mydata = xp2.data;
@@ -370,7 +382,6 @@ if options.do_zscore && all(cellfun(@isnumeric,xp2.data(:))) && ~is_image
 end
 
 % Shift the overlay by a certain amount
-if ~isempty(Ndims_per_subplot)
     if options.do_overlay_shift && all(cellfun(@isnumeric,xp2.data(:))) && ~is_image
         Nd = ndims(xp2);
         xp2 = xp2.packDim(Nd);
@@ -382,7 +393,6 @@ if ~isempty(Ndims_per_subplot)
         xp2 = xp2.unpackDim(3,Nd);
         xp2 = xp2.squeezeRegexp('Dim');
     end
-end
 
 %% Crop data
 % This is inserted here because apparently the operation is slow and it's
@@ -414,7 +424,7 @@ if isempty(plot_options.xlims) && lock_axes && ~is_image
 end
 if isempty(plot_options.ylims) && lock_axes && ~is_image
     switch plot_type
-        case 'waveform'
+        case {'waveform','waveformErr'}
             % Merge all data into one single huge column
             data_all = xp2.data(:);
             data_all = cellfunu(@(x) x(:), data_all);
@@ -448,7 +458,9 @@ else
             % Is data
             data_plothandle = @xp1D_matrix_plot;
             if ~isempty(plot_handle); data_plothandle = plot_handle; end
-            
+        case 'waveformErr'
+            data_plothandle = @xp1D_matrix_boundedline;
+            if ~isempty(plot_handle); data_plothandle = plot_handle; end
         case 'imagesc'
             data_plothandle = @xp_matrix_imagesc;
             if ~isempty(plot_handle); data_plothandle = plot_handle; end
@@ -478,14 +490,18 @@ else
             data_plothandle = @xp_PlotData;
             if ~isempty(plot_handle); data_plothandle = plot_handle; end
             
-            if any(strcmp(plot_type,{'rastergram','raster'}))
-                % Move populations axis to the end of xp2. This ensures
+            if any(strcmp(plot_type,{'rastergram','raster'})) && isempty(force_last) && isempty(options.dim_stacking)
+                % Move populations axis to the end of xp2. (Only do this if
+                % we're not already overwriting dims stacking order).
                 ax_names = xp2.exportAxisNames;
                 ind_pop = false(1,length(ax_names));
                 ind_pop(xp2.findaxis('populations')) = true;
                 ind_rest = ~ind_pop;
                 order = [find(ind_rest) find(ind_pop)];
                 xp2 = xp2.permute(order);
+            end
+            if any(strcmp(plot_type,{'rastergram','raster'})) 
+                % Force Ndims_per_subplot to 2 fro rastergram.
                 if isempty(Ndims_per_subplot)
                     Ndims_per_subplot = 2;                 % Overwrite Ndims_per_subplot to 2. This ensures
                 end                                        % that multiple populations can be stacked in a
@@ -493,7 +509,7 @@ else
             end
             
         case {'heatmapFR','heatmap_sortedFR','meanFR','meanFRdens'}
-            % Disable legend when using ds.plotFR2
+            % Disable legend when using dsPlotFR2
             subplot_options.legend1 = [];
             % Remove FR suffix from heatmap and heatmap_sorted plot types
             if any(strcmp(plot_type,{'heatmapFR','heatmap_sortedFR'}))
@@ -594,7 +610,7 @@ function var_out = getdefaultstatevar(xp)
         return;
     end
     
-    vars_from_labels = ds.get_variables_from_meta(xp);
+    vars_from_labels = dsGet_variables_from_meta(xp);
     if ~isempty(vars_from_labels)
         vars_from_labels = vars_from_labels(1);   % Best guess at default state variable. Usually its the 1st entry in labels
     end

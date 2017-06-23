@@ -1,14 +1,14 @@
 function handles = dsPlot(data,varargin)
 %DSPlot - plot data in various ways depending on what data was provided and what options are defined.
 %
-% This function is wrapped by ds.plotWaveforms, PlotPower, etc. to provide a single
+% This function is wrapped by dsPlotWaveforms, PlotPower, etc. to provide a single
 % function for organizing and displaying data.
 %
 % Usage:
 %   handles=dsPlot(data,'option',value)
 %
 % Inputs:
-%   - data: DynaSim data structure (see ds.checkData)
+%   - data: DynaSim data structure (see dsCheckData)
 %   - options:
 %     'plot_type'       : what to plot {'waveform' (default),'rastergram','rates','power'}
 %     'variable'        : name of field containing data to plot (default: all
@@ -22,8 +22,8 @@ function handles = dsPlot(data,varargin)
 %     'lock_gca'        : Plots within currently active axis (gca); doesn't
 %                         open new figures or subplots.
 %     - NOTE: analysis options are available depending on plot_type
-%       - see see ds.calcFR options for plot_type 'rastergram' or 'rates'
-%       - see ds.calcPower options for plot_type 'power'
+%       - see see dsCalcFR options for plot_type 'rastergram' or 'rates'
+%       - see dsCalcPower options for plot_type 'power'
 %
 % Outputs:
 %   - handles: graphic handles to figures
@@ -144,15 +144,15 @@ function handles = dsPlot(data,varargin)
 %       dsPlot(data,'variable','E1_v');
 %       dsPlot(data,'variable','*');
 %
-% See also: ds.calcFR, ds.calcPower, ds.plotWaveforms, ds.checkData
+% See also: dsCalcFR, dsCalcPower, dsPlotWaveforms, dsCheckData
 
 % Check inputs
-data=ds.checkData(data, varargin{:});
-  % NOTE: calling ds.checkData() at beginning enables analysis/plotting functions to
+data=dsCheckData(data, varargin{:});
+  % NOTE: calling dsCheckData() at beginning enables analysis/plotting functions to
   %       accept data matrix [time x cells] in addition to DynaSim data structure.
 
 % get options
-options=ds.checkOptions(varargin,{...
+options=dsCheckOptions(varargin,{...
   'time_limits',[-inf inf],[],...
   'variable',[],[],...
   'max_num_overlaid',50,[],...
@@ -202,7 +202,7 @@ if any(strcmp(fields, 'varied'))
     vary_lengths(v) = length(vary_vectors{v});
   end
 
-  [effective_vary_indices, ~] = ds.checkCovary(vary_lengths, vary_params, varargin{:});
+  [effective_vary_indices, ~] = dsCheckCovary(vary_lengths, vary_params, varargin{:});
 
   if prod(vary_lengths(effective_vary_indices)) == length(data)
       
@@ -253,7 +253,7 @@ if any(strcmp(fields, 'varied'))
   end % dimensions_varied
 end
 
-data=ds.checkData(data, varargin{:});
+data=dsCheckData(data, varargin{:});
 handles=[];
 
 lock_gca = options.lock_gca;
@@ -261,7 +261,7 @@ lock_gca = options.lock_gca;
 % TODO: add option 'plot_mode' {'trace','image'}
 
 % variables to plot
-var_fields=ds.selectVariables(data(1).labels,options.variable, varargin{:});
+var_fields=dsSelectVariables(data(1).labels,options.variable, varargin{:});
 tmp=regexp(var_fields,'_(.+)$','tokens','once');
 variables=unique([tmp{:}]);
 
@@ -305,7 +305,7 @@ switch options.plot_type
     xlab='time (ms)'; % x-axis label
   case 'power'      % plot VARIABLE_Power_SUA.Pxx
     if any(cellfun(@isempty,regexp(var_fields,'.*_Power_SUA$')))
-      data=ds.calcPower(data,varargin{:});
+      data=dsCalcPower(data,varargin{:});
     end
     xdata=data(1).([var_fields{1} '_Power_SUA']).frequency;
     xlab='frequency (Hz)'; % x-axis label
@@ -315,13 +315,13 @@ switch options.plot_type
     end
   case {'rastergram','raster'} % raster VARIABLE_spike_times
     if any(cellfun(@isempty,regexp(var_fields,'.*_spike_times$')))
-      data=ds.calcFR(data,varargin{:});
+      data=dsCalcFR(data,varargin{:});
     end
     xdata=time;
     xlab='time (ms)'; % x-axis label
   case 'rates'      % plot VARIABLE_FR
     if any(cellfun(@isempty,regexp(var_fields,'.*_FR$')))
-      data=ds.calcFR(data,varargin{:});
+      data=dsCalcFR(data,varargin{:});
     end
     xdata=data.time_FR;
     xlab='time (ms, bins)'; % x-axis label
@@ -379,7 +379,7 @@ if num_sims>1 && isfield(data,'varied')
       param_cell{j}=unique([data.(varied{j})]); % unique values for each parameter
     else
       % TODO: handle sims varying non-numeric model components
-      % (eg, mechanisms) (also in ds.plotFR and dsSelect)
+      % (eg, mechanisms) (also in dsPlotFR and dsSelect)
     end
   end
   param_size=cellfun(@length,param_cell); % number of unique values for each parameter
@@ -882,7 +882,7 @@ end % end loop over figure sets
 if options.auto_gen_test_data_flag
   argout = {handles}; % specific to this function
 
-  ds.unit.saveAutoGenTestDir(argin, argout);
+  dsUnitSaveAutoGenTestDir(argin, argout);
 end
 
 % 1 sim, 1 pop, 1 var (X)

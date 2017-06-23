@@ -54,7 +54,7 @@ if ~nargin
 end
 
 %% Check inputs
-options=ds.checkOptions(varargin,{...
+options=dsCheckOptions(varargin,{...
   'result_file','result',[],...
   'save_results_flag',0,{0,1},...
   'format','svg',{'svg','jpg','eps','png','fig'},...
@@ -332,7 +332,7 @@ end % fInd
 if options.auto_gen_test_data_flag
   argout = {result}; % specific to this function
   
-  %ds.unit.saveAutoGenTestData(argin, argout); % TODO: check if needs to be saveAutoGenTestDir
+  %dsUnitSaveAutoGenTestData(argin, argout); % TODO: check if needs to be saveAutoGenTestDir
 end
 
 end %main fn
@@ -345,7 +345,7 @@ end %main fn
 function [data, studyinfo] = parseSrc(src, options, varargin)
 
 %% auto_gen_test_data_flag argin
-options = ds.checkOptions(varargin,{'auto_gen_test_data_flag',0,{0,1}},false);
+options = dsCheckOptions(varargin,{'auto_gen_test_data_flag',0,{0,1}},false);
 if options.auto_gen_test_data_flag
   varargs = varargin;
   varargs{find(strcmp(varargs, 'auto_gen_test_data_flag'))+1} = 0;
@@ -362,7 +362,7 @@ elseif ischar(src) %string input
     [data,studyinfo] = dsImport(src, varargin{:});
   else % only load studyinfo
     data = [];
-    studyinfo = ds.checkStudyinfo(src);
+    studyinfo = dsCheckStudyinfo(src);
   end
 
   % update study_dir
@@ -421,7 +421,7 @@ end
 if options.auto_gen_test_data_flag
   argout = {data, studyinfo}; % specific to this function
   
-  %ds.unit.saveAutoGenTestDataLocalFn(argin, argout); % localfn
+  %dsUnitSaveAutoGenTestDataLocalFn(argin, argout); % localfn
 end
 
 end
@@ -467,7 +467,8 @@ function filename = filenameFromVaried(filename, func, data, plotFnBool, options
 %       states.
 
 %% auto_gen_test_data_flag argin
-options = ds.checkOptions(varargin,{'auto_gen_test_data_flag',0,{0,1}},false);
+options = catstruct(options, dsCheckOptions(varargin,{'auto_gen_test_data_flag',0,{0,1}},false));
+
 if options.auto_gen_test_data_flag
   varargs = varargin;
   varargs{find(strcmp(varargs, 'auto_gen_test_data_flag'))+1} = 0;
@@ -484,9 +485,12 @@ else
     else
       plot_options = options.function_options{fInd};
     end
+    
+    fInd = regexp(options.result_file, 'plot(\d+)', 'tokens');
+    fInd = fInd{1}{1};
 
     % check if 'plot_type' given as part of plot_options
-    plot_options = CheckOptions(plot_options,{'plot_type',['plot' num2str(fInd)],[]},false);
+    plot_options = ds.checkOptions(plot_options,{'plot_type',['plot' fInd],[]},false);
 
     prefix = plot_options.plot_type; % will be waveform by default due to CheckOptions in main fn
   else % ~plotFnBool
@@ -494,13 +498,13 @@ else
   end
 end
 
-filename = nameFromVaried(data, prefix, filename);
+filename = ds.nameFromVaried(data, prefix, filename);
 
 %% auto_gen_test_data_flag argout
 if options.auto_gen_test_data_flag
   argout = {filename}; % specific to this function
   
-  %ds.unit.saveAutoGenTestDataLocalFn(argin, argout); % localfn
+  %dsUnitSaveAutoGenTestDataLocalFn(argin, argout); % localfn
 end
 
 end
@@ -555,7 +559,7 @@ function result = add_modifications(result, data, varargin)
 % the simulator options.
 
 %% auto_gen_test_data_flag argin
-options = ds.checkOptions(varargin,{'auto_gen_test_data_flag',0,{0,1}},false);
+options = dsCheckOptions(varargin,{'auto_gen_test_data_flag',0,{0,1}},false);
 if options.auto_gen_test_data_flag
   varargs = varargin;
   varargs{find(strcmp(varargs, 'auto_gen_test_data_flag'))+1} = 0;
@@ -563,7 +567,7 @@ if options.auto_gen_test_data_flag
   argin = [{result}, {data}, varargs]; % specific to this function
 end
 
-% #todo: The function ds.modifications2Vary implements this functionality.
+% #todo: The function dsModifications2Vary implements this functionality.
 % Consider using it here.
 if ~isempty(data(1).simulator_options.modifications)
   varied = {};
@@ -598,6 +602,6 @@ end
 if options.auto_gen_test_data_flag
   argout = {result}; % specific to this function
   
-  %ds.unit.saveAutoGenTestDataLocalFn(argin, argout); % localfn
+  %dsUnitSaveAutoGenTestDataLocalFn(argin, argout); % localfn
 end
 end % add_modifications

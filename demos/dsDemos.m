@@ -20,7 +20,7 @@ else
 end
 
 % Set where to save outputs
-output_directory = ds.getConfig('demos_path');
+output_directory = dsGetConfig('demos_path');
 
 % move to root directory where outputs will be saved
 mkdirSilent(output_directory);
@@ -173,8 +173,8 @@ figure; plot(data.time,data.(data.labels{1}))
 xlabel('time (ms)'); ylabel('membrane potential (mV)'); title('Hodgkin-Huxley neuron')
 
 % View the mechanism files:
-[~,eqnfile]=ds.locateModelFiles('iNa.mech'); edit(eqnfile{1});
-[~,eqnfile]=ds.locateModelFiles('iK.mech');  edit(eqnfile{1});
+[~,eqnfile]=dsLocateModelFiles('iNa.mech'); edit(eqnfile{1});
+[~,eqnfile]=dsLocateModelFiles('iK.mech');  edit(eqnfile{1});
 % Mechanisms can be custom built; however, DynaSim does come pakaged with
 % some common ones like popular ion currents (see <dynasim>/models).
 
@@ -224,7 +224,7 @@ dsPlot(data);
 dsPlot(data,'variable',{'E_v','E_I_iGABAa_ISYN'});
 
 % View the connection mechanism file:
-[~,eqnfile]=ds.locateModelFiles('iAMPA.mech'); edit(eqnfile{1});
+[~,eqnfile]=dsLocateModelFiles('iAMPA.mech'); edit(eqnfile{1});
 
 % %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% SAVING SIMULATED DATA
@@ -262,7 +262,7 @@ data=dsImport('demo_sPING_3');
 dsPlot(data);
 dsPlot(data,'plot_type','rastergram');
 dsPlot(data,'plot_type','power');
-ds.plotFR(data); % examine how mean firing rate changes with Iapp and tauD
+dsPlotFR(data); % examine how mean firing rate changes with Iapp and tauD
 
 % %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% RUNNING SIMULATIONS ON THE CLUSTER

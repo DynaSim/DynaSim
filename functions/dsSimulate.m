@@ -6,11 +6,11 @@ function [data,studyinfo,result] = dsSimulate(model,varargin)
 % is performed. It can optionally save the simulated data and create/submit
 % simulation jobs to a compute cluster.
 % Inputs:
-%   model: DynaSim model structure or equations (see ds.generateModel and
-%          ds.checkModel for more details)
+%   model: DynaSim model structure or equations (see dsGenerateModel and
+%          dsCheckModel for more details)
 %
 %   solver options (provided as key/value pairs: 'option1',value1,'option2',value2,...):
-%     'solver'      : solver for numerical integration (see ds.getSolveFile)
+%     'solver'      : solver for numerical integration (see dsGetSolveFile)
 %                     {'euler','rk2','rk4', or any built-in matlab solver} (default: 'rk4')
 %     'tspan'       : time limits of simulation [begin,end] (default: [0 100]) [ms]
 %                     note: units must be consistent with dt and model equations
@@ -25,7 +25,7 @@ function [data,studyinfo,result] = dsSimulate(model,varargin)
 %
 %   options for running sets of simulations:
 %     'vary'        : (default: [], vary nothing): cell matrix specifying model
-%                     components to vary across simulations (see NOTE 1 and ds.vary2Modifications)
+%                     components to vary across simulations (see NOTE 1 and dsVary2Modifications)
 %
 %   options to control saved data:
 %     'save_results_flag': whether to save results of analysis and plotting
@@ -38,7 +38,7 @@ function [data,studyinfo,result] = dsSimulate(model,varargin)
 %
 %   options for cluster computing:
 %     'cluster_flag'  : whether to run simulations on a cluster submitted
-%                     using qsub (see ds.createBatch) {0 or 1} (default: 0)
+%                     using qsub (see dsCreateBatch) {0 or 1} (default: 0)
 %     'sims_per_job'  : number of simulations to run per batch job (default: 1)
 %     'memory_limit'  : memory to allocate per batch job (default: '8G')
 %     'qsub_mode'     : whether to use SGE -t array for 1 qsub, mode: 'array'; or
@@ -59,11 +59,12 @@ function [data,studyinfo,result] = dsSimulate(model,varargin)
 %
 %   other options:
 %     'verbose_flag'  : whether to display informative messages/logs (default: 0)
-%     'modifications' : how to modify DynaSim specification structure component before simulation (see ds.applyModifications)
+%     'modifications' : how to modify DynaSim specification structure component before simulation (see dsApplyModifications)
 %     'experiment'    : function handle of experiment function (see NOTE 2)
 %     'experiment_options' : single cell array of key/value options for experiment function
 %     'optimization'  : function handle of optimization function (see NOTE 2)
 %     'debug_flag'    : set to debug mode
+%     'benchmark_flag': set to benchmark mode. will add tic/toc to sims.
 %
 % Outputs:
 %   DynaSim data structure:
@@ -75,7 +76,7 @@ function [data,studyinfo,result] = dsSimulate(model,varargin)
 %     data.model            : model used to generate simulated data
 %     [data.varied]         : list of varied model components (present only if anything was varied)
 %
-%   DynaSim studyinfo structure (only showing select fields, see ds.checkStudyinfo for more details)
+%   DynaSim studyinfo structure (only showing select fields, see dsCheckStudyinfo for more details)
 %     studyinfo.study_dir
 %     studyinfo.base_model (=[]): original model from which a set of simulations was derived
 %     studyinfo.base_simulator_options (=[])
@@ -95,7 +96,7 @@ function [data,studyinfo,result] = dsSimulate(model,varargin)
 % parameter 'gNa', taking on values 100 and 120, in population 'E', set
 % vary={'E','gNa',[100 120]}. To additionally vary 'gSYN' in the connection
 % mechanism from 'E' to 'I', set vary={'E','gNa',[100 120];'E->I','gSYN',[0 1]}.
-% Mechanism lists and equations can also be varied. (see ds.vary2Modifications
+% Mechanism lists and equations can also be varied. (see dsVary2Modifications
 % for more details and examples).
 %
 % EXAMPLES:
@@ -129,7 +130,7 @@ function [data,studyinfo,result] = dsSimulate(model,varargin)
 %   eqns='dv/dt=@current+10; {iNa,iK}; v(0)=-60';
 %   data=dsSimulate(eqns,'vary',{'','gNa',[50 100 200]});
 %   % plot how mean firing rate varies with parameter
-%   ds.plotFR(data,'bin_size',30,'bin_shift',10); % bin_size and bin_shift in [ms]
+%   dsPlotFR(data,'bin_size',30,'bin_shift',10); % bin_size and bin_shift in [ms]
 %
 % Example 5: Sparse Pyramidal-Interneuron-Network-Gamma rhythm with rastergram
 %   % define equations of cell model (same for E and I populations)
@@ -178,16 +179,16 @@ function [data,studyinfo,result] = dsSimulate(model,varargin)
 %     };
 %   data=dsSimulate(s,'vary',vary);
 %   % plot firing rates calculated from spike monitor in both populations
-%   ds.plotFR(data,'variable','*_spikes','bin_size',30,'bin_shift',10);
+%   dsPlotFR(data,'variable','*_spikes','bin_size',30,'bin_shift',10);
 %
 %
-% See also: ds.generateModel, ds.checkModel, ds.getSolveFile, ds.checkData,
-%           ds.vary2Modifications, ds.checkStudyinfo, ds.createBatch
+% See also: dsGenerateModel, dsCheckModel, dsGetSolveFile, dsCheckData,
+%           dsVary2Modifications, dsCheckStudyinfo, dsCreateBatch
 
 % TODO: rename 'disk_flag' to something more descriptive
 
-% dependencies: ds.writeDynaSimSolver, ds.writeMatlabSolver, ds.propagateFunctions, ds.checkModel,
-% ds.checkOptions, ds.options2Keyval, displayError, DynaSim2Odefun
+% dependencies: dsWriteDynaSimSolver, dsWriteMatlabSolver, dsPropagateFunctions, dsCheckModel,
+% dsCheckOptions, dsOptions2Keyval, displayError, DynaSim2Odefun
 
 % <-- temporarily removed from help section -->
 % NOTE 2: special functions that recursively call dsSimulate:
@@ -216,7 +217,7 @@ studyinfo=[];
 
 % Check inputs
 varargin = backward_compatibility(varargin);
-options=ds.checkOptions(varargin,{...
+options=dsCheckOptions(varargin,{...
   'tspan',[0 100],[],...          % [beg,end] (units must be consistent with dt and equations)
   'ic',[],[],...                  % initial conditions (overrides definition in model structure; can input as IC structure or numeric array)
   'solver','rk4',{'euler','rk1','rk2','rk4','modified_euler','rungekutta','rk',...
@@ -266,6 +267,7 @@ options=ds.checkOptions(varargin,{...
   'debug_flag',0,{0,1},...
   'auto_gen_test_data_flag',0,{0,1},...
   'unit_test_flag',0,{0,1},...
+  'benchmark_flag',0,{0,1},...
   },false);
 % more options: remove_solve_dir, remove_batch_dir, post_downsample_factor
 
@@ -475,11 +477,11 @@ end
 [model,options]=extract_vary_statement(model,options);
 
 % check/standardize model
-model=ds.checkModel(model, varargin{:}); % handles conversion when input is a string w/ equations or a DynaSim specification structure
+model=dsCheckModel(model, varargin{:}); % handles conversion when input is a string w/ equations or a DynaSim specification structure
 
 % 1.1 apply modifications before simulation and optional further variation across simulations
 if ~isempty(options.modifications)
-  [model,options.modifications]=ds.applyModifications(model,options.modifications, varargin{:});
+  [model,options.modifications]=dsApplyModifications(model,options.modifications, varargin{:});
 end
 
 % 1.2 incorporate user-supplied initial conditions
@@ -499,7 +501,7 @@ end
 
 % expand set of things to vary across simulations
 if ~isempty(options.vary)
-  modifications_set=ds.vary2Modifications(options.vary,model);
+  modifications_set=dsVary2Modifications(options.vary,model);
 else
   modifications_set={[]};
 end
@@ -517,15 +519,15 @@ end
 % whether to write jobs for distributed processing on cluster
 if options.cluster_flag
   % add to model any parameters in 'vary' not explicit in current model
-  %   approach: use ds.applyModifications(), it does that automatically
+  %   approach: use dsApplyModifications(), it does that automatically
   for i = 1:length(modifications_set)
     if ~isempty(modifications_set{i}) && ~strcmp(modifications_set{i}{2},'mechanism_list') && ~strcmp(modifications_set{i}{2},'equations')
-      model = ds.applyModifications(model,modifications_set{i}, varargin{:});
+      model = dsApplyModifications(model,modifications_set{i}, varargin{:});
       break
     end
   end
-  keyvals = ds.options2Keyval(options);
-  studyinfo = ds.createBatch(model,modifications_set,'simulator_options',options,'process_id',options.sim_id,keyvals{:});
+  keyvals = dsOptions2Keyval(options);
+  studyinfo = dsCreateBatch(model,modifications_set,'simulator_options',options,'process_id',options.sim_id,keyvals{:});
   
   if options.one_solve_file_flag
     % copy params.mat from project_dir to batchdirs
@@ -538,12 +540,12 @@ if options.cluster_flag
   
   %if options.overwrite_flag==0
   % check status of study
-  %     [~,s]=ds.monitorStudy(studyinfo.study_dir,'verbose_flag',0,'process_id',options.sim_id);
+  %     [~,s]=dsMonitorStudy(studyinfo.study_dir,'verbose_flag',0,'process_id',options.sim_id);
   %     if s==1 % study finished
   %       if options.verbose_flag
   %         fprintf('Study already finished. Importing data...\n');
   %       end
-  %       studyinfo=ds.checkStudyinfo(studyinfo.study_dir,'process_id',options.sim_id);
+  %       studyinfo=dsCheckStudyinfo(studyinfo.study_dir,'process_id',options.sim_id);
   %       data=dsImport(studyinfo,'process_id',options.sim_id);
   %     end
   %end
@@ -569,7 +571,7 @@ if options.cluster_flag
     removeStudyinfo(); % remove studyinfo file
     renameMexFilesForUnitTesting(); % rename mex files for unit testing
     
-    ds.unit.saveAutoGenTestDir(argin, argout, [], dirOut);
+    dsUnitSaveAutoGenTestDir(argin, argout, [], dirOut);
   end
   
   %% unit test
@@ -594,7 +596,7 @@ end
 % (however SCC cluster+parallel works)
 if options.parallel_flag
   % prepare studyinfo
-  [studyinfo,options]=ds.setupStudy(model,'simulator_options',options,'modifications_set',modifications_set);
+  [studyinfo,options]=dsSetupStudy(model,'simulator_options',options,'modifications_set',modifications_set);
   
   if options.compile_flag
     % Ensure mex_dir is absolute
@@ -616,7 +618,7 @@ if options.parallel_flag
   
   % prepare options
   options_temp = rmfield(options,{'vary','modifications','solve_file','parallel_flag','studyinfo','in_parfor_loop_flag'});
-  keyvals=ds.options2Keyval(options_temp);
+  keyvals=dsOptions2Keyval(options_temp);
   
   keyvals{find(strcmp(keyvals, 'auto_gen_test_data_flag'))+1} = 0;
   if options.auto_gen_test_data_flag || options.unit_test_flag
@@ -683,7 +685,7 @@ if options.parallel_flag
     removeStudyinfo(); % remove studyinfo file
     renameMexFilesForUnitTesting(); % rename mex files for unit testing
     
-    ds.unit.saveAutoGenTestDir(argin, argout, [], dirOut);
+    dsUnitSaveAutoGenTestDir(argin, argout, [], dirOut);
   end
   
   %% unit test
@@ -705,7 +707,7 @@ end %parallel_flag
 
 %% 1.4 prepare study_dir and studyinfo if saving data
 if isempty(options.studyinfo)
-  [studyinfo,options] = ds.setupStudy(model,'modifications_set',modifications_set,'simulator_options',options,'process_id',options.sim_id);
+  [studyinfo,options] = dsSetupStudy(model,'modifications_set',modifications_set,'simulator_options',options,'process_id',options.sim_id);
 else % in parfor loop and/or cluster job
   studyinfo = options.studyinfo;
 end
@@ -756,7 +758,7 @@ if ~options.debug_flag
 
     % update studyinfo
     if options.save_data_flag && ~options.one_solve_file_flag
-      studyinfo=ds.updateStudy(studyinfo.study_dir,'process_id',sim_id,'status','failed','verbose_flag',options.verbose_flag);
+      studyinfo=dsUpdateStudy(studyinfo.study_dir,'process_id',sim_id,'status','failed','verbose_flag',options.verbose_flag);
       data=studyinfo;
     end
     cleanup('error');
@@ -793,7 +795,7 @@ if ~options.in_parfor_loop_flag % if not inside of parfor loop
     removeStudyinfo(); % remove studyinfo file
     renameMexFilesForUnitTesting(); % rename mex files for unit testing
     
-    ds.unit.saveAutoGenTestDir(argin, argout, [], dirOut);
+    dsUnitSaveAutoGenTestDir(argin, argout, [], dirOut);
   end
   
   %% unit test
@@ -823,9 +825,9 @@ end % in_parfor_loop_flag
 % -------------------------
   function tryFn(nargoutmain)
     % functions:             outputs:
-    % ds.writeDynaSimSolver  m-file for DynaSim solver
-    % ds.writeMatlabSolver   m-file for Matlab solver (including @odefun)
-    % ds.prepareMEX          mex-file for m-file
+    % dsWriteDynaSimSolver  m-file for DynaSim solver
+    % dsWriteMatlabSolver   m-file for Matlab solver (including @odefun)
+    % dsPrepareMEX          mex-file for m-file
     
     %% 1.5 loop over simulations, possibly varying things
     base_model=model;
@@ -860,12 +862,12 @@ end % in_parfor_loop_flag
       
       % apply modifications for this point in search space
       if ~isempty(modifications_set{sim})
-        model=ds.applyModifications(base_model,modifications_set{sim}, varargin{:});
+        model=dsApplyModifications(base_model,modifications_set{sim}, varargin{:});
       end
       
       % update studyinfo
       if options.save_data_flag
-        %studyinfo=ds.updateStudy(studyinfo.study_dir,'process_id',sim_id,'status','started','model',model,'simulator_options',options,'verbose_flag',options.verbose_flag);
+        %studyinfo=dsUpdateStudy(studyinfo.study_dir,'process_id',sim_id,'status','started','model',model,'simulator_options',options,'verbose_flag',options.verbose_flag);
       end
       
       %% Experiment
@@ -878,11 +880,11 @@ end % in_parfor_loop_flag
         % from varargin...
         % remove 'experiment', 'modifications', 'vary', 'cluster_flag' to avoid undesired recursive action in experiment function
         % remove 'save_data_flag' to prevent individual simulations from being saved during experiment
-        keyvals=ds.removeKeyval(varargin,{'experiment','cluster_flag','vary','modifications','save_data_flag'});
+        keyvals=dsRemoveKeyval(varargin,{'experiment','cluster_flag','vary','modifications','save_data_flag'});
         
         if ~isempty(options.experiment_options)
           % user-supplied experiment options override any found in dsSimulate options
-          keyvals=ds.removeKeyval(keyvals,options.experiment_options(1:2:end));
+          keyvals=dsRemoveKeyval(keyvals,options.experiment_options(1:2:end));
           keyvals=cat(2,keyvals,options.experiment_options);
         end
         
@@ -901,7 +903,7 @@ end % in_parfor_loop_flag
               ~exist([options.solve_file '.mexa64'],'file') &&...
               ~exist([options.solve_file '.mexa32'],'file') &&...
               ~exist([options.solve_file '.mexmaci64'],'file'))
-            options.solve_file = ds.getSolveFile(model,studyinfo,options); % store name of solver file in options struct
+            options.solve_file = dsGetSolveFile(model,studyinfo,options); % store name of solver file in options struct
           end
           
           % TODO: consider providing better support for studies that produce different m-files per sim (e.g., varying mechanism_list)
@@ -928,12 +930,12 @@ end % in_parfor_loop_flag
         
         % save parameters there
         warning('off','catstruct:DuplicatesFound');
-        p = catstruct(ds.checkSolverOptions(options),model.parameters);
+        p = catstruct(dsCheckSolverOptions(options),model.parameters);
         
         if matlabSolverBool
           % add IC to p for use in matlab solver
           if isempty(options.ic)
-            [~, p.ic]=ds.dynasim2odefun(  ds.propagateParameters( ds.propagateFunctions(model, varargin{:}), varargin{:} ), 'odefun_output','func_body', varargin{:}  );
+            [~, p.ic]=dsDynasim2odefun(  dsPropagateParameters( dsPropagateFunctions(model, varargin{:}), varargin{:} ), 'odefun_output','func_body', varargin{:}  );
           else
             p.ic = options.ic;
           end
@@ -1029,7 +1031,7 @@ end % in_parfor_loop_flag
         end
       end
       
-      tmpdata = ds.modifications2Vary(tmpdata,options.modifications,options,modifications_set,sim);
+      tmpdata = dsModifications2Vary(tmpdata,options.modifications,options,modifications_set,sim);
       
       if (options.auto_gen_test_data_flag || options.unit_test_flag) && isfield(tmpdata, 'simulator_options')
         tmpdata= rmfield(tmpdata, 'simulator_options');
@@ -1037,8 +1039,8 @@ end % in_parfor_loop_flag
       
       % save single data set and update studyinfo
       if options.save_data_flag
-        ds.exportData(tmpdata,'filename',data_file,'format','mat','verbose_flag',options.verbose_flag);
-        %studyinfo=ds.updateStudy(studyinfo.study_dir,'process_id',sim_id,'status','finished','duration',duration,'solve_file',options.solve_file,'email',options.email,'verbose_flag',options.verbose_flag,'model',model,'simulator_options',options);
+        dsExportData(tmpdata,'filename',data_file,'format','mat','verbose_flag',options.verbose_flag);
+        %studyinfo=dsUpdateStudy(studyinfo.study_dir,'process_id',sim_id,'status','finished','duration',duration,'solve_file',options.solve_file,'email',options.email,'verbose_flag',options.verbose_flag,'model',model,'simulator_options',options);
       end
       
       % do post-simulation analysis and plotting
@@ -1129,7 +1131,7 @@ end % in_parfor_loop_flag
     % first, figure out how many IC values we need (i.e., how many state
     % variables we need across all cells).
     var_names=model.state_variables;
-    [nvals_per_var,monitor_counts]=ds.getOutputCounts(model);
+    [nvals_per_var,monitor_counts]=dsGetOutputCounts(model);
     num_state_variables=sum(nvals_per_var);
     % check that the correct number of IC values was provided
     if length(options.ic)~=num_state_variables
