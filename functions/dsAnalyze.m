@@ -467,7 +467,8 @@ function filename = filenameFromVaried(filename, func, data, plotFnBool, options
 %       states.
 
 %% auto_gen_test_data_flag argin
-options = dsCheckOptions(varargin,{'auto_gen_test_data_flag',0,{0,1}},false);
+options = catstruct(options, dsCheckOptions(varargin,{'auto_gen_test_data_flag',0,{0,1}},false));
+
 if options.auto_gen_test_data_flag
   varargs = varargin;
   varargs{find(strcmp(varargs, 'auto_gen_test_data_flag'))+1} = 0;
@@ -484,9 +485,12 @@ else
     else
       plot_options = options.function_options{fInd};
     end
+    
+    fInd = regexp(options.result_file, 'plot(\d+)', 'tokens');
+    fInd = fInd{1}{1};
 
     % check if 'plot_type' given as part of plot_options
-    plot_options = CheckOptions(plot_options,{'plot_type',['plot' num2str(fInd)],[]},false);
+    plot_options = ds.checkOptions(plot_options,{'plot_type',['plot' fInd],[]},false);
 
     prefix = plot_options.plot_type; % will be waveform by default due to CheckOptions in main fn
   else % ~plotFnBool
@@ -494,7 +498,7 @@ else
   end
 end
 
-filename = nameFromVaried(data, prefix, filename);
+filename = ds.nameFromVaried(data, prefix, filename);
 
 %% auto_gen_test_data_flag argout
 if options.auto_gen_test_data_flag

@@ -51,6 +51,7 @@ options=dsCheckOptions(varargin,{...
   'compile_flag',0,{0,1},... % whether to prepare script for being compiled using coder instead of interpreting Matlab
   'verbose_flag',1,{0,1},...
   'one_solve_file_flag',0,{0,1},... % use only 1 solve file of each type, but can't vary mechs yet
+  'benchmark_flag',0,{0,1},...
   },false);
 
 % Check inputs
@@ -233,6 +234,11 @@ else
   fprintf(fid,'function %s=solve_ode(simID)\n',output_string);
 end
 
+% Benchmark tic
+if options.benchmark_flag
+  fprintf(fid, 'tic;');
+end
+
 % 2.3 load parameters
 if options.save_parameters_flag
   fprintf(fid,'%% ------------------------------------------------------------\n');
@@ -397,7 +403,12 @@ if ~isempty(model.monitors)
   end
 end
 
-%% fprintf end for solve function
+%% Benchmark toc
+if options.benchmark_flag
+  fprintf(fid, 'fprintf(''Sim Time: %%g seconds\\n'', toc);');
+end
+
+%% end solve function
 fprintf(fid,'\nend\n\n');
 
 %% ODEFUN
