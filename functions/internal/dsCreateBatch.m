@@ -399,16 +399,16 @@ else % on cluster with qsub
     else
       if strcmp(options.qsub_mode, 'array') && ~options.one_solve_file_flag
         % TODO: remove old error and output files; put e and o in their own dirs
-        cmd = sprintf('echo ''%s/qmatjob_array %s sim_job'' | qsub -V -hard -l ''h_vmem=%s'' -wd %s -N %s_sim_job -t 1-%i',...
+        cmd = sprintf('echo ''%s/internal/qmatjob_array %s sim_job'' | qsub -V -hard -l ''h_vmem=%s'' -wd %s -N %s_sim_job -t 1-%i',...
           dsFnPath, batch_dir, options.memory_limit, batch_dir, batch_dir_name, num_jobs);
       elseif strcmp(options.qsub_mode, 'array') && options.one_solve_file_flag
         [~, job_filename] = fileparts2(job_file); %remove path and extension
-        cmd = sprintf('echo ''%s/qmatjob_array_one_file %s %s'' | qsub -V -hard -l ''h_vmem=%s'' -wd %s -N %s_sim_job -t 1-%i:%i',...
+        cmd = sprintf('echo ''%s/internal/qmatjob_array_one_file %s %s'' | qsub -V -hard -l ''h_vmem=%s'' -wd %s -N %s_sim_job -t 1-%i:%i',...
           dsFnPath, batch_dir, job_filename, options.memory_limit, batch_dir, batch_dir_name, num_simulations, options.sims_per_job);
         % NOTE: using num_simulations, not num_jobs, since the job_file will
         %   determine it's own sims to run
       elseif strcmp(options.qsub_mode, 'loop')
-        cmd = sprintf('qmatjobs_memlimit_loop %s %s',batch_dir_name,options.memory_limit);
+        cmd = sprintf('%s/internal/qmatjobs_memlimit_loop %s %s',dsFnPath, batch_dir_name,options.memory_limit);
       end
       %status=system('which qmatjobs_memlimit');
     end
