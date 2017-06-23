@@ -1,5 +1,5 @@
 function data = calcMetrics(data, varargin)
-options=ds.checkOptions(varargin,{...
+options=dsCheckOptions(varargin,{...
   'W',1,[],...
   'calc_power_flag',0,[0,1],...
   'auto_gen_test_data_flag',0,[0,1],...
@@ -14,8 +14,8 @@ if options.auto_gen_test_data_flag
 end
 
 if numel(data)>1
-  % use dsAnalyze to recursively call ds.calcMetrics on each data set
-  data = dsAnalyze(data,@ds.calcMetrics,varargin{:});
+  % use dsAnalyze to recursively call dsCalcMetrics on each data set
+  data = dsAnalyze(data,@dsCalcMetrics,varargin{:});
   return;
 end
 
@@ -30,25 +30,25 @@ if NW <1.25
 end
 
 if options.calc_power_flag
-  data = ds.calcPower(data, 'smooth_factor',1, 'timeBandwidthProduct',NW, varargin{:});
+  data = dsCalcPower(data, 'smooth_factor',1, 'timeBandwidthProduct',NW, varargin{:});
   % data.VARIABLE_Power_SUA.(Pxx,PeakFreq,PeakArea,frequency)
   % data.VARIABLE_Power_MUA.(Pxx,PeakFreq,PeakArea,frequency)
   %   avgs voltage trace then calc power
 end
 
-data = ds.calcFRmulti(data, 'bin_size',1, 'bin_shift',1, varargin{:});
+data = dsCalcFRmulti(data, 'bin_size',1, 'bin_shift',1, varargin{:});
 % data.VARIABLE_FR_SUA
 % data.VARIABLE_FR_MUA
 %   sums all spikes in bin then calcs firing rate from bin time length
-data = ds.calcFRmulti(data, 'bin_size',1000, 'bin_shift',1000, 'output_suffix','_1sBins' ,varargin{:});
-data = ds.calcFRmulti(data, 'bin_size',100, 'bin_shift',100, 'output_suffix','_100msBins' ,varargin{:});
+data = dsCalcFRmulti(data, 'bin_size',1000, 'bin_shift',1000, 'output_suffix','_1sBins' ,varargin{:});
+data = dsCalcFRmulti(data, 'bin_size',100, 'bin_shift',100, 'output_suffix','_100msBins' ,varargin{:});
 
-data = ds.calcISI(data, varargin{:});
+data = dsCalcISI(data, varargin{:});
 % data.VARIABLE_ISI_SUA
 % data.VARIABLE_ISI_MUA
 %   combines all SUA ISIs
 
-data = ds.calcACF(data, varargin{:});
+data = dsCalcACF(data, varargin{:});
 % data.VARIABLE_ACF_SUA
 % data.VARIABLE_ACF_MUA
 %   adds all spikes for each time point, does gaussian conv, then takes acf
@@ -61,7 +61,7 @@ data.labels = [data.labels, acfTokens'];
 
 %calc power of spike acf for spike power
 if options.calc_power_flag
-  data = ds.calcPower(data, 'smooth_factor',1, 'timeBandwidthProduct',NW, 'variable','ACF_MUA', 'time_limits',[time(1) min(time(end)-dt, time(min(length(time),1000)-1))], varargin{:});
+  data = dsCalcPower(data, 'smooth_factor',1, 'timeBandwidthProduct',NW, 'variable','ACF_MUA', 'time_limits',[time(1) min(time(end)-dt, time(min(length(time),1000)-1))], varargin{:});
 end
 
 % default variable to process
@@ -124,13 +124,19 @@ for iPop = 1:length(popNames)
         break
       end
     end
-    finalD = thisD;
-    burstingISIbool(2) = any(finalD.mu<=5); % mu <= 5 ms = 200 Hz for bursting
     
-    counts = histc(muaISI, [-inf, 5, inf]);
-    counts(end) = []; %remove check for count=inf
-    burstProp = min(1, counts(1)/counts(2)); % isi < 5ms = 200 Hz for bursting
-    burstingISIbool(3) = (burstProp > .3);
+    try
+      finalD = thisD;
+      burstingISIbool(2) = any(finalD.mu<=5); % mu <= 5 ms = 200 Hz for bursting
+
+      counts = histc(muaISI, [-inf, 5, inf]);
+      counts(end) = []; %remove check for count=inf
+      burstProp = min(1, counts(1)/counts(2)); % isi < 5ms = 200 Hz for bursting
+      burstingISIbool(3) = (burstProp > .3);
+    catch
+      burstingISIbool = false;
+    end
+    
   else
     burstingISIbool = false;
   end
@@ -180,7 +186,7 @@ end %popnames
 if options.auto_gen_test_data_flag
   argout = {data}; % specific to this function
   
-  ds.saveAutoGenTestData(argin, argout);
+  dsSaveAutoGenTestData(argin, argout);
 end
 
 end %function

@@ -158,3 +158,49 @@ dsSimulate(s,'save_data_flag',1, 'save_results_flag',1, 'overwrite_flag',1, 'stu
   'plot_options',{
     {'varied_filename_flag', 1, 'format', 'jpg', 'visible', 'off'},...
   });
+
+%% Izhikevich neuron with noisy drive sweep
+% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+% Izhikevich study of neuro-computational properties (using Syntax 1)
+% based on: http://www.izhikevich.org/publications/izhikevich.m
+
+% Set where to save outputs
+study_dir = 'demo_izhikevich_classify_lattice';
+
+% define equations of cell model
+eqns={
+  'a=.02; b=.2; c=-65; d=6; I=14';
+  'dV/dt=.04*V^2+5*V+140-u+I; V(0)=-70';
+  'du/dt=a*(b*V-u); u(0)=-20';
+  'if(V>=30)(V=c;u=u+d)';
+  };
+
+% create DynaSim specification structure
+s=[];
+s.populations(1).name = 'pop1';
+s.populations(1).size = 1;
+s.populations(1).equations = eqns;
+
+% sim parameters
+time_end = 1000;
+dt = 0.01;
+
+% Specify what to vary
+P='pop1'; % name of population
+vary={
+  P,'a',linspace(-.1, 1, 5);
+  P,'b',linspace(-.1, 1, 5);
+  P,'c',[-45, -55, -65];
+  P,'d',linspace(0, 8, 5);
+  P,'I',[0, 30, 70]
+  };
+
+dsSimulate(s,'save_data_flag',1, 'save_results_flag',1, 'overwrite_flag',1, 'study_dir',study_dir, 'compile_flag',1,...
+  'vary',vary, 'solver','euler', 'dt',0.01, 'verbose_flag',1, 'tspan', [0 time_end], 'downsample_factor',1/dt, 'parallel_flag',1,...
+  'analysis_functions',{@classifyPop1, @calcFRcellOut},...
+  'analysis_options',{{},{'variable','*_V', 'bin_size',.99}},...
+  'plot_functions',{@dsPlot},...
+  'plot_options',{
+    {'varied_filename_flag', 1, 'format', 'jpg', 'visible', 'off'},...
+  });
