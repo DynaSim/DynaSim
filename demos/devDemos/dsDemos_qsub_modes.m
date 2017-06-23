@@ -11,7 +11,7 @@ else
 end
 
 % Set where to save outputs
-output_directory = ds.getConfig('demos_path');
+output_directory = dsGetConfig('demos_path');
 
 % move to root directory where outputs will be saved
 mkdirSilent(output_directory);

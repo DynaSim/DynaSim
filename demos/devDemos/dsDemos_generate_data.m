@@ -14,7 +14,7 @@ else
 end
 
 % Set where to save outputs
-output_directory = ds.getConfig('demos_path');
+output_directory = dsGetConfig('demos_path');
 
 % move to root directory where outputs will be saved
 mkdirSilent(output_directory);
@@ -64,7 +64,7 @@ vary={
   };
 dsSimulate(s,'save_data_flag',1,'study_dir',study_dir,...
                 'vary',vary,'verbose_flag',1, 'downsample_factor', 10, ...
-                'save_results_flag',1,'parallel_flag',1,'plot_functions',{@dsPlot,@dsPlot,@ds.plotFR2},'plot_options',{{'format','png','visible','off','figwidth',0.5,'figheight',0.5}, ...
+                'save_results_flag',1,'parallel_flag',1,'plot_functions',{@dsPlot,@dsPlot,@dsPlotFR2},'plot_options',{{'format','png','visible','off','figwidth',0.5,'figheight',0.5}, ...
                 {'format','png','visible','off','plot_type','rastergram','figwidth',0.5,'figheight',0.5},...
                 {'format','png','visible','off'}} );
             
@@ -75,14 +75,14 @@ dsSimulate(s,'save_data_flag',1,'study_dir',study_dir,...
 data=dsImport(study_dir);
 
 % Import plot files
-data_img = ds.importPlots(study_dir);
+data_img = dsImportPlots(study_dir);
 
 
 %% Downsample number of cells if necessary
 % (For saving space)
 
 % Convert to MDD object
-xp = ds.ds2MDD(data);
+xp = ds2MDD(data);
 
 % Num_cells_to_keep = 20;
 downsample_factor = 2;
@@ -103,13 +103,13 @@ data = ds.MDD2ds(xp);
 
 % Stores it in the DynaSim demos archive for adding to repo
 zipfname = zipDemoData(study_dir);
-% (can later recover this by running: ds.unzipDemoData(study_dir);)
+% (can later recover this by running: dsUnzipDemoData(study_dir);)
 
 %% 
 
 
 % Load into DynaSim structure
-[data_table,column_titles] = ds.dataField2Table (data_img,'plot_files');
+[data_table,column_titles] = dsDataField2Table (data_img,'plot_files');
 
 % Preview the contents of this table
 previewTable(data_table,column_titles);
