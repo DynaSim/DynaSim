@@ -54,24 +54,24 @@ if options.auto_gen_test_data_flag
   argin = [{model}, varargs]; % specific to this function
 end
 
-% evaluate params -> fixed_vars -> funcs
-types={'parameters','fixed_variables','functions'};
-for p=1:length(types)
-  type=types{p};
-  if ~isempty(model.(type))
-    fields=fieldnames(model.(type));
-    for i=1:length(fields)
-      val=model.(type).(fields{i});
-      if ~ischar(val)
-        val=toString(val,'compact');
-      end
-      % evaluate
-      eval(sprintf('%s = %s;',fields{i},val));
-%       evalin('caller',sprintf('%s = %s;',fields{i},val));
-%       assignin('caller',fields{i},val);
-    end
-  end
-end
+% % evaluate params -> fixed_vars -> funcs
+% types={'parameters','fixed_variables','functions'};
+% for p=1:length(types)
+%   type=types{p};
+%   if ~isempty(model.(type))
+%     fields=fieldnames(model.(type));
+%     for i=1:length(fields)
+%       val=model.(type).(fields{i});
+%       if ~ischar(val)
+%         val=toString(val,'compact');
+%       end
+%       % evaluate
+%       eval(sprintf('%s = %s;',fields{i},val));
+% %       evalin('caller',sprintf('%s = %s;',fields{i},val));
+% %       assignin('caller',fields{i},val);
+%     end
+%   end
+% end
 
 % evaluate ICs to get (# elems) per state var and set up generic state var X
 num_vars=length(model.state_variables);
@@ -112,7 +112,7 @@ end
 % prepare ODE system (comma-separated ODEs)
 ODEs=strtrim(struct2cell(model.ODEs));
 idx=cellfun(@isempty,regexp(ODEs,';$')); % lines that need semicolons
-ODEs(idx)=cellfun(@(x)[x ';'],ODEs(idx),'uni',0);
+ODEs(idx)=cellfun(@(x)[x '&'],ODEs(idx),'uni',0);
 ODEs=[ODEs{:}]; % concatenate ODEs into a single string
 
 % substitute in generic state vector X
@@ -126,15 +126,15 @@ elem_names=cat(2,IC_names{:});
 
 switch options.odefun_output
   case 'func_handle'
-    ODEs=strrep(ODEs,';',','); % replace semicolons by commas
+    ODEs=strrep(ODEs,'&',','); % replace semicolons by commas
     ODEs(end) = []; %remove trailing comma
     ODEFUN = eval(['@(t,X) [' ODEs ']'';']);
   case 'anonymous_func_string'
-    ODEs=strrep(ODEs,';',','); % replace semicolons by commas
+    ODEs=strrep(ODEs,'&',','); % replace semicolons by commas
     ODEs(end) = []; %remove trailing comma
     ODEFUN = ['@(t,X) [' ODEs ']'';'];
   case 'func_body'
-    ODEs=strrep(ODEs,';',',...\n'); % replace semicolons by commas with newline
+    ODEs=strrep(ODEs,'&',',...\n'); % replace semicolons by commas with newline
     ODEFUN = ODEs;
 end
 
