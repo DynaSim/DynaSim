@@ -14,7 +14,7 @@ function ha = tight_subplot(Nh, Nw, gap, marg_h, marg_w)
 %
 %  out:  ha     array of handles of the axes objects
 %                   starting from upper left corner, going row-wise as in
-%                   going row-wise as in
+%                   subplot.
 %
 %  Example: ha = tight_subplot(3,2,[.01 .03],[.1 .01],[.01 .01])
 %           for ii = 1:6; axes(ha(ii)); plot(randn(10,ii)); end
