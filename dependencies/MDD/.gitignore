@@ -1,0 +1,6 @@
+*~
+.directory
+.DS_Store
+outputs
+models/personal
+*.png
