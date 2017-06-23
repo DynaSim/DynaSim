@@ -14,21 +14,21 @@ else
 end
 
 % Set where to save outputs
-output_directory = ds.getConfig('demos_path');
+output_directory = dsGetConfig('demos_path');
 study_dir = fullfile(output_directory,'demo_sPING_100cells_3x3');
 
 %% Import the data
 
 % Make sure sample data exists; if not copy it into place
 if ~exist(study_dir,'dir')
-    ds.unzipDemoData(study_dir);
+    dsUnzipDemoData(study_dir);
 end
 
 % Load data in traditional DynaSim format
 data=dsImport(study_dir);
 
 % % Import saved plots from huge sweep of images
-% data_3D_plots = ds.importPlots(fullfile(output_directory,'demo_sPING_3b_3D'));
+% data_3D_plots = dsImportPlots(fullfile(output_directory,'demo_sPING_3b_3D'));
 
 
 %% Do some basic plots with dsPlot2
@@ -52,7 +52,7 @@ dsPlot2(data,'population','E','variable','v','E_Iapp',1:3,'varied2',[1,3],'do_zo
 % All basic plot_types from dsPlot should work
 % Options are availalbe from dsPlot:
 %     {'waveform','imagesc','rastergram','raster','power'}
-% And also from ds.plotFR2
+% And also from dsPlotFR2
 %     {'heatmapFR','heatmap_sortedFR','meanFR','meanFRdens'}
 dsPlot2(data,'population','all','plot_type','rastergram')              % Rastergram
 dsPlot2(data,'population','I','plot_type','heatmap_sortedFR')          % Firing rate (FR) heatmap
@@ -146,7 +146,7 @@ dsPlot2(data,'population','E','variable','/v|I_iGABAa_s/','force_last','variable
 close all
 
 % Import plot files
-data_img = ds.importPlots(study_dir);
+data_img = dsImportPlots(study_dir);
 dsPlot2(data_img);
 
 % Can also reference study_dir directly
@@ -168,7 +168,7 @@ study_dir2 = fullfile(output_directory,'demo_sPING_100cells_5x1');
 
 % Make sure sample data exists; if not copy it into place
 if ~exist(study_dir2,'dir')
-    ds.unzipDemoData(study_dir2);
+    dsUnzipDemoData(study_dir2);
 end
 
 % Load data in traditional DynaSim format
@@ -178,17 +178,17 @@ data_sim2=dsImport(study_dir2);
 dsPlot2(data_sim2);
 
 % Plot the merged new data with the old data
-data_merged = ds.mergeData(data,data_sim2);
+data_merged = dsMergeData(data,data_sim2);
 dsPlot2(data_merged,'do_mean',1)
 
 
 %% Merge simulations' saved images
 
-data_img_sim2=ds.importPlots(study_dir2);
+data_img_sim2=dsImportPlots(study_dir2);
 
 % Test plot of saved images from sim2
 dsPlot2(data_img_sim2);
 
 % Merge
-data_img_merged = ds.mergeData(data_img,data_img_sim2);
+data_img_merged = dsMergeData(data_img,data_img_sim2);
 dsPlot2(data_img_merged);
