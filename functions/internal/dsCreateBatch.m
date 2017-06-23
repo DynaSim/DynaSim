@@ -415,7 +415,7 @@ else % on cluster with qsub
 
     % add shell script to linux path if not already there
     %if status~=0
-      setenv('PATH', [getenv('PATH') ':' dynasim_functions ':' fullfile(dynasim_functions, '+ds')]);
+      setenv('PATH', [getenv('PATH') ':' dynasim_functions ':' fullfile(dynasim_functions, 'internal')]);
     %end
 
     if options.verbose_flag
