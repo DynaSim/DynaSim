@@ -571,7 +571,7 @@ if options.cluster_flag
     removeStudyinfo(); % remove studyinfo file
     renameMexFilesForUnitTesting(); % rename mex files for unit testing
     
-    ds.unit.saveAutoGenTestDir(argin, argout, [], dirOut);
+    dsUnit.saveAutoGenTestDir(argin, argout, [], dirOut);
   end
   
   %% unit test
@@ -685,7 +685,7 @@ if options.parallel_flag
     removeStudyinfo(); % remove studyinfo file
     renameMexFilesForUnitTesting(); % rename mex files for unit testing
     
-    ds.unit.saveAutoGenTestDir(argin, argout, [], dirOut);
+    dsUnit.saveAutoGenTestDir(argin, argout, [], dirOut);
   end
   
   %% unit test
@@ -795,7 +795,7 @@ if ~options.in_parfor_loop_flag % if not inside of parfor loop
     removeStudyinfo(); % remove studyinfo file
     renameMexFilesForUnitTesting(); % rename mex files for unit testing
     
-    ds.unit.saveAutoGenTestDir(argin, argout, [], dirOut);
+    dsUnit.saveAutoGenTestDir(argin, argout, [], dirOut);
   end
   
   %% unit test

@@ -291,7 +291,7 @@ end
 if options.auto_gen_test_data_flag
   argout = {data, studyinfo}; % specific to this function
 
-  ds.unit.saveAutoGenTestData(argin, argout);
+  dsUnit.saveAutoGenTestData(argin, argout);
 end
 
 end % main fn

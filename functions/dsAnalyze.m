@@ -332,7 +332,7 @@ end % fInd
 if options.auto_gen_test_data_flag
   argout = {result}; % specific to this function
   
-  %ds.unit.saveAutoGenTestData(argin, argout); % TODO: check if needs to be saveAutoGenTestDir
+  %dsUnit.saveAutoGenTestData(argin, argout); % TODO: check if needs to be saveAutoGenTestDir
 end
 
 end %main fn
@@ -421,7 +421,7 @@ end
 if options.auto_gen_test_data_flag
   argout = {data, studyinfo}; % specific to this function
   
-  %ds.unit.saveAutoGenTestDataLocalFn(argin, argout); % localfn
+  %dsUnit.saveAutoGenTestDataLocalFn(argin, argout); % localfn
 end
 
 end
@@ -503,7 +503,7 @@ filename = ds.nameFromVaried(data, prefix, filename);
 if options.auto_gen_test_data_flag
   argout = {filename}; % specific to this function
   
-  %ds.unit.saveAutoGenTestDataLocalFn(argin, argout); % localfn
+  %dsUnit.saveAutoGenTestDataLocalFn(argin, argout); % localfn
 end
 
 end
@@ -601,6 +601,6 @@ end
 if options.auto_gen_test_data_flag
   argout = {result}; % specific to this function
   
-  %ds.unit.saveAutoGenTestDataLocalFn(argin, argout); % localfn
+  %dsUnit.saveAutoGenTestDataLocalFn(argin, argout); % localfn
 end
 end % add_modifications

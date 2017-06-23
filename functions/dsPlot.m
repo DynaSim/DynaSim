@@ -882,7 +882,7 @@ end % end loop over figure sets
 if options.auto_gen_test_data_flag
   argout = {handles}; % specific to this function
 
-  ds.unit.saveAutoGenTestDir(argin, argout);
+  dsUnit.saveAutoGenTestDir(argin, argout);
 end
 
 % 1 sim, 1 pop, 1 var (X)
