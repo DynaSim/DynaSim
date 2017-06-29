@@ -490,7 +490,7 @@ else
     fInd = fInd{1}{1};
 
     % check if 'plot_type' given as part of plot_options
-    plot_options = ds.checkOptions(plot_options,{'plot_type',['plot' fInd],[]},false);
+    plot_options = dsCheckOptions(plot_options,{'plot_type',['plot' fInd],[]},false);
 
     prefix = plot_options.plot_type; % will be waveform by default due to CheckOptions in main fn
   else % ~plotFnBool
@@ -498,7 +498,7 @@ else
   end
 end
 
-filename = ds.nameFromVaried(data, prefix, filename);
+filename = dsNameFromVaried(data, prefix, filename);
 
 %% auto_gen_test_data_flag argout
 if options.auto_gen_test_data_flag
