@@ -22,6 +22,7 @@ function [data,studyinfo,result] = dsSimulate(model,varargin)
 %     'random_seed' : seed for random number generator (default: 'shuffle', set randomly) (usage: rng(options.random_seed))
 %     'compile_flag': whether to compile simulation using coder instead of
 %                     interpreting Matlab {0 or 1} (default: 0)
+%     'sparse_flag' : whether to convert numeric fixed variables to sparse matrices {0 or 1} (default: 0)
 %
 %   options for running sets of simulations:
 %     'vary'        : (default: [], vary nothing): cell matrix specifying model
@@ -246,6 +247,7 @@ options=dsCheckOptions(varargin,{...
   'parallel_flag',0,{0,1},...     % whether to run simulations in parallel (using parfor)
   'num_cores',4,[],... % # cores for parallel processing (SCC supports 1-12)
   'compile_flag',0,{0,1},... % exist('codegen')==6, whether to compile using coder instead of interpreting Matlab
+  'sparse_flag',0,{0,1},... % whether to sparsify fixed variables before simulation
   'disk_flag',0,{0,1},...            % whether to write to disk during simulation instead of storing in memory
   'save_data_flag',0,{0,1},...  % whether to save simulated data
   'save_results_flag',0,{0,1},...  % whether to save results from simulated data
@@ -286,6 +288,10 @@ end
 
 %% prepare solve options
 
+if options.compile_flag && options.sparse_flag
+  error('The Matlab Coder toolbox does not support sparse matrices. Choose either ''compile_flag'' or ''sparse_flag''.');
+end
+
 if options.parallel_flag && feature('numCores') == 1 % TODO: check on windows and single core machine
   fprintf('Setting ''parallel_flag''=0 since only 1 core detected on this machine.\n')
   options.parallel_flag = 0;
@@ -297,10 +303,6 @@ if options.compile_flag && ~options.reduce_function_calls_flag
 end
 
 if options.cluster_flag && ~options.save_data_flag
-  %   options.save_data_flag=1;
-  %   if options.verbose_flag
-  %     fprintf('Setting ''save_data_flag'' to 1 for storing data from batch jobs for later access.\n');
-  %   end
   options.save_results_flag=1;
   if options.verbose_flag
     fprintf('Setting ''save_results_flag'' to 1 for storing results of batch jobs for later access.\n');
@@ -424,12 +426,7 @@ if ~isempty(options.analysis_functions)
   elseif length(options.analysis_options) ~= length(options.analysis_functions)
     error('there must be one option cell array per analysis function.');
   end
-  
-  %   if options.cluster_flag~=1
-  %     warning('analysis functions will not be run after simulation. currently automatic post-simulation analyses are supported only for cluster jobs.');
-  %     options.analysis_functions=[];
-  %     options.analysis_options=[];
-  %   end
+
 end
 
 %% prepare plot functions and options
@@ -464,11 +461,6 @@ if ~isempty(options.plot_functions)
   elseif length(options.plot_options) ~= length(options.plot_functions)
     error('there must be one option cell array per plot function.');
   end
-  %   if options.cluster_flag~=1
-  %     warning('plot functions will not be run after simulation. currently automatic post-simulation plotting are supported only for cluster jobs.');
-  %     options.plot_functions=[];
-  %     options.plot_options=[];
-  %   end
 end
 
 %% 1.0 prepare model and study structures for simulation
