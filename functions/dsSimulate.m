@@ -640,11 +640,9 @@ if options.parallel_flag
   clear data
   
   parfor sim=1:length(modifications_set)
-    %data(sim)=dsSimulate(model,'modifications',modifications_set{sim},'solve_file',solve_file,keyvals{:});       % Original parfor code
     data(sim)=dsSimulate(model,'modifications',modifications_set{sim},keyvals{:},'studyinfo',studyinfo,'sim_id',sim, 'in_parfor_loop_flag', 1);  % My modification; now specifies a separate study directory for each sim
     %disp(sim);
   end
-  
   
   % Clean up files leftover from sim
   % Unfortunately we can't remove the folders due to locked .nfs files.
@@ -657,8 +655,6 @@ if options.parallel_flag
   [~,result] = system('find * -name "core*"','-echo');
   if ~isempty(result); fprintf(strcat(result,'\n')); warning('Core files found. Consider deleting to free up space'); end
   
-  % close pool
-  %   delete(gcp)
   % TODO: sort data sets by things varied in modifications_set
   % TODO: Figure out how to delete locked .nfs files
   
@@ -851,7 +847,7 @@ end % in_parfor_loop_flag
       if options.save_data_flag
         % check if output data already exists. load if so and skip simulation
         data_file=studyinfo.simulations(sim_ind).data_file;
-        if exist(data_file,'file') && options.overwrite_flag==0
+        if exist(data_file,'file') && ~options.overwrite_flag
           if 1%options.verbose_flag
             % note: this is important, should always display
             fprintf('Loading data from %s\n',data_file);
@@ -1206,6 +1202,7 @@ function options = backward_compatibility(options)
 option_names = {...
   'override','modifications';
   'timelimits','tspan';
+  'time_limits','tspan';
   'IC','ic';
   'verbose','verbose_flag';
   'SOLVER','solver';
