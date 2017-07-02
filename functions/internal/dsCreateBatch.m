@@ -60,7 +60,6 @@ end
 
 %% main fn
 % Set up studyinfo structure, study directory and output file names
-%[studyinfo,options.simulator_options]=dsSetupStudy(base_model,modifications_set,options.simulator_options);
 [studyinfo,options.simulator_options]=dsSetupStudy(base_model,'modifications_set',modifications_set,'simulator_options',options.simulator_options,'process_id',options.process_id);
 study_file=fullfile(studyinfo.study_dir,'studyinfo.mat');
 num_simulations=length(modifications_set);
@@ -179,6 +178,20 @@ studyinfo.paths.batch_dir = batch_dir;
 options.simulator_options.parallel_flag = 0;
 options.simulator_options.cluster_flag = 0;
 options.simulator_options.verbose_flag = 1; % turn on verbose for cluster logs (stdout)
+
+% collect paths to add to all jobs
+% reason: adding paths to jobs supports m-files stored/associated with mechanism files
+% add dynasim root path (where functions are located)
+addpaths={dynasim_path,dynasim_functions};
+% add the toolbox models directory and all subdirectories
+  % note: users can store their models as subdirectories of dynasim/models
+  % and incorporate them in their models without worrying about paths.
+addpaths=cat(2,addpaths,fullfile(dynasim_path,'models'));
+%addpaths=regexp(genpath(dynasim_path),':','split');
+if ~isempty(mech_paths)
+  addpaths=cat(2,addpaths,mech_paths); 
+  addpaths=unique(addpaths);
+end
 
 % create jobs (k)
 jobs={};
@@ -480,6 +493,11 @@ end
 
     % create job file
     fjob=fopen(job_file,'wt');
+    
+    % add paths
+    for p=1:length(addpaths)
+      fprintf(fjob,'addpath %s\n',addpaths{p});
+    end
 
     % load studyinfo using helper function to avoid busy file errors
     %fprintf(fjob,'studyinfo=dsCheckStudyinfo(''%s'',''process_id'',%g);\n',study_file,sim_ids(1), varargin{:});
