@@ -719,40 +719,6 @@ function spec = backward_compatibility(spec, varargin)
       spec.populations=rmfield(spec.populations,'dynamics');
     end
 
-    % rename population "mechanisms" to "mechanism_list"
-    if isfield(spec.populations,'mechanisms')
-      for i=1:length(spec.populations)
-        spec.populations(i).mechanism_list=spec.populations(i).mechanisms;
-      end
-      spec.populations=rmfield(spec.populations,'mechanisms');
-    end
-  end
-
-  % check for old (pre,post) organization of connections substructure
-  if isfield(spec,'connections') && size(spec.connections,1)>1
-    % convert to linear connections structure array
-    old=spec.connections;
-    spec=rmfield(spec,'connections');
-    index=1;
-    for i=1:size(old,1)
-      for j=1:size(old,2)
-        if ~isempty(old(i,j).mechanisms)
-          spec.connections(index).source=spec.populations(i).name;
-          spec.connections(index).target=spec.populations(j).name;
-
-          if isfield(old,'mechanisms')
-            spec.connections(index).mechanism_list=old(i,j).mechanisms;
-          elseif isfield(old,'mechanism_list')
-            spec.connections(index).mechanism_list=old(i,j).mechanism_list;
-          end
-
-          if isfield(old,'parameters')
-            spec.connections(index).parameters=old(i,j).parameters;
-          end
-          index=index+1;
-        end
-      end
-    end
   end
 
   if isfield(spec,'connections') && isfield(spec.connections,'direction')
