@@ -598,11 +598,83 @@ for i=1:length(state_variables)
   end
 end
 
-% add index to state variables in ODEs
+% add index to state variables in ODEs and look for delay differential equations
+delayinfo=[];
 odes = struct2cell(model.ODEs);
 for i=1:length(odes)
   for j=1:length(state_variables)
     odes{i}=dsStrrep(odes{i}, state_variables{j}, [state_variables{j} index_lasts{j}], '', '', varargin{:});
+    % #####################################################################
+    % COLLECT DELAY DIFFERENTIAL EQUATION INFO
+    % search for delays: [state_variables{j} index_lasts{j} '(t-']
+    tmp=strrep(strrep([state_variables{j} index_lasts{j}],'(','\('),')','\)');
+    if ~isempty(regexp(odes{i},[tmp '\(t'],'once'))
+      matches=regexp(odes{i},[tmp '\(t-[\w\.,:]+\)'],'match');
+      for k=1:length(matches)
+        % determine amount of delay for each occurrence of a delay to this state variable
+        %     note: account for user-specified X(t-tau) and X(t-tau,:)
+        %     note: account for tau as variable defined elsewhere or numeric
+        % look for: X(t-#)
+        delay=cell2num(regexp(matches{k},'\(t-([\.\d]+)\)','tokens','once'));
+        if isempty(delay)
+          % look for: X(t-#,:)
+          delay=cell2num(regexp(matches{k},'\(t-([\.\d]+),:\)','tokens','once'));
+        end
+        if isempty(delay)
+          % look for: X(t-param)
+          delay=regexp(matches{k},'\(t-([\w\.]+)\)','tokens','once');
+        end
+        if isempty(delay)
+          % look for: X(t-param,:)
+          delay=regexp(matches{k},'\(t-([\w\.]+),:\)','tokens','once');
+        end        
+        if ischar(delay{1})
+          delay=strrep(delay{1},parameter_prefix,''); % remove parameter prefix
+          delay=strrep(delay,',:',''); % remove population dimension from index to delay matrix
+          % look for parameter with delay length
+          if isfield(model.parameters,delay)
+            delay=model.parameters.(delay);
+          else
+            error('delay parameter ''%s'' not found.',delay);
+          end
+        end
+        if ~isempty(delay) && isnumeric(delay)
+          delay_samp = ceil(delay/options.dt);
+          delayinfo(end+1).variable=state_variables{j};
+          delayinfo(end).strmatch=matches{k};
+          delayinfo(end).delay_samp=delay_samp;
+          delayinfo(end).ode_index=i;
+        end          
+      end
+    end
+    % #####################################################################
+  end
+end
+% #####################################################################
+% PROCESS DELAY DIFFERENTIAL EQUATION INFO
+% determine max delay for each state variable
+if ~isempty(delayinfo)
+  delay_vars=unique({delayinfo.variable});
+  delay_maxi=zeros(size(delay_vars));
+  for i=1:length(delay_vars)
+    if i==1
+      fprintf(fid,'%% DELAY MATRICES:\n');      
+    end
+    % find max delay for this state variable
+    idx=ismember({delayinfo.variable},delay_vars{i});
+    Dmax=max([delayinfo(idx).delay_samp]);
+    delay_maxi(i)=Dmax;
+    % convert delay indices into delay vector indices based on max delay
+    tmps=num2cell(Dmax-[delayinfo(idx).delay_samp]);
+    [delayinfo(idx).delay_index]=deal(tmps{:});
+    % initialize delay matrix with max delay ICs and all time points
+    fprintf(fid,'%s_delay = zeros(nsamp+%g,size(%s,2));\n',delayinfo(i).variable,Dmax,delayinfo(i).variable);
+    fprintf(fid,'  %s_delay(1:%g,:) = repmat(%s(1,:),[%g 1]);\n',delayinfo(i).variable,Dmax,delayinfo(i).variable,Dmax);      
+  end
+  % replace delays in ODEs with indices to delay matrices
+  for i=1:length(delayinfo)
+    rep=sprintf('%s_delay(k+%g,:)',delayinfo(i).variable,delayinfo(i).delay_index);
+    odes{delayinfo(i).ode_index}=strrep(odes{delayinfo(i).ode_index},delayinfo(i).strmatch,rep);
   end
 end
 
@@ -667,6 +739,19 @@ else % store every downsample_factor time point in memory or on disk
   
   fprintf(fid,'  n=n+1;\n');
   fprintf(fid,'end\n');
+end
+% update delay matrices
+if ~isempty(delayinfo)
+  fprintf(fid,'  %% ------------------------------------------------------------\n');
+  fprintf(fid,'  %% Update delay matrices:\n');
+  fprintf(fid,'  %% ------------------------------------------------------------\n');
+  for i=1:length(delay_vars)
+    if options.downsample_factor==1 && options.disk_flag==0
+      fprintf(fid,'  %s_delay(k+%g,:)=%s(k,:);\n',delay_vars{i},delay_maxi(i),delay_vars{i});
+    else
+      fprintf(fid,'  %s_delay(k+%g,:)=%s_last;\n',delay_vars{i},delay_maxi(i),delay_vars{i});      
+    end
+  end
 end
 
 fprintf(fid,'end\n');
