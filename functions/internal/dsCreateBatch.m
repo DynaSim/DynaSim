@@ -213,7 +213,6 @@ if ~options.one_solve_file_flag
     % only run simulations if data_file does not exist (unless overwrite_flag=1)
     proc_sims=[]; % simulations to run in this job
     for j=1:length(sim_ids)
-      %if ~exist(studyinfo.simulations(sim_ids(j)).data_file,'file') || options.overwrite_flag
       if (options.simulator_options.save_data_flag && ~exist(studyinfo.simulations(sim_ids(j)).data_file,'file')) || ...
           (options.simulator_options.save_results_flag && ~exist(studyinfo.simulations(sim_ids(j)).result_files{1},'file')) || ...
           options.overwrite_flag
@@ -271,10 +270,8 @@ if strcmp(options.qsub_mode, 'loop')
   if options.verbose_flag
     fprintf('Creating file listing jobs in batch directory: %s\n',script_filename);
   end
-end
 
-% write to file
-if strcmp(options.qsub_mode, 'loop')
+  % write to file
   fScript=fopen(script_filename,'wt');
 
   for j=1:length(jobs)
@@ -331,26 +328,23 @@ if ~options.one_solve_file_flag
     studyinfo.simulations(sim).simulator_options.sim_id=studyinfo.simulations(sim).sim_id;
     studyinfo.simulations(sim).error_log='';
 
-    % copy studyinfo to batch_dir for each simulation
-    %this_study_file=fullfile(batch_dir,sprintf('studyinfo_%g.mat',sim));
-    %save(this_study_file,'studyinfo');
-
-    % copy studyinfo file to batch_dir for each simulation
-    for sim=1:num_simulations
-      this_study_file=fullfile(batch_dir,sprintf('studyinfo_%g.mat',sim));
-
-      if sim==1
-        save(this_study_file,'studyinfo');
-        first_study_file=this_study_file;
-      else
-        % use copyfile() after saving first b/c >10x faster than save()
-        [success,msg]=copyfile(first_study_file,this_study_file);
-
-        if ~success, error(msg); end
-      end
-    end
-
   end %sim
+  
+  % copy studyinfo file to batch_dir for each simulation
+  for sim=1:num_simulations
+    this_study_file=fullfile(batch_dir,sprintf('studyinfo_%g.mat',sim));
+
+    if sim==1
+      save(this_study_file,'studyinfo');
+      first_study_file=this_study_file;
+    else
+      % use copyfile() after saving first b/c >10x faster than save()
+      [success,msg]=copyfile(first_study_file,this_study_file);
+
+      if ~success, error(msg); end
+    end
+  end %sim
+
 else %one_solve_file_flag
   % set studyinfo solve_file to use for this simulation
   [studyinfo.simulations.solve_file] = deal(full_solve_file);
