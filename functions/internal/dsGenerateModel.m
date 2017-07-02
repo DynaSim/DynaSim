@@ -448,8 +448,8 @@ end
     Nsrc=[src '_Npop'];
     Ndst=[dst '_Npop'];
     
-    old={'Npre','N[1]','N_pre','Npost','N_post','N[0]','Npop','N_pop'};
-    new={Nsrc,Nsrc,Nsrc,Ndst,Ndst,Ndst,Ndst,Ndst};
+    old={'Npre','N[1]','N_pre','Npost','N_post','N[0]','Npop','N_pop','tspike_pre','tspike_post','tspike'};
+    new={Nsrc,Nsrc,Nsrc,Ndst,Ndst,Ndst,Ndst,Ndst,[src '_tspike'],[dst '_tspike'],[dst '_tspike']};
     for p=1:length(old)
       name_map(end+1,:)={old{p},new{p},namespace,'parameters'};
     end
