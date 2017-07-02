@@ -90,7 +90,7 @@ model=dsCheckModel(model, varargin{:});
 separator=','; % ',', '\\t'
 
 %% 1.0 prepare model info
-parameter_prefix='p.';%'pset.p.';
+parameter_prefix='p.';
 state_variables=model.state_variables;
 
 % 1.1 eliminate internal (anonymous) function calls from model equations
@@ -463,6 +463,10 @@ if ~isempty(model.monitors)
         % variables in which to search. add spikes to output data file.
       end
       
+      % number of spike times to store for each cell
+      spike_buffer_size=2;%5;%100;
+      % TODO: add support for: monitor VAR.spikes(thresh,buffer_size) (edit next if-then statements)
+      
       if isempty(monitor_expression{i})
         spike_threshold=0;
       elseif isempty(regexp(monitor_expression{i},'[^\d]','once'))
@@ -474,8 +478,12 @@ if ~isempty(model.monitors)
       end
       
       % approach: add conditional check for upward threshold crossing
+      pop_name=regexp(monitor_names{i},'_','split');
+      pop_name=pop_name{1};
       var_spikes=regexp(monitor_names{i},'(.*)_spikes$','tokens','once');
       var_spikes=var_spikes{1}; % variable to monitor
+      var_tspikes=[pop_name '_tspike']; % only allow one event type to be tracked per population (i.e., it is ok to use pop_name, like 'E', as namespace instead of pop_var, like 'E_v')
+      var_buffer_index=[pop_name '_buffer_index'];
       
       if ismember(var_spikes,model.state_variables)
         model.conditionals(end+1).namespace='spike_monitor';
@@ -488,13 +496,27 @@ if ~isempty(model.monitors)
             sprintf('%s(n,:)>=%s&%s(n-1,:)<%s',var_spikes,spike_threshold,var_spikes,spike_threshold);
         end
         
-        model.conditionals(end).action=sprintf('%s(n,conditional_test)=1',monitor_names{i});
+        action1=sprintf('%s(n,conditional_test)=1',monitor_names{i});
+        action2=sprintf('inds=find(conditional_test); for j=1:length(inds), i=inds(j); %s(%s(i),i)=t; %s(i)=mod(-1+(%s(i)+1),%g)+1; end',var_tspikes,var_buffer_index,var_buffer_index,var_buffer_index,spike_buffer_size);
+        model.conditionals(end).action=sprintf('%s;%s',action1,action2);
         model.conditionals(end).else=[];
         % move spike monitor to first position (ie.., to evaluate before other conditionals)
         model.conditionals=model.conditionals([length(model.conditionals) 1:length(model.conditionals)-1]);
         % remove from monitor list
         model.monitors=rmfield(model.monitors,monitor_names{i});
       end
+
+      % initialize spike buffer and buffer index
+      if options.save_parameters_flag
+        % tspike = -inf(buffer_size,npop):
+        fprintf(fid,'%s = -inf(%g,%s%s_Npop);\n',var_tspikes,spike_buffer_size,parameter_prefix,pop_name);
+        % buffer_index = ones(1,npop):
+        fprintf(fid,'%s = ones(1,%s%s_Npop);\n',var_buffer_index,parameter_prefix,pop_name);
+      else
+        fprintf(fid,'%s = -inf(%g,%g);\n',var_tspikes,spike_buffer_size,model.parameters.([pop_name '_Npop']));
+        fprintf(fid,'%s = ones(1,%g);\n',var_buffer_index,model.parameters.([pop_name '_Npop']));
+      end
+      
     elseif isempty(monitor_expression{i}) && isfield(model.functions,monitor_names{i})
     % set expression if monitoring function referenced by name
       tmp=regexp(model.functions.(monitor_names{i}),'@\([a-zA-Z][\w,]*\)\s*(.*)','tokens','once');
