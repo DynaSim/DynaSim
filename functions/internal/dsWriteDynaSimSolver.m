@@ -22,6 +22,7 @@ function [outfile,options] = dsWriteDynaSimSolver(model,varargin)
 %                    randomly) (usage: rng(options.random_seed))
 %     'disk_flag'  : whether to write to disk during simulation instead of
 %                    storing in memory {0 or 1} (default: 0)
+%     'sparse_flag' : whether to convert numeric fixed variables to sparse matrices {0 or 1} (default: 0)
 %
 % Outputs:
 %   - solver_file (e.g., solve_ode.m): function that numerically integrates the model
@@ -81,6 +82,7 @@ options=dsCheckOptions(varargin,{...
   'fileID',1,[],...
   'compile_flag',0,{0,1},... % whether to prepare script for being compiled using coder instead of interpreting Matlab
   'verbose_flag',1,{0,1},...
+  'sparse_flag',0,{0,1},...
   'one_solve_file_flag',0,{0,1},... % use only 1 solve file of each type, but can't vary mechs yet
   'benchmark_flag',0,{0,1},...
   },false);
@@ -341,6 +343,10 @@ if ~isempty(model.fixed_variables)
   expressions=struct2cell(model.fixed_variables);
   for i=1:length(names)
     fprintf(fid,'%s = %s;\n',names{i},expressions{i});
+    if options.sparse_flag
+      % create sparse matrix
+      fprintf(fid,'%s = sparse(%s);\n',names{i},names{i});
+    end
   end
 end
 
