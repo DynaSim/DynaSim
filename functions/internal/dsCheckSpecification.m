@@ -586,30 +586,6 @@ for f=1:length(fields)
   end
 end
 
-% TODO: delete the following block after testing
-% [~,files]=dsLocateModelFiles(spec);
-% if ~isempty(files)
-%   fnames={};
-%   for f=1:length(files)
-%     [~,name]=fileparts2(files{f});
-%     fnames{f}=name;
-%   end
-%   
-%   % update population and connection mechanism lists
-%   fields={'populations','connections'};
-%   for f=1:length(fields)
-%     object=fields{f};
-%     for i=1:length(spec.(object))
-%       for j=1:length(spec.(object)(i).mechanism_list)
-%         mech=spec.(object)(i).mechanism_list{j};
-%         if ismember(mech,fnames)
-%           spec.(object)(i).mechanism_list{j}=files{find(ismember(fnames,mech),1,'first')};
-%         end
-%       end
-%     end
-%   end
-% end
-
 %% auto_gen_test_data_flag argout
 if options.auto_gen_test_data_flag
   argout = {spec}; % specific to this function
