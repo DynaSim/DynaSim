@@ -287,31 +287,7 @@ for i=1:npops
         name_map=cat(1,name_map,tmpmap);
         linker_pops=cat(2,linker_pops,repmat({specification.populations(i).name},[1 length(tmpmodel.linkers)]));
       end
-    end
-    
-    % TODO: delete following block after testing
-%     % parse mechanism equations
-%     [tmpmodel,tmpmap]=dsImportModel(mechanism,'namespace',MechScope,'ic_pop',specification.populations(i).name,'user_parameters',parameters);
-%     % replace 1st linker name by the one in specification
-%     if ~isempty(new_linker) && ~isempty(tmpmodel.linkers)
-%       % first try to find 1st linker target starting with @
-%       links_at=find(~cellfun(@isempty,regexp({tmpmodel.linkers.target},'^@','once')));
-%       
-%       if ~isempty(links_at)
-%         % use first link with target prepended by '@'
-%         link_ind=links_at(1);
-%       else
-%         % use first link
-%         link_ind=1;
-%       end
-%       
-%       tmpmodel.linkers(link_ind).target=['@' new_linker];
-%     end
-%     
-%     % combine sub-model with other sub-models
-%     model=dsCombineModels(model,tmpmodel, varargin{:});
-%     name_map=cat(1,name_map,tmpmap);
-%     linker_pops=cat(2,linker_pops,repmat({specification.populations(i).name},[1 length(tmpmodel.linkers)]));
+    end    
   end
   pop=specification.populations(i).name;
   
