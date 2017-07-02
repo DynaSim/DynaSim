@@ -61,17 +61,6 @@ elseif isstruct(input)
         mechanism_list{end+1}=input.populations(i).equations;
       end
     end
-    
-% TODO: delete the following block after testing    
-%     m={input.populations.mechanism_list};
-%     m=unique([m{:}],'stable');
-%     mechanism_list=cat(2,mechanism_list,m);
-%     % add equations to mechanism_list in case it contains a .eqns file
-%     for i=1:length(input.populations)
-%       if ~isempty(input.populations(i).equations)
-%         mechanism_list{end+1}=input.populations(i).equations;
-%       end
-%     end
   end
   if isfield(input,'connections') && isstruct(input.connections)
     % extract mechanism_list connections in DynaSim specification structure
@@ -95,10 +84,6 @@ elseif isstruct(input)
       end
       mechanism_list=cat(2,mechanism_list,m);
     end        
-% TODO: delete the following block after testing    
-%     m={input.connections.mechanism_list};
-%     m=unique([m{:}],'stable');
-%     mechanism_list=cat(2,mechanism_list,m);
   end
   % remove mechanisms present in specification structure
   if ~isempty(mechanism_list) && isfield(input,'mechanisms') && isfield(input.mechanisms,'name')
