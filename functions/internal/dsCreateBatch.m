@@ -488,11 +488,6 @@ end
     % create job file
     fjob=fopen(job_file,'wt');
     
-    % add paths
-    for p=1:length(addpaths)
-      fprintf(fjob,'addpath %s\n',addpaths{p});
-    end
-
     % load studyinfo using helper function to avoid busy file errors
     %fprintf(fjob,'studyinfo=dsCheckStudyinfo(''%s'',''process_id'',%g);\n',study_file,sim_ids(1), varargin{:});
     %fprintf(fjob,'load(''%s'',''studyinfo'');\n',study_file);
@@ -519,6 +514,11 @@ end
       fprintf(fjob,'SimIDs = simIDstart:min(simIDlast,simIDstart+simIDstep-1);\n');
     end
 
+    % add paths
+    for p=1:length(addpaths)
+      fprintf(fjob,'addpath %s\n',addpaths{p});
+    end
+    
     % loop over and run simulations in this job
     if options.parallel_flag
       % set parallel computing options
