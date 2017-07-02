@@ -615,10 +615,10 @@ for i=1:length(odes)
         %     note: account for user-specified X(t-tau) and X(t-tau,:)
         %     note: account for tau as variable defined elsewhere or numeric
         % look for: X(t-#)
-        delay=cell2num(regexp(matches{k},'\(t-([\.\d]+)\)','tokens','once'));
+        delay=cellstr2num(regexp(matches{k},'\(t-([\.\d]+)\)','tokens','once'));
         if isempty(delay)
           % look for: X(t-#,:)
-          delay=cell2num(regexp(matches{k},'\(t-([\.\d]+),:\)','tokens','once'));
+          delay=cellstr2num(regexp(matches{k},'\(t-([\.\d]+),:\)','tokens','once'));
         end
         if isempty(delay)
           % look for: X(t-param)
@@ -627,7 +627,7 @@ for i=1:length(odes)
         if isempty(delay)
           % look for: X(t-param,:)
           delay=regexp(matches{k},'\(t-([\w\.]+),:\)','tokens','once');
-        end        
+        end
         if iscell(delay) && ischar(delay{1})
           delay=strrep(delay{1},parameter_prefix,''); % remove parameter prefix
           delay=strrep(delay,',:',''); % remove population dimension from index to delay matrix
