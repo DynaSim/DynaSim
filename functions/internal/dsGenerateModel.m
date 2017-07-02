@@ -681,8 +681,10 @@ end
 %% 4.0 finalize
 
 % 4.1 sort .ODEs and .ICs wrt .state_variables
-model.ODEs = orderfields(model.ODEs,model.state_variables);
-model.ICs = orderfields(model.ICs,model.state_variables);
+if ~isempty(model.ODEs)
+  model.ODEs = orderfields(model.ODEs,model.state_variables);
+  model.ICs = orderfields(model.ICs,model.state_variables);
+end
 
 % 4.2 convert to numeric parameters
 c = struct2cell(model.parameters);
@@ -695,8 +697,6 @@ idx2=find(cellfun(@isempty,regexp(c(idx1),'[a-z_A-Z]')) | ~cellfun(@isempty,rege
 
 % convert those strings which contain numeric values
 c(idx1(idx2)) = cellfun(@eval,c(idx1(idx2)),'uni',0);
-%idx=cellfun(@isempty,regexp(c,'[a-z_A-Z]')) | ~cellfun(@isempty,regexp(c,'^\s*\[*\s*inf\s*\]*\s*$','ignorecase'));
-%c(idx) = cellfun(@eval,c(idx),'uni',0);
 f = fieldnames(model.parameters);
 model.parameters = cell2struct(c,f,1);
 
