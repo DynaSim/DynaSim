@@ -543,10 +543,10 @@ if ~isempty(model.functions) && ~isempty(model.linkers)
   expressions={model.linkers.expression};
   [~,I,J]=intersect(function_names,expressions);
   for i=1:length(I)
-    e=model.functions.(function_names{J(i)}); % function expression (eg,'@(x,y,z)x-(y-z)')
+    e=model.functions.(function_names{I(i)}); % function expression (eg,'@(x,y,z)x-(y-z)')
     v=regexp(e,'@(\([\w,]+\))','tokens','once'); % function input list (eg, '(x,y,z)')
     if ~isempty(v)
-      model.linkers(I(i)).expression=[model.linkers(I(i)).expression v{1}];
+      model.linkers(J(i)).expression=[model.linkers(J(i)).expression v{1}];
     end
   end
 end
