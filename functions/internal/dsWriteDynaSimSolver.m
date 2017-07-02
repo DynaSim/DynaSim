@@ -628,7 +628,7 @@ for i=1:length(odes)
           % look for: X(t-param,:)
           delay=regexp(matches{k},'\(t-([\w\.]+),:\)','tokens','once');
         end        
-        if ischar(delay{1})
+        if iscell(delay) && ischar(delay{1})
           delay=strrep(delay{1},parameter_prefix,''); % remove parameter prefix
           delay=strrep(delay,',:',''); % remove population dimension from index to delay matrix
           % look for parameter with delay length
