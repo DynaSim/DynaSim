@@ -16,6 +16,7 @@ function [model,name_map] = dsGenerateModel(specification, varargin)
 %                        before generating the model, see dsApplyModifications
 %                        for more details (default?: []).
 %     'open_link_flag' : whether to leave linker identifiers in place (default: 0)
+%     'auto_gen_test_data_flag': whether to save model for unit testing (default: 0)
 %
 % Outputs:
 %   - model: DynaSim model structure (see dsCheckModel for more details):
