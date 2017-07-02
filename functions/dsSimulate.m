@@ -463,6 +463,16 @@ if ~isempty(options.plot_functions)
   end
 end
 
+% check path
+dynasim_path=fileparts(which(mfilename));
+onPath=~isempty(strfind(path,[dynasim_path, pathsep]));
+if ~onPath
+  if options.verbose_flag
+    fprintf('adding dynasim and sub-directory to Matlab path: %s\n',dynasim_path);
+  end
+  addpath(genpath(dynasim_path)); % necessary b/c of changing directory for simulation
+end
+
 %% 1.0 prepare model and study structures for simulation
 
 % handle special case of input equations with vary() statement
