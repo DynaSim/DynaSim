@@ -250,38 +250,68 @@ for i=1:npops
     if numel(mechanism_)>1, new_linker=mechanism_{2}; else new_linker=[]; end
     
     % set mechanism namespace
-    if any(mechanism==':')
+    [~,MechID]=fileparts2(mechanism);
+    if any(MechID==':')
       % exclude host name from namespace
-      tmp=regexp(mechanism,':','split');
+      tmp=regexp(MechID,':','split');
       MechScope=[specification.populations(i).name '_' tmp{2}];
     else
       % extract mechanism file name without path
-      [~,MechID]=fileparts2(mechanism);
       MechScope=[specification.populations(i).name '_' MechID];
     end
 
-    % parse mechanism equations
-    [tmpmodel,tmpmap]=dsImportModel(mechanism,'namespace',MechScope,'ic_pop',specification.populations(i).name,'user_parameters',parameters);
-    % replace 1st linker name by the one in specification
-    if ~isempty(new_linker) && ~isempty(tmpmodel.linkers)
-      % first try to find 1st linker target starting with @
-      links_at=find(~cellfun(@isempty,regexp({tmpmodel.linkers.target},'^@','once')));
-      
-      if ~isempty(links_at)
-        % use first link with target prepended by '@'
-        link_ind=links_at(1);
-      else
-        % use first link
-        link_ind=1;
+    % use mechanism equations in specification if present
+    if isfield(specification.populations,'mechanisms') && ~isempty(specification.populations(i).mechanisms)
+      if ismember(MechID,{specification.populations(i).mechanisms.name})
+        idx=ismember({specification.populations(i).mechanisms.name},MechID);
+        mechanism=specification.populations(i).mechanisms(idx).equations;
       end
-      
-      tmpmodel.linkers(link_ind).target=['@' new_linker];
+      % parse mechanism equations  
+      if ~isempty(mechanism)
+        [tmpmodel,tmpmap]=dsImportModel(mechanism,'namespace',MechScope,'ic_pop',specification.populations(i).name,'user_parameters',parameters);
+        % replace 1st linker name by the one in specification
+        if ~isempty(new_linker) && ~isempty(tmpmodel.linkers)
+          % first try to find 1st linker target starting with @
+          links_at=find(~cellfun(@isempty,regexp({tmpmodel.linkers.target},'^@','once')));
+          if ~isempty(links_at)
+            % use first link with target prepended by '@'
+            link_ind=links_at(1);
+          else
+            % use first link
+            link_ind=1;
+          end
+          tmpmodel.linkers(link_ind).target=['@' new_linker];
+        end
+        % combine sub-model with other sub-models
+        model=dsCombineModels(model,tmpmodel, varargin{:});
+        name_map=cat(1,name_map,tmpmap);
+        linker_pops=cat(2,linker_pops,repmat({specification.populations(i).name},[1 length(tmpmodel.linkers)]));
+      end
     end
     
-    % combine sub-model with other sub-models
-    model=dsCombineModels(model,tmpmodel, varargin{:});
-    name_map=cat(1,name_map,tmpmap);
-    linker_pops=cat(2,linker_pops,repmat({specification.populations(i).name},[1 length(tmpmodel.linkers)]));
+    % TODO: delete following block after testing
+%     % parse mechanism equations
+%     [tmpmodel,tmpmap]=dsImportModel(mechanism,'namespace',MechScope,'ic_pop',specification.populations(i).name,'user_parameters',parameters);
+%     % replace 1st linker name by the one in specification
+%     if ~isempty(new_linker) && ~isempty(tmpmodel.linkers)
+%       % first try to find 1st linker target starting with @
+%       links_at=find(~cellfun(@isempty,regexp({tmpmodel.linkers.target},'^@','once')));
+%       
+%       if ~isempty(links_at)
+%         % use first link with target prepended by '@'
+%         link_ind=links_at(1);
+%       else
+%         % use first link
+%         link_ind=1;
+%       end
+%       
+%       tmpmodel.linkers(link_ind).target=['@' new_linker];
+%     end
+%     
+%     % combine sub-model with other sub-models
+%     model=dsCombineModels(model,tmpmodel, varargin{:});
+%     name_map=cat(1,name_map,tmpmap);
+%     linker_pops=cat(2,linker_pops,repmat({specification.populations(i).name},[1 length(tmpmodel.linkers)]));
   end
   pop=specification.populations(i).name;
   
@@ -315,6 +345,12 @@ for i=1:ncons
         % NOTE: must use target_source_mechanism for connection mechanisms
         % to distinguish their parent namespaces from those of population mechanisms
         % see: dsGetParentNamespace
+    
+    % use mechanism equations in specification if present
+    if ~isempty(specification.connections(i).mechanisms) && ismember(MechID,{specification.connections(i).mechanisms.name})
+      idx=ismember({specification.connections(i).mechanisms.name},MechID);
+      mechanism=specification.connections(i).mechanisms(idx).equations;
+    end
     
     % parse model equations
     [tmpmodel,tmpmap]=dsImportModel(mechanism,'namespace',MechScope,'ic_pop',source,'user_parameters',parameters);
