@@ -216,6 +216,16 @@ function [data,studyinfo,result] = dsSimulate(model,varargin)
 data=[];
 studyinfo=[];
 
+% check path
+dynasim_path=fileparts(which(mfilename));
+onPath=~isempty(strfind(path,[dynasim_path, pathsep]));
+if ~onPath
+  if 1
+    fprintf('adding dynasim and sub-directory to Matlab path: %s\n',dynasim_path);
+  end
+  addpath(genpath(dynasim_path)); % necessary b/c of changing directory for simulation
+end
+
 % Check inputs
 varargin = backward_compatibility(varargin);
 options=dsCheckOptions(varargin,{...
@@ -461,16 +471,6 @@ if ~isempty(options.plot_functions)
   elseif length(options.plot_options) ~= length(options.plot_functions)
     error('there must be one option cell array per plot function.');
   end
-end
-
-% check path
-dynasim_path=fileparts(which(mfilename));
-onPath=~isempty(strfind(path,[dynasim_path, pathsep]));
-if ~onPath
-  if options.verbose_flag
-    fprintf('adding dynasim and sub-directory to Matlab path: %s\n',dynasim_path);
-  end
-  addpath(genpath(dynasim_path)); % necessary b/c of changing directory for simulation
 end
 
 %% 1.0 prepare model and study structures for simulation
