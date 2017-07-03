@@ -1,0 +1,94 @@
+DynaSim edits (+) made by Erik, Ben, and Dave, and things missing (-) (and now added) from my updates
+------------------------------------------------------------------------------------------------
+CHANGE LOG
+
+ParseModelEquations -> dsParseModelEquations:
+- extra constraint on check that input is a mech file name
+
+CheckSpecification -> dsCheckSpecification:
++ varargin to expand_list()
+- spec.pops(*).mechanisms
+
+GenerateModel -> dsGenerateModel:
++ added option for auto_gen_test_data_flag, including passing varargin to: *dsCheckSpecification*, *dsApplyModifications*, *dsCombineModels*, *dsPropagateNamespaces*, *dsCheckModel*
+- support for spec.pops(*).mechanisms(*).equations
+- support for reserved keyword "tspike"
+- corrected indexing error: I->J
+- support case of model without ODEs
+
+PropagateNamespaces -> dsPropagateNamespaces:
++ added option for auto_gen_test_data_flag
++ pass varargin to: *dsGetParentNamespace*, dynasim_strrep -> *dsStrrep*
++ added substitution of 'state_variables' into ICs
++ added hack for setting ICs using initial value of state variable
+
+PropagateFunctions -> dsPropagateFunctions:
++ added option for auto_gen_test_data_flag
++ pass varargin to: subfunction insert_functions
+
+AnalyzeData -> dsAnalyze:
++ many new features...
+
+GetSolveFile -> dsGetSolveFile:
++ added support for mex files stored in separate directory
++ moved MEX-specific code to dsPrepareMEX.m
+
+PrepareMEX -> dsPrepareMEX:
+- made compatible with Windows
+
+LocateModelFiles -> dsLocateModelFiles:
+- windows-compatible constraints on the search space for model files
+
+SimulateModel -> dsSimulate:
++ added option for auto_gen_test_data_flag
++ added support for built-in solvers
++ options: 'qsub_mode', 'one_solve_file_flag', 'optimize_big_vary', 'mex_dir', 'in_parfor_loop_flag', debug_flag', 'auto_gen_test_data_flag', 'unit_test_flag', 'benchmark_flag'
++ prepare solver_options using odeset (for use with built-in solvers)
++ pass varargin to: *dsCheckModel*, *dsApplyModifications*, 
++ added support for unit testing framework
++ corrected parfor implementation
++ added support for mex files stored in separate directory
++ prepare_varied_metadata() was renamed dsModifications2Vary() and made an external function
+- sparse_flag option
+- auto add full dynasim toolbox to path (i.e., all sub-directories including internal functions and dependencies)
+Q: can auto_gen_test_data_flag and unit testing code be moved to function (external, nested or subfunction)? looks like the ode is repeated multiple times....
+
+WriteDynaSimSolver -> dsWriteDynaSimSolver:
++ options: 'one_solve_file_flag', 'benchmark_flag'
++ one_solve_file_flag: store all varied values in params.mat and write solve file with a SimID arg for retrieving the appropriate param value
++ benchmark_flag: tic-toc, 
++ passing varargin to: *dsPropagateFunctions*
++ added hack for setting ICs using initial value of state variable
+- sparse_flag: option to sparsify model.fixed_variables
+- store spike/event times and access using 'tspike'
+- support for delay differential equations: e.g., dx/dt=-x(t-delay)
+- remove unused @linkers
+
+dsPropagateParameters:
++ options: prefix->('prop_prefix','prop_suffix'), 'param_type', 'auto_gen_test_data_flag'
+
+CreateBatch -> dsCreateBatch:
++ options: 'qsub_mode', 'one_solve_file_flag', 'auto_gen_test_data_flag', 'unit_test_flag'
++ qsub_mode: how to submit jobs (using SGE array or csh for-loop)
+- add model file paths at start of sim job to support mechanisms with custom m-file dependencies
+Q: why was addpaths removed?
+Q: why exclude dsCheckHostPaths if options.one_solve_file_flag?
+Q: does parallel_flag work with cluster_flag?
+
+------------------------------------------------------------------------------------------------
+
+Add:
+[x] dynasim (GUI) 
+- dynasim2lems
+- dynasim2xpp
+
+TODO:
+[x] remove directory: models/legacy
+- add support for parallel_flag with cluster_flag
+
+Need to understand:
+- auto_gen_test_data_flag
+- unit_test_flag
+- edits to dsVary2Modifications
+
+Test: dsPlot(dsSimulate('dv[5]/dt=@M+10-v(t-50)+100*randn(1,Npop); {iNa,iK}@M'))
