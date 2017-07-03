@@ -178,7 +178,7 @@ function [expression,functions_were_found] = insert_functions(expression,functio
       % prepare found expression with variable names from the target function
       if ~isequal(orig_vars,new_vars)
         for v=1:length(orig_vars)
-          found_expression=dsStrrep(found_expression,orig_vars{v},new_vars{v}, '', '', varargin{:});
+          found_expression=dsStrrep(found_expression,orig_vars{v},['(' new_vars{v} ')'], '', '', varargin{:});
         end
       end
 
