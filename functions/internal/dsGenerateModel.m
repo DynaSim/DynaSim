@@ -16,7 +16,7 @@ function [model,name_map] = dsGenerateModel(specification, varargin)
 %                        before generating the model, see dsApplyModifications
 %                        for more details (default?: []).
 %     'open_link_flag' : whether to leave linker identifiers in place (default: 0)
-%     'auto_gen_test_data_flag' : whether to save input/output data for unit testing (default: 0)
+%     'auto_gen_test_data_flag': whether to save model for unit testing (default: 0)
 %
 % Outputs:
 %   - model: DynaSim model structure (see dsCheckModel for more details):
@@ -259,7 +259,6 @@ for i=1:npops
       % extract mechanism file name without path
       MechScope=[specification.populations(i).name '_' MechID];
     end
-
     % use mechanism equations in specification if present
     if isfield(specification.populations,'mechanisms') && ~isempty(specification.populations(i).mechanisms)
       if ismember(MechID,{specification.populations(i).mechanisms.name})
