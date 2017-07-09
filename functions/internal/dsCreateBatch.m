@@ -517,7 +517,9 @@ end
 
     % add paths
     for p=1:length(addpaths)
-      fprintf(fjob,'addpath %s\n',addpaths{p});
+      if ~isempty(addpaths{p})
+        fprintf(fjob,'addpath %s\n',addpaths{p});
+      end
     end
     
     % loop over and run simulations in this job
