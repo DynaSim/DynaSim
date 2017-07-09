@@ -16,7 +16,7 @@ at the end of the help section to browse through related help documentation.
 if exist('setupDynaSimPath','file')
     setupDynaSimPath;
 else
-    error('Add the DynaSim folder to the MATLAB path - e.g. run addpath(genpath(DynaSimPath))');
+    error('Add the DynaSim folder to the MATLAB path - e.g.) addpath(genpath(''/path/to/dynasim''))');
 end
 
 % Set where to save outputs
