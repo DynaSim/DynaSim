@@ -182,7 +182,8 @@ options.simulator_options.verbose_flag = 1; % turn on verbose for cluster logs (
 % collect paths to add to all jobs
 % reason: adding paths to jobs supports m-files stored/associated with mechanism files
 % add dynasim root path (where functions are located)
-addpaths={dynasim_path,dynasim_functions};
+addpaths=cat(2,dynasim_path,regexp(genpath(dynasim_functions),':','split'));
+%addpaths={dynasim_path,dynasim_functions};
 % add the toolbox models directory and all subdirectories
   % note: users can store their models as subdirectories of dynasim/models
   % and incorporate them in their models without worrying about paths.
