@@ -306,6 +306,11 @@ dsSimulate(eqns, 'save_data_flag',1, 'study_dir','demo_cluster_3',...
 % given. You can pass handles and options for any built-in, pre-packaged,
 % or custom functions.
 
+% Run on cluster with compilation
+dsSimulate(eqns, 'save_data_flag',1, 'study_dir','demo_cluster_4','compile_flag',1,...
+                   'vary',vary, 'cluster_flag',1, 'overwrite_flag',1, 'verbose_flag',1);
+
+
 % %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% MORE FEATURES
 % %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
