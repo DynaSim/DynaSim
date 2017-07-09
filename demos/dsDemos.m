@@ -16,7 +16,7 @@ at the end of the help section to browse through related help documentation.
 if exist('setupDynaSimPath','file')
     setupDynaSimPath;
 else
-    error('Add the DynaSim folder to the MATLAB path - e.g. run addpath(genpath(DynaSimPath))');
+    error('Add the DynaSim folder to the MATLAB path - e.g.) addpath(genpath(''/path/to/dynasim''))');
 end
 
 % Set where to save outputs
@@ -40,10 +40,10 @@ cd(output_directory);
 % separated by semicolons.
 
 eqns={
-  's=10; r=27; b=2.666';
-  'dx/dt=s*(y-x)';
-  'dy/dt=r*x-y-x*z';
-  'dz/dt=-b*z+x*y';
+  's=10; r=27; b=2.666'
+  'dx/dt=s*(y-x)'
+  'dy/dt=r*x-y-x*z'
+  'dz/dt=-b*z+x*y'
 };
 data=dsSimulate(eqns, 'tspan',[0 100], 'ic',[1 2 .5], 'solver','rk4', 'study_dir','demo_lorenz');
 
@@ -75,13 +75,13 @@ title('Lorenz equations'); xlabel('x'); ylabel('z')
 % Syntax: monitor FUNCTION
 
 eqns={
-  'C=100; vr=-60; vt=-40; k=.7; Iapp=70; ton=200; toff=800';
-  'a=.03; b=-2; c=-50; d=100; vpeak=35';
-  'dv/dt=(k*(v-vr)*(v-vt)-u+I(t))/C; v(0)=vr';
-  'du/dt=a*(b*(v-vr)-u); u(0)=0';
-  'if(v>vpeak)(v=c; u=u+d)';
-  'I(t)=Iapp*(t>ton&t<toff)*(1+.5*rand)'; % define applied input using reserved variables 't' for time and 'dt' for fixed time step of numerical integration
-  'monitor I';                            % indicate to store applied input during simulation
+  'C=100; vr=-60; vt=-40; k=.7; Iapp=70; ton=200; toff=800'
+  'a=.03; b=-2; c=-50; d=100; vpeak=35'
+  'dv/dt=(k*(v-vr)*(v-vt)-u+I(t))/C; v(0)=vr'
+  'du/dt=a*(b*(v-vr)-u); u(0)=0'
+  'if(v>vpeak)(v=c; u=u+d)'
+  'I(t)=Iapp*(t>ton&t<toff)*(1+.5*rand)' % define applied input using reserved variables 't' for time and 'dt' for fixed time step of numerical integration
+  'monitor I'                            % indicate to store applied input during simulation
 };
 data=dsSimulate(eqns, 'tspan',[0 1000], 'study_dir','demo_izhikevich');
 
@@ -112,10 +112,10 @@ xlabel('time (ms)'); ylabel('Iapp');
 % Izhikevich study of neuro-computational properties (using Syntax 1)
 % based on: http://www.izhikevich.org/publications/izhikevich.m
 eqns={
-  'a=.02; b=.2; c=-65; d=6; I=14';
-  'dv/dt=.04*v^2+5*v+140-u+I; v(0)=-70';
-  'du/dt=a*(b*v-u); u(0)=-20';
-  'if(v>=30)(v=c;u=u+d)';
+  'a=.02; b=.2; c=-65; d=6; I=14'
+  'dv/dt=.04*v^2+5*v+140-u+I; v(0)=-70'
+  'du/dt=a*(b*v-u); u(0)=-20'
+  'if(v>=30)(v=c;u=u+d)'
   };
 P='pop1'; % name of population
 vary={
@@ -147,19 +147,19 @@ data=dsSimulate(eqns, 'tspan',[0 250], 'vary',vary, 'study_dir','demo_izhikevich
 
 % Hodgkin-Huxley neuron equations (without predefined mechanisms)
 eqns={
-  'gNa=120; gK=36; Cm=1';
-  'INa(v,m,h) = gNa.*m.^3.*h.*(v-50)';
-  'IK(v,n) = gK.*n.^4.*(v+77)';
-  'dv/dt = (10-INa(v,m,h)-IK(v,n))/Cm; v(0)=-65';
-  'dm/dt = aM(v).*(1-m)-bM(v).*m; m(0)=.1';
-  'dh/dt = aH(v).*(1-h)-bH(v).*h; h(0)=.1';
-  'dn/dt = aN(v).*(1-n)-bN(v).*n; n(0)=0';
-  'aM(v) = (2.5-.1*(v+65))./(exp(2.5-.1*(v+65))-1)';
-  'bM(v) = 4*exp(-(v+65)/18)';
-  'aH(v) = .07*exp(-(v+65)/20)';
-  'bH(v) = 1./(exp(3-.1*(v+65))+1)';
-  'aN(v) = (.1-.01*(v+65))./(exp(1-.1*(v+65))-1)';
-  'bN(v) = .125*exp(-(v+65)/80)';
+  'gNa=120; gK=36; Cm=1'
+  'INa(v,m,h) = gNa.*m.^3.*h.*(v-50)'
+  'IK(v,n) = gK.*n.^4.*(v+77)'
+  'dv/dt = (10-INa(v,m,h)-IK(v,n))/Cm; v(0)=-65'
+  'dm/dt = aM(v).*(1-m)-bM(v).*m; m(0)=.1'
+  'dh/dt = aH(v).*(1-h)-bH(v).*h; h(0)=.1'
+  'dn/dt = aN(v).*(1-n)-bN(v).*n; n(0)=0'
+  'aM(v) = (2.5-.1*(v+65))./(exp(2.5-.1*(v+65))-1)'
+  'bM(v) = 4*exp(-(v+65)/18)'
+  'aH(v) = .07*exp(-(v+65)/20)'
+  'bH(v) = 1./(exp(3-.1*(v+65))+1)'
+  'aN(v) = (.1-.01*(v+65))./(exp(1-.1*(v+65))-1)'
+  'bN(v) = .125*exp(-(v+65)/80)'
 };
 data=dsSimulate(eqns, 'study_dir','demo_hh_1');
 
@@ -193,7 +193,7 @@ xlabel('time (ms)'); ylabel('membrane potential (mV)'); title('Intrinsically Bur
 
 % define equations of cell model (same for E and I populations)
 eqns={
-  'dv/dt=Iapp+@current+noise*randn(1,N_pop)';
+  'dv/dt=Iapp+@current+noise*randn(1,N_pop)'
   'monitor iGABAa.functions, iAMPA.functions'
 };
 % Tip: monitor all functions of a mechanism using: monitor MECHANISM.functions
