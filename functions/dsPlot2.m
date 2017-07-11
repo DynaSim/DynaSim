@@ -224,7 +224,7 @@ end
 % Average across cells if necessary
 if do_mean && ~is_image
     mydata = xp.data;
-    mydata = cellfun(@(x) mean(x,2), mydata,'UniformOutput',0);
+    mydata = cellfun(@(x) mean(x,2), mydata, 'UniformOutput', 0);
     xp.data = mydata;
     xp.meta.datainfo(2).values = {'<Cells>'};
 end
@@ -374,6 +374,8 @@ end
 
 %% Set up do z-score & overlay shift
 if options.do_zscore && all(cellfun(@isnumeric,xp2.data(:))) && ~is_image
+    
+    % xp2 = recursivePlot({@xp_parfor, @xpzscore}
     mydata = xp2.data;
     for i = 1:numel(mydata)
         mydata{i} = zscore(mydata{i});
