@@ -274,10 +274,10 @@ else %options.disk_flag==0
   end
 end
 
-% Benchmark tic
-if options.benchmark_flag
-  fprintf(fid, 'tic;');
-end
+% % Benchmark tic
+% if options.benchmark_flag
+%   fprintf(fid, 'tic;');
+% end
 
 % 2.3 load parameters
 if options.save_parameters_flag
@@ -779,10 +779,10 @@ if options.disk_flag==1
   fprintf(fid,'%% ------------------------------------------------------------\n');
 end
 
-%% Benchmark toc
-if options.benchmark_flag
-  fprintf(fid, 'fprintf(''Sim Time: %%g seconds\\n'', toc);');
-end
+% %% Benchmark toc
+% if options.benchmark_flag
+%   fprintf(fid, 'fprintf(''Sim Time: %%g seconds\\n'', toc);');
+% end
 
 %% end solve function
 fprintf(fid,'\nend\n\n');
