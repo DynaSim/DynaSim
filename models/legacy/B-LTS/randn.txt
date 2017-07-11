@@ -1,5 +1,0 @@
-noise = [100] 
-noisefunc(t) = noise.*randn(Npop,1).*sqrt(dt) 
-current => noisefunc(t)
-
-

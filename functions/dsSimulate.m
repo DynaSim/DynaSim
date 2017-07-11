@@ -22,6 +22,7 @@ function [data,studyinfo,result] = dsSimulate(model,varargin)
 %     'random_seed' : seed for random number generator (default: 'shuffle', set randomly) (usage: rng(options.random_seed))
 %     'compile_flag': whether to compile simulation using coder instead of
 %                     interpreting Matlab {0 or 1} (default: 0)
+%     'sparse_flag' : whether to convert numeric fixed variables to sparse matrices {0 or 1} (default: 0)
 %
 %   options for running sets of simulations:
 %     'vary'        : (default: [], vary nothing): cell matrix specifying model
@@ -215,6 +216,16 @@ function [data,studyinfo,result] = dsSimulate(model,varargin)
 data=[];
 studyinfo=[];
 
+% check path
+dynasim_path=fileparts(which(mfilename));
+onPath=~isempty(strfind(path,[dynasim_path, pathsep]));
+if ~onPath
+  if 1
+    fprintf('adding dynasim and sub-directory to Matlab path: %s\n',dynasim_path);
+  end
+  addpath(genpath(dynasim_path)); % necessary b/c of changing directory for simulation
+end
+
 % Check inputs
 varargin = backward_compatibility(varargin);
 options=dsCheckOptions(varargin,{...
@@ -246,6 +257,7 @@ options=dsCheckOptions(varargin,{...
   'parallel_flag',0,{0,1},...     % whether to run simulations in parallel (using parfor)
   'num_cores',4,[],... % # cores for parallel processing (SCC supports 1-12)
   'compile_flag',0,{0,1},... % exist('codegen')==6, whether to compile using coder instead of interpreting Matlab
+  'sparse_flag',0,{0,1},... % whether to sparsify fixed variables before simulation
   'disk_flag',0,{0,1},...            % whether to write to disk during simulation instead of storing in memory
   'save_data_flag',0,{0,1},...  % whether to save simulated data
   'save_results_flag',0,{0,1},...  % whether to save results from simulated data
@@ -286,6 +298,10 @@ end
 
 %% prepare solve options
 
+if options.compile_flag && options.sparse_flag
+  error('The Matlab Coder toolbox does not support sparse matrices. Choose either ''compile_flag'' or ''sparse_flag''.');
+end
+
 if options.parallel_flag && feature('numCores') == 1 % TODO: check on windows and single core machine
   fprintf('Setting ''parallel_flag''=0 since only 1 core detected on this machine.\n')
   options.parallel_flag = 0;
@@ -297,10 +313,6 @@ if options.compile_flag && ~options.reduce_function_calls_flag
 end
 
 if options.cluster_flag && ~options.save_data_flag
-  %   options.save_data_flag=1;
-  %   if options.verbose_flag
-  %     fprintf('Setting ''save_data_flag'' to 1 for storing data from batch jobs for later access.\n');
-  %   end
   options.save_results_flag=1;
   if options.verbose_flag
     fprintf('Setting ''save_results_flag'' to 1 for storing results of batch jobs for later access.\n');
@@ -424,12 +436,7 @@ if ~isempty(options.analysis_functions)
   elseif length(options.analysis_options) ~= length(options.analysis_functions)
     error('there must be one option cell array per analysis function.');
   end
-  
-  %   if options.cluster_flag~=1
-  %     warning('analysis functions will not be run after simulation. currently automatic post-simulation analyses are supported only for cluster jobs.');
-  %     options.analysis_functions=[];
-  %     options.analysis_options=[];
-  %   end
+
 end
 
 %% prepare plot functions and options
@@ -464,11 +471,6 @@ if ~isempty(options.plot_functions)
   elseif length(options.plot_options) ~= length(options.plot_functions)
     error('there must be one option cell array per plot function.');
   end
-  %   if options.cluster_flag~=1
-  %     warning('plot functions will not be run after simulation. currently automatic post-simulation plotting are supported only for cluster jobs.');
-  %     options.plot_functions=[];
-  %     options.plot_options=[];
-  %   end
 end
 
 %% 1.0 prepare model and study structures for simulation
@@ -638,11 +640,9 @@ if options.parallel_flag
   clear data
   
   parfor sim=1:length(modifications_set)
-    %data(sim)=dsSimulate(model,'modifications',modifications_set{sim},'solve_file',solve_file,keyvals{:});       % Original parfor code
     data(sim)=dsSimulate(model,'modifications',modifications_set{sim},keyvals{:},'studyinfo',studyinfo,'sim_id',sim, 'in_parfor_loop_flag', 1);  % My modification; now specifies a separate study directory for each sim
     %disp(sim);
   end
-  
   
   % Clean up files leftover from sim
   % Unfortunately we can't remove the folders due to locked .nfs files.
@@ -655,8 +655,6 @@ if options.parallel_flag
   [~,result] = system('find * -name "core*"','-echo');
   if ~isempty(result); fprintf(strcat(result,'\n')); warning('Core files found. Consider deleting to free up space'); end
   
-  % close pool
-  %   delete(gcp)
   % TODO: sort data sets by things varied in modifications_set
   % TODO: Figure out how to delete locked .nfs files
   
@@ -849,7 +847,7 @@ end % in_parfor_loop_flag
       if options.save_data_flag
         % check if output data already exists. load if so and skip simulation
         data_file=studyinfo.simulations(sim_ind).data_file;
-        if exist(data_file,'file') && options.overwrite_flag==0
+        if exist(data_file,'file') && ~options.overwrite_flag
           if 1%options.verbose_flag
             % note: this is important, should always display
             fprintf('Loading data from %s\n',data_file);
@@ -1204,6 +1202,7 @@ function options = backward_compatibility(options)
 option_names = {...
   'override','modifications';
   'timelimits','tspan';
+  'time_limits','tspan';
   'IC','ic';
   'verbose','verbose_flag';
   'SOLVER','solver';

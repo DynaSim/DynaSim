@@ -93,8 +93,10 @@ end
 
 %% 1.0 convert text into cell array of strings (one string per line)
 % check for DynaSim extensions if input is single \w+ string
-if ischar(text) && ~any(which(text)) && isempty(regexp(text,'[^\w.]','once')) % isempty(regexp(text,'[^\w]','once'))
 
+if ischar(text) && isempty(regexp(text,'[^\w.]','once')) && ~any(which(text)) % isempty(regexp(text,'[^\w]','once'))
+
+  %if ischar(text) && ~any(which(text)) && isempty(regexp(text,'[^\w.]','once')) % isempty(regexp(text,'[^\w]','once'))
   %if ischar(text) && ~exist(text,'file') && isempty(regexp(text,'[^\w.]','once')) % isempty(regexp(text,'[^\w]','once'))
   [~,text]=dsLocateModelFiles(text);
   if iscell(text) && ~isempty(text)
@@ -260,7 +262,6 @@ for index=1:length(text) % loop over lines of text
           if any(name=='.')
             % check for numeric monitor argument
             arg=regexp(line,[name '\(([-+]*\w+)\)'],'tokens','once');
-            %arg=regexp(line,[name '\(([-+]*\d+)\)'],'tokens','once');
             % set argument as expression (see dsWriteDynaSimSolver() for usage as such)
             if ~isempty(arg)
               rhs=arg;
@@ -310,19 +311,11 @@ for index=1:length(text) % loop over lines of text
       else
         model.conditionals(end).else=[];
       end
-%       groups=regexp(line,'\(((\w+\([\w,@]+\))?[\w@-\+*^/\s><=,&|\.]+)\)','tokens');
-%       condition=groups{1}{1};
-%       model.conditionals(end+1).namespace=namespace;
-%       model.conditionals(end).condition=condition;
-%       model.conditionals(end).action=strrep(groups{2}{1},',',';'); % restore semicolon-delimited multiple actions like if(x>1)(x=0;y=0)
-%       if length(groups)>2
-%         model.conditionals(end).else=groups{3}{1};
-%       else
-%         model.conditionals(end).else=[];
-%       end
+      
       if ~isempty(comment)
         model.comments{end+1}=sprintf('%s conditional(%s): %s',namespace,condition,comment);
       end
+      
     case 'linker'           % [link ]? target operation expression (e.g., link target += f(x))
       % viable options: ((\+=)|(-=)|(\*=)|(/=)|(=>))
       line=regexprep(line,'^link (\s*\w)','$1');
