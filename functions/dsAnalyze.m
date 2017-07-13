@@ -551,7 +551,7 @@ end
 function result = add_modifications(result, data, varargin)
 % add modifications to result structure, excluding modifications made
 % within experiments. note: while this nested function is similar to
-% prepare_varied_metadata in SimulateModel, the data structure contains
+% dsModifications2Vary called by dsSimulate, the data structure contains
 % all modifications (those within and across experiments; listed in 'varied').
 % the result structure collapses data sets from an experiment into a single
 % result; thus, each result corresponds to modifications across
