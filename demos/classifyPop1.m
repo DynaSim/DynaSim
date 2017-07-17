@@ -19,12 +19,12 @@ if ischar(data) && strcmp(data, 'info')
 end
 
 if numel(data)>1
-  % use ds.analyzeStudy to recursively call classifyTCRE on each data set
-  result = ds.analyzeStudy(data,@classifyPop1, varargin{:});
+  % use dsAnalyzeStudy to recursively call classifyTCRE on each data set
+  result = dsAnalyzeStudy(data,@classifyPop1, varargin{:});
   return;
 end
 
-data = ds.calcMetrics(data, varargin{:});
+data = dsCalcMetrics(data, varargin{:});
 
 % NaN
 if data.pop1_metrics.nanV
