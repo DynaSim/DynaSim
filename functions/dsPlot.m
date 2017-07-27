@@ -315,6 +315,12 @@ switch options.plot_type
     end
   case {'rastergram','raster'} % raster VARIABLE_spike_times
     if any(cellfun(@isempty,regexp(var_fields,'.*_spike_times$')))
+      rmfields=cellfun(@(x)[x '_spikes'],var_fields,'uni',0);
+      idx=cellfun(@(x)isfield(data,x),rmfields);
+      if any(idx)
+         data=rmfield(data,rmfields);
+         data.labels=setdiff(data.labels,rmfields,'stable');
+      end
       data=dsCalcFR(data,varargin{:});
     end
     xdata=time;
