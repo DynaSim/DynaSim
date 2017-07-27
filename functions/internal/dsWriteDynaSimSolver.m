@@ -509,11 +509,10 @@ if ~isempty(model.monitors)
       % initialize spike buffer and buffer index
       if options.save_parameters_flag
         % tspike = -inf(buffer_size,npop):
-        fprintf(fid,'%s = -inf(%g,%s%s_Npop);\n',var_tspikes,spike_buffer_size,parameter_prefix,pop_name);
-        % buffer_index = ones(1,npop):
+        fprintf(fid,'%s = -1e6*ones(%g,%s%s_Npop);\n',var_tspikes,spike_buffer_size,parameter_prefix,pop_name);
         fprintf(fid,'%s = ones(1,%s%s_Npop);\n',var_buffer_index,parameter_prefix,pop_name);
       else
-        fprintf(fid,'%s = -inf(%g,%g);\n',var_tspikes,spike_buffer_size,model.parameters.([pop_name '_Npop']));
+        fprintf(fid,'%s = -1e6*ones(%g,%g);\n',var_tspikes,spike_buffer_size,model.parameters.([pop_name '_Npop']));
         fprintf(fid,'%s = ones(1,%g);\n',var_buffer_index,model.parameters.([pop_name '_Npop']));
       end
       
