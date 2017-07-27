@@ -1,2 +1,0 @@
-classdef myMDDAxisSubclass < MDDAxis
-end

@@ -115,89 +115,89 @@ end % main fn
 %% SUBFUNCTIONS
 function [expression,functions_were_found] = insert_functions(expression,functions, varargin)
 
-%% auto_gen_test_data_flag argin
-options = dsCheckOptions(varargin,{'auto_gen_test_data_flag',0,{0,1}},false);
-if options.auto_gen_test_data_flag
-  varargs = varargin;
-  varargs{find(strcmp(varargs, 'auto_gen_test_data_flag'))+1} = 0;
-  varargs(end+1:end+2) = {'unit_test_flag',1};
-  argin = [{expression}, {functions}, varargs]; % specific to this function
-end
-
-functions_were_found=0;
-% get list of functions called by this target function
-words=unique(regexp(expression,'[a-zA-Z]+\w*','match'));
-found_functions=words(ismember(words,fieldnames(functions)));
-if ~isempty(found_functions)
-  functions_were_found=1;
-  % substitute those found into this target functions
-  for ff=1:length(found_functions)
-    % name of found function
-    found_function=found_functions{ff};
-    
-    % found expression to replace found function name in target
-    found_expression=functions.(found_function);
-    
-    % variable names used in the original found function definition
-    orig_var_list=regexp(found_expression,'^@\(([^\)]+)\)','tokens','once');
-    orig_vars=regexp(orig_var_list{1},',','split'); % variables used in original function definition
-    
-    % variable names passed from the target function to the function found in it
-    % get arguments to function call, support function arguments
-    %       new_var_list=regexp(expression,[found_function '\(*\(([^\)\(]+)\)'],'tokens','once');
-    index=regexp(expression,[found_function '\('],'once');
-    substr=expression(index:end); % string starting with first function call
-    lb=find(substr=='('); % indices to open parentheses
-    rb=find(substr==')'); % indices to close parentheses
-    ix=ones(size(lb)); % binary vector indicating open parentheses that have not been closed
-    
-    for i=1:length(rb)
-      pos=find(lb<rb(i)&ix==1,1,'last'); % last open parentheses before this closing parenthesis
-      if pos==1 % this closing parenthesis closes the function call
-        R=rb(i);
-        break;
-      else % this closing parenthesis closes a grouped expression within the arguments of the function call
-        ix(pos)=0; % this open parenthesis has been closed
-      end
-    end
-    
-    % add escape character to regexp special characters
-    new_var_list{1}=regexprep(substr(lb(1)+1:R-1),'([\(\)\+\*\.\^])','\\$1');
-    
-    % split variables on comma
-    new_vars=regexp(new_var_list{1},',','split');
-    
-    % found expression without the input variable list
-    found_expression=regexp(found_expression,'^@\([^\)]+\)(.+)','tokens','once');
-    found_expression=found_expression{1};
-    
-    if length(orig_vars)~=length(new_vars)
-      error('failed to match variables for function %s',found_function);
-    end
-    
-    % prepare found expression with variable names from the target function
-    if ~isequal(orig_vars,new_vars)
-      for v=1:length(orig_vars)
-        found_expression=dsStrrep(found_expression,orig_vars{v},new_vars{v}, '', '', varargin{:});
-      end
-    end
-    
-    % string to replace in the target function
-    oldstr=[found_function '\(' new_var_list{1} '\)'];
-    
-    % string to insert in the target function
-    newstr=sprintf('(%s)',found_expression);
-    
-    % update the target function
-    expression=dsStrrep(expression,oldstr,newstr,'(',')', varargin{:});
+  %% auto_gen_test_data_flag argin
+  options = dsCheckOptions(varargin,{'auto_gen_test_data_flag',0,{0,1}},false);
+  if options.auto_gen_test_data_flag
+    varargs = varargin;
+    varargs{find(strcmp(varargs, 'auto_gen_test_data_flag'))+1} = 0;
+    varargs(end+1:end+2) = {'unit_test_flag',1};
+    argin = [{expression}, {functions}, varargs]; % specific to this function
   end
-end
 
-%% auto_gen_test_data_flag argout
-if options.auto_gen_test_data_flag
-  argout = {expression, functions_were_found}; % specific to this function
-  
-  dsUnitSaveAutoGenTestDataLocalFn(argin, argout); % localfn
-end
+  functions_were_found=0;
+  % get list of functions called by this target function
+  words=unique(regexp(expression,'[a-zA-Z]+\w*','match'));
+  found_functions=words(ismember(words,fieldnames(functions)));
+  if ~isempty(found_functions)
+    functions_were_found=1;
+    % substitute those found into this target functions
+    for ff=1:length(found_functions)
+      % name of found function
+      found_function=found_functions{ff};
+
+      % found expression to replace found function name in target
+      found_expression=functions.(found_function);
+
+      % variable names used in the original found function definition
+      orig_var_list=regexp(found_expression,'^@\(([^\)]+)\)','tokens','once');
+      orig_vars=regexp(orig_var_list{1},',','split'); % variables used in original function definition
+
+      % variable names passed from the target function to the function found in it
+      % get arguments to function call, support function arguments
+      %       new_var_list=regexp(expression,[found_function '\(*\(([^\)\(]+)\)'],'tokens','once');
+      index=regexp(expression,[found_function '\('],'once');
+      substr=expression(index:end); % string starting with first function call
+      lb=find(substr=='('); % indices to open parentheses
+      rb=find(substr==')'); % indices to close parentheses
+      ix=ones(size(lb)); % binary vector indicating open parentheses that have not been closed
+
+      for i=1:length(rb)
+        pos=find(lb<rb(i)&ix==1,1,'last'); % last open parentheses before this closing parenthesis
+        if pos==1 % this closing parenthesis closes the function call
+          R=rb(i);
+          break;
+        else % this closing parenthesis closes a grouped expression within the arguments of the function call
+          ix(pos)=0; % this open parenthesis has been closed
+        end
+      end
+
+      % add escape character to regexp special characters
+      new_var_list{1}=regexprep(substr(lb(1)+1:R-1),'([\(\)\+\*\.\^])','\\$1');
+
+      % split variables on comma
+      new_vars=regexp(new_var_list{1},',','split');
+
+      % found expression without the input variable list
+      found_expression=regexp(found_expression,'^@\([^\)]+\)(.+)','tokens','once');
+      found_expression=found_expression{1};
+
+      if length(orig_vars)~=length(new_vars)
+        error('failed to match variables for function %s',found_function);
+      end
+
+      % prepare found expression with variable names from the target function
+      if ~isequal(orig_vars,new_vars)
+        for v=1:length(orig_vars)
+          found_expression=dsStrrep(found_expression,orig_vars{v},['(' new_vars{v} ')'], '', '', varargin{:});
+        end
+      end
+
+      % string to replace in the target function
+      oldstr=[found_function '\(' new_var_list{1} '\)'];
+
+      % string to insert in the target function
+      newstr=sprintf('(%s)',found_expression);
+
+      % update the target function
+      expression=dsStrrep(expression,oldstr,newstr,'(',')', varargin{:});
+    end
+  end
+
+  %% auto_gen_test_data_flag argout
+  if options.auto_gen_test_data_flag
+    argout = {expression, functions_were_found}; % specific to this function
+
+    dsUnitSaveAutoGenTestDataLocalFn(argin, argout); % localfn
+  end
 
 end
