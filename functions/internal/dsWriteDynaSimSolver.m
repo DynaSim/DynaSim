@@ -488,12 +488,19 @@ if ~isempty(model.monitors)
       if ismember(var_spikes,model.state_variables)
         model.conditionals(end+1).namespace='spike_monitor';
         
+        if (options.downsample_factor>1 || options.disk_flag==1)
+          index_curr='_last';
+        else
+          index_curr='(n,:)';
+        end
+        index_last='(n-1,:)';
+          
         if isnumeric(spike_threshold)
           model.conditionals(end).condition=...
-            sprintf('%s(n,:)>=%g&%s(n-1,:)<%g',var_spikes,spike_threshold,var_spikes,spike_threshold);
+            sprintf('%s%s>=%g&%s%s<%g',var_spikes,index_curr,spike_threshold,var_spikes,index_last,spike_threshold);
         else
           model.conditionals(end).condition=...
-            sprintf('%s(n,:)>=%s&%s(n-1,:)<%s',var_spikes,spike_threshold,var_spikes,spike_threshold);
+            sprintf('%s%s>=%s&%s%s<%s',var_spikes,index_curr,spike_threshold,var_spikes,index_last,spike_threshold);
         end
         
         action1=sprintf('%s(n,conditional_test)=1',monitor_names{i});
@@ -523,8 +530,9 @@ if ~isempty(model.monitors)
       model.monitors.(monitor_names{i})=tmp{1};
     end
     
-    % initialize mon_last
-    if options.downsample_factor>1 || options.disk_flag==1
+    % initialize mon_last if not storing every time point and this is not a
+    % spike monitor
+    if (options.downsample_factor>1 || options.disk_flag==1) && isempty(regexp(monitor_names{i},'_spikes$','once'))
       % set mon_last=f(IC);
       tmp=cell2struct({monitor_expression{i}},{monitor_names{i}},1);
       print_monitor_update(fid,tmp,'_last',state_variables,'_last', varargin{:});
