@@ -320,13 +320,15 @@ switch options.plot_type
       if any(idx)
         % get spike times from binary spike matrix
         inds=find(idx);
-        for i=1:length(inds)
-          spike_fld=[var_fields{inds(i)} '_spikes'];
-          spike_time_fld=[var_fields{inds(i)} '_spike_times'];
-          for j=1:size(data.(spike_fld),2)
-            data.(spike_time_fld){j}=data.time(find(data.(spike_fld)(:,j)));
-          end
-        end
+        for s=1:length(data) % sims
+          for i=1:length(inds) % pops
+            spike_fld=[var_fields{inds(i)} '_spikes'];
+            spike_time_fld=[var_fields{inds(i)} '_spike_times'];
+            for j=1:size(data(s).(spike_fld),2) % cells
+              data(s).(spike_time_fld){j}=data(s).time((1==data(s).(spike_fld)(:,j)));
+            end % cells
+          end % pops
+        end % sims
 %       rmfields=cellfun(@(x)[x '_spikes'],var_fields,'uni',0);
 %       idx=cellfun(@(x)isfield(data,x),rmfields);
 %       if any(idx)
