@@ -315,13 +315,28 @@ switch options.plot_type
     end
   case {'rastergram','raster'} % raster VARIABLE_spike_times
     if any(cellfun(@isempty,regexp(var_fields,'.*_spike_times$')))
-      rmfields=cellfun(@(x)[x '_spikes'],var_fields,'uni',0);
-      idx=cellfun(@(x)isfield(data,x),rmfields);
+      spike_fields=cellfun(@(x)[x '_spikes'],var_fields,'uni',0);
+      idx=cellfun(@(x)isfield(data,x),spike_fields);
       if any(idx)
-         data=rmfield(data,rmfields);
-         data.labels=setdiff(data.labels,rmfields,'stable');
+        % get spike times from binary spike matrix
+        inds=find(idx);
+        for i=1:length(inds)
+          spike_fld=[var_fields{inds(i)} '_spikes'];
+          spike_time_fld=[var_fields{inds(i)} '_spike_times'];
+          for j=1:size(data.(spike_fld),2)
+            data.(spike_time_fld){j}=data.time(find(data.(spike_fld)(:,j)));
+          end
+        end
+%       rmfields=cellfun(@(x)[x '_spikes'],var_fields,'uni',0);
+%       idx=cellfun(@(x)isfield(data,x),rmfields);
+%       if any(idx)
+%          data=rmfield(data,rmfields);
+%          data.labels=setdiff(data.labels,rmfields,'stable');
+%       end
+      else
+        % find spikes from threshold crossing      
+        data=dsCalcFR(data,varargin{:});
       end
-      data=dsCalcFR(data,varargin{:});
     end
     xdata=time;
     xlab='time (ms)'; % x-axis label
