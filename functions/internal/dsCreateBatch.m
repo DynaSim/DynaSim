@@ -60,6 +60,7 @@ end
 
 %% main fn
 % Set up studyinfo structure, study directory and output file names
+%[studyinfo,options.simulator_options]=dsSetupStudy(base_model,modifications_set,options.simulator_options);
 [studyinfo,options.simulator_options]=dsSetupStudy(base_model,'modifications_set',modifications_set,'simulator_options',options.simulator_options,'process_id',options.process_id);
 study_file=fullfile(studyinfo.study_dir,'studyinfo.mat');
 num_simulations=length(modifications_set);
@@ -179,21 +180,6 @@ options.simulator_options.parallel_flag = 0;
 options.simulator_options.cluster_flag = 0;
 options.simulator_options.verbose_flag = 1; % turn on verbose for cluster logs (stdout)
 
-% collect paths to add to all jobs
-% reason: adding paths to jobs supports m-files stored/associated with mechanism files
-% add dynasim root path (where functions are located)
-addpaths=cat(2,dynasim_path,regexp(genpath(dynasim_functions),':','split'));
-%addpaths={dynasim_path,dynasim_functions};
-% add the toolbox models directory and all subdirectories
-  % note: users can store their models as subdirectories of dynasim/models
-  % and incorporate them in their models without worrying about paths.
-addpaths=cat(2,addpaths,fullfile(dynasim_path,'models'));
-%addpaths=regexp(genpath(dynasim_path),':','split');
-if ~isempty(mech_paths)
-  addpaths=cat(2,addpaths,mech_paths); 
-  addpaths=unique(addpaths);
-end
-
 % create jobs (k)
 jobs={};
 skip_sims=[];
@@ -214,6 +200,7 @@ if ~options.one_solve_file_flag
     % only run simulations if data_file does not exist (unless overwrite_flag=1)
     proc_sims=[]; % simulations to run in this job
     for j=1:length(sim_ids)
+      %if ~exist(studyinfo.simulations(sim_ids(j)).data_file,'file') || options.overwrite_flag
       if (options.simulator_options.save_data_flag && ~exist(studyinfo.simulations(sim_ids(j)).data_file,'file')) || ...
           (options.simulator_options.save_results_flag && ~exist(studyinfo.simulations(sim_ids(j)).result_files{1},'file')) || ...
           options.overwrite_flag
@@ -271,8 +258,10 @@ if strcmp(options.qsub_mode, 'loop')
   if options.verbose_flag
     fprintf('Creating file listing jobs in batch directory: %s\n',script_filename);
   end
+end
 
-  % write to file
+% write to file
+if strcmp(options.qsub_mode, 'loop')
   fScript=fopen(script_filename,'wt');
 
   for j=1:length(jobs)
@@ -329,23 +318,26 @@ if ~options.one_solve_file_flag
     studyinfo.simulations(sim).simulator_options.sim_id=studyinfo.simulations(sim).sim_id;
     studyinfo.simulations(sim).error_log='';
 
-  end %sim
-  
-  % copy studyinfo file to batch_dir for each simulation
-  for sim=1:num_simulations
-    this_study_file=fullfile(batch_dir,sprintf('studyinfo_%g.mat',sim));
+    % copy studyinfo to batch_dir for each simulation
+    %this_study_file=fullfile(batch_dir,sprintf('studyinfo_%g.mat',sim));
+    %save(this_study_file,'studyinfo');
 
-    if sim==1
-      save(this_study_file,'studyinfo');
-      first_study_file=this_study_file;
-    else
-      % use copyfile() after saving first b/c >10x faster than save()
-      [success,msg]=copyfile(first_study_file,this_study_file);
+    % copy studyinfo file to batch_dir for each simulation
+    for sim=1:num_simulations
+      this_study_file=fullfile(batch_dir,sprintf('studyinfo_%g.mat',sim));
 
-      if ~success, error(msg); end
+      if sim==1
+        save(this_study_file,'studyinfo');
+        first_study_file=this_study_file;
+      else
+        % use copyfile() after saving first b/c >10x faster than save()
+        [success,msg]=copyfile(first_study_file,this_study_file);
+
+        if ~success, error(msg); end
+      end
     end
-  end %sim
 
+  end %sim
 else %one_solve_file_flag
   % set studyinfo solve_file to use for this simulation
   [studyinfo.simulations.solve_file] = deal(full_solve_file);
@@ -488,7 +480,7 @@ end
 
     % create job file
     fjob=fopen(job_file,'wt');
-    
+
     % load studyinfo using helper function to avoid busy file errors
     %fprintf(fjob,'studyinfo=dsCheckStudyinfo(''%s'',''process_id'',%g);\n',study_file,sim_ids(1), varargin{:});
     %fprintf(fjob,'load(''%s'',''studyinfo'');\n',study_file);
@@ -515,13 +507,6 @@ end
       fprintf(fjob,'SimIDs = simIDstart:min(simIDlast,simIDstart+simIDstep-1);\n');
     end
 
-    % add paths
-    for p=1:length(addpaths)
-      if ~isempty(addpaths{p})
-        fprintf(fjob,'addpath %s\n',addpaths{p});
-      end
-    end
-    
     % loop over and run simulations in this job
     if options.parallel_flag
       % set parallel computing options

@@ -1,0 +1,16 @@
+gNa = [120]
+ENa = [50]
+ 
+aM(V) = (2.5-.1*(V+65))./(exp(2.5-.1*(V+65))-1)
+bM(V) = 4*exp(-(V+65)/18)
+aH(V) = .07*exp(-(V+65)/20)
+bH(V) = 1./(exp(3-.1*(V+65))+1)
+INaf(V,m,h) = gNa.*m.^3.*h.*(V-ENa)
+ 
+mNaf' = aM(X).*(1-mNaf)-bM(X).*mNaf;
+mNaf(0) = .05+.1*rand(Npop,1)
+hNaf' = aH(X).*(1-hNaf)-bH(X).*hNaf;
+hNaf(0) = .54+.1*rand(Npop,1)
+ 
+current => -INaf(X,mNaf,hNaf)
+ 

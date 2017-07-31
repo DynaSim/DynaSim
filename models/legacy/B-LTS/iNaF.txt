@@ -1,0 +1,24 @@
+gNaF = [200]
+NaF_V0 = [38]
+NaF_V1 = [58.3]
+NaF_d1 = [6.7]
+NaF_V2 = [37]
+NaF_d2 = [15]
+NaF_c0 = [0.15]
+NaF_c1 = [1.15]
+E_NaF = [50]
+IC = [0.5]
+IC_noise = [0]
+ 
+hinf(V) = 1./(1+exp((V+NaF_V1)/NaF_d1))
+htau(V) = NaF_c0 + NaF_c1./(1+exp((V+NaF_V2)/NaF_d2))
+m0(V) = 1./(1+exp((-V-NaF_V0)/10))
+aH(V) = hinf(V) ./ htau(V)
+bH(V) = (1-hinf(V))./htau(V)
+INaF(V,h) = gNaF.*m0(V).^3.*h.*(V-E_NaF)
+ 
+hNaF' = aH(V).*(1-hNaF)-bH(V).*hNaF;
+hNaF(0) = IC+IC_noise.*rand(Npop,1)
+ 
+current => -INaF(V,hNaF)
+ 

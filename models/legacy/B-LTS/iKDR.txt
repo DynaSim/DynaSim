@@ -1,0 +1,20 @@
+gKDR = [20]
+KDR_V1 = [27]
+KDR_d1 = [11.5]
+KDR_V2 = [10]
+KDR_d2 = [10]
+E_KDR = [-100]
+IC = [.34]
+IC_noise = [0]
+ 
+minf(V) = 1./(1+exp((-V-KDR_V1)/KDR_d1))
+mtau(V) = .25+4.35*exp(-abs(V+KDR_V2)/KDR_d2)
+aM(V) = minf(V) ./ mtau(V)
+bM(V) = (1-minf(V))./mtau(V)
+IKDR(V,m) = gKDR.*m.^4.*(V-E_KDR)
+ 
+mKDR' = aM(V).*(1-mKDR)-bM(V).*mKDR;
+mKDR(0) = IC+IC_noise.*rand(Npop,1)
+ 
+current => -IKDR(V,mKDR)
+ 

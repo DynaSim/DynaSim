@@ -1,0 +1,28 @@
+function validBool = isValidFigHandle(h)
+%% isValidFigHandle
+% Purpose: check if input exists and is a valid figure handle.
+%
+% Usage:
+%   validBool = isValidFigHandle(handle)
+%   validBool = isValidFigHandle(strForHandle)
+%
+% Input: string with handle name, or handle itself
+%
+% Note: will work with string containing any callable matlab indexing/object
+
+try
+  if ischar(h) %string input
+    validBool = evalin('caller', ['isvalid(' h ')']) || evalin('caller', ['isgraphics(' h ')']);
+  elseif ismatrix(h)
+    validBool = zeros(1,length(h));
+    for iH = 1:length(h)
+      validBool(iH) = h(iH);
+    end
+  else
+    validBool = isvalid(h) || isgraphics(h);
+  end
+catch
+  validBool = 0;
+end
+
+end

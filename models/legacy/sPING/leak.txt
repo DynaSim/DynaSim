@@ -1,0 +1,7 @@
+g_l = [0.3]
+E_l = [-54.4]
+ 
+Ileak(X) = g_l.*(X-E_l)
+ 
+current => -Ileak(X)
+ 

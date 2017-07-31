@@ -1,0 +1,20 @@
+g_SYN = [15]
+E_SYN = [-75]
+tauDx = [5]
+tauRx = [0.5]
+IC = [0.1]
+IC_noise = [0]
+ 
+fanout = inf
+UB = max(Npre,Npost)
+Xpre = linspace(1,UB,Npre)'*ones(1,Npost)
+Xpost = (linspace(1,UB,Npost)'*ones(1,Npre))'
+mask = abs(Xpre-Xpost)<=fanout
+
+ISYN(V,s) = (g_SYN.*(s'*mask)'.*(V-E_SYN))
+ 
+sSYNpre' = -sSYNpre./tauDx + ((1-sSYNpre)/tauRx).*(1+tanh(Vpre/10));
+sSYNpre(0) = IC+IC_noise.*rand(Npre,1)
+ 
+current => -ISYN(Vpost,sSYNpre)
+ 
