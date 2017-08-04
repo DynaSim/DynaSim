@@ -215,6 +215,8 @@ if any(strcmp(fields, 'varied'))
      
       warning('unable to determine which parameters are covaried. Data will be plotted as a lattice.')
       
+      dimensions_varied = 1;
+      
   end
 
   if dimensions_varied > 2

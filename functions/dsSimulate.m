@@ -212,6 +212,7 @@ function [data,studyinfo,result] = dsSimulate(model,varargin)
 % while-looping through multiple Studies and analyzing data sets to update
 % Model Components on each iteration until some stop condition is reached.
 
+%% 0.0 Outputs & inputs.
 % Initialize outputs
 data=[];
 studyinfo=[];
@@ -283,7 +284,7 @@ options=dsCheckOptions(varargin,{...
   },false);
 % more options: remove_solve_dir, remove_batch_dir, post_downsample_factor
 
-%% auto_gen_test_data_flag argin
+%% 0.1 Auto_gen_test_data_flag save argin (arguments passed to dsSimulate).
 if options.auto_gen_test_data_flag
   varargs = varargin;
   varargs{find(strcmp(varargs, 'auto_gen_test_data_flag'))+1} = 0;
@@ -291,12 +292,12 @@ if options.auto_gen_test_data_flag
   argin = [{model}, varargs]; % specific to this function
 end
 
-%% unit test
+%% 0.2 Unit testing.
 if options.unit_test_flag
   options.study_dir = getAbsolutePath(options.study_dir);
 end
 
-%% prepare solve options
+%% 0.3 Prepare solve options.
 
 if options.compile_flag && options.sparse_flag
   error('The Matlab Coder toolbox does not support sparse matrices. Choose either ''compile_flag'' or ''sparse_flag''.');
@@ -348,12 +349,13 @@ end
 %   end
 % end
 
-% convert matlab solver options from key/value to struct using odeset if necessary
+% Convert matlab solver options from key/value to struct using odeset if
+% necessary.
 if iscell(options.matlab_solver_options)
   options.matlab_solver_options = odeset(options.matlab_solver_options{:});
 end
 
-%% Non-Batch Checks
+%% 0.4 Non-Batch checks.
 if isempty(options.sim_id) % not in part of a batch sim
   if options.optimize_big_vary
     options.cluster_flag = 1;
@@ -404,7 +406,7 @@ if isempty(options.sim_id) % not in part of a batch sim
   end
 end % isempty(options.sim_id)
 
-%% prepare analysis functions and options
+%% 0.5 Prepare analysis functions and options.
 if ~isempty(options.analysis_functions)
   if ~iscell(options.analysis_functions)
     % convert function handle into cell array of function handles
@@ -439,7 +441,7 @@ if ~isempty(options.analysis_functions)
 
 end
 
-%% prepare plot functions and options
+%% 0.6 Prepare plot functions and options.
 if ~isempty(options.plot_functions)
   if ~iscell(options.plot_functions)
     % convert function handle into cell array of function handles
@@ -473,20 +475,20 @@ if ~isempty(options.plot_functions)
   end
 end
 
-%% 1.0 prepare model and study structures for simulation
+%% 1.0 Prepare model and study structures for simulation.
 
-% handle special case of input equations with vary() statement
-[model,options]=extract_vary_statement(model,options);
+% Handle special case of input equations with vary() statement.
+[model,options] = extract_vary_statement(model,options);
 
-% check/standardize model
-model=dsCheckModel(model, varargin{:}); % handles conversion when input is a string w/ equations or a DynaSim specification structure
+% Check/standardize model.
+model = dsCheckModel(model, varargin{:}); % handles conversion when input is a string w/ equations or a DynaSim specification structure
 
-% 1.1 apply modifications before simulation and optional further variation across simulations
+%% 1.1 Apply modifications before simulation and optional further variation across simulations.
 if ~isempty(options.modifications)
-  [model,options.modifications]=dsApplyModifications(model,options.modifications, varargin{:});
+  [model,options.modifications] = dsApplyModifications(model,options.modifications, varargin{:});
 end
 
-% 1.2 incorporate user-supplied initial conditions
+%% 1.2 Incorporate user-supplied initial conditions.
 if ~isempty(options.ic)
   if isstruct(options.ic)
     % TODO: create subfunc that converts numeric ICs to strings for
@@ -516,8 +518,8 @@ if options.one_solve_file_flag && is_varied_mech_list()
   % TODO: this is a temp setting until iss_90 is fully implemented
 end
 
-% 1.3 check for parallel simulations
-%% 1.3.1 manage cluster computing
+%% 1.3 Handle parallel simulations.
+%% 1.3.1 Manage cluster computing.
 % whether to write jobs for distributed processing on cluster
 if options.cluster_flag
   % add to model any parameters in 'vary' not explicit in current model
@@ -593,7 +595,7 @@ if options.cluster_flag
   return;
 end
 
-%% 1.3.2 manage parallel computing on local machine
+%% 1.3.2 Manage parallel computing on local machine.
 % TODO: debug local parallel sims, doesn't seem to be working right...
 % (however SCC cluster+parallel works)
 if options.parallel_flag
@@ -640,7 +642,8 @@ if options.parallel_flag
   clear data
   
   parfor sim=1:length(modifications_set)
-    data(sim)=dsSimulate(model,'modifications',modifications_set{sim},keyvals{:},'studyinfo',studyinfo,'sim_id',sim, 'in_parfor_loop_flag', 1);  % My modification; now specifies a separate study directory for each sim
+    data(sim)=dsSimulate(model, 'modifications', modifications_set{sim}, keyvals{:},...
+        'studyinfo', studyinfo, 'sim_id',sim, 'in_parfor_loop_flag', 1);  % My modification; now specifies a separate study directory for each sim.
     %disp(sim);
   end
   

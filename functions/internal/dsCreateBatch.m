@@ -30,7 +30,7 @@ function [studyinfo, cmd] = dsCreateBatch(base_model,modifications_set,varargin)
 %
 % See also: dsGenerateModel, dsSimulate, dsCheckStudyinfo, dsVary2Modifications
 
-% check inputs
+%% check inputs
 options=dsCheckOptions(varargin,{...
   'compile_flag',0,{0,1},...
   'parallel_flag',0,{0,1},...
@@ -58,13 +58,13 @@ if options.auto_gen_test_data_flag
   argin = [{base_model},{modifications_set}, varargs]; % specific to this function
 end
 
-%% main fn
-% Set up studyinfo structure, study directory and output file names
+%% Main function.
+%% Set up studyinfo structure, study directory and output file names
 [studyinfo,options.simulator_options]=dsSetupStudy(base_model,'modifications_set',modifications_set,'simulator_options',options.simulator_options,'process_id',options.process_id);
 study_file=fullfile(studyinfo.study_dir,'studyinfo.mat');
 num_simulations=length(modifications_set);
 
-% check whether study has already completed
+%% check whether study has already completed
 % if options.overwrite_flag==0
   [~,s]=dsMonitorStudy(studyinfo.study_dir,'verbose_flag',0,'process_id',options.process_id);
   if s==1 % study finished
@@ -78,17 +78,17 @@ num_simulations=length(modifications_set);
   end
 % end
 
-% Check if attempting to compile Experiment
+%% Check if attempting to compile Experiment
 if isa(options.simulator_options.experiment,'function_handle') && options.compile_flag
   options.compile_flag=0;
   options.simulator_options.compile_flag=0;
   wprintf('solver compilation is not available for experiments run on the cluster.');
 end
 
-% create base solve_file (m- or MEX-file)
+%% create base solve_file (m- or MEX-file)
 solve_file = dsGetSolveFile(base_model,studyinfo,options.simulator_options);
 
-% add appropriate MEX extension if compiled
+%% add appropriate MEX extension if compiled
 %   NOTE: the extension depends on whether a 32-bit or 64-bit machine is used
 if options.compile_flag
   % get directory where solve_file is located and the file name
@@ -116,16 +116,16 @@ else
 end
 studyinfo.base_solve_file=solve_file;
 
-% set name of batch_dir for this study
+%% set name of batch_dir for this study
 % get study-specific timestamp
 % timestamp = datestr(studyinfo.study_id,'yyyymmddHHMMSS');
 
 % get home directory of the current user
-[o,home]=system('echo $HOME');
+[~,home]=system('echo $HOME');
 
-% create batch directory
+%% create batch directory
 study_dir_full_path = fileparts2(studyinfo.study_dir); % convert to path with closing slash
-[study_dir_path, study_dir_name, study_dir_suffix] = fileparts(study_dir_full_path); % get final directory
+[~, study_dir_name, study_dir_suffix] = fileparts(study_dir_full_path); % get final directory
 study_dir_name=[study_dir_name study_dir_suffix];
 
 if ~options.auto_gen_test_data_flag && ~options.unit_test_flag
@@ -148,7 +148,7 @@ if options.verbose_flag
   fprintf('\nPREPARING BATCH:\n');
 end
 
-% create batch_dir to hold m-file jobs and more for this study
+%% create batch_dir to hold m-file jobs and more for this study
 if ~exist(batch_dir,'dir')
   if options.verbose_flag
     fprintf('Creating batch jobs directory: %s\n',batch_dir);
@@ -156,25 +156,25 @@ if ~exist(batch_dir,'dir')
   mkdir(batch_dir);
 end
 
-% copy study_file to batchdir
+%% copy study_file to batchdir
 [success,msg]=copyfile(study_file,batch_dir);
 if ~success
   error(msg)
 end
 
-% locate DynaSim toolbox
+%% locate DynaSim toolbox
 dynasim_path = dsGetRootPath(); % root is one level up from directory containing this function
 dynasim_functions=fullfile(dynasim_path,'functions');
 
-% locate mechanism files
+%% locate mechanism files
 [mech_paths,mech_files]=dsLocateModelFiles(base_model);
 
-% add paths to studyinfo structure
+%% add paths to studyinfo structure
 studyinfo.paths.dynasim_functions = dynasim_functions;
 studyinfo.paths.mechanisms = mech_paths;
 studyinfo.paths.batch_dir = batch_dir;
 
-% edit simulator_options so that subsequent single simulations do not create further batches
+%% edit simulator_options so that subsequent single simulations do not create further batches
 options.simulator_options.parallel_flag = 0;
 options.simulator_options.cluster_flag = 0;
 options.simulator_options.verbose_flag = 1; % turn on verbose for cluster logs (stdout)
@@ -194,7 +194,7 @@ if ~isempty(mech_paths)
   addpaths=unique(addpaths);
 end
 
-% create jobs (k)
+%% create jobs (k)
 jobs={};
 skip_sims=[];
 sim_cnt=0;
@@ -256,7 +256,7 @@ end %if
 %   file in this function and skip simulations if they're already running
 %   (similar to skipping if data_file already exists).
 
-% exit if there are no simulations to run
+%% exit if there are no simulations to run
 if numel(skip_sims)==num_simulations
   if options.verbose_flag
     fprintf('Data exists for all simulations in study. nothing to do.\n');
@@ -265,7 +265,7 @@ if numel(skip_sims)==num_simulations
   return;
 end
 
-% create script_filename (list of vars or jobs)
+%% create script_filename (list of vars or jobs)
 if strcmp(options.qsub_mode, 'loop')
   script_filename = fullfile(batch_dir,'scriptlist.txt');
   if options.verbose_flag
@@ -364,12 +364,12 @@ else %one_solve_file_flag
   save(batch_study_file,'studyinfo');
 end
 
-% update studyinfo on disk
+%% update studyinfo on disk
 dsStudyinfoIO(studyinfo,study_file,options.simulator_options.sim_id,options.verbose_flag);
 
 % TODO: remove old lock files ..
 
-% check for qsub on system
+%% check for qsub on system
 [status,result]=system('which qsub');
 
 if options.auto_gen_test_data_flag || options.unit_test_flag

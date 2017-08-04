@@ -45,6 +45,7 @@ if options.auto_gen_test_data_flag
   argin = [{model}, varargs]; % specific to this function
 end
 
+%% Finding parameters.
 parameters=model.(options.param_type);
 if isempty(parameters)
   return
