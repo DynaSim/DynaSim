@@ -348,7 +348,7 @@ for i=1:ncons
         % see: dsGetParentNamespace
     
     % use mechanism equations in specification if present
-    if ~isempty(specification.connections(i).mechanisms) && ismember(MechID,{specification.connections(i).mechanisms.name})
+    if isfield(specification.connections(i), 'mechanisms') && ~isempty(specification.connections(i).mechanisms) && ismember(MechID,{specification.connections(i).mechanisms.name})
       idx=ismember({specification.connections(i).mechanisms.name},MechID);
       mechanism=specification.connections(i).mechanisms(idx).equations;
     end
