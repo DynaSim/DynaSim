@@ -250,16 +250,15 @@ for i=1:npops
     if numel(mechanism_)>1, new_linker=mechanism_{2}; else new_linker=[]; end
     
     % set mechanism namespace
-    [~,MechID]=fileparts(mechanism);
+    [~,MechID]=fileparts2(mechanism);
     if any(MechID==':')
       % exclude host name from namespace
       tmp=regexp(MechID,':','split');
       MechScope=[specification.populations(i).name '_' tmp{2}];
     else
-      % use mechanism file name without path
+      % extract mechanism file name without path
       MechScope=[specification.populations(i).name '_' MechID];
     end
-    
     % use mechanism equations in specification if present
     if isfield(specification.populations,'mechanisms') && ~isempty(specification.populations(i).mechanisms)
       if ismember(MechID,{specification.populations(i).mechanisms.name})
@@ -283,36 +282,11 @@ for i=1:npops
           tmpmodel.linkers(link_ind).target=['@' new_linker];
         end
         % combine sub-model with other sub-models
-        model=dsCombineModels(model,tmpmodel);
+        model=dsCombineModels(model,tmpmodel, varargin{:});
         name_map=cat(1,name_map,tmpmap);
         linker_pops=cat(2,linker_pops,repmat({specification.populations(i).name},[1 length(tmpmodel.linkers)]));
       end
     end    
-
-% DELETE THIS BLOCK AFTER TESTING:
-%     % parse mechanism equations
-%     [tmpmodel,tmpmap]=dsImportModel(mechanism,'namespace',MechScope,'ic_pop',specification.populations(i).name,'user_parameters',parameters);
-%     % replace 1st linker name by the one in specification
-%     if ~isempty(new_linker) && ~isempty(tmpmodel.linkers)
-%       % first try to find 1st linker target starting with @
-%       links_at=find(~cellfun(@isempty,regexp({tmpmodel.linkers.target},'^@','once')));
-%       
-%       if ~isempty(links_at)
-%         % use first link with target prepended by '@'
-%         link_ind=links_at(1);
-%       else
-%         % use first link
-%         link_ind=1;
-%       end
-%       
-%       tmpmodel.linkers(link_ind).target=['@' new_linker];
-%     end
-%     
-%     % combine sub-model with other sub-models
-%     model=dsCombineModels(model,tmpmodel, varargin{:});
-%     name_map=cat(1,name_map,tmpmap);
-%     linker_pops=cat(2,linker_pops,repmat({specification.populations(i).name},[1 length(tmpmodel.linkers)]));
-    
   end
   pop=specification.populations(i).name;
   
@@ -348,7 +322,7 @@ for i=1:ncons
         % see: dsGetParentNamespace
     
     % use mechanism equations in specification if present
-    if isfield(specification.connections(i), 'mechanisms') && ~isempty(specification.connections(i).mechanisms) && ismember(MechID,{specification.connections(i).mechanisms.name})
+    if ~isempty(specification.connections(i).mechanisms) && ismember(MechID,{specification.connections(i).mechanisms.name})
       idx=ismember({specification.connections(i).mechanisms.name},MechID);
       mechanism=specification.connections(i).mechanisms(idx).equations;
     end
@@ -698,8 +672,6 @@ idx2=find(cellfun(@isempty,regexp(c(idx1),'[a-z_A-Z]')) | ~cellfun(@isempty,rege
 
 % convert those strings which contain numeric values
 c(idx1(idx2)) = cellfun(@eval,c(idx1(idx2)),'uni',0);
-%idx=cellfun(@isempty,regexp(c,'[a-z_A-Z]')) | ~cellfun(@isempty,regexp(c,'^\s*\[*\s*inf\s*\]*\s*$','ignorecase'));
-%c(idx) = cellfun(@eval,c(idx),'uni',0);
 f = fieldnames(model.parameters);
 model.parameters = cell2struct(c,f,1);
 
