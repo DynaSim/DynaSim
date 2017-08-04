@@ -256,8 +256,8 @@ vary={
   'E'   ,'Iapp',[0 10 20];      % amplitude of tonic input to E-cells
   'I->E','tauD',[5 10 15]       % inhibition decay time constant from I to E
   };
-dsSimulate(s, 'save_data_flag',1, 'study_dir','demo_sPING_3',...
-                'vary',vary, 'verbose_flag',1);
+dsSimulate(s, 'save_data_flag', 1, 'study_dir', 'demo_sPING_3',...
+                'vary', vary, 'verbose_flag', 1);
 data=dsImport('demo_sPING_3');
 dsPlot(data);
 dsPlot(data,'plot_type','rastergram');

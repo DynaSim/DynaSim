@@ -410,8 +410,8 @@ end
     Nsrc=[src '_Npop'];
     Ndst=[dst '_Npop'];
     
-    old={'Npre','N[1]','N_pre','Npost','N_post','N[0]','Npop','N_pop'};
-    new={Nsrc,Nsrc,Nsrc,Ndst,Ndst,Ndst,Ndst,Ndst};
+    old={'Npre','N[1]','N_pre','Npost','N_post','N[0]','Npop','N_pop','tspike_pre','tspike_post','tspike'};
+    new={Nsrc,Nsrc,Nsrc,Ndst,Ndst,Ndst,Ndst,Ndst,[src '_tspike'],[dst '_tspike'],[dst '_tspike']};
     for p=1:length(old)
       name_map(end+1,:)={old{p},new{p},namespace,'parameters'};
     end
@@ -505,10 +505,10 @@ if ~isempty(model.functions) && ~isempty(model.linkers)
   expressions={model.linkers.expression};
   [~,I,J]=intersect(function_names,expressions);
   for i=1:length(I)
-    e=model.functions.(function_names{J(i)}); % function expression (eg,'@(x,y,z)x-(y-z)')
+    e=model.functions.(function_names{I(i)}); % function expression (eg,'@(x,y,z)x-(y-z)')
     v=regexp(e,'@(\([\w,]+\))','tokens','once'); % function input list (eg, '(x,y,z)')
     if ~isempty(v)
-      model.linkers(I(i)).expression=[model.linkers(I(i)).expression v{1}];
+      model.linkers(J(i)).expression=[model.linkers(J(i)).expression v{1}];
     end
   end
 end
