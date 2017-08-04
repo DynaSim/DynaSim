@@ -1,5 +1,5 @@
 [submodule "dependencies/MDD"]
-	path = dependencies/MDD_SM
+	path = functions/dependencies/MDD_SM
 	url = https://github.com/davestanley/MultiDimensionalDictionary.git
 [submodule "functions/internal/unit-test"]
 	path = functions/internal/unit-test

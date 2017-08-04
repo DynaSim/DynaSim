@@ -105,9 +105,9 @@ end
 
 % update specification with whatever is in modifications
 modifications = standardize_modifications(modifications,specification,varargin{:});
-if ismodel % TODO: test this
+% if ismodel % TODO: test this
   specification = modify_specification(specification,modifications,varargin{:});
-end
+% end
 
 % update model if input was a model structure
 if ismodel

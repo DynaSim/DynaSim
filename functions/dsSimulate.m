@@ -297,26 +297,21 @@ if options.compile_flag && ~options.reduce_function_calls_flag
   options.reduce_function_calls_flag=1;
 end
 
-if options.cluster_flag && ~options.save_data_flag
-  %   options.save_data_flag=1;
-  %   if options.verbose_flag
-  %     fprintf('Setting ''save_data_flag'' to 1 for storing data from batch jobs for later access.\n');
-  %   end
-  options.save_results_flag=1;
-  if options.verbose_flag
-    fprintf('Setting ''save_results_flag'' to 1 for storing results of batch jobs for later access.\n');
-  end
-end
-
-% Make sure that data is either saved to disk, saved to variable, or
-% plotted.
-if nargout==0 && ~options.save_data_flag && ~options.save_results_flag && isempty(options.plot_functions)
+% Make sure that data is either saved to disk, saved to variable, or plotted
+if (nargout==0 || options.cluster_flag) && ~options.save_data_flag && ~options.save_results_flag && isempty(options.plot_functions)
   if ~isempty(options.analysis_functions)
     fprintf('Setting ''save_results_flag''=1 since output from dsSimulate is not stored in a variable and analysis functions specified.\n')
     options.save_results_flag = 1;
   else
     fprintf('Setting ''save_data_flag''=1 since output from dsSimulate is not stored in a variable and no plot or analysis functions specified.\n')
     options.save_data_flag = 1;
+  end
+end
+
+if options.cluster_flag && ~options.save_data_flag
+  options.save_results_flag=1;
+  if options.verbose_flag
+    fprintf('Setting ''save_results_flag'' to 1 for storing results of batch jobs for later access.\n');
   end
 end
 
@@ -642,7 +637,9 @@ if options.parallel_flag
   
   parfor sim=1:length(modifications_set)
     %data(sim)=dsSimulate(model,'modifications',modifications_set{sim},'solve_file',solve_file,keyvals{:});       % Original parfor code
-    data(sim)=dsSimulate(model, 'modifications', modifications_set{sim}, keyvals{:}, 'studyinfo', studyinfo, 'sim_id', sim, 'in_parfor_loop_flag', 1);  % My modification; now specifies a separate study directory for each sim
+    data(sim)=dsSimulate(model, 'modifications', modifications_set{sim}, keyvals{:},...
+        'studyinfo', studyinfo, 'sim_id',sim, 'in_parfor_loop_flag', 1);  % My modification; now specifies a separate study directory for each sim.
+        
     %disp(sim);
   end
   
