@@ -47,6 +47,13 @@ function study_dir = dsUnzipDemoData(zipfname,overwrite_flag,verbose_flag)
     [path, zipfilename_only, ext] = fileparts(zipfname);
     zipfname = [zipfilename_only, '.zip'];
     
+    % Verify the source (zip file) exists; if not, download it from web!
+    if ~exist(fullfile(demo_zips_path,zipfname),'file')
+     
+        dsDownloadFiles(fullfile(demo_zips_path,zipfname));
+
+    end
+    
     % Get the destination directory
     study_dir = fullfile(demos_path,zipfilename_only);
 
