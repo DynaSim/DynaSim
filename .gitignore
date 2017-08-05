@@ -5,6 +5,7 @@ outputs
 models/personal
 *.png
 *.mat
+*.zip
 dsVars.txt
 dsConfig.txt
 _ignore
