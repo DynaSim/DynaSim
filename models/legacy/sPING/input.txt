@@ -1,0 +1,8 @@
+stim = [6.75]
+onset = [5]
+offset = [Inf]
+ 
+Itonic(t) = stim*(t>onset & t<offset)
+ 
+current => Itonic(t)
+ 

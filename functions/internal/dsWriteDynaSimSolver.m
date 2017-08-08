@@ -22,7 +22,6 @@ function [outfile,options] = dsWriteDynaSimSolver(model,varargin)
 %                    randomly) (usage: rng(options.random_seed))
 %     'disk_flag'  : whether to write to disk during simulation instead of
 %                    storing in memory {0 or 1} (default: 0)
-%     'sparse_flag' : whether to convert numeric fixed variables to sparse matrices {0 or 1} (default: 0)
 %
 % Outputs:
 %   - solver_file (e.g., solve_ode.m): function that numerically integrates the model
@@ -82,7 +81,6 @@ options=dsCheckOptions(varargin,{...
   'fileID',1,[],...
   'compile_flag',0,{0,1},... % whether to prepare script for being compiled using coder instead of interpreting Matlab
   'verbose_flag',1,{0,1},...
-  'sparse_flag',0,{0,1},...
   'one_solve_file_flag',0,{0,1},... % use only 1 solve file of each type, but can't vary mechs yet
   'benchmark_flag',0,{0,1},...
   },false);
@@ -90,7 +88,7 @@ model=dsCheckModel(model, varargin{:});
 separator=','; % ',', '\\t'
 
 %% 1.0 prepare model info
-parameter_prefix='p.';
+parameter_prefix='p.';%'pset.p.';
 state_variables=model.state_variables;
 
 % 1.1 eliminate internal (anonymous) function calls from model equations
@@ -343,10 +341,6 @@ if ~isempty(model.fixed_variables)
   expressions=struct2cell(model.fixed_variables);
   for i=1:length(names)
     fprintf(fid,'%s = %s;\n',names{i},expressions{i});
-    if options.sparse_flag
-      % create sparse matrix
-      fprintf(fid,'%s = sparse(%s);\n',names{i},names{i});
-    end
   end
 end
 
@@ -463,10 +457,6 @@ if ~isempty(model.monitors)
         % variables in which to search. add spikes to output data file.
       end
       
-      % number of spike times to store for each cell
-      spike_buffer_size=2;%5;%100;
-      % TODO: add support for: monitor VAR.spikes(thresh,buffer_size) (edit next if-then statements)
-      
       if isempty(monitor_expression{i})
         spike_threshold=0;
       elseif isempty(regexp(monitor_expression{i},'[^\d]','once'))
@@ -478,51 +468,27 @@ if ~isempty(model.monitors)
       end
       
       % approach: add conditional check for upward threshold crossing
-      pop_name=regexp(monitor_names{i},'_','split');
-      pop_name=pop_name{1};
       var_spikes=regexp(monitor_names{i},'(.*)_spikes$','tokens','once');
       var_spikes=var_spikes{1}; % variable to monitor
-      var_tspikes=[pop_name '_tspike']; % only allow one event type to be tracked per population (i.e., it is ok to use pop_name, like 'E', as namespace instead of pop_var, like 'E_v')
-      var_buffer_index=[pop_name '_buffer_index'];
       
       if ismember(var_spikes,model.state_variables)
         model.conditionals(end+1).namespace='spike_monitor';
         
-        if (options.downsample_factor>1 || options.disk_flag==1)
-          index_curr='_last';
-        else
-          index_curr='(n,:)';
-        end
-        index_last='(n-1,:)';
-          
         if isnumeric(spike_threshold)
           model.conditionals(end).condition=...
-            sprintf('%s%s>=%g&%s%s<%g',var_spikes,index_curr,spike_threshold,var_spikes,index_last,spike_threshold);
+            sprintf('%s(n,:)>=%g&%s(n-1,:)<%g',var_spikes,spike_threshold,var_spikes,spike_threshold);
         else
           model.conditionals(end).condition=...
-            sprintf('%s%s>=%s&%s%s<%s',var_spikes,index_curr,spike_threshold,var_spikes,index_last,spike_threshold);
+            sprintf('%s(n,:)>=%s&%s(n-1,:)<%s',var_spikes,spike_threshold,var_spikes,spike_threshold);
         end
         
-        action1=sprintf('%s(n,conditional_test)=1',monitor_names{i});
-        action2=sprintf('inds=find(conditional_test); for j=1:length(inds), i=inds(j); %s(%s(i),i)=t; %s(i)=mod(-1+(%s(i)+1),%g)+1; end',var_tspikes,var_buffer_index,var_buffer_index,var_buffer_index,spike_buffer_size);
-        model.conditionals(end).action=sprintf('%s;%s',action1,action2);
+        model.conditionals(end).action=sprintf('%s(n,conditional_test)=1',monitor_names{i});
         model.conditionals(end).else=[];
         % move spike monitor to first position (ie.., to evaluate before other conditionals)
         model.conditionals=model.conditionals([length(model.conditionals) 1:length(model.conditionals)-1]);
         % remove from monitor list
         model.monitors=rmfield(model.monitors,monitor_names{i});
       end
-
-      % initialize spike buffer and buffer index
-      if options.save_parameters_flag
-        % tspike = -inf(buffer_size,npop):
-        fprintf(fid,'%s = -1e6*ones(%g,%s%s_Npop);\n',var_tspikes,spike_buffer_size,parameter_prefix,pop_name);
-        fprintf(fid,'%s = ones(1,%s%s_Npop);\n',var_buffer_index,parameter_prefix,pop_name);
-      else
-        fprintf(fid,'%s = -1e6*ones(%g,%g);\n',var_tspikes,spike_buffer_size,model.parameters.([pop_name '_Npop']));
-        fprintf(fid,'%s = ones(1,%g);\n',var_buffer_index,model.parameters.([pop_name '_Npop']));
-      end
-      
     elseif isempty(monitor_expression{i}) && isfield(model.functions,monitor_names{i})
     % set expression if monitoring function referenced by name
       tmp=regexp(model.functions.(monitor_names{i}),'@\([a-zA-Z][\w,]*\)\s*(.*)','tokens','once');
@@ -530,9 +496,8 @@ if ~isempty(model.monitors)
       model.monitors.(monitor_names{i})=tmp{1};
     end
     
-    % initialize mon_last if not storing every time point and this is not a
-    % spike monitor
-    if (options.downsample_factor>1 || options.disk_flag==1) && isempty(regexp(monitor_names{i},'_spikes$','once'))
+    % initialize mon_last
+    if options.downsample_factor>1 || options.disk_flag==1
       % set mon_last=f(IC);
       tmp=cell2struct({monitor_expression{i}},{monitor_names{i}},1);
       print_monitor_update(fid,tmp,'_last',state_variables,'_last', varargin{:});
@@ -605,99 +570,13 @@ for i=1:length(state_variables)
   end
 end
 
-% add index to state variables in ODEs and look for delay differential equations
-delayinfo=[];
+% add index to state variables in ODEs
 odes = struct2cell(model.ODEs);
 for i=1:length(odes)
   for j=1:length(state_variables)
     odes{i}=dsStrrep(odes{i}, state_variables{j}, [state_variables{j} index_lasts{j}], '', '', varargin{:});
-    % #####################################################################
-    % COLLECT DELAY DIFFERENTIAL EQUATION INFO
-    % search for delays: [state_variables{j} index_lasts{j} '(t-']
-    tmp=strrep(strrep([state_variables{j} index_lasts{j}],'(','\('),')','\)');
-    if ~isempty(regexp(odes{i},[tmp '\(t'],'once'))
-      matches=regexp(odes{i},[tmp '\(t-[\w\.,:]+\)'],'match');
-      for k=1:length(matches)
-        % determine amount of delay for each occurrence of a delay to this state variable
-        %     note: account for user-specified X(t-tau) and X(t-tau,:)
-        %     note: account for tau as variable defined elsewhere or numeric
-        % look for: X(t-#)
-        delay=cellstr2num(regexp(matches{k},'\(t-([\.\d]+)\)','tokens','once'));
-        if isempty(delay)
-          % look for: X(t-#,:)
-          delay=cellstr2num(regexp(matches{k},'\(t-([\.\d]+),:\)','tokens','once'));
-        end
-        if isempty(delay)
-          % look for: X(t-param)
-          delay=regexp(matches{k},'\(t-([\w\.]+)\)','tokens','once');
-        end
-        if isempty(delay)
-          % look for: X(t-param,:)
-          delay=regexp(matches{k},'\(t-([\w\.]+),:\)','tokens','once');
-        end
-        if iscell(delay) && ischar(delay{1})
-          delay=strrep(delay{1},parameter_prefix,''); % remove parameter prefix
-          delay=strrep(delay,',:',''); % remove population dimension from index to delay matrix
-          % look for parameter with delay length
-          if isfield(model.parameters,delay)
-            delay=model.parameters.(delay);
-          else
-            error('delay parameter ''%s'' not found.',delay);
-          end
-        end
-        if ~isempty(delay) && isnumeric(delay)
-          delay_samp = ceil(delay/options.dt);
-          delayinfo(end+1).variable=state_variables{j};
-          delayinfo(end).strmatch=matches{k};
-          delayinfo(end).delay_samp=delay_samp;
-          delayinfo(end).ode_index=i;
-        end          
-      end
-    end
-    % #####################################################################
   end
 end
-% #####################################################################
-% PROCESS DELAY DIFFERENTIAL EQUATION INFO
-% determine max delay for each state variable
-if ~isempty(delayinfo)
-  delay_vars=unique({delayinfo.variable});
-  delay_maxi=zeros(size(delay_vars));
-  for i=1:length(delay_vars)
-    if i==1
-      fprintf(fid,'%% DELAY MATRICES:\n');      
-    end
-    % find max delay for this state variable
-    idx=ismember({delayinfo.variable},delay_vars{i});
-    Dmax=max([delayinfo(idx).delay_samp]);
-    delay_maxi(i)=Dmax;
-    % convert delay indices into delay vector indices based on max delay
-    tmps=num2cell(Dmax-[delayinfo(idx).delay_samp]);
-    [delayinfo(idx).delay_index]=deal(tmps{:});
-    % initialize delay matrix with max delay ICs and all time points
-    fprintf(fid,'%s_delay = zeros(nsamp+%g,size(%s,2));\n',delayinfo(i).variable,Dmax,delayinfo(i).variable);
-    fprintf(fid,'  %s_delay(1:%g,:) = repmat(%s(1,:),[%g 1]);\n',delayinfo(i).variable,Dmax,delayinfo(i).variable,Dmax);      
-  end
-  % replace delays in ODEs with indices to delay matrices
-  for i=1:length(delayinfo)
-    rep=sprintf('%s_delay(k+%g,:)',delayinfo(i).variable,delayinfo(i).delay_index);
-    odes{delayinfo(i).ode_index}=strrep(odes{delayinfo(i).ode_index},delayinfo(i).strmatch,rep);
-  end
-end
-% #####################################################################
-% remove unused @linkers from ODEs
-for i=1:length(odes)
-  if any(odes{i}=='@')
-    tmp=regexp(odes{i},'@([\w_]+)','tokens');
-    if ~isempty(tmp)
-      tmp=[tmp{:}];
-      for j=1:length(tmp)
-        odes{i}=strrep(odes{i},['@' tmp{j}],'0');
-      end
-    end
-  end
-end
-% #####################################################################
 
 %% Numerical integration
 % write code to do numerical integration
@@ -760,19 +639,6 @@ else % store every downsample_factor time point in memory or on disk
   
   fprintf(fid,'  n=n+1;\n');
   fprintf(fid,'end\n');
-end
-% update delay matrices
-if ~isempty(delayinfo)
-  fprintf(fid,'  %% ------------------------------------------------------------\n');
-  fprintf(fid,'  %% Update delay matrices:\n');
-  fprintf(fid,'  %% ------------------------------------------------------------\n');
-  for i=1:length(delay_vars)
-    if options.downsample_factor==1 && options.disk_flag==0
-      fprintf(fid,'  %s_delay(k+%g,:)=%s(k,:);\n',delay_vars{i},delay_maxi(i),delay_vars{i});
-    else
-      fprintf(fid,'  %s_delay(k+%g,:)=%s_last;\n',delay_vars{i},delay_maxi(i),delay_vars{i});      
-    end
-  end
 end
 
 fprintf(fid,'end\n');

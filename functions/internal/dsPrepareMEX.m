@@ -20,7 +20,6 @@ options=dsCheckOptions(keyvals,{...
   'verbose_flag',0,{0,1},... % set verbose to 1 by default
   'mex_dir',[],[],... % Directory to search for pre-compiled solve files (solve*_mex*)
   'codegen_args',[],[],...
-  'cluster_flag',0,{0,1},...
   },false);
 
 mex_dir = options.mex_dir;
@@ -58,7 +57,7 @@ else % mex file exists
 end %if
 
 % If mex_dir is specified, back up the newly compiled mex files to this folder
-if ~isempty(mex_dir) && ~options.cluster_flag
+if ~isempty(mex_dir)
   [~,solvefile] = fileparts2(mfileInput);
   [~,mexfile] = fileparts2(mexfileOutput);
   
@@ -91,10 +90,9 @@ cfg.DynamicMemoryAllocation = 'AllVariableSizeArrays';
 
 % Generate MEX function
 if isempty(options.codegen_args)
-  eval(['codegen -d codemex -config cfg ',file]);
+  eval(sprintf('codegen -d codemex -config cfg %s',file));
 else % codegen_args specified
-  %eval(sprintf('codegen -args %s -d codemex -config cfg %s', 'options.codegen_args', file));
-  eval(['codegen -args options.codegen_args -d codemex -config cfg %s',file]);
+  eval(sprintf('codegen -args %s -d codemex -config cfg %s', 'options.codegen_args', file));
 end
 % TODO: convert eval to feval or call to codegen
 
