@@ -826,7 +826,9 @@ for figset=1:num_fig_sets
           %set(haxes(row),'YTickLabel','');
         end
         xlim(options.xlim);
-        ylabel(strrep(var,'_','\_'));
+        if ~strcmp(options.plot_type,'rastergram')
+          ylabel(strrep(var,'_','\_'));
+        end
         if ~isempty(options.ylim)
           ylims=options.ylim;
         elseif shared_ylims_flag
