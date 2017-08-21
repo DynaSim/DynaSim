@@ -59,7 +59,7 @@ function destinationFile = dsDownloadFiles(requestedFile,destinationFile,overwri
         mkdirSilent(pathstr);
     end
 
-    requestedURL = ['https://github.com/DynaSim/DynaSim/blob/dsFiles/' requestedFileRelative '?raw=true'];
+    requestedURL = ['https://github.com/DynaSim/DynaSimFiles/blob/master/' requestedFileRelative '?raw=true'];
     if ispc
         % If it's a windows machine, replace all \ with / in URL path.
         requestedURL = strrep(requestedURL,'\','/');
