@@ -16,6 +16,10 @@ function [output,modifications] = dsApplyModifications(model, modifications, var
 %       Y = thing to modify ('name', 'size', or parameter name)
 %       set Y=Z if Y = name, size, or value
 %       Note: (X1,X2) or (Y1,Y2): modify these simultaneously in the same way
+%       Note: Z can be a scalar, row vector, column vector, or matrix. Columns
+%       of Z are applied across items Y1, Y2, etc (e.g. parameters); rows of
+%       Z are applied to X1, X2, etc (e.g. population names). See examples
+%       in dsVary2Modifications.
 %
 % Outputs:
 %   - TODO

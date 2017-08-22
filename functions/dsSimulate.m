@@ -505,7 +505,7 @@ end
 
 % expand set of things to vary across simulations
 if ~isempty(options.vary)
-  modifications_set=dsVary2Modifications(options.vary,model);
+  modifications_set=dsVary2Modifications(options.vary,model);       % Note: options.vary can also be itself a modifications set.
 else
   modifications_set={[]};
 end
