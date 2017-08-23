@@ -50,7 +50,7 @@ function [Abasis, Abasisi, Asubs] = getLinearIndependentCell(A,ignore_constant_s
 % % % % % % % % % Abasis - the subset of basis columns % % % % % % % % %
 % 
 % horzcat(Abasis{:})
-%   3�5 cell array
+%   3???5 cell array
 %     [1]    [1]    'a'    'd'    [  5]
 %     [2]    [2]    'b'    'e'    [  3]
 %     [3]    [5]    'c'    'f'    @plot
@@ -58,14 +58,14 @@ function [Abasis, Abasisi, Asubs] = getLinearIndependentCell(A,ignore_constant_s
 % % % % Abasisi - the indices of these columns in the original matrix % % % 
 % 
 % Abasisi =
-%   1�5 cell array
+%   1???5 cell array
 %     [4]    [5]    [1]    [3]    [6]
 % 
 % % % % % % % % % Asubs - subsets ofl linearly dependent columns % % % % % % % % %
 % 
 % Asubs =
-%   1�5 cell array
-%     [1�2 double]    [5]    [1�2 double]    [3]    [1�2 double]
+%   1???5 cell array
+%     [1???2 double]    [5]    [1???2 double]    [3]    [1???2 double]
 % Asubs{1} : [4, 8]
 % Asubs{2} : [5]
 % Asubs{3} : [1, 2]
@@ -122,6 +122,8 @@ end
 
 Asubs=vertcat(covaried1(:),covaried2(:))';
 
+Abasisi = {};
+Abasis = {};
 for i = 1:length(Asubs)
     Abasisi{i} = Asubs{i}(1);
     Abasis{i} = A(:,Abasisi{i});

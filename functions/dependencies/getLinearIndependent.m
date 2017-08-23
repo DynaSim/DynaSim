@@ -62,8 +62,8 @@ function [Abasis, Abasisi, Asub]= getLinearIndependent(A,ignore_constant_shift)
 %     Abasisi =                         % Indices of basis vectors
 %          1     3
 %     Asub =
-%       1×2 cell array
-%         [1×3 double]    [1×2 double]
+%       1?2 cell array
+%         [1?3 double]    [1?2 double]
 %     Asub{1} : [1, 2, 5]               % Subset of columns described by 1st basis vector
 %     Asub{2} : [3, 4]                  % Subset of columns described by 2nd basis vector
 % 
@@ -92,8 +92,8 @@ function [Abasis, Abasisi, Asub]= getLinearIndependent(A,ignore_constant_shift)
 %     Abasisi =
 %      1     2     4
 %     Asub =
-%       1×3 cell array
-%         [1×3 double]    [1×2 double]    [4]
+%       1?3 cell array
+%         [1?3 double]    [1?2 double]    [4]
 %     Asub{1} : [1, 3, 5]
 %     Asub{2} : [2, 6]
 %     Asub{3} : [4]
@@ -139,9 +139,11 @@ end
 
 % Since we artificially added in a column of constants, if there were
 % no other columns linearly dependent on a constant value, then
-% covaried{1} will be empty and we can drop it.
-if isempty(Asub{Nnz}) && ignore_constant_shift
-    Asub = Asub(1:end-1);
+% Asub{end} will be empty and we can drop it.
+if ignore_constant_shift
+    if isempty(Asub{Nnz})
+        Asub = Asub(1:end-1);
+    end
 end
 
 
