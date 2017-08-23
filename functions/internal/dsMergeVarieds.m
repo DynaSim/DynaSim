@@ -41,7 +41,7 @@ function [data_new, variedname_merged, varied_vals ] = dsMergeVarieds(data,varie
 
     
     if nargin < 3
-        maxchars = 20;
+        maxchars = 100;
     end
 
     varied_vals = cell(length(data),length(varied_fields));
@@ -94,6 +94,8 @@ function out = cropname(in, maxchars)
 
     if length(in) > maxchars
         out = strcat(in(1:maxchars-3),'___');
+    else
+        out = in;
     end
     
 end
