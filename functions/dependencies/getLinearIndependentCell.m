@@ -1,6 +1,6 @@
 
 
-function [Abasis, Abasisi, Asubs] = dsGetLinearIndependentCell(A,ignore_constant_shift)
+function [Abasis, Abasisi, Asubs] = getLinearIndependentCell(A,ignore_constant_shift)
 % [Abasis, Abasisi, Asubs] = getLinearIndependentCell(A,ignore_constant_shift)
 %
 % Purpose: Takes in a matrix or cell array and identifies a
@@ -38,11 +38,11 @@ function [Abasis, Abasisi, Asubs] = dsGetLinearIndependentCell(A,ignore_constant
 %   share linear dependence.
 %
 % Example:
-% A = {'a','b','c';'a','b','c';'d','e','f';1,2,3;1,2,5;5,3,@plot;5,3,@plot;1,2,3}';
+% A = {'a','b','c';'a','b','c';'d','e','f';1,2,3;1,2,5;5,3,@plot;5,3,@plot;2,4,6}';
 % A = 
-%     'a'    'a'    'd'    [1]    [1]    [  5]    [  5]    [1]
-%     'b'    'b'    'e'    [2]    [2]    [  3]    [  3]    [2]
-%     'c'    'c'    'f'    [3]    [5]    @plot    @plot    [3]
+%     'a'    'a'    'd'    [1]    [1]    [  5]    [  5]    [2]
+%     'b'    'b'    'e'    [2]    [2]    [  3]    [  3]    [4]
+%     'c'    'c'    'f'    [3]    [5]    @plot    @plot    [6]
 % [Abasis, Abasisi, Asubs] = getLinearIndependentCell(A)
 % 
 % Results:

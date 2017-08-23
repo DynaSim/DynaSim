@@ -3,11 +3,11 @@ function xp = ds2mdd(data,merge_covaried_axes,merge_sparse_axes,varargin)
     
     
     if nargin < 2
-        merge_covaried_axes = false;
+        merge_covaried_axes = true;
     end
     
     if nargin < 3
-        merge_sparse_axes = false;
+        merge_sparse_axes = true;
     end
 
     data = dsCheckData(data, varargin{:});
