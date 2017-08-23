@@ -385,15 +385,34 @@ end
 
 % Shift the overlay by a certain amount
     if options.do_overlay_shift && all(cellfun(@isnumeric,xp2.data(:))) && ~is_image
-        Nd = ndims(xp2);
-        xp2 = xp2.packDim(Nd);
-        mydata = xp2.data;
-        for i = 1:numel(mydata)
-            mydata{i} = do_shift_lastdim (mydata{i},options.overlay_shift_val);
+        if isempty(Ndims_per_subplot) || Ndims_per_subplot <= 1
+            % If xp2.data is going to be NxM, shift each column
+            mydata = xp2.data;
+            for i = 1:numel(mydata)
+                mydata{i} = do_shift_lastdim (mydata{i},options.overlay_shift_val);
+            end
+            xp2.data = mydata;
+        else
+            % If Ndims_per_subplot > 1, then this means we're going to be
+            % packing an additional dim into xp2.data. Therefore, shift the
+            % last dimension in xp2. We'll do this by temporarily packing
+            % it into xp2.data (e.g. along dim 4, which is unused) and then
+            % unpacking it later.
+            sz = size(xp2);
+            ind = find(sz > 1, 1, 'last');
+            if ~isempty(ind)
+                xp2 = xp2.packDim(ind,4);
+            end
+            mydata = xp2.data;
+            for i = 1:numel(mydata)
+                mydata{i} = do_shift_lastdim (mydata{i},options.overlay_shift_val);
+            end
+            xp2.data = mydata;
+            if ~isempty(ind)
+                xp2 = xp2.unpackDim(4,ind);
+                xp2 = xp2.squeezeRegexp('Dim');
+            end
         end
-        xp2.data = mydata;
-        xp2 = xp2.unpackDim(3,Nd);
-        xp2 = xp2.squeezeRegexp('Dim');
     end
 
 %% Crop data
@@ -747,6 +766,7 @@ function mydata_out = do_shift_lastdim (mydata,shift)
         stdevs = nanstd(temp)*upscale_factor;               % STD ignoring NaNs
         sh = [0, stdevs(1:end-1) + stdevs(2:end)]';
         sh = sh * -1;        % Forces shifts to be downward (same as subplots)
+        sh = cumsum(sh);     % Dave note - this seemed to be missing so added it for case of size(Nd)=2; not sure if it will mess up other cases.
     else
         sh = shift*[0:sz(end)-1]';      % Fixed shift amount
         sh = sh * -1;        % Forces shifts to be downward (same as subplots)
