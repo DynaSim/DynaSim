@@ -33,70 +33,70 @@ function [Abasis, Abasisi, Asub]= getLinearIndependent(A,ignore_constant_shift)
 % 
 % Examples:
 % 
-%     -----------------------
-%     % % % Example 1: % % % 
-%     -----------------------
+%     % -----------------------
+%     % % % % Example 1: % % % 
+%     % -----------------------
 %     A = [1, 9, 2, 3, 2; 2, 8, 2, 3, 4; 3, 7, 3, 4 6; 4, 6, 4, 5, 8 ; 5, 5, 5, 6, 10];
-%     A =
-%          1     9     2     3     2
-%          2     8     2     3     4
-%          3     7     3     4     6
-%          4     6     4     5     8
-%          5     5     5     6    10
-% 
+%     % A =
+%     %      1     9     2     3     2
+%     %      2     8     2     3     4
+%     %      3     7     3     4     6
+%     %      4     6     4     5     8
+%     %      5     5     5     6    10
+%     %
 %     % Note that: col2 = 10 - col1
 %     %            col4 = col3 + 1
 %     %            col5 = col1*2
 % 
 %     [Abasis, Abasisi, Asub]= getLinearIndependent(A, true)
 % 
-%     -----------------------
-%     % % % Result 1: % % % 
-%     -----------------------
-%     Abasis =                           % Subset of basis vectors
-%          1     2
-%          2     2
-%          3     3
-%          4     4
-%          5     5
-%     Abasisi =                         % Indices of basis vectors
-%          1     3
-%     Asub =
-%       1?2 cell array
-%         [1?3 double]    [1?2 double]
-%     Asub{1} : [1, 2, 5]               % Subset of columns described by 1st basis vector
-%     Asub{2} : [3, 4]                  % Subset of columns described by 2nd basis vector
-% 
-%     -----------------------
-%     % % % Example 2: % % % 
-%     -----------------------
+%     % -----------------------
+%     % % % % Result 1: % % % 
+%     % -----------------------
+%     % Abasis =                           % Subset of basis vectors
+%     %      1     2
+%     %      2     2
+%     %      3     3
+%     %      4     4
+%     %      5     5
+%     % Abasisi =                         % Indices of basis vectors
+%     %      1     3
+%     % Asub =
+%     %   1x2 cell array
+%     %     [1x3 double]    [1x2 double]
+%     % Asub{1} : [1, 2, 5]               % Subset of columns described by 1st basis vector
+%     % Asub{2} : [3, 4]                  % Subset of columns described by 2nd basis vector
+%     %
+%     % -----------------------
+%     % % % % Example 2: % % % 
+%     % -----------------------
 %     A2 = [ [2,2,2,2,2]', A]
-%     A2 =
-%      2     1     9     2     3     2
-%      2     2     8     2     3     4
-%      2     3     7     3     4     6
-%      2     4     6     4     5     8
-%      2     5     5     5     6    10
-% 
+%     % A2 =
+%     %  2     1     9     2     3     2
+%     %  2     2     8     2     3     4
+%     %  2     3     7     3     4     6
+%     %  2     4     6     4     5     8
+%     %  2     5     5     5     6    10
+%     % 
 %     [Abasis, Abasisi, Asub]= getLinearIndependent(A2, false)
 % 
-%     -----------------------
-%     % % % Result 2: % % % 
-%     -----------------------
-%     Abasis =
-%          1     2     2
-%          2     2     2
-%          3     3     2
-%          4     4     2
-%          5     5     2
-%     Abasisi =
-%      1     2     4
-%     Asub =
-%       1?3 cell array
-%         [1?3 double]    [1?2 double]    [4]
-%     Asub{1} : [1, 3, 5]
-%     Asub{2} : [2, 6]
-%     Asub{3} : [4]
+%     % -----------------------
+%     % % % % Result 2: % % % 
+%     % -----------------------
+%     % Abasis =
+%     %      1     2     2
+%     %      2     2     2
+%     %      3     3     2
+%     %      4     4     2
+%     %      5     5     2
+%     % Abasisi =
+%     %  1     2     4
+%     % Asub =
+%     %   1x3 cell array
+%     %     [1x3 double]    [1x2 double]    [4]
+%     % Asub{1} : [1, 3, 5]
+%     % Asub{2} : [2, 6]
+%     % Asub{3} : [4]
 % 
 %
 % Author: David Stanley, Boston University, 2017

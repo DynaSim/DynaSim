@@ -36,41 +36,41 @@ function [Abasis, Abasisi, Asubs] = getLinearIndependentCell(A,ignore_constant_s
 %   Asub: Cell array with one element for each basis vector in A. Each cell
 %   in Asub identifies clusters of columns in the original matrix A that
 %   share linear dependence.
-%
-% Example:
-% A = {'a','b','c';'a','b','c';'d','e','f';1,2,3;1,2,5;5,3,@plot;5,3,@plot;2,4,6}';
-% A = 
-%     'a'    'a'    'd'    [1]    [1]    [  5]    [  5]    [2]
-%     'b'    'b'    'e'    [2]    [2]    [  3]    [  3]    [4]
-%     'c'    'c'    'f'    [3]    [5]    @plot    @plot    [6]
-% [Abasis, Abasisi, Asubs] = getLinearIndependentCell(A)
 % 
-% Results:
+%     % Example:
+%     A = {'a','b','c';'a','b','c';'d','e','f';1,2,3;1,2,5;5,3,@plot;5,3,@plot;2,4,6}';
+%     % A = 
+%     %     'a'    'a'    'd'    [1]    [1]    [  5]    [  5]    [2]
+%     %     'b'    'b'    'e'    [2]    [2]    [  3]    [  3]    [4]
+%     %     'c'    'c'    'f'    [3]    [5]    @plot    @plot    [6]
+%     [Abasis, Abasisi, Asubs] = getLinearIndependentCell(A)
 % 
-% % % % % % % % % Abasis - the subset of basis columns % % % % % % % % %
-% 
-% horzcat(Abasis{:})
-%   3???5 cell array
-%     [1]    [1]    'a'    'd'    [  5]
-%     [2]    [2]    'b'    'e'    [  3]
-%     [3]    [5]    'c'    'f'    @plot
-% 
-% % % % Abasisi - the indices of these columns in the original matrix % % % 
-% 
-% Abasisi =
-%   1???5 cell array
-%     [4]    [5]    [1]    [3]    [6]
-% 
-% % % % % % % % % Asubs - subsets ofl linearly dependent columns % % % % % % % % %
-% 
-% Asubs =
-%   1???5 cell array
-%     [1???2 double]    [5]    [1???2 double]    [3]    [1???2 double]
-% Asubs{1} : [4, 8]
-% Asubs{2} : [5]
-% Asubs{3} : [1, 2]
-% Asubs{4} : [3]
-% Asubs{5} : [6, 7]
+%     % Results:
+%     % 
+%     % % % % % % % % % Abasis - the subset of basis columns % % % % % % % % %
+%     % 
+%     % horzcat(Abasis{:})
+%     %   3x5 cell array
+%     %     [1]    [1]    'a'    'd'    [  5]
+%     %     [2]    [2]    'b'    'e'    [  3]
+%     %     [3]    [5]    'c'    'f'    @plot
+%     % 
+%     % % % % Abasisi - the indices of these columns in the original matrix % % % 
+%     % 
+%     % Abasisi =
+%     %   1x5 cell array
+%     %     [4]    [5]    [1]    [3]    [6]
+%     % 
+%     % % % % % % % % % Asubs - subsets ofl linearly dependent columns % % % % % % % % %
+%     % 
+%     % Asubs =
+%     %   1x5 cell array
+%     %     [1x2 double]    [5]    [1x2 double]    [3]    [1x2 double]
+%     % Asubs{1} : [4, 8]
+%     % Asubs{2} : [5]
+%     % Asubs{3} : [1, 2]
+%     % Asubs{4} : [3]
+%     % Asubs{5} : [6, 7]
 % 
 % 
 % Submodules: getLinearIndependent, uniqueCellGeneralized, iscellnum
