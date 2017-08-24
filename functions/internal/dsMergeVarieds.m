@@ -41,7 +41,7 @@ function [data_new, variedname_merged, varied_vals ] = dsMergeVarieds(data,varie
 
     
     if nargin < 3
-        maxchars = 100;
+        maxchars = 45;      % Warnimg - max char length for field name is 63; so this needs to be <= 63
     end
 
     varied_vals = cell(length(data),length(varied_fields));
