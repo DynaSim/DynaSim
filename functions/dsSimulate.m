@@ -1050,7 +1050,7 @@ end % in_parfor_loop_flag
           % do analysis and plotting while saving results
           siminfo=studyinfo.simulations(sim_ind);
           for f=1:length(siminfo.result_functions)
-            tmpresult=dsAnalyze(tmpdata,siminfo.result_functions{f},'result_file',siminfo.result_files{f},'save_data_flag',1,'save_results_flag',1,siminfo.result_options{f}{:});
+            tmpresult=dsAnalyze(tmpdata,siminfo.result_functions{f},'result_file',siminfo.result_files{f},'save_data_flag',1,'save_results_flag',1,siminfo.result_options{f}{:},'parallel_flag',options.parallel_flag);
             
             % since the plots are saved, close all generated figures
             if all(ishandle(tmpresult))
@@ -1061,13 +1061,13 @@ end % in_parfor_loop_flag
           % do analysis and plotting without saving results
           if ~isempty(options.analysis_functions) && nargoutmain > 2
             for f=1:length(options.analysis_functions)
-              tmpresult=dsAnalyze(tmpdata,options.analysis_functions{f},'result_file',[],'save_data_flag',0,'save_results_flag',options.save_results_flag,options.analysis_options{f}{:});
+              tmpresult=dsAnalyze(tmpdata,options.analysis_functions{f},'result_file',[],'save_data_flag',0,'save_results_flag',options.save_results_flag,options.analysis_options{f}{:},'parallel_flag',options.parallel_flag);
             end
           end
           
           if ~isempty(options.plot_functions)
             for f=1:length(options.plot_functions)
-              dsAnalyze(tmpdata,options.plot_functions{f},'result_file',[],'save_data_flag',0,'save_results_flag',options.save_results_flag,options.plot_options{f}{:});
+              dsAnalyze(tmpdata,options.plot_functions{f},'result_file',[],'save_data_flag',0,'save_results_flag',options.save_results_flag,options.plot_options{f}{:},'parallel_flag',options.parallel_flag);
             end
           end
         end
