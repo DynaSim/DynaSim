@@ -41,14 +41,14 @@ function [data_new, variedname_merged, varied_vals ] = dsMergeVarieds(data,varie
 
     
     if nargin < 3
-        maxchars = 45;      % Warnimg - max char length for field name is 63; so this needs to be <= 63
+        maxchars = 25;      % Warnimg - max char length for field name is 63; so this needs to be <= 63
     end
 
     varied_vals = cell(length(data),length(varied_fields));
     for i = 1:length(data)
         data_temp = data(i);
         variedname_merged = cat_with_underscores(varied_fields);
-        variedname_merged = strcat('Covaried_',variedname_merged);
+        variedname_merged = strcat('C_',variedname_merged);
         variedname_merged = cropname(variedname_merged, maxchars);
         
         for j = 1:length(varied_fields)
