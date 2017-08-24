@@ -3,9 +3,11 @@
 function [Abasis, Abasisi, Asubs] = getLinearIndependentCell(A,ignore_constant_shift)
 % [Abasis, Abasisi, Asubs] = getLinearIndependentCell(A,ignore_constant_shift)
 %
+% 
 % Purpose: Takes in a matrix or cell array and identifies a
 % subset of independent columns. It also clusters subsets of columns
 % that are dependent upon each other. 
+% 
 % 
 % Details: If input is a matrix, behavior is exacly the same as
 % getLinearIndependent. That is, for numeric inputs, "dependence" is
@@ -38,11 +40,14 @@ function [Abasis, Abasisi, Asubs] = getLinearIndependentCell(A,ignore_constant_s
 %   share linear dependence.
 % 
 %     % Example:
+% 
 %     A = {'a','b','c';'a','b','c';'d','e','f';1,2,3;1,2,5;5,3,@plot;5,3,@plot;2,4,6}';
+% 
 %     % A = 
 %     %     'a'    'a'    'd'    [1]    [1]    [  5]    [  5]    [2]
 %     %     'b'    'b'    'e'    [2]    [2]    [  3]    [  3]    [4]
 %     %     'c'    'c'    'f'    [3]    [5]    @plot    @plot    [6]
+% 
 %     [Abasis, Abasisi, Asubs] = getLinearIndependentCell(A)
 % 
 %     % Results:

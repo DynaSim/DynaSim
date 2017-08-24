@@ -1,12 +1,16 @@
 
 function [Abasis, Abasisi, Asub]= getLinearIndependent(A,ignore_constant_shift)
-% [covaried] = getLinearIndependent(vary_params)
+% [Abasis, Abasisi, Asub]= getLinearIndependent(A,ignore_constant_shift)
 %
+% 
 % Purpose: Takes in a matrix of column vectors and identifies
 % the subset of columns that forms a linear independent basis (Abasis). 
+% 
+% 
 % It also clusters columns in the original matrix into groups of those that
 % share linear dependence (Asub). (e.g. If col2 = 2*col1, then col1 and
 % col2 would be grouped together).
+% 
 % 
 % Usage:
 %   [Abasis, Abasisi, Asub]= getLinearIndependent(A)
@@ -36,7 +40,9 @@ function [Abasis, Abasisi, Asub]= getLinearIndependent(A,ignore_constant_shift)
 %     % -----------------------
 %     % % % % Example 1: % % % 
 %     % -----------------------
+% 
 %     A = [1, 9, 2, 3, 2; 2, 8, 2, 3, 4; 3, 7, 3, 4 6; 4, 6, 4, 5, 8 ; 5, 5, 5, 6, 10];
+% 
 %     % A =
 %     %      1     9     2     3     2
 %     %      2     8     2     3     4
@@ -70,7 +76,9 @@ function [Abasis, Abasisi, Asub]= getLinearIndependent(A,ignore_constant_shift)
 %     % -----------------------
 %     % % % % Example 2: % % % 
 %     % -----------------------
+% 
 %     A2 = [ [2,2,2,2,2]', A]
+% 
 %     % A2 =
 %     %  2     1     9     2     3     2
 %     %  2     2     8     2     3     4
@@ -78,6 +86,7 @@ function [Abasis, Abasisi, Asub]= getLinearIndependent(A,ignore_constant_shift)
 %     %  2     4     6     4     5     8
 %     %  2     5     5     5     6    10
 %     % 
+% 
 %     [Abasis, Abasisi, Asub]= getLinearIndependent(A2, false)
 % 
 %     % -----------------------
