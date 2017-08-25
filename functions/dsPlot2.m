@@ -154,6 +154,7 @@ end
   'save_res',[],[],...
   'Ndims_per_subplot',[],[],...
   'dim_stacking',[],[],...
+  'subplot_handle',@xp_subplot_grid,[],...
   'plot_handle',[],[],...
   },false);
 handles=[];
@@ -169,6 +170,7 @@ force_last = options.force_last;
 crop_range = options.crop_range;
 lock_axes = options.lock_axes;
 Ndims_per_subplot = options.Ndims_per_subplot;
+subplot_handle = options.subplot_handle;
 plot_handle = options.plot_handle;
 
 % Add default options to structures
@@ -191,6 +193,8 @@ plot_handle = options.plot_handle;
 % Subplot_options
 subplot_options = struct_addDef(subplot_options,'subplotzoom_enabled',options.do_zoom);
 subplot_options = struct_addDef(subplot_options,'force_rowvect',true);
+subplot_options = struct_addDef(subplot_options,'autosuppress_interior_tics',true);
+
 
 % Figure options
 figure_options = struct_addDef(figure_options,'visible',options.visible);
@@ -560,19 +564,19 @@ end
 switch num_embedded_subplots
     case 1
         % Ordering of axis handles
-        function_handles = {@xp_handles_newfig, @xp_subplot_grid,data_plothandle};   % Specifies the handles of the plotting functions
+        function_handles = {@xp_handles_newfig, subplot_handle,data_plothandle};   % Specifies the handles of the plotting functions
         dims_per_function_handle = [1,1,Ndims_per_subplot];
         function_args = {{figure_options},{subplot_options},{plot_options}};
         
     case 2
         % Ordering of axis handles
-        function_handles = {@xp_handles_newfig, @xp_subplot_grid,data_plothandle};   % Specifies the handles of the plotting functions
+        function_handles = {@xp_handles_newfig, subplot_handle,data_plothandle};   % Specifies the handles of the plotting functions
         dims_per_function_handle = [1,2,Ndims_per_subplot];
         function_args = {{figure_options},{subplot_options},{plot_options}};
         
     case 3
         % Ordering of axis handles
-        function_handles = {@xp_handles_newfig, @xp_subplot_grid, @xp_subplot_grid,data_plothandle};   % Specifies the handles of the plotting functions
+        function_handles = {@xp_handles_newfig, subplot_handle, subplot_handle,data_plothandle};   % Specifies the handles of the plotting functions
         dims_per_function_handle = [1,2,1,Ndims_per_subplot];
         subplot_options2 = subplot_options;
         subplot_options2.legend1 = [];
@@ -580,7 +584,7 @@ switch num_embedded_subplots
         function_args = {{figure_options},{subplot_options2},{subplot_options},{plot_options}};
     case 4
         % Ordering of axis handles
-        function_handles = {@xp_handles_newfig, @xp_subplot_grid, @xp_subplot_grid,data_plothandle};   % Specifies the handles of the plotting functions
+        function_handles = {@xp_handles_newfig, subplot_handle, subplot_handle,data_plothandle};   % Specifies the handles of the plotting functions
         dims_per_function_handle = [1,2,2,Ndims_per_subplot];
         subplot_options2 = subplot_options;
         subplot_options2.legend1 = [];
