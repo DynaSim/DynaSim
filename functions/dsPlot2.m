@@ -343,6 +343,7 @@ if ~isempty(force_last)
     others_ind = true(1,ndims(xp2));
     others_ind(ax_ind) = false;
     xp2 = xp2.permute([find(others_ind), ax_ind]);        % Move chosen axis to the back!
+    xp2 = xp2.fixAxes;                                   % This permute can create naming issues if using default axis names (Dim 1, Dim 2, etc. For example, Dim2 can end up associated with xp2.axis(1)). 
     
 end
 
