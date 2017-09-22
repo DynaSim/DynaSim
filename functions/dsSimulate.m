@@ -275,7 +275,8 @@ options=dsCheckOptions(varargin,{...
   'plot_functions',[],[],...
   'plot_options',[],[],...
   'optimize_big_vary',0,{0,1},...
-  'mex_dir','mex',[],... % Directory to search for pre-compiled solve files (solve*_mex*). Can be relative to 'study_dir' or absolute path.
+  'mex_dir_flag',1,{0,1},... % Flag to tell whether or not to search in mex_dir for pre-compiled solve files (solve*_mex*).
+  'mex_dir',[],[],... % Directory to search for pre-compiled mex files. Can be relative to 'study_dir' or absolute path.
   'in_parfor_loop_flag',0,{0,1},... % if inside parfor loop
   'debug_flag',0,{0,1},...
   'auto_gen_test_data_flag',0,{0,1},...
@@ -298,6 +299,10 @@ if options.unit_test_flag
 end
 
 %% 0.3 Prepare solve options.
+
+if isempty(options.mex_dir)
+    options.mex_dir = dsGetConfig('mex_path');
+end
 
 if options.compile_flag && options.sparse_flag
   error('The Matlab Coder toolbox does not support sparse matrices. Choose either ''compile_flag'' or ''sparse_flag''.');
@@ -615,7 +620,7 @@ if options.parallel_flag
     end
     
     % Create mex_dir if it does not yet exist
-    if ~exist(options.mex_dir,'dir') && ~options.cluster_flag
+    if ~exist(options.mex_dir,'dir') && ~options.cluster_flag && options.mex_dir_flag
       mkdir(options.mex_dir);
     end
   end
@@ -731,7 +736,7 @@ if options.compile_flag
   end
   
   % Create mex_dir if it does not yet exist
-  if ~exist(options.mex_dir,'dir') && ~options.cluster_flag
+  if ~exist(options.mex_dir,'dir') && ~options.cluster_flag && options.mex_dir_flag
     mkdir(options.mex_dir);
   end
 end
