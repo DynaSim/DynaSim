@@ -534,9 +534,15 @@ else
             if any(strcmp(plot_type,{'rastergram','raster'})) 
                 % Force Ndims_per_subplot to 2 fro rastergram.
                 if isempty(Ndims_per_subplot)
-                    Ndims_per_subplot = 2;                 % Overwrite Ndims_per_subplot to 2. This ensures
-                end                                        % that multiple populations can be stacked in a
-                                                           % single subplot.
+                    if ~isempty(xp2.findaxis('populations'))
+                        Ndims_per_subplot = 2;                 % Overwrite Ndims_per_subplot to 2. This ensures
+                                                               % that multiple populations can be stacked in a
+                                                               % single subplot.
+                    else
+                        Ndims_per_subplot = 1;                 % Only do this if population axis is still present!
+                    end
+                end                                        
+                                                          
             end
             
         case {'heatmapFR','heatmap_sortedFR','meanFR','meanFRdens'}
