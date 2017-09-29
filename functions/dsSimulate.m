@@ -304,7 +304,11 @@ if options.compile_flag && options.sparse_flag
 end
 
 if options.parallel_flag && (~strcmp(reportUI,'matlab') || feature('numCores') == 1) % TODO: check on windows and single core machine
-  fprintf('Setting ''parallel_flag''=0 since only 1 core detected on this machine.\n')
+  if ~strcmp(reportUI,'matlab')
+    fprintf('Setting ''parallel_flag''=0 in Octave.\n')
+  else
+    fprintf('Setting ''parallel_flag''=0 since only 1 core detected on this machine.\n')
+  end
   options.parallel_flag = 0;
 end
 
