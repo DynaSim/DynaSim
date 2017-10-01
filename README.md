@@ -24,6 +24,10 @@ systems in Matlab or Octave!
   subfolder](https://github.com/DynaSim/DynaSim/tree/master/docs).
 - For more help, check out the [DynaSim wiki](https://github.com/DynaSim/DynaSim/wiki)
 
+#### Wiki
+
+- The DynaSim [wiki](https://github.com/DynaSim/DynaSim/wiki/) contains tips, best practices, user FAQ, and other information
+
 ### Mailing lists:
 
 - Join the [user mailing list](https://groups.google.com/forum/#!forum/dynasim-users) to ask questions, request features, report bugs, and discuss DynaSim related issues
