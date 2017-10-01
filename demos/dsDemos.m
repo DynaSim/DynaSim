@@ -57,7 +57,7 @@ data=dsSimulate(eqns, 'tspan',[0 100], 'ic',[1 2 .5], 'solver','rk4', 'study_dir
 % it) is stored in data.simulator_options and can be viewed or rerun afterwards:
 edit(data.simulator_options.solve_file)
 
-% Every component of the model is assigned to a "population", and the 
+% Every component of the model is assigned to a "population", and the
 % population name (default: 'pop1') is prepended to all variable and
 % function names.
 
@@ -93,7 +93,7 @@ subplot(2,1,2); plot(data.time,data.pop1_I); % plot input function
 xlabel('time (ms)'); ylabel('Iapp');
 
 % note: "t", "dt", and "T" are special variables that can be used in model
-% equations. "t" represents the current time point of the simulation. 
+% equations. "t" represents the current time point of the simulation.
 % "dt" is the fixed time step used for numeric integration. "T" is the full
 % simulated time vector defined before simulation begins.
 
@@ -101,7 +101,7 @@ xlabel('time (ms)'); ylabel('Iapp');
 %% RUNNING SETS OF SIMULATIONS
 % %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-% 'vary' indicates the variable to vary, the values it should take, and the 
+% 'vary' indicates the variable to vary, the values it should take, and the
 % object (population or connection) whose variable should be varied.
 
 % Syntax 1: vary={{object, variable, value1},{object, variable, value2},...}
@@ -138,7 +138,7 @@ data=dsSimulate(eqns, 'tspan',[0 250], 'vary',vary, 'study_dir','demo_izhikevich
 %% QUICKLY BUILDING LARGE MODELS FROM EXISTING "MECHANISMS"
 % %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-% Mechanisms are predefined reusable sub-models meant to be incorporated 
+% Mechanisms are predefined reusable sub-models meant to be incorporated
 % in larger complete models. Examples of mechanisms in neuron models include
 % ion currents, pumps, etc. Once defined, they can be easily incorporated
 % into larger models by simply listing the name of the file containing their
@@ -297,7 +297,7 @@ dsSimulate(eqns, 'save_data_flag',1, 'study_dir','demo_cluster_3',...
                    'plot_functions',{@dsPlot,@dsPlot},...
                    'plot_options',{{},{'plot_type','power'}});
 % !cat ~/batchdirs/demo_cluster_3/pbsout/sim_job1.out
- 
+
 % Post-simulation analyses can be performed similarly by passing
 % analysis function handles and options using 'analysis_functions' and
 % 'analysis_options'.
@@ -317,7 +317,7 @@ dsSimulate(eqns, 'save_data_flag',1, 'study_dir','demo_cluster_4','compile_flag'
 
 % Simulating large models can be sped up significantly by compiling the
 % simulation before running it. DynaSim makes this easy to do using the
-% 'compile_flag' option in dsSimulate. Note: compiling the model can 
+% 'compile_flag' option in dsSimulate. Note: compiling the model can
 % take several seconds to minutes; however, it only compiles the first time
 % it is run and is significantly faster on subsequent runs.
 
