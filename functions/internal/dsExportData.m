@@ -31,13 +31,13 @@ switch lower(options.format)
       if strcmp(reportUI,'matlab')
         save(options.filename,vars{:},'-v7.3');
       else
-        save(options.filename,vars{:},'-v7');
+        save(options.filename,vars{:});
       end
     else
       if strcmp(reportUI,'matlab')
         save(options.filename,'data','-v7.3');
       else
-        save(options.filename,'data','-v7');
+        save(options.filename,'data');
       end
     end
   case 'csv'
