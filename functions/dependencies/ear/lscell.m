@@ -1,4 +1,4 @@
-function dirList = lscell(arg, removePathBool)
+function dirList = lscell(arg, removePathBool, recursiveBool)
 %% lscell
 % Author: Erik Roberts
 %
@@ -12,18 +12,34 @@ function dirList = lscell(arg, removePathBool)
 %   arg: argument to ls
 %   removePathBool: logical of whether to remove the path before the files/dirs
 
-if ~exist('removePathBool', 'var')
+% args
+if nargin < 2 || isempty(removePathBool)
   removePathBool = true; %defaults to true
 end
-
-if nargin == 0
-  dirList = ls;
+if nargin < 3 || isempty(recursiveBool)
+  recursiveBool = false; %defaults to false
+end
+if ~nargin || isempty(arg)
+  if ~recursiveBool
+    arg = {};
+  else
+    arg = {'.'};
+  end
 else
+  arg = {arg};
+end
+  
+if ~recursiveBool
   try
-    dirList = ls(arg);
+    dirList = ls(arg{:});
   catch % no arg files found
     dirList = {};
     return
+  end
+else % recursiveBool
+  if (ismac || isunix)
+    [~, dirList] = system(['find ' arg{:}]);
+  elseif ispc
   end
 end
 
@@ -39,7 +55,7 @@ elseif ispc
   end
 end
 
-if isempty(dirList{1})
+if isempty(dirList) || isempty(dirList{1})
   dirList = {};
 end
 
