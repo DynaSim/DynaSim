@@ -358,13 +358,42 @@ for i=1:length(spec.populations)
       end
     end
     % extract population-level parameters from equations
+    param_name={};
+    param_value={};
     eqn=spec.populations(i).equations;
     p=getfield(dsParseModelEquations(eqn, varargin{:}),'parameters');
     if ~isempty(p)
-      param_name=fieldnames(p);
-      param_value=struct2cell(p);
+      param_name=cat(1,param_name,fieldnames(p));
+      param_value=cat(1,param_value,struct2cell(p));
+    end
+    % extract mechanism-specific parameters defined in master equations
+    % eg) eqn='dv/dt=@current+10; monitor iAMPA.functions; iNa.IC_noise=10; iK.g=g; g=3';
+    o=regexp(eqn,';\s*[a-zA-Z]+\w*\.[a-zA-Z]+\w*\s*=[a-z_A-Z0-9\.]+','match'); 
+      % eg) '; MECH.PARAM=VALUE', assumes param is not defined at start of equation string
+    % add mechanism-specific keys (MECH.PARAM) and vals to p
+    if ~isempty(o)
+      % remove leading semicolons
+      oo=regexprep(o,';',''); % {'MECH1.PARAM1=VAL1','MECH2.PARAM2=VAL2',..}
+      for l=1:length(oo)
+        tmp=strtrim(regexp(oo{l},'=','split')); % {'MECH1.PARAM1','VAL1'}
+        param_name{end+1}=tmp{1}; % 'MECH1.PARAM1'
+        param_value{end+1}=tmp{2}; % 'VAL1'
+        % remove from equations
+        eqn=strrep(eqn,o{l},'');
+      end
+      spec.populations(i).equations=eqn;
+    end    
+    % move user-defined parameters from equations to the parameters field
+%     if ~isempty(p)
+%       param_name=fieldnames(p);
+%       param_value=struct2cell(p);
+    if ~isempty(param_name)
       for l=1:length(param_name)
-        value=eval(param_value{l});
+        try
+          value=eval(param_value{l});
+        catch
+          error('Values of this type are not supported for parameters set in equations.');
+        end
         if isempty(spec.populations(i).parameters)
           spec.populations(i).parameters={param_name{l},value};
         elseif ~ismember(param_name{l},spec.populations(i).parameters(1:2:end))
@@ -372,7 +401,9 @@ for i=1:length(spec.populations)
           spec.populations(i).parameters{end+1}=value;
         end
       end
-    end
+    end    
+    % TODO: remove support for MECH.PARAM from dsParseModelEquations,
+    % because that returns MECH_PARAM, whereas we now support MECH.PARAM.
     
     % incorporate user-supplied parameters in pop equations if used in them
     if ~isempty(spec.populations(i).parameters)
