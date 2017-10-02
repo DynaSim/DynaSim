@@ -184,6 +184,18 @@ if ~isfield(spec.populations,'model')
   spec.populations(1).model=[];
 end
 
+% move compartments into populations if present
+if isfield(spec,'compartments')
+  npops=length(spec.populations);
+  fields=fieldnames(spec.compartments);
+  for i=1:length(spec.compartments)
+    for f=1:length(fields)
+      spec.populations(npops+i).(fields{f})=spec.compartments(i).(fields{f});
+    end
+  end
+  spec=rmfield(spec,'compartments');
+end
+
 % special case: split equations with '[...][...]...[...]' into multiple populations
 for i=1:length(spec.populations)
   eqn=spec.populations(i).equations;
@@ -694,6 +706,11 @@ function spec = backward_compatibility(spec, varargin)
     spec=rmfield(spec,'cons');
   end
 
+  if isfield(spec,'comps')
+    spec.compartments=spec.comps;
+    spec=rmfield(spec,'comps');
+  end
+  
   if isfield(spec,'populations')
     % rename population "label" to "name"
     if isfield(spec.populations,'label')
