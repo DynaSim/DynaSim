@@ -275,6 +275,23 @@ for i=1:size(mods,1)
     obj=[obj(ind(1)+2:end) '->' obj(1:ind(1)-1)];
   end
   
+  % check and adjust for mechanism-specific parameter identifier
+%   MECH='';
+  if any(obj=='.') % OBJECT.MECH
+    tmp=regexp(obj,'\.','split');
+    obj=tmp{1};
+    MECH=tmp{2};
+    fld=[MECH '.' fld];
+  end
+%   if any(fld=='.') % MECH.PARAM
+%     tmp=regexp(fld,'\.','split');
+%     MECH=tmp{1};
+%     fld=tmp{2};
+%   end
+%   if ~isempty(MECH)
+%     fld=[MECH '.' fld];
+%   end
+    
   val=mods{i,3}; % value for population name or size, or parameter to modify
   if ismember(obj,pop_names)
     type='populations';
@@ -400,6 +417,8 @@ for i=1:size(mods,1)
     end
   end
 end
+
+% todo: split X.MECH, set (type,index) from X, store {MECH.fld,val} in .parameters
 
 %% auto_gen_test_data_flag argout
 if options.auto_gen_test_data_flag
