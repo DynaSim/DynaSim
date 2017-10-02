@@ -91,14 +91,43 @@ function modl=set_user_parameters(modl,params,namespace)
   user_keys=cellfun(@(x)[namespace '_' x],params(1:2:end),'uni',0);
   user_vals=params(2:2:end);
   
-  % HACK
-  % remove duplicate namespace from user-supplied params
-  for iKey = 1:length(user_keys)
-    locs = regexp(user_keys{iKey}, namespace, 'end');
-    if length(locs) > 1 %then duplicated namespace
-      user_keys{iKey}(1:locs(1)+1) = []; %remove duplicate and trailing _
+  % check for mechanism-specific parameters
+  if any(~cellfun(@isempty,regexp(user_keys,'\.')))
+    % at least one key has MECH.PARAM
+    rem_inds=[]; % inds to user_keys not to be updated in this namespace
+    key_inds=find(~cellfun(@isempty,regexp(user_keys,'\.'))); % indices into user_keys with .
+    par_inds=2*key_inds-1; % indices into params for keys with .
+    % check whether MECH is in this namespace
+    for i=1:length(key_inds)
+      % split params key to obtain MECH and PARAM names
+      o=regexp(params{par_inds(i)},'\.','split');
+      MECH=o{1};
+      PARM=o{2};
+      % check that MECH is in namespace (pat='\_MECH$')
+      o=regexp(namespace,['\_' MECH '$'],'once');
+      if ~isempty(o)
+        % yes: set user_keys{key_inds(i)}=[namespace '_' PARAM]
+        user_keys{key_inds(i)}=[namespace '_' PARM];
+      else
+        % store key_inds(i) to remove from user_keys and user_vals
+        rem_inds=[rem_inds key_inds(i)];
+      end
+    end
+    % exclude parameters not meant for this namespace
+    if ~isempty(rem_inds)
+      user_keys(rem_inds)=[];
+      user_vals(rem_inds)=[];
     end
   end
+  
+  % HACK
+  % remove duplicate namespace from user-supplied params
+%   for iKey = 1:length(user_keys)
+%     locs = regexp(user_keys{iKey}, namespace, 'end');
+%     if length(locs) > 1 %then duplicated namespace
+%       user_keys{iKey}(1:locs(1)+1) = []; %remove duplicate and trailing _
+%     end
+%   end
   
   % get list of parameters in modl
   param_names=fieldnames(modl.parameters);
