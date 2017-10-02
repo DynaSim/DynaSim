@@ -62,7 +62,7 @@ function [model,name_map] = dsGenerateModel(specification, varargin)
 %         {'param1',value1,'param2',value2,...}
 %       .model (default: [])   : optional DynaSim model structure
 %   .connections(i) (default: []): contains info for linking population models
-%       .source (required if >1 pops): name of source population
+%       .source (required if >1 pops): name of OUT population
 %       .target (required if >1 pops): name of target population
 %       .mechanism_list (required)   : list of mechanisms that link two populations
 %       .parameters (default: [])    : parameters to assign across all equations in
@@ -497,6 +497,7 @@ end
 
 %% 2.0 propagate namespaces through variable and function names
 %      i.e., to establish uniqueness of names by adding namespace/namespace prefixes)
+model.specification=specification;
 model = dsPropagateNamespaces(model,name_map, varargin{:});
 
 %% 3.0 expand population equations according to mechanism linkers
