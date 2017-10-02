@@ -160,7 +160,7 @@ for v=1:length(options.variable)
     if smooth_factor>1 && strcmp(reportUI,'matlab')
       tmpPxx=smooth(tmpPxx,smooth_factor);
     else
-      tmpPxx=locsmooth(tmpPxx,smooth_factor);
+      tmpPxx=lsmooth(tmpPxx,smooth_factor);
     end
 
     % Peak Detection:
@@ -229,7 +229,7 @@ for v=1:length(options.variable)
     if smooth_factor>1 && strcmp(reportUI,'matlab')
       tmpPxx=smooth(tmpPxx,smooth_factor);
     else
-      tmpPxx=locsmooth(tmpPxx,smooth_factor);
+      tmpPxx=lsmooth(tmpPxx,smooth_factor);
     end
 
     % Peak Detection:
