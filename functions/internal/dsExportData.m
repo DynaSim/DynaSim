@@ -28,9 +28,17 @@ switch lower(options.format)
       for i=1:length(vars)
         eval(sprintf('%s=data.%s;',vars{i},vars{i}));
       end
-      save(options.filename,vars{:},'-v7.3');
+      if strcmp(reportUI,'matlab')
+        save(options.filename,vars{:},'-v7.3');
+      else
+        save(options.filename,vars{:});
+      end
     else
-      save(options.filename,'data','-v7.3');
+      if strcmp(reportUI,'matlab')
+        save(options.filename,'data','-v7.3');
+      else
+        save(options.filename,'data');
+      end
     end
   case 'csv'
     % write csv file

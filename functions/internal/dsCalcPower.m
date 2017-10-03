@@ -135,7 +135,11 @@ for v=1:length(options.variable)
     % select data
     X=detrend(dat(t1:t2,i)); % detrend the data
     % calculate spectral estimate
-    [tmpPxx,f] = pmtm(X, NW, NFFT, Fs); % calculate power
+    if strcmp(reportUI,'matlab')
+      [tmpPxx,f] = pmtm(X, NW, NFFT, Fs); % calculate power
+    else
+      [tmpPxx,f] = pwelch(X,NFFT,[],NFFT,Fs); % calculate power in octave (pmtm is not implemented yet)
+    end
     
     if i==1
       % get size of spectrum and preallocate result matrix
@@ -152,9 +156,11 @@ for v=1:length(options.variable)
       tmpPxx=double(tmpPxx);
     end
     
-    if smooth_factor>1
-      % smooth the spectrum
+    % smooth the spectrum
+    if smooth_factor>1 && strcmp(reportUI,'matlab')
       tmpPxx=smooth(tmpPxx,smooth_factor);
+    else
+      tmpPxx=lsmooth(tmpPxx,smooth_factor);
     end
     
     % Peak Detection:
@@ -162,11 +168,16 @@ for v=1:length(options.variable)
     sel = find(FreqRange(1)<=f & f<=FreqRange(end));
     
     % set threshold for peak detection
-    ht=prctile(log10(tmpPxx(sel)),thresh_prctile);
+    ht=prctile(tmpPxx(sel),thresh_prctile); % ht=prctile(log10(tmpPxx(sel)),thresh_prctile);
     
     if ~isnan(ht)
       % get index of peaks in range over threshold
-      [PeakPower,PPind]=findpeaks(log10(tmpPxx(sel)),'MinPeakHeight',ht,'NPeaks',3);
+      if strcmp(reportUI,'matlab')
+        [linPeakPower,PPind]=findpeaks(tmpPxx(sel),'MinPeakHeight',ht,'NPeaks',3); % [PeakPower,PPind]=findpeaks(log10(tmpPxx(sel)),'MinPeakHeight',ht,'NPeaks',3);
+      else
+        [linPeakPower,PPind]=findpeaks(tmpPxx(sel),'MinPeakHeight',ht,'MinPeakDistance',0,'MinPeakWidth',0);
+      end
+      PeakPower = log10(linPeakPower);
     else
       PPind=[];
     end
@@ -215,9 +226,11 @@ for v=1:length(options.variable)
       tmpPxx=double(tmpPxx);
     end
     
-    if smooth_factor>1
-      % smooth the spectrum
+    % smooth the spectrum
+    if smooth_factor>1 && strcmp(reportUI,'matlab')
       tmpPxx=smooth(tmpPxx,smooth_factor);
+    else
+      tmpPxx=lsmooth(tmpPxx,smooth_factor);
     end
     
     % Peak Detection:
@@ -225,10 +238,15 @@ for v=1:length(options.variable)
     sel = find(FreqRange(1)<=f & f<=FreqRange(end));
     
     % set threshold for peak detection
-    ht=prctile(log10(tmpPxx(sel)),thresh_prctile);
+    ht=prctile(tmpPxx(sel),thresh_prctile); % ht=prctile(log10(tmpPxx(sel)),thresh_prctile);
     if ~isnan(ht)
       % get index of peaks in range over threshold
-      [PeakPower,PPind]=findpeaks(log10(tmpPxx(sel)),'MinPeakHeight',ht,'NPeaks',3);
+      if strcmp(reportUI,'matlab')
+        [linPeakPower,PPind]=findpeaks(tmpPxx(sel),'MinPeakHeight',ht,'NPeaks',3); % [PeakPower,PPind]=findpeaks(log10(tmpPxx(sel)),'MinPeakHeight',ht,'NPeaks',3);
+      else
+        [linPeakPower,PPind]=findpeaks(tmpPxx(sel),'MinPeakHeight',ht,'MinPeakDistance',0,'MinPeakWidth',0);
+      end
+      PeakPower = log10(linPeakPower);
     else
       PPind=[];
     end
