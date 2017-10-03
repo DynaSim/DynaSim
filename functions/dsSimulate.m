@@ -308,7 +308,7 @@ if options.compile_flag && options.sparse_flag
   error('The Matlab Coder toolbox does not support sparse matrices. Choose either ''compile_flag'' or ''sparse_flag''.');
 end
 
-if options.parallel_flag && feature('numCores') == 1 % TODO: check on windows and single core machine
+if options.parallel_flag && (~strcmp(reportUI,'matlab') || feature('numCores') == 1) % TODO: check on windows and single core machine
   fprintf('Setting ''parallel_flag''=0 since only 1 core detected on this machine.\n')
   options.parallel_flag = 0;
 end
