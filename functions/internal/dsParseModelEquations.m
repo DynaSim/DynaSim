@@ -64,7 +64,7 @@ else
 end
 
 % set namespace
-if ismember('namespace',keys) % check for user-supplied namespace (i.e., namespace)
+if ~isempty(keys) && ismember('namespace',keys) % check for user-supplied namespace (i.e., namespace)
   namespace=values{ismember(keys,'namespace')}; % user-supplied namespace
   if ~isempty(namespace)
     namespace=[namespace '_'];
@@ -76,7 +76,7 @@ else
 end
 
 % set delimiter
-if ismember('delimiter',keys) % check for user-supplied delimiter
+if ~isempty(keys) && ismember('delimiter',keys) % check for user-supplied delimiter
   delimiter = values(ismember(keys,'delimiter')); % user-supplied delimiter
 else
   delimiter=';';
