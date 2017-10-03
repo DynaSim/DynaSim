@@ -284,7 +284,7 @@ for index=1:length(text) % loop over lines of text
       end
       
     case 'conditional'      % if(conditions)(actions)
-      groups=regexp(line,')(','split');
+      groups=regexp(line,'\)\(','split');
       condition=regexp(groups{1},'^if\s*\((.*)','tokens','once');
       if length(groups)==2
         if groups{2}(end)==')'

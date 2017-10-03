@@ -45,6 +45,7 @@ str=regexprep(str,pat,rep);
 % check for neighboring occurrence that wasn't substituted (e.g., (v-v^2) -> (pop1_v-v^2))
 % NOTE: this is only a possible issue for strings "in the middle"
 test=['([^\w\.]{1})' oldstr '([^\w(' newstr ')]{1})'];
+test = strrep(test,'-','\-');
 if ~isempty(regexp(str,test,'once'))%~isempty(regexp(str,test,'match'))
   % substitute remaining occurrences
   str=regexprep(str,test,rep);
