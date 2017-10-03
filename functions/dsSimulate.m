@@ -299,31 +299,36 @@ end
 
 %% 0.3 Prepare solve options.
 
+if options.compile_flag && ~strcmp(reportUI,'matlab')
+  fprintf('Setting ''compile_flag=0'' in Octave.\n')
+  options.compile_flag = 0;
+end
+
 if options.compile_flag && options.sparse_flag
   error('The Matlab Coder toolbox does not support sparse matrices. Choose either ''compile_flag'' or ''sparse_flag''.');
 end
 
 if options.parallel_flag && (~strcmp(reportUI,'matlab') || feature('numCores') == 1) % TODO: check on windows and single core machine
   if ~strcmp(reportUI,'matlab')
-    fprintf('Setting ''parallel_flag''=0 in Octave.\n')
+    fprintf('Setting ''parallel_flag=0'' in Octave.\n')
   else
-    fprintf('Setting ''parallel_flag''=0 since only 1 core detected on this machine.\n')
+    fprintf('Setting ''parallel_flag=0'' since only 1 core detected on this machine.\n')
   end
   options.parallel_flag = 0;
 end
 
 if options.compile_flag && ~options.reduce_function_calls_flag
-  fprintf('Setting ''reduce_function_calls_flag'' to 1 for compatibility with ''compile_flag''=1 (coder does not support anonymous functions).\n');
+  fprintf('Setting ''reduce_function_calls_flag'' to 1 for compatibility with ''compile_flag=1'' (coder does not support anonymous functions).\n');
   options.reduce_function_calls_flag=1;
 end
 
 % Make sure that data is either saved to disk, saved to variable, or plotted
 if (nargout==0 || options.cluster_flag) && ~options.save_data_flag && ~options.save_results_flag && isempty(options.plot_functions)
   if ~isempty(options.analysis_functions)
-    fprintf('Setting ''save_results_flag''=1 since output from dsSimulate is not stored in a variable and analysis functions specified.\n')
+    fprintf('Setting ''save_results_flag=1'' since output from dsSimulate is not stored in a variable and analysis functions specified.\n')
     options.save_results_flag = 1;
   else
-    fprintf('Setting ''save_data_flag''=1 since output from dsSimulate is not stored in a variable and no plot or analysis functions specified.\n')
+    fprintf('Setting ''save_data_flag=1'' since output from dsSimulate is not stored in a variable and no plot or analysis functions specified.\n')
     options.save_data_flag = 1;
   end
 end
