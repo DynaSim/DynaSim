@@ -91,8 +91,8 @@ if options.save_parameters_flag
     % todo: make seed string (eg, 'shuffle') from param struct work with coder (options.compile_flag=1)
     % (currently raises error: "String input must be constant")
     % workaround: (shuffle here and get numeric seed for MEX-compatible params.mat)
-    rng(options.random_seed);
-    options.random_seed=getfield(rng,'Seed');  % <-- current active seed
+    rng_wrapper(options.random_seed);
+    options.random_seed=getfield(rng_wrapper,'Seed');  % <-- current active seed
   end
   
   % set parameter file name (save with m-file)
@@ -327,12 +327,12 @@ fprintf(fid,'%% ------------------------------------------------------------\n')
 % 2.2 set random seed
 fprintf(fid,'%% seed the random number generator\n');
 if options.save_parameters_flag
-  fprintf(fid,'rng(%srandom_seed);\n',parameter_prefix);
+  fprintf(fid,'rng_wrapper(%srandom_seed);\n',parameter_prefix);
 else  
   if ischar(options.random_seed)
-    fprintf(fid,'rng(''%s'');\n',options.random_seed);
+    fprintf(fid,'rng_wrapper(''%s'');\n',options.random_seed);
   elseif isnumeric(options.random_seed)
-    fprintf(fid,'rng(%g);\n',options.random_seed);
+    fprintf(fid,'rng_wrapper(%g);\n',options.random_seed);
   end
 end
 

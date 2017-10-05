@@ -318,7 +318,7 @@ for i=1:size(mods,1)
     
     if strcmp(val(1),'+')
       % add mechanisms to existing list
-      spec.(type)(index).mechanism_list=unique(cat(2,spec.(type)(index).mechanism_list,elems),'stable');
+      spec.(type)(index).mechanism_list=unique_wrapper(cat(2,spec.(type)(index).mechanism_list,elems),'stable');
     elseif strcmp(val(1),'-')
       % remove mechanisms from existing list
       spec.(type)(index).mechanism_list=setdiff(spec.(type)(index).mechanism_list,elems,'stable');

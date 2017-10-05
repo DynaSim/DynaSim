@@ -405,7 +405,7 @@ if ~isempty(model.monitors)
   end
   
   % eliminate duplicate function names
-  functions_to_monitor=unique(functions_to_monitor);
+  functions_to_monitor=unique_wrapper(functions_to_monitor);
   
   % add functions to monitor list
   for i=1:length(functions_to_monitor)
@@ -567,7 +567,7 @@ for i=1:length(model.linkers)
   inds=find(expressions_in_pop&names_in_namespace&ismember(name_map(:,4),search_types));
   
   % eliminate duplicates (e.g., state_variables replacing OUT and X)
-  [jnk,ia,ib]=unique(name_map(inds,2),'stable');
+  [jnk,ia,ib]=unique_wrapper(name_map(inds,2),'stable');
   inds=inds(ia);
   all_expression_inds=[all_expression_inds inds'];
   all_expression_targets=cat(2,all_expression_targets,repmat({oldstr},[1 length(inds)]));

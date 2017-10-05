@@ -49,9 +49,9 @@ elseif isstruct(input)
     end
     if ~isempty(m)
       if iscell(m{1})
-        m=unique([m{:}],'stable');
+        m=unique_wrapper([m{:}],'stable');
       else
-        m=unique(m,'stable');
+        m=unique_wrapper(m,'stable');
       end
       mechanism_list=cat(2,mechanism_list,m);
     end
@@ -78,9 +78,9 @@ elseif isstruct(input)
 %     m={input.connections.mechanism_list};
     if ~isempty(m)
       if iscell(m{1})
-        m=unique([m{:}],'stable');
+        m=unique_wrapper([m{:}],'stable');
       else
-        m=unique(m,'stable');
+        m=unique_wrapper(m,'stable');
       end
       mechanism_list=cat(2,mechanism_list,m);
     end        
@@ -152,4 +152,4 @@ if iscellstr(mechanism_list)
 end
 
 % extract unique paths to mechanism files
-paths=unique(cellfun(@fileparts2,files,'uni',0),'stable');
+paths=unique_wrapper(cellfun(@fileparts2,files,'uni',0),'stable');

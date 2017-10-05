@@ -31,7 +31,7 @@ end
 
 % load data
 contents=importdata(file,',');
-fields=unique(contents.colheaders,'stable');
+fields=unique_wrapper(contents.colheaders,'stable');
 data.labels=fields([2:length(fields) 1]); % move time vector to end of labels
 for i=1:length(fields)
   data.(fields{i})=contents.data(:,ismember(contents.colheaders,fields{i}));
