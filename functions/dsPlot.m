@@ -898,7 +898,9 @@ for figset=1:num_fig_sets
     end
 
     %link x axes
-    linkaxes(haxes, 'x')
+    if numel(haxes) > 1
+      linkaxes(haxes, 'x')
+    end
 
   end % end loop over figures in this set
 end % end loop over figure sets

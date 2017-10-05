@@ -137,8 +137,15 @@ for v=1:length(options.variable)
     % calculate spectral estimate
     if strcmp(reportUI,'matlab')
       [tmpPxx,f] = pmtm(X, NW, NFFT, Fs); % calculate power
-    else
+    elseif exist('pwelch') == 2 % 'pwelch is in Octave's path
       [tmpPxx,f] = pwelch(X,NFFT,[],NFFT,Fs); % calculate power in octave (pmtm is not implemented yet)
+    elseif exist('pwelch') ~= 2 % 'pwelch is not in Octave's path
+      try
+        pkg load signal; % trying to load octave forge 'signal' package before using pwelch function
+        [tmpPxx,f] = pwelch(X,NFFT,[],NFFT,Fs); % calculate power in octave (pmtm is not implemented yet)
+      catch
+        error('pwelch function is needed for spectral analysis in Octave, please install the signal package from Octave Forge');
+      end      
     end
     
     if i==1
@@ -216,6 +223,13 @@ for v=1:length(options.variable)
     X=detrend(nanmean(dat(t1:t2,:),2)); % detrend the data
     
     % calculate spectral estimate
+    if ~strcmp(reportUI,'matlab') && exist('pwelch') ~= 2 % 'pwelch is not in Octave's path
+      try
+        pkg load signal; % trying to load octave forge 'signal' package before using pwelch function
+      catch
+        error('pwelch function is needed for spectral analysis in Octave, please install the signal package from Octave Forge');
+      end
+    end
     [tmpPxx,f] = pwelch(X,NFFT,[],NFFT,Fs); % calculate power
     if all(isnan(tmpPxx(:)))
       tmpPxx=zeros(size(tmpPxx));
