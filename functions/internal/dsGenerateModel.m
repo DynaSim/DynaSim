@@ -185,15 +185,16 @@ ncons=length(specification.connections); % number of connections
 %     - then have dsCheckSpecification convert {Na,K}@M into {Na@M,K@M}
 
 %% 1.0 load sub-models, assign namespaces, and combine across all equations and mechanisms in specification
-model.parameters={};
-model.fixed_variables=[];
-model.functions=[];
-model.monitors=[];
+% use empty struct for Octave compatibility
+model.parameters=struct('');
+model.fixed_variables=struct('');
+model.functions=struct('');
+model.monitors=struct('');
 model.state_variables={};
-model.ODEs=[];
-model.ICs=[];
-model.conditionals=[];
-model.linkers=[];
+model.ODEs=struct('');
+model.ICs=struct('');
+model.conditionals=struct('');
+model.linkers=struct('');
 model.comments={};
 name_map={}; % {name, namespace_name, namespace, type}, used for namespacing
 linker_pops={}; % list of populations associated with mechanism linkers

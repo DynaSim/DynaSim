@@ -168,7 +168,7 @@ function modl=add_missing_ICs(modl,popname)
   
   % add default ICs
   for ic=1:length(missing_ICs)
-    modl.ICs.(missing_ICs{ic})=sprintf('zeros(1,%s)',Npopstr);
+    modl.ICs(1).(missing_ICs{ic})=sprintf('zeros(1,%s)',Npopstr);
   end
   
   % convert scalar ICs to vectors of population size
@@ -176,7 +176,7 @@ function modl=add_missing_ICs(modl,popname)
   for ic=1:length(ICfields)
     % check if scalar (scientific notation or decimal)
     if ~isempty(regexp(modl.ICs.(ICfields{ic}),'^((\d+e[\-\+]?\d+)|([\d.-]+))$','once'))
-      modl.ICs.(ICfields{ic})=sprintf('%s*ones(1,%s)',modl.ICs.(ICfields{ic}),Npopstr);
+      modl.ICs(1).(ICfields{ic})=sprintf('%s*ones(1,%s)',modl.ICs.(ICfields{ic}),Npopstr);
     end
   end
 
