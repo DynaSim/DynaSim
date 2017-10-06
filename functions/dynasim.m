@@ -452,6 +452,7 @@ for i=1:length(LHS)
   try % todo: support functions with parameters and embedded functions
     eval(sprintf('%s=@%s;',LHS{i},RHS{i}));
     eval(sprintf('Y=%s(X);',LHS{i}));
+    warning('off','MATLAB:hg:EraseModeIgnored');
     handles.static_traces(cnt)=line('parent',handles.ax_static_plot,'color',cfg.linecolors(max(1,mod(i,length(cfg.linecolors)))),...
       'LineStyle',cfg.linetype{max(1,mod(i,length(cfg.linetype)))},'erase','background','xdata',X,'ydata',Y,'zdata',[]);
     cnt=cnt+1;
@@ -829,7 +830,8 @@ for plot_index=1:num_plots
     case 'trace'
       set(handles.axes_data_trace(plot_index),'visible','on');
       if size(handles.line_data,1)>=plot_index
-        set(handles.line_data(plot_index,:),'visible','on');
+        sel=handles.line_data(plot_index,:)~=0;
+        set(handles.line_data(plot_index,sel),'visible','on');
       end
     case 'image'
       set(handles.axes_data_image(plot_index),'visible','on');    
@@ -880,6 +882,7 @@ for plot_index=1:num_plots
         if size(handles.line_data,1)>=plot_index && size(handles.line_data,2)>=line_index && ishandle(handles.line_data(plot_index,line_index)) && handles.line_data(plot_index,line_index)>0
           set(handles.line_data(plot_index,line_index),'ydata',plot_Y(:,line_index),'xdata',(0:cfg.ntime-1)*cfg.dt,'visible','on');
         else
+          warning('off','MATLAB:hg:EraseModeIgnored');
           handles.line_data(plot_index,line_index)=line('parent',handles.axes_data_trace(plot_index),'color',cfg.linecolors(max(1,mod(line_index,length(cfg.linecolors)))),'LineStyle',cfg.linetype{max(1,mod(line_index,length(cfg.linetype)))},'erase','background','xdata',(0:cfg.ntime-1)*cfg.dt,'ydata',plot_Y(:,line_index),'zdata',[],'tag','simview_trace');
         end
       end
@@ -887,7 +890,9 @@ for plot_index=1:num_plots
       ylims=[cfg.ymin(plot_index) cfg.ymax(plot_index)];
       % hide other lines
       if size(handles.line_data,2)>num_elems
-        set(handles.line_data(plot_index,num_elems+1:end),'visible','off');
+        sel=num_elems+1:size(handles.line_data,2);
+        sel=sel(handles.line_data(plot_index,sel)~=0);
+        set(handles.line_data(plot_index,sel),'visible','off');
       end
     case 'image'
       set(handles.img_data(plot_index),'cdata',plot_Y','ydata',1:num_elems,'xdata',(0:cfg.ntime-1)*cfg.dt);
