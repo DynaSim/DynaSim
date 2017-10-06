@@ -44,7 +44,7 @@
 ## @seealso{union, intersect, setdiff, setxor, ismember}
 ## @end deftypefn
 
-function [y, i, j] = unique (x, varargin)
+function [y, i, j] = unique_octave (x, varargin)
 
   if (nargin < 1)
     print_usage ();

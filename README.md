@@ -11,18 +11,17 @@ systems in Matlab or Octave!
 
 ### Installation
 
-- [Go here](https://github.com/DynaSim/DynaSim/wiki/Installation) for the VERY
-  easy installation.
+- Download the toolbox, and add it to your MATLAB or Octave path.
+- [Go here](https://github.com/DynaSim/DynaSim/wiki/Installation) for additional instructions.
 
 ### Documentation:
 
-- Get started with the demos: [demos/demos.m](https://github.com/DynaSim/DynaSim/blob/master/demos/demos.m)
-- For more details and examples walk through the tutorial: [demos/tutorial.m](https://github.com/DynaSim/DynaSim/blob/master/demos/tutorial.m)
+- Get started with the demos: [demos/dsDemos.m](https://github.com/DynaSim/DynaSim/blob/master/demos/dsDemos.m)
+- For more details and examples walk through the tutorial: [demos/dsTutorial.m](https://github.com/DynaSim/DynaSim/blob/master/demos/dsTutorial.m)
+- The DynaSim [wiki](https://github.com/DynaSim/DynaSim/wiki/) contains tips, best practices, user FAQ, and other information
+- Info on DynaSim functions is [available online
+  here](https://dynasim.github.io/DynaSim/).
 - Example modeling projects: [PFC networks](https://github.com/jsherfey/PFC_models), [Thalamus](https://github.com/asoplata/ching2010_tcre_dynasim_mechanisms)
-- DynaSim code documentation is [available online
-  here](https://dynasim.github.io/DynaSim/), and also [in the docs
-  subfolder](https://github.com/DynaSim/DynaSim/tree/master/docs).
-- For more help, check out the [DynaSim wiki](https://github.com/DynaSim/DynaSim/wiki)
 
 ### Mailing lists:
 
