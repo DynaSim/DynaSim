@@ -205,18 +205,18 @@ if any(strcmp(fields, 'varied'))
   [effective_vary_indices, ~] = dsCheckCovary(vary_lengths, vary_params, varargin{:});
 
   if prod(vary_lengths(effective_vary_indices)) == length(data)
-      
+
       dimensions_varied = sum(effective_vary_indices);
       vary_params = vary_params(:, effective_vary_indices);
       vary_vectors = vary_vectors(effective_vary_indices);
       vary_lengths = vary_lengths(effective_vary_indices);
-      
+
   else
-     
+
       warning('unable to determine which parameters are covaried. Data will be plotted as a lattice.')
-      
+
       dimensions_varied = 1;
-      
+
   end
 
   if dimensions_varied > 2
@@ -232,7 +232,7 @@ if any(strcmp(fields, 'varied'))
       for v = 4:dimensions_varied
         figure_params(v - 2) = vary_vectors{v}(ceil(f/vary_lengths_cp(v - 3)));
       end
-      
+
       figure_data_index = ones(size(vary_params, 1), 1);
       for v = 3:dimensions_varied
         figure_data_index = figure_data_index & vary_params(:, v) == figure_params(v - 2);
@@ -243,7 +243,7 @@ if any(strcmp(fields, 'varied'))
       for v = 1:(dimensions_varied - 2)
         vary_title = [vary_title, sprintf('%s = %f ', vary_labels{v + 2}, figure_params(v))];
       end
-      
+
       handles = dsPlot(data(figure_data_index), varargin{:});
       for h = 1:length(handles)
         % figure(handles(h))
@@ -338,7 +338,7 @@ switch options.plot_type
 %          data.labels=setdiff(data.labels,rmfields,'stable');
 %       end
       else
-        % find spikes from threshold crossing      
+        % find spikes from threshold crossing
         data=dsCalcFR(data,varargin{:});
       end
     end
@@ -554,6 +554,13 @@ for figset=1:num_fig_sets
             case 'waveform'
               % calculate averages across populations
               dat=nan(num_times,num_pops);
+              if ~strcmp(reportUI,'matlab') && exist('nanmean') ~= 2 % 'nanmean is not in Octave's path
+                try
+                  pkg load statistics; % trying to load octave forge 'statistics' package before using nanmean function
+                catch
+                  error('nanmean function is needed, please install the statistics package from Octave Forge');
+                end
+              end
               for k=1:num_pops
                 dat(:,k)=nanmean(data(sim_index).(var_fields{k}),2);
               end
@@ -562,6 +569,13 @@ for figset=1:num_fig_sets
               dat=nan(length(xdata),num_pops);
               AuxData=nan(length(xdata),num_pops);
               AuxDataName={}; vlines=[];
+              if ~strcmp(reportUI,'matlab') && exist('nanmean') ~= 2 % 'nanmean is not in Octave's path
+                try
+                  pkg load statistics; % trying to load octave forge 'statistics' package before using nanmean function
+                catch
+                  error('nanmean function is needed, please install the statistics package from Octave Forge');
+                end
+              end
               for k=1:num_pops
                 dat(:,k)=nanmean(data(sim_index).([var_fields{k} '_Power_SUA']).Pxx,2);
                 AuxData(:,k)=data(sim_index).([var_fields{k} '_Power_MUA']).Pxx;
@@ -647,6 +661,13 @@ for figset=1:num_fig_sets
             case 'waveform'
               % calculate averages across populations
               dat=nan(num_times,num_pops);
+              if ~strcmp(reportUI,'matlab') && exist('nanmean') ~= 2 % 'nanmean is not in Octave's path
+                try
+                  pkg load statistics; % trying to load octave forge 'statistics' package before using nanmean function
+                catch
+                  error('nanmean function is needed, please install the statistics package from Octave Forge');
+                end
+              end
               for k=1:num_pops
                 dat(:,k)=nanmean(data(sim_index).(var_fields{k}),2);
               end
@@ -655,6 +676,13 @@ for figset=1:num_fig_sets
               dat=nan(length(xdata),num_pops);
               AuxData=nan(length(xdata),num_pops);
               AuxDataName={}; vlines=[];
+              if ~strcmp(reportUI,'matlab') && exist('nanmean') ~= 2 % 'nanmean is not in Octave's path
+                try
+                  pkg load statistics; % trying to load octave forge 'statistics' package before using nanmean function
+                catch
+                  error('nanmean function is needed, please install the statistics package from Octave Forge');
+                end
+              end
               for k=1:num_pops
                 dat(:,k)=nanmean(data(sim_index).([var_fields{k} '_Power_SUA']).Pxx,2);
                 AuxData(:,k)=data(sim_index).([var_fields{k} '_Power_MUA']).Pxx;
@@ -680,6 +708,13 @@ for figset=1:num_fig_sets
             case 'waveform'
               % calculate averages across populations
               dat=nan(num_times,num_pops);
+              if ~strcmp(reportUI,'matlab') && exist('nanmean') ~= 2 % 'nanmean is not in Octave's path
+                try
+                  pkg load statistics; % trying to load octave forge 'statistics' package before using nanmean function
+                catch
+                  error('nanmean function is needed, please install the statistics package from Octave Forge');
+                end
+              end
               for k=1:num_pops
                 if isnan(pop_var_indices{k}(figset))
                   continue;
@@ -692,6 +727,13 @@ for figset=1:num_fig_sets
               dat=nan(length(xdata),num_pops);
               AuxData=nan(length(xdata),num_pops);
               AuxDataName={}; vlines=[];
+              if ~strcmp(reportUI,'matlab') && exist('nanmean') ~= 2 % 'nanmean is not in Octave's path
+                try
+                  pkg load statistics; % trying to load octave forge 'statistics' package before using nanmean function
+                catch
+                  error('nanmean function is needed, please install the statistics package from Octave Forge');
+                end
+              end
               for k=1:num_pops
                 if isnan(pop_var_indices{k}(figset))
                   continue;
