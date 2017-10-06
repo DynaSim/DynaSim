@@ -11,7 +11,7 @@ systems in MATLAB or GNU Octave!
 
 ### Installation
 
-* Download the toolbox, and add it to your MATLAB or GNU Octave path.
+* Download the toolbox, and add it to your MATLAB and GNU Octave path.
   * Download using GitHub or Terminal: `git clone https://github.com/DynaSim/DynaSim.git`
   * Add to path using startup.m or Command Window:
     * `addpath(genpath('YOUR/PATH/TO/DynaSim'))`
