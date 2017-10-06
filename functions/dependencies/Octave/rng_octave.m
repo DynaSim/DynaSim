@@ -1,5 +1,5 @@
-function [rand_res,randn_res] = rng(x)
-%rng(x) establishes the seed for the random number generator of rand and randn
+function [rand_seed,randn_seed] = rng_octave(x)
+%rng_octave(x) establishes the seed for the random number generator of rand and randn
 %x must be:
 %- a numeric value that sets the seed value
 %- 'shuffle': it seeds rng based on current time
@@ -8,9 +8,11 @@ function [rand_res,randn_res] = rng(x)
 %- 'state': it reports the state of the rng, so can be replicated afterwards
 %if x is empty or missing, rng returns the seed of the random number generator
 
-  errmsg = 'only numeric and limited string arguments are allowed, type help rng for details';
+  errmsg = 'only a single numeric or limited string argument is supported, type help rng_octave for details';
 
-  if nargin < 1 || isempty(x)
+  if nargin > 1
+    error(errmsg);
+  elseif nargin < 1 || isempty(x)
     x = 'seed';
   elseif ischar(x)
     if strcmp(x,'shuffle')
@@ -24,12 +26,14 @@ function [rand_res,randn_res] = rng(x)
     error(errmsg);
   end
   if strcmp(x,'seed')
-    rand_res = rand('seed');
-    randn_res = randn('seed');
+    rand_seed = rand('seed');
+    randn_seed = randn('seed');
   elseif strcmp(x,'state')
-    rand_res = rand('state');
-    randn_res = randn('state');
+    rand_seed = rand('state');
+    randn_seed = randn('state');
   else
+    rand_seed = x;
+    randn_seed = x;
     rand('seed',x);
     randn('seed',x);
   end

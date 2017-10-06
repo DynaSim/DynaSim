@@ -11,10 +11,11 @@ if strcmp(reportUI,'matlab')
   end
 else
   if nargin==0
-    out = rng_octave;
+    [rand_seed, randn_seed] = rng_octave;
   elseif isempty(varargin)
-    out = rng_octave(in);
+    [rand_seed, randn_seed] = rng_octave(in);
   else
-    out = rng_octave(in,varargin{:});
+    [rand_seed, randn_seed] = rng_octave(in,varargin{:});
   end
+  out = [rand_seed, randn_seed];
 end
