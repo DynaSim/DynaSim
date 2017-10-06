@@ -56,7 +56,7 @@ function modifications_set = dsVary2Modifications(vary,model)
 %   %     * E_EK1, I_EK1 = -60 and E_EK2, I_EK2 = -65
 %     mod_set=dsVary2Modifications(vary); mod_set{:}
 %     celldisp(mod_set)
-%   % Take home message: X(rows) of vary_values are individual simulations; Y (columns) are parameters.
+%   % Take home message: X (rows) of vary_values are individual simulations; Y (columns) are parameters.
 % 
 %         clear vary_values
 %         vary_values(:, :, 1) = [-80 -60];
@@ -67,7 +67,7 @@ function modifications_set = dsVary2Modifications(vary,model)
 %   %     * E_EK1, E_EK2 = -60 and I_EK1, I_EK2 = -65
 %     mod_set=dsVary2Modifications(vary); mod_set{:}
 %     celldisp(mod_set)
-%   % Take home message: X(rows) of vary_values are individual simulations; Z (height) is populations.
+%   % Take home message: X (rows) of vary_values are individual simulations; Z (height) is populations.
 % 
 %
 %         clear vary_values
@@ -79,7 +79,7 @@ function modifications_set = dsVary2Modifications(vary,model)
 %   %     * E_EK1 = -55, E_EK2 = -60, I_EK1 = -65, I_EK2 = -70.
 %     mod_set=dsVary2Modifications(vary); mod_set{:}
 %     celldisp(mod_set)
-%   % Take home message: X(rows) of vary_values are individual simulations; Y (columns) are parameters; Z (height) is populations.
+%   % Take home message: X (rows) of vary_values are individual simulations; Y (columns) are parameters; Z (height) is populations.
 %
 % Notes:
 %   - valid groupings:
@@ -205,7 +205,7 @@ if isnumeric(item)
         list=cellfun(@(x) permute(x, [1 3 2]), list, 'UniformOutput', 0);
     end
 elseif ischar(item)
-  elems=regexp(item,'[\w\.]+','match');
+  elems=regexp(item,'[\w->\.]+','match');
   operator=regexp(item,'^([\+\-\*/^])','tokens','once');
   if isempty(operator)
     operator='';
