@@ -1,9 +1,5 @@
 # DynaSim
 
-[![Build Status](https://www.dropbox.com/s/ncjgzvrwdd50p6o/build.svg?dl=1)](https://www.dropbox.com/s/ncjgzvrwdd50p6o/build.svg?dl=1)
-
-[![Coverage Status](https://www.dropbox.com/s/2qxxpgff71hytbp/coverage.svg?dl=1)](https://www.dropbox.com/s/2qxxpgff71hytbp/coverage.svg?dl=1)
-
 [![Join the chat at https://gitter.im/DynaSim/DynaSim](https://badges.gitter.im/DynaSim/DynaSim.svg)](https://gitter.im/DynaSim/DynaSim?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
 This is the home of the DynaSim toolbox for modeling and simulating dynamical
