@@ -48,7 +48,8 @@ options=dsCheckOptions(varargin,{...
   'verbose_flag',0,{0,1},...
   'parallel_flag',0,{0,1},...     % whether to run simulations in parallel (using parfor)
   'compile_flag',0,{0,1},... % exist('codegen')==6, whether to compile using coder instead of interpreting Matlab
-  'mex_dir',[],[],... % Directory to search for pre-compiled solve files (solve*_mex*)
+  'mex_dir_flag',1,{0,1},... % Flag to tell whether or not to search in mex_dir for pre-compiled solve files (solve*_mex*).
+  'mex_dir',[],[],... % Directory to search for pre-compiled mex files. Can be relative to 'study_dir' or absolute path.
   'auto_gen_test_data_flag',0,{0,1},...
   'unit_test_flag',0,{0,1},...
   },false);
@@ -59,6 +60,10 @@ if ~isempty(opts)
   warning('off','catstruct:DuplicatesFound');
   options=catstruct(options,opts);
   options=orderfields(options,fields);
+end
+
+if isempty(options.mex_dir)
+    options.mex_dir = dsGetConfig('mex_path');
 end
 
 if options.verbose_flag
@@ -161,8 +166,8 @@ if ~exist(solve_file,'file')
                 % should be able to handle: dsSimulate(@odefun,'tspan',tspan,'ic',ic)
   end
   solve_file=dsCompareSolveFiles(solve_file_m);               % First search in local solve folder...
-  if options.compile_flag
-    solve_file=dsCompareSolveFiles(solve_file,options.mex_dir); % Then search in mex_dir (if it exists and if compile_flag==1).
+  if options.compile_flag && options.mex_dir_flag
+    solve_file=dsCompareSolveFiles(solve_file,options.mex_dir,options.verbose_flag); % Then search in mex_dir (if it exists and if compile_flag==1).
   end
 else
   if options.verbose_flag

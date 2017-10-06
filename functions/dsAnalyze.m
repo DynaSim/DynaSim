@@ -32,6 +32,7 @@ function result = dsAnalyze(src,funcIn,varargin)
 %                             key,val list as varargin for AnalyzeData
 %     'load_all_data_flag'  : whether to load all the data in studyinfo
 %                             at once {0 or 1} (default: 0)
+%     'parallel_flag' : whether to use parfor to run analysis {0 or 1} (default: 0)
 %
 % Outputs:
 %   - result: structure returned by the analysis function
@@ -66,6 +67,7 @@ options=dsCheckOptions(varargin,{...
   'load_all_data_flag',0,{0,1},...
   'auto_gen_test_data_flag',0,{0,1},...
   'unit_test_flag',0,{0,1},...
+  'parallel_flag',0,{0,1},...     % whether to run analysis in parallel (using parfor)
   'auto_gen_test_data_flag',0,{0,1},...
   },false);
 
@@ -511,14 +513,30 @@ end
 
 
 function result = evalFnWithArgs(fInd, data, func, options, varargin)
+
+p = gcp('nocreate');
+
 if isempty(options.function_options)
-  parfor dInd = 1:length(data)
-    result(dInd) = feval(func,data(dInd),varargin{:});
+  if options.parallel_flag && ~isempty(p)       % Only do parfor mode if parallel_flag is set and parpool is already running. Otherwise, this will add unncessary overhead.
+    parfor dInd = 1:length(data)
+      result(dInd) = feval(func,data(dInd),varargin{:});
+    end
+  else
+    for dInd = 1:length(data)
+      result(dInd) = feval(func,data(dInd),varargin{:});
+    end
   end
 else
   function_options = options.function_options{fInd};
-  parfor dInd = 1:length(data)
-    result(dInd) = feval(func,data(dInd),function_options{:});
+  
+  if options.parallel_flag && ~isempty(p)
+    parfor dInd = 1:length(data)
+      result(dInd) = feval(func,data(dInd),function_options{:});
+    end
+  else
+    for dInd = 1:length(data)
+      result(dInd) = feval(func,data(dInd),function_options{:});
+    end
   end
 end
 end

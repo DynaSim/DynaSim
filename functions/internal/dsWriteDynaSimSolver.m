@@ -108,8 +108,8 @@ if options.save_parameters_flag
     % todo: make seed string (eg, 'shuffle') from param struct work with coder (options.compile_flag=1)
     % (currently raises error: "String input must be constant")
     % workaround: (shuffle here and get numeric seed for MEX-compatible params.mat)
-    rng(options.random_seed);
-    options.random_seed=getfield(rng,'Seed');  % <-- current active seed
+    rng_wrapper(options.random_seed);
+    options.random_seed=getfield(rng_wrapper,'Seed');  % <-- current active seed
   end
   
   % set parameter file name (save with m-file)
@@ -370,12 +370,12 @@ fprintf(fid,'%% ------------------------------------------------------------\n')
 % 2.2 set random seed
 fprintf(fid,'%% seed the random number generator\n');
 if options.save_parameters_flag
-  fprintf(fid,'rng(%srandom_seed);\n',parameter_prefix);
+  fprintf(fid,'rng_wrapper(%srandom_seed);\n',parameter_prefix);
 else
   if ischar(options.random_seed)
-    fprintf(fid,'rng(''%s'');\n',options.random_seed);
+    fprintf(fid,'rng_wrapper(''%s'');\n',options.random_seed);
   elseif isnumeric(options.random_seed)
-    fprintf(fid,'rng(%g);\n',options.random_seed);
+    fprintf(fid,'rng_wrapper(%g);\n',options.random_seed);
   end
 end
 
@@ -415,24 +415,33 @@ for i=1:length(state_variables)
     fprintf(fid,'for i=1:numel(%s), fprintf(fileID,''%%g%s'',%s(i)); end\n',var_last,separator,var_last);
   else
     % preallocate state variables
-    parts=regexp(state_variables{i},'_','split');
-    
-    if numel(parts)==4 % has connection mechanism namespace: target_source_mechanism
-      % state variables defined in connection mechanisms are assumed to
-      % have dimensionality of the source population
-      part=parts{2};
-    else % has intrinsic mechanism or population namespace: target_mechanism
-      % state variables defined in intrinsic mechanisms or population
-      % equations have dimensionality of the target population
-      part=parts{1};
-    end
-    
+    [pop_size,pop_name]=dsGetPopSizeFromName(model,state_variables{i});
     if options.save_parameters_flag
-      fprintf(fid,'%s = zeros(nsamp,%s%s_Npop);\n',state_variables{i},parameter_prefix,part);
+      fprintf(fid,'%s = zeros(nsamp,%s%s_Npop);\n',state_variables{i},parameter_prefix,pop_name);
     else
-      fprintf(fid,'%s = zeros(nsamp,%g);\n',state_variables{i},model.parameters.([part '_Npop']));
+      fprintf(fid,'%s = zeros(nsamp,%g);\n',state_variables{i},model.parameters.([pop_name '_Npop']));
     end
-    nvals_per_var(i)=model.parameters.([part '_Npop']);
+    nvals_per_var(i)=model.parameters.([pop_name '_Npop']);
+    
+%     % preallocate state variables
+%     parts=regexp(state_variables{i},'_','split');
+%     
+%     if numel(parts)==4 % has connection mechanism namespace: target_source_mechanism
+%       % state variables defined in connection mechanisms are assumed to
+%       % have dimensionality of the source population
+%       part=parts{2};
+%     else % has intrinsic mechanism or population namespace: target_mechanism
+%       % state variables defined in intrinsic mechanisms or population
+%       % equations have dimensionality of the target population
+%       part=parts{1};
+%     end
+%     
+%     if options.save_parameters_flag
+%       fprintf(fid,'%s = zeros(nsamp,%s%s_Npop);\n',state_variables{i},parameter_prefix,part);
+%     else
+%       fprintf(fid,'%s = zeros(nsamp,%g);\n',state_variables{i},model.parameters.([part '_Npop']));
+%     end
+%     nvals_per_var(i)=model.parameters.([part '_Npop'])
     
     % initialize state variables
     if options.downsample_factor==1
@@ -544,12 +553,18 @@ if ~isempty(model.monitors)
       fprintf(fid,'for i=1:numel(%s), fprintf(fileID,''%%g%s'',%s(i)); end\n',mon_last,separator,mon_last);
     else
       % preallocate monitors
-      parts=regexp(monitor_names{i},'_','split');
+      [~,~,pop_name] = dsGetPopSizeFromName(model,monitor_names{i});
       if options.save_parameters_flag
-        fprintf(fid,'%s = zeros(nsamp,%s%s_Npop);\n',monitor_names{i},parameter_prefix,parts{1});
+        fprintf(fid,'%s = zeros(nsamp,%s%s_Npop);\n',monitor_names{i},parameter_prefix,pop_name);
       else
-        fprintf(fid,'%s = zeros(nsamp,%g);\n',monitor_names{i},model.parameters.([parts{1} '_Npop']));
+        fprintf(fid,'%s = zeros(nsamp,%g);\n',monitor_names{i},model.parameters.([pop_name '_Npop']));
       end
+%       parts=regexp(monitor_names{i},'_','split');
+%       if options.save_parameters_flag
+%         fprintf(fid,'%s = zeros(nsamp,%s%s_Npop);\n',monitor_names{i},parameter_prefix,parts{1});
+%       else
+%         fprintf(fid,'%s = zeros(nsamp,%g);\n',monitor_names{i},model.parameters.([parts{1} '_Npop']));
+%       end
       
       if isempty(monitor_expression{i})
         continue;

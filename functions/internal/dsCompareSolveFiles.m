@@ -1,4 +1,4 @@
-function solve_file_m = dsCompareSolveFiles(solve_file_m,mexPath)
+function solve_file_m = dsCompareSolveFiles(solve_file_m,mexPath,verbose_flag)
 %COMPARESOLVEFILES - look for an equivalent file in same directory
 %
 %  - Step 1: compare to other *.m in /solve/
@@ -8,11 +8,26 @@ function solve_file_m = dsCompareSolveFiles(solve_file_m,mexPath)
 % in the mexPath, as opposed to the current solve folder
 %
 % See also: dsGetSolveFile, dsSimulate, dsCreateBatch
+%
+% % Example code for testing mex_dir options:
+% eqns={
+%   's=10; r=27; b=2.666'
+%   'dx/dt=s*(y-x)'
+%   'dy/dt=r*x-y-x*z'
+%   'dz/dt=-b*z+x*y'
+% };
+% data=dsSimulate(eqns, 'tspan',[0 100], 'ic',[1 2 .5],'verbose',1, 'solver','rk4', 'study_dir','demo_lorenz','compile_flag',1,'mex_dir_flag',0,'mex_dir',[]);
+% data=dsSimulate(eqns, 'tspan',[0 100], 'ic',[1 2 .5],'verbose',1, 'solver','rk4', 'study_dir','demo_lorenz','compile_flag',1,'mex_dir_flag',1,'mex_dir',[]);
+% data=dsSimulate(eqns, 'tspan',[0 100], 'ic',[1 2 .5],'verbose',1, 'solver','rk4', 'study_dir','demo_lorenz','compile_flag',1,'mex_dir_flag',1,'mex_dir','mexes_temp');
 
 [solvePath,fname,fext]=fileparts(solve_file_m);
 
 if nargin < 2
     mexPath = solvePath;
+end
+
+if nargin < 3
+    verbose_flag = false;
 end
 
 % get list of files in where solve_file is located
@@ -35,6 +50,9 @@ for f=1:length(files)
         [~,fname] = fileparts(files{f});
         if ~isempty(dir(fullfile(mexPath,[fname '_mex*'])))
             copyfile(fullfile(mexPath,[fname '_mex*']),solvePath);
+            if verbose_flag
+                fprintf(['Copying mex file from ' fullfile(mexPath,[fname '_mex*']) ' to ' solvePath]);
+            end
         end
     end
     

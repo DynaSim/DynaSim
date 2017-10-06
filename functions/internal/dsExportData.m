@@ -10,7 +10,7 @@ function exportData(data,varargin)
 %     'filename'    : name of output data file (default: 'data.mat')
 %     'format'      : mat. todo: csv, HDF. (default: 'mat')
 %     'verbose_flag': whether to print log info (default: 0)
-% 
+%
 % See also: dsImport, dsCheckData, dsSimulate
 
 options=dsCheckOptions(varargin,{...
@@ -28,9 +28,25 @@ switch lower(options.format)
       for i=1:length(vars)
         eval(sprintf('%s=data.%s;',vars{i},vars{i}));
       end
-      save(options.filename,vars{:},'-v7.3');
+      try
+        save(options.filename,vars{:},'-v7');
+      catch
+        if strcmp(reportUI,'matlab')
+          save(options.filename,vars{:},'-v7.3');
+        else
+          save(options.filename,vars{:},'-hdf5'); % hdf5 format in Octave
+        end
+      end
     else
-      save(options.filename,'data','-v7.3');
+      try
+        save(options.filename,'data','-v7');
+      catch
+        if strcmp(reportUI,'matlab')
+          save(options.filename,'data','-v7.3');
+        else
+          save(options.filename,'data','-hdf5'); % hdf5 format in Octave
+        end
+      end
     end
   case 'csv'
     % write csv file

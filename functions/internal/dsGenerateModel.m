@@ -62,7 +62,7 @@ function [model,name_map] = dsGenerateModel(specification, varargin)
 %         {'param1',value1,'param2',value2,...}
 %       .model (default: [])   : optional DynaSim model structure
 %   .connections(i) (default: []): contains info for linking population models
-%       .source (required if >1 pops): name of source population
+%       .source (required if >1 pops): name of OUT population
 %       .target (required if >1 pops): name of target population
 %       .mechanism_list (required)   : list of mechanisms that link two populations
 %       .parameters (default: [])    : parameters to assign across all equations in
@@ -185,15 +185,16 @@ ncons=length(specification.connections); % number of connections
 %     - then have dsCheckSpecification convert {Na,K}@M into {Na@M,K@M}
 
 %% 1.0 load sub-models, assign namespaces, and combine across all equations and mechanisms in specification
-model.parameters={};
-model.fixed_variables=[];
-model.functions=[];
-model.monitors=[];
+% use empty struct for Octave compatibility
+model.parameters=struct('');
+model.fixed_variables=struct('');
+model.functions=struct('');
+model.monitors=struct('');
 model.state_variables={};
-model.ODEs=[];
-model.ICs=[];
-model.conditionals=[];
-model.linkers=[];
+model.ODEs=struct('');
+model.ICs=struct('');
+model.conditionals=struct('');
+model.linkers=struct('');
 model.comments={};
 name_map={}; % {name, namespace_name, namespace, type}, used for namespacing
 linker_pops={}; % list of populations associated with mechanism linkers
@@ -405,7 +406,7 @@ if ~isempty(model.monitors)
   end
   
   % eliminate duplicate function names
-  functions_to_monitor=unique(functions_to_monitor);
+  functions_to_monitor=unique_wrapper(functions_to_monitor);
   
   % add functions to monitor list
   for i=1:length(functions_to_monitor)
@@ -497,6 +498,7 @@ end
 
 %% 2.0 propagate namespaces through variable and function names
 %      i.e., to establish uniqueness of names by adding namespace/namespace prefixes)
+model.specification=specification;
 model = dsPropagateNamespaces(model,name_map, varargin{:});
 
 %% 3.0 expand population equations according to mechanism linkers
@@ -566,7 +568,7 @@ for i=1:length(model.linkers)
   inds=find(expressions_in_pop&names_in_namespace&ismember(name_map(:,4),search_types));
   
   % eliminate duplicates (e.g., state_variables replacing OUT and X)
-  [jnk,ia,ib]=unique(name_map(inds,2),'stable');
+  [jnk,ia,ib]=unique_wrapper(name_map(inds,2),'stable');
   inds=inds(ia);
   all_expression_inds=[all_expression_inds inds'];
   all_expression_targets=cat(2,all_expression_targets,repmat({oldstr},[1 length(inds)]));

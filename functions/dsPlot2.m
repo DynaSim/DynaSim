@@ -131,6 +131,8 @@ end
   'xlims',[],[],...
   'ylims',[],[],...
   'zlims',[],[],...
+  'LineWidth',[],[],...
+  'plotargs',[],[],...
   'figwidth',[1],[],...
   'figheight',[1],[],...
   'crop_range',[],[],...
@@ -144,6 +146,7 @@ end
   'yscale','linear',{'linear','log','log10','log2'},...
   'visible','on',{'on','off'},...
   'show_colorbar',false,[false true],...
+  'ColorMap',[],[],...
   'save_figures',false,[false true],...
   'save_figname_prefix',[],[],...
   'save_figname_path',[],[],...
@@ -152,6 +155,7 @@ end
   'save_res',[],[],...
   'Ndims_per_subplot',[],[],...
   'dim_stacking',[],[],...
+  'subplot_handle',@xp_subplot_grid,[],...
   'plot_handle',[],[],...
   },false);
 handles=[];
@@ -167,6 +171,7 @@ force_last = options.force_last;
 crop_range = options.crop_range;
 lock_axes = options.lock_axes;
 Ndims_per_subplot = options.Ndims_per_subplot;
+subplot_handle = options.subplot_handle;
 plot_handle = options.plot_handle;
 
 % Add default options to structures
@@ -175,6 +180,8 @@ plot_handle = options.plot_handle;
     plot_options = struct_addDef(plot_options,'ylims',options.ylims);
     plot_options = struct_addDef(plot_options,'xlims',options.xlims);
     plot_options = struct_addDef(plot_options,'zlims',options.zlims);
+    plot_options = struct_addDef(plot_options,'LineWidth',options.LineWidth);
+    plot_options = struct_addDef(plot_options,'plotargs',options.plotargs);
 % Used when running xp_plotimage
     plot_options = struct_addDef(plot_options,'saved_fignum',options.saved_fignum);
 % Used when running xp_PlotData or xp_PlotFR2
@@ -182,10 +189,14 @@ plot_handle = options.plot_handle;
 % Used when running waveformErr
     plot_options = struct_addDef(plot_options,'meanfunc',@(x) mean(x,2));
     plot_options = struct_addDef(plot_options,'errfunc',@(x) std(x,[],2) ./ (sqrt(size(x,2)) * ones(size(x,1),1)));
+% Used when running xp_matrix_imagesc    
+    plot_options = struct_addDef(plot_options,'ColorMap',options.ColorMap);
 
 % Subplot_options
 subplot_options = struct_addDef(subplot_options,'subplotzoom_enabled',options.do_zoom);
 subplot_options = struct_addDef(subplot_options,'force_rowvect',true);
+subplot_options = struct_addDef(subplot_options,'autosuppress_interior_tics',true);
+
 
 % Figure options
 figure_options = struct_addDef(figure_options,'visible',options.visible);
@@ -334,6 +345,7 @@ if ~isempty(force_last)
     others_ind = true(1,ndims(xp2));
     others_ind(ax_ind) = false;
     xp2 = xp2.permute([find(others_ind), ax_ind]);        % Move chosen axis to the back!
+    xp2 = xp2.fixAxes;                                   % This permute can create naming issues if using default axis names (Dim 1, Dim 2, etc. For example, Dim2 can end up associated with xp2.axis(1)). 
     
 end
 
@@ -385,15 +397,34 @@ end
 
 % Shift the overlay by a certain amount
     if options.do_overlay_shift && all(cellfun(@isnumeric,xp2.data(:))) && ~is_image
-        Nd = ndims(xp2);
-        xp2 = xp2.packDim(Nd);
-        mydata = xp2.data;
-        for i = 1:numel(mydata)
-            mydata{i} = do_shift_lastdim (mydata{i},options.overlay_shift_val);
+        if isempty(Ndims_per_subplot) || Ndims_per_subplot <= 1
+            % If xp2.data is going to be NxM, shift each column
+            mydata = xp2.data;
+            for i = 1:numel(mydata)
+                mydata{i} = do_shift_lastdim (mydata{i},options.overlay_shift_val);
+            end
+            xp2.data = mydata;
+        else
+            % If Ndims_per_subplot > 1, then this means we're going to be
+            % packing an additional dim into xp2.data. Therefore, shift the
+            % last dimension in xp2. We'll do this by temporarily packing
+            % it into xp2.data (e.g. along dim 4, which is unused) and then
+            % unpacking it later.
+            sz = size(xp2);
+            ind = find(sz > 1, 1, 'last');
+            if ~isempty(ind)
+                xp2 = xp2.packDim(ind,4);
+            end
+            mydata = xp2.data;
+            for i = 1:numel(mydata)
+                mydata{i} = do_shift_lastdim (mydata{i},options.overlay_shift_val);
+            end
+            xp2.data = mydata;
+            if ~isempty(ind)
+                xp2 = xp2.unpackDim(4,ind);
+                xp2 = xp2.squeezeRegexp('Dim');
+            end
         end
-        xp2.data = mydata;
-        xp2 = xp2.unpackDim(3,Nd);
-        xp2 = xp2.squeezeRegexp('Dim');
     end
 
 %% Crop data
@@ -505,9 +536,15 @@ else
             if any(strcmp(plot_type,{'rastergram','raster'})) 
                 % Force Ndims_per_subplot to 2 fro rastergram.
                 if isempty(Ndims_per_subplot)
-                    Ndims_per_subplot = 2;                 % Overwrite Ndims_per_subplot to 2. This ensures
-                end                                        % that multiple populations can be stacked in a
-                                                           % single subplot.
+                    if ~isempty(xp2.findaxis('populations'))
+                        Ndims_per_subplot = 2;                 % Overwrite Ndims_per_subplot to 2. This ensures
+                                                               % that multiple populations can be stacked in a
+                                                               % single subplot.
+                    else
+                        Ndims_per_subplot = 1;                 % Only do this if population axis is still present!
+                    end
+                end                                        
+                                                          
             end
             
         case {'heatmapFR','heatmap_sortedFR','meanFR','meanFRdens'}
@@ -536,19 +573,19 @@ end
 switch num_embedded_subplots
     case 1
         % Ordering of axis handles
-        function_handles = {@xp_handles_newfig, @xp_subplot_grid,data_plothandle};   % Specifies the handles of the plotting functions
+        function_handles = {@xp_handles_newfig, subplot_handle,data_plothandle};   % Specifies the handles of the plotting functions
         dims_per_function_handle = [1,1,Ndims_per_subplot];
         function_args = {{figure_options},{subplot_options},{plot_options}};
         
     case 2
         % Ordering of axis handles
-        function_handles = {@xp_handles_newfig, @xp_subplot_grid,data_plothandle};   % Specifies the handles of the plotting functions
+        function_handles = {@xp_handles_newfig, subplot_handle,data_plothandle};   % Specifies the handles of the plotting functions
         dims_per_function_handle = [1,2,Ndims_per_subplot];
         function_args = {{figure_options},{subplot_options},{plot_options}};
         
     case 3
         % Ordering of axis handles
-        function_handles = {@xp_handles_newfig, @xp_subplot_grid, @xp_subplot_grid,data_plothandle};   % Specifies the handles of the plotting functions
+        function_handles = {@xp_handles_newfig, subplot_handle, subplot_handle,data_plothandle};   % Specifies the handles of the plotting functions
         dims_per_function_handle = [1,2,1,Ndims_per_subplot];
         subplot_options2 = subplot_options;
         subplot_options2.legend1 = [];
@@ -556,7 +593,7 @@ switch num_embedded_subplots
         function_args = {{figure_options},{subplot_options2},{subplot_options},{plot_options}};
     case 4
         % Ordering of axis handles
-        function_handles = {@xp_handles_newfig, @xp_subplot_grid, @xp_subplot_grid,data_plothandle};   % Specifies the handles of the plotting functions
+        function_handles = {@xp_handles_newfig, subplot_handle, subplot_handle,data_plothandle};   % Specifies the handles of the plotting functions
         dims_per_function_handle = [1,2,2,Ndims_per_subplot];
         subplot_options2 = subplot_options;
         subplot_options2.legend1 = [];
@@ -747,6 +784,7 @@ function mydata_out = do_shift_lastdim (mydata,shift)
         stdevs = nanstd(temp)*upscale_factor;               % STD ignoring NaNs
         sh = [0, stdevs(1:end-1) + stdevs(2:end)]';
         sh = sh * -1;        % Forces shifts to be downward (same as subplots)
+        sh = cumsum(sh);     % Dave note - this seemed to be missing so added it for case of size(Nd)=2; not sure if it will mess up other cases.
     else
         sh = shift*[0:sz(end)-1]';      % Fixed shift amount
         sh = sh * -1;        % Forces shifts to be downward (same as subplots)

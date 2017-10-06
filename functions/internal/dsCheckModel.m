@@ -79,7 +79,8 @@ end
 field_order={'parameters','fixed_variables','functions','monitors',...
   'state_variables','ODEs','ICs','conditionals','linkers','comments',...
   'specification','namespaces'};
-field_defaults={[],[],[],[],{},[],[],[],[],{},[],{}};
+field_defaults={struct(''),struct(''),struct(''),struct(''),{},struct(''),...
+                struct(''),struct(''),struct(''),{},struct(''),{}};
 
 if isempty(model)
   % prepare empty model structure

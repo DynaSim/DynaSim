@@ -64,7 +64,7 @@ else
 end
 
 % set namespace
-if ismember('namespace',keys) % check for user-supplied namespace (i.e., namespace)
+if ~isempty(keys) && ismember('namespace',keys) % check for user-supplied namespace (i.e., namespace)
   namespace=values{ismember(keys,'namespace')}; % user-supplied namespace
   if ~isempty(namespace)
     namespace=[namespace '_'];
@@ -76,7 +76,7 @@ else
 end
 
 % set delimiter
-if ismember('delimiter',keys) % check for user-supplied delimiter
+if ~isempty(keys) && ismember('delimiter',keys) % check for user-supplied delimiter
   delimiter = values(ismember(keys,'delimiter')); % user-supplied delimiter
 else
   delimiter=';';
@@ -159,15 +159,16 @@ if ~iscellstr(text)
 end
 
 %% 2.0 classify and parse lines; store info in model structure
-model.parameters=[];
-model.fixed_variables=[];
-model.functions=[];
-model.monitors=[];
+% use empty struct for Octave compatibility
+model.parameters=struct('');
+model.fixed_variables=struct('');
+model.functions=struct('');
+model.monitors=struct('');
 model.state_variables={};
-model.ODEs=[];
-model.ICs=[];
-model.conditionals=[];
-model.linkers=[];
+model.ODEs=struct('');
+model.ICs=struct('');
+model.conditionals=struct('');
+model.linkers=struct('');
 model.comments={};
 for index=1:length(text) % loop over lines of text
   % organize model data in model structure
@@ -186,7 +187,7 @@ for index=1:length(text) % loop over lines of text
       lhs=regexp(line,'^([\w\.]+)\s*=','tokens','once');
       lhs{1}=strrep(lhs{1},'.','_'); % e.g., Na.g --> Na_g
       name=strtrim(lhs{1}); expression=rhs{1};
-      model.parameters.([namespace name]) = expression;
+      model.parameters(1).([namespace name]) = expression;
       name_map(end+1,:) = {name,[namespace name],namespace,'parameters'};
       if ~isempty(comment)
         model.comments{end+1}=sprintf('%s (parameter): %s',[namespace name],comment);
@@ -195,7 +196,7 @@ for index=1:length(text) % loop over lines of text
       lhs=regexp(line,'^(\w+)\s*=','tokens','once');
       rhs=regexp(line,'=(.+)$','tokens','once');
       name=strtrim(lhs{1}); expression=rhs{1};
-      model.fixed_variables.([namespace name]) = expression;
+      model.fixed_variables(1).([namespace name]) = expression;
       name_map(end+1,:) = {name,[namespace name],namespace,'fixed_variables'};
       if ~isempty(comment)
         model.comments{end+1}=sprintf('%s (fixed_variable): %s',[namespace name],comment);
@@ -210,7 +211,7 @@ for index=1:length(text) % loop over lines of text
       rhs=regexp(line,'=(.+)$','tokens','once');
       name=strtrim(name{1});
       expression=sprintf('@(%s)%s',vars{1},rhs{1});
-      model.functions.([namespace name]) = expression;
+      model.functions(1).([namespace name]) = expression;
       name_map(end+1,:) = {name,[namespace name],namespace,'functions'};
       if ~isempty(comment)
         model.comments{end+1}=sprintf('%s (function): %s',[namespace name],comment);
@@ -222,7 +223,7 @@ for index=1:length(text) % loop over lines of text
       end
       rhs=regexp(line,'=(.+)$','tokens','once');
       state_variable=strtrim(var{1}); expression=rhs{1};
-      model.ODEs.([namespace state_variable])=expression;
+      model.ODEs(1).([namespace state_variable])=expression;
       if ~ismember([namespace state_variable],model.state_variables)
         name_map(end+1,:) = {state_variable,[namespace state_variable],namespace,'state_variables'};
         model.state_variables{end+1}=[namespace state_variable];
@@ -234,7 +235,7 @@ for index=1:length(text) % loop over lines of text
       var=regexp(line,'^(\w+)\(','tokens','once');
       rhs=regexp(line,'=(.+)$','tokens','once');
       state_variable=strtrim(var{1}); expression=rhs{1};
-      model.ICs.([namespace state_variable])=expression;
+      model.ICs(1).([namespace state_variable])=expression;
       if ~isempty(comment)
         model.comments{end+1}=sprintf('%s(0) (IC): %s',[namespace state_variable],comment);
       end
@@ -273,7 +274,7 @@ for index=1:length(text) % loop over lines of text
           
           if ~isempty(rhs), expression=rhs{1}; else expression=[]; end
           
-          model.monitors.([namespace name]) = expression;
+          model.monitors(1).([namespace name]) = expression;
           name_map(end+1,:) = {name,[namespace name],namespace,'monitors'};
           
           if ~isempty(comment)
@@ -284,7 +285,7 @@ for index=1:length(text) % loop over lines of text
       end
       
     case 'conditional'      % if(conditions)(actions)
-      groups=regexp(line,')(','split');
+      groups=regexp(line,'\)\(','split');
       condition=regexp(groups{1},'^if\s*\((.*)','tokens','once');
       if length(groups)==2
         if groups{2}(end)==')'

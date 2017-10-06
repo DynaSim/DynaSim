@@ -8,7 +8,7 @@ function study_dir = dsUnzipDemoData(zipfname,overwrite_flag,verbose_flag)
 %   study_dir = dsUnzipDemoData(zipfname,overwrite_flag)
 %
 % Inputs:
-%   zipfname: string with name of zipped file. Can be either full path or
+%   zipfname: string with name of zipped file. Can be either a full path or
 %       just the filename, since DynaSim knows where to look for its
 %       demo zip files.
 %   overwrite_flag: {0,1} - Flag to force overwrite if directory already
@@ -47,17 +47,25 @@ function study_dir = dsUnzipDemoData(zipfname,overwrite_flag,verbose_flag)
     [path, zipfilename_only, ext] = fileparts(zipfname);
     zipfname = [zipfilename_only, '.zip'];
     
+    % Verify the source (zip file) exists; if not, download it from web!
+    if ~exist(fullfile(demo_zips_path,zipfname),'file')
+     
+        dsDownloadFiles(fullfile(demo_zips_path,zipfname));
+
+    end
+    
     % Get the destination directory
     study_dir = fullfile(demos_path,zipfilename_only);
 
     % Unzip
     if ~exist(study_dir,'dir')
+        if verbose_flag; fprintf('Unzipping demo data to %s.\n',study_dir); end
         unzip(fullfile(demo_zips_path,zipfname),demos_path);
     elseif exist(study_dir,'dir') && overwrite_flag
-        if verbose_flag; fprintf('Demo data folder %s already exists. Overwriting \n',demos_path); end
+        if verbose_flag; fprintf('Demo data folder %s already exists. Overwriting \n',study_dir); end
         unzip(fullfile(demo_zips_path,zipfname),demos_path);
     else
-        if verbose_flag; fprintf('Failed to create demo data folder: %s \n',demos_path);end
+        if verbose_flag; fprintf('Demo data folder %s already exists. Skipping \n',study_dir); end
     end
     
     

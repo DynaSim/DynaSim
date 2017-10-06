@@ -18,10 +18,25 @@ end
 
 options=dsCheckOptions(keyvals,{...
   'verbose_flag',0,{0,1},... % set verbose to 1 by default
-  'mex_dir',[],[],... % Directory to search for pre-compiled solve files (solve*_mex*)
+  'mex_dir_flag',1,{0,1},... % Flag to tell whether or not to search in mex_dir for pre-compiled solve files (solve*_mex*).
+  'mex_dir',[],[],... % Directory to search for pre-compiled mex files. Can be relative to 'study_dir' or absolute path.
   'codegen_args',[],[],...
   'cluster_flag',0,{0,1},...
   },false);
+
+% % Example code for testing mex_dir options:
+% eqns={
+%   's=10; r=27; b=2.666'
+%   'dx/dt=s*(y-x)'
+%   'dy/dt=r*x-y-x*z'
+%   'dz/dt=-b*z+x*y'
+% };
+% data=dsSimulate(eqns, 'tspan',[0 100], 'ic',[1 2 .5],'verbose',1, 'solver','rk4', 'study_dir','demo_lorenz','compile_flag',1,'mex_dir_flag',0,'mex_dir',[]);
+% data=dsSimulate(eqns, 'tspan',[0 100], 'ic',[1 2 .5],'verbose',1, 'solver','rk4', 'study_dir','demo_lorenz','compile_flag',1,'mex_dir_flag',1,'mex_dir',[]);
+% data=dsSimulate(eqns, 'tspan',[0 100], 'ic',[1 2 .5],'verbose',1, 'solver','rk4', 'study_dir','demo_lorenz','compile_flag',1,'mex_dir_flag',1,'mex_dir','mexes_temp');
+if isempty(options.mex_dir)
+    options.mex_dir = dsGetConfig('mex_path');
+end
 
 mex_dir = options.mex_dir;
 
@@ -58,7 +73,7 @@ else % mex file exists
 end %if
 
 % If mex_dir is specified, back up the newly compiled mex files to this folder
-if ~isempty(mex_dir) && ~options.cluster_flag
+if ~isempty(mex_dir) && ~options.cluster_flag && options.mex_dir_flag
   [~,solvefile] = fileparts2(mfileInput);
   [~,mexfile] = fileparts2(mexfileOutput);
   
