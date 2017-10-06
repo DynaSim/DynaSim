@@ -205,18 +205,18 @@ if any(strcmp(fields, 'varied'))
   [effective_vary_indices, ~] = dsCheckCovary(vary_lengths, vary_params, varargin{:});
 
   if prod(vary_lengths(effective_vary_indices)) == length(data)
-
+      
       dimensions_varied = sum(effective_vary_indices);
       vary_params = vary_params(:, effective_vary_indices);
       vary_vectors = vary_vectors(effective_vary_indices);
       vary_lengths = vary_lengths(effective_vary_indices);
-
+      
   else
-
+     
       warning('unable to determine which parameters are covaried. Data will be plotted as a lattice.')
-
+      
       dimensions_varied = 1;
-
+      
   end
 
   if dimensions_varied > 2
@@ -232,7 +232,7 @@ if any(strcmp(fields, 'varied'))
       for v = 4:dimensions_varied
         figure_params(v - 2) = vary_vectors{v}(ceil(f/vary_lengths_cp(v - 3)));
       end
-
+      
       figure_data_index = ones(size(vary_params, 1), 1);
       for v = 3:dimensions_varied
         figure_data_index = figure_data_index & vary_params(:, v) == figure_params(v - 2);
@@ -243,7 +243,7 @@ if any(strcmp(fields, 'varied'))
       for v = 1:(dimensions_varied - 2)
         vary_title = [vary_title, sprintf('%s = %f ', vary_labels{v + 2}, figure_params(v))];
       end
-
+      
       handles = dsPlot(data(figure_data_index), varargin{:});
       for h = 1:length(handles)
         % figure(handles(h))
@@ -338,7 +338,7 @@ switch options.plot_type
 %          data.labels=setdiff(data.labels,rmfields,'stable');
 %       end
       else
-        % find spikes from threshold crossing
+        % find spikes from threshold crossing      
         data=dsCalcFR(data,varargin{:});
       end
     end
@@ -898,9 +898,7 @@ for figset=1:num_fig_sets
     end
 
     %link x axes
-    if numel(haxes) > 1
-      linkaxes(haxes, 'x')
-    end
+    linkaxes(haxes, 'x')
 
   end % end loop over figures in this set
 end % end loop over figure sets

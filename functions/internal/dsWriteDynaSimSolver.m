@@ -862,9 +862,7 @@ function odes_out=update_odes(odes,suffix_k,increment,state_variables,index_last
   odes_out=odes;
   for i=1:length(odes)
     for j=1:length(odes)
-      tmp=[state_variables{j} index_lasts{j}]; % original state variable as appears in ODEs
-      tmp=strrep(strrep(tmp,')','\)'),'(','\('); % escape parentheses for substitution
-      odes_out{i}=dsStrrep(odes_out{i}, tmp, sprintf('(%s%s+%s*%s%s)', state_variables{j}, index_lasts{j}, increment, state_variables{j}, suffix_k), '(',')', varargin{:});
+      odes_out{i}=dsStrrep(odes_out{i}, [state_variables{j} index_lasts{j}], sprintf('(%s%s+%s*%s%s)', state_variables{j}, index_lasts{j}, increment, state_variables{j}, suffix_k), '(',')', varargin{:});
     end
   end
 end
