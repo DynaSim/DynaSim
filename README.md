@@ -7,11 +7,11 @@
 [![Join the chat at https://gitter.im/DynaSim/DynaSim](https://badges.gitter.im/DynaSim/DynaSim.svg)](https://gitter.im/DynaSim/DynaSim?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
 This is the home of the DynaSim toolbox for modeling and simulating dynamical
-systems in Matlab or Octave!
+systems in Matlab or GNU Octave!
 
 ### Installation
 
-* Download the toolbox, and add it to your MATLAB or Octave path.
+* Download the toolbox, and add it to your MATLAB or GNU Octave path.
   * Download using GitHub or Terminal: `git clone https://github.com/DynaSim/DynaSim.git`
   * Add to path using startup.m or Command Window:
     * `addpath(genpath('YOUR/PATH/TO/DynaSim'))`
