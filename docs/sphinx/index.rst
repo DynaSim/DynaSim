@@ -10,8 +10,8 @@ Welcome to DynaSim's documentation!
    :maxdepth: 2
    :caption: Contents:
 
-   installation
-   introduction
+   user/index
+   developer/index
 
 
 Indices and tables
