@@ -26,4 +26,4 @@ systems in MATLAB and GNU Octave!
 ### Mailing lists:
 
 - Join the [user mailing list](https://groups.google.com/forum/#!forum/dynasim-users) to ask questions and discuss DynaSim.
-- Join the [developer mailing list](https://groups.google.com/forum/#!forum/dynasim-developers) or email [Jason Sherfey](http://jasonsherfey.com/) if you are interested in becoming a collaborator on DynaSim.
+- Join the [developer mailing list](https://groups.google.com/forum/#!forum/dynasim-developers) to participate in development discussion.
