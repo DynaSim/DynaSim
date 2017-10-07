@@ -14,6 +14,9 @@ function str = dsStrrep(str,oldstr,newstr,lpad,rpad, varargin)
 %
 %   'new.old' == dynasim_strrep('old.old','old','new')
 %   'new.old.old' == dynasim_strrep('old.old.old','old','new')
+% 
+% Author: Jason Sherfey, PhD <jssherfey@gmail.com>
+% Copyright (C) 2016 Jason Sherfey, Boston University, USA
 
 if nargin<4, lpad=''; end
 if nargin<5, rpad=''; end

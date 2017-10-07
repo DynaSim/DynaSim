@@ -108,6 +108,9 @@ function stats = dsCalcCellProperties(data, varargin)
 %   stats = dsCalcCellProperties(data)
 %
 % See also: dsProbeCellProperties
+% 
+% Author: Jason Sherfey, PhD <jssherfey@gmail.com>
+% Copyright (C) 2016 Jason Sherfey, Boston University, USA
 
 % Check inputs
 options=dsCheckOptions(varargin,{...

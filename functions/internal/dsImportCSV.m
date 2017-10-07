@@ -23,6 +23,9 @@ function data = dsImportCSV(file)
 %   sequential columns with same header repeated for each cell.
 %
 % See also: dsImport
+% 
+% Author: Jason Sherfey, PhD <jssherfey@gmail.com>
+% Copyright (C) 2016 Jason Sherfey, Boston University, USA
 
 % check inputs
 if ~exist(file,'file')

@@ -3,6 +3,9 @@ function [state_var_counts,monitor_counts] = dsGetOutputCounts(model)
 %
 % Usage:
 %   [state_var_counts,monitor_counts]=dsGetOutputCounts(model)
+% 
+% Author: Jason Sherfey, PhD <jssherfey@gmail.com>
+% Copyright (C) 2016 Jason Sherfey, Boston University, USA
 
 state_var_counts=0;
 if ~isempty(model.state_variables)

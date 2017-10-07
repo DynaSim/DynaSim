@@ -113,6 +113,9 @@ function [model,name_map] = dsGenerateModel(specification, varargin)
 %     note: currently not supported on *most* machines...
 %
 % See also: dsCheckSpecification, dsCheckModel, dsParseModelEquations, dsSimulate
+% 
+% Author: Jason Sherfey, PhD <jssherfey@gmail.com>
+% Copyright (C) 2016 Jason Sherfey, Boston University, USA
 
 % Check inputs
 % ------------------------------------------------------

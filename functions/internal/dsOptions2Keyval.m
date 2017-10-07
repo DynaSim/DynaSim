@@ -8,6 +8,9 @@ function keyval = dsOptions2Keyval(options)
 %   - options: options structure to convert
 %
 % See also: dsCheckOptions
+% 
+% Author: Jason Sherfey, PhD <jssherfey@gmail.com>
+% Copyright (C) 2016 Jason Sherfey, Boston University, USA
 
 % Grab the field names
 fields = fieldnames(options);

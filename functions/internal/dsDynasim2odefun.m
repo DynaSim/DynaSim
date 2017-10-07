@@ -34,7 +34,10 @@ function [ODEFUN,IC,elem_names] = dsDynasim2odefun(model, varargin)
 % vectors have cells along columns. Therefore, for DynaSim models to be
 % compatible with built-in solvers, all state vectors must be transposed in
 % ODEFUN. This slows down simulation but cannot be avoided easily.
- 
+% 
+% Author: Jason Sherfey, PhD <jssherfey@gmail.com>
+% Copyright (C) 2016 Jason Sherfey, Boston University, USA
+
 % Approach:
 % 1. evaluate params -> fixed_vars -> funcs
 % 2. evaluate ICs to get (# elems) per state var

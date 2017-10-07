@@ -3,6 +3,9 @@ function options = dsCheckSolverOptions(options)
 %
 % Use this to achieve consistent params.mat whether created by dsSimulate(),
 % dsWriteDynaSimSolver(), or dsWriteMatlabSolver().
+% 
+% Author: Jason Sherfey, PhD <jssherfey@gmail.com>
+% Copyright (C) 2016 Jason Sherfey, Boston University, USA
 
 % standardize and set defaults
 keyvals = dsOptions2Keyval(options);

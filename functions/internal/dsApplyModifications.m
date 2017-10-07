@@ -69,7 +69,10 @@ function [output,modifications] = dsApplyModifications(model, modifications, var
 %       m.populations.equations
 %
 % See also: dsGenerateModel, dsSimulate, dsVary2Modifications
-
+% 
+% Author: Jason Sherfey, PhD <jssherfey@gmail.com>
+% Copyright (C) 2016 Jason Sherfey, Boston University, USA
+ 
 %% localfn output
 if ~nargin
   output = localfunctions; % output var name specific to this fn

@@ -24,6 +24,9 @@ function handles = dsPlotFR(data,varargin)
 % TODO: add rastergrams
 %
 % See also: dsCalcFR, dsSimulate, dsCheckData
+% 
+% Author: Jason Sherfey, PhD <jssherfey@gmail.com>
+% Copyright (C) 2016 Jason Sherfey, Boston University, USA
 
 data=dsCheckData(data, varargin{:});
 fields=fieldnames(data);

@@ -29,6 +29,9 @@ function [studyinfo, cmd] = dsCreateBatch(base_model,modifications_set,varargin)
 % Dependencies: dsSetupStudy, dsUpdateStudy
 %
 % See also: dsGenerateModel, dsSimulate, dsCheckStudyinfo, dsVary2Modifications
+% 
+% Author: Jason Sherfey, PhD <jssherfey@gmail.com>
+% Copyright (C) 2016 Jason Sherfey, Boston University, USA
 
 %% check inputs
 options=dsCheckOptions(varargin,{...

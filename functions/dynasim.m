@@ -1,4 +1,12 @@
 % DynaSim GUI
+% Purpose: graphical interface for DynaSim model building and exploration.
+% Usage:
+%   dynasim; % load default model
+%   dynasim(specification)
+% 
+% Author: Jason Sherfey, PhD <jssherfey@gmail.com>
+% Copyright (C) 2016 Jason Sherfey, Boston University, USA
+
 function dynasim(spec)
 global handles SPEC MODEL cfg LASTSPEC LASTCFG
 handles=[];

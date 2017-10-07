@@ -12,6 +12,9 @@ function exportData(data,varargin)
 %     'verbose_flag': whether to print log info (default: 0)
 %
 % See also: dsImport, dsCheckData, dsSimulate
+% 
+% Author: Jason Sherfey, PhD <jssherfey@gmail.com>
+% Copyright (C) 2016 Jason Sherfey, Boston University, USA
 
 options=dsCheckOptions(varargin,{...
   'filename','data.mat',[],... % name of output data file

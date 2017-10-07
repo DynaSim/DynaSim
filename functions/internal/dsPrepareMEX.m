@@ -2,6 +2,9 @@ function mexfileOutput = dsPrepareMEX(mfileInput, varargin)
 %PREPAREMEX - take an m-file path and compile it using the Matlab coder.
 %
 % See also: dsGetSolveFile
+% 
+% Author: Jason Sherfey, PhD <jssherfey@gmail.com>
+% Copyright (C) 2016 Jason Sherfey, Boston University, USA
 
 % Input args
 args = varargin;

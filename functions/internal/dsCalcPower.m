@@ -55,6 +55,10 @@ function data = dsCalcPower(data, varargin)
 %   xlabel('frequency (Hz)'); ylabel('power'); xlim([0 200]);
 %
 % See also: PlotPower, dsAnalyzeStudy, dsSimulate, dsCheckData, dsSelectVariables
+% 
+% Author: Jason Sherfey, PhD <jssherfey@gmail.com>
+% Copyright (C) 2016 Jason Sherfey, Boston University, USA
+
 %% 1.0 Check inputs
 options=dsCheckOptions(varargin,{...
   'variable',[],[],...

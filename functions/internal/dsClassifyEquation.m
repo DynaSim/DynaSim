@@ -35,6 +35,9 @@ function classes = dsClassifyEquation(string,delimiter, varargin)
 %   classes=dsClassifyEquation('model.eqns');
 %
 % See also: dsParseModelEquations
+% 
+% Author: Jason Sherfey, PhD <jssherfey@gmail.com>
+% Copyright (C) 2016 Jason Sherfey, Boston University, USA
 
 %% localfn output
 if ~nargin

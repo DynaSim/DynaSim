@@ -3,7 +3,12 @@ function [name_,name__] = dsGetNamespaces(spec)
 % Outputs:
 %   name_: object names separated by single underscore
 %   name__: object names separated by double underscores
-% See also: dsGetParentNamespace, dsPropagateNamespaces
+%
+% See also: dsPropagateNamespaces
+% 
+% Author: Jason Sherfey, PhD <jssherfey@gmail.com>
+% Copyright (C) 2016 Jason Sherfey, Boston University, USA
+
 
 if isfield(spec,'specification') % this is a model structure
   spec=spec.specification; % extract the specification

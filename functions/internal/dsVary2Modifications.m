@@ -128,6 +128,9 @@ function modifications_set = dsVary2Modifications(vary,model)
 %   modifications_set{:}
 %
 % See also: dsApplyModifications, dsSimulate, dsGenerateModel
+% 
+% Author: Jason Sherfey, PhD <jssherfey@gmail.com>
+% Copyright (C) 2016 Jason Sherfey, Boston University, USA
 
 % check inputs
 if iscell(vary) && iscell(vary{1})

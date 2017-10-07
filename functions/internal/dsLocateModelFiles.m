@@ -12,6 +12,9 @@ function [paths,files] = dsLocateModelFiles(input)
 %   - files: full names of files containing mechanism sub-models
 %
 % See also (used by): dsParseModelEquations, dsCheckHostPaths, dsCreateBatch
+% 
+% Author: Jason Sherfey, PhD <jssherfey@gmail.com>
+% Copyright (C) 2016 Jason Sherfey, Boston University, USA
 
 % extract list of mechanisms from input
 if ischar(input)

@@ -145,6 +145,9 @@ function handles = dsPlot(data,varargin)
 %       dsPlot(data,'variable','*');
 %
 % See also: dsCalcFR, dsCalcPower, dsPlotWaveforms, dsCheckData
+% 
+% Author: Jason Sherfey, PhD <jssherfey@gmail.com>
+% Copyright (C) 2016 Jason Sherfey, Boston University, USA
 
 % Check inputs
 data=dsCheckData(data, varargin{:});

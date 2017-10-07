@@ -78,6 +78,9 @@ function studyinfo = dsCheckStudyinfo(studyinfo, varargin)
 %     studyinfo=dsCheckStudyinfo(studyinfo)
 %
 % See also: dsSetupStudy, dsSimulate, dsCreateBatch, dsImport, dsAnalyzeStudy
+% 
+% Author: Jason Sherfey, PhD <jssherfey@gmail.com>
+% Copyright (C) 2016 Jason Sherfey, Boston University, USA
 
 options=dsCheckOptions(varargin,{...
   'verbose_flag',0,{0,1},...

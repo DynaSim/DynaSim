@@ -24,6 +24,9 @@ function studyinfo = dsUpdateStudy(study_dir,varargin)
 % TODO: this multiple things in this function should be split up into individual functions
 %
 % See also: dsCheckStudyinfo, dsSetupStudy, dsSimulate, dsCreateBatch, dsAnalyzeStudy
+% 
+% Author: Jason Sherfey, PhD <jssherfey@gmail.com>
+% Copyright (C) 2016 Jason Sherfey, Boston University, USA
 
 
 % check inputs

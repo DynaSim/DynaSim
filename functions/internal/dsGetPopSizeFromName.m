@@ -10,6 +10,9 @@ function [pop_size,pop_name,target] = dsGetPopSizeFromName(model,name)
 % model=dsGenerateModel('dv/dt=@current+10;{iNa,iK}');
 % name='E_1_iNa_m;
 % name='E_1_E_2_iAMPA_s';
+% 
+% Author: Jason Sherfey, PhD <jssherfey@gmail.com>
+% Copyright (C) 2016 Jason Sherfey, Boston University, USA
 
 spec=model.specification;
 pops={spec.populations.name};

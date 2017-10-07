@@ -103,6 +103,9 @@ function spec = dsCheckSpecification(specification, varargin)
 %       s=dsCheckSpecification(s)
 %
 % See also: dsGenerateModel, dsCheckModel
+% 
+% Author: Jason Sherfey, PhD <jssherfey@gmail.com>
+% Copyright (C) 2016 Jason Sherfey, Boston University, USA
 
 %% localfn output
 if ~nargin

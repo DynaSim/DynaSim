@@ -41,6 +41,9 @@ function result = dsAnalyze(src,funcIn,varargin)
 %
 %
 % See also: dsSimulate
+% 
+% Author: Jason Sherfey, PhD <jssherfey@gmail.com>
+% Copyright (C) 2016 Jason Sherfey, Boston University, USA
 
 %% General cases:
 %   - data struct (likely from SimualteModel call)

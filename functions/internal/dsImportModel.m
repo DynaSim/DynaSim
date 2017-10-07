@@ -20,6 +20,9 @@ function [model,map] = dsImportModel(source,varargin)
 %   DynaSim model structure (see dsGenerateModel)
 %
 % See also: dsGenerateModel, dsCheckModel
+% 
+% Author: Jason Sherfey, PhD <jssherfey@gmail.com>
+% Copyright (C) 2016 Jason Sherfey, Boston University, USA
 
 % Check inputs
 options=dsCheckOptions(varargin,{...

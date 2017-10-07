@@ -185,6 +185,9 @@ function [data,studyinfo,result] = dsSimulate(model,varargin)
 %
 % See also: dsGenerateModel, dsCheckModel, dsGetSolveFile, dsCheckData,
 %           dsVary2Modifications, dsCheckStudyinfo, dsCreateBatch
+% 
+% Author: Jason Sherfey, PhD <jssherfey@gmail.com>
+% Copyright (C) 2016 Jason Sherfey, Boston University, USA
 
 % TODO: rename 'disk_flag' to something more descriptive
 

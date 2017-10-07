@@ -17,6 +17,10 @@ function results = dsImportResults(studyinfo,func, varargin)
 %   recognize the image extensions. I wrote "dsImportPlots" as a way around this,
 %   but there might be better solutions for differentiating "plots" from other
 %   "results"
+% 
+% Author: Jason Sherfey, PhD <jssherfey@gmail.com>
+% Copyright (C) 2016 Jason Sherfey, Boston University, USA
+
 
 if ischar(studyinfo) && isdir(studyinfo) % study directory
   study_dir=studyinfo;

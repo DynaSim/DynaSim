@@ -24,6 +24,9 @@ function stats = dsCalcSpikeSync(data, varargin)
 %   spike_threshold=0; % same for all ROIs
 %   spike_threshold=[0 .5]; % use 0 for all ROI1s and .5 for all ROI2s
 %   spike_threshold=[0 .5; 0 .25];
+% 
+% Author: Jason Sherfey, PhD <jssherfey@gmail.com>
+% Copyright (C) 2016 Jason Sherfey, Boston University, USA
 
 %% 1.0 Check inputs
 options=dsCheckOptions(varargin,{...
