@@ -1,4 +1,4 @@
-Installing DynaSim is VERY easy! 
+Installation
 =================================
 
 Just follow these steps:

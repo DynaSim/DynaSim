@@ -1,3 +1,6 @@
+Function template
+========
+
 .. code:: matlab
 
     function output = FunctionName(arguments)
