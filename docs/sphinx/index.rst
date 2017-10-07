@@ -11,6 +11,7 @@ Welcome to DynaSim's documentation!
    :caption: Contents:
 
    introduction
+   installation
 
 
 Indices and tables
