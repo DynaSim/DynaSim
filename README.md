@@ -21,8 +21,9 @@ systems in MATLAB and GNU Octave!
 - A browsable function reference is [available
   here](https://dynasim.github.io/DynaSim/).
 - Example modeling projects: [PFC networks](https://github.com/jsherfey/PFC_models), [Thalamus](https://github.com/asoplata/ching2010_tcre_dynasim_mechanisms).
+- Report issues [here](https://github.com/DynaSim/DynaSim/issues).
 
 ### Mailing lists:
 
-- Join the [user mailing list](https://groups.google.com/forum/#!forum/dynasim-users) to ask questions, request features, report bugs, and discuss DynaSim related issues.
+- Join the [user mailing list](https://groups.google.com/forum/#!forum/dynasim-users) to ask questions and discuss DynaSim related issues.
 - Join the [developer mailing list](https://groups.google.com/forum/#!forum/dynasim-developers) or email [Jason Sherfey](http://jasonsherfey.com/) if you are interested in becoming a collaborator on DynaSim.
