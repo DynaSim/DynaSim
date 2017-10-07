@@ -20,6 +20,14 @@
 # import sys
 # sys.path.insert(0, os.path.abspath('.'))
 
+# Add support for markdown
+from recommonmark.parser import CommonMarkParser
+
+source_parsers = {
+    '.md': CommonMarkParser,
+}
+
+source_suffix = ['.rst', '.md']
 
 # -- General configuration ------------------------------------------------
 
