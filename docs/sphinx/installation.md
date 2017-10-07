@@ -1,4 +1,7 @@
-Installing DynaSim is VERY easy! Just follow these steps:
+Installing DynaSim is VERY easy!
+================================
+
+Just follow these steps:
 
 0. Install Matlab. If you are at BU, you can get it for free [from here](http://www.bu.edu/tech/services/cccs/desktop/distribution/mathsci/matlab/)
 1. Download the DynaSim toolbox using either:
