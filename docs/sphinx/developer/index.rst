@@ -1,4 +1,6 @@
 .. toctree::
    :maxdepth: 1
 
-   function-help-template
+   contributing
+   function_template
+

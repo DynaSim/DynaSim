@@ -9,7 +9,9 @@ Welcome to DynaSim's documentation!
 .. toctree::
    :maxdepth: 2
    :caption: Contents:
+   :titlesonly:
 
+   introduction/index
    user/index
    developer/index
 
