@@ -12,14 +12,13 @@ systems in MATLAB and GNU Octave!
   * Add to path using startup.m or Command Window:
     * `addpath(genpath('YOUR/PATH/TO/DynaSim'))`
     * `savepath`
-* [Go here](https://github.com/DynaSim/DynaSim/wiki/Installation) for additional instructions.
+* [Go here](http://dynasim.readthedocs.io/en/latest/introduction/installation.html) for additional instructions.
 
 ### Documentation:
 
 - Get started with the demos: [demos/dsDemos.m](https://github.com/DynaSim/DynaSim/blob/master/demos/dsDemos.m).
-- For more details and examples walk through the tutorial: [demos/dsTutorial.m](https://github.com/DynaSim/DynaSim/blob/master/demos/dsTutorial.m).
-- The DynaSim [wiki](https://github.com/DynaSim/DynaSim/wiki/) contains tips, best practices, user FAQ, and other information.
-- Info on DynaSim functions is [available online
+- Complete documentation is available at [dynasim.readthedocs.org](http://dynasim.readthedocs.org).
+- A browsable function reference is [available
   here](https://dynasim.github.io/DynaSim/).
 - Example modeling projects: [PFC networks](https://github.com/jsherfey/PFC_models), [Thalamus](https://github.com/asoplata/ching2010_tcre_dynasim_mechanisms).
 
