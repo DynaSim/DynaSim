@@ -21,7 +21,7 @@ function solve_file = dsGetSolveFile(model,studyinfo,varargin)
 %
 % See also: dsWriteDynaSimSolver, dsCompareSolveFiles, dsPrepareMEX,
 %           dsSimulate, dsCreateBatch
-% 
+%
 % Author: Jason Sherfey, PhD <jssherfey@gmail.com>
 % Copyright (C) 2016 Jason Sherfey, Boston University, USA
 
@@ -56,7 +56,7 @@ options=dsCheckOptions(varargin,{...
   'auto_gen_test_data_flag',0,{0,1},...
   'unit_test_flag',0,{0,1},...
   },false);
-  
+
 if ~isempty(opts)
   % combine default options and user-supplied options w/ the latter
   % overriding the former
@@ -112,6 +112,9 @@ elseif options.auto_gen_test_data_flag || options.unit_test_flag
 else
   % set default solve_file name
   solve_file=['solve_ode_' datestr(now,'yyyymmddHHMMSS_FFF') '.m'];
+  if ~strcmp(reportUI,'matlab')
+    warning('off', 'Octave:function-name-clash');
+  end
 end
 
 [fpath,fname,fext]=fileparts2(solve_file);
@@ -123,7 +126,7 @@ if isempty(fpath)
   else
     solve_file=fullfile(options.study_dir,'solve',[fname fext]);
   end
-  
+
   % convert relative path to absolute path
   solve_file = getAbsolutePath(solve_file);
 end
@@ -162,7 +165,7 @@ if ~exist(solve_file,'file')
                 % design: dsWriteMatlabSolver should be very similar to
                 % dsWriteDynaSimSolver except have a subfunction with an odefun
                 % format variation and main function that calls odeset and
-                % feval. 
+                % feval.
                 % DynaSimToOdefun(): a function called outside of
                 % dsSimulate. it should evaluate fixed_variables and
                 % return @odefun with all substitutions. dsSimulate
