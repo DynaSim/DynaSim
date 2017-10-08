@@ -2453,11 +2453,11 @@ if strcmp(get(ax,'XTickLabelMode'),'auto') && strcmp(get(ax,'XScale'),'linear')
         numlabels = get(ax,'XTickLabel');
         if ~isempty(numlabels)
           numlabels_tmp = str2double(numlabels);
-            if(isnan(numlabels_tmp)) || size(numlabels,1) ~= size(numlabels_tmp,1)
-              numlabels = str2num(numlabels);
-            else
-              numlabels = numlabels_tmp;
-            end
+          if any(isnan(numlabels_tmp)) || size(numlabels,1) ~= size(numlabels_tmp,1)
+            numlabels = str2num(numlabels);
+          else
+            numlabels = numlabels_tmp;
+          end
         end
     end
     labelpos = axxtick;%get(ax,'XTick');
@@ -2490,11 +2490,11 @@ if strcmp(get(ax,'YTickLabelMode'),'auto') && strcmp(get(ax,'YScale'),'linear')
         numlabels = get(ax,'YTickLabel');
         if ~isempty(numlabels)
           numlabels_tmp = str2double(numlabels);
-            if(isnan(numlabels_tmp)) || size(numlabels,1) ~= size(numlabels_tmp,1)
-              numlabels = str2num(numlabels);
-            else
-              numlabels = numlabels_tmp;
-            end
+          if any(isnan(numlabels_tmp)) || size(numlabels,1) ~= size(numlabels_tmp,1)
+            numlabels = str2num(numlabels);
+          else
+            numlabels = numlabels_tmp;
+          end
         end
     end
     labelpos = axytick;%get(ax,'YTick');
@@ -2527,11 +2527,11 @@ if strcmp(get(ax,'ZTickLabelMode'),'auto') && strcmp(get(ax,'ZScale'),'linear')
         numlabels = get(ax,'ZTickLabel');
         if ~isempty(numlabels)
           numlabels_tmp = str2double(numlabels);
-            if(isnan(numlabels_tmp)) || size(numlabels,1) ~= size(numlabels_tmp,1)
-              numlabels = str2num(numlabels);
-            else
-              numlabels = numlabels_tmp;
-            end
+          if any(isnan(numlabels_tmp)) || size(numlabels,1) ~= size(numlabels_tmp,1)
+            numlabels = str2num(numlabels);
+          else
+            numlabels = numlabels_tmp;
+          end
         end
     end
     labelpos = axztick;%get(ax,'ZTick');
