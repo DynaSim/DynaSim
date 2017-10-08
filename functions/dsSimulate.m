@@ -29,6 +29,7 @@ function [data,studyinfo,result] = dsSimulate(model,varargin)
 %                     components to vary across simulations (see NOTE 1 and dsVary2Modifications)
 %
 %   options to control saved data:
+%     'matCompatibility_flag': whether to save mat files in compatible mode, vs to prioritize > 2GB VARs {0 or 1} (default: 1)
 %     'save_results_flag': whether to save results of analysis and plotting
 %     'save_data_flag': whether to save simulated data to disk after completion {0 or 1} (default: 0)
 %     'overwrite_flag': whether to overwrite existing data files {0 or 1} (default: 0)
@@ -185,7 +186,7 @@ function [data,studyinfo,result] = dsSimulate(model,varargin)
 %
 % See also: dsGenerateModel, dsCheckModel, dsGetSolveFile, dsCheckData,
 %           dsVary2Modifications, dsCheckStudyinfo, dsCreateBatch
-% 
+%
 % Author: Jason Sherfey, PhD <jssherfey@gmail.com>
 % Copyright (C) 2016 Jason Sherfey, Boston University, USA
 
@@ -263,6 +264,7 @@ options=dsCheckOptions(varargin,{...
   'compile_flag',0,{0,1},... % exist('codegen')==6, whether to compile using coder instead of interpreting Matlab
   'sparse_flag',0,{0,1},... % whether to sparsify fixed variables before simulation
   'disk_flag',0,{0,1},...            % whether to write to disk during simulation instead of storing in memory
+  'matCompatibility_flag',1,{0,1},...  % whether to save mat files in compatible mode, vs to prioritize > 2GB VARs
   'save_data_flag',0,{0,1},...  % whether to save simulated data
   'save_results_flag',0,{0,1},...  % whether to save results from simulated data
   'project_dir',pwd,[],...
@@ -1056,7 +1058,7 @@ end % in_parfor_loop_flag
 
       % save single data set and update studyinfo
       if options.save_data_flag
-        dsExportData(tmpdata,'filename',data_file,'format','mat','verbose_flag',options.verbose_flag);
+        dsExportData(tmpdata,'filename',data_file,'format','mat','matCompatibility_flag',options.matCompatibility_flag,'verbose_flag',options.verbose_flag);
         %studyinfo=dsUpdateStudy(studyinfo.study_dir,'process_id',sim_id,'status','finished','duration',duration,'solve_file',options.solve_file,'email',options.email,'verbose_flag',options.verbose_flag,'model',model,'simulator_options',options);
       end
 
