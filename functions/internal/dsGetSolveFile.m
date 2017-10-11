@@ -115,7 +115,7 @@ else
 end
 
 if ~strcmp(reportUI,'matlab') && ~strcmp(solve_file,'solve_ode.m')
-  wrn_fnc = warning('query', 'Octave:function-name-clash')
+  wrn_fnc = warning('query', 'Octave:function-name-clash');
   if strcmp(wrn_fnc.state,'on')
     fprintf('Switching off ''function-name-clash'' warnings because of solve_ode suffix.\n');
     warning('off', 'Octave:function-name-clash');
