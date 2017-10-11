@@ -1,4 +1,4 @@
-function exportData(data,varargin)
+function dsExportData(data,varargin)
 %EXPORTDATA - export DynaSim data structure in various formats.
 %
 % Usage:

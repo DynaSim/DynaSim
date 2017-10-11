@@ -112,12 +112,13 @@ elseif options.auto_gen_test_data_flag || options.unit_test_flag
 else
   % set default solve_file name
   solve_file=['solve_ode_' datestr(now,'yyyymmddHHMMSS_FFF') '.m'];
-  if ~strcmp(reportUI,'matlab')
-    wrn_fnc = warning('query', 'Octave:function-name-clash');
-    if strcmp(wrn_fnc.state,'on')
-      fprintf('Switching off ''function-name-clash'' warnings because of solve_ode suffix.\n')
-      warning('off', 'Octave:function-name-clash');
-    end
+end
+
+if ~strcmp(reportUI,'matlab') && ~strcmp(solve_file,'solve_ode.m')
+  wrn_fnc = warning('query', 'Octave:function-name-clash')
+  if strcmp(wrn_fnc.state,'on')
+    fprintf('Switching off ''function-name-clash'' warnings because of solve_ode suffix.\n');
+    warning('off', 'Octave:function-name-clash');
   end
 end
 
