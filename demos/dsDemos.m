@@ -263,10 +263,6 @@ dsPlot(data);
 dsPlot(data,'plot_type','rastergram');
 dsPlotFR(data); % examine how mean firing rate changes with Iapp and tauD
 
-if strcmp(reportUI,'octave')
-  pkg load statistics; % load Octave package to access pwelch function
-end
-
 dsPlot(data,'plot_type','power');
 
 % %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
