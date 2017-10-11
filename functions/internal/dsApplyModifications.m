@@ -69,10 +69,10 @@ function [output,modifications] = dsApplyModifications(model, modifications, var
 %       m.populations.equations
 %
 % See also: dsGenerateModel, dsSimulate, dsVary2Modifications
-% 
+%
 % Author: Jason Sherfey, PhD <jssherfey@gmail.com>
 % Copyright (C) 2016 Jason Sherfey, Boston University, USA
- 
+
 %% localfn output
 if ~nargin
   output = localfunctions; % output var name specific to this fn
@@ -127,7 +127,7 @@ end
 %% auto_gen_test_data_flag argout
 if options.auto_gen_test_data_flag
   argout = {output, modifications}; % specific to this function
-  
+
   dsUnitSaveAutoGenTestData(argin, argout);
 end
 
@@ -173,27 +173,27 @@ end
 % note: should be able to support {'(E,I)','(EK,EK2)',-80}
 if any(~cellfun(@isempty,regexp(modifications(:,1),'^\(.*\)$'))) || ...
    any(~cellfun(@isempty,regexp(modifications(:,2),'^\(.*\)$')))
- 
+
   % loop over modifications
   modifications_={};
   for i=1:size(modifications,1)
     % check namespace for ()
     namespaces=regexp(modifications{i,1},'[\w\.\-<>]+','match');
-    
+
     % check variable for ()
     variables=regexp(modifications{i,2},'[\w\.-]+','match');
-    
+
     if ischar(modifications{i,3})
-        
+
         % expand list of modifications
         for j=1:length(namespaces)
             for k=1:length(variables)
                 modifications_(end+1,1:3)={namespaces{j},variables{k},modifications{i,3}};
             end
         end
-        
+
     elseif isnumeric(modifications{i,3})
-        
+
         % check size of values matches number of namespaces, variables
         if isscalar(modifications{i,3}) % in case number of values is one
             modifications{i,3} = repmat(modifications{i,3},length(variables),length(namespaces));
@@ -214,14 +214,14 @@ if any(~cellfun(@isempty,regexp(modifications(:,1),'^\(.*\)$'))) || ...
                 end
             end
         end
-        
+
         % expand list of modifications
         for j=1:length(namespaces)
             for k=1:length(variables)
                 modifications_(end+1,1:3)={namespaces{j},variables{k},modifications{i,3}(k,j)};
             end
         end
-        
+
     end
 
   end
@@ -233,7 +233,7 @@ end
 %% auto_gen_test_data_flag argout
 if options.auto_gen_test_data_flag
   argout = {modifications}; % specific to this function
-  
+
   dsUnitSaveAutoGenTestDataLocalFn(argin, argout); % localfn
 end
 
@@ -263,21 +263,21 @@ end
 for i=1:size(mods,1)
   obj=mods{i,1}; % population name or connection source-target
   fld=mods{i,2}; % population name, size, or parameter name
-  
+
   if ~ischar(obj)
     error('modification must be applied to population name or connection source-target');
   end
-  
+
   if ~ischar(fld) %|| ~ismember(fld,{'name','size','parameters','mechanism_list','equations'})
     error('modification must be applied to population ''name'',''size'',or a parameter referenced by its name');
   end
-  
+
   % standardize connection object: convert target<-source to source->target
   if any(strfind(obj,'<-'))
     ind=strfind(obj,'<-');
     obj=[obj(ind(1)+2:end) '->' obj(1:ind(1)-1)];
   end
-  
+
   % check and adjust for mechanism-specific parameter identifier
 %   MECH='';
   if any(obj=='.') % OBJECT.MECH
@@ -294,7 +294,7 @@ for i=1:size(mods,1)
 %   if ~isempty(MECH)
 %     fld=[MECH '.' fld];
 %   end
-    
+
   val=mods{i,3}; % value for population name or size, or parameter to modify
   if ismember(obj,pop_names)
     type='populations';
@@ -306,9 +306,9 @@ for i=1:size(mods,1)
     warning('name of object to modify not found in populations or connections.');
     continue
   end
-  
+
   index=ismember(names,obj);
-  
+
   if strcmp(fld,'mechanism_list')
     % support --
     % 'E'    'mechanism_list'    '(iNa,iK)'
@@ -316,9 +316,9 @@ for i=1:size(mods,1)
     % 'E'    'mechanism_list'    '+(iK)'
     % 'E'    'mechanism_list'    '+iK'
     % 'E'    'mechanism_list'    'iK'
-    
+
     elems=regexp(val,'[\w@]+','match');
-    
+
     if strcmp(val(1),'+')
       % add mechanisms to existing list
       spec.(type)(index).mechanism_list=unique_wrapper(cat(2,spec.(type)(index).mechanism_list,elems),'stable');
@@ -367,7 +367,7 @@ for i=1:size(mods,1)
       pattern='^\w+\([a-zA-Z][\w,]*\)\s*='; % pattern for functions
       inds=regexp(lines,pattern,'once'); % indices to function statements
       inds=find(~cellfun(@isempty,inds));
-      
+
       % get index to the function statement to modify
       if strcmp(target,'FUNCTION')
         ind=inds(1);
@@ -383,7 +383,7 @@ for i=1:size(mods,1)
     % add escape character for using regular expression to match function statements
     target=strrep(target,'(','\(');
     target=strrep(target,')','\)');
-    
+
     % modify equations
     old=regexp(eqns,[target '\s*=[^;]+'],'match');
     if ~isempty(old)
@@ -398,7 +398,7 @@ for i=1:size(mods,1)
         if strcmp(pop_names{index},spec.connections(j).source)
           spec.connections(j).source=val;
         end
-        
+
         if strcmp(pop_names{index},spec.connections(j).target)
           spec.connections(j).target=val;
         end
@@ -426,7 +426,7 @@ end
 %% auto_gen_test_data_flag argout
 if options.auto_gen_test_data_flag
   argout = {spec}; % specific to this function
-  
+
   dsUnitSaveAutoGenTestDataLocalFn(argin, argout); % localfn
 end
 
@@ -451,12 +451,12 @@ if size(modifications,2)==4
     if strcmp(modifications{i,2},'parameters')
       % shift parameter name to 2nd column
       modifications{i,2}=modifications{i,3};
-      
+
       % shift parameter value to 3rd column
       modifications{i,3}=modifications{i,4};
     end
   end
-  
+
   % remove fourth column
   modifications=modifications(:,1:3);
 end
