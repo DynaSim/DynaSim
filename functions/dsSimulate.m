@@ -134,7 +134,11 @@ function [data,studyinfo,result] = dsSimulate(model,varargin)
 %   % plot how mean firing rate varies with parameter
 %   dsPlotFR(data,'bin_size',30,'bin_shift',10); % bin_size and bin_shift in [ms]
 %
-% Example 5: Sparse Pyramidal-Interneuron-Network-Gamma rhythm with rastergram
+% Example 5: simulate predefined Hodgkin-Huxley neuron with Iapp=10
+%   data = dsSimulate('HH','vary',{'HH','Iapp',10});
+%   figure; plot(data.time,data.HH_V);
+%
+% Example 6: Sparse Pyramidal-Interneuron-Network-Gamma rhythm with rastergram
 %   % define equations of cell model (same for E and I populations)
 %   eqns={
 %     'dv/dt=Iapp+@current/Cm+noise*randn(1,N_pop)*sqrt(dt)/dt';
