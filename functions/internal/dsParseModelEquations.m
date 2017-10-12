@@ -109,34 +109,35 @@ end
 
 % check if input is a filename
 if ischar(text) && exist(text,'file')
-  [~,name,ext]=fileparts2(text);
-  switch ext
-    case '.m'
-      model=feval(name); % evaluate model-creating function and return model
-      return;
-    case '.mat' % todo: uncomment once dsImportModel supports loading .mat
-      %model=dsImportModel(text);
-      %return;
-  end
-  
-  % load equations from file
-  [text,res]=readtext(text,'\n','%'); % text: cell array of strings, one element per line in text file
-  
-  % remove all lines without text
-  text=text(res.stringMask);
-  
-  % remove leading/trailing white space
-  text=strtrim(text);
-  
-  % end each line with semicolon
-  for i=1:length(text)
-    if ~isequal(text{i}(end),';')
-      text{i}(end+1)=';';
-    end
-  end
-  
-  % concatenate into a single string
-  text=[text{:}]; % concatenate text from all lines
+  text = dsReadText(text);
+%   [~,name,ext]=fileparts2(text);
+%   switch ext
+%     case '.m'
+%       model=feval(name); % evaluate model-creating function and return model
+%       return;
+%     case '.mat' % todo: uncomment once dsImportModel supports loading .mat
+%       %model=dsImportModel(text);
+%       %return;
+%   end
+%   
+%   % load equations from file
+%   [text,res]=readtext(text,'\n','%'); % text: cell array of strings, one element per line in text file
+%   
+%   % remove all lines without text
+%   text=text(res.stringMask);
+%   
+%   % remove leading/trailing white space
+%   text=strtrim(text);
+%   
+%   % end each line with semicolon
+%   for i=1:length(text)
+%     if ~isequal(text{i}(end),';')
+%       text{i}(end+1)=';';
+%     end
+%   end
+%   
+%   % concatenate into a single string
+%   text=[text{:}]; % concatenate text from all lines
 end
 
 % split string into cell array of lines delimited by semicolon
