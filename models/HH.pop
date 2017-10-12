@@ -1,0 +1,1 @@
+HH: dV/dt=(@current+Iapp)/Cm; {iNa,iK,ileak}@current; V(0)=-65; Cm=1; Iapp=0
