@@ -101,6 +101,9 @@ function spec = dsCheckSpecification(specification, varargin)
 %   - Example 6: standardize specification with everything in equation string
 %       s.pops.equations='E:dv[10]/dt=@M+I; {iNa,iK}@M; I=10';
 %       s=dsCheckSpecification(s)
+% 
+%     Example 7: standardize equations from predefined population model
+%       specification=dsCheckSpecification('HH');
 %
 % See also: dsGenerateModel, dsCheckModel
 % 
@@ -199,11 +202,21 @@ if isfield(spec,'compartments')
   spec=rmfield(spec,'compartments');
 end
 
-% special case: split equations with '[...][...]...[...]' into multiple populations
+% special cases of equation specification: 
 for i=1:length(spec.populations)
   eqn=spec.populations(i).equations;
   if ~isempty(eqn) && ischar(eqn)
-    if ~isempty(regexp(eqn,'\[[a-z_A-Z].*\]','match','once'))
+    % check for predefined population equations
+    if exist([eqn '.eqns'],'file')
+      eqn=[eqn '.eqns'];
+    elseif exist([eqn '.pop'],'file')
+      eqn=[eqn '.pop'];
+    end
+    if exist(eqn,'file')
+      % load equations from file
+      spec.populations(i).equations=dsReadText(eqn);
+    elseif ~isempty(regexp(eqn,'\[[a-z_A-Z].*\]','match','once'))
+      % split equations with '[...][...]...[...]' into multiple populations
       % create extra population
       tmp=regexp(eqn(2:end-1),'\],?\s*\[','split');
       spec.populations(i).equations=tmp{1};
@@ -261,8 +274,11 @@ for i=1:length(spec.populations)
       
       % store name in specification
       name=regexp(name,'^(\w+):','tokens','once');
-      spec.populations(i).name=name{1};
       spec.populations(i).equations=eqn;
+      if strcmp(spec.populations(i).name,sprintf('pop%g',i))
+        % replace default name with the name from equations
+        spec.populations(i).name=name{1};
+      end      
     end
     
     % extract size from equations if present (eg, v[4]'=.., dv[4]/dt=...)
@@ -437,6 +453,8 @@ for i=1:length(spec.populations)
             precision=8; % number of digits allowed for user-supplied values
             found_value = toString(vals{strcmp(found_word,keys)},precision);
             eqn=[eqn sprintf(' %s=%s;',found_word,found_value)];
+          else
+            keyboard;
           end
         end
         spec.populations(i).equations=eqn;
