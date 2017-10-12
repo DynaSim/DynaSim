@@ -1,0 +1,5 @@
+% Gaussian noise with time scaling
+noise_amp=1000 % units: 1/sqrt(ms)
+Inoise(t) = noise_amp.*randn(1,N_pop).*sqrt(dt)
+@current += Inoise(t)
+
