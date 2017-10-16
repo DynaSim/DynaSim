@@ -1,6 +1,6 @@
 function out = rng_wrapper(in,varargin)
 % Purpose: call the Matlab or Octave specific unique function
-% 
+%
 % Author: Jason Sherfey, PhD <jssherfey@gmail.com>
 % Copyright (C) 2016 Jason Sherfey, Boston University, USA
 
