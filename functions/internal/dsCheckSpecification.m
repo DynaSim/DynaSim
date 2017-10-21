@@ -425,6 +425,8 @@ for i=1:length(spec.populations)
     % because that returns MECH_PARAM, whereas we now support MECH.PARAM.
     
     % incorporate user-supplied parameters in pop equations if used in them
+    % note: this is necessary for proper substitution when the master
+    % equations are parsed in dsGenerateModel.
     if ~isempty(spec.populations(i).parameters)
       keys=spec.populations(i).parameters(1:2:end);
       vals=spec.populations(i).parameters(2:2:end);
@@ -453,8 +455,8 @@ for i=1:length(spec.populations)
             precision=8; % number of digits allowed for user-supplied values
             found_value = toString(vals{strcmp(found_word,keys)},precision);
             eqn=[eqn sprintf(' %s=%s;',found_word,found_value)];
-          else
-            keyboard;
+%           else
+%             keyboard;
           end
         end
         spec.populations(i).equations=eqn;
