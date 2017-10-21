@@ -17,11 +17,11 @@ netcon = ones(N_pre,N_post) % default connectivity matrix (all-to-all)
 %BMg(X) = 1./(1+exp(-.062*X)*1.5/3.57)		% sigmoidal magnesium block from [Methods in Neuronal Modeling]
 BMg(X) = (1.50265./(1+0.33*exp(X./(-16)))) 	% sigmoidal magnesium block from [DS00], increases gradually to 1.50265 with postsynaptic voltage above -50mV (i.e., any Vpost EPSPs)
 NT(X) = Tmax./(1+exp(-(X-Vpp)/Kp)) 		% sigmoidal neurotransmitter concentration [T] increasing rapidly to Tmax with presynaptic voltage above 0mV (i.e., Vpre spike)
-INMDA(X,s) = gNMDA.*BMg(X).*(s*netcon).*(X-ENMDA) % post-synaptic NMDA current
+INMDA(X,s) = -gNMDA.*BMg(X).*(s*netcon).*(X-ENMDA) % post-synaptic NMDA current
 
 % ODEs and ICs
 s' = NT(X_pre).*(1-s)/tauNMDAr-s/tauNMDA 	% first-order kinetics for two-state (open/closed) scheme. [s]=fraction of receptors in open state
 s(0) = IC+IC_noise*rand(1,N_pre)
 
 % linkers
-@current += -INMDA(X_post,s)
+@current += INMDA(X_post,s)
