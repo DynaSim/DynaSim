@@ -82,11 +82,6 @@ if ~isempty(options.status) && ~isempty(studyinfo.simulations)
       end
       % obtain and record machine info
       try
-        try
-          user_name = getenv('USER');
-        catch
-          user_name = '';
-        end
         [~,kernel] = system('uname -v');
         [~,OS]     = system('uname -o');
        [~,home]    = system('echo $HOME');  % home directory
@@ -108,7 +103,6 @@ if ~isempty(options.status) && ~isempty(studyinfo.simulations)
        machine_info.operating_system=strtrim(OS);
        machine_info.kernel=strtrim(kernel);
        machine_info.home_dir=strtrim(home); 
-       machine_info.user_name=user_name; 
        studyinfo.simulations(sim_ind).machine_info=machine_info;
       end
       % set duration
