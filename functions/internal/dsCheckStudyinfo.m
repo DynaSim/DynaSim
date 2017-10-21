@@ -38,6 +38,7 @@ function studyinfo = dsCheckStudyinfo(studyinfo, varargin)
 %                           .machine_info.operating_system
 %                           .machine_info.kernel
 %                           .machine_info.home_dir
+%                           .machine_info.user_name
 %            .simulations(k).modified_model_file
 %            .simulations(k).simulator_options
 %            .simulations(k).solve_file
