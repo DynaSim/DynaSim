@@ -140,7 +140,11 @@ end
 % parameter check: var=expression (string or numeric)
 %pattern='^(([\w\.]+)|(\[\w+\]))\s*=\s*((''.*'')|(\[?[\d\.-(Inf)(inf)]+\]?))$';
 % TODO: support scientific notation
-pattern='^(([\w\.]+)|(\[\w+\]))\s*=\s*((''.*'')|(\[?[\d\.\-(Inf)(inf)]+\]?)|(\d+e[\-\+]?\d+))$';
+if strcmp(reportUI,'matlab')
+  pattern='^(([\w\.]+)|(\[\w+\]))\s*=\s*((''.*'')|(\[?[\d\.-(Inf)(inf)]+\]?)|(\d+e[\-\+]?\d+))$';
+else
+  pattern='^(([\w\.]+)|(\[\w+\]))\s*=\s*((''.*'')|(\[?[\d\.\-(Inf)(inf)]+\]?)|(\d+e[\-\+]?\d+))$';
+end
 if isempty(class) && ~isempty(regexp(string,pattern,'once'))
   class='parameter';
 end
