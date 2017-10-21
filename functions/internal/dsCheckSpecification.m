@@ -760,6 +760,16 @@ function spec = backward_compatibility(spec, varargin)
     spec=rmfield(spec,'cons');
   end
 
+  if isfield(spec,'edges')
+    spec.connections=spec.edges;
+    spec=rmfield(spec,'edges');
+  end
+  
+  if isfield(spec,'links')
+    spec.connections=spec.links;
+    spec=rmfield(spec,'links');
+  end
+  
   if isfield(spec,'comps')
     spec.compartments=spec.comps;
     spec=rmfield(spec,'comps');
