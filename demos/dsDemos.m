@@ -178,12 +178,19 @@ xlabel('time (ms)'); ylabel('membrane potential (mV)'); title('Hodgkin-Huxley ne
 % Mechanisms can be custom built; however, DynaSim does come pakaged with
 % some common ones like popular ion currents (see <dynasim>/models).
 
-% Example of a bursting neuron model using three active current mechanisms:
-eqns='dv/dt=5+@current; {iNaF,iKDR,iM}; gNaF=100; gKDR=5; gM=1.5; v(0)=-70';
-data=dsSimulate(eqns, 'tspan',[0 200], 'study_dir','demo_hh_3');
+% Example of a bursting neuron model using three predefined current mechanisms:
+eqns='dv/dt=Iapp+@current; {iNaF,iKDR,iM}; Iapp=5; gNaF=100; gKDR=5; gM=1.5; v(0)=-70';
+data=dsSimulate(eqns, 'tspan',[0 200]);
 
 figure; plot(data.time,data.(data.labels{1}))
-xlabel('time (ms)'); ylabel('membrane potential (mV)'); title('Intrinsically Bursting neuron')
+xlabel('time (ms)'); ylabel('membrane potential (mV)'); title('Intrinsically Bursting neuron using predefined mechanisms')
+
+% Example of the same bursting neuron using a predefined population
+eqns='IB'; % file name of predefined model of intrinsically bursting (IB) neuron
+data=dsSimulate(eqns, 'vary',{'IB','Iapp',5}, 'tspan',[0 200]);
+
+figure; plot(data.time,data.(data.labels{1}))
+xlabel('time (ms)'); ylabel('membrane potential (mV)'); title('Predefined Intrinsically Bursting neuron')
 
 % %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% BUILDING LARGE MODELS WITH MULTIPLE POPULATIONS AND CONNECTIONS
@@ -193,7 +200,7 @@ xlabel('time (ms)'); ylabel('membrane potential (mV)'); title('Intrinsically Bur
 
 % define equations of cell model (same for E and I populations)
 eqns={
-  'dv/dt=Iapp+@current+noise*randn(1,N_pop)'
+  'dv/dt=Iapp+@current+noise*randn(1,N_pop); Iapp=0; noise=0'
   'monitor iGABAa.functions, iAMPA.functions'
 };
 % Tip: monitor all functions of a mechanism using: monitor MECHANISM.functions
@@ -337,3 +344,67 @@ dsPlot(data);
 vary={'E','Iapp',[0 10 20]};
 data=dsSimulate(s, 'compile_flag',1, 'parallel_flag',1, 'vary', vary, 'study_dir','demo_sPING_3_compile_parallel');
 dsPlot(data);
+
+% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Script-based modeling using predefined objects without writing equations.
+% swapping out population models:
+
+T=[0 200]; % ms, [beg end], simulation time limits
+
+s=[];
+s.populations.size=5;
+s.populations.mechanism_list={'stim','noise'}; 
+
+% Classic Hodgkin-Huxley neurons
+s.populations.equations='HH';
+s.populations.parameters={'stim_amp',10,'noise_amp',1e3};
+dsPlot(dsSimulate(s,'time_limits',T));
+
+% Intrinsically-Bursting neurons
+s.populations.equations='IB';
+s.populations.parameters={'stim_amp',5,'noise_amp',1e3};
+dsPlot(dsSimulate(s,'time_limits',T));
+
+% Morris-Lecar neurons
+s.populations.equations='ML';
+s.populations.parameters={'stim_amp',100,'noise_amp',1e3};
+dsPlot(dsSimulate(s,'time_limits',T));
+
+% FitzHugh-Nagumo neurons
+s.populations.equations='FHN';
+s.populations.parameters={'stim_amp',.5,'noise_amp',10};
+dsPlot(dsSimulate(s,'time_limits',T));
+
+% Leaky integrate-and-fire neurons
+s.populations.equations='LIF';
+s.populations.parameters={'stim_amp',10,'noise_amp',1e3};
+dsPlot(dsSimulate(s,'time_limits',T));
+
+% Izhikevich neurons
+s.populations.equations='Izh';
+s.populations.parameters={'stim_amp',200,'noise_amp',2e4};
+dsPlot(dsSimulate(s,'time_limits',T));
+
+% Wilson-Cowan oscillators
+s.populations.equations='WC';
+s.populations.parameters={'stim_amp',0,'noise_amp',10};
+dsPlot(dsSimulate(s,'time_limits',T));
+
+% Regular Spiking (RS) neuron from Kramer 2008:
+s.populations.equations='RS';
+s.populations.parameters={'stim_amp',5,'noise_amp',1e3};
+dsPlot(dsSimulate(s,'time_limits',T));
+
+% Layer 2/3 somatosensory RS/FS network (adapted from Kramer 2008):
+s=[];
+s.populations(1).equations='RS';              % excitatory (E) population
+s.populations(1).mechanism_list={'stim'};     % tonic stimulation
+s.populations(1).parameters={'stim_amp',10};  % amplitude of stimulation
+s.populations(2).equations='FS';              % inhibitory (I) population
+s.connections(1).direction='RS->FS';          % E->I connection
+s.connections(1).mechanism_list='iAMPA';      % AMPA synapse
+s.connections(1).parameters={'gSYN',.5};      % synaptic weight
+s.connections(2).direction='FS->RS';          % I->E connection
+s.connections(2).mechanism_list='iGABAa';     % GABAa synapse
+s.connections(2).parameters={'gSYN',1,'tauD',10}; % strength and time constant of inhibition
+dsPlot(dsSimulate(s,'time_limits',T));
