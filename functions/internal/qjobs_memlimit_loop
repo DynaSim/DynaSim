@@ -5,7 +5,7 @@ cd $batchdir
 mkdir -p pbsout
 set joblist = `cat scriptlist.txt`
 
-set h_vmem = $2
+set mem_total = $2
 
 foreach job ( $joblist )
   echo $job
@@ -15,8 +15,8 @@ foreach job ( $joblist )
   if (-e pbsout/$job.err) then
     rm -f pbsout/$job.err
   endif
-  echo "qmatjob_loop $batchdir $job" '|' qsub -V -hard -l 'h_vmem='$h_vmem -cwd -N $1_$job -o pbsout/$job.out -e pbsout/$job.err
-  echo "qmatjob_loop $batchdir $job" | qsub -V -hard -l 'h_vmem='$h_vmem -cwd -N $1_$job -o pbsout/$job.out -e pbsout/$job.err
+  echo "qmatjob_loop $batchdir $job" '|' qsub -V -hard -l 'mem_total='$mem_total -cwd -N $1_$job -o pbsout/$job.out -e pbsout/$job.err
+  echo "qmatjob_loop $batchdir $job" | qsub -V -hard -l 'mem_total='$mem_total -cwd -N $1_$job -o pbsout/$job.out -e pbsout/$job.err
   sleep 0.25 #is this the lower limit?
 end
 
