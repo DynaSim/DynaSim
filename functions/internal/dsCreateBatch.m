@@ -29,7 +29,7 @@ function [studyinfo, cmd] = dsCreateBatch(base_model,modifications_set,varargin)
 % Dependencies: dsSetupStudy, dsUpdateStudy
 %
 % See also: dsGenerateModel, dsSimulate, dsCheckStudyinfo, dsVary2Modifications
-% 
+%
 % Author: Jason Sherfey, PhD <jssherfey@gmail.com>
 % Copyright (C) 2016 Jason Sherfey, Boston University, USA
 
@@ -133,7 +133,7 @@ study_dir_name=[study_dir_name study_dir_suffix];
 
 if ~options.auto_gen_test_data_flag && ~options.unit_test_flag
   main_batch_dir = fullfile(strtrim(home),'batchdirs');
-  
+
   % create main batch_dir
   if ~exist(main_batch_dir,'dir')
     mkdir(main_batch_dir);
@@ -193,7 +193,7 @@ addpaths=cat(2,dynasim_path,regexp(genpath(dynasim_functions),':','split'));
 addpaths=cat(2,addpaths,fullfile(dynasim_path,'models'));
 %addpaths=regexp(genpath(dynasim_path),':','split');
 if ~isempty(mech_paths)
-  addpaths=cat(2,addpaths,mech_paths); 
+  addpaths=cat(2,addpaths,mech_paths);
   addpaths=unique(addpaths);
 end
 
@@ -333,13 +333,13 @@ if ~options.one_solve_file_flag
     studyinfo.simulations(sim).error_log='';
 
   end %sim
-  
+
   % copy studyinfo file to batch_dir for each simulation
   for sim=1:num_simulations
     this_study_file=fullfile(batch_dir,sprintf('studyinfo_%g.mat',sim));
 
     if sim==1
-      save(this_study_file,'studyinfo');
+      save(this_study_file,'studyinfo','-v7');
       first_study_file=this_study_file;
     else
       % use copyfile() after saving first b/c >10x faster than save()
@@ -364,7 +364,7 @@ else %one_solve_file_flag
 
   % copy studyinfo file to batch_dir since more information now
   batch_study_file = fullfile(batch_dir,'studyinfo.mat');
-  save(batch_study_file,'studyinfo');
+  save(batch_study_file,'studyinfo','-v7');
 end
 
 %% update studyinfo on disk
@@ -491,7 +491,7 @@ end
 
     % create job file
     fjob=fopen(job_file,'wt');
-    
+
     % load studyinfo using helper function to avoid busy file errors
     %fprintf(fjob,'studyinfo=dsCheckStudyinfo(''%s'',''process_id'',%g);\n',study_file,sim_ids(1), varargin{:});
     %fprintf(fjob,'load(''%s'',''studyinfo'');\n',study_file);
@@ -524,7 +524,7 @@ end
         fprintf(fjob,'addpath %s\n',addpaths{p});
       end
     end
-    
+
     % loop over and run simulations in this job
     if options.parallel_flag
       % set parallel computing options
