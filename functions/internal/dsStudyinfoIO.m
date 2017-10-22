@@ -13,7 +13,7 @@ function studyinfo = dsStudyinfoIO(studyinfo,study_file,id,verbose_flag)
 %   - studyinfo: (empty [] for loading) or (DynaSim studyinfo structure to save)
 %   - study_file: name of file to load or save
 %   - id: process identifier for lock file name [optional]
-% 
+%
 % Author: Jason Sherfey, PhD <jssherfey@gmail.com>
 % Copyright (C) 2016 Jason Sherfey, Boston University, USA
 
@@ -169,7 +169,7 @@ while ~done
               end
             end
             % save study_file
-            save(study_file,'studyinfo');
+            save(study_file,'studyinfo','-v7');
             %save(study_file,'studyinfo','-v7.3');
         end
         done=1; break;

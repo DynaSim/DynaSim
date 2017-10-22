@@ -186,7 +186,7 @@ if options.save_parameters_flag
   if options.verbose_flag
     fprintf('Saving params.mat\n');
   end
-  save(param_file_path,'p');
+  save(param_file_path,'p','-v7');
 else
   % insert parameter values into model expressions
   model=dsPropagateParameters(model,'action','substitute', varargin{:});

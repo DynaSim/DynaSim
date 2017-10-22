@@ -24,7 +24,7 @@ function studyinfo = dsUpdateStudy(study_dir,varargin)
 % TODO: this multiple things in this function should be split up into individual functions
 %
 % See also: dsCheckStudyinfo, dsSetupStudy, dsSimulate, dsCreateBatch, dsAnalyzeStudy
-% 
+%
 % Author: Jason Sherfey, PhD <jssherfey@gmail.com>
 % Copyright (C) 2016 Jason Sherfey, Boston University, USA
 
@@ -75,7 +75,7 @@ if ~isempty(options.status) && ~isempty(studyinfo.simulations)
       if isstruct(options.model)
         model=options.model;
         model_file=studyinfo.simulations(sim_ind).modified_model_file;
-        save(model_file,'model','-v7.3');
+        save(model_file,'model','-v7');
         if options.verbose_flag
           fprintf('model saved to %s\n',model_file);
         end
@@ -85,7 +85,7 @@ if ~isempty(options.status) && ~isempty(studyinfo.simulations)
         [~,kernel] = system('uname -v');
         [~,OS]     = system('uname -o');
        [~,home]    = system('echo $HOME');  % home directory
-       [zzz, computername] = system('hostname');           % Uses linux system command to get the machine name of host. 
+       [zzz, computername] = system('hostname');           % Uses linux system command to get the machine name of host.
        [zzz, meminfo]      = system('cat /proc/meminfo');  % Uses linux system command to get a report on system memory
        total_memory        = textscan(meminfo, '%*s %s %s', 1);  % Parses the memory report for 2nd and 3rd space-delimited items of first line: memory amount.
        total_memory        = [total_memory{1}{1} ' ' total_memory{2}{1}];  % Extracts the info from cell array to create char array.
@@ -102,7 +102,7 @@ if ~isempty(options.status) && ~isempty(studyinfo.simulations)
        machine_info.num_cores=feature('numcores');          % Matlab command to get the number of processor cores on current host machine.
        machine_info.operating_system=strtrim(OS);
        machine_info.kernel=strtrim(kernel);
-       machine_info.home_dir=strtrim(home); 
+       machine_info.home_dir=strtrim(home);
        studyinfo.simulations(sim_ind).machine_info=machine_info;
       end
       % set duration
@@ -249,7 +249,7 @@ dsStudyinfoIO(studyinfo.simulations(sim_ind),study_dir,options.process_id,option
 %          [~,kernel] = system('uname -v');
 %          [~,OS]     = system('uname -o');
 %         [~,home]    = system('echo $HOME');  % home directory
-%         [zzz, computername] = system('hostname');           % Uses linux system command to get the machine name of host. 
+%         [zzz, computername] = system('hostname');           % Uses linux system command to get the machine name of host.
 %         [zzz, meminfo]      = system('cat /proc/meminfo');  % Uses linux system command to get a report on system memory
 %         total_memory        = textscan(meminfo, '%*s %s %s', 1);  % Parses the memory report for 2nd and 3rd space-delimited items of first line: memory amount.
 %         total_memory        = [total_memory{1}{1} ' ' total_memory{2}{1}];  % Extracts the info from cell array to create char array.
