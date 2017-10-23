@@ -811,12 +811,14 @@ if ~isempty(model.monitors) && ~strcmp(reportUI,'matlab') && options.disk_flag==
 
   % add indexes to state variables in monitors
   for i=1:length(monitor_name)
-    % hacks to vectorize the expression:
-    monitor_vectorized_expression = strrep(monitor_expression{i},'*','.*');
-    monitor_vectorized_expression = strrep(monitor_vectorized_expression,'..*','.*');
+    % hacks to vectorize expression:
     monitor_vectorized_expression = dsStrrep(monitor_vectorized_expression,'t','T');
-    monitor_vectorized_expression = dsStrrep(monitor_vectorized_expression,'rand','rand(size(T))');
-    monitor_vectorized_expression = dsStrrep(monitor_vectorized_expression,'randn','randn(size(T))');
+    monitor_vectorized_expression = dsStrrep(monitor_vectorized_expression,'(1,Npop)','(length(T),Npop)');
+    monitor_vectorized_expression = dsStrrep(monitor_vectorized_expression,'(1,N_pop)','(length(T),N_pop)');
+    monitor_vectorized_expression = dsStrrep(monitor_vectorized_expression,'(1,Npre)','(length(T),Npre)');
+    monitor_vectorized_expression = dsStrrep(monitor_vectorized_expression,'(1,N_pre)','(length(T),N_pre)');
+    monitor_vectorized_expression = dsStrrep(monitor_vectorized_expression,'(1,Npost)','(length(T),Npost)');
+    monitor_vectorized_expression = dsStrrep(monitor_vectorized_expression,'(1,N_post)','(length(T),N_post)');
     % write monitors to solver function
     fprintf(fid,'%s=%s;\n',monitor_name{i},monitor_vectorized_expression);
   end
