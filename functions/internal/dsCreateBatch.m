@@ -405,32 +405,29 @@ else % on cluster with qsub
     end
 
     if options.parallel_flag
-      warning('jobs in the cluster use a single thread')
-    end
-
-    if strcmp(options.qsub_mode, 'array') && ~options.one_solve_file_flag
-      % TODO: remove old error and output files; put e and o in their own dirs
-      cmd = sprintf('echo ''%s/qsub_jobs_array %s sim_job'' | qsub -V -hard -l ''h_vmem=%s'' -wd %s -N %s_sim_job -t 1-%i',...
-        dsFnPath, batch_dir, options.memory_limit, batch_dir, batch_dir_name, num_jobs);
-    elseif strcmp(options.qsub_mode, 'array') && options.one_solve_file_flag
-      [~, job_filename] = fileparts2(job_file); %remove path and extension
-      cmd = sprintf('echo ''%s/qsub_jobs_array_one_file %s %s'' | qsub -V -hard -l ''h_vmem=%s'' -wd %s -N %s_sim_job -t 1-%i:%i',...
-        dsFnPath, batch_dir, job_filename, options.memory_limit, batch_dir, batch_dir_name, num_simulations, options.sims_per_job);
-      % NOTE: using num_simulations, not num_jobs, since the job_file will
-      %   determine it's own sims to run
-    elseif strcmp(options.qsub_mode, 'loop')
-      if strcmp(reportUI,'matlab')
-        ui_command = 'matlab -nodisplay -singleCompThread -r';
-        l_directives = ['mem_total=',options.memory_limit];
-      else
-        ui_command = 'octave-cli --eval';
-        l_directives = ['centos7=TRUE mem_total=',options.memory_limit];
+      cmd=sprintf('qmatjobs_pct %s %s %g',batch_dir_name,options.memory_limit,options.num_cores);
+      %status=system('which qmatjobs_pct');
+    else
+      if strcmp(options.qsub_mode, 'array') && ~options.one_solve_file_flag
+        % TODO: remove old error and output files; put e and o in their own dirs
+        cmd = sprintf('echo ''%s/qmatjob_array %s sim_job'' | qsub -V -hard -l ''h_vmem=%s'' -wd %s -N %s_sim_job -t 1-%i',...
+          dsFnPath, batch_dir, options.memory_limit, batch_dir, batch_dir_name, num_jobs);
+      elseif strcmp(options.qsub_mode, 'array') && options.one_solve_file_flag
+        [~, job_filename] = fileparts2(job_file); %remove path and extension
+        cmd = sprintf('echo ''%s/qmatjob_array_one_file %s %s'' | qsub -V -hard -l ''h_vmem=%s'' -wd %s -N %s_sim_job -t 1-%i:%i',...
+          dsFnPath, batch_dir, job_filename, options.memory_limit, batch_dir, batch_dir_name, num_simulations, options.sims_per_job);
+        % NOTE: using num_simulations, not num_jobs, since the job_file will
+        %   determine it's own sims to run
+      elseif strcmp(options.qsub_mode, 'loop')
+        cmd = sprintf('%s/qmatjobs_memlimit_loop %s %s',dsFnPath, batch_dir_name,options.memory_limit);
       end
-      cmd = sprintf('%s/qsub_jobs_loop %s %s %s',dsFnPath,batch_dir_name,ui_command,l_directives);
+      %status=system('which qmatjobs_memlimit');
     end
 
     % add shell script to linux path if not already there
-    setenv('PATH', [getenv('PATH') ':' dynasim_functions ':' fullfile(dynasim_functions, 'internal')]);
+    %if status~=0
+      setenv('PATH', [getenv('PATH') ':' dynasim_functions ':' fullfile(dynasim_functions, 'internal')]);
+    %end
 
     if options.verbose_flag
       fprintf('Submitting cluster jobs with shell command: "%s"\n',cmd);
