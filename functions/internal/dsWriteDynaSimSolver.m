@@ -811,14 +811,9 @@ if ~isempty(model.monitors) && ~strcmp(reportUI,'matlab') && options.disk_flag==
 
   % add indexes to state variables in monitors
   for i=1:length(monitor_name)
-    % hacks to vectorize expression:
-    monitor_vectorized_expression = dsStrrep(monitor_vectorized_expression,'t','T');
-    monitor_vectorized_expression = dsStrrep(monitor_vectorized_expression,'(1,Npop)','(length(T),Npop)');
-    monitor_vectorized_expression = dsStrrep(monitor_vectorized_expression,'(1,N_pop)','(length(T),N_pop)');
-    monitor_vectorized_expression = dsStrrep(monitor_vectorized_expression,'(1,Npre)','(length(T),Npre)');
-    monitor_vectorized_expression = dsStrrep(monitor_vectorized_expression,'(1,N_pre)','(length(T),N_pre)');
-    monitor_vectorized_expression = dsStrrep(monitor_vectorized_expression,'(1,Npost)','(length(T),Npost)');
-    monitor_vectorized_expression = dsStrrep(monitor_vectorized_expression,'(1,N_post)','(length(T),N_post)');
+    % hacks to vectorize expression in Octave:
+    monitor_vectorized_expression = dsStrrep(monitor_expression{i},'t','T');
+    monitor_vectorized_expression = strrep(monitor_vectorized_expression,'1,p.pop','length(T),p.pop');
     % write monitors to solver function
     fprintf(fid,'%s=%s;\n',monitor_name{i},monitor_vectorized_expression);
   end
