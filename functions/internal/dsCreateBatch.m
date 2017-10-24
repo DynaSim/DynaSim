@@ -420,10 +420,10 @@ else % on cluster with qsub
       %   determine it's own sims to run
     elseif strcmp(options.qsub_mode, 'loop')
       if strcmp(reportUI,'matlab')
-        ui_command = 'matlab -nodisplay -singleCompThread -r';
+        ui_command = '"matlab -nodisplay -singleCompThread -r"';
         l_directives = ['-l mem_total=',options.memory_limit];
       else
-        ui_command = 'octave-cli --eval';
+        ui_command = '"octave-cli --eval"';
         l_directives = ['-l centos7=TRUE mem_total=',options.memory_limit];
       end
       cmd = sprintf('%s/qsub_jobs_loop %s ''%s'' ''%s''',dsFnPath,batch_dir_name,ui_command,l_directives);
