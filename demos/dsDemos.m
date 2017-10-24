@@ -329,6 +329,11 @@ dsSimulate(eqns, 'save_data_flag',1, 'study_dir','demo_cluster_4','compile_flag'
 % take several seconds to minutes; however, it only compiles the first time
 % it is run and is significantly faster on subsequent runs.
 
+eqns={
+  'dv/dt=Iapp+@current+noise*randn(1,N_pop); Iapp=0; noise=0'
+  'monitor iGABAa.functions, iAMPA.functions'
+};
+
 data=dsSimulate(s, 'compile_flag',1, 'study_dir','demo_sPING_3_compile');
 dsPlot(data);
 
@@ -336,7 +341,7 @@ dsPlot(data);
 data=dsSimulate(s, 'compile_flag',1, 'study_dir','demo_sPING_3_compile');
 dsPlot(data);
 
-% Combine compilation and parallelization to maxmize computatinal speed locally
+% Combine compilation and parallelization to maximize computational speed locally
 vary={'E','Iapp',[0 10 20]};
 data=dsSimulate(s, 'compile_flag',1, 'parallel_flag',1, 'vary', vary, 'study_dir','demo_sPING_3_compile_parallel');
 dsPlot(data);
@@ -349,7 +354,7 @@ T=[0 200]; % ms, [beg end], simulation time limits
 
 s=[];
 s.populations.size=5;
-s.populations.mechanism_list={'stim','noise'}; 
+s.populations.mechanism_list={'stim','noise'};
 
 % Classic Hodgkin-Huxley neurons
 s.populations.equations='HH';
