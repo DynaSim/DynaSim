@@ -462,7 +462,9 @@ end %state_variables
 
 %% MONITORS
 if ~isempty(model.monitors)
-  fprintf(fid,'\n%% MONITORS:\n');
+  if strcmp(reportUI,'matlab') || options.disk_flag==1
+    fprintf(fid,'\n%% MONITORS:\n');
+  end
 
   monitor_names=fieldnames(model.monitors);
   monitor_expression=struct2cell(model.monitors);
@@ -557,7 +559,7 @@ if ~isempty(model.monitors)
       % print mon_last
       mon_last=sprintf('%s_last',monitor_names{i});
       fprintf(fid,'for i=1:numel(%s), fprintf(fileID,''%%g%s'',%s(i)); end\n',mon_last,separator,mon_last);
-    else
+    elseif strcmp(reportUI,'matlab')
       % preallocate monitors
       [~,~,pop_name] = dsGetPopSizeFromName(model,monitor_names{i});
       if options.save_parameters_flag
@@ -735,8 +737,9 @@ if options.downsample_factor==1 && options.disk_flag==0 % store every time point
   % conditionals;     % var(k,:)->var(k,:) or var(k)->var(k)
   print_conditional_update(fid,model.conditionals,index_nexts,state_variables)
 
-  % update_monitors;  % mon(:,k-1)->mon(k,:) or mon(k-1)->mon(k)
-  print_monitor_update(fid,model.monitors,index_nexts,state_variables, [], varargin{:});
+  if strcmp(reportUI,'matlab') % update_monitors;  % mon(:,k-1)->mon(k,:) or mon(k-1)->mon(k)
+    print_monitor_update(fid,model.monitors,index_nexts,state_variables, [], varargin{:});
+  end
 
   fprintf(fid,'  n=n+1;\n');
 else % store every downsample_factor time point in memory or on disk
@@ -775,8 +778,9 @@ else % store every downsample_factor time point in memory or on disk
   else            % store in memory
     % update_vars;    % var_last -> var(n,:) or var(n)
     print_var_update_last(fid,index_nexts,state_variables)
-    % update_monitors;% f(var_last) -> mon(n,:) or mon(n)
-    print_monitor_update(fid,model.monitors,index_nexts,state_variables, [], varargin{:});
+    if strcmp(reportUI,'matlab') % update_monitors;% f(var_last) -> mon(n,:) or mon(n)
+      print_monitor_update(fid,model.monitors,index_nexts,state_variables, [], varargin{:});
+    end
   end %disk_flag
 
   fprintf(fid,'  n=n+1;\n');
@@ -797,7 +801,24 @@ if ~isempty(delayinfo)
 end
 
 fprintf(fid,'end\n');
-fprintf(fid,'T=T(1:downsample_factor:ntime);\n');
+if ~isempty(model.monitors) && ~strcmp(reportUI,'matlab') && options.disk_flag==0 % computing monitors outside the solver loop
+  fprintf(fid,'%% ------------------------------------------------------------\n');
+  fprintf(fid,'%% Compute monitors:\n');
+  fprintf(fid,'%% ------------------------------------------------------------\n');
+
+  monitor_name=fieldnames(model.monitors);
+  monitor_expression=struct2cell(model.monitors);
+
+  % add indexes to state variables in monitors
+  for i=1:length(monitor_name)
+    % hacks to vectorize expression in Octave:
+    monitor_vectorized_expression = dsStrrep(monitor_expression{i},'t','T');
+    monitor_vectorized_expression = strrep(monitor_vectorized_expression,'1,p.pop','length(T),p.pop');
+    % write monitors to solver function
+    fprintf(fid,'%s=%s;\n',monitor_name{i},monitor_vectorized_expression);
+  end
+end
+fprintf(fid,'\nT=T(1:downsample_factor:ntime);\n');
 
 % cleanup
 if options.disk_flag==1
@@ -1031,7 +1052,6 @@ function print_monitor_update(fid,monitors,index_nexts,state_variables,index_las
     fprintf(fid,'  %s%s=%s;\n',monitor_name{i},monitor_index,monitor_expression{i});
   end
 end
-
 
 %{
 PSEUDOCODE:

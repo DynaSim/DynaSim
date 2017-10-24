@@ -80,7 +80,7 @@ eqns={
   'dv/dt=(k*(v-vr)*(v-vt)-u+I(t))/C; v(0)=vr'
   'du/dt=a*(b*(v-vr)-u); u(0)=0'
   'if(v>vpeak)(v=c; u=u+d)'
-  'I(t)=Iapp*(t>ton&t<toff)*(1+.5*rand)' % define applied input using reserved variables 't' for time and 'dt' for fixed time step of numerical integration
+  'I(t)=Iapp*(t>ton&t<toff).*(1+.5*rand(1,Npop))' % define applied input using reserved variables 't' for time and 'dt' for fixed time step of numerical integration
   'monitor I'                            % indicate to store applied input during simulation
 };
 data=dsSimulate(eqns, 'tspan',[0 1000], 'study_dir','demo_izhikevich');
