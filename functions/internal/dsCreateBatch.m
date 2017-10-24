@@ -380,7 +380,7 @@ if options.auto_gen_test_data_flag || options.unit_test_flag
   result = 1;
 end
 
-if isempty(result)
+if 0 % isempty(result)
   [~,host] = system('hostname');
   fprintf('qsub not found on host (%s).\n',strtrim(host));
   fprintf('Jobs NOT submitted to cluster queue.\n');
@@ -421,12 +421,12 @@ else % on cluster with qsub
     elseif strcmp(options.qsub_mode, 'loop')
       if strcmp(reportUI,'matlab')
         ui_command = 'matlab -nodisplay -singleCompThread -r';
-        l_directives = ['mem_total=',options.memory_limit];
+        l_directives = ['-l mem_total=',options.memory_limit];
       else
         ui_command = 'octave-cli --eval';
-        l_directives = ['centos7=TRUE mem_total=',options.memory_limit];
+        l_directives = ['-l centos7=TRUE mem_total=',options.memory_limit];
       end
-      cmd = sprintf('%s/qsub_jobs_loop %s %s %s',dsFnPath,batch_dir_name,ui_command,l_directives);
+      cmd = sprintf('%s/qsub_jobs_loop %s ''%s'' ''%s''',dsFnPath,batch_dir_name,ui_command,l_directives);
     end
 
     % add shell script to linux path if not already there
