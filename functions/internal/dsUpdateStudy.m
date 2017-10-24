@@ -75,7 +75,18 @@ if ~isempty(options.status) && ~isempty(studyinfo.simulations)
       if isstruct(options.model)
         model=options.model;
         model_file=studyinfo.simulations(sim_ind).modified_model_file;
-        save(model_file,'model','-v7');
+        try
+          save(model_file,'model','-v7');
+          if ~strcmp(reportUI,'matlab')
+            [wrn_msg,wrn_id] = lastwarn;
+            if strcmp(wrn_msg,'save: wrong type argument ''function handle''')
+              error('save: wrong type argument ''function handle''');
+            end
+          end
+        catch
+          fprintf('Data is not ''-v7'' compatible. Saving in hdf5 format.\n')
+          save(model_file,'model','-hdf5');
+        end
         if options.verbose_flag
           fprintf('model saved to %s\n',model_file);
         end
