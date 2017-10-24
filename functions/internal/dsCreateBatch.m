@@ -380,7 +380,7 @@ if options.auto_gen_test_data_flag || options.unit_test_flag
   result = 1;
 end
 
-if 0 % isempty(result)
+if isempty(result)
   [~,host] = system('hostname');
   fprintf('qsub not found on host (%s).\n',strtrim(host));
   fprintf('Jobs NOT submitted to cluster queue.\n');
