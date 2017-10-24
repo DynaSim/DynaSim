@@ -18,6 +18,6 @@ foreach job ( $joblist )
   endif
   # why do we need these two echo instructions? ask jason
   echo "qsub_job $batchdir $ui_command $job" '|' qsub -V -hard -l $l_directives -cwd -N $1_$job -o pbsout/$job.out -e pbsout/$job.err
-  echo "qsub_job $batchdir $ui_comman $job" | qsub -V -hard -l $l_directives -cwd -N $1_$job -o pbsout/$job.out -e pbsout/$job.err
+  echo "qsub_job $batchdir $ui_command $job" | qsub -V -hard -l $l_directives -cwd -N $1_$job -o pbsout/$job.out -e pbsout/$job.err
   sleep 0.25 #is this the lower limit?
 end
