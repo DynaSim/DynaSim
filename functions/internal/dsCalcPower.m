@@ -55,7 +55,7 @@ function data = dsCalcPower(data, varargin)
 %   xlabel('frequency (Hz)'); ylabel('power'); xlim([0 200]);
 %
 % See also: PlotPower, dsAnalyzeStudy, dsSimulate, dsCheckData, dsSelectVariables
-% 
+%
 % Author: Jason Sherfey, PhD <jssherfey@gmail.com>
 % Copyright (C) 2016 Jason Sherfey, Boston University, USA
 
@@ -126,14 +126,14 @@ for v=1:length(options.variable)
   % extract this data set
   var=options.variable{v};
   dat=data.(var);
-  
+
   % determine how many cells are in this data set
   ncells=size(dat,2);
-  
+
   % preallocation
   PeakFreq=nan(1,ncells);
   PeakArea=nan(1,ncells);
-  
+
   % SUA spectra: loop over cells
   for i=1:ncells
     % select data
@@ -142,45 +142,47 @@ for v=1:length(options.variable)
     if strcmp(reportUI,'matlab')
       [tmpPxx,f] = pmtm(X, NW, NFFT, Fs); % calculate power
     elseif exist('pwelch') == 2 % 'pwelch is in Octave's path
+      fprintf('''pmtm'' function for spectral analysis not available in Octave, using pwelch.\n')
       [tmpPxx,f] = pwelch(X,NFFT,[],NFFT,Fs); % calculate power in octave (pmtm is not implemented yet)
     elseif exist('pwelch') ~= 2 % 'pwelch is not in Octave's path
       try
         pkg load signal; % trying to load octave forge 'signal' package before using pwelch function
+        fprintf('''pmtm'' function for spectral analysis not available in Octave, using pwelch.\n')
         [tmpPxx,f] = pwelch(X,NFFT,[],NFFT,Fs); % calculate power in octave (pmtm is not implemented yet)
       catch
         error('pwelch function is needed for spectral analysis in Octave, please install the signal package from Octave Forge');
-      end      
+      end
     end
-    
+
     if i==1
       % get size of spectrum and preallocate result matrix
       nfreq=length(f);
       Pxx=nan(nfreq,ncells);
     end
-    
+
     if all(isnan(tmpPxx(:)))
       tmpPxx=zeros(size(tmpPxx));
     end
-    
+
     if ~isa(tmpPxx,'double')
       % convert to double precision
       tmpPxx=double(tmpPxx);
     end
-    
+
     % smooth the spectrum
     if smooth_factor>1 && strcmp(reportUI,'matlab')
       tmpPxx=smooth(tmpPxx,smooth_factor);
     else
       tmpPxx=lsmooth(tmpPxx,smooth_factor);
     end
-    
+
     % Peak Detection:
     % select range of frequencies over which to look for peaks
     sel = find(FreqRange(1)<=f & f<=FreqRange(end));
-    
+
     % set threshold for peak detection
     ht=prctile(tmpPxx(sel),thresh_prctile); % ht=prctile(log10(tmpPxx(sel)),thresh_prctile);
-    
+
     if ~isnan(ht)
       % get index of peaks in range over threshold
       if strcmp(reportUI,'matlab')
@@ -192,16 +194,16 @@ for v=1:length(options.variable)
     else
       PPind=[];
     end
-    
+
     if ~isempty(PPind)
       % if multiple peaks, only consider the largest
       if numel(PPind)>1
         PPind=PPind(max(PeakPower)==PeakPower); %PPind=PPind(1);
       end
-      
+
       % get frequency at that index
       PeakFreq(i) = f(sel(PPind));
-      
+
       % set limits for calculating area under spectrum around peak
       flo=PeakFreq(i)-Fwin/2;
       fhi=PeakFreq(i)+Fwin/2;
@@ -225,7 +227,7 @@ for v=1:length(options.variable)
   else
     % calculate MUA
     X=detrend(nanmean(dat(t1:t2,:),2)); % detrend the data
-    
+
     % calculate spectral estimate
     if ~strcmp(reportUI,'matlab') && exist('pwelch') ~= 2 % 'pwelch is not in Octave's path
       try
@@ -238,23 +240,23 @@ for v=1:length(options.variable)
     if all(isnan(tmpPxx(:)))
       tmpPxx=zeros(size(tmpPxx));
     end
-    
+
     if ~isa(tmpPxx,'double')
       % convert to double precision
       tmpPxx=double(tmpPxx);
     end
-    
+
     % smooth the spectrum
     if smooth_factor>1 && strcmp(reportUI,'matlab')
       tmpPxx=smooth(tmpPxx,smooth_factor);
     else
       tmpPxx=lsmooth(tmpPxx,smooth_factor);
     end
-    
+
     % Peak Detection:
     % select range of frequencies over which to look for peaks
     sel = find(FreqRange(1)<=f & f<=FreqRange(end));
-    
+
     % set threshold for peak detection
     ht=prctile(tmpPxx(sel),thresh_prctile); % ht=prctile(log10(tmpPxx(sel)),thresh_prctile);
     if ~isnan(ht)
@@ -268,21 +270,21 @@ for v=1:length(options.variable)
     else
       PPind=[];
     end
-    
+
     if ~isempty(PPind)
       % if multiple peaks, only consider the largest
       if numel(PPind)>1
         PPind=PPind(max(PeakPower)==PeakPower); %PPind=PPind(1);
       end
-      
+
       % get frequency at that index
       Pxx_mean_PeakFreq = f(sel(PPind));
-      
+
       % set limits for calculating area under spectrum around peak
       flo=Pxx_mean_PeakFreq-Fwin/2;
       fhi=Pxx_mean_PeakFreq+Fwin/2;
       sel2=(flo<=f & f<=fhi);
-      
+
       % calculate area under spectrum around peak
       Pxx_mean_PeakArea = sum(tmpPxx(sel2))*(f(2)-f(1));
     else
@@ -291,7 +293,7 @@ for v=1:length(options.variable)
     end
     Pxx_mean=tmpPxx;
   end
-  
+
   %% Add resulting power spectra to data structure
   % organization scheme:
   % data.VARIABLE_Power_SUA.(Pxx,PeakFreq,PeakArea,frequency)
@@ -304,15 +306,15 @@ for v=1:length(options.variable)
   data.([var '_Power_MUA' options.output_suffix]).PeakFreq=Pxx_mean_PeakFreq;
   data.([var '_Power_MUA' options.output_suffix]).PeakArea=Pxx_mean_PeakArea;
   data.([var '_Power_MUA' options.output_suffix]).frequency=f;
-  
+
   if ~ismember([var '_Power_SUA' options.output_suffix],data.results)
     data.results{end+1}=[var '_Power_SUA' options.output_suffix];
   end
-  
+
   if ~ismember([var '_Power_MUA' options.output_suffix],data.results)
     data.results{end+1}=[var '_Power_MUA' options.output_suffix];
   end
-  
+
   if options.exclude_data_flag
     for l=1:length(data.labels)
       data=rmfield(data,data.labels{l});
@@ -333,12 +335,12 @@ for v=1:length(options.variable)
 %     data.results{end+1}=[var '_Pxx_mean_Pxx_PeakFreq'];
 %     data.results{end+1}=[var '_Pxx_mean_Pxx_PeakArea'];
 %   end
-  
+
 end
 
 %% auto_gen_test_data_flag argout
 if options.auto_gen_test_data_flag
   argout = {data}; % specific to this function
-  
+
   dsUnitSaveAutoGenTestData(argin, argout);
 end
