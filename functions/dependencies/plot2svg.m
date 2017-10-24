@@ -919,7 +919,7 @@ if strcmp(get(ax,'Visible'),'on')
         p = back_faces(pindex);
         for k = 1:size(corners,1)
             selectedCorners = squeeze(corners(k,:,p));
-            if verLessThan(PLOT2SVG_globals.UI, '8.4.0')
+            if ~strcmp(reportUI,'matlab') || verLessThan(PLOT2SVG_globals.UI, '8.4.0')
                 gridAlpha = 1;
                 minorGridAlpha = 1;
             else
@@ -929,7 +929,7 @@ if strcmp(get(ax,'Visible'),'on')
             switch corners(k,1,p)
                 case 1 % x
                     % Draw x-grid
-                    if verLessThan(PLOT2SVG_globals.UI, '8.4.0')
+                    if ~strcmp(reportUI,'matlab') || verLessThan(PLOT2SVG_globals.UI, '8.4.0')
                         scolorname = get(ax, 'XColor');
                     else
                         if strcmp(get(ax, 'GridColorMode'), 'auto')
@@ -960,7 +960,7 @@ if strcmp(get(ax,'Visible'),'on')
                     end
                 case 2 % y
                     % Draw y-grid
-                    if verLessThan(PLOT2SVG_globals.UI, '8.4.0')
+                    if ~strcmp(reportUI,'matlab') || verLessThan(PLOT2SVG_globals.UI, '8.4.0')
                         scolorname = get(ax, 'YColor');
                     else
                         if strcmp(get(ax, 'GridColorMode'), 'auto')
@@ -991,7 +991,7 @@ if strcmp(get(ax,'Visible'),'on')
                     end
                 case 3 % z
                     % Draw z-grid
-                    if verLessThan(PLOT2SVG_globals.UI, '8.4.0')
+                    if ~strcmp(reportUI,'matlab') || verLessThan(PLOT2SVG_globals.UI, '8.4.0')
                         scolorname = get(ax, 'ZColor');
                     else
                         if strcmp(get(ax, 'GridColorMode'), 'auto')
@@ -1026,7 +1026,7 @@ if strcmp(get(ax,'Visible'),'on')
 end
 fprintf(fid,'    <g>\n');
 axchild=get(ax,'Children');
-if ~verLessThan(PLOT2SVG_globals.UI,'8.4.0')
+if strcmp(reportUI,'matlab') && ~verLessThan(PLOT2SVG_globals.UI,'8.4.0')
     % Matlab h2 engine
     axchild = [axchild; ax.Title; ax.XLabel; ax.YLabel; ax.ZLabel];
 end
@@ -2344,7 +2344,7 @@ end
 function control2svg(fid,id,ax,paperpos)
 global PLOT2SVG_globals
 set(ax,'Units','pixels');
-if verLessThan(PLOT2SVG_globals.UI, '8.4.0')
+if ~strcmp(reportUI,'matlab') || verLessThan(PLOT2SVG_globals.UI, '8.4.0')
     pos=get(ax,'Position');
 else
     pos=ax.OuterPosition;

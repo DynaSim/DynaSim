@@ -339,7 +339,18 @@ if ~options.one_solve_file_flag
     this_study_file=fullfile(batch_dir,sprintf('studyinfo_%g.mat',sim));
 
     if sim==1
-      save(this_study_file,'studyinfo','-v7');
+      try
+        save(this_study_file,'studyinfo','-v7');
+        if ~strcmp(reportUI,'matlab')
+          [wrn_msg,wrn_id] = lastwarn;
+          if strcmp(wrn_msg,'save: wrong type argument ''function handle''')
+            error('save: wrong type argument ''function handle''');
+          end
+        end
+      catch
+        fprintf('Data is not ''-v7'' compatible. Saving in hdf5 format.\n')
+        save(this_study_file,'studyinfo','-hdf5');
+      end
       first_study_file=this_study_file;
     else
       % use copyfile() after saving first b/c >10x faster than save()
@@ -364,7 +375,18 @@ else %one_solve_file_flag
 
   % copy studyinfo file to batch_dir since more information now
   batch_study_file = fullfile(batch_dir,'studyinfo.mat');
-  save(batch_study_file,'studyinfo','-v7');
+  try
+    save(batch_study_file,'studyinfo','-v7');
+    if ~strcmp(reportUI,'matlab')
+      [wrn_msg,wrn_id] = lastwarn;
+      if strcmp(wrn_msg,'save: wrong type argument ''function handle''')
+        error('save: wrong type argument ''function handle''');
+      end
+    end
+  catch
+    fprintf('Data is not ''-v7'' compatible. Saving in hdf5 format.\n')
+    save(batch_study_file,'studyinfo','-hdf5');
+  end
 end
 
 %% update studyinfo on disk
@@ -420,13 +442,13 @@ else % on cluster with qsub
       %   determine it's own sims to run
     elseif strcmp(options.qsub_mode, 'loop')
       if strcmp(reportUI,'matlab')
-        ui_command = 'matlab -nodisplay -singleCompThread -r';
-        l_directives = ['mem_total=',options.memory_limit];
+        ui_command = '"matlab -nodisplay -singleCompThread -r"';
+        l_directives = ['-l mem_total=',options.memory_limit];
       else
-        ui_command = 'octave-cli --eval';
-        l_directives = ['centos7=TRUE mem_total=',options.memory_limit];
+        ui_command = '"octave-cli --eval"';
+        l_directives = ['-l centos7=TRUE -l mem_total=',options.memory_limit];
       end
-      cmd = sprintf('%s/qsub_jobs_loop %s %s %s',dsFnPath,batch_dir_name,ui_command,l_directives);
+      cmd = sprintf('%s/qsub_jobs_loop %s ''%s'' ''%s''',dsFnPath,batch_dir_name,ui_command,l_directives);
     end
 
     % add shell script to linux path if not already there

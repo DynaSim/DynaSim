@@ -1,4 +1,4 @@
-#!/bin/csh
+#!/bin/sh
 
 cd $1
 echo "ui_command = " $2
@@ -7,7 +7,7 @@ echo "cwd = " `pwd`
 echo "HOSTNAME = " $HOSTNAME
 echo "JOB_NAME = " $JOB_ID
 echo "JOB_NAME = " $JOB_NAME
-# matlab -nodisplay -singleCompThread -r "$3"
-# octave-cli --eval "$3"
-$2 $3
+# matlab -nodisplay -singleCompThread -r $3
+# octave-cli --eval $3
+$2 "$3;exit"
 echo "finished"

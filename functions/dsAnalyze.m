@@ -41,7 +41,7 @@ function result = dsAnalyze(src,funcIn,varargin)
 %
 %
 % See also: dsSimulate
-% 
+%
 % Author: Jason Sherfey, PhD <jssherfey@gmail.com>
 % Copyright (C) 2016 Jason Sherfey, Boston University, USA
 
@@ -336,7 +336,7 @@ end % fInd
 %% auto_gen_test_data_flag argout
 if options.auto_gen_test_data_flag
   argout = {result}; % specific to this function
-  
+
   %dsUnitSaveAutoGenTestData(argin, argout); % TODO: check if needs to be saveAutoGenTestDir
 end
 
@@ -425,7 +425,7 @@ end
 %% auto_gen_test_data_flag argout
 if options.auto_gen_test_data_flag
   argout = {data, studyinfo}; % specific to this function
-  
+
   %dsUnitSaveAutoGenTestDataLocalFn(argin, argout); % localfn
 end
 
@@ -490,7 +490,7 @@ else
     else
       plot_options = options.function_options{fInd};
     end
-    
+
     fInd = regexp(options.result_file, 'plot(\d+)', 'tokens');
     fInd = fInd{1}{1};
 
@@ -508,7 +508,7 @@ filename = dsNameFromVaried(data, prefix, filename);
 %% auto_gen_test_data_flag argout
 if options.auto_gen_test_data_flag
   argout = {filename}; % specific to this function
-  
+
   %dsUnitSaveAutoGenTestDataLocalFn(argin, argout); % localfn
 end
 
@@ -517,7 +517,9 @@ end
 
 function result = evalFnWithArgs(fInd, data, func, options, varargin)
 
-p = gcp('nocreate');
+if strcmp(reportUI,'matlab')
+  p = gcp('nocreate');
+end
 
 if isempty(options.function_options)
   if options.parallel_flag && ~isempty(p)       % Only do parfor mode if parallel_flag is set and parpool is already running. Otherwise, this will add unncessary overhead.
@@ -531,7 +533,7 @@ if isempty(options.function_options)
   end
 else
   function_options = options.function_options{fInd};
-  
+
   if options.parallel_flag && ~isempty(p)
     parfor dInd = 1:length(data)
       result(dInd) = feval(func,data(dInd),function_options{:});
@@ -597,10 +599,10 @@ if ~isempty(data(1).simulator_options.modifications)
     for jj = 1:size(mods,1)
       % prepare valid field name for thing varied:
       fld = [mods{jj,1} '_' mods{jj,2}];
-      
+
       % convert arrows and periods to underscores
       fld = regexprep(fld,'(->)|(<-)|(-)|(\.)','_');
-      
+
       % remove brackets and parentheses
       fld = regexprep(fld,'[\[\]\(\)\{\}]','');
       result(ii).(fld) = mods{jj,3};
@@ -622,7 +624,7 @@ end
 %% auto_gen_test_data_flag argout
 if options.auto_gen_test_data_flag
   argout = {result}; % specific to this function
-  
+
   %dsUnitSaveAutoGenTestDataLocalFn(argin, argout); % localfn
 end
 end % add_modifications

@@ -169,8 +169,18 @@ while ~done
               end
             end
             % save study_file
-            save(study_file,'studyinfo','-v7');
-            %save(study_file,'studyinfo','-v7.3');
+            try
+              save(study_file,'studyinfo','-v7');
+              if ~strcmp(reportUI,'matlab')
+                [wrn_msg,wrn_id] = lastwarn;
+                if strcmp(wrn_msg,'save: wrong type argument ''function handle''')
+                  error('save: wrong type argument ''function handle''');
+                end
+              end
+            catch
+              fprintf('Data is not ''-v7'' compatible. Saving in hdf5 format.\n')
+              save(study_file,'studyinfo','-hdf5');
+            end
         end
         done=1; break;
       catch
