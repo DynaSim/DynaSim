@@ -1,5 +1,5 @@
 function solve_ode_filepath = dsWriteMatlabSolver(model,varargin)
-%WRITEMATLABSOLVER - write m-file that numerically inteegrates the model
+%WRITEMATLABSOLVER - write m-file that numerically integrates the model
 %
 % Usage:
 %   filepath = dsWriteMatlabSolver(model,varargin)
@@ -178,7 +178,6 @@ if options.save_parameters_flag
       p.(mod_params{iParam}) = param_values(iParam,:);
     end
   end % one_solve_file_flag
-
 
   if options.verbose_flag
     fprintf('saving params.mat\n');
