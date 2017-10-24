@@ -142,7 +142,6 @@ for v=1:length(options.variable)
     if strcmp(reportUI,'matlab')
       [tmpPxx,f] = pmtm(X, NW, NFFT, Fs); % calculate power
     elseif exist('pwelch') == 2 % 'pwelch is in Octave's path
-      fprintf('''pmtm'' function for spectral analysis not available in Octave, using pwelch.\n')
       [tmpPxx,f] = pwelch(X,NFFT,[],NFFT,Fs); % calculate power in octave (pmtm is not implemented yet)
     elseif exist('pwelch') ~= 2 % 'pwelch is not in Octave's path
       try
@@ -225,6 +224,13 @@ for v=1:length(options.variable)
     Pxx_mean_PeakFreq=PeakFreq;
     Pxx_mean_PeakArea=PeakArea;
   else
+    if ~strcmp(reportUI,'matlab') && exist('nanmean') ~= 2 % 'nanmean is not in Octave's path
+      try
+        pkg load statistics; % trying to load octave forge 'statistics' package before using nanmean function
+      catch
+        error('nanmean function is needed, please install the statistics package from Octave Forge');
+      end
+    end
     % calculate MUA
     X=detrend(nanmean(dat(t1:t2,:),2)); % detrend the data
 

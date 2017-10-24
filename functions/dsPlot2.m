@@ -39,12 +39,12 @@ function [handles,xp] = dsPlot2(data,varargin)
 %       see dsCalcPower options for plot_type 'power'
 % Outputs:
 %   handles: graphic handles to figures
-% 
+%
 % See also: dsCalcFR, dsCalcPower, dsPlotWaveforms, dsCheckData, dsPlot, MDD,
 %           MDD
 
 %% Set Master parameters
-  
+
 % Flag for returning error if the user specifies name/value pairs that are not in the
 % dsCheckOptions list
 strict_mode = 0;        % Should be set to zero for this to work within simulate model
@@ -54,10 +54,10 @@ strict_mode = 0;        % Should be set to zero for this to work within simulate
 % If data is path to studyinfo...
 if ischar(data)
     study_dir = data;
-    
+
     % Import plot files
     data_img = dsImportPlots(study_dir);
-    
+
     [handles, xp] = dsPlot2(data_img,varargin{:});
     return;
 end
@@ -82,11 +82,11 @@ varied_names = only_varieds(xp);  % Returns only the names of the varied variabl
 % actual varied parameters
 myargin = varargin;
 for i = 1:length(myargin)
-    % Char entries 
+    % Char entries
     if ischar(myargin{i})
         myargin{i} = variedN_to_axisnames(myargin{i},varied_names);
     end
-    
+
     % Nested char entries within cell array entries
     if iscell(myargin{i})
         for j = 1:length(myargin{i})
@@ -103,13 +103,13 @@ end
 %     xp.axis(Na+1).name = 'populations';
 %     xp.axis(Na+1).values = 'Pop1';
 % end
-% 
+%
 % if isempty(xp.findaxis('variables'))
 %     Na=length(xp.axis);
 %     xp.axis(Na+1).name = 'variables';
 %     xp.axis(Na+1).values = 'X';
 % end
-% 
+%
 % if isempty(findaxis_varied(xp))  % If no varied axes
 %     Na=length(xp.axis);
 %     xp.axis(Na+1).name = 'Varied1';
@@ -189,7 +189,7 @@ plot_handle = options.plot_handle;
 % Used when running waveformErr
     plot_options = struct_addDef(plot_options,'meanfunc',@(x) mean(x,2));
     plot_options = struct_addDef(plot_options,'errfunc',@(x) std(x,[],2) ./ (sqrt(size(x,2)) * ones(size(x,1),1)));
-% Used when running xp_matrix_imagesc    
+% Used when running xp_matrix_imagesc
     plot_options = struct_addDef(plot_options,'ColorMap',options.ColorMap);
 
 % Subplot_options
@@ -222,10 +222,10 @@ if any(strcmp(options.plot_type,{'waveform','waveformErr','power'})) && all(cell
             mydata2{i} = mydata{i}(:,1:min(size(mydata{i},2),MTPP));
         end
     end
-    
+
     xp.data = mydata2;
     clear mydata mydata2
-    
+
     % Update cell numbers metadata
     cell_names = [1:max(cellfun(@(x) size(x,2),xp.data(:)))];
     cell_names_str = cellfunu(@(s) ['Cell ' num2str(s)], num2cell(cell_names));
@@ -314,12 +314,12 @@ end
 
 %% If doing force overlay, move overlay population to the end
 if ~isempty(force_last)
-    
-    % If it's a stand-alone string, convert to cell array 
+
+    % If it's a stand-alone string, convert to cell array
     if ischar(force_last)
         force_last = {force_last};
     end
-    
+
     % Functionalize this at some point... building list of requested axes
     ax_names = xp2.exportAxisNames;
     ax_ind = zeros(1,length(force_last));
@@ -330,7 +330,7 @@ if ~isempty(force_last)
         end
         ax_ind(i) = temp;
     end
-    
+
 %     % % Note: I am disabling this for now, because it is messing up
 %     certain plotting options. % %
 %     % Dims per subplot should be at least 2 if we're forcing last...
@@ -341,12 +341,12 @@ if ~isempty(force_last)
 %     if Ndims_per_subplot == 1
 %         Ndims_per_subplot = 2;
 %     end
-    
+
     others_ind = true(1,ndims(xp2));
     others_ind(ax_ind) = false;
     xp2 = xp2.permute([find(others_ind), ax_ind]);        % Move chosen axis to the back!
-    xp2 = xp2.fixAxes;                                   % This permute can create naming issues if using default axis names (Dim 1, Dim 2, etc. For example, Dim2 can end up associated with xp2.axis(1)). 
-    
+    xp2 = xp2.fixAxes;                                   % This permute can create naming issues if using default axis names (Dim 1, Dim 2, etc. For example, Dim2 can end up associated with xp2.axis(1)).
+
 end
 
 
@@ -355,20 +355,20 @@ end
 % If only 1 cell, move in 2nd cell
 if length(xp2.meta.datainfo(2).values) <= 1 && ~is_image
     % Move populations axis to the end if it exists
-    
+
     ax2overlay = [];
     if isempty(force_last) && isempty(options.dim_stacking)
         ax2overlay = xp2.findaxis('populations');           % If force_last or dim_stacking isn't specified, then choose populations
     end
-    
+
     if isempty(ax2overlay)
         ax2overlay = xp2.ndims;     % If can't find populations, use last axis on the stack
     end
-    
+
     % Save variables associated with this axis
     packed_vars = xp2.axis(ax2overlay).values;
     packed_name = xp2.axis(ax2overlay).name;
-    
+
     % Add <average> symbols if necessary to packed_vars
     cellnames = xp2.meta.datainfo(2).values;
     temp = cellfun(@isempty,strfind(cellnames,'<'));    % Check if originals were averages!
@@ -376,17 +376,17 @@ if length(xp2.meta.datainfo(2).values) <= 1 && ~is_image
         if isnumeric(packed_vars); packed_vars = cellfunu(@(s) [strrep(packed_name,'_',' ') ' ' num2str(s)],num2cell(packed_vars)); end
         packed_vars = cellfunu(@(s) ['<' s '>'], packed_vars);
     end
-    
+
     xp2.meta.datainfo(2).name = packed_name;
     xp2.meta.datainfo(2).values = packed_vars(:)';
-    
+
     xp2 = xp2.packDim(ax2overlay,2);
     xp2 = xp2.squeezeRegexp('Dim');
 end
 
 %% Set up do z-score & overlay shift
 if options.do_zscore && all(cellfun(@isnumeric,xp2.data(:))) && ~is_image
-    
+
     % xp2 = recursivePlot({@xp_parfor, @xpzscore}
     mydata = xp2.data;
     for i = 1:numel(mydata)
@@ -437,13 +437,13 @@ if ~isempty(crop_range) &&  all(cellfun(@isnumeric,xp2.data(:))) && ~is_image
         if ~isempty(xp2.data{i}); xp2.data{i} = xp2.data{i}(ind,:); end
     end
     xp2.meta.datainfo(1).values = t_temp(ind);
-    
+
     % Also crop DynaSim metadata info about time.
     t_temp2 = xp2.meta.dynasim.time;
     ind = (t_temp2 > crop_range(1) & t_temp2 <= crop_range(2));
     t_temp2 = t_temp2(ind);
     xp2.meta.dynasim.time = t_temp2;
-    
+
 end
 
 %% Set up legend entries and axis limits
@@ -513,16 +513,16 @@ else
                 subplot_options.do_colorbar = false;
                 plot_options.do_colorbar = options.show_colorbar;
             end
-            
+
         case {'power','rastergram','raster'}
             % Disable legend when using dsPlot
             subplot_options.legend1 = [];
-            
+
             % Setup call to xp_PlotData
             plot_options.args = {plot_options.args{:}, 'plot_type',plot_type};
             data_plothandle = @xp_PlotData;
             if ~isempty(plot_handle); data_plothandle = plot_handle; end
-            
+
             if any(strcmp(plot_type,{'rastergram','raster'})) && isempty(force_last) && isempty(options.dim_stacking)
                 % Move populations axis to the end of xp2. (Only do this if
                 % we're not already overwriting dims stacking order).
@@ -533,7 +533,7 @@ else
                 order = [find(ind_rest) find(ind_pop)];
                 xp2 = xp2.permute(order);
             end
-            if any(strcmp(plot_type,{'rastergram','raster'})) 
+            if any(strcmp(plot_type,{'rastergram','raster'}))
                 % Force Ndims_per_subplot to 2 fro rastergram.
                 if isempty(Ndims_per_subplot)
                     if ~isempty(xp2.findaxis('populations'))
@@ -543,10 +543,10 @@ else
                     else
                         Ndims_per_subplot = 1;                 % Only do this if population axis is still present!
                     end
-                end                                        
-                                                          
+                end
+
             end
-            
+
         case {'heatmapFR','heatmap_sortedFR','meanFR','meanFRdens'}
             % Disable legend when using dsPlotFR2
             subplot_options.legend1 = [];
@@ -554,7 +554,7 @@ else
             if any(strcmp(plot_type,{'heatmapFR','heatmap_sortedFR'}))
                 plot_type = strrep(plot_type,'FR','');
             end
-            
+
             % Setup call to xp_PlotFR2
             plot_options.args = {plot_options.args{:}, 'plot_type',plot_type};
             data_plothandle = @xp_PlotFR2;
@@ -576,13 +576,13 @@ switch num_embedded_subplots
         function_handles = {@xp_handles_newfig, subplot_handle,data_plothandle};   % Specifies the handles of the plotting functions
         dims_per_function_handle = [1,1,Ndims_per_subplot];
         function_args = {{figure_options},{subplot_options},{plot_options}};
-        
+
     case 2
         % Ordering of axis handles
         function_handles = {@xp_handles_newfig, subplot_handle,data_plothandle};   % Specifies the handles of the plotting functions
         dims_per_function_handle = [1,2,Ndims_per_subplot];
         function_args = {{figure_options},{subplot_options},{plot_options}};
-        
+
     case 3
         % Ordering of axis handles
         function_handles = {@xp_handles_newfig, subplot_handle, subplot_handle,data_plothandle};   % Specifies the handles of the plotting functions
@@ -640,35 +640,35 @@ end
 function var_out = getdefaultstatevar(xp)
     % search through and try to find the variable represnting voltage. If can't find
     % it, just return the first variable listed.
-    
+
     % See if variables axis even exists
     if isempty(xp.findaxis('variables'))
         % If reach here, it means variables is not used in the code. Just
         % return some dummy values and move on.
-        var_out = ':'; 
+        var_out = ':';
         return;
     end
-    
+
     vars_from_labels = dsGet_variables_from_meta(xp);
     if ~isempty(vars_from_labels)
         vars_from_labels = vars_from_labels(1);   % Best guess at default state variable. Usually its the 1st entry in labels
     end
-    
+
     % Pull out variables
     vars_orig = xp.axis('variables').values;
-    
+
     % Make everything uppercase to ensure
     % case-insensitive.
     vars = upper(vars_orig);
     possibilities = upper({vars_from_labels{:},'V','X','Vm','Xm','Y','Ym'});
-    
+
     ind = [];
     i=0;
     while isempty(ind) && i < length(possibilities)
         i=i+1;
         ind = find(strcmpi(vars,possibilities{i}));
     end
-    
+
     if ~isempty(ind)
         var_out = vars_orig{ind};
     else
@@ -680,16 +680,16 @@ function [chosen_varied, options_varied ]= get_chosen_varied(varied_names,option
 
     % Initialize output
     chosen_varied = repmat({':'},1,length(varied_names));
-    
+
     % Varied name-value pairs entered by user
     varied_NVPs = fieldnames(options_varied);
-    
+
     % See if any of these match actual varied parameters
     for i =  1:length(varied_NVPs)
         ind = find(strcmp(varied_names,varied_NVPs{i}));
         if length(ind) == 1
             chosen_varied{ind} = options_varied.(varied_NVPs{i});
-            
+
             % Optional (remove from options_varied)
             options_varied = rmfield(options_varied,varied_NVPs{i});
         elseif length(ind) > 1
@@ -697,10 +697,10 @@ function [chosen_varied, options_varied ]= get_chosen_varied(varied_names,option
         else
             % Not a varied variable name
         end
-        
-        
+
+
     end
-    
+
 end
 
 function str_out = variedN_to_axisnames(str_in,ax_names_varied)
@@ -712,7 +712,7 @@ function str_out = variedN_to_axisnames(str_in,ax_names_varied)
         else
             str_out = str_in;
         end
-    
+
 end
 
 function ax_ind_varied = findaxis_varied(xp)
@@ -726,7 +726,7 @@ function ax_ind_varied = findaxis_varied(xp)
         if sum(ind) ~= 1; error('Varied axis not found OR something wrong with varied label'); end
         ax_ind_varied = ax_ind_varied | ind;
     end
-    
+
     ax_ind_varied = find(ax_ind_varied);
 end
 
@@ -736,18 +736,18 @@ function dimensions = get_dimensions(ax_names,dims_per_function_handle)
 
     i = length(dims_per_function_handle);
     while i > 0 && ~isempty(ax_names)
-        
+
         Ndims_curr = dims_per_function_handle(i);
         dimensions{i} = ax_names(max(1,end-Ndims_curr+1):end);
         ax_names = ax_names(1:end-Ndims_curr);
         i=i-1;
     end
-    
+
 end
 
 function xp2 = reduce_dims(xp2,maxNplotdims)
     Nd = ndims(xp2);
-    if Nd > maxNplotdims 
+    if Nd > maxNplotdims
         xp2 = xp2.mergeDims( [maxNplotdims:Nd] );
         xp2 = xp2.squeeze;
         Nd = ndims(xp2);
@@ -759,16 +759,16 @@ end
 function varied_names = only_varieds(xp)
     % Get list of varied axis names
     varied_names = xp.meta.dynasim.varied;
-    
-    % Make sure that they are acutally in xp.axis.names. 
+
+    % Make sure that they are acutally in xp.axis.names.
     findaxis_varied(xp); % This function will return an error if they are missing!
-    
+
 end
 
 function varied_names = only_varieds_old_deleteme(all_names)
     warning('update this command or possibly merge with findaxis_varied');
     inds = true(1,length(all_names));
-    inds(strcmp(all_names,'populations')) = false; 
+    inds(strcmp(all_names,'populations')) = false;
     inds(strcmp(all_names,'variables')) = false;
     varied_names = all_names(inds);
 end
@@ -776,11 +776,18 @@ end
 function mydata_out = do_shift_lastdim (mydata,shift)
     sz = size(mydata);
     nd = ndims(mydata);
-    
+
     if isempty(shift)
         % Do adaptive shift
         upscale_factor = 2;
         temp = reshape(mydata,prod(sz(1:nd-1)),sz(nd));
+        if ~strcmp(reportUI,'matlab') && exist('nanstd') ~= 2 % 'nanstd is not in Octave's path
+          try
+            pkg load statistics; % trying to load octave forge 'statistics' package before using nanstd function
+          catch
+            error('nanstd function is needed, please install the statistics package from Octave Forge');
+          end
+        end
         stdevs = nanstd(temp)*upscale_factor;               % STD ignoring NaNs
         sh = [0, stdevs(1:end-1) + stdevs(2:end)]';
         sh = sh * -1;        % Forces shifts to be downward (same as subplots)
@@ -789,21 +796,21 @@ function mydata_out = do_shift_lastdim (mydata,shift)
         sh = shift*[0:sz(end)-1]';      % Fixed shift amount
         sh = sh * -1;        % Forces shifts to be downward (same as subplots)
     end
-    
-    
+
+
     sh = permute(sh, [2:nd,1]);
     if length(sz(1:nd-1)) == 1
         sh2 = repmat(sh, sz(1:nd-1),1);     % Special case for scalar input to repmat. When repmat receives a scalar, it repeats BOTH rows and columns instead of just rows
     else
         sh2 = repmat(sh, sz(1:nd-1));
     end
-    
+
     mydata_out = mydata + sh2;
-    
+
 end
 
 function leg1 = setup_legends(xp2)
-    
+
     % Pull out all metadata names and values
     for i = 1:length(xp2.meta.datainfo)
         mn{i} = xp2.meta.datainfo(i).name;
@@ -823,7 +830,7 @@ function leg1 = setup_legends(xp2)
             end
         end
     end
-    
+
     if length(mv) == 2
         leg1 = mv{2};
     elseif length(mv) == 3
