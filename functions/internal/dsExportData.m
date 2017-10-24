@@ -36,7 +36,7 @@ switch lower(options.format)
         try
           save(options.filename,vars{:},'-v7');
         catch
-          fprintf('Setting ''matCompatibility_flag'' to 0 since variable(-s) > 2GB exist.\n')
+          fprintf('Data is not ''-v7'' compatible. Setting ''matCompatibility_flag'' to 0.\n')
           options.matCompatibility_flag = 0;
           if strcmp(reportUI,'matlab')
             save(options.filename,vars{:},'-v7.3');
@@ -56,7 +56,7 @@ switch lower(options.format)
         try
           save(options.filename,'data','-v7');
         catch
-          fprintf('Setting ''matCompatibility_flag'' to 0 since variable(-s) > 2GB exist.\n')
+          fprintf('Data is not ''-v7'' compatible. Setting ''matCompatibility_flag'' to 0.\n')
           options.matCompatibility_flag = 0;
           if strcmp(reportUI,'matlab')
             save(options.filename,'data','-v7.3');
