@@ -375,7 +375,6 @@ else %one_solve_file_flag
 
   % copy studyinfo file to batch_dir since more information now
   batch_study_file = fullfile(batch_dir,'studyinfo.mat');
-  save(batch_study_file,'studyinfo','-v7');
   try
     save(batch_study_file,'studyinfo','-v7');
     if ~strcmp(reportUI,'matlab')
