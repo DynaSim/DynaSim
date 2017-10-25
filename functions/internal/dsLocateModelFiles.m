@@ -168,33 +168,10 @@ if iscellstr(mechanism_list)
       % use 'which' to get full filename of file in Matlab path
       file = which(file);
       
-      if s == num_paths && isempty(fileparts2(file))
-        % if here, could either be: absolute path, on matlab path, or wrong name
-        
-        % check if absolute path
-        file = which(file);
-        
-        if ~isempty(file)
-          % not absolute path
-          
-          % see if on matlab path with standard extensions
-          if ~isempty(which([mech '.eqns']))
-            file = which([mech '.eqns']);
-          elseif ~isempty(which([mech '.mech']))
-            file = which([mech '.mech']);
-          elseif ~isempty(which([mech '.txt']))
-            file = which([mech '.txt']);
-          elseif ~isempty(which([mech '.m']))
-            file = which([mech '.m']);
-          else
-            % mech is not on matlab path or wrong name
-            file = '';
-          end
-        end
-        
-        if isempty(file)
-          warning('Could not find mechanism ''%s'' on path (with standard extensions).', mech);
-        end
+      if s == num_paths && isempty(file)
+        % looked through all paths at this point
+        % if still empty, then wrong name or not on path
+        warning('Could not find mechanism ''%s'' on path (with standard extensions).', mech);
       end
       
       if ~isempty(file)
