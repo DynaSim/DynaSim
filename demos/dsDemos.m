@@ -44,6 +44,8 @@ eqns={
   'dx/dt=s*(y-x)'
   'dy/dt=r*x-y-x*z'
   'dz/dt=-b*z+x*y'
+  'w(t)=x.*y.*z'              % just an example to illustrate the use of monitors in DynaSim (monitor expression follows Matlab's syntax)
+  'monitor w'                 % indicate to variable 'w' during simulation
 };
 data=dsSimulate(eqns, 'tspan',[0 100], 'ic',[1 2 .5], 'solver','rk4', 'study_dir','demo_lorenz');
 
@@ -239,8 +241,18 @@ dsPlot(data,'variable',{'E_v','E_I_iGABAa_ISYN'});
 % How to: set 'save_data_flag' to 1 and (optionally) 'study_dir' to /path/to/outputs
 
 %% Save data from a single simulation
+
+% By default data is saved in compatible mode between Matlab and Octave ('matCompatibility_flag' set to 1, i.e., data is saved in '-v7' mat format).
+
 % Example using the previous sPING model:
 data=dsSimulate(s,'save_data_flag',1,'study_dir','demo_sPING_1');
+
+%% Unfortunately, '-v7' mat format is not able to save variables > 2GB.
+% If compatible saving fails, data is saved in '-v7.3' format (Matlab), or in '-hdf5' format (Octave). This allows that data can be stored in all its integrity.
+
+%% However, if any var > 2GB is anticipated, we strongly recommend to set 'matCompatibility_flag' manually to 0 to speed up data saving.
+% Example using 'matCompatibility_flag' set to 0:
+data=dsSimulate(s,'matCompatibility_flag',0,'save_data_flag',1,'study_dir','demo_sPING_1_varlt2GB');
 
 %% Save data from a set of simulations
 
