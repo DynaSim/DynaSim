@@ -138,7 +138,11 @@ function modl=set_user_parameters(modl,params,namespace)
   % find adjusted user-supplied param names in this sub-model
   ind=find(ismember(user_keys,param_names));
   for p=1:length(ind)
-    modl.parameters.(user_keys{ind(p)})=toString(user_vals{ind(p)},precision);
+    if isnumeric(user_vals{ind(p)}) && size(user_vals{ind(p)},2)>1
+      modl.parameters.(user_keys{ind(p)})=user_vals{ind(p)};
+    else
+      modl.parameters.(user_keys{ind(p)})=toString(user_vals{ind(p)},precision);
+    end
   end
   
   % repeat for fixed_variables (e.g., connection matrix)
