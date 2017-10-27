@@ -7,8 +7,12 @@ Just follow these steps:
    here <http://www.bu.edu/tech/services/cccs/desktop/distribution/mathsci/matlab/>`__
 1. Download the DynaSim toolbox using either:
 
+   -  
+
       1. `Zip
          download <https://github.com/DynaSim/DynaSim/archive/master.zip>`__
+
+   -  
 
       2. `Git clone <https://github.com/DynaSim/DynaSim.git>`__ (so you
          have access to all the latest updates)
