@@ -67,7 +67,7 @@ function stats = dsCalcCellProperties(data, varargin)
 %   AP_taud = (time to decay from 10% to 90% between Vpeak and Vthresh)
 %   AP_dur (spikewidth) = (time between rising and falling (Vthresh+APamp/2) = (Vthresh+Vpeak)/2)
 %   AHP_amp = (Vbaseline-Vmin) where Vmin taken during repolarizing phase
-%   AHP_dur (AHP duration, half-width) = time between half-peak amplitude of AHP 
+%   AHP_dur (AHP duration, half-width) = time between half-peak amplitude of AHP
 %                                     = (time between falling and rising (Vbaseline+AHPamp/2))
 %   AHP_time2trough = (time between falling Vbaseline and AHPamp)
 %   ADPamp? ADPdur?
@@ -108,7 +108,7 @@ function stats = dsCalcCellProperties(data, varargin)
 %   stats = dsCalcCellProperties(data)
 %
 % See also: dsProbeCellProperties
-% 
+%
 % Author: Jason Sherfey, PhD <jssherfey@gmail.com>
 % Copyright (C) 2016 Jason Sherfey, Boston University, USA
 
@@ -279,7 +279,7 @@ for p=1:num_pops
       Vmax=max(V(tsel)); % maximum point of hump
       stats.(pop).hump(c)=((Vmax-Vend)/abs(bl-Vend));
     end
-    
+
     % 4) calculate (R_in,tau_m) (from avg over repetitions) Across hyperpolarizing subthreshold steps
     % Rin = Input resistence (I/V slope) [4]
     % taum = Membrane time constant: time for voltage relaxation to (1/e)Vmax
@@ -330,7 +330,7 @@ for p=1:num_pops
     end
 
     % 5) calculate FI_slope (from avg over repetitions) Across suprathreshold steps with at least two spikes
-    % FI slope: slope of f/I curve (firing freq vs injected current 0-140pA) (see [2])  
+    % FI slope: slope of f/I curve (firing freq vs injected current 0-140pA) (see [2])
 %     step_sel=find(num_spikes>1 & amplitudes'>0);
 %     amps=amplitudes(step_sel);
 %     uamps=unique(amps);
@@ -357,7 +357,7 @@ for p=1:num_pops
 %       [num_spikes(step_sel) amplitudes(step_sel)']
 %     end
 
-    % 6) calculate ARs (avg over repetitions) & AR_coefficient Across 
+    % 6) calculate ARs (avg over repetitions) & AR_coefficient Across
     %    suprathreshold steps >=60pA above first step with at least two spikes
     % AR coefficient: (slope of AR/I) where per step AR=ISI(1)/ISI(end)
     thresh_step=find(num_spikes>1,1,'first');
@@ -400,6 +400,13 @@ for p=1:num_pops
       stats.(pop).ISI_step_median(c)=median(ISI);
       % store FR at 60pA above threshold
       stats.(pop).FR_step(c)=FR(1); % FR at 60pA above threshold
+      if ~strcmp(reportUI,'matlab') && exist('nanmax') ~= 2 % 'nanmax is not in Octave's path
+        try
+          pkg load statistics; % trying to load octave forge 'statistics' package before using nanmax function
+        catch
+          error('nanmax function is needed, please install the statistics package from Octave Forge');
+        end
+      end
       stats.(pop).ARif(c)=nanmax(AR); % nanmean, nanmedian
       % calculate AR_coefficient
       if any(~isnan(AR))
@@ -418,14 +425,14 @@ for p=1:num_pops
         %[num_spikes(step_sel) amplitudes(step_sel)']
       end
     end
-    
+
     % 7) calculate FR_min From first suprathreshold T sec step
     % FRmin (threshrate) = (# spikes)/T
     step_sel=find(num_spikes>0,1,'first');
     if any(step_sel)
       stats.(pop).FR_min(c)=num_spikes(step_sel)/((offset-onset)/1000);
     end
-    
+
     % 8) calculate FR_min2 From first suprathreshold T sec step with at least two spikes
     % FRmin2 (steprate?) = (# spikes)/T
     step_sel=find(num_spikes>1,1,'first');
@@ -556,7 +563,7 @@ for p=1:num_pops
       %Vmin=max(findpeaks(-V(V10_i_d:end)));
       %Vmin=min(V(V10_i_d:end));
       AHPamp=abs(bl-Vmin);
-      % AHPdur (AHP duration, half-width) = time between half-peak amplitude of AHP 
+      % AHPdur (AHP duration, half-width) = time between half-peak amplitude of AHP
       %                                   = (time between falling and rising (Vbaseline+AHPamp/2))
       ahp_V50=bl+.5*AHPamp;
       ahp_V50_i_d=1+find(V(1:end-1)>=ahp_V50 & V(2:end)<ahp_V50); % first
@@ -578,7 +585,7 @@ for p=1:num_pops
       if any(V10_i_d)
         AHPtime2trough=t(ahp_trough_i(1))-t(Vpeak_i);%t(V10_i_d(1));
         if options.plot_flag
-          figure; plot(t,V); 
+          figure; plot(t,V);
           line(xlim,[V10 V10]); line(xlim,[Vmin Vmin]);
           line([t(ahp_trough_i(1)) t(ahp_trough_i(1))],ylim);
           line([t(Vpeak_i) t(Vpeak_i)],ylim,'color','r');
@@ -587,16 +594,16 @@ for p=1:num_pops
         AHPtime2trough=nan;
       end
       if options.plot_flag
-        figure; plot(t,V); 
-        line(xlim,[bl bl]); 
+        figure; plot(t,V);
+        line(xlim,[bl bl]);
         line(xlim,[Vthresh Vthresh]);
         line(xlim,[Vpeak Vpeak]);
-        line(xlim,[V10 V10]); 
+        line(xlim,[V10 V10]);
         line([t(V10_i_r(1)) t(V10_i_r(1))],ylim);
         line([t(V10_i_d(1)) t(V10_i_d(1))],ylim);
         line(xlim,[V50 V50]);
         line(xlim,[V90 V90]);
-        line(xlim,[ahp_V50 ahp_V50],'color','r'); 
+        line(xlim,[ahp_V50 ahp_V50],'color','r');
         line([t(ahp_V50_i_r(1)) t(ahp_V50_i_r(1))],ylim,'color','r');
         line([t(ahp_V50_i_d(1)) t(ahp_V50_i_d(1))],ylim,'color','r');
       end
@@ -617,6 +624,13 @@ for p=1:num_pops
     X(s,:,:)=data(s).(this_var);
   end
   % calculate simple means
+  if ~strcmp(reportUI,'matlab') && exist('nanmean') ~= 2 % 'nanmean is not in Octave's path
+    try
+      pkg load statistics; % trying to load octave forge 'statistics' package before using nanmean function
+    catch
+      error('nanmean function is needed, please install the statistics package from Octave Forge');
+    end
+  end
   means=nanmean(X(:,tsel,:),2); % average over select times
   % store means in stats structure
   stats.([this_var '_mean_per_amp'])=squeeze(means);
@@ -643,7 +657,7 @@ end
 %% auto_gen_test_data_flag argout
 if options.auto_gen_test_data_flag
   argout = {stats}; % specific to this function
-  
+
   dsUnitSaveAutoGenTestData(argin, argout);
 end
 
@@ -660,7 +674,7 @@ end
 
 % AHPtau (AHP duration, half-width) = time between half-peak amplitude of AHP
 
-% From Iinj=0: 
+% From Iinj=0:
 % RMP: resting membrane potential [mV] = avg V over step 150-500ms
 
 % From first spike:

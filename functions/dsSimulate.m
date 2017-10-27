@@ -979,7 +979,7 @@ end % in_parfor_loop_flag
         if options.disk_flag  % ### data stored on disk during simulation ###
           sim_start_time=tic;
           if ~options.one_solve_file_flag
-            save(param_file,'p'); % save params immediately before solving
+            save(param_file,'p','-v7'); % save params immediately before solving
           end
           csv_data_file=feval(fname);  % returns name of file storing the simulated data
           duration=toc(sim_start_time);
@@ -1012,7 +1012,7 @@ end % in_parfor_loop_flag
           outputs=cell(1,length(output_variables)); % preallocate for PCT compatibility
 
           if ~options.one_solve_file_flag
-            save(param_file,'p'); % save params immediately before solving
+            save(param_file,'p','-v7'); % save params immediately before solving
           end
 
           % feval solve file

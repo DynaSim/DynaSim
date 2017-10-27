@@ -29,7 +29,7 @@ function [studyinfo, cmd] = dsCreateBatch(base_model,modifications_set,varargin)
 % Dependencies: dsSetupStudy, dsUpdateStudy
 %
 % See also: dsGenerateModel, dsSimulate, dsCheckStudyinfo, dsVary2Modifications
-% 
+%
 % Author: Jason Sherfey, PhD <jssherfey@gmail.com>
 % Copyright (C) 2016 Jason Sherfey, Boston University, USA
 
@@ -133,7 +133,7 @@ study_dir_name=[study_dir_name study_dir_suffix];
 
 if ~options.auto_gen_test_data_flag && ~options.unit_test_flag
   main_batch_dir = fullfile(strtrim(home),'batchdirs');
-  
+
   % create main batch_dir
   if ~exist(main_batch_dir,'dir')
     mkdir(main_batch_dir);
@@ -193,7 +193,7 @@ addpaths=cat(2,dynasim_path,regexp(genpath(dynasim_functions),':','split'));
 addpaths=cat(2,addpaths,fullfile(dynasim_path,'models'));
 %addpaths=regexp(genpath(dynasim_path),':','split');
 if ~isempty(mech_paths)
-  addpaths=cat(2,addpaths,mech_paths); 
+  addpaths=cat(2,addpaths,mech_paths);
   addpaths=unique(addpaths);
 end
 
@@ -333,13 +333,24 @@ if ~options.one_solve_file_flag
     studyinfo.simulations(sim).error_log='';
 
   end %sim
-  
+
   % copy studyinfo file to batch_dir for each simulation
   for sim=1:num_simulations
     this_study_file=fullfile(batch_dir,sprintf('studyinfo_%g.mat',sim));
 
     if sim==1
-      save(this_study_file,'studyinfo');
+      try
+        save(this_study_file,'studyinfo','-v7');
+        if ~strcmp(reportUI,'matlab')
+          [wrn_msg,wrn_id] = lastwarn;
+          if strcmp(wrn_msg,'save: wrong type argument ''function handle''')
+            error('save: wrong type argument ''function handle''');
+          end
+        end
+      catch
+        fprintf('Data is not ''-v7'' compatible. Saving in hdf5 format.\n')
+        save(this_study_file,'studyinfo','-hdf5');
+      end
       first_study_file=this_study_file;
     else
       % use copyfile() after saving first b/c >10x faster than save()
@@ -364,7 +375,18 @@ else %one_solve_file_flag
 
   % copy studyinfo file to batch_dir since more information now
   batch_study_file = fullfile(batch_dir,'studyinfo.mat');
-  save(batch_study_file,'studyinfo');
+  try
+    save(batch_study_file,'studyinfo','-v7');
+    if ~strcmp(reportUI,'matlab')
+      [wrn_msg,wrn_id] = lastwarn;
+      if strcmp(wrn_msg,'save: wrong type argument ''function handle''')
+        error('save: wrong type argument ''function handle''');
+      end
+    end
+  catch
+    fprintf('Data is not ''-v7'' compatible. Saving in hdf5 format.\n')
+    save(batch_study_file,'studyinfo','-hdf5');
+  end
 end
 
 %% update studyinfo on disk
@@ -405,29 +427,32 @@ else % on cluster with qsub
     end
 
     if options.parallel_flag
-      cmd=sprintf('qmatjobs_pct %s %s %g',batch_dir_name,options.memory_limit,options.num_cores);
-      %status=system('which qmatjobs_pct');
-    else
-      if strcmp(options.qsub_mode, 'array') && ~options.one_solve_file_flag
-        % TODO: remove old error and output files; put e and o in their own dirs
-        cmd = sprintf('echo ''%s/qmatjob_array %s sim_job'' | qsub -V -hard -l ''h_vmem=%s'' -wd %s -N %s_sim_job -t 1-%i',...
-          dsFnPath, batch_dir, options.memory_limit, batch_dir, batch_dir_name, num_jobs);
-      elseif strcmp(options.qsub_mode, 'array') && options.one_solve_file_flag
-        [~, job_filename] = fileparts2(job_file); %remove path and extension
-        cmd = sprintf('echo ''%s/qmatjob_array_one_file %s %s'' | qsub -V -hard -l ''h_vmem=%s'' -wd %s -N %s_sim_job -t 1-%i:%i',...
-          dsFnPath, batch_dir, job_filename, options.memory_limit, batch_dir, batch_dir_name, num_simulations, options.sims_per_job);
-        % NOTE: using num_simulations, not num_jobs, since the job_file will
-        %   determine it's own sims to run
-      elseif strcmp(options.qsub_mode, 'loop')
-        cmd = sprintf('%s/qmatjobs_memlimit_loop %s %s',dsFnPath, batch_dir_name,options.memory_limit);
+      warning('jobs in the cluster use a single thread')
+    end
+
+    if strcmp(options.qsub_mode, 'array') && ~options.one_solve_file_flag
+      % TODO: remove old error and output files; put e and o in their own dirs
+      cmd = sprintf('echo ''%s/qsub_jobs_array %s sim_job'' | qsub -V -hard -l ''h_vmem=%s'' -wd %s -N %s_sim_job -t 1-%i',...
+        dsFnPath, batch_dir, options.memory_limit, batch_dir, batch_dir_name, num_jobs);
+    elseif strcmp(options.qsub_mode, 'array') && options.one_solve_file_flag
+      [~, job_filename] = fileparts2(job_file); %remove path and extension
+      cmd = sprintf('echo ''%s/qsub_jobs_array_one_file %s %s'' | qsub -V -hard -l ''h_vmem=%s'' -wd %s -N %s_sim_job -t 1-%i:%i',...
+        dsFnPath, batch_dir, job_filename, options.memory_limit, batch_dir, batch_dir_name, num_simulations, options.sims_per_job);
+      % NOTE: using num_simulations, not num_jobs, since the job_file will
+      %   determine it's own sims to run
+    elseif strcmp(options.qsub_mode, 'loop')
+      if strcmp(reportUI,'matlab')
+        ui_command = '"matlab -nodisplay -singleCompThread -r"';
+        l_directives = ['-l mem_total=',options.memory_limit];
+      else
+        ui_command = '"octave-cli --eval"';
+        l_directives = ['-l centos7=TRUE -l mem_total=',options.memory_limit];
       end
-      %status=system('which qmatjobs_memlimit');
+      cmd = sprintf('%s/qsub_jobs_loop %s ''%s'' ''%s''',dsFnPath,batch_dir_name,ui_command,l_directives);
     end
 
     % add shell script to linux path if not already there
-    %if status~=0
-      setenv('PATH', [getenv('PATH') ':' dynasim_functions ':' fullfile(dynasim_functions, 'internal')]);
-    %end
+    setenv('PATH', [getenv('PATH') ':' dynasim_functions ':' fullfile(dynasim_functions, 'internal')]);
 
     if options.verbose_flag
       fprintf('Submitting cluster jobs with shell command: "%s"\n',cmd);
@@ -491,7 +516,7 @@ end
 
     % create job file
     fjob=fopen(job_file,'wt');
-    
+
     % load studyinfo using helper function to avoid busy file errors
     %fprintf(fjob,'studyinfo=dsCheckStudyinfo(''%s'',''process_id'',%g);\n',study_file,sim_ids(1), varargin{:});
     %fprintf(fjob,'load(''%s'',''studyinfo'');\n',study_file);
@@ -524,7 +549,7 @@ end
         fprintf(fjob,'addpath %s\n',addpaths{p});
       end
     end
-    
+
     % loop over and run simulations in this job
     if options.parallel_flag
       % set parallel computing options

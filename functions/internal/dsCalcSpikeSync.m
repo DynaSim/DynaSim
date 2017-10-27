@@ -24,7 +24,7 @@ function stats = dsCalcSpikeSync(data, varargin)
 %   spike_threshold=0; % same for all ROIs
 %   spike_threshold=[0 .5]; % use 0 for all ROI1s and .5 for all ROI2s
 %   spike_threshold=[0 .5; 0 .25];
-% 
+%
 % Author: Jason Sherfey, PhD <jssherfey@gmail.com>
 % Copyright (C) 2016 Jason Sherfey, Boston University, USA
 
@@ -144,14 +144,14 @@ for pair=1:npairs
     continue;
   end
   cnt=cnt+1;
-  
+
   stats.pairs(cnt).var1=var1;
   stats.pairs(cnt).indices1=roi1;
   stats.pairs(cnt).var2=var2;
   stats.pairs(cnt).indices2=roi2;
   stats.pairs(cnt).roi1=options.ROI_pairs{pair,2};
   stats.pairs(cnt).roi2=options.ROI_pairs{pair,4};
-  
+
   t=data.time;
   V1=data.(var1)(:,roi1);
   V2=data.(var2)(:,roi2);
@@ -183,7 +183,7 @@ for pair=1:npairs
     end
   end
   coactive=length(find(spiked1&spiked2))/length(find(spiked1|spiked2));
-  
+
   % calculate fraction of 10ms bins with spikes in both populations
   edges=0:maxlag_time:max(t);
   nspiked1=zeros(1,length(edges));
@@ -201,7 +201,7 @@ for pair=1:npairs
   rm=tmp>prctile(tmp,th);
   tmp(rm)=0;
   ncoactive=sum(tmp)/(sum(nspiked1(~rm))*sum(nspiked2(~rm)));
-    
+
   % Calculate instantaneous firing rates for each cell
   r1=zeros(nt,n1);
   if ~isempty(raster1)
@@ -242,7 +242,7 @@ for pair=1:npairs
       allxc_maxs(i,j)=max(xc);
     end
   end
-  
+
   % Calculate competition measures
   num_spikes1=size(raster1,1);
   num_spikes2=size(raster2,1);
@@ -250,12 +250,19 @@ for pair=1:npairs
   dNsumN=dN/(num_spikes1+num_spikes2);
   minN=min(num_spikes1,num_spikes2);
   maxN=max(num_spikes1,num_spikes2);
-  
+
   % spectral analysis
   dat=dsSelect(data,'roi',{var1,roi1});
   dat=dsCalcPower(dat,'time_limits',options.time_limits);
   Power_MUA1=dat.([var1 '_Power_MUA']);
   Power_SUA1=dat.([var1 '_Power_SUA']);
+  if ~strcmp(reportUI,'matlab') && exist('nanmean') ~= 2 % 'nanmean is not in Octave's path
+    try
+      pkg load statistics; % trying to load octave forge 'statistics' package before using nanmean function
+    catch
+      error('nanmean function is needed, please install the statistics package from Octave Forge');
+    end
+  end
   Power_SUA1.Pxx_mu=nanmean(Power_SUA1.Pxx,2);
   Power_SUA1.Pxx_sd=nanstd(Power_SUA1.Pxx,[],2);
 
@@ -265,7 +272,7 @@ for pair=1:npairs
   Power_SUA2=dat.([var2 '_Power_SUA']);
   Power_SUA2.Pxx_mu=nanmean(Power_SUA2.Pxx,2);
   Power_SUA2.Pxx_sd=nanstd(Power_SUA2.Pxx,[],2);
-  
+
   % store measures
   stats.pairs(cnt).raster1=raster1;
   stats.pairs(cnt).raster2=raster2;
@@ -292,7 +299,7 @@ for pair=1:npairs
   stats.pairs(cnt).Power_SUA1=Power_SUA1;
   stats.pairs(cnt).Power_MUA2=Power_MUA2;
   stats.pairs(cnt).Power_SUA2=Power_SUA2;
-  
+
 %   stats.([var1 '_roi'])=roi1;
 %   stats.([var2 '_roi'])=roi2;
 %   stats.([var1 '_raster'])=raster1;
@@ -320,6 +327,6 @@ stats.options=options;
 %% auto_gen_test_data_flag argout
 if options.auto_gen_test_data_flag
   argout = {stats};
-  
+
   dsUnitSaveAutoGenTestData(argin, argout);
 end

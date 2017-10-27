@@ -1,5 +1,5 @@
 function solve_ode_filepath = dsWriteMatlabSolver(model,varargin)
-%WRITEMATLABSOLVER - write m-file that numerically inteegrates the model
+%WRITEMATLABSOLVER - write m-file that numerically integrates the model
 %
 % Usage:
 %   filepath = dsWriteMatlabSolver(model,varargin)
@@ -179,11 +179,10 @@ if options.save_parameters_flag
     end
   end % one_solve_file_flag
 
-
   if options.verbose_flag
     fprintf('saving params.mat\n');
   end
-  save(param_file_name,'p');
+  save(param_file_name,'p','-v7');
 else
   % insert parameter values into model expressions
   model=dsPropagateParameters(model,'action','substitute', varargin{:});
