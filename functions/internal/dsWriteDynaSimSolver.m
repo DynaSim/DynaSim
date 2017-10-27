@@ -406,7 +406,8 @@ end
 
 %% STATE_VARIABLES
 fprintf(fid,'\n%% STATE_VARIABLES:\n');
-nvals_per_var=zeros(1,length(state_variables));
+nvals_per_var=zeros(1,length(state_variables)); % number of elements
+ndims_per_var=zeros(1,length(state_variables)); % number of dimensions
 IC_expressions=struct2cell(model.ICs);
 for i=1:length(state_variables)
   % initialize var_last
@@ -422,40 +423,51 @@ for i=1:length(state_variables)
   else
     % preallocate state variables
     [pop_size,pop_name]=dsGetPopSizeFromName(model,state_variables{i});
+    ndims_per_var(i)=length(pop_size);
+    nvals_per_var(i)=prod(model.parameters.([pop_name '_Npop']));
     if options.save_parameters_flag
-      fprintf(fid,'%s = zeros(nsamp,%s%s_Npop);\n',state_variables{i},parameter_prefix,pop_name);
+      % use pop size in saved params structure
+      if ndims_per_var(i)==1
+        % 1D population (time index is first dimension)
+        fprintf(fid,'%s = zeros(nsamp,%s%s_Npop);\n',state_variables{i},parameter_prefix,pop_name);
+      else
+        % 2D population (time index is final dimension; will be shifted after simulation)
+        % note: time index is last to avoid needing to squeeze() the matrix
+        fprintf(fid,'%s = zeros([%s%s_Npop,nsamp]);\n',state_variables{i},parameter_prefix,pop_name);
+      end
     else
-      fprintf(fid,'%s = zeros(nsamp,%g);\n',state_variables{i},model.parameters.([pop_name '_Npop']));
+      % hard-code the pop size
+      if ndims_per_var(i)==1
+        % 1D population (time index is first dimension)
+        fprintf(fid,'%s = zeros(nsamp,%g);\n',state_variables{i},model.parameters.([pop_name '_Npop']));
+      else
+        % 2D population (time index is final dimension; will be shifted after simulation)
+        % note: time index is last to avoid needing to squeeze() the matrix
+        fprintf(fid,'%s = zeros([[%s],nsamp]);\n',state_variables{i},num2str(model.parameters.([pop_name '_Npop'])));
+      end
     end
-    nvals_per_var(i)=model.parameters.([pop_name '_Npop']);
-
-%     % preallocate state variables
-%     parts=regexp(state_variables{i},'_','split');
-%
-%     if numel(parts)==4 % has connection mechanism namespace: target_source_mechanism
-%       % state variables defined in connection mechanisms are assumed to
-%       % have dimensionality of the source population
-%       part=parts{2};
-%     else % has intrinsic mechanism or population namespace: target_mechanism
-%       % state variables defined in intrinsic mechanisms or population
-%       % equations have dimensionality of the target population
-%       part=parts{1};
-%     end
-%
-%     if options.save_parameters_flag
-%       fprintf(fid,'%s = zeros(nsamp,%s%s_Npop);\n',state_variables{i},parameter_prefix,part);
-%     else
-%       fprintf(fid,'%s = zeros(nsamp,%g);\n',state_variables{i},model.parameters.([part '_Npop']));
-%     end
-%     nvals_per_var(i)=model.parameters.([part '_Npop'])
 
     % initialize state variables
     if options.downsample_factor==1
-      % set var(1,:)=IC;
-      fprintf(fid,'  %s(1,:) = %s;\n',state_variables{i},IC_expressions{i});
+      if ndims_per_var(i)==1
+        % set var(1,:)=IC;
+        fprintf(fid,'  %s(1,:) = %s;\n',state_variables{i},IC_expressions{i});
+      elseif ndims_per_var(i)==2
+        % set var(:,:,1)=IC;        
+        fprintf(fid,'  %s(:,:,1) = %s;\n',state_variables{i},IC_expressions{i});
+      else
+        error('only 1D and 2D populations are supported a this time.');
+      end
     else
-      % set var(1,:)=var_last;
-      fprintf(fid,'  %s(1,:) = %s_last;\n',state_variables{i},state_variables{i});
+      if ndims_per_var(i)==1
+        % set var(1,:)=var_last;
+        fprintf(fid,'  %s(1,:) = %s_last;\n',state_variables{i},state_variables{i});
+      elseif ndims_per_var(i)==2
+        % set var(:,:,1)=var_last;
+        fprintf(fid,'  %s(:,:,1) = %s_last;\n',state_variables{i},state_variables{i});
+      else
+        error('only 1D and 2D populations are supported a this time.');
+      end
     end
   end %disk_flag
 end %state_variables
@@ -607,8 +619,13 @@ for i=1:length(state_variables)
   if options.downsample_factor==1 && options.disk_flag==0
     % store state directly into state variables on each integration step
     if nvals_per_var(i)>1 % use full 2D matrix indexing
-      index_lasts{i}='(n-1,:)';
-      index_nexts{i}='(n,:)';
+      if ndims_per_var(i)==1 % 1D population
+        index_lasts{i}='(n-1,:)';
+        index_nexts{i}='(n,:)'; 
+      elseif ndims_per_var(i)==2 % 2D population
+        index_lasts{i}='(:,:,n-1)';
+        index_nexts{i}='(:,:,n)';
+      end
     else % use more concise 1D indexing because it is much faster for some Matlab-specific reason...
       index_lasts{i}='(n-1)';
       index_nexts{i}='(n)';
@@ -617,7 +634,11 @@ for i=1:length(state_variables)
     % store state in var_last then update state variables on each downsample_factor integration step
     index_lasts{i}='_last';
     if nvals_per_var(i)>1
-      index_nexts{i}='(n,:)';
+      if ndims_per_var(i)==1 % 1D population
+        index_nexts{i}='(n,:)';
+      elseif ndims_per_var(i)==2 % 2D population
+        index_nexts{i}='(:,:,n)';
+      end
     else
       index_nexts{i}='(n)';
     end
@@ -637,6 +658,7 @@ for i=1:length(odes)
     % #####################################################################
     % COLLECT DELAY DIFFERENTIAL EQUATION INFO
     % search for delays: [state_variables{j} index_lasts{j} '(t-']
+    % note: this only works for 1D populations
     tmp=strrep(strrep([state_variables{j} index_lasts{j}],'(','\('),')','\)');
     if ~isempty(regexp(odes{i},[tmp '\(t'],'once'))
       matches=regexp(odes{i},[tmp '\(t-[\w\.,:]+\)'],'match');
@@ -819,6 +841,15 @@ if ~isempty(model.monitors) && ~strcmp(reportUI,'matlab') && options.disk_flag==
   end
 end
 fprintf(fid,'\nT=T(1:downsample_factor:ntime);\n');
+
+if any(ndims_per_var>1) % is there at least one 2D population?  
+  for i=1:length(state_variables)
+    if ndims_per_var(i)>1
+      % move time index to first dimension
+      fprintf(fid,'%s=shiftdim(%s,%g);\n',state_variables{i},state_variables{i},ndims_per_var(i));
+    end
+  end
+end
 
 % cleanup
 if options.disk_flag==1
