@@ -45,7 +45,7 @@ eqns={
   'dy/dt=r*x-y-x*z'
   'dz/dt=-b*z+x*y'
   'w(t)=x.*y.*z'              % just an example to illustrate the use of monitors in DynaSim (monitor expression follows Matlab's syntax)
-  'monitor w'                 % indicate to variable 'w' during simulation
+  'monitor w'                 % indicate to store variable 'w' during simulation
 };
 data=dsSimulate(eqns, 'tspan',[0 100], 'ic',[1 2 .5], 'solver','rk4', 'study_dir','demo_lorenz');
 
