@@ -297,7 +297,7 @@ for i=1:npops
   % add reserved keywords (parameters and state variables) to name_map
   add_keywords(pop,pop,[PopScope '_']);
   %model.parameters.([pop '_Npop'])=num2str(specification.populations(i).size);
-  model.parameters.([pop '_Npop'])=toString(specification.populations(i).size,0);
+  model.parameters(1).([pop '_Npop'])=toString(specification.populations(i).size,0);
 end
 
 % 1.2 load and combine sub-models from connection mechanisms
