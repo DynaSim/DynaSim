@@ -198,10 +198,23 @@ for index=1:length(text) % loop over lines of text
       end
     case 'fixed_variable'   % var=(expression with grouping or arithmetic), var(#), var([#]), var([# #]), var([#,#]), var(#:#), var(#:end), var([#:#]), var([#:end])
       lhs=regexp(line,'^(\w+)\s*=','tokens','once');
-      rhs=regexp(line,'=(.+)$','tokens','once');
-      name=strtrim(lhs{1}); expression=rhs{1};
-      model.fixed_variables(1).([namespace name]) = expression;
-      name_map(end+1,:) = {name,[namespace name],namespace,'fixed_variables'};
+      if ~isempty(lhs)        
+        rhs=regexp(line,'=(.+)$','tokens','once');
+        name=strtrim(lhs{1}); expression=rhs{1};
+        model.fixed_variables(1).([namespace name]) = expression;
+        name_map(end+1,:) = {name,[namespace name],namespace,'fixed_variables'};
+      else
+        % check for update to fixed variable that is already defined
+        lhs=regexp(line,'^(.+)\(.*\)\s*=','tokens','once');
+        name=strtrim(lhs{1});
+        if isfield(model.fixed_variables(1),[namespace name])
+          % add update to fixed variable definition
+          expression=[model.fixed_variables(1).([namespace name]) ';' line];
+          model.fixed_variables(1).([namespace name]) = expression;
+        else
+          warning('failed to set fixed variable.');
+        end
+      end
       if ~isempty(comment)
         model.comments{end+1}=sprintf('%s (fixed_variable): %s',[namespace name],comment);
       end
