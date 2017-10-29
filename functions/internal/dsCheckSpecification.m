@@ -283,33 +283,32 @@ for i=1:length(spec.populations)
     
     % extract size from equations if present (eg, v[4]'=.., dv[4]/dt=...)
     eqn=spec.populations(i).equations;
-    pattern='((\w+(\[\d+\])'')|(d\w+(\[\d+\])/dt))\s*='; % support size spec, dv[4]/dt
+    %pattern='((\w+(\[\d+\])'')|(d\w+(\[\d+\])/dt))\s*='; % support size spec, dv[4]/dt
+    pattern='((\w+(\[[\d,]+\])'')|(d\w+(\[[\d,]+\])/dt))\s*='; % support size spec, dv[4]/dt and dv[4,5]/dt
     
     % extract all differentials with size specification
     LHSs=regexp(eqn,pattern,'match');
     if ~isempty(LHSs)
       % extract sizes from all differentials (eg, 4 from v[4] or dv[4]/dt)
-      szs=nan(1,length(LHSs));
       for k=1:length(LHSs)
-        tmp=regexp(LHSs{k},'\w+\[(\d+)\]''','tokens','once');
+        tmp=regexp(LHSs{k},'\w+\[([\d,]+)\]''','tokens','once');
         if isempty(tmp)
-          tmp=regexp(LHSs{k},'d\w+\[(\d+)\]/dt','tokens','once');
+          tmp=regexp(LHSs{k},'d\w+\[([\d,]+)\]/dt','tokens','once');
         end
-        szs(k)=str2num(tmp{1});
-        
+        sz=cellfun(@str2double,regexp(tmp{1},',','split'));
+        % check that all vars in same population have same size
+        if k==1
+          sz_first=sz;
+        elseif sz~=sz_first
+          error('all variables in same population must have same size. split ODEs with different sizes into different populations.');
+        end        
         % remove size from ODE in population equations
         old=LHSs{k};
         new=strrep(LHSs{k},['[' tmp{1} ']'],'');
         eqn=strrep(eqn,old,new);
-      end
-      
-      % check that all vars in same population have same size
-      if ~all(szs==szs(1))
-        error('all variables in same population must have same size. split ODEs with different sizes into different populations.');
-      end
-      
+      end      
       spec.populations(i).equations=eqn;
-      spec.populations(i).size=szs(1);
+      spec.populations(i).size=sz;
     end
     
     % add mechanisms embedded in equations to mechanism_list ({M1,M2,...})
