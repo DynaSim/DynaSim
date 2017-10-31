@@ -573,10 +573,11 @@ else
             % Axis indices of populations
             ax_ind_var = xp2.findaxis('variables');
             ax_ind_pop = xp2.findaxis('population');
-            ax_ind_varied = findaxis_varied(xp2);
+            %ax_ind_varied = findaxis_varied(xp2);
+            ax_ind_other = setdiff(1:ndims(xp2),[ax_ind_var, ax_ind_pop]);
 
             % Permute to put varied variables last
-            myorder = [ax_ind_varied(:)', ax_ind_var, ax_ind_pop];
+            myorder = [ax_ind_other(:)', ax_ind_var, ax_ind_pop];
             if length(myorder) > 1
                 xp2 = permute(xp2,myorder);
             end
