@@ -52,8 +52,8 @@ title('Gaussian kernel regression with 20% missing data')
 %
 
 % Check input and output
-error(nargchk(2,4,nargin));
-error(nargoutchk(0,1,nargout));
+narginchk(2,4);
+nargoutchk(0,1);
 if numel(x)~=numel(y)
     error('x and y are in different sizes.');
 end
