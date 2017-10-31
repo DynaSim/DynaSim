@@ -157,8 +157,15 @@ end
   'dim_stacking',[],[],...
   'subplot_handle',@xp_subplot_grid,[],...
   'plot_handle',[],[],...
+  'plotFR_override',[],[false true],...
   },false);
 handles=[];
+
+% If plotFR_override is true, then go directly to dsPlotFR
+if options.plotFR_override
+    handles = dsPlotFR(data,varargin{:});
+    return;
+end
 
 % Pull out fields from options struct
 plot_type = options.plot_type;
