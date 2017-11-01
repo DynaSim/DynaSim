@@ -478,6 +478,10 @@ dsPlot(data);
 % for more examples, see: dynasim/demos/dsLIFnetwork.m
 
 %% Delay differential equations (e.g., axonal delays in network of HH neurons)
+% This example demonstrates (1) creating delay differential  equations with 
+% X_pre(t-delay), and (2) defining mechanisms (e.g., iampa) in the same
+% script as the full model specification  and storing them using 
+% the specification.mechanisms field.
 
 ampa_with_delay={
   'gSYN=.1; ESYN=0; tauD=2; tauR=0.4; delay=20'
