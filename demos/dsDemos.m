@@ -443,15 +443,15 @@ dsPlot(d);
 
 %% Networks of integrate-and-fire neurons with axonal delays and refractory period
 % tau [ms]: membrane time constant (RC)
-% tabs [ms]: absolute refractory period
+% tref [ms]: absolute refractory period
 % delay [ms]: axonal delay
 % tspike: reserved variable for storing past spike times when monitoring spikes
 
 % 1 E-cell driving 1 I-cell
 LIF={
     'dV/dt=(E-V+R*I+noise*randn-@isyn)/tau; V(0)=-65'
-    'if(any(t<tspike+tabs,1))(V=reset)'
-    'tau=10; tabs=10; E=-70; thresh=-55; reset=-75; R=9; I=1.55; noise=100'
+    'if(any(t<tspike+tref,1))(V=reset)'
+    'tau=10; tref=10; E=-70; thresh=-55; reset=-75; R=9; I=1.55; noise=100'
     'monitor V.spikes(thresh)'
      };
 
