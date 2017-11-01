@@ -1,16 +1,16 @@
-function r=ksr(x,y,h,N)
-% KSR   Kernel smoothing regression
+function r=eksr(x,y,h,N)
+% EKSR Epanechnikov Kernel smoothing regression
 %
-% r=ksr(x,y) returns the Gaussian kernel regression in structure r such that
+% r=eksr(x,y) returns the Epanechnikov kernel regression in structure r such that
 %   r.f(r.x) = y(x) + e
 % The bandwidth and number of samples are also stored in r.h and r.n
 % respectively.
 %
-% r=ksr(x,y,h) performs the regression using the specified bandwidth, h.
+% r=eksr(x,y,h) performs the regression using the specified bandwidth, h.
 %
-% r=ksr(x,y,h,n) calculates the regression in n points (default same as input).
+% r=eksr(x,y,h,n) calculates the regression in n points (default same as input).
 %
-% Without output, ksr(x,y) or ksr(x,y,h) will display the regression plot.
+% Without output, eksr(x,y) or eksr(x,y,h) will display the regression plot.
 %
 % Algorithm
 % The kernel regression is a non-parametric approach to estimate the
@@ -20,11 +20,11 @@ function r=ksr(x,y,h,N)
 %
 % where f is a non-parametric function. Based on the kernel density
 % estimation, this code implements the Nadaraya-Watson kernel regression
-% using the Gaussian kernel as follows:
+% using the Epanechnikov kernel as follows:
 %
 % f(x) = sum(kerf((x-X)/h).*Y)/sum(kerf((x-X)/h))
 %
-% See also gkde, ksdensity
+% See also ksr, gkde, ksdensity
 
 % Example 1: smooth curve with noise
 %{
@@ -87,21 +87,27 @@ end
 r.h=h;
 
 % Gaussian kernel function
-kerf=@(z)exp(-z.*z/2)/sqrt(2*pi);
+% kerf = @(z)exp(-z.*z/2)/sqrt(2*pi);
+
+% Epanechnikov kernel function
+kerf = @(z)0.75*(1-z.*z);
 
 r.x=linspace(min(x),max(x),N);
 r.f=zeros(1,N);
 for k=1:N
-    z=kerf((r.x(k)-x)/h);
-    %figure
-    %plot(z)
-    r.f(k)=sum(z.*y)/sum(z);
+    z = kerf((r.x(k)-x)/h);
+    z(z < 0) = 0;
+    r.f(k) = sum(z.*y)/sum(z);
+    % if k >= N/2 && k < N/2 +1
+    %   figure,plot(z)
+    % end
 end
 
 % Plot
 if ~nargout
+    figure
     plot(r.x,r.f,'r',x,y,'bo')
     ylabel('f(x)')
     xlabel('x')
-    title('Kernel Smoothing Regression');
+    title('Epanechnikov Kernel Smoothing Regression');
 end

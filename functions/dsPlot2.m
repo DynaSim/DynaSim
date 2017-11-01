@@ -127,7 +127,7 @@ end
   'do_overlay_shift',false,[false true],...
   'overlay_shift_val',[],[],...
   'do_zscore',[false],[false true],...
-  'plot_type','waveform',{'waveform','waveformErr','imagesc','rastergram','raster','power','heatmapFR','heatmap_sortedFR','meanFR','meanFRdens'},...
+  'plot_type','waveform',{'waveform','waveformErr','imagesc','rastergram','raster','power','heatmapFR','heatmap_sortedFR','meanFR','meanFRdens','FRpanel'},...
   'xlims',[],[],...
   'ylims',[],[],...
   'zlims',[],[],...
@@ -157,8 +157,15 @@ end
   'dim_stacking',[],[],...
   'subplot_handle',@xp_subplot_grid,[],...
   'plot_handle',[],[],...
+  'plotFR_override',[],[false true],...
   },false);
 handles=[];
+
+% If plotFR_override is true, then go directly to dsPlotFR
+if options.plotFR_override
+    handles = dsPlotFR(data,varargin{:});
+    return;
+end
 
 % Pull out fields from options struct
 plot_type = options.plot_type;
@@ -559,6 +566,24 @@ else
             plot_options.args = {plot_options.args{:}, 'plot_type',plot_type};
             data_plothandle = @xp_PlotFR2;
             if ~isempty(plot_handle); data_plothandle = plot_handle; end
+            
+        case {'FRpanel'}
+            data_plothandle = @xp_PlotFRpanel;
+            
+            % Axis indices of populations
+            ax_ind_var = xp2.findaxis('variables');
+            ax_ind_pop = xp2.findaxis('population');
+            %ax_ind_varied = findaxis_varied(xp2);
+            ax_ind_other = setdiff(1:ndims(xp2),[ax_ind_var, ax_ind_pop]);
+
+            % Permute to put varied variables last
+            myorder = [ax_ind_other(:)', ax_ind_var, ax_ind_pop];
+            if length(myorder) > 1
+                xp2 = permute(xp2,myorder);
+            end
+            
+            Ndims_per_subplot = 1 + ~isempty(ax_ind_pop) + ~isempty(ax_ind_var);    % Allows for multiple populations to get passed to dsPlotFR to produce the panel
+            num_embedded_subplots = 0;                                              % No subplotting
     end
 end
 
@@ -571,6 +596,11 @@ end
 % Split available axes into the number of dimensions supported by each
 % axis handle
 switch num_embedded_subplots
+    case 0
+        % Ordering of axis handles
+        function_handles = {@xp_handles_newfig, data_plothandle};   % Specifies the handles of the plotting functions
+        dims_per_function_handle = [1,Ndims_per_subplot];
+        function_args = {{figure_options},{plot_options}};
     case 1
         % Ordering of axis handles
         function_handles = {@xp_handles_newfig, subplot_handle,data_plothandle};   % Specifies the handles of the plotting functions

@@ -17,6 +17,8 @@ function handles = dsPlotFR(data,varargin)
 %     'plot_type': options for sim study mode. Options include 'heatmap',
 %                  'heatmap_sorted' (default), 'meanFR,' 'meanFRdens', and
 %                  'summary'.
+%     'lock_gca' : Plots within currently active axis (gca); doesn't
+%                  open new figures or subplots.
 %
 % Examples:
 % dsPlotFR(data,'bin_size',30,'bin_shift',10);
@@ -27,6 +29,13 @@ function handles = dsPlotFR(data,varargin)
 % 
 % Author: Jason Sherfey, PhD <jssherfey@gmail.com>
 % Copyright (C) 2016 Jason Sherfey, Boston University, USA
+
+
+% Pull out lock_gca from varargin
+options=dsCheckOptions(varargin,{...
+  'lock_gca',false,[true,false],...
+  },false);
+lock_gca = options.lock_gca;
 
 data=dsCheckData(data, varargin{:});
 fields=fieldnames(data);
@@ -61,7 +70,7 @@ end
     % purpose: plot each data set data.(FR_fields{k})
     % plots for N populations (FR data sets) from this simulation
     ht=320; % height per subplot row (=per population or FR data set)
-    handles(end+1)=figure('position',[250 max(50,600-(nsets-1)*ht) 1400 min(ht*nsets,750)]);
+    if ~lock_gca; handles(end+1)=figure('position',[250 max(50,600-(nsets-1)*ht) 1400 min(ht*nsets,750)]); end
     for k=1:nsets % index of firing rate data field
       dat=data(i).(FR_fields{k});
       bins=0:1.05*max(dat(:));
@@ -177,7 +186,7 @@ end
     % plot how avg firing rate for each pop varies with each parameter
     ht=320; % height per subplot row (=per population or FR data set)
     wt=500;
-    handles(end+1)=figure('position',[250 max(50,600-(nsets-1)*ht) min(1500,500+(nvaried-1)*wt) min(ht*nsets,750)]);
+    if ~lock_gca; handles(end+1)=figure('position',[250 max(50,600-(nsets-1)*ht) min(1500,500+(nvaried-1)*wt) min(ht*nsets,750)]); end
     cnt=0;
     for k=1:nsets % populations
       popname=regexp(FR_fields{k},'^([a-zA-Z0-9]+)_','tokens','once');
@@ -212,7 +221,7 @@ end
     if length(varied)==2
       % plots for N populations and 2 varied elements
       % organize and imagesc FRmu(param 1, param 2)
-      handles(end+1)=figure('position',[1150 max(50,600-(nsets-1)*ht) 500 min(ht*nsets,750)]);
+      if ~lock_gca; handles(end+1)=figure('position',[1150 max(50,600-(nsets-1)*ht) 500 min(ht*nsets,750)]); end
       pvals1=unique(params(:,1)); nv1=length(pvals1);
       pvals2=unique(params(:,2)); nv2=length(pvals2);
       for k=1:nsets
