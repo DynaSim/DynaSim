@@ -82,6 +82,7 @@ eqns={
   'if(v>vpeak)(v=c; u=u+d)'
   'I(t)=Iapp*(t>ton&t<toff).*(1+.5*rand(1,Npop))' % define applied input using reserved variables 't' for time and 'dt' for fixed time step of numerical integration
   'monitor I'                            % indicate to store applied input during simulation
+  'monitor w(t)=u.*v'                    % defining a function of state variables to monitor
 };
 data=dsSimulate(eqns, 'time_limits',[0 1000]);
 
