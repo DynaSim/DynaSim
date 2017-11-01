@@ -82,7 +82,7 @@ eqns={
   'if(v>vpeak)(v=c; u=u+d)'
   'I(t)=Iapp*(t>ton&t<toff).*(1+.5*rand(1,Npop))' % define applied input using reserved variables 't' for time and 'dt' for fixed time step of numerical integration
   'monitor I'                            % indicate to store applied input during simulation
-  'monitor w(t)=u.*v'                    % defining a function of state variables to monitor
+  'monitor w(t)=u.*v'                    % defining a function of state variables to monitor (note that monitor expressions follow Matlab's syntax)
 };
 data=dsSimulate(eqns, 'time_limits',[0 1000]);
 
@@ -479,9 +479,9 @@ dsPlot(data);
 % for more examples, see: dynasim/demos/dsLIFnetwork.m
 
 %% Delay differential equations (e.g., axonal delays in network of HH neurons)
-% This example demonstrates (1) creating delay differential  equations with 
+% This example demonstrates (1) creating delay differential  equations with
 % X_pre(t-delay), and (2) defining mechanisms (e.g., iampa) in the same
-% script as the full model specification  and storing them using 
+% script as the full model specification  and storing them using
 % the specification.mechanisms field.
 
 ampa_with_delay={
