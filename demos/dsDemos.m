@@ -492,7 +492,7 @@ s.populations(1).name='HH';
 s.populations(1).equations='dV/dt=@current+10*(t<50);{iNa,iK};V(0)=-65';
 s.connections(1).direction='HH->HH';
 s.connections(1).mechanism_list='iampa';
-s.connections(1).parameters={'gSYN',.1,'netcon',netcon};
+s.connections(1).parameters={'gSYN',.1};
 s.mechanisms(1).name='iampa';
 s.mechanisms(1).equations=ampa_with_delay;
 data=dsSimulate(s,'time_limits',[0 100]);
