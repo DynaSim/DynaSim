@@ -461,7 +461,9 @@ for i=1:length(LHS)
     eval(sprintf('%s=@%s;',LHS{i},RHS{i}));
     eval(sprintf('Y=%s(X);',LHS{i}));
     handles.static_traces(cnt)=line('parent',handles.ax_static_plot,'color',cfg.linecolors(max(1,mod(i,length(cfg.linecolors)))),...
-      'LineStyle',cfg.linetype{max(1,mod(i,length(cfg.linetype)))},'erase','background','xdata',X,'ydata',Y,'zdata',[]);
+      'LineStyle',cfg.linetype{max(1,mod(i,length(cfg.linetype)))},'xdata',X,'ydata',Y,'zdata',[]);
+%     handles.static_traces(cnt)=line('parent',handles.ax_static_plot,'color',cfg.linecolors(max(1,mod(i,length(cfg.linecolors)))),...
+%       'LineStyle',cfg.linetype{max(1,mod(i,length(cfg.linetype)))},'erase','background','xdata',X,'ydata',Y,'zdata',[]);
     cnt=cnt+1;
   end
 end
@@ -837,7 +839,8 @@ for plot_index=1:num_plots
     case 'trace'
       set(handles.axes_data_trace(plot_index),'visible','on');
       if size(handles.line_data,1)>=plot_index
-        set(handles.line_data(plot_index,:),'visible','on');
+        ind=find(handles.line_data(plot_index,:)~=0);
+        set(handles.line_data(plot_index,ind),'visible','on');
       end
     case 'image'
       set(handles.axes_data_image(plot_index),'visible','on');    
@@ -857,7 +860,8 @@ for plot_index=num_plots+1:cfg.max_num_plots
   set(handles.list_cells(plot_index),'visible','off');
   set(handles.axes_data_trace(plot_index),'visible','off');
   if size(handles.line_data,1)>=plot_index
-    set(handles.line_data(plot_index,:),'visible','off');
+    ind=find(handles.line_data(plot_index,:)~=0);    
+    set(handles.line_data(plot_index,ind),'visible','off');
   end
   set(handles.axes_data_image(plot_index),'visible','off');
   set(handles.img_data(plot_index),'visible','off');
@@ -888,14 +892,17 @@ for plot_index=1:num_plots
         if size(handles.line_data,1)>=plot_index && size(handles.line_data,2)>=line_index && ishandle(handles.line_data(plot_index,line_index)) && handles.line_data(plot_index,line_index)>0
           set(handles.line_data(plot_index,line_index),'ydata',plot_Y(:,line_index),'xdata',(0:cfg.ntime-1)*cfg.dt,'visible','on');
         else
-          handles.line_data(plot_index,line_index)=line('parent',handles.axes_data_trace(plot_index),'color',cfg.linecolors(max(1,mod(line_index,length(cfg.linecolors)))),'LineStyle',cfg.linetype{max(1,mod(line_index,length(cfg.linetype)))},'erase','background','xdata',(0:cfg.ntime-1)*cfg.dt,'ydata',plot_Y(:,line_index),'zdata',[],'tag','simview_trace');
+          %handles.line_data(plot_index,line_index)=line('parent',handles.axes_data_trace(plot_index),'color',cfg.linecolors(max(1,mod(line_index,length(cfg.linecolors)))),'LineStyle',cfg.linetype{max(1,mod(line_index,length(cfg.linetype)))},'erase','background','xdata',(0:cfg.ntime-1)*cfg.dt,'ydata',plot_Y(:,line_index),'zdata',[],'tag','simview_trace');
+          handles.line_data(plot_index,line_index)=line('parent',handles.axes_data_trace(plot_index),'color',cfg.linecolors(max(1,mod(line_index,length(cfg.linecolors)))),'LineStyle',cfg.linetype{max(1,mod(line_index,length(cfg.linetype)))},'xdata',(0:cfg.ntime-1)*cfg.dt,'ydata',plot_Y(:,line_index),'zdata',[],'tag','simview_trace');
         end
       end
       ax=handles.axes_data_trace(plot_index);
       ylims=[cfg.ymin(plot_index) cfg.ymax(plot_index)];
       % hide other lines
       if size(handles.line_data,2)>num_elems
-        set(handles.line_data(plot_index,num_elems+1:end),'visible','off');
+        ind=num_elems+1:size(handles.line_data,2);
+        ind=ind(handles.line_data(plot_index,ind)~=0);
+        set(handles.line_data(plot_index,ind),'visible','off');
       end
     case 'image'
       set(handles.img_data(plot_index),'cdata',plot_Y','ydata',1:num_elems,'xdata',(0:cfg.ntime-1)*cfg.dt);
@@ -1034,6 +1041,9 @@ elem_names=cfg.elem_names(vind);
 yind=[]; 
 for i=1:length(sel_var_names)
   cind=find(strcmp(sel_var_names{i},elem_names)); % all indices to this var
+  if max(sel_cell_inds)>length(cind)    
+    sel_cell_inds=sel_cell_inds(sel_cell_inds<=length(cind));
+  end
   yind=[yind vind(cind(sel_cell_inds))];
 end
 plot_Y=cfg.Y(cfg.t_plot_indices,yind);
