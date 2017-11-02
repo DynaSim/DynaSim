@@ -298,46 +298,50 @@ dsPlot(data,'plot_type','power');
 % How to: set 'cluster_flag' to 1
 % Requirement: you must be logged on to a cluster that recognizes 'qsub'
 
-% Run three simulations in parallel jobs and save the simulated data
-eqns='dv/dt=@current+I; {iNa,iK}';
-vary={'','I',[0 10 20]};
-dsSimulate(eqns, 'save_data_flag',1, 'study_dir','demo_cluster_1',...
-                   'vary',vary, 'cluster_flag',1, 'overwrite_flag',1, 'verbose_flag',1);
-% tips for checking job status:
-% !qstat -u <YOUR_USERNAME>
-% !cat ~/batchdirs/demo_cluster_1/pbsout/sim_job1.out
-data=dsImport('demo_cluster_1');
-dsPlot(data);
+if 0 
+  % Execute the following cluster examples from a login node
+  
+  % Run three simulations in parallel jobs and save the simulated data
+  eqns='dv/dt=@current+I; {iNa,iK}';
+  vary={'','I',[0 10 20]};
+  dsSimulate(eqns, 'save_data_flag',1, 'study_dir','demo_cluster_1',...
+                     'vary',vary, 'cluster_flag',1, 'overwrite_flag',1, 'verbose_flag',1);
+  % tips for checking job status:
+  % !qstat -u <YOUR_USERNAME>
+  % !cat ~/batchdirs/demo_cluster_1/pbsout/sim_job1.out
+  data=dsImport('demo_cluster_1');
+  dsPlot(data);
 
-% Repeat but also save plotted data
-eqns='dv/dt=@current+I; {iNa,iK}';
-vary={'','I',[0 10 20]};
-dsSimulate(eqns, 'save_data_flag',1, 'study_dir','demo_cluster_2',...
-                   'vary',vary, 'cluster_flag',1, 'overwrite_flag',1, 'verbose_flag',1,...
-                   'plot_functions',@dsPlot);
-% !cat ~/batchdirs/demo_cluster_2/pbsout/sim_job1.out
+  % Repeat but also save plotted data
+  eqns='dv/dt=@current+I; {iNa,iK}';
+  vary={'','I',[0 10 20]};
+  dsSimulate(eqns, 'save_data_flag',1, 'study_dir','demo_cluster_2',...
+                     'vary',vary, 'cluster_flag',1, 'overwrite_flag',1, 'verbose_flag',1,...
+                     'plot_functions',@dsPlot);
+  % !cat ~/batchdirs/demo_cluster_2/pbsout/sim_job1.out
 
-% Save multiple plots and pass custom options to each plotting function
-eqns='dv/dt=@current+I; {iNa,iK}';
-vary={'','I',[0 10 20]};
-dsSimulate(eqns, 'save_data_flag',1, 'study_dir','demo_cluster_3',...
-                   'vary',vary, 'cluster_flag',1, 'overwrite_flag',1, 'verbose_flag',1,...
-                   'plot_functions',{@dsPlot,@dsPlot},...
-                   'plot_options',{{},{'plot_type','power'}});
-% !cat ~/batchdirs/demo_cluster_3/pbsout/sim_job1.out
+  % Save multiple plots and pass custom options to each plotting function
+  eqns='dv/dt=@current+I; {iNa,iK}';
+  vary={'','I',[0 10 20]};
+  dsSimulate(eqns, 'save_data_flag',1, 'study_dir','demo_cluster_3',...
+                     'vary',vary, 'cluster_flag',1, 'overwrite_flag',1, 'verbose_flag',1,...
+                     'plot_functions',{@dsPlot,@dsPlot},...
+                     'plot_options',{{},{'plot_type','power'}});
+  % !cat ~/batchdirs/demo_cluster_3/pbsout/sim_job1.out
 
-% Post-simulation analyses can be performed similarly by passing
-% analysis function handles and options using 'analysis_functions' and
-% 'analysis_options'.
+  % Post-simulation analyses can be performed similarly by passing
+  % analysis function handles and options using 'analysis_functions' and
+  % 'analysis_options'.
 
-% Note: options will be passed to plot and analysis functions in the order
-% given. You can pass handles and options for any built-in, pre-packaged,
-% or custom functions.
+  % Note: options will be passed to plot and analysis functions in the order
+  % given. You can pass handles and options for any built-in, pre-packaged,
+  % or custom functions.
 
-% Run on cluster with compilation
-dsSimulate(eqns, 'save_data_flag',1, 'study_dir','demo_cluster_4','compile_flag',1,...
-                   'vary',vary, 'cluster_flag',1, 'overwrite_flag',1, 'verbose_flag',1);
-
+  % Run on cluster with compilation
+  dsSimulate(eqns, 'save_data_flag',1, 'study_dir','demo_cluster_4','compile_flag',1,...
+                     'vary',vary, 'cluster_flag',1, 'overwrite_flag',1, 'verbose_flag',1);
+                   
+end
 
 % %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% MORE FEATURES
@@ -348,11 +352,6 @@ dsSimulate(eqns, 'save_data_flag',1, 'study_dir','demo_cluster_4','compile_flag'
 % 'compile_flag' option in dsSimulate. Note: compiling the model can
 % take several seconds to minutes; however, it only compiles the first time
 % it is run and is significantly faster on subsequent runs.
-
-eqns={
-  'dv/dt=Iapp+@current+noise*randn(1,N_pop); Iapp=0; noise=0'
-  'monitor iGABAa.functions, iAMPA.functions'
-};
 
 data=dsSimulate(s, 'compile_flag',1, 'study_dir','demo_sPING_3_compile');
 dsPlot(data);
