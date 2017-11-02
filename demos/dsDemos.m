@@ -217,7 +217,7 @@ s.populations(2).name='I';
 s.populations(2).size=20;
 s.populations(2).equations=eqns;
 s.populations(2).mechanism_list={'iNa','iK'};
-s.populations(2).parameters={'Iapp',0,'gNa',120,'gK',36,'noise',40};
+s.populations(2).parameters={'Iapp',0,'gNa',120,'gK',36,'noise',10};
 s.connections(1).direction='I->E';
 s.connections(1).mechanism_list={'iGABAa'};
 s.connections(1).parameters={'tauD',10,'gSYN',.1,'netcon','ones(N_pre,N_post)'};
@@ -228,11 +228,20 @@ s.connections(2).parameters={'tauD',2,'gSYN',.1,'netcon',ones(80,20)};
 %% Simulate Sparse Pyramidal-Interneuron-Network-Gamma (sPING)
 data=dsSimulate(s);
 
-dsPlot(data); % <--  4 in DynaSim paper
+dsPlot(data); % <-- Figure 4 in DynaSim paper
 dsPlot(data,'variable',{'E_v','E_I_iGABAa_ISYN'});
 
 % View the connection mechanism file:
 [~,eqnfile]=dsLocateModelFiles('iAMPA.mech'); edit(eqnfile{1});
+
+%% Explore sPING in DynaSim GUI
+
+dynasim(s); % Display model "s" in the DynaSim GUI
+
+% Notes: 
+% - DynaSim GUI is only supported in MATLAB at this time.
+% - Launching the GUI without a model (i.e., by executing "dynasim") 
+%   will load a default demo network.
 
 % %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% SAVING SIMULATED DATA
