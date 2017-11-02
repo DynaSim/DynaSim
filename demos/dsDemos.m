@@ -41,14 +41,13 @@ cd(output_directory);
 
 eqns={
   's=10; r=27; b=2.666'
-  'dx/dt=s*(y-x)'
-  'dy/dt=r*x-y-x*z'
-  'dz/dt=-b*z+x*y'
+  'dx/dt=s*(y-x);   x(0)=1'
+  'dy/dt=r*x-y-x*z; y(0)=2'
+  'dz/dt=-b*z+x*y;  z(0)=.5'
 };
-data=dsSimulate(eqns, 'time_limits',[0 100], 'ic',[1 2 .5], 'solver','rk4');
+data=dsSimulate(eqns, 'time_limits',[0 100], 'solver','rk4');
 
 % time_limits: time limits on integration [ms]
-% ic: initial conditions
 % solver: numerical method to use (default: rk4 = "4th-order Runge-Kutta")
 
 % All models are numerically integrated using a DynaSim solver function
