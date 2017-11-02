@@ -252,7 +252,7 @@ dynasim(s); % Display model "s" in the DynaSim GUI
 % Example using the previous sPING model:
 data=dsSimulate(s,'save_data_flag',1,'study_dir','demo_sPING_1');
 
-% Saving large data files:
+% Tip for saving large data files:
 % - By default data is saved in compatible mode between Matlab and Octave ('matCompatibility_flag' set to 1, i.e., data is saved in '-v7' mat format).
 %   - Unfortunately, '-v7' mat format is not able to save variables > 2GB.
 %   - If compatible saving fails, data is saved in '-v7.3' format (Matlab), or in '-hdf5' format (Octave). This allows that data can be stored in all its integrity.
