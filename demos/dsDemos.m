@@ -414,6 +414,7 @@ s.populations.parameters={'stim_amp',5,'noise_amp',1e3};
 dsPlot(dsSimulate(s,'time_limits',T));
 
 % Layer 2/3 somatosensory RS/FS network (adapted from Kramer 2008):
+% Note that the entire model is specified without writing any equations!
 s=[];
 s.populations(1).equations='RS';              % excitatory (E) population
 s.populations(1).mechanism_list={'stim'};     % tonic stimulation
@@ -428,6 +429,10 @@ s.connections(2).parameters={'gSYN',1,'tauD',10}; % strength and time constant o
 dsPlot(dsSimulate(s,'time_limits',T));
 
 %% Multicompartment neurons
+
+% Compartments can be specified using the "populations" field or the
+% "compartments" field; the latter is an alias for the former; it was
+% added for conceptual clarity in the model specification.
 
 % Excitatory cell S driving two-comparmtent E-cell
 s=[];
@@ -445,7 +450,8 @@ s.connections(2).mechanism_list='iCOM';
 d=dsSimulate(s);
 dsPlot(d);
 
-% for more examples, see: dynasim/demos/examples/Multicompartment_PFC_neurons
+% For more examples that include compartmental dimensions/geometry, see
+% dynasim/demos/examples/Multicompartment_PFC_neurons
 
 %% Networks of integrate-and-fire neurons with axonal delays and refractory period
 % tau [ms]: membrane time constant (RC)
@@ -482,7 +488,7 @@ s.mechanisms(1).equations=iampa;
 data=dsSimulate(s,'time_limits',[0 200],'solver','rk1','dt',.01);
 dsPlot(data);
 
-% for more examples, see: dynasim/demos/dsLIFnetwork.m
+% For more examples, including STDP, see: dynasim/demos/dsLIFnetwork.m
 
 %% Delay differential equations (e.g., axonal delays in network of HH neurons)
 % This example demonstrates (1) creating delay differential  equations with
