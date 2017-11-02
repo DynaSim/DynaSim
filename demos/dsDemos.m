@@ -23,7 +23,7 @@ end
 output_directory = dsGetConfig('demos_path');
 
 % move to root directory where outputs will be saved
-mkdirSilent(output_directory);
+mkdir(output_directory);
 cd(output_directory);
 
 % Here we go!
