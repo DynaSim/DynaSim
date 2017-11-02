@@ -219,10 +219,10 @@ s.populations(2).mechanism_list={'iNa','iK'};
 s.populations(2).parameters={'Iapp',0,'gNa',120,'gK',36,'noise',10};
 s.connections(1).direction='I->E';
 s.connections(1).mechanism_list={'iGABAa'};
-s.connections(1).parameters={'tauD',10,'gSYN',.1,'netcon','ones(N_pre,N_post)'};
+s.connections(1).parameters={'tauD',10,'gSYN',.1,'netcon','ones(N_pre,N_post)'}; % connectivity matrix defined using a string that evalutes to a numeric matrix
 s.connections(2).direction='E->I';
 s.connections(2).mechanism_list={'iAMPA'};
-s.connections(2).parameters={'tauD',2,'gSYN',.1,'netcon',ones(80,20)};
+s.connections(2).parameters={'tauD',2,'gSYN',.1,'netcon',ones(80,20)}; % connectivity set using a numeric matrix defined in script
 
 %% Simulate Sparse Pyramidal-Interneuron-Network-Gamma (sPING)
 data=dsSimulate(s);
