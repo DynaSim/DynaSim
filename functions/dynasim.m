@@ -8,6 +8,13 @@
 % Copyright (C) 2016 Jason Sherfey, Boston University, USA
 
 function dynasim(spec)
+
+% abort if not running in MATLAB
+if ~strcmp(reportUI,'matlab')
+  warning('DynaSim GUI is not supported in GNU Octave at this time.');
+  return
+end
+
 global handles SPEC MODEL cfg LASTSPEC LASTCFG
 handles=[];
 
