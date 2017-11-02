@@ -444,18 +444,31 @@ for i=1:length(spec.populations)
         % set in population equations if not already defined there
         for ff=1:length(found_words)
           found_word=found_words{ff};
+          precision=8; % number of digits allowed for user-supplied values
+          found_value = toString(vals{strcmp(found_word,keys)},precision);
           
           % check if not explicitly set in population equations
           if isempty(regexp(eqn,[';\s*' found_word '\s*='],'once')) && ... % not in middle or at end
-             isempty(regexp(eqn,['^' found_word '\s*='],'once')) % not at beginning
-            
-            % explicitly set in population equations
+             isempty(regexp(eqn,['^' found_word '\s*='],'once')) % not at beginning            
+            % append and explicitly set in population equations
             if eqn(end)~=';', eqn(end+1)=';'; end % add semicolon if necessary
-            precision=8; % number of digits allowed for user-supplied values
-            found_value = toString(vals{strcmp(found_word,keys)},precision);
             eqn=[eqn sprintf(' %s=%s;',found_word,found_value)];
-%           else
-%             keyboard;
+          else
+            % update values in population equations
+            old=regexp(eqn,[';\s*' found_word '\s*=\s*[\w\.'']+'],'match','once'); % in middle or at end
+            if ~isempty(old)
+%               % remove semicolon for proper substitution using dsStrrep
+%               old=old(2:end);
+              % replace value in middle or at end
+              new=['; ' found_word '=' found_value];
+%               new=[' ' found_word '=' found_value];
+            else
+              % replace value at the beginning
+              old=regexp(eqn,['^' found_word '\s*=\s*[\w\.'']+'],'match','once');
+              new=[found_word '=' found_value];
+            end
+            eqn=strrep(eqn,old,new); % update value in equations
+%             eqn=dsStrrep(eqn,old,new); % update value in equations
           end
         end
         spec.populations(i).equations=eqn;
