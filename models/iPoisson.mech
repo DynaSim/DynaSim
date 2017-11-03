@@ -21,10 +21,10 @@ s=getPoissonGating(baseline,DC,AC,f,phi,onset,offset,tau,T,Npop);
 gPoisson(t)=gext.*s(k,:)
 
 % input synaptic current
-IPoisson(V)=-gPoisson(t).*(V-Eext);
+IPoisson(X)=-gPoisson(t).*(X-Eext);
 
 % monitor
 monitor gPoisson
 
 % linker
-@current += IPoisson(V)
+@current += IPoisson(X)
