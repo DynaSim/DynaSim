@@ -514,3 +514,43 @@ s.mechanisms(1).name='iampa';
 s.mechanisms(1).equations=ampa_with_delay;
 data=dsSimulate(s,'time_limits',[0 100]);
 figure; plot(data.time,data.HH_V);
+
+%% Poisson synaptic inputs
+
+eqns='dV/dt=@current; {iNa,iK,iPoisson}; V(0)=-65; DC=2000; gext=.01';
+data=dsSimulate(eqns,'time_limits',[0 1000]);
+dsPlot(data,'variable',{'V','gPoisson'});
+
+% REFERENCE (default iPoisson parameters)
+% % poisson parameters
+% baseline=0;     % sp/s, baseline rate
+% DC=2000;        % sp/s, steady component of the signal
+% AC=0;           % sp/s, oscillatory component of the signal
+% f=0;            % Hz, modulation frequency of the signal
+% phi=0;          % radians, phase at which the signal begins
+% onset=0;        % ms, start time of signal
+% offset=inf;     % ms, stop time of signal
+% 
+% % synaptic parameters
+% gext=.01;       % max synaptic conductance
+% Eext=0;         % mV, synaptic reversal potential
+% tau=2;          % ms, synaptic time constant
+
+%% Tips for efficient simulation
+
+downsample_factor=10; % downsampling saves time by recording fewer time points
+compile_flag=1;       % takes longer to compile on 1st run; faster on subsequent runs
+                      % Note: compilation is most beneficial when Npop>1.
+solver='euler';       % Euler integration requires fewer calculations than 4th-order Runge Kutta
+dt=.01;               % increase time step as long as solution converges
+
+eqns='dv/dt=@current+I; {iNa,iK}';
+
+% run and compile MEX file
+data=dsSimulate(eqns,'vary',{'I',10},'downsample_factor',downsample_factor,...
+  'compile_flag',compile_flag,'solver',solver,'dt',dt);
+dsPlot(data);
+
+% sets of simulations:
+% multinode (on a cluster): cluster_flag=1;
+% multicore (local simulation): parallel_flag=1;
