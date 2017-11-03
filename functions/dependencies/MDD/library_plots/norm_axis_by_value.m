@@ -26,7 +26,7 @@ obj = obj.unpackDim(axis_pack_dim, axis_dim);
 
 % Removing axis value which will be used for normalization, and replicating
 % the resulting object to be the same size as the original object.
-obj_denom = obj.axissubset(axis_dim, axis_value);
+obj_denom = obj.axisSubset(axis_dim, axis_value);
 obj_denom = obj_denom.permute([1:(axis_dim - 1) (axis_dim + 1):ndims(obj_denom) axis_dim]);
 obj_denom.axis(end) = [];
         

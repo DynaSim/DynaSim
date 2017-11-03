@@ -5,6 +5,19 @@ function hsg = xp_subplot_grid_adaptive (xp, dim_order, max_subplot_side, displa
     
     hxp = struct;
     
+%     if nargin < 2, op = struct; end
+%     
+%     if isempty(op), op = struct; end;
+%     
+%     op = struct_addDef(op,'transpose_on',0);
+%     op = struct_addDef(op,'display_mode',0);
+%     op = struct_addDef(op,'subplotzoom_enabled',1);
+%     op = struct_addDef(op,'legend1',[]);
+%     op = struct_addDef(op,'do_colorbar',false);
+%     op = struct_addDef(op,'max_legend',20);
+%     op = struct_addDef(op,'force_rowvect',false);
+%     op = struct_addDef(op,'zlims',[]);
+    
     if nargin < 5
         transpose_on = [];
     end
@@ -66,7 +79,7 @@ function hsg = xp_subplot_grid_adaptive (xp, dim_order, max_subplot_side, displa
     open_figures = findall(0, 'Type', 'figure');
     
     if ~isempty(open_figures)
-        if isstruct(open_figures)
+        if isa(open_figures, 'matlab.ui.Figure')
             last_figure = max([open_figures(:).Number]);
         elseif isnumeric(open_figures)
             last_figure = max(open_figures);

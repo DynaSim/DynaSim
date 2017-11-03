@@ -102,7 +102,7 @@ function varargout = recursiveFunc_2(xp,function_handles,dimensions,function_arg
 %         error('Total number of entries supplied in dimensions must equal ndims(xp)');
 %     end
 
-    sz = size(xp);
+    size_xp = size(xp);
     if length(function_handles) > 1
         
         % xp_temp = permute(xp, [dimensions{1}, cell2mat(dimensions{2:end})]);
@@ -110,24 +110,25 @@ function varargout = recursiveFunc_2(xp,function_handles,dimensions,function_arg
         % Set up a new MDD object with dimensions matching current
         % function handle
         xp2 = xp.reset;                         % Create a new MDD object
-        sz2 = sz(dimensions{1});
-        ndims2 = length(dimensions{1});
-        total_calls = prod(sz2);
+        size_xp2 = size_xp(dimensions{1});
+        ndims_xp2 = length(dimensions{1});
+        total_calls = prod(size_xp2);
         
-        selection_curr = cell(1,length(sz));
+        [xp2_indices{1:ndims_xp2}] = ind2sub(size_xp2, 1:total_calls);      % xp2 will loop through chosen dimensions
         
-        clear output_indices
-        [xp2_indices{1:ndims2}] = ind2sub(sz2, 1:total_calls);      % xp2 will loop through chosen dimensions
+        xp2_indices = cat(1, xp2_indices{:})';
         
-        xp2_indices = num2cell(cat(1, xp2_indices{:})');
+        if ndims_xp2 == 1, xp2_indices = [xp2_indices ones(size(xp2_indices))]; end
+        
+        xp2_indices = num2cell(xp2_indices);
         
         xp_indices = cell(1, length(xp.axis));                      % Initialize xp_indices
         
         for call = 1:total_calls
             
-            xp_indices(dimensions{1}) = xp2_indices(call, :);
+            xp_indices(dimensions{1}) = xp2_indices(call, 1:ndims_xp2);
             
-            mydata{xp2_indices{call, :}} = @() recursiveFunc_2(xp.subset(xp_indices{:}),...
+            mydata{xp2_indices{call, :}} = @() recursiveFunc(xp.subset(xp_indices{:}),...
                 function_handles(2:end), dimensions(2:end), function_arguments(2:end));
             
         end
@@ -164,11 +165,21 @@ function dimensions = dimensions_regex_2_index(xp,dimensions)
                 dim_curr{j} = findaxis_mod(xp,dim_curr{j});
             end
             
-            if any(cellfun(@length,dim_curr) > 1); error('Ambiguous dimension supplied'); end
+            if any(cellfun(@length,dim_curr) > 1)
+                warning('Ambiguous dimension supplied')
+            end
             
-            dim_curr = cell2mat(dim_curr);
+            try
+                dim_curr = cell2mat(dim_curr);
+            catch err
+                error('Ambiguous dimension supplied, unable to create matrix of dimensions for recursiveFunc.')
+                display(err)
+            end
+            
         elseif ischar(dim_curr)
+            
             dim_curr = findaxis_mod(xp,dim_curr);
+        
         end
         dimensions{i} = dim_curr;
     end

@@ -52,7 +52,7 @@ function hxp = xp_handles_newfig (xp, op)
     end
     
     if op.save_figures
-        mkdir(foldername);
+        mkdirSilent(foldername);
     end
     
     % Scale down default font size if increased save_res
@@ -87,7 +87,7 @@ function hxp = xp_handles_newfig (xp, op)
             end
             
             set(hxp.hcurr(i),'PaperPositionMode','auto');
-            tic; print(hxp.hcurr(i),'-dpng',['-r' num2str(op.save_res)],'-opengl',fullfile(foldername,filename));toc
+            tic; print(hxp.hcurr(i),'-dpng',['-r' num2str(op.save_res)],fullfile(foldername,filename));toc
             close(hxp.hcurr(i));
         end
         
@@ -98,3 +98,20 @@ function hxp = xp_handles_newfig (xp, op)
 end
 
 
+function varargout = mkdirSilent(output_path,varargin)
+% makes dir if doesn't exist, otherwise does nothing
+
+suppress_output = 1;
+
+if ~exist(output_path,'file')
+    if ~suppress_output
+        fprintf('Creating %s \n', output_path);
+    end
+    %system( ['mkdir ' output_path]);
+    [varargout{1:nargout}] = mkdir(output_path,varargin{:});   % Outputs are supplied simply to suppress warning
+    % message for existing folder.
+else
+    if ~suppress_output; fprintf('Folder %s already exists. Doing nothing.\n',output_path); end
+end
+
+end

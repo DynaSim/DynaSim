@@ -16,9 +16,6 @@ function [obj2, ro] = subset(obj,varargin)
 %   ro:  if regular expressions are used, contains regular expressions and 
 %        results of regexp 'start' indicies.
 
-% Verify that size of obj is correct
-checkDims(obj);
-
 debug_mode = false;
 
 % Check for numericsAsValuesFlag

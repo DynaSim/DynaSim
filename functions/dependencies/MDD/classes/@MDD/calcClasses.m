@@ -15,7 +15,7 @@ function [out, outsimple] = calcClasses(input,field_type)
             elseif iscell(input)
                 if iscellnum(input)
                     out = 'cellnum';
-                elseif all(cellfun(@(s) isa(s,'MDD'),input(:)))
+                elseif all(cellfun(@isaMDD,input(:)))
                     out = 'cellMDD';
                 else
                     out = 'cell';
@@ -80,4 +80,8 @@ function [out, outsimple] = calcClasses(input,field_type)
     outsimple = strrep(outsimple,'cellnum','cell');
     outsimple = strrep(outsimple,'cellMDD','cell');
 
+    %% Nested fn
+  function out = isaMDD(in)
+    out = isa(in,'MDD');
+  end
 end

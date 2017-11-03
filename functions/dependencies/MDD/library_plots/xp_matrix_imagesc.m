@@ -21,9 +21,8 @@ function hxp = xp_matrix_imagesc (xp, options)
     if ~isfield(options,'ydat'); options.ydat = []; end
     if ~isfield(options,'zlims'); options.zlims = []; end
     if ~isfield(options,'do_colorbar'); options.do_colorbar = false; end
-            % Display_mode: 0-Just plot directly
-                          % 1-Plot as an image (cdata)
-                          % 2-Save to a figure file
+    options = struct_addDef(options,'ColorMap',[]);
+
 
     transpose_on = options.transpose_on;
     xlims = options.xlims;
@@ -32,6 +31,7 @@ function hxp = xp_matrix_imagesc (xp, options)
     ydat = options.ydat;
     zlims = options.zlims;
     do_colorbar = options.do_colorbar;
+    ColorMap = options.ColorMap;
 
 
     if transpose_on
@@ -71,5 +71,7 @@ function hxp = xp_matrix_imagesc (xp, options)
     end
 
     axis xy
+    
+    if ~isempty(ColorMap); colormap(ColorMap); end
 
 end

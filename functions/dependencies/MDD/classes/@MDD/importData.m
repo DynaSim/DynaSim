@@ -3,7 +3,7 @@ function obj = importData(obj, data, axis_vals, axis_names)
 
 % Note: functionality can be called from a static (ie class) or object method
 %   obj = ImportData(data,axis_vals,axis_names) % uppercase method
-%   obj = importData(obj, data,axis_vals,axis_names) % lowercase method
+%   obj = obj.importData(data,axis_vals,axis_names) % lowercase method
 
 obj.data_pr = data;
 obj = obj.fixAxes;
