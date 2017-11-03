@@ -201,7 +201,7 @@ data=dsSimulate('HH.pop');
   % note: dsLocateModelFiles accepts DynaSim structures (model, data, specification, or studyinfo)
   % as inputs and returns all associated model files.
 [~,eqnfile]=dsLocateModelFiles('HH.pop');  
-  % note: can also be used to locate .eqns and .mech model files
+  % note: can also be used to locate .pop and .mech model files
 % Open the model file:
 edit(eqnfile{1}); % compare to the above list of equations
 % tip: you can use dsLocateModelFiles to see what model files will be used
