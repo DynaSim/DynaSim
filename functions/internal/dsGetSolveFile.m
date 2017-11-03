@@ -21,6 +21,9 @@ function solve_file = dsGetSolveFile(model,studyinfo,varargin)
 %
 % See also: dsWriteDynaSimSolver, dsCompareSolveFiles, dsPrepareMEX,
 %           dsSimulate, dsCreateBatch
+%
+% Author: Jason Sherfey, PhD <jssherfey@gmail.com>
+% Copyright (C) 2016 Jason Sherfey, Boston University, USA
 
 % Check inputs
 opts=[];
@@ -48,17 +51,22 @@ options=dsCheckOptions(varargin,{...
   'verbose_flag',0,{0,1},...
   'parallel_flag',0,{0,1},...     % whether to run simulations in parallel (using parfor)
   'compile_flag',0,{0,1},... % exist('codegen')==6, whether to compile using coder instead of interpreting Matlab
-  'mex_dir',[],[],... % Directory to search for pre-compiled solve files (solve*_mex*)
+  'mex_dir_flag',1,{0,1},... % Flag to tell whether or not to search in mex_dir for pre-compiled solve files (solve*_mex*).
+  'mex_dir',[],[],... % Directory to search for pre-compiled mex files. Can be relative to 'study_dir' or absolute path.
   'auto_gen_test_data_flag',0,{0,1},...
   'unit_test_flag',0,{0,1},...
   },false);
-  
+
 if ~isempty(opts)
   % combine default options and user-supplied options w/ the latter
   % overriding the former
   warning('off','catstruct:DuplicatesFound');
   options=catstruct(options,opts);
   options=orderfields(options,fields);
+end
+
+if isempty(options.mex_dir)
+    options.mex_dir = dsGetConfig('mex_path');
 end
 
 if options.verbose_flag
@@ -106,6 +114,14 @@ else
   solve_file=['solve_ode_' datestr(now,'yyyymmddHHMMSS_FFF') '.m'];
 end
 
+if ~strcmp(reportUI,'matlab') && ~strcmp(solve_file,'solve_ode.m')
+  wrn_fnc = warning('query', 'Octave:function-name-clash');
+  if strcmp(wrn_fnc.state,'on')
+    fprintf('Switching off ''function-name-clash'' warnings because of solve_ode suffix.\n');
+    warning('off', 'Octave:function-name-clash');
+  end
+end
+
 [fpath,fname,fext]=fileparts2(solve_file);
 
 if isempty(fpath)
@@ -115,7 +131,7 @@ if isempty(fpath)
   else
     solve_file=fullfile(options.study_dir,'solve',[fname fext]);
   end
-  
+
   % convert relative path to absolute path
   solve_file = getAbsolutePath(solve_file);
 end
@@ -154,15 +170,15 @@ if ~exist(solve_file,'file')
                 % design: dsWriteMatlabSolver should be very similar to
                 % dsWriteDynaSimSolver except have a subfunction with an odefun
                 % format variation and main function that calls odeset and
-                % feval. 
+                % feval.
                 % DynaSimToOdefun(): a function called outside of
                 % dsSimulate. it should evaluate fixed_variables and
                 % return @odefun with all substitutions. dsSimulate
                 % should be able to handle: dsSimulate(@odefun,'tspan',tspan,'ic',ic)
   end
   solve_file=dsCompareSolveFiles(solve_file_m);               % First search in local solve folder...
-  if options.compile_flag
-    solve_file=dsCompareSolveFiles(solve_file,options.mex_dir); % Then search in mex_dir (if it exists and if compile_flag==1).
+  if options.compile_flag && options.mex_dir_flag
+    solve_file=dsCompareSolveFiles(solve_file,options.mex_dir,options.verbose_flag); % Then search in mex_dir (if it exists and if compile_flag==1).
   end
 else
   if options.verbose_flag

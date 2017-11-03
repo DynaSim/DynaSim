@@ -61,6 +61,9 @@ function [data,studyinfo] = dsImport(file,varargin)
 % - achieve by calling function dsSelect() at end of this function.
 
 % See also: dsSimulate, dsExportData, dsCheckData, dsSelect
+% 
+% Author: Jason Sherfey, PhD <jssherfey@gmail.com>
+% Copyright (C) 2016 Jason Sherfey, Boston University, USA
 
 
 % Check inputs

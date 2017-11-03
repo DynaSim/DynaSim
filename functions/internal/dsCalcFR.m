@@ -40,6 +40,9 @@ function data = dsCalcFR(data, varargin)
 %   data % contains firing rates for E and I pops in .E_v_FR and .I_v_FR.
 %
 % See also: dsPlotFR, dsAnalyzeStudy, dsSimulate, dsCheckData, dsSelectVariables
+% 
+% Author: Jason Sherfey, PhD <jssherfey@gmail.com>
+% Copyright (C) 2016 Jason Sherfey, Boston University, USA
 
 %% 1.0 Check inputs
 options=dsCheckOptions(varargin,{...

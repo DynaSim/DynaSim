@@ -62,7 +62,7 @@ function [model,name_map] = dsGenerateModel(specification, varargin)
 %         {'param1',value1,'param2',value2,...}
 %       .model (default: [])   : optional DynaSim model structure
 %   .connections(i) (default: []): contains info for linking population models
-%       .source (required if >1 pops): name of source population
+%       .source (required if >1 pops): name of OUT population
 %       .target (required if >1 pops): name of target population
 %       .mechanism_list (required)   : list of mechanisms that link two populations
 %       .parameters (default: [])    : parameters to assign across all equations in
@@ -113,6 +113,9 @@ function [model,name_map] = dsGenerateModel(specification, varargin)
 %     note: currently not supported on *most* machines...
 %
 % See also: dsCheckSpecification, dsCheckModel, dsParseModelEquations, dsSimulate
+%
+% Author: Jason Sherfey, PhD <jssherfey@gmail.com>
+% Copyright (C) 2016 Jason Sherfey, Boston University, USA
 
 % Check inputs
 % ------------------------------------------------------
@@ -185,15 +188,16 @@ ncons=length(specification.connections); % number of connections
 %     - then have dsCheckSpecification convert {Na,K}@M into {Na@M,K@M}
 
 %% 1.0 load sub-models, assign namespaces, and combine across all equations and mechanisms in specification
-model.parameters={};
-model.fixed_variables=[];
-model.functions=[];
-model.monitors=[];
+% use empty struct for Octave compatibility
+model.parameters=struct('');
+model.fixed_variables=struct('');
+model.functions=struct('');
+model.monitors=struct('');
 model.state_variables={};
-model.ODEs=[];
-model.ICs=[];
-model.conditionals=[];
-model.linkers=[];
+model.ODEs=struct('');
+model.ICs=struct('');
+model.conditionals=struct('');
+model.linkers=struct('');
 model.comments={};
 name_map={}; % {name, namespace_name, namespace, type}, used for namespacing
 linker_pops={}; % list of populations associated with mechanism linkers
@@ -204,7 +208,7 @@ for i=1:npops
   if ~isempty(specification.populations(i).model)
     tmpmodel=specification.populations(i).model; % get model structure
     tmpname=tmpmodel.specification.populations.name; % assumes one population sub-model
-    
+
     % adjust the name if necessary
     if ~strcmp(specification.populations(i).name,tmpname)
       % use the name in the specification
@@ -213,7 +217,7 @@ for i=1:npops
       % use default name for this population index
       tmpmodel=dsApplyModifications(tmpmodel,{tmpname,'name',sprintf('pop%g',i)}, varargin{:});
     end
-    
+
     tmpmodel.linkers=[]; % remove old linkers from original model construction
     model=dsCombineModels(model,tmpmodel, varargin{:});
     name_map=cat(1,name_map,tmpmodel.namespaces);
@@ -226,29 +230,29 @@ for i=1:npops
     % namespaces/namespaces. (this could be cleaned up by adding '_' to PopScope
     % here, removing it below, and removing the additional '_' from
     % dsParseModelEquations).
-    
+
   % 1.1.1 parse population equations
   equations=specification.populations(i).equations;
   parameters=specification.populations(i).parameters;
   nmechs=length(specification.populations(i).mechanism_list);
-  
+
   % parse population equations
   if ~isempty(equations)
     [tmpmodel,tmpmap]=dsImportModel(equations,'namespace',PopScope,'ic_pop',specification.populations(i).name,'user_parameters',parameters);
     model=dsCombineModels(model,tmpmodel, varargin{:});
     name_map=cat(1,name_map,tmpmap);
   end
-  
+
   % 1.1.2 parse population mechanisms
   for j=1:nmechs
     mechanism_=specification.populations(i).mechanism_list{j};
-    
+
     % support separation of linker names in pop equations vs mechanisms
     mechanism_=regexp(mechanism_,'@','split');
     mechanism=mechanism_{1};
-    
+
     if numel(mechanism_)>1, new_linker=mechanism_{2}; else new_linker=[]; end
-    
+
     % set mechanism namespace
     [~,MechID]=fileparts2(mechanism);
     if any(MechID==':')
@@ -265,7 +269,7 @@ for i=1:npops
         idx=ismember({specification.populations(i).mechanisms.name},MechID);
         mechanism=specification.populations(i).mechanisms(idx).equations;
       end
-      % parse mechanism equations  
+      % parse mechanism equations
       if ~isempty(mechanism)
         [tmpmodel,tmpmap]=dsImportModel(mechanism,'namespace',MechScope,'ic_pop',specification.populations(i).name,'user_parameters',parameters);
         % replace 1st linker name by the one in specification
@@ -286,13 +290,14 @@ for i=1:npops
         name_map=cat(1,name_map,tmpmap);
         linker_pops=cat(2,linker_pops,repmat({specification.populations(i).name},[1 length(tmpmodel.linkers)]));
       end
-    end    
+    end
   end
   pop=specification.populations(i).name;
-  
+
   % add reserved keywords (parameters and state variables) to name_map
   add_keywords(pop,pop,[PopScope '_']);
-  model.parameters.([pop '_Npop'])=num2str(specification.populations(i).size);
+  %model.parameters.([pop '_Npop'])=num2str(specification.populations(i).size);
+  model.parameters(1).([pop '_Npop'])=toString(specification.populations(i).size,0);
 end
 
 % 1.2 load and combine sub-models from connection mechanisms
@@ -303,44 +308,44 @@ for i=1:ncons
   parameters=specification.connections(i).parameters;
   ConScope=[target '_' source '_'];
     % NOTE: in contrast to PopScope above, ConScope is never passed to
-    % dsParseModelEquations; thus the '_' should be added here for consistency 
+    % dsParseModelEquations; thus the '_' should be added here for consistency
     % with mechanism namespaces (which are modified by dsParseModelEquations).
   for j=1:length(specification.connections(i).mechanism_list)
     mechanism_=specification.connections(i).mechanism_list{j};
-    
+
     % support separation of linker names in pop equations vs mechanisms
     mechanism_=regexp(mechanism_,'@','split');
     mechanism=mechanism_{1};
-    
+
     if numel(mechanism_)>1, new_linker=mechanism_{2}; else new_linker=[]; end
-    
+
     % extract mechanism file name without path
     [~,MechID]=fileparts2(mechanism);
     MechScope=[target '_' source '_' MechID];
         % NOTE: must use target_source_mechanism for connection mechanisms
         % to distinguish their parent namespaces from those of population mechanisms
         % see: dsGetParentNamespace
-    
+
     % use mechanism equations in specification if present
     if ~isempty(specification.connections(i).mechanisms) && ismember(MechID,{specification.connections(i).mechanisms.name})
       idx=ismember({specification.connections(i).mechanisms.name},MechID);
       mechanism=specification.connections(i).mechanisms(idx).equations;
     end
-    
+
     % parse model equations
     [tmpmodel,tmpmap]=dsImportModel(mechanism,'namespace',MechScope,'ic_pop',source,'user_parameters',parameters);
-    
+
     % replace 1st linker name by the one in specification
     if ~isempty(new_linker) && ~isempty(tmpmodel.linkers)
       tmpmodel.linkers(1).target=['@' new_linker];
     end
-    
+
     model=dsCombineModels(model,tmpmodel, varargin{:});
     name_map=cat(1,name_map,tmpmap);
-    
+
     % link this mechanism to the target population
     linker_pops=cat(2,linker_pops,repmat(target,[1 length(tmpmodel.linkers)]));
-    
+
     % edit names of connection monitors specified in population equations
     % TODO: consider design changes to avoid specifying connection monitors
     %   in population equations; this is an undesirable hack:
@@ -354,13 +359,13 @@ for i=1:ncons
         for m=1:length(con_mon_to_update)
           % get name of monitor with incorrect connection namespace
           old=monitor_names{con_mon_to_update(m)};
-          
+
           % get name of monitor with correct connection namespace
           new=strrep(old,[target '_' mechanism '_'],[MechScope '_']);
-          
+
           % add new monitor with correct namespace
           model.monitors.(new)=model.monitors.(old);
-          
+
           % remove old monitor with incorrect namespace
           model.monitors=rmfield(model.monitors,old);
         end
@@ -381,32 +386,32 @@ if ~isempty(model.monitors)
   end
   % get list of monitor names
   monitor_names=fieldnames(model.monitors);
-  
+
   % get indices to monitors with names ending in _functions
   function_monitor_index=find(~cellfun(@isempty,regexp(monitor_names,'_functions$','once')));
-  
+
   % create list of functions with namespaces matching monitors ending in _functions
   functions_to_monitor={};
-  
+
   for i=1:length(function_monitor_index)
     % get namespace of functions to monitor
     monitor_name=monitor_names{function_monitor_index(i)};
     monitor_namespace=regexp(monitor_name,'(.*)_functions$','tokens','once');
     monitor_namespace=monitor_namespace{1};
-    
+
     % get list of functions with matching namespace
     function_index=find(~cellfun(@isempty,regexp(function_names,['^' monitor_namespace],'once')));
-    
+
     % add functions to list
     functions_to_monitor=cat(1,functions_to_monitor,function_names(function_index));
-    
+
     % remove "function" monitor name
     model.monitors=rmfield(model.monitors,monitor_name);
   end
-  
+
   % eliminate duplicate function names
-  functions_to_monitor=unique(functions_to_monitor);
-  
+  functions_to_monitor=unique_wrapper(functions_to_monitor);
+
   % add functions to monitor list
   for i=1:length(functions_to_monitor)
     model.monitors.(functions_to_monitor{i})=[];
@@ -421,20 +426,20 @@ end
     %   for parameters
     Nsrc=[src '_Npop'];
     Ndst=[dst '_Npop'];
-    
+
     old={'Npre','N[1]','N_pre','Npost','N_post','N[0]','Npop','N_pop','tspike_pre','tspike_post','tspike'};
     new={Nsrc,Nsrc,Nsrc,Ndst,Ndst,Ndst,Ndst,Ndst,[src '_tspike'],[dst '_tspike'],[dst '_tspike']};
     for p=1:length(old)
       name_map(end+1,:)={old{p},new{p},namespace,'parameters'};
     end
-    
+
     % for state variables
     new={};
     old={};
     src_excluded=~cellfun(@isempty,regexp(name_map(:,1),['pre' '$']));
     dst_excluded=~cellfun(@isempty,regexp(name_map(:,1),['post' '$']));
     excluded=src_excluded|dst_excluded;
-    
+
     PopScope=[src '_'];
     var_idx=strcmp(PopScope,name_map(:,3)) & strcmp('state_variables',name_map(:,4)) & ~excluded;
     if any(var_idx)
@@ -449,7 +454,7 @@ end
       Xsrc_new_vars=[];
       Xsrc=[];
     end
-    
+
     PopScope=[dst '_'];
     var_idx=strcmp(PopScope,name_map(:,3)) & strcmp('state_variables',name_map(:,4)) & ~excluded;
     if any(var_idx)
@@ -464,32 +469,32 @@ end
       Xdst_new_vars=[];
       Xdst=[];
     end
-    
+
     % add variants [var_pre,var_post,varpre,varpost]
     if ~isempty(Xsrc_old_vars)
       [Xsrc_old_vars,IA]=setdiff(Xsrc_old_vars,old);
       Xsrc_new_vars=Xsrc_new_vars(IA);
     end
-    
+
     if ~isempty(Xdst_old_vars)
       [Xdst_old_vars,IA]=setdiff(Xdst_old_vars,old);
       Xdst_new_vars=Xdst_new_vars(IA);
     end
-    
+
     for p=1:length(Xsrc_old_vars)
       old{end+1}=[Xsrc_old_vars{p} '_pre'];
       new{end+1}=Xsrc_new_vars{p};
       old{end+1}=[Xsrc_old_vars{p} 'pre'];
       new{end+1}=Xsrc_new_vars{p};
     end
-    
+
     for p=1:length(Xdst_old_vars)
       old{end+1}=[Xdst_old_vars{p} '_post'];
       new{end+1}=Xdst_new_vars{p};
       old{end+1}=[Xdst_old_vars{p} 'post'];
       new{end+1}=Xdst_new_vars{p};
     end
-    
+
     for p=1:length(old)
       name_map(end+1,:)={old{p},new{p},namespace,'state_variables'};
     end
@@ -497,6 +502,7 @@ end
 
 %% 2.0 propagate namespaces through variable and function names
 %      i.e., to establish uniqueness of names by adding namespace/namespace prefixes)
+model.specification=specification;
 model = dsPropagateNamespaces(model,name_map, varargin{:});
 
 %% 3.0 expand population equations according to mechanism linkers
@@ -546,37 +552,37 @@ for i=1:length(model.linkers)
   % determine what to link (ie, link across everything belonging to the linker population)
   % explicitly constrain to linker population
   expressions_in_pop=~cellfun(@isempty,regexp(name_map(:,3),['^' linker_pops{i}]));
-  
+
   if ~isempty(model.conditionals)
     conditionals_in_pop=~cellfun(@isempty,regexp({model.conditionals.namespace},['^' linker_pops{i}]));
   end
-  
+
   if ~isempty(model.linkers)
     linkers_in_pop=~cellfun(@isempty,regexp({model.linkers.namespace},['^' linker_pops{i}]));
   end
-  
+
   % constrain to namespace
   names_in_namespace=cellfun(@(x,y)strncmp(y,x,length(y)),name_map(:,2),name_map(:,3));
-  
+
   % get list of (functions,monitors,ODEs) belonging to the linker population
   eqn_types={'ODEs','monitors','functions'};%{'monitors','ODEs'};
   search_types={'state_variables','monitors','functions'};%{'monitors','state_variables'};
-  
+
   % indices to expressions in the linker population with the correct search_types and namespace
   inds=find(expressions_in_pop&names_in_namespace&ismember(name_map(:,4),search_types));
-  
+
   % eliminate duplicates (e.g., state_variables replacing OUT and X)
-  [jnk,ia,ib]=unique(name_map(inds,2),'stable');
+  [jnk,ia,ib]=unique_wrapper(name_map(inds,2),'stable');
   inds=inds(ia);
   all_expression_inds=[all_expression_inds inds'];
   all_expression_targets=cat(2,all_expression_targets,repmat({oldstr},[1 length(inds)]));
- 
+
   % substitute link
   for j=1:length(inds)
     name=name_map{inds(j),2}; % name of variable as stored in model structure
     type=name_map{inds(j),4}; % search_types
     eqn_type=eqn_types{strcmp(type,search_types)}; % corresponding equation type
-    
+
     % update expression with the current link
     if isfield(model.(eqn_type),name)
       % note: name will not be a field of eqn_type for special monitors
@@ -584,15 +590,15 @@ for i=1:length(model.linkers)
       model.(eqn_type).(name)=linker_strrep(model.(eqn_type).(name),oldstr,newstr,operator);
     end
   end
-  
+
   if ~isempty(model.conditionals)
     fields={'condition','action','else'};
-    
+
     % get list of conditionals belonging to the linker population
     inds=find(conditionals_in_pop);
     all_conditionals_inds=[all_conditionals_inds inds];
     all_conditionals_targets=cat(2,all_conditionals_targets,repmat({oldstr},[1 length(inds)]));
-    
+
     % substitute link
     for j=1:length(inds)
       for field_index=1:length(fields)
@@ -601,7 +607,7 @@ for i=1:length(model.linkers)
       end
     end
   end
-  
+
   if ~isempty(model.linkers)
     inds=find(linkers_in_pop);
     for j=1:length(inds)
@@ -646,7 +652,7 @@ end
 % ------------------------------------------
 % NOTE on non-ideal implementation of 3.0: model.linkers does not contain enough
 % information to determine the population to which it belongs in all cases
-% (due to namespace format differences for population vs connection mechanisms & models 
+% (due to namespace format differences for population vs connection mechanisms & models
 % with one vs more populations). consequently, had to perform linking in this
 % function using info stored above while parsing the model; ideally, the
 % linking could occur independently of this function, informed by info in
@@ -684,7 +690,7 @@ model=dsCheckModel(model, varargin{:});
 %% auto_gen_test_data_flag argout
 if options.auto_gen_test_data_flag
   argout = {model, name_map}; % specific to this function
-  
+
   dsUnitSaveAutoGenTestData(argin, argout);
 end
 
@@ -702,7 +708,7 @@ function str=linker_strrep(str,oldstr,newstr,operator)
   % by non-additive operations (e.g., @cai+=cai1 and @cai+=cai2 into
   % v'=f(v)*cai where cai1 & cai2 are defined in mechanisms for the same v;
   % workaround: insert into v'=f(v)*(cai)).
-  
+
   % check if anything besides a single variable:
   if isempty(regexp(newstr,'[^a-z_A-Z\d]+','once'))
     str=dsStrrep(str,oldstr,newstr);

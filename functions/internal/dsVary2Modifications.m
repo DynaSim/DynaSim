@@ -3,13 +3,16 @@ function modifications_set = dsVary2Modifications(vary,model)
 %
 % The returned set of modifications has one element per point in search space;
 % each element can be passed along with DynaSim model or specification to
-% dsApplyModifications to produce the modified object.
+% dsApplyModifications to produce the modified object. If passed a
+% modifications set as an input, returns the input as an output.
 %
 % Usage:
 %   modifications_set=dsVary2Modifications(vary)
+%   modifications_set=dsVary2Modifications(modifications_set)
 %
 % Inputs:
 %   - vary: {object, variable, values; ...}
+%   - modifications_set: see below
 %
 % Outputs:
 %   - modifications_set:
@@ -32,30 +35,51 @@ function modifications_set = dsVary2Modifications(vary,model)
 %   vary={'(E,I)','gNa',[100 120]};
 %   vary={'(E,I)','(EK1,EK2)',[-80 -60]};
 %   vary={'(E,I)','(EK1,EK2)',[-80 -60; -85 -65]};
+% 
+%             vary_values(:, :, 1) = [-80 -60];
+%             vary_values(:, :, 2) = [-85 -65];
 %   vary={'(E,I)','(EK1,EK2)',vary_values},
-%         with vary_values(:, :, 1) = [-80 -60]; vary_values(:, :, 2) = [-85 -65];
+% 
+%             vary_values(:, :, 1) = [-75 -55; -80 -60];
+%             vary_values(:, :, 2) = [-85 -65; -90 -70]
 %   vary={'(E,I)','(EK1,EK2)',vary_values},
-%         with vary_values(:, :, 1) = [-75 -55; -80 -60]; vary_values(:, :, 2) = [-85 -65; -90 -70];
 %
 %   % This sets modifications:
 %   %     * E_EK1, E_EK2, I_EK1, I_EK2 = -80
 %   %     * E_EK1, E_EK2, I_EK1, I_EK2 = -60
 %   vary={'(E,I)','(EK1,EK2)',[-80 -60]};
 %
+% 
+%   vary={'(E,I)','(EK1,EK2)',[-80 -60; -85 -65]};
 %   % This sets modifications:
 %   %     * E_EK1, I_EK1 = -80 and E_EK2, I_EK2 = -85
 %   %     * E_EK1, I_EK1 = -60 and E_EK2, I_EK2 = -65
-%   vary={'(E,I)','(EK1,EK2)',[-80 -60; -85 -65]};
-%
+%     mod_set=dsVary2Modifications(vary); mod_set{:}
+%     celldisp(mod_set)
+%   % Take home message: X (rows) of vary_values are individual simulations; Y (columns) are parameters.
+% 
+%         clear vary_values
+%         vary_values(:, :, 1) = [-80 -60];
+%         vary_values(:, :, 2) = [-85 -65]
+%   vary={'(E,I)','(EK1,EK2)',vary_values};
 %   % This sets modifications:
 %   %     * E_EK1, E_EK2 = -80 and I_EK1, I_EK2 = -85
 %   %     * E_EK1, E_EK2 = -60 and I_EK1, I_EK2 = -65
-%   vary={'(E,I)','(EK1,EK2)',vary_values}, with vary_values(:, :, 1) = [-80 -60]; vary_values(:, :, 2) = [-85 -65];
+%     mod_set=dsVary2Modifications(vary); mod_set{:}
+%     celldisp(mod_set)
+%   % Take home message: X (rows) of vary_values are individual simulations; Z (height) is populations.
+% 
 %
+%         clear vary_values
+%         vary_values(:, :, 1) = [-75 -55; -80 -60];
+%         vary_values(:, :, 2) = [-85 -65; -90 -70];
+%     vary={'(E,I)','(EK1,EK2)',vary_values};
 %   % This sets modifications:
 %   %     * E_EK1 = -75, E_EK2 = -80, I_EK1 = -85, I_EK2 = -90.
 %   %     * E_EK1 = -55, E_EK2 = -60, I_EK1 = -65, I_EK2 = -70.
-%   vary={'(E,I)','(EK1,EK2)',vary_values}, with vary_values(:, :, 1) = [-75 -55; -80 -60]; vary_values(:, :, 2) = [-85 -65; -90 -70];
+%     mod_set=dsVary2Modifications(vary); mod_set{:}
+%     celldisp(mod_set)
+%   % Take home message: X (rows) of vary_values are individual simulations; Y (columns) are parameters; Z (height) is populations.
 %
 % Notes:
 %   - valid groupings:
@@ -104,6 +128,9 @@ function modifications_set = dsVary2Modifications(vary,model)
 %   modifications_set{:}
 %
 % See also: dsApplyModifications, dsSimulate, dsGenerateModel
+% 
+% Author: Jason Sherfey, PhD <jssherfey@gmail.com>
+% Copyright (C) 2016 Jason Sherfey, Boston University, USA
 
 % check inputs
 if iscell(vary) && iscell(vary{1})
@@ -181,7 +208,7 @@ if isnumeric(item)
         list=cellfun(@(x) permute(x, [1 3 2]), list, 'UniformOutput', 0);
     end
 elseif ischar(item)
-  elems=regexp(item,'[\w\.]+','match');
+  elems=regexp(item,'[\w->\.]+','match');
   operator=regexp(item,'^([\+\-\*/^])','tokens','once');
   if isempty(operator)
     operator='';

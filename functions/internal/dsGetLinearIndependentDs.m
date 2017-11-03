@@ -59,7 +59,7 @@ for i = 1:N
     end
 end
 
-[Abasis, Abasisi, Asubs] = dsGetLinearIndependentCell(vary_params,ignore_constant_shift);
+[Abasis, Abasisi, Asubs] = getLinearIndependentCell(vary_params,ignore_constant_shift);
 
 
 %% auto_gen_test_data_flag argout

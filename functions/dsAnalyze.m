@@ -32,6 +32,7 @@ function result = dsAnalyze(src,funcIn,varargin)
 %                             key,val list as varargin for AnalyzeData
 %     'load_all_data_flag'  : whether to load all the data in studyinfo
 %                             at once {0 or 1} (default: 0)
+%     'parallel_flag' : whether to use parfor to run analysis {0 or 1} (default: 0)
 %
 % Outputs:
 %   - result: structure returned by the analysis function
@@ -40,6 +41,9 @@ function result = dsAnalyze(src,funcIn,varargin)
 %
 %
 % See also: dsSimulate
+%
+% Author: Jason Sherfey, PhD <jssherfey@gmail.com>
+% Copyright (C) 2016 Jason Sherfey, Boston University, USA
 
 %% General cases:
 %   - data struct (likely from SimualteModel call)
@@ -59,13 +63,14 @@ options=dsCheckOptions(varargin,{...
   'save_results_flag',0,{0,1},...
   'format','svg',{'svg','jpg','eps','png','fig'},...
   'varied_filename_flag',0,{0,1},...
-  'plot_type','waveform',{'waveform','rastergram','raster','power','rates','imagesc','heatmapFR','heatmap_sortedFR','meanFR','meanFRdens'},...
+  'plot_type','waveform',{'waveform','rastergram','raster','power','rates','imagesc','heatmapFR','heatmap_sortedFR','meanFR','meanFRdens','FRpanel'},...
   'save_prefix',[],[],...
   'function_options',{},[],...
   'simIDs',[],[],...
   'load_all_data_flag',0,{0,1},...
   'auto_gen_test_data_flag',0,{0,1},...
   'unit_test_flag',0,{0,1},...
+  'parallel_flag',0,{0,1},...     % whether to run analysis in parallel (using parfor)
   'auto_gen_test_data_flag',0,{0,1},...
   },false);
 
@@ -331,7 +336,7 @@ end % fInd
 %% auto_gen_test_data_flag argout
 if options.auto_gen_test_data_flag
   argout = {result}; % specific to this function
-  
+
   %dsUnitSaveAutoGenTestData(argin, argout); % TODO: check if needs to be saveAutoGenTestDir
 end
 
@@ -420,7 +425,7 @@ end
 %% auto_gen_test_data_flag argout
 if options.auto_gen_test_data_flag
   argout = {data, studyinfo}; % specific to this function
-  
+
   %dsUnitSaveAutoGenTestDataLocalFn(argin, argout); % localfn
 end
 
@@ -485,7 +490,7 @@ else
     else
       plot_options = options.function_options{fInd};
     end
-    
+
     fInd = regexp(options.result_file, 'plot(\d+)', 'tokens');
     fInd = fInd{1}{1};
 
@@ -503,7 +508,7 @@ filename = dsNameFromVaried(data, prefix, filename);
 %% auto_gen_test_data_flag argout
 if options.auto_gen_test_data_flag
   argout = {filename}; % specific to this function
-  
+
   %dsUnitSaveAutoGenTestDataLocalFn(argin, argout); % localfn
 end
 
@@ -511,14 +516,32 @@ end
 
 
 function result = evalFnWithArgs(fInd, data, func, options, varargin)
+
+if strcmp(reportUI,'matlab')
+  p = gcp('nocreate');
+end
+
 if isempty(options.function_options)
-  parfor dInd = 1:length(data)
-    result(dInd) = feval(func,data(dInd),varargin{:});
+  if options.parallel_flag && ~isempty(p)       % Only do parfor mode if parallel_flag is set and parpool is already running. Otherwise, this will add unncessary overhead.
+    parfor dInd = 1:length(data)
+      result(dInd) = feval(func,data(dInd),varargin{:});
+    end
+  else
+    for dInd = 1:length(data)
+      result(dInd) = feval(func,data(dInd),varargin{:});
+    end
   end
 else
   function_options = options.function_options{fInd};
-  parfor dInd = 1:length(data)
-    result(dInd) = feval(func,data(dInd),function_options{:});
+
+  if options.parallel_flag && ~isempty(p)
+    parfor dInd = 1:length(data)
+      result(dInd) = feval(func,data(dInd),function_options{:});
+    end
+  else
+    for dInd = 1:length(data)
+      result(dInd) = feval(func,data(dInd),function_options{:});
+    end
   end
 end
 end
@@ -576,10 +599,10 @@ if ~isempty(data(1).simulator_options.modifications)
     for jj = 1:size(mods,1)
       % prepare valid field name for thing varied:
       fld = [mods{jj,1} '_' mods{jj,2}];
-      
+
       % convert arrows and periods to underscores
       fld = regexprep(fld,'(->)|(<-)|(-)|(\.)','_');
-      
+
       % remove brackets and parentheses
       fld = regexprep(fld,'[\[\]\(\)\{\}]','');
       result(ii).(fld) = mods{jj,3};
@@ -601,7 +624,7 @@ end
 %% auto_gen_test_data_flag argout
 if options.auto_gen_test_data_flag
   argout = {result}; % specific to this function
-  
+
   %dsUnitSaveAutoGenTestDataLocalFn(argin, argout); % localfn
 end
 end % add_modifications

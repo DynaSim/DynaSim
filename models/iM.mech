@@ -8,14 +8,14 @@ IC=0; IC_noise=0
 % Functions
 aM(X) = c_MaM.*(.02./(1+exp((-20-X)/5))) # [Traub, 2003]
 bM(X) = c_MbM.*(.01*exp((-43-X)/18)) # [Traub, 2003]
-IM(X,m) = gM.*m.*(X-E_M)
+IM(X,m) = -gM.*m.*(X-E_M)
 
 % ODEs
 mM' = (aM(X).*(1-mM)-bM(X).*mM)
 mM(0)=IC+IC_noise.*rand(Npop,1)
 
 % Interface
-@current += -IM(X,mM)
+@current += IM(X,mM)
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % References: 

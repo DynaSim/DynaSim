@@ -67,6 +67,7 @@ function studyinfo = dsCheckStudyinfo(studyinfo, varargin)
 %            .analyses(j).derived_result_file: full file names of derived data sets
 %   studyinfo.matlab_version
 %   studyinfo.dynasim_hash
+%   studyinfo.user_name
 %   studyinfo.paths (=[])
 %   studyinfo.project_id (=[])
 %
@@ -78,6 +79,9 @@ function studyinfo = dsCheckStudyinfo(studyinfo, varargin)
 %     studyinfo=dsCheckStudyinfo(studyinfo)
 %
 % See also: dsSetupStudy, dsSimulate, dsCreateBatch, dsImport, dsAnalyzeStudy
+% 
+% Author: Jason Sherfey, PhD <jssherfey@gmail.com>
+% Copyright (C) 2016 Jason Sherfey, Boston University, USA
 
 options=dsCheckOptions(varargin,{...
   'verbose_flag',0,{0,1},...
@@ -94,7 +98,7 @@ end
 
 studyinfo_field_order={'study_id','study_dir','time_created','last_modified',...
   'base_model','base_simulator_options','base_solve_file','simulations','base_data_files',...
-  'analysis','matlab_version','dynasim_hash','paths','project_id'};
+  'analysis','matlab_version','dynasim_hash','user_name','paths','project_id'};
 
 sim_field_order={'sim_id','modifications','stop_time','duration','status',...
   'data_file','batch_dir','job_file','error_log','machine_info','modified_model_file',...
@@ -166,6 +170,14 @@ if ~isfield(studyinfo,'dynasim_hash')
   studyinfo.dynasim_hash=strtrim(b);
   % return to original directory
   cd(cwd);
+end
+if ~isfield(studyinfo,'user_name')  
+  try
+    user_name = getenv('USER');
+  catch
+    user_name = '';
+  end
+  studyinfo.user_name=user_name;
 end
 if ~isfield(studyinfo,'project_id')
   studyinfo.project_id=[]; % no project by default

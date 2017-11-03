@@ -1,11 +1,13 @@
 
 
-function [Abasis, Abasisi, Asubs] = dsGetLinearIndependentCell(A,ignore_constant_shift)
+function [Abasis, Abasisi, Asubs] = getLinearIndependentCell(A,ignore_constant_shift)
 % [Abasis, Abasisi, Asubs] = getLinearIndependentCell(A,ignore_constant_shift)
 %
+% 
 % Purpose: Takes in a matrix or cell array and identifies a
 % subset of independent columns. It also clusters subsets of columns
 % that are dependent upon each other. 
+% 
 % 
 % Details: If input is a matrix, behavior is exacly the same as
 % getLinearIndependent. That is, for numeric inputs, "dependence" is
@@ -36,41 +38,44 @@ function [Abasis, Abasisi, Asubs] = dsGetLinearIndependentCell(A,ignore_constant
 %   Asub: Cell array with one element for each basis vector in A. Each cell
 %   in Asub identifies clusters of columns in the original matrix A that
 %   share linear dependence.
-%
-% Example:
-% A = {'a','b','c';'a','b','c';'d','e','f';1,2,3;1,2,5;5,3,@plot;5,3,@plot;1,2,3}';
-% A = 
-%     'a'    'a'    'd'    [1]    [1]    [  5]    [  5]    [1]
-%     'b'    'b'    'e'    [2]    [2]    [  3]    [  3]    [2]
-%     'c'    'c'    'f'    [3]    [5]    @plot    @plot    [3]
-% [Abasis, Abasisi, Asubs] = getLinearIndependentCell(A)
 % 
-% Results:
+%     % Example:
 % 
-% % % % % % % % % Abasis - the subset of basis columns % % % % % % % % %
+%     A = {'a','b','c';'a','b','c';'d','e','f';1,2,3;1,2,5;5,3,@plot;5,3,@plot;2,4,6}';
 % 
-% horzcat(Abasis{:})
-%   3�5 cell array
-%     [1]    [1]    'a'    'd'    [  5]
-%     [2]    [2]    'b'    'e'    [  3]
-%     [3]    [5]    'c'    'f'    @plot
+%     % A = 
+%     %     'a'    'a'    'd'    [1]    [1]    [  5]    [  5]    [2]
+%     %     'b'    'b'    'e'    [2]    [2]    [  3]    [  3]    [4]
+%     %     'c'    'c'    'f'    [3]    [5]    @plot    @plot    [6]
 % 
-% % % % Abasisi - the indices of these columns in the original matrix % % % 
+%     [Abasis, Abasisi, Asubs] = getLinearIndependentCell(A)
 % 
-% Abasisi =
-%   1�5 cell array
-%     [4]    [5]    [1]    [3]    [6]
-% 
-% % % % % % % % % Asubs - subsets ofl linearly dependent columns % % % % % % % % %
-% 
-% Asubs =
-%   1�5 cell array
-%     [1�2 double]    [5]    [1�2 double]    [3]    [1�2 double]
-% Asubs{1} : [4, 8]
-% Asubs{2} : [5]
-% Asubs{3} : [1, 2]
-% Asubs{4} : [3]
-% Asubs{5} : [6, 7]
+%     % Results:
+%     % 
+%     % % % % % % % % % Abasis - the subset of basis columns % % % % % % % % %
+%     % 
+%     % horzcat(Abasis{:})
+%     %   3x5 cell array
+%     %     [1]    [1]    'a'    'd'    [  5]
+%     %     [2]    [2]    'b'    'e'    [  3]
+%     %     [3]    [5]    'c'    'f'    @plot
+%     % 
+%     % % % % Abasisi - the indices of these columns in the original matrix % % % 
+%     % 
+%     % Abasisi =
+%     %   1x5 cell array
+%     %     [4]    [5]    [1]    [3]    [6]
+%     % 
+%     % % % % % % % % % Asubs - subsets ofl linearly dependent columns % % % % % % % % %
+%     % 
+%     % Asubs =
+%     %   1x5 cell array
+%     %     [1x2 double]    [5]    [1x2 double]    [3]    [1x2 double]
+%     % Asubs{1} : [4, 8]
+%     % Asubs{2} : [5]
+%     % Asubs{3} : [1, 2]
+%     % Asubs{4} : [3]
+%     % Asubs{5} : [6, 7]
 % 
 % 
 % Submodules: getLinearIndependent, uniqueCellGeneralized, iscellnum
@@ -122,6 +127,8 @@ end
 
 Asubs=vertcat(covaried1(:),covaried2(:))';
 
+Abasisi = {};
+Abasis = {};
 for i = 1:length(Asubs)
     Abasisi{i} = Asubs{i}(1);
     Abasis{i} = A(:,Abasisi{i});
