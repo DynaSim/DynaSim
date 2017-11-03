@@ -14,9 +14,10 @@ host_name = strtrim(host_name); % remove whitespace from host_name
 
 docs_path = fullfile(home_path, 'Documents');
 
-% System-specific customization
+% Docs folder
 ds_data_path = fullfile(docs_path,'DynaSimData');
 demos_path = fullfile(ds_data_path, 'demos');
+mex_path = fullfile(ds_data_path,'mexes');
 
 ds_root_path = fileparts(fileparts(which('dsSimulate')));
 

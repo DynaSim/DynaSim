@@ -11,6 +11,9 @@ function [param_mat,varied,param_cell] = dsCollectVariedParams(data, varargin)
 %   - all_values: [num_sets x num_params_varied], values used for each data set
 %   - param_names: list of names of varied parameters
 %   - unique_values: cell array of unique values used for each varied  parameter
+% 
+% Author: Jason Sherfey, PhD <jssherfey@gmail.com>
+% Copyright (C) 2016 Jason Sherfey, Boston University, USA
 
 % Check inputs
 %% auto_gen_test_data_flag argin

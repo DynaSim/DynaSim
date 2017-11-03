@@ -40,6 +40,9 @@ function [model,name_map] = dsParseModelEquations(text,varargin)
 %     [model,map] = dsParseModelEquations(connection_mechanism,'namespace','pop_pop_mech')
 %
 % See also: dsClassifyEquation, dsGenerateModel, dsLocateModelFiles
+% 
+% Author: Jason Sherfey, PhD <jssherfey@gmail.com>
+% Copyright (C) 2016 Jason Sherfey, Boston University, USA
 
 %% auto_gen_test_data_flag argin
 options = dsCheckOptions(varargin,{'auto_gen_test_data_flag',0,{0,1}},false);
@@ -64,7 +67,7 @@ else
 end
 
 % set namespace
-if ismember('namespace',keys) % check for user-supplied namespace (i.e., namespace)
+if ~isempty(keys) && ismember('namespace',keys) % check for user-supplied namespace (i.e., namespace)
   namespace=values{ismember(keys,'namespace')}; % user-supplied namespace
   if ~isempty(namespace)
     namespace=[namespace '_'];
@@ -76,7 +79,7 @@ else
 end
 
 % set delimiter
-if ismember('delimiter',keys) % check for user-supplied delimiter
+if ~isempty(keys) && ismember('delimiter',keys) % check for user-supplied delimiter
   delimiter = values(ismember(keys,'delimiter')); % user-supplied delimiter
 else
   delimiter=';';
@@ -106,34 +109,35 @@ end
 
 % check if input is a filename
 if ischar(text) && exist(text,'file')
-  [~,name,ext]=fileparts2(text);
-  switch ext
-    case '.m'
-      model=feval(name); % evaluate model-creating function and return model
-      return;
-    case '.mat' % todo: uncomment once dsImportModel supports loading .mat
-      %model=dsImportModel(text);
-      %return;
-  end
-  
-  % load equations from file
-  [text,res]=readtext(text,'\n','%'); % text: cell array of strings, one element per line in text file
-  
-  % remove all lines without text
-  text=text(res.stringMask);
-  
-  % remove leading/trailing white space
-  text=strtrim(text);
-  
-  % end each line with semicolon
-  for i=1:length(text)
-    if ~isequal(text{i}(end),';')
-      text{i}(end+1)=';';
-    end
-  end
-  
-  % concatenate into a single string
-  text=[text{:}]; % concatenate text from all lines
+  text = dsReadText(text);
+%   [~,name,ext]=fileparts2(text);
+%   switch ext
+%     case '.m'
+%       model=feval(name); % evaluate model-creating function and return model
+%       return;
+%     case '.mat' % todo: uncomment once dsImportModel supports loading .mat
+%       %model=dsImportModel(text);
+%       %return;
+%   end
+%   
+%   % load equations from file
+%   [text,res]=readtext(text,'\n','%'); % text: cell array of strings, one element per line in text file
+%   
+%   % remove all lines without text
+%   text=text(res.stringMask);
+%   
+%   % remove leading/trailing white space
+%   text=strtrim(text);
+%   
+%   % end each line with semicolon
+%   for i=1:length(text)
+%     if ~isequal(text{i}(end),';')
+%       text{i}(end+1)=';';
+%     end
+%   end
+%   
+%   % concatenate into a single string
+%   text=[text{:}]; % concatenate text from all lines
 end
 
 % split string into cell array of lines delimited by semicolon
@@ -159,15 +163,16 @@ if ~iscellstr(text)
 end
 
 %% 2.0 classify and parse lines; store info in model structure
-model.parameters=[];
-model.fixed_variables=[];
-model.functions=[];
-model.monitors=[];
+% use empty struct for Octave compatibility
+model.parameters=struct('');
+model.fixed_variables=struct('');
+model.functions=struct('');
+model.monitors=struct('');
 model.state_variables={};
-model.ODEs=[];
-model.ICs=[];
-model.conditionals=[];
-model.linkers=[];
+model.ODEs=struct('');
+model.ICs=struct('');
+model.conditionals=struct('');
+model.linkers=struct('');
 model.comments={};
 for index=1:length(text) % loop over lines of text
   % organize model data in model structure
@@ -186,17 +191,30 @@ for index=1:length(text) % loop over lines of text
       lhs=regexp(line,'^([\w\.]+)\s*=','tokens','once');
       lhs{1}=strrep(lhs{1},'.','_'); % e.g., Na.g --> Na_g
       name=strtrim(lhs{1}); expression=rhs{1};
-      model.parameters.([namespace name]) = expression;
+      model.parameters(1).([namespace name]) = expression;
       name_map(end+1,:) = {name,[namespace name],namespace,'parameters'};
       if ~isempty(comment)
         model.comments{end+1}=sprintf('%s (parameter): %s',[namespace name],comment);
       end
     case 'fixed_variable'   % var=(expression with grouping or arithmetic), var(#), var([#]), var([# #]), var([#,#]), var(#:#), var(#:end), var([#:#]), var([#:end])
       lhs=regexp(line,'^(\w+)\s*=','tokens','once');
-      rhs=regexp(line,'=(.+)$','tokens','once');
-      name=strtrim(lhs{1}); expression=rhs{1};
-      model.fixed_variables.([namespace name]) = expression;
-      name_map(end+1,:) = {name,[namespace name],namespace,'fixed_variables'};
+      if ~isempty(lhs)        
+        rhs=regexp(line,'=(.+)$','tokens','once');
+        name=strtrim(lhs{1}); expression=rhs{1};
+        model.fixed_variables(1).([namespace name]) = expression;
+        name_map(end+1,:) = {name,[namespace name],namespace,'fixed_variables'};
+      else
+        % check for update to fixed variable that is already defined
+        lhs=regexp(line,'^(.+)\(.*\)\s*=','tokens','once');
+        name=strtrim(lhs{1});
+        if isfield(model.fixed_variables(1),[namespace name])
+          % add update to fixed variable definition
+          expression=[model.fixed_variables(1).([namespace name]) ';' line];
+          model.fixed_variables(1).([namespace name]) = expression;
+        else
+          warning('failed to set fixed variable.');
+        end
+      end
       if ~isempty(comment)
         model.comments{end+1}=sprintf('%s (fixed_variable): %s',[namespace name],comment);
       end
@@ -210,7 +228,7 @@ for index=1:length(text) % loop over lines of text
       rhs=regexp(line,'=(.+)$','tokens','once');
       name=strtrim(name{1});
       expression=sprintf('@(%s)%s',vars{1},rhs{1});
-      model.functions.([namespace name]) = expression;
+      model.functions(1).([namespace name]) = expression;
       name_map(end+1,:) = {name,[namespace name],namespace,'functions'};
       if ~isempty(comment)
         model.comments{end+1}=sprintf('%s (function): %s',[namespace name],comment);
@@ -222,7 +240,7 @@ for index=1:length(text) % loop over lines of text
       end
       rhs=regexp(line,'=(.+)$','tokens','once');
       state_variable=strtrim(var{1}); expression=rhs{1};
-      model.ODEs.([namespace state_variable])=expression;
+      model.ODEs(1).([namespace state_variable])=expression;
       if ~ismember([namespace state_variable],model.state_variables)
         name_map(end+1,:) = {state_variable,[namespace state_variable],namespace,'state_variables'};
         model.state_variables{end+1}=[namespace state_variable];
@@ -234,7 +252,7 @@ for index=1:length(text) % loop over lines of text
       var=regexp(line,'^(\w+)\(','tokens','once');
       rhs=regexp(line,'=(.+)$','tokens','once');
       state_variable=strtrim(var{1}); expression=rhs{1};
-      model.ICs.([namespace state_variable])=expression;
+      model.ICs(1).([namespace state_variable])=expression;
       if ~isempty(comment)
         model.comments{end+1}=sprintf('%s(0) (IC): %s',[namespace state_variable],comment);
       end
@@ -273,7 +291,7 @@ for index=1:length(text) % loop over lines of text
           
           if ~isempty(rhs), expression=rhs{1}; else expression=[]; end
           
-          model.monitors.([namespace name]) = expression;
+          model.monitors(1).([namespace name]) = expression;
           name_map(end+1,:) = {name,[namespace name],namespace,'monitors'};
           
           if ~isempty(comment)
@@ -284,7 +302,7 @@ for index=1:length(text) % loop over lines of text
       end
       
     case 'conditional'      % if(conditions)(actions)
-      groups=regexp(line,')(','split');
+      groups=regexp(line,'\)\(','split');
       condition=regexp(groups{1},'^if\s*\((.*)','tokens','once');
       if length(groups)==2
         if groups{2}(end)==')'

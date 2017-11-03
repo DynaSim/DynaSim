@@ -75,11 +75,11 @@ function plotWaveforms(data,varargin)
 %     spec.connections(1).mechanism_list='iAMPA';
 %     data=dsSimulate(spec);
 %     dsPlotWaveforms(data); % plot first state variable
-%     dsPlotWaveforms(data,'variable','*'); 
+%     dsPlotWaveforms(data,'variable','*');
 %     % plot monitored synaptic current with post-synaptic voltages:
-%     dsPlotWaveforms(data,'variable',{'E2_v','ISYN'}); 
+%     dsPlotWaveforms(data,'variable',{'E2_v','ISYN'});
 %     % plot monitored synaptic current with pre- and post-synaptic voltages:
-%     dsPlotWaveforms(data,'variable',{'v','ISYN'}); 
+%     dsPlotWaveforms(data,'variable',{'v','ISYN'});
 %
 % - Example 6: Two populations varying one parameter (input amplitude):
 %     vary={'E1','amp',[0 10 20]};
@@ -183,7 +183,7 @@ if num_sims>1 && isfield(data,'varied')
       param_mat(:,j)=[data.(varied{j})];
       param_cell{j}=unique([data.(varied{j})]);
     else
-      % todo: handle sims varying non-numeric model components 
+      % todo: handle sims varying non-numeric model components
       % (eg, mechanisms) (also in dsPlotFR)
     end
   end
@@ -264,6 +264,13 @@ for figset=1:num_fig_sets
           % calculate averages across populations
           dat=nan(num_times,num_pops);
           for k=1:num_pops
+            if ~strcmp(reportUI,'matlab') && exist('nanmean') ~= 2 % 'nanmean is not in Octave's path
+              try
+                pkg load statistics; % trying to load octave forge 'statistics' package before using nanmean function
+              catch
+                error('nanmean function is needed, please install the statistics package from Octave Forge');
+              end
+            end
             dat(:,k)=nanmean(data(sim_index).(var_fields{k}),2);
           end
           var=['<' variables{1} '>'];
@@ -276,6 +283,12 @@ for figset=1:num_fig_sets
               continue;
             end
             var=var_fields{pop_var_indices{k}(figset)};
+            try
+                pkg load statistics; % trying to load octave forge 'statistics' package before using nanmean function
+              catch
+                error('nanmean function is needed, please install the statistics package from Octave Forge');
+              end
+            end
             dat(:,k)=nanmean(data(sim_index).(var),2);
           end
           var=['<' variables{figset} '>'];
@@ -367,37 +380,37 @@ end % end loop over figure sets
 % 	N=1		one fig, one row (plot var X)
 % 	N>1		one row per cell (plot var X), 			enough figs for all cells
 % 	(nsims=1, num_pops=1, num_vars=1, pop_sizes>=1): num_fig_sets=1, num_figs=ceil(pop_sizes/MRPF), num_rows=min(pop_sizes,MRPF): row r: dat = data(s=1).(var)(:,c=r) where var=vars{v=1}
-% 
+%
 % 1 sim, 1 pop, >1 vars (X,Y,...)
 % 	N=1		one row per var (plot cell 1), 			enough figs for all vars
 % 	N>1		one row per var (overlay cells), 		enough figs for all vars
 % 	(nsims=1, num_pops=1, num_vars>=1, pop_sizes>=1): num_fig_sets=1, num_figs=ceil(num_vars/MRPF), num_rows=min(num_vars,MRPF): row r: dat = data(s=1).(var)(:,1:MTPP) where var=vars{v=r}
-% 
+%
 % 1 sim, >1 pops, 1 var (X)
 % 	all N=1		one row per pop (plot var X, cell 1),		enough figs for all pops
 % 	any N>1		one row per pop (plot var X, overlay cells), 	enough figs for all pops
 % 	(nsims=1, num_pops>=1, num_vars=1, pop_sizes>=1): num_fig_sets=1, num_figs=ceil(num_pops/MRPF), num_rows=min(num_pops,MRPF): row r: dat = data(s=1).(var)(:,1:MTPP) where var=vars{v=r}
-% 
+%
 % 1 sim, >1 pops, >1 vars (X,Y,...)
 % 	all N=1		one row per pop (plot var X, cell 1), 		enough figs for all pops, separate figs for each var
 % 	any N>1		one row per pop (plot var X, overlay cells), 	enough figs for all pops, separate figs for each var
 % 	(nsims=1, num_pops>=1, num_vars>=1, pop_sizes>=1): num_fig_sets=num_vars, num_figs=ceil(num_pops/MRPF), num_rows=min(num_pops,MRPF): row r: dat = data(s=1).(var)(:,1:MTPP) where var=vars{these(p=r)}
-% 
+%
 % >1 sim, 1 pop, 1 var (X)
 % 	N=1		one row per sim (plot var X, cell 1), 		enough figs for all sims
 % 	N>1		one row per sim (plot var X, overlay cells), 	enough figs for all sims
 % 	(nsims>1, num_pops=1, num_vars=1, pop_sizes>=1): num_fig_sets=1, num_figs=ceil(nsims/MRPF), num_rows=min(nsims,MRPF): row r: dat = data(s=r).(var)(:,1:MTPP) where var=vars{v=1}
-% 
+%
 % >1 sim, 1 pop, >1 vars (X,Y,...)
 % 	N=1		one row per sim (plot var X, cell 1), 		enough figs for all sims, separate figs for each var
 % 	N>1		one row per sim (plot var X, overlay cells), 	enough figs for all sims, separate figs for each var
 % 	(nsims>1, num_pops=1, num_vars=1, pop_sizes>=1): num_fig_sets=num_vars, num_figs=ceil(nsims/MRPF), num_rows=min(nsims,MRPF): row r: dat = data(s=r).(var)(:,1:MTPP) where var=vars{v++}
-% 
+%
 % >1 sim, >1 pops, 1 var (X)
 % 	all N=1		one row per sim (plot var X, overlay pops),	enough figs for all sims
 % 	any N>1		one row per sim (plot var <X>, overlay pops),	enough figs for all sims
 % 	(nsims>1, num_pops=1, num_vars=1, pop_sizes>=1): num_fig_sets=1, num_figs=ceil(nsims/MRPF), num_rows=min(nsims,MRPF): row r: dat = <data(s=r).(var)(:,1:MTPP),2|vars>
-% 
+%
 % >1 sim, >1 pops, >1 vars (X,Y,...)
 % 	all N=1		one row per sim (plot var X, overlay pops),	enough figs for all sims, separate figs for each var
 % 	any N>1		one row per sim (plot var <X>, overlay pops),	enough figs for all sims, separate figs for each var

@@ -7,6 +7,9 @@ function keyvals_out = dsRemoveKeyval(keyvals,keys)
 % Examples:
 %   keyvals=dsRemoveKeyval({'opt1',1,'opt2',2,'opt3',3},'opt2')
 %   keyvals=dsRemoveKeyval({'opt1',1,'opt2',2,'opt3',3},{'opt2','opt1'})
+% 
+% Author: Jason Sherfey, PhD <jssherfey@gmail.com>
+% Copyright (C) 2016 Jason Sherfey, Boston University, USA
 
 keyvals_out=keyvals;
 

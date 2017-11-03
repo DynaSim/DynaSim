@@ -101,8 +101,14 @@ function spec = dsCheckSpecification(specification, varargin)
 %   - Example 6: standardize specification with everything in equation string
 %       s.pops.equations='E:dv[10]/dt=@M+I; {iNa,iK}@M; I=10';
 %       s=dsCheckSpecification(s)
+% 
+%     Example 7: standardize equations from predefined population model
+%       specification=dsCheckSpecification('HH');
 %
 % See also: dsGenerateModel, dsCheckModel
+% 
+% Author: Jason Sherfey, PhD <jssherfey@gmail.com>
+% Copyright (C) 2016 Jason Sherfey, Boston University, USA
 
 %% localfn output
 if ~nargin
@@ -184,11 +190,33 @@ if ~isfield(spec.populations,'model')
   spec.populations(1).model=[];
 end
 
-% special case: split equations with '[...][...]...[...]' into multiple populations
+% move compartments into populations if present
+if isfield(spec,'compartments')
+  npops=length(spec.populations);
+  fields=fieldnames(spec.compartments);
+  for i=1:length(spec.compartments)
+    for f=1:length(fields)
+      spec.populations(npops+i).(fields{f})=spec.compartments(i).(fields{f});
+    end
+  end
+  spec=rmfield(spec,'compartments');
+end
+
+% special cases of equation specification: 
 for i=1:length(spec.populations)
   eqn=spec.populations(i).equations;
   if ~isempty(eqn) && ischar(eqn)
-    if ~isempty(regexp(eqn,'\[[a-z_A-Z].*\]','match','once'))
+    % check for predefined population equations
+    if exist([eqn '.eqns'],'file')
+      eqn=[eqn '.eqns'];
+    elseif exist([eqn '.pop'],'file')
+      eqn=[eqn '.pop'];
+    end
+    if exist(eqn,'file')
+      % load equations from file
+      spec.populations(i).equations=dsReadText(eqn);
+    elseif ~isempty(regexp(eqn,'\[[a-z_A-Z].*\]','match','once'))
+      % split equations with '[...][...]...[...]' into multiple populations
       % create extra population
       tmp=regexp(eqn(2:end-1),'\],?\s*\[','split');
       spec.populations(i).equations=tmp{1};
@@ -246,39 +274,41 @@ for i=1:length(spec.populations)
       
       % store name in specification
       name=regexp(name,'^(\w+):','tokens','once');
-      spec.populations(i).name=name{1};
       spec.populations(i).equations=eqn;
+      if strcmp(spec.populations(i).name,sprintf('pop%g',i))
+        % replace default name with the name from equations
+        spec.populations(i).name=name{1};
+      end      
     end
     
     % extract size from equations if present (eg, v[4]'=.., dv[4]/dt=...)
     eqn=spec.populations(i).equations;
-    pattern='((\w+(\[\d+\])'')|(d\w+(\[\d+\])/dt))\s*='; % support size spec, dv[4]/dt
+    %pattern='((\w+(\[\d+\])'')|(d\w+(\[\d+\])/dt))\s*='; % support size spec, dv[4]/dt
+    pattern='((\w+(\[[\d,]+\])'')|(d\w+(\[[\d,]+\])/dt))\s*='; % support size spec, dv[4]/dt and dv[4,5]/dt
     
     % extract all differentials with size specification
     LHSs=regexp(eqn,pattern,'match');
     if ~isempty(LHSs)
       % extract sizes from all differentials (eg, 4 from v[4] or dv[4]/dt)
-      szs=nan(1,length(LHSs));
       for k=1:length(LHSs)
-        tmp=regexp(LHSs{k},'\w+\[(\d+)\]''','tokens','once');
+        tmp=regexp(LHSs{k},'\w+\[([\d,]+)\]''','tokens','once');
         if isempty(tmp)
-          tmp=regexp(LHSs{k},'d\w+\[(\d+)\]/dt','tokens','once');
+          tmp=regexp(LHSs{k},'d\w+\[([\d,]+)\]/dt','tokens','once');
         end
-        szs(k)=str2num(tmp{1});
-        
+        sz=cellfun(@str2double,regexp(tmp{1},',','split'));
+        % check that all vars in same population have same size
+        if k==1
+          sz_first=sz;
+        elseif sz~=sz_first
+          error('all variables in same population must have same size. split ODEs with different sizes into different populations.');
+        end        
         % remove size from ODE in population equations
         old=LHSs{k};
         new=strrep(LHSs{k},['[' tmp{1} ']'],'');
         eqn=strrep(eqn,old,new);
-      end
-      
-      % check that all vars in same population have same size
-      if ~all(szs==szs(1))
-        error('all variables in same population must have same size. split ODEs with different sizes into different populations.');
-      end
-      
+      end      
       spec.populations(i).equations=eqn;
-      spec.populations(i).size=szs(1);
+      spec.populations(i).size=sz;
     end
     
     % add mechanisms embedded in equations to mechanism_list ({M1,M2,...})
@@ -346,13 +376,42 @@ for i=1:length(spec.populations)
       end
     end
     % extract population-level parameters from equations
+    param_name={};
+    param_value={};
     eqn=spec.populations(i).equations;
     p=getfield(dsParseModelEquations(eqn, varargin{:}),'parameters');
     if ~isempty(p)
-      param_name=fieldnames(p);
-      param_value=struct2cell(p);
+      param_name=cat(1,param_name,fieldnames(p));
+      param_value=cat(1,param_value,struct2cell(p));
+    end
+    % extract mechanism-specific parameters defined in master equations
+    % eg) eqn='dv/dt=@current+10; monitor iAMPA.functions; iNa.IC_noise=10; iK.g=g; g=3';
+    o=regexp(eqn,';\s*[a-zA-Z]+\w*\.[a-zA-Z]+\w*\s*=[a-z_A-Z0-9\.]+','match'); 
+      % eg) '; MECH.PARAM=VALUE', assumes param is not defined at start of equation string
+    % add mechanism-specific keys (MECH.PARAM) and vals to p
+    if ~isempty(o)
+      % remove leading semicolons
+      oo=regexprep(o,';',''); % {'MECH1.PARAM1=VAL1','MECH2.PARAM2=VAL2',..}
+      for l=1:length(oo)
+        tmp=strtrim(regexp(oo{l},'=','split')); % {'MECH1.PARAM1','VAL1'}
+        param_name{end+1}=tmp{1}; % 'MECH1.PARAM1'
+        param_value{end+1}=tmp{2}; % 'VAL1'
+        % remove from equations
+        eqn=strrep(eqn,o{l},'');
+      end
+      spec.populations(i).equations=eqn;
+    end    
+    % move user-defined parameters from equations to the parameters field
+%     if ~isempty(p)
+%       param_name=fieldnames(p);
+%       param_value=struct2cell(p);
+    if ~isempty(param_name)
       for l=1:length(param_name)
-        value=eval(param_value{l});
+        try
+          value=eval(param_value{l});
+        catch
+          error('Values of this type are not supported for parameters set in equations.');
+        end
         if isempty(spec.populations(i).parameters)
           spec.populations(i).parameters={param_name{l},value};
         elseif ~ismember(param_name{l},spec.populations(i).parameters(1:2:end))
@@ -360,9 +419,13 @@ for i=1:length(spec.populations)
           spec.populations(i).parameters{end+1}=value;
         end
       end
-    end
+    end    
+    % TODO: remove support for MECH.PARAM from dsParseModelEquations,
+    % because that returns MECH_PARAM, whereas we now support MECH.PARAM.
     
     % incorporate user-supplied parameters in pop equations if used in them
+    % note: this is necessary for proper substitution when the master
+    % equations are parsed in dsGenerateModel.
     if ~isempty(spec.populations(i).parameters)
       keys=spec.populations(i).parameters(1:2:end);
       vals=spec.populations(i).parameters(2:2:end);
@@ -381,16 +444,31 @@ for i=1:length(spec.populations)
         % set in population equations if not already defined there
         for ff=1:length(found_words)
           found_word=found_words{ff};
+          precision=8; % number of digits allowed for user-supplied values
+          found_value = toString(vals{strcmp(found_word,keys)},precision);
           
           % check if not explicitly set in population equations
           if isempty(regexp(eqn,[';\s*' found_word '\s*='],'once')) && ... % not in middle or at end
-             isempty(regexp(eqn,['^' found_word '\s*='],'once')) % not at beginning
-            
-            % explicitly set in population equations
+             isempty(regexp(eqn,['^' found_word '\s*='],'once')) % not at beginning            
+            % append and explicitly set in population equations
             if eqn(end)~=';', eqn(end+1)=';'; end % add semicolon if necessary
-            precision=8; % number of digits allowed for user-supplied values
-            found_value = toString(vals{strcmp(found_word,keys)},precision);
             eqn=[eqn sprintf(' %s=%s;',found_word,found_value)];
+          else
+            % update values in population equations
+            old=regexp(eqn,[';\s*' found_word '\s*=\s*[\w\.'']+'],'match','once'); % in middle or at end
+            if ~isempty(old)
+%               % remove semicolon for proper substitution using dsStrrep
+%               old=old(2:end);
+              % replace value in middle or at end
+              new=['; ' found_word '=' found_value];
+%               new=[' ' found_word '=' found_value];
+            else
+              % replace value at the beginning
+              old=regexp(eqn,['^' found_word '\s*=\s*[\w\.'']+'],'match','once');
+              new=[found_word '=' found_value];
+            end
+            eqn=strrep(eqn,old,new); % update value in equations
+%             eqn=dsStrrep(eqn,old,new); % update value in equations
           end
         end
         spec.populations(i).equations=eqn;
@@ -702,6 +780,21 @@ function spec = backward_compatibility(spec, varargin)
     spec=rmfield(spec,'edges');
   end
 
+  if isfield(spec,'edges')
+    spec.connections=spec.edges;
+    spec=rmfield(spec,'edges');
+  end
+  
+  if isfield(spec,'links')
+    spec.connections=spec.links;
+    spec=rmfield(spec,'links');
+  end
+  
+  if isfield(spec,'comps')
+    spec.compartments=spec.comps;
+    spec=rmfield(spec,'comps');
+  end
+  
   if isfield(spec,'populations')
     % rename population "label" to "name"
     if isfield(spec.populations,'label')

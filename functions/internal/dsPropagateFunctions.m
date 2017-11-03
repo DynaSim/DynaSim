@@ -9,6 +9,9 @@ function model = dsPropagateFunctions(model, varargin)
 % Output: DynaSim model structure without internal function calls
 %
 % See also: dsSimulate, dsGenerateModel, dsPropagateNamespaces
+% 
+% Author: Jason Sherfey, PhD <jssherfey@gmail.com>
+% Copyright (C) 2016 Jason Sherfey, Boston University, USA
 
 %% localfn output
 if ~nargin

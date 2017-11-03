@@ -1,12 +1,16 @@
 
 function [Abasis, Abasisi, Asub]= getLinearIndependent(A,ignore_constant_shift)
-% [covaried] = getLinearIndependent(vary_params)
+% [Abasis, Abasisi, Asub]= getLinearIndependent(A,ignore_constant_shift)
 %
+% 
 % Purpose: Takes in a matrix of column vectors and identifies
 % the subset of columns that forms a linear independent basis (Abasis). 
+% 
+% 
 % It also clusters columns in the original matrix into groups of those that
 % share linear dependence (Asub). (e.g. If col2 = 2*col1, then col1 and
 % col2 would be grouped together).
+% 
 % 
 % Usage:
 %   [Abasis, Abasisi, Asub]= getLinearIndependent(A)
@@ -33,70 +37,75 @@ function [Abasis, Abasisi, Asub]= getLinearIndependent(A,ignore_constant_shift)
 % 
 % Examples:
 % 
-%     -----------------------
-%     % % % Example 1: % % % 
-%     -----------------------
-%     A = [1, 9, 2, 3, 2; 2, 8, 2, 3, 4; 3, 7, 3, 4 6; 4, 6, 4, 5, 8 ; 5, 5, 5, 6, 10];
-%     A =
-%          1     9     2     3     2
-%          2     8     2     3     4
-%          3     7     3     4     6
-%          4     6     4     5     8
-%          5     5     5     6    10
+%     % -----------------------
+%     % % % % Example 1: % % % 
+%     % -----------------------
 % 
+%     A = [1, 9, 2, 3, 2; 2, 8, 2, 3, 4; 3, 7, 3, 4 6; 4, 6, 4, 5, 8 ; 5, 5, 5, 6, 10];
+% 
+%     % A =
+%     %      1     9     2     3     2
+%     %      2     8     2     3     4
+%     %      3     7     3     4     6
+%     %      4     6     4     5     8
+%     %      5     5     5     6    10
+%     %
 %     % Note that: col2 = 10 - col1
 %     %            col4 = col3 + 1
 %     %            col5 = col1*2
 % 
 %     [Abasis, Abasisi, Asub]= getLinearIndependent(A, true)
 % 
-%     -----------------------
-%     % % % Result 1: % % % 
-%     -----------------------
-%     Abasis =                           % Subset of basis vectors
-%          1     2
-%          2     2
-%          3     3
-%          4     4
-%          5     5
-%     Abasisi =                         % Indices of basis vectors
-%          1     3
-%     Asub =
-%       1×2 cell array
-%         [1×3 double]    [1×2 double]
-%     Asub{1} : [1, 2, 5]               % Subset of columns described by 1st basis vector
-%     Asub{2} : [3, 4]                  % Subset of columns described by 2nd basis vector
+%     % -----------------------
+%     % % % % Result 1: % % % 
+%     % -----------------------
+%     % Abasis =                           % Subset of basis vectors
+%     %      1     2
+%     %      2     2
+%     %      3     3
+%     %      4     4
+%     %      5     5
+%     % Abasisi =                         % Indices of basis vectors
+%     %      1     3
+%     % Asub =
+%     %   1x2 cell array
+%     %     [1x3 double]    [1x2 double]
+%     % Asub{1} : [1, 2, 5]               % Subset of columns described by 1st basis vector
+%     % Asub{2} : [3, 4]                  % Subset of columns described by 2nd basis vector
+%     %
+%     % -----------------------
+%     % % % % Example 2: % % % 
+%     % -----------------------
 % 
-%     -----------------------
-%     % % % Example 2: % % % 
-%     -----------------------
 %     A2 = [ [2,2,2,2,2]', A]
-%     A2 =
-%      2     1     9     2     3     2
-%      2     2     8     2     3     4
-%      2     3     7     3     4     6
-%      2     4     6     4     5     8
-%      2     5     5     5     6    10
+% 
+%     % A2 =
+%     %  2     1     9     2     3     2
+%     %  2     2     8     2     3     4
+%     %  2     3     7     3     4     6
+%     %  2     4     6     4     5     8
+%     %  2     5     5     5     6    10
+%     % 
 % 
 %     [Abasis, Abasisi, Asub]= getLinearIndependent(A2, false)
 % 
-%     -----------------------
-%     % % % Result 2: % % % 
-%     -----------------------
-%     Abasis =
-%          1     2     2
-%          2     2     2
-%          3     3     2
-%          4     4     2
-%          5     5     2
-%     Abasisi =
-%      1     2     4
-%     Asub =
-%       1×3 cell array
-%         [1×3 double]    [1×2 double]    [4]
-%     Asub{1} : [1, 3, 5]
-%     Asub{2} : [2, 6]
-%     Asub{3} : [4]
+%     % -----------------------
+%     % % % % Result 2: % % % 
+%     % -----------------------
+%     % Abasis =
+%     %      1     2     2
+%     %      2     2     2
+%     %      3     3     2
+%     %      4     4     2
+%     %      5     5     2
+%     % Abasisi =
+%     %  1     2     4
+%     % Asub =
+%     %   1x3 cell array
+%     %     [1x3 double]    [1x2 double]    [4]
+%     % Asub{1} : [1, 3, 5]
+%     % Asub{2} : [2, 6]
+%     % Asub{3} : [4]
 % 
 %
 % Author: David Stanley, Boston University, 2017
@@ -139,9 +148,11 @@ end
 
 % Since we artificially added in a column of constants, if there were
 % no other columns linearly dependent on a constant value, then
-% covaried{1} will be empty and we can drop it.
-if isempty(Asub{Nnz}) && ignore_constant_shift
-    Asub = Asub(1:end-1);
+% Asub{end} will be empty and we can drop it.
+if ignore_constant_shift
+    if isempty(Asub{Nnz})
+        Asub = Asub(1:end-1);
+    end
 end
 
 

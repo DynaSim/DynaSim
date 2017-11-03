@@ -1,5 +1,5 @@
 function studyinfo = dsStudyinfoIO(studyinfo,study_file,id,verbose_flag)
-%STUDYINFOIO - use lock files to manage concurrent access to a shared studyinfo 
+%STUDYINFOIO - use lock files to manage concurrent access to a shared studyinfo
 %
 % This is an internal helper function called by dsCheckStudyinfo, dsSetupStudy,
 % TrackStudy, and dsCreateBatch to prevent busy-file conflicts. file. i.e.,
@@ -13,12 +13,15 @@ function studyinfo = dsStudyinfoIO(studyinfo,study_file,id,verbose_flag)
 %   - studyinfo: (empty [] for loading) or (DynaSim studyinfo structure to save)
 %   - study_file: name of file to load or save
 %   - id: process identifier for lock file name [optional]
+%
+% Author: Jason Sherfey, PhD <jssherfey@gmail.com>
+% Copyright (C) 2016 Jason Sherfey, Boston University, USA
 
 % check inputs
 if nargin<4, verbose_flag=0; end
 if nargin<3, id=[]; end
 if nargin<2 || isempty(study_file)
-  study_file='studyinfo.mat'; 
+  study_file='studyinfo.mat';
 elseif isdir(study_file)
   study_file=fullfile(study_file,'studyinfo.mat');
 end
@@ -41,7 +44,7 @@ if isempty(id)
   switch OS
     case {'linux','darwin'} % Linux or Mac
       % lock_file format: .lock_<timestamp>_<id>
-      [status,result]=system(['ls ' study_dir '/.lock_*']);
+      [status,result]=system(['ls ' study_dir '/.lock_* 2>/dev/null']);
       if status==0
         ids=regexp(result,'.lock_\d+_(\d+)','tokens');
         if ~isempty(ids), curr_ids=cellstr2num([ids{:}]); end
@@ -51,7 +54,7 @@ if isempty(id)
       D=dir(study_dir);
       status=~any(find(~cellfun(@isempty,regexp({D.name},'^lock_'))));
       if status==0
-        ids=regexp({D.name},'lock_\d+_(\d+)','tokens','once'); 
+        ids=regexp({D.name},'lock_\d+_(\d+)','tokens','once');
         if ~isempty(ids), curr_ids=cellstr2num([ids{:}]); end
       end
   end
@@ -59,7 +62,7 @@ end
 
 MIN_LOAD_ID=1e7; % 10M
   % should be set to a number larger than the max number of sims or analyses expected in a batch
-  % note: this gives priority to loading over saving 
+  % note: this gives priority to loading over saving
   % (since NextStudyinfoID = max existing lock id with min timestamp)
 
 % determine proper settings based on inputs (whether studyinfo struct was
@@ -115,7 +118,7 @@ end
 % pause(.01); % wait 10ms
 
 try
-  
+
 %% perform action (load or save) for this process when it's ID is the Next ID
 timeout=30; % seconds, total time to wait before failing to access studyinfo
 delay=0.001; % seconds, time to pause between attempts to access studyinfo
@@ -136,8 +139,8 @@ while ~done
           if s, error(r); end
         otherwise
           fid=fopen(common_lock_file,'w');
-          fclose(fid);          
-      end      
+          fclose(fid);
+      end
       try
         switch action
           case 'load'
@@ -159,15 +162,25 @@ while ~done
               end
               if verbose_flag
                 fprintf('updating simulation metadata in study file: %s\n',study_file);
-              end              
+              end
             else
               if verbose_flag
                 fprintf('saving study file: %s\n',study_file);
-              end              
+              end
             end
             % save study_file
-            save(study_file,'studyinfo');
-            %save(study_file,'studyinfo','-v7.3');
+            try
+              save(study_file,'studyinfo','-v7');
+              if ~strcmp(reportUI,'matlab')
+                [wrn_msg,wrn_id] = lastwarn;
+                if strcmp(wrn_msg,'save: wrong type argument ''function handle''')
+                  error('save: wrong type argument ''function handle''');
+                end
+              end
+            catch
+              fprintf('Data is not ''-v7'' compatible. Saving in hdf5 format.\n')
+              save(study_file,'studyinfo','-hdf5');
+            end
         end
         done=1; break;
       catch
@@ -195,7 +208,7 @@ while ~done
     D=dir(study_dir); % contents of study_dir directory
     pat=sprintf('^.?lock_\\d+_%i$',last_next_id);
     ind=find(~cellfun(@isempty,regexp({D.name},pat)));
-    if ~isempty(ind)    
+    if ~isempty(ind)
       next_lock_file=D(ind).name; % file with next_id (^.?lock_*_<next_id>$)
       if verbose_flag
         fprintf('deleting stale temporary lock file: %s\n',next_lock_file);
@@ -207,7 +220,7 @@ while ~done
   if ~done
     if verbose_flag
       fprintf('TIMEOUT #%g while waiting to %s study file for process %g (next_id=%g).\n',cnt,action,id,next_id);
-    end    
+    end
     cnt=cnt+1;
   end
   % check if max attempts has been exceeded
@@ -235,7 +248,7 @@ catch err
   delete(lock_file);
   delete(common_lock_file);
   displayError(err);
-end  
+end
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% SUBFUNCTIONS
@@ -249,7 +262,7 @@ id=0; % next process id
 switch OS
   case {'linux','darwin'} % Linux or Mac
     % check if there are any lock files
-    [status,result]=system(['ls ' fullfile(study_dir,'.lock_*')]);
+    [status,result]=system(['ls ' fullfile(study_dir,'.lock_* 2>/dev/null')]);
     if status==0 % there exist lock files
       % get list of locked ids
       ids=regexp(result,'.lock_\d+_(\d+)','tokens');
@@ -306,7 +319,7 @@ for idx=1:(5*timeout/delay) % timeout after 5*timeout sec (then clear all lock f
   switch OS
     case {'linux','darwin'} % Linux or Mac
       % lock_file format: .lock_<timestamp>_<id>
-      [status,~]=system(['ls ' study_dir '/.lock_*']); % note: ls is faster than dir
+      [status,~]=system(['ls ' study_dir '/.lock_* 2>/dev/null']); % note: ls is faster than dir
     otherwise % Windows
       % lock_file format: lock_<timestamp>_<id>
       D=dir(study_dir);
@@ -314,8 +327,8 @@ for idx=1:(5*timeout/delay) % timeout after 5*timeout sec (then clear all lock f
   end
   % --------------------------------------------
   if status==0 % there exists a file .lock_*
-    % note: {.lock_*} are temporary files created to indicate periods during 
-    % which studyinfo.mat is being accessed. studyinfo.mat should not be 
+    % note: {.lock_*} are temporary files created to indicate periods during
+    % which studyinfo.mat is being accessed. studyinfo.mat should not be
     % loaded until all .lock_* files have been removed.
     pause(delay); % wait
   else

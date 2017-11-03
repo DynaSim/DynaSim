@@ -3,7 +3,7 @@ function data = dsThevEquiv(data, fields_currents, field_voltage, reversals_list
 % given set of M specified ionic channels.
 % Inputs:
 %   data - DynaSim data structure (see dsCheckData)
-%   fields_currents - 1xM cell array of field namesthat
+%   fields_currents - 1xM cell array of field names that
 %           contain the ionic currents (M entries, one for each ionic channel).
 %   field_voltage - 1x1 string specifying membrane voltage
 %   reversals_list - 1xM array containing a list of all reversal

@@ -22,6 +22,9 @@ function [results,studyinfo] = dsAnalyzeStudy(data,func,varargin)
 % TODO: annotate figures with data set-specific modifications
 %
 % See also: dsSimulate, dsCalcFR
+% 
+% Author: Jason Sherfey, PhD <jssherfey@gmail.com>
+% Copyright (C) 2016 Jason Sherfey, Boston University, USA
 
 % check inputs
 options=dsCheckOptions(varargin,{...

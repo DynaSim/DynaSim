@@ -1,5 +1,5 @@
 function solve_ode_filepath = dsWriteMatlabSolver(model,varargin)
-%WRITEMATLABSOLVER - write m-file that numerically inteegrates the model
+%WRITEMATLABSOLVER - write m-file that numerically integrates the model
 %
 % Usage:
 %   filepath = dsWriteMatlabSolver(model,varargin)
@@ -85,27 +85,30 @@ parameter_prefix='p.';%'pset.p.';
 if options.save_parameters_flag
   % add parameter struct prefix to parameters in model equations
   model=dsPropagateParameters(model,'action','prepend','prop_prefix',parameter_prefix, varargin{:});
-  
+
   % set and capture numeric seed value
   if options.compile_flag==1
     % todo: make seed string (eg, 'shuffle') from param struct work with coder (options.compile_flag=1)
     % (currently raises error: "String input must be constant")
     % workaround: (shuffle here and get numeric seed for MEX-compatible params.mat)
-    rng(options.random_seed);
-    options.random_seed=getfield(rng,'Seed');  % <-- current active seed
+    rng_wrapper(options.random_seed);
+    options.random_seed=getfield(rng_wrapper,'Seed');  % <-- current active seed
+    rng_function = 'rng';
+  else
+    rng_function = 'rng_wrapper';
   end
-  
+
   % set parameter file name (save with m-file)
   [fpath,fname,fext]=fileparts2(options.filename);
   odefun_filename = [fname '_odefun'];
   param_file_name = fullfile(fpath,'params.mat');
-  
+
   % save parameters to disk
   warning('off','catstruct:DuplicatesFound');
-  
+
   % make p struct
   p=catstruct(dsCheckSolverOptions(options),model.parameters);
-  
+
   % add IC to p
   %   NOTE: will get done again in simulateModel
   if isempty(options.ic)
@@ -113,23 +116,23 @@ if options.save_parameters_flag
   else %if overridden from options
     p.ic = options.ic;
   end
-  
+
   % add matlab_solver_options to p
   if ~isempty(options.matlab_solver_options)
     p.matlab_solver_options = options.matlab_solver_options;
   end
-  
+
   if options.one_solve_file_flag
     % fill p flds that were varied with vectors of length = nSims
-    
+
     vary=dsCheckOptions(varargin,{'vary',[],[],},false);
     vary = vary.vary;
 
     mod_set = dsVary2Modifications(vary);
     % The first 2 cols of modifications_set are idenitical to vary, it just
     % has the last column distributed out to the number of sims
-    
-    
+
+
     % Get param names
     iMod = 1;
     % Split extra entries in first 2 cols of mods, so each row is a single pop and param
@@ -141,7 +144,7 @@ if options.save_parameters_flag
     % add col of underscores
     first_mod_set = cat(2,first_mod_set(:,1), repmat({'_'},size(first_mod_set,1), 1), first_mod_set(:,2:end));
     nParamMods = size(first_mod_set, 1);
-    
+
     % get param names
     mod_params = cell(nParamMods,1);
     for iRow = 1:nParamMods
@@ -152,9 +155,9 @@ if options.save_parameters_flag
         % find correct entry based on param and pop
         nsInd = logical(~cellfun(@isempty, strfind(model.namespaces(:,2), [first_mod_set{iRow,1} '_'])) .* ...
           ~cellfun(@isempty, strfind(model.namespaces(:,2), first_mod_set{iRow,3})));
-        
+
         assert(sum(nsInd) == 1)
-        
+
         % add mech names using namespace
         mod_params{iRow} = model.namespaces{nsInd,2};
       end
@@ -165,22 +168,21 @@ if options.save_parameters_flag
     for iMod = 1:length(mod_set)
       % Split extra entries in first 2 cols of mods, so each row is a single pop and param
       [~, mod_set{iMod}] = dsApplyModifications([],mod_set{iMod}, varargin{:});
-      
+
       % Get scalar values as vector
       param_values(:, iMod) = [mod_set{iMod}{:,3}];
     end
-    
+
     % Assign value vectors to params
     for iParam = 1:nParamMods
       p.(mod_params{iParam}) = param_values(iParam,:);
     end
   end % one_solve_file_flag
-  
-  
+
   if options.verbose_flag
     fprintf('saving params.mat\n');
   end
-  save(param_file_name,'p');
+  save(param_file_name,'p','-v7');
 else
   % insert parameter values into model expressions
   model=dsPropagateParameters(model,'action','substitute', varargin{:});
@@ -219,7 +221,7 @@ if ~isempty(options.filename)
   if options.verbose_flag
     fprintf('Creating solver file: %s\n',options.filename);
   end
-  
+
   fid=fopen(options.filename,'wt');
 else
   fid=options.fileID;
@@ -245,7 +247,7 @@ if options.save_parameters_flag
   fprintf(fid,'%% Parameters:\n');
   fprintf(fid,'%% ------------------------------------------------------------\n');
   fprintf(fid,'params = load(''params.mat'',''p'');\n');
-  
+
   if options.one_solve_file_flag && options.compile_flag
     fprintf(fid,'pVecs = params.p;\n');
   else
@@ -269,7 +271,7 @@ if options.one_solve_file_flag
     for iParam = 1:nParamMods
       fprintf(fid,'p.%s = pVecs.%s(simID);\n', mod_params{iParam}, mod_params{iParam});
     end
-    
+
     % take scalar from scalar params
     [~,sharedFlds] = intersect(fields(p), mod_params);
     scalar_params = fields(p);
@@ -326,13 +328,14 @@ fprintf(fid,'%% ------------------------------------------------------------\n')
 
 % 2.2 set random seed
 fprintf(fid,'%% seed the random number generator\n');
+fprintf(fid,'%% seed the random number generator\n');
 if options.save_parameters_flag
-  fprintf(fid,'rng(%srandom_seed);\n',parameter_prefix);
-else  
+  fprintf(fid,'%s(%srandom_seed);\n',rng_function,parameter_prefix);
+else
   if ischar(options.random_seed)
-    fprintf(fid,'rng(''%s'');\n',options.random_seed);
+    fprintf(fid,'%s(''%s'');\n',rng_function,options.random_seed);
   elseif isnumeric(options.random_seed)
-    fprintf(fid,'rng(%g);\n',options.random_seed);
+    fprintf(fid,'%s(%g);\n',rng_function,options.random_seed);
   end
 end
 
@@ -344,7 +347,7 @@ fprintf(fid,'%% ###########################################################\n');
 
 if options.compile_flag && strcmp(options.solver_type,'matlab_no_mex')
   odefun_str_name = odefun_filename;
-  
+
   if options.compile_flag
     odefun_str_name = [odefun_str_name '_mex']; % switch to mex version
   end
@@ -366,28 +369,28 @@ num_vars=length(model.state_variables);
 state_var_index=0;
 for i=1:num_vars
   var=model.state_variables{i};
-  
+
   % check ICs for use of inital state_var value and put in proper starting value
   if regexp(model.ICs.(var), '_last')
     stateVars = regexp(model.ICs.(var), '([\w_]+)_last', 'tokens');
     model.ICs.(var) = regexprep(model.ICs.(var), '_last', '');
-    
+
     for iSVar = 1:length(stateVars)
       thisSvar = stateVars{iSVar}{1};
       model.ICs.(var) = regexprep(model.ICs.(var), thisSvar, model.ICs.(thisSvar));
     end
   end
-  
+
   % evaluate ICs to get (# elems) per state var
   num_elems=length(eval([model.ICs.(var) ';']));
-  
+
   % set state var indices a variables for generic state vector X
   data_inds = state_var_index + [1,num_elems];
-  
+
   assert(strcmp(elem_names{data_inds(1)}, var)) %current elem should be same as var
-  
+
   fprintf(fid,'%s = data(:, %i:%i);\n', var, data_inds(1), data_inds(end));
-  
+
   state_var_index = state_var_index + num_elems;
 end
 
@@ -416,24 +419,24 @@ if options.compile_flag && strcmp(options.solver_type,'matlab_no_mex') % save od
   %open file
   odefun_filepath = fullfile(fpath, [odefun_filename fext]);
   odefun_fid = fopen(odefun_filepath,'wt');
-  
+
   %write to file
   fprintf(odefun_fid,'function dydt = %s(t,X)\n', odefun_filename);
   fprintf(odefun_fid,['dydt = [\n\n' odefun '\n]'';\n']); % make row into col vector
   fprintf(odefun_fid,'end\n');
-  
+
   %close file
   fclose(odefun_fid);
-  
+
   %% mex compile odefun
   options.codegen_args = {0,IC};
   dsPrepareMEX(odefun_filepath, options);
-  
+
 else % use subfunction
   fprintf(fid,'\n%% ###########################################################\n');
   fprintf(fid,'%% SUBFUNCTIONS\n');
   fprintf(fid,'%% ###########################################################\n\n');
-  
+
   % make sub function (no shared variables with main function workspace for max performance)
   fprintf(fid,'function dydt = odefun(t,X)\n');
   fprintf(fid,['dydt = [\n\n' odefun '\n]'';\n']); % make row into col vector

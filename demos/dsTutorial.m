@@ -192,16 +192,16 @@ data=dsSimulate(eqns);
 figure; plot(data.time,data.(data.labels{1}))
 xlabel('time (ms)'); ylabel('membrane potential (mV)'); title('Hodgkin-Huxley neuron')
 
-% Equations can also be stored in a text file and simulated by passing the
-% file name to dsSimulate:
-data=dsSimulate('HH.eqns');
+% Equations can also be stored in a text file (e.g., 'HH.pop') and 
+% simulated by passing the file name to dsSimulate:
+data=dsSimulate('HH.pop');
 
 % Model files used for simulation can be easily located:
 [~,eqnfile]=dsLocateModelFiles(data); % eqnfile is a cell array of file names
   % note: dsLocateModelFiles accepts DynaSim structures (model, data, specification, or studyinfo)
   % as inputs and returns all associated model files.
-[~,eqnfile]=dsLocateModelFiles('HH.eqns');  
-  % note: can also be used to locate .eqns and .mech model files
+[~,eqnfile]=dsLocateModelFiles('HH.pop');  
+  % note: can also be used to locate .pop and .mech model files
 % Open the model file:
 edit(eqnfile{1}); % compare to the above list of equations
 % tip: you can use dsLocateModelFiles to see what model files will be used
@@ -812,35 +812,9 @@ vary={
 data=dsSimulate(eqns,'tspan',[0 250],'vary',vary);
 dsPlot(data);
     
-    
-return
-
-
 % %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Special issues and advanced concepts
 % %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-%% Converting models from DNSim to DynaSim
-
-% Replace function calls: buildmodel() by dsGenerateModel(); runsim() by 
-% dsSimulate(); simstudy() by dsSimulate() with (scope,variable,values) 
-% reorganized and passed as modifications={scope,variable,values; scope,variable,values; ...}.
-
-% Each variable/monitor now has dimensions [data] = time x cells.  
-% Previously was [data]=cells x time
-% Now, connection matrices: [netcon]=(Npre x Npost).
-
-% Therefore, in each DNSim connection mechanism, transpose the connectivity 
-% matrix and replace (netcon*s) by (s*netcon).
-
-% Example: in <dynasim>/models/legacy/sPING
-% Compare
-%   AMPA.txt  -- prepared for DNSim
-%   AMPA2.txt -- edited for DynaSim
-
-% Remove underscores from names of populations, mechanisms, and variables.
-
-% Everything else should be back-compatible.
 
 %% Linking variables across mechanisms
 

@@ -21,14 +21,14 @@ htau(X) = NaF_c0 + NaF_c1./(1+exp((X+NaF_V2)/NaF_d2))
 m0(X) = 1./(1+exp((-X-NaF_V0)/10))
 aH(X) = hinf(X) ./ htau(X)
 bH(X) = (1-hinf(X))./htau(X)
-INaF(X,h) = gNaF.*m0(X).^3.*h.*(X-E_NaF)
+INaF(X,h) = -gNaF.*m0(X).^3.*h.*(X-E_NaF)
 
 % ODEs
 hNaF' = aH(X).*(1-hNaF)-bH(X).*hNaF
 hNaF(0)=IC+IC_noise.*rand(Npop,1)
 
 % Interface
-@current += -INaF(X,hNaF)
+@current += INaF(X,hNaF)
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % References: 
