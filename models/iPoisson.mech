@@ -1,9 +1,9 @@
 % Poisson input
 
 % poisson parameters
-baseline=0;     % Hz, baseline rate
-DC=2000;        % Hz, steady component of the signal
-AC=0;           % Hz, oscillatory component of the signal
+baseline=0;     % sp/s, baseline rate
+DC=2000;        % sp/s, steady component of the signal
+AC=0;           % sp/s, oscillatory component of the signal
 f=0;            % Hz, modulation frequency of the signal
 phi=0;          % radians, phase at which the signal begins
 onset=0;        % ms, start time of signal
