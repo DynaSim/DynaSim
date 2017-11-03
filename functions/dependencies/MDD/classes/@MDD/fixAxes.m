@@ -46,6 +46,12 @@ end
 if optionalFixesFlag
     % convert any cellnum axis_values to numeric
     % Author: Erik Roberts
+    % #todo - consider removing this option for the following reason:
+    %    Axis values could be of type cell, being a mixture of numerics and
+    %    non-numerics. But then indexing in a certain way could remove all
+    %    numerics, causing the axis_values to be automatically converted.
+    %    However, this would produce an error if future manipulation of the
+    %    later re-introduce non-numerics.
     axValClasses = getclass_obj_axis_values(obj);
     cellNumInds = find(strcmp(axValClasses, 'cellnum'));
     if any(cellNumInds)

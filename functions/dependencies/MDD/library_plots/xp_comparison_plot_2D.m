@@ -1,20 +1,43 @@
-function xp_comparison_plot_2D(xp, test_handle, significance, transpose_flag, flip_axis_flag)
+function xp_comparison_plot_2D(xp, op)
+    
+    if nargin < 2, op = struct; end
+    
+    if isempty(op), op = struct; end;
+    
+    op = struct_addDef(op,'test_handle',@ttest2);
+    op = struct_addDef(op,'significance',.05);
+    op = struct_addDef(op,'transpose_flag',0);
+    op = struct_addDef(op,'flip_axis_flag',0);
+    op = struct_addDef(op,'xscale','linear');
+    op = struct_addDef(op,'yscale','linear');
 
-    if nargin < 2, test_handle = []; end
-    
-    if isempty(test_handle), test_handle = @ttest2; end
-    
-    if nargin < 3, significance = []; end
-    
-    if isempty(significance), significance = .05; end
-
-    if nargin < 4, transpose_flag = []; end
-    
-    if isempty(transpose_flag), transpose_flag = 0; end
-
-    if nargin < 5, flip_axis_flag = []; end
-    
-    if isempty(flip_axis_flag), flip_axis_flag = 0; end
+%     if nargin < 2, test_handle = []; end
+%     
+%     if isempty(test_handle), test_handle = @ttest2; end
+%     
+%     if nargin < 3, significance = []; end
+%     
+%     if isempty(significance), significance = .05; end
+% 
+%     if nargin < 4, transpose_flag = []; end
+%     
+%     if isempty(transpose_flag), transpose_flag = 0; end
+% 
+%     if nargin < 5, flip_axis_flag = []; end
+%     
+%     if isempty(flip_axis_flag), flip_axis_flag = 0; end
+%     
+%     if nargin < 6, scale = {}; end
+%     
+%     if isempty(scale)
+%         scale = {'linear', 'linear'};
+%     end
+%     
+%     if isscalar(scale)
+%         scale_in = scale;
+%         clear scale
+%         scale{1:2} = scale;
+%     end
     
     [xp_dims, xp_sort_index] = sort(size(xp), 2, 'descend');
 
@@ -39,7 +62,7 @@ function xp_comparison_plot_2D(xp, test_handle, significance, transpose_flag, fl
         end
     end
     
-    if transpose_flag
+    if op.transpose_flag
         
         xp.data = cellfun(@(x) x', xp.data, 'UniformOutput', 0);
         
@@ -49,7 +72,7 @@ function xp_comparison_plot_2D(xp, test_handle, significance, transpose_flag, fl
     
     end
     
-    if flip_axis_flag
+    if op.flip_axis_flag
         
         indices = cell(1, ndims(xp));
         indices(:) = {':'};
@@ -75,13 +98,13 @@ function xp_comparison_plot_2D(xp, test_handle, significance, transpose_flag, fl
     
     for t = 1:no_tests
         
-        [~, p_values(t, 1)] = feval(test_handle, xp.data_pr{1}(t, :)', xp.data_pr{2}(t, :)', 'tail', 'left');
+        [~, p_values(t, 1)] = feval(op.test_handle, xp.data_pr{1}(t, :)', xp.data_pr{2}(t, :)', 'tail', 'left');
         
-        [~, p_values(t, 2)] = feval(test_handle, xp.data_pr{1}(t, :)', xp.data_pr{2}(t, :)', 'tail', 'right');
+        [~, p_values(t, 2)] = feval(op.test_handle, xp.data_pr{1}(t, :)', xp.data_pr{2}(t, :)', 'tail', 'right');
        
     end
 
-    test = p_values < significance/2;
+    test = p_values < op.significance/2;
 
     %% Find mean and s.e.
     
@@ -101,7 +124,7 @@ function xp_comparison_plot_2D(xp, test_handle, significance, transpose_flag, fl
     
     if length(axis_values{1}) < plot_length, axis_values{1}((end + 1):plot_length) = nan; end
     
-    boundedline(axis_values{1}, sample_mean, prep_for_boundedline(norminv(significance/2)*sample_se))
+    boundedline(axis_values{1}, sample_mean, prep_for_boundedline(norminv(op.significance/2)*sample_se))
     
     set(gca, 'XTickLabelMode', 'auto', 'YTickLabelMode', 'auto')
     
@@ -128,5 +151,8 @@ function xp_comparison_plot_2D(xp, test_handle, significance, transpose_flag, fl
     end
     
     legend(mylegend)
+    
+    set(gca, 'XScale', op.xscale)
+    set(gca, 'YScale', op.yscale)
     
 end

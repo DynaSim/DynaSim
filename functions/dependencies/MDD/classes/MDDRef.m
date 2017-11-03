@@ -81,6 +81,8 @@ classdef MDDRef < handle & matlab.mixin.Copyable
         function varargout = subsref(obj, S)
             if strcmp(S(1).type, '.') && (strcmp(S(1).subs, 'copy') || strcmp(S(1).subs, 'methods'))
                 [varargout{1:nargout}] = builtin('subsref', obj, S);
+            elseif strcmp(S(1).type, '.') && strcmp(S(1).subs, 'merge')
+                obj.valueObj = obj.valueObj.merge(S(2).subs{1});
             else
                 [varargout{1:nargout}] = builtin('subsref', obj.valueObj, S);
                 if nargout > 1 % Otherwise, commands like xp7.printAxisInfo, with no return value, will error.

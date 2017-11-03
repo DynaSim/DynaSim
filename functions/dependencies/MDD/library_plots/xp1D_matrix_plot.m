@@ -13,10 +13,13 @@ function hxp = xp1D_matrix_plot (xp, op)
     
     op = struct_addDef(op,'xlims',[]);
     op = struct_addDef(op,'ylims',[]);
-%     op = struct_addDef(op,'shift_val',[]);
+    op = struct_addDef(op,'LineWidth',0.5);
+    op = struct_addDef(op,'plotargs',{});
     
     xlims = op.xlims;
     ylims = op.ylims;
+    LineWidth = op.LineWidth;
+    plotargs = op.plotargs;
 %     shift_val0 = op.shift_val;
     
     
@@ -30,7 +33,8 @@ function hxp = xp1D_matrix_plot (xp, op)
         d = xp.data{i};
         if ~isempty(d)
             if ismatrix(d)
-                hold on; hxp.hcurr = plot(t,d);
+                hold on; hxp.hcurr = plot(t,d,plotargs{:},'LineWidth',LineWidth);
+%                 hold on; hxp.hcurr = plot(t,d);
             else
                 error('Too many dimensions');
             end

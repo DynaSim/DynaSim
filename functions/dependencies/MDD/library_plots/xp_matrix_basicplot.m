@@ -25,11 +25,17 @@ function hxp = xp_matrix_basicplot (xp, options)
 
     if ~isempty(xp.meta.datainfo(1).values)
         t = xp.meta.datainfo(1).values;
-        if ~isempty(xp.data{1}); hxp.hcurr = plot(t,xp.data{1}); end
+        if ~isempty(xp.data{1}), hxp.hcurr = plot(t,xp.data{1}); end
     else
-        if ~isempty(xp.data{1}); hxp.hcurr = plot(xp.data{1}); end
+        if ~isempty(xp.data{1}), hxp.hcurr = plot(xp.data{1}); end
     end
+    
     if ~isempty(xlims); xlim(xlims); end
     if ~isempty(ylims); ylim(ylims); end
+    
+    if isfield(options, 'xscale'), set(gca, 'XScale', options.xscale), end
+    if isfield(options, 'yscale'), set(gca, 'YScale', options.yscale), end
+    
+    axis tight
 
 end

@@ -27,8 +27,6 @@ if nargin < 3
     dim_target = last_non_singleton + 1;
 end
 
-checkDims(obj);
-
 % Make sure that obj.data_pr is a cell array
 if ~iscell(obj.data_pr); error('MDD.data must be a cell array.'); end
 
@@ -126,6 +124,7 @@ obj.data_pr = permute(obj.data_pr,[2:dim_src, 1, dim_src+1:Nd]);
 % Also, clear obj.axis_pr
 ax_src = obj.axis_pr(dim_src);
 obj = setAxisDefaults(obj,dim_src);
+obj.axis_pr(dim_src).values = 1:size(obj,dim_src);
 obj.axis_pr(dim_src).name = ['Dim ' num2str(dim_src)];
 
 % Store obj.axis_pr(dim_src) as meta data.

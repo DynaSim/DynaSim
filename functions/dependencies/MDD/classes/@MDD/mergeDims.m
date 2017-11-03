@@ -15,7 +15,6 @@ end
 
 if isempty(dims2merge); return; end
 
-obj.checkDims;
 Nd2p = length(dims2merge);
 %sz = size(obj.data_pr);
 sz = size(obj);

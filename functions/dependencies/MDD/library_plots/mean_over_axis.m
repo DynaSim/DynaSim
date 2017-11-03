@@ -1,10 +1,21 @@
-function obj_out = mean_over_axis(obj, axis_dim, function_handle, varargin)
-
-    if nargin < 3, function_handle = []; end
+function obj_out = mean_over_axis(obj, axis_dim, op) % axis_dim, function_handle, varargin)
     
-    if isempty(function_handle), function_handle = @nanmean; end
+    if nargin < 2, axis_dim = []; end
     
-    if nargin < 4, varargin = {}; end
+    if isempty(axis_dim), axis_dim = 1; end
+    
+    if nargin < 3, op = struct; end
+    
+    if isempty(op), op = struct; end;
+    
+    op = struct_addDef(op,'function_handle',@nanmean);
+    % op = struct_addDef(op,'function_arguments',{});
+    
+    % if nargin < 3, function_handle = []; end
+    % 
+    % if isempty(function_handle), function_handle = @nanmean; end
+    % 
+    % if nargin < 4, varargin = {}; end
     
     if ischar(axis_dim)
         dim_string = axis_dim;
@@ -26,9 +37,13 @@ function obj_out = mean_over_axis(obj, axis_dim, function_handle, varargin)
     
     %% Taking mean.
     
-    varargin{end + 1} = mean_dim;
+    if isfield(op, 'function_arguments')
+        op.function_arguments{end + 1} = mean_dim;   
+    else
+        op.function_arguments = {mean_dim};
+    end
     
-    obj_out.data = cellfun(@(x) feval(function_handle, x, varargin{:}), obj_out.data, 'UniformOutput', 0);
+    obj_out.data = cellfun(@(x) feval(op.function_handle, x, op.function_arguments{:}), obj_out.data, 'UniformOutput', 0);
     
     obj_out.meta = rmfield(obj_out.meta, ['matrix_dim_', num2str(mean_dim)]);
     

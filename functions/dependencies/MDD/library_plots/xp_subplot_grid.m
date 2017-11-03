@@ -19,6 +19,7 @@ function hxp = xp_subplot_grid (xp, op)
     op = struct_addDef(op,'max_legend',20);
     op = struct_addDef(op,'force_rowvect',false);
     op = struct_addDef(op,'zlims',[]);
+    op = struct_addDef(op,'autosuppress_interior_tics',false);
             % Display_mode: 0-Just plot directly
                           % 1-Plot as an image (cdata)
                           % 2-Save to a figure file 
@@ -29,6 +30,7 @@ function hxp = xp_subplot_grid (xp, op)
     legend1 = op.legend1;
     do_colorbar = op.do_colorbar;
     zlims = op.zlims;               % This might be used for setting the colorbar limits (clims), but cannot get it working with subplot_grid
+    autosuppress_interior_tics = op.autosuppress_interior_tics;
     
     if verLessThan('matlab','8.4') && display_mode == 1; warning('Display_mode==1 might not work with earlier versions of MATLAB.'); end
     if transpose_on && ismatrix(xp)
@@ -39,6 +41,13 @@ function hxp = xp_subplot_grid (xp, op)
     
     if isrow(xp.data) && op.force_rowvect
         xp = xp.transpose;
+    end
+    
+    % Remove underscores from legend1
+    if iscellstr(legend1)
+        legend1b = cellfunu(@(s) strrep(s,'_',' '),legend1);
+    else
+        legend1b = legend1;
     end
     
     % Parameters
@@ -70,20 +79,20 @@ function hxp = xp_subplot_grid (xp, op)
                     c=c+1;
                     hxp.hcurr.set_gca(c);
                     hxp.hsub{i,j} = xp.data{i,j}();
-                    if i == 1 && j == 1 && ~isempty(legend1)
+                    if i == 1 && j == 1 && ~isempty(legend1b)
                         % Place a legend in the 1st subplot
-                        legend(legend1{1:min(end,op.max_legend)});
+                        legend(legend1b{1:min(end,op.max_legend)});
                     end
                     if i == 1 && j == 1 && do_colorbar
                         colorbar;
                         %hsg.colorbar;
                         %hsg.colorbar([],zlims);
                     end
-                    if j ~= 1
+                    if j ~= 1 && autosuppress_interior_tics
                         set(gca,'YTickLabel','');
                         ylabel('');
                     end
-                    if i ~= N1
+                    if i ~= N1 && autosuppress_interior_tics
                         set(gca,'XTickLabel','');
                         xlabel('');
                     end
@@ -91,17 +100,23 @@ function hxp = xp_subplot_grid (xp, op)
             end
             
             % Do labels for rows
-            if ~strcmp(xp.axis(1).name(1:3),'Dim')          % Only display if its not an empty axis
+            if ~strcmp(xp.axis(1).name(1:3),'Dim')          % Only display if it's not an empty axis
                 rowstr = setup_axis_labels(xp.axis(1));
                 hxp.hcurr.rowtitles(rowstr);
             end
             
             % Do labels for columns
-            if ~strcmp(xp.axis(2).name(1:3),'Dim')          % Only display if its not an empty axis
+            if ~strcmp(xp.axis(2).name(1:3),'Dim')          % Only display if it's not an empty axis
                 colstr = setup_axis_labels(xp.axis(2));
                 hxp.hcurr.coltitles(colstr);
             end
             
+            % Do labels for x-axis.
+            if ~isempty(xp.meta.datainfo(1).name)
+                xlabels = cell(size(xp.axis(2).getvalues_cellstr));
+                xlabels(:) = {xp.meta.datainfo(1).name};
+                hxp.hcurr.coltitles(xlabels, 'bottom');
+            end
             
             if display_mode == 1
                 

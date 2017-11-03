@@ -25,9 +25,9 @@ function hxp = xp_matrix (xp, legend_flag)
     end
 
     if isnumeric(axis_values{1})
-        hxp.hcurr = plot(axis_values{1}, xp.data{1})
+        hxp.hcurr = plot(axis_values{1}, xp.data{1});
     else
-        hxp.hcurr = plot(xp.data{1})
+        hxp.hcurr = plot(xp.data{1});
     end
 
     box off
