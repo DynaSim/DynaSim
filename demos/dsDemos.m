@@ -193,7 +193,9 @@ figure; plot(data.time,data.(data.labels{1}))
 xlabel('time (ms)'); ylabel('membrane potential (mV)'); title('Predefined Intrinsically Bursting neuron')
 
 % Predefined populations are stored in text files (e.g., 'IB.pop') and 
-% simulated by passing the file name to dsSimulate (e.g., dsSimulate('IB')).
+% simulated by passing the file name to dsSimulate (e.g., dsSimulate('IB'))
+% or by equating population equations to it in the DynaSim specification
+% structure (see below).
 
 % View the predefined population file:
 [~,eqnfile]=dsLocateModelFiles('IB.pop'); edit(eqnfile{1});
