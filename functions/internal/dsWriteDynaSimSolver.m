@@ -453,7 +453,7 @@ for i=1:length(state_variables)
         % set var(1,:)=IC;
         fprintf(fid,'  %s(1,:) = %s;\n',state_variables{i},IC_expressions{i});
       elseif ndims_per_var(i)==2
-        % set var(:,:,1)=IC;        
+        % set var(:,:,1)=IC;
         fprintf(fid,'  %s(:,:,1) = %s;\n',state_variables{i},IC_expressions{i});
       else
         error('only 1D and 2D populations are supported a this time.');
@@ -621,7 +621,7 @@ for i=1:length(state_variables)
     if nvals_per_var(i)>1 % use full 2D matrix indexing
       if ndims_per_var(i)==1 % 1D population
         index_lasts{i}='(n-1,:)';
-        index_nexts{i}='(n,:)'; 
+        index_nexts{i}='(n,:)';
       elseif ndims_per_var(i)==2 % 2D population
         index_lasts{i}='(:,:,n-1)';
         index_nexts{i}='(:,:,n)';
@@ -836,13 +836,14 @@ if ~isempty(model.monitors) && ~strcmp(reportUI,'matlab') && options.disk_flag==
     % hacks to vectorize expression in Octave:
     monitor_vectorized_expression = dsStrrep(monitor_expression{i},'t','T');
     monitor_vectorized_expression = strrep(monitor_vectorized_expression,'1,p.pop','length(T),p.pop');
+    monitor_vectorized_expression = strrep(monitor_vectorized_expression,'(k,:)','');
     % write monitors to solver function
     fprintf(fid,'%s=%s;\n',monitor_name{i},monitor_vectorized_expression);
   end
 end
 fprintf(fid,'\nT=T(1:downsample_factor:ntime);\n');
 
-if any(ndims_per_var>1) % is there at least one 2D population?  
+if any(ndims_per_var>1) % is there at least one 2D population?
   for i=1:length(state_variables)
     if ndims_per_var(i)>1
       % move time index to first dimension
