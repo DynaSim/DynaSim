@@ -290,7 +290,7 @@ vary={
   'I->E','tauD',[5 10 15]       % inhibition decay time constant from I to E
   };
 dsSimulate(s, 'save_data_flag', 1, 'study_dir', 'demo_sPING_3',...
-                'vary', vary, 'verbose_flag', 1);
+                'vary', vary, 'verbose_flag', 1, 'parallel_flag',1);
 data=dsImport('demo_sPING_3');
 dsPlot(data);
 dsPlot(data,'plot_type','rastergram'); % <-- Figure 5 in DynaSim paper
