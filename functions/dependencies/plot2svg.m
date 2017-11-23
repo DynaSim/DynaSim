@@ -13,31 +13,33 @@ function varargout = plot2svg(param1,id,pixelfiletype)
 
 global PLOT2SVG_globals
 global colorname
-progversion='13-Mar-2017';
+progversion='23-Nov-2017';
 PLOT2SVG_globals.runningIdNumber = 0;
 PLOT2SVG_globals.UI = reportUI;
 PLOT2SVG_globals.octave = false;
 PLOT2SVG_globals.checkUserData = true;
-PLOT2SVG_globals.ScreenPixelsPerInch = 90; % Default 90ppi
+PLOT2SVG_globals.ScreenPixelsPerInch = 96; % New default ppi
+PLOT2SVG_globals.resolutionScaling = 1;
+PLOT2SVG_globals.WN = 0;
 PLOT2SVG_globals.EnableClippling = 1; % 0; % SA: note that it does not work fine with Inkscape pdf conversion for latex
 
 try
     PLOT2SVG_globals.ScreenPixelsPerInch = get(0, 'ScreenPixelsPerInch');
 catch
-    % Keep the default 90ppi
+    % Keep the default ppi
 end
+PLOT2SVG_globals.resolutionScaling = PLOT2SVG_globals.ScreenPixelsPerInch/96;
 if nargout==1
     varargout={0};
 end
 % disp(['   Matlab/Octave to SVG converter version ' progversion ', Juerg Schwizer (converter@bluewin.ch).'])
 disp(['   Forked Matlab/Octave to SVG converter version ' progversion ', Salva Ardid (sardid@bu.edu).'])
 disp(['   Credit to Juerg Schwizer (converter@bluewin.ch).'])
-matversion=version;
-if exist('OCTAVE_VERSION','builtin')
+if strcmp(PLOT2SVG_globals.UI,'octave')
     PLOT2SVG_globals.octave = true;
     % disp('   Info: PLOT2SVG runs in Octave mode.')
 else
-    if str2num(matversion(1))<6 % Check for matlab version and print warning if matlab version lower than version 6.0 (R.12)
+    if verLessThan(PLOT2SVG_globals.UI, '6.0') % Check for matlab version and print warning if matlab version lower than version 6.0 (R.12)
         disp('   Warning: Future versions may no more support older versions than MATLAB R12.')
     end
 end
@@ -88,6 +90,7 @@ else
         finalname=param1;
     end
 end
+
 % needed to see annotation axes
 originalShowHiddenHandles = get(0, 'ShowHiddenHandles');
 set(0, 'ShowHiddenHandles', 'on');
@@ -145,7 +148,6 @@ ax=get(id,'Children');
 for j=length(ax):-1:1
     currenttype = get(ax(j),'Type');
     if strcmp(currenttype,'axes')
-
         groups=[groups group];
         group=axes2svg(fid,id,ax(j),group,paperpos);
     elseif strcmp(currenttype,'uicontrol')
@@ -618,6 +620,7 @@ else
 end
 
 function frontTicks(fid, x, y, scolorname, linewidth, tick, index, edge_neighbours, c, valid_ticks, ticklength, tick_ratio, lim, drawBorder)
+global PLOT2SVG_globals
 for k = 1:length(index)
     x_tick_end1 = interp1([0 1],[x(index(k)) x(edge_neighbours(index(k),c(1)))],ticklength*tick_ratio(c(3)),'linear','extrap');
     y_tick_end1 = interp1([0 1],[y(index(k)) y(edge_neighbours(index(k),c(1)))],ticklength*tick_ratio(c(3)),'linear','extrap');
@@ -631,7 +634,13 @@ for k = 1:length(index)
         line2svg(fid,[xg_line_start(i) xg_line_end(i)],[yg_line_start(i) yg_line_end(i)],scolorname,'-',linewidth)
     end
     if drawBorder
-        line2svg(fid,[x(index(k)) x(edge_neighbours(index(k),c(2)))],[y(index(k)) y(edge_neighbours(index(k),c(2)))],scolorname,'-',linewidth)
+        % SA: full line, looks better and currently used in Matlab
+        % line2svg(fid,[x(index(k)) x(edge_neighbours(index(k),c(2)))],[y(index(k)) y(edge_neighbours(index(k),c(2)))],scolorname,'-',linewidth)
+        if mod(k,2)
+          line2svg(fid,[x(index(k)) x(edge_neighbours(index(k),c(2)))],[y(index(k)) y(edge_neighbours(index(k),c(2)))-0.3/PLOT2SVG_globals.resolutionScaling*linewidth],scolorname,'-',linewidth)
+        else
+          line2svg(fid,[x(index(k)) x(edge_neighbours(index(k),c(2)))+0.3/PLOT2SVG_globals.resolutionScaling*linewidth],[y(index(k)) y(edge_neighbours(index(k),c(2)))],scolorname,'-',linewidth)
+        end
     end
 end
 
@@ -666,7 +675,7 @@ function group=axes2svg(fid,id,ax,group,paperpos)
 global PLOT2SVG_globals
 originalAxesUnits=get(ax,'Units');
 set(ax,'Units','normalized');
-axpos=get(ax,'Position');
+axpos = get(ax,'Position');
 faces =    [1 2 4 3; 2 4 8 6; 3 4 8 7; 1 2 6 5; 1 5 7 3; 5 6 8 7];
 %           x-y    ; y-z    ; x-z    ; y-z    ; x-z    ; x-y
 corners(:,:,1) = [1 1 2 3 4; 2 1 3 2 4];
@@ -731,7 +740,6 @@ fprintf(fid,'    <rect x="%0.3f" y="%0.3f" width="%0.3f" height="%0.3f"/>\n',...
     boundingBoxAxes(1), boundingBoxAxes(2), boundingBoxAxes(3), boundingBoxAxes(4));
 fprintf(fid,'  </clipPath>\n');
 if strcmp(get(ax,'Visible'),'on')
-
     axxtick=get(ax,'XTick');
     axytick=get(ax,'YTick');
     axztick=get(ax,'ZTick');
@@ -785,7 +793,7 @@ if strcmp(get(ax,'Visible'),'on')
     end
     gridlinestyle=get(ax,'GridLineStyle');
     minor_gridlinestyle=get(ax,'MinorGridLineStyle');
-    both_ticklength = get(ax,'TickLength');
+    both_ticklength = 1.5*get(ax,'TickLength'); % SA: longer ticks, looks better and more similar to newer Matlab versions
     gridBehind = true; % Default setting
     try
         if strcmp(get(ax, 'Layer'), 'top') && projection.xyplane
@@ -812,7 +820,7 @@ if strcmp(get(ax,'Visible'),'on')
         label_distance = -2*abs(ticklength);
         tick_ratio = [1 1 1];
     end
-    % linewidth = get(ax,'LineWidth');
+    % linewidth = PLOT2SVG_globals.resolutionScaling*get(ax,'LineWidth');
     axxindex=find((axxtick >= axlimori(1)) & (axxtick <= (axlimori(1)+axlimori(4))));
     axyindex=find((axytick >= axlimori(2)) & (axytick <= (axlimori(2)+axlimori(5))));
     axzindex=find((axztick >= axlimori(3)) & (axztick <= (axlimori(3)+axlimori(6))));
@@ -904,7 +912,7 @@ if strcmp(get(ax,'Visible'),'on')
         minor_axztick = minor_axztick(minor_axztick > min(axlimz) & minor_axztick < max(axlimz));
     end
     % Draw back faces
-    linewidth=get(ax,'LineWidth');
+    linewidth = PLOT2SVG_globals.resolutionScaling*get(ax,'LineWidth');
     if ~strcmp(get(ax,'Color'),'none')
         background_color = searchcolor(id,get(ax,'Color'));
         background_opacity = 1;
@@ -919,7 +927,7 @@ if strcmp(get(ax,'Visible'),'on')
         p = back_faces(pindex);
         for k = 1:size(corners,1)
             selectedCorners = squeeze(corners(k,:,p));
-            if ~strcmp(reportUI,'matlab') || verLessThan(PLOT2SVG_globals.UI, '8.4.0')
+            if PLOT2SVG_globals.octave || verLessThan(PLOT2SVG_globals.UI, '8.4.0')
                 gridAlpha = 1;
                 minorGridAlpha = 1;
             else
@@ -929,7 +937,7 @@ if strcmp(get(ax,'Visible'),'on')
             switch corners(k,1,p)
                 case 1 % x
                     % Draw x-grid
-                    if ~strcmp(reportUI,'matlab') || verLessThan(PLOT2SVG_globals.UI, '8.4.0')
+                    if PLOT2SVG_globals.octave || verLessThan(PLOT2SVG_globals.UI, '8.4.0')
                         scolorname = get(ax, 'XColor');
                     else
                         if strcmp(get(ax, 'GridColorMode'), 'auto')
@@ -960,7 +968,7 @@ if strcmp(get(ax,'Visible'),'on')
                     end
                 case 2 % y
                     % Draw y-grid
-                    if ~strcmp(reportUI,'matlab') || verLessThan(PLOT2SVG_globals.UI, '8.4.0')
+                    if PLOT2SVG_globals.octave || verLessThan(PLOT2SVG_globals.UI, '8.4.0')
                         scolorname = get(ax, 'YColor');
                     else
                         if strcmp(get(ax, 'GridColorMode'), 'auto')
@@ -991,7 +999,7 @@ if strcmp(get(ax,'Visible'),'on')
                     end
                 case 3 % z
                     % Draw z-grid
-                    if ~strcmp(reportUI,'matlab') || verLessThan(PLOT2SVG_globals.UI, '8.4.0')
+                    if PLOT2SVG_globals.octave || verLessThan(PLOT2SVG_globals.UI, '8.4.0')
                         scolorname = get(ax, 'ZColor');
                     else
                         if strcmp(get(ax, 'GridColorMode'), 'auto')
@@ -1026,7 +1034,7 @@ if strcmp(get(ax,'Visible'),'on')
 end
 fprintf(fid,'    <g>\n');
 axchild=get(ax,'Children');
-if strcmp(reportUI,'matlab') && ~verLessThan(PLOT2SVG_globals.UI,'8.4.0')
+if ~PLOT2SVG_globals.octave && ~verLessThan(PLOT2SVG_globals.UI,'8.4.0')
     % Matlab h2 engine
     axchild = [axchild; ax.Title; ax.XLabel; ax.YLabel; ax.ZLabel];
 end
@@ -1270,9 +1278,10 @@ if strcmp(get(ax,'Visible'),'on')
             yg_line_end = interp1(lim,[y_tick_end1 y_tick_end2],axztick);
             xg_label_end = interp1(lim,[x_label_end1 x_label_end2],axztick);
             yg_label_end = interp1(lim,[y_label_end1 y_label_end2],axztick);
-            for i = valid_zsticks
-                line2svg(fid,[xg_line_start(i) xg_line_end(i)],[yg_line_start(i) yg_line_end(i)],scolorname,'-',linewidth)
-            end
+            % SA: looks better without and not used anymore in Matlab
+            % for i = valid_zsticks
+            %     line2svg(fid,[xg_line_start(i) xg_line_end(i)],[yg_line_start(i) yg_line_end(i)],scolorname,'-',linewidth)
+            % end
             line2svg(fid,[x(z_axis_point_index) x(edge_neighbours(z_axis_point_index,3))],[y(z_axis_point_index) y(edge_neighbours(z_axis_point_index,3))],scolorname,'-',linewidth)
             if ~isempty(axlabelz) && ~(iscell(axlabelz) && all(cellfun(@isempty,axlabelz)))
                 if ischar(axlabelz) && size(axlabelz, 1) == 1
@@ -1308,11 +1317,11 @@ for i=length(axchild):-1:1
     if strcmp(get(axchild(i), 'Visible'), 'off')
         % do nothing
     elseif strcmp(get(axchild(i),'Type'),'line')
-        scolorname=searchcolor(id,get(axchild(i),'Color'));
-        linestyle=get(axchild(i),'LineStyle');
-        linewidth=get(axchild(i),'LineWidth');
-        marker=get(axchild(i),'Marker');
-        markeredgecolor=get(axchild(i),'MarkerEdgeColor');
+        scolorname = searchcolor(id,get(axchild(i),'Color'));
+        linestyle = get(axchild(i),'LineStyle');
+        linewidth = PLOT2SVG_globals.resolutionScaling*get(axchild(i),'LineWidth');
+        marker = get(axchild(i),'Marker');
+        markeredgecolor = get(axchild(i),'MarkerEdgeColor');
         if ischar(markeredgecolor)
             switch markeredgecolor
                 case 'none',markeredgecolorname='none';
@@ -1411,7 +1420,7 @@ for i=length(axchild):-1:1
         cmap = get(id,'Colormap');
         c = get(axchild(i),'ContourMatrix');
         linestyle = get(axchild(i),'LineStyle');
-        linewidth = get(axchild(i),'LineWidth');
+        linewidth = PLOT2SVG_globals.resolutionScaling*get(axchild(i),'LineWidth');
         edge_opacity = 1.0;
         face_opacity = 1.0;
         index = 1;
@@ -1484,7 +1493,7 @@ for i=length(axchild):-1:1
             edge_opacity = 1.0;
         end
         linestyle = get(axchild(i),'LineStyle');
-        linewidth = get(axchild(i),'LineWidth');
+        linewidth = PLOT2SVG_globals.resolutionScaling*get(axchild(i),'LineWidth');
         marker = get(axchild(i),'Marker');
         markeredgecolor=get(axchild(i),'MarkerEdgeColor');
         markersize=get(axchild(i),'MarkerSize')/1.5;
@@ -1711,9 +1720,9 @@ for i=length(axchild):-1:1
         else
             edge_opacity = 1.0;
         end
-        pointc=min(pointc,size(cmap,1));
-        linestyle=get(axchild(i),'LineStyle');
-        linewidth=get(axchild(i),'LineWidth');
+        pointc = min(pointc,size(cmap,1));
+        linestyle = get(axchild(i),'LineStyle');
+        linewidth = PLOT2SVG_globals.resolutionScaling*get(axchild(i),'LineWidth');
         if strcmp(get(ax,'XScale'),'log')
             points(1,:)=log10(points(1,:));
         end
@@ -1837,7 +1846,7 @@ for i=length(axchild):-1:1
     elseif strcmp(get(axchild(i),'Type'),'rectangle')
         scolorname = searchcolor(id,get(axchild(i),'EdgeColor'));
         fcolorname = searchcolor(id,get(axchild(i),'FaceColor'));
-        linewidth = get(axchild(i),'LineWidth');
+        linewidth = PLOT2SVG_globals.resolutionScaling*get(axchild(i),'LineWidth');
         position = get(axchild(i),'Position');
         posx = [position(1) position(1)+position(3)];
         if strcmp(get(ax,'XScale'),'log')
@@ -1892,7 +1901,7 @@ for i=length(axchild):-1:1
         margin = get(axchild(i),'Margin');
         facecolor = get(axchild(i),'BackgroundColor');
         edgecolor = get(axchild(i),'EdgeColor');
-        linewidth = get(axchild(i),'LineWidth');
+        linewidth = PLOT2SVG_globals.resolutionScaling*get(axchild(i),'LineWidth');
         linestyle = get(axchild(i),'LineStyle');
         if ischar(facecolor)
             if ~strcmp(facecolor,'none')
@@ -2344,7 +2353,7 @@ end
 function control2svg(fid,id,ax,paperpos)
 global PLOT2SVG_globals
 set(ax,'Units','pixels');
-if ~strcmp(reportUI,'matlab') || verLessThan(PLOT2SVG_globals.UI, '8.4.0')
+if PLOT2SVG_globals.octave || verLessThan(PLOT2SVG_globals.UI, '8.4.0')
     pos=get(ax,'Position');
 else
     pos=ax.OuterPosition;
@@ -2430,8 +2439,9 @@ if size(texttext,2)~=0
 else
     label2svg(fid,axpos,id,x,y,'',textalign,textrot,textvalign,lines,font_color)
 end
-set(id,'Units',originalTextUnits);
-set(id,'Position', originalTextPosition);
+% SA: the following two lines don't seem to do anything and break the consistency of the figure in Matlab
+% set(id,'Units',originalTextUnits);
+% set(id,'Position', originalTextPosition);
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % adds the exponents to the axis thickmarks if needed
@@ -2557,6 +2567,7 @@ end
 % former versions of FrameMaker supported the commands FDY and FDX to shift the text
 % this commands were replaced by a shift parameter that is normed by the font size
 function label2svg(fid,axpos,id,x,y,tex,align,angle,valign,lines,font_color)
+global PLOT2SVG_globals
 if isempty(tex)
     return;
 end
@@ -2592,18 +2603,24 @@ switch lower(fontangle)
 otherwise, fangle = '';  % default 'normal'
 end
 % Note: The attribute 'alignment-baseline' cannot be used as it is often
-% badly supported. Therfore, we use shifts.
-switch lower(valign)
-     case 'top',shift=fontsize*1.18;
-     case 'cap',shift=fontsize*0.95;
-     case 'middle',shift = -((lines-1)/2*fontsize*1.25*1.2) + fontsize * 0.45;
-     case 'bottom',shift = -((lines-1)*fontsize*1.25*1.2) + fontsize * -0.25;
-     otherwise,shift=0;
+% badly supported. Therefore, we use shifts.
+% SA: using 'dominant-baseline'
+if verLessThan(PLOT2SVG_globals.UI, '8.4.0') && ~PLOT2SVG_globals.WN
+  fprintf('\n   Warning: plot2svg does not support axes'' labels and title allocation in Octave and Matlab versions < 2014b.\n\n')
+  PLOT2SVG_globals.WN = 1;
 end
+switch lower(valign)
+    case 'top', balign = 'text-before-edge'; % 'hanging'; % shift=fontsize*1.18;
+    case 'cap', balign = 'hanging'; % shift=fontsize*0.95;
+    case 'baseline', balign = 'auto'; % shift = -((lines-1)/2*fontsize*1.25*1.2) + fontsize * 0.45;
+    case 'bottom', balign = 'text-after-edge'; % 'ideographic'; % 'text-after-edge'; % shift = -((lines-1)*fontsize*1.25*1.2) + fontsize * -0.25;
+    otherwise, balign = 'central'; % shift=0; % middle (default)
+end
+shift = 0;
 switch lower(align)
     case 'right', anchor = 'end';
-    case 'center',anchor = 'middle';
-    otherwise,anchor = 'start';
+    case 'center', anchor = 'middle';
+    otherwise, anchor = 'start'; % left alignment (default)
 end
 if iscellstr(tex)
     tex = strvcat(tex);
@@ -2728,11 +2745,11 @@ end
 if isempty(tex)
     return;
 end
-
 %fprintf('%s\n', tex);
 fprintf(fid,'  <g transform="translate(%0.3f,%0.3f)">\n', x - shift * sin(-angle/180*pi), y + shift * cos(-angle/180*pi));
 fprintf(fid,'    <g transform="rotate(%0.1f)">\n',-angle);
-fprintf(fid,'      <text x="%0.3f" y="%0.3f" font-family="%s" text-anchor="%s" font-size="%0.0fpt"%s%s fill="%s" >', 0, 0, textfontname, anchor, textfontsize, fweight, fangle, font_color);
+% fprintf(fid,'      <text x="%0.3f" y="%0.3f" font-family="%s" text-anchor="%s" font-size="%0.0fpt"%s%s fill="%s" >', 0, 0, textfontname, anchor, textfontsize, fweight, fangle, font_color);
+fprintf(fid,'      <text x="%0.3f" y="%0.3f" font-family="%s" text-anchor="%s" dominant-baseline="%s" font-size="%0.0fpt"%s%s fill="%s" >', 0, 0, textfontname, anchor, balign, textfontsize, fweight, fangle, font_color);
 fprintf(fid,'%s',tex);
 fprintf(fid,'</text>\n');
 fprintf(fid,'    </g>\n');
@@ -2876,13 +2893,11 @@ global PLOT2SVG_globals
 % Modification by Jonathon Harding:
 % MATLAB however, assumes a variable number of pixels per inch, and
 % assuming that the pixels match is dangerous.
-% SA: scaling factor as if it was PLOT2SVG_globals.ScreenPixelsPerInch = 45 from actually PLOT2SVG_globals.ScreenPixelsPerInch = 96
-scalingPixelsPerInch = 45/96; % this creates analogous figure sizes in matlab and octave
 if nargin < 4
     parentheight = 1.25;    % Default
 end
 switch lower(from)  % convert from input unit to points
-    case 'pixels', rvalue = value * 72/(PLOT2SVG_globals.ScreenPixelsPerInch*scalingPixelsPerInch);
+    case 'pixels', rvalue = value * 72/PLOT2SVG_globals.ScreenPixelsPerInch/PLOT2SVG_globals.resolutionScaling;
     case 'points', rvalue = value;
     case 'centimeters', rvalue = value / 2.54*72;
     case 'inches', rvalue = value * 72; % 72 points = 1 inch
@@ -2890,7 +2905,7 @@ switch lower(from)  % convert from input unit to points
     otherwise, error(['Unknown unit ' from '.']);
 end
 switch lower(to)    % convert from points to specified unit
-    case 'pixels', rvalue = rvalue * 1.25;
+    case 'pixels', rvalue = rvalue * PLOT2SVG_globals.ScreenPixelsPerInch/72;
     case 'points'; % do nothing
     case 'centimeters', rvalue = rvalue * 2.54 / 72;
     case 'inches', rvalue = rvalue / 72;    % 72 points = 1 inch
