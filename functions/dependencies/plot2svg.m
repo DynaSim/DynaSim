@@ -39,7 +39,7 @@ if strcmp(PLOT2SVG_globals.UI,'octave')
     PLOT2SVG_globals.octave = true;
     % disp('   Info: PLOT2SVG runs in Octave mode.')
 else
-    if verLessThan(PLOT2SVG_globals.UI, '6.0') % Check for matlab version and print warning if matlab version lower than version 6.0 (R.12)
+    if UIverlessthan('6.0') % Check for matlab version and print warning if matlab version lower than version 6.0 (R.12)
         disp('   Warning: Future versions may no more support older versions than MATLAB R12.')
     end
 end
@@ -637,9 +637,9 @@ for k = 1:length(index)
         % SA: full line, looks better and currently used in Matlab
         % line2svg(fid,[x(index(k)) x(edge_neighbours(index(k),c(2)))],[y(index(k)) y(edge_neighbours(index(k),c(2)))],scolorname,'-',linewidth)
         if mod(k,2)
-          line2svg(fid,[x(index(k)) x(edge_neighbours(index(k),c(2)))],[y(index(k)) y(edge_neighbours(index(k),c(2)))-0.3/PLOT2SVG_globals.resolutionScaling*linewidth],scolorname,'-',linewidth)
+          line2svg(fid,[x(index(k)) x(edge_neighbours(index(k),c(2)))],[y(index(k)) y(edge_neighbours(index(k),c(2)))-0.2/PLOT2SVG_globals.resolutionScaling*linewidth],scolorname,'-',linewidth)
         else
-          line2svg(fid,[x(index(k)) x(edge_neighbours(index(k),c(2)))+0.3/PLOT2SVG_globals.resolutionScaling*linewidth],[y(index(k)) y(edge_neighbours(index(k),c(2)))],scolorname,'-',linewidth)
+          line2svg(fid,[x(index(k)) x(edge_neighbours(index(k),c(2)))+0.2/PLOT2SVG_globals.resolutionScaling*linewidth],[y(index(k)) y(edge_neighbours(index(k),c(2)))],scolorname,'-',linewidth)
         end
     end
 end
@@ -927,7 +927,7 @@ if strcmp(get(ax,'Visible'),'on')
         p = back_faces(pindex);
         for k = 1:size(corners,1)
             selectedCorners = squeeze(corners(k,:,p));
-            if PLOT2SVG_globals.octave || verLessThan(PLOT2SVG_globals.UI, '8.4.0')
+            if PLOT2SVG_globals.octave || UIverlessthan('8.4.0')
                 gridAlpha = 1;
                 minorGridAlpha = 1;
             else
@@ -937,7 +937,7 @@ if strcmp(get(ax,'Visible'),'on')
             switch corners(k,1,p)
                 case 1 % x
                     % Draw x-grid
-                    if PLOT2SVG_globals.octave || verLessThan(PLOT2SVG_globals.UI, '8.4.0')
+                    if PLOT2SVG_globals.octave || UIverlessthan('8.4.0')
                         scolorname = get(ax, 'XColor');
                     else
                         if strcmp(get(ax, 'GridColorMode'), 'auto')
@@ -968,7 +968,7 @@ if strcmp(get(ax,'Visible'),'on')
                     end
                 case 2 % y
                     % Draw y-grid
-                    if PLOT2SVG_globals.octave || verLessThan(PLOT2SVG_globals.UI, '8.4.0')
+                    if PLOT2SVG_globals.octave || UIverlessthan('8.4.0')
                         scolorname = get(ax, 'YColor');
                     else
                         if strcmp(get(ax, 'GridColorMode'), 'auto')
@@ -999,7 +999,7 @@ if strcmp(get(ax,'Visible'),'on')
                     end
                 case 3 % z
                     % Draw z-grid
-                    if PLOT2SVG_globals.octave || verLessThan(PLOT2SVG_globals.UI, '8.4.0')
+                    if PLOT2SVG_globals.octave || UIverlessthan('8.4.0')
                         scolorname = get(ax, 'ZColor');
                     else
                         if strcmp(get(ax, 'GridColorMode'), 'auto')
@@ -1034,7 +1034,7 @@ if strcmp(get(ax,'Visible'),'on')
 end
 fprintf(fid,'    <g>\n');
 axchild=get(ax,'Children');
-if ~PLOT2SVG_globals.octave && ~verLessThan(PLOT2SVG_globals.UI,'8.4.0')
+if ~PLOT2SVG_globals.octave && ~UIverlessthan('8.4.0')
     % Matlab h2 engine
     axchild = [axchild; ax.Title; ax.XLabel; ax.YLabel; ax.ZLabel];
 end
@@ -1278,10 +1278,12 @@ if strcmp(get(ax,'Visible'),'on')
             yg_line_end = interp1(lim,[y_tick_end1 y_tick_end2],axztick);
             xg_label_end = interp1(lim,[x_label_end1 x_label_end2],axztick);
             yg_label_end = interp1(lim,[y_label_end1 y_label_end2],axztick);
-            % SA: looks better without and not used anymore in Matlab
-            % for i = valid_zsticks
-            %     line2svg(fid,[xg_line_start(i) xg_line_end(i)],[yg_line_start(i) yg_line_end(i)],scolorname,'-',linewidth)
-            % end
+            tol = 1e-10;
+            if any(abs([diff(xg_line_start) diff(xg_line_end) diff(yg_line_start) diff(yg_line_end)]) > tol) % SA: looks better without and not used anymore in Matlab
+              for i = valid_zsticks
+                  line2svg(fid,[xg_line_start(i) xg_line_end(i)],[yg_line_start(i) yg_line_end(i)],scolorname,'-',linewidth)
+              end
+            end
             line2svg(fid,[x(z_axis_point_index) x(edge_neighbours(z_axis_point_index,3))],[y(z_axis_point_index) y(edge_neighbours(z_axis_point_index,3))],scolorname,'-',linewidth)
             if ~isempty(axlabelz) && ~(iscell(axlabelz) && all(cellfun(@isempty,axlabelz)))
                 if ischar(axlabelz) && size(axlabelz, 1) == 1
@@ -2353,7 +2355,7 @@ end
 function control2svg(fid,id,ax,paperpos)
 global PLOT2SVG_globals
 set(ax,'Units','pixels');
-if PLOT2SVG_globals.octave || verLessThan(PLOT2SVG_globals.UI, '8.4.0')
+if PLOT2SVG_globals.octave || UIverlessthan('8.4.0')
     pos=get(ax,'Position');
 else
     pos=ax.OuterPosition;
@@ -2470,7 +2472,7 @@ if strcmp(get(ax,'XTickLabelMode'),'auto') && strcmp(get(ax,'XScale'),'linear')
           end
         end
     end
-    labelpos = axxtick;%get(ax,'XTick');
+    labelpos = axxtick; % get(ax,'XTick');
     numlabels = numlabels(:);
     labelpos = labelpos(:);
     indexnz = find(labelpos ~= 0);
@@ -2507,7 +2509,7 @@ if strcmp(get(ax,'YTickLabelMode'),'auto') && strcmp(get(ax,'YScale'),'linear')
           end
         end
     end
-    labelpos = axytick;%get(ax,'YTick');
+    labelpos = axytick; % get(ax,'YTick');
     numlabels = numlabels(:);
     labelpos = labelpos(:);
     indexnz = find(labelpos ~= 0);
@@ -2544,7 +2546,7 @@ if strcmp(get(ax,'ZTickLabelMode'),'auto') && strcmp(get(ax,'ZScale'),'linear')
           end
         end
     end
-    labelpos = axztick;%get(ax,'ZTick');
+    labelpos = axztick; % get(ax,'ZTick');
     numlabels = numlabels(:);
     labelpos = labelpos(:);
     indexnz = find(labelpos ~= 0);
@@ -2605,8 +2607,8 @@ end
 % Note: The attribute 'alignment-baseline' cannot be used as it is often
 % badly supported. Therefore, we use shifts.
 % SA: using 'dominant-baseline'
-if verLessThan(PLOT2SVG_globals.UI, '8.4.0') && ~PLOT2SVG_globals.WN
-  fprintf('\n   Warning: plot2svg does not support axes'' labels and title allocation in Octave and Matlab versions < 2014b.\n\n')
+if UIverlessthan('8.4.0') && ~PLOT2SVG_globals.WN
+  fprintf('   Warning: plot2svg does not support proper location of axes'' labels in Octave and Matlab versions < 2014b.\n')
   PLOT2SVG_globals.WN = 1;
 end
 switch lower(valign)
