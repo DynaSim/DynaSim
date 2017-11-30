@@ -13,7 +13,7 @@ function varargout = plot2svg(param1,id,pixelfiletype)
 
   global PLOT2SVG_globals
   global colorname
-  progversion = '23-Nov-2017';
+  progversion = '30-Nov-2017';
   PLOT2SVG_globals.debugModeOn = 0;
   PLOT2SVG_globals.runningIdNumber = 0;
   PLOT2SVG_globals.UI = reportUI;
@@ -52,6 +52,20 @@ function varargout = plot2svg(param1,id,pixelfiletype)
   if nargin<2 % Check if handle was included into function call, otherwise take current figure
       id = gcf;
   end
+
+  % a nice way to keep the original figure safe and work on a temporary copy
+  warning('off', 'MATLAB:copyobj:ObjectNotCopied'); % these warnings don't seem to come from figure content
+  h1 = id;
+  if PLOT2SVG_globals.debugModeOn % only show the copy in debug mode
+    h2 = figure;
+  else
+    h2 = figure('visible', 'off');
+  end
+  objects = allchild(h1);
+  copyobj(get(h1,'children'),h2);
+  id = h2;
+  warning('on', 'MATLAB:copyobj:ObjectNotCopied'); % restoring the warning after copying
+
   if nargin == 0
       if PLOT2SVG_globals.octave
           error('PLOT2SVG in Octave mode does not yet support a file menu. File name is needed during function call.')
@@ -158,7 +172,9 @@ function varargout = plot2svg(param1,id,pixelfiletype)
           group = axes2svg(fid,id,ax(j),group,paperpos);
       elseif strcmp(currentType,'legend')
           legendVisible = get(ax(j),'Visible');
-          if legendVisible
+          if strcmp(legendVisible,'on')
+            set(ax(j),'AutoUpdate','off'); % sometimes weird things happen with legends including patches (e.g., bar graphs) if not used
+
             legendPosition = get(ax(j),'Position');
 
             x = legendPosition(1)*paperpos(3);
@@ -222,6 +238,10 @@ function varargout = plot2svg(param1,id,pixelfiletype)
   end
   set(id,'Units',originalFigureUnits);
   set(0, 'ShowHiddenHandles', originalShowHiddenHandles);
+
+  if ~PLOT2SVG_globals.debugModeOn % close the temporary copies
+    close(gcf);
+  end
 end
 
 function clippingIdString = clipping2svg(fid, id, ax, paperpos, axpos, projection, clippingIdString)
@@ -1547,6 +1567,7 @@ function boundingBoxAxes = axchild2svg(fid,id,axIdString,ax,paperpos,axchild,axp
               index = index+c(2,index)+1;
           end
       elseif strcmp(get(axchild(i),'Type'),'patch')
+          fromLegend = 0;
           flat_shading = 1;
           cmap = get(id,'Colormap');
           pointc = get(axchild(i),'FaceVertexCData');
@@ -1559,8 +1580,12 @@ function boundingBoxAxes = axchild2svg(fid,id,axIdString,ax,paperpos,axchild,axp
           end
           % Scale color if scaled color mapping is turned on
           if strcmp(get(axchild(i),'CDataMapping'),'scaled')
-              clim = get(ax,'CLim');
-              pointc = (pointc-clim(1))/(clim(2)-clim(1))*(size(cmap,1)-1)+1;
+              try
+                clim = get(ax,'CLim');
+                pointc = (pointc-clim(1))/(clim(2)-clim(1))*(size(cmap,1)-1)+1;
+              catch
+                fromLegend = 1; % legend patch
+              end
           end
           % Limit index to smallest or biggest color index
           pointc = max(pointc,1);
@@ -1581,10 +1606,10 @@ function boundingBoxAxes = axchild2svg(fid,id,axIdString,ax,paperpos,axchild,axp
           markeredgecolor = get(axchild(i),'MarkerEdgeColor');
           markersize = 2/3*get(axchild(i),'MarkerSize');
           points = get(axchild(i),'Vertices')';
-          if strcmp(get(ax,'XScale'),'log')
+          if ~fromLegend && strcmp(get(ax,'XScale'),'log')
               points(1,:) = log10(points(1,:));
           end
-          if strcmp(get(ax,'YScale'),'log')
+          if  ~fromLegend && strcmp(get(ax,'YScale'),'log') && ~isLegend
               points(2,:) = log10(points(2,:));
           end
           if size(points,1) == 3
@@ -1592,7 +1617,10 @@ function boundingBoxAxes = axchild2svg(fid,id,axIdString,ax,paperpos,axchild,axp
                   points(3,:) = log10(points(3,:));
               end
           end
-          if size(points,1) == 3
+          if fromLegend
+              x = points(1,:);
+              y = points(2,:);
+          elseif size(points,1) == 3
               [x,y,z] = project(points(1,:),points(2,:),points(3,:),projection);
           else
               [x,y,~] = project(points(1,:),points(2,:),zeros(size(points(1,:))),projection);
