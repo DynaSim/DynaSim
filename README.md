@@ -19,7 +19,7 @@ systems in MATLAB and GNU Octave!
 - Get started with the demos: [demos/dsDemos.m](https://github.com/DynaSim/DynaSim/blob/master/demos/dsDemos.m).
 - Complete documentation is available at [dynasim.readthedocs.org](http://dynasim.readthedocs.org).
 - A browsable function reference is [available
-  here](https://dynasim.github.io/DynaSim/).
+  here](https://dynasim.github.io/docs/).
 - Example modeling projects: [PFC networks](https://github.com/jsherfey/PFC_models), [Thalamus](https://github.com/asoplata/ching2010_tcre_dynasim_mechanisms).
 - Report issues [here](https://github.com/DynaSim/DynaSim/issues).
 
