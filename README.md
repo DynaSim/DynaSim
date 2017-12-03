@@ -8,7 +8,7 @@ systems in MATLAB and GNU Octave!
 ### Installation
 
 * Download the toolbox, and add it to your MATLAB or GNU Octave path.
-  * Download using GitHub or Terminal: `git clone https://github.com/DynaSim/DynaSim.git`
+  * Download as [Zip file](https://github.com/DynaSim/DynaSim/archive/master.zip) or clone it from the Terminal: `git clone https://github.com/DynaSim/DynaSim.git`
   * Add to path using startup.m or Command Window:
     * `addpath(genpath('YOUR/PATH/TO/DynaSim'))`
     * `savepath`
