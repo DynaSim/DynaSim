@@ -1,6 +1,4 @@
 %% Simple example for teaching about implementing 2D pops in DynaSim
-clear
-
 s=[];
 s.pops.size=[300 300];
 s.pops.equations={'dA/dt=    del2(A)-A.*B.^2+.022*(1-A); A(0)=A_IC'
