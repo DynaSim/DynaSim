@@ -1,5 +1,5 @@
 % This script provides explicit DynaSim specifications for each PFC cell 
-% type used in JSS PFC network models. Script created by JSS on 11-Apr-2016.
+% type used in PFC network models. Script created by Jason Sherfey on 11-Apr-2016.
 
 % Cell models:
 % 1) [DS02PY]: two-compartment pyramidal cell (PYs,PYd) (from [DS02])
