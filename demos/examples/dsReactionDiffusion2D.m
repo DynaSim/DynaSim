@@ -1,4 +1,5 @@
 %% Simple example for teaching about implementing 2D pops in DynaSim
+% based on https://blogs.mathworks.com/graphics/2015/03/16/how-the-tiger-got-its-stripes/
 s=[];
 s.pops.size=[300 300];
 s.pops.equations={'dA/dt=    del2(A)-A.*B.^2+.022*(1-A); A(0)=A_IC'
