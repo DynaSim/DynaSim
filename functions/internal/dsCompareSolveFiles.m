@@ -3,7 +3,7 @@ function solve_file_m = dsCompareSolveFiles(solve_file_m,mexPath,verbose_flag)
 %
 %  - Step 1: compare to other *.m in /solve/
 %  - Step 2: if match: remove(solve_file); solve_file=match;
-% 
+%
 % If mexPath is specified, then will do a comparison to other files
 % in the mexPath, as opposed to the current solve folder
 %
@@ -19,7 +19,7 @@ function solve_file_m = dsCompareSolveFiles(solve_file_m,mexPath,verbose_flag)
 % data=dsSimulate(eqns, 'tspan',[0 100], 'ic',[1 2 .5],'verbose',1, 'solver','rk4', 'study_dir','demo_lorenz','compile_flag',1,'mex_dir_flag',0,'mex_dir',[]);
 % data=dsSimulate(eqns, 'tspan',[0 100], 'ic',[1 2 .5],'verbose',1, 'solver','rk4', 'study_dir','demo_lorenz','compile_flag',1,'mex_dir_flag',1,'mex_dir',[]);
 % data=dsSimulate(eqns, 'tspan',[0 100], 'ic',[1 2 .5],'verbose',1, 'solver','rk4', 'study_dir','demo_lorenz','compile_flag',1,'mex_dir_flag',1,'mex_dir','mexes_temp');
-% 
+%
 % Author: Jason Sherfey, PhD <jssherfey@gmail.com>
 % Copyright (C) 2016 Jason Sherfey, Boston University, USA
 
@@ -41,12 +41,12 @@ files=setdiff(files,[fname fext]);
 
 % compare solve_file_m to each file
 for f=1:length(files)
-  [~,diffs] = system(['diff ' solve_file_m ' ' fullfile(mexPath,files{f})]);
+  [~,diffs] = system(['diff -aBEbZ ' solve_file_m ' ' fullfile(mexPath,files{f})]);
   if isempty(diffs)
     %dbstack
     old_solve_file_m=solve_file_m;
     delete(old_solve_file_m);
-    
+
     if ~strcmp(mexPath,solvePath)
         % Copy mex file and solve file from mexPath into solve path
         copyfile(fullfile(mexPath,files{f}),solvePath);
@@ -58,7 +58,7 @@ for f=1:length(files)
             end
         end
     end
-    
+
     solve_file_m=fullfile(solvePath,files{f});
     break;
   end
