@@ -345,6 +345,18 @@ if ~isempty(model.fixed_variables)
   fprintf(fid,'%% ------------------------------------------------------------\n');
   fprintf(fid,'%% Fixed variables:\n');
   fprintf(fid,'%% ------------------------------------------------------------\n');
+  % 2.2 set random seed
+  fprintf(fid,'%% seed the random number generator\n');
+  if options.save_parameters_flag
+    fprintf(fid,'%s(%srandom_seed);\n',rng_function,parameter_prefix);
+  else
+    if ischar(options.random_seed)
+      fprintf(fid,'%s(''%s'');\n',rng_function,options.random_seed);
+    elseif isnumeric(options.random_seed)
+      fprintf(fid,'%s(%g);\n',rng_function,options.random_seed);
+    end
+  end
+  
   names=fieldnames(model.fixed_variables);
   expressions=struct2cell(model.fixed_variables);
   for i=1:length(names)
@@ -373,7 +385,8 @@ fprintf(fid,'%% ------------------------------------------------------------\n')
 fprintf(fid,'%% Initial conditions:\n');
 fprintf(fid,'%% ------------------------------------------------------------\n');
 
-% 2.2 set random seed
+% 2.2 set random seed (do this a 2nd time, so earlier functions don't mess
+% up the random seed)
 fprintf(fid,'%% seed the random number generator\n');
 if options.save_parameters_flag
   fprintf(fid,'%s(%srandom_seed);\n',rng_function,parameter_prefix);
