@@ -1,20 +1,27 @@
-function varargout = plot2svg(param1,id,pixelfiletype)
-  %  Matlab to SVG converter
-  %  Prelinary version supporting 3D plots as well
+function varargout = plot2svg(filename, id, debug, legendicons, figuresize, pixelfiletype)
+  %  Matlab/GNU Octave FIG to SVG converter
   %
-  %  Usage: plot2svg(filename,graphic handle,pixelfiletype)
-  %                  optional     optional     optional
-  %         or
+  %  Usage: plot2svg(filename, graphic handle, debug, legendicons, figuresize, pixelfiletype)
   %
-  %         plot2svg(figuresize,graphic handle,pixelfiletype)
-  %                   optional     optional      optional
+  %         all arguments are optional
   %
-  %         pixelfiletype = 'png' (default), 'jpg'
+  %         filename: name of the svg file (including extension)
+  %         can be omitted (nargin < 1) or left empty ('' or []) and a system dialog will be prompted
+  %
+  %         id: figure handle (if omitted or empty, current gcf is taken)
+  %
+  %         debug = 0 or 1 (enable to ease debugging of plot2svg functionality; 0 if omitted or empty)
+  %
+  %         legendicons: legend pieces (necessary in new matlab versions to respect legend appearance)
+  %         can be omitted (nargin < 4) or left empty ('' or [])
+  %
+  %         figuresize = [width,height] (actual figure size if omitted or empty)
+  %
+  %         pixelfiletype = 'png' or 'jpg' (png used if omitted or empty)
 
   global PLOT2SVG_globals
   global colorname
-  progversion = '30-Nov-2017';
-  PLOT2SVG_globals.debugModeOn = 0;
+  progversion = '4-Dec-2017';
   PLOT2SVG_globals.runningIdNumber = 0;
   PLOT2SVG_globals.UI = reportUI;
   PLOT2SVG_globals.octave = false;
@@ -25,87 +32,96 @@ function varargout = plot2svg(param1,id,pixelfiletype)
   PLOT2SVG_globals.EnableClippling = 1; % 0; % SA: note that it does not work fine with Inkscape pdf conversion for latex
 
   try
-      % Rounding it to be an integer (Octave resolution is 96.024)
-      PLOT2SVG_globals.ScreenPixelsPerInch = round(get(0, 'ScreenPixelsPerInch'));
+    % Rounding it to be an integer (Octave resolution is 96.024)
+    PLOT2SVG_globals.ScreenPixelsPerInch = round(get(0, 'ScreenPixelsPerInch'));
   catch
-      % Keep the default ppi
+    % Keep the default ppi
   end
   % Octave resolution is 96.024, rounding it to 96
   PLOT2SVG_globals.resolutionScaling = PLOT2SVG_globals.ScreenPixelsPerInch/96;
   if nargout == 1
-      varargout = {0};
+    varargout = {0};
   end
   % disp(['   Matlab/Octave to SVG converter version ' progversion ', Juerg Schwizer (converter@bluewin.ch).'])
   disp(['   Forked Matlab/Octave to SVG converter version ' progversion ', Salva Ardid (sardid@bu.edu).'])
   disp('   Credit to Juerg Schwizer (converter@bluewin.ch).')
   if strcmp(PLOT2SVG_globals.UI,'octave')
-      PLOT2SVG_globals.octave = true;
-      % disp('   Info: PLOT2SVG runs in Octave mode.')
+    PLOT2SVG_globals.octave = true;
+    % disp('   Info: PLOT2SVG runs in Octave mode.')
   else
-      if UIverlessthan('6.0') % Check for matlab version and print warning if matlab version lower than version 6.0 (R.12)
-          disp('   Warning: Future versions may no more support older versions than MATLAB R12.')
-      end
+    if UIverlessthan('6.0') % Check for matlab version and print warning if matlab version lower than version 6.0 (R.12)
+      disp('   Warning: Future versions may no more support older versions than MATLAB R12.')
+    end
   end
   if nargout > 1
-      error('Function returns only one return value.')
+    error('Function returns only one return value.')
   end
-  if nargin<2 % Check if handle was included into function call, otherwise take current figure
-      id = gcf;
+
+  if nargin < 2 || isempty(id) % Check if proper handle was included into function call, otherwise take current figure
+    id = gcf;
+  end
+  if nargin < 3 || isempty(debug) % No debug mode
+    PLOT2SVG_globals.debugModeOn = 0;
+  else
+    PLOT2SVG_globals.debugModeOn = debug;
   end
 
   % a nice way to keep the original figure safe and work on a temporary copy
   warning('off', 'MATLAB:copyobj:ObjectNotCopied'); % these warnings don't seem to come from figure content
-  h1 = id;
+  f1 = id;
+  xl = get(gca,'xlabel');
+  yl = get(gca,'ylabel');
+  zl = get(gca,'zlabel');
+  tl = get(gca,'title');
   if PLOT2SVG_globals.debugModeOn % only show the copy in debug mode
-    h2 = figure;
+    f2 = figure;
   else
-    h2 = figure('visible', 'off');
+    f2 = figure('visible', 'off');
   end
-  objects = allchild(h1);
-  copyobj(get(h1,'children'),h2);
-  id = h2;
+  objects = allchild(f1);
+  copyobj(get(f1,'children'),f2);
+  if ~UIverlessthan('8.4.0')
+    if ~isempty(xl.String)
+     set(gca,'xlabel',xl)
+    end
+    if ~isempty(yl.String)
+     set(gca,'ylabel',yl)
+    end
+    if ~isempty(zl.String)
+     set(gca,'zlabel',zl)
+    end
+    if ~isempty(tl.String)
+     set(gca,'title',tl)
+    end
+  else
+    copyobj(xl,gca);
+    copyobj(yl,gca);
+    copyobj(zl,gca);
+    copyobj(tl,gca);
+  end
+  id = f2;
   warning('on', 'MATLAB:copyobj:ObjectNotCopied'); % restoring the warning after copying
 
-  if nargin == 0
-      if PLOT2SVG_globals.octave
-          error('PLOT2SVG in Octave mode does not yet support a file menu. File name is needed during function call.')
-      else
-          [filename, pathname] = uiputfile( {'*.svg', 'SVG File (*.svg)'},'Save Figure as SVG File');
-          if ~( isequal( filename, 0) || isequal( pathname, 0))
-              % yes. add backslash to path (if not already there)
-              pathname = addBackSlash( pathname);
-              % check, if extension is allrigth
-              if ( ~strcmpi( getFileExtension( filename), '.svg'))
-                  filename = [ filename, '.svg'];
-              end
-              finalname = [pathname filename];
-          else
-              disp('   Cancel button was pressed.')
-              return
-          end
+  if nargin < 1 || isempty(filename)
+    [filename, pathname] = uiputfile( {'*.svg', 'SVG File (*.svg)'},'Save Figure as SVG File');
+    if ~( isequal( filename, 0) || isequal( pathname, 0))
+      % yes. add backslash to path (if not already there)
+      pathname = addBackSlash( pathname);
+      % check, if extension is allrigth
+      if ( ~strcmpi( getFileExtension( filename), '.svg'))
+        filename = [ filename, '.svg'];
       end
+      finalname = [pathname filename];
+    else
+      disp('   Cancel button was pressed.')
+      return
+    end
   else
-      if isnumeric(param1)
-          if PLOT2SVG_globals.octave
-              error('PLOT2SVG in Octave mode does not yet support a file menu. File name is needed during function call.')
-          else
-              [filename, pathname] = uiputfile( {'*.svg', 'SVG File (*.svg)'},'Save Figure as SVG File');
-              if ~( isequal( filename, 0) || isequal( pathname, 0))
-                  % yes. add backslash to path (if not already there)
-                  pathname = addBackSlash( pathname);
-                  % check if extension is alright
-                  if ( ~strcmpi( getFileExtension( filename), '.svg'))
-                      filename = [ filename, '.svg'];
-                  end
-                  finalname = [pathname filename];
-              else
-                  disp('   Cancel button was pressed.')
-                  return
-              end
-          end
-      else
-          finalname = param1;
-      end
+    finalname = filename;
+  end
+
+  if nargin < 4 % No legend icons passed
+    legendicons = [];
   end
 
   % needed to see annotation axes
@@ -114,22 +130,20 @@ function varargout = plot2svg(param1,id,pixelfiletype)
   originalFigureUnits = get(id,'Units');
   set(id,'Units','pixels');   % All data in the svg-file is saved in pixels
   paperpos = get(id,'Position');
-  if ( nargin > 0)
-      if isnumeric(param1)
-          paperpos(3) = param1(1);
-          paperpos(4) = param1(2);
-      end
+  if nargin >= 5 && ~isempty(figuresize)
+    paperpos(3) = param1(1);
+    paperpos(4) = param1(2);
   end
   paperpos = convertunit(paperpos, 'pixels', 'pixels');
-  if (nargin < 3)
-      PLOT2SVG_globals.pixelfiletype = 'png';
+  if (nargin < 6) || isempty(pixelfiletype)
+    PLOT2SVG_globals.pixelfiletype = 'png';
   else
-      PLOT2SVG_globals.pixelfiletype = pixelfiletype;
+    PLOT2SVG_globals.pixelfiletype = pixelfiletype;
   end
   cmap = get(id,'Colormap');
   colorname = '';
   for i = 1:size(cmap,1)
-      colorname(i,:) = sprintf('%02x%02x%02x',fix(cmap(i,1)*255),fix(cmap(i,2)*255),fix(cmap(i,3)*255));
+    colorname(i,:) = sprintf('%02x%02x%02x',fix(cmap(i,1)*255),fix(cmap(i,2)*255),fix(cmap(i,3)*255));
   end
 
   % Open SVG-file
@@ -140,7 +154,9 @@ function varargout = plot2svg(param1,id,pixelfiletype)
   PLOT2SVG_globals.figurenumber = 1;
   fid = fopen(finalname,'wt');   % Create a new text file
   fprintf(fid,'<?xml version = "1.0" encoding = "utf-8" standalone = "no"?><!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">\n');    % Insert file header
-  fprintf(fid,'<svg preserveAspectRatio = "xMinYMin meet" width = "100%%" height = "100%%" fill = "#ffffff" viewBox = "0 0 %0.3f %0.3f" ',paperpos(3),paperpos(4));
+  % Making transparent by default
+  % fprintf(fid,'<svg preserveAspectRatio = "xMinYMin meet" width = "100%%" height = "100%%" fill = "#ffffff" viewBox = "0 0 %0.3f %0.3f" ',paperpos(3),paperpos(4));
+  fprintf(fid,'<svg preserveAspectRatio = "xMinYMin meet" width = "100%%" height = "100%%" fill = "none" viewBox = "0 0 %0.3f %0.3f" ',paperpos(3),paperpos(4));
   fprintf(fid,' version = "1.1" xmlns = "http://www.w3.org/2000/svg" xmlns:xlink = "http://www.w3.org/1999/xlink"');
   %fprintf(fid,' onload = "Init(evt)"');
   fprintf(fid,'>\n');
@@ -151,96 +167,131 @@ function varargout = plot2svg(param1,id,pixelfiletype)
   groups = [];
   % Frame of figure
   figcolor = searchcolor(id,get(id, 'Color'));
-  if (~ strcmp(figcolor, 'none'))
-      % Draw rectangle in the background of the graphic frame to cover all
-      % other graphic elements
-      if strcmp(get(id,'InvertHardcopy'),'on')
-          fprintf(fid,'  <rect x = "0" y = "0" width = "%0.3f" height = "%0.3f" fill = "#ffffff" stroke-linecap = "square" stroke-linejoin = "miter" stroke = "none" />\n',paperpos(3),paperpos(4));
-      else
-          fprintf(fid,'  <rect x = "0" y = "0" width = "%0.3f" height = "%0.3f" fill = "%s" stroke-linecap = "square" stroke-linejoin = "miter" stroke = "none" />\n',paperpos(3),paperpos(4),figcolor);
-      end
+  if ~strcmp(figcolor, 'none')
+    % Draw rectangle in the background of the graphic frame to cover all
+    % other graphic elements
+    if strcmp(get(id,'InvertHardcopy'),'on')
+      fprintf(fid,'  <rect x = "0" y = "0" width = "%0.3f" height = "%0.3f" fill = "#ffffff" stroke = "none" />\n',paperpos(3),paperpos(4));
+    else
+      fprintf(fid,'  <rect x = "0" y = "0" width = "%0.3f" height = "%0.3f" fill = "%s" stroke = "none" />\n',paperpos(3),paperpos(4),figcolor);
+    end
   end
   % Search all axes
   ax = get(id,'Children');
   for j = length(ax):-1:1
-      currentType = get(ax(j),'Type');
-      if strcmp(currentType,'axes') || strcmp(currentType,'bar')
-          if PLOT2SVG_globals.debugModeOn
-            disp(['ax(',num2str(j),') = ', currentType]);
-          end
-          groups = [groups group];
-          group = axes2svg(fid,id,ax(j),group,paperpos);
-      elseif strcmp(currentType,'legend')
-          legendVisible = get(ax(j),'Visible');
-          if strcmp(legendVisible,'on')
-            set(ax(j),'AutoUpdate','off'); % sometimes weird things happen with legends including patches (e.g., bar graphs) if not used
-
-            legendPosition = get(ax(j),'Position');
-
-            x = legendPosition(1)*paperpos(3);
-            w = legendPosition(3)*paperpos(3);
-            y = (1-(legendPosition(2)+legendPosition(4)))*paperpos(4);
-            h = legendPosition(4)*paperpos(4);
-            legendBoundingBox = [x y w h];
-
-            legendLabels = get(ax(j),'String');
-            legendBox = get(ax(j),'Box');
-            legendColor = get(ax(j),'Color');
-            legendEdgeColor = get(ax(j),'EdgeColor');
-            legendFontSize = get(ax(j),'FontSize');
-            legendLineWidth = get(ax(j),'LineWidth');
-            legendLocation = get(ax(j),'Location');
-            legendOrientation = get(ax(j),'Orientation');
-            [~,icons] = legend(legendLabels,'Location',legendLocation,'Orientation',legendOrientation,'FontSize',legendFontSize,'LineWidth',legendLineWidth,'Color',legendColor,'EdgeColor',legendEdgeColor,'Box',legendBox);
-            if PLOT2SVG_globals.debugModeOn
-              for k = numel(icons):-1:1
-                iconType = get(icons(k),'Type');
-                disp(['legend(',num2str(k),') = ', iconType]);
-              end
-            end
-            legendGroupax = 1;
-            projection = []; % not used
-            fprintf(fid,'  <g id  = "%s">\n', createId);
-            legendIdString = createId;
-            fprintf(fid,'  <clipPath id = "%s">\n',legendIdString);
-            fprintf(fid,'    <rect x = "%0.3f" y = "%0.3f" width = "%0.3f" height = "%0.3f"/>\n',...
-                legendBoundingBox(1), legendBoundingBox(2), legendBoundingBox(3), legendBoundingBox(4));
-            fprintf(fid,'  </clipPath>\n');
-            if strcmp(legendBox,'on')
-                scolorname = searchcolor(id,legendEdgeColor);
-                fcolorname = searchcolor(id,legendColor);
-                fprintf(fid,'  <g id = "%s">\n',createId);
-                fprintf(fid,'    <rect fill = "%s" stroke-linecap = "square" stroke-linejoin = "miter" stroke = "%s" stroke-width = "%0.3fpt" stroke-dasharray = "none" stroke-opacity = "1.000" x = "%0.3f" y = "%0.3f" width = "%0.3f" height = "%0.3f"/>\n',...
-                    fcolorname, scolorname, legendLineWidth, legendBoundingBox(1), legendBoundingBox(2), legendBoundingBox(3), legendBoundingBox(4));
-                fprintf(fid,'  </g>\n');
-            end
-            axchild2svg(fid,id,legendIdString,ax(j),paperpos,icons,legendPosition,legendGroupax,projection,legendBoundingBox);
-            fprintf(fid,'  </g>\n');
-          end
-      elseif strcmp(currentType,'uicontrol')
-          if strcmp(get(ax(j),'Visible'),'on')
-              control2svg(fid,id,ax(j),paperpos);
-          end
-      elseif strcmp(currentType, 'uicontextmenu') || ...
-              strcmp(currentType, 'uimenu') || ...
-              strcmp(currentType, 'hgjavacomponent') || ...
-              strcmp(currentType, 'uitoolbar')
-          % ignore these types
-      else
-          disp(['   Warning: Unhandled main figure child type: ' currentType]);
+    currentType = get(ax(j),'Type');
+    if strcmp(currentType,'axes') || strcmp(currentType,'bar')
+      if PLOT2SVG_globals.debugModeOn
+      disp(['ax(',num2str(j),') = ', currentType]);
       end
+      groups = [groups group];
+      group = axes2svg(fid,id,ax(j),group,paperpos);
+    elseif strcmp(currentType,'legend')
+      legendVisible = get(ax(j),'Visible');
+      if strcmp(legendVisible,'on')
+      set(ax(j),'AutoUpdate','off'); % sometimes weird things happen with legends including patches (e.g., bar graphs) if not used
+
+      legendPosition = get(ax(j),'Position');
+
+      x = legendPosition(1)*paperpos(3);
+      w = legendPosition(3)*paperpos(3);
+      y = (1-(legendPosition(2)+legendPosition(4)))*paperpos(4);
+      h = legendPosition(4)*paperpos(4);
+      legendBoundingBox = [x y w h];
+
+      legendLabels = get(ax(j),'String');
+      legendBox = get(ax(j),'Box');
+      legendColor = get(ax(j),'Color');
+      legendEdgeColor = get(ax(j),'EdgeColor');
+      legendFontSize = get(ax(j),'FontSize');
+      legendLineWidth = get(ax(j),'LineWidth');
+      legendLocation = get(ax(j),'Location');
+      legendOrientation = get(ax(j),'Orientation');
+      % The following is a trick to automatically get the distinct parts of a legend. However, there are some Matlab limitations, so for a proper legend, it's strongly encouraged to pass the legend icons to plot2svg (see warnind and explanations below)
+      if isempty(legendicons)
+        % note though that when only a subset of the graph appears in the legend, this trick selects, with the exception of text, not the proper subset of the graph, but the first items that were plotted (Matlab's fault).
+        % one way to workaround the issue is to just plot things in order in the original graph, as they appear in the legend, but that's not always optimal, continue reading:
+        % an additional problem comes from lines appearing under patches, which could be fixed by adding zdata (different layers of depth in the xy projection from the z-axis), but this solution is only expected to work in svg 2, once z index is introduced (limitation of current svg implementation).
+        % there are two possible solutions to this:
+        % 1. Encouraged 'fix': pass the legend icons to plot2svg (see below to know how)
+        % 2. Discouraged 'fix': plot those lines twice, before the patch, so they appear in the legend (matlab's fault), and after the patch, so they appear on top (svg 1.1 limitacion).
+        warning(sprintf('For proper results when lines and patches are present in a figure, pass the legend icons to plot2svg function as a fourth argument, e.g., plot2svg(''filename.svg'','''','''',legendicons)\nLegend icons can be grabbed by calling legend in the following way: [lgd,legendicons] = legend(...);'));
+        [~,legendicons] = legend(legendLabels,'Location',legendLocation,'Orientation',legendOrientation,'FontSize',legendFontSize,'LineWidth',legendLineWidth,'Color',legendColor,'EdgeColor',legendEdgeColor,'Box',legendBox);
+      end
+      if PLOT2SVG_globals.debugModeOn
+        for k = numel(legendicons):-1:1
+        iconType = get(legendicons(k),'Type');
+        disp(['legend(',num2str(k),') = ', iconType]);
+        end
+      end
+      legendGroupax = 1;
+      projection = []; % not used
+      fprintf(fid,'  <g id  = "%s">\n', createId);
+      legendIdString = createId;
+      fprintf(fid,'  <clipPath id = "%s">\n',legendIdString);
+      fprintf(fid,'    <rect x = "%0.3f" y = "%0.3f" width = "%0.3f" height = "%0.3f"/>\n',...
+        legendBoundingBox(1), legendBoundingBox(2), legendBoundingBox(3), legendBoundingBox(4));
+      fprintf(fid,'  </clipPath>\n');
+      if strcmp(legendBox,'on')
+        scolorname = searchcolor(id,legendEdgeColor);
+        fcolorname = searchcolor(id,legendColor);
+        fprintf(fid,'  <g id = "%s">\n',createId);
+        fprintf(fid,'    <rect fill = "%s" stroke-linecap = "square" stroke-linejoin = "miter" stroke = "%s" stroke-width = "%0.3fpt" stroke-dasharray = "none" stroke-opacity = "1.000" x = "%0.3f" y = "%0.3f" width = "%0.3f" height = "%0.3f"/>\n',...
+          fcolorname, scolorname, legendLineWidth, legendBoundingBox(1), legendBoundingBox(2), legendBoundingBox(3), legendBoundingBox(4));
+        fprintf(fid,'  </g>\n');
+      end
+      axchild2svg(fid,id,legendIdString,ax(j),paperpos,legendicons,legendPosition,legendGroupax,projection,legendBoundingBox);
+      fprintf(fid,'  </g>\n');
+      end
+    elseif strcmp(currentType,'uicontrol')
+      if strcmp(get(ax(j),'Visible'),'on')
+        control2svg(fid,id,ax(j),paperpos);
+      end
+    elseif strcmp(currentType, 'uicontextmenu') || ...
+      strcmp(currentType, 'uimenu') || ...
+      strcmp(currentType, 'hgjavacomponent') || ...
+      strcmp(currentType, 'uitoolbar')
+      % ignore these types
+    else
+      disp(['   Warning: Unhandled main figure child type: ' currentType]);
+    end
   end
   fprintf(fid,'  </g>\n');
   fprintf(fid,'</svg>\n');
   fclose(fid);    % close text file
   if nargout == 1
-      varargout = {0};
+    varargout = {0};
   end
-  set(id,'Units',originalFigureUnits);
-  set(0, 'ShowHiddenHandles', originalShowHiddenHandles);
-
+  % set(id,'Units',originalFigureUnits);
+  % set(0, 'ShowHiddenHandles', originalShowHiddenHandles);
+  set(0,'CurrentFigure',f1)
+  if ~UIverlessthan('8.4.0')
+    if ~isempty(xl.String)
+     set(gca,'xlabel',xl)
+    end
+    if ~isempty(yl.String)
+     set(gca,'ylabel',yl)
+    end
+    if ~isempty(zl.String)
+     set(gca,'zlabel',zl)
+    end
+    % weird but title does not come back unless I do this:
+    copyobj(tl,gca);
+    % if ~isempty(tl.String)
+    %  set(gca,'title',tl)
+    % end
+  end
   if ~PLOT2SVG_globals.debugModeOn % close the temporary copies
-    close(gcf);
+    close(f2);
+  else
+    set(0,'CurrentFigure',f2)
+    if ~UIverlessthan('8.4.0')
+      % in new matlab versions, these look like the same but don't behave internally like axes' labels, so that's why I moved the actual axes' labels from the original to the copied figure, and then back, once the svg file was complete (here I just copy them for visual debugging)
+      copyobj(xl,gca);
+      copyobj(yl,gca);
+      copyobj(zl,gca);
+      copyobj(tl,gca);
+    end
   end
 end
 
@@ -281,7 +332,7 @@ function clippingIdString = clipping2svg(fid, id, ax, paperpos, axpos, projectio
                   x = (x*axpos(3)+axpos(1))*paperpos(3);
                   y = (1-(y*axpos(4)+axpos(2)))*paperpos(4);
                   clippingIdString = createId;
-                  fprintf(fid,'<clipPath id = "%s">\n  <polygon fill = "none" stroke-linecap = "square" stroke-linejoin = "miter" stroke = "none" points = "', clippingIdString);
+                  fprintf(fid,'<clipPath id = "%s">\n  <polygon fill = "none" stroke = "none" points = "', clippingIdString);
                   fprintf(fid,'%0.3f,%0.3f ',[x';y']);
                   fprintf(fid,'"/>\n</clipPath>\n');
               end
@@ -292,27 +343,52 @@ end
 
 function [angle, align] = improvedXLabel(id, angle, align)
   global PLOT2SVG_globals
-  if PLOT2SVG_globals.checkUserData && isstruct(get(id,'UserData'))
+  try
+    angle = get(id,'XTickLabelRotation');
+  catch
+    if PLOT2SVG_globals.checkUserData && isstruct(get(id,'UserData'))
       struct_data = get(id,'UserData');
       if isfield(struct_data,'svg')
-          if isfield(struct_data.svg,'XTickLabelAngle')
-              angle = struct_data.svg.XTickLabelAngle;
-              align = 'Left';
-          end
+        if isfield(struct_data.svg,'XTickLabelAngle')
+          angle = struct_data.svg.XTickLabelAngle;
+          align = 'Left';
+        end
       end
+    end
   end
 end
 
 function [angle, align] = improvedYLabel(id, angle, align)
   global PLOT2SVG_globals
-  if PLOT2SVG_globals.checkUserData && isstruct(get(id,'UserData'))
+  try
+    angle = get(id,'YTickLabelRotation');
+  catch
+    if PLOT2SVG_globals.checkUserData && isstruct(get(id,'UserData'))
       struct_data = get(id,'UserData');
       if isfield(struct_data,'svg')
-          if isfield(struct_data.svg,'YTickLabelAngle')
-              angle = struct_data.svg.YTickLabelAngle;
-              align = 'Left';
-          end
+        if isfield(struct_data.svg,'YTickLabelAngle')
+          angle = struct_data.svg.YTickLabelAngle;
+          align = 'Left';
+        end
       end
+    end
+  end
+end
+
+function [angle, align] = improvedZLabel(id, angle, align)
+  global PLOT2SVG_globals
+  try
+    angle = get(id,'ZTickLabelRotation');
+  catch
+    if PLOT2SVG_globals.checkUserData && isstruct(get(id,'UserData'))
+      struct_data = get(id,'UserData');
+      if isfield(struct_data,'svg')
+        if isfield(struct_data.svg,'ZTickLabelAngle')
+          angle = struct_data.svg.ZTickLabelAngle;
+          align = 'Left';
+        end
+      end
+    end
   end
 end
 
@@ -730,7 +806,7 @@ function gridLines(fid, x, y, scolorname, gridlinestyle, linewidth, axlim, axtic
       gridAlpha = 1;
   end
   for i = axindex_inner
-      line2svg(fid, [xg_line_start(i) xg_line_end(i)],[yg_line_start(i) yg_line_end(i)], scolorname, gridlinestyle, linewidth, gridAlpha)
+      line2svg(fid, [xg_line_start(i) xg_line_end(i)],[yg_line_start(i) yg_line_end(i)], scolorname, gridlinestyle, linewidth, '', gridAlpha)
   end
 end
 
@@ -743,7 +819,7 @@ function minorGridLines(fid, x, y, scolorname, minor_gridlinestyle, linewidth, a
       gridAlpha = 1;
   end
   for i = 1:length(xg_line_start)
-      line2svg(fid, [xg_line_start(i) xg_line_end(i)],[yg_line_start(i) yg_line_end(i)], scolorname, minor_gridlinestyle, linewidth, gridAlpha)
+      line2svg(fid, [xg_line_start(i) xg_line_end(i)],[yg_line_start(i) yg_line_end(i)], scolorname, minor_gridlinestyle, linewidth, '', gridAlpha)
   end
 end
 
@@ -881,8 +957,10 @@ function group = axes2svg(fid,id,ax,group,paperpos)
           ticklength = both_ticklength(1);
           xy_ratio = axpos(3)*paperpos(3)/ (axpos(4)*paperpos(4));
           if xy_ratio < 1
+              % disp('2D xy_ratio < 1')
               tick_ratio = [1 1/xy_ratio 1];
           else
+              % disp('2D xy_ratio >= 1')
               tick_ratio = [xy_ratio 1 1];
           end
           if strcmp(get(ax,'TickDir'),'out')
@@ -890,10 +968,17 @@ function group = axes2svg(fid,id,ax,group,paperpos)
           else
               label_distance = -0.02;
           end
+          xlabel_distance = label_distance;
+          ylabel_distance = label_distance;
+          zlabel_distance = label_distance;
       else
+          % disp('3D')
           ticklength = both_ticklength(2);
-          label_distance = -2*abs(ticklength);
-          tick_ratio = [1 1 1];
+          tick_ratio = [2 1 3]; % [1 1 1]; % SA works better as for whatever reason tick lengths appear quite shorter for X and Z axes
+          label_distance = -1.5*abs(ticklength);
+          xlabel_distance = tick_ratio(1)*label_distance;
+          ylabel_distance = tick_ratio(2)*label_distance;
+          zlabel_distance = tick_ratio(3)*label_distance;
       end
       % linewidth = get(ax,'LineWidth'); % linewidth = PLOT2SVG_globals.resolutionScaling*get(ax,'LineWidth');
       axxindex = find((axxtick >= axlimori(1)) & (axxtick <= (axlimori(1)+axlimori(4))));
@@ -1218,10 +1303,10 @@ function group = axes2svg(fid,id,ax,group,paperpos)
               else
                   lim = [axlimx(1) axlimx(2)];
               end
-              x_label_end1 = interp1([0 1],[x(x_axis_point_index(1)) x(edge_neighbours(x_axis_point_index(1),2))],label_distance,'linear','extrap');
-              y_label_end1 = interp1([0 1],[y(x_axis_point_index(1)) y(edge_neighbours(x_axis_point_index(1),2))],label_distance,'linear','extrap');
-              x_label_end2 = interp1([0 1],[x(edge_neighbours(x_axis_point_index(1),1)) x(edge_neighbours(edge_neighbours(x_axis_point_index(1),1),2))],label_distance,'linear','extrap');
-              y_label_end2 = interp1([0 1],[y(edge_neighbours(x_axis_point_index(1),1)) y(edge_neighbours(edge_neighbours(x_axis_point_index(1),1),2))],label_distance,'linear','extrap');
+              x_label_end1 = interp1([0 1],[x(x_axis_point_index(1)) x(edge_neighbours(x_axis_point_index(1),2))],xlabel_distance,'linear','extrap');
+              y_label_end1 = interp1([0 1],[y(x_axis_point_index(1)) y(edge_neighbours(x_axis_point_index(1),2))],xlabel_distance,'linear','extrap');
+              x_label_end2 = interp1([0 1],[x(edge_neighbours(x_axis_point_index(1),1)) x(edge_neighbours(edge_neighbours(x_axis_point_index(1),1),2))],xlabel_distance,'linear','extrap');
+              y_label_end2 = interp1([0 1],[y(edge_neighbours(x_axis_point_index(1),1)) y(edge_neighbours(edge_neighbours(x_axis_point_index(1),1),2))],xlabel_distance,'linear','extrap');
               xg_label_end = interp1(lim,[x_label_end1 x_label_end2],axxtick);
               yg_label_end = interp1(lim,[y_label_end1 y_label_end2],axxtick);
               frontTicks(fid, x, y, scolorname, linewidth, ...
@@ -1249,13 +1334,13 @@ function group = axes2svg(fid,id,ax,group,paperpos)
                     axlabelx = axlabelx(:); % SA: Octave compatibility
                   end
                   if strcmp(get(ax,'XAxisLocation'),'top') && (projection.xyplane == true)
-                      for i = 1:length(axxindex)
-                          label2svg(fid,axpos,ax,xg_label_end(i),yg_label_end(i),convertString(axlabelx(i,:)),align,angle,'bottom',1,scolorname);
-                      end
-                  else
-                      for i = 1:length(axxindex)
-                          label2svg(fid,axpos,ax,xg_label_end(i),yg_label_end(i),convertString(axlabelx(i,:)),align,angle,'top',1,scolorname);
-                      end
+                   for i = 1:length(axxindex)
+                     label2svg(fid,axpos,ax,xg_label_end(i),yg_label_end(i),convertString(axlabelx(i,:)),align,angle,'bottom',1,scolorname);
+                   end
+                   else
+                   for i = 1:length(axxindex)
+                     label2svg(fid,axpos,ax,xg_label_end(i),yg_label_end(i),convertString(axlabelx(i,:)),align,angle,'top',1,scolorname);
+                   end
                   end
               end
           end
@@ -1277,10 +1362,10 @@ function group = axes2svg(fid,id,ax,group,paperpos)
               else
                   lim = [axlimy(1) axlimy(2)];
               end
-              x_label_end1 = interp1([0 1],[x(y_axis_point_index(1)) x(edge_neighbours(y_axis_point_index(1),1))],label_distance,'linear','extrap');
-              y_label_end1 = interp1([0 1],[y(y_axis_point_index(1)) y(edge_neighbours(y_axis_point_index(1),1))],label_distance,'linear','extrap');
-              x_label_end2 = interp1([0 1],[x(edge_neighbours(y_axis_point_index(1),2)) x(edge_neighbours(edge_neighbours(y_axis_point_index(1),2),1))],label_distance,'linear','extrap');
-              y_label_end2 = interp1([0 1],[y(edge_neighbours(y_axis_point_index(1),2)) y(edge_neighbours(edge_neighbours(y_axis_point_index(1),2),1))],label_distance,'linear','extrap');
+              x_label_end1 = interp1([0 1],[x(y_axis_point_index(1)) x(edge_neighbours(y_axis_point_index(1),1))],ylabel_distance,'linear','extrap');
+              y_label_end1 = interp1([0 1],[y(y_axis_point_index(1)) y(edge_neighbours(y_axis_point_index(1),1))],ylabel_distance,'linear','extrap');
+              x_label_end2 = interp1([0 1],[x(edge_neighbours(y_axis_point_index(1),2)) x(edge_neighbours(edge_neighbours(y_axis_point_index(1),2),1))],ylabel_distance,'linear','extrap');
+              y_label_end2 = interp1([0 1],[y(edge_neighbours(y_axis_point_index(1),2)) y(edge_neighbours(edge_neighbours(y_axis_point_index(1),2),1))],ylabel_distance,'linear','extrap');
               xg_label_end = interp1(lim,[x_label_end1 x_label_end2],axytick);
               yg_label_end = interp1(lim,[y_label_end1 y_label_end2],axytick);
               frontTicks(fid, x, y, scolorname, linewidth, ...
@@ -1319,8 +1404,11 @@ function group = axes2svg(fid,id,ax,group,paperpos)
                           end
                       end
                   else
+                      [angle, align] = improvedYLabel(ax, 0, 'Right');
                       for i = 1:length(axyindex)
-                          label2svg(fid,axpos,ax,xg_label_end(i),yg_label_end(i),convertString(axlabely(i,:)),'Center',0,'top',1,scolorname);
+                          % Not matlab default but seems more proper
+                          % label2svg(fid,axpos,ax,xg_label_end(i),yg_label_end(i),convertString(axlabely(i,:)),align,angle,'top',1,scolorname);
+                          label2svg(fid,axpos,ax,xg_label_end(i),yg_label_end(i),convertString(axlabely(i,:)),align,angle,'middle',1,scolorname);
                       end
                   end
               end
@@ -1347,10 +1435,10 @@ function group = axes2svg(fid,id,ax,group,paperpos)
               y_tick_end1 = interp1([0 1],[y(z_axis_point_index) y(edge_neighbours(z_axis_point_index,2))],ticklength*tick_ratio(3),'linear','extrap');
               x_tick_end2 = interp1([0 1],[x(edge_neighbours(z_axis_point_index,3)) x(edge_neighbours(edge_neighbours(z_axis_point_index,3),2))],ticklength*tick_ratio(3),'linear','extrap');
               y_tick_end2 = interp1([0 1],[y(edge_neighbours(z_axis_point_index,3)) y(edge_neighbours(edge_neighbours(z_axis_point_index,3),2))],ticklength*tick_ratio(3),'linear','extrap');
-              x_label_end1 = interp1([0 1],[x(z_axis_point_index) x(edge_neighbours(z_axis_point_index,2))],label_distance,'linear','extrap');
-              y_label_end1 = interp1([0 1],[y(z_axis_point_index) y(edge_neighbours(z_axis_point_index,2))],label_distance,'linear','extrap');
-              x_label_end2 = interp1([0 1],[x(edge_neighbours(z_axis_point_index,3)) x(edge_neighbours(edge_neighbours(z_axis_point_index,3),2))],label_distance,'linear','extrap');
-              y_label_end2 = interp1([0 1],[y(edge_neighbours(z_axis_point_index,3)) y(edge_neighbours(edge_neighbours(z_axis_point_index,3),2))],label_distance,'linear','extrap');
+              x_label_end1 = interp1([0 1],[x(z_axis_point_index) x(edge_neighbours(z_axis_point_index,2))],zlabel_distance,'linear','extrap');
+              y_label_end1 = interp1([0 1],[y(z_axis_point_index) y(edge_neighbours(z_axis_point_index,2))],zlabel_distance,'linear','extrap');
+              x_label_end2 = interp1([0 1],[x(edge_neighbours(z_axis_point_index,3)) x(edge_neighbours(edge_neighbours(z_axis_point_index,3),2))],zlabel_distance,'linear','extrap');
+              y_label_end2 = interp1([0 1],[y(edge_neighbours(z_axis_point_index,3)) y(edge_neighbours(edge_neighbours(z_axis_point_index,3),2))],zlabel_distance,'linear','extrap');
               xg_line_start = interp1(lim,[x(z_axis_point_index) x(edge_neighbours(z_axis_point_index,3))],axztick);
               yg_line_start = interp1(lim,[y(z_axis_point_index) y(edge_neighbours(z_axis_point_index,3))],axztick);
               xg_line_end = interp1(lim,[x_tick_end1 x_tick_end2],axztick);
@@ -1371,6 +1459,7 @@ function group = axes2svg(fid,id,ax,group,paperpos)
                       % behavior of Matlab
                       axlabelz = repmat(axlabelz, length(axzindex), 1);
                   end
+                  [angle, align] = improvedZLabel(ax, 0, 'Right');
                   if (strcmp(get(ax,'ZTickLabelMode'),'manual'))
                       axlabelz = axlabelz(axzindex,:);
                   end
@@ -1378,7 +1467,7 @@ function group = axes2svg(fid,id,ax,group,paperpos)
                     axlabelz = axlabelz(:); % SA: Octave compatibility
                   end
                   for i = 1:length(axzindex)
-                      label2svg(fid,axpos,ax,xg_label_end(i),yg_label_end(i),convertString(axlabelz(i,:)),'Right',0,'middle',1,scolorname);
+                      label2svg(fid,axpos,ax,xg_label_end(i),yg_label_end(i),convertString(axlabelz(i,:)),align,angle,'middle',1,scolorname);
                   end
               end
           end
@@ -1482,9 +1571,9 @@ function boundingBoxAxes = axchild2svg(fid,id,axIdString,ax,paperpos,axchild,axp
           end
           if ~isempty(filterString)
               % Workaround for Inkscape filter bug
-              fprintf(fid,'<rect x = "%0.3f" y = "%0.3f" width = "%0.3f" height = "%0.3f" fill = "none" stroke-linecap = "square" stroke-linejoin = "miter" stroke = "none" />\n', boundingBox(1), boundingBox(2), boundingBox(3), boundingBox(4));
+              fprintf(fid,'<rect x = "%0.3f" y = "%0.3f" width = "%0.3f" height = "%0.3f" fill = "none" stroke = "none" />\n', boundingBox(1), boundingBox(2), boundingBox(3), boundingBox(4));
           end
-          line2svg(fid,x,y,scolorname,linestyle,linewidth)
+          line2svg(fid,x,y,scolorname,linestyle,linewidth,'round')
           % put the markers into a subgroup of the lines
           if  ~strcmp(marker, 'none') % but only do it if we actually are drawing markers
               fprintf(fid,'<g>\n');
@@ -1606,14 +1695,18 @@ function boundingBoxAxes = axchild2svg(fid,id,axIdString,ax,paperpos,axchild,axp
           markeredgecolor = get(axchild(i),'MarkerEdgeColor');
           markersize = 2/3*get(axchild(i),'MarkerSize');
           points = get(axchild(i),'Vertices')';
-          if ~fromLegend && strcmp(get(ax,'XScale'),'log')
+          try
+            if ~fromLegend && strcmp(get(ax,'XScale'),'log')
               points(1,:) = log10(points(1,:));
+            end
+          catch
+              fromLegend = 1;
           end
-          if  ~fromLegend && strcmp(get(ax,'YScale'),'log') && ~isLegend
+          if  ~fromLegend && strcmp(get(ax,'YScale'),'log')
               points(2,:) = log10(points(2,:));
           end
           if size(points,1) == 3
-              if strcmp(get(ax,'ZScale'),'log')
+              if ~fromLegend && strcmp(get(ax,'ZScale'),'log')
                   points(3,:) = log10(points(3,:));
               end
           end
@@ -1651,7 +1744,7 @@ function boundingBoxAxes = axchild2svg(fid,id,axIdString,ax,paperpos,axchild,axp
           end
           if ~isempty(filterString)
               % Workaround for Inkscape filter bug
-              fprintf(fid,'<rect x = "%0.3f" y = "%0.3f" width = "%0.3f" height = "%0.3f" fill = "none" stroke-linecap = "square" stroke-linejoin = "miter" stroke = "none" />\n', boundingBox(1), boundingBox(2), boundingBox(3), boundingBox(4));
+              fprintf(fid,'<rect x = "%0.3f" y = "%0.3f" width = "%0.3f" height = "%0.3f" fill = "none" stroke = "none" />\n', boundingBox(1), boundingBox(2), boundingBox(3), boundingBox(4));
           end
           for p = 1:size(faces,1)
               if ischar(get(axchild(i),'FaceColor'))
@@ -1877,7 +1970,7 @@ function boundingBoxAxes = axchild2svg(fid,id,axIdString,ax,paperpos,axchild,axp
           end
           if ~isempty(filterString)
               % Workaround for Inkscape filter bug
-              fprintf(fid,'<rect x = "%0.3f" y = "%0.3f" width = "%0.3f" height = "%0.3f" fill = "none" stroke-linecap = "square" stroke-linejoin = "miter" stroke = "none" />\n', boundingBox(1), boundingBox(2), boundingBox(3), boundingBox(4));
+              fprintf(fid,'<rect x = "%0.3f" y = "%0.3f" width = "%0.3f" height = "%0.3f" fill = "none" stroke = "none" />\n', boundingBox(1), boundingBox(2), boundingBox(3), boundingBox(4));
           end
           for p = 1:size(faces,1)
               if ischar(get(axchild(i),'FaceColor'))
@@ -2004,7 +2097,7 @@ function boundingBoxAxes = axchild2svg(fid,id,axIdString,ax,paperpos,axchild,axp
           end
           if ~isempty(filterString)
               % Workaround for Inkscape filter bug
-              fprintf(fid,'<rect x = "%0.3f" y = "%0.3f" width = "%0.3f" height = "%0.3f" fill = "none" stroke-linecap = "square" stroke-linejoin = "miter" stroke = "none" />\n', boundingBox(1), boundingBox(2), boundingBox(3), boundingBox(4));
+              fprintf(fid,'<rect x = "%0.3f" y = "%0.3f" width = "%0.3f" height = "%0.3f" fill = "none" stroke = "none" />\n', boundingBox(1), boundingBox(2), boundingBox(3), boundingBox(4));
           end
           fprintf(fid,'<rect x = "%0.3f" y = "%0.3f" width = "%0.3f" height = "%0.3f" rx = "%0.3f" ry = "%0.3f" fill = "%s" stroke-linecap = "square" stroke-linejoin = "miter" stroke = "%s" stroke-width = "%0.3fpt" %s />\n',...
               rect(1), rect(2), rect(3), rect(4), curvature(1), curvature(2), fcolorname, scolorname, linewidth, pattern);
@@ -2066,7 +2159,7 @@ function boundingBoxAxes = axchild2svg(fid,id,axIdString,ax,paperpos,axchild,axp
           end
           if ~isempty(filterString)
               % Workaround for Inkscape filter bug
-              fprintf(fid,'<rect x = "%0.3f" y = "%0.3f" width = "%0.3f" height = "%0.3f" fill = "none" stroke-linecap = "square" stroke-linejoin = "miter" stroke = "none" />\n', boundingBox(1), boundingBox(2), boundingBox(3), boundingBox(4));
+              fprintf(fid,'<rect x = "%0.3f" y = "%0.3f" width = "%0.3f" height = "%0.3f" fill = "none" stroke = "none" />\n', boundingBox(1), boundingBox(2), boundingBox(3), boundingBox(4));
           end
           if ~strcmp(edgecolorname, 'none') || ~strcmp(facecolorname, 'none')
               pattern = lineStyle2svg(linestyle, linewidth);
@@ -2205,7 +2298,7 @@ function boundingBoxAxes = axchild2svg(fid,id,axIdString,ax,paperpos,axchild,axp
               fprintf(fid,'<g id = "%s" clip-path = "url(#%s)" %s>\n', createId, clippingIdString, filterString);
               if ~isempty(filterString)
                   % Workaround for Inkscape filter bug
-                  fprintf(fid,'<rect x = "%0.3f" y = "%0.3f" width = "%0.3f" height = "%0.3f" fill = "none" stroke-linecap = "square" stroke-linejoin = "miter" stroke = "none" />\n', boundingBox(1), boundingBox(2), boundingBox(3), boundingBox(4));
+                  fprintf(fid,'<rect x = "%0.3f" y = "%0.3f" width = "%0.3f" height = "%0.3f" fill = "none" stroke = "none" />\n', boundingBox(1), boundingBox(2), boundingBox(3), boundingBox(4));
               end
               fprintf(fid,'<image x = "%0.3f" y = "%0.3f" width = "%0.3f" height = "%0.3f" image-rendering = "optimizeQuality" preserveAspectRatio = "none" xlink:href = "%s" />\n', pointsx, pointsy, lx, ly, filename);
               fprintf(fid,'</g>\n');
@@ -2213,7 +2306,7 @@ function boundingBoxAxes = axchild2svg(fid,id,axIdString,ax,paperpos,axchild,axp
               fprintf(fid,'<g id = "%s" %s>\n', createId, filterString);
               if ~isempty(filterString)
                   % Workaround for Inkscape filter bug
-                  fprintf(fid,'<rect x = "%0.3f" y = "%0.3f" width = "%0.3f" height = "%0.3f" fill = "none" stroke-linecap = "square" stroke-linejoin = "miter" stroke = "none" />\n', boundingBox(1), boundingBox(2), boundingBox(3), boundingBox(4));
+                  fprintf(fid,'<rect x = "%0.3f" y = "%0.3f" width = "%0.3f" height = "%0.3f" fill = "none" stroke = "none" />\n', boundingBox(1), boundingBox(2), boundingBox(3), boundingBox(4));
               end
               fprintf(fid,'<image x = "%0.3f" y = "%0.3f" width = "%0.3f" height = "%0.3f" image-rendering = "optimizeQuality" preserveAspectRatio = "none" xlink:href = "%s" />\n', pointsx, pointsy, lx, ly, filename);
               fprintf(fid,'</g>\n');
@@ -2231,7 +2324,7 @@ function boundingBoxAxes = axchild2svg(fid,id,axIdString,ax,paperpos,axchild,axp
           end
           if ~isempty(filterString)
               % Workaround for Inkscape filter bug
-              fprintf(fid,'<rect x = "%0.3f" y = "%0.3f" width = "%0.3f" height = "%0.3f" fill = "none" stroke-linecap = "square" stroke-linejoin = "miter" stroke = "none" />\n', boundingBox(1), boundingBox(2), boundingBox(3), boundingBox(4));
+              fprintf(fid,'<rect x = "%0.3f" y = "%0.3f" width = "%0.3f" height = "%0.3f" fill = "none" stroke = "none" />\n', boundingBox(1), boundingBox(2), boundingBox(3), boundingBox(4));
           end
           if strcmp(get(axchild(i),'Type'),'hggroup')
             boundingBoxAxes = axchild2svg(fid,id,axIdString,ax,paperpos,get(axchild(i), 'Children'),axpos,groupax,projection,boundingBoxAxes);
@@ -2344,7 +2437,7 @@ function boundingBoxAxes = axchild2svg(fid,id,axIdString,ax,paperpos,axchild,axp
               end
               if ~isempty(filterString)
                   % Workaround for Inkscape filter bug
-                  fprintf(fid,'<rect x = "%0.3f" y = "%0.3f" width = "%0.3f" height = "%0.3f" fill = "none" stroke-linecap = "square" stroke-linejoin = "miter" stroke = "none" />\n', boundingBox(1), boundingBox(2), boundingBox(3), boundingBox(4));
+                  fprintf(fid,'<rect x = "%0.3f" y = "%0.3f" width = "%0.3f" height = "%0.3f" fill = "none" stroke = "none" />\n', boundingBox(1), boundingBox(2), boundingBox(3), boundingBox(4));
               end
               boundingBoxAxes = axchild2svg(fid,id,axIdString,ax,paperpos,get(axchild(i), 'Children'),axpos,groupax,projection,boundingBoxAxes);
               fprintf(fid, '</g>');
@@ -2413,11 +2506,28 @@ function patch2svg(fid,xtot,ytot,scolorname,style,width, edgecolorname, face_opa
           for j = 1:20000:length(x)
               xx = x(j:min(length(x), j + 19999));
               yy = y(j:min(length(y), j + 19999));
-              if ~strcmp(edgecolorname,'none') || ~strcmp(scolorname,'none')
-                  fprintf(fid,'      <%s fill = "%s" fill-opacity = "%0.3f" stroke-linecap = "square" stroke-linejoin = "miter" stroke = "%s" stroke-width = "%0.3fpt" stroke-opacity = "%0.3f" %s points = "',...
-                      type, scolorname, face_opacity, edgecolorname, width, edge_opacity, pattern);
+              if ~isempty(xx) && ~isempty(xx) && (~strcmp(edgecolorname,'none') || ~strcmp(scolorname,'none'))
+                if strcmp(type,'polygon')
+                  if ~strcmp(edgecolorname,'none') && ~strcmp(scolorname,'none')
+                    fprintf(fid,'      <%s fill = "%s" fill-opacity = "%0.3f" stroke-linecap = "square" stroke-linejoin = "miter" stroke = "%s" stroke-width = "%0.3fpt" stroke-opacity = "%0.3f" %s points = "', type, scolorname, face_opacity, edgecolorname, width, edge_opacity, pattern);
+                  elseif ~strcmp(scolorname,'none')
+                    fprintf(fid,'      <%s fill = "%s" fill-opacity = "%0.3f" stroke = "none" points = "', type, scolorname, face_opacity);
+                  else % ~strcmp(edgecolorname,'none')
+                    fprintf(fid,'      <%s fill = "none" stroke-linecap = "square" stroke-linejoin = "miter" stroke = "%s" stroke-width = "%0.3fpt" stroke-opacity = "%0.3f" %s points = "', type, edgecolorname, width, edge_opacity, pattern);
+                  end
                   fprintf(fid,'%0.3f,%0.3f ',[xx;yy]);
                   fprintf(fid,'"/>\n');
+                else
+                  if ~strcmp(edgecolorname,'none') && ~strcmp(scolorname,'none')
+                    fprintf(fid,'      <%s fill = "%s" fill-opacity = "%0.3f" stroke-linecap = "square" stroke-linejoin = "round" stroke = "%s" stroke-width = "%0.3fpt" stroke-opacity = "%0.3f" %s points = "', type, scolorname, face_opacity, edgecolorname, width, edge_opacity, pattern);
+                  elseif ~strcmp(scolorname,'none')
+                    fprintf(fid,'      <%s fill = "%s" fill-opacity = "%0.3f" stroke = "none" points = "', type, scolorname, face_opacity);
+                  else % ~strcmp(edgecolorname,'none')
+                    fprintf(fid,'      <%s fill = "none" stroke-linecap = "square" stroke-linejoin = "round" stroke = "%s" stroke-width = "%0.3fpt" stroke-opacity = "%0.3f" %s points = "', type, edgecolorname, width, edge_opacity, pattern);
+                  end
+                  fprintf(fid,'%0.3f,%0.3f ',[xx;yy]);
+                  fprintf(fid,'"/>\n');
+                end
               end
           end
       else
@@ -2431,10 +2541,15 @@ function patch2svg(fid,xtot,ytot,scolorname,style,width, edgecolorname, face_opa
           for j = 1:(length(parts) - 1)
               xx = x((parts(j)+1):(parts(j+1)-1));
               yy = y((parts(j)+1):(parts(j+1)-1));
-              if ~strcmp(edgecolorname,'none') || ~strcmp(scolorname,'none')
+              if ~isempty(xx) && (~strcmp(edgecolorname,'none') || ~strcmp(scolorname,'none'))
                   if ~isempty(xx)
-                      fprintf(fid,'      <%s fill = "%s" fill-opacity = "%0.3f" stroke-linecap = "square" stroke-linejoin = "miter" stroke = "%s" stroke-width = "%0.3fpt" stroke-opacity = "%0.3f" %s points = "',...
+                      if strcmp(type,'polygon')
+                        fprintf(fid,'      <%s fill = "%s" fill-opacity = "%0.3f" stroke-linecap = "square" stroke-linejoin = "miter" stroke = "%s" stroke-width = "%0.3fpt" stroke-opacity = "%0.3f" %s points = "',...
                           type, scolorname, face_opacity, edgecolorname, width, edge_opacity, pattern);
+                      else
+                        fprintf(fid,'      <%s fill = "%s" fill-opacity = "%0.3f" stroke-linecap = "square" stroke-linejoin = "round" stroke = "%s" stroke-width = "%0.3fpt" stroke-opacity = "%0.3f" %s points = "',...
+                          type, scolorname, face_opacity, edgecolorname, width, edge_opacity, pattern);
+                      end
                       fprintf(fid,'%0.3f,%0.3f ',[xx;yy]);
                       fprintf(fid,'"/>\n');
                   end
@@ -2464,6 +2579,9 @@ function gouraud_patch2svg(fid,xtot,ytot,cdata,style,width, edgecolorname, face_
           if length(x) > 2
               for j = 3:length(x)
                   coord = [x([1 j-1 j]);y([1 j-1 j])];
+                  if isempty(coord)
+                    continue
+                  end
                   face_color = cdata(1,:);
                   face_color2 = cdata(j-1,:);
                   face_color3 = cdata(j,:);
@@ -2503,8 +2621,8 @@ function gouraud_patch2svg(fid,xtot,ytot,cdata,style,width, edgecolorname, face_
                           % Open group
                           temp_string = sprintf('%0.3f,%0.3f ',coord);
                           fprintf(fid,'<g opacity = "%0.3f">\n',face_opacity);
-                          fprintf(fid,'<polyline fill = "url(#%s)" stroke-linecap = "square" stroke-linejoin = "miter" stroke = "none" points = "%s"/>\n',IDstring1,temp_string);
-                          fprintf(fid,'<polyline fill = "url(#%s)" stroke-linecap = "square" stroke-linejoin = "miter" stroke = "none" points = "%s"/>\n',IDstring2,temp_string);
+                          fprintf(fid,'<polyline fill = "url(#%s)" stroke = "none" points = "%s"/>\n',IDstring1,temp_string);
+                          fprintf(fid,'<polyline fill = "url(#%s)" stroke = "none" points = "%s"/>\n',IDstring2,temp_string);
                           % Close group
                           fprintf(fid,'</g>\n');
                       end
@@ -2539,9 +2657,18 @@ end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % create a line segment
 % this algorthm was optimized for large segement counts
-function line2svg(fid, x, y, scolorname, style, width, strokeopacity)
+function line2svg(fid, x, y, scolorname, style, width, linejoin, strokeopacity)
   SEG_SIZE = 5000;
-  if nargin < 7 || ~isscalar(strokeopacity)
+  if nargin < 7 || isempty(linejoin)
+      linejoin = 'miter';
+  end
+  % tried this but does not make a difference
+  % if strcmp(linejoin,'round')
+  %   linecap = 'butt';
+  % else
+  %   linecap = 'square';
+  % end
+  if nargin < 8 || ~isscalar(strokeopacity)
       strokeopacity = 1;
   end
   if ~strcmp(style,'none')
@@ -2569,11 +2696,13 @@ function line2svg(fid, x, y, scolorname, style, width, strokeopacity)
       for j = 1:numel(start_pts)
           xx = x(start_pts(j):end_pts(j));
           yy = y(start_pts(j):end_pts(j));
-          % Scaling stroke is a better default
-          % fprintf(fid,'      <polyline fill = "none" vector-effect = "non-scaling-stroke" stroke = "%s" stroke-width = "%0.3fpt" %s stroke-opacity = "%0.3f" points = "', scolorname, width, pattern, strokeopacity);
-          fprintf(fid,'      <polyline fill = "none" stroke-linecap = "square" stroke-linejoin = "miter" stroke = "%s" stroke-width = "%0.3fpt" %s stroke-opacity = "%0.3f" points = "', scolorname, width, pattern, strokeopacity);
-          fprintf(fid,'%0.3f,%0.3f ',[xx;yy]);
-          fprintf(fid,'"/>\n');
+          if ~isempty(xx) && ~isempty(yy)
+            % Scaling stroke is a better default
+            % fprintf(fid,'      <polyline fill = "none" vector-effect = "non-scaling-stroke" stroke = "%s" stroke-width = "%0.3fpt" %s stroke-opacity = "%0.3f" points = "', scolorname, width, pattern, strokeopacity);
+            fprintf(fid,'      <polyline fill = "none" stroke-linecap = "square" stroke-linejoin = "%s" stroke = "%s" stroke-width = "%0.3fpt" %s stroke-opacity = "%0.3f" points = "', linejoin, scolorname, width, pattern, strokeopacity);
+            fprintf(fid,'%0.3f,%0.3f ',[xx;yy]);
+            fprintf(fid,'"/>\n');
+          end
       end
   end
 end
@@ -2582,7 +2711,7 @@ end
 % create a circle
 function circle2svg(fid,x,y,radius,markeredgecolorname,markerfacecolorname,width)
   for j = 1:length(x)
-      if ~(isnan(x(j)) || isnan(y(j)))
+      if ~isempty(x) && ~isempty(y) && ~(isnan(x(j)) || isnan(y(j)))
           if ~strcmp(markeredgecolorname,'none') || ~strcmp(markerfacecolorname,'none')
               fprintf(fid,'<circle cx = "%0.3f" cy = "%0.3f" r = "%0.3f" fill = "%s" stroke-linecap = "square" stroke-linejoin = "miter" stroke = "%s" stroke-width = "%0.3fpt" />\n',x(j),y(j),radius,markerfacecolorname,markeredgecolorname,width);
           end
@@ -2667,6 +2796,10 @@ function text2svg(fid,axpos,paperpos,id,ax,projection)
   x = (x * axpos(3) + axpos(1)) * paperpos(3);
   y = (1 - (y * axpos(4) + axpos(2))) * paperpos(4);
   textvalign = get(id,'VerticalAlignment');
+  % checking if this is a 2-D or 3-D plot: gca axes in 2-D plots can appear in z-axis at the bottom layer [default] z = -1, at the same layer [default for legends] z = 0, or at the top layer z = 1:
+  if numel(textpos) > 2 && all(abs(textpos(3)-[-1,0,1]) > 1e-10) % 3D plot
+    textvalign = ['3d-',textvalign];
+  end
   textalign = get(id,'HorizontalAlignment');
   texttext = get(id,'String');
   textrot = get(id,'Rotation');
@@ -2700,13 +2833,16 @@ function exponent2svg(fid,axpos,paperpos,ax,axxtick,axytick,axztick)
   if strcmp(get(ax,'XTickLabelMode'),'auto') && strcmp(get(ax,'XScale'),'linear')
       fontsize = convertunit(get(ax,'FontSize'),get(ax,'FontUnits'),'points', axpos(4));   % convert fontsize to inches
       font_color = searchcolor(ax,get(ax,'XColor'));
-      if PLOT2SVG_globals.octave
-          % Octave stores XTickLabel in a cell array, which does not work nicely with str2num. --Jakob Malm
-          axlabelx = get(ax, 'XTickLabel');
-          numlabels = zeros(length(axlabelx), 1);
-          for ix = 1:length (axlabelx)
-              numlabels(ix) = str2num(axlabelx{ix});
+      axlabelx = get (ax, 'XTickLabel');
+      if iscell(axlabelx)
+        % Also new Matlab versions
+        % Octave stores YTickLabel in a cell array, which does not work nicely with str2num. --Jakob Malm
+        numlabels = zeros(length(axlabelx), 1);
+        for ix = 1:length(axlabelx)
+          if ~isempty(axlabelx{ix})
+            numlabels(ix) = str2num(axlabelx{ix});
           end
+        end
       else
           numlabels = get(ax,'XTickLabel');
           if ~isempty(numlabels)
@@ -2737,15 +2873,18 @@ function exponent2svg(fid,axpos,paperpos,ax,axxtick,axytick,axztick)
   if strcmp(get(ax,'YTickLabelMode'),'auto') && strcmp(get(ax,'YScale'),'linear')
       fontsize = convertunit(get(ax,'FontSize'),get(ax,'FontUnits'),'points', axpos(4));
       font_color = searchcolor(ax,get(ax,'YColor'));
-      if PLOT2SVG_globals.octave
-          % Octave stores YTickLabel in a cell array, which does not work nicely with str2num. --Jakob Malm
-          axlabely = get(ax, 'YTickLabel');
-          numlabels = zeros(length(axlabely), 1);
-          for ix = 1:length(axlabely)
-              numlabels(ix) = str2num(axlabely{ix});
+      axlabely = get(ax, 'YTickLabel');
+      if iscell(axlabely)
+        % Also new Matlab versions
+        % Octave stores YTickLabel in a cell array, which does not work nicely with str2num. --Jakob Malm
+        numlabels = zeros(length(axlabely), 1);
+        for ix = 1:length(axlabely)
+          if ~isempty(axlabely{ix})
+            numlabels(ix) = str2num(axlabely{ix});
           end
+        end
       else
-          numlabels = get(ax,'YTickLabel');
+          numlabels = axlabely;
           if ~isempty(numlabels)
             numlabels_tmp = str2double(numlabels);
             if any(isnan(numlabels_tmp)) || size(numlabels,1) ~= size(numlabels_tmp,1)
@@ -2774,13 +2913,16 @@ function exponent2svg(fid,axpos,paperpos,ax,axxtick,axytick,axztick)
   if strcmp(get(ax,'ZTickLabelMode'),'auto') && strcmp(get(ax,'ZScale'),'linear')
       fontsize = convertunit(get(ax,'FontSize'),get(ax,'FontUnits'),'points', axpos(4));
       font_color = searchcolor(ax,get(ax,'ZColor'));
-      if PLOT2SVG_globals.octave
-          % Octave stores ZTickLabel in a cell array, which does not work nicely with str2num. --Jakob Malm
-          axlabelz = get (ax, 'ZTickLabel');
-          numlabels = zeros(length(axlabelz), 1);
-          for ix = 1:length(axlabelz)
-              numlabels(ix) = str2num(axlabelz{ix});
+      axlabelz = get (ax, 'ZTickLabel');
+      if iscell(axlabelz)
+        % Also new Matlab versions
+        % Octave stores YTickLabel in a cell array, which does not work nicely with str2num. --Jakob Malm
+        numlabels = zeros(length(axlabelz), 1);
+        for ix = 1:length(axlabelz)
+          if ~isempty(axlabelz{ix})
+            numlabels(ix) = str2num(axlabelz{ix});
           end
+        end
       else
           numlabels = get(ax,'ZTickLabel');
           if ~isempty(numlabels)
@@ -2850,25 +2992,53 @@ function label2svg(fid,axpos,id,x,y,tex,align,angle,valign,lines,font_color)
       case 'oblique', fangle = ' font-style = "oblique"';
   otherwise, fangle = '';  % default 'normal'
   end
-  % Note: The attribute 'alignment-baseline' cannot be used as it is often
-  % badly supported. Therefore, we use shifts.
-  % SA: using 'dominant-baseline'
-  if UIverlessthan('8.4.0') && ~PLOT2SVG_globals.WN
-    fprintf('   Warning: plot2svg does not support proper location of axes'' labels in Octave and Matlab versions < 2014b.\n')
-    PLOT2SVG_globals.WN = 1;
-  end
+  % This does not seem to be needed anymore
+  % % Note: The attribute 'alignment-baseline' cannot be used as it is often
+  % % badly supported. Therefore, we use shifts.
+  % % SA: using 'dominant-baseline'
+  % if UIverlessthan('8.4.0') && ~PLOT2SVG_globals.WN
+  %   fprintf('   Warning: plot2svg does not support proper location of axes'' labels in Octave and Matlab versions < 2014b.\n')
+  %   PLOT2SVG_globals.WN = 1;
+  % end
   switch lower(valign)
-      case 'top', balign = 'text-before-edge'; % 'hanging'; % shift = fontsize*1.18;
-      case 'cap', balign = 'hanging'; % shift = fontsize*0.95;
-      case 'baseline', balign = 'auto'; % shift = -((lines-1)/2*fontsize*1.25*1.2) + fontsize * 0.45;
-      case 'bottom', balign = 'text-after-edge'; % 'ideographic'; % 'text-after-edge'; % shift = -((lines-1)*fontsize*1.25*1.2) + fontsize * -0.25;
-      otherwise, balign = 'central'; % shift = 0; % middle (default)
+  case 'top', balign = 'text-before-edge';
+  case '3d-top', balign = 'central';
+  case '3d-bottom', balign = 'central';
+  case 'cap', balign = 'central';
+  case 'baseline', balign = 'central';
+  case 'bottom', balign = 'text-after-edge';
+  otherwise, balign = 'central';
   end
-  shift = 0;
   switch lower(align)
-      case 'right', anchor = 'end';
-      case 'center', anchor = 'middle';
-      otherwise, anchor = 'start'; % left alignment (default)
+    case 'right', anchor = 'end';
+    case 'center', anchor = 'middle';
+    otherwise, anchor = 'start'; % left alignment (default)
+  end
+  if abs(angle) > 1e-10 && strcmp(valign,'top') && ~strcmp(get(id,'Type'),'text')
+    if angle > 1e-10
+      anchor = 'end';
+    else
+      anchor = 'start';
+    end
+    dx = sin(angle * pi / 180) * convertunit(fontsize * (-0.25), 'points', 'pixels');
+    dy = cos(angle * pi / 180) * convertunit(fontsize * 0.25, 'points', 'pixels');
+  elseif abs(angle) > 1e-10 && strcmp(valign,'bottom') && ~strcmp(get(id,'Type'),'text')
+    if angle > 1e-10
+      anchor = 'start';
+    else
+      anchor = 'end';
+    end
+    dx = sin(angle * pi / 180) * convertunit(fontsize * 0.5, 'points', 'pixels');
+    dy = cos(angle * pi / 180) * convertunit(fontsize * 0, 'points', 'pixels');
+  elseif abs(angle) > 1e-10 && strcmp(align,'Left')
+    dx = cos(angle * pi / 180) * convertunit(fontsize * 0, 'points', 'pixels');
+    dy = sin(angle * pi / 180) * convertunit(fontsize * 0.25, 'points', 'pixels');
+  elseif abs(angle) > 1e-10 && strcmp(align,'Right')
+    dx = cos(angle * pi / 180) * convertunit(fontsize * (-0.25), 'points', 'pixels');
+    dy = sin(angle * pi / 180) * convertunit(fontsize * (-0.25), 'points', 'pixels');
+  else
+    dx = 0;
+    dy = 0;
   end
   if iscellstr(tex)
       tex = strvcat(tex);
@@ -2975,7 +3145,7 @@ function label2svg(fid,axpos,id,x,y,tex,align,angle,valign,lines,font_color)
       tex = strrep(tex,'\cdot','{&#8901;}');
       tex = strrep(tex,'\bullet','{&#8226;}');
       tex = strrep(tex,'\ldots','{&#8230;}');
-    tex = strrep(tex,'\prime','{&#8242;}');
+      tex = strrep(tex,'\prime','{&#8242;}');
       % &#8243; double prime
       % &#8254; oline
 
@@ -2993,12 +3163,26 @@ function label2svg(fid,axpos,id,x,y,tex,align,angle,valign,lines,font_color)
   if isempty(tex)
       return;
   end
-  %fprintf('%s\n', tex);
-  fprintf(fid,'  <g transform = "translate(%0.3f,%0.3f)">\n', x - shift * sin(-angle/180*pi), y + shift * cos(-angle/180*pi));
+  fprintf(fid,'  <g transform = "translate(%0.3f,%0.3f)">\n', x + dx, y + dy);
   fprintf(fid,'    <g transform = "rotate(%0.3f)">\n',-angle);
-  % fprintf(fid,'      <text x = "%0.3f" y = "%0.3f" font-family = "%s" text-anchor = "%s" font-size = "%0.3fpt"%s%s fill = "%s" >', 0, 0, textfontname, anchor, textfontsize, fweight, fangle, font_color);
-  fprintf(fid,'      <text x = "%0.3f" y = "%0.3f" font-family = "%s" text-anchor = "%s" dominant-baseline = "%s" font-size = "%0.3fpt"%s%s fill = "%s" >', 0, 0, textfontname, anchor, balign, textfontsize, fweight, fangle, font_color);
-  fprintf(fid,'%s',tex);
+  fprintf(fid,'      <text x = "%0.3f" y = "%0.3f" font-family = "%s" text-anchor = "%s" dominant-baseline = "%s" font-size = "%0.3fpt"%s%s fill = "%s">', 0, 0, textfontname, anchor, balign, textfontsize, fweight, fangle, font_color);
+  % tex = strrep(tex, '<tspan>', '');
+  % tex = strrep(tex, '</tspan>', '');
+  if strcmp(valign, '3d-top')
+    fprintf('   applying baseline-shift to "%s": it may not seem so in browsers but works in inkscape\n',get(id,'String'));
+    fprintf(fid,'<tspan baseline-shift = "-15%%">%s</tspan>',tex);
+  elseif strcmp(valign, '3d-bottom')
+    fprintf(fid,'<tspan baseline-shift = "30%%">%s</tspan>',tex);
+    fprintf('   applying baseline-shift to "%s": it may not seem so in browsers but works in inkscape\n',get(id,'String'));
+  elseif ~strncmp(tex,'<tspan>',7)
+    fprintf(fid,'<tspan>%s</tspan>',tex);
+  else
+    fprintf(fid,'%s',tex);
+  end
+  if PLOT2SVG_globals.debugModeOn
+  % useful for debugging:
+    fprintf('balign = "%s" angle = "%0.3f" type = "%s" valign = "%s" tex = "%s"\n',balign, angle, get(id,'Type'),valign,tex);
+  end
   fprintf(fid,'</text>\n');
   fprintf(fid,'    </g>\n');
   fprintf(fid,'  </g>\n');
