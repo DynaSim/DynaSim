@@ -41,7 +41,7 @@ files=setdiff(files,[fname fext]);
 
 % compare solve_file_m to each file
 for f=1:length(files)
-  [~,diffs] = system(['diff -aBEbZ ' solve_file_m ' ' fullfile(mexPath,files{f})]);
+  [~,diffs] = system(['diff -aBEb ' solve_file_m ' ' fullfile(mexPath,files{f})]);
   if isempty(diffs)
     %dbstack
     old_solve_file_m=solve_file_m;
