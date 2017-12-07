@@ -40,12 +40,16 @@ files=files(cellfun(@any,regexp(files,'.m$')));
 files=setdiff(files,[fname fext]);
 
 % compare solve_file_m to each file
+diff_file = fullfile('solve_file_m.diff');
 for f=1:length(files)
-  [~,diffs] = system(['diff -aBEb ' solve_file_m ' ' fullfile(mexPath,files{f})]);
-  if isempty(diffs)
+  % -B neglects empty lines, -b neglects in-between (>1) and trailing (all) whitespace, sed with regexp is used to neglect leading whitespace
+  [status,diffs] = system(['diff -Bb <(sed ''s/^[ \t]*//'' ' solve_file_m ') <(sed ''s/^[ \t]*//'' ' fullfile(mexPath,files{f}) ')']);
+  fid = fopen(diff_file,'wt');
+  if status == 0 && isempty(diffs)
     %dbstack
     old_solve_file_m=solve_file_m;
     delete(old_solve_file_m);
+    delete(diff_file);
 
     if ~strcmp(mexPath,solvePath)
         % Copy mex file and solve file from mexPath into solve path
@@ -61,6 +65,9 @@ for f=1:length(files)
 
     solve_file_m=fullfile(solvePath,files{f});
     break;
+  else
+    fprintf(fid,'%s',diffs);
   end
+  fclose(fid);
 end
 end
