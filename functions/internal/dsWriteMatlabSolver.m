@@ -304,17 +304,7 @@ if ~isempty(model.fixed_variables)
   fprintf(fid,'%% ------------------------------------------------------------\n');
   
   % 2.2 set random seed
-  fprintf(fid,'%% seed the random number generator\n');
-  fprintf(fid,'%% seed the random number generator\n');
-  if options.save_parameters_flag
-    fprintf(fid,'%s(%srandom_seed);\n',rng_function,parameter_prefix);
-  else
-    if ischar(options.random_seed)
-      fprintf(fid,'%s(''%s'');\n',rng_function,options.random_seed);
-    elseif isnumeric(options.random_seed)
-      fprintf(fid,'%s(%g);\n',rng_function,options.random_seed);
-    end
-  end
+  setup_randomseed(options,fid,rng_function,parameter_prefix)
   
   names=fieldnames(model.fixed_variables);
   expressions=struct2cell(model.fixed_variables);
@@ -341,17 +331,8 @@ fprintf(fid,'%% Initial conditions:\n');
 fprintf(fid,'%% ------------------------------------------------------------\n');
 
 % 2.2 set random seed
-fprintf(fid,'%% seed the random number generator\n');
-fprintf(fid,'%% seed the random number generator\n');
-if options.save_parameters_flag
-  fprintf(fid,'%s(%srandom_seed);\n',rng_function,parameter_prefix);
-else
-  if ischar(options.random_seed)
-    fprintf(fid,'%s(''%s'');\n',rng_function,options.random_seed);
-  elseif isnumeric(options.random_seed)
-    fprintf(fid,'%s(%g);\n',rng_function,options.random_seed);
-  end
-end
+setup_randomseed(options,fid,rng_function,parameter_prefix)
+
 
 %% Numerical integration
 % write code to do numerical integration
@@ -467,3 +448,18 @@ end
 
 end %function
 %% END MAIN FUNC
+
+
+function setup_randomseed(options,fid,rng_function,parameter_prefix)
+  fprintf(fid,'%% seed the random number generator\n');
+  fprintf(fid,'%% seed the random number generator\n');
+  if options.save_parameters_flag
+    fprintf(fid,'%s(%srandom_seed);\n',rng_function,parameter_prefix);
+  else
+    if ischar(options.random_seed)
+      fprintf(fid,'%s(''%s'');\n',rng_function,options.random_seed);
+    elseif isnumeric(options.random_seed)
+      fprintf(fid,'%s(%g);\n',rng_function,options.random_seed);
+    end
+  end
+end

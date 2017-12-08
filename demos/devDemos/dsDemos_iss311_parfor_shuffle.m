@@ -1,5 +1,5 @@
 
-%% Simulate Sparse Pyramidal-Interneuron-Network-Gamma (sPING)
+%% Setup Sparse Pyramidal-Interneuron-Network-Gamma (sPING)
 
 % define equations of cell model (same for E and I populations)
 eqns={
@@ -29,6 +29,13 @@ s.connections(2).parameters={'tauD',2,'gSYN',.1,'netcon',ones(10,10)}; % connect
 
 vary = {'E','myshuffle',1:3};
 
+%%
+% Test 0: Compile
+data=dsSimulate(s,'tspan',[0 200],'compile_flag',1,'verbose_flag',1,'random_seed','shuffle');
+dsPlot2(data,'plot_type','raster','population','E')
+
+
+%%
 % Test 1: Cluster flag off, compile flag on. Test parallel vs non-parallel
 % Parallel
 data=dsSimulate(s,'tspan',[0 200],'compile_flag',1,'verbose_flag',1,'random_seed','shuffle','parallel_flag',1,'vary',vary);
@@ -45,4 +52,10 @@ dsPlot2(data,'plot_type','raster','population','E')
 
 
 %%
+% Test 3: Cluster flag on, compile flag on.
+% Parallel
+data=dsSimulate(s,'tspan',[0 200],'compile_flag',0,'verbose_flag',1,'random_seed','shuffle','parallel_flag',0,'vary',vary,...
+  'cluster_flag',1);
+dsPlot2(data,'plot_type','raster','population','E')
+
 
