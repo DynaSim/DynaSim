@@ -192,7 +192,7 @@ data=dsSimulate(eqns, 'vary',{'IB','Iapp',5}, 'time_limits',[0 200]);
 figure; plot(data.time,data.(data.labels{1}))
 xlabel('time (ms)'); ylabel('membrane potential (mV)'); title('Predefined Intrinsically Bursting neuron')
 
-% Predefined populations are stored in text files (e.g., 'IB.pop') and 
+% Predefined populations are stored in text files (e.g., 'IB.pop') and
 % simulated by passing the file name to dsSimulate (e.g., dsSimulate('IB'))
 % or by equating population equations to it in the DynaSim specification
 % structure (see below).
@@ -245,9 +245,9 @@ dsPlot(data,'variable',{'E_v','E_I_iGABAa_ISYN'});
 
 dynasim(s); % Display model "s" in the DynaSim GUI
 
-% Notes: 
+% Notes:
 % - DynaSim GUI is only supported in MATLAB at this time.
-% - Launching the GUI without a model (i.e., by executing "dynasim") 
+% - Launching the GUI without a model (i.e., by executing "dynasim")
 %   will load a default demo network.
 
 % %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -304,9 +304,9 @@ dsPlot(data,'plot_type','power');
 % How to: set 'cluster_flag' to 1
 % Requirement: you must be logged on to a cluster that recognizes 'qsub'
 
-if 0 
+if 0
   % Execute the following cluster examples from a login node
-  
+
   % Run three simulations in parallel jobs and save the simulated data
   eqns='dv/dt=@current+I; {iNa,iK}';
   vary={'','I',[0 10 20]};
@@ -315,8 +315,8 @@ if 0
   % tips for checking job status:
   % !qstat -u <YOUR_USERNAME>
   % !cat ~/batchdirs/demo_cluster_1/pbsout/sim_job1.out
-  data=dsImport('demo_cluster_1');
-  dsPlot(data);
+  % data=dsImport('demo_cluster_1');
+  % dsPlot(data);
 
   % Repeat but also save plotted data
   eqns='dv/dt=@current+I; {iNa,iK}';
@@ -346,7 +346,6 @@ if 0
   % Run on cluster with compilation
   dsSimulate(eqns, 'save_data_flag',1, 'study_dir','demo_cluster_4','compile_flag',1,...
                      'vary',vary, 'cluster_flag',1, 'overwrite_flag',1, 'verbose_flag',1);
-                   
 end
 
 % %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -538,7 +537,7 @@ dsPlot(data,'variable',{'V','gPoisson'});
 % phi=0;          % radians, phase at which the signal begins
 % onset=0;        % ms, start time of signal
 % offset=inf;     % ms, stop time of signal
-% 
+%
 % % synaptic parameters
 % gext=.01;       % max synaptic conductance
 % Eext=0;         % mV, synaptic reversal potential
