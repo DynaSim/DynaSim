@@ -11,6 +11,13 @@ function xp = ds2mdd(data,merge_covaried_axes,merge_sparse_axes,varargin)
         merge_sparse_axes = true;
     end
 
+    if isempty(data)
+      error('Input data is empty');
+    end
+    
+    if ~isstruct(data)
+      error('Input data must be a struct');
+    end
 
 % % % % % % % % % % % % % % %  Merge data varied statements if necessary % % % % %   
     if merge_covaried_axes && isfield(data(1),'varied')
