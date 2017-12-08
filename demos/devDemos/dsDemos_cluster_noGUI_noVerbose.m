@@ -315,8 +315,8 @@ if 1
   % tips for checking job status:
   % !qstat -u <YOUR_USERNAME>
   % !cat ~/batchdirs/demo_cluster_1/pbsout/sim_job1.out
-  data=dsImport('demo_cluster_1');
-  dsPlot(data);
+  % data=dsImport('demo_cluster_1');
+  % dsPlot(data);
 
   % Repeat but also save plotted data
   eqns='dv/dt=@current+I; {iNa,iK}';
@@ -346,7 +346,6 @@ if 1
   % Run on cluster with compilation
   dsSimulate(eqns, 'save_data_flag',1, 'study_dir','demo_cluster_4','compile_flag',1,...
                      'vary',vary, 'cluster_flag',1, 'overwrite_flag',1, 'verbose_flag',0);
-
 end
 
 % %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
