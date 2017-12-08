@@ -54,8 +54,9 @@ dsPlot2(data,'plot_type','raster','population','E')
 %%
 % Test 3: Cluster flag on, compile flag on.
 % Parallel
-data=dsSimulate(s,'tspan',[0 200],'compile_flag',0,'verbose_flag',1,'random_seed','shuffle','parallel_flag',0,'vary',vary,...
-  'cluster_flag',1);
+dsSimulate(s,'tspan',[0 200],'compile_flag',0,'verbose_flag',1,'random_seed','shuffle','parallel_flag',0,'vary',vary,...
+  'cluster_flag',1,'study_dir','demo_iss311out');
+
+pause (20);     % Wait for sims to finish
+data = dsImport('demo_iss311out');
 dsPlot2(data,'plot_type','raster','population','E')
-
-
