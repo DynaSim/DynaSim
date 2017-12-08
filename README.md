@@ -8,7 +8,7 @@ systems in MATLAB and GNU Octave!
 ### Installation
 
 * Download the toolbox, and add it to your MATLAB or GNU Octave path.
-  * Download using GitHub or Terminal: `git clone https://github.com/DynaSim/DynaSim.git`
+  * Download as [Zip file](https://github.com/DynaSim/DynaSim/archive/master.zip) or clone it from the Terminal: `git clone https://github.com/DynaSim/DynaSim.git`
   * Add to path using startup.m or Command Window:
     * `addpath(genpath('YOUR/PATH/TO/DynaSim'))`
     * `savepath`
@@ -16,10 +16,10 @@ systems in MATLAB and GNU Octave!
 
 ### Documentation:
 
-- Get started with the demos: [demos/dsDemos.m](https://github.com/DynaSim/DynaSim/blob/master/demos/dsDemos.m).
-- Complete documentation is available at [dynasim.readthedocs.org](http://dynasim.readthedocs.org).
+- Get started with the [DynaSim tutorial](https://github.com/DynaSim/DynaSim/wiki/DynaSim-tutorial).
+- Complete documentation is available at the [DynaSim wiki](https://github.com/DynaSim/DynaSim/wiki).
 - A browsable function reference is [available
-  here](https://dynasim.github.io/DynaSim/).
+  here](https://dynasim.github.io/docs/).
 - Example modeling projects: [PFC networks](https://github.com/jsherfey/PFC_models), [Thalamus](https://github.com/asoplata/ching2010_tcre_dynasim_mechanisms).
 - Report issues [here](https://github.com/DynaSim/DynaSim/issues).
 

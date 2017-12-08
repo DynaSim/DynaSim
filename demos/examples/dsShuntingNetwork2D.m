@@ -1,4 +1,7 @@
 % 2D competitive network with excitatory and inhibitory rate-based populations
+% The 2D grid is vectorized into a 1D linear array; it is displayed in 2D using dsPlot2D.
+% See dsReactionDiffusion2D.m for a 2D grid modeled using matrices.
+
 aa = 40;        % Side length of square grid
 N = aa*aa;      % Number of neurons
 tlen = 10000;
