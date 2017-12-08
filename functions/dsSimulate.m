@@ -307,6 +307,13 @@ if options.unit_test_flag
   options.study_dir = getAbsolutePath(options.study_dir);
 end
 
+%% 0.21 Set rng if rng is shuffle
+if strcmp(options.random_seed,'shuffle')
+  % Setting up random seed here to avoid setting it within for loop or
+  % parfor loop.
+  rng_wrapper(options.random_seed);
+end
+
 %% 0.3 Prepare solve options.
 
 if options.compile_flag && ~strcmp(reportUI,'matlab')
@@ -660,8 +667,23 @@ if options.parallel_flag
 
   clear data
 
+  % Create array of random seeds
+  
+  
+  
+  seeds = repmat({options.random_seed},1,length(modifications_set));
+  
+  % If random_seed is shuffle, generate a series of seeds here
+  if strcmp(options.random_seed,'shuffle') && strcmp(reportUI,'matlab')
+    sd = rng_wrapper('shuffle');            % Get current seed
+    for j = 1:length(modifications_set)
+      seeds{j} = double(sd.Seed) + j;   % Increment by 1 for each sim
+    end
+  end
+  
   % note that parfor currently acts just as a regular for in Octave
   parfor sim=1:length(modifications_set)
+    rng_wrapper(seeds{sim});  % Set rng
     data(sim)=dsSimulate(model, 'modifications', modifications_set{sim}, keyvals{:},...
         'studyinfo', studyinfo, 'sim_id',sim, 'in_parfor_loop_flag', 1);  % My modification; now specifies a separate study directory for each sim.
     %disp(sim);
