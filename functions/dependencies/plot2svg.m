@@ -2076,9 +2076,6 @@ function boundingBoxAxes = axchild2svg(fid,id,axIdString,ax,paperpos,axchild,axp
           if ~strcmp(linestyle, 'none')
               markerOverlap = max(markerOverlap, convertunit(linewidth*0.5, 'points', 'pixels', axpos(4)));
           end
-          if ~strcmp(marker, 'none')
-              markerOverlap = max(markerOverlap, convertunit(markersize, 'points', 'pixels', axpos(4)));
-          end
           if PLOT2SVG_globals.ClippingMode ~= 2
             boundingBoxElement = [min(x)-markerOverlap min(y)-markerOverlap max(x)-min(x)+2*markerOverlap max(y)-min(y)+2*markerOverlap];
           else
@@ -2213,9 +2210,6 @@ function boundingBoxAxes = axchild2svg(fid,id,axIdString,ax,paperpos,axchild,axp
           if ~strcmp(linestyle, 'none')
               markerOverlap = max(markerOverlap, convertunit(linewidth*0.5, 'points', 'pixels', axpos(4)));
           end
-          if ~strcmp(marker, 'none')
-              markerOverlap = max(markerOverlap, convertunit(markersize, 'points', 'pixels', axpos(4)));
-          end
           % put a rectangle into a group with its markers
           if PLOT2SVG_globals.ClippingMode ~= 2
             boundingBoxElement = rect + [-markerOverlap -markerOverlap 2*markerOverlap 2*markerOverlap];
@@ -2286,9 +2280,6 @@ function boundingBoxAxes = axchild2svg(fid,id,axIdString,ax,paperpos,axchild,axp
           markerOverlap = 0;
           if ~strcmp(linestyle, 'none')
               markerOverlap = max(markerOverlap, convertunit(linewidth*0.5, 'points', 'pixels', axpos(4)));
-          end
-          if ~strcmp(marker, 'none')
-              markerOverlap = max(markerOverlap, convertunit(markersize, 'points', 'pixels', axpos(4)));
           end
           if PLOT2SVG_globals.ClippingMode ~= 2
             boundingBoxElement = [min(x)-markerOverlap min(y)-markerOverlap max(x)-min(x)+2*markerOverlap max(y)-min(y)+2*markerOverlap];
