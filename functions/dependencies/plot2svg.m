@@ -21,7 +21,7 @@ function varargout = plot2svg(filename, id, debug, legendicons, figuresize, pixe
 
   global PLOT2SVG_globals
   global colorname
-  progversion = '4-Dec-2017';
+  progversion = '9-Dec-2017';
   PLOT2SVG_globals.runningIdNumber = 0;
   PLOT2SVG_globals.UI = reportUI;
   PLOT2SVG_globals.octave = false;
@@ -1497,7 +1497,7 @@ function boundingBoxAxes = axchild2svg(fid,id,axIdString,ax,paperpos,axchild,axp
       end
       if strcmp(get(axchild(i), 'Visible'), 'off')
           % do nothing
-      elseif strcmp(get(axchild(i),'Type'),'line')
+      elseif strcmp(get(axchild(i),'Type'),'line') || strcmp(get(axchild(i),'Type'),'errorbar')
           scolorname = searchcolor(id,get(axchild(i),'Color'));
           linestyle = get(axchild(i),'LineStyle');
           linewidth = get(axchild(i),'LineWidth'); % linewidth = PLOT2SVG_globals.resolutionScaling*get(axchild(i),'LineWidth');
@@ -1525,41 +1525,127 @@ function boundingBoxAxes = axchild2svg(fid,id,axIdString,ax,paperpos,axchild,axp
           linex = linex(:)'; % Octave stores the data in a column vector
           liney = get(axchild(i),'YData');
           liney = liney(:)'; % Octave stores the data in a column vector
-          linez = get(axchild(i),'ZData');
-          linez = linez(:)'; % Octave stores the data in a column vector
+          if ~strcmp(get(axchild(i),'Type'),'errorbar')
+            linez = get(axchild(i),'ZData');
+            linez = linez(:)'; % Octave stores the data in a column vector
+          else
+            linez = zeros(size(linex));
+            xnegdelta = get(axchild(i),'XNegativeDelta');
+            xposdelta = get(axchild(i),'XPositiveDelta');
+            if ~isempty(xnegdelta)
+              xnegdelta = linex - xnegdelta;
+              xposdelta = linex + xposdelta;
+            end
+            ynegdelta = get(axchild(i),'YNegativeDelta');
+            yposdelta = get(axchild(i),'YPositiveDelta');
+            if ~isempty(ynegdelta)
+              ynegdelta = liney - ynegdelta;
+              yposdelta = liney + yposdelta;
+            end
+            capsize = get(axchild(i),'CapSize');
+          end
           try
             if strcmp(get(ax,'XScale'),'log')
                 linex(linex <= 0) = NaN;
                 linex = log10(linex);
+                if strcmp(get(axchild(i),'Type'),'errorbar')
+                  xnegdelta(xnegdelta <= 0) = NaN;
+                  xnegdelta = log10(xnegdelta);
+                  xposdelta(xposdelta <= 0) = NaN;
+                  xposdelta = log10(xposdelta);
+                end
             end
             if strcmp(get(ax,'YScale'),'log')
                 liney(liney <= 0) = NaN;
                 liney = log10(liney);
+                if strcmp(get(axchild(i),'Type'),'errorbar')
+                  ynegdelta(ynegdelta <= 0) = NaN;
+                  ynegdelta = log10(ynegdelta);
+                  yposdelta(yposdelta <= 0) = NaN;
+                  yposdelta = log10(yposdelta);
+                end
             end
-            if isempty(linez)
+            if ~strcmp(get(axchild(i),'Type'),'errorbar')
+              if isempty(linez)
                 linez = zeros(size(linex));
-            end
-            if strcmp(get(ax,'ZScale'),'log')
+              end
+              if strcmp(get(ax,'ZScale'),'log')
                 linez(linez <= 0) = NaN;
                 linez = log10(linez);
+              end
             end
             [x,y,~] = project(linex,liney,linez,projection);
+            if strcmp(get(axchild(i),'Type'),'errorbar')
+              if ~isempty(xnegdelta)
+                xerrorbar_linex = [xnegdelta;xposdelta;nan(size(xnegdelta))];
+                xerrorbar_linex = xerrorbar_linex(:)';
+                xerrorbar_liney = [liney;liney;nan(size(xnegdelta))];
+                xerrorbar_liney = xerrorbar_liney(:)';
+                xerrorbar_linez = [linez;linez;nan(size(xnegdelta))];
+                xerrorbar_linez = xerrorbar_linez(:)';
+                [xerrorbar_x,xerrorbar_y,~] = project(xerrorbar_linex,xerrorbar_liney,xerrorbar_linez,projection);
+              end
+              if ~isempty(ynegdelta)
+                yerrorbar_liney = [ynegdelta;yposdelta;nan(size(ynegdelta))];
+                yerrorbar_liney = yerrorbar_liney(:)';
+                yerrorbar_linex = [linex;linex;nan(size(ynegdelta))];
+                yerrorbar_linex = yerrorbar_linex(:)';
+                yerrorbar_linez = [linez;linez;nan(size(ynegdelta))];
+                yerrorbar_linez = yerrorbar_linez(:)';
+                [yerrorbar_x,yerrorbar_y,~] = project(yerrorbar_linex,yerrorbar_liney,yerrorbar_linez,projection);
+              end
+            end
           catch
             % children of legend objects
             x = linex;
             y = liney;
-            z = linez;
+            if ~strcmp(get(axchild(i),'Type'),'errorbar')
+              z = linez;
+            end
           end
           x = (x*axpos(3)+axpos(1))*paperpos(3);
           y = (1-(y*axpos(4)+axpos(2)))*paperpos(4);
+          if strcmp(get(axchild(i),'Type'),'errorbar')
+            if ~isempty(xnegdelta)
+              xerrorbar_x = (xerrorbar_x*axpos(3)+axpos(1))*paperpos(3);
+              xerrorbar_y = (1-(xerrorbar_y*axpos(4)+axpos(2)))*paperpos(4);
+              xcapsize_y = bsxfun(@plus,0.5*capsize*[1;-1;NaN]*ones(size(xerrorbar_y(~isnan(xerrorbar_y)))),xerrorbar_y(~isnan(xerrorbar_y)));
+              xcapsize_y = xcapsize_y(:)';
+              xcapsize_x = bsxfun(@times,[1;1;NaN]*ones(size(xerrorbar_x(~isnan(xerrorbar_x)))),xerrorbar_x(~isnan(xerrorbar_x)));
+              xcapsize_x = xcapsize_x(:)';
+            else
+              xerrorbar_x = [];
+              xerrorbar_y = [];
+              xcapsize_y = [];
+              xcapsize_x = [];
+            end
+            if ~isempty(ynegdelta)
+              yerrorbar_x = (yerrorbar_x*axpos(3)+axpos(1))*paperpos(3);
+              yerrorbar_y = (1-(yerrorbar_y*axpos(4)+axpos(2)))*paperpos(4);
+              ycapsize_x = bsxfun(@plus,0.5*capsize*[1;-1;NaN]*ones(size(yerrorbar_x(~isnan(yerrorbar_x)))),yerrorbar_x(~isnan(yerrorbar_x)));
+              ycapsize_x = ycapsize_x(:)';
+              ycapsize_y = bsxfun(@times,[1;1;NaN]*ones(size(yerrorbar_y(~isnan(yerrorbar_y)))),yerrorbar_y(~isnan(yerrorbar_y)));
+              ycapsize_y = ycapsize_y(:)';
+            else
+              yerrorbar_x = [];
+              yerrorbar_y = [];
+              ycapsize_x = [];
+              ycapsize_y = [];
+            end
+          end
+
           markerOverlap = 0;
           if ~strcmp(linestyle, 'none')
               markerOverlap = max(markerOverlap, convertunit(linewidth*0.5, 'points', 'pixels', axpos(4)));
           end
           if ~strcmp(marker, 'none')
-              markerOverlap = max(markerOverlap, convertunit(2*markersize, 'points', 'pixels', axpos(4)));
+              markerOverlap = max(markerOverlap, convertunit(markersize, 'points', 'pixels', axpos(4)));
           end
-          boundingBoxElement = [min(x)-markerOverlap min(y)-markerOverlap max(x)-min(x)+2*markerOverlap max(y)-min(y)+2*markerOverlap];
+          if ~strcmp(get(axchild(i),'Type'),'errorbar')
+            boundingBoxElement = [min(x)-markerOverlap min(y)-markerOverlap max(x)-min(x)+2*markerOverlap max(y)-min(y)+2*markerOverlap];
+          else
+            boundingBoxElement = [min([x,xerrorbar_x,xcapsize_y])-markerOverlap min([y,yerrorbar_y,ycapsize_x])-markerOverlap max([x,xerrorbar_x,xcapsize_y])-min([x,xerrorbar_x,xcapsize_y])+2*markerOverlap max([y,yerrorbar_y,ycapsize_x])-min([y,yerrorbar_y,ycapsize_x])+2*markerOverlap];
+          end
           [filterString, boundingBox] = filter2svg(fid, axchild(i), boundingBoxAxes, boundingBoxElement);
           boundingBoxAxes = [min([boundingBoxAxes(1) boundingBoxElement(1)]) min([boundingBoxAxes(2) boundingBoxElement(2)]) max([boundingBoxAxes(3)+max([boundingBoxAxes(1)-boundingBoxElement(1),0]) boundingBoxElement(3)+max([boundingBoxElement(1)-boundingBoxAxes(1),0])]) max([boundingBoxAxes(4)+max([boundingBoxAxes(2)-boundingBoxElement(2),0]) boundingBoxElement(4)+max([boundingBoxElement(2)-boundingBoxAxes(2),0])])];
           % put a line into a group with its markers
@@ -1574,6 +1660,13 @@ function boundingBoxAxes = axchild2svg(fid,id,axIdString,ax,paperpos,axchild,axp
               fprintf(fid,'<rect x = "%0.3f" y = "%0.3f" width = "%0.3f" height = "%0.3f" fill = "none" stroke = "none" />\n', boundingBox(1), boundingBox(2), boundingBox(3), boundingBox(4));
           end
           line2svg(fid,x,y,scolorname,linestyle,linewidth,'round')
+          if strcmp(get(axchild(i),'Type'),'errorbar')
+            line2svg(fid,xerrorbar_x,xerrorbar_y,scolorname,linestyle,linewidth,'round')
+            line2svg(fid,xcapsize_x,xcapsize_y,scolorname,linestyle,linewidth,'round')
+            line2svg(fid,yerrorbar_x,yerrorbar_y,scolorname,linestyle,linewidth,'round')
+            line2svg(fid,ycapsize_x,ycapsize_y,scolorname,linestyle,linewidth,'round')
+          end
+
           % put the markers into a subgroup of the lines
           if  ~strcmp(marker, 'none') % but only do it if we actually are drawing markers
               fprintf(fid,'<g>\n');
@@ -2312,7 +2405,7 @@ function boundingBoxAxes = axchild2svg(fid,id,axIdString,ax,paperpos,axchild,axp
               fprintf(fid,'</g>\n');
           end
       elseif strcmp(get(axchild(i),'Type'),'hggroup') || strcmp(get(axchild(i),'Type'),'bar')
-          % handle group types (like error bars)
+          % handle group types (like error bars in matlab < 2014b)
           % FIXME: they are not yet perfectly handled, there are more options
           % that are not used
           [filterString, boundingBox] = filter2svg(fid, axchild(i), boundingBoxAxes, boundingBoxAxes);
@@ -3659,7 +3752,7 @@ function [xlims, ylims, zlims] = AxesChildBounds(ax)
 
   % Now get all children of those objects that have data we can analyze
   dataObjs = findobj(children, 'Type', 'line', ...
-      '-or', 'Type', 'patch', '-or', 'Type', 'Rectangle', '-or', 'Type', 'Surface', '-or', 'Type', 'image','-or', 'Type', 'bar');
+      '-or', 'Type', 'patch', '-or', 'Type', 'Rectangle', '-or', 'Type', 'Surface', '-or', 'Type', 'image','-or', 'Type', 'bar','-or', 'Type', 'errorbar');
 
   % SA: remove data that is outside of the axis limits (see below)
   for j = 1:numel(dataObjs)
@@ -3675,7 +3768,7 @@ function [xlims, ylims, zlims] = AxesChildBounds(ax)
   end
 
   % Iterate through each axis one at a time
-  if (numel(get(dataObjs,'Type')) == 1 && strcmpi(get(dataObjs,'Type'),'image')) || any(strcmpi(get(dataObjs,'Type'),'bar'))
+  if (numel(get(dataObjs,'Type')) == 1 && strcmpi(get(dataObjs,'Type'),'image')) || any(strcmpi(get(dataObjs,'Type'),'bar')) || any(strcmpi(get(dataObjs,'Type'),'errorbar'))
     axisData = {'XData', 'YData'};
   else
     axisData = {'XData', 'YData', 'ZData'};
