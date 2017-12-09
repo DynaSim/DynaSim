@@ -1635,7 +1635,7 @@ function boundingBoxAxes = axchild2svg(fid,id,axIdString,ax,paperpos,axchild,axp
           end
 
           markerOverlap = 0;
-          if ~strcmp(linestyle, 'none')
+          if ~strcmp(linestyle, 'none') && ~strcmp(get(axchild(i),'Type'),'errorbar')
               markerOverlap = max(markerOverlap, convertunit(linewidth*0.5, 'points', 'pixels', axpos(4)));
           end
           if ~strcmp(marker, 'none')
@@ -1661,10 +1661,10 @@ function boundingBoxAxes = axchild2svg(fid,id,axIdString,ax,paperpos,axchild,axp
           end
           line2svg(fid,x,y,scolorname,linestyle,linewidth,'round')
           if strcmp(get(axchild(i),'Type'),'errorbar')
-            line2svg(fid,xerrorbar_x,xerrorbar_y,scolorname,linestyle,linewidth,'round')
-            line2svg(fid,xcapsize_x,xcapsize_y,scolorname,linestyle,linewidth,'round')
-            line2svg(fid,yerrorbar_x,yerrorbar_y,scolorname,linestyle,linewidth,'round')
-            line2svg(fid,ycapsize_x,ycapsize_y,scolorname,linestyle,linewidth,'round')
+            line2svg(fid,xerrorbar_x,xerrorbar_y,scolorname,'-',linewidth,'round')
+            line2svg(fid,xcapsize_x,xcapsize_y,scolorname,'-',linewidth,'round')
+            line2svg(fid,yerrorbar_x,yerrorbar_y,scolorname,'-',linewidth,'round')
+            line2svg(fid,ycapsize_x,ycapsize_y,scolorname,'-',linewidth,'round')
           end
 
           % put the markers into a subgroup of the lines
