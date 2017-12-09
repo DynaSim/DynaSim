@@ -1,7 +1,7 @@
-function varargout = plot2svg(filename, id, debug, legendicons, figuresize, pixelfiletype)
+function varargout = plot2svg(filename, id, debug, legendicons, clippingmode, figuresize, pixelfiletype)
   %  Matlab/GNU Octave FIG to SVG converter
   %
-  %  Usage: plot2svg(filename, graphic handle, debug, legendicons, figuresize, pixelfiletype)
+  %  Usage: plot2svg(filename, graphic handle, debug, legendicons, clippingmode, figuresize, pixelfiletype)
   %
   %         all arguments are optional
   %
@@ -14,6 +14,9 @@ function varargout = plot2svg(filename, id, debug, legendicons, figuresize, pixe
   %
   %         legendicons: legend pieces (necessary in new matlab versions to respect legend appearance)
   %         can be omitted (nargin < 4) or left empty ('' or [])
+  %
+  %         clippingmode = 0 (no clipping) or 1 (box on/off dependent clipping) or 2 (strict axes clipping) or 3 (axes+data dependent clipping)
+  %         clippingmode is set to 1 if argument is omitted or empty
   %
   %         figuresize = [width,height] (actual figure size if omitted or empty)
   %
@@ -29,7 +32,11 @@ function varargout = plot2svg(filename, id, debug, legendicons, figuresize, pixe
   PLOT2SVG_globals.ScreenPixelsPerInch = 96; % New default ppi
   PLOT2SVG_globals.resolutionScaling = 1;
   PLOT2SVG_globals.WN = 0;
-  PLOT2SVG_globals.EnableClippling = 1; % 0; % SA: note that it does not work fine with Inkscape pdf conversion for latex
+  if nargin < 5 || isempty(clippingmode)
+    PLOT2SVG_globals.ClippingMode = 1; % nees revision -> note that it does not work fine with Inkscape pdf conversion for latex
+  else
+    PLOT2SVG_globals.ClippingMode = clippingmode;
+  end
 
   try
     % Rounding it to be an integer (Octave resolution is 96.024)
@@ -43,8 +50,8 @@ function varargout = plot2svg(filename, id, debug, legendicons, figuresize, pixe
     varargout = {0};
   end
   % disp(['   Matlab/Octave to SVG converter version ' progversion ', Juerg Schwizer (converter@bluewin.ch).'])
-  disp(['   Forked Matlab/Octave to SVG converter version ' progversion ', Salva Ardid (sardid@bu.edu).'])
-  disp('   Credit to Juerg Schwizer (converter@bluewin.ch).')
+  disp(['   Forked FIG to SVG converter version ' progversion ', Salva Ardid (sardid@bu.edu).'])
+  disp('   Most credit to Juerg Schwizer (converter@bluewin.ch).')
   if strcmp(PLOT2SVG_globals.UI,'octave')
     PLOT2SVG_globals.octave = true;
     % disp('   Info: PLOT2SVG runs in Octave mode.')
@@ -130,12 +137,12 @@ function varargout = plot2svg(filename, id, debug, legendicons, figuresize, pixe
   originalFigureUnits = get(id,'Units');
   set(id,'Units','pixels');   % All data in the svg-file is saved in pixels
   paperpos = get(id,'Position');
-  if nargin >= 5 && ~isempty(figuresize)
+  if nargin >= 6 && ~isempty(figuresize)
     paperpos(3) = param1(1);
     paperpos(4) = param1(2);
   end
   paperpos = convertunit(paperpos, 'pixels', 'pixels');
-  if (nargin < 6) || isempty(pixelfiletype)
+  if (nargin < 7) || isempty(pixelfiletype)
     PLOT2SVG_globals.pixelfiletype = 'png';
   else
     PLOT2SVG_globals.pixelfiletype = pixelfiletype;
@@ -1018,6 +1025,7 @@ function group = axes2svg(fid,id,ax,group,paperpos)
       else
           minor_axztick = [];
       end
+      PLOT2SVG_globals.BoxOn = strcmp(get(ax,'Box'),'on');
       if strcmp(get(ax,'Box'),'on')
           axxindex_inner = find((axxtick > axlimori(1)) & (axxtick < (axlimori(1)+axlimori(4))));
           axyindex_inner = find((axytick > axlimori(2)) & (axytick < (axlimori(2)+axlimori(5))));
@@ -1641,19 +1649,27 @@ function boundingBoxAxes = axchild2svg(fid,id,axIdString,ax,paperpos,axchild,axp
           if ~strcmp(marker, 'none')
               markerOverlap = max(markerOverlap, convertunit(markersize, 'points', 'pixels', axpos(4)));
           end
-          if ~strcmp(get(axchild(i),'Type'),'errorbar')
-            boundingBoxElement = [min(x)-markerOverlap min(y)-markerOverlap max(x)-min(x)+2*markerOverlap max(y)-min(y)+2*markerOverlap];
+          % put a line into a group with its markers
+          if PLOT2SVG_globals.ClippingMode ~= 2
+            if ~strcmp(get(axchild(i),'Type'),'errorbar')
+              boundingBoxElement = [min(x)-markerOverlap min(y)-markerOverlap max(x)-min(x)+2*markerOverlap max(y)-min(y)+2*markerOverlap];
+            else
+              boundingBoxElement = [min([x,xerrorbar_x,xcapsize_y])-markerOverlap min([y,yerrorbar_y,ycapsize_x])-markerOverlap max([x,xerrorbar_x,xcapsize_y])-min([x,xerrorbar_x,xcapsize_y])+2*markerOverlap max([y,yerrorbar_y,ycapsize_x])-min([y,yerrorbar_y,ycapsize_x])+2*markerOverlap];
+            end
           else
-            boundingBoxElement = [min([x,xerrorbar_x,xcapsize_y])-markerOverlap min([y,yerrorbar_y,ycapsize_x])-markerOverlap max([x,xerrorbar_x,xcapsize_y])-min([x,xerrorbar_x,xcapsize_y])+2*markerOverlap max([y,yerrorbar_y,ycapsize_x])-min([y,yerrorbar_y,ycapsize_x])+2*markerOverlap];
+            boundingBoxElement = boundingBoxAxes;
           end
           [filterString, boundingBox] = filter2svg(fid, axchild(i), boundingBoxAxes, boundingBoxElement);
-          boundingBoxAxes = [min([boundingBoxAxes(1) boundingBoxElement(1)]) min([boundingBoxAxes(2) boundingBoxElement(2)]) max([boundingBoxAxes(3)+max([boundingBoxAxes(1)-boundingBoxElement(1),0]) boundingBoxElement(3)+max([boundingBoxElement(1)-boundingBoxAxes(1),0])]) max([boundingBoxAxes(4)+max([boundingBoxAxes(2)-boundingBoxElement(2),0]) boundingBoxElement(4)+max([boundingBoxElement(2)-boundingBoxAxes(2),0])])];
-          % put a line into a group with its markers
-          if strcmp(get(axchild(i),'Clipping'),'on') && PLOT2SVG_globals.EnableClippling
-              clippingIdString = clipping2svg(fid, axchild(i), ax, paperpos, axpos, projection, axIdString);
-              fprintf(fid,'<g id = "%s" clip-path = "url(#%s)" %s>\n', createId, clippingIdString, filterString);
+          if PLOT2SVG_globals.ClippingMode == 1 && ~PLOT2SVG_globals.BoxOn
+            boundingBoxAxes = [boundingBoxAxes(1) min([boundingBoxAxes(2) boundingBoxElement(2)]) max([boundingBoxAxes(3)+max([boundingBoxAxes(1)-boundingBoxElement(1),0]) boundingBoxElement(3)+max([boundingBoxElement(1)-boundingBoxAxes(1),0])]) [boundingBoxAxes(4)+max([boundingBoxAxes(2)-boundingBoxElement(2),0])]];
+          elseif PLOT2SVG_globals.ClippingMode == 3
+            boundingBoxAxes = [min([boundingBoxAxes(1) boundingBoxElement(1)]) min([boundingBoxAxes(2) boundingBoxElement(2)]) max([boundingBoxAxes(3)+max([boundingBoxAxes(1)-boundingBoxElement(1),0]) boundingBoxElement(3)+max([boundingBoxElement(1)-boundingBoxAxes(1),0])]) max([boundingBoxAxes(4)+max([boundingBoxAxes(2)-boundingBoxElement(2),0]) boundingBoxElement(4)+max([boundingBoxElement(2)-boundingBoxAxes(2),0])])];
+          end
+          if strcmp(get(axchild(i),'Clipping'),'on') && PLOT2SVG_globals.ClippingMode ~= 0
+            clippingIdString = clipping2svg(fid, axchild(i), ax, paperpos, axpos, projection, axIdString);
+            fprintf(fid,'<g id = "%s" clip-path = "url(#%s)" %s>\n', createId, clippingIdString, filterString);
           else
-              fprintf(fid,'<g id = "%s" %s>\n', createId, filterString);
+            fprintf(fid,'<g id = "%s" %s>\n', createId, filterString);
           end
           if ~isempty(filterString)
               % Workaround for Inkscape filter bug
@@ -1824,16 +1840,24 @@ function boundingBoxAxes = axchild2svg(fid,id,axIdString,ax,paperpos,axchild,axp
               markerOverlap = max(markerOverlap, convertunit(linewidth*0.5, 'points', 'pixels', axpos(4)));
           end
           if ~strcmp(marker, 'none')
-              markerOverlap = max(markerOverlap, convertunit(2*markersize, 'points', 'pixels', axpos(4)));
+              markerOverlap = max(markerOverlap, convertunit(markersize, 'points', 'pixels', axpos(4)));
           end
-          boundingBoxElement = [min(x)-markerOverlap min(y)-markerOverlap max(x)-min(x)+2*markerOverlap max(y)-min(y)+2*markerOverlap];
-          [filterString, boundingBox] = filter2svg(fid, axchild(i), boundingBoxAxes, boundingBoxElement);
-          boundingBoxAxes = [min([boundingBoxAxes(1) boundingBoxElement(1)]) min([boundingBoxAxes(2) boundingBoxElement(2)]) max([boundingBoxAxes(3)+max([boundingBoxAxes(1)-boundingBoxElement(1),0]) boundingBoxElement(3)+max([boundingBoxElement(1)-boundingBoxAxes(1),0])]) max([boundingBoxAxes(4)+max([boundingBoxAxes(2)-boundingBoxElement(2),0]) boundingBoxElement(4)+max([boundingBoxElement(2)-boundingBoxAxes(2),0])])];
-          if strcmp(get(axchild(i),'Clipping'),'on') && PLOT2SVG_globals.EnableClippling
-              clippingIdString = clipping2svg(fid, axchild(i), ax, paperpos, axpos, projection, axIdString);
-              fprintf(fid,'<g id = "%s" clip-path = "url(#%s)" %s>\n', createId, clippingIdString, filterString);
+          if PLOT2SVG_globals.ClippingMode ~= 2
+            boundingBoxElement = [min(x)-markerOverlap min(y)-markerOverlap max(x)-min(x)+2*markerOverlap max(y)-min(y)+2*markerOverlap];
           else
-              fprintf(fid,'<g id = "%s" %s>\n', createId, filterString);
+            boundingBoxElement = boundingBoxAxes;
+          end
+          [filterString, boundingBox] = filter2svg(fid, axchild(i), boundingBoxAxes, boundingBoxElement);
+          if PLOT2SVG_globals.ClippingMode == 1 && ~PLOT2SVG_globals.BoxOn
+            boundingBoxAxes = [boundingBoxAxes(1) min([boundingBoxAxes(2) boundingBoxElement(2)]) max([boundingBoxAxes(3)+max([boundingBoxAxes(1)-boundingBoxElement(1),0]) boundingBoxElement(3)+max([boundingBoxElement(1)-boundingBoxAxes(1),0])]) [boundingBoxAxes(4)+max([boundingBoxAxes(2)-boundingBoxElement(2),0])]];
+          elseif PLOT2SVG_globals.ClippingMode == 3
+            boundingBoxAxes = [min([boundingBoxAxes(1) boundingBoxElement(1)]) min([boundingBoxAxes(2) boundingBoxElement(2)]) max([boundingBoxAxes(3)+max([boundingBoxAxes(1)-boundingBoxElement(1),0]) boundingBoxElement(3)+max([boundingBoxElement(1)-boundingBoxAxes(1),0])]) max([boundingBoxAxes(4)+max([boundingBoxAxes(2)-boundingBoxElement(2),0]) boundingBoxElement(4)+max([boundingBoxElement(2)-boundingBoxAxes(2),0])])];
+          end
+          if strcmp(get(axchild(i),'Clipping'),'on') && PLOT2SVG_globals.ClippingMode ~= 0
+            clippingIdString = clipping2svg(fid, axchild(i), ax, paperpos, axpos, projection, axIdString);
+            fprintf(fid,'<g id = "%s" clip-path = "url(#%s)" %s>\n', createId, clippingIdString, filterString);
+          else
+            fprintf(fid,'<g id = "%s" %s>\n', createId, filterString);
           end
           if ~isempty(filterString)
               % Workaround for Inkscape filter bug
@@ -2052,14 +2076,25 @@ function boundingBoxAxes = axchild2svg(fid,id,axIdString,ax,paperpos,axchild,axp
           if ~strcmp(linestyle, 'none')
               markerOverlap = max(markerOverlap, convertunit(linewidth*0.5, 'points', 'pixels', axpos(4)));
           end
-          boundingBoxElement = [min(x)-markerOverlap min(y)-markerOverlap max(x)-min(x)+2*markerOverlap max(y)-min(y)+2*markerOverlap];
-          [filterString, boundingBox] = filter2svg(fid, axchild(i), boundingBoxAxes, boundingBoxElement);
-          boundingBoxAxes = [min([boundingBoxAxes(1) boundingBoxElement(1)]) min([boundingBoxAxes(2) boundingBoxElement(2)]) max([boundingBoxAxes(3)+max([boundingBoxAxes(1)-boundingBoxElement(1),0]) boundingBoxElement(3)+max([boundingBoxElement(1)-boundingBoxAxes(1),0])]) max([boundingBoxAxes(4)+max([boundingBoxAxes(2)-boundingBoxElement(2),0]) boundingBoxElement(4)+max([boundingBoxElement(2)-boundingBoxAxes(2),0])])];
-          if strcmp(get(axchild(i),'Clipping'),'on') && PLOT2SVG_globals.EnableClippling
-              clippingIdString = clipping2svg(fid, axchild(i), ax, paperpos, axpos, projection, axIdString);
-              fprintf(fid,'<g clip-path = "url(#%s)" id = "%s" %s>\n',clippingIdString, createId, filterString);
+          if ~strcmp(marker, 'none')
+              markerOverlap = max(markerOverlap, convertunit(markersize, 'points', 'pixels', axpos(4)));
+          end
+          if PLOT2SVG_globals.ClippingMode ~= 2
+            boundingBoxElement = [min(x)-markerOverlap min(y)-markerOverlap max(x)-min(x)+2*markerOverlap max(y)-min(y)+2*markerOverlap];
           else
-              fprintf(fid,'<g id = "%s" %s>\n', createId, filterString);
+            boundingBoxElement = boundingBoxAxes;
+          end
+          [filterString, boundingBox] = filter2svg(fid, axchild(i), boundingBoxAxes, boundingBoxElement);
+          if PLOT2SVG_globals.ClippingMode == 1 && ~PLOT2SVG_globals.BoxOn
+            boundingBoxAxes = [boundingBoxAxes(1) min([boundingBoxAxes(2) boundingBoxElement(2)]) max([boundingBoxAxes(3)+max([boundingBoxAxes(1)-boundingBoxElement(1),0]) boundingBoxElement(3)+max([boundingBoxElement(1)-boundingBoxAxes(1),0])]) [boundingBoxAxes(4)+max([boundingBoxAxes(2)-boundingBoxElement(2),0])]];
+          elseif PLOT2SVG_globals.ClippingMode == 3
+            boundingBoxAxes = [min([boundingBoxAxes(1) boundingBoxElement(1)]) min([boundingBoxAxes(2) boundingBoxElement(2)]) max([boundingBoxAxes(3)+max([boundingBoxAxes(1)-boundingBoxElement(1),0]) boundingBoxElement(3)+max([boundingBoxElement(1)-boundingBoxAxes(1),0])]) max([boundingBoxAxes(4)+max([boundingBoxAxes(2)-boundingBoxElement(2),0]) boundingBoxElement(4)+max([boundingBoxElement(2)-boundingBoxAxes(2),0])])];
+          end
+          if strcmp(get(axchild(i),'Clipping'),'on') && PLOT2SVG_globals.ClippingMode ~= 0
+            clippingIdString = clipping2svg(fid, axchild(i), ax, paperpos, axpos, projection, axIdString);
+            fprintf(fid,'<g id = "%s" clip-path = "url(#%s)" %s>\n', createId, clippingIdString, filterString);
+          else
+            fprintf(fid,'<g id = "%s" %s>\n', createId, filterString);
           end
           if ~isempty(filterString)
               % Workaround for Inkscape filter bug
@@ -2178,15 +2213,26 @@ function boundingBoxAxes = axchild2svg(fid,id,axIdString,ax,paperpos,axchild,axp
           if ~strcmp(linestyle, 'none')
               markerOverlap = max(markerOverlap, convertunit(linewidth*0.5, 'points', 'pixels', axpos(4)));
           end
-          boundingBoxElement = rect + [-markerOverlap -markerOverlap 2*markerOverlap 2*markerOverlap];
-          [filterString, boundingBox] = filter2svg(fid, axchild(i), boundingBoxAxes, boundingBoxElement);
-          boundingBoxAxes = [min([boundingBoxAxes(1) boundingBoxElement(1)]) min([boundingBoxAxes(2) boundingBoxElement(2)]) max([boundingBoxAxes(3)+max([boundingBoxAxes(1)-boundingBoxElement(1),0]) boundingBoxElement(3)+max([boundingBoxElement(1)-boundingBoxAxes(1),0])]) max([boundingBoxAxes(4)+max([boundingBoxAxes(2)-boundingBoxElement(2),0]) boundingBoxElement(4)+max([boundingBoxElement(2)-boundingBoxAxes(2),0])])];
+          if ~strcmp(marker, 'none')
+              markerOverlap = max(markerOverlap, convertunit(markersize, 'points', 'pixels', axpos(4)));
+          end
           % put a rectangle into a group with its markers
-          if strcmp(get(axchild(i),'Clipping'),'on') && PLOT2SVG_globals.EnableClippling
-              clippingIdString = clipping2svg(fid, axchild(i), ax, paperpos, axpos, projection, axIdString);
-              fprintf(fid,'<g id = "%s" clip-path = "url(#%s)" %s>\n', createId, clippingIdString, filterString);
+          if PLOT2SVG_globals.ClippingMode ~= 2
+            boundingBoxElement = rect + [-markerOverlap -markerOverlap 2*markerOverlap 2*markerOverlap];
           else
-              fprintf(fid,'<g id = "%s" %s>\n', createId, filterString);
+            boundingBoxElement = boundingBoxAxes;
+          end
+          [filterString, boundingBox] = filter2svg(fid, axchild(i), boundingBoxAxes, boundingBoxElement);
+          if PLOT2SVG_globals.ClippingMode == 1 && ~PLOT2SVG_globals.BoxOn
+            boundingBoxAxes = [boundingBoxAxes(1) min([boundingBoxAxes(2) boundingBoxElement(2)]) max([boundingBoxAxes(3)+max([boundingBoxAxes(1)-boundingBoxElement(1),0]) boundingBoxElement(3)+max([boundingBoxElement(1)-boundingBoxAxes(1),0])]) [boundingBoxAxes(4)+max([boundingBoxAxes(2)-boundingBoxElement(2),0])]];
+          elseif PLOT2SVG_globals.ClippingMode == 3
+            boundingBoxAxes = [min([boundingBoxAxes(1) boundingBoxElement(1)]) min([boundingBoxAxes(2) boundingBoxElement(2)]) max([boundingBoxAxes(3)+max([boundingBoxAxes(1)-boundingBoxElement(1),0]) boundingBoxElement(3)+max([boundingBoxElement(1)-boundingBoxAxes(1),0])]) max([boundingBoxAxes(4)+max([boundingBoxAxes(2)-boundingBoxElement(2),0]) boundingBoxElement(4)+max([boundingBoxElement(2)-boundingBoxAxes(2),0])])];
+          end
+          if strcmp(get(axchild(i),'Clipping'),'on') && PLOT2SVG_globals.ClippingMode ~= 0
+            clippingIdString = clipping2svg(fid, axchild(i), ax, paperpos, axpos, projection, axIdString);
+            fprintf(fid,'<g id = "%s" clip-path = "url(#%s)" %s>\n', createId, clippingIdString, filterString);
+          else
+            fprintf(fid,'<g id = "%s" %s>\n', createId, filterString);
           end
           if ~isempty(filterString)
               % Workaround for Inkscape filter bug
@@ -2241,14 +2287,25 @@ function boundingBoxAxes = axchild2svg(fid,id,axIdString,ax,paperpos,axchild,axp
           if ~strcmp(linestyle, 'none')
               markerOverlap = max(markerOverlap, convertunit(linewidth*0.5, 'points', 'pixels', axpos(4)));
           end
-          boundingBoxElement = [min(x)-markerOverlap min(y)-markerOverlap max(x)-min(x)+2*markerOverlap max(y)-min(y)+2*markerOverlap];
-          [filterString, boundingBox] = filter2svg(fid, axchild(i), boundingBoxAxes, boundingBoxElement);
-          boundingBoxAxes = [min([boundingBoxAxes(1) boundingBoxElement(1)]) min([boundingBoxAxes(2) boundingBoxElement(2)]) max([boundingBoxAxes(3)+max([boundingBoxAxes(1)-boundingBoxElement(1),0]) boundingBoxElement(3)+max([boundingBoxElement(1)-boundingBoxAxes(1),0])]) max([boundingBoxAxes(4)+max([boundingBoxAxes(2)-boundingBoxElement(2),0]) boundingBoxElement(4)+max([boundingBoxElement(2)-boundingBoxAxes(2),0])])];
-          if strcmp(get(axchild(i),'Clipping'),'on') && PLOT2SVG_globals.EnableClippling && ~PLOT2SVG_globals.octave
-              clippingIdString = clipping2svg(fid, axchild(i), ax, paperpos, axpos, projection, axIdString);
-              fprintf(fid,'<g id = "%s" clip-path = "url(#%s)" %s>\n', createId, clippingIdString, filterString);
+          if ~strcmp(marker, 'none')
+              markerOverlap = max(markerOverlap, convertunit(markersize, 'points', 'pixels', axpos(4)));
+          end
+          if PLOT2SVG_globals.ClippingMode ~= 2
+            boundingBoxElement = [min(x)-markerOverlap min(y)-markerOverlap max(x)-min(x)+2*markerOverlap max(y)-min(y)+2*markerOverlap];
           else
-              fprintf(fid,'<g id = "%s" %s>\n', createId, filterString);
+            boundingBoxElement = boundingBoxAxes;
+          end
+          [filterString, boundingBox] = filter2svg(fid, axchild(i), boundingBoxAxes, boundingBoxElement);
+          if PLOT2SVG_globals.ClippingMode == 1 && ~PLOT2SVG_globals.BoxOn
+            boundingBoxAxes = [boundingBoxAxes(1) min([boundingBoxAxes(2) boundingBoxElement(2)]) max([boundingBoxAxes(3)+max([boundingBoxAxes(1)-boundingBoxElement(1),0]) boundingBoxElement(3)+max([boundingBoxElement(1)-boundingBoxAxes(1),0])]) [boundingBoxAxes(4)+max([boundingBoxAxes(2)-boundingBoxElement(2),0])]];
+          elseif PLOT2SVG_globals.ClippingMode == 3
+            boundingBoxAxes = [min([boundingBoxAxes(1) boundingBoxElement(1)]) min([boundingBoxAxes(2) boundingBoxElement(2)]) max([boundingBoxAxes(3)+max([boundingBoxAxes(1)-boundingBoxElement(1),0]) boundingBoxElement(3)+max([boundingBoxElement(1)-boundingBoxAxes(1),0])]) max([boundingBoxAxes(4)+max([boundingBoxAxes(2)-boundingBoxElement(2),0]) boundingBoxElement(4)+max([boundingBoxElement(2)-boundingBoxAxes(2),0])])];
+          end
+          if strcmp(get(axchild(i),'Clipping'),'on') && PLOT2SVG_globals.ClippingMode ~= 0
+            clippingIdString = clipping2svg(fid, axchild(i), ax, paperpos, axpos, projection, axIdString);
+            fprintf(fid,'<g id = "%s" clip-path = "url(#%s)" %s>\n', createId, clippingIdString, filterString);
+          else
+            fprintf(fid,'<g id = "%s" %s>\n', createId, filterString);
           end
           if ~isempty(filterString)
               % Workaround for Inkscape filter bug
@@ -2386,7 +2443,7 @@ function boundingBoxAxes = axchild2svg(fid,id,axIdString,ax,paperpos,axchild,axp
               pointsy = (1-(axpos(4)+axpos(2)))*paperpos(4);
           end
           [filterString, boundingBox] = filter2svg(fid, axchild(i), boundingBoxAxes, boundingBoxAxes);
-          if strcmp(get(axchild(i),'Clipping'),'on') && PLOT2SVG_globals.EnableClippling
+          if strcmp(get(axchild(i),'Clipping'),'on') && PLOT2SVG_globals.ClippingMode
               clippingIdString = clipping2svg(fid, axchild(i), ax, paperpos, axpos, projection, axIdString);
               fprintf(fid,'<g id = "%s" clip-path = "url(#%s)" %s>\n', createId, clippingIdString, filterString);
               if ~isempty(filterString)
@@ -2409,7 +2466,7 @@ function boundingBoxAxes = axchild2svg(fid,id,axIdString,ax,paperpos,axchild,axp
           % FIXME: they are not yet perfectly handled, there are more options
           % that are not used
           [filterString, boundingBox] = filter2svg(fid, axchild(i), boundingBoxAxes, boundingBoxAxes);
-          if strcmp(get(axchild(i),'Clipping'),'on') && PLOT2SVG_globals.EnableClippling
+          if strcmp(get(axchild(i),'Clipping'),'on') && PLOT2SVG_globals.ClippingMode
               clippingIdString = clipping2svg(fid, axchild(i), ax, paperpos, axpos, projection, axIdString);
               fprintf(fid,'<g id = "%s" clip-path = "url(#%s)" %s>\n', createId, clippingIdString, filterString);
           else
@@ -2522,7 +2579,7 @@ function boundingBoxAxes = axchild2svg(fid,id,axIdString,ax,paperpos,axchild,axp
       elseif strcmp(get(axchild(i),'Type'),'hgtransform')
           if strcmpi(get(axchild(i), 'Visible'), 'on')
               [filterString, boundingBox] = filter2svg(fid, axchild(i), boundingBoxAxes, boundingBoxAxes);
-              if strcmp(get(axchild(i),'Clipping'),'on') && PLOT2SVG_globals.EnableClippling
+              if strcmp(get(axchild(i),'Clipping'),'on') && PLOT2SVG_globals.ClippingMode
                   clippingIdString = clipping2svg(fid, axchild(i), ax, paperpos, axpos, projection, axIdString);
                   fprintf(fid,'<g id = "%s" clip-path = "url(#%s)" %s>\n', createId, clippingIdString, filterString);
               else
