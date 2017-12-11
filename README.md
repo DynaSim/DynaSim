@@ -7,20 +7,21 @@ systems in MATLAB and GNU Octave!
 
 ### Installation
 
-* Download the toolbox, and add it to your MATLAB or GNU Octave path.
-  * Download as [Zip file](https://github.com/DynaSim/DynaSim/archive/master.zip) or clone it from the Terminal: `git clone https://github.com/DynaSim/DynaSim.git`
-  * Add to path using startup.m or Command Window:
+* Full instructions are [online](https://github.com/DynaSim/DynaSim/wiki/Installation).
+* In brief:
+  1. Download the toolbox, and add it to your MATLAB or GNU Octave path.
+    * Download it as a [Zip file](https://github.com/DynaSim/DynaSim/archive/master.zip) or clone it from the Terminal: `git clone https://github.com/DynaSim/DynaSim.git`
+  2. Add to path using startup.m or Command Window:
     * `addpath(genpath('YOUR/PATH/TO/DynaSim'))`
     * `savepath`
-* [Go here](http://dynasim.readthedocs.io/en/latest/introduction/installation.html) for additional instructions.
 
 ### Documentation:
 
-- Get started with the [DynaSim tutorial](https://github.com/DynaSim/DynaSim/wiki/DynaSim-tutorial).
-- Complete documentation is available at the [DynaSim wiki](https://github.com/DynaSim/DynaSim/wiki).
-- A browsable function reference is [available
-  here](https://dynasim.github.io/docs/).
+- Get started with the [DynaSim tutorial](https://github.com/DynaSim/DynaSim/wiki/DynaSim-Getting-Started-Tutorial).
+- Complete documentation is [available online] (https://dynasim.github.io/docs).
+- A browsable function reference is [available here](https://dynasim.github.io/docs/function_reference).
 - Example modeling projects: [PFC networks](https://github.com/jsherfey/PFC_models), [Thalamus](https://github.com/asoplata/ching2010_tcre_dynasim_mechanisms).
+  - See the [online documentation](https://dynasim.github.io/docs) for more.
 - Report issues [here](https://github.com/DynaSim/DynaSim/issues).
 
 ### Mailing lists:
