@@ -12,5 +12,6 @@ _ignore
 unitTestData/
 docs/offline_docs
 docs/offline_function_reference/
+docs/_online_docs/
 testCoverage/
 solve/
