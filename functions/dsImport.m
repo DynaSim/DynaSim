@@ -4,7 +4,7 @@ function [data,studyinfo] = dsImport(file,varargin)
 % Usage:
 %   [data,studyinfo] = dsImport(data_file)
 %   [data,studyinfo] = dsImport(studyinfo)
-%   data = ImportData(data_file)
+%   data = dsImport(data_file)
 %
 % Inputs:
 %   - First input/argument:

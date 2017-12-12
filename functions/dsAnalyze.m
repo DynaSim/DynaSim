@@ -383,17 +383,17 @@ end
 % if ischar(src)
 %   if exist(src,'file') % data file or studyinfo.mat
 %     if strfind(src, 'studyinfo') %studyinfo.mat
-%       [data,studyinfo] = ImportData(src, varargin{:}); % load data
+%       [data,studyinfo] = dsImport(src, varargin{:}); % load data
 %       studyinfo.study_dir = fileparts2(src);
 %     else % data file
-%       [data,studyinfo] = ImportData(src, varargin{:}); % load data
+%       [data,studyinfo] = dsImport(src, varargin{:}); % load data
 %     end
 %   elseif isdir(src) % study_dir
-%     [data,studyinfo] = ImportData(src, varargin{:}); % load data
+%     [data,studyinfo] = dsImport(src, varargin{:}); % load data
 %     studyinfo.study_dir = src;
 %   else
 %     try
-%       [data,studyinfo] = ImportData(src, varargin{:}); % load data
+%       [data,studyinfo] = dsImport(src, varargin{:}); % load data
 %     catch
 %       error('Unknown source for first input/argument.')
 %     end
@@ -404,13 +404,13 @@ end
 %   if isfield(src,'time') % single data file
 %     data = src;
 %   else % studyinfo struct
-%     [data,studyinfo] = ImportData(src, varargin{:}); % load data
+%     [data,studyinfo] = dsImport(src, varargin{:}); % load data
 %   end
 % elseif iscell(src) % cell array of files
-%   [data,studyinfo] = ImportData(src, varargin{:}); % load data
+%   [data,studyinfo] = dsImport(src, varargin{:}); % load data
 % else
 %   try
-%     [data,studyinfo] = ImportData(src, varargin{:}); % load data
+%     [data,studyinfo] = dsImport(src, varargin{:}); % load data
 %   catch
 %     error('Unknown source for first input/argument.')
 %   end
@@ -567,7 +567,7 @@ else
   varinputs{find(~cellfun(@isempty,strfind(varinputs(1:2:end), 'simIDs')))*2} = simIDs;
 end
 
-data = ImportData(src, varinputs{:}); % load data
+data = dsImport(src, varinputs{:}); % load data
 end
 
 
