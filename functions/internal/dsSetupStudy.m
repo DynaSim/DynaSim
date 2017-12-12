@@ -4,6 +4,9 @@ function [studyinfo,options] = dsSetupStudy(base_model,varargin)
 % TODO: break up this function into smaller functions
 %
 % See also: dsSimulate, dsUpdateStudy
+% 
+% Author: Jason Sherfey, PhD <jssherfey@gmail.com>
+% Copyright (C) 2016 Jason Sherfey, Boston University, USA
 
 % Check inputs
 opts=dsCheckOptions(varargin,{...

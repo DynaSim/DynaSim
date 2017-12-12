@@ -36,6 +36,9 @@ function data = dsProbeCellProperties(model,varargin)
 % Analysis: input data sets for all step levels, output one stat structure 
 %           per experiment call with ephys properties for each cell in each 
 %           population of the model.
+% 
+% Author: Jason Sherfey, PhD <jssherfey@gmail.com>
+% Copyright (C) 2016 Jason Sherfey, Boston University, USA
 
 % Check inputs
 options=dsCheckOptions(varargin,{...

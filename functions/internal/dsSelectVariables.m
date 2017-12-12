@@ -20,6 +20,9 @@ function [variables,pop_names] = dsSelectVariables(labels,var_strings, varargin)
 %   var_strings='pop1_v';
 %   var_strings='pop1_*';
 %   var_strings='pop2_*';
+% 
+% Author: Jason Sherfey, PhD <jssherfey@gmail.com>
+% Copyright (C) 2016 Jason Sherfey, Boston University, USA
 
 %% auto_gen_test_data_flag argin
 options = dsCheckOptions(varargin,{'auto_gen_test_data_flag',0,{0,1}},false);

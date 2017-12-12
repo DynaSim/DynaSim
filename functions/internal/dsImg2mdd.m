@@ -1,17 +1,26 @@
 function xp = dsImg2mdd(data_img,merge_covaried_axes,merge_sparse_axes,varargin)
 
-  
     if nargin < 2
-        merge_covaried_axes = false;
+        merge_covaried_axes = true;
     end
     
     if nargin < 3
-        merge_sparse_axes = false;
+        merge_sparse_axes = true;
     end
-
-% % % % % % % % % % % % % % %     
+    
+    if isempty(data_img)
+      error('Input data_img is empty');
+    end
+    
+    if ~isstruct(data_img)
+      error('Input data_img must be a struct');
+    end
+      
+% % % % % % % % % % % % % % %  Merge data varied statements if necessary % % % % %   
     if merge_covaried_axes && isfield(data_img(1),'varied')
-
+        % Remove any data in data(1...N) that is empty (e.g. skipped by
+        % the simulator)
+        % (Not relevant for xp_img!!)
         
 
         
@@ -38,11 +47,10 @@ function xp = dsImg2mdd(data_img,merge_covaried_axes,merge_sparse_axes,varargin)
     end
     
     if merge_sparse_axes && isfield(data_img(1),'varied')
-        [data_img] = dsAutoMergeVarieds(data_img);
+        [data_img, variedname_merged, varied_vals ] = dsAutoMergeVarieds(data_img);
     end
     
-% % % % % % % % % % % % % % %     
-
+% % % % % % % % % % % % % % % Merging is complete % % % % % % % %
 
     % Load into DynaSim structure
     [data_table,column_titles] = dsDataField2Table (data_img,'plot_files');

@@ -19,6 +19,9 @@ function model = dsPropagateNamespaces(model,map, varargin)
 % Example 1: TODO
 %
 % See also: dsGenerateModel, dsPropagateFunctions, dsParseModelEquations, dsGetParentNamespace
+% 
+% Author: Jason Sherfey, PhD <jssherfey@gmail.com>
+% Copyright (C) 2016 Jason Sherfey, Boston University, USA
 
 %% auto_gen_test_data_flag argin
 options = dsCheckOptions(varargin,{'auto_gen_test_data_flag',0,{0,1}},false);
@@ -36,6 +39,16 @@ if ~iscell(map) || size(map,2)~=4
   error('map must be a cell array with four columns for (name, namespace_name, namespace, type)');
 end
 names_in_namespace=cellfun(@(x,y)strncmp(y,x,length(y)),map(:,2),map(:,3));
+[name_,name__]=dsGetNamespaces(model);
+% Purpose: add double underscores between model objects (i.e., separate 
+% populations and mechanisms in namespace). This enables retrieving model
+% object names from the namespace in dsGetParentNamespace for segregating
+% model elements in dsPropagateNamespaces. This is necessary if object
+% names contain underscores. Limitation: object names with double 
+% underscores are not permitted.
+% Note: this approach to tracking objects with namespaces was chosen
+% because of its efficiency given code generation based on string
+% substitution.
 
 % namespace propagation pattern:
 allowed_insert_types.fixed_variables=...
@@ -117,8 +130,11 @@ function expressions=propagate_namespaces(expressions,namespaces,map,insert_type
     % get namespace for this expression
     this_namespace=namespaces{i};
     
-    % find parent namespaces
-    parent_namespace = dsGetParentNamespace(this_namespace, varargin{:});
+    % convert to double underscore version for segregating objects
+    this_namespace__ = name__{strcmp(this_namespace,name_)};
+    
+    % find parent namespaces (by segregating model objects delimited by underscores)
+    parent_namespace = dsGetParentNamespace(this_namespace__, varargin{:});
     
     % find where this and parent namespaces are in map array
     insert_type_constraint = ismember(map(:,4),insert_types);
@@ -140,6 +156,7 @@ function expressions=propagate_namespaces(expressions,namespaces,map,insert_type
         if exist('type','var') && strcmp(type, 'ICs') && strcmp(words{j}, 'X')
           new_word = [new_word '_last']; % HACK
         end
+        % TODO: move this to dsWriteDynaSimSolver()
         
         % replace found word in expression by map(names_bar|parent_namespace)
         expressions{i}=dsStrrep(expressions{i},words{j},new_word, '', '', varargin{:});
@@ -182,6 +199,58 @@ if options.auto_gen_test_data_flag
   argout = {model}; % specific to this function
   
   dsUnitSaveAutoGenTestData(argin, argout);
+end
+
+end
+
+% SUBFUNCTIONS
+
+function parent = dsGetParentNamespace(namespace)
+%GETPARENTNAMESPACE - determine parent namespace from namespace specified in namespace
+% Usage:
+%   parent = dsGetParentNamespace(namespace)
+% Input:
+%   - namespace: current namespace of object
+% Output:
+%   - parent: parent namespace containing the current namespace
+% Examples:
+%   parent=dsGetParentNamespace('pop')
+%   parent=dsGetParentNamespace('pop__mech')
+%   parent=dsGetParentNamespace('pop__pop')
+%   parent=dsGetParentNamespace('pop__pop__mech')
+%   parent=dsGetParentNamespace('mech')
+%   parent=dsGetParentNamespace('')
+
+if isempty(namespace) && isnumeric(namespace)
+  namespace='';
+end
+if ~isempty(namespace) && namespace(end)=='_'
+  namespace=namespace(1:end-1);
+end
+if ~isempty(namespace)
+  parts=regexp(namespace,'__','split');
+else
+  parts=[];
+end
+
+switch length(parts)
+  case 0                          % ''
+    parent='global';
+  case 1                          % pop or mech
+    parent='';
+  case 2
+    if isequal(parts{1},parts{2}) % pop_pop
+      parent='global';
+    else                          % pop_mech
+      parent=[parts{1} '_'];
+    end
+  case 3                          % pop_pop_mech
+    parent=[parts{1} '_' parts{2} '_'];
+  otherwise                       % a_b_c_d_...
+    parent='';
+    for i=1:length(parts)-1
+      parent=[parent parts{i} '_'];
+    end
 end
 
 end

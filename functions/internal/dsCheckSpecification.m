@@ -101,8 +101,14 @@ function spec = dsCheckSpecification(specification, varargin)
 %   - Example 6: standardize specification with everything in equation string
 %       s.pops.equations='E:dv[10]/dt=@M+I; {iNa,iK}@M; I=10';
 %       s=dsCheckSpecification(s)
+% 
+%     Example 7: standardize equations from predefined population model
+%       specification=dsCheckSpecification('HH');
 %
 % See also: dsGenerateModel, dsCheckModel
+% 
+% Author: Jason Sherfey, PhD <jssherfey@gmail.com>
+% Copyright (C) 2016 Jason Sherfey, Boston University, USA
 
 %% localfn output
 if ~nargin
@@ -131,9 +137,9 @@ else
 end
 
 spec=backward_compatibility(spec, varargin{:});
-pop_field_order={'name','size','equations','mechanism_list','parameters',...
+pop_field_order={'name','size','equations','mechanism_list','mechanisms','parameters',...
   'conditionals','monitors','model'};
-con_field_order={'source','target','mechanism_list','parameters'};
+con_field_order={'source','target','mechanism_list','mechanisms','parameters'};
 
 if ~isfield(spec,'populations')
   spec.populations.name='pop1';
@@ -141,6 +147,10 @@ end
 
 if ~isfield(spec,'connections')
   spec.connections=[];
+end
+
+if ~isfield(spec,'mechanisms')
+  spec.mechanisms=[];
 end
 
 % 1.0 standardize populations
@@ -160,6 +170,10 @@ if ~isfield(spec.populations,'mechanism_list')
   spec.populations(1).mechanism_list=[];
 end
 
+if ~isfield(spec.populations,'mechanisms')
+  spec.populations(1).mechanisms=[];
+end
+
 if ~isfield(spec.populations,'parameters')
   spec.populations(1).parameters={};
 end
@@ -176,11 +190,33 @@ if ~isfield(spec.populations,'model')
   spec.populations(1).model=[];
 end
 
-% special case: split equations with '[...][...]...[...]' into multiple populations
+% move compartments into populations if present
+if isfield(spec,'compartments')
+  npops=length(spec.populations);
+  fields=fieldnames(spec.compartments);
+  for i=1:length(spec.compartments)
+    for f=1:length(fields)
+      spec.populations(npops+i).(fields{f})=spec.compartments(i).(fields{f});
+    end
+  end
+  spec=rmfield(spec,'compartments');
+end
+
+% special cases of equation specification: 
 for i=1:length(spec.populations)
   eqn=spec.populations(i).equations;
   if ~isempty(eqn) && ischar(eqn)
-    if ~isempty(regexp(eqn,'\[[a-z_A-Z].*\]','match','once'))
+    % check for predefined population equations
+    if exist([eqn '.eqns'],'file')
+      eqn=[eqn '.eqns'];
+    elseif exist([eqn '.pop'],'file')
+      eqn=[eqn '.pop'];
+    end
+    if exist(eqn,'file')
+      % load equations from file
+      spec.populations(i).equations=dsReadText(eqn);
+    elseif ~isempty(regexp(eqn,'\[[a-z_A-Z].*\]','match','once'))
+      % split equations with '[...][...]...[...]' into multiple populations
       % create extra population
       tmp=regexp(eqn(2:end-1),'\],?\s*\[','split');
       spec.populations(i).equations=tmp{1};
@@ -238,39 +274,41 @@ for i=1:length(spec.populations)
       
       % store name in specification
       name=regexp(name,'^(\w+):','tokens','once');
-      spec.populations(i).name=name{1};
       spec.populations(i).equations=eqn;
+      if strcmp(spec.populations(i).name,sprintf('pop%g',i))
+        % replace default name with the name from equations
+        spec.populations(i).name=name{1};
+      end      
     end
     
     % extract size from equations if present (eg, v[4]'=.., dv[4]/dt=...)
     eqn=spec.populations(i).equations;
-    pattern='((\w+(\[\d+\])'')|(d\w+(\[\d+\])/dt))\s*='; % support size spec, dv[4]/dt
+    %pattern='((\w+(\[\d+\])'')|(d\w+(\[\d+\])/dt))\s*='; % support size spec, dv[4]/dt
+    pattern='((\w+(\[[\d,]+\])'')|(d\w+(\[[\d,]+\])/dt))\s*='; % support size spec, dv[4]/dt and dv[4,5]/dt
     
     % extract all differentials with size specification
     LHSs=regexp(eqn,pattern,'match');
     if ~isempty(LHSs)
       % extract sizes from all differentials (eg, 4 from v[4] or dv[4]/dt)
-      szs=nan(1,length(LHSs));
       for k=1:length(LHSs)
-        tmp=regexp(LHSs{k},'\w+\[(\d+)\]''','tokens','once');
+        tmp=regexp(LHSs{k},'\w+\[([\d,]+)\]''','tokens','once');
         if isempty(tmp)
-          tmp=regexp(LHSs{k},'d\w+\[(\d+)\]/dt','tokens','once');
+          tmp=regexp(LHSs{k},'d\w+\[([\d,]+)\]/dt','tokens','once');
         end
-        szs(k)=str2num(tmp{1});
-        
+        sz=cellfun(@str2double,regexp(tmp{1},',','split'));
+        % check that all vars in same population have same size
+        if k==1
+          sz_first=sz;
+        elseif sz~=sz_first
+          error('all variables in same population must have same size. split ODEs with different sizes into different populations.');
+        end        
         % remove size from ODE in population equations
         old=LHSs{k};
         new=strrep(LHSs{k},['[' tmp{1} ']'],'');
         eqn=strrep(eqn,old,new);
-      end
-      
-      % check that all vars in same population have same size
-      if ~all(szs==szs(1))
-        error('all variables in same population must have same size. split ODEs with different sizes into different populations.');
-      end
-      
+      end      
       spec.populations(i).equations=eqn;
-      spec.populations(i).size=szs(1);
+      spec.populations(i).size=sz;
     end
     
     % add mechanisms embedded in equations to mechanism_list ({M1,M2,...})
@@ -279,8 +317,6 @@ for i=1:length(spec.populations)
     % mechanism lists (eg, for cons.mechanism_list='{AMPA,NMDA}@M')
     % ----------
     % extract mechanism list from equations
-    %mech_lists=regexp(spec.populations(i).equations,'\s*{.*}\s*;?\s*','match');
-    %mech_lists=regexp(spec.populations(i).equations,'\s*(\w+:)?{.*}\s*(@\w+)?;?\s*','match');
      mech_lists=regexp(spec.populations(i).equations,'\s*(\w+:)?{[\w\d@:,]*}\s*(@\w+)?;?\s*','match');
     % test: mech_list=regexp('v''=@M+sin(2*pi*t); {iNa, iK}','{.*}','match');
     if ~isempty(mech_lists)
@@ -303,7 +339,6 @@ for i=1:length(spec.populations)
           external_link=strrep(external_link{1},';','');
           
           % get list of mechanism names in cell array
-          %words=regexp(mech_list,'[a-zA-Z]+[\w:]*','match');
           words=regexp(mech_list(2:end-1),',','split');
           
           % append external link alias to each mechanism name
@@ -341,13 +376,42 @@ for i=1:length(spec.populations)
       end
     end
     % extract population-level parameters from equations
+    param_name={};
+    param_value={};
     eqn=spec.populations(i).equations;
     p=getfield(dsParseModelEquations(eqn, varargin{:}),'parameters');
     if ~isempty(p)
-      param_name=fieldnames(p);
-      param_value=struct2cell(p);
+      param_name=cat(1,param_name,fieldnames(p));
+      param_value=cat(1,param_value,struct2cell(p));
+    end
+    % extract mechanism-specific parameters defined in master equations
+    % eg) eqn='dv/dt=@current+10; monitor iAMPA.functions; iNa.IC_noise=10; iK.g=g; g=3';
+    o=regexp(eqn,';\s*[a-zA-Z]+\w*\.[a-zA-Z]+\w*\s*=[a-z_A-Z0-9\.]+','match'); 
+      % eg) '; MECH.PARAM=VALUE', assumes param is not defined at start of equation string
+    % add mechanism-specific keys (MECH.PARAM) and vals to p
+    if ~isempty(o)
+      % remove leading semicolons
+      oo=regexprep(o,';',''); % {'MECH1.PARAM1=VAL1','MECH2.PARAM2=VAL2',..}
+      for l=1:length(oo)
+        tmp=strtrim(regexp(oo{l},'=','split')); % {'MECH1.PARAM1','VAL1'}
+        param_name{end+1}=tmp{1}; % 'MECH1.PARAM1'
+        param_value{end+1}=tmp{2}; % 'VAL1'
+        % remove from equations
+        eqn=strrep(eqn,o{l},'');
+      end
+      spec.populations(i).equations=eqn;
+    end    
+    % move user-defined parameters from equations to the parameters field
+%     if ~isempty(p)
+%       param_name=fieldnames(p);
+%       param_value=struct2cell(p);
+    if ~isempty(param_name)
       for l=1:length(param_name)
-        value=eval(param_value{l});
+        try
+          value=eval(param_value{l});
+        catch
+          error('Values of this type are not supported for parameters set in equations.');
+        end
         if isempty(spec.populations(i).parameters)
           spec.populations(i).parameters={param_name{l},value};
         elseif ~ismember(param_name{l},spec.populations(i).parameters(1:2:end))
@@ -355,9 +419,13 @@ for i=1:length(spec.populations)
           spec.populations(i).parameters{end+1}=value;
         end
       end
-    end
+    end    
+    % TODO: remove support for MECH.PARAM from dsParseModelEquations,
+    % because that returns MECH_PARAM, whereas we now support MECH.PARAM.
     
     % incorporate user-supplied parameters in pop equations if used in them
+    % note: this is necessary for proper substitution when the master
+    % equations are parsed in dsGenerateModel.
     if ~isempty(spec.populations(i).parameters)
       keys=spec.populations(i).parameters(1:2:end);
       vals=spec.populations(i).parameters(2:2:end);
@@ -376,16 +444,31 @@ for i=1:length(spec.populations)
         % set in population equations if not already defined there
         for ff=1:length(found_words)
           found_word=found_words{ff};
+          precision=8; % number of digits allowed for user-supplied values
+          found_value = toString(vals{strcmp(found_word,keys)},precision);
           
           % check if not explicitly set in population equations
           if isempty(regexp(eqn,[';\s*' found_word '\s*='],'once')) && ... % not in middle or at end
-             isempty(regexp(eqn,['^' found_word '\s*='],'once')) % not at beginning
-            
-            % explicitly set in population equations
+             isempty(regexp(eqn,['^' found_word '\s*='],'once')) % not at beginning            
+            % append and explicitly set in population equations
             if eqn(end)~=';', eqn(end+1)=';'; end % add semicolon if necessary
-            precision=8; % number of digits allowed for user-supplied values
-            found_value = toString(vals{strcmp(found_word,keys)},precision);
             eqn=[eqn sprintf(' %s=%s;',found_word,found_value)];
+          else
+            % update values in population equations
+            old=regexp(eqn,[';\s*' found_word '\s*=\s*[\w\.'']+'],'match','once'); % in middle or at end
+            if ~isempty(old)
+%               % remove semicolon for proper substitution using dsStrrep
+%               old=old(2:end);
+              % replace value in middle or at end
+              new=['; ' found_word '=' found_value];
+%               new=[' ' found_word '=' found_value];
+            else
+              % replace value at the beginning
+              old=regexp(eqn,['^' found_word '\s*=\s*[\w\.'']+'],'match','once');
+              new=[found_word '=' found_value];
+            end
+            eqn=strrep(eqn,old,new); % update value in equations
+%             eqn=dsStrrep(eqn,old,new); % update value in equations
           end
         end
         spec.populations(i).equations=eqn;
@@ -410,7 +493,11 @@ if ~isempty(spec.connections)
   if ~isfield(spec.connections,'mechanism_list')
     spec.connections(1).mechanism_list=[];
   end
-  
+
+  if ~isfield(spec.connections,'mechanisms')
+    spec.connections(1).mechanisms=[];
+  end
+
   if ~isfield(spec.connections,'parameters')
     spec.connections(1).parameters={};
   end
@@ -468,29 +555,110 @@ if isstruct(spec.connections)
   spec.connections=rmfield(spec.connections,otherfields);
   spec.connections=orderfields(spec.connections,con_field_order);
 end
+spec=orderfields(spec,{'populations','connections','mechanisms'});
 
-% 4.0 replace mechanism names by full file names
+% 4.0 standardize mechanism equations
+[~,files]=dsLocateModelFiles(spec);
+% read mechanism files
+for f=1:length(files)
+  [~,name]=fileparts(files{f}); % name of mechanism
+  if isempty(spec.mechanisms) || ~ismember(name,{spec.mechanisms.name})
+    spec.mechanisms(end+1).name=name;
+    spec.mechanisms(end).equations=read_mechanism_file(files{f});
+  end
+end
+% make sure equations are all in a single string
+for m=1:length(spec.mechanisms)
+  if iscellstr(spec.mechanisms(m).equations)
+    % make sure each line ends with a semicolon and space
+    eqn=spec.mechanisms(m).equations;
+    idx=cellfun(@isempty,regexp(eqn,';$')); % lines that need semicolons
+    eqn(idx)=cellfun(@(x)[x ';'],eqn(idx),'uni',0);
+    idx=cellfun(@isempty,regexp(eqn,'\s$')); % lines that need a space
+    eqn(idx)=cellfun(@(x)[x ' '],eqn(idx),'uni',0);
+    % concatenate lines into a single string
+    spec.mechanisms(m).equations=[eqn{:}];
+  end
+end
+
+% 4.1 replace mechanism names by full file names
 % this is necessary so that regenerated models will use the same mechanism
 % files to recreate the model (e.g., when a cluster job simulates a
 % modified version of an original base model).
-[~,files]=dsLocateModelFiles(spec);
+% also: add mech equations to pop specification, and apply global population 
+% parameters to pop-specific mechanism equations.
+
+fnames={};
 if ~isempty(files)
-  fnames={};
   for f=1:length(files)
     [~,name]=fileparts2(files{f});
     fnames{f}=name;
   end
-  
-  % update population and connection mechanism lists
-  fields={'populations','connections'};
-  for f=1:length(fields)
-    object=fields{f};
-    for i=1:length(spec.(object))
-      for j=1:length(spec.(object)(i).mechanism_list)
-        mech=spec.(object)(i).mechanism_list{j};
-        if ismember(mech,fnames)
-          spec.(object)(i).mechanism_list{j}=files{find(ismember(fnames,mech),1,'first')};
+end
+if ~isempty(spec.mechanisms)
+  mnames={spec.mechanisms.name};
+else
+  mnames={};
+end
+fields={'populations','connections'};
+% update population and connection mechanism lists
+for f=1:length(fields)
+  object=fields{f};
+  for i=1:length(spec.(object))
+    for j=1:length(spec.(object)(i).mechanism_list)
+      mech=spec.(object)(i).mechanism_list{j};
+      if ismember(mech,fnames)
+        % replace mechanism names by full file names
+        % this is necessary so that regenerated models will use the same mechanism
+        % files to recreate the model (e.g., when a cluster job simulates a
+        % modified version of an original base model).
+        index=find(ismember(fnames,mech),1,'first');
+        spec.(object)(i).mechanism_list{j}=files{index};
+      end
+      if ismember('@',mech) % remove linker alias
+        mech=regexp(mech,'@','split');
+        mech=mech{1};
+      end
+      if isfield(spec.(object),'mechanisms') && ~isempty(spec.(object)(i).mechanisms) && ismember(mech,{spec.(object)(i).mechanisms.name})
+        % mechanism already defined for this population, nothing else to do
+        continue;
+      end
+      if ismember(mech,mnames)
+        % store mechanism equations in object-level specification
+        index=find(ismember(mnames,mech),1,'first');
+        if isempty(spec.(object)(i).mechanisms)
+          spec.(object)(i).mechanisms=spec.mechanisms(index);
+        elseif ~ismember(mech,{spec.(object)(i).mechanisms.name})
+          % store if mechanism is not already defined at population-level
+          spec.(object)(i).mechanisms(j)=spec.mechanisms(index);
         end
+        % apply global population parameters to pop-specific mechanism equations
+        if ~isempty(spec.(object)(i).parameters)
+          % approach: set key=val for all keys in eqns
+          eqns=spec.(object)(i).mechanisms(j).equations;
+          keys=spec.(object)(i).parameters(1:2:end);
+          vals=spec.(object)(i).parameters(2:2:end);
+          % get list of parameters/variables/functions in population equations
+          words=unique(regexp(eqns,'[a-zA-Z]+\w*','match'));
+          % find words in user-supplied parameters (keys)
+          found_words=words(ismember(words,keys));
+          if ~isempty(found_words)
+            for ff=1:length(found_words)
+              found_word=found_words{ff};
+              % new parameter assignment
+              precision=8; % number of digits allowed for user-supplied values
+              found_value=toString(vals{strcmp(found_word,keys)},precision);
+              rep=sprintf(' %s=%s;',found_word,found_value);
+              % replace old parameter assignment in the middle of equations
+              pat=['([^\w]{1})' found_word '\s*=\s*\w+;']; % find in the middle
+              eqns=regexprep(eqns,pat,['$1' rep]);
+              % replace old parameter assignment at the beginning of equations
+              pat=['^' found_word '\s*=\s*\w+;']; % find at the beginning
+              eqns=regexprep(eqns,pat,rep);
+            end
+          end
+          spec.(object)(i).mechanisms(j).equations=eqns;
+        end        
       end
     end
   end
@@ -507,162 +675,176 @@ end % main fn
 
 
 %% local fns
-function list = expand_list(list, varargin)
-%% auto_gen_test_data_flag argin
-options = dsCheckOptions(varargin,{'auto_gen_test_data_flag',0,{0,1}},false);
-if options.auto_gen_test_data_flag
-  varargs = varargin;
-  varargs{find(strcmp(varargs, 'auto_gen_test_data_flag'))+1} = 0;
-  varargs(end+1:end+2) = {'unit_test_flag',1};
-  argin = [{list}, varargs];
-end
-
-% expand mechanism list if any element is itself a list of mechanisms (eg, {'AMPA','{GABAa,GABAb}'} or '{GABAa,GABAb}')
-if isempty(list)
-  return;
-end
-
-if any(~cellfun(@isempty,regexp(list,'[{,}]+')))
-  mechs={};
-  for k=1:length(list)
-    tmp=regexp(list{k},'\w+','match');
-    mechs=cat(2,mechs,tmp{:});
+function txt=read_mechanism_file(file)
+  fid=fopen(file,'rt');
+  % read all text
+  txt=textscan(fid,'%s','Delimiter','\n');
+  if ~isempty(txt)
+    % remove empty lines
+    txt=txt{1}(~cellfun(@isempty,txt{1}));
+    % remove comments
+    txt=txt(~cellfun(@isempty,regexp(txt,'^[^#%]')));
+    txt=regexp(txt,'^[^%#]*','match');
+    txt=[txt{:}];
+    % remove leading/trailing white space
+    txt=strtrim(txt);
+    % make sure each line ends with a semicolon and space
+    idx=cellfun(@isempty,regexp(txt,';$')); % lines that need semicolons
+    txt(idx)=cellfun(@(x)[x ';'],txt(idx),'uni',0);
+    idx=cellfun(@isempty,regexp(txt,'\s$')); % lines that need a space
+    txt(idx)=cellfun(@(x)[x ' '],txt(idx),'uni',0);
+    % concatenate lines into a single string
+    txt=[txt{:}];
   end
-  list=mechs;
+  % close text file
+  fclose(fid);
 end
 
-%% auto_gen_test_data_flag argout
-if options.auto_gen_test_data_flag
-  argout = {list};
-  
-  dsUnitSaveAutoGenTestDataLocalFn(argin, argout); % localfn
-end
+function list = expand_list(list, varargin)
+  %% auto_gen_test_data_flag argin
+  options = dsCheckOptions(varargin,{'auto_gen_test_data_flag',0,{0,1}},false);
+  if options.auto_gen_test_data_flag
+    varargs = varargin;
+    varargs{find(strcmp(varargs, 'auto_gen_test_data_flag'))+1} = 0;
+    varargs(end+1:end+2) = {'unit_test_flag',1};
+    argin = [{list}, varargs];
+  end
+
+  % expand mechanism list if any element is itself a list of mechanisms (eg, {'AMPA','{GABAa,GABAb}'} or '{GABAa,GABAb}')
+  if isempty(list)
+    return;
+  end
+
+  if any(~cellfun(@isempty,regexp(list,'[{,}]+')))
+    mechs={};
+    for k=1:length(list)
+      tmp=regexp(list{k},'\w+','match');
+      mechs=cat(2,mechs,tmp{:});
+    end
+    list=mechs;
+  end
+
+  %% auto_gen_test_data_flag argout
+  if options.auto_gen_test_data_flag
+    argout = {list};
+
+    dsUnitSaveAutoGenTestDataLocalFn(argin, argout); % localfn
+  end
 
 end
 
 
 function spec = backward_compatibility(spec, varargin)
-% purpose: change name of fields from old to new convention
-% rename "nodes" or "entities" to "populations"
+  % purpose: change name of fields from old to new convention
+  % rename "nodes" or "entities" to "populations"
 
-%% auto_gen_test_data_flag argin
-options = dsCheckOptions(varargin,{'auto_gen_test_data_flag',0,{0,1}},false);
-if options.auto_gen_test_data_flag
-  varargs = varargin;
-  varargs{find(strcmp(varargs, 'auto_gen_test_data_flag'))+1} = 0;
-  varargs(end+1:end+2) = {'unit_test_flag',1};
-  argin = [{spec}, varargs];
-end
+  %% auto_gen_test_data_flag argin
+  options = dsCheckOptions(varargin,{'auto_gen_test_data_flag',0,{0,1}},false);
+  if options.auto_gen_test_data_flag
+    varargs = varargin;
+    varargs{find(strcmp(varargs, 'auto_gen_test_data_flag'))+1} = 0;
+    varargs(end+1:end+2) = {'unit_test_flag',1};
+    argin = [{spec}, varargs];
+  end
 
-if isfield(spec,'nodes')
-  spec.populations=spec.nodes;
-  spec=rmfield(spec,'nodes');
-end
+  if isfield(spec,'nodes')
+    spec.populations=spec.nodes;
+    spec=rmfield(spec,'nodes');
+  end
 
-if isfield(spec,'cells')
-  spec.populations=spec.cells;
-  spec=rmfield(spec,'cells');
-end
+  if isfield(spec,'cells')
+    spec.populations=spec.cells;
+    spec=rmfield(spec,'cells');
+  end
 
-if isfield(spec,'entities')
-  spec.populations=spec.entities;
-  spec=rmfield(spec,'entities');
-end
+  if isfield(spec,'entities')
+    spec.populations=spec.entities;
+    spec=rmfield(spec,'entities');
+  end
 
-if isfield(spec,'pops')
-  spec.populations=spec.pops;
-  spec=rmfield(spec,'pops');
-end
+  if isfield(spec,'pops')
+    spec.populations=spec.pops;
+    spec=rmfield(spec,'pops');
+  end
 
-if isfield(spec,'cons')
-  spec.connections=spec.cons;
-  spec=rmfield(spec,'cons');
-end
+  if isfield(spec,'cons')
+    spec.connections=spec.cons;
+    spec=rmfield(spec,'cons');
+  end
+  if isfield(spec,'links')
+    spec.connections=spec.links;
+    spec=rmfield(spec,'links');
+  end
+  if isfield(spec,'edges')
+    spec.connections=spec.edges;
+    spec=rmfield(spec,'edges');
+  end
 
-if isfield(spec,'populations')
-  % rename population "label" to "name"
-  if isfield(spec.populations,'label')
-    for i=1:length(spec.populations)
-      spec.populations(i).name=spec.populations(i).label;
-    end
-    spec.populations=rmfield(spec.populations,'label');
+  if isfield(spec,'edges')
+    spec.connections=spec.edges;
+    spec=rmfield(spec,'edges');
   end
   
-  % rename population "multiplicity" to "size"
-  if isfield(spec.populations,'multiplicity')
-    for i=1:length(spec.populations)
-      spec.populations(i).size=spec.populations(i).multiplicity;
-    end
-    spec.populations=rmfield(spec.populations,'multiplicity');
+  if isfield(spec,'links')
+    spec.connections=spec.links;
+    spec=rmfield(spec,'links');
   end
   
-  % rename population "dynamics" to "equations"
-  if isfield(spec.populations,'dynamics')
-    for i=1:length(spec.populations)
-      spec.populations(i).equations=spec.populations(i).dynamics;
-    end
-    spec.populations=rmfield(spec.populations,'dynamics');
+  if isfield(spec,'comps')
+    spec.compartments=spec.comps;
+    spec=rmfield(spec,'comps');
   end
   
-  % rename population "mechanisms" to "mechanism_list"
-  if isfield(spec.populations,'mechanisms')
-    for i=1:length(spec.populations)
-      spec.populations(i).mechanism_list=spec.populations(i).mechanisms;
+  if isfield(spec,'populations')
+    % rename population "label" to "name"
+    if isfield(spec.populations,'label')
+      for i=1:length(spec.populations)
+        spec.populations(i).name=spec.populations(i).label;
+      end
+      spec.populations=rmfield(spec.populations,'label');
     end
-    spec.populations=rmfield(spec.populations,'mechanisms');
-  end
-end
 
-% check for old (pre,post) organization of connections substructure
-if isfield(spec,'connections') && size(spec.connections,1)>1
-  % convert to linear connections structure array
-  old=spec.connections;
-  spec=rmfield(spec,'connections');
-  index=1;
-  for i=1:size(old,1)
-    for j=1:size(old,2)
-      if ~isempty(old(i,j).mechanisms)
-        spec.connections(index).source=spec.populations(i).name;
-        spec.connections(index).target=spec.populations(j).name;
-        
-        if isfield(old,'mechanisms')
-          spec.connections(index).mechanism_list=old(i,j).mechanisms;
-        elseif isfield(old,'mechanism_list')
-          spec.connections(index).mechanism_list=old(i,j).mechanism_list;
+    % rename population "multiplicity" to "size"
+    if isfield(spec.populations,'multiplicity')
+      for i=1:length(spec.populations)
+        spec.populations(i).size=spec.populations(i).multiplicity;
+      end
+      spec.populations=rmfield(spec.populations,'multiplicity');
+    end
+
+    % rename population "dynamics" to "equations"
+    if isfield(spec.populations,'dynamics')
+      for i=1:length(spec.populations)
+        spec.populations(i).equations=spec.populations(i).dynamics;
+      end
+      spec.populations=rmfield(spec.populations,'dynamics');
+    end
+
+  end
+
+  if isfield(spec,'connections') && isfield(spec.connections,'direction')
+    for i=1:length(spec.connections)
+      if ischar(spec.connections(i).direction)
+        str=spec.connections(i).direction;
+        if any(regexp(str,'->','once'))
+          pops=regexp(str,'->','split');
+          spec.connections(i).source=pops{1};
+          spec.connections(i).target=pops{2};
+        elseif any(regexp(str,'<-','once'))
+          pops=regexp(str,'<-','split');
+          spec.connections(i).source=pops{2};
+          spec.connections(i).target=pops{1};
         end
-        
-        if isfield(old,'parameters')
-          spec.connections(index).parameters=old(i,j).parameters;
-        end
-        index=index+1;
       end
     end
+    spec.connections=rmfield(spec.connections,'direction');
   end
-end
 
-if isfield(spec,'connections') && isfield(spec.connections,'direction')
-  for i=1:length(spec.connections)
-    if ischar(spec.connections(i).direction)
-      str=spec.connections(i).direction;
-      if any(regexp(str,'->','once'))
-        pops=regexp(str,'->','split');
-        spec.connections(i).source=pops{1};
-        spec.connections(i).target=pops{2};
-      elseif any(regexp(str,'<-','once'))
-        pops=regexp(str,'<-','split');
-        spec.connections(i).source=pops{2};
-        spec.connections(i).target=pops{1};
-      end
-    end
+  %% auto_gen_test_data_flag argout
+  if options.auto_gen_test_data_flag
+    argout = {spec};
+
+    dsUnitSaveAutoGenTestDataLocalFn(argin, argout); % localfn
   end
-  spec.connections=rmfield(spec.connections,'direction');
-end
-
-%% auto_gen_test_data_flag argout
-if options.auto_gen_test_data_flag
-  argout = {spec};
-  
-  dsUnitSaveAutoGenTestDataLocalFn(argin, argout); % localfn
-end
 
 end

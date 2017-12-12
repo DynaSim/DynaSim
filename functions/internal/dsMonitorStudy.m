@@ -17,6 +17,9 @@ function [studyinfo,study_status] = dsMonitorStudy(studyinfo,varargin)
 %       -1 (function failed)
 %
 % See also: dsSimulate, dsCreateBatch, dsCheckStudyinfo
+% 
+% Author: Jason Sherfey, PhD <jssherfey@gmail.com>
+% Copyright (C) 2016 Jason Sherfey, Boston University, USA
 
 % Check inputs
 options=dsCheckOptions(varargin,{...

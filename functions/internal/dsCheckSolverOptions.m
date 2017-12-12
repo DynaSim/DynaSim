@@ -3,6 +3,9 @@ function options = dsCheckSolverOptions(options)
 %
 % Use this to achieve consistent params.mat whether created by dsSimulate(),
 % dsWriteDynaSimSolver(), or dsWriteMatlabSolver().
+% 
+% Author: Jason Sherfey, PhD <jssherfey@gmail.com>
+% Copyright (C) 2016 Jason Sherfey, Boston University, USA
 
 % standardize and set defaults
 keyvals = dsOptions2Keyval(options);
@@ -27,8 +30,8 @@ if options.compile_flag==1
   % todo: make seed string (eg, 'shuffle') from param struct work with coder (options.compile_flag=1)
   % (currently raises error: "String input must be constant")
   % workaround: (shuffle here and get numeric seed for MEX-compatible params.mat)
-  rng(options.random_seed);
-  options.random_seed=getfield(rng,'Seed');
+  rng_wrapper(options.random_seed);
+  options.random_seed=getfield(rng_wrapper,'Seed');
 end
 
 % standardize field order

@@ -218,7 +218,19 @@ function labels = get_axis_labels(obj,ax_vals)
     labels_curr = labels_curr(ind_remove);
     labels = {labels_orig{:} labels_curr{:}};
     
+    % Make sure 'time' is not the first entry (sometimes this can happen if
+    % all the labels before "time" get stripped away) by the above
+    % operations. Having "time" come first causes errors in certain DynaSim
+    % functions, which use the 1st label to get the variable name, so best
+    % to avoid this.
+    if strcmp(labels{1},'time')
+        labels = circshift(labels,-1);       % Move to back
+    end
+    
     labels = labels(:)';
+    
+    
+    
 end
 
 

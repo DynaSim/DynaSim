@@ -9,6 +9,9 @@ function model = dsCombineModels(model1,model2, varargin)
 % Output: DynaSim model with fields combined from both models
 %
 % See also: dsCheckModel, dsGenerateModel
+% 
+% Author: Jason Sherfey, PhD <jssherfey@gmail.com>
+% Copyright (C) 2016 Jason Sherfey, Boston University, USA
 
 %% auto_gen_test_data_flag argin
 options = dsCheckOptions(varargin,{'auto_gen_test_data_flag',0,{0,1}},false);

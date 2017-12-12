@@ -62,7 +62,7 @@ dsPlot2(data,'population','I','plot_type','heatmap_sortedFR')          % Firing 
 close all
 
 % The number of subplots packed into a single figure can be substantially
-% increased by recurisve subplotting. This is controlled with the
+% increased by recursive subplotting. This is controlled with the
 % "num_embedded_subplots" flag, which can range from 1-4.
 
 % Plot membrane voltage for E and I cells across the parameter sweep

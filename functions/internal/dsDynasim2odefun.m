@@ -34,7 +34,10 @@ function [ODEFUN,IC,elem_names] = dsDynasim2odefun(model, varargin)
 % vectors have cells along columns. Therefore, for DynaSim models to be
 % compatible with built-in solvers, all state vectors must be transposed in
 % ODEFUN. This slows down simulation but cannot be avoided easily.
- 
+% 
+% Author: Jason Sherfey, PhD <jssherfey@gmail.com>
+% Copyright (C) 2016 Jason Sherfey, Boston University, USA
+
 % Approach:
 % 1. evaluate params -> fixed_vars -> funcs
 % 2. evaluate ICs to get (# elems) per state var
@@ -54,24 +57,24 @@ if options.auto_gen_test_data_flag
   argin = [{model}, varargs]; % specific to this function
 end
 
-% % evaluate params -> fixed_vars -> funcs
-% types={'parameters','fixed_variables','functions'};
-% for p=1:length(types)
-%   type=types{p};
-%   if ~isempty(model.(type))
-%     fields=fieldnames(model.(type));
-%     for i=1:length(fields)
-%       val=model.(type).(fields{i});
-%       if ~ischar(val)
-%         val=toString(val,'compact');
-%       end
-%       % evaluate
-%       eval(sprintf('%s = %s;',fields{i},val));
-% %       evalin('caller',sprintf('%s = %s;',fields{i},val));
-% %       assignin('caller',fields{i},val);
-%     end
-%   end
-% end
+% evaluate params -> fixed_vars -> funcs
+types={'parameters','fixed_variables','functions'};
+for p=1:length(types)
+  type=types{p};
+  if ~isempty(model.(type))
+    fields=fieldnames(model.(type));
+    for i=1:length(fields)
+      val=model.(type).(fields{i});
+      if ~ischar(val)
+        val=toString(val,'compact');
+      end
+      % evaluate
+      eval(sprintf('%s = %s;',fields{i},val));
+%       evalin('caller',sprintf('%s = %s;',fields{i},val));
+%       assignin('caller',fields{i},val);
+    end
+  end
+end
 
 % evaluate ICs to get (# elems) per state var and set up generic state var X
 num_vars=length(model.state_variables);

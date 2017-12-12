@@ -145,6 +145,9 @@ function handles = dsPlot(data,varargin)
 %       dsPlot(data,'variable','*');
 %
 % See also: dsCalcFR, dsCalcPower, dsPlotWaveforms, dsCheckData
+% 
+% Author: Jason Sherfey, PhD <jssherfey@gmail.com>
+% Copyright (C) 2016 Jason Sherfey, Boston University, USA
 
 % Check inputs
 data=dsCheckData(data, varargin{:});
@@ -205,16 +208,18 @@ if any(strcmp(fields, 'varied'))
   [effective_vary_indices, ~] = dsCheckCovary(vary_lengths, vary_params, varargin{:});
 
   if prod(vary_lengths(effective_vary_indices)) == length(data)
-      
+
       dimensions_varied = sum(effective_vary_indices);
       vary_params = vary_params(:, effective_vary_indices);
       vary_vectors = vary_vectors(effective_vary_indices);
       vary_lengths = vary_lengths(effective_vary_indices);
-      
+
   else
-     
+
       warning('unable to determine which parameters are covaried. Data will be plotted as a lattice.')
-      
+
+      dimensions_varied = 1;
+
   end
 
   if dimensions_varied > 2
@@ -230,7 +235,7 @@ if any(strcmp(fields, 'varied'))
       for v = 4:dimensions_varied
         figure_params(v - 2) = vary_vectors{v}(ceil(f/vary_lengths_cp(v - 3)));
       end
-      
+
       figure_data_index = ones(size(vary_params, 1), 1);
       for v = 3:dimensions_varied
         figure_data_index = figure_data_index & vary_params(:, v) == figure_params(v - 2);
@@ -241,7 +246,7 @@ if any(strcmp(fields, 'varied'))
       for v = 1:(dimensions_varied - 2)
         vary_title = [vary_title, sprintf('%s = %f ', vary_labels{v + 2}, figure_params(v))];
       end
-      
+
       handles = dsPlot(data(figure_data_index), varargin{:});
       for h = 1:length(handles)
         % figure(handles(h))
@@ -315,7 +320,30 @@ switch options.plot_type
     end
   case {'rastergram','raster'} % raster VARIABLE_spike_times
     if any(cellfun(@isempty,regexp(var_fields,'.*_spike_times$')))
-      data=dsCalcFR(data,varargin{:});
+      spike_fields=cellfun(@(x)[x '_spikes'],var_fields,'uni',0);
+      idx=cellfun(@(x)isfield(data,x),spike_fields);
+      if any(idx)
+        % get spike times from binary spike matrix
+        inds=find(idx);
+        for s=1:length(data) % sims
+          for i=1:length(inds) % pops
+            spike_fld=[var_fields{inds(i)} '_spikes'];
+            spike_time_fld=[var_fields{inds(i)} '_spike_times'];
+            for j=1:size(data(s).(spike_fld),2) % cells
+              data(s).(spike_time_fld){j}=data(s).time((1==data(s).(spike_fld)(:,j)));
+            end % cells
+          end % pops
+        end % sims
+%       rmfields=cellfun(@(x)[x '_spikes'],var_fields,'uni',0);
+%       idx=cellfun(@(x)isfield(data,x),rmfields);
+%       if any(idx)
+%          data=rmfield(data,rmfields);
+%          data.labels=setdiff(data.labels,rmfields,'stable');
+%       end
+      else
+        % find spikes from threshold crossing
+        data=dsCalcFR(data,varargin{:});
+      end
     end
     xdata=time;
     xlab='time (ms)'; % x-axis label
@@ -529,6 +557,13 @@ for figset=1:num_fig_sets
             case 'waveform'
               % calculate averages across populations
               dat=nan(num_times,num_pops);
+              if ~strcmp(reportUI,'matlab') && exist('nanmean') ~= 2 % 'nanmean is not in Octave's path
+                try
+                  pkg load statistics; % trying to load octave forge 'statistics' package before using nanmean function
+                catch
+                  error('nanmean function is needed, please install the statistics package from Octave Forge');
+                end
+              end
               for k=1:num_pops
                 dat(:,k)=nanmean(data(sim_index).(var_fields{k}),2);
               end
@@ -537,6 +572,13 @@ for figset=1:num_fig_sets
               dat=nan(length(xdata),num_pops);
               AuxData=nan(length(xdata),num_pops);
               AuxDataName={}; vlines=[];
+              if ~strcmp(reportUI,'matlab') && exist('nanmean') ~= 2 % 'nanmean is not in Octave's path
+                try
+                  pkg load statistics; % trying to load octave forge 'statistics' package before using nanmean function
+                catch
+                  error('nanmean function is needed, please install the statistics package from Octave Forge');
+                end
+              end
               for k=1:num_pops
                 dat(:,k)=nanmean(data(sim_index).([var_fields{k} '_Power_SUA']).Pxx,2);
                 AuxData(:,k)=data(sim_index).([var_fields{k} '_Power_MUA']).Pxx;
@@ -622,6 +664,13 @@ for figset=1:num_fig_sets
             case 'waveform'
               % calculate averages across populations
               dat=nan(num_times,num_pops);
+              if ~strcmp(reportUI,'matlab') && exist('nanmean') ~= 2 % 'nanmean is not in Octave's path
+                try
+                  pkg load statistics; % trying to load octave forge 'statistics' package before using nanmean function
+                catch
+                  error('nanmean function is needed, please install the statistics package from Octave Forge');
+                end
+              end
               for k=1:num_pops
                 dat(:,k)=nanmean(data(sim_index).(var_fields{k}),2);
               end
@@ -630,6 +679,13 @@ for figset=1:num_fig_sets
               dat=nan(length(xdata),num_pops);
               AuxData=nan(length(xdata),num_pops);
               AuxDataName={}; vlines=[];
+              if ~strcmp(reportUI,'matlab') && exist('nanmean') ~= 2 % 'nanmean is not in Octave's path
+                try
+                  pkg load statistics; % trying to load octave forge 'statistics' package before using nanmean function
+                catch
+                  error('nanmean function is needed, please install the statistics package from Octave Forge');
+                end
+              end
               for k=1:num_pops
                 dat(:,k)=nanmean(data(sim_index).([var_fields{k} '_Power_SUA']).Pxx,2);
                 AuxData(:,k)=data(sim_index).([var_fields{k} '_Power_MUA']).Pxx;
@@ -655,6 +711,13 @@ for figset=1:num_fig_sets
             case 'waveform'
               % calculate averages across populations
               dat=nan(num_times,num_pops);
+              if ~strcmp(reportUI,'matlab') && exist('nanmean') ~= 2 % 'nanmean is not in Octave's path
+                try
+                  pkg load statistics; % trying to load octave forge 'statistics' package before using nanmean function
+                catch
+                  error('nanmean function is needed, please install the statistics package from Octave Forge');
+                end
+              end
               for k=1:num_pops
                 if isnan(pop_var_indices{k}(figset))
                   continue;
@@ -667,6 +730,13 @@ for figset=1:num_fig_sets
               dat=nan(length(xdata),num_pops);
               AuxData=nan(length(xdata),num_pops);
               AuxDataName={}; vlines=[];
+              if ~strcmp(reportUI,'matlab') && exist('nanmean') ~= 2 % 'nanmean is not in Octave's path
+                try
+                  pkg load statistics; % trying to load octave forge 'statistics' package before using nanmean function
+                catch
+                  error('nanmean function is needed, please install the statistics package from Octave Forge');
+                end
+              end
               for k=1:num_pops
                 if isnan(pop_var_indices{k}(figset))
                   continue;
@@ -801,7 +871,9 @@ for figset=1:num_fig_sets
           %set(haxes(row),'YTickLabel','');
         end
         xlim(options.xlim);
-        ylabel(strrep(var,'_','\_'));
+        if ~strcmp(options.plot_type,'rastergram')
+          ylabel(strrep(var,'_','\_'));
+        end
         if ~isempty(options.ylim)
           ylims=options.ylim;
         elseif shared_ylims_flag
@@ -873,7 +945,9 @@ for figset=1:num_fig_sets
     end
 
     %link x axes
-    linkaxes(haxes, 'x')
+    if numel(haxes) > 1
+      linkaxes(haxes, 'x')
+    end
 
   end % end loop over figures in this set
 end % end loop over figure sets

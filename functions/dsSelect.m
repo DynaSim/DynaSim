@@ -44,6 +44,9 @@ function data = dsSelect(data,varargin)
 %     {'E','gNa',[.1 .3]; 'I->E','tauI',[15 25]; 'I','mechanism_list','+iM'}
 %
 % See also: dsSimulate, dsVary2Modifications, dsImport
+% 
+% Author: Jason Sherfey, PhD <jssherfey@gmail.com>
+% Copyright (C) 2016 Jason Sherfey, Boston University, USA
 
 % check inputs
 data=dsCheckData(data, varargin{:});

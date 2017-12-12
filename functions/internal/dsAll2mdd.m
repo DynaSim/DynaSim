@@ -1,5 +1,9 @@
 function [xp,is_image] = dsAll2mdd(data,varargin)
 
+if isempty(data)
+  error('Input data is empty');
+end
+
 if ~isfield(data,'plot_files')      % Standard DynaSim data structure
 
     % Check inputs

@@ -17,14 +17,14 @@ minf(X) = 1./(1+exp((-X-KDR_V1)/KDR_d1))  	% [Traub, 2003]
 mtau(X) = .25+4.35*exp(-abs(X+KDR_V2)/KDR_d2) % [Traub, 2003]
 aM(X) = minf(X) ./ mtau(X)
 bM(X) = (1-minf(X))./mtau(X)
-IKDR(X,m) = gKDR.*m.^4.*(X-E_KDR)
+IKDR(X,m) = -gKDR.*m.^4.*(X-E_KDR)
 
 % ODEs
 mKDR' = aM(X).*(1-mKDR)-bM(X).*mKDR
 mKDR(0)=IC+IC_noise.*rand(Npop,1)
 
 % Interface
-@current += -IKDR(X,mKDR)
+@current += IKDR(X,mKDR)
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % References: 

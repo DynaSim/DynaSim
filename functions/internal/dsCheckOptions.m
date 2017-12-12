@@ -24,6 +24,9 @@ function [parms, params_unspecified ] = dsCheckOptions(options, options_schema, 
 %   - options: structure with options (using default values if not supplied)
 %
 % See also: dsOptions2Keyval, dsCheckSpecification, dsCheckModel, dsCheckData
+% 
+% Author: Jason Sherfey, PhD <jssherfey@gmail.com>
+% Copyright (C) 2016 Jason Sherfey, Boston University, USA
 
 
 % Convert cell argument to struct if contains struct (Leave as is if already a struct)
