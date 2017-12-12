@@ -53,8 +53,9 @@ for f=1:length(files)
         [~,fname] = fileparts(files{f});
         if ~isempty(dir(fullfile(mexPath,[fname '_mex*'])))
             copyfile(fullfile(mexPath,[fname '_mex*']),solvePath);
+            
             if verbose_flag
-                fprintf(['Copying mex file from ' fullfile(mexPath,[fname '_mex*']) ' to ' solvePath]);
+                fprintf('Copying mex file from %s to %s \n', fullfile(mexPath,[fname '_mex*']), solvePath);
             end
         end
     end
