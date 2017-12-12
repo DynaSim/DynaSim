@@ -158,8 +158,6 @@ for fInd = 1:nFunc % loop over function inputs
     result = [];
   end
 
-
-
   % calc nResults
   if ~isempty(result)
     nResults = length(result);
@@ -175,9 +173,9 @@ for fInd = 1:nFunc % loop over function inputs
   % example, dsPlot2 returns a nested structure of figure, axis, and plot
   % handles. This command updates it.
   if isstruct(result)
-      if isfield(result,'hcurr')
-          result = result.hcurr;
-      end
+    if isfield(result,'hcurr')
+      result = result.hcurr;
+    end
   end
 
   % determine if result is a plot handle or derived data
@@ -205,6 +203,7 @@ for fInd = 1:nFunc % loop over function inputs
 
             %skip if no data
             if isempty(data)
+              fprintf('Skipping simID=%i since no data.\n', simID);
               continue
             end
 
@@ -238,6 +237,12 @@ for fInd = 1:nFunc % loop over function inputs
         % Data needed for plotting:
         %   - thisResult
         %   - fPath
+        
+        %skip if no data
+        if isempty(thisResult)
+          fprintf('Skipping simID=%i since no result.\n', simID);
+          continue
+        end
 
         set(thisResult, 'PaperPositionMode','auto');
         fprintf('\t\tSaving plot: %s\n',fname);
@@ -521,29 +526,35 @@ if strcmp(reportUI,'matlab')
   p = gcp('nocreate');
 end
 
-if isempty(options.function_options)
-  if options.parallel_flag && ~isempty(p)       % Only do parfor mode if parallel_flag is set and parpool is already running. Otherwise, this will add unncessary overhead.
-    parfor dInd = 1:length(data)
-      result(dInd) = feval(func,data(dInd),varargin{:});
+try
+  if isempty(options.function_options)
+    if options.parallel_flag && ~isempty(p)       % Only do parfor mode if parallel_flag is set and parpool is already running. Otherwise, this will add unncessary overhead.
+      parfor dInd = 1:length(data)
+        result(dInd) = feval(func,data(dInd),varargin{:});
+      end
+    else
+      for dInd = 1:length(data)
+        result(dInd) = feval(func,data(dInd),varargin{:});
+      end
     end
   else
-    for dInd = 1:length(data)
-      result(dInd) = feval(func,data(dInd),varargin{:});
+    function_options = options.function_options{fInd};
+    
+    if options.parallel_flag && ~isempty(p)
+      parfor dInd = 1:length(data)
+        result(dInd) = feval(func,data(dInd),function_options{:});
+      end
+    else
+      for dInd = 1:length(data)
+        result(dInd) = feval(func,data(dInd),function_options{:});
+      end
     end
   end
-else
-  function_options = options.function_options{fInd};
-
-  if options.parallel_flag && ~isempty(p)
-    parfor dInd = 1:length(data)
-      result(dInd) = feval(func,data(dInd),function_options{:});
-    end
-  else
-    for dInd = 1:length(data)
-      result(dInd) = feval(func,data(dInd),function_options{:});
-    end
-  end
+catch err
+  warning(err.message);
+  result = [];
 end
+
 end
 
 
