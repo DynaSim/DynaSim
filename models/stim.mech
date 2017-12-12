@@ -1,0 +1,7 @@
+% Istim(t): tonic stimulus
+stim_amp=10
+onset=0 	% onset [ms] of stimulation
+offset=inf	% offset [ms] of stimulation
+Istim(t) = stim_amp*(t>=onset & t<offset)
+@current += Istim(t)
+

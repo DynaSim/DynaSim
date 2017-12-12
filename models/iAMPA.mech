@@ -11,7 +11,7 @@ IC_noise = [0]
 netcon = ones(N_pre,N_post)
 
 % functions
-ISYN(X,s) = (gSYN.*(s*netcon).*(X-ESYN))
+ISYN(X,s) = -gSYN.*(s*netcon).*(X-ESYN)
  
 % ODEs and ICs
 s' = -s./tauD + ((1-s)/tauR).*(1+tanh(X_pre/10))
@@ -20,5 +20,5 @@ s(0) = IC+IC_noise.*rand(1,N_pre)
 monitor functions % always record the synaptic current
  
 % linkers
-@current += -ISYN(X_post,s)
+@current += ISYN(X_post,s)
  

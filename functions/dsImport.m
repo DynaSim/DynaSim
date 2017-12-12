@@ -4,7 +4,7 @@ function [data,studyinfo] = dsImport(file,varargin)
 % Usage:
 %   [data,studyinfo] = dsImport(data_file)
 %   [data,studyinfo] = dsImport(studyinfo)
-%   data = ImportData(data_file)
+%   data = dsImport(data_file)
 %
 % Inputs:
 %   - First input/argument:
@@ -61,6 +61,9 @@ function [data,studyinfo] = dsImport(file,varargin)
 % - achieve by calling function dsSelect() at end of this function.
 
 % See also: dsSimulate, dsExportData, dsCheckData, dsSelect
+% 
+% Author: Jason Sherfey, PhD <jssherfey@gmail.com>
+% Copyright (C) 2016 Jason Sherfey, Boston University, USA
 
 
 % Check inputs
@@ -142,11 +145,12 @@ if isstruct(file) && isfield(file,'study_dir')
     fprintf('loading file %g/%g: %s\n',i,num_files,data_files{i});
     tmp_data=dsImport(data_files{i},keyvals{:});
     num_sets_per_file=length(tmp_data);
-    if ~isfield(tmp_data,'varied')
+    modifications=sim_info(i).modifications;
+    
+    if ~isfield(tmp_data,'varied') && ~isempty(modifications)
     % add varied info
       % this is necessary here when loading .csv data lacking metadata
       tmp_data.varied={};
-      modifications=sim_info(i).modifications;
       modifications(:,1:2) = cellfun( @(x) strrep(x,'->','_'),modifications(:,1:2),'UniformOutput',0);
 
       for j=1:size(modifications,1)

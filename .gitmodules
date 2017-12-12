@@ -1,10 +1,9 @@
 [submodule "dependencies/gimbl-vis"]
 	path = dependencies/gimbl-vis
 	url = https://github.com/erik-roberts/GIMBL-Vis
-
-[submodule "dependencies/MDD"]
-	path = dependencies/MDD_SM
-	url = https://github.com/davestanley/MultiDimensionalDictionary.git
 [submodule "functions/internal/unit-test"]
 	path = functions/internal/unit-test
 	url = https://github.com/DynaSim/unit-test.git
+[submodule "functions/dependencies/MultiDimensionalDictionary"]
+	path = functions/dependencies/MDD_SM
+	url = https://github.com/davestanley/MultiDimensionalDictionary

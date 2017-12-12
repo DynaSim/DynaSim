@@ -1,0 +1,13 @@
+% Nonspecific passive leak current
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Parameters
+gpas = .0333 	% mS/cm2, maximal conductance
+epas = -70 	% mV, passive reversal potential
+% Note: passive taum=Cm*Rm=Cm/gpas. cell resonates at 1/taum. RMP~epas.
+
+% Functions
+Ileak(X)=gpas.*(X-epas)
+
+% Linkers
+@current += -Ileak(X)
+

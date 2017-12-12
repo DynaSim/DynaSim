@@ -1,0 +1,27 @@
+% LTS (adapted from Kramer 2008)
+% usage: dsPlot(dsSimulate('LTS','vary',{'LTS','Iapp',10}))
+
+LTS:
+dV/dt=(Iapp+@current)./Cm; {iNaF,iKDR,iAR,ileak}@current; V(0)=-65
+gNaF=200; gKDR=10; gAR=50; Iapp=0;  % Iapp=40
+
+Cm=.9; Eleak=-65; gleak=6
+E_NaF=50; E_KDR=-100; E_AR=-35;
+
+NaF_V0=38; NaF_V1=58.3; NaF_d1=6.7; NaF_V2=37; NaF_d2=15; NaF_c0=.15; NaF_c1=1.15;
+KDR_V1=27; KDR_d1=11.5; KDR_V2=10; KDR_d2=10;
+AR_V12=-87.5; AR_k=-5.5; c_ARaM=1; c_ARbM=1; AR_L=1; AR_R=1;
+
+% Reference:
+% Kramer, M. A., Roopun, A. K., Carracedo, L. M., Traub, R. D., Whittington, M. A., & Kopell, N. J. (2008). Rhythm generation through period concatenation in rat somatosensory cortex. PLoS computational biology, 4(9), e1000169. (http://www.ploscompbiol.org/article/info%3Adoi%2F10.1371%2Fjournal.pcbi.1000169)
+
+% CAUTION: this model is a work-in-progress and provided "AS IS". Tonic
+% stimulation and noise differ from Kramer 2008.
+
+% THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+% IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+% FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+% AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+% LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+% OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+% SOFTWARE.

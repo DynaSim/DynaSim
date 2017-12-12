@@ -35,6 +35,9 @@ function classes = dsClassifyEquation(string,delimiter, varargin)
 %   classes=dsClassifyEquation('model.eqns');
 %
 % See also: dsParseModelEquations
+%
+% Author: Jason Sherfey, PhD <jssherfey@gmail.com>
+% Copyright (C) 2016 Jason Sherfey, Boston University, USA
 
 %% localfn output
 if ~nargin
@@ -83,7 +86,7 @@ end
 %% auto_gen_test_data_flag argout
 if options.auto_gen_test_data_flag
   argout = {classes}; % specific to this function
-  
+
   dsUnitSaveAutoGenTestData(argin, argout);
 end
 
@@ -115,7 +118,7 @@ elseif string(1)=='%' || string(1)=='#'
   class='comment';
 end
 
-% linker check: % [link ]? target operation expression 
+% linker check: % [link ]? target operation expression
                 % DynaSim-linker (matlab-incompatible) character combinations
 pattern='(link\s*)?((\+=)|(\-=)|(\*=)|(/=)|(=>))';
 if isempty(class) && ~isempty(regexp(string,pattern,'once'))
@@ -137,7 +140,7 @@ end
 % parameter check: var=expression (string or numeric)
 %pattern='^(([\w\.]+)|(\[\w+\]))\s*=\s*((''.*'')|(\[?[\d\.-(Inf)(inf)]+\]?))$';
 % TODO: support scientific notation
-pattern='^(([\w\.]+)|(\[\w+\]))\s*=\s*((''.*'')|(\[?[\d\.-(Inf)(inf)]+\]?)|(\d+e[\-\+]?\d+))$';
+pattern='^(([\w\.]+)|(\[\w+\]))\s*=\s*((''.*'')|(\[?[+\d\.\-(Inf)(inf)]+\]?)|(\d+e[\-\+]?\d+))$';
 if isempty(class) && ~isempty(regexp(string,pattern,'once'))
   class='parameter';
 end
@@ -184,7 +187,7 @@ end
 %% auto_gen_test_data_flag argout
 if options.auto_gen_test_data_flag
   argout = {class}; % specific to this function
-  
+
   dsUnitSaveAutoGenTestDataLocalFn(argin, argout); % localfn
 end
 

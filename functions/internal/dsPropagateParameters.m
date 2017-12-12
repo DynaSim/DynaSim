@@ -14,6 +14,9 @@ function model = dsPropagateParameters(model,varargin)
 % Output: DynaSim model structure with updated parameter in all equations
 %
 % See also: dsPropagateFunctions, dsWriteDynaSimSolver
+% 
+% Author: Jason Sherfey, PhD <jssherfey@gmail.com>
+% Copyright (C) 2016 Jason Sherfey, Boston University, USA
 
 %% localfn output
 if ~nargin
@@ -45,6 +48,7 @@ if options.auto_gen_test_data_flag
   argin = [{model}, varargs]; % specific to this function
 end
 
+%% Finding parameters.
 parameters=model.(options.param_type);
 if isempty(parameters)
   return

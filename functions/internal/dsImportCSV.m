@@ -23,6 +23,9 @@ function data = dsImportCSV(file)
 %   sequential columns with same header repeated for each cell.
 %
 % See also: dsImport
+% 
+% Author: Jason Sherfey, PhD <jssherfey@gmail.com>
+% Copyright (C) 2016 Jason Sherfey, Boston University, USA
 
 % check inputs
 if ~exist(file,'file')
@@ -31,7 +34,7 @@ end
 
 % load data
 contents=importdata(file,',');
-fields=unique(contents.colheaders,'stable');
+fields=unique_wrapper(contents.colheaders,'stable');
 data.labels=fields([2:length(fields) 1]); % move time vector to end of labels
 for i=1:length(fields)
   data.(fields{i})=contents.data(:,ismember(contents.colheaders,fields{i}));

@@ -1,4 +1,4 @@
-function data_out = dsCropData(data,inds)
+function data_out = dsCropData(data,inds,varargin)
 %CROPDATA - Crops DynaSim data structre
 %
 % Usage:

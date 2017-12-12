@@ -1,4 +1,4 @@
-function sext=getPoissonGating(baseline,dc,ac,freq,phase,onset,offset,tau,Total_time,N,kernel,kick,ramp_dc_flag,ramp_ac_flag)
+function sext=getPoissonGating(baseline,dc,ac,freq,phase,onset,offset,tau,T,N,kernel,kick,ramp_dc_flag,ramp_ac_flag)
 % s=getPoissonGating(baseline,dc,ac,freq,phase,onset,offset,tau,T,N,kernel)
 % 
 % % Example 1:
@@ -39,19 +39,17 @@ if nargin<2, dc=0; end % Hz
 if nargin<3, ac=0; end % Hz
 if nargin<4, freq=0; end % Hz
 if nargin<5, phase=0; end % radians
-if nargin<9, Total_time = 1000; end % =(0:.01:1000)'; end % ms
+if nargin<9, T=(0:.01:1000)'; end % ms
+if nargin<6, onset=T(1); end % ms
+if nargin<7, offset=T(end); end % ms
 if nargin<8, tau=2; end % ms
 if nargin<10, N=1; end % number of target cells
 if nargin<11, kernel=ones(1,N); end % connectivity to target cells
 if nargin<12, kick=1; end
 if nargin<13, ramp_dc_flag=0; end % whether to ramp dc from 0 to dc over [onset,offset], else step at onset
 if nargin<14, ramp_ac_flag=0; end % whether to ramp ac from 0 to ac over [onset,offset], else step at onset
-dt = .01;
-T = 0:dt:Total_time;
-if nargin<6, onset=T(1); end % ms
-if nargin<7, offset=Total_time; end % ms
 
-% dt=T(2)-T(1);
+dt=T(2)-T(1);
 interval=T(end)-T(1);
 latency=.1; 
 fspread=.03; 

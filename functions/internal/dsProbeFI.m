@@ -13,6 +13,9 @@ function data = dsProbeFI(model,varargin)
 %   array of DynaSim data structures for simulations varying inputs
 % 
 % see also: dsSimulate, dsCalcFR
+% 
+% Author: Jason Sherfey, PhD <jssherfey@gmail.com>
+% Copyright (C) 2016 Jason Sherfey, Boston University, USA
 
 options=dsCheckOptions(varargin,{...
   'target','ODE1',[],...
