@@ -9,11 +9,20 @@
   <meta name="generator" content="m2html &copy; 2005 Guillaume Flandin">
   <meta name="robots" content="index, follow">
   <link type="text/css" rel="stylesheet" href="{MASTERPATH}m2html.css">
-  <script type="text/javascript">
+  <!-- <script type="text/javascript">
     if (top.frames.length == 0) { top.location = "{MASTERPATH}index.html"; };
-  </script>
+  </script> -->
 </head>
 <body>
+  
+<!-- Add home button if no iframe -->
+<div id="home-button"></div>
+ <script type="text/javascript">
+  if (top.frames.length == 0){ 
+    document.getElementById('home-button').innerHTML = '<a href="../index.html"><img alt="<" border="0" src="../left.png">Home</a>'
+  }
+</script>
+  
 <a name="_top"></a>
 <!-- BEGIN pathline -->
 <!-- {LPATHDIR} {PATHDIR} -->
