@@ -1,5 +1,5 @@
-[submodule "dependencies/gimbl-vis"]
-	path = dependencies/gimbl-vis
+[submodule "functions/dependencies/gimbl-vis"]
+	path = functions/dependencies/gimbl-vis_SM
 	url = https://github.com/erik-roberts/GIMBL-Vis
 [submodule "functions/internal/unit-test"]
 	path = functions/internal/unit-test
