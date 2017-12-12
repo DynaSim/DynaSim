@@ -15,14 +15,6 @@
 </head>
 <body>
   
-<!-- Add home button if no iframe -->
-<div id="home-button"></div>
- <script type="text/javascript">
-  if (top.frames.length == 0){ 
-    document.getElementById('home-button').innerHTML = '<a href="../index.html"><img alt="<" border="0" src="../left.png">Home</a>'
-  }
-</script>
-  
 <a name="_top"></a>
 <!-- BEGIN pathline -->
 <!-- {LPATHDIR} {PATHDIR} -->

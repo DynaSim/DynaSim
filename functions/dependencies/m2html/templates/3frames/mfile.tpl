@@ -11,20 +11,12 @@
   <link type="text/css" rel="stylesheet" href="{MASTERPATH}m2html.css">
 </head>
 <body>
-  
-<!-- Add home button if no iframe -->
-<div id="home-button"></div>
- <script type="text/javascript">
-  if (top.frames.length == 0){ 
-    document.getElementById('home-button').innerHTML = '<a href="../index.html"><img alt="<" border="0" src="../left.png">Home</a>'
-  }
-</script>
 
 <!-- header -->
 <a name="_top"></a>
 <!-- BEGIN pathline -->
 <!-- {LPATHDIR} {PATHDIR} -->
-<!-- END pathline --> 
+<!-- END pathline -->
 <h1>Documentation for <span id="markup">&quot;{NAME}&quot;</span>
 <!-- BEGIN mexfile --> &nbsp;&nbsp;<img src="{MASTERPATH}{MEXTYPE}.png" alt="{PLATFORMS}" border="0" title="{PLATFORMS}"> <!-- END mexfile -->
 </h1>

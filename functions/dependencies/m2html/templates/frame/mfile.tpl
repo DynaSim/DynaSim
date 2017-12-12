@@ -14,19 +14,11 @@
   </script> -->
 </head>
 <body>
-  
-<!-- Add home button if no iframe -->
-<div id="home-button"></div>
- <script type="text/javascript">
-  if (top.frames.length == 0){ 
-    document.getElementById('home-button').innerHTML = '<a href="../index.html"><img alt="<" border="0" src="../left.png">Home</a>'
-  }
-</script>
-  
+
 <a name="_top"></a>
 <!-- BEGIN pathline -->
 <!-- {LPATHDIR} {PATHDIR} -->
-<!-- END pathline --> 
+<!-- END pathline -->
 <h1>{NAME}
 <!-- BEGIN mexfile --> &nbsp;&nbsp;<img src="{MASTERPATH}{MEXTYPE}.png" alt="{PLATFORMS}" border="0" title="{PLATFORMS}"> <!-- END mexfile -->
 </h1>
