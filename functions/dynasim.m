@@ -150,8 +150,10 @@ if nargin==0
 end
 
 % open figure for model designer
-figure_position=[245 145 1460 770]; % compact
-handles.fig_main = figure('position',figure_position,'color',cfg.BackgroundColor,'tag','designer','name','DynaSim Model Builder','NumberTitle','off','WindowScrollWheelFcn',@ZoomFunction,'CloseRequestFcn','delete(gcf); clear global H');
+% figure_position=[245 145 1460 770]; % compact
+% handles.fig_main = figure('position',figure_position,'color',cfg.BackgroundColor,'tag','designer','name','DynaSim Model Builder','NumberTitle','off','WindowScrollWheelFcn',@ZoomFunction,'CloseRequestFcn','delete(gcf); clear global H');
+% Full screen figure
+handles.fig_main = figure('units','normalized','outerposition',[0 0 1 1],'color',cfg.BackgroundColor,'tag','designer','name','DynaSim Model Builder','NumberTitle','off','WindowScrollWheelFcn',@ZoomFunction,'CloseRequestFcn','delete(gcf); clear global H');
 
 % #####################################
 % MENU NEEDS WORK!!!
