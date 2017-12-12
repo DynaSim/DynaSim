@@ -24,7 +24,11 @@ function result = dsAnalyze(src,funcIn,varargin)
 %     'format'              : format for saved plots if figures are generated
 %                             {'svg','jpg','eps','png'} (default: 'svg')
 %     'varied_filename_flag': whether to make filename based on the varied
-%                             parameters and type of plot {0 or 1} (default: 0)
+%                             parameters and type of plot {0 or 1}. will overwrite
+%                             if multiple plots of same type (use 'save_prefix' to
+%                             avoid overwrite in that case) (default: 0)
+%     'save_prefix'         : if 'varied_filename_flag'==1, add a string prefix 
+%                             to the name (default: '')
 %     'function_options'    : cell array of option cell arrays {'option1',value1,...}
 %                             in which each cell corresponds to the options for
 %                             the corresponding function cell. if only passing a
@@ -473,7 +477,7 @@ function filename = filenameFromVaried(filename, func, data, plotFnBool, options
 
 %% auto_gen_test_data_flag argin
 options = catstruct(options, dsCheckOptions(varargin,{'auto_gen_test_data_flag',0,{0,1}},false));
-
+keyboard
 if options.auto_gen_test_data_flag
   varargs = varargin;
   varargs{find(strcmp(varargs, 'auto_gen_test_data_flag'))+1} = 0;
