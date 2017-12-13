@@ -22,8 +22,8 @@ if nargin==0 % default model
   %SPEC=dsCheckSpecification([]);
   ina={
     'INa(v,m,h) = -gNa.*m.^3.*h.*(v-50); gNa=120';  % sodium current
-    'dm/dt = aM(v).*(1-m)-bM(v).*m; m(0)=.1';       % - activation
-    'dh/dt = aH(v).*(1-h)-bH(v).*h; h(0)=.1';       % - inactivation
+    'dm/dt = aM(v).*(1-m)-bM(v).*m; m(0)=.1*ones(1,N_pop)';       % - activation
+    'dh/dt = aH(v).*(1-h)-bH(v).*h; h(0)=.1*ones(1,N_pop)';       % - inactivation
     'aM(v) = (2.5-.1*(v+65))./(exp(2.5-.1*(v+65))-1)';
     'bM(v) = 4*exp(-(v+65)/18)';
     'aH(v) = .07*exp(-(v+65)/20)';
@@ -32,7 +32,7 @@ if nargin==0 % default model
   };
   ik={
     'IK(v,n) = -gK.*n.^4.*(v+77); gK=36';           % potassium current
-    'dn/dt = aN(v).*(1-n)-bN(v).*n; n(0)=0';        % - activation
+    'dn/dt = aN(v).*(1-n)-bN(v).*n; n(0)=0*ones(1,N_pop)';        % - activation
     'aN(v) = (.1-.01*(v+65))./(exp(1-.1*(v+65))-1)';
     'bN(v) = .125*exp(-(v+65)/80)';  
     '@current+=IK';
@@ -41,14 +41,14 @@ if nargin==0 % default model
     'gSYN=0.1; ESYN=0; tauD=2; tauR=0.4';
     'netcon=ones(N_pre,N_post)';
     'ISYN(X,s)=(gSYN.*(s*netcon).*(X-ESYN))';
-    'ds/dt=-s./tauD+((1-s)/tauR).*(1+tanh(X_pre/10)); s(0)=.1';
+    'ds/dt=-s./tauD+((1-s)/tauR).*(1+tanh(X_pre/10)); s(0)=.1*ones(1,N_pre)';
     '@isyn += -ISYN(X_post,s)';    
   };
   igaba={
     'gSYN=0.25; ESYN=-80; tauD=10; tauR=0.4';
     'netcon=ones(N_pre,N_post)';
     'ISYN(X,s)=(gSYN.*(s*netcon).*(X-ESYN))';
-    'ds/dt=-s./tauD+((1-s)/tauR).*(1+tanh(X_pre/10)); s(0)=.1';
+    'ds/dt=-s./tauD+((1-s)/tauR).*(1+tanh(X_pre/10)); s(0)=.1*ones(1,N_pre)';
     '@isyn += -ISYN(X_post,s)';
   };
   input='Iapp=0; noise=0; @input+=Iapp+noise*randn(1,N_pop)';
@@ -235,9 +235,9 @@ handles.txt_model = uicontrol('parent',handles.peqnview,'style','edit','units','
 uicontrol('parent',handles.fig_main,'style','text','string','DynaSim Model Designer','fontsize',16,'units','normalized','position',[0 .95 .25 .04],'backgroundcolor',bgcolor,'FontWeight','bold','ForegroundColor',[0 0 0]);
 uicontrol('parent',handles.fig_main,'style','pushbutton','units','normalized','position',[.35 .95 .15 .05],'string','SAVE MODEL','backgroundcolor',cfg.ButtonColor,'ForegroundColor',cfg.ButtonFontColor,'ForegroundColor',cfg.ButtonFontColor,'FontWeight','bold','callback',@SaveModel,'FontSize',14);
 uicontrol('parent',handles.fig_main,'style','pushbutton','units','normalized','position',[.3 .97 .04 .03],'string','undo','backgroundcolor',cfg.ButtonColor,'ForegroundColor',cfg.ButtonFontColor,'FontWeight','bold','callback',@undo,'visible','on');
-bhistory=uicontrol('parent',handles.fig_main,'style','pushbutton','units','normalized','position',[0 .01 .1 .03],'string','View history','backgroundcolor',cfg.ButtonColor,'ForegroundColor',cfg.ButtonFontColor,'FontWeight','bold','callback',[],'Enable','off');
-bversion=uicontrol('parent',handles.fig_main,'style','pushbutton','units','normalized','position',[.12 .01 .08 .03],'string','+ Version','backgroundcolor',cfg.ButtonColor,'ForegroundColor',cfg.ButtonFontColor,'FontWeight','bold','callback',[],'Enable','off');
-bsimstudy=uicontrol('parent',handles.fig_main,'style','pushbutton','units','normalized','position',[.4 .01 .09 .03],'string','NEW SWEEP','backgroundcolor',cfg.ButtonColor,'ForegroundColor',cfg.ButtonFontColor,'FontWeight','bold','callback',[],'Enable','off');
+bhistory=uicontrol('parent',handles.fig_main,'style','pushbutton','units','normalized','position',[0 .01 .1 .03],'string','View history','backgroundcolor',cfg.ButtonColor,'ForegroundColor',cfg.ButtonFontColor,'FontWeight','bold','callback',[],'Enable','off','Visible','off');
+bversion=uicontrol('parent',handles.fig_main,'style','pushbutton','units','normalized','position',[.12 .01 .08 .03],'string','+ Version','backgroundcolor',cfg.ButtonColor,'ForegroundColor',cfg.ButtonFontColor,'FontWeight','bold','callback',[],'Enable','off','Visible','off');
+bsimstudy=uicontrol('parent',handles.fig_main,'style','pushbutton','units','normalized','position',[.4 .01 .09 .03],'string','NEW SWEEP','backgroundcolor',cfg.ButtonColor,'ForegroundColor',cfg.ButtonFontColor,'FontWeight','bold','callback',@DrawStudyInfo,'Enable','on');
 % ####################################################################
 
 % Model Designer:
@@ -1574,7 +1574,340 @@ UpdateModel;
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % SWEEPS
-% ...
+% function ShowSimStudy(src,evnt)
+% if isempty(findobj('tag','fig_simstudy'))
+%   DrawStudyInfo;
+% else
+%   figure(findobj('tag','fig_simstudy'));
+% end
+
+function DrawStudyInfo(src,evnt)
+global cfg handles
+
+bgcolor=[204 204 180]/255;
+bgcolor2='w';
+
+if isempty(findobj('tag','fig_simstudy'))
+  handles.fig_simstudy=figure('tag','fig_simstudy','name','Batch Simulation Manager','units','normalized','outerposition',[.25 .1 .5 .8],'NumberTitle','off','color',bgcolor);
+  handles.pbatchcontrols=uipanel('parent',handles.fig_simstudy,'backgroundcolor',bgcolor,'title','(1) Configure simulator options','units','normalized','position',[0 .8 1 .2],'fontweight','bold');
+  handles.pbatchspace=uipanel('parent',handles.fig_simstudy,'backgroundcolor',bgcolor,'title','(2) Configure search space','units','normalized','position',[0 .3 1 .5],'fontweight','bold');
+  handles.pbatchoutputs=uipanel('parent',handles.fig_simstudy,'backgroundcolor',bgcolor,'title','(3) Configure outputs','units','normalized','position',[0 0 1 .3],'fontweight','bold');
+else
+  figure(findobj('tag','fig_simstudy'));
+end
+
+if isfield(cfg,'study')
+  study = cfg.study;
+else
+  study.scope = '';
+  study.variable = '';
+  study.values = '';  
+  cfg.study = study;
+end
+if ~isfield(handles,'text_scope') || ~ishandle(handles.text_scope)
+  % controls
+  yshift=-.05; ht=.17;
+  uicontrol('parent',handles.pbatchcontrols,'units','normalized','backgroundcolor',bgcolor,...
+    'style','text','position',[.05 .75+yshift .13 .2],'string','machine',...
+    'HorizontalAlignment','left');%,'backgroundcolor','w'
+  handles.text_memory_limit=uicontrol('parent',handles.pbatchcontrols,'units','normalized','backgroundcolor',bgcolor,...
+    'style','text','position',[.5 .75+yshift .13 .2],'string','memory_limit',...
+    'HorizontalAlignment','right','visible','off');%,'backgroundcolor','w'
+  handles.chk_parallel_flag=uicontrol('style','checkbox','value',1,'parent',handles.pbatchcontrols,'backgroundcolor',bgcolor2,'units','normalized','position',[.5 .8+yshift .13 ht],'string','parallel_flag','visible','on');
+  uicontrol('parent',handles.pbatchcontrols,'units','normalized','backgroundcolor',bgcolor,...
+    'style','text','position',[.05 .5+yshift .13 .2],'string','tspan',...
+    'HorizontalAlignment','left');%,'backgroundcolor','w'
+  uicontrol('parent',handles.pbatchcontrols,'units','normalized','backgroundcolor',bgcolor,...
+    'style','text','position',[.05 .3+yshift .13 .2],'string','solver',...
+    'HorizontalAlignment','left');%,'backgroundcolor','w'
+  uicontrol('parent',handles.pbatchcontrols,'units','normalized','backgroundcolor',bgcolor,...
+    'style','text','position',[.25 .3+yshift .13 .2],'string','dt',...
+    'HorizontalAlignment','right');%,'backgroundcolor','w'
+  uicontrol('parent',handles.pbatchcontrols,'units','normalized',...
+    'style','text','position',[.05 .1+yshift .13 .2],'string','# realizations','backgroundcolor',bgcolor,...
+    'HorizontalAlignment','left');%,'backgroundcolor','w'
+  handles.chk_compile_flag=uicontrol('style','checkbox','value',0,'parent',handles.pbatchcontrols,'backgroundcolor',bgcolor2,'units','normalized','position',[.5 .55+yshift .13 ht],'string','compile_flag','visible','on'); % [.415 .13+yshift .13 ht]
+  handles.rad_machine=uibuttongroup('visible','off','units','normalized','backgroundcolor',bgcolor2,'Position',[.18 .8+yshift .3 .2],'parent',handles.pbatchcontrols);
+  handles.rad_machine_1=uicontrol('style','radiobutton','backgroundcolor',bgcolor2,'string','local','parent',handles.rad_machine,'HandleVisibility','off',...
+    'units','normalized','pos',[0 0 .4 1],'Callback','global handles; set(handles.edit_memory_limit,''visible'',''off''); set(handles.text_memory_limit,''visible'',''off''); set(handles.chk_parallel_flag,''visible'',''on'');');
+  handles.rad_machine_2=uicontrol('style','radiobutton','backgroundcolor',bgcolor2,'string','SGE cluster','parent',handles.rad_machine,'HandleVisibility','off',...
+    'units','normalized','pos',[.45 0 .5 1],'Callback','global handles; set(handles.edit_memory_limit,''visible'',''on''); set(handles.text_memory_limit,''visible'',''on''); set(handles.chk_parallel_flag,''visible'',''off'');');
+  set(handles.rad_machine,'SelectedObject',handles.rad_machine_1);  % No selection
+  set(handles.rad_machine,'Visible','on');    
+  handles.edit_memory_limit = uicontrol('parent',handles.pbatchcontrols,'units','normalized',...
+    'style','edit','position',[.65 .8+yshift .1 ht],'backgroundcolor','w','string','8G',...
+    'HorizontalAlignment','left','visible','off');
+  handles.edit_timelimits = uicontrol('parent',handles.pbatchcontrols,'units','normalized',...
+    'style','edit','position',[.18 .55+yshift .15 ht],'backgroundcolor','w','string','[0 100]',...
+    'HorizontalAlignment','left');
+  handles.edit_solver = uicontrol('parent',handles.pbatchcontrols,'units','normalized',...
+    'style','edit','position',[.18 .35+yshift .15 ht],'backgroundcolor','w','string','euler',...
+    'HorizontalAlignment','left');
+  handles.edit_dt = uicontrol('parent',handles.pbatchcontrols,'units','normalized',...
+    'style','edit','position',[.4 .35+yshift .08 ht],'backgroundcolor','w','string','0.01',...
+    'HorizontalAlignment','left');
+  handles.edit_repeats = uicontrol('parent',handles.pbatchcontrols,'units','normalized',...
+    'style','edit','position',[.18 .15+yshift .15 ht],'backgroundcolor','w','string','1',...
+    'HorizontalAlignment','left');  
+  % search space
+  handles.text_scope = uicontrol('parent',handles.pbatchspace,'units','normalized','backgroundcolor',bgcolor,...
+    'style','text','position',[.1 .9 .1 .05],'string','object',...
+    'HorizontalAlignment','center');%,'backgroundcolor','w'
+  handles.text_variable = uicontrol('parent',handles.pbatchspace,'units','normalized','backgroundcolor',bgcolor,...
+    'style','text','position',[.31 .9 .1 .05],'string','variable',...
+    'HorizontalAlignment','center');%,'backgroundcolor','w'
+  handles.text_values = uicontrol('parent',handles.pbatchspace,'units','normalized','backgroundcolor',bgcolor,...
+    'style','text','position',[.52 .9 .1 .05],'string','values',...
+    'HorizontalAlignment','center'); %,'backgroundcolor','w'
+  handles.btn_batch_help = uicontrol('parent',handles.pbatchspace,'units','normalized',...
+    'style','pushbutton','fontsize',10,'string','help','callback','web(''https://github.com/DynaSim/DynaSim/wiki/DynaSim-Getting-Started-Tutorial#varying-parameters'',''-browser'');',...
+    'position',[.85 .92 .1 .06]); 
+  % outputs
+  uicontrol('parent',handles.pbatchoutputs,'units','normalized','backgroundcolor',bgcolor,...
+    'style','text','position',[.05 .85 .13 .1],'string','study_dir',...
+    'HorizontalAlignment','left');%,'backgroundcolor','w'
+  uicontrol('parent',handles.pbatchoutputs,'units','normalized','backgroundcolor',bgcolor,...
+    'style','text','position',[.75 .85 .15 .1],'string','downsample_factor',...
+    'HorizontalAlignment','right');%,'backgroundcolor','w'
+  uicontrol('parent',handles.pbatchoutputs,'units','normalized','backgroundcolor',bgcolor,...
+    'style','text','position',[.05 .7 .1 .1],'string','save',...
+    'HorizontalAlignment','right');%,'backgroundcolor','w'
+  uicontrol('parent',handles.pbatchoutputs,'units','normalized','backgroundcolor',bgcolor,...
+    'style','text','position',[.3 .7 .1 .1],'string','plot',...
+    'HorizontalAlignment','right');%,'backgroundcolor','w'  
+  handles.edit_study_dir = uicontrol('parent',handles.pbatchoutputs,'units','normalized',...
+    'style','edit','position',[.15 .85 .55 .15],'backgroundcolor','w','string',pwd,...
+    'HorizontalAlignment','left');
+  handles.edit_dsfact = uicontrol('parent',handles.pbatchoutputs,'units','normalized',...
+    'style','edit','position',[.92 .85 .05 .15],'backgroundcolor','w','string','10',...
+    'HorizontalAlignment','left');  
+  handles.btn_run_simstudy = uicontrol('parent',handles.pbatchoutputs,'units','normalized',...
+    'style','pushbutton','fontsize',20,'string','RUN SWEEP','callback',@RunSimStudy,...
+    'position',[.67 .4 .3 .3],'backgroundcolor',cfg.ButtonColor,'ForegroundColor',cfg.ButtonFontColor); 
+  handles.chk_overwrite=uicontrol('style','checkbox','value',0,'parent',handles.pbatchoutputs,'backgroundcolor',bgcolor2,'units','normalized','position'   ,[.83 .75 .14 .08],'string','overwrite_flag');
+  handles.chk_savedata=uicontrol('style','checkbox','value',0,'parent',handles.pbatchoutputs,'backgroundcolor',bgcolor2,'units','normalized','position'   ,[.13 .6 .15 .1],'string','raw data');
+%   handles.chk_savesum=uicontrol('style','checkbox','value',0,'parent',handles.pbatchoutputs,'backgroundcolor',bgcolor2,'units','normalized','position'    ,[.13 .5 .15 .1],'string','pop average');
+%   handles.chk_savespikes=uicontrol('style','checkbox','value',0,'parent',handles.pbatchoutputs,'backgroundcolor',bgcolor2,'units','normalized','position' ,[.13 .4 .15 .1],'string','spike times');
+%   handles.chk_saveplots=uicontrol('style','checkbox','value',0,'parent',handles.pbatchoutputs,'backgroundcolor',bgcolor2,'units','normalized','position'  ,[.13 .3 .15 .1],'string','plots');
+  handles.chk_saveplots=uicontrol('style','checkbox','value',0,'parent',handles.pbatchoutputs,'backgroundcolor',bgcolor2,'units','normalized','position'  ,[.13 .5 .15 .1],'string','plots');
+  handles.chk_plottraces=uicontrol('style','checkbox','value',1,'parent',handles.pbatchoutputs,'backgroundcolor',bgcolor2,'units','normalized','position' ,[.38 .6 .17 .1],'string','state variables');
+  handles.chk_plotrates=uicontrol('style','checkbox','value',0,'parent',handles.pbatchoutputs,'backgroundcolor',bgcolor2,'units','normalized','position'  ,[.38 .5 .17 .1],'string','raster plots');
+  handles.chk_plotspectra=uicontrol('style','checkbox','value',0,'parent',handles.pbatchoutputs,'backgroundcolor',bgcolor2,'units','normalized','position',[.38 .4 .17 .1],'string','power spectrum');
+end
+if isfield(handles,'edit_scope') 
+  if ishandle(handles.edit_scope)
+    delete(handles.edit_scope);
+    delete(handles.edit_variable);
+    delete(handles.edit_values);
+    delete(handles.btn_simset_delete);
+    delete(handles.btn_simset_copy);
+  end
+  handles = rmfield(handles,{'edit_scope','edit_variable','edit_values','btn_simset_delete','btn_simset_copy'});
+end 
+for i=1:length(study)
+  handles.edit_scope(i) = uicontrol('parent',handles.pbatchspace,'units','normalized',...
+    'style','edit','position',[.1 .8-.1*(i-1) .2 .08],'backgroundcolor','w','string',study(i).scope,...
+    'HorizontalAlignment','left','Callback',sprintf('global cfg; cfg.study(%g).scope=get(gcbo,''string'');',i));
+  handles.edit_variable(i) = uicontrol('parent',handles.pbatchspace,'units','normalized',...
+    'style','edit','position',[.31 .8-.1*(i-1) .2 .08],'backgroundcolor','w','string',study(i).variable,...
+    'HorizontalAlignment','left','Callback',sprintf('global cfg; cfg.study(%g).variable=get(gcbo,''string'');',i));
+  handles.edit_values(i) = uicontrol('parent',handles.pbatchspace,'units','normalized',...
+    'style','edit','position',[.52 .8-.1*(i-1) .4 .08],'backgroundcolor','w','string',study(i).values,...
+    'HorizontalAlignment','left','Callback',sprintf('global cfg; cfg.study(%g).values=get(gcbo,''string'');',i)); 
+  handles.btn_simset_delete(i) = uicontrol('parent',handles.pbatchspace,'units','normalized',...
+    'style','pushbutton','fontsize',10,'string','-','callback',{@DeleteSimSet,i},...
+    'position',[.06 .8-.1*(i-1) .03 .08]);
+  handles.btn_simset_copy(i) = uicontrol('parent',handles.pbatchspace,'units','normalized',...
+    'style','pushbutton','fontsize',10,'string','+','callback',{@CopySimSet,i},...
+    'position',[.93 .8-.1*(i-1) .03 .08]);
+end
+% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+function DeleteSimSet(src,evnt,index)
+global cfg
+cfg.study(index) = [];
+DrawStudyInfo;
+% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+function CopySimSet(src,evnt,index)
+global cfg
+cfg.study(end+1) = cfg.study(index);
+DrawStudyInfo;
+
+% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+function RunSimStudy(src,evnt)
+% Purpose: run simulation batch
+
+% Note on schema for sim notes and history:
+% notes(1).id='model2';
+% notes(1).date='yyyymmdd-hhmmss';
+% notes(1).text='batch sim note...';
+% notes(1).changes{1}='E.n: 1 => 2';
+% notes(1).changes{2}='+E2: {iNa,iK}';
+% notes(1).isbatch = 1;
+% notes(1).batch.space(1).scope = '(E,I)';
+% notes(1).batch.space(1).variables = 'N';
+% notes(1).batch.space(1).values = '[1 2 3]';
+% notes(1).model = CURRSPEC;
+% CURRSPEC.history(end+1)=notes;
+
+disp('Running sweep varying model parameters...');
+
+global cfg SPEC handles % BACKUPFILE BIOSIMROOT
+if isempty(SPEC.populations), return; end
+if isempty([cfg.study.scope]) && isempty([cfg.study.variable])
+  cfg.study.scope=SPEC.populations(1).label;
+  cfg.study.variable='size';
+  cfg.study.values=sprintf('[%g]',SPEC.populations(1).size);
+end
+scope = {cfg.study.scope};
+variable = {cfg.study.variable};
+values = {cfg.study.values};
+dir=get(handles.edit_study_dir,'string');
+mem=get(handles.edit_memory_limit,'string');
+dt=str2num(get(handles.edit_dt,'string'));
+lims=str2num(get(handles.edit_timelimits,'string'));
+dsfact=str2num(get(handles.edit_dsfact,'string'));
+
+machine=get(get(handles.rad_machine,'SelectedObject'),'String');
+if strcmp(machine,'local')
+  cluster_flag = 0;
+  set(handles.edit_memory_limit,'visible','off');
+  set(handles.text_memory_limit,'visible','off');
+  set(handles.chk_parallel_flag,'visible','on');
+elseif strcmp(machine,'cluster')
+  cluster_flag = 1;
+  set(handles.edit_memory_limit,'visible','on');
+  set(handles.text_memory_limit,'visible','on');
+  set(handles.chk_parallel_flag,'visible','off');
+end
+nrepeats=str2num(get(handles.edit_repeats,'string'));
+set(handles.btn_run_simstudy,'Enable','off'); drawnow
+for i=1:nrepeats
+  if nrepeats>1
+    fprintf('Submitting batch iteration %g of %g...\n',i,nrepeats);
+  end
+  
+  % Record note
+%   if ~isfield(SPEC,'history') || isempty(SPEC.history)
+%     id=1; 
+%   else
+%     id=max([SPEC.history.id])+1;
+%   end
+%   note.id=id;
+%   timestamp=datestr(now,'yyyymmdd-HHMMSS');
+%   note.date=timestamp;
+%   if strcmp(machine,'local')
+%     note.text=sprintf('%s BATCH: t=[%g %g], dt=%g. ',machine,lims,dt);
+%   else
+%     note.text=sprintf('%s BATCH: t=[%g %g], dt=%g. ',machine,lims,dt);% study_dir=%s',machine,dir);
+%   end
+%   tmp=SPEC;
+%   if isfield(tmp.model,'eval')
+%     tmp.model=rmfield(tmp.model,'eval');
+%   end
+%   if isfield(tmp,'history')
+%     tmp = rmfield(tmp,'history');
+%   end
+%   if id>1 && isequal(SPEC.history(end).spec.model,SPEC.model)
+%     note.id=id-1;
+%     note.spec=tmp;
+%     note.changes={};
+%   else
+%     note.spec=tmp;
+%     note.changes={'changes made'};
+%   end
+%   note.isbatch=1;  
+%   note.batch.space=cfg.study;
+%   note.batch.study_dir = dir;
+%   note.batch.machine = machine;
+%   % update controls
+%   s=get(handles.lst_notes,'string');
+%   v=get(handles.lst_notes,'value');
+%   s={s{:} num2str(note.id)};
+%   v=[v length(s)];
+%   set(handles.lst_notes,'string',s,'value',v);
+%   set(handles.edit_notes,'string','');
+%   note.batch.savedata = get(handles.chk_savedata,'value');
+%   if id==1
+%     SPEC.history = note;
+%   else
+%     SPEC.history(end+1) = note;
+%   end
+%   UpdateHistory;
+%   tmpspec=rmfield(SPEC,'history');
+
+  % Prepare 'vary'
+  values=cellfun(@eval,values,'uni',0);
+  vary=cat(1,scope,variable,values)';
+  
+  % Prepare plot options
+  if cluster_flag || get(handles.chk_saveplots,'value')
+    % prepare plot_functions and plot_options according to plot checkboxes
+    plot_functions={};
+    plot_options={};
+    if get(handles.chk_plottraces,'value')
+      plot_functions{end+1}=@dsPlot;
+      plot_options{end+1}={'plot_type','waveform'};
+    end
+    if get(handles.chk_plotrates,'value')
+      plot_functions{end+1}=@dsPlot;
+      plot_options{end+1}={'plot_type','raster'};
+    end
+    if get(handles.chk_plotspectra,'value')
+      plot_functions{end+1}=@dsPlot;
+      plot_options{end+1}={'plot_type','power'};
+    end
+  else
+    plot_functions=[];
+    plot_options=[];
+  end
+
+  % Submit simulation batch
+%   if cluster_flag
+%     warndlg('Submitting sweep to SGE cluster. Check study_dir/plots and study_dir/data for results.');
+%   else
+%     warndlg('Running sweep locally. Check Command Window for status. Plots will pop up here when simulations are finished.');  
+%   end
+  [data,studyinfo] = dsSimulate(SPEC,'vary',vary,'dt',dt,'study_dir',dir,'memory_limit',mem,...
+    'tspan',lims,'downsample_factor',dsfact,'cluster_flag',cluster_flag, ...
+    'save_flag',get(handles.chk_savedata,'value'),'verbose_flag',1,... 
+    'overwrite_flag',get(handles.chk_overwrite,'value'),'solver',get(handles.edit_solver,'string'),...
+    'plot_functions',plot_functions,'plot_options',plot_options,...
+    'parallel_flag',get(handles.chk_parallel_flag,'value'),'compile_flag',get(handles.chk_compile_flag,'value'));
+    %'addpath',fullfile(BIOSIMROOT,'matlab'), 'timestamp',timestamp,...
+    %'savepopavg_flag',get(handles.chk_savesum,'value'),'savespikes_flag',get(handles.chk_savespikes,'value'),...
+    
+    if ~cluster_flag
+      % plot data according to plot checkboxes
+      if get(handles.chk_plottraces,'value')
+        dsPlot(data,'plot_type','waveform');
+      end
+      if get(handles.chk_plotrates,'value')
+        dsPlot(data,'plot_type','raster');
+      end
+      if get(handles.chk_plotspectra,'value')
+        dsPlot(data,'plot_type','power');
+      end
+    end
+    
+%   clear tmpspec
+%   if isempty(rootoutdir)
+%     note.batch.rootoutdir = {};
+%   else
+%     note.batch.rootoutdir = rootoutdir{1};
+%   end
+%   if id==1
+%     SPEC.history = note;
+%   else
+%     SPEC.history(end+1) = note;
+%   end
+%   UpdateHistory;
+end
+set(handles.btn_run_simstudy,'Enable','on');
+% autosave
+% if 1
+%   spec=SPEC;
+%   save(BACKUPFILE,'spec');
+% end
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % function SPEC=ApplyPopulationParameters(spec)
