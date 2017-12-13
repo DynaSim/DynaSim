@@ -505,18 +505,42 @@ if ~isempty(model.monitors)
         % variables in which to search. add spikes to output data file.
       end
 
-      % number of spike times to store for each cell
+      % default number of spike times to store for each cell
       spike_buffer_size=2;%5;%100;
-      % TODO: add support for: monitor VAR.spikes(thresh,buffer_size) (edit next if-then statements)
-
+      
+      % Support: monitor VAR.spikes(thresh,buffer_size)
+      % - monitor VAR.spikes(#)
+      % - monitor VAR.spikes(thresh)
+      % - monitor VAR.spikes(thresh,#)
+      % - monitor VAR.spikes(#,#)
+      % - TODO: support: monitor VAR.spikes(thresh,buffer_size)
+      
       if isempty(monitor_expression{i})
+        % monitor VAR.spikes
         spike_threshold=0;
-      elseif isempty(regexp(monitor_expression{i},'[^\d]','once'))
-        spike_threshold=str2num(monitor_expression{i});
-        monitor_expression{i}=[];
       else
-        spike_threshold=monitor_expression{i};
-        monitor_expression{i}=[];
+        parts=regexp(monitor_expression{i},',','split');
+        part1=strrep(parts{1},'(',''); % user provided spike threshold
+        if isempty(regexp(part1,'[^\d]','once'))
+          % monitor VAR.spikes(#)
+          spike_threshold=str2num(part1);
+          monitor_expression{i}=[];
+        else
+          % monitor VAR.spikes(param
+          spike_threshold=part1;
+          monitor_expression{i}=[];
+        end
+        if length(parts)>1 % user provided spike buffer size
+          part2=strrep(parts{2},')','');
+          if isempty(regexp(part2,'[^\d]','once'))
+            % monitor VAR.spikes(*,#)
+            spike_buffer_size=str2num(part2);
+          else
+            % monitor VAR.spikes(*,param)
+            spike_buffer_size=eval(part2);
+            % TODO: edit dsParseModelEquations to support (*,param)
+          end
+        end          
       end
 
       % approach: add conditional check for upward threshold crossing
