@@ -14,7 +14,6 @@ systems in MATLAB and GNU Octave!
   2. Add to path using startup.m or Command Window:
       * `addpath(genpath('YOUR/PATH/TO/DynaSim'))`
       * `savepath`
-* [Detailed install](http://dynasim.readthedocs.io/en/latest/introduction/installation.html) available here.
 
 ### Tutorial:
 
