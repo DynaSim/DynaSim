@@ -5,7 +5,7 @@
 This is the home of the DynaSim toolbox for modeling and simulating dynamical
 systems in MATLAB and GNU Octave!
 
-### Quick Install
+### Quick Install:
 
 * Download the toolbox, and add it to your MATLAB or GNU Octave path.
   * Download using GitHub or Terminal: `git clone https://github.com/DynaSim/DynaSim.git`
