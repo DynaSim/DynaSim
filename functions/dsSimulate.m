@@ -618,6 +618,12 @@ end
 % TODO: debug local parallel sims, doesn't seem to be working right...
 % (however SCC cluster+parallel works)
 if options.parallel_flag
+  % Disable for Octave and return error
+   if ~strcmp(reportUI,'matlab')
+     warning('Parfor mode not implemented in Octave.');
+   end
+  
+  
   % prepare studyinfo
   [studyinfo,options]=dsSetupStudy(model,'simulator_options',options,'modifications_set',modifications_set);
 
@@ -664,7 +670,7 @@ if options.parallel_flag
   seeds = repmat({options.random_seed},1,length(modifications_set));
   
   % If random_seed is shuffle, generate a series of seeds here
-  if strcmp(options.random_seed,'shuffle') && strcmp(reportUI,'matlab')
+  if strcmp(options.random_seed,'shuffle')
     rng_wrapper('shuffle');
     sd = rng_wrapper;            % Get current seed
     for j = 1:length(modifications_set)
