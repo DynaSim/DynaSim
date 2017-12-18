@@ -39,6 +39,9 @@ for iOpt = 1:nOpt
   parallel_flag = thisOpt(3);
   one_solve_file_flag = thisOpt(4);
   
+  % print
+  fprintf('opt: %i/%i \n  qsub_mode:%s \n  compile_flag:%i \n  parallel_flag:%i \n  one_solve_file_flag:%i \n\n', iOpt, nOpt, qsub_mode, compile_flag, parallel_flag, one_solve_file_flag)
+  
   if parallel_flag
     num_cores = 2;
   else
@@ -60,4 +63,7 @@ for iOpt = 1:nOpt
   dsSimulate(eqns,'vary',vary, 'study_dir',study_dir,'save_data_flag',1,...
   'cluster_flag',1,'verbose_flag',1,'qsub_mode',qsub_mode, 'compile_flag',compile_flag,...
   'one_solve_file_flag',one_solve_file_flag, 'parallel_flag',parallel_flag, 'num_cores',num_cores);
+
+  % print hr 
+  fprintf('_____________________________________________________________________ \n')
 end
