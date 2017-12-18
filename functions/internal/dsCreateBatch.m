@@ -552,12 +552,16 @@ end
 
     % loop over and run simulations in this job
     if options.parallel_flag
+      fprintf(fjob,'if strcmp(reportUI,''matlab'')\n');
       % set parallel computing options
       %fprintf(fjob,'started=0;\npool=gcp(''nocreate'');\n');
       %fprintf(fjob,'if isempty(pool), parpool(%g); started=1; end\n',options.num_cores);
-      fprintf(fjob,'c=parcluster;\nsaveAsProfile(c,''local_%g'');\nparpool(c,%g);\n',k,options.num_cores);
+      fprintf(fjob,'  c=parcluster;\nsaveAsProfile(c,''local_%g'');\nparpool(c,%g);\n',k,options.num_cores);
 
       % use parfor loop
+      fprintf(fjob,'else\n');
+      fprintf(fjob,'  disp('' Info for GNU Octave users: Do not expect any speed up by using DynaSim''s ''parallel_flag''. This flag uses parfor loops, which currently default to regular for loops in GNU Octave.'');\n');
+      fprintf(fjob,'end\n');
       fprintf(fjob,'parfor s=1:length(SimIDs)\n');
     else
       % use for loop
@@ -604,8 +608,10 @@ end
     % end loop over simulations in this job
     fprintf(fjob,'end\n');
     if options.parallel_flag
+      fprintf(fjob,'if strcmp(reportUI,''matlab'')\n');
       %fprintf(fjob,'if started, delete(gcp); end\n');
-      fprintf(fjob,'delete(gcp)\n');
+      fprintf(fjob,'  delete(gcp)\n');
+      fprintf(fjob,'end\n');
     end
 
     % exit script

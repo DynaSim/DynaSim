@@ -661,6 +661,9 @@ if options.parallel_flag
   clear data
 
   % note that parfor currently acts just as a regular for in Octave
+  if ~strcmp(reportUI,'matlab')
+    disp(' Info for GNU Octave users: Do not expect any speed up by using DynaSim''s ''parallel_flag''. This flag uses parfor loops, which currently default to regular for loops in GNU Octave.');
+  end
   parfor sim=1:length(modifications_set)
     data(sim)=dsSimulate(model, 'modifications', modifications_set{sim}, keyvals{:},...
         'studyinfo', studyinfo, 'sim_id',sim, 'in_parfor_loop_flag', 1);  % My modification; now specifies a separate study directory for each sim.
