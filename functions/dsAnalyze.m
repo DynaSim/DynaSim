@@ -237,7 +237,7 @@ for fInd = 1:nFunc % loop over function inputs
         % Data needed for plotting:
         %   - thisResult
         %   - fPath
-        
+
         %skip if no data
         if isempty(thisResult)
           fprintf('Skipping simID=%i since no result.\n', simID);
@@ -529,6 +529,10 @@ end
 try
   if isempty(options.function_options)
     if options.parallel_flag && ~isempty(p)       % Only do parfor mode if parallel_flag is set and parpool is already running. Otherwise, this will add unncessary overhead.
+      % note that parfor currently acts just as a regular for in Octave
+      if ~strcmp(reportUI,'matlab')
+        disp(' Info for GNU Octave users: Do not expect any speed up by using DynaSim''s ''parallel_flag''. This flag uses parfor loops, which currently default to regular for loops in GNU Octave.');
+      end
       parfor dInd = 1:length(data)
         result(dInd) = feval(func,data(dInd),varargin{:});
       end
@@ -539,8 +543,12 @@ try
     end
   else
     function_options = options.function_options{fInd};
-    
+
     if options.parallel_flag && ~isempty(p)
+      % note that parfor currently acts just as a regular for in Octave
+      if ~strcmp(reportUI,'matlab')
+        disp(' Info for GNU Octave users: Do not expect any speed up by using DynaSim''s ''parallel_flag''. This flag uses parfor loops, which currently default to regular for loops in GNU Octave.');
+      end
       parfor dInd = 1:length(data)
         result(dInd) = feval(func,data(dInd),function_options{:});
       end
