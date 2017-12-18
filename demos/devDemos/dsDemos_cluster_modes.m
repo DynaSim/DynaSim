@@ -16,6 +16,10 @@ output_directory = dsGetConfig('demos_path');
 mkdirSilent(output_directory);
 cd(output_directory);
 
+%% model
+eqns='dv/dt = @current+I; {iNa,iK}';
+vary={'','I',0:10:30};
+
 %% options
 qsub_modes = {'loop', 'array'};
 % compile_flag = [0,1];
@@ -35,6 +39,12 @@ for iOpt = 1:nOpt
   parallel_flag = thisOpt(3);
   one_solve_file_flag = thisOpt(4);
   
+  if parallel_flag
+    num_cores = 2;
+  else
+    num_cores = 1;
+  end
+  
   % make dir name
   study_dir = fullfile(output_directory, sprintf('study_HH_varyI_cluster_%s',qsub_mode));
   if compile_flag
@@ -49,5 +59,5 @@ for iOpt = 1:nOpt
 
   dsSimulate(eqns,'vary',vary, 'study_dir',study_dir,'save_data_flag',1,...
   'cluster_flag',1,'verbose_flag',1,'qsub_mode',qsub_mode, 'compile_flag',compile_flag,...
-  'one_solve_file_flag',one_solve_file_flag, 'parallel_flag',parallel_flag);
+  'one_solve_file_flag',one_solve_file_flag, 'parallel_flag',parallel_flag, 'num_cores',num_cores);
 end
