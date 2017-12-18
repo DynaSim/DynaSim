@@ -744,6 +744,8 @@ end
 fprintf(fid,'%% ###########################################################\n');
 fprintf(fid,'%% Numerical integration:\n');
 fprintf(fid,'%% ###########################################################\n');
+% Set up random seed again, just incase.
+setup_randomseed(options,fid,rng_function,parameter_prefix)
 fprintf(fid,'n=2;\n');
 fprintf(fid,'for k=2:ntime\n'); % time index
 fprintf(fid,'  t=T(k-1);\n');

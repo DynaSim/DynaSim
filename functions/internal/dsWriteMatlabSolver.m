@@ -339,6 +339,8 @@ setup_randomseed(options,fid,rng_function,parameter_prefix)
 fprintf(fid,'%% ###########################################################\n');
 fprintf(fid,'%% Numerical integration:\n');
 fprintf(fid,'%% ###########################################################\n');
+% Set up random seed again, just incase.
+setup_randomseed(options,fid,rng_function,parameter_prefix)
 
 if options.compile_flag && strcmp(options.solver_type,'matlab_no_mex')
   odefun_str_name = odefun_filename;
