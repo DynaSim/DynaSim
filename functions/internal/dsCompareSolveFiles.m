@@ -43,7 +43,7 @@ files=setdiff(files,[fname fext]);
 diff_file = [fname,'.diff'];
 for f=1:length(files)
   % -B neglects empty lines, -b neglects in-between (>1) and trailing (all) whitespace, sed with regexp is used to neglect all leading whitespace
-  [~,diffs] = system(['diff -Bb <(sed ''s/^[ \t]*//'' ' solve_file_m ') <(sed ''s/^[ \t]*//'' ' fullfile(mexPath,files{f}) ')']);
+  [~,diffs] = system(['bash -c "diff -Bb <(sed ''s/^[ \t]*//'' ' solve_file_m ') <(sed ''s/^[ \t]*//'' ' fullfile(mexPath,files{f}) ')"']);
   fid = fopen(diff_file,'wt');
   if isempty(diffs)
     %dbstack
