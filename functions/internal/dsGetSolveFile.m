@@ -49,7 +49,7 @@ options=dsCheckOptions(varargin,{...
   'solve_file',[],[],... % m- or mex-file solving the system
   'study_dir',[],[],... % study directory
   'verbose_flag',0,{0,1},...
-  'parallel_flag',0,{0,1},...     % whether to run simulations in parallel (using parfor)
+  'parfor_flag',0,{0,1},...     % whether to run simulations in parallel (using parfor)
   'compile_flag',0,{0,1},... % exist('codegen')==6, whether to compile using coder instead of interpreting Matlab
   'mex_dir_flag',1,{0,1},... % Flag to tell whether or not to search in mex_dir for pre-compiled solve files (solve*_mex*).
   'mex_dir',[],[],... % Directory to search for pre-compiled mex files. Can be relative to 'study_dir' or absolute path.
