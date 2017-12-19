@@ -577,7 +577,7 @@ title('sPING with E->I turned off');
 %     'memory_limit'  : memory to allocate per batch job (default: '8G')
 % 
 %   options for parallel computing: (requires Parallel Computing Toolbox)
-%     'parallel_flag' : whether to use parfor to run simulations {0 or 1} (default: 0)
+%     'parfor_flag' : whether to use parfor to run simulations {0 or 1} (default: 0)
 %     'num_cores'     : number of cores to specify in the parallel pool
 %     *note: parallel computing has been disabled for debugging...
 % 

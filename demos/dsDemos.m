@@ -132,7 +132,7 @@ data=dsSimulate(eqns, 'time_limits',[0 250], 'vary',vary);
 dsPlot(data);
 
 % Do the same simulation, but using parfor in order to speed up larger computations
-data=dsSimulate(eqns, 'time_limits',[0 250], 'vary',vary, 'parallel_flag',1);
+data=dsSimulate(eqns, 'time_limits',[0 250], 'vary',vary, 'parfor_flag',1);
 
 % %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% QUICKLY BUILDING LARGE MODELS FROM EXISTING "MECHANISMS"
@@ -290,7 +290,7 @@ vary={
   'I->E','tauD',[5 10 15]       % inhibition decay time constant from I to E
   };
 dsSimulate(s, 'save_data_flag', 1, 'study_dir', 'demo_sPING_3',...
-                'vary', vary, 'verbose_flag', 1, 'parallel_flag',1);
+                'vary', vary, 'verbose_flag', 1, 'parfor_flag',1);
 data=dsImport('demo_sPING_3');
 dsPlot(data);
 dsPlot(data,'plot_type','rastergram'); % <-- Figure 5 in DynaSim paper
@@ -367,7 +367,7 @@ dsPlot(data);
 
 % Combine compilation and parallelization to maximize computational speed locally
 vary={'E','Iapp',[0 10 20]};
-data=dsSimulate(s, 'compile_flag',1, 'parallel_flag',1, 'vary', vary, 'study_dir','demo_sPING_3_compile_parallel');
+data=dsSimulate(s, 'compile_flag',1, 'parfor_flag',1, 'vary', vary, 'study_dir','demo_sPING_3_compile_parallel');
 dsPlot(data);
 
 % %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -560,4 +560,4 @@ dsPlot(data);
 
 % sets of simulations:
 % multinode (on a cluster): cluster_flag=1;
-% multicore (local simulation): parallel_flag=1;
+% multicore (local simulation): parfor_flag=1;

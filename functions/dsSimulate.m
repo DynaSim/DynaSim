@@ -1237,6 +1237,7 @@ option_names = {...
   'nofunctions','reduce_function_calls_flag';
   'dsfact','downsample_factor';
   'memlimit','memory_limit';
+  'parfor_flag','parallel_flag';
   };
 
 if any(ismember(option_names(:,1),options(1:2:end)))
