@@ -376,6 +376,12 @@ end
 
 %% 0.4 Non-Batch checks.
 if isempty(options.sim_id) % not in part of a batch sim
+  if strcmp(options.qsub_mode, 'array') && ~options.one_solve_file_flag && options.sims_per_job > 1
+    fprintf('Since qsub_mode==''array'' and one_solve_file_flag==1, setting options.sims_per_job=1 \n')
+    options.sims_per_job = 1;
+    % TODO: this is a temp setting until array mode handles sims_per_job > 1
+  end
+
   if options.optimize_big_vary
     options.cluster_flag = 1;
     options.qsub_mode = 'array';
@@ -388,28 +394,28 @@ if isempty(options.sim_id) % not in part of a batch sim
   % check for one_solve_file_flag
   if options.one_solve_file_flag && ~options.cluster_flag
     % One file flag only for cluster
-    fprintf('Since cluster_flag==0, setting options.one_solve_file_flag=0\n')
+    fprintf('Since cluster_flag==0, setting options.one_solve_file_flag=0 \n')
     options.one_solve_file_flag = 0;
     % TODO: this is a temp setting until iss_90 is fully implemented
   end
 
   if options.one_solve_file_flag && ~options.overwrite_flag
     % One file flag will overwrite
-    fprintf('Since one_solve_file_flag==1, setting options.overwrite_flag=1\n')
+    fprintf('Since one_solve_file_flag==1, setting options.overwrite_flag=1 \n')
     options.overwrite_flag = 1;
     % TODO: this is a temp setting until iss_90 is fully implemented
   end
 
   if options.one_solve_file_flag && ~strcmp(options.qsub_mode, 'array')
     % One file flag needs array mode
-    fprintf('Since one_solve_file_flag==1, setting options.qsub_mode=''array''\n')
+    fprintf('Since one_solve_file_flag==1, setting options.qsub_mode=''array'' \n')
     options.qsub_mode = 'array';
     % TODO: this is a temp setting until iss_90 is fully implemented
   end
 
   if options.one_solve_file_flag && options.parallel_flag
     % One file flag can't do parallel_flag
-    fprintf('Since one_solve_file_flag==1, setting options.parallel_flag=0\n')
+    fprintf('Since one_solve_file_flag==1, setting options.parallel_flag=0 \n')
     options.parallel_flag = 0;
     % TODO: this is a temp setting until iss_90 is fully implemented
   end
@@ -419,7 +425,7 @@ if isempty(options.sim_id) % not in part of a batch sim
   end
 
   if options.one_solve_file_flag && ~options.save_parameters_flag
-    fprintf('Since one_solve_file_flag==1, setting options.save_parameters_flag=1\n')
+    fprintf('Since one_solve_file_flag==1, setting options.save_parameters_flag=1 \n')
     options.save_parameters_flag = 1;
     % TODO: this is a temp setting until iss_90 is fully implemented
   end
