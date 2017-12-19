@@ -20,7 +20,7 @@ function [studyinfo, cmd] = dsCreateBatch(base_model,modifications_set,varargin)
 %                         qsub in csh for loop, mode: 'loop'. (default: 'loop').
 %     - options for parallel computing: (requires Parallel Computing Toolbox)
 %       - Note: parallel computing has been DISABLED for debugging...
-%       'parfor_flag' : whether to use parfor to run simulations {0 or 1} (default: 0)
+%       'parallel_flag' : whether to use parfor to run simulations {0 or 1} (default: 0)
 %       'num_cores'     : number of cores to specify in the parallel pool
 %
 % Outputs:
@@ -39,7 +39,7 @@ isMatlab = strcmp(reportUI,'matlab'); % logical
 %% check inputs
 options=dsCheckOptions(varargin,{...
   'compile_flag',0,{0,1},...
-  'parfor_flag',0,{0,1},...
+  'parallel_flag',0,{0,1},...
   'num_cores',4,[],... % # cores for parallel processing (SCC supports 1-12)
   'sims_per_job',1,[],... % how many sims to run per cluster job
   'memory_limit','8G',[],... % how much memory to allocate per cluster job
@@ -181,7 +181,7 @@ studyinfo.paths.mechanisms = mech_paths;
 studyinfo.paths.batch_dir = batch_dir;
 
 %% edit simulator_options so that subsequent single simulations do not create further batches
-options.simulator_options.parfor_flag = 0;
+options.simulator_options.parallel_flag = 0;
 options.simulator_options.cluster_flag = 0;
 options.simulator_options.verbose_flag = 1; % turn on verbose for cluster logs (stdout)
 
@@ -429,19 +429,19 @@ else % on cluster with qsub
       dsFnDirPath = 'dsFnPath';
     end
 
-%     if options.parfor_flag
+%     if options.parallel_flag
 %       warning('jobs in the cluster use a single thread') % TODO remove when parfor on cluster
 %     end
-
+    
     % setup inputs
     if isMatlab
-      if ~options.parfor_flag
+      if ~options.parallel_flag
         ui_command = 'matlab -nodisplay -nosplash -singleCompThread -r';
       else
         ui_command = 'matlab -nodisplay -nosplash -r';
       end
-
-      if ~options.parfor_flag
+      
+      if ~options.parallel_flag
         l_directives = sprintf('-l mem_total=%s', options.memory_limit);
       else
         l_directives = sprintf('-l mem_total=%s -pe omp %i', options.memory_limit, options.num_cores);
@@ -572,7 +572,7 @@ end
     end
 
     % loop over and run simulations in this job
-    if options.parfor_flag
+    if options.parallel_flag
       fprintf(fjob,'if strcmp(reportUI,''matlab'')\n');
       % set parallel computing options
       %fprintf(fjob,'started=0;\npool=gcp(''nocreate'');\n');
@@ -583,7 +583,7 @@ end
 
       % use parfor loop
       fprintf(fjob,'else\n');
-      fprintf(fjob,'  disp(''   Info for GNU Octave users: Do not expect any speed up by using DynaSims "parfor_flag". In GNU Octave, parfor loops currently default to regular for loops.'');\n');
+      fprintf(fjob,'  disp('' Info for GNU Octave users: Do not expect any speed up by using DynaSims "parallel_flag". This flag uses parfor loops, which currently default to regular for loops in GNU Octave.'');\n');
       fprintf(fjob,'end\n');
       fprintf(fjob,'parfor s=1:length(SimIDs)\n');
     else
@@ -603,14 +603,14 @@ end
       fprintf(fjob,'\t\tstudyinfoFile = load(fullfile(''%s'',''studyinfo.mat''),''studyinfo'');\n',batch_dir);
     end
     fprintf(fjob, 'studyinfo = studyinfoFile.studyinfo;\n');
-
+    
     % compare paths between compute machine and studyinfo startup
     fprintf(fjob,'\t\t[valid,message]=dsCheckHostPaths(studyinfo);\n');
 
     % set this simID to failed in studyinfo
     if ~options.one_solve_file_flag
       fprintf(fjob,'\t\tif ~valid\n\t\t  lasterr(message);\n\t\t  dsUpdateStudy(studyinfo.study_dir,''sim_id'',tSimID,''status'',''failed''); \n\t\t');
-      if ~options.parfor_flag
+      if ~options.parallel_flag
         fprintf(fjob,'  continue;\n');
       end
       fprintf(fjob,'\t\tend\n');
@@ -637,7 +637,7 @@ end
 
     % end loop over simulations in this job
     fprintf(fjob,'end\n');
-    if options.parfor_flag
+    if options.parallel_flag
       fprintf(fjob,'if strcmp(reportUI,''matlab'')\n');
       %fprintf(fjob,'if started, delete(gcp); end\n');
       fprintf(fjob,'  delete(gcp)\n');
