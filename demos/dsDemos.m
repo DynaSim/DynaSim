@@ -227,16 +227,16 @@ s.populations(2).mechanism_list={'iNa','iK'};
 s.populations(2).parameters={'Iapp',0,'gNa',120,'gK',36,'noise',10};
 s.connections(1).direction='I->E';
 s.connections(1).mechanism_list={'iGABAa'};
-s.connections(1).parameters={'tauD',10,'gSYN',.1,'netcon','ones(N_pre,N_post)'}; % connectivity matrix defined using a string that evalutes to a numeric matrix
+s.connections(1).parameters={'tauD',10,'gGABAa',.1,'netcon','ones(N_pre,N_post)'}; % connectivity matrix defined using a string that evalutes to a numeric matrix
 s.connections(2).direction='E->I';
 s.connections(2).mechanism_list={'iAMPA'};
-s.connections(2).parameters={'tauD',2,'gSYN',.1,'netcon',ones(80,20)}; % connectivity set using a numeric matrix defined in script
+s.connections(2).parameters={'tauD',2,'gAMPA',.1,'netcon',ones(80,20)}; % connectivity set using a numeric matrix defined in script
 
 %% Simulate Sparse Pyramidal-Interneuron-Network-Gamma (sPING)
 data=dsSimulate(s);
 
 dsPlot(data); % <-- Figure 4 in DynaSim paper
-dsPlot(data,'variable',{'E_v','E_I_iGABAa_ISYN'});
+dsPlot(data,'variable',{'E_v','E_I_iGABAa_IGABAa'});
 
 % View the connection mechanism file:
 [~,eqnfile]=dsLocateModelFiles('iAMPA.mech'); edit(eqnfile{1});
@@ -429,10 +429,10 @@ s.populations(1).parameters={'stim_amp',10};  % amplitude of stimulation
 s.populations(2).equations='FS';              % inhibitory (I) population
 s.connections(1).direction='RS->FS';          % E->I connection
 s.connections(1).mechanism_list='iAMPA';      % AMPA synapse
-s.connections(1).parameters={'gSYN',.5};      % synaptic weight
+s.connections(1).parameters={'gAMPA',.5};      % synaptic weight
 s.connections(2).direction='FS->RS';          % I->E connection
 s.connections(2).mechanism_list='iGABAa';     % GABAa synapse
-s.connections(2).parameters={'gSYN',1,'tauD',10}; % strength and time constant of inhibition
+s.connections(2).parameters={'gGABAa',1,'tauD',10}; % strength and time constant of inhibition
 dsPlot(dsSimulate(s,'time_limits',T));
 
 %% Multicompartment neurons
@@ -475,9 +475,9 @@ LIF={
      };
 
 iampa={
-  'gSYN=.5; ESYN=0; tauD=2; tauR=0.4; delay=15'
+  'gAMPA=.5; EAMPA=0; tauD=2; tauR=0.4; delay=15'
   'f(x) = (exp(-x/tauD)-exp(-x/tauR)).*(x>0)'
-  'Isyn(V) = gSYN.*sum(f(t-tspike_pre-delay)).*(V-ESYN)'
+  'Isyn(V) = gAMPA.*sum(f(t-tspike_pre-delay)).*(V-EAMPA)'
   '@isyn += Isyn(V_post)'
 };
 
@@ -504,11 +504,11 @@ dsPlot(data);
 % the specification.mechanisms field.
 
 ampa_with_delay={
-  'gSYN=.1; ESYN=0; tauD=2; tauR=0.4; delay=20'
+  'gAMPA=.1; EAMPA=0; tauD=2; tauR=0.4; delay=20'
   'netcon=ones(N_pre,N_post)'
-  'ISYN(X,s)=gSYN.*(s*netcon).*(X-ESYN)'
+  'IAMPA(X,s)=gAMPA.*(s*netcon).*(X-EAMPA)'
   'ds/dt=-s./tauD+((1-s)/tauR).*(1+tanh(X_pre(t-delay)/10)); s(0)=.1' % 20ms delay
-  '@current += -ISYN(X_post,s)'
+  '@current += -IAMPA(X_post,s)'
 };
 
 s=[];
@@ -516,7 +516,7 @@ s.populations(1).name='HH';
 s.populations(1).equations='dV/dt=@current+10*(t<50);{iNa,iK};V(0)=-65';
 s.connections(1).direction='HH->HH';
 s.connections(1).mechanism_list='iampa';
-s.connections(1).parameters={'gSYN',.1};
+s.connections(1).parameters={'gAMPA',.1};
 s.mechanisms(1).name='iampa';
 s.mechanisms(1).equations=ampa_with_delay;
 data=dsSimulate(s,'time_limits',[0 100]);
