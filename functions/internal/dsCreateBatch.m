@@ -577,7 +577,9 @@ end
       % set parallel computing options
       %fprintf(fjob,'started=0;\npool=gcp(''nocreate'');\n');
       %fprintf(fjob,'if isempty(pool), parpool(%g); started=1; end\n',options.num_cores);
-      fprintf(fjob,'  c=parcluster;\n  %%saveAsProfile(c,''local_%g'');\n  parpool(c,%g);\n',k,options.num_cores);
+      fprintf(fjob,'  c=parcluster;\n');
+      fprintf(fjob,'  saveAsProfile(c, sprintf(''local_%%s'', getenv(''JOB_ID''))); \n');
+      fprintf(fjob,'  parpool(c,%g); \n',options.num_cores);
 
       % use parfor loop
       fprintf(fjob,'else\n');
@@ -600,7 +602,7 @@ end
     else
       fprintf(fjob,'\t\tstudyinfoFile = load(fullfile(''%s'',''studyinfo.mat''),''studyinfo'');\n',batch_dir);
     end
-    fprintf(fjob, 'studyinfo = studyinfoFile.studyinfo;');
+    fprintf(fjob, 'studyinfo = studyinfoFile.studyinfo;\n');
     
     % compare paths between compute machine and studyinfo startup
     fprintf(fjob,'\t\t[valid,message]=dsCheckHostPaths(studyinfo);\n');
