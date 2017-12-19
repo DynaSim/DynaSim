@@ -32,7 +32,7 @@ function result = dsAnalyze(src,funcIn,varargin)
 %                             key,val list as varargin for AnalyzeData
 %     'load_all_data_flag'  : whether to load all the data in studyinfo
 %                             at once {0 or 1} (default: 0)
-%     'parallel_flag' : whether to use parfor to run analysis {0 or 1} (default: 0)
+%     'parfor_flag' : whether to use parfor to run analysis {0 or 1} (default: 0)
 %
 % Outputs:
 %   - result: structure returned by the analysis function
@@ -70,7 +70,7 @@ options=dsCheckOptions(varargin,{...
   'load_all_data_flag',0,{0,1},...
   'auto_gen_test_data_flag',0,{0,1},...
   'unit_test_flag',0,{0,1},...
-  'parallel_flag',0,{0,1},...     % whether to run analysis in parallel (using parfor)
+  'parfor_flag',0,{0,1},...     % whether to run analysis in parallel (using parfor)
   'auto_gen_test_data_flag',0,{0,1},...
   },false);
 
@@ -528,10 +528,10 @@ end
 
 try
   if isempty(options.function_options)
-    if options.parallel_flag && ~isempty(p)       % Only do parfor mode if parallel_flag is set and parpool is already running. Otherwise, this will add unncessary overhead.
+    if options.parfor_flag && ~isempty(p)       % Only do parfor mode if parfor_flag is set and parpool is already running. Otherwise, this will add unncessary overhead.
       % note that parfor currently acts just as a regular for in Octave
       if ~strcmp(reportUI,'matlab')
-        disp(' Info for GNU Octave users: Do not expect any speed up by using DynaSim''s ''parallel_flag''. This flag uses parfor loops, which currently default to regular for loops in GNU Octave.');
+        disp('   Info for GNU Octave users: Do not expect any speed up by using DynaSim''s ''parfor_flag''. In GNU Octave, parfor loops currently default to regular for loops.');
       end
       parfor dInd = 1:length(data)
         result(dInd) = feval(func,data(dInd),varargin{:});
@@ -544,10 +544,10 @@ try
   else
     function_options = options.function_options{fInd};
 
-    if options.parallel_flag && ~isempty(p)
+    if options.parfor_flag && ~isempty(p)
       % note that parfor currently acts just as a regular for in Octave
       if ~strcmp(reportUI,'matlab')
-        disp(' Info for GNU Octave users: Do not expect any speed up by using DynaSim''s ''parallel_flag''. This flag uses parfor loops, which currently default to regular for loops in GNU Octave.');
+        disp('   Info for GNU Octave users: Do not expect any speed up by using DynaSim''s ''parfor_flag''. In GNU Octave, parfor loops currently default to regular for loops.');
       end
       parfor dInd = 1:length(data)
         result(dInd) = feval(func,data(dInd),function_options{:});
