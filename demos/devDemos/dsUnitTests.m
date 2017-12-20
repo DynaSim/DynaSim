@@ -79,28 +79,28 @@ spec=[];
 spec.populations(1).equations='dv/dt=current; {iNa,iK};';
 spec.populations(1).size=1;
 model=dsGenerateModel(spec);
-data=dsSimulate(model,'mex_flag',0);
+data=dsSimulate(model,'compile_flag',0);
 figure; plot(data.time,data.(data.labels{1}))
 
 spec=[];
 spec.populations(1).equations='dv/dt=current; {iNa,iK};';
 spec.populations(1).size=2;
 model=dsGenerateModel(spec);
-data=dsSimulate(model,'mex_flag',0);
+data=dsSimulate(model,'compile_flag',0);
 figure; plot(data.time,data.(data.labels{1}))
 
 spec=[];
 spec.populations(1).equations='dv/dt=current; {iNa,iK,iCa};';
 spec.populations(1).size=1;
 model=dsGenerateModel(spec);
-data=dsSimulate(model,'mex_flag',0);
+data=dsSimulate(model,'compile_flag',0);
 figure; plot(data.time,data.(data.labels{1}))
 
 spec=[];
 spec.populations(1).equations='dv/dt=current; {iNa,iK,iCa};';
 spec.populations(1).size=2;
 model=dsGenerateModel(spec);
-data=dsSimulate(model,'mex_flag',0);
+data=dsSimulate(model,'compile_flag',0);
 figure; plot(data.time,data.(data.labels{1}))
 
 if 1
@@ -114,7 +114,7 @@ if 1
   spec.populations(1).equations='dv/dt=current; {iNa,iK,iCa,CaBuffer,iCan};';
   spec.populations(1).size=1;
   model=dsGenerateModel(spec);
-  data=dsSimulate(model,'mex_flag',0);
+  data=dsSimulate(model,'compile_flag',0);
   figure; plot(data.time,data.(data.labels{1}))
 
   % !rm solve_ode.m params.mat
@@ -122,7 +122,7 @@ if 1
   spec.populations(1).equations='dv/dt=current; {iNa,iK,iCa,CaBuffer,iCan};';
   spec.populations(1).size=5;
   model=dsGenerateModel(spec);
-  data=dsSimulate(model,'mex_flag',0);
+  data=dsSimulate(model,'compile_flag',0);
   figure; plot(data.time,data.(data.labels{1}))
 
   !rm solve_ode.m params.mat
@@ -131,7 +131,7 @@ if 1
   spec.populations(1).size=5;
   spec.connections(1).mechanism_list={'GABAa'};
   model=dsGenerateModel(spec);
-  data=dsSimulate(model,'mex_flag',0);
+  data=dsSimulate(model,'compile_flag',0);
   figure; plot(data.time,data.(data.labels{1}))
 end
 
@@ -144,34 +144,34 @@ spec.connections(1).source='pop1';
 spec.connections(1).target='pop2';
 spec.connections(1).mechanism_list={'GABAa'};
 model=dsGenerateModel(spec);
-data=dsSimulate(model,'mex_flag',0,'verbose_flag',1);
+data=dsSimulate(model,'compile_flag',0,'verbose_flag',1);
 figure; plot(data.time,data.pop1_v,'b'); hold on; plot(data.time,data.pop2_v,'r')
-data=dsSimulate(model,'mex_flag',1);
+data=dsSimulate(model,'compile_flag',1);
 figure; plot(data.time,data.pop1_v,'b'); hold on; plot(data.time,data.pop2_v,'r')
 
 spec=[];
 spec.populations(1).equations='dv/dt=@current+10; {iNa3,iK3};';
 model=dsGenerateModel(spec);
-data=dsSimulate(model,'mex_flag',0);
+data=dsSimulate(model,'compile_flag',0);
 figure; plot(data.time,data.(data.labels{1}))
 
 spec=[];
 spec.populations(1).equations='dv/dt=@M+@current+10; {iNa3@M,iK3};';
 model=dsGenerateModel(spec);
-data=dsSimulate(model,'mex_flag',0);
+data=dsSimulate(model,'compile_flag',0);
 figure; plot(data.time,data.(data.labels{1}))
 
 spec=[];
 spec.populations(1).equations='dv/dt=@M+10; {iNa3@M,iK3@M};';
 model=dsGenerateModel(spec);
-data=dsSimulate(model,'mex_flag',0);
+data=dsSimulate(model,'compile_flag',0);
 figure; plot(data.time,data.(data.labels{1}))
 
 % EXAMPLE: fully modularized model specification (iNa3.mech uses 'X')
 spec=[];
 spec.populations(1).equations='dv/dt=@M+10; {iNa3,iK3}@M;';
 model=dsGenerateModel(spec);
-data=dsSimulate(model,'mex_flag',0);
+data=dsSimulate(model,'compile_flag',0);
 figure; plot(data.time,data.(data.labels{1}))
 
 % todo:
@@ -183,27 +183,27 @@ spec=[];
 spec.populations(1).equations='dv/dt=@M+10; monitor o=v/1000; {iNa3,iK3}@M;';
 model=dsGenerateModel(spec);
 % pause(1) % does this fix the bug? YES. it should if problem is solver file gets same timestamp-based name
-data=dsSimulate(model,'mex_flag',0);
+data=dsSimulate(model,'compile_flag',0);
 figure; plot(data.time,data.pop1_o)
 figure; plot(data.time,data.pop1_iNa3_I) % monitor set in iNa3.mech
 
 spec=[];
 spec.populations(1).equations='dv/dt=@M+10; monitor iK3.I; {iNa3,iK3}@M;';
 model=dsGenerateModel(spec);
-data=dsSimulate(model,'mex_flag',0);
+data=dsSimulate(model,'compile_flag',0);
 figure; plot(data.time,data.pop1_iK3_I)
 
 spec=[];
 spec.populations(1).equations='dv/dt=@M+10; monitor iK3_I; {iNa3,iK3}@M;';
 model=dsGenerateModel(spec);
-data=dsSimulate(model,'mex_flag',0);
+data=dsSimulate(model,'compile_flag',0);
 figure; plot(data.time,data.pop1_iK3_I)
 
 % Spike Monitor (default threshold=0)
 spec=[];
 spec.populations(1).equations='dv/dt=@M+10; {iNa3,iK3}@M; monitor v.spikes;';
 model=dsGenerateModel(spec);
-data=dsSimulate(model,'mex_flag',0);
+data=dsSimulate(model,'compile_flag',0);
 figure; plot(data.time,data.pop1_v); hold on; plot(data.time,100*data.pop1_v_spikes,'r');
 
 % Spike Monitor with custom threshold (=60)
@@ -294,7 +294,7 @@ spec.connections(2,2).label = 'LTS-B';
 spec.connections(2,2).mechanisms = {'iSYN'};
 spec.connections(2,2).parameters = {'g_SYN',gLTSB,'E_SYN',-80,'tauDx',20,'tauRx',.5,'IC_noise',0};
 model=dsGenerateModel(spec);
-data=dsSimulate(model,'tspan',[0 1000],'mex_flag',1);
+data=dsSimulate(model,'tspan',[0 1000],'compile_flag',1);
 figure; plot(data.time,data.B_V,'r-',data.time,data.LTS_V,'g-')
 
 
@@ -319,7 +319,7 @@ spec.connections(2,1).label = 'I-E';
 spec.connections(2,1).mechanisms = {'GABAa2'};
 spec.connections(2,1).parameters = {'tauDx',tauI,'g_SYN',gI*(20/nI)};
 model=dsGenerateModel(spec);
-data=dsSimulate(model,'tspan',[0 100],'mex_flag',0);
+data=dsSimulate(model,'tspan',[0 100],'compile_flag',0);
 figure; plot(data.time,data.E_V,'b-',data.time,data.I_V,'r-')
 
 % Sparse PING in new specification format
@@ -338,7 +338,7 @@ s.cons(2).source='I';
 s.cons(2).target='E';
 s.cons(2).mechanism_list={'GABAa2'};
 s.cons(2).parameters={'tauDx',10,'g_SYN',.1};
-data=dsSimulate(s,'tspan',[0 100],'solver','rk4','mex_flag',0);
+data=dsSimulate(s,'tspan',[0 100],'solver','rk4','compile_flag',0);
 figure; plot(data.time,data.E_V,'b-',data.time,data.I_V,'r-')
 
 % Sparse PING in new specification format w/ full modularization (w/o input mechanism or pop state var IC)
@@ -357,7 +357,7 @@ s.cons(2).source='I';
 s.cons(2).target='E';
 s.cons(2).mechanism_list={'GABAa2@M'};
 s.cons(2).parameters={'tauDx',10,'g_SYN',.1};
-data=dsSimulate(s,'tspan',[0 100],'solver','rk4','mex_flag',0);
+data=dsSimulate(s,'tspan',[0 100],'solver','rk4','compile_flag',0);
 figure; plot(data.time,data.E_y,'b-',data.time,data.I_y,'r-')
 
 % equivalent with explicit noise term
@@ -376,7 +376,7 @@ s.cons(2).source='I';
 s.cons(2).target='E';
 s.cons(2).mechanism_list={'GABAa2@M'};
 s.cons(2).parameters={'tauDx',10,'g_SYN',.1};
-data=dsSimulate(s,'tspan',[0 100],'solver','rk4','mex_flag',0);
+data=dsSimulate(s,'tspan',[0 100],'solver','rk4','compile_flag',0);
 figure; plot(data.time,data.E_y,'b-',data.time,data.I_y,'r-')
 
 % simulate with data stored on disk: method 1
@@ -930,13 +930,13 @@ dsPlotFR(data);
 % --------------------------------------
 
 % test sim: local, one sim, compiled
-data=dsSimulate('dv/dt=@M+10; {iNa,iK}@M','mex_flag',1);
-data=dsSimulate('dv/dt=@M+10; {iNa,iK}@M','mex_flag',1);
+data=dsSimulate('dv/dt=@M+10; {iNa,iK}@M','compile_flag',1);
+data=dsSimulate('dv/dt=@M+10; {iNa,iK}@M','compile_flag',1);
 dsPlotFR(data);
 
 % test sim: local, 3 sims, compiled
-data=dsSimulate('dv/dt=@M+10; {iNa,iK}@M; vary(gNa=[50 100 200])','mex_flag',1);
-data=dsSimulate('dv/dt=@M+10; {iNa,iK}@M; vary(gNa=[50 100 200])','mex_flag',1);
+data=dsSimulate('dv/dt=@M+10; {iNa,iK}@M; vary(gNa=[50 100 200])','compile_flag',1);
+data=dsSimulate('dv/dt=@M+10; {iNa,iK}@M; vary(gNa=[50 100 200])','compile_flag',1);
 dsPlotFR(data);
 
 % % using studyinfo (save_data_flag=1): ###################################
@@ -963,23 +963,23 @@ studyinfo.simulations(2)
 studyinfo.simulations(2).machine_info
 
 % test sim: local, one sim, compiled
-dsSimulate('dv/dt=@M+10; {iNa,iK}@M','mex_flag',1,'save_data_flag',1,'study_dir','StudyC','verbose_flag',1);
-data=dsSimulate('dv/dt=@M+10; {iNa,iK}@M','mex_flag',1,'save_data_flag',1,'study_dir','StudyC','verbose_flag',1);
+dsSimulate('dv/dt=@M+10; {iNa,iK}@M','compile_flag',1,'save_data_flag',1,'study_dir','StudyC','verbose_flag',1);
+data=dsSimulate('dv/dt=@M+10; {iNa,iK}@M','compile_flag',1,'save_data_flag',1,'study_dir','StudyC','verbose_flag',1);
 dsPlotFR(data);
 
 % test sim: local, 3 sims, compiled
-dsSimulate('dv/dt=@M+10; {iNa,iK}@M; vary(gNa=[50 100 200])','mex_flag',1,'save_data_flag',1,'study_dir','StudyD','verbose_flag',1);
-data=dsSimulate('dv/dt=@M+10; {iNa,iK}@M; vary(gNa=[50 100 200])','mex_flag',1,'save_data_flag',1,'study_dir','StudyD','verbose_flag',1);
+dsSimulate('dv/dt=@M+10; {iNa,iK}@M; vary(gNa=[50 100 200])','compile_flag',1,'save_data_flag',1,'study_dir','StudyD','verbose_flag',1);
+data=dsSimulate('dv/dt=@M+10; {iNa,iK}@M; vary(gNa=[50 100 200])','compile_flag',1,'save_data_flag',1,'study_dir','StudyD','verbose_flag',1);
 dsPlotFR(data);
 
 % test tspan=[0 200]
 data=dsSimulate('dv/dt=@M+10; {iNa,iK}@M; vary(gNa=[50 100 200])','tspan',[0 200]);
 data(1).time(end)
-data=dsSimulate('dv/dt=@M+10; {iNa,iK}@M','mex_flag',1,'tspan',[0 200]);
+data=dsSimulate('dv/dt=@M+10; {iNa,iK}@M','compile_flag',1,'tspan',[0 200]);
 data(1).time(end)
-data=dsSimulate('dv/dt=@M+10; {iNa,iK}@M','mex_flag',1,'tspan',[0 200],'save_data_flag',1);
+data=dsSimulate('dv/dt=@M+10; {iNa,iK}@M','compile_flag',1,'tspan',[0 200],'save_data_flag',1);
 data(1).time(end)
-data=dsSimulate('dv/dt=@M+10; {iNa,iK}@M','mex_flag',1,'tspan',[0 200],'save_data_flag',1,'study_dir','StudyE');
+data=dsSimulate('dv/dt=@M+10; {iNa,iK}@M','compile_flag',1,'tspan',[0 200],'save_data_flag',1,'study_dir','StudyE');
 data(1).time(end)
 dsPlotFR(data);
 
@@ -1070,14 +1070,14 @@ end
 
 % test sim: cluster, one sim, compiled
 [data,studyinfo]=dsSimulate('dv/dt=@M+10; {iNa,iK}@M',...
-  'cluster_flag',1,'mex_flag',1,'study_dir','ClusterTestMEX','verbose_flag',1);
+  'cluster_flag',1,'compile_flag',1,'study_dir','ClusterTestMEX','verbose_flag',1);
 dsMonitorStudy(studyinfo.study_dir);
 run(studyinfo.simulations.job_file);
 dsMonitorStudy(studyinfo.study_dir);
 
 % test sim: cluster, 3 sims, compiled
 [data,studyinfo]=dsSimulate('dv/dt=(@M+10)/Cm; Cm=1; {iNa,iK}@M; vary(Cm=[1 2 3])',...
-  'cluster_flag',1,'mex_flag',1,'study_dir','TestClusterSetMEX','verbose_flag',1);
+  'cluster_flag',1,'compile_flag',1,'study_dir','TestClusterSetMEX','verbose_flag',1);
 dsMonitorStudy(studyinfo.study_dir);
 run(studyinfo.simulations(1).job_file);
 dsMonitorStudy(studyinfo.study_dir);
@@ -1091,7 +1091,7 @@ studyinfo=dsMonitorStudy(studyinfo.study_dir);
 % test sim: cluster, 3 sims in 2 jobs, not compiled
 % set sims_per_job=2
 [data,studyinfo]=dsSimulate('dv/dt=(@M+10)/Cm; Cm=1; {iNa,iK}@M; vary(Cm=[1 2 3])',...
-  'cluster_flag',1,'mex_flag',0,'sims_per_job',2,'study_dir','ClusterTestSet2','verbose_flag',1);
+  'cluster_flag',1,'compile_flag',0,'sims_per_job',2,'study_dir','ClusterTestSet2','verbose_flag',1);
 dsMonitorStudy(studyinfo.study_dir);
 run(studyinfo.simulations(1).job_file);
 studyinfo=dsMonitorStudy(studyinfo.study_dir);
@@ -1112,7 +1112,7 @@ exist(studyinfo.simulations(3).data_file)
 % test sim: cluster, 3 sims in 2 jobs, compiled
 % set sims_per_job=2
 [data,studyinfo]=dsSimulate('dv/dt=(@M+10)/Cm; Cm=1; {iNa,iK}@M; vary(Cm=[1 2 3])',...
-  'cluster_flag',1,'mex_flag',1,'sims_per_job',2,'study_dir','ClusterTestSetMEX2','verbose_flag',1);
+  'cluster_flag',1,'compile_flag',1,'sims_per_job',2,'study_dir','ClusterTestSetMEX2','verbose_flag',1);
 dsMonitorStudy(studyinfo.study_dir);
 run(studyinfo.simulations(1).job_file);
 studyinfo=dsMonitorStudy(studyinfo.study_dir);
@@ -1132,7 +1132,7 @@ exist(studyinfo.simulations(3).data_file)
 
 % test email notification when study simulations are complete
 [data,studyinfo]=dsSimulate('dv/dt=(@M+10)/Cm; Cm=1; {iNa,iK}@M; vary(Cm=[1 2 3])',...
-  'cluster_flag',1,'mex_flag',1,'sims_per_job',2,'email','jssherfey@gmail.com','study_dir','ClusterTestSetMEX3','verbose_flag',1);
+  'cluster_flag',1,'compile_flag',1,'sims_per_job',2,'email','jssherfey@gmail.com','study_dir','ClusterTestSetMEX3','verbose_flag',1);
 run(studyinfo.simulations(1).job_file);
 run(studyinfo.simulations(3).job_file);
 dsMonitorStudy(studyinfo.study_dir);
@@ -1154,7 +1154,7 @@ dsPlotFR(data);
 
 % test sim: cluster, 3 sims, compiled, save csv
 [data,studyinfo]=dsSimulate('dv/dt=(@M+10)/Cm; Cm=1; {iNa,iK}@M; vary(Cm=[1 2 3])',...
-  'cluster_flag',1,'disk_flag',1,'mex_flag',1,'study_dir','TestDiskClusterSetMEX','verbose_flag',1);
+  'cluster_flag',1,'disk_flag',1,'compile_flag',1,'study_dir','TestDiskClusterSetMEX','verbose_flag',1);
 dsMonitorStudy(studyinfo.study_dir);
 run(studyinfo.simulations(1).job_file);
 dsMonitorStudy(studyinfo.study_dir);
@@ -1167,14 +1167,14 @@ dsPlotFR(data);
 
 % test sim: local, 3 sims, not compiled, save csv
 [data,studyinfo]=dsSimulate('dv/dt=(@M+10)/Cm; Cm=1; {iNa,iK}@M; vary(Cm=[1 2 3])',...
-  'cluster_flag',0,'disk_flag',1,'mex_flag',0,'study_dir','TestDiskLocalSet','verbose_flag',1);
+  'cluster_flag',0,'disk_flag',1,'compile_flag',0,'study_dir','TestDiskLocalSet','verbose_flag',1);
 dsPlotFR(data);
 data2=dsImport('TestDiskLocalSet');
 dsPlotFR(data2);
 
 % test sim: local, 3 sims, compiled, save csv
 [data,studyinfo]=dsSimulate('dv/dt=(@M+10)/Cm; Cm=1; {iNa,iK}@M; vary(Cm=[1 2 3])',...
-  'cluster_flag',0,'disk_flag',1,'mex_flag',1,'study_dir','TestDiskLocalSetMEX','verbose_flag',1);
+  'cluster_flag',0,'disk_flag',1,'compile_flag',1,'study_dir','TestDiskLocalSetMEX','verbose_flag',1);
 dsPlotFR(data);
 data2=dsImport('TestDiskLocalSetMEX');
 dsPlotFR(data2);
@@ -1202,7 +1202,7 @@ m.functions.pop1_pop1_AMPA_ISYN
 
 if 1 % todo -- DONE: FIX: data sets returned are identical and only reflect the last result
   [data,studyinfo]=dsSimulate('dv/dt=(@M+10)/Cm; Cm=1; {iNa,iK}@M; vary(gNa=[100 200])',...
-  'cluster_flag',1,'mex_flag',1,'study_dir','Test4','verbose_flag',1);
+  'cluster_flag',1,'compile_flag',1,'study_dir','Test4','verbose_flag',1);
   dsMonitorStudy(studyinfo.study_dir);
   run(studyinfo.simulations(1).job_file);
   dsMonitorStudy(studyinfo.study_dir);
@@ -1212,11 +1212,11 @@ if 1 % todo -- DONE: FIX: data sets returned are identical and only reflect the 
   dsPlotFR(data);
   % should look like this:
   [data,studyinfo]=dsSimulate('dv/dt=(@M+10)/Cm; Cm=1; {iNa,iK}@M; vary(gNa=[100 200])',...
-  'cluster_flag',0,'mex_flag',1,'verbose_flag',1);
+  'cluster_flag',0,'compile_flag',1,'verbose_flag',1);
   dsPlotFR(data);
 
   [data,studyinfo]=dsSimulate('dv/dt=(@M+10)/Cm; Cm=1; {iNa,iK}@M; vary(gNa=[100 200])',...
-  'cluster_flag',1,'mex_flag',0,'study_dir','Test4b','verbose_flag',1);
+  'cluster_flag',1,'compile_flag',0,'study_dir','Test4b','verbose_flag',1);
   dsMonitorStudy(studyinfo.study_dir);
   run(studyinfo.simulations(1).job_file);
   dsMonitorStudy(studyinfo.study_dir);
@@ -1228,26 +1228,26 @@ end
 
 % A) * FIX: tspan not adjustable after compiling MEX -- DONE
 data=dsSimulate('dv/dt=@M+10; {iNa,iK}@M; vary(gNa=[50 100 200])',...
-  'tspan',[0 200],'mex_flag',1,'verbose_flag',1);
+  'tspan',[0 200],'compile_flag',1,'verbose_flag',1);
 dsPlotFR(data); dsPlotFR(data(2));
 data=dsSimulate('dv/dt=@M+10; {iNa,iK}@M; vary(gNa=[50 100 200])',...
-  'tspan',[0 100],'mex_flag',1,'verbose_flag',1);
-dsPlotFR(data); dsPlotFR(data(2));
-% works
-
-data=dsSimulate('dv/dt=@M+10; {iNa,iK}@M; vary(gNa=[50 100 200])',...
-  'tspan',[0 200],'mex_flag',1,'save_data_flag',1,'verbose_flag',1);
-dsPlotFR(data); dsPlotFR(data(2));
-data=dsSimulate('dv/dt=@M+10; {iNa,iK}@M; vary(gNa=[50 100 200])',...
-  'tspan',[0 100],'mex_flag',1,'save_data_flag',1,'verbose_flag',1);
+  'tspan',[0 100],'compile_flag',1,'verbose_flag',1);
 dsPlotFR(data); dsPlotFR(data(2));
 % works
 
 data=dsSimulate('dv/dt=@M+10; {iNa,iK}@M; vary(gNa=[50 100 200])',...
-  'tspan',[0 200],'mex_flag',1,'save_data_flag',1,'study_dir','StudyG','verbose_flag',1);
+  'tspan',[0 200],'compile_flag',1,'save_data_flag',1,'verbose_flag',1);
 dsPlotFR(data); dsPlotFR(data(2));
 data=dsSimulate('dv/dt=@M+10; {iNa,iK}@M; vary(gNa=[50 100 200])',...
-  'tspan',[0 100],'mex_flag',1,'save_data_flag',1,'study_dir','StudyG','verbose_flag',1);
+  'tspan',[0 100],'compile_flag',1,'save_data_flag',1,'verbose_flag',1);
+dsPlotFR(data); dsPlotFR(data(2));
+% works
+
+data=dsSimulate('dv/dt=@M+10; {iNa,iK}@M; vary(gNa=[50 100 200])',...
+  'tspan',[0 200],'compile_flag',1,'save_data_flag',1,'study_dir','StudyG','verbose_flag',1);
+dsPlotFR(data); dsPlotFR(data(2));
+data=dsSimulate('dv/dt=@M+10; {iNa,iK}@M; vary(gNa=[50 100 200])',...
+  'tspan',[0 100],'compile_flag',1,'save_data_flag',1,'study_dir','StudyG','verbose_flag',1);
 dsPlotFR(data); dsPlotFR(data(2));
 % works as it should; second simulation loads the result saved from the
 % first; that is why the second data does not have 100ms in it. possible
@@ -1256,7 +1256,7 @@ dsPlotFR(data); dsPlotFR(data(2));
 % addition to the data_file name before deciding whether to load existing
 % data or run a new simulation.
 data=dsSimulate('dv/dt=@M+10; {iNa,iK}@M; vary(gNa=[50 100 200])',...
-  'tspan',[0 100],'mex_flag',1,'save_data_flag',1,'study_dir','StudyG',...
+  'tspan',[0 100],'compile_flag',1,'save_data_flag',1,'study_dir','StudyG',...
   'overwrite_flag',1,'verbose_flag',1);
 dsPlotFR(data); dsPlotFR(data(2));
 % works
@@ -1350,7 +1350,7 @@ model.monitors
 
 % test sim: cluster, 3 sims, compiled
 [data,studyinfo]=dsSimulate('dv/dt=(@M+10)/Cm; Cm=1; {iNa,iK}@M; vary(Cm=[1 2 3])',...
-  'cluster_flag',1,'mex_flag',1,'study_dir','TestProfileStudy','verbose_flag',1);
+  'cluster_flag',1,'compile_flag',1,'study_dir','TestProfileStudy','verbose_flag',1);
 dsMonitorStudy(studyinfo.study_dir);
 run(studyinfo.simulations(1).job_file);
 dsMonitorStudy(studyinfo.study_dir);
@@ -1488,10 +1488,10 @@ end
 % on SCC: works
 if 0
   [data,studyinfo]=dsSimulate('dv/dt=(@M+10)/Cm; Cm=1; {iNa,iK}@M; vary(Cm=[1 2 3])',...
-    'cluster_flag',1,'mex_flag',1,'sims_per_job',2,'parfor_flag',1,'verbose_flag',1);
+    'cluster_flag',1,'compile_flag',1,'sims_per_job',2,'parfor_flag',1,'verbose_flag',1);
   % local test:
   [data,studyinfo]=dsSimulate('dv/dt=(@M+10)/Cm; Cm=1; {iNa,iK}@M; vary(Cm=[1 2 3])',...
-    'cluster_flag',1,'mex_flag',1,'sims_per_job',2,'parfor_flag',1,'verbose_flag',1);
+    'cluster_flag',1,'compile_flag',1,'sims_per_job',2,'parfor_flag',1,'verbose_flag',1);
   dsMonitorStudy(studyinfo);
   [s,r]=system(sprintf('cat %s',studyinfo.simulations(1).job_file));
   eval(r);

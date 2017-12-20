@@ -344,7 +344,7 @@ if 0
   % or custom functions.
 
   % Run on cluster with compilation
-  dsSimulate(eqns, 'save_data_flag',1, 'study_dir','demo_cluster_4','mex_flag',1,...
+  dsSimulate(eqns, 'save_data_flag',1, 'study_dir','demo_cluster_4','compile_flag',1,...
                      'vary',vary, 'cluster_flag',1, 'overwrite_flag',1, 'verbose_flag',1);
 end
 
@@ -354,20 +354,20 @@ end
 
 % Simulating large models can be sped up significantly by compiling the
 % simulation before running it. DynaSim makes this easy to do using the
-% 'mex_flag' option in dsSimulate. Note: compiling the model can
+% 'compile_flag' option in dsSimulate. Note: compiling the model can
 % take several seconds to minutes; however, it only compiles the first time
 % it is run and is significantly faster on subsequent runs.
 
-data=dsSimulate(s, 'mex_flag',1, 'study_dir','demo_sPING_3_compile');
+data=dsSimulate(s, 'compile_flag',1, 'study_dir','demo_sPING_3_compile');
 dsPlot(data);
 
 % Now run again:
-data=dsSimulate(s, 'mex_flag',1, 'study_dir','demo_sPING_3_compile');
+data=dsSimulate(s, 'compile_flag',1, 'study_dir','demo_sPING_3_compile');
 dsPlot(data);
 
 % Combine compilation and parallelization to maximize computational speed locally
 vary={'E','Iapp',[0 10 20]};
-data=dsSimulate(s, 'mex_flag',1, 'parfor_flag',1, 'vary', vary, 'study_dir','demo_sPING_3_compile_parallel');
+data=dsSimulate(s, 'compile_flag',1, 'parfor_flag',1, 'vary', vary, 'study_dir','demo_sPING_3_compile_parallel');
 dsPlot(data);
 
 % %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -546,7 +546,7 @@ dsPlot(data,'variable',{'V','gPoisson'});
 %% Tips for efficient simulation
 
 downsample_factor=10; % downsampling saves time by recording fewer time points
-mex_flag=1;       % takes longer to compile on 1st run; faster on subsequent runs
+compile_flag=1;       % takes longer to compile on 1st run; faster on subsequent runs
                       % Note: compilation is most beneficial when Npop>1.
 solver='euler';       % Euler integration requires fewer calculations than 4th-order Runge Kutta
 dt=.01;               % increase time step as long as solution converges
@@ -555,7 +555,7 @@ eqns='dv/dt=@current+I; {iNa,iK}';
 
 % run and compile MEX file
 data=dsSimulate(eqns,'vary',{'I',10},'downsample_factor',downsample_factor,...
-  'mex_flag',mex_flag,'solver',solver,'dt',dt);
+  'compile_flag',compile_flag,'solver',solver,'dt',dt);
 dsPlot(data);
 
 % sets of simulations:

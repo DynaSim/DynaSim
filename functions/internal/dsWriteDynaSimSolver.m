@@ -83,7 +83,7 @@ options=dsCheckOptions(varargin,{...
   'filename',[],[],...         % name of solver file that integrates model
   'data_file','data.csv',[],... % name of data file if disk_flag=1
   'fileID',1,[],...
-  'mex_flag',0,{0,1},... % whether to prepare script for being compiled using coder instead of interpreting Matlab
+  'compile_flag',0,{0,1},... % whether to prepare script for being compiled using coder instead of interpreting Matlab
   'verbose_flag',1,{0,1},...
   'sparse_flag',0,{0,1},...
   'one_solve_file_flag',0,{0,1},... % use only 1 solve file of each type, but can't vary mechs yet
@@ -107,8 +107,8 @@ if options.save_parameters_flag
   model=dsPropagateParameters(model,'action','prepend', 'prop_prefix',parameter_prefix, varargin{:});
 
   % set and capture numeric seed value
-  if options.mex_flag==1
-    % todo: make seed string (eg, 'shuffle') from param struct work with coder (options.mex_flag=1)
+  if options.compile_flag==1
+    % todo: make seed string (eg, 'shuffle') from param struct work with coder (options.compile_flag=1)
     % (currently raises error: "String input must be constant")
     % workaround: (shuffle here and get numeric seed for MEX-compatible params.mat)
     rng_wrapper(options.random_seed);
@@ -237,7 +237,7 @@ if options.disk_flag==1
     fprintf(fid,'function data_file=solve_ode\n');
   else
     fprintf(fid,'function data_file=solve_ode(simID)\n');
-    if options.mex_flag
+    if options.compile_flag
       fprintf(fid, 'assert(isa(simID, ''double''));\n');
     end
   end
@@ -274,7 +274,7 @@ else %options.disk_flag==0
     fprintf(fid,'function %s=solve_ode\n',output_string);
   else
     fprintf(fid,'function %s=solve_ode(simID)\n',output_string);
-    if options.mex_flag
+    if options.compile_flag
       fprintf(fid, 'assert(isa(simID, ''double''));\n');
     end
   end
@@ -292,7 +292,7 @@ if options.save_parameters_flag
   fprintf(fid,'%% ------------------------------------------------------------\n');
   fprintf(fid,'params = load(''params.mat'',''p'');\n');
 
-  if options.one_solve_file_flag && options.mex_flag
+  if options.one_solve_file_flag && options.compile_flag
     fprintf(fid,'pVecs = params.p;\n');
   else
      fprintf(fid,'p = params.p;\n');
@@ -301,7 +301,7 @@ end
 
 if options.one_solve_file_flag
   % loop through p and for any vector, take simID index of it (ignores tspan)
-  if ~options.mex_flag
+  if ~options.compile_flag
     fprintf(fid,'\n%% For vector params, select index for this simID\n');
     fprintf(fid,'flds = fields(rmfield(p,''tspan''));\n'); % remove tspan
     fprintf(fid,'for fld = flds''\n');
@@ -310,7 +310,7 @@ if options.one_solve_file_flag
     fprintf(fid,'    p.(fld) = p.(fld)(simID);\n');
     fprintf(fid,'  end\n');
     fprintf(fid,'end\n\n');
-  else %mex_flag
+  else %compile_flag
     % slice scalar from vector params
     for iParam = 1:nParamMods
       fprintf(fid,'p.%s = pVecs.%s(simID);\n', mod_params{iParam}, mod_params{iParam});
@@ -404,7 +404,7 @@ fprintf(fid,'t=0; k=1;\n');
 % todo: get coder varsize working with new format:
 
 % prepare for compilation
-% if options.mex_flag==1
+% if options.compile_flag==1
 %   for i = 1:length(state_variables)
 %     %fprintf(fid,'coder.varsize(''%s'',[1e4,1],[true,false]);\n',state_variables{i}); % population size up to 1e4 for variable initial conditions
 %     fprintf(fid,'coder.varsize(''%s'',[1e8,1e4],[true,true]);\n',state_variables{i}); % population size up to 1e4 for variable initial conditions

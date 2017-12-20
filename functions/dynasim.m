@@ -1148,7 +1148,7 @@ set(handles.btn_start,'Enable','off');
 %   verbose_flag=0;
 % end
 try
-  DATA=dsSimulate(SPEC,'time_limits',[cfg.t0 cfg.tf],'dt',cfg.dt,'solver','euler','mex_flag',get(handles.check_compile,'value'),'verbose_flag',verbose_flag);
+  DATA=dsSimulate(SPEC,'time_limits',[cfg.t0 cfg.tf],'dt',cfg.dt,'solver','euler','compile_flag',get(handles.check_compile,'value'),'verbose_flag',verbose_flag);
 catch
   set(handles.btn_quicksim,'Enable','on');
   set(handles.btn_start,'Enable','on');
@@ -1626,7 +1626,7 @@ if ~isfield(handles,'text_scope') || ~ishandle(handles.text_scope)
   uicontrol('parent',handles.pbatchcontrols,'units','normalized',...
     'style','text','position',[.05 .1+yshift .13 .2],'string','# realizations','backgroundcolor',bgcolor,...
     'HorizontalAlignment','left');%,'backgroundcolor','w'
-  handles.chk_mex_flag=uicontrol('style','checkbox','value',0,'parent',handles.pbatchcontrols,'backgroundcolor',bgcolor2,'units','normalized','position',[.5 .55+yshift .13 ht],'string','mex_flag','visible','on'); % [.415 .13+yshift .13 ht]
+  handles.chk_compile_flag=uicontrol('style','checkbox','value',0,'parent',handles.pbatchcontrols,'backgroundcolor',bgcolor2,'units','normalized','position',[.5 .55+yshift .13 ht],'string','compile_flag','visible','on'); % [.415 .13+yshift .13 ht]
   handles.rad_machine=uibuttongroup('visible','off','units','normalized','backgroundcolor',bgcolor2,'Position',[.18 .8+yshift .3 .2],'parent',handles.pbatchcontrols);
   handles.rad_machine_1=uicontrol('style','radiobutton','backgroundcolor',bgcolor2,'string','local','parent',handles.rad_machine,'HandleVisibility','off',...
     'units','normalized','pos',[0 0 .4 1],'Callback','global handles; set(handles.edit_memory_limit,''visible'',''off''); set(handles.text_memory_limit,''visible'',''off''); set(handles.chk_parfor_flag,''visible'',''on'');');
@@ -1872,7 +1872,7 @@ for i=1:nrepeats
     'save_flag',get(handles.chk_savedata,'value'),'verbose_flag',1,...
     'overwrite_flag',get(handles.chk_overwrite,'value'),'solver',get(handles.edit_solver,'string'),...
     'plot_functions',plot_functions,'plot_options',plot_options,...
-    'parfor_flag',get(handles.chk_parfor_flag,'value'),'mex_flag',get(handles.chk_mex_flag,'value'));
+    'parfor_flag',get(handles.chk_parfor_flag,'value'),'compile_flag',get(handles.chk_compile_flag,'value'));
     %'addpath',fullfile(BIOSIMROOT,'matlab'), 'timestamp',timestamp,...
     %'savepopavg_flag',get(handles.chk_savesum,'value'),'savespikes_flag',get(handles.chk_savespikes,'value'),...
 

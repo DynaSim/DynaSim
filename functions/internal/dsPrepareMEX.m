@@ -34,9 +34,9 @@ options=dsCheckOptions(keyvals,{...
 %   'dy/dt=r*x-y-x*z'
 %   'dz/dt=-b*z+x*y'
 % };
-% data=dsSimulate(eqns, 'tspan',[0 100], 'ic',[1 2 .5],'verbose',1, 'solver','rk4', 'study_dir','demo_lorenz','mex_flag',1,'mex_dir_flag',0,'mex_dir',[]);
-% data=dsSimulate(eqns, 'tspan',[0 100], 'ic',[1 2 .5],'verbose',1, 'solver','rk4', 'study_dir','demo_lorenz','mex_flag',1,'mex_dir_flag',1,'mex_dir',[]);
-% data=dsSimulate(eqns, 'tspan',[0 100], 'ic',[1 2 .5],'verbose',1, 'solver','rk4', 'study_dir','demo_lorenz','mex_flag',1,'mex_dir_flag',1,'mex_dir','mexes_temp');
+% data=dsSimulate(eqns, 'tspan',[0 100], 'ic',[1 2 .5],'verbose',1, 'solver','rk4', 'study_dir','demo_lorenz','compile_flag',1,'mex_dir_flag',0,'mex_dir',[]);
+% data=dsSimulate(eqns, 'tspan',[0 100], 'ic',[1 2 .5],'verbose',1, 'solver','rk4', 'study_dir','demo_lorenz','compile_flag',1,'mex_dir_flag',1,'mex_dir',[]);
+% data=dsSimulate(eqns, 'tspan',[0 100], 'ic',[1 2 .5],'verbose',1, 'solver','rk4', 'study_dir','demo_lorenz','compile_flag',1,'mex_dir_flag',1,'mex_dir','mexes_temp');
 if isempty(options.mex_dir)
     options.mex_dir = dsGetConfig('mex_path');
 end
