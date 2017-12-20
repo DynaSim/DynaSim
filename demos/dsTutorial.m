@@ -556,7 +556,7 @@ title('sPING with E->I turned off');
 %     'ic'          : numeric array of initial conditions, one value per state 
 %                     variable (default: all zeros). overrides definition in model structure
 %     'random_seed' : seed for random number generator (default: 'shuffle', set randomly) (usage: rng(options.random_seed))
-%     'mex_flag': whether to compile simulation using coder instead of 
+%     'compile_flag': whether to compile simulation using coder instead of 
 %                     interpreting Matlab {0 or 1} (default: 0)
 % 
 %   options for running sets of simulations:

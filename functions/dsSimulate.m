@@ -20,7 +20,7 @@ function [data,studyinfo,result] = dsSimulate(model,varargin)
 %     'ic'          : numeric array of initial conditions, one value per state
 %                     variable (default: all zeros). overrides definition in model structure
 %     'random_seed' : seed for random number generator (default: 'shuffle', set randomly) (usage: rng(options.random_seed))
-%     'mex_flag': whether to compile simulation using coder instead of
+%     'compile_flag': whether to compile simulation using coder instead of
 %                     interpreting Matlab {0 or 1} (default: 0)
 %     'sparse_flag' : whether to convert numeric fixed variables to sparse matrices {0 or 1} (default: 0)
 %
@@ -265,7 +265,7 @@ options=dsCheckOptions(varargin,{...
   'one_solve_file_flag',0,{0,1},... % use only 1 solve file of each type, but can't vary mechs yet
   'parfor_flag',0,{0,1},...     % whether to run simulations in parallel (using parfor)
   'num_cores',4,[],... % # cores for parallel processing (SCC supports 1-12)
-  'mex_flag',0,{0,1},... % exist('codegen')==6, whether to compile using coder instead of interpreting Matlab
+  'compile_flag',0,{0,1},... % exist('codegen')==6, whether to compile using coder instead of interpreting Matlab
   'sparse_flag',0,{0,1},... % whether to sparsify fixed variables before simulation
   'disk_flag',0,{0,1},...            % whether to write to disk during simulation instead of storing in memory
   'matCompatibility_flag',1,{0,1},...  % whether to save mat files in compatible mode, vs to prioritize > 2GB VARs
@@ -309,17 +309,17 @@ end
 
 %% 0.3 Prepare solve options.
 
-if options.mex_flag && ~strcmp(reportUI,'matlab')
-  fprintf('Setting ''mex_flag'' to 0 in Octave.\n')
-  options.mex_flag = 0;
+if options.compile_flag && ~strcmp(reportUI,'matlab')
+  fprintf('Setting ''compile_flag'' to 0 in Octave.\n')
+  options.compile_flag = 0;
 end
 
 if isempty(options.mex_dir)
     options.mex_dir = dsGetConfig('mex_path');
 end
 
-if options.mex_flag && options.sparse_flag
-  error('The Matlab Coder toolbox does not support sparse matrices. Choose either ''mex_flag'' or ''sparse_flag''.');
+if options.compile_flag && options.sparse_flag
+  error('The Matlab Coder toolbox does not support sparse matrices. Choose either ''compile_flag'' or ''sparse_flag''.');
 end
 
 if options.parfor_flag && (strcmp(reportUI,'matlab') && feature('numCores') == 1 || ~strcmp(reportUI,'matlab') && nproc() == 1)
@@ -327,8 +327,8 @@ if options.parfor_flag && (strcmp(reportUI,'matlab') && feature('numCores') == 1
   options.parfor_flag = 0;
 end
 
-if options.mex_flag && ~options.reduce_function_calls_flag
-  fprintf('Setting ''reduce_function_calls_flag'' to 1 for compatibility with ''mex_flag=1'' (coder does not support anonymous functions).\n');
+if options.compile_flag && ~options.reduce_function_calls_flag
+  fprintf('Setting ''reduce_function_calls_flag'' to 1 for compatibility with ''compile_flag=1'' (coder does not support anonymous functions).\n');
   options.reduce_function_calls_flag=1;
 end
 
@@ -385,7 +385,7 @@ if isempty(options.sim_id) % not in part of a batch sim
   if options.optimize_big_vary
     options.cluster_flag = 1;
     options.qsub_mode = 'array';
-    options.mex_flag = 1;
+    options.compile_flag = 1;
     options.downsample_factor = max(1/options.dt, options.downsample_factor); % at most 1000Hz sampling
     options.one_solve_file_flag = 1;
     options.sims_per_job = 2;
@@ -627,7 +627,7 @@ if options.parfor_flag
   % prepare studyinfo
   [studyinfo,options]=dsSetupStudy(model,'simulator_options',options,'modifications_set',modifications_set);
 
-  if options.mex_flag
+  if options.compile_flag
     % Ensure mex_dir is absolute
     if (ispc && options.mex_dir(2) == ':') || (~ispc && options.mex_dir(1) == filesep)
       relMexPath = false;
@@ -744,7 +744,7 @@ else % in parfor loop and/or cluster job
   studyinfo = options.studyinfo;
 end
 
-if options.mex_flag
+if options.compile_flag
   % Ensure mex_dir is absolute
   if (ispc && options.mex_dir(2) == ':') || (~ispc && options.mex_dir(1) == filesep)
     relMexPath = false;
@@ -777,7 +777,7 @@ if ~options.debug_flag
   try
     tryFn(nargout)
   catch err % error handling
-    if options.mex_flag && ~isempty(options.solve_file) && ~options.one_solve_file_flag
+    if options.compile_flag && ~isempty(options.solve_file) && ~options.one_solve_file_flag
 
       if options.verbose_flag
         fprintf('Removing failed compiled solve file: %s\n',options.solve_file);
@@ -905,7 +905,7 @@ end % in_parfor_loop_flag
       %% Experiment
       if isa(options.experiment,'function_handle')
         % EXPERIMENT (wrapping around a set of simulations)
-        if options.cluster_flag && options.mex_flag
+        if options.cluster_flag && options.compile_flag
           warning('compiled solver is not available for experiments on the cluster. Simulation will be run in Matlab.');
         end
 
