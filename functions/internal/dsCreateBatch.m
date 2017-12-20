@@ -8,7 +8,7 @@ function [studyinfo, cmd] = dsCreateBatch(base_model,modifications_set,varargin)
 %   - DynaSim model (see dsGenerateModel)
 %   - modifications_set (as returned by dsVary2Modifications())
 %     - options:
-%       'compile_flag'  : whether to compile simulation using coder instead of
+%       'mex_flag'  : whether to compile simulation using coder instead of
 %                         interpreting Matlab {0 or 1} (default: 0)
 %       'verbose_flag'  : whether to display informative messages/logs (default: 0)
 %       'overwrite_flag': whether to overwrite existing data files {0 or 1} (default: 0)
@@ -38,7 +38,7 @@ isMatlab = strcmp(reportUI,'matlab'); % logical
 
 %% check inputs
 options=dsCheckOptions(varargin,{...
-  'compile_flag',0,{0,1},...
+  'mex_flag',0,{0,1},...
   'parfor_flag',0,{0,1},...
   'num_cores',4,[],... % # cores for parallel processing (SCC supports 1-12)
   'sims_per_job',1,[],... % how many sims to run per cluster job
@@ -85,9 +85,9 @@ num_simulations=length(modifications_set);
 % end
 
 %% Check if attempting to compile Experiment
-if isa(options.simulator_options.experiment,'function_handle') && options.compile_flag
-  options.compile_flag=0;
-  options.simulator_options.compile_flag=0;
+if isa(options.simulator_options.experiment,'function_handle') && options.mex_flag
+  options.mex_flag=0;
+  options.simulator_options.mex_flag=0;
   wprintf('solver compilation is not available for experiments run on the cluster.');
 end
 
@@ -96,7 +96,7 @@ solve_file = dsGetSolveFile(base_model,studyinfo,options.simulator_options);
 
 %% add appropriate MEX extension if compiled
 %   NOTE: the extension depends on whether a 32-bit or 64-bit machine is used
-if options.compile_flag
+if options.mex_flag
   % get directory where solve_file is located and the file name
   [fpath,fname]=fileparts2(solve_file);
 
@@ -250,7 +250,7 @@ else %one_solve_file_flag
   WriteSimJob([], job_file); % create job script
 
   % TODO: compile job_file
-%   if options.compile_flag
+%   if options.mex_flag
 %     job_file = dsPrepareMEX(job_file, options); %compile the job file
 %   end
 
@@ -554,7 +554,7 @@ end
       % function declaration
       fprintf(fjob, 'function %s(simIDstart, simIDstep, simIDlast)\n\n', job_filename);
 
-      if options.compile_flag
+      if options.mex_flag
         fprintf(fjob, 'assert(isa(simIDstart, ''double''));\n');
         fprintf(fjob, 'assert(isa(simIDstep, ''double''));\n');
         fprintf(fjob, 'assert(isa(simIDlast, ''double''));\n');
