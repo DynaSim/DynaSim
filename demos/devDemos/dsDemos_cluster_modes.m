@@ -22,7 +22,7 @@ vary={'','I',0:10:30};
 
 %% options
 qsub_modes = {'loop', 'array'};
-% compile_flag = [0,1];
+% mex_flag = [0,1];
 % one_solve_file_flag = [0,1];
 % parfor_flag = [0,1];
 
@@ -35,12 +35,12 @@ for iOpt = 1:nOpt
 
   % get opt values
   qsub_mode = qsub_modes{thisOpt(1)+1};
-  compile_flag = thisOpt(2);
+  mex_flag = thisOpt(2);
   parfor_flag = thisOpt(3);
   one_solve_file_flag = thisOpt(4);
 
   % print
-  fprintf('opt: %i/%i \n  qsub_mode:%s \n  compile_flag:%i \n  parfor_flag:%i \n  one_solve_file_flag:%i \n\n', iOpt, nOpt, qsub_mode, compile_flag, parfor_flag, one_solve_file_flag)
+  fprintf('opt: %i/%i \n  qsub_mode:%s \n  mex_flag:%i \n  parfor_flag:%i \n  one_solve_file_flag:%i \n\n', iOpt, nOpt, qsub_mode, mex_flag, parfor_flag, one_solve_file_flag)
 
   if parfor_flag
     num_cores = 2;
@@ -50,7 +50,7 @@ for iOpt = 1:nOpt
 
   % make dir name
   study_dir = fullfile(output_directory, sprintf('study_HH_varyI_cluster_%s',qsub_mode));
-  if compile_flag
+  if mex_flag
     study_dir = [study_dir '_comp'];
   end
   if parfor_flag
@@ -61,7 +61,7 @@ for iOpt = 1:nOpt
   end
 
   dsSimulate(eqns,'vary',vary, 'study_dir',study_dir,'save_data_flag',1,...
-  'cluster_flag',1,'verbose_flag',1,'qsub_mode',qsub_mode, 'compile_flag',compile_flag,...
+  'cluster_flag',1,'verbose_flag',1,'qsub_mode',qsub_mode, 'mex_flag',mex_flag,...
   'one_solve_file_flag',one_solve_file_flag, 'parfor_flag',parfor_flag, 'num_cores',num_cores);
 
   % print hr
