@@ -624,7 +624,7 @@ end
 % TODO: debug local parallel sims, doesn't seem to be working right...
 % (however SCC cluster+parallel works)
 
-if options.parallel_flag
+if options.parfor_flag
   % Disable for Octave and return error
    if ~strcmp(reportUI,'matlab')
      warning('Parfor mode not implemented in Octave.');
@@ -652,7 +652,7 @@ if options.parallel_flag
   end
 
   % prepare options
-  options_temp = rmfield(options,{'vary','modifications','solve_file','parallel_flag','studyinfo','in_parfor_loop_flag','random_seed'});
+  options_temp = rmfield(options,{'vary','modifications','solve_file','parfor_flag','studyinfo','in_parfor_loop_flag','random_seed'});
   keyvals=dsOptions2Keyval(options_temp);
 
   keyvals{find(strcmp(keyvals, 'auto_gen_test_data_flag'))+1} = 0;
