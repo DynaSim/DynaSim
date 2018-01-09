@@ -24,7 +24,11 @@ function result = dsAnalyze(src,funcIn,varargin)
 %     'format'              : format for saved plots if figures are generated
 %                             {'svg','jpg','eps','png'} (default: 'svg')
 %     'varied_filename_flag': whether to make filename based on the varied
-%                             parameters and type of plot {0 or 1} (default: 0)
+%                             parameters and type of plot {0 or 1}. will overwrite
+%                             if multiple plots of same type (use 'save_prefix' to
+%                             avoid overwrite in that case) (default: 0)
+%     'save_prefix'         : if 'varied_filename_flag'==1, add a string prefix 
+%                             to the name (default: '')
 %     'function_options'    : cell array of option cell arrays {'option1',value1,...}
 %                             in which each cell corresponds to the options for
 %                             the corresponding function cell. if only passing a
@@ -355,7 +359,7 @@ end %main fn
 function [data, studyinfo] = parseSrc(src, options, varargin)
 
 %% auto_gen_test_data_flag argin
-options = dsCheckOptions(varargin,{'auto_gen_test_data_flag',0,{0,1}},false);
+options = catstruct(options, dsCheckOptions(varargin,{'auto_gen_test_data_flag',0,{0,1}},false));
 if options.auto_gen_test_data_flag
   varargs = varargin;
   varargs{find(strcmp(varargs, 'auto_gen_test_data_flag'))+1} = 0;
@@ -388,17 +392,17 @@ end
 % if ischar(src)
 %   if exist(src,'file') % data file or studyinfo.mat
 %     if strfind(src, 'studyinfo') %studyinfo.mat
-%       [data,studyinfo] = ImportData(src, varargin{:}); % load data
+%       [data,studyinfo] = dsImport(src, varargin{:}); % load data
 %       studyinfo.study_dir = fileparts2(src);
 %     else % data file
-%       [data,studyinfo] = ImportData(src, varargin{:}); % load data
+%       [data,studyinfo] = dsImport(src, varargin{:}); % load data
 %     end
 %   elseif isdir(src) % study_dir
-%     [data,studyinfo] = ImportData(src, varargin{:}); % load data
+%     [data,studyinfo] = dsImport(src, varargin{:}); % load data
 %     studyinfo.study_dir = src;
 %   else
 %     try
-%       [data,studyinfo] = ImportData(src, varargin{:}); % load data
+%       [data,studyinfo] = dsImport(src, varargin{:}); % load data
 %     catch
 %       error('Unknown source for first input/argument.')
 %     end
@@ -409,13 +413,13 @@ end
 %   if isfield(src,'time') % single data file
 %     data = src;
 %   else % studyinfo struct
-%     [data,studyinfo] = ImportData(src, varargin{:}); % load data
+%     [data,studyinfo] = dsImport(src, varargin{:}); % load data
 %   end
 % elseif iscell(src) % cell array of files
-%   [data,studyinfo] = ImportData(src, varargin{:}); % load data
+%   [data,studyinfo] = dsImport(src, varargin{:}); % load data
 % else
 %   try
-%     [data,studyinfo] = ImportData(src, varargin{:}); % load data
+%     [data,studyinfo] = dsImport(src, varargin{:}); % load data
 %   catch
 %     error('Unknown source for first input/argument.')
 %   end
@@ -478,7 +482,7 @@ function filename = filenameFromVaried(filename, func, data, plotFnBool, options
 
 %% auto_gen_test_data_flag argin
 options = catstruct(options, dsCheckOptions(varargin,{'auto_gen_test_data_flag',0,{0,1}},false));
-
+keyboard
 if options.auto_gen_test_data_flag
   varargs = varargin;
   varargs{find(strcmp(varargs, 'auto_gen_test_data_flag'))+1} = 0;
@@ -586,7 +590,7 @@ else
   varinputs{find(~cellfun(@isempty,strfind(varinputs(1:2:end), 'simIDs')))*2} = simIDs;
 end
 
-data = ImportData(src, varinputs{:}); % load data
+data = dsImport(src, varinputs{:}); % load data
 end
 
 

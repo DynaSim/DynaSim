@@ -8,6 +8,14 @@ function xp = dsImg2mdd(data_img,merge_covaried_axes,merge_sparse_axes,varargin)
         merge_sparse_axes = true;
     end
     
+    if isempty(data_img)
+      error('Input data_img is empty');
+    end
+    
+    if ~isstruct(data_img)
+      error('Input data_img must be a struct');
+    end
+      
 % % % % % % % % % % % % % % %  Merge data varied statements if necessary % % % % %   
     if merge_covaried_axes && isfield(data_img(1),'varied')
         % Remove any data in data(1...N) that is empty (e.g. skipped by

@@ -623,7 +623,13 @@ end
 %% 1.3.2 Manage parallel computing on local machine.
 % TODO: debug local parallel sims, doesn't seem to be working right...
 % (however SCC cluster+parallel works)
-if options.parfor_flag
+
+if options.parallel_flag
+  % Disable for Octave and return error
+   if ~strcmp(reportUI,'matlab')
+     warning('Parfor mode not implemented in Octave.');
+   end
+
   % prepare studyinfo
   [studyinfo,options]=dsSetupStudy(model,'simulator_options',options,'modifications_set',modifications_set);
 
@@ -646,7 +652,7 @@ if options.parfor_flag
   end
 
   % prepare options
-  options_temp = rmfield(options,{'vary','modifications','solve_file','parfor_flag','studyinfo','in_parfor_loop_flag'});
+  options_temp = rmfield(options,{'vary','modifications','solve_file','parallel_flag','studyinfo','in_parfor_loop_flag','random_seed'});
   keyvals=dsOptions2Keyval(options_temp);
 
   keyvals{find(strcmp(keyvals, 'auto_gen_test_data_flag'))+1} = 0;
@@ -666,12 +672,25 @@ if options.parfor_flag
 
   clear data
 
+  % Create array of random seeds
+  seeds = repmat({options.random_seed},1,length(modifications_set));
+  
+  % If random_seed is shuffle, generate a series of seeds here
+  if strcmp(options.random_seed,'shuffle')
+    rng_wrapper('shuffle');
+    sd = rng_wrapper;            % Get current seed
+    for j = 1:length(modifications_set)
+      seeds{j} = double(sd.Seed) + j;   % Increment by 1 for each sim
+    end
+  end
+  
   % note that parfor currently acts just as a regular for in Octave
   if ~strcmp(reportUI,'matlab')
     disp('   Info for GNU Octave users: Do not expect any speed up by using DynaSim''s ''parfor_flag''. In GNU Octave, parfor loops currently default to regular for loops.');
   end
   parfor sim=1:length(modifications_set)
     data(sim)=dsSimulate(model, 'modifications', modifications_set{sim}, keyvals{:},...
+        'random_seed',seeds{sim},...                                      % Use unique random seed for each sim if shuffle
         'studyinfo', studyinfo, 'sim_id',sim, 'in_parfor_loop_flag', 1);  % My modification; now specifies a separate study directory for each sim.
     %disp(sim);
   end

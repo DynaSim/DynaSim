@@ -346,16 +346,7 @@ if ~isempty(model.fixed_variables)
   fprintf(fid,'%% Fixed variables:\n');
   fprintf(fid,'%% ------------------------------------------------------------\n');
   % 2.2 set random seed
-  fprintf(fid,'%% seed the random number generator\n');
-  if options.save_parameters_flag
-    fprintf(fid,'%s(%srandom_seed);\n',rng_function,parameter_prefix);
-  else
-    if ischar(options.random_seed)
-      fprintf(fid,'%s(''%s'');\n',rng_function,options.random_seed);
-    elseif isnumeric(options.random_seed)
-      fprintf(fid,'%s(%g);\n',rng_function,options.random_seed);
-    end
-  end
+  setup_randomseed(options,fid,rng_function,parameter_prefix)
   
   names=fieldnames(model.fixed_variables);
   expressions=struct2cell(model.fixed_variables);
@@ -387,16 +378,7 @@ fprintf(fid,'%% ------------------------------------------------------------\n')
 
 % 2.2 set random seed (do this a 2nd time, so earlier functions don't mess
 % up the random seed)
-fprintf(fid,'%% seed the random number generator\n');
-if options.save_parameters_flag
-  fprintf(fid,'%s(%srandom_seed);\n',rng_function,parameter_prefix);
-else
-  if ischar(options.random_seed)
-    fprintf(fid,'%s(''%s'');\n',rng_function,options.random_seed);
-  elseif isnumeric(options.random_seed)
-    fprintf(fid,'%s(%g);\n',rng_function,options.random_seed);
-  end
-end
+setup_randomseed(options,fid,rng_function,parameter_prefix)
 
 % initialize time
 fprintf(fid,'t=0; k=1;\n');
@@ -786,6 +768,8 @@ end
 fprintf(fid,'%% ###########################################################\n');
 fprintf(fid,'%% Numerical integration:\n');
 fprintf(fid,'%% ###########################################################\n');
+% Set up random seed again, just incase.
+setup_randomseed(options,fid,rng_function,parameter_prefix)
 fprintf(fid,'n=2;\n');
 fprintf(fid,'for k=2:ntime\n'); % time index
 fprintf(fid,'  t=T(k-1);\n');
@@ -1171,3 +1155,25 @@ end
 % end
 % --------------------------------------------------------------------------------
 %}
+function setup_randomseed(options,fid,rng_function,parameter_prefix)
+  %if ~strcmp(options.random_seed,'shuffle')
+  if 1
+    % If not doing shuffle, proceed as normal to set random seed
+    fprintf(fid,'%% seed the random number generator\n');
+    if options.save_parameters_flag
+      fprintf(fid,'%s(%srandom_seed);\n',rng_function,parameter_prefix);
+    else
+      if ischar(options.random_seed)
+        fprintf(fid,'%s(''%s'');\n',rng_function,options.random_seed);
+      elseif isnumeric(options.random_seed)
+        fprintf(fid,'%s(%g);\n',rng_function,options.random_seed);
+      end
+    end
+  else
+    % If random_seed is shuffle, we'll skip setting it within the solve
+    % file, and instead set it inside the dsSimulate parfor loop (see iss
+    % #311 and here:
+    % https://www.mathworks.com/matlabcentral/answers/180290-problem-with-rng-shuffle)
+    fprintf(fid,'%% random_seed was set to shuffle earlier. \n');
+  end
+end
