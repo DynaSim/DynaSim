@@ -132,7 +132,7 @@ data=dsSimulate(eqns, 'time_limits',[0 250], 'vary',vary);
 dsPlot(data);
 
 % Do the same simulation, but using parfor in order to speed up larger computations
-data=dsSimulate(eqns, 'time_limits',[0 250], 'vary',vary, 'parallel_flag',1);
+data=dsSimulate(eqns, 'time_limits',[0 250], 'vary',vary, 'parfor_flag',1);
 
 % %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% QUICKLY BUILDING LARGE MODELS FROM EXISTING "MECHANISMS"
@@ -192,7 +192,7 @@ data=dsSimulate(eqns, 'vary',{'IB','Iapp',5}, 'time_limits',[0 200]);
 figure; plot(data.time,data.(data.labels{1}))
 xlabel('time (ms)'); ylabel('membrane potential (mV)'); title('Predefined Intrinsically Bursting neuron')
 
-% Predefined populations are stored in text files (e.g., 'IB.pop') and 
+% Predefined populations are stored in text files (e.g., 'IB.pop') and
 % simulated by passing the file name to dsSimulate (e.g., dsSimulate('IB'))
 % or by equating population equations to it in the DynaSim specification
 % structure (see below).
@@ -227,16 +227,16 @@ s.populations(2).mechanism_list={'iNa','iK'};
 s.populations(2).parameters={'Iapp',0,'gNa',120,'gK',36,'noise',10};
 s.connections(1).direction='I->E';
 s.connections(1).mechanism_list={'iGABAa'};
-s.connections(1).parameters={'tauD',10,'gSYN',.1,'netcon','ones(N_pre,N_post)'}; % connectivity matrix defined using a string that evalutes to a numeric matrix
+s.connections(1).parameters={'tauD',10,'gGABAa',.1,'netcon','ones(N_pre,N_post)'}; % connectivity matrix defined using a string that evalutes to a numeric matrix
 s.connections(2).direction='E->I';
 s.connections(2).mechanism_list={'iAMPA'};
-s.connections(2).parameters={'tauD',2,'gSYN',.1,'netcon',ones(80,20)}; % connectivity set using a numeric matrix defined in script
+s.connections(2).parameters={'tauD',2,'gAMPA',.1,'netcon',ones(80,20)}; % connectivity set using a numeric matrix defined in script
 
 %% Simulate Sparse Pyramidal-Interneuron-Network-Gamma (sPING)
 data=dsSimulate(s);
 
 dsPlot(data); % <-- Figure 4 in DynaSim paper
-dsPlot(data,'variable',{'E_v','E_I_iGABAa_ISYN'});
+dsPlot(data,'variable',{'E_v','E_I_iGABAa_IGABAa'});
 
 % View the connection mechanism file:
 [~,eqnfile]=dsLocateModelFiles('iAMPA.mech'); edit(eqnfile{1});
@@ -245,9 +245,9 @@ dsPlot(data,'variable',{'E_v','E_I_iGABAa_ISYN'});
 
 dynasim(s); % Display model "s" in the DynaSim GUI
 
-% Notes: 
+% Notes:
 % - DynaSim GUI is only supported in MATLAB at this time.
-% - Launching the GUI without a model (i.e., by executing "dynasim") 
+% - Launching the GUI without a model (i.e., by executing "dynasim")
 %   will load a default demo network.
 
 % %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -290,7 +290,7 @@ vary={
   'I->E','tauD',[5 10 15]       % inhibition decay time constant from I to E
   };
 dsSimulate(s, 'save_data_flag', 1, 'study_dir', 'demo_sPING_3',...
-                'vary', vary, 'verbose_flag', 1);
+                'vary', vary, 'verbose_flag', 1, 'parfor_flag',1);
 data=dsImport('demo_sPING_3');
 dsPlot(data);
 dsPlot(data,'plot_type','rastergram'); % <-- Figure 5 in DynaSim paper
@@ -304,9 +304,9 @@ dsPlot(data,'plot_type','power');
 % How to: set 'cluster_flag' to 1
 % Requirement: you must be logged on to a cluster that recognizes 'qsub'
 
-if 0 
+if 0
   % Execute the following cluster examples from a login node
-  
+
   % Run three simulations in parallel jobs and save the simulated data
   eqns='dv/dt=@current+I; {iNa,iK}';
   vary={'','I',[0 10 20]};
@@ -315,8 +315,8 @@ if 0
   % tips for checking job status:
   % !qstat -u <YOUR_USERNAME>
   % !cat ~/batchdirs/demo_cluster_1/pbsout/sim_job1.out
-  data=dsImport('demo_cluster_1');
-  dsPlot(data);
+  % data=dsImport('demo_cluster_1');
+  % dsPlot(data);
 
   % Repeat but also save plotted data
   eqns='dv/dt=@current+I; {iNa,iK}';
@@ -344,9 +344,8 @@ if 0
   % or custom functions.
 
   % Run on cluster with compilation
-  dsSimulate(eqns, 'save_data_flag',1, 'study_dir','demo_cluster_4','compile_flag',1,...
+  dsSimulate(eqns, 'save_data_flag',1, 'study_dir','demo_cluster_4','mex_flag',1,...
                      'vary',vary, 'cluster_flag',1, 'overwrite_flag',1, 'verbose_flag',1);
-                   
 end
 
 % %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -355,20 +354,20 @@ end
 
 % Simulating large models can be sped up significantly by compiling the
 % simulation before running it. DynaSim makes this easy to do using the
-% 'compile_flag' option in dsSimulate. Note: compiling the model can
+% 'mex_flag' option in dsSimulate. Note: compiling the model can
 % take several seconds to minutes; however, it only compiles the first time
 % it is run and is significantly faster on subsequent runs.
 
-data=dsSimulate(s, 'compile_flag',1, 'study_dir','demo_sPING_3_compile');
+data=dsSimulate(s, 'mex_flag',1, 'study_dir','demo_sPING_3_compile');
 dsPlot(data);
 
 % Now run again:
-data=dsSimulate(s, 'compile_flag',1, 'study_dir','demo_sPING_3_compile');
+data=dsSimulate(s, 'mex_flag',1, 'study_dir','demo_sPING_3_compile');
 dsPlot(data);
 
 % Combine compilation and parallelization to maximize computational speed locally
 vary={'E','Iapp',[0 10 20]};
-data=dsSimulate(s, 'compile_flag',1, 'parallel_flag',1, 'vary', vary, 'study_dir','demo_sPING_3_compile_parallel');
+data=dsSimulate(s, 'mex_flag',1, 'parfor_flag',1, 'vary', vary, 'study_dir','demo_sPING_3_compile_parallel');
 dsPlot(data);
 
 % %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -430,10 +429,10 @@ s.populations(1).parameters={'stim_amp',10};  % amplitude of stimulation
 s.populations(2).equations='FS';              % inhibitory (I) population
 s.connections(1).direction='RS->FS';          % E->I connection
 s.connections(1).mechanism_list='iAMPA';      % AMPA synapse
-s.connections(1).parameters={'gSYN',.5};      % synaptic weight
+s.connections(1).parameters={'gAMPA',.5};      % synaptic weight
 s.connections(2).direction='FS->RS';          % I->E connection
 s.connections(2).mechanism_list='iGABAa';     % GABAa synapse
-s.connections(2).parameters={'gSYN',1,'tauD',10}; % strength and time constant of inhibition
+s.connections(2).parameters={'gGABAa',1,'tauD',10}; % strength and time constant of inhibition
 dsPlot(dsSimulate(s,'time_limits',T));
 
 %% Multicompartment neurons
@@ -476,9 +475,9 @@ LIF={
      };
 
 iampa={
-  'gSYN=.5; ESYN=0; tauD=2; tauR=0.4; delay=15'
+  'gAMPA=.5; EAMPA=0; tauD=2; tauR=0.4; delay=15'
   'f(x) = (exp(-x/tauD)-exp(-x/tauR)).*(x>0)'
-  'Isyn(V) = gSYN.*sum(f(t-tspike_pre-delay)).*(V-ESYN)'
+  'Isyn(V) = gAMPA.*sum(f(t-tspike_pre-delay)).*(V-EAMPA)'
   '@isyn += Isyn(V_post)'
 };
 
@@ -505,11 +504,11 @@ dsPlot(data);
 % the specification.mechanisms field.
 
 ampa_with_delay={
-  'gSYN=.1; ESYN=0; tauD=2; tauR=0.4; delay=20'
+  'gAMPA=.1; EAMPA=0; tauD=2; tauR=0.4; delay=20'
   'netcon=ones(N_pre,N_post)'
-  'ISYN(X,s)=gSYN.*(s*netcon).*(X-ESYN)'
+  'IAMPA(X,s)=gAMPA.*(s*netcon).*(X-EAMPA)'
   'ds/dt=-s./tauD+((1-s)/tauR).*(1+tanh(X_pre(t-delay)/10)); s(0)=.1' % 20ms delay
-  '@current += -ISYN(X_post,s)'
+  '@current += -IAMPA(X_post,s)'
 };
 
 s=[];
@@ -517,7 +516,7 @@ s.populations(1).name='HH';
 s.populations(1).equations='dV/dt=@current+10*(t<50);{iNa,iK};V(0)=-65';
 s.connections(1).direction='HH->HH';
 s.connections(1).mechanism_list='iampa';
-s.connections(1).parameters={'gSYN',.1};
+s.connections(1).parameters={'gAMPA',.1};
 s.mechanisms(1).name='iampa';
 s.mechanisms(1).equations=ampa_with_delay;
 data=dsSimulate(s,'time_limits',[0 100]);
@@ -538,7 +537,7 @@ dsPlot(data,'variable',{'V','gPoisson'});
 % phi=0;          % radians, phase at which the signal begins
 % onset=0;        % ms, start time of signal
 % offset=inf;     % ms, stop time of signal
-% 
+%
 % % synaptic parameters
 % gext=.01;       % max synaptic conductance
 % Eext=0;         % mV, synaptic reversal potential
@@ -547,7 +546,7 @@ dsPlot(data,'variable',{'V','gPoisson'});
 %% Tips for efficient simulation
 
 downsample_factor=10; % downsampling saves time by recording fewer time points
-compile_flag=1;       % takes longer to compile on 1st run; faster on subsequent runs
+mex_flag=1;       % takes longer to compile on 1st run; faster on subsequent runs
                       % Note: compilation is most beneficial when Npop>1.
 solver='euler';       % Euler integration requires fewer calculations than 4th-order Runge Kutta
 dt=.01;               % increase time step as long as solution converges
@@ -556,9 +555,9 @@ eqns='dv/dt=@current+I; {iNa,iK}';
 
 % run and compile MEX file
 data=dsSimulate(eqns,'vary',{'I',10},'downsample_factor',downsample_factor,...
-  'compile_flag',compile_flag,'solver',solver,'dt',dt);
+  'mex_flag',mex_flag,'solver',solver,'dt',dt);
 dsPlot(data);
 
 % sets of simulations:
 % multinode (on a cluster): cluster_flag=1;
-% multicore (local simulation): parallel_flag=1;
+% multicore (local simulation): parfor_flag=1;

@@ -16,7 +16,7 @@
 <a name="_top"></a>
 <!-- BEGIN pathline -->
 <!-- {LPATHDIR} {PATHDIR} -->
-<!-- END pathline --> 
+<!-- END pathline -->
 <h1>Documentation for <span id="markup">&quot;{NAME}&quot;</span>
 <!-- BEGIN mexfile --> &nbsp;&nbsp;<img src="{MASTERPATH}{MEXTYPE}.png" alt="{PLATFORMS}" border="0" title="{PLATFORMS}"> <!-- END mexfile -->
 </h1>

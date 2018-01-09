@@ -1,7 +1,7 @@
 % iGABAa: synaptic current, fast threshold modulation with inhibitory GABAa-ergic parameters
 % parameters
-gSYN = [0.25]
-ESYN = [-80]
+gGABAa = [0.25]
+EGABAa = [-80]
 tauD = [10]
 tauR = [0.4]
 IC = [0.1]
@@ -11,7 +11,7 @@ IC_noise = [0]
 netcon = ones(N_pre,N_post)
 
 % functions
-ISYN(X,s) = -gSYN.*(s*netcon).*(X-ESYN)
+IGABAa(X,s) = -gGABAa.*(s*netcon).*(X-EGABAa)
  
 % ODEs and ICs
 s' = -s./tauD + ((1-s)/tauR).*(1+tanh(X_pre/10))
@@ -20,5 +20,5 @@ s(0) = IC+IC_noise.*rand(1,N_pre)
 monitor functions % always record the synaptic current
  
 % linkers
-@current += ISYN(X_post,s)
+@current += IGABAa(X_post,s)
 

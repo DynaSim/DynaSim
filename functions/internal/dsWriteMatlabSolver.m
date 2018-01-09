@@ -42,13 +42,13 @@ options=dsCheckOptions(varargin,{...
   'downsample_factor',1,[],...    % downsampling applied after simulation (only every downsample_factor-time point is returned)
   'random_seed','shuffle',[],...        % seed for random number generator (usage: rng(random_seed))
   'solver','ode45',{'ode23','ode45','ode113','ode15s','ode23s','ode23t','ode23tb'},... % built-in Matlab solvers
-  'solver_type','matlab',{'matlab', 'matlab_no_mex'},... % if compile_flag==1, will decide whether to mex solve_file or odefun_file
+  'solver_type','matlab',{'matlab', 'matlab_no_mex'},... % if mex_flag==1, will decide whether to mex solve_file or odefun_file
   'matlab_solver_options',[],[],... % options from odeset for use with built-in Matlab solvers
   'reduce_function_calls_flag',1,{0,1},...   % whether to eliminate internal (anonymous) function calls
   'save_parameters_flag',1,{0,1},...
   'filename',[],[],...         % name of solver file that integrates model
   'fileID',1,[],...
-  'compile_flag',0,{0,1},... % whether to prepare script for being compiled using coder instead of interpreting Matlab
+  'mex_flag',0,{0,1},... % whether to prepare script for being compiled using coder instead of interpreting Matlab
   'verbose_flag',1,{0,1},...
   'one_solve_file_flag',0,{0,1},... % use only 1 solve file of each type, but can't vary mechs yet
   'benchmark_flag',0,{0,1},...
@@ -87,8 +87,8 @@ if options.save_parameters_flag
   model=dsPropagateParameters(model,'action','prepend','prop_prefix',parameter_prefix, varargin{:});
 
   % set and capture numeric seed value
-  if options.compile_flag==1
-    % todo: make seed string (eg, 'shuffle') from param struct work with coder (options.compile_flag=1)
+  if options.mex_flag==1
+    % todo: make seed string (eg, 'shuffle') from param struct work with coder (options.mex_flag=1)
     % (currently raises error: "String input must be constant")
     % workaround: (shuffle here and get numeric seed for MEX-compatible params.mat)
     rng_wrapper(options.random_seed);
@@ -248,7 +248,7 @@ if options.save_parameters_flag
   fprintf(fid,'%% ------------------------------------------------------------\n');
   fprintf(fid,'params = load(''params.mat'',''p'');\n');
 
-  if options.one_solve_file_flag && options.compile_flag
+  if options.one_solve_file_flag && options.mex_flag
     fprintf(fid,'pVecs = params.p;\n');
   else
      fprintf(fid,'p = params.p;\n');
@@ -257,7 +257,7 @@ end
 
 if options.one_solve_file_flag
   % loop through p and for any vector, take simID index of it (ignores tspan)
-  if ~options.compile_flag
+  if ~options.mex_flag
     fprintf(fid,'\n%% For vector params, select index for this simID\n');
     fprintf(fid,'flds = fields(rmfield(p,''tspan''));\n'); % remove tspan
     fprintf(fid,'for fld = flds''\n');
@@ -266,7 +266,7 @@ if options.one_solve_file_flag
     fprintf(fid,'    p.(fld) = p.(fld)(simID);\n');
     fprintf(fid,'  end\n');
     fprintf(fid,'end\n\n');
-  else %compile_flag
+  else %mex_flag
     % slice scalar from vector params
     for iParam = 1:nParamMods
       fprintf(fid,'p.%s = pVecs.%s(simID);\n', mod_params{iParam}, mod_params{iParam});
@@ -304,17 +304,7 @@ if ~isempty(model.fixed_variables)
   fprintf(fid,'%% ------------------------------------------------------------\n');
   
   % 2.2 set random seed
-  fprintf(fid,'%% seed the random number generator\n');
-  fprintf(fid,'%% seed the random number generator\n');
-  if options.save_parameters_flag
-    fprintf(fid,'%s(%srandom_seed);\n',rng_function,parameter_prefix);
-  else
-    if ischar(options.random_seed)
-      fprintf(fid,'%s(''%s'');\n',rng_function,options.random_seed);
-    elseif isnumeric(options.random_seed)
-      fprintf(fid,'%s(%g);\n',rng_function,options.random_seed);
-    end
-  end
+  setup_randomseed(options,fid,rng_function,parameter_prefix)
   
   names=fieldnames(model.fixed_variables);
   expressions=struct2cell(model.fixed_variables);
@@ -341,28 +331,21 @@ fprintf(fid,'%% Initial conditions:\n');
 fprintf(fid,'%% ------------------------------------------------------------\n');
 
 % 2.2 set random seed
-fprintf(fid,'%% seed the random number generator\n');
-fprintf(fid,'%% seed the random number generator\n');
-if options.save_parameters_flag
-  fprintf(fid,'%s(%srandom_seed);\n',rng_function,parameter_prefix);
-else
-  if ischar(options.random_seed)
-    fprintf(fid,'%s(''%s'');\n',rng_function,options.random_seed);
-  elseif isnumeric(options.random_seed)
-    fprintf(fid,'%s(%g);\n',rng_function,options.random_seed);
-  end
-end
+setup_randomseed(options,fid,rng_function,parameter_prefix)
+
 
 %% Numerical integration
 % write code to do numerical integration
 fprintf(fid,'%% ###########################################################\n');
 fprintf(fid,'%% Numerical integration:\n');
 fprintf(fid,'%% ###########################################################\n');
+% Set up random seed again, just incase.
+setup_randomseed(options,fid,rng_function,parameter_prefix)
 
-if options.compile_flag && strcmp(options.solver_type,'matlab_no_mex')
+if options.mex_flag && strcmp(options.solver_type,'matlab_no_mex')
   odefun_str_name = odefun_filename;
 
-  if options.compile_flag
+  if options.mex_flag
     odefun_str_name = [odefun_str_name '_mex']; % switch to mex version
   end
 else
@@ -429,7 +412,7 @@ end
 fprintf(fid,'\nend\n\n');
 
 %% ODEFUN
-if options.compile_flag && strcmp(options.solver_type,'matlab_no_mex') % save ode function as separate m-file for mex compilation
+if options.mex_flag && strcmp(options.solver_type,'matlab_no_mex') % save ode function as separate m-file for mex compilation
   %open file
   odefun_filepath = fullfile(fpath, [odefun_filename fext]);
   odefun_fid = fopen(odefun_filepath,'wt');
@@ -467,3 +450,18 @@ end
 
 end %function
 %% END MAIN FUNC
+
+
+function setup_randomseed(options,fid,rng_function,parameter_prefix)
+  fprintf(fid,'%% seed the random number generator\n');
+  fprintf(fid,'%% seed the random number generator\n');
+  if options.save_parameters_flag
+    fprintf(fid,'%s(%srandom_seed);\n',rng_function,parameter_prefix);
+  else
+    if ischar(options.random_seed)
+      fprintf(fid,'%s(''%s'');\n',rng_function,options.random_seed);
+    elseif isnumeric(options.random_seed)
+      fprintf(fid,'%s(%g);\n',rng_function,options.random_seed);
+    end
+  end
+end

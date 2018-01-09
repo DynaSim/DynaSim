@@ -4,7 +4,7 @@ function [studyinfo,options] = dsSetupStudy(base_model,varargin)
 % TODO: break up this function into smaller functions
 %
 % See also: dsSimulate, dsUpdateStudy
-% 
+%
 % Author: Jason Sherfey, PhD <jssherfey@gmail.com>
 % Copyright (C) 2016 Jason Sherfey, Boston University, USA
 
@@ -28,7 +28,7 @@ if options.verbose_flag
   fprintf('PREPARING STUDY:\n');
 end
 
-if options.save_data_flag || options.save_results_flag || options.parallel_flag
+if options.save_data_flag || options.save_results_flag || options.parfor_flag
   % If in parallel mode, need to calculate
   % studyinfo regardless of whether or not
   % are saving data.

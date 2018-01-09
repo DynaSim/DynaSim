@@ -154,7 +154,11 @@ function modl=set_user_parameters(modl,params,namespace)
     ind=find(ismember(user_keys,fixvars_names));
     for p=1:length(ind)
       if ~ischar(user_vals{ind(p)})
-        modl.fixed_variables.(user_keys{ind(p)})=toString(user_vals{ind(p)},precision);
+        if isinteger(user_vals{ind(p)})
+          modl.fixed_variables.(user_keys{ind(p)})=toString(user_vals{ind(p)},precision);
+        else
+          modl.fixed_variables.(user_keys{ind(p)})=toString(user_vals{ind(p)});
+        end
       else
         modl.fixed_variables.(user_keys{ind(p)})=user_vals{ind(p)};
       end

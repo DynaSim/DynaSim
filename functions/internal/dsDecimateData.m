@@ -1,4 +1,4 @@
-function data_out = dsDecimateData(data,ds)
+function data_out = dsDecimateData(data,ds, varargin)
 %DOWNSAMPLEDATA - Downsamples DynaSim data structre data
 %
 % Usage:

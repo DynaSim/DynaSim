@@ -198,7 +198,7 @@ for index=1:length(text) % loop over lines of text
       end
     case 'fixed_variable'   % var=(expression with grouping or arithmetic), var(#), var([#]), var([# #]), var([#,#]), var(#:#), var(#:end), var([#:#]), var([#:end])
       lhs=regexp(line,'^(\w+)\s*=','tokens','once');
-      if ~isempty(lhs)        
+      if ~isempty(lhs)
         rhs=regexp(line,'=(.+)$','tokens','once');
         name=strtrim(lhs{1}); expression=rhs{1};
         model.fixed_variables(1).([namespace name]) = expression;
@@ -251,7 +251,14 @@ for index=1:length(text) % loop over lines of text
     case 'IC'               % x(0)=expression
       var=regexp(line,'^(\w+)\(','tokens','once');
       rhs=regexp(line,'=(.+)$','tokens','once');
-      state_variable=strtrim(var{1}); expression=rhs{1};
+      state_variable = strtrim(var{1});
+      expression = rhs{1};
+      
+      % convert scalars to vectors for when npop > 1 to permit compiler
+      if ~isnan(str2double(expression))
+        expression = [expression ' * ones(1,Npop)'];
+      end
+      
       model.ICs(1).([namespace state_variable])=expression;
       if ~isempty(comment)
         model.comments{end+1}=sprintf('%s(0) (IC): %s',[namespace state_variable],comment);
@@ -259,6 +266,21 @@ for index=1:length(text) % loop over lines of text
     case 'monitor'          % monitor f=(expression or function)
       % split list of monitors
       lines=strtrim(regexp(line,',','split'));
+      
+      % combine elements with args for same monitor (e.g., v.spikes(0,5))
+      idx=~cellfun(@isempty,regexp(lines,'^\d'));
+      if any(idx)
+        tmp={};
+        for i=1:length(idx)
+          if idx(i)==0 || i==1
+            tmp{end+1}=lines{i};
+          else
+            tmp{end}=[tmp{end} ',' lines{i}];
+          end
+        end
+        lines=tmp;
+      end      
+      
       % loop over monitors in list
       for l=1:length(lines)
         % process this monitor
@@ -283,6 +305,11 @@ for index=1:length(text) % loop over lines of text
             % set argument as expression (see dsWriteDynaSimSolver() for usage as such)
             if ~isempty(arg)
               rhs=arg;
+            else
+              arg=regexp(line,[name '\(([-+\w,]+)\)'],'tokens','once');
+              if ~isempty(arg)
+                rhs={['(' arg{1} ')']};
+              end
             end
           end
           

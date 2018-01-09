@@ -1,4 +1,4 @@
-% Poisson input
+% Poisson input (this is a copy of the iPoisson mechanism)
 
 % poisson parameters
 baseline=0;     % sp/s, baseline rate

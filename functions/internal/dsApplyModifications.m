@@ -274,8 +274,16 @@ for i=1:size(mods,1)
 
   % standardize connection object: convert target<-source to source->target
   if any(strfind(obj,'<-'))
+    if any(obj=='.') % check for dot reference to connection mechanism
+      ind=find(obj=='.');
+      suffix=obj(ind:length(obj));
+      obj=obj(1:ind-1);
+    else
+      suffix='';
+    end
     ind=strfind(obj,'<-');
     obj=[obj(ind(1)+2:end) '->' obj(1:ind(1)-1)];
+    obj=[obj suffix];
   end
 
   % check and adjust for mechanism-specific parameter identifier
@@ -299,15 +307,23 @@ for i=1:size(mods,1)
   if ismember(obj,pop_names)
     type='populations';
     names=pop_names;
+    index=ismember(names,obj);
   elseif ismember(obj,con_names)
     type='connections';
     names=con_names;
+    index=ismember(names,obj);
+  elseif any(strfind(obj,'->')) && strcmp(fld,'mechanism_list')
+    type='connections';
+    names=con_names;
+    if isempty(spec.(type))
+      index=1;
+    else
+      index=length(spec.(type))+1;
+    end
   else
     warning('name of object to modify not found in populations or connections.');
     continue
   end
-
-  index=ismember(names,obj);
 
   if strcmp(fld,'mechanism_list')
     % support --
@@ -321,7 +337,15 @@ for i=1:size(mods,1)
 
     if strcmp(val(1),'+')
       % add mechanisms to existing list
-      spec.(type)(index).mechanism_list=unique_wrapper(cat(2,spec.(type)(index).mechanism_list,elems),'stable');
+      if index>length(spec.(type))
+        if strcmp(type,'connections')
+          % add direction
+          spec.(type)(index).direction=obj;
+        end
+        spec.(type)(index).mechanism_list=elems;
+      else
+        spec.(type)(index).mechanism_list=unique_wrapper(cat(2,spec.(type)(index).mechanism_list,elems),'stable');
+      end
     elseif strcmp(val(1),'-')
       % remove mechanisms from existing list
       spec.(type)(index).mechanism_list=setdiff(spec.(type)(index).mechanism_list,elems,'stable');

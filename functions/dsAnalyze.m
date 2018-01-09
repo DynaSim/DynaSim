@@ -24,7 +24,11 @@ function result = dsAnalyze(src,funcIn,varargin)
 %     'format'              : format for saved plots if figures are generated
 %                             {'svg','jpg','eps','png'} (default: 'svg')
 %     'varied_filename_flag': whether to make filename based on the varied
-%                             parameters and type of plot {0 or 1} (default: 0)
+%                             parameters and type of plot {0 or 1}. will overwrite
+%                             if multiple plots of same type (use 'save_prefix' to
+%                             avoid overwrite in that case) (default: 0)
+%     'save_prefix'         : if 'varied_filename_flag'==1, add a string prefix 
+%                             to the name (default: '')
 %     'function_options'    : cell array of option cell arrays {'option1',value1,...}
 %                             in which each cell corresponds to the options for
 %                             the corresponding function cell. if only passing a
@@ -32,7 +36,7 @@ function result = dsAnalyze(src,funcIn,varargin)
 %                             key,val list as varargin for AnalyzeData
 %     'load_all_data_flag'  : whether to load all the data in studyinfo
 %                             at once {0 or 1} (default: 0)
-%     'parallel_flag' : whether to use parfor to run analysis {0 or 1} (default: 0)
+%     'parfor_flag' : whether to use parfor to run analysis {0 or 1} (default: 0)
 %
 % Outputs:
 %   - result: structure returned by the analysis function
@@ -70,7 +74,7 @@ options=dsCheckOptions(varargin,{...
   'load_all_data_flag',0,{0,1},...
   'auto_gen_test_data_flag',0,{0,1},...
   'unit_test_flag',0,{0,1},...
-  'parallel_flag',0,{0,1},...     % whether to run analysis in parallel (using parfor)
+  'parfor_flag',0,{0,1},...     % whether to run analysis in parallel (using parfor)
   'auto_gen_test_data_flag',0,{0,1},...
   },false);
 
@@ -158,8 +162,6 @@ for fInd = 1:nFunc % loop over function inputs
     result = [];
   end
 
-
-
   % calc nResults
   if ~isempty(result)
     nResults = length(result);
@@ -175,9 +177,9 @@ for fInd = 1:nFunc % loop over function inputs
   % example, dsPlot2 returns a nested structure of figure, axis, and plot
   % handles. This command updates it.
   if isstruct(result)
-      if isfield(result,'hcurr')
-          result = result.hcurr;
-      end
+    if isfield(result,'hcurr')
+      result = result.hcurr;
+    end
   end
 
   % determine if result is a plot handle or derived data
@@ -205,6 +207,7 @@ for fInd = 1:nFunc % loop over function inputs
 
             %skip if no data
             if isempty(data)
+              fprintf('Skipping simID=%i since no data.\n', simID);
               continue
             end
 
@@ -238,6 +241,12 @@ for fInd = 1:nFunc % loop over function inputs
         % Data needed for plotting:
         %   - thisResult
         %   - fPath
+
+        %skip if no data
+        if isempty(thisResult)
+          fprintf('Skipping simID=%i since no result.\n', simID);
+          continue
+        end
 
         set(thisResult, 'PaperPositionMode','auto');
         fprintf('\t\tSaving plot: %s\n',fname);
@@ -350,7 +359,7 @@ end %main fn
 function [data, studyinfo] = parseSrc(src, options, varargin)
 
 %% auto_gen_test_data_flag argin
-options = dsCheckOptions(varargin,{'auto_gen_test_data_flag',0,{0,1}},false);
+options = catstruct(options, dsCheckOptions(varargin,{'auto_gen_test_data_flag',0,{0,1}},false));
 if options.auto_gen_test_data_flag
   varargs = varargin;
   varargs{find(strcmp(varargs, 'auto_gen_test_data_flag'))+1} = 0;
@@ -383,17 +392,17 @@ end
 % if ischar(src)
 %   if exist(src,'file') % data file or studyinfo.mat
 %     if strfind(src, 'studyinfo') %studyinfo.mat
-%       [data,studyinfo] = ImportData(src, varargin{:}); % load data
+%       [data,studyinfo] = dsImport(src, varargin{:}); % load data
 %       studyinfo.study_dir = fileparts2(src);
 %     else % data file
-%       [data,studyinfo] = ImportData(src, varargin{:}); % load data
+%       [data,studyinfo] = dsImport(src, varargin{:}); % load data
 %     end
 %   elseif isdir(src) % study_dir
-%     [data,studyinfo] = ImportData(src, varargin{:}); % load data
+%     [data,studyinfo] = dsImport(src, varargin{:}); % load data
 %     studyinfo.study_dir = src;
 %   else
 %     try
-%       [data,studyinfo] = ImportData(src, varargin{:}); % load data
+%       [data,studyinfo] = dsImport(src, varargin{:}); % load data
 %     catch
 %       error('Unknown source for first input/argument.')
 %     end
@@ -404,13 +413,13 @@ end
 %   if isfield(src,'time') % single data file
 %     data = src;
 %   else % studyinfo struct
-%     [data,studyinfo] = ImportData(src, varargin{:}); % load data
+%     [data,studyinfo] = dsImport(src, varargin{:}); % load data
 %   end
 % elseif iscell(src) % cell array of files
-%   [data,studyinfo] = ImportData(src, varargin{:}); % load data
+%   [data,studyinfo] = dsImport(src, varargin{:}); % load data
 % else
 %   try
-%     [data,studyinfo] = ImportData(src, varargin{:}); % load data
+%     [data,studyinfo] = dsImport(src, varargin{:}); % load data
 %   catch
 %     error('Unknown source for first input/argument.')
 %   end
@@ -473,7 +482,7 @@ function filename = filenameFromVaried(filename, func, data, plotFnBool, options
 
 %% auto_gen_test_data_flag argin
 options = catstruct(options, dsCheckOptions(varargin,{'auto_gen_test_data_flag',0,{0,1}},false));
-
+keyboard
 if options.auto_gen_test_data_flag
   varargs = varargin;
   varargs{find(strcmp(varargs, 'auto_gen_test_data_flag'))+1} = 0;
@@ -521,29 +530,43 @@ if strcmp(reportUI,'matlab')
   p = gcp('nocreate');
 end
 
-if isempty(options.function_options)
-  if options.parallel_flag && ~isempty(p)       % Only do parfor mode if parallel_flag is set and parpool is already running. Otherwise, this will add unncessary overhead.
-    parfor dInd = 1:length(data)
-      result(dInd) = feval(func,data(dInd),varargin{:});
+try
+  if isempty(options.function_options)
+    if options.parfor_flag && ~isempty(p)       % Only do parfor mode if parfor_flag is set and parpool is already running. Otherwise, this will add unncessary overhead.
+      % note that parfor currently acts just as a regular for in Octave
+      if ~strcmp(reportUI,'matlab')
+        disp('   Info for GNU Octave users: Do not expect any speed up by using DynaSim''s ''parfor_flag''. In GNU Octave, parfor loops currently default to regular for loops.');
+      end
+      parfor dInd = 1:length(data)
+        result(dInd) = feval(func,data(dInd),varargin{:});
+      end
+    else
+      for dInd = 1:length(data)
+        result(dInd) = feval(func,data(dInd),varargin{:});
+      end
     end
   else
-    for dInd = 1:length(data)
-      result(dInd) = feval(func,data(dInd),varargin{:});
-    end
-  end
-else
-  function_options = options.function_options{fInd};
+    function_options = options.function_options{fInd};
 
-  if options.parallel_flag && ~isempty(p)
-    parfor dInd = 1:length(data)
-      result(dInd) = feval(func,data(dInd),function_options{:});
-    end
-  else
-    for dInd = 1:length(data)
-      result(dInd) = feval(func,data(dInd),function_options{:});
+    if options.parfor_flag && ~isempty(p)
+      % note that parfor currently acts just as a regular for in Octave
+      if ~strcmp(reportUI,'matlab')
+        disp('   Info for GNU Octave users: Do not expect any speed up by using DynaSim''s ''parfor_flag''. In GNU Octave, parfor loops currently default to regular for loops.');
+      end
+      parfor dInd = 1:length(data)
+        result(dInd) = feval(func,data(dInd),function_options{:});
+      end
+    else
+      for dInd = 1:length(data)
+        result(dInd) = feval(func,data(dInd),function_options{:});
+      end
     end
   end
+catch err
+  warning(err.message);
+  result = [];
 end
+
 end
 
 
@@ -567,7 +590,7 @@ else
   varinputs{find(~cellfun(@isempty,strfind(varinputs(1:2:end), 'simIDs')))*2} = simIDs;
 end
 
-data = ImportData(src, varinputs{:}); % load data
+data = dsImport(src, varinputs{:}); % load data
 end
 
 
