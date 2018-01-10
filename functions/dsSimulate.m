@@ -1263,6 +1263,7 @@ option_names = {...
   'dsfact','downsample_factor';
   'memlimit','memory_limit';
   'parallel_flag','parfor_flag';
+  'compile_flag','mex_flag';
   };
 
 if any(ismember(option_names(:,1),options(1:2:end)))
