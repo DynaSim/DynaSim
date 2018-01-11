@@ -456,13 +456,18 @@ for iFigset = 1:num_fig_sets
     % create figure
     if ~lock_gca
         if isempty(options.fig_handle) || (iFig > 1)
-          handles(end+1) = figure('units','normalized','outerposition',[options.figx options.figy options.figwidth, options.figheight],'visible',options.visible);
+          thisHandle = figure('units','normalized','outerposition',[options.figx options.figy options.figwidth, options.figheight],'visible',options.visible);
         else
-          handles(end+1) = options.fig_handle; % use for first figure handle
+          thisHandle = options.fig_handle; % use for first figure handle
         end
         
+        % append to array
+        handles = [handles thisHandle];
+          % note: don't use `handles(end+1) = thisHandle;` since that will mess
+          % up graphics objects and convert them to doubles
+        
         % position axes
-        haxes = tight_subplot2(num_rows, num_cols, [.01 .03], [.05 .01], [.03 .01], handles(end));
+        haxes = tight_subplot2(num_rows, num_cols, [.01 .03], [.05 .01], [.03 .01], thisHandle);
     else
         if isempty(options.ax_handle)
           haxes = gca;
@@ -475,6 +480,8 @@ for iFigset = 1:num_fig_sets
         else
           handles = options.fig_handle;
         end
+        
+        thisHandle = handles;
     end
 
     axis_counter=0;
@@ -484,6 +491,7 @@ for iFigset = 1:num_fig_sets
     text_string=''; % string to add to subplot (set below)
     legend_strings=''; % legend for subplot (set below)
     shared_ylims_flag=1;
+    
     % draw plots
     for row=1:num_rows
       for col=1:num_cols
@@ -817,9 +825,10 @@ for iFigset = 1:num_fig_sets
         if ~isempty(AuxData) && length(legend_strings)<=max_legend_entries
           legend_strings=cat(2,legend_strings,AuxDataName);
         end
+        
         % plot data
         %axes(haxes(axis_counter));
-        set(gcf,'CurrentAxes',haxes(axis_counter));
+        set(thisHandle, 'CurrentAxes',haxes(axis_counter));
         switch options.plot_type
           case {'waveform','power'}
             % finish preparing data
@@ -957,7 +966,7 @@ for iFigset = 1:num_fig_sets
             end
             axis_counter=axis_counter+1;
             %axes(haxes(axis_counter));
-            set(gcf,'CurrentAxes',haxes(axis_counter));
+            set(thisHandle,'CurrentAxes',haxes(axis_counter));
             xmin=min(xlim); xmax=max(xlim);
             ymin=min(ylim); ymax=max(ylim);
             text_xpos=double(xmin+.05*(xmax-xmin));
@@ -975,6 +984,7 @@ for iFigset = 1:num_fig_sets
 
   end % end loop over figures in this set
 end % end loop over figure sets
+
 
 %% auto_gen_test_data_flag argout
 if options.auto_gen_test_data_flag
