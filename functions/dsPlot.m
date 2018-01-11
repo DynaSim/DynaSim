@@ -589,6 +589,7 @@ for iFigset = 1:num_fig_sets
             case 'waveform'
               % calculate averages across populations
               dat=nan(num_times,num_pops);
+              
               if ~strcmp(reportUI,'matlab') && exist('nanmean') ~= 2 % 'nanmean is not in Octave's path
                 try
                   pkg load statistics; % trying to load octave forge 'statistics' package before using nanmean function
@@ -596,14 +597,17 @@ for iFigset = 1:num_fig_sets
                   error('nanmean function is needed, please install the statistics package from Octave Forge');
                 end
               end
+              
               for k=1:num_pops
                 dat(:,k)=nanmean(data(sim_index).(var_fields{k}),2);
               end
+              
               var=['<' variables{1} '>'];
             case 'power'
               dat=nan(length(xdata),num_pops);
               AuxData=nan(length(xdata),num_pops);
               AuxDataName={}; vlines=[];
+              
               if ~strcmp(reportUI,'matlab') && exist('nanmean') ~= 2 % 'nanmean is not in Octave's path
                 try
                   pkg load statistics; % trying to load octave forge 'statistics' package before using nanmean function
@@ -611,6 +615,7 @@ for iFigset = 1:num_fig_sets
                   error('nanmean function is needed, please install the statistics package from Octave Forge');
                 end
               end
+              
               for k=1:num_pops
                 dat(:,k)=nanmean(data(sim_index).([var_fields{k} '_Power_SUA']).Pxx,2);
                 AuxData(:,k)=data(sim_index).([var_fields{k} '_Power_MUA']).Pxx;
@@ -620,11 +625,13 @@ for iFigset = 1:num_fig_sets
               var=['<' variables{1} '_Power_SUA>'];
             case {'rastergram','raster'}
               set_name={};
+              
               for k=1:num_pops
                 tmp=regexp(var_fields{k},'^([a-zA-Z0-9]+)_','tokens','once');
                 set_name{k}=tmp{1};
                 allspikes{k}=data(sim_index).([var_fields{k} '_spike_times']);
               end
+              
               var=['<' variables{1} '>'];
 
           end
@@ -822,13 +829,18 @@ for iFigset = 1:num_fig_sets
           end
           text_string{row,col}=['(' strrep(str(1:end-2),'_','\_') ')'];
         end
+        
         if ~isempty(AuxData) && length(legend_strings)<=max_legend_entries
           legend_strings=cat(2,legend_strings,AuxDataName);
         end
         
-        % plot data
+        %% plot data
+        
+        % set axes
         %axes(haxes(axis_counter));
         set(thisHandle, 'CurrentAxes',haxes(axis_counter));
+        thisAxes = haxes(axis_counter);
+        
         switch options.plot_type
           case {'waveform','power'}
             % finish preparing data
@@ -836,19 +848,21 @@ for iFigset = 1:num_fig_sets
               dat=feval(options.yscale,dat); % log or log10
               % alternative approach: use semilogy for log10
             end
+            
             if length(options.xlim)==2
               sel=(xdata>=options.xlim(1)&xdata<=options.xlim(2));
             else
               sel=1:length(xdata);
             end
+            
             % plot traces
             if strcmp(options.plot_mode,'trace')
               % select max subset allowed
               dat=dat(:,1:min(size(dat,2),MTPP)); % select max subset to plot
-              plot(xdata(sel),dat(sel,:));
-              set(gca,'ticklength',get(gca,'ticklength')/2) %make ticks shorter
+              plot(thisAxes, xdata(sel),dat(sel,:));
+              set(thisAxes,'ticklength',get(thisAxes,'ticklength')/2) %make ticks shorter
             else
-              imagesc(dat);
+              imagesc(thisAxes, dat);
             end
           case {'rastergram','raster'}
             % draw spikes
@@ -861,52 +875,62 @@ for iFigset = 1:num_fig_sets
                 spks=spikes{c}; % spikes for one cell
                 for k=1:length(spks) % loop over spikes for cell c
                   spk=spks(k); % time of spike k in cell c of population p
-                  line([spk spk],[c+ypos-.5 c+ypos+.5],'color','k'); hold on
+                  line(thisAxes, [spk spk],[c+ypos-.5 c+ypos+.5],'color','k'); hold on
                 end
               end
+              
               % record position for population tick name
               yticks(end+1)=ypos+c/2+.5;
               yticklabels{end+1}=set_name{p};
+              
               % draw line separating populations
               if length(allspikes)>1
                 pos=c+ypos+.5;
-                line([min(time) max(time)],[pos pos],'color','k','linewidth',3);
+                line(thisAxes, [min(time) max(time)],[pos pos],'color','k','linewidth',3);
                 if p<length(allspikes)
                   % increment y-position for next population
                   ypos=ypos+c;
                 end
               end
             end
+            
             % artificially set "dat" to get correct ylims below
             dat=[.5 ypos+c+.5];
             shared_ylims_flag=0;
             legend_strings='';
+            
             % set y-ticks to population names
-            set(gca,'ytick',yticks,'yticklabel',yticklabels);
+            set(thisAxes,'ytick',yticks,'yticklabel',yticklabels);
+            
             % set x-ticks
-            plot([min(time) max(time)],[.5 .5],'w');
-            nticks=length(get(gca,'xtick'));
+            plot(thisAxes, [min(time) max(time)],[.5 .5],'w');
+            nticks=length(get(thisAxes,'xtick'));
             xticks=linspace(options.xlim(1),options.xlim(2),nticks);
-            set(gca,'xtick',xticks,'xticklabel',xticks);
-            %set(gca,'xticklabel',get(gca,'ytick'));
-            set(gca,'ticklength',get(gca,'ticklength')/2) %make ticks shorter
+            set(thisAxes,'xtick',xticks,'xticklabel',xticks);
+            %set(thisAxes,'xticklabel',get(thisAxes,'ytick'));
+            set(thisAxes,'ticklength',get(thisAxes,'ticklength')/2) %make ticks shorter
         end % end switch options.plot_type
+        
         % plot auxiliary data
         if ~isempty(AuxData) %strcmp(options.plot_type,'power')
           hold on
-          plot(xdata(sel),AuxData(sel,:),'-','linewidth',3);%,'o-','linewidth',3);%'--.');
+          plot(thisAxes, xdata(sel),AuxData(sel,:),'-','linewidth',3);%,'o-','linewidth',3);%'--.');
         end
+        
         % format axes
         if row==num_rows
           xlabel(xlab);
         else
-          set(haxes(axis_counter),'XTickLabel','');
+          set(thisAxes,'XTickLabel','');
           %set(haxes(row),'YTickLabel','');
         end
-        xlim(options.xlim);
+        
+        xlim(thisAxes, options.xlim);
+        
         if ~strcmp(options.plot_type,'rastergram')
-          ylabel(strrep(var,'_','\_'));
+          ylabel(thisAxes, strrep(var,'_','\_'));
         end
+        
         if ~isempty(options.ylim)
           ylims=options.ylim;
         elseif shared_ylims_flag
@@ -917,7 +941,7 @@ for iFigset = 1:num_fig_sets
           % set ylim to max/min of this data set
           ylims=[min(dat(:)) max(dat(:))];
           if ylims(1)~=ylims(2)
-            ylim(ylims);
+            ylim(thisAxes, ylims);
           end
           % add text
           if ~isempty(text_string)
@@ -927,11 +951,11 @@ for iFigset = 1:num_fig_sets
             text_ypos=ymin+.9*(ymax-ymin);
             try
               if any(strcmp(options.plot_type, {'rastergram','raster'}))
-                xlims = double(get(gca,'xlim'));
-                ylims = double(get(gca,'ylim'));
-                text(0.05*xlims(end),0.9*ylims(end),text_string{row,col});
+                xlims = double(get(thisAxes,'xlim'));
+                ylims = double(get(thisAxes,'ylim'));
+                text(thisAxes, 0.05*xlims(end),0.9*ylims(end),text_string{row,col});
               else
-                text(text_xpos,text_ypos,text_string{row,col});
+                text(thisAxes, text_xpos,text_ypos,text_string{row,col});
               end
             end
           end
@@ -940,18 +964,19 @@ for iFigset = 1:num_fig_sets
         if ~isempty(vlines)
           for k=1:length(vlines)
             if ~isnan(vlines(k))
-              line([vlines(k) vlines(k)],ylim,'color','k','linestyle','--');
+              line(thisAxes, [vlines(k) vlines(k)],ylim,'color','k','linestyle','--');
               ymax=max(ylim);
-              text(double(vlines(k) + 0.1*range(xlim)), 0.9*ymax, sprintf('MUA Sxx Peak F: %.f', vlines(k)))
+              text(thisAxes, double(vlines(k) + 0.1*range(xlim)), 0.9*ymax, sprintf('MUA Sxx Peak F: %.f', vlines(k)))
             end
           end
         end
         % add legend
         if ~isempty(legend_strings) && axis_counter==1
-          legend(legend_strings);
+          legend(thisAxes, legend_strings);
         end
       end % end loop over subplot columns
     end % end loop over subplot rows
+    
     % set y-limits to max/min over data in this figure
     if shared_ylims_flag || ~isempty(options.ylim)
       if ylims(1)~=ylims(2)
@@ -965,13 +990,15 @@ for iFigset = 1:num_fig_sets
               continue;
             end
             axis_counter=axis_counter+1;
+            
             %axes(haxes(axis_counter));
             set(thisHandle,'CurrentAxes',haxes(axis_counter));
+            
             xmin=min(xlim); xmax=max(xlim);
             ymin=min(ylim); ymax=max(ylim);
             text_xpos=double(xmin+.05*(xmax-xmin));
             text_ypos=ymin+.9*(ymax-ymin);
-            text(text_xpos,text_ypos,text_string{row,col});
+            text(haxes(axis_counter), text_xpos,text_ypos,text_string{row,col});
           end
         end
       end
