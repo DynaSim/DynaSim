@@ -714,30 +714,39 @@ default_visible='on';
 % Create panels (parent: psimview):
 % p_sim_plots
 handles.p_sim_plots=uipanel('parent',handles.psimview,'units','normalized','position',[0 .15 1 .85],'backgroundcolor','w','title','','visible','on');
+
 % p_quicksim_settings
 handles.p_quicksim_settings=uipanel('parent',handles.psimview,'units','normalized','position',[0 0 .25 .15],'backgroundcolor','w','title','','visible','on');
+
 % p_runsim_settings
 handles.p_runsim_settings=uipanel('parent',handles.psimview,'units','normalized','position',[.25 0 .75 .15],'backgroundcolor','w','title','','visible','on');
+
 
 % Create controls for interactive plotting (parent: p_sim_plots)
 for i=1:cfg.max_num_plots
   % list_vars: listbox for pop-specific variables
   handles.list_vars(i)=uicontrol('units','normalized','position',[.01 yp+(i-1)*dy .14 -.8*dy],'parent',handles.p_sim_plots,'BackgroundColor',[.9 .9 .9],'style','listbox','value',1,'string',[],'Max',100,'Callback',@UpdateSimView,'TooltipString','Left-click to select variable to plot','visible',default_visible);
+  
   % list_cells: listbox for pop-specific cell indices
   handles.list_cells(i)=uicontrol('units','normalized','position',[.15 yp+(i-1)*dy .05 -.8*dy],'parent',handles.p_sim_plots,'BackgroundColor',[.9 .9 .9],'style','listbox','value',[],'string',[],'Max',1000,'Callback',@UpdateSimView,'TooltipString','Left-click to select cells to plot','visible',default_visible);
+  
   % axes_data_image: axis for plotting images
   handles.axes_data_image(i)=subplot('position',[.23 yp+(i-1)*dy .72 -.8*dy],'parent',handles.p_sim_plots,'visible','off','tag','simview_image');
   handles.img_data(i) = imagesc(cfg.t,1:length(cfg.IC),cfg.Y); axis xy; %colorbar
   set(handles.img_data(i),'visible','off','tag','simview_image');
+  
   % axes_data_trace: axis for plotting traces
-  handles.axes_data_trace(i)=subplot('position',[.23 yp+(i-1)*dy .72 -.8*dy],'xdata',cfg.t,'ydata',cfg.Y(:,1),'parent',handles.p_sim_plots,'linewidth',3,'color','w','visible',default_visible,'tag','simview_trace');
+  handles.axes_data_trace(i)=subplot('position',[.23 yp+(i-1)*dy .72 -.8*dy], 'parent',handles.p_sim_plots,'tag','simview_trace');
+  
   % edit_ymax: max y-limits
   callback=sprintf('global handles; set(handles.axes_data_trace(%g),''ylim'',[str2double(get(handles.edit_ymin(%g),''string'')) str2double(get(gco,''string''))]); set(handles.axes_data_image(%g),''clim'',[str2double(get(handles.edit_ymin(%g),''string'')) str2double(get(gco,''string''))]); cfg.ymax(%g)=str2double(get(gco,''string''));',i,i,i,i,i);
   handles.edit_ymax(i)=uicontrol('style','edit','parent',handles.p_sim_plots,'tag','ymax','units','normalized','position',[.955 .95+dy*(i-1)-.01 .037 .03],'backgroundcolor','w','string',cfg.ymax(i),'HorizontalAlignment','left','Callback',callback,'fontsize',8);
+  
   % edit_ymin: min y-limits
   callback=sprintf('global handles; set(handles.axes_data_trace(%g),''ylim'',[str2double(get(gco,''string'')) str2double(get(handles.edit_ymax(%g),''string''))]); set(handles.axes_data_image(%g),''clim'',[str2double(get(gco,''string'')) str2double(get(handles.edit_ymax(%g),''string''))]); cfg.ymin(%g)=str2double(get(gco,''string''));',i,i,i,i,i);
   handles.edit_ymin(i)=uicontrol('style','edit','parent',handles.p_sim_plots,'tag','ymin','units','normalized','position',[.955 .95+dy*(i-1)+.8*dy+.03-.01 .037 .03],'backgroundcolor','w','string',cfg.ymin(i),'HorizontalAlignment','left','Callback',callback,'fontsize',8);
   handles.btn_sim_autoscale(i)=uicontrol('style','pushbutton','parent',handles.p_sim_plots,'units','normalized','position',[.96 .95+dy*(i-1)+.8*dy/2 .027 .05],'fontsize',12,'fontweight','bold','fontname','Blue Highway','String',char(cfg.autoscale_charcode),'callback',{@AutoscaleSimPlot,i},'visible',default_visible);%,'backgroundcolor',cfg.ButtonColor,'ForegroundColor',cfg.ButtonFontColor);
+  
   % ref: how to display pic on button: https://www.mathworks.com/matlabcentral/newsreader/view_thread/51230
     % for charcode=1:10000,fprintf('%g: %s\n',charcode,char(charcode)); end
     % up/down arrows: 5864, 8597, 8645, 8661
@@ -752,17 +761,21 @@ for i=1:cfg.max_num_plots
 %   pic_arrow=1-ind2rgb(pic_arrow,gray);
 %   handles.btn_sim_autoscale(i)=uicontrol('style','pushbutton','parent',handles.p_sim_plots,'units','normalized','position',[.955 .95+dy*(i-1)+.8*dy/2 .037 .08],'fontsize',12,'fontweight','bold','Cdata',pic_arrow,'callback',@QuickSim);%,'backgroundcolor',cfg.ButtonColor,'ForegroundColor',cfg.ButtonFontColor);
 end
+
 handles.line_data=[];
 % Create controls with default settings for QuickSim (parent: p_quicksim_settings)
 % btn_quicksim
 handles.btn_quicksim=uicontrol('style','pushbutton','parent',handles.p_quicksim_settings,'units','normalized','position',[.15 .55 .7 .3],'fontsize',12,'fontweight','bold','string','QuickSim','callback',@QuickSim,'backgroundcolor',cfg.ButtonColor,'ForegroundColor',cfg.ButtonFontColor);
+
 % edit_t0
 handles.edit_t0 = uicontrol('style','edit','parent',handles.p_quicksim_settings,'units','normalized','position',[.15 .15 .3 .3],'fontsize',12,'string','0','HorizontalAlignment','left','backgroundcolor','w','callback','global cfg; cfg.t0=str2num(get(gcbo,''string''));');
 uicontrol('style','text','parent',handles.p_quicksim_settings,'units','normalized','position',[.05 .1 .1 .3],'fontsize',10,'string','t0','HorizontalAlignment','center','backgroundcolor','w','callback','global cfg; cfg.dt=str2num(get(gcbo,''string''));');
+
 % edit_tf
 handles.edit_tf = uicontrol('style','edit','parent',handles.p_quicksim_settings,'units','normalized','position',[.55 .15 .3 .3],'fontsize',12,'string','200','HorizontalAlignment','left','backgroundcolor','w','callback','global cfg; cfg.tf=str2num(get(gcbo,''string''));');
 uicontrol('style','text','parent',handles.p_quicksim_settings,'units','normalized','position',[.45 .1 .1 .3],'fontsize',10,'string','tf','HorizontalAlignment','center','backgroundcolor','w','callback','global cfg; cfg.dt=str2num(get(gcbo,''string''));');
 handles.check_compile = uicontrol('style','checkbox','parent',handles.p_quicksim_settings,'units','normalized','position',[.15 .05 .85 .1],'string','compile','value',0,'backgroundcolor','w');
+
 
 % Create controls with default settings for running sims (parent: p_runsim_settings)
 % btn_start (string: start/pause/resume)
@@ -800,7 +813,9 @@ uicontrol('style','pushbutton','parent',handles.p_runsim_settings,'units','norma
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 function UpdateSimView(src,evnt)
 % Purpose: update Sim View controls (except plotted data)
+
 global handles cfg MODEL
+
 % update plot type
 if nargin>0 && isequal(src,handles.radio_plot_type)
   % hide all sim view plot objects
@@ -808,10 +823,12 @@ if nargin>0 && isequal(src,handles.radio_plot_type)
   for i=1:length(Children)
     set(findobj('tag',get(Children(i),'userdata')),'visible','off');
   end
+  
   % show plot objects for the select type
   SelectedObject=get(handles.radio_plot_type,'SelectedObject');
   set(findobj('tag',get(SelectedObject,'userdata')),'visible','on');
 end
+
 % get selection info
 pop_names=get(handles.list_pops,'string');
 sel_pop_inds=get(handles.list_pops,'value');
@@ -821,7 +838,8 @@ all_state_vars=MODEL.state_variables;
 if ~isempty(MODEL.monitors)
   all_state_vars=cat(2,all_state_vars,fieldnames(MODEL.monitors)');
 end
-%
+
+
 for plot_index=1:num_plots
   pop_name=sel_pop_names{plot_index};
   % get vars for this pop
@@ -843,6 +861,7 @@ for plot_index=1:num_plots
     set(handles.list_cells(plot_index),'value',sel_cell_inds);
   end
 end
+
 % display all axes with select pops to plot
 for plot_index=1:num_plots
   switch get(get(handles.radio_plot_type,'SelectedObject'),'String')
@@ -862,6 +881,7 @@ for plot_index=1:num_plots
   set(handles.list_cells(plot_index),'visible','on');
   set(handles.btn_sim_autoscale(plot_index),'visible','on');
 end
+
 % hide all available axes without select pops to plot
 for plot_index=num_plots+1:cfg.max_num_plots
   set(handles.edit_ymax(plot_index),'visible','off');
@@ -877,6 +897,7 @@ for plot_index=num_plots+1:cfg.max_num_plots
   set(handles.img_data(plot_index),'visible','off');
   set(handles.btn_sim_autoscale(plot_index),'visible','off');
 end
+
 % update plotted data
 UpdateSimPlots;
 
@@ -886,8 +907,10 @@ function UpdateSimPlots(src,evnt)
 global handles cfg
 sel_pop_inds=get(handles.list_pops,'value');
 num_plots=min(length(sel_pop_inds),cfg.max_num_plots);
+
 % what kind of plot? (trace, image)
 plot_type=get(get(handles.radio_plot_type,'SelectedObject'),'String');
+
 % loop over populations to plot
 for plot_index=1:num_plots
   % select data to plot for this population

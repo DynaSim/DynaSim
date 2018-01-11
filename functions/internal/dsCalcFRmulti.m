@@ -145,8 +145,10 @@ end
 
 % times at which bins begin
 bin_times=time(bin_index_begs);
+
 % number of bins
 nbins=length(bin_index_begs);
+
 % time width of a single bin in seconds
 bin_width=(dt/1000)*options.bin_size;
 
@@ -177,7 +179,7 @@ for v=1:length(options.variable)
     for bin=1:nbins
       % (# spikes in bin) / (duration of bin in seconds)
       FR_SUA(bin,:)=sum(spikes(bin_index_begs(bin):bin_index_ends(bin), :))/bin_width;
-      FR_MUA(bin)=sum(sum(spikes(bin_index_begs(bin):bin_index_ends(bin), :)))/bin_width;
+      FR_MUA(bin)=sum(sum(spikes(bin_index_begs(bin):bin_index_ends(bin), :))) / (bin_width * ncells); % MUA average
     end
   end
   
