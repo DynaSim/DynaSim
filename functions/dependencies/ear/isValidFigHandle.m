@@ -9,6 +9,8 @@ function validBool = isValidFigHandle(h)
 % Input: string with handle name, or handle itself
 %
 % Note: will work with string containing any callable matlab indexing/object
+%
+% Author: Erik Roberts
 
 if isempty(h)
   validBool = false;
