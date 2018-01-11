@@ -17,10 +17,17 @@ function handles = dsPlot(data,varargin)
 %     'max_num_overlaid': maximum # of waveforms to overlay per plot
 %     'max_num_rows'    : maximum # of subplot rows per figure
 %     'xlim'            : x-axis limits {[XMIN XMAX]} (default: all data)
+%     'ylim'            : y-axis limits {[YMIN YMAX]} (default: all data)
 %     'yscale'          : whether to plot linear or log scale {'linear','log','log10'}
+%     'figwidth'        : outerposition width
+%     'figheight'       : outerposition height
+%     'figx'            : outerposition x
+%     'figy'            : outerposition y
 %     'visible'         : {'on','off'}
 %     'lock_gca'        : Plots within currently active axis (gca); doesn't
 %                         open new figures or subplots.
+%     'fig_handle'      : Parent figure handle to plot in.
+%     'ax_handle'       : Axes handle to plot in. If lock_gca, defaults to gca.
 %     - NOTE: analysis options are available depending on plot_type
 %       - see see dsCalcFR options for plot_type 'rastergram' or 'rates'
 %       - see dsCalcPower options for plot_type 'power'
@@ -156,19 +163,23 @@ data=dsCheckData(data, varargin{:});
 
 % get options
 options=dsCheckOptions(varargin,{...
-  'time_limits',[-inf inf],[],...
+  'plot_type','waveform',{'waveform','rastergram','raster','power','rates'},...
+  'plot_mode','trace',{'trace','image'},...
   'variable',[],[],...
+  'time_limits',[-inf inf],[],...
   'max_num_overlaid',50,[],...
   'max_num_rows',20,[],...
-  'plot_mode','trace',{'trace','image'},...
-  'plot_type','waveform',{'waveform','rastergram','raster','power','rates'},...
   'xlim',[],[],...
   'ylim',[],[],...
+  'yscale','linear',{'linear','log','log10','log2'},...
   'figwidth',[1],[],...
   'figheight',[1],[],...
-  'lock_gca',[false],[false, true],...
-  'yscale','linear',{'linear','log','log10','log2'},...
+  'figx',[0],[],...
+  'figy',[0],[],...
   'visible','on',{'on','off'},...
+  'lock_gca',[false],[false, true],...
+  'fig_handle',[],[],...
+  'ax_handle',[],[],...
   'auto_gen_test_data_flag',0,{0,1},...
   },false);
 
@@ -208,28 +219,24 @@ if any(strcmp(fields, 'varied'))
   [effective_vary_indices, ~] = dsCheckCovary(vary_lengths, vary_params, varargin{:});
 
   if prod(vary_lengths(effective_vary_indices)) == length(data)
-
       dimensions_varied = sum(effective_vary_indices);
       vary_params = vary_params(:, effective_vary_indices);
       vary_vectors = vary_vectors(effective_vary_indices);
       vary_lengths = vary_lengths(effective_vary_indices);
-
   else
-
       warning('unable to determine which parameters are covaried. Data will be plotted as a lattice.')
 
       dimensions_varied = 1;
-
   end
 
   if dimensions_varied > 2
-    no_figures = prod(vary_lengths(3:end));
+    nFigures = prod(vary_lengths(3:end));
 
     figure_params = nan(dimensions_varied - 2, 1);
 
     vary_lengths_cp = cumprod(vary_lengths);
 
-    for f = 1:no_figures
+    for f = 1:nFigures
       figure_params(1) = vary_vectors{3}(mod(f - 1, vary_lengths(3)) + 1);
 
       for v = 4:dimensions_varied
@@ -244,7 +251,7 @@ if any(strcmp(fields, 'varied'))
       vary_title = '';
 
       for v = 1:(dimensions_varied - 2)
-        vary_title = [vary_title, sprintf('%s = %f ', vary_labels{v + 2}, figure_params(v))];
+        vary_title = [vary_title, sprintf('%s = %f ', vary_labels{v + 2}, figure_params(v))]; %#ok<AGROW>
       end
 
       handles = dsPlot(data(figure_data_index), varargin{:});
@@ -276,6 +283,7 @@ pop_names={data(1).model.specification.populations.name}; % list of populations
 pop_indices=[];     % indices of populations to plot
 pop_var_indices={}; % indices of var_fields to plot per population
   % pop_var_indices{pop}(variable): index into var_fields
+  
 for i=1:length(pop_names)
   % do any variables start with this population name?
   var_inds=find(~cellfun(@isempty,regexp(var_fields,['^' pop_names{i}])));
@@ -298,6 +306,7 @@ num_sims=length(data); % number of simulations
 num_vars=length(variables);
 num_labels=length(var_fields); % number of labels to plot
 num_times=length(time);
+
 % set x-axis limits
 if isempty(options.time_limits)
   options.time_limits=[min(time) max(time)];
@@ -388,7 +397,7 @@ end
 
 % If are doing rastergram, pops can be greater than 1 when doing lock_gca
 if lock_gca && (num_sims>1 || num_vars>1)
-    error('Option lock_gca cannot with more than one simulation or variable');
+    error('Option lock_gca not permitted with more than one simulation or variable');
 end
 
 % make subplot adjustments for varied parameters
@@ -435,22 +444,44 @@ if num_sims>1 && isfield(data,'varied')
 %     sim_indices=[sim_indices find(param_mat(:,row_param_index)==row_param_values(row))];
 %   end
 else
-  sim_indices=ones(1,num_rows); % index into data array
-  num_cols=1;
+  sim_indices = ones(1,num_rows); % index into data array
+  num_cols = 1;
 end
 
-max_legend_entries=10;
-for figset=1:num_fig_sets
-  for fig=1:num_figs
+max_legend_entries = 10;
+for iFigset = 1:num_fig_sets
+  for iFig = 1:num_figs
     ylims=[nan nan];
+    
     % create figure
     if ~lock_gca
-        handles(end+1)=figure('units','normalized','outerposition',[0 0 options.figwidth, options.figheight],'visible',options.visible);
+        if isempty(options.fig_handle) || (iFig > 1)
+          thisHandle = figure('units','normalized','outerposition',[options.figx options.figy options.figwidth, options.figheight],'visible',options.visible);
+        else
+          thisHandle = options.fig_handle; % use for first figure handle
+        end
+        
+        % append to array
+        handles = [handles thisHandle];
+          % note: don't use `handles(end+1) = thisHandle;` since that will mess
+          % up graphics objects and convert them to doubles
+        
         % position axes
-        haxes=tight_subplot(num_rows,num_cols,[.01 .03],[.05 .01],[.03 .01]);
+        haxes = tight_subplot2(num_rows, num_cols, [.01 .03], [.05 .01], [.03 .01], thisHandle);
     else
-        handles = gcf;
-        haxes = gca;
+        if isempty(options.ax_handle)
+          haxes = gca;
+        else
+          haxes = options.ax_handle;
+        end
+        
+        if isempty(options.fig_handle)
+          handles = gcf;
+        else
+          handles = options.fig_handle;
+        end
+        
+        thisHandle = handles;
     end
 
     axis_counter=0;
@@ -460,6 +491,7 @@ for figset=1:num_fig_sets
     text_string=''; % string to add to subplot (set below)
     legend_strings=''; % legend for subplot (set below)
     shared_ylims_flag=1;
+    
     % draw plots
     for row=1:num_rows
       for col=1:num_cols
@@ -600,10 +632,10 @@ for figset=1:num_fig_sets
         elseif num_sims==1 && num_pops>1 && num_vars>1
         % -----------------------------------------------------------------
           % one population per row: dat = data(s=1).(var)(:,1:MTPP) where var=vars{these(p=r)}
-          if isnan(pop_var_indices{row}(figset))
+          if isnan(pop_var_indices{row}(iFigset))
             continue;
           end
-          var=var_fields{pop_var_indices{row}(figset)};
+          var=var_fields{pop_var_indices{row}(iFigset)};
           switch options.plot_type
             case 'waveform'
               dat=data(sim_index).(var);
@@ -639,10 +671,10 @@ for figset=1:num_fig_sets
         elseif num_sims>1 && num_pops==1 && num_vars>1
         % -----------------------------------------------------------------
           % one simulation per row: dat = data(s=r).(var)(:,1:MTPP) where var=vars{v++}
-          if isnan(pop_var_indices{1}(figset))
+          if isnan(pop_var_indices{1}(iFigset))
             continue;
           end
-          var=var_fields{pop_var_indices{1}(figset)};
+          var=var_fields{pop_var_indices{1}(iFigset)};
           switch options.plot_type
             case 'waveform'
               dat=data(sim_index).(var);
@@ -719,13 +751,13 @@ for figset=1:num_fig_sets
                 end
               end
               for k=1:num_pops
-                if isnan(pop_var_indices{k}(figset))
+                if isnan(pop_var_indices{k}(iFigset))
                   continue;
                 end
-                var=var_fields{pop_var_indices{k}(figset)};
+                var=var_fields{pop_var_indices{k}(iFigset)};
                 dat(:,k)=nanmean(data(sim_index).(var),2);
               end
-              var=['<' variables{figset} '>'];
+              var=['<' variables{iFigset} '>'];
             case 'power'
               dat=nan(length(xdata),num_pops);
               AuxData=nan(length(xdata),num_pops);
@@ -738,28 +770,28 @@ for figset=1:num_fig_sets
                 end
               end
               for k=1:num_pops
-                if isnan(pop_var_indices{k}(figset))
+                if isnan(pop_var_indices{k}(iFigset))
                   continue;
                 end
-                var=var_fields{pop_var_indices{k}(figset)};
+                var=var_fields{pop_var_indices{k}(iFigset)};
                 dat(:,k)=nanmean(data(sim_index).([var '_Power_SUA']).Pxx,2);
                 AuxData(:,k)=data(sim_index).([var '_Power_MUA']).Pxx;
                 AuxDataName{end+1}=strrep([var '_Power_MUA'],'_','\_');
                 vlines(end+1)=data(sim_index).([var '_Power_MUA']).PeakFreq;
               end
-              var=['<' variables{figset} '_Power_SUA>'];
+              var=['<' variables{iFigset} '_Power_SUA>'];
             case {'rastergram','raster'}
               set_name={};
               for k=1:num_pops
-                if isnan(pop_var_indices{k}(figset))
+                if isnan(pop_var_indices{k}(iFigset))
                   continue;
                 end
-                var=var_fields{pop_var_indices{k}(figset)};
+                var=var_fields{pop_var_indices{k}(iFigset)};
                 tmp=regexp(var,'^([a-zA-Z0-9]+)_','tokens','once');
                 set_name{k}=tmp{1};
                 allspikes{k}=data(sim_index).([var '_spike_times']);
               end
-              var=['<' variables{figset} '>'];
+              var=['<' variables{iFigset} '>'];
           end
         end
         % #################################################################
@@ -793,9 +825,10 @@ for figset=1:num_fig_sets
         if ~isempty(AuxData) && length(legend_strings)<=max_legend_entries
           legend_strings=cat(2,legend_strings,AuxDataName);
         end
+        
         % plot data
         %axes(haxes(axis_counter));
-        set(gcf,'CurrentAxes',haxes(axis_counter));
+        set(thisHandle, 'CurrentAxes',haxes(axis_counter));
         switch options.plot_type
           case {'waveform','power'}
             % finish preparing data
@@ -933,7 +966,7 @@ for figset=1:num_fig_sets
             end
             axis_counter=axis_counter+1;
             %axes(haxes(axis_counter));
-            set(gcf,'CurrentAxes',haxes(axis_counter));
+            set(thisHandle,'CurrentAxes',haxes(axis_counter));
             xmin=min(xlim); xmax=max(xlim);
             ymin=min(ylim); ymax=max(ylim);
             text_xpos=double(xmin+.05*(xmax-xmin));
@@ -951,6 +984,7 @@ for figset=1:num_fig_sets
 
   end % end loop over figures in this set
 end % end loop over figure sets
+
 
 %% auto_gen_test_data_flag argout
 if options.auto_gen_test_data_flag
