@@ -22,7 +22,7 @@ function results = dsImportResults(studyinfo,func, varargin)
 % Copyright (C) 2016 Jason Sherfey, Boston University, USA
 
 
-if ischar(studyinfo) && isdir(studyinfo) % study directory
+if ischar(studyinfo) && (isdir(studyinfo) || isfile(studyinfo)) % study directory
   study_dir=studyinfo;
   clear studyinfo
   studyinfo.study_dir=study_dir;
