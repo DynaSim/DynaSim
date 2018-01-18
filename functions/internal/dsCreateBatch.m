@@ -18,6 +18,10 @@ function [studyinfo, cmd] = dsCreateBatch(base_model,modifications_set,varargin)
 %       'batch_dir'     : where to save job scripts
 %       'qsub_mode'     : whether to use SGE -t array for 1 qsub, mode: 'array'; or
 %                         qsub in csh for loop, mode: 'loop'. (default: 'loop').
+%       'email_notify'  : whether to receive email notification about jobs.
+%                         options specified by 1-3 characters as string. 'b' for job
+%                         begins, 'a' for job aborts, 'e' for job ends.
+%       'one_solve_file_flag': only use 1 file of each time when solving (default: 0)
 %     - options for parallel computing: (requires Parallel Computing Toolbox)
 %       - Note: parallel computing has been DISABLED for debugging...
 %       'parfor_flag' : whether to use parfor to run simulations {0 or 1} (default: 0)
@@ -49,6 +53,7 @@ options=dsCheckOptions(varargin,{...
   'overwrite_flag',0,{0,1},...
   'process_id',[],[],... % process identifier for loading studyinfo if necessary
   'qsub_mode','loop',{'loop','array'},... % whether to submit jobs as an array using qsub -t or in a for loop
+  'email_notify',[],[],...
   'one_solve_file_flag',0,{0,1},... % use only 1 solve file of each type, but can't vary mechs yet
   'solver','rk4',{'euler','rk1','rk2','rk4','modified_euler','rungekutta','rk','ode23','ode45',...
     'ode1','ode2','ode3','ode4','ode5','ode8','ode113','ode15s','ode23s','ode23t','ode23tb'},... % DynaSim and built-in Matlab solvers
@@ -451,20 +456,27 @@ else % on cluster with qsub
       l_directives = ['-l centos7=TRUE -l mem_total=', options.memory_limit];
     end
 
+    % email string
+    if isempty(options.email_notify)
+      qsubStr = '';
+    else
+      qsubStr = ['-m ' options.email_notify];
+    end
+    
     % submit commands
     jobPrefix = batch_dir_name;
     batch_dir_abs_path = batch_dir;
     if strcmp(options.qsub_mode, 'array') && ~options.one_solve_file_flag
       % TODO: remove old error and output files; put e and o in their own dirs
       job_filename = 'sim_job';
-      cmd = sprintf('echo "%s/qsub_jobs_array ''%s'' %s ''%s''" | qsub -V -hard %s -wd ''%s'' -N %s_sim_job -t 1-%i',...
+      cmd = sprintf('echo "%s/qsub_jobs_array ''%s'' %s ''%s''" | qsub -V -hard %s -wd ''%s'' -N %s_sim_job -t 1-%i %s',...
         dsFnDirPath, batch_dir_abs_path, job_filename, ui_command,... % echo vars
-        l_directives, batch_dir_abs_path, jobPrefix, num_jobs); % qsub vars
+        l_directives, batch_dir_abs_path, jobPrefix, num_jobs, qsubStr); % qsub vars
     elseif strcmp(options.qsub_mode, 'array') && options.one_solve_file_flag
       [~, job_filename] = fileparts2(job_file); %remove path and extension
-      cmd = sprintf('echo "%s/qsub_jobs_array_one_file ''%s'' %s ''%s''" | qsub -V -hard %s -wd ''%s'' -N %s_sim_job -t 1-%i:%i',...
+      cmd = sprintf('echo "%s/qsub_jobs_array_one_file ''%s'' %s ''%s''" | qsub -V -hard %s -wd ''%s'' -N %s_sim_job -t 1-%i:%i %s',...
         dsFnDirPath, batch_dir_abs_path, job_filename, ui_command,... % echo vars
-        l_directives, batch_dir_abs_path, jobPrefix, num_simulations, options.sims_per_job); % qsub vars
+        l_directives, batch_dir_abs_path, jobPrefix, num_simulations, options.sims_per_job, qsubStr); % qsub vars
       % NOTE: using num_simulations, not num_jobs, since the job_file will
       %   determine it's own sims to run
     elseif strcmp(options.qsub_mode, 'loop')

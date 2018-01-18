@@ -45,6 +45,9 @@ function [data,studyinfo,result] = dsSimulate(model,varargin)
 %     'memory_limit'  : memory to allocate per batch job (default: '8G')
 %     'qsub_mode'     : whether to use SGE -t array for 1 qsub, mode: 'array'; or
 %                         qsub in csh for loop, mode: 'loop'. (default: 'loop').
+%     'email_notify'  : whether to receive email notification about jobs.
+%                       options specified by 1-3 characters as string. 'b' for job
+%                       begins, 'a' for job aborts, 'e' for job ends.
 %     'one_solve_file_flag': only use 1 file of each time when solving (default: 0)
 %     'optimize_big_vary': Select best options for doing many sims {0 or 1} (default: 0)
 %
@@ -262,6 +265,7 @@ options=dsCheckOptions(varargin,{...
   'sims_per_job',1,[],... % how many sims to run per batch job
   'memory_limit','8G',[],... % how much memory to allocate per batch job
   'qsub_mode','loop',{'loop','array'},... % whether to submit jobs as an array using qsub -t or in a for loop
+  'email_notify',[],[],...
   'one_solve_file_flag',0,{0,1},... % use only 1 solve file of each type, but can't vary mechs yet
   'parfor_flag',0,{0,1},...     % whether to run simulations in parallel (using parfor)
   'num_cores',4,[],... % # cores for parallel processing (SCC supports 1-12)
