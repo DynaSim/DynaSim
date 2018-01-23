@@ -20,7 +20,7 @@ function [data,studyinfo,result] = dsSimulate(model,varargin)
 %     'ic'          : numeric array of initial conditions, one value per state
 %                     variable (default: all zeros). overrides definition in model structure
 %     'random_seed' : seed for random number generator (default: 'shuffle', set randomly) (usage: rng(options.random_seed))
-%     'compile_flag': whether to compile simulation using coder instead of
+%     'mex_flag': whether to compile simulation using coder instead of
 %                     interpreting Matlab {0 or 1} (default: 0)
 %     'sparse_flag' : whether to convert numeric fixed variables to sparse matrices {0 or 1} (default: 0)
 %
@@ -45,11 +45,14 @@ function [data,studyinfo,result] = dsSimulate(model,varargin)
 %     'memory_limit'  : memory to allocate per batch job (default: '8G')
 %     'qsub_mode'     : whether to use SGE -t array for 1 qsub, mode: 'array'; or
 %                         qsub in csh for loop, mode: 'loop'. (default: 'loop').
+%     'email_notify'  : whether to receive email notification about jobs.
+%                       options specified by 1-3 characters as string. 'b' for job
+%                       begins, 'a' for job aborts, 'e' for job ends.
 %     'one_solve_file_flag': only use 1 file of each time when solving (default: 0)
 %     'optimize_big_vary': Select best options for doing many sims {0 or 1} (default: 0)
 %
 %   options for parallel computing: (requires Parallel Computing Toolbox)
-%     'parallel_flag' : whether to use parfor to run simulations {0 or 1} (default: 0)
+%     'parfor_flag' : whether to use parfor to run simulations {0 or 1} (default: 0)
 %     'num_cores'     : number of cores to specify in the parallel pool
 %     *note: parallel computing has been disabled for debugging...
 %
@@ -262,10 +265,11 @@ options=dsCheckOptions(varargin,{...
   'sims_per_job',1,[],... % how many sims to run per batch job
   'memory_limit','8G',[],... % how much memory to allocate per batch job
   'qsub_mode','loop',{'loop','array'},... % whether to submit jobs as an array using qsub -t or in a for loop
+  'email_notify',[],[],...
   'one_solve_file_flag',0,{0,1},... % use only 1 solve file of each type, but can't vary mechs yet
-  'parallel_flag',0,{0,1},...     % whether to run simulations in parallel (using parfor)
+  'parfor_flag',0,{0,1},...     % whether to run simulations in parallel (using parfor)
   'num_cores',4,[],... % # cores for parallel processing (SCC supports 1-12)
-  'compile_flag',0,{0,1},... % exist('codegen')==6, whether to compile using coder instead of interpreting Matlab
+  'mex_flag',0,{0,1},... % exist('codegen')==6, whether to compile using coder instead of interpreting Matlab
   'sparse_flag',0,{0,1},... % whether to sparsify fixed variables before simulation
   'disk_flag',0,{0,1},...            % whether to write to disk during simulation instead of storing in memory
   'matCompatibility_flag',1,{0,1},...  % whether to save mat files in compatible mode, vs to prioritize > 2GB VARs
@@ -309,26 +313,26 @@ end
 
 %% 0.3 Prepare solve options.
 
-if options.compile_flag && ~strcmp(reportUI,'matlab')
-  fprintf('Setting ''compile_flag'' to 0 in Octave.\n')
-  options.compile_flag = 0;
+if options.mex_flag && ~strcmp(reportUI,'matlab')
+  fprintf('Setting ''mex_flag'' to 0 in Octave.\n')
+  options.mex_flag = 0;
 end
 
 if isempty(options.mex_dir)
     options.mex_dir = dsGetConfig('mex_path');
 end
 
-if options.compile_flag && options.sparse_flag
-  error('The Matlab Coder toolbox does not support sparse matrices. Choose either ''compile_flag'' or ''sparse_flag''.');
+if options.mex_flag && options.sparse_flag
+  error('The Matlab Coder toolbox does not support sparse matrices. Choose either ''mex_flag'' or ''sparse_flag''.');
 end
 
-if options.parallel_flag && (strcmp(reportUI,'matlab') && feature('numCores') == 1 || ~strcmp(reportUI,'matlab') && nproc() == 1)
-  fprintf('Setting ''parallel_flag'' to 0 since only 1 core detected on this machine.\n')
-  options.parallel_flag = 0;
+if options.parfor_flag && (strcmp(reportUI,'matlab') && feature('numCores') == 1 || ~strcmp(reportUI,'matlab') && nproc() == 1)
+  fprintf('Setting ''parfor_flag'' to 0 since only 1 core detected on this machine.\n')
+  options.parfor_flag = 0;
 end
 
-if options.compile_flag && ~options.reduce_function_calls_flag
-  fprintf('Setting ''reduce_function_calls_flag'' to 1 for compatibility with ''compile_flag=1'' (coder does not support anonymous functions).\n');
+if options.mex_flag && ~options.reduce_function_calls_flag
+  fprintf('Setting ''reduce_function_calls_flag'' to 1 for compatibility with ''mex_flag=1'' (coder does not support anonymous functions).\n');
   options.reduce_function_calls_flag=1;
 end
 
@@ -376,10 +380,16 @@ end
 
 %% 0.4 Non-Batch checks.
 if isempty(options.sim_id) % not in part of a batch sim
+  if strcmp(options.qsub_mode, 'array') && ~options.one_solve_file_flag && options.sims_per_job > 1
+    fprintf('Since qsub_mode==''array'' and one_solve_file_flag==1, setting options.sims_per_job=1 \n')
+    options.sims_per_job = 1;
+    % TODO: this is a temp setting until array mode handles sims_per_job > 1
+  end
+
   if options.optimize_big_vary
     options.cluster_flag = 1;
     options.qsub_mode = 'array';
-    options.compile_flag = 1;
+    options.mex_flag = 1;
     options.downsample_factor = max(1/options.dt, options.downsample_factor); % at most 1000Hz sampling
     options.one_solve_file_flag = 1;
     options.sims_per_job = max(2, options.sims_per_job);
@@ -388,29 +398,29 @@ if isempty(options.sim_id) % not in part of a batch sim
   % check for one_solve_file_flag
   if options.one_solve_file_flag && ~options.cluster_flag
     % One file flag only for cluster
-    fprintf('Since cluster_flag==0, setting options.one_solve_file_flag=0\n')
+    fprintf('Since cluster_flag==0, setting options.one_solve_file_flag=0 \n')
     options.one_solve_file_flag = 0;
     % TODO: this is a temp setting until iss_90 is fully implemented
   end
 
   if options.one_solve_file_flag && ~options.overwrite_flag
     % One file flag will overwrite
-    fprintf('Since one_solve_file_flag==1, setting options.overwrite_flag=1\n')
+    fprintf('Since one_solve_file_flag==1, setting options.overwrite_flag=1 \n')
     options.overwrite_flag = 1;
     % TODO: this is a temp setting until iss_90 is fully implemented
   end
 
   if options.one_solve_file_flag && ~strcmp(options.qsub_mode, 'array')
     % One file flag needs array mode
-    fprintf('Since one_solve_file_flag==1, setting options.qsub_mode=''array''\n')
+    fprintf('Since one_solve_file_flag==1, setting options.qsub_mode=''array'' \n')
     options.qsub_mode = 'array';
     % TODO: this is a temp setting until iss_90 is fully implemented
   end
 
-  if options.one_solve_file_flag && options.parallel_flag
-    % One file flag can't do parallel_flag
-    fprintf('Since one_solve_file_flag==1, setting options.parallel_flag=0\n')
-    options.parallel_flag = 0;
+  if options.one_solve_file_flag && options.parfor_flag
+    % One file flag can't do parfor_flag
+    fprintf('Since one_solve_file_flag==1, setting options.parfor_flag=0 \n')
+    options.parfor_flag = 0;
     % TODO: this is a temp setting until iss_90 is fully implemented
   end
 
@@ -419,7 +429,7 @@ if isempty(options.sim_id) % not in part of a batch sim
   end
 
   if options.one_solve_file_flag && ~options.save_parameters_flag
-    fprintf('Since one_solve_file_flag==1, setting options.save_parameters_flag=1\n')
+    fprintf('Since one_solve_file_flag==1, setting options.save_parameters_flag=1 \n')
     options.save_parameters_flag = 1;
     % TODO: this is a temp setting until iss_90 is fully implemented
   end
@@ -617,11 +627,17 @@ end
 %% 1.3.2 Manage parallel computing on local machine.
 % TODO: debug local parallel sims, doesn't seem to be working right...
 % (however SCC cluster+parallel works)
-if options.parallel_flag
+
+if options.parfor_flag
+  % Disable for Octave and return error
+   if ~strcmp(reportUI,'matlab')
+     warning('Parfor mode not implemented in Octave.');
+   end
+
   % prepare studyinfo
   [studyinfo,options]=dsSetupStudy(model,'simulator_options',options,'modifications_set',modifications_set);
 
-  if options.compile_flag
+  if options.mex_flag
     % Ensure mex_dir is absolute
     if (ispc && options.mex_dir(2) == ':') || (~ispc && options.mex_dir(1) == filesep)
       relMexPath = false;
@@ -640,7 +656,7 @@ if options.parallel_flag
   end
 
   % prepare options
-  options_temp = rmfield(options,{'vary','modifications','solve_file','parallel_flag','studyinfo','in_parfor_loop_flag','random_seed'});
+  options_temp = rmfield(options,{'vary','modifications','solve_file','parfor_flag','studyinfo','in_parfor_loop_flag','random_seed'});
   keyvals=dsOptions2Keyval(options_temp);
 
   keyvals{find(strcmp(keyvals, 'auto_gen_test_data_flag'))+1} = 0;
@@ -664,7 +680,7 @@ if options.parallel_flag
   seeds = repmat({options.random_seed},1,length(modifications_set));
   
   % If random_seed is shuffle, generate a series of seeds here
-  if strcmp(options.random_seed,'shuffle') && strcmp(reportUI,'matlab')
+  if strcmp(options.random_seed,'shuffle')
     rng_wrapper('shuffle');
     sd = rng_wrapper;            % Get current seed
     for j = 1:length(modifications_set)
@@ -673,6 +689,9 @@ if options.parallel_flag
   end
   
   % note that parfor currently acts just as a regular for in Octave
+  if ~strcmp(reportUI,'matlab')
+    disp('   Info for GNU Octave users: Do not expect any speed up by using DynaSim''s ''parfor_flag''. In GNU Octave, parfor loops currently default to regular for loops.');
+  end
   parfor sim=1:length(modifications_set)
     data(sim)=dsSimulate(model, 'modifications', modifications_set{sim}, keyvals{:},...
         'random_seed',seeds{sim},...                                      % Use unique random seed for each sim if shuffle
@@ -739,7 +758,7 @@ if options.parallel_flag
   end
 
   return
-end %parallel_flag
+end %parfor_flag
 
 %% 1.4 prepare study_dir and studyinfo if saving data
 if isempty(options.studyinfo)
@@ -748,7 +767,7 @@ else % in parfor loop and/or cluster job
   studyinfo = options.studyinfo;
 end
 
-if options.compile_flag
+if options.mex_flag
   % Ensure mex_dir is absolute
   if (ispc && options.mex_dir(2) == ':') || (~ispc && options.mex_dir(1) == filesep)
     relMexPath = false;
@@ -781,7 +800,7 @@ if ~options.debug_flag
   try
     tryFn(nargout)
   catch err % error handling
-    if options.compile_flag && ~isempty(options.solve_file) && ~options.one_solve_file_flag
+    if options.mex_flag && ~isempty(options.solve_file) && ~options.one_solve_file_flag
 
       if options.verbose_flag
         fprintf('Removing failed compiled solve file: %s\n',options.solve_file);
@@ -909,7 +928,7 @@ end % in_parfor_loop_flag
       %% Experiment
       if isa(options.experiment,'function_handle')
         % EXPERIMENT (wrapping around a set of simulations)
-        if options.cluster_flag && options.compile_flag
+        if options.cluster_flag && options.mex_flag
           warning('compiled solver is not available for experiments on the cluster. Simulation will be run in Matlab.');
         end
 
@@ -1085,7 +1104,7 @@ end % in_parfor_loop_flag
           % do analysis and plotting while saving results
           siminfo=studyinfo.simulations(sim_ind);
           for f=1:length(siminfo.result_functions)
-            tmpresult=dsAnalyze(tmpdata,siminfo.result_functions{f},'result_file',siminfo.result_files{f},'save_data_flag',1,'save_results_flag',1,siminfo.result_options{f}{:},'parallel_flag',options.parallel_flag);
+            tmpresult=dsAnalyze(tmpdata,siminfo.result_functions{f},'result_file',siminfo.result_files{f},'save_data_flag',1,'save_results_flag',1,siminfo.result_options{f}{:},'parfor_flag',options.parfor_flag);
 
             % since the plots are saved, close all generated figures
             if all(ishandle(tmpresult))
@@ -1096,13 +1115,13 @@ end % in_parfor_loop_flag
           % do analysis and plotting without saving results
           if ~isempty(options.analysis_functions) && nargoutmain > 2
             for f=1:length(options.analysis_functions)
-              tmpresult=dsAnalyze(tmpdata,options.analysis_functions{f},'result_file',[],'save_data_flag',0,'save_results_flag',options.save_results_flag,options.analysis_options{f}{:},'parallel_flag',options.parallel_flag);
+              tmpresult=dsAnalyze(tmpdata,options.analysis_functions{f},'result_file',[],'save_data_flag',0,'save_results_flag',options.save_results_flag,options.analysis_options{f}{:},'parfor_flag',options.parfor_flag);
             end
           end
 
           if ~isempty(options.plot_functions)
             for f=1:length(options.plot_functions)
-              dsAnalyze(tmpdata,options.plot_functions{f},'result_file',[],'save_data_flag',0,'save_results_flag',options.save_results_flag,options.plot_options{f}{:},'parallel_flag',options.parallel_flag);
+              dsAnalyze(tmpdata,options.plot_functions{f},'result_file',[],'save_data_flag',0,'save_results_flag',options.save_results_flag,options.plot_options{f}{:},'parfor_flag',options.parfor_flag);
             end
           end
         end
@@ -1247,6 +1266,8 @@ option_names = {...
   'nofunctions','reduce_function_calls_flag';
   'dsfact','downsample_factor';
   'memlimit','memory_limit';
+  'parallel_flag','parfor_flag';
+  'compile_flag','mex_flag';
   };
 
 if any(ismember(option_names(:,1),options(1:2:end)))

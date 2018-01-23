@@ -1,12 +1,17 @@
 #!/bin/csh
 
-set batchdir = ~/batchdirs/$1
+# $1 is abs path to working dir
+# $2 = 'sim_job', the job name prefix
+
+set batchdir = "$1"
 cd $batchdir
+
 mkdir -p pbsout
 set joblist = `cat scriptlist.txt`
 
-set ui_command = "$2"
-set l_directives = "$3"
+set jobPrefix = "$2"
+set ui_command = "$3"
+set l_directives = "$4"
 
 foreach job ( $joblist )
   echo $job
@@ -16,8 +21,8 @@ foreach job ( $joblist )
   if (-e pbsout/$job.err) then
     rm -f pbsout/$job.err
   endif
-  # why do we need these two echo instructions? ask jason
-  echo "qsub_job $batchdir $ui_command $job" '|' qsub -V -hard $l_directives -cwd -N $1_$job -o pbsout/$job.out -e pbsout/$job.err
-  echo "qsub_job $batchdir $ui_command $job" | qsub -V -hard $l_directives -cwd -N $1_$job -o pbsout/$job.out -e pbsout/$job.err
-  sleep 0.25 #is this the lower limit?
+  echo "qsub_job ${batchdir} ${ui_command} ${job}" '|' qsub -V -hard $l_directives -cwd -N ${jobPrefix}_${job} -o pbsout/${job}.out -e pbsout/${job}.err
+  #echo "qsub_job ${batchdir} ${ui_command} ${job}" | qsub -V -hard $l_directives -cwd -N ${jobPrefix}_${job} -o pbsout/${job}.out -e pbsout/${job}.err
+  echo "qsub_job ${batchdir} "'"'"${ui_command}"'"'" ${job}" | qsub -V -hard $l_directives -cwd -N ${jobPrefix}_${job} -o pbsout/${job}.out -e pbsout/${job}.err
+  sleep 0.25
 end

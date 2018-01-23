@@ -5,7 +5,7 @@
 This is the home of the DynaSim toolbox for modeling and simulating dynamical
 systems in MATLAB and GNU Octave!
 
-### Installation
+### Quick Install:
 
 * Full instructions are [online](https://github.com/DynaSim/DynaSim/wiki/Installation).
 * In brief:
@@ -15,11 +15,17 @@ systems in MATLAB and GNU Octave!
       * `addpath(genpath('YOUR/PATH/TO/DynaSim'))`
       * `savepath`
 
-### Documentation:
+### Tutorial:
 
 - Get started with the [DynaSim tutorial](https://github.com/DynaSim/DynaSim/wiki/DynaSim-Getting-Started-Tutorial).
+
+### Documentation:
+
 - Complete documentation is [available online](https://dynasim.github.io/docs).
 - A browsable function reference is [available here](https://dynasim.github.io/docs/function_reference).
+
+### Other References:
+
 - Example modeling projects: [PFC networks](https://github.com/jsherfey/PFC_models), [Thalamus](https://github.com/asoplata/ching2010_tcre_dynasim_mechanisms).
   - See the [online documentation](https://dynasim.github.io/docs) for more.
 - Report issues [here](https://github.com/DynaSim/DynaSim/issues).

@@ -1,13 +1,17 @@
-#!/bin/sh
+#!/bin/csh
 
-cd $1
-echo "ui_command = " $2
-echo "m_command = " $3
+set batchdir = "$1"
+set ui_command = "$2"
+set m_command = "$3"
+
+cd $batchdir
+echo "ui_command = " $ui_command
+echo "m_command = " $m_command
 echo "cwd = " `pwd`
 echo "HOSTNAME = " $HOSTNAME
 echo "JOB_NAME = " $JOB_ID
 echo "JOB_NAME = " $JOB_NAME
-# matlab -nodisplay -singleCompThread -r $3
-# octave-cli --eval $3
-$2 "$3;exit"
+# matlab -nodisplay -singleCompThread -r $m_command
+# octave-cli --eval $m_command
+$ui_command "${m_command};exit"
 echo "finished"

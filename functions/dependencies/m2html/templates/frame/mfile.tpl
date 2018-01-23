@@ -9,15 +9,16 @@
   <meta name="generator" content="m2html &copy; 2005 Guillaume Flandin">
   <meta name="robots" content="index, follow">
   <link type="text/css" rel="stylesheet" href="{MASTERPATH}m2html.css">
-  <script type="text/javascript">
+  <!-- <script type="text/javascript">
     if (top.frames.length == 0) { top.location = "{MASTERPATH}index.html"; };
-  </script>
+  </script> -->
 </head>
 <body>
+
 <a name="_top"></a>
 <!-- BEGIN pathline -->
 <!-- {LPATHDIR} {PATHDIR} -->
-<!-- END pathline --> 
+<!-- END pathline -->
 <h1>{NAME}
 <!-- BEGIN mexfile --> &nbsp;&nbsp;<img src="{MASTERPATH}{MEXTYPE}.png" alt="{PLATFORMS}" border="0" title="{PLATFORMS}"> <!-- END mexfile -->
 </h1>

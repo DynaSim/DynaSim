@@ -54,7 +54,7 @@ data=dsSimulate(eqns, 'time_limits',[0 100], 'solver','rk4');
 % created uniquely for a given model and stored in a directory named
 % "solve". The file that solves the system (i.e,. numerically integrates
 % it) is stored in data.simulator_options and can be viewed or rerun afterwards:
-edit(data.simulator_options.solve_file)
+% edit(data.simulator_options.solve_file)
 
 % Every component of the model is assigned to a "population", and the
 % population name (default: 'pop1') is prepended to all variable and
@@ -173,8 +173,8 @@ figure; plot(data.time,data.(data.labels{1}))
 xlabel('time (ms)'); ylabel('membrane potential (mV)'); title('Hodgkin-Huxley neuron')
 
 % View the mechanism files:
-[~,eqnfile]=dsLocateModelFiles('iNa.mech'); edit(eqnfile{1});
-[~,eqnfile]=dsLocateModelFiles('iK.mech');  edit(eqnfile{1});
+[~,eqnfile]=dsLocateModelFiles('iNa.mech'); % edit(eqnfile{1});
+[~,eqnfile]=dsLocateModelFiles('iK.mech');  % edit(eqnfile{1});
 % Mechanisms can be custom built; however, DynaSim does come pakaged with
 % some common ones like popular ion currents (see <dynasim>/models).
 
@@ -198,7 +198,7 @@ xlabel('time (ms)'); ylabel('membrane potential (mV)'); title('Predefined Intrin
 % structure (see below).
 
 % View the predefined population file:
-[~,eqnfile]=dsLocateModelFiles('IB.pop'); edit(eqnfile{1});
+[~,eqnfile]=dsLocateModelFiles('IB.pop'); % edit(eqnfile{1});
 
 % %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% BUILDING LARGE MODELS WITH MULTIPLE POPULATIONS AND CONNECTIONS
@@ -227,23 +227,23 @@ s.populations(2).mechanism_list={'iNa','iK'};
 s.populations(2).parameters={'Iapp',0,'gNa',120,'gK',36,'noise',10};
 s.connections(1).direction='I->E';
 s.connections(1).mechanism_list={'iGABAa'};
-s.connections(1).parameters={'tauD',10,'gGABAa',.1,'netcon','ones(N_pre,N_post)'}; % connectivity matrix defined using a string that evalutes to a numeric matrix
+s.connections(1).parameters={'tauD',10,'gSYN',.1,'netcon','ones(N_pre,N_post)'}; % connectivity matrix defined using a string that evalutes to a numeric matrix
 s.connections(2).direction='E->I';
 s.connections(2).mechanism_list={'iAMPA'};
-s.connections(2).parameters={'tauD',2,'gAMPA',.1,'netcon',ones(80,20)}; % connectivity set using a numeric matrix defined in script
+s.connections(2).parameters={'tauD',2,'gSYN',.1,'netcon',ones(80,20)}; % connectivity set using a numeric matrix defined in script
 
 %% Simulate Sparse Pyramidal-Interneuron-Network-Gamma (sPING)
 data=dsSimulate(s);
 
 dsPlot(data); % <-- Figure 4 in DynaSim paper
-dsPlot(data,'variable',{'E_v','E_I_iGABAa_IGABAa'});
+dsPlot(data,'variable',{'E_v','E_I_iGABAa_ISYN'});
 
 % View the connection mechanism file:
-[~,eqnfile]=dsLocateModelFiles('iAMPA.mech'); edit(eqnfile{1});
+[~,eqnfile]=dsLocateModelFiles('iAMPA.mech'); % edit(eqnfile{1});
 
 %% Explore sPING in DynaSim GUI
 
-dynasim(s); % Display model "s" in the DynaSim GUI
+% dynasim(s); % Display model "s" in the DynaSim GUI
 
 % Notes:
 % - DynaSim GUI is only supported in MATLAB at this time.
@@ -290,7 +290,7 @@ vary={
   'I->E','tauD',[5 10 15]       % inhibition decay time constant from I to E
   };
 dsSimulate(s, 'save_data_flag', 1, 'study_dir', 'demo_sPING_3',...
-                'vary', vary, 'verbose_flag', 1, 'parfor_flag',1);
+                'vary', vary, 'verbose_flag', 0, 'parfor_flag',1);
 data=dsImport('demo_sPING_3');
 dsPlot(data);
 dsPlot(data,'plot_type','rastergram'); % <-- Figure 5 in DynaSim paper
@@ -304,14 +304,14 @@ dsPlot(data,'plot_type','power');
 % How to: set 'cluster_flag' to 1
 % Requirement: you must be logged on to a cluster that recognizes 'qsub'
 
-if 0
+if 1
   % Execute the following cluster examples from a login node
 
   % Run three simulations in parallel jobs and save the simulated data
   eqns='dv/dt=@current+I; {iNa,iK}';
   vary={'','I',[0 10 20]};
   dsSimulate(eqns, 'save_data_flag',1, 'study_dir','demo_cluster_1',...
-                     'vary',vary, 'cluster_flag',1, 'overwrite_flag',1, 'verbose_flag',1);
+                     'vary',vary, 'cluster_flag',1, 'overwrite_flag',1, 'verbose_flag',0);
   % tips for checking job status:
   % !qstat -u <YOUR_USERNAME>
   % !cat ~/batchdirs/demo_cluster_1/pbsout/sim_job1.out
@@ -322,7 +322,7 @@ if 0
   eqns='dv/dt=@current+I; {iNa,iK}';
   vary={'','I',[0 10 20]};
   dsSimulate(eqns, 'save_data_flag',1, 'study_dir','demo_cluster_2',...
-                     'vary',vary, 'cluster_flag',1, 'overwrite_flag',1, 'verbose_flag',1,...
+                     'vary',vary, 'cluster_flag',1, 'overwrite_flag',1, 'verbose_flag',0,...
                      'plot_functions',@dsPlot);
   % !cat ~/batchdirs/demo_cluster_2/pbsout/sim_job1.out
 
@@ -330,7 +330,7 @@ if 0
   eqns='dv/dt=@current+I; {iNa,iK}';
   vary={'','I',[0 10 20]};
   dsSimulate(eqns, 'save_data_flag',1, 'study_dir','demo_cluster_3',...
-                     'vary',vary, 'cluster_flag',1, 'overwrite_flag',1, 'verbose_flag',1,...
+                     'vary',vary, 'cluster_flag',1, 'overwrite_flag',1, 'verbose_flag',0,...
                      'plot_functions',{@dsPlot,@dsPlot},...
                      'plot_options',{{},{'plot_type','power'}});
   % !cat ~/batchdirs/demo_cluster_3/pbsout/sim_job1.out
@@ -345,7 +345,7 @@ if 0
 
   % Run on cluster with compilation
   dsSimulate(eqns, 'save_data_flag',1, 'study_dir','demo_cluster_4','mex_flag',1,...
-                     'vary',vary, 'cluster_flag',1, 'overwrite_flag',1, 'verbose_flag',1);
+                     'vary',vary, 'cluster_flag',1, 'overwrite_flag',1, 'verbose_flag',0);
 end
 
 % %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -429,10 +429,10 @@ s.populations(1).parameters={'stim_amp',10};  % amplitude of stimulation
 s.populations(2).equations='FS';              % inhibitory (I) population
 s.connections(1).direction='RS->FS';          % E->I connection
 s.connections(1).mechanism_list='iAMPA';      % AMPA synapse
-s.connections(1).parameters={'gAMPA',.5};      % synaptic weight
+s.connections(1).parameters={'gSYN',.5};      % synaptic weight
 s.connections(2).direction='FS->RS';          % I->E connection
 s.connections(2).mechanism_list='iGABAa';     % GABAa synapse
-s.connections(2).parameters={'gGABAa',1,'tauD',10}; % strength and time constant of inhibition
+s.connections(2).parameters={'gSYN',1,'tauD',10}; % strength and time constant of inhibition
 dsPlot(dsSimulate(s,'time_limits',T));
 
 %% Multicompartment neurons
@@ -475,9 +475,9 @@ LIF={
      };
 
 iampa={
-  'gAMPA=.5; EAMPA=0; tauD=2; tauR=0.4; delay=15'
+  'gSYN=.5; ESYN=0; tauD=2; tauR=0.4; delay=15'
   'f(x) = (exp(-x/tauD)-exp(-x/tauR)).*(x>0)'
-  'Isyn(V) = gAMPA.*sum(f(t-tspike_pre-delay)).*(V-EAMPA)'
+  'Isyn(V) = gSYN.*sum(f(t-tspike_pre-delay)).*(V-ESYN)'
   '@isyn += Isyn(V_post)'
 };
 
@@ -504,11 +504,11 @@ dsPlot(data);
 % the specification.mechanisms field.
 
 ampa_with_delay={
-  'gAMPA=.1; EAMPA=0; tauD=2; tauR=0.4; delay=20'
+  'gSYN=.1; ESYN=0; tauD=2; tauR=0.4; delay=20'
   'netcon=ones(N_pre,N_post)'
-  'IAMPA(X,s)=gAMPA.*(s*netcon).*(X-EAMPA)'
+  'ISYN(X,s)=gSYN.*(s*netcon).*(X-ESYN)'
   'ds/dt=-s./tauD+((1-s)/tauR).*(1+tanh(X_pre(t-delay)/10)); s(0)=.1' % 20ms delay
-  '@current += -IAMPA(X_post,s)'
+  '@current += -ISYN(X_post,s)'
 };
 
 s=[];
@@ -516,7 +516,7 @@ s.populations(1).name='HH';
 s.populations(1).equations='dV/dt=@current+10*(t<50);{iNa,iK};V(0)=-65';
 s.connections(1).direction='HH->HH';
 s.connections(1).mechanism_list='iampa';
-s.connections(1).parameters={'gAMPA',.1};
+s.connections(1).parameters={'gSYN',.1};
 s.mechanisms(1).name='iampa';
 s.mechanisms(1).equations=ampa_with_delay;
 data=dsSimulate(s,'time_limits',[0 100]);

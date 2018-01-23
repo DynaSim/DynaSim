@@ -8,7 +8,7 @@ function [studyinfo, cmd] = dsCreateBatch(base_model,modifications_set,varargin)
 %   - DynaSim model (see dsGenerateModel)
 %   - modifications_set (as returned by dsVary2Modifications())
 %     - options:
-%       'compile_flag'  : whether to compile simulation using coder instead of
+%       'mex_flag'  : whether to compile simulation using coder instead of
 %                         interpreting Matlab {0 or 1} (default: 0)
 %       'verbose_flag'  : whether to display informative messages/logs (default: 0)
 %       'overwrite_flag': whether to overwrite existing data files {0 or 1} (default: 0)
@@ -18,9 +18,13 @@ function [studyinfo, cmd] = dsCreateBatch(base_model,modifications_set,varargin)
 %       'batch_dir'     : where to save job scripts
 %       'qsub_mode'     : whether to use SGE -t array for 1 qsub, mode: 'array'; or
 %                         qsub in csh for loop, mode: 'loop'. (default: 'loop').
+%       'email_notify'  : whether to receive email notification about jobs.
+%                         options specified by 1-3 characters as string. 'b' for job
+%                         begins, 'a' for job aborts, 'e' for job ends.
+%       'one_solve_file_flag': only use 1 file of each time when solving (default: 0)
 %     - options for parallel computing: (requires Parallel Computing Toolbox)
 %       - Note: parallel computing has been DISABLED for debugging...
-%       'parallel_flag' : whether to use parfor to run simulations {0 or 1} (default: 0)
+%       'parfor_flag' : whether to use parfor to run simulations {0 or 1} (default: 0)
 %       'num_cores'     : number of cores to specify in the parallel pool
 %
 % Outputs:
@@ -33,10 +37,13 @@ function [studyinfo, cmd] = dsCreateBatch(base_model,modifications_set,varargin)
 % Author: Jason Sherfey, PhD <jssherfey@gmail.com>
 % Copyright (C) 2016 Jason Sherfey, Boston University, USA
 
+%% check program
+isMatlab = strcmp(reportUI,'matlab'); % logical
+
 %% check inputs
 options=dsCheckOptions(varargin,{...
-  'compile_flag',0,{0,1},...
-  'parallel_flag',0,{0,1},...
+  'mex_flag',0,{0,1},...
+  'parfor_flag',0,{0,1},...
   'num_cores',4,[],... % # cores for parallel processing (SCC supports 1-12)
   'sims_per_job',1,[],... % how many sims to run per cluster job
   'memory_limit','8G',[],... % how much memory to allocate per cluster job
@@ -46,6 +53,7 @@ options=dsCheckOptions(varargin,{...
   'overwrite_flag',0,{0,1},...
   'process_id',[],[],... % process identifier for loading studyinfo if necessary
   'qsub_mode','loop',{'loop','array'},... % whether to submit jobs as an array using qsub -t or in a for loop
+  'email_notify',[],[],...
   'one_solve_file_flag',0,{0,1},... % use only 1 solve file of each type, but can't vary mechs yet
   'solver','rk4',{'euler','rk1','rk2','rk4','modified_euler','rungekutta','rk','ode23','ode45',...
     'ode1','ode2','ode3','ode4','ode5','ode8','ode113','ode15s','ode23s','ode23t','ode23tb'},... % DynaSim and built-in Matlab solvers
@@ -82,9 +90,9 @@ num_simulations=length(modifications_set);
 % end
 
 %% Check if attempting to compile Experiment
-if isa(options.simulator_options.experiment,'function_handle') && options.compile_flag
-  options.compile_flag=0;
-  options.simulator_options.compile_flag=0;
+if isa(options.simulator_options.experiment,'function_handle') && options.mex_flag
+  options.mex_flag=0;
+  options.simulator_options.mex_flag=0;
   wprintf('solver compilation is not available for experiments run on the cluster.');
 end
 
@@ -93,7 +101,7 @@ solve_file = dsGetSolveFile(base_model,studyinfo,options.simulator_options);
 
 %% add appropriate MEX extension if compiled
 %   NOTE: the extension depends on whether a 32-bit or 64-bit machine is used
-if options.compile_flag
+if options.mex_flag
   % get directory where solve_file is located and the file name
   [fpath,fname]=fileparts2(solve_file);
 
@@ -178,7 +186,7 @@ studyinfo.paths.mechanisms = mech_paths;
 studyinfo.paths.batch_dir = batch_dir;
 
 %% edit simulator_options so that subsequent single simulations do not create further batches
-options.simulator_options.parallel_flag = 0;
+options.simulator_options.parfor_flag = 0;
 options.simulator_options.cluster_flag = 0;
 options.simulator_options.verbose_flag = 1; % turn on verbose for cluster logs (stdout)
 
@@ -247,7 +255,7 @@ else %one_solve_file_flag
   WriteSimJob([], job_file); % create job script
 
   % TODO: compile job_file
-%   if options.compile_flag
+%   if options.mex_flag
 %     job_file = dsPrepareMEX(job_file, options); %compile the job file
 %   end
 
@@ -341,7 +349,7 @@ if ~options.one_solve_file_flag
     if sim==1
       try
         save(this_study_file,'studyinfo','-v7');
-        if ~strcmp(reportUI,'matlab')
+        if ~isMatlab
           [wrn_msg,wrn_id] = lastwarn;
           if strcmp(wrn_msg,'save: wrong type argument ''function handle''')
             error('save: wrong type argument ''function handle''');
@@ -377,7 +385,7 @@ else %one_solve_file_flag
   batch_study_file = fullfile(batch_dir,'studyinfo.mat');
   try
     save(batch_study_file,'studyinfo','-v7');
-    if ~strcmp(reportUI,'matlab')
+    if ~isMatlab
       [wrn_msg,wrn_id] = lastwarn;
       if strcmp(wrn_msg,'save: wrong type argument ''function handle''')
         error('save: wrong type argument ''function handle''');
@@ -418,53 +426,78 @@ else % on cluster with qsub
     end
 
     [batch_dir_path,batch_dir_name,batch_suffix]=fileparts(batch_dir);
-    batch_dir_name=[batch_dir_name batch_suffix];
+    batch_dir_name = [batch_dir_name batch_suffix];
 
     if ~options.auto_gen_test_data_flag && ~options.unit_test_flag
-      dsFnPath = fileparts(mfilename('fullpath'));
+      dsFnDirPath = fileparts(mfilename('fullpath')); % path to functions dir containing qsub files
     else
-      dsFnPath = 'dsFnPath';
+      dsFnDirPath = 'dsFnPath';
     end
 
-    if options.parallel_flag
-      warning('jobs in the cluster use a single thread')
+%     if options.parfor_flag
+%       warning('jobs in the cluster use a single thread') % TODO remove when parfor on cluster
+%     end
+
+    % setup inputs
+    if isMatlab
+      if ~options.parfor_flag
+        ui_command = 'matlab -nodisplay -nosplash -singleCompThread -r';
+      else
+        ui_command = 'matlab -nodisplay -nosplash -r';
+      end
+
+      if ~options.parfor_flag
+        l_directives = sprintf('-l mem_total=%s', options.memory_limit);
+      else
+        l_directives = sprintf('-l mem_total=%s -pe omp %i', options.memory_limit, options.num_cores);
+      end
+    else
+      ui_command = 'octave-cli --eval';
+      l_directives = ['-l centos7=TRUE -l mem_total=', options.memory_limit];
     end
 
+    % email string
+    if isempty(options.email_notify)
+      qsubStr = '';
+    else
+      qsubStr = ['-m ' options.email_notify];
+    end
+    
+    % submit commands
+    jobPrefix = batch_dir_name;
+    batch_dir_abs_path = batch_dir;
     if strcmp(options.qsub_mode, 'array') && ~options.one_solve_file_flag
       % TODO: remove old error and output files; put e and o in their own dirs
-      cmd = sprintf('echo ''%s/qsub_jobs_array %s sim_job'' | qsub -V -hard -l ''h_vmem=%s'' -wd %s -N %s_sim_job -t 1-%i',...
-        dsFnPath, batch_dir, options.memory_limit, batch_dir, batch_dir_name, num_jobs);
+      job_filename = 'sim_job';
+      cmd = sprintf('echo "%s/qsub_jobs_array ''%s'' %s ''%s''" | qsub -V -hard %s -wd ''%s'' -N %s_sim_job -t 1-%i %s',...
+        dsFnDirPath, batch_dir_abs_path, job_filename, ui_command,... % echo vars
+        l_directives, batch_dir_abs_path, jobPrefix, num_jobs, qsubStr); % qsub vars
     elseif strcmp(options.qsub_mode, 'array') && options.one_solve_file_flag
       [~, job_filename] = fileparts2(job_file); %remove path and extension
-      cmd = sprintf('echo ''%s/qsub_jobs_array_one_file %s %s'' | qsub -V -hard -l ''h_vmem=%s'' -wd %s -N %s_sim_job -t 1-%i:%i',...
-        dsFnPath, batch_dir, job_filename, options.memory_limit, batch_dir, batch_dir_name, num_simulations, options.sims_per_job);
+      cmd = sprintf('echo "%s/qsub_jobs_array_one_file ''%s'' %s ''%s''" | qsub -V -hard %s -wd ''%s'' -N %s_sim_job -t 1-%i:%i %s',...
+        dsFnDirPath, batch_dir_abs_path, job_filename, ui_command,... % echo vars
+        l_directives, batch_dir_abs_path, jobPrefix, num_simulations, options.sims_per_job, qsubStr); % qsub vars
       % NOTE: using num_simulations, not num_jobs, since the job_file will
       %   determine it's own sims to run
     elseif strcmp(options.qsub_mode, 'loop')
-      if strcmp(reportUI,'matlab')
-        ui_command = '"matlab -nodisplay -singleCompThread -r"';
-        l_directives = ['-l mem_total=',options.memory_limit];
-      else
-        ui_command = '"octave-cli --eval"';
-        l_directives = ['-l centos7=TRUE -l mem_total=',options.memory_limit];
-      end
-      cmd = sprintf('%s/qsub_jobs_loop %s ''%s'' ''%s''',dsFnPath,batch_dir_name,ui_command,l_directives);
+      cmd = sprintf('%s/qsub_jobs_loop ''%s'' %s ''%s'' ''%s''',...
+        dsFnDirPath, batch_dir_abs_path, jobPrefix, ui_command, l_directives);
     end
 
     % add shell script to linux path if not already there
     setenv('PATH', [getenv('PATH') ':' dynasim_functions ':' fullfile(dynasim_functions, 'internal')]);
 
     if options.verbose_flag
-      fprintf('Submitting cluster jobs with shell command: "%s"\n',cmd);
+      fprintf('Submitting cluster jobs with shell command: %s \n',cmd);
     end
 
     if ~options.auto_gen_test_data_flag && ~options.unit_test_flag
-      [status,result]=system(cmd);
+      [status,result] = system(cmd);
     end
 
     if status > 0
       if options.verbose_flag
-        fprintf('Submit command failed: "%s"\n',cmd);
+        fprintf('Submit command failed: %s\n',cmd);
         disp(result);
       end
       return;
@@ -533,7 +566,7 @@ end
       % function declaration
       fprintf(fjob, 'function %s(simIDstart, simIDstep, simIDlast)\n\n', job_filename);
 
-      if options.compile_flag
+      if options.mex_flag
         fprintf(fjob, 'assert(isa(simIDstart, ''double''));\n');
         fprintf(fjob, 'assert(isa(simIDstep, ''double''));\n');
         fprintf(fjob, 'assert(isa(simIDlast, ''double''));\n');
@@ -551,13 +584,19 @@ end
     end
 
     % loop over and run simulations in this job
-    if options.parallel_flag
+    if options.parfor_flag
+      fprintf(fjob,'if strcmp(reportUI,''matlab'')\n');
       % set parallel computing options
       %fprintf(fjob,'started=0;\npool=gcp(''nocreate'');\n');
       %fprintf(fjob,'if isempty(pool), parpool(%g); started=1; end\n',options.num_cores);
-      fprintf(fjob,'c=parcluster;\nsaveAsProfile(c,''local_%g'');\nparpool(c,%g);\n',k,options.num_cores);
+      fprintf(fjob,'  c=parcluster;\n');
+      fprintf(fjob,'  saveAsProfile(c, sprintf(''local_%%s'', getenv(''JOB_ID''))); \n');
+      fprintf(fjob,'  parpool(c,%g); \n',options.num_cores);
 
       % use parfor loop
+      fprintf(fjob,'else\n');
+      fprintf(fjob,'  disp(''   Info for GNU Octave users: Do not expect any speed up by using DynaSims "parfor_flag". In GNU Octave, parfor loops currently default to regular for loops.'');\n');
+      fprintf(fjob,'end\n');
       fprintf(fjob,'parfor s=1:length(SimIDs)\n');
     else
       % use for loop
@@ -571,15 +610,22 @@ end
 
     % load studyinfo for this simulation
     if ~options.one_solve_file_flag
-      fprintf(fjob,'\t\tload(fullfile(''%s'',sprintf(''studyinfo_%%g.mat'',SimID)),''studyinfo'');\n',batch_dir);
+      fprintf(fjob,'\t\tstudyinfoFile = load(fullfile(''%s'',sprintf(''studyinfo_%%g.mat'',SimID)),''studyinfo'');\n',batch_dir);
     else
-      fprintf(fjob,'\t\tload(fullfile(''%s'',''studyinfo.mat''),''studyinfo'');\n',batch_dir);
+      fprintf(fjob,'\t\tstudyinfoFile = load(fullfile(''%s'',''studyinfo.mat''),''studyinfo'');\n',batch_dir);
     end
+    fprintf(fjob, 'studyinfo = studyinfoFile.studyinfo;\n');
+
     % compare paths between compute machine and studyinfo startup
     fprintf(fjob,'\t\t[valid,message]=dsCheckHostPaths(studyinfo);\n');
 
+    % set this simID to failed in studyinfo
     if ~options.one_solve_file_flag
-      fprintf(fjob,'\t\tif ~valid\n\t\t  lasterr(message);\n\t\t  for s=1:length(SimIDs), dsUpdateStudy(studyinfo.study_dir,''sim_id'',SimIDs(s),''status'',''failed''); end\n\t\t  continue;\n\t\tend\n');
+      fprintf(fjob,'\t\tif ~valid\n\t\t  lasterr(message);\n\t\t  dsUpdateStudy(studyinfo.study_dir,''sim_id'',tSimID,''status'',''failed''); \n\t\t');
+      if ~options.parfor_flag
+        fprintf(fjob,'  continue;\n');
+      end
+      fprintf(fjob,'\t\tend\n');
     end
 
     % simulate model with proper modifications and options
@@ -603,9 +649,11 @@ end
 
     % end loop over simulations in this job
     fprintf(fjob,'end\n');
-    if options.parallel_flag
+    if options.parfor_flag
+      fprintf(fjob,'if strcmp(reportUI,''matlab'')\n');
       %fprintf(fjob,'if started, delete(gcp); end\n');
-      fprintf(fjob,'delete(gcp)\n');
+      fprintf(fjob,'  delete(gcp)\n');
+      fprintf(fjob,'end\n');
     end
 
     % exit script

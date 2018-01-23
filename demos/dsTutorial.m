@@ -447,7 +447,7 @@ s.populations(2).equations='E:dv/dt=-.01*v+@current';
 s.connections(1).source='I';
 s.connections(1).target='E';
 s.connections(1).mechanism_list='iGABAa';
-s.connections(1).parameters={'gSYN',100};
+s.connections(1).parameters={'gGABAa',100};
 data=dsSimulate(s,'tspan',[0 400]);
 figure; plot(data.time,data.E_v,'b-',data.time,data.I_v,'r-'); 
 title('E/I network'); xlabel('time (ms)'); ylabel('v'); legend('E (decay)','I (LIF)'); ylim([-80 -50])
@@ -473,11 +473,11 @@ s.populations(2).parameters={'Iapp',0,'gNa',120,'gK',36,'Cm',1,'noise',4};
 s.connections(1).source='I';
 s.connections(1).target='E';
 s.connections(1).mechanism_list={'iGABAa'};
-s.connections(1).parameters={'tauD',10,'gSYN',.1,'netcon','ones(N_pre,N_post)'};
+s.connections(1).parameters={'tauD',10,'gGABAa',.1,'netcon','ones(N_pre,N_post)'};
 s.connections(2).source='E';
 s.connections(2).target='I';
 s.connections(2).mechanism_list={'iAMPA'};
-s.connections(2).parameters={'tauD',2,'gSYN',.1,'netcon',ones(80,20)};
+s.connections(2).parameters={'tauD',2,'gAMPA',.1,'netcon',ones(80,20)};
 data=dsSimulate(s);
 
 % Resulting data matrices have dimensions [time x cells].
@@ -524,11 +524,11 @@ s.pops(2).equations='I:dv[20]/dt= 0+@current+4*randn(1,N_pop); {iNa,iK}';
 s.cons(1).source='I';
 s.cons(1).target='E';
 s.cons(1).mechanism_list={'iGABAa'};
-s.cons(1).parameters={'tauD',10,'gSYN',.1,'netcon','ones(N_pre,N_post)'};
+s.cons(1).parameters={'tauD',10,'gGABAa',.1,'netcon','ones(N_pre,N_post)'};
 s.cons(2).source='E';
 s.cons(2).target='I';
 s.cons(2).mechanism_list={'iAMPA'};
-s.cons(2).parameters={'tauD',2,'gSYN',.1,'netcon',0*ones(80,20)};
+s.cons(2).parameters={'tauD',2,'gAMPA',.1,'netcon',0*ones(80,20)};
 data=dsSimulate(s);
 figure; plot(data.time,data.E_v,'b-',data.time,data.I_v,'r-')
 title('sPING with E->I turned off');
@@ -556,7 +556,7 @@ title('sPING with E->I turned off');
 %     'ic'          : numeric array of initial conditions, one value per state 
 %                     variable (default: all zeros). overrides definition in model structure
 %     'random_seed' : seed for random number generator (default: 'shuffle', set randomly) (usage: rng(options.random_seed))
-%     'compile_flag': whether to compile simulation using coder instead of 
+%     'mex_flag': whether to compile simulation using coder instead of 
 %                     interpreting Matlab {0 or 1} (default: 0)
 % 
 %   options for running sets of simulations:
@@ -577,7 +577,7 @@ title('sPING with E->I turned off');
 %     'memory_limit'  : memory to allocate per batch job (default: '8G')
 % 
 %   options for parallel computing: (requires Parallel Computing Toolbox)
-%     'parallel_flag' : whether to use parfor to run simulations {0 or 1} (default: 0)
+%     'parfor_flag' : whether to use parfor to run simulations {0 or 1} (default: 0)
 %     'num_cores'     : number of cores to specify in the parallel pool
 %     *note: parallel computing has been disabled for debugging...
 % 
@@ -602,8 +602,8 @@ title('sPING with E->I turned off');
 % For instance, to vary parameter 'gNa', taking on values 100 and 120, in 
 % population 'E', set vary={'E','gNa',[100 120]} (syntax 1) or 
 % vary={{'E','gNa',100},{'E','gNa',120}} (syntax 2). To additionally vary 
-% 'gSYN' in the connection mechanism from 'E' to 'I', set 
-% vary={'E','gNa',[100 120];'E->I','gSYN',[0 1]}.
+% 'gAMPA' in the connection mechanism from 'E' to 'I', set 
+% vary={'E','gNa',[100 120];'E->I','gAMPA',[0 1]}.
 % Mechanism lists and equations can also be varied. (see dsVary2Modifications 
 % for more details and examples).
 
@@ -921,7 +921,7 @@ data.model.monitors
 
     % more examples of 'vary'
     vary={'E','gNa',[100 120]};
-    vary={'E','gNa',[100 120];'E->I','gSYN',[0 1]};
+    vary={'E','gNa',[100 120];'E->I','gAMPA',[0 1]};
     vary={'E','mechanism_list','+[iNa,iK]'};
     vary={'E','mechanism_list','-{iNa,iK}'};
     vary={'(E,I)','gNa',[100 120]};

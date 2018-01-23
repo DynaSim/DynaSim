@@ -17,17 +17,17 @@ options=dsCheckOptions(keyvals,{...
   'disk_flag',0,[],...            % whether to write to disk during simulation instead of storing in memory
   'dt',.01,[],...                 % time step used for fixed step DynaSim solvers
   'datafile','data.csv',[],... % name of data file if disk_flag=1
-  'compile_flag',exist('codegen','file')==6,[],... % whether to prepare script for being compiled using coder instead of interpreting Matlab
+  'mex_flag',exist('codegen','file')==6,[],... % whether to prepare script for being compiled using coder instead of interpreting Matlab
   'verbose_flag',1,[],...
   'matlab_solver_options',[],[],...
   },false);
 
 field_order={'tspan','downsample_factor','random_seed','solver','disk_flag',...
-  'dt','datafile','compile_flag','verbose_flag','matlab_solver_options'};
+  'dt','datafile','mex_flag','verbose_flag','matlab_solver_options'};
 
-if options.compile_flag==1
+if options.mex_flag==1
   % <-- copied from dsWriteDynaSimSolver.m -->
-  % todo: make seed string (eg, 'shuffle') from param struct work with coder (options.compile_flag=1)
+  % todo: make seed string (eg, 'shuffle') from param struct work with coder (options.mex_flag=1)
   % (currently raises error: "String input must be constant")
   % workaround: (shuffle here and get numeric seed for MEX-compatible params.mat)
   rng_wrapper(options.random_seed);
