@@ -526,8 +526,10 @@ if ~isempty(model.monitors)
       end
 
       % approach: add conditional check for upward threshold crossing
-      pop_name=regexp(monitor_names{i},'_','split');
-      pop_name=pop_name{1};
+      parent=dsGetParentNamespace(model,monitor_names{i});
+      pop_name=parent(1:end-1); % remove trailing _
+%       pop_name=regexp(monitor_names{i},'_','split');
+%       pop_name=pop_name{1};
       var_spikes=regexp(monitor_names{i},'(.*)_spikes$','tokens','once');
       var_spikes=var_spikes{1}; % variable to monitor
       var_tspikes=[pop_name '_tspike']; % only allow one event type to be tracked per population (i.e., it is ok to use pop_name, like 'E', as namespace instead of pop_var, like 'E_v')
