@@ -120,7 +120,7 @@ else
 end
 
 %% 2.0 set list of variables to process as cell array of strings
-options.variable=dsSelectVariables(data(1).labels,options.variable, varargin{:});
+options.variable=dsSelectVariables(data(1),options.variable, varargin{:});
 
 %% 3.0 calculate firing rates for each variable
 if ~isfield(data,'results')

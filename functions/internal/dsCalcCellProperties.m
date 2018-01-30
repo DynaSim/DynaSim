@@ -164,7 +164,7 @@ data=data(I);
 num_steps=length(amplitudes);
 
 % get list of variables to analyze
-[vars,vars_pop]=dsSelectVariables(data(1).labels, varargin{:});
+[vars,vars_pop]=dsSelectVariables(data(1), [], varargin{:});
 
 % assume only one variable per population
 if length(unique(vars_pop))>num_pops
