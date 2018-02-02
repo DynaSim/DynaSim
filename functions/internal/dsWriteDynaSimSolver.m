@@ -96,15 +96,15 @@ separator=','; % ',', '\\t'
 parameter_prefix='p.';
 state_variables=model.state_variables;
 
-% 1.1 eliminate internal (anonymous) function calls from model equations
+% 1.1a eliminate internal (anonymous) function calls from model equations
 if options.reduce_function_calls_flag==1
-  model=dsPropagateFunctions(model, varargin{:});
+  model = dsPropagateFunctions(model, varargin{:});
 end
 
-% 1.1 prepare parameters
+% 1.1b prepare parameters
 if options.save_parameters_flag
   % add parameter struct prefix to parameters in model equations
-  model=dsPropagateParameters(model,'action','prepend', 'prop_prefix',parameter_prefix, varargin{:});
+  model = dsPropagateParameters(model,'action','prepend', 'prop_prefix',parameter_prefix, varargin{:});
 
   % set and capture numeric seed value
   if options.mex_flag==1
@@ -126,21 +126,22 @@ if options.save_parameters_flag
   warning('off','catstruct:DuplicatesFound');
   p = catstruct(dsCheckSolverOptions(options),model.parameters);
 
+  
+  %% 1.1c one_solve_file_flag
   if options.one_solve_file_flag
     % fill p flds that were varied with vectors of length = nSims
 
-    vary=dsCheckOptions(varargin,{'vary',[],[],},false);
+    vary = dsCheckOptions(varargin,{'vary',[],[],},false);
     vary = vary.vary;
 
     mod_set = dsVary2Modifications(vary);
     % The first 2 cols of modifications_set are idenitical to vary, it just
     % has the last column distributed out to the number of sims
 
-
     % Get param names
     iMod = 1;
     % Split extra entries in first 2 cols of mods, so each row is a single pop and param
-    [~, first_mod_set] = dsApplyModifications([],mod_set{iMod}, varargin{:});
+    [~, first_mod_set] = dsApplyModifications(model, mod_set{iMod}, varargin{:});
 
     % replace '->' with '_'
     first_mod_set(:,1) = strrep(first_mod_set(:,1), '->', '_');
@@ -171,7 +172,7 @@ if options.save_parameters_flag
     param_values = nan(nParamMods, length(mod_set));
     for iMod = 1:length(mod_set)
       % Split extra entries in first 2 cols of mods, so each row is a single pop and param
-      [~, mod_set{iMod}] = dsApplyModifications([],mod_set{iMod}, varargin{:});
+      [~, mod_set{iMod}] = dsApplyModifications(model,mod_set{iMod}, varargin{:});
 
       % Get scalar values as vector
       param_values(:, iMod) = [mod_set{iMod}{:,3}];
@@ -182,6 +183,8 @@ if options.save_parameters_flag
       p.(mod_params{iParam}) = param_values(iParam,:);
     end
   end % one_solve_file_flag
+  
+  
 
   if options.verbose_flag
     fprintf('Saving params.mat\n');
