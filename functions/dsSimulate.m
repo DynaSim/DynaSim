@@ -1086,7 +1086,11 @@ end % in_parfor_loop_flag
         end
       end
 
+      % create 'vary' field in data to store varied values
       tmpdata = dsModifications2Vary(tmpdata,options.modifications,options,modifications_set,sim);
+      
+      % change data precision if needed
+      tmpdata = dsSavedDataPrecision(tmpdata,options);
 
       if (options.auto_gen_test_data_flag || options.unit_test_flag) && isfield(tmpdata, 'simulator_options')
         tmpdata= rmfield(tmpdata, 'simulator_options');
