@@ -152,30 +152,45 @@ if options.save_parameters_flag
 
     % get param names
     mod_params = cell(nParamMods,1);
-    for iRow = 1:nParamMods
-      mod_params{iRow} = [first_mod_set{iRow,1:3}];
+    val2modMap = nan(nParamMods,1); % this connects the values from original mod set to expanded mod set
+    iRow = 1;
+    for iParamMod = 1:nParamMods
+      this_mod_param = [first_mod_set{iParamMod,1:3}];
 
-      %check if variable in namespace
-      if ~any(strcmp(model.namespaces(:,2), mod_params{iRow}))
-        % find correct entry based on param and pop
-        nsInd = logical(~cellfun(@isempty, strfind(model.namespaces(:,2), [first_mod_set{iRow,1} '_'])) .* ...
-          ~cellfun(@isempty, strfind(model.namespaces(:,2), first_mod_set{iRow,3})));
+      % add param with correct namespace(s) to mod_params
+      if ~any(strcmp(model.namespaces(:,2), this_mod_param))
+        % find correct namespace(s) based on param and pop
+        namespaceInd = logical(~cellfun(@isempty, strfind(model.namespaces(:,2), [first_mod_set{iParamMod,1} '_'])) .* ...
+          ~cellfun(@isempty, strfind(model.namespaces(:,2), first_mod_set{iParamMod,3})));
 
-        assert(sum(nsInd) == 1)
+        numNamespaceMatches = sum(namespaceInd);
 
         % add mech names using namespace
-        mod_params{iRow} = model.namespaces{nsInd,2};
+        mod_params(iRow:iRow+numNamespaceMatches-1) = model.namespaces(namespaceInd,2);
+        
+        val2modMap(iRow:iRow+numNamespaceMatches-1) = iParamMod;
+        
+        iRow = iRow + numNamespaceMatches;
+      elseif sum(strcmp(model.namespaces(:,2), this_mod_param)) == 1
+        namespaceInd = strcmp(model.namespaces(:,2), this_mod_param);
+        mod_params{iRow} = model.namespaces{namespaceInd,2};
+        val2modMap(iRow) = iParamMod;
+        iRow = iRow + 1;
+      else
+        error('Multiple namespace matches.')
       end
     end
+    
+    % update since may have increased due to multiple namespace matches for param
+    nParamMods = size(mod_params, 1);
 
     % Get param values for each sim
-    param_values = nan(nParamMods, length(mod_set));
+    param_values = cell(nParamMods, length(mod_set));
     for iMod = 1:length(mod_set)
-      % Split extra entries in first 2 cols of mods, so each row is a single pop and param
-      [~, mod_set{iMod}] = dsApplyModifications(model,mod_set{iMod}, varargin{:});
-
+      thisModValSet = mod_set{iMod}(:,3);
+      
       % Get scalar values as vector
-      param_values(:, iMod) = [mod_set{iMod}{:,3}];
+      param_values(:, iMod) = thisModValSet(val2modMap);
     end
 
     % Assign value vectors to params
@@ -309,14 +324,14 @@ if options.one_solve_file_flag
     fprintf(fid,'flds = fields(rmfield(p,''tspan''));\n'); % remove tspan
     fprintf(fid,'for fld = flds''\n');
     fprintf(fid,'  fld = fld{1};\n');
-    fprintf(fid,'  if isnumeric(p.(fld)) && length(p.(fld)) > 1\n');
-    fprintf(fid,'    p.(fld) = p.(fld)(simID);\n');
+    fprintf(fid,'  if iscell(p.(fld)) && length(p.(fld)) > 1\n');
+    fprintf(fid,'    p.(fld) = p.(fld){simID};\n');
     fprintf(fid,'  end\n');
     fprintf(fid,'end\n\n');
   else %mex_flag
     % slice scalar from vector params
     for iParam = 1:nParamMods
-      fprintf(fid,'p.%s = pVecs.%s(simID);\n', mod_params{iParam}, mod_params{iParam});
+      fprintf(fid,'p.%s = pVecs.%s{simID};\n', mod_params{iParam}, mod_params{iParam});
     end
 
     % take scalar from scalar params
