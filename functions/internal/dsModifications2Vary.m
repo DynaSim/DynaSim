@@ -20,7 +20,7 @@ function data = dsModifications2Vary(data,modifications,options,modifications_se
     %
     %
     % Inputs (Optional):
-    %   options : Options structure containing experiment OR precision
+    %   options : Options structure containing experiment
     %   fields (see dsSimulate)
     %   modifications_set : Additional modifications, produced by
     %                       dsVary2Modifications(options.vary,model);
@@ -93,17 +93,6 @@ function data = dsModifications2Vary(data,modifications,options,modifications_se
       for j=1:length(data)
         data(j).varied=varied;
       end
-    end
-    % convert tmpdata to single precision
-    if nargin > 2
-        if strcmp(options.precision,'single')
-          for j=1:length(data)
-            for k=1:length(data(j).labels)
-              fld=data(j).labels{k};
-              data(j).(fld)=single(data(j).(fld));
-            end
-          end
-        end
     end
 end
 
