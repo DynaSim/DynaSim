@@ -1,4 +1,4 @@
-function result = dsAnalyze(src,funcIn,varargin)
+function result = dsAnalyze(src,varargin)
 %DSANALYZE - Apply an analysis function to DynaSim data, optionally saving data
 %
 % Pass a single DynaSim data structure or an array of data structures to a
@@ -6,9 +6,14 @@ function result = dsAnalyze(src,funcIn,varargin)
 % optionally save the output structure.
 %
 % Usage:
+%  1) dsAnalyze Style: explicit func handle/cell of handles
 %   result = AnalyzeData(data,func,'option1',value1,...) % pass data or datafile name
 %   result = AnalyzeData(studyinfo,func,'option1',value1,...) % pass studyinfo struct
 %   result = AnalyzeData(study_dir,func,'option1',value1,...) % pass study_dir containing studyinfo.mat
+%  2) dsSimluate Style: implicit func through options.analysis_functions/options.plot_functions
+%   result = AnalyzeData(data,'option1',value1,...) % pass data or datafile name
+%   result = AnalyzeData(studyinfo,'option1',value1,...) % pass studyinfo struct
+%   result = AnalyzeData(study_dir,'option1',value1,...) % pass study_dir containing studyinfo.mat
 %
 % Inputs:
 %   - First input/argument:
@@ -20,6 +25,8 @@ function result = dsAnalyze(src,funcIn,varargin)
 %           'plot' unless is a function that returns a figure handle for plotting.
 %   - options: (key/value pairs are passed on to the analysis function)
 %     'save_results_flag'   : whether to save result {0 or 1} (default: 0)
+%     'matCompatibility_flag': whether to save mat files in compatible mode, vs to prioritize > 2GB VARs {0 or 1} (default: 1)
+%     'overwrite_flag': whether to overwrite existing result files {0 or 1} (default: 0)
 %     'result_file'         : where to save result (default: 'result.mat')
 %     'format'              : format for saved plots if figures are generated
 %                             {'svg','jpg','eps','png'} (default: 'svg')
@@ -29,13 +36,22 @@ function result = dsAnalyze(src,funcIn,varargin)
 %                             avoid overwrite in that case) (default: 0)
 %     'save_prefix'         : if 'varied_filename_flag'==1, add a string prefix 
 %                             to the name (default: '')
+%    2 ways to specify:
+%     1)
 %     'function_options'    : cell array of option cell arrays {'option1',value1,...}
 %                             in which each cell corresponds to the options for
 %                             the corresponding function cell. if only passing a
 %                             single func, can specificy function options as
 %                             key,val list as varargin for AnalyzeData
+%     2)
+%     'analysis_functions': cell array of analysis function handles
+%     'analysis_options'  : cell array of option cell arrays {'option1',value1,...}
+%     'plot_functions'    : cell array of plot function handles
+%     'plot_options'      : cell array of option cell arrays {'option1',value1,...}
+%
 %     'load_all_data_flag'  : whether to load all the data in studyinfo
 %                             at once {0 or 1} (default: 0)
+%     'verbose_flag'  : whether to display informative messages/logs (default: 0)
 %     'parfor_flag' : whether to use parfor to run analysis {0 or 1} (default: 0)
 %
 % Outputs:
@@ -61,10 +77,20 @@ if ~nargin
   return
 end
 
+%% check input type
+if (nargin > 1) && (iscell(varargin{1}) || isfunction(varargin{1}))
+  funcIn = varargin{1};
+  varargin(1) = [];
+else
+  funcIn = [];
+end
+
 %% Check inputs
 options=dsCheckOptions(varargin,{...
   'result_file','result',[],...
   'save_results_flag',0,{0,1},...
+  'matCompatibility_flag',1,{0,1},...  % whether to save mat files in compatible mode, vs to prioritize > 2GB VARs
+  'overwrite_flag',0,{0,1},... % whether to overwrite existing data
   'format','svg',{'svg','jpg','eps','png','fig'},...
   'varied_filename_flag',0,{0,1},...
   'plot_type','waveform',{'waveform','rastergram','raster','power','rates','imagesc','heatmapFR','heatmap_sortedFR','meanFR','meanFRdens','FRpanel'},...
@@ -75,6 +101,11 @@ options=dsCheckOptions(varargin,{...
   'auto_gen_test_data_flag',0,{0,1},...
   'unit_test_flag',0,{0,1},...
   'parfor_flag',0,{0,1},...     % whether to run analysis in parallel (using parfor)
+  'verbose_flag',0,{0,1},...
+  'analysis_functions',[],[],...
+  'analysis_options',[],[],...
+  'plot_functions',[],[],...
+  'plot_options',[],[],...
   'auto_gen_test_data_flag',0,{0,1},...
   },false);
 
@@ -88,22 +119,16 @@ end
 
 
 %% Save data if no output is requested.
-if nargout<1
+if nargout < 1
   options.save_results_flag = 1;
+  dsVprintf(options, 'Setting save_results_flag=1 since no nargout.\n')
 end
 
-% varinputs = varargin;
-% % check if simIDs specified
-% if ~isempty(options.simIDs)
-%   if isstruct(varinputs{1})
-%     varinputs.simIDs = options.simIDs;
-%   else
-%     % find simIDs in varinputs
-%     varinputs{find(~cellfun(@isempty,strfind(varinputs(1:2:end), 'simIDs')))*2} = options.simIDs;
-%   end
-% end
+if options.parfor_flag && ~strcmp(reportUI,'matlab')
+  disp('For GNU Octave users: Do not expect any speed up by using DynaSim''s ''parfor_flag''. In GNU Octave, parfor loops currently default to regular for loops.');
+end
 
-%% Parse src.
+%% Parse src
 [data, studyinfo] = parseSrc(src, options, varargin{:});
 % Data at this point:
 %   - 'data' as single struct or struct array, or empty
@@ -124,6 +149,7 @@ end
 %   - 'studyinfo' struct with many flds or just 'study_dir' field
 
 % convert data to double precision before analysis
+dsVprintf(options, 'Converting data to double precision before analysis.\n')
 for j = 1:length(data)
   for k = 1:length(data(j).labels)
     fld = data(j).labels{k};
@@ -131,11 +157,28 @@ for j = 1:length(data)
   end
 end
 
-% convert func to handle if not a cell array
+% make fn fields into cells
+if ~isempty(options.plot_functions) || ~iscell(options.plot_functions)
+  options.plot_functions = {options.plot_functions};
+end
+if ~isempty(options.analysis_functions) || ~iscell(options.analysis_functions)
+  options.analysis_functions = {options.analysis_functions};
+end
+
+% make funcIn for dsSimulate Style
+if isempty(funcIn) && ( ~isempty(options.plot_functions) || ~isempty(options.analysis_functions) )
+  funcIn = [options.plot_functions(:); options.analysis_functions(:)];
+  plotFnBoolVec = false(size(funcIn));
+  plotFnBoolVec(1:length(options.analysis_functions)) = true; % specify which fn were plot fn
+else
+  plotFnBoolVec = [];
+end
+
+% convert func string to handle, or check length of cell array
 [funcIn, nFunc] = parseFuncIn(funcIn);
 
 % check if postSim
-postSimBool = studyinfoBool || (length(data) > 1); % since length(data)==1 and no studyinfo with SimulateModel call
+postSimBool = studyinfoBool || (length(data) > 1); % since length(data)==1 and no studyinfo with dsSimulate call. EAR: not sure about that.
 
 for fInd = 1:nFunc % loop over function inputs
   func = funcIn{fInd};
@@ -144,7 +187,11 @@ for fInd = 1:nFunc % loop over function inputs
   func = parseFunc(func);
 
   % check if plot in fn name
-  plotFnBool = ~isempty(regexpi(func2str(func), 'plot'));
+  if ~isempty(plotFnBoolVec)
+    plotFnBool = plotFnBoolVec(fInd);
+  else
+    plotFnBool = ~isempty(regexpi(func2str(func), 'plot'));
+  end
 
   % change result_file if varied_filename_flag
   if options.varied_filename_flag && isfield(data, 'varied')
@@ -152,7 +199,7 @@ for fInd = 1:nFunc % loop over function inputs
   end
 
   % do analysis
-  fprintf('\tExecuting post-processing function: %s\n',func2str(func));
+  dsVprintf(options, '  Executing post-processing function: %s\n',func2str(func));
   tstart = tic;
 
   %% Eval func
@@ -171,7 +218,7 @@ for fInd = 1:nFunc % loop over function inputs
     nResults = length(siminfo.simulations);
   end
 
-  fprintf('\t\tElapsed time: %g sec\n',toc(tstart));
+  dsVprintf(options, '    Elapsed time: %g sec\n',toc(tstart));
 
   % Dave: Not all plotting functions will return a plot handle. For
   % example, dsPlot2 returns a nested structure of figure, axis, and plot
@@ -193,31 +240,33 @@ for fInd = 1:nFunc % loop over function inputs
         extension = ['.' options.format]; % '.svg'; % {.jpg,.svg}
 
         if ~postSimBool % approx nResults == 1 && ~studyinfoBool % approx ~postSimBool
-          fname = [options.result_file extension];
-          fPath = fname;
+          fName = [options.result_file extension];
+          fPath = fName;
 
           thisResult = result(iResult);
         elseif studyinfoBool
           simID = studyinfo.simulations(iResult).sim_id;
           prefix = func2str(func);
-          fname = [prefix '_sim' num2str(simID) '_plot' num2str(fInd) '_' func2str(func)];
+          fName = [prefix '_sim' num2str(simID) '_plot' num2str(fInd) '_' func2str(func)];
 
           if (postSimBool && ~options.load_all_data_flag)
             data = loadDataFromSingleSim(simID, options, varargin);
 
             %skip if no data
             if isempty(data)
-              fprintf('Skipping simID=%i since no data.\n', simID);
+              dsVprintf(options, 'Skipping simID=%i since no data.\n', simID);
               continue
             end
 
             % calc result for this data
             thisResult = evalFnWithArgs(fInd, data, func, options, varargin);
+          else % (postSimBool && options.load_all_data_flag)
+            thisResult = result(iResult);
           end
 
           % change result_file if varied_filename_flag
           if options.varied_filename_flag && isfield(data, 'varied')
-            fname = filenameFromVaried(fname, func, data, plotFnBool, options, varargin{:});
+            fName = filenameFromVaried(fName, func, data, plotFnBool, options, varargin{:});
           end % varied_filename_flag
 
           % make fPath
@@ -225,16 +274,16 @@ for fInd = 1:nFunc % loop over function inputs
           if ~exist(fDir,'dir')
             mkdir(fDir)
           end
-          fPath = fullfile(fDir,fname);
+          fPath = fullfile(fDir,fName);
         else % length(result)>1 and ~studyinfoBool
-          fname = [options.result_file '_page' num2str(iResult) extension];
+          fName = [options.result_file '_page' num2str(iResult) extension];
 
           % make fPath
           fDir = fullfile(studyinfo.study_dir, 'postSimPlots');
           if ~exist(fDir,'dir')
             mkdir(fDir)
           end
-          fPath = fullfile(fDir,fname);
+          fPath = fullfile(fDir,fName);
 
           thisResult = result(iResult);
         end
@@ -244,12 +293,12 @@ for fInd = 1:nFunc % loop over function inputs
 
         %skip if no data
         if isempty(thisResult)
-          fprintf('Skipping simID=%i since no result.\n', simID);
+          dsVprintf(options, 'Skipping simID=%i since no result.\n', simID);
           continue
         end
 
         set(thisResult, 'PaperPositionMode','auto');
-        fprintf('\t\tSaving plot: %s\n',fname);
+        dsVprintf(options, '    Saving plot: %s\n',fName);
 
         switch extension
           case '.svg'
@@ -310,33 +359,33 @@ for fInd = 1:nFunc % loop over function inputs
           end
 
           prefix = func2str(func);
-          fname = [prefix '_sim' num2str(simID) '_analysis' num2str(fInd) '_' func2str(func) '.mat'];
+          fName = [prefix '_sim' num2str(simID) '_analysis' num2str(fInd) '_' func2str(func) '.mat'];
 
           % change result_file if varied_filename_flag
           if options.varied_filename_flag && isfield(data, 'varied')
-            fname = filenameFromVaried(fname, func, data, plotFnBool, options, varargin{:});
+            fName = filenameFromVaried(fName, func, data, plotFnBool, options, varargin{:});
           end % varied_filename_flag
 
           % make fPath
-          fDir = fullfile(studyinfo.study_dir, 'analyzedData');
+          fDir = fullfile(studyinfo.study_dir, 'postSimResults');
           if ~exist(fDir,'dir')
             mkdir(fDir)
           end
-          fPath = fullfile(fDir,fname);
+          fPath = fullfile(fDir,fName);
 
-          fprintf('\t\tSaving derived data: %s\n', fPath);
-          save(fPath,'result','-v7.3');
+          dsExportData(result, 'filename',fPath, 'result_flag',1, varargin{:});
         end %iResult
       else % ~studyinfoBool, whether 1 or array of struct
-        fname = options.result_file;
+        fName = options.result_file;
         extension = '.mat';
 
-        if ~strcmp(fname(end-3:end), extension) %check for .mat extension
-          fname = [fname extension];
+        if ~strcmp(fName(end-3:end), extension) %check for .mat extension
+          fName = [fName extension];
         end
+        
+        fPath = fName;
 
-        fprintf('\t\tSaving derived data: %s\n', fname);
-        save(fname,'result','-v7.3');
+        dsExportData(result, 'filename',fPath, 'result_flag',1, varargin{:});
       end % scenarios
     end % save_results_flag
   end % ishandle(result)
@@ -482,7 +531,6 @@ function filename = filenameFromVaried(filename, func, data, plotFnBool, options
 
 %% auto_gen_test_data_flag argin
 options = catstruct(options, dsCheckOptions(varargin,{'auto_gen_test_data_flag',0,{0,1}},false));
-keyboard
 if options.auto_gen_test_data_flag
   varargs = varargin;
   varargs{find(strcmp(varargs, 'auto_gen_test_data_flag'))+1} = 0;
@@ -532,11 +580,9 @@ end
 
 try
   if isempty(options.function_options)
-    if options.parfor_flag && ~isempty(p)       % Only do parfor mode if parfor_flag is set and parpool is already running. Otherwise, this will add unncessary overhead.
-      % note that parfor currently acts just as a regular for in Octave
-      if ~strcmp(reportUI,'matlab')
-        disp('   Info for GNU Octave users: Do not expect any speed up by using DynaSim''s ''parfor_flag''. In GNU Octave, parfor loops currently default to regular for loops.');
-      end
+    % Only do parfor mode if parfor_flag is set and parpool is already running. Otherwise, this will add unncessary overhead.
+    if options.parfor_flag && ~isempty(p)
+      
       parfor dInd = 1:length(data)
         result(dInd) = feval(func,data(dInd),varargin{:});
       end
@@ -544,15 +590,11 @@ try
       for dInd = 1:length(data)
         result(dInd) = feval(func,data(dInd),varargin{:});
       end
-    end
+    end % options.parfor_flag && ~isempty(p)
   else
     function_options = options.function_options{fInd};
 
     if options.parfor_flag && ~isempty(p)
-      % note that parfor currently acts just as a regular for in Octave
-      if ~strcmp(reportUI,'matlab')
-        disp('   Info for GNU Octave users: Do not expect any speed up by using DynaSim''s ''parfor_flag''. In GNU Octave, parfor loops currently default to regular for loops.');
-      end
       parfor dInd = 1:length(data)
         result(dInd) = feval(func,data(dInd),function_options{:});
       end
@@ -560,8 +602,8 @@ try
       for dInd = 1:length(data)
         result(dInd) = feval(func,data(dInd),function_options{:});
       end
-    end
-  end
+    end % options.parfor_flag && ~isempty(p)
+  end % isempty(options.function_options)
 catch err
   warning(err.message);
   result = [];

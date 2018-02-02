@@ -32,7 +32,7 @@ function [data,studyinfo,result] = dsSimulate(model,varargin)
 %     'matCompatibility_flag': whether to save mat files in compatible mode, vs to prioritize > 2GB VARs {0 or 1} (default: 1)
 %     'save_results_flag': whether to save results of analysis and plotting
 %     'save_data_flag': whether to save simulated data to disk after completion {0 or 1} (default: 0)
-%     'overwrite_flag': whether to overwrite existing data files {0 or 1} (default: 0)
+%     'overwrite_flag': whether to overwrite existing data and result files {0 or 1} (default: 0)
 %     'study_dir'     : relative or absolute path to output directory (default: current directory)
 %     'prefix'        : string to prepend to all output file names (default: 'study')
 %     'disk_flag'     : whether to write to disk during simulation instead of storing in memory {0 or 1} (default: 0)
@@ -631,7 +631,7 @@ end
 if options.parfor_flag
   % Disable for Octave and return error
    if ~strcmp(reportUI,'matlab')
-     warning('Parfor mode not implemented in Octave.');
+     warning('Info for GNU Octave users: Do not expect any speed up by using DynaSim''s ''parfor_flag''. In GNU Octave, parfor loops currently default to regular for loops.');
    end
 
   % prepare studyinfo
