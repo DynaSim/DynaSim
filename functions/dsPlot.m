@@ -273,9 +273,26 @@ lock_gca = options.lock_gca;
 % TODO: add option 'plot_mode' {'trace','image'}
 
 % variables to plot
-var_fields=dsSelectVariables(data(1).labels,options.variable, varargin{:});
-tmp=regexp(var_fields,'_(.+)$','tokens','once');
-variables=unique([tmp{:}]);
+% if isempty(options.variable)
+%   % set default: all pops with state variable of first element of labels
+%   parent=dsGetParentNamespace(data(1).model,data(1).labels{1});
+%   var=regexp(data(1).labels{1},[parent '(.*)'],'tokens','once');
+%   if isempty(var)
+%     options.variable='*';
+%   else
+%     options.variable=['*' var{1}];
+%   end
+% end
+var_fields=dsSelectVariables(data(1),options.variable, varargin{:});
+variables=cell(size(var_fields));
+for i=1:length(var_fields)
+  parent=dsGetParentNamespace(data(1).model,var_fields{i});
+  var=regexp(var_fields{i},[parent '(.*)'],'tokens','once');
+  variables{i}=var{1};
+end
+variables=unique(variables);
+% tmp=regexp(var_fields,'_(.+)$','tokens','once');
+% variables=unique([tmp{:}]);
 
 % populations to plot
 pop_names={data(1).model.specification.populations.name}; % list of populations
@@ -286,7 +303,7 @@ pop_var_indices={}; % indices of var_fields to plot per population
   
 for i=1:length(pop_names)
   % do any variables start with this population name?
-  var_inds=find(~cellfun(@isempty,regexp(var_fields,['^' pop_names{i}])));
+  var_inds=find(~cellfun(@isempty,regexp(var_fields,['^' pop_names{i} '_'])));
   if any(var_inds)
     inds=cellfun(@(x)find(~cellfun(@isempty,regexp(var_fields(var_inds),['_' x '$'],'once'))),variables,'uni',0);
     varsel=~cellfun(@isempty,inds);

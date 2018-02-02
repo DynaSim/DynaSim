@@ -551,7 +551,7 @@ for i=1:length(model.linkers)
   end
   % determine what to link (ie, link across everything belonging to the linker population)
   % explicitly constrain to linker population
-  expressions_in_pop=~cellfun(@isempty,regexp(name_map(:,3),['^' linker_pops{i}]));
+  expressions_in_pop=~cellfun(@isempty,regexp(name_map(:,3),['^' linker_pops{i} '_']));
 
   if ~isempty(model.conditionals)
     conditionals_in_pop=~cellfun(@isempty,regexp({model.conditionals.namespace},['^' linker_pops{i}]));

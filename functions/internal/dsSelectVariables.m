@@ -1,8 +1,8 @@
-function [variables,pop_names] = dsSelectVariables(labels,var_strings, varargin)
+function [variables,pop_names] = dsSelectVariables(data,var_strings, varargin)
 %SELECTVARIABLES - determine what variables to plot
 %
 % Usage:
-%   variables=dsSelectVariables(labels,var_strings)
+%   variables=dsSelectVariables(data,var_strings)
 %
 % Inputs:
 %   - labels: cell array of variable names
@@ -30,23 +30,35 @@ if options.auto_gen_test_data_flag
   varargs = varargin;
   varargs{find(strcmp(varargs, 'auto_gen_test_data_flag'))+1} = 0;
   varargs(end+1:end+2) = {'unit_test_flag',1};
-  argin = [{labels}, {var_strings}, varargs]; % specific to this function
+  argin = [{data}, {var_strings}, varargs]; % specific to this function
 end
+labels=data(1).labels;
 
 if nargin<2
   var_strings=[];
 end
 
+% if isempty(var_strings)
+%   % set default: all pops with state variable of first element of labels
+%   var=regexp(labels{1},'_.*$','match');
+%   % add wildcard
+%   if isempty(var)
+%     var_strings={'*'};
+%   else
+%     var_strings={['*' var{1}]};
+%   end
+% elseif ~iscell(var_strings)
 if isempty(var_strings)
   % set default: all pops with state variable of first element of labels
-  var=regexp(labels{1},'_.*$','match');
-  % add wildcard
+  parent=dsGetParentNamespace(data(1).model,data(1).labels{1});
+  var=regexp(data(1).labels{1},[parent '(.*)'],'tokens','once');
   if isempty(var)
-    var_strings={'*'};
+    var_strings='*';
   else
-    var_strings={['*' var{1}]};
+    var_strings=['*' var{1}];
   end
-elseif ~iscell(var_strings)
+end
+if ~iscell(var_strings)
   var_strings={var_strings};
 end
 

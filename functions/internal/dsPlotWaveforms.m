@@ -114,7 +114,7 @@ options=dsCheckOptions(varargin,{...
 % todo: add option 'plot_mode' {'trace','image'}
 
 % variables to plot
-var_fields=dsSelectVariables(data(1).labels,options.variable, varargin{:});
+var_fields=dsSelectVariables(data(1),options.variable, varargin{:});
 tmp=regexp(var_fields,'_(.+)$','tokens','once');
 variables=unique([tmp{:}]);
 
