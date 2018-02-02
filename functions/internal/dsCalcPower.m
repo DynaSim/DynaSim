@@ -114,7 +114,7 @@ NFFT=2^(nextpow2(nsamp-1)-1);%2); % <-- use higher resolution to capture STO fre
 NW = options.timeBandwidthProduct;
 
 %% 2.0 set list of variables to process as cell array of strings
-options.variable=dsSelectVariables(data(1).labels,options.variable, varargin{:});
+options.variable=dsSelectVariables(data(1),options.variable, varargin{:});
 
 %% 3.0 calculate power spectrum for each variable
 if ~isfield(data,'results')
