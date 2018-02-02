@@ -188,6 +188,11 @@ if options.save_parameters_flag
       % Get scalar values as vector
       param_values(:, iMod) = thisModValSet(val2modMap);
     end
+    
+    % convert to mat if mex_flag since can't have cell slicing for mex
+    if options.mex_flag
+      param_values = cell2mat(param_values);
+    end
 
     % Assign value vectors to params
     for iParam = 1:nParamMods
@@ -287,7 +292,7 @@ if options.one_solve_file_flag
   else %mex_flag
     % slice scalar from vector params
     for iParam = 1:nParamMods
-      fprintf(fid,'p.%s = pVecs.%s{simID};\n', mod_params{iParam}, mod_params{iParam});
+      fprintf(fid,'p.%s = pVecs.%s(simID);\n', mod_params{iParam}, mod_params{iParam});
     end
 
     % take scalar from scalar params
