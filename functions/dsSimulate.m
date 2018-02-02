@@ -232,9 +232,7 @@ studyinfo=[];
 dynasim_path=fileparts(which(mfilename));
 onPath=~isempty(strfind(path,[dynasim_path, pathsep]));
 if ~onPath
-  if 1
-    fprintf('adding dynasim and sub-directory to Matlab path: %s\n',dynasim_path);
-  end
+  dsVprintf(options, 'Adding dynasim and sub-directory to Matlab path: %s\n',dynasim_path);
   addpath(genpath(dynasim_path)); % necessary b/c of changing directory for simulation
 end
 
@@ -309,13 +307,15 @@ end
 %% 0.2 Unit testing.
 if options.unit_test_flag
   options.study_dir = getAbsolutePath(options.study_dir);
+  varargin = modify_varargin(varargin, 'study_dir', options.study_dir);
 end
 
 %% 0.3 Prepare solve options.
 
 if options.mex_flag && ~strcmp(reportUI,'matlab')
-  fprintf('Setting ''mex_flag'' to 0 in Octave.\n')
+  dsVprintf(options, 'Setting ''mex_flag'' to 0 in Octave.\n')
   options.mex_flag = 0;
+  varargin = modify_varargin(varargin, 'mex_flag', options.mex_flag);
 end
 
 if isempty(options.mex_dir)
@@ -327,31 +327,34 @@ if options.mex_flag && options.sparse_flag
 end
 
 if options.parfor_flag && (strcmp(reportUI,'matlab') && feature('numCores') == 1 || ~strcmp(reportUI,'matlab') && nproc() == 1)
-  fprintf('Setting ''parfor_flag'' to 0 since only 1 core detected on this machine.\n')
+  dsVprintf(options, 'Setting ''parfor_flag'' to 0 since only 1 core detected on this machine.\n')
   options.parfor_flag = 0;
+  varargin = modify_varargin(varargin, 'parfor_flag', options.parfor_flag);
 end
 
 if options.mex_flag && ~options.reduce_function_calls_flag
-  fprintf('Setting ''reduce_function_calls_flag'' to 1 for compatibility with ''mex_flag=1'' (coder does not support anonymous functions).\n');
-  options.reduce_function_calls_flag=1;
+  dsVprintf(options, 'Setting ''reduce_function_calls_flag'' to 1 for compatibility with ''mex_flag=1'' (coder does not support anonymous functions).\n');
+  options.reduce_function_calls_flag = 1;
+  varargin = modify_varargin(varargin, 'reduce_function_calls_flag', options.reduce_function_calls_flag);
 end
 
 % Make sure that data is either saved to disk, saved to variable, or plotted
 if (nargout==0 || options.cluster_flag) && ~options.save_data_flag && ~options.save_results_flag && isempty(options.plot_functions)
   if ~isempty(options.analysis_functions)
-    fprintf('Setting ''save_results_flag'' to 1 since output from dsSimulate is not stored in a variable and analysis functions specified.\n')
+    dsVprintf(options, 'Setting ''save_results_flag'' to 1 since output from dsSimulate is not stored in a variable and analysis functions specified.\n')
     options.save_results_flag = 1;
+    varargin = modify_varargin(varargin, 'save_results_flag', options.save_results_flag);
   else
-    fprintf('Setting ''save_data_flag'' to 1 since output from dsSimulate is not stored in a variable and no plot or analysis functions specified.\n')
+    dsVprintf(options, 'Setting ''save_data_flag'' to 1 since output from dsSimulate is not stored in a variable and no plot or analysis functions specified.\n')
     options.save_data_flag = 1;
+    varargin = modify_varargin(varargin, 'save_data_flag', options.save_data_flag);
   end
 end
 
 if options.cluster_flag && ~options.save_data_flag
-  options.save_results_flag=1;
-  if options.verbose_flag
-    fprintf('Setting ''save_results_flag'' to 1 for storing results of batch jobs for later access.\n');
-  end
+  dsVprintf(options, 'Setting ''save_results_flag'' to 1 for storing results of batch jobs for later access.\n');
+  options.save_results_flag = 1;
+  varargin = modify_varargin(varargin, 'save_results_flag', options.save_results_flag);
 end
 
 if any(strcmp(options.solver, {'ode23','ode45','ode113','ode15s','ode23s','ode23t','ode23tb'}))
@@ -361,8 +364,9 @@ else
 end
 
 if options.disk_flag && matlabSolverBool
-  fprintf('Since using built-in solver, setting options.disk_flag=1.\n');
+  dsVprintf(options, 'Since using built-in solver, setting options.disk_flag=1.\n');
   options.disk_flag = 1;
+  varargin = modify_varargin(varargin, 'disk_flag', options.disk_flag);
 end
 
 % if ischar(options.study_dir) && options.save_data_flag==0
@@ -380,12 +384,6 @@ end
 
 %% 0.4 Non-Batch checks.
 if isempty(options.sim_id) % not in part of a batch sim
-  if strcmp(options.qsub_mode, 'array') && ~options.one_solve_file_flag && options.sims_per_job > 1
-    fprintf('Since qsub_mode==''array'' and one_solve_file_flag==1, setting options.sims_per_job=1 \n')
-    options.sims_per_job = 1;
-    % TODO: this is a temp setting until array mode handles sims_per_job > 1
-  end
-
   if options.optimize_big_vary
     options.cluster_flag = 1;
     options.qsub_mode = 'array';
@@ -398,29 +396,33 @@ if isempty(options.sim_id) % not in part of a batch sim
   % check for one_solve_file_flag
   if options.one_solve_file_flag && ~options.cluster_flag
     % One file flag only for cluster
-    fprintf('Since cluster_flag==0, setting options.one_solve_file_flag=0 \n')
+    dsVprintf(options, 'Since cluster_flag==0, setting options.one_solve_file_flag=0 \n')
     options.one_solve_file_flag = 0;
+    varargin = modify_varargin(varargin, 'one_solve_file_flag', options.one_solve_file_flag);
     % TODO: this is a temp setting until iss_90 is fully implemented
   end
 
   if options.one_solve_file_flag && ~options.overwrite_flag
     % One file flag will overwrite
-    fprintf('Since one_solve_file_flag==1, setting options.overwrite_flag=1 \n')
+    dsVprintf(options, 'Since one_solve_file_flag==1, setting options.overwrite_flag=1 \n')
     options.overwrite_flag = 1;
+    varargin = modify_varargin(varargin, 'overwrite_flag', options.overwrite_flag);
     % TODO: this is a temp setting until iss_90 is fully implemented
   end
 
   if options.one_solve_file_flag && ~strcmp(options.qsub_mode, 'array')
     % One file flag needs array mode
-    fprintf('Since one_solve_file_flag==1, setting options.qsub_mode=''array'' \n')
+    dsVprintf(options, 'Since one_solve_file_flag==1, setting options.qsub_mode=''array'' \n')
     options.qsub_mode = 'array';
+    varargin = modify_varargin(varargin, 'qsub_mode', options.qsub_mode);
     % TODO: this is a temp setting until iss_90 is fully implemented
   end
 
   if options.one_solve_file_flag && options.parfor_flag
     % One file flag can't do parfor_flag
-    fprintf('Since one_solve_file_flag==1, setting options.parfor_flag=0 \n')
+    dsVprintf(options, 'Since one_solve_file_flag==1, setting options.parfor_flag=0 \n')
     options.parfor_flag = 0;
+    varargin = modify_varargin(varargin, 'parfor_flag', options.parfor_flag);
     % TODO: this is a temp setting until iss_90 is fully implemented
   end
 
@@ -429,8 +431,9 @@ if isempty(options.sim_id) % not in part of a batch sim
   end
 
   if options.one_solve_file_flag && ~options.save_parameters_flag
-    fprintf('Since one_solve_file_flag==1, setting options.save_parameters_flag=1 \n')
+    dsVprintf(options, 'Since one_solve_file_flag==1, setting options.save_parameters_flag=1 \n')
     options.save_parameters_flag = 1;
+    varargin = modify_varargin(varargin, 'save_parameters_flag', options.save_parameters_flag);
     % TODO: this is a temp setting until iss_90 is fully implemented
   end
 end % isempty(options.sim_id)
@@ -709,15 +712,16 @@ if options.parfor_flag
 
     % Verify all core files are deleted
     [~,result] = system('find * -name "core*"','-echo');
-    if ~isempty(result); fprintf(strcat(result,'\n')); warning('Core files found. Consider deleting to free up space'); end
+    if ~isempty(result)
+      fprintf(strcat(result,'\n'));
+      warning('Core files found. Consider deleting to free up space');
+    end
   end
 
   % TODO: sort data sets by things varied in modifications_set
   % TODO: Figure out how to delete locked .nfs files
 
-  if options.verbose_flag
-    fprintf('\nParallel simulations complete.\n\n')
-  end
+  dsVprintf(options, '\nParallel simulations complete.\n\n')
 
   %% auto_gen_test_data_flag argout
   if options.auto_gen_test_data_flag
@@ -801,10 +805,7 @@ if ~options.debug_flag
     tryFn(nargout)
   catch err % error handling
     if options.mex_flag && ~isempty(options.solve_file) && ~options.one_solve_file_flag
-
-      if options.verbose_flag
-        fprintf('Removing failed compiled solve file: %s\n',options.solve_file);
-      end
+      dsVprintf(options, 'Removing failed compiled solve file: %s\n',options.solve_file);
 
       delete([options.solve_file '*']);
     end
@@ -824,9 +825,7 @@ else
   tryFn(nargout) % outside of try block if options.debug_flag
 end
 
-if options.verbose_flag
-  fprintf('\nSimulations complete.\n\n')
-end
+dsVprintf(options, '\nSimulations complete.\n\n')
 
 if ~options.in_parfor_loop_flag % if not inside of parfor loop
   %% auto_gen_test_data_flag argout
@@ -905,10 +904,7 @@ end % in_parfor_loop_flag
         % check if output data already exists. load if so and skip simulation
         data_file=studyinfo.simulations(sim_ind).data_file;
         if exist(data_file,'file') && ~options.overwrite_flag
-          if 1%options.verbose_flag
-            % note: this is important, should always display
-            fprintf('Loading data from %s\n',data_file);
-          end
+          fprintf('Loading data from %s\n',data_file); % Note: this is important, should always display
           tmpdata=dsImport(data_file,'process_id',sim_id);
           update_data; % concatenate data structures across simulations
           continue; % skip to next simulation
@@ -977,9 +973,7 @@ end % in_parfor_loop_flag
         % - DynaSim solver: run solve_ode.m or create/run MEX
         % move to directory with solver file
 
-        if options.verbose_flag
-          fprintf('Changing directory to %s\n',fpath);
-        end
+        dsVprintf(options, 'Changing directory to %s\n',fpath);
 
         cd(fpath);
 
@@ -1002,9 +996,7 @@ end % in_parfor_loop_flag
         end
 
         param_file = fullfile(fpath,'params.mat');
-        if options.verbose_flag
-          fprintf('Saving model parameters: %s\n',param_file);
-        end
+        dsVprintf(options, 'Saving model parameters: %s\n',param_file);
         %pause(.01);
 
         %% Solve System
@@ -1036,9 +1028,7 @@ end % in_parfor_loop_flag
           end
 
           % run simulation
-          if options.verbose_flag
-            fprintf('\nRunning simulation %g/%g (solver=''%s'', dt=%g, tspan=[%g %g]) ...\n',sim,length(modifications_set),options.solver,options.dt,options.tspan);
-          end
+          dsVprintf(options, '\nRunning simulation %g/%g (solver=''%s'', dt=%g, tspan=[%g %g]) ...\n',sim,length(modifications_set),options.solver,options.dt,options.tspan);
           sim_start_time=tic;
 
           outputs=cell(1,length(output_variables)); % preallocate for PCT compatibility
@@ -1074,9 +1064,7 @@ end % in_parfor_loop_flag
           end
         end
 
-        if options.verbose_flag
-          fprintf('Elapsed time: %g seconds.\n',duration);
-        end
+        dsVprintf(options, 'Elapsed time: %g seconds.\n',duration);
 
         % add metadata to tmpdata
         tmpdata.simulator_options=options; % store simulator controls
@@ -1169,9 +1157,7 @@ end % in_parfor_loop_flag
     % remove temporary files and optionally store info for debugging
     % ...
     % return to original directory
-    if options.verbose_flag
-      fprintf('Changing directory to %s\n',cwd);
-    end
+    dsVprintf(options, 'Changing directory to %s\n',cwd);
     cd(cwd);
     switch status
       case 'success'
@@ -1282,4 +1268,11 @@ if any(ismember(option_names(:,1),options(1:2:end)))
   end
 end
 
+end
+
+function varargs = modify_varargin(varargs, key, newValue)
+  % set a key in varargin to newValue
+  try
+    varargs{find(strcmp(varargs, key))+1} = newValue;
+  end
 end
