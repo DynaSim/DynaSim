@@ -105,9 +105,9 @@ end
 
 % check specification
 if ismodel
-  specification=dsCheckSpecification(model.specification, varargin{:});
+  specification = dsCheckSpecification(model.specification, varargin{:});
 else
-  specification=dsCheckSpecification(model, varargin{:});
+  specification = dsCheckSpecification(model, varargin{:});
 end
 
 % update specification with whatever is in modifications
@@ -118,7 +118,7 @@ modifications = standardize_modifications(modifications,specification,varargin{:
 
 % update model if input was a model structure
 if ismodel
-  output=dsGenerateModel(specification);
+  output = dsGenerateModel(specification);
 else
   output = specification;
 end
@@ -222,12 +222,56 @@ if any(~cellfun(@isempty,regexp(modifications(:,1),'^\(.*\)$'))) || ...
             end
         end
 
-    end
+    end % ischar
 
-  end
+  end % mods
 
   modifications=modifications_;
 
+end % if groups
+
+% standardize connection object
+for i = 1:size(modifications,1)
+  obj=modifications{i,1}; % population name or connection source-target
+  fld=modifications{i,2}; % population name, size, or parameter name
+  
+  % convert target<-source to source->target
+  if any(strfind(obj,'<-'))
+    if any(obj=='.') % check for dot reference to connection mechanism
+      ind=find(obj=='.');
+      suffix=obj(ind:length(obj));
+      obj=obj(1:ind-1);
+    else
+      suffix='';
+    end
+    ind=strfind(obj,'<-');
+    obj=[obj(ind(1)+2:end) '->' obj(1:ind(1)-1)];
+    obj=[obj suffix];
+    
+    % update modifications
+    modifications{i,1} = obj; % population name or connection source-target
+  end
+  
+  % check for dot notation. Change POP.MECH to MECH_PARAM notation.
+  if any(obj=='.')
+    tmp=regexp(obj,'\.','split');
+    obj=tmp{1};
+    MECH=tmp{2};
+    fld=[MECH '_' fld];
+    
+    % update modifications
+    modifications{i,1} = obj; % population name or connection source-target
+    modifications{i,2} = fld; % population name, size, or parameter name
+  end
+  
+  % check for dot notation. Change MECH.PARAM to MECH_PARAM notation.
+  if any(fld=='.')
+    tmp=regexp(fld,'\.','split');
+    fld=[tmp{1} '_' tmp{2}];
+    
+    % update modifications
+    modifications{i,2} = fld; % population name, size, or parameter name
+  end
 end
 
 %% auto_gen_test_data_flag argout
@@ -271,37 +315,6 @@ for i=1:size(mods,1)
   if ~ischar(fld) %|| ~ismember(fld,{'name','size','parameters','mechanism_list','equations'})
     error('modification must be applied to population ''name'',''size'',or a parameter referenced by its name');
   end
-
-  % standardize connection object: convert target<-source to source->target
-  if any(strfind(obj,'<-'))
-    if any(obj=='.') % check for dot reference to connection mechanism
-      ind=find(obj=='.');
-      suffix=obj(ind:length(obj));
-      obj=obj(1:ind-1);
-    else
-      suffix='';
-    end
-    ind=strfind(obj,'<-');
-    obj=[obj(ind(1)+2:end) '->' obj(1:ind(1)-1)];
-    obj=[obj suffix];
-  end
-
-  % check and adjust for mechanism-specific parameter identifier
-%   MECH='';
-  if any(obj=='.') % OBJECT.MECH
-    tmp=regexp(obj,'\.','split');
-    obj=tmp{1};
-    MECH=tmp{2};
-    fld=[MECH '.' fld];
-  end
-%   if any(fld=='.') % MECH.PARAM
-%     tmp=regexp(fld,'\.','split');
-%     MECH=tmp{1};
-%     fld=tmp{2};
-%   end
-%   if ~isempty(MECH)
-%     fld=[MECH '.' fld];
-%   end
 
   val=mods{i,3}; % value for population name or size, or parameter to modify
   if ismember(obj,pop_names)
