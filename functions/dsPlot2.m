@@ -1,5 +1,5 @@
 function [handles,xp] = dsPlot2(data,varargin)
-%% handles=dsPlot(data,'option',value)
+%% handles=dsPlot2(data,'option',value)
 % Purpose: plot data in various ways depending on what data was provided
 % and what options are defined. this function is wrapped by dsPlotWaveforms,
 % PlotPower, ... to provide a single function for organizing and displaying
