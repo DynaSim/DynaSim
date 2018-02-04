@@ -205,12 +205,16 @@ end
 
 if isempty(funcIn)
   % make fn fields into cells
-  if ~isempty(options.plot_functions) || ~iscell(options.plot_functions)
+  if ~isempty(options.plot_functions) && ~iscell(options.plot_functions)
     options.plot_functions = {options.plot_functions};
   end
 
-  if ~isempty(options.analysis_functions) || ~iscell(options.analysis_functions)
+  if ~isempty(options.analysis_functions) && ~iscell(options.analysis_functions)
     options.analysis_functions = {options.analysis_functions};
+  end
+  
+  if ~isempty(options.result_functions) && ~iscell(options.result_functions)
+    options.result_functions = {options.result_functions};
   end
 end
 
@@ -220,11 +224,13 @@ if ~isempty(funcIn) % style 1
 elseif ( ~isempty(options.plot_functions) || ~isempty(options.analysis_functions) ) % style 2.1
   funcIn = [options.plot_functions(:); options.analysis_functions(:)];
   plotFnBoolVec = false(size(funcIn));
-  plotFnBoolVec(1:length(options.analysis_functions)) = true; % specify which fn were plot fn
+  plotFnBoolVec(1:length(options.plot_functions)) = true; % specify which fn were plot fn
   
   options.function_options = [options.plot_options(:); options.analysis_options(:)];
 elseif ~isempty(options.result_functions) % style 2.2
   funcIn = options.result_functions;
+  
+  plotFnBoolVec = [];
 end
 
 % convert func string to handle, or check length of cell array
