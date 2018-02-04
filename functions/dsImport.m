@@ -1,9 +1,10 @@
-function [data,studyinfo] = dsImport(file,varargin)
+function [data,studyinfo] = dsImport(src,varargin)
 %DSIMPORT - load data into DynaSim formatted data structure.
 %
 % Usage:
 %   [data,studyinfo] = dsImport(data_file)
 %   [data,studyinfo] = dsImport(studyinfo)
+%   [data,studyinfo] = dsImport(study_dir) % containing studyinfo.mat
 %   data = dsImport(data_file)
 %
 % Inputs:
@@ -82,7 +83,7 @@ if options.auto_gen_test_data_flag
   varargs = varargin;
   varargs{find(strcmp(varargs, 'auto_gen_test_data_flag'))+1} = 0;
   varargs(end+1:end+2) = {'unit_test_flag',1};
-  argin = [{file}, varargs]; % specific to this function
+  argin = [{src}, varargs]; % specific to this function
 end
 
 if ischar(options.variables)
@@ -90,18 +91,16 @@ if ischar(options.variables)
 end
 
 % check if input is a DynaSim study_dir or path to studyinfo
-if ischar(file)
-  if isdir(file) % study directory
-    study_dir = file;
-    clear file
+if ischar(src)
+  if isdir(src) % study directory
+    study_dir = src;
     file.study_dir = study_dir;
-  elseif strfind(file, 'studyinfo') %#ok<STRIFCND>
-    filePath = fileparts2(file);
+  elseif strfind(src, 'studyinfo') %#ok<STRIFCND>
+    filePath = fileparts2(src);
     if isempty(filePath)
       filePath = pwd;
     end
     study_dir = filePath;
-    clear file
     file.study_dir = study_dir;
   end
 end

@@ -1103,13 +1103,14 @@ end % in_parfor_loop_flag
       if ~isempty(options.analysis_functions) || ~isempty(options.plot_functions)
         if options.save_results_flag
           % do analysis and plotting while saving results
-          siminfo=studyinfo.simulations(sim_ind);
+          siminfo = studyinfo.simulations(sim_ind);
           
           for f=1:length(siminfo.result_functions)
-            tmpresult = dsAnalyze(tmpdata, siminfo.result_functions{f},'result_file',siminfo.result_files{f},'save_data_flag',1,'save_results_flag',1,siminfo.result_options{f}{:},'parfor_flag',options.parfor_flag, 'in_sim_flag',1);
-
+            % saving handled internally to dsAnalyze
+            tmpresult = dsAnalyze(tmpdata, siminfo.result_functions{f},'result_file',siminfo.result_files{f},'save_data_flag',1,'save_results_flag',1, siminfo.result_options{f}{:}, 'parfor_flag',options.parfor_flag, 'in_sim_flag',1);
+            
             % since the plots are saved, close all generated figures
-            if all(ishandle(tmpresult)) % FIXME: dsPlot2 doesnt return handles, so won't close
+            if all(ishandle(tmpresult)) % FIXME: dsPlot2 doesnt return handles, so won't close?
               close(tmpresult);
             elseif isstruct(tmpresult) && isfield(tmpresult,'hcurr') % for plotData2 based on dsAnalyze line 281
               close(tmpresult.hcurr);

@@ -199,13 +199,15 @@ data = convertDoublePrecision(data);
 
 %% Parse fn
 
-% make fn fields into cells
-if ~isempty(options.plot_functions) || ~iscell(options.plot_functions)
-  options.plot_functions = {options.plot_functions};
-end
+if isempty(funcIn)
+  % make fn fields into cells
+  if ~isempty(options.plot_functions) || ~iscell(options.plot_functions)
+    options.plot_functions = {options.plot_functions};
+  end
 
-if ~isempty(options.analysis_functions) || ~iscell(options.analysis_functions)
-  options.analysis_functions = {options.analysis_functions};
+  if ~isempty(options.analysis_functions) || ~iscell(options.analysis_functions)
+    options.analysis_functions = {options.analysis_functions};
+  end
 end
 
 % make funcIn for dsSimulate Style
@@ -280,12 +282,12 @@ if options.save_results_flag && postHocBool
     newFns = sort(cellfun(@func2str, funcIn, 'Uni',0));
     
     if isempty(setdiff(oldFns, oldFns))
-      dsVprintf('Overwriting old results and plot function indicies in new folders starting at index 0.');
+      dsVprintf(options, 'Overwriting old results and plot function indicies in new folders starting at index 0.');
       
       lastPlotIndex = 0;
       lastAnalysisIndex = 0;
     else
-      dsVprintf('Not overwriting old results and plot function indicies in new folders since functions are not the same, so incrementing index.');
+      dsVprintf(options, 'Not overwriting old results and plot function indicies in new folders since functions are not the same, so incrementing index.');
     end
   end
 else % ~postHocBool
@@ -359,10 +361,14 @@ for fInd = 1:nFunc % loop over function inputs
         extension = ['.' options.format]; % '.svg'; % {.jpg,.svg}
 
         if ~postHocBool % in sim
-          fName = [options.result_file extension];
-          fPath = [fName extension];
-
-          thisResult = result(iResult);
+          % ensure extension is '.mat'
+          extension = '.mat';
+          fPath = options.result_file;
+          [parentPath, filename, orig_ext] = fileparts(fPath);
+          if ~strcmp(orig_ext, extension) %check for .mat extension
+            fPath = [parentPath filename extension];
+          end
+          thisResult = result;
         elseif studyinfoBool % posthoc with studyinfo
           simID = studyinfo.simulations(iResult).sim_id;
           prefix = func2str(func);
@@ -480,16 +486,14 @@ for fInd = 1:nFunc % loop over function inputs
       
       for iResult = 1:nResults
         if ~postHocBool % in sim
-          fName = options.result_file;
+          fPath = options.result_file;
           
           % ensure extension is '.mat'
           extension = '.mat';
-          [~, fName, orig_ext] = fileparts(fName);
+          [parentPath, filename, orig_ext] = fileparts(fPath);
           if ~strcmp(orig_ext, extension) %check for .mat extension
-            fName = [fName extension];
+            fPath = [parentPath filename extension];
           end
-          
-          fPath = fName;
         elseif studyinfoBool % posthoc with studyinfo
           simID = studyinfo.simulations(iResult).sim_id;
           prefix = func2str(func);
