@@ -178,6 +178,14 @@ end
 %   - 'data' as single struct or struct array, or empty
 %   - 'studyinfo' struct or empty
 
+if options.load_all_data_flag
+  assert(~isempty(data));
+  
+  % convert data to double precision before analysis
+  dsVprintf(options, 'Converting data to double precision before analysis.\n')
+  data = convertDoublePrecision(data);
+end
+
 % check if study_dir defined
 if isempty(studyinfo)
   studyinfoBool = false;
@@ -192,10 +200,6 @@ end
 % Data at this point:
 %   - 'data' as single struct or struct array, or empty
 %   - 'studyinfo' struct with many flds or just 'study_dir' field
-
-% convert data to double precision before analysis
-dsVprintf(options, 'Converting data to double precision before analysis.\n')
-data = convertDoublePrecision(data);
 
 %% Parse fn
 
@@ -349,7 +353,7 @@ for fInd = 1:nFunc % loop over function inputs
   end
 
   % determine if result is a plot handle or derived data
-  if all(ishandle(result)) || plotFnBool % analysis function returned a graphics handle or has plot in fn name or given in plot_functions field
+  if ~iscell(result) && ((~isempty(data) && all(ishandle(result))) || plotFnBool) % analysis function returned a graphics handle or has plot in fn name or given in plot_functions field
     %% Plot Function
     % will save plots, else return main fn since plot already open
     
@@ -361,12 +365,18 @@ for fInd = 1:nFunc % loop over function inputs
         extension = ['.' options.format]; % '.svg'; % {.jpg,.svg}
 
         if ~postHocBool % in sim
-          % ensure extension is '.mat'
-          extension = '.mat';
+          % ensure extension is extension
           fPath = options.result_file;
           [parentPath, filename, orig_ext] = fileparts(fPath);
-          if ~strcmp(orig_ext, extension) %check for .mat extension
-            fPath = [parentPath filename extension];
+          if length(orig_ext) > 4 % extra periods in name
+            orig_ext = fPath(end-3:end);
+            if ~strcmp(orig_ext, extension) %check for .mat extension
+              fPath = [fPath(1:end-4) extension];
+            end
+          else
+            if ~strcmp(orig_ext, extension) %check for .mat extension
+              fPath = [parentPath filename extension];
+            end
           end
           thisResult = result;
         elseif studyinfoBool % posthoc with studyinfo
@@ -451,6 +461,8 @@ for fInd = 1:nFunc % loop over function inputs
             print(thisResult,fPath,'-dpng');
           case '.fig'
             savefig(thisResult,fPath);
+          otherwise
+            error('Unknown plot extension. Try again with known extension. See help(dsAnalyze)')
         end
         
         if (options.save_results_flag && (options.close_fig_flag ~= 0)) || options.close_fig_flag==1

@@ -102,6 +102,8 @@ if ischar(src)
     end
     study_dir = filePath;
     file.study_dir = study_dir;
+  else
+    file = src; % path to data file
   end
 end
 
