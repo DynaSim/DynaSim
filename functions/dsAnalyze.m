@@ -233,6 +233,11 @@ end
 % check if postHoc (ie not from dsSimulate call)
 postHocBool = ~options.in_sim_flag;
 
+% allFnResults
+if nargout
+  allFnResults = cell(nFunc,1);
+end
+
 %% Handle existing results
 % Check to see if results files exist. Deal with overwriting them, or
 % increasing index number. Note: if use same fn name, assume its a new call so
@@ -426,95 +431,95 @@ for fInd = 1:nFunc % loop over function inputs
     % will save plots, else return main fn since plot already open
     
     plotFnInd = plotFnInd + 1;
-    
-    if options.save_results_flag
-      % loop through results. all results may exist or need to be made during loop
-      for iResult = 1:nResults
-        extension = ['.' options.format]; % '.svg'; % {.jpg,.svg}
 
-        if ~postHocBool % in sim
-          % ensure extension is extension
-          fPath = options.result_file;
-          [parentPath, filename, orig_ext] = fileparts(fPath);
-          if length(orig_ext) > 4 % extra periods in name
-            orig_ext = fPath(end-3:end);
-            if ~strcmp(orig_ext, extension) %check for .mat extension
-              fPath = [fPath(1:end-4) extension];
-            end
-          else
-            if ~strcmp(orig_ext, extension) %check for .mat extension
-              fPath = fullfile(parentPath, [filename extension]);
-            end
+    % loop through results. all results may exist or need to be made during loop
+    for iResult = 1:nResults
+      extension = ['.' options.format]; % '.svg'; % {.jpg,.svg}
+
+      if ~postHocBool % in sim
+        % ensure extension is extension
+        fPath = options.result_file;
+        [parentPath, filename, orig_ext] = fileparts(fPath);
+        if length(orig_ext) > 4 % extra periods in name
+          orig_ext = fPath(end-3:end);
+          if ~strcmp(orig_ext, extension) %check for .mat extension
+            fPath = [fPath(1:end-4) extension];
           end
-          thisResult = result;
-        elseif studyinfoBool % posthoc with studyinfo
-          simID = studyinfo.simulations(iResult).sim_id;
-          prefix = func2str(func);
-          fName = [prefix '_sim' num2str(simID) '_plot' num2str(plotFnInd) '_' func2str(func)];
-
-          if options.load_all_data_flag
-            thisResult = result(iResult);
-          else % load data
-            data = loadDataFromSingleSim(src, simID, options, varargin{:});
-
-            %skip if no data
-            if isempty(data)
-              dsVprintf(options, '  Skipping simID=%i since no data.\n', simID);
-              continue
-            end
-
-            % calc result for this data
-            thisResult = evalFnWithArgs(fInd, data, func, options, varargin{:});
-          end % if ~options.load_all_data_flag
-
-          % change result_file if varied_filename_flag
-          if options.varied_filename_flag && isfield(data, 'varied')
-            fName = filenameFromVaried(fName, func, data, plotFnBool, options, varargin{:});
-          end % varied_filename_flag
-
-          % make fPath
-          fDir = fullfile(studyinfo.study_dir, 'postHocPlots');
-          if ~exist(fDir,'dir')
-            mkdir(fDir)
+        else
+          if ~strcmp(orig_ext, extension) %check for .mat extension
+            fPath = fullfile(parentPath, [filename extension]);
           end
-          fPath = fullfile(fDir,[fName extension]);
-        else  % posthoc without studyinfo
+        end
+        thisResult = result;
+      elseif studyinfoBool % posthoc with studyinfo
+        simID = studyinfo.simulations(iResult).sim_id;
+        prefix = func2str(func);
+        fName = [prefix '_sim' num2str(simID) '_plot' num2str(plotFnInd) '_' func2str(func)];
+
+        if options.load_all_data_flag
           thisResult = result(iResult);
-          simID = iResult;
-          
-          % make fName
-          if isfield(options, 'result_file') && ~isempty(options.result_file)
-            prefix = options.result_file;
-          else
-            prefix = func2str(func);
-          end
-          fName = [prefix '_data' num2str(iResult) '_plot' num2str(iResult) extension];
-          
-          % make fDir
-          fDir = fullfile(studyinfo.study_dir, 'postHocPlots');
-          if ~exist(fDir,'dir')
-            mkdir(fDir)
-          end
-          
-          % make fPath
-          fPath = fullfile(fDir,[fName extension]);
-        end % if ~postHocBool
-        
-        % Data needed for plotting:
-        %   - thisResult
-        %   - fPath
+        else % load data
+          data = loadDataFromSingleSim(src, simID, options, varargin{:});
 
-        %skip if no result
-        if isempty(thisResult)
-          if ~postHocBool
-            dsVprintf(options, '  Skipping since no result.\n');
-          else
-            dsVprintf(options, '  Skipping simID=%i since no result.\n', simID);
+          %skip if no data
+          if isempty(data)
+            dsVprintf(options, '  Skipping simID=%i since no data.\n', simID);
+            continue
           end
-          
-          continue
-        end % if isempty(thisResult)
 
+          % calc result for this data
+          thisResult = evalFnWithArgs(fInd, data, func, options, varargin{:});
+        end % if ~options.load_all_data_flag
+
+        % change result_file if varied_filename_flag
+        if options.varied_filename_flag && isfield(data, 'varied')
+          fName = filenameFromVaried(fName, func, data, plotFnBool, options, varargin{:});
+        end % varied_filename_flag
+
+        % make fPath
+        fDir = fullfile(studyinfo.study_dir, 'postHocPlots');
+        if ~exist(fDir,'dir')
+          mkdir(fDir)
+        end
+        fPath = fullfile(fDir,[fName extension]);
+      else  % posthoc without studyinfo
+        thisResult = result(iResult);
+        simID = iResult;
+
+        % make fName
+        if isfield(options, 'result_file') && ~isempty(options.result_file)
+          prefix = options.result_file;
+        else
+          prefix = func2str(func);
+        end
+        fName = [prefix '_data' num2str(iResult) '_plot' num2str(iResult) extension];
+
+        % make fDir
+        fDir = fullfile(studyinfo.study_dir, 'postHocPlots');
+        if ~exist(fDir,'dir')
+          mkdir(fDir)
+        end
+
+        % make fPath
+        fPath = fullfile(fDir,[fName extension]);
+      end % if ~postHocBool
+
+      % Data needed for plotting:
+      %   - thisResult
+      %   - fPath
+
+      %skip if no result
+      if isempty(thisResult)
+        if ~postHocBool
+          dsVprintf(options, '  Skipping since no result.\n');
+        else
+          dsVprintf(options, '  Skipping simID=%i since no result.\n', simID);
+        end
+
+        continue
+      end % if isempty(thisResult)
+
+      if options.save_results_flag
         set(thisResult, 'PaperPositionMode','auto');
         dsVprintf(options, '    Saving plot: %s\n',fPath);
 
@@ -532,16 +537,22 @@ for fInd = 1:nFunc % loop over function inputs
           otherwise
             error('Unknown plot extension. Try again with known extension. See help(dsAnalyze)')
         end
+      end %save_results_flag
         
-        if (options.save_results_flag && (options.close_fig_flag ~= 0)) || options.close_fig_flag==1
-          close(thisResult)
-        end
-        
-        if ~options.load_all_data_flag
-          data = [];
-        end
-      end %nResults
-    end %save_results_flag
+      if (options.save_results_flag && (options.close_fig_flag ~= 0)) || options.close_fig_flag==1
+        close(thisResult)
+      end
+
+      if ~options.load_all_data_flag
+        data = [];
+      end
+
+      % store result
+      if nargout
+        allFnResults{fInd}{iResult} = thisResult;
+      end
+    end %nResults
+    
   else % analysis function returned derived data
     %% Analysis Function
     if isstruct(result)
@@ -561,96 +572,105 @@ for fInd = 1:nFunc % loop over function inputs
     
     analysisFnInd = analysisFnInd + 1;
 
-    % save derived data else return main function
-    if options.save_results_flag
-      if postHocBool
-        allResults = result;
-        clear result;
-      end
-      
-      for iResult = 1:nResults
-        if ~postHocBool % in sim
-          fPath = options.result_file;
-          
-          % ensure extension is '.mat'
-          extension = '.mat';
-          [parentPath, filename, orig_ext] = fileparts(fPath);
-          if ~strcmp(orig_ext, extension) %check for .mat extension
-            fPath = [parentPath filename extension];
-          end
-        elseif studyinfoBool % posthoc with studyinfo
-          simID = studyinfo.simulations(iResult).sim_id;
-          prefix = func2str(func);
-          fName = [prefix '_sim' num2str(simID) '_analysis' num2str(analysisFnInd) '_' func2str(func) '.mat'];
-          
-          if options.load_all_data_flag
-            result = allResults(iResult);
-          else % load data
-            data = loadDataFromSingleSim(src, simID, options, varargin{:});
-            
-            %skip if no data
-            if isempty(data)
-              dsVprintf(options, '  Skipping simID=%i since no data.\n', simID);
-              continue
-            end
-            
-            % calc result for this data
-            result = evalFnWithArgs(fInd, data, func, options, varargin{:});
-          end
-          
-          % change result_file if varied_filename_flag
-          if options.varied_filename_flag && isfield(data, 'varied')
-            fName = filenameFromVaried(fName, func, data, plotFnBool, options, varargin{:});
-          end % varied_filename_flag
-          
-          % make fPath
-          fDir = fullfile(studyinfo.study_dir, 'postHocResults');
-          if ~exist(fDir,'dir')
-            mkdir(fDir)
-          end
-          fPath = fullfile(fDir,fName);
-        else  % posthoc without studyinfo
-          result = allResults(iResult);
-          simID = iResult;
-          
-          % make fName
-          if isfield(options, 'result_file') && ~isempty(options.result_file)
-            prefix = options.result_file;
-          else
-            prefix = func2str(func);
-          end
-          fName = [prefix '_data' num2str(iResult) '_analysis' num2str(analysisFnInd) '_' func2str(func) '.mat'];
-          
-          % make fDir
-          fDir = fullfile(studyinfo.study_dir, 'postHocResults');
-          if ~exist(fDir,'dir')
-            mkdir(fDir)
-          end
-          
-          % make fPath
-          fPath = fullfile(fDir,fName);
-        end % if ~postHocBool
-        
-        %skip if no result
-        if isempty(result)
-          if ~postHocBool
-            dsVprintf(options, '  Skipping since no result.\n');
-          else
-            dsVprintf(options, '  Skipping simID=%i since no result.\n', simID);
-          end
-          
-          continue
-        end % if isempty(result)
-        
-        dsExportData(result, 'filename',fPath, 'result_flag',1, varargin{:});
-        
-        if ~options.load_all_data_flag
-          data = [];
+    if postHocBool
+      allResults = result;
+      clear result;
+    end
+
+    for iResult = 1:nResults
+      if ~postHocBool % in sim
+        fPath = options.result_file;
+
+        % ensure extension is '.mat'
+        extension = '.mat';
+        [parentPath, filename, orig_ext] = fileparts(fPath);
+        if ~strcmp(orig_ext, extension) %check for .mat extension
+          fPath = [parentPath filename extension];
         end
-      end % nResults
-    end % save_results_flag
+      elseif studyinfoBool % posthoc with studyinfo
+        simID = studyinfo.simulations(iResult).sim_id;
+        prefix = func2str(func);
+        fName = [prefix '_sim' num2str(simID) '_analysis' num2str(analysisFnInd) '_' func2str(func) '.mat'];
+
+        if options.load_all_data_flag
+          result = allResults(iResult);
+        else % load data
+          data = loadDataFromSingleSim(src, simID, options, varargin{:});
+
+          %skip if no data
+          if isempty(data)
+            dsVprintf(options, '  Skipping simID=%i since no data.\n', simID);
+            continue
+          end
+
+          % calc result for this data
+          result = evalFnWithArgs(fInd, data, func, options, varargin{:});
+        end
+
+        % change result_file if varied_filename_flag
+        if options.varied_filename_flag && isfield(data, 'varied')
+          fName = filenameFromVaried(fName, func, data, plotFnBool, options, varargin{:});
+        end % varied_filename_flag
+
+        % make fPath
+        fDir = fullfile(studyinfo.study_dir, 'postHocResults');
+        if ~exist(fDir,'dir')
+          mkdir(fDir)
+        end
+        fPath = fullfile(fDir,fName);
+      else  % posthoc without studyinfo
+        result = allResults(iResult);
+        simID = iResult;
+
+        % make fName
+        if isfield(options, 'result_file') && ~isempty(options.result_file)
+          prefix = options.result_file;
+        else
+          prefix = func2str(func);
+        end
+        fName = [prefix '_data' num2str(iResult) '_analysis' num2str(analysisFnInd) '_' func2str(func) '.mat'];
+
+        % make fDir
+        fDir = fullfile(studyinfo.study_dir, 'postHocResults');
+        if ~exist(fDir,'dir')
+          mkdir(fDir)
+        end
+
+        % make fPath
+        fPath = fullfile(fDir,fName);
+      end % if ~postHocBool
+
+      %skip if no result
+      if isempty(result)
+        if ~postHocBool
+          dsVprintf(options, '  Skipping since no result.\n');
+        else
+          dsVprintf(options, '  Skipping simID=%i since no result.\n', simID);
+        end
+
+        continue
+      end % if isempty(result)
+      
+      if options.save_results_flag  
+        dsExportData(result, 'filename',fPath, 'result_flag',1, varargin{:});
+      end % save_results_flag
+        
+      if ~options.load_all_data_flag
+        data = [];
+      end
+
+      % store result
+      if nargout
+        allFnResults{fInd}{iResult} = result;
+      end
+    end % nResults
   end % ishandle(result)
 end % fInd
+
+% if only 1 fn, dont return cell of cells
+if nargout && nFunc == 1
+  allFnResults = allFnResults{1};
+end
 
 %% auto_gen_test_data_flag argout
 if options.auto_gen_test_data_flag
