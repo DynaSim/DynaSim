@@ -110,7 +110,7 @@ if ~nargin
 end
 
 %% check input type
-if (nargin > 1) && (iscell(varargin{1}) || isfunction(varargin{1}))
+if (nargin > 1) && (iscell(varargin{1}) || all(isfunction(varargin{1})))
   funcIn = varargin{1};
   varargin(1) = [];
 else
@@ -264,6 +264,40 @@ if options.save_results_flag && postHocBool
     lastPlotIndex = 0;
   end
   
+  % get plots lastPlotIndex
+  plotsDir = fullfile(studyinfo.study_dir, 'plots');
+  if exist(plotsDir ,'dir')
+    plotFiles = lscell(plotsDir);
+    plotFiles = regexpi(plotFiles, '_plot(\d+)_(.+)', 'tokens');
+    plotFiles = [plotFiles{:}];
+    if ~isempty(plotFiles)
+      plotIndFn = cat(1, plotFiles{:});
+      
+      plotInds = cellfun(@str2double, plotIndFn(:,1));
+      
+      lastPlotIndex = max(lastPlotIndex, max(plotInds));
+    else
+      lastPlotIndex = lastPlotIndex;
+    end
+  end
+  
+  % get postHocPlots lastPlotIndex
+  postHocPlotsDir = fullfile(studyinfo.study_dir, 'postHocPlots');
+  if exist(postHocPlotsDir ,'dir')
+    plotFiles = lscell(postHocPlotsDir);
+    plotFiles = regexpi(plotFiles, '_plot(\d+)_(.+)', 'tokens');
+    plotFiles = [plotFiles{:}];
+    if ~isempty(plotFiles)
+      plotIndFn = cat(1, plotFiles{:});
+      
+      plotInds = cellfun(@str2double, plotIndFn(:,1));
+      
+      lastPlotIndex = max(lastPlotIndex, max(plotInds));
+    else
+      lastPlotIndex = lastPlotIndex;
+    end
+  end
+  
   % get lastAnalysisIndex
   analysisFiles = regexpi(files, '_analysis(\d+)_(.+)', 'tokens');
   analysisFiles = [analysisFiles{:}];
@@ -277,11 +311,45 @@ if options.save_results_flag && postHocBool
     lastAnalysisIndex = 0;
   end
   
+  % get results lastAnalysisIndex
+  resultsDir = fullfile(studyinfo.study_dir, 'results');
+  if exist(resultsDir ,'dir')
+    analysisFiles = lscell(resultsDir);
+    analysisFiles = regexpi(analysisFiles, '_analysis(\d+)_(.+)', 'tokens');
+    analysisFiles = [analysisFiles{:}];
+    if ~isempty(analysisFiles)
+      analysisIndFn = cat(1, analysisFiles{:});
+      
+      analysisInds = cellfun(@str2double, analysisIndFn(:,1));
+      
+      lastAnalysisIndex = max(lastAnalysisIndex, max(analysisInds));
+    else
+      lastAnalysisIndex = lastAnalysisIndex;
+    end
+  end
+  
+  % get postHocResults lastAnalysisIndex
+  postHocResultsDir = fullfile(studyinfo.study_dir, 'postHocResults');
+  if exist(postHocResultsDir ,'dir')
+    analysisFiles = lscell(postHocResultsDir);
+    analysisFiles = regexpi(analysisFiles, '_analysis(\d+)_(.+)', 'tokens');
+    analysisFiles = [analysisFiles{:}];
+    if ~isempty(analysisFiles)
+      analysisIndFn = cat(1, analysisFiles{:});
+      
+      analysisInds = cellfun(@str2double, analysisIndFn(:,1));
+      
+      lastAnalysisIndex = max(lastAnalysisIndex, max(analysisInds));
+    else
+      lastAnalysisIndex = lastAnalysisIndex;
+    end
+  end
+  
   if ~studyinfoBool
     oldFns = sort([analysisIndFn(:,2); plotIndFn(:,2)]);
   end
   
-  if options.overwrite_flag || (~isempty(plotFiles) || ~isempty(analysisFiles))
+  if options.overwrite_flag && (~isempty(plotFiles) || ~isempty(analysisFiles))
     % check if all functions the same as old ones
     newFns = sort(cellfun(@func2str, funcIn, 'Uni',0));
     
@@ -605,6 +673,10 @@ if options.auto_gen_test_data_flag
   argin = [{src},{options}, varargs]; % specific to this function
 end
 
+if isempty(src)
+  src = pwd;
+end
+
 
 if isstruct(src) && isfield(src,'time') % data struct (single or array)
   data = src; % if length==1,then likely from SimulateModel call
@@ -695,6 +767,11 @@ elseif ischar(funcIn)
   nFunc = 1;
 else
   nFunc = numel(funcIn);
+  
+  % convert to fn handle if strings
+  if all(cellfun(@ischar, funcIn))
+    funcIn = cellfun(@str2func, funcIn, 'Uni',0);
+  end
 end
 end % parseFuncIn
 
