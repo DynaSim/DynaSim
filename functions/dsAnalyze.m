@@ -222,15 +222,44 @@ end
 if ~isempty(funcIn) % style 1
   plotFnBoolVec = [];
 elseif ( ~isempty(options.plot_functions) || ~isempty(options.analysis_functions) ) % style 2.1
+  % functions
   funcIn = [options.plot_functions(:); options.analysis_functions(:)];
   plotFnBoolVec = false(size(funcIn));
   plotFnBoolVec(1:length(options.plot_functions)) = true; % specify which fn were plot fn
   
+  % options
+  if isempty(options.plot_options)
+    options.plot_options = {{}};
+  end
+  if isempty(options.analysis_options)
+    options.analysis_options = {{}};
+  end
+  
+  % make sure there is one option cell array per function
+  if length(options.plot_options) < length(options.plot_functions)
+    % extend plot_options with blank cells
+    options.plot_options(length(options.plot_options)+1:length(options.plot_functions)) = {{}};
+  end
+  if length(options.analysis_options) < length(options.analysis_functions)
+    % extend analysis_options with blank cells
+    options.analysis_options(length(options.analysis_options)+1:length(options.analysis_functions)) = {{}};
+  end
   options.function_options = [options.plot_options(:); options.analysis_options(:)];
 elseif ~isempty(options.result_functions) % style 2.2
+  % functions
   funcIn = options.result_functions;
-  
   plotFnBoolVec = [];
+  
+  % options
+  if isempty(options.result_options)
+    options.result_options = {{}};
+  end
+  
+  % make sure there is one option cell array per function
+  if length(options.function_options) < length(options.result_functions)
+    % extend function_options with blank cells
+    options.function_options(length(options.function_options)+1:length(options.result_functions)) = {{}};
+  end
 end
 
 % convert func string to handle, or check length of cell array
@@ -394,6 +423,14 @@ for fInd = 1:nFunc % loop over function inputs
   else
     plotFnBool = ~isempty(regexpi(func2str(func), 'plot'));
   end
+  
+  % plot format
+  formatS = dsCheckOptions(options.function_options{fInd}, {'format',[],{'svg','jpg','eps','png','fig'}}, 0);
+  if isempty(formatS.format)
+    plotFormat = options.format;
+  else
+    plotFormat = formatS.format;
+  end
 
   % change result_file if varied_filename_flag
   if options.varied_filename_flag && isfield(data, 'varied')
@@ -440,7 +477,7 @@ for fInd = 1:nFunc % loop over function inputs
 
     % loop through results. all results may exist or need to be made during loop
     for iResult = 1:nResults
-      extension = ['.' options.format]; % '.svg'; % {.jpg,.svg}
+      extension = ['.' plotFormat]; % '.svg'; % {.jpg,.svg}
 
       if ~postHocBool % in sim
         % ensure extension is extension
@@ -699,7 +736,9 @@ function [data, studyinfo] = parseSrc(src, options, varargin)
 % - studydir and studyinfo: gest studyinfo, and if load_all_data_flag, loads data
 
 %% auto_gen_test_data_flag argin
+warning('off','catstruct:DuplicatesFound');
 options = catstruct(options, dsCheckOptions(varargin,{'auto_gen_test_data_flag',0,{0,1}},false));
+warning('on','catstruct:DuplicatesFound');
 if options.auto_gen_test_data_flag
   varargs = varargin;
   varargs{find(strcmp(varargs, 'auto_gen_test_data_flag'))+1} = 0;
@@ -842,10 +881,10 @@ if isfield(options, 'save_prefix') && ~isempty(options.save_prefix)
   prefix = options.save_prefix;
 else
   if plotFnBool
-    if isempty(options.function_options)
+    plot_options = options.function_options{fInd};
+    
+    if isempty(plot_options)
       plot_options = options;
-    else
-      plot_options = options.function_options{fInd};
     end
 
     fInd = regexp(options.result_file, 'plot(\d+)', 'tokens');
