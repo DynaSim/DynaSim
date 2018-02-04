@@ -154,7 +154,7 @@ end
 
 %% Parse options
 if (options.parfor_flag && ~options.load_all_data_flag)
-  dsVprintf(options, 'Since load_all_data_flag==0, setting parfor_flag==0 \n');
+  warning('Since load_all_data_flag==0, setting parfor_flag==0');
   options.parfor_flag = 0;
 end
 
@@ -871,13 +871,17 @@ function result = evalFnWithArgs(fInd, data, func, options, varargin)
 
 if strcmp(reportUI,'matlab')
   p = gcp('nocreate');
+  
+  if options.parfor_flag && isempty(p)
+    warning('Only does parfor mode if parfor_flag is set and parpool is already running to avoid unnecessary overhead.')
+  end
 end
 
 try
   make_invis_bool = options.save_results_flag && (options.close_fig_flag ~= 0);
   
   if isempty(options.function_options)
-    % Only do parfor mode if parfor_flag is set and parpool is already running. Otherwise, this will add unncessary overhead.
+    % Only do parfor mode if parfor_flag is set and parpool is already running. Otherwise, this will add unnecessary overhead.
     if options.parfor_flag && ~isempty(p)
       parfor dInd = 1:length(data)
         result(dInd) = feval(func,data(dInd));
