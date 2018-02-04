@@ -536,6 +536,10 @@ for fInd = 1:nFunc % loop over function inputs
         if (options.save_results_flag && (options.close_fig_flag ~= 0)) || options.close_fig_flag==1
           close(thisResult)
         end
+        
+        if ~options.load_all_data_flag
+          data = [];
+        end
       end %nResults
     end %save_results_flag
   else % analysis function returned derived data
@@ -639,7 +643,11 @@ for fInd = 1:nFunc % loop over function inputs
         end % if isempty(result)
         
         dsExportData(result, 'filename',fPath, 'result_flag',1, varargin{:});
-      end
+        
+        if ~options.load_all_data_flag
+          data = [];
+        end
+      end % nResults
     end % save_results_flag
   end % ishandle(result)
 end % fInd
