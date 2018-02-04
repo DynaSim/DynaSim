@@ -35,7 +35,9 @@ function [data,studyinfo,result] = dsSimulate(model,varargin)
 %     'overwrite_flag': whether to overwrite existing data and result files {0 or 1} (default: 0)
 %     'study_dir'     : relative or absolute path to output directory (default: current directory)
 %     'prefix'        : string to prepend to all output file names (default: 'study')
-%     'disk_flag'     : whether to write to disk during simulation instead of storing in memory {0 or 1} (default: 0)
+%     'disk_flag'     : whether to write to disk during simulation instead of
+%                       storing in memory {0 or 1} (default: 0) Still imports
+%                       into memory after finishing sim for result functions.
 %     'precision'     : {'single','double'} precision of simulated data saved to disk (default: 'single')
 %
 %   options for cluster computing:
@@ -273,7 +275,7 @@ options=dsCheckOptions(varargin,{...
   'matCompatibility_flag',1,{0,1},...  % whether to save mat files in compatible mode, vs to prioritize > 2GB VARs
   'save_data_flag',0,{0,1},...  % whether to save simulated data
   'save_results_flag',0,{0,1},...  % whether to save results from simulated data
-  'project_dir',pwd,[],...
+  'project_dir',pwd,[],... % only used to build default study_dir in dsSetupStudy if study_dir not given
   'study_dir',[],[],... % study directory
   'prefix','study',[],... % prefix prepended to all output files
   'overwrite_flag',0,{0,1},... % whether to overwrite existing data
@@ -338,24 +340,26 @@ if options.mex_flag && ~options.reduce_function_calls_flag
   varargin = modify_varargin(varargin, 'reduce_function_calls_flag', options.reduce_function_calls_flag);
 end
 
+
 % Make sure that data is either saved to disk, saved to variable, or plotted
-if (nargout==0 || options.cluster_flag) && ~options.save_data_flag && ~options.save_results_flag && isempty(options.plot_functions)
-  if ~isempty(options.analysis_functions)
-    dsVprintf(options, 'Setting ''save_results_flag'' to 1 since output from dsSimulate is not stored in a variable and analysis functions specified.\n')
-    options.save_results_flag = 1;
-    varargin = modify_varargin(varargin, 'save_results_flag', options.save_results_flag);
-  else
-    dsVprintf(options, 'Setting ''save_data_flag'' to 1 since output from dsSimulate is not stored in a variable and no plot or analysis functions specified.\n')
-    options.save_data_flag = 1;
-    varargin = modify_varargin(varargin, 'save_data_flag', options.save_data_flag);
-  end
+% 1) If (nargout==0 or cluster) and no analysis or plots, need save_data_flag
+if (nargout==0 || options.cluster_flag) && isempty(options.plot_functions) && isempty(options.analysis_functions) && ~options.save_data_flag
+  dsVprintf(options, 'Setting ''save_data_flag'' to 1 since output from dsSimulate is not stored in a variable and no plot or analysis functions specified.\n')
+  options.save_data_flag = 1;
 end
 
-if options.cluster_flag && ~options.save_data_flag
-  dsVprintf(options, 'Setting ''save_results_flag'' to 1 for storing results of batch jobs for later access.\n');
+% 2) If nargout<3 and analysis, need save_results_flag
+if nargout<3 && ~isempty(options.analysis_functions) && ~options.save_results_flag
+  dsVprintf(options, 'Setting ''save_results_flag''=1 since results not stored in a variable and analysis functions specified.\n')
   options.save_results_flag = 1;
-  varargin = modify_varargin(varargin, 'save_results_flag', options.save_results_flag);
 end
+
+% 3) If cluster and analysis or plots, need save_results_flag
+if options.cluster_flag && (~isempty(options.plot_functions) || ~isempty(options.analysis_functions)) && ~options.save_results_flag
+  dsVprintf(options, 'Setting ''save_results_flag''=1 for storing results of batch jobs for later access.\n');
+  options.save_results_flag = 1;
+end
+
 
 if any(strcmp(options.solver, {'ode23','ode45','ode113','ode15s','ode23s','ode23t','ode23tb'}))
   matlabSolverBool = 1;
@@ -553,26 +557,20 @@ end
 %% 1.3 Handle parallel simulations.
 %% 1.3.1 Manage cluster computing.
 % whether to write jobs for distributed processing on cluster
-if options.cluster_flag
+if options.cluster_flag % will return
   % add to model any parameters in 'vary' not explicit in current model
   %   approach: use dsApplyModifications(), it does that automatically
   for i = 1:length(modifications_set)
     if ~isempty(modifications_set{i}) && ~strcmp(modifications_set{i}{2},'mechanism_list') && ~strcmp(modifications_set{i}{2},'equations')
       model = dsApplyModifications(model,modifications_set{i}, varargin{:});
-      break
+      break;
     end
   end
+  
   keyvals = dsOptions2Keyval(options);
+  
+  % submit jobs
   studyinfo = dsCreateBatch(model,modifications_set,'simulator_options',options,'process_id',options.sim_id,keyvals{:});
-
-  if options.one_solve_file_flag
-    % copy params.mat from project_dir to batchdirs
-    param_file_path = fullfile(options.project_dir, options.study_dir, 'solve','params.mat');
-    [~,home]=system('echo $HOME');
-    batch_dir = fullfile(strtrim(home),'batchdirs',options.study_dir);
-    batch_param_file_path = fullfile(batch_dir,'params.mat');
-    [success,msg]=copyfile(param_file_path, batch_param_file_path);
-  end
 
   %if options.overwrite_flag==0
   % check status of study
@@ -589,8 +587,9 @@ if options.cluster_flag
   %% auto_gen_test_data_flag argout
   if options.auto_gen_test_data_flag
     if isfield(data, 'simulator_options')
-      data= rmfield(data, 'simulator_options'); % specific to this function
+      data = rmfield(data, 'simulator_options'); % specific to this function
     end
+    
     if ~isempty(studyinfo)
       studyinfo = []; % specific to this function
     end
@@ -625,13 +624,13 @@ if options.cluster_flag
   end
 
   return;
-end
+end % if options.cluster_flag
 
 %% 1.3.2 Manage parallel computing on local machine.
 % TODO: debug local parallel sims, doesn't seem to be working right...
 % (however SCC cluster+parallel works)
 
-if options.parfor_flag
+if options.parfor_flag % will return after nested dsSimulate calls
   % Disable for Octave and return error
    if ~strcmp(reportUI,'matlab')
      warning('Info for GNU Octave users: Do not expect any speed up by using DynaSim''s ''parfor_flag''. In GNU Octave, parfor loops currently default to regular for loops.');
@@ -695,8 +694,9 @@ if options.parfor_flag
   if ~strcmp(reportUI,'matlab')
     disp('   Info for GNU Octave users: Do not expect any speed up by using DynaSim''s ''parfor_flag''. In GNU Octave, parfor loops currently default to regular for loops.');
   end
+  
   parfor sim=1:length(modifications_set)
-    data(sim)=dsSimulate(model, 'modifications', modifications_set{sim}, keyvals{:},...
+    data(sim) = dsSimulate(model, 'modifications', modifications_set{sim}, keyvals{:},...
         'random_seed',seeds{sim},...                                      % Use unique random seed for each sim if shuffle
         'studyinfo', studyinfo, 'sim_id',sim, 'in_parfor_loop_flag', 1);  % My modification; now specifies a separate study directory for each sim.
     %disp(sim);
@@ -726,8 +726,9 @@ if options.parfor_flag
   %% auto_gen_test_data_flag argout
   if options.auto_gen_test_data_flag
     if isfield(data, 'simulator_options')
-      data= rmfield(data, 'simulator_options'); % specific to this function
+      data = rmfield(data, 'simulator_options'); % specific to this function
     end
+    
     if ~isempty(studyinfo)
       studyinfo = []; % specific to this function
     end
@@ -753,6 +754,7 @@ if options.parfor_flag
     if isfield(data, 'simulator_options')
       data= rmfield(data, 'simulator_options'); % specific to this function
     end
+    
     if ~isempty(studyinfo)
       studyinfo = [];
     end
@@ -761,8 +763,8 @@ if options.parfor_flag
     renameMexFilesForUnitTesting(); % rename mex files for unit testing
   end
 
-  return
-end %parfor_flag
+  return;
+end % if options.parfor_flag
 
 %% 1.4 prepare study_dir and studyinfo if saving data
 if isempty(options.studyinfo)
@@ -886,14 +888,14 @@ end % in_parfor_loop_flag
     %% 1.5 loop over simulations, possibly varying things
     base_model=model;
 
-    for sim=1:length(modifications_set)
+    for sim = 1:length(modifications_set)
       if ~strcmp(pwd,cwd) % move back to original directory before potentially regenerating to make sure the model files used are the same
         cd(cwd);
       end
 
       % get index for this simulation
       if ~isempty(options.sim_id)
-        sim_ind=find([studyinfo.simulations.sim_id]==options.sim_id);
+        sim_ind = find([studyinfo.simulations.sim_id]==options.sim_id);
         sim_id=options.sim_id;
       else
         sim_ind=sim;
@@ -902,10 +904,10 @@ end % in_parfor_loop_flag
 
       if options.save_data_flag
         % check if output data already exists. load if so and skip simulation
-        data_file=studyinfo.simulations(sim_ind).data_file;
+        data_file = studyinfo.simulations(sim_ind).data_file;
         if exist(data_file,'file') && ~options.overwrite_flag
           fprintf('Loading data from %s\n',data_file); % Note: this is important, should always display
-          tmpdata=dsImport(data_file,'process_id',sim_id);
+          tmpdata = dsImport(data_file,'process_id',sim_id);
           update_data; % concatenate data structures across simulations
           continue; % skip to next simulation
         end
@@ -1002,14 +1004,17 @@ end % in_parfor_loop_flag
         %% Solve System
         if options.disk_flag  % ### data stored on disk during simulation ###
           sim_start_time=tic;
+          
           if ~options.one_solve_file_flag
             save(param_file,'p','-v7'); % save params immediately before solving
           end
-          csv_data_file=feval(fname);  % returns name of file storing the simulated data
-          duration=toc(sim_start_time);
+          
+          csv_data_file = feval(fname);  % returns name of file storing the simulated data
+          
+          duration = toc(sim_start_time);
 
           if nargout>0 || options.save_data_flag
-            tmpdata=dsImport(csv_data_file,'process_id',sim_id); % eg, data.csv
+            tmpdata = dsImport(csv_data_file,'process_id',sim_id); % eg, data.csv
           end
         else                  % ### data stored in memory during simulation ###
           % create list of output variables to capture
@@ -1039,10 +1044,10 @@ end % in_parfor_loop_flag
 
           % feval solve file
           if ~options.one_solve_file_flag
-            [outputs{1:length(output_variables)}]=feval(fname);
-          else
+            [outputs{1:length(output_variables)}] = feval(fname);
+          else % one_solve_file_flag
             % pass sim_id for slicing params
-            [outputs{1:length(output_variables)}]=feval(fname, sim_id);
+            [outputs{1:length(output_variables)}] = feval(fname, sim_id);
           end
 
           duration=toc(sim_start_time);
@@ -1050,8 +1055,8 @@ end % in_parfor_loop_flag
 
           % prepare DynaSim data structure
           % organize simulated data in data structure (move time to last)
-          tmpdata.labels=output_variables([2:length(output_variables)-num_fixed_variables 1]);
-          for i=1:length(output_variables)
+          tmpdata.labels = output_variables([2:length(output_variables)-num_fixed_variables 1]);
+          for i = 1:length(output_variables)
             if ~isempty(model.fixed_variables) && isfield(model.fixed_variables,output_variables{i})
               % store fixed variables in model substructure
               model.fixed_variables.(output_variables{i})=outputs{i};
@@ -1062,17 +1067,21 @@ end % in_parfor_loop_flag
 
             outputs{i}=[]; % clear assigned outputs from memory
           end
-        end
+        end % if options.disk_flag
+        
 
         dsVprintf(options, 'Elapsed time: %g seconds.\n',duration);
 
         % add metadata to tmpdata
-        tmpdata.simulator_options=options; % store simulator controls
+        tmpdata.simulator_options = options; % store simulator controls
 
         if options.store_model_flag==1  % optionally store the simulated model
-          tmpdata.model=model;
+          tmpdata.model = model;
         end
-      end
+        
+      end % else for if isa(options.experiment,'function_handle')
+      
+      % Note: tmpdata is from a single sim in for loop
 
       % create 'vary' field in data to store varied values
       tmpdata = dsModifications2Vary(tmpdata,options.modifications,options,modifications_set,sim);
@@ -1092,32 +1101,31 @@ end % in_parfor_loop_flag
 
       % do post-simulation analysis and plotting
       if ~isempty(options.analysis_functions) || ~isempty(options.plot_functions)
-        if options.save_data_flag || options.save_results_flag
+        if options.save_results_flag
           % do analysis and plotting while saving results
           siminfo=studyinfo.simulations(sim_ind);
+          
           for f=1:length(siminfo.result_functions)
-            tmpresult=dsAnalyze(tmpdata,siminfo.result_functions{f},'result_file',siminfo.result_files{f},'save_data_flag',1,'save_results_flag',1,siminfo.result_options{f}{:},'parfor_flag',options.parfor_flag);
+            tmpresult = dsAnalyze(tmpdata, siminfo.result_functions{f},'result_file',siminfo.result_files{f},'save_data_flag',1,'save_results_flag',1,siminfo.result_options{f}{:},'parfor_flag',options.parfor_flag, 'in_sim_flag',1);
 
             % since the plots are saved, close all generated figures
-            if all(ishandle(tmpresult))
+            if all(ishandle(tmpresult)) % FIXME: dsPlot2 doesnt return handles, so won't close
               close(tmpresult);
+            elseif isstruct(tmpresult) && isfield(tmpresult,'hcurr') % for plotData2 based on dsAnalyze line 281
+              close(tmpresult.hcurr);
             end
           end
         else
           % do analysis and plotting without saving results
           if ~isempty(options.analysis_functions) && nargoutmain > 2
-            for f=1:length(options.analysis_functions)
-              tmpresult=dsAnalyze(tmpdata,options.analysis_functions{f},'result_file',[],'save_data_flag',0,'save_results_flag',options.save_results_flag,options.analysis_options{f}{:},'parfor_flag',options.parfor_flag);
-            end
+            dsAnalyze(tmpdata, options.analysis_functions, 'result_file',[], 'save_data_flag',0, 'save_results_flag',options.save_results_flag, 'function_options',options.analysis_options, 'parfor_flag',options.parfor_flag, 'in_sim_flag',1);
           end
 
           if ~isempty(options.plot_functions)
-            for f=1:length(options.plot_functions)
-              dsAnalyze(tmpdata,options.plot_functions{f},'result_file',[],'save_data_flag',0,'save_results_flag',options.save_results_flag,options.plot_options{f}{:},'parfor_flag',options.parfor_flag);
-            end
+            dsAnalyze(tmpdata, options.plot_functions, 'result_file',[], 'save_data_flag',0, 'save_results_flag',options.save_results_flag, 'function_options',options.plot_options, 'parfor_flag',options.parfor_flag, 'in_sim_flag',1);
           end
-        end
-      end
+        end % if options.save_data_flag || options.save_results_flag
+      end % if ~isempty(options.analysis_functions) || ~isempty(options.plot_functions)
 
       if nargoutmain>0
         update_data; % concatenate data structures across simulations
@@ -1126,7 +1134,7 @@ end % in_parfor_loop_flag
       if nargoutmain>2
         update_result;
       end
-    end % end loop over sims
+    end % for sim = 1:length(modifications_set)
 
     cleanup('success');
   end %tryfn

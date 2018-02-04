@@ -78,6 +78,7 @@ if isempty(studyinfo)
       id=MIN_LOAD_ID; % value greater than the max # of batch processes (i.e., greater than the max process ID)
     end
   end
+  
   if ~exist(study_file,'file')
     error('studyinfo.mat file not found: %s',study_file);
   end
