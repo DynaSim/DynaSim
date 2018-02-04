@@ -124,7 +124,7 @@ if options.save_data_flag || options.save_results_flag || options.parfor_flag
 %     mkdir(models_dir);
 %   end
 
-  % create data dir if it doesn't exist and saving model
+  % create data dir if it doesn't exist
   data_dir = fullfile(options.study_dir,'data');
   if ~isdir(data_dir)
     if options.verbose_flag
@@ -132,6 +132,16 @@ if options.save_data_flag || options.save_results_flag || options.parfor_flag
     end
     mkdir(data_dir);
   end
+  
+  % create results dir if it doesn't exist
+  results_dir = fullfile(options.study_dir,'results');
+  if ~isdir(results_dir)
+    if options.verbose_flag
+      fprintf('Creating results directory: %s\n',results_dir);
+    end
+    mkdir(results_dir);
+  end
+
 
   % create figure dir if it doesn't exist and is needed
   if ~isempty(options.plot_functions)
@@ -150,23 +160,26 @@ if options.save_data_flag || options.save_results_flag || options.parfor_flag
     if length(studyinfo.simulations)<k || isempty(studyinfo.simulations(k).status)
       studyinfo.simulations(k).sim_id=k;
       studyinfo.simulations(k).modifications=modifications_set{k};
+      
+      % set file names for data (in data_dir)
       fname=[options.prefix '_sim' num2str(k) '_data.mat'];
       studyinfo.simulations(k).data_file=fullfile(data_dir,fname);
+      
       fname=[options.prefix '_sim' num2str(k) '_model.mat'];
       %studyinfo.simulations(k).modified_model_file=fullfile(models_dir,fname);
       studyinfo.simulations(k).status='initialized';
 
-      % set file names for analysis results
+      % set file names for analysis results (in results_dir)
       for kk = 1:length(options.analysis_functions)
         studyinfo.simulations(k).result_functions{end+1} = options.analysis_functions{kk};
         studyinfo.simulations(k).result_options{end+1} = options.analysis_options{kk};
 
         fname = [options.prefix '_sim' num2str(k) '_analysis' num2str(kk) '_' func2str(options.analysis_functions{kk}) '.mat'];
-        studyinfo.simulations(k).result_files{end+1} = fullfile(data_dir,fname);
+        studyinfo.simulations(k).result_files{end+1} = fullfile(results_dir,fname);
       end
 
       % set files names for saved plots (in plot_dir)
-      for kk=1:length(options.plot_functions)
+      for kk = 1:length(options.plot_functions)
         studyinfo.simulations(k).result_functions{end+1}=options.plot_functions{kk};
         studyinfo.simulations(k).result_options{end+1}=options.plot_options{kk};
         fname=[options.prefix '_sim' num2str(k) '_plot' num2str(kk) '_' func2str(options.plot_functions{kk})];

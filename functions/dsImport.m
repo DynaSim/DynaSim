@@ -1,9 +1,10 @@
-function [data,studyinfo] = dsImport(file,varargin)
+function [data,studyinfo] = dsImport(src,varargin)
 %DSIMPORT - load data into DynaSim formatted data structure.
 %
 % Usage:
 %   [data,studyinfo] = dsImport(data_file)
 %   [data,studyinfo] = dsImport(studyinfo)
+%   [data,studyinfo] = dsImport(study_dir) % containing studyinfo.mat
 %   data = dsImport(data_file)
 %
 % Inputs:
@@ -31,7 +32,7 @@ function [data,studyinfo] = dsImport(file,varargin)
 %       [data.varied]         : list of varied model components
 %       [data.results]        : list of derived data sets created by post-processing
 %   - studyinfo: DynaSim studyinfo structure (see CheckStudyinfo)
-%     Note: if data is missing, studyinfo.simulations will only show found data
+%       Note: if data is missing, studyinfo.simulations will only show found data
 %
 % Notes:
 %   - NOTE 1: CSV file structure assumes CSV file contains data organized
@@ -73,6 +74,7 @@ options=dsCheckOptions(varargin,{...
   'time_limits',[],[],...
   'variables',[],[],...
   'simIDs',[],[],...
+  'as_cell',0,{0,1},... % output as cell array instead of structure array
   'auto_gen_test_data_flag',0,{0,1},...
   },false);
 
@@ -81,7 +83,7 @@ if options.auto_gen_test_data_flag
   varargs = varargin;
   varargs{find(strcmp(varargs, 'auto_gen_test_data_flag'))+1} = 0;
   varargs(end+1:end+2) = {'unit_test_flag',1};
-  argin = [{file}, varargs]; % specific to this function
+  argin = [{src}, varargs]; % specific to this function
 end
 
 if ischar(options.variables)
@@ -89,22 +91,23 @@ if ischar(options.variables)
 end
 
 % check if input is a DynaSim study_dir or path to studyinfo
-if ischar(file)
-  if isdir(file) % study directory
-    study_dir = file;
-    clear file
+if ischar(src)
+  if isdir(src) % study directory
+    study_dir = src;
     file.study_dir = study_dir;
-  elseif strfind(file, 'studyinfo')
-    filePath = fileparts2(file);
+  elseif strfind(src, 'studyinfo') %#ok<STRIFCND>
+    filePath = fileparts2(src);
     if isempty(filePath)
       filePath = pwd;
     end
     study_dir = filePath;
-    clear file
     file.study_dir = study_dir;
+  else
+    file = src; % path to data file
   end
 end
 
+%% studyinfo input
 if isstruct(file) && isfield(file,'study_dir')
   % "file" is a studyinfo structure.
   % retrieve most up-to-date studyinfo structure from studyinfo.mat file
@@ -125,9 +128,9 @@ if isstruct(file) && isfield(file,'study_dir')
 
   if ~all(success)
     % convert original absolute paths to paths relative to study_dir
-    for i = 1:length(data_files)
-      [~,fname,fext] = fileparts2(data_files{i});
-      data_files{i} = fullfile(file.study_dir,'data',[fname fext]);
+    for iFile = 1:length(data_files)
+      [~,fname,fext] = fileparts2(data_files{iFile});
+      data_files{iFile} = fullfile(file.study_dir,'data',[fname fext]);
     end
 
     success = cellfun(@exist,data_files)==2;
@@ -135,17 +138,20 @@ if isstruct(file) && isfield(file,'study_dir')
 
   data_files = data_files(success);
   sim_info = studyinfo.simulations(success);
+  if options.as_cell
+    sim_ids = [studyinfo.simulations(success).sim_id];
+  end
   studyinfo.simulations = studyinfo.simulations(success); % remove missing data
-
+  
   % load each data set recursively
   keyvals = dsOptions2Keyval(options);
   num_files = length(data_files);
 
-  for i = 1:num_files
-    fprintf('loading file %g/%g: %s\n',i,num_files,data_files{i});
-    tmp_data=dsImport(data_files{i},keyvals{:});
+  for iFile = 1:num_files
+    fprintf('loading file %g/%g: %s\n',iFile,num_files,data_files{iFile});
+    tmp_data=dsImport(data_files{iFile},keyvals{:});
     num_sets_per_file=length(tmp_data);
-    modifications=sim_info(i).modifications;
+    modifications=sim_info(iFile).modifications;
     
     if ~isfield(tmp_data,'varied') && ~isempty(modifications)
     % add varied info
@@ -161,20 +167,32 @@ if isstruct(file) && isfield(file,'study_dir')
         end
       end
     end
+    
+    if options.as_cell
+      this_sim_id = sim_ids(iFile);
+    end
 
     % store this data
-    if i==1
-      total_num_sets=num_sets_per_file*num_files;
+    if iFile == 1
+      total_num_sets = num_sets_per_file * num_files;
       set_indices=0:num_sets_per_file:total_num_sets-1;
 
       % preallocate full data matrix based on first data file
-      data(1:total_num_sets)=tmp_data(1);
-%       data(1:length(data_files))=tmp_data;
-%     else
-%       data(i)=tmp_data;
+      if ~options.as_cell
+        data(1:total_num_sets) = tmp_data(1);
+      else
+        data = {};
+        data{this_sim_id} = tmp_data;
+      end
     end
+    
     % replace i-th set of data sets by these data sets
-    data(set_indices(i)+(1:num_sets_per_file))=tmp_data;
+    if ~options.as_cell
+      data(set_indices(iFile)+(1:num_sets_per_file)) = tmp_data;
+    else
+%       data{set_indices(iFile)+(1:num_sets_per_file)} = tmp_data;
+      data{this_sim_id} = tmp_data;
+    end
   end
 
   return;
@@ -182,6 +200,7 @@ else
   studyinfo=[];
 end
 
+%% cell of file paths input
 % check if input is a list of data files (TODO: eliminate duplicate code by
 % combining with the above recursive loading for studyinfo data_files)
 if iscellstr(file)
@@ -191,20 +210,30 @@ if iscellstr(file)
   keyvals=dsOptions2Keyval(options);
 
   % load each data set recursively
-  for i=1:length(data_files)
-    tmp_data=dsImport(data_files{i},keyvals{:});
+  for iFile=1:length(data_files)
+    tmp_data=dsImport(data_files{iFile},keyvals{:});
     % store this data
-    if i==1
+    if iFile==1
       % preallocate full data matrix based on first data file
-      data(1:length(data_files))=tmp_data;
+      if ~options.as_cell
+        data(1:length(data_files)) = tmp_data;
+      else
+        data = {};
+        data{1} = tmp_data;
+      end
     else
       % replace i-th data element by this data set
-      data(i)=tmp_data;
+      if ~options.as_cell
+        data(iFile)=tmp_data;
+      else
+        data{iFile}=tmp_data;
+      end
     end
   end
   return;
 end
 
+%% char file path input
 if ischar(file)
   [~,~,ext]=fileparts2(file);
   switch lower(ext)
@@ -246,8 +275,8 @@ if ischar(file)
         data.labels=labels;
 
         % load state variables and monitors
-        for i=1:length(labels)
-          data.(labels{i})=obj.(labels{i})(time_indices,:);
+        for iLabel=1:length(labels)
+          data.(labels{iLabel})=obj.(labels{iLabel})(time_indices,:);
         end
 
         data.time=time(time_indices);
@@ -260,8 +289,8 @@ if ischar(file)
         if ismember('varied',varlist)
           varied=obj.varied;
           data.varied=varied;
-          for i=1:length(varied)
-            data.(varied{i})=obj.(varied{i});
+          for iVaried=1:length(varied)
+            data.(varied{iVaried})=obj.(varied{iVaried});
           end
         end
 
@@ -273,8 +302,8 @@ if ischar(file)
           data.results=results;
 
           % load results
-          for i=1:length(results)
-            data.(results{i})=obj.(results{i})(time_indices,:);
+          for iResult=1:length(results)
+            data.(results{iResult})=obj.(results{iResult})(time_indices,:);
           end
         end
       end

@@ -57,6 +57,7 @@ options=dsCheckOptions(varargin,{...
   'one_solve_file_flag',0,{0,1},... % use only 1 solve file of each type, but can't vary mechs yet
   'solver','rk4',{'euler','rk1','rk2','rk4','modified_euler','rungekutta','rk','ode23','ode45',...
     'ode1','ode2','ode3','ode4','ode5','ode8','ode113','ode15s','ode23s','ode23t','ode23tb'},... % DynaSim and built-in Matlab solvers
+  'study_dir',[],[],... % for one_solve_file_flag
   'auto_gen_test_data_flag',0,{0,1},...
   'unit_test_flag',0,{0,1},...
   },false);
@@ -98,6 +99,16 @@ end
 
 %% create base solve_file (m- or MEX-file)
 solve_file = dsGetSolveFile(base_model,studyinfo,options.simulator_options);
+  % Note: also creates 'params.mat' file
+
+% copy params.mat from study_dir to batchdirs if one_solve_file_flag
+if options.one_solve_file_flag
+  param_file_path = fullfile(options.study_dir, 'solve','params.mat');
+  [~,home]=system('echo $HOME');
+  batch_dir = fullfile(strtrim(home),'batchdirs',options.study_dir);
+  batch_param_file_path = fullfile(batch_dir,'params.mat');
+  [success,msg]=copyfile(param_file_path, batch_param_file_path);
+end
 
 %% add appropriate MEX extension if compiled
 %   NOTE: the extension depends on whether a 32-bit or 64-bit machine is used
@@ -416,6 +427,7 @@ if isempty(result)
   fprintf('Jobs NOT submitted to cluster queue.\n');
 else % on cluster with qsub
   % submit jobs (e.g., fScripjobs_memlimit batch_dir 32G)
+  
   % check status of study
   [~,s]=dsMonitorStudy(studyinfo.study_dir,'verbose_flag',0);
 
@@ -556,6 +568,7 @@ end
 
     [~, job_filename] = fileparts(job_file); %remove path and extension
 
+    
     if ~options.one_solve_file_flag
       % function declaration
       fprintf(fjob, 'function %s\n\n', job_filename);
@@ -574,8 +587,9 @@ end
 
       % set IDs of simulations to run
       fprintf(fjob,'SimIDs = simIDstart:min(simIDlast,simIDstart+simIDstep-1);\n');
-    end
+    end % if ~options.one_solve_file_flag
 
+    
     % add paths
     for p=1:length(addpaths)
       if ~isempty(addpaths{p})
@@ -595,13 +609,13 @@ end
 
       % use parfor loop
       fprintf(fjob,'else\n');
-      fprintf(fjob,'  disp(''   Info for GNU Octave users: Do not expect any speed up by using DynaSims "parfor_flag". In GNU Octave, parfor loops currently default to regular for loops.'');\n');
+      fprintf(fjob,'  disp(''   For GNU Octave users: Do not expect any speed up by using DynaSims "parfor_flag". In GNU Octave, parfor loops currently default to regular for loops.'');\n');
       fprintf(fjob,'end\n');
       fprintf(fjob,'parfor s=1:length(SimIDs)\n');
     else
       % use for loop
       fprintf(fjob,'for s=1:length(SimIDs)\n');
-    end
+    end % if options.parfor_flag
 
     fprintf(fjob,'\tSimID=SimIDs(s);\n');
 
@@ -637,7 +651,7 @@ end
     fprintf(fjob,'\t\tfprintf(''-----------------------------------------------------\\n'');\n');
     fprintf(fjob,'\t\tdata=dsSimulate(studyinfo.base_model,''modifications'',siminfo.modifications,''studyinfo'',studyinfo,''sim_id'',SimID,keyvals{:});\n');
     fprintf(fjob,'\t\tfor i=1:length(siminfo.result_functions)\n');
-    fprintf(fjob,'\t\t\tdsAnalyze(data,siminfo.result_functions{i},''result_file'',siminfo.result_files{i},''save_data_flag'',1,siminfo.result_options{i}{:});\n');
+    fprintf(fjob,'\t\t\tdsAnalyze(data, siminfo.result_functions{i}, ''result_file'',siminfo.result_files{i}, ''save_data_flag'',1, siminfo.result_options{i}{:}, ''in_sim_flag'',1);\n');
     fprintf(fjob,'\t\tend\n');
 
     % add error handling
@@ -676,7 +690,7 @@ end
       thisFile = studyinfoFiles{k};
       delete(thisFile)
     end
-  end
+  end % removeStudyinfo
 
 end % main fn
 

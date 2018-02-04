@@ -49,9 +49,10 @@ function varargout = plot2svg(filename, id, debug, legendicons, clippingmode, fi
   if nargout == 1
     varargout = {0};
   end
-  % disp(['   Matlab/Octave to SVG converter version ' progversion ', Juerg Schwizer (converter@bluewin.ch).'])
-  disp(['   Forked FIG to SVG converter version ' progversion ', Salva Ardid (sardid@bu.edu).'])
-  disp('   Most credit to Juerg Schwizer (converter@bluewin.ch).')
+
+  % Forked FIG to SVG converter version ' progversion ', Salva Ardid (sardid@bu.edu).
+  % Most credit to Juerg Schwizer (converter@bluewin.ch).
+  
   if strcmp(PLOT2SVG_globals.UI,'octave')
     PLOT2SVG_globals.octave = true;
     % disp('   Info: PLOT2SVG runs in Octave mode.')
