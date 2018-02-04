@@ -179,7 +179,7 @@ if options.save_data_flag || options.save_results_flag || options.parfor_flag
       end
 
       % set files names for saved plots (in plot_dir)
-      for kk=1:length(options.plot_functions)
+      for kk = 1:length(options.plot_functions)
         studyinfo.simulations(k).result_functions{end+1}=options.plot_functions{kk};
         studyinfo.simulations(k).result_options{end+1}=options.plot_options{kk};
         fname=[options.prefix '_sim' num2str(k) '_plot' num2str(kk) '_' func2str(options.plot_functions{kk})];

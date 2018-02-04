@@ -503,11 +503,9 @@ if ~isempty(options.plot_functions)
   end
 
   % make sure there is one option cell array per plot function
-  if length(options.plot_options)==1 && length(options.plot_functions)>1
-    % copy options for each plot function
-    options.plot_options=repmat(options.plot_options,[1 length(options.plot_functions)]);
-  elseif length(options.plot_options) ~= length(options.plot_functions)
-    error('there must be one option cell array per plot function.');
+  if length(options.plot_options) < length(options.plot_functions)
+    % extend plot_options with blank cells
+    options.plot_options(length(options.plot_options)+1:length(options.plot_functions)) = {{}};
   end
 end
 

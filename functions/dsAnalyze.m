@@ -375,7 +375,7 @@ for fInd = 1:nFunc % loop over function inputs
             end
           else
             if ~strcmp(orig_ext, extension) %check for .mat extension
-              fPath = [parentPath filename extension];
+              fPath = fullfile(parentPath, [filename extension]);
             end
           end
           thisResult = result;
