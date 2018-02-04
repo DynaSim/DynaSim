@@ -10,7 +10,7 @@ function result = dsAnalyze(src,varargin)
 %   result = AnalyzeData(data,func,'option1',value1,...) % pass data or datafile name
 %   result = AnalyzeData(studyinfo,func,'option1',value1,...) % pass studyinfo struct
 %   result = AnalyzeData(study_dir,func,'option1',value1,...) % pass study_dir containing studyinfo.mat
-%  2) dsSimluate Style: implicit func through options.analysis_functions/options.plot_functions
+%  2) dsSimluate Style: implicit func through options.analysis_functions/options.plot_functions/options.result_functions
 %   result = AnalyzeData(data,'option1',value1,...) % pass data or datafile name
 %   result = AnalyzeData(studyinfo,'option1',value1,...) % pass studyinfo struct
 %   result = AnalyzeData(study_dir,'option1',value1,...) % pass study_dir containing studyinfo.mat
@@ -22,7 +22,8 @@ function result = dsAnalyze(src,varargin)
 %     - study_dir: DynaSim study directory containing studyinfo.mat
 %   - func: function handle or cell array of function handles pointing to plot
 %           or analysis function(s). Should not contain case-insensitive string
-%           'plot' unless is a function that returns a figure handle for plotting.
+%           'plot' unless is a function that returns a figure handle for
+%           plotting, in which case it must have 'plot' string.
 %   - options: (key/value pairs are passed on to the analysis function)
 %     'save_results_flag'   : whether to save result {0 or 1} (default: 0)
 %     'matCompatibility_flag': whether to save mat files in compatible mode, vs to prioritize > 2GB VARs {0 or 1} (default: 1)
@@ -43,11 +44,17 @@ function result = dsAnalyze(src,varargin)
 %                             the corresponding function cell. if only passing a
 %                             single func, can specificy function options as
 %                             key,val list as varargin for AnalyzeData
-%     2)
-%     'analysis_functions': cell array of analysis function handles
-%     'analysis_options'  : cell array of option cell arrays {'option1',value1,...}
-%     'plot_functions'    : cell array of plot function handles
-%     'plot_options'      : cell array of option cell arrays {'option1',value1,...}
+%     2.1)
+%     'analysis_functions'  : cell array of analysis function handles
+%     'analysis_options'    : cell array of option cell arrays {'option1',value1,...}
+%     'plot_functions'      : cell array of plot function handles
+%     'plot_options'        : cell array of option cell arrays {'option1',value1,...}
+%     2.2)
+%     'result_functions'    : cell array of function handles. Function names should
+%                             not contain case-insensitive string 'plot' unless they
+%                             are functions that returns a figure handle for plotting,
+%                             in which case it must have 'plot' string.
+%     'function_options'    : cell array of option cell arrays {'option1',value1,...}
 %
 %     'load_all_data_flag'  : whether to load all the data in studyinfo
 %                             at once {0 or 1} (default: 0)
@@ -71,6 +78,31 @@ function result = dsAnalyze(src,varargin)
 %   - studyinfo with load_all_data_flag==0
 %   - studyinfo with load_all_data_flag==1
 
+% Dev note: calls to this fn
+% - from dsSimulate:
+%     if options.save_data_flag || options.save_results_flag
+%       siminfo=studyinfo.simulations(sim_ind);
+%
+%       for f=1:length(siminfo.result_functions)
+%         tmpresult=dsAnalyze(tmpdata,siminfo.result_functions{f},'result_file',siminfo.result_files{f},'save_data_flag',1,'save_results_flag',1,siminfo.result_options{f}{:},'parfor_flag',options.parfor_flag);
+% 
+%         % since the plots are saved, close all generated figures
+%         if all(ishandle(tmpresult))
+%           close(tmpresult);
+%         end
+%       end
+%     else
+%
+%     if ~isempty(options.analysis_functions) && nargoutmain > 2
+%       dsAnalyze(tmpdata, options.analysis_functions, 'result_file',[], 'save_data_flag',0, 'save_results_flag',options.save_results_flag, 'function_options',options.analysis_options, 'parfor_flag',options.parfor_flag);
+%     end
+% 
+%     if ~isempty(options.plot_functions)
+%       dsAnalyze(tmpdata, options.plot_functions, 'result_file',[], 'save_data_flag',0, 'save_results_flag',options.save_results_flag, 'function_options',options.plot_options, 'parfor_flag',options.parfor_flag);
+%     end
+% - from cluster job:
+%     dsAnalyze(data,siminfo.result_functions{i},'result_file',siminfo.result_files{i},'save_data_flag',1,siminfo.result_options{i}{:});
+
 %% localfn output
 if ~nargin
   output = localfunctions; % output var name specific to this fn
@@ -87,6 +119,7 @@ end
 
 %% Check inputs
 options=dsCheckOptions(varargin,{...
+  'in_sim_flag',0,{0,1},...
   'result_file','result',[],...
   'save_results_flag',0,{0,1},...
   'matCompatibility_flag',1,{0,1},...  % whether to save mat files in compatible mode, vs to prioritize > 2GB VARs
@@ -95,6 +128,7 @@ options=dsCheckOptions(varargin,{...
   'varied_filename_flag',0,{0,1},...
   'plot_type','waveform',{'waveform','rastergram','raster','power','rates','imagesc','heatmapFR','heatmap_sortedFR','meanFR','meanFRdens','FRpanel'},...
   'save_prefix',[],[],...
+  'result_functions',[],[],...
   'function_options',{},[],...
   'simIDs',[],[],...
   'load_all_data_flag',0,{0,1},...
@@ -106,6 +140,7 @@ options=dsCheckOptions(varargin,{...
   'analysis_options',[],[],...
   'plot_functions',[],[],...
   'plot_options',[],[],...
+  'close_fig_flag',-1,{0,1},... % close figures as they are created. can be specified for all figs or for individual fig using plot_options. -1 means not set by user.
   'auto_gen_test_data_flag',0,{0,1},...
   },false);
 
@@ -117,6 +152,15 @@ if options.auto_gen_test_data_flag
   argin = [{src},{funcIn}, varargs]; % specific to this function
 end
 
+%% Parse options
+if (options.parfor_flag && ~options.load_all_data_flag)
+  dsVprintf(options, 'Since load_all_data_flag==0, setting parfor_flag==0 \n');
+  options.parfor_flag = 0;
+end
+
+if (options.load_all_data_flag && ~options.parfor_flag)
+  dsVprintf(options, 'Since load_all_data_flag==1, recommend setting parfor_flag==1 for speedup. \n');
+end
 
 %% Save data if no output is requested.
 if nargout < 1
@@ -139,9 +183,10 @@ if isempty(studyinfo)
   studyinfoBool = false;
 else
   studyinfoBool = true;
-  if ~isfield(studyinfo,'study_dir') || isempty(studyinfo.study_dir) || ~isdir(studyinfo.study_dir)
-    studyinfo.study_dir = pwd;
-  end
+end
+
+if ~isfield(studyinfo,'study_dir') || isempty(studyinfo.study_dir) || ~isdir(studyinfo.study_dir)
+  studyinfo.study_dir = pwd;
 end
 
 % Data at this point:
@@ -150,36 +195,108 @@ end
 
 % convert data to double precision before analysis
 dsVprintf(options, 'Converting data to double precision before analysis.\n')
-for j = 1:length(data)
-  for k = 1:length(data(j).labels)
-    fld = data(j).labels{k};
-    data(j).(fld) = double(data(j).(fld));
-  end
-end
+data = convertDoublePrecision(data);
+
+%% Parse fn
 
 % make fn fields into cells
 if ~isempty(options.plot_functions) || ~iscell(options.plot_functions)
   options.plot_functions = {options.plot_functions};
 end
+
 if ~isempty(options.analysis_functions) || ~iscell(options.analysis_functions)
   options.analysis_functions = {options.analysis_functions};
 end
 
 % make funcIn for dsSimulate Style
-if isempty(funcIn) && ( ~isempty(options.plot_functions) || ~isempty(options.analysis_functions) )
+if ~isempty(funcIn) % style 1
+  plotFnBoolVec = [];
+elseif ( ~isempty(options.plot_functions) || ~isempty(options.analysis_functions) ) % style 2.1
   funcIn = [options.plot_functions(:); options.analysis_functions(:)];
   plotFnBoolVec = false(size(funcIn));
   plotFnBoolVec(1:length(options.analysis_functions)) = true; % specify which fn were plot fn
-else
-  plotFnBoolVec = [];
+  
+  options.function_options = [options.plot_options(:); options.analysis_options(:)];
+elseif ~isempty(options.result_functions) % style 2.2
+  funcIn = options.result_functions;
 end
 
 % convert func string to handle, or check length of cell array
 [funcIn, nFunc] = parseFuncIn(funcIn);
 
-% check if postSim
-postSimBool = studyinfoBool || (length(data) > 1); % since length(data)==1 and no studyinfo with dsSimulate call. EAR: not sure about that.
+% check if postHoc (ie not from dsSimulate call)
+postHocBool = ~options.in_sim_flag;
 
+%% Handle existing results
+% Check to see if results files exist. Deal with overwriting them, or
+% increasing index number. Note: if use same fn name, assume its a new call so
+% increment index. Only overwrite if all functions are the same as original.
+if options.save_results_flag && postHocBool
+  if studyinfoBool
+    if ~isempty(studyinfo.simulations(1).result_functions)
+      oldFns = sort(cellfun(@func2str, studyinfo.simulations(1).result_functions, 'Uni',0));
+      
+      files = studyinfo.simulations(1).result_files;
+    end
+  else
+    files = lscell(studyinfo.study_dir);
+  end
+  
+  % get filename without extension or parent path
+  files = cellfun(@fileNameFileparts, files, 'Uni',0);
+  
+  % get lastPlotIndex
+  plotFiles = regexpi(files, '_plot(\d+)_(.+)', 'tokens');
+  plotFiles = [plotFiles{:}];
+  if ~isempty(plotFiles)
+    plotIndFn = cat(1, plotFiles{:});
+    
+    plotInds = cellfun(@str2double, plotIndFn(:,1));
+    
+    lastPlotIndex = max(plotInds);
+  else
+    lastPlotIndex = 0;
+  end
+  
+  % get lastAnalysisIndex
+  analysisFiles = regexpi(files, '_analysis(\d+)_(.+)', 'tokens');
+  analysisFiles = [analysisFiles{:}];
+  if ~isempty(analysisFiles)
+    analysisIndFn = cat(1, analysisFiles{:});
+    
+    analysisInds = cellfun(@str2double, analysisIndFn(:,1));
+    
+    lastAnalysisIndex = max(analysisInds);
+  else
+    lastAnalysisIndex = 0;
+  end
+  
+  if ~studyinfoBool
+    oldFns = sort([analysisIndFn(:,2); plotIndFn(:,2)]);
+  end
+  
+  if options.overwrite_flag || (~isempty(plotFiles) || ~isempty(analysisFiles))
+    % check if all functions the same as old ones
+    newFns = sort(cellfun(@func2str, funcIn, 'Uni',0));
+    
+    if isempty(setdiff(oldFns, oldFns))
+      dsVprintf('Overwriting old results and plot function indicies in new folders starting at index 0.');
+      
+      lastPlotIndex = 0;
+      lastAnalysisIndex = 0;
+    else
+      dsVprintf('Not overwriting old results and plot function indicies in new folders since functions are not the same, so incrementing index.');
+    end
+  end
+else % ~postHocBool
+  % setting to avoid errors
+  lastPlotIndex = 0;
+  lastAnalysisIndex = 0;
+end % if options.save_results_flag && postHocBool
+
+%% Calc results
+plotFnInd = lastPlotIndex;
+analysisFnInd = lastAnalysisIndex;
 for fInd = 1:nFunc % loop over function inputs
   func = funcIn{fInd};
 
@@ -203,7 +320,7 @@ for fInd = 1:nFunc % loop over function inputs
   tstart = tic;
 
   %% Eval func
-  if length(data)==1 || postSimBool % Don't need to add check on load_all_data_flag, since if false data is empty.
+  if ~isempty(data)
     result = evalFnWithArgs(fInd, data, func, options, varargin{:});
   else
     result = [];
@@ -214,8 +331,10 @@ for fInd = 1:nFunc % loop over function inputs
     nResults = length(result);
   elseif ~isempty(data)
     nResults = length(data);
+  elseif studyinfoBool
+    nResults = length(studyinfo.simulations);
   else
-    nResults = length(siminfo.simulations);
+    error('Cannot determine nResults');
   end
 
   dsVprintf(options, '    Elapsed time: %g sec\n',toc(tstart));
@@ -223,46 +342,46 @@ for fInd = 1:nFunc % loop over function inputs
   % Dave: Not all plotting functions will return a plot handle. For
   % example, dsPlot2 returns a nested structure of figure, axis, and plot
   % handles. This command updates it.
-  if isstruct(result)
-    if isfield(result,'hcurr')
-      result = result.hcurr;
-    end
+  if isstruct(result) && isfield(result,'hcurr')
+    result = result.hcurr;
   end
 
   % determine if result is a plot handle or derived data
-  if all(ishandle(result)) || plotFnBool % analysis function returned a graphics handle or has plot in fn name
+  if all(ishandle(result)) || plotFnBool % analysis function returned a graphics handle or has plot in fn name or given in plot_functions field
     %% Plot Function
-
-    % will save plots else return main fn
+    % will save plots, else return main fn since plot already open
+    
+    plotFnInd = plotFnInd + 1;
+    
     if options.save_results_flag
       % loop through results. all results may exist or need to be made during loop
       for iResult = 1:nResults
         extension = ['.' options.format]; % '.svg'; % {.jpg,.svg}
 
-        if ~postSimBool % approx nResults == 1 && ~studyinfoBool % approx ~postSimBool
+        if ~postHocBool % in sim
           fName = [options.result_file extension];
-          fPath = fName;
+          fPath = [fName extension];
 
           thisResult = result(iResult);
-        elseif studyinfoBool
+        elseif studyinfoBool % posthoc with studyinfo
           simID = studyinfo.simulations(iResult).sim_id;
           prefix = func2str(func);
-          fName = [prefix '_sim' num2str(simID) '_plot' num2str(fInd) '_' func2str(func)];
+          fName = [prefix '_sim' num2str(simID) '_plot' num2str(plotFnInd) '_' func2str(func)];
 
-          if (postSimBool && ~options.load_all_data_flag)
-            data = loadDataFromSingleSim(simID, options, varargin);
+          if options.load_all_data_flag
+            thisResult = result(iResult);
+          else % load data
+            data = loadDataFromSingleSim(src, simID, options, varargin{:});
 
             %skip if no data
             if isempty(data)
-              dsVprintf(options, 'Skipping simID=%i since no data.\n', simID);
+              dsVprintf(options, '  Skipping simID=%i since no data.\n', simID);
               continue
             end
 
             % calc result for this data
-            thisResult = evalFnWithArgs(fInd, data, func, options, varargin);
-          else % (postSimBool && options.load_all_data_flag)
-            thisResult = result(iResult);
-          end
+            thisResult = evalFnWithArgs(fInd, data, func, options, varargin{:});
+          end % if ~options.load_all_data_flag
 
           % change result_file if varied_filename_flag
           if options.varied_filename_flag && isfield(data, 'varied')
@@ -270,35 +389,50 @@ for fInd = 1:nFunc % loop over function inputs
           end % varied_filename_flag
 
           % make fPath
-          fDir = fullfile(studyinfo.study_dir, 'postSimPlots');
+          fDir = fullfile(studyinfo.study_dir, 'postHocPlots');
           if ~exist(fDir,'dir')
             mkdir(fDir)
           end
-          fPath = fullfile(fDir,fName);
-        else % length(result)>1 and ~studyinfoBool
-          fName = [options.result_file '_page' num2str(iResult) extension];
-
-          % make fPath
-          fDir = fullfile(studyinfo.study_dir, 'postSimPlots');
-          if ~exist(fDir,'dir')
-            mkdir(fDir)
-          end
-          fPath = fullfile(fDir,fName);
-
+          fPath = fullfile(fDir,[fName extension]);
+        else  % posthoc without studyinfo
           thisResult = result(iResult);
-        end
+          simID = iResult;
+          
+          % make fName
+          if isfield(options, 'result_file') && ~isempty(options.result_file)
+            prefix = options.result_file;
+          else
+            prefix = func2str(func);
+          end
+          fName = [prefix '_data' num2str(iResult) '_plot' num2str(iResult) extension];
+          
+          % make fDir
+          fDir = fullfile(studyinfo.study_dir, 'postHocPlots');
+          if ~exist(fDir,'dir')
+            mkdir(fDir)
+          end
+          
+          % make fPath
+          fPath = fullfile(fDir,[fName extension]);
+        end % if ~postHocBool
+        
         % Data needed for plotting:
         %   - thisResult
         %   - fPath
 
-        %skip if no data
+        %skip if no result
         if isempty(thisResult)
-          dsVprintf(options, 'Skipping simID=%i since no result.\n', simID);
+          if ~postHocBool
+            dsVprintf(options, '  Skipping since no result.\n');
+          else
+            dsVprintf(options, '  Skipping simID=%i since no result.\n', simID);
+          end
+          
           continue
-        end
+        end % if isempty(thisResult)
 
         set(thisResult, 'PaperPositionMode','auto');
-        dsVprintf(options, '    Saving plot: %s\n',fName);
+        dsVprintf(options, '    Saving plot: %s\n',fPath);
 
         switch extension
           case '.svg'
@@ -312,8 +446,8 @@ for fInd = 1:nFunc % loop over function inputs
           case '.fig'
             savefig(thisResult,fPath);
         end
-
-        if nResults > 1
+        
+        if (options.save_results_flag && (options.close_fig_flag ~= 0)) || options.close_fig_flag==1
           close(thisResult)
         end
       end %nResults
@@ -325,7 +459,7 @@ for fInd = 1:nFunc % loop over function inputs
 
       for iResult = 1:length(result)
         % add options to result structure
-        if length(varargin)>1
+        if length(varargin) > 1
           for j = 1:2:length(varargin)
             result(iResult).options.(varargin{j}) = varargin{j+1};
           end
@@ -334,59 +468,94 @@ for fInd = 1:nFunc % loop over function inputs
         end
       end %iResult
     end %isstruct
+    
+    analysisFnInd = analysisFnInd + 1;
 
     % save derived data else return main function
     if options.save_results_flag
-      if studyinfoBool
+      if postHocBool
         allResults = result;
         clear result;
-
-        for iResult = 1:nResults
+      end
+      
+      for iResult = 1:nResults
+        if ~postHocBool % in sim
+          fName = options.result_file;
+          
+          % ensure extension is '.mat'
+          extension = '.mat';
+          [~, fName, orig_ext] = fileparts(fName);
+          if ~strcmp(orig_ext, extension) %check for .mat extension
+            fName = [fName extension];
+          end
+          
+          fPath = fName;
+        elseif studyinfoBool % posthoc with studyinfo
           simID = studyinfo.simulations(iResult).sim_id;
-
+          prefix = func2str(func);
+          fName = [prefix '_sim' num2str(simID) '_analysis' num2str(analysisFnInd) '_' func2str(func) '.mat'];
+          
           if options.load_all_data_flag
             result = allResults(iResult);
           else % load data
-            data = loadDataFromSingleSim(simID, options, varargin);
-
+            data = loadDataFromSingleSim(src, simID, options, varargin{:});
+            
             %skip if no data
             if isempty(data)
+              dsVprintf(options, '  Skipping simID=%i since no data.\n', simID);
               continue
             end
-
+            
             % calc result for this data
-            result = evalFnWithArgs(fInd, data, func, options, varargin);
+            result = evalFnWithArgs(fInd, data, func, options, varargin{:});
           end
-
-          prefix = func2str(func);
-          fName = [prefix '_sim' num2str(simID) '_analysis' num2str(fInd) '_' func2str(func) '.mat'];
-
+          
           % change result_file if varied_filename_flag
           if options.varied_filename_flag && isfield(data, 'varied')
             fName = filenameFromVaried(fName, func, data, plotFnBool, options, varargin{:});
           end % varied_filename_flag
-
+          
           % make fPath
-          fDir = fullfile(studyinfo.study_dir, 'postSimResults');
+          fDir = fullfile(studyinfo.study_dir, 'postHocResults');
           if ~exist(fDir,'dir')
             mkdir(fDir)
           end
           fPath = fullfile(fDir,fName);
-
-          dsExportData(result, 'filename',fPath, 'result_flag',1, varargin{:});
-        end %iResult
-      else % ~studyinfoBool, whether 1 or array of struct
-        fName = options.result_file;
-        extension = '.mat';
-
-        if ~strcmp(fName(end-3:end), extension) %check for .mat extension
-          fName = [fName extension];
-        end
+        else  % posthoc without studyinfo
+          result = allResults(iResult);
+          simID = iResult;
+          
+          % make fName
+          if isfield(options, 'result_file') && ~isempty(options.result_file)
+            prefix = options.result_file;
+          else
+            prefix = func2str(func);
+          end
+          fName = [prefix '_data' num2str(iResult) '_analysis' num2str(analysisFnInd) '_' func2str(func) '.mat'];
+          
+          % make fDir
+          fDir = fullfile(studyinfo.study_dir, 'postHocResults');
+          if ~exist(fDir,'dir')
+            mkdir(fDir)
+          end
+          
+          % make fPath
+          fPath = fullfile(fDir,fName);
+        end % if ~postHocBool
         
-        fPath = fName;
-
+        %skip if no result
+        if isempty(result)
+          if ~postHocBool
+            dsVprintf(options, '  Skipping since no result.\n');
+          else
+            dsVprintf(options, '  Skipping simID=%i since no result.\n', simID);
+          end
+          
+          continue
+        end % if isempty(result)
+        
         dsExportData(result, 'filename',fPath, 'result_flag',1, varargin{:});
-      end % scenarios
+      end
     end % save_results_flag
   end % ishandle(result)
 end % fInd
@@ -406,6 +575,10 @@ end %main fn
 %% Local functions
 
 function [data, studyinfo] = parseSrc(src, options, varargin)
+
+% if src is:
+% - data: data = src, studyinfo = []
+% - studydir and studyinfo: gest studyinfo, and if load_all_data_flag, loads data
 
 %% auto_gen_test_data_flag argin
 options = catstruct(options, dsCheckOptions(varargin,{'auto_gen_test_data_flag',0,{0,1}},false));
@@ -429,7 +602,7 @@ elseif ischar(src) %string input
   end
 
   % update study_dir
-  if exist(src, 'file') && ~isempty(strfind(src, 'studyinfo')) %studyinfo.mat
+  if exist(src, 'file') && contains(src, 'studyinfo') %studyinfo.mat
     studyinfo.study_dir = fileparts2(src);
   elseif isdir(src) % study_dir
     studyinfo.study_dir = src;
@@ -487,7 +660,7 @@ if options.auto_gen_test_data_flag
   %dsUnitSaveAutoGenTestDataLocalFn(argin, argout); % localfn
 end
 
-end
+end % parseSrc
 
 
 function [funcIn, nFunc] = parseFuncIn(funcIn)
@@ -507,7 +680,7 @@ elseif ischar(funcIn)
 else
   nFunc = numel(funcIn);
 end
-end
+end % parseFuncIn
 
 
 function func = parseFunc(func)
@@ -522,7 +695,7 @@ if ~isa(func,'function_handle')
     error('Post-processing function must be supplied as a function handle or function name string');
   end
 end
-end
+end % parseFunc
 
 
 function filename = filenameFromVaried(filename, func, data, plotFnBool, options, varargin)
@@ -569,7 +742,8 @@ if options.auto_gen_test_data_flag
   %dsUnitSaveAutoGenTestDataLocalFn(argin, argout); % localfn
 end
 
-end
+end % filenameFromVaried
+
 
 
 function result = evalFnWithArgs(fInd, data, func, options, varargin)
@@ -579,16 +753,25 @@ if strcmp(reportUI,'matlab')
 end
 
 try
+  make_invis_bool = options.save_results_flag && (options.close_fig_flag ~= 0);
+  
   if isempty(options.function_options)
     % Only do parfor mode if parfor_flag is set and parpool is already running. Otherwise, this will add unncessary overhead.
     if options.parfor_flag && ~isempty(p)
-      
       parfor dInd = 1:length(data)
-        result(dInd) = feval(func,data(dInd),varargin{:});
+        result(dInd) = feval(func,data(dInd));
+        
+        if ishandle(result(dInd)) && make_invis_bool
+          set(result(dInd), 'Visible', 'off'); % cannot close yet until save, but can make invisible
+        end
       end
     else
       for dInd = 1:length(data)
-        result(dInd) = feval(func,data(dInd),varargin{:});
+        result(dInd) = feval(func,data(dInd));
+        
+        if ishandle(result(dInd)) && make_invis_bool
+          set(result(dInd), 'Visible', 'off'); % cannot close yet until save, but can make invisible
+        end
       end
     end % options.parfor_flag && ~isempty(p)
   else
@@ -596,11 +779,19 @@ try
 
     if options.parfor_flag && ~isempty(p)
       parfor dInd = 1:length(data)
-        result(dInd) = feval(func,data(dInd),function_options{:});
+        result(dInd) = feval(func,data(dInd),function_options{:}); %#ok<PFBNS>
+        
+        if ishandle(result(dInd)) && make_invis_bool
+          set(result(dInd), 'Visible', 'off'); % cannot close yet until save, but can make invisible
+        end
       end
     else
       for dInd = 1:length(data)
         result(dInd) = feval(func,data(dInd),function_options{:});
+        
+        if ishandle(result(dInd)) && make_invis_bool
+          set(result(dInd), 'Visible', 'off'); % cannot close yet until save, but can make invisible
+        end
       end
     end % options.parfor_flag && ~isempty(p)
   end % isempty(options.function_options)
@@ -609,10 +800,10 @@ catch err
   result = [];
 end
 
-end
+end % evalFnWithArgs
 
 
-function data = loadDataFromSingleSim(simID, options, varargin)
+function data = loadDataFromSingleSim(src, simID, options, varargin)
 % check if iResult in options.simIDs
 if isempty(options.simIDs)
   simIDs = simID;
@@ -624,16 +815,19 @@ else
   end
 end
 
-varinputs = varargin; % create copy of varargin
-if isstruct(varinputs{1})
-  varinputs.simIDs = simIDs;
+% check if src is data or other
+if isstruct(src) && isfield('time','src')
+  data = src;
+  data = data(simID);
 else
-  % find simIDs in varinputs
-  varinputs{find(~cellfun(@isempty,strfind(varinputs(1:2:end), 'simIDs')))*2} = simIDs;
+  % overwrite simIDs in varargin
+  varargin(end+1:end+2) = {'simIDs', simIDs};
+
+  data = dsImport(src, varargin{:}); % load data
 end
 
-data = dsImport(src, varinputs{:}); % load data
-end
+data = convertDoublePrecision(data);
+end % loadDataFromSingleSim
 
 
 function result = add_modifications(result, data, varargin)
@@ -693,3 +887,20 @@ if options.auto_gen_test_data_flag
   %dsUnitSaveAutoGenTestDataLocalFn(argin, argout); % localfn
 end
 end % add_modifications
+
+
+function filename = fileNameFileparts(filepath)
+  [~, filename] = fileparts(filepath);
+end % fileNameFileparts
+
+
+function data = convertDoublePrecision(data)
+  if ~isempty(data) && isstruct(data)
+    for j = 1:length(data)
+      for k = 1:length(data(j).labels)
+        fld = data(j).labels{k};
+        data(j).(fld) = double(data(j).(fld));
+      end
+    end
+  end
+end % convertDoublePrecision
