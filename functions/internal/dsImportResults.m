@@ -66,7 +66,7 @@ if isstruct(studyinfo) && isfield(studyinfo,'study_dir')
       else
         %check relative path
         [~,fname,fext]=fileparts2(result_files{s}{i});
-        result_files{s}{i}=fullfile(studyinfo.study_dir,'data',[fname fext]);
+        result_files{s}{i}=fullfile(studyinfo.study_dir,'results',[fname fext]);
         if exist(result_files{s}{i},'file')
           load(result_files{s}{i},'result');
           results(s,i)=result;
