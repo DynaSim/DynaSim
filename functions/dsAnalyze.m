@@ -120,7 +120,8 @@ end
 %% Check inputs
 options=dsCheckOptions(varargin,{...
   'in_sim_flag',0,{0,1},...
-  'result_file','result',[],...
+  'result_file',[],[],...
+  'prefix','study',[],...
   'save_results_flag',0,{0,1},...
   'matCompatibility_flag',1,{0,1},...  % whether to save mat files in compatible mode, vs to prioritize > 2GB VARs
   'overwrite_flag',0,{0,1},... % whether to overwrite existing data
@@ -485,66 +486,71 @@ for fInd = 1:nFunc % loop over function inputs
         [parentPath, filename, orig_ext] = fileparts(fPath);
         if length(orig_ext) > 4 % extra periods in name
           orig_ext = fPath(end-3:end);
-          if ~strcmp(orig_ext, extension) %check for .mat extension
+          if ~strcmp(orig_ext, extension)
             fPath = [fPath(1:end-4) extension];
           end
         else
-          if ~strcmp(orig_ext, extension) %check for .mat extension
+          if ~strcmp(orig_ext, extension)
             fPath = fullfile(parentPath, [filename extension]);
           end
         end
         thisResult = result;
       elseif studyinfoBool % posthoc with studyinfo
         simID = studyinfo.simulations(iResult).sim_id;
-        prefix = func2str(func);
-        fName = [prefix '_sim' num2str(simID) '_plot' num2str(plotFnInd) '_' func2str(func)];
 
-        if options.load_all_data_flag
-          thisResult = result(iResult);
-        else % load data
-          data = loadDataFromSingleSim(src, simID, options, varargin{:});
-
-          %skip if no data
-          if isempty(data)
-            dsVprintf(options, '  Skipping simID=%i since no data.\n', simID);
-            continue
+        if isfield(options, 'result_file') && ~isempty(options.result_file)
+          fPath = options.result_file;
+        else
+          if options.load_all_data_flag
+            thisData = data(iResult);
+            
+            thisResult = result(iResult);
+          else % load data
+            thisData = loadDataFromSingleSim(src, simID, options, varargin{:});
+            
+            %skip if no data
+            if isempty(thisData)
+              dsVprintf(options, '  Skipping simID=%i since no data.\n', simID);
+              continue
+            end
+            
+            % calc result for this data
+            thisResult = evalFnWithArgs(fInd, thisData, func, options, varargin{:});
+          end % if ~options.load_all_data_flag
+          
+          % make fPath
+          fName = [options.prefix '_sim' num2str(simID) '_plot' num2str(plotFnInd) '_' func2str(func)];
+          
+          % change result_file if varied_filename_flag
+          if options.varied_filename_flag && isfield(thisData, 'varied')
+            fName = filenameFromVaried(fName, func, thisData, plotFnBool, options, varargin{:});
+          end % varied_filename_flag
+          
+          % make fPath
+          fDir = fullfile(studyinfo.study_dir, 'postHocPlots');
+          if ~exist(fDir,'dir')
+            mkdir(fDir)
           end
-
-          % calc result for this data
-          thisResult = evalFnWithArgs(fInd, data, func, options, varargin{:});
-        end % if ~options.load_all_data_flag
-
-        % change result_file if varied_filename_flag
-        if options.varied_filename_flag && isfield(data, 'varied')
-          fName = filenameFromVaried(fName, func, data, plotFnBool, options, varargin{:});
-        end % varied_filename_flag
-
-        % make fPath
-        fDir = fullfile(studyinfo.study_dir, 'postHocPlots');
-        if ~exist(fDir,'dir')
-          mkdir(fDir)
+          
+          fPath = fullfile(fDir,[fName extension]);
         end
-        fPath = fullfile(fDir,[fName extension]);
       else  % posthoc without studyinfo
         thisResult = result(iResult);
         simID = iResult;
 
         % make fName
         if isfield(options, 'result_file') && ~isempty(options.result_file)
-          prefix = options.result_file;
+          fPath = options.result_file;
         else
-          prefix = func2str(func);
+          fName = [options.prefix '_data' num2str(iResult) '_plot' num2str(iResult) extension];
+          fPath = fullfile(fDir,[fName extension]);
         end
-        fName = [prefix '_data' num2str(iResult) '_plot' num2str(iResult) extension];
 
         % make fDir
         fDir = fullfile(studyinfo.study_dir, 'postHocPlots');
         if ~exist(fDir,'dir')
           mkdir(fDir)
         end
-
-        % make fPath
-        fPath = fullfile(fDir,[fName extension]);
       end % if ~postHocBool
 
       % Data needed for plotting:
@@ -632,55 +638,61 @@ for fInd = 1:nFunc % loop over function inputs
         end
       elseif studyinfoBool % posthoc with studyinfo
         simID = studyinfo.simulations(iResult).sim_id;
-        prefix = func2str(func);
-        fName = [prefix '_sim' num2str(simID) '_analysis' num2str(analysisFnInd) '_' func2str(func) '.mat'];
 
         if options.load_all_data_flag
+          thisData = data(iResult);
+          
           result = allResults(iResult);
         else % load data
-          data = loadDataFromSingleSim(src, simID, options, varargin{:});
+          thisData = loadDataFromSingleSim(src, simID, options, varargin{:});
 
           %skip if no data
-          if isempty(data)
+          if isempty(thisData)
             dsVprintf(options, '  Skipping simID=%i since no data.\n', simID);
             continue
           end
 
           % calc result for this data
-          result = evalFnWithArgs(fInd, data, func, options, varargin{:});
-        end
-
-        % change result_file if varied_filename_flag
-        if options.varied_filename_flag && isfield(data, 'varied')
-          fName = filenameFromVaried(fName, func, data, plotFnBool, options, varargin{:});
-        end % varied_filename_flag
-
+          result = evalFnWithArgs(fInd, thisData, func, options, varargin{:});
+        end % if options.load_all_data_flag
+        
         % make fPath
-        fDir = fullfile(studyinfo.study_dir, 'postHocResults');
-        if ~exist(fDir,'dir')
-          mkdir(fDir)
+        if isfield(options, 'result_file') && ~isempty(options.result_file)
+          fPath = options.result_file;
+        else
+          fName = [options.prefix '_sim' num2str(simID) '_analysis' num2str(analysisFnInd) '_' func2str(func) '.mat'];
+          
+          % change result_file if varied_filename_flag
+          if options.varied_filename_flag && isfield(thisData, 'varied')
+            fName = filenameFromVaried(fName, func, thisData, plotFnBool, options, varargin{:});
+          end % varied_filename_flag
+          
+          % make fDir
+          fDir = fullfile(studyinfo.study_dir, 'postHocResults');
+          if ~exist(fDir,'dir')
+            mkdir(fDir)
+          end
+          
+          fPath = fullfile(fDir,fName);
         end
-        fPath = fullfile(fDir,fName);
       else  % posthoc without studyinfo
         result = allResults(iResult);
         simID = iResult;
 
         % make fName
         if isfield(options, 'result_file') && ~isempty(options.result_file)
-          prefix = options.result_file;
+          fPath = options.result_file;
         else
-          prefix = func2str(func);
+          fName = [options.prefix '_data' num2str(iResult) '_analysis' num2str(analysisFnInd) '_' func2str(func) '.mat'];
+          
+          % make fDir
+          fDir = fullfile(studyinfo.study_dir, 'postHocResults');
+          if ~exist(fDir,'dir')
+            mkdir(fDir)
+          end
+          
+          fPath = fullfile(fDir,fName);
         end
-        fName = [prefix '_data' num2str(iResult) '_analysis' num2str(analysisFnInd) '_' func2str(func) '.mat'];
-
-        % make fDir
-        fDir = fullfile(studyinfo.study_dir, 'postHocResults');
-        if ~exist(fDir,'dir')
-          mkdir(fDir)
-        end
-
-        % make fPath
-        fPath = fullfile(fDir,fName);
       end % if ~postHocBool
 
       %skip if no result
