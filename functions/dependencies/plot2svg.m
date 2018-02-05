@@ -24,7 +24,7 @@ function varargout = plot2svg(filename, id, debug, legendicons, clippingmode, fi
 
   global PLOT2SVG_globals
   global colorname
-  progversion = '9-Dec-2017';
+  progversion = '4-Feb-2018';
   PLOT2SVG_globals.runningIdNumber = 0;
   PLOT2SVG_globals.UI = reportUI;
   PLOT2SVG_globals.octave = false;
@@ -49,17 +49,11 @@ function varargout = plot2svg(filename, id, debug, legendicons, clippingmode, fi
   if nargout == 1
     varargout = {0};
   end
-
-  % Forked FIG to SVG converter version ' progversion ', Salva Ardid (sardid@bu.edu).
-  % Most credit to Juerg Schwizer (converter@bluewin.ch).
-  
+  % disp(['   Matlab/Octave to SVG converter version ' progversion ', Juerg Schwizer (converter@bluewin.ch).'])
+  disp(['   Forked FIG to SVG converter version ' progversion ', Salva Ardid (sardid@bu.edu).'])
+  disp('   Most credit to Juerg Schwizer (converter@bluewin.ch).')
   if strcmp(PLOT2SVG_globals.UI,'octave')
     PLOT2SVG_globals.octave = true;
-    % disp('   Info: PLOT2SVG runs in Octave mode.')
-  else
-    if UIverlessthan('6.0') % Check for matlab version and print warning if matlab version lower than version 6.0 (R.12)
-      disp('   Warning: Future versions may no more support older versions than MATLAB R12.')
-    end
   end
   if nargout > 1
     error('Function returns only one return value.')
@@ -952,7 +946,7 @@ function group = axes2svg(fid,id,ax,group,paperpos)
       end
       gridlinestyle = get(ax,'GridLineStyle');
       minor_gridlinestyle = get(ax,'MinorGridLineStyle');
-      both_ticklength = get(ax,'TickLength'); % 1.5*get(ax,'TickLength'); % SA: it comes from stroke-linecap = "square", no need to do it manually
+      both_ticklength = get(ax,'TickLength');
       gridBehind = true; % Default setting
       try
           if strcmp(get(ax, 'Layer'), 'top') && projection.xyplane
@@ -2493,17 +2487,22 @@ function boundingBoxAxes = axchild2svg(fid,id,axIdString,ax,paperpos,axchild,axp
 
             barColors = get(axchild(i),'CData');
             barCenters = get(axchild(i),'XData');
+            if numel(barCenters) > 1
+              barSep = min(diff(barCenters));
+            else
+              barSep = 1;
+            end
             barHeight = get(axchild(i),'YData');
             barWidth = get(axchild(i),'BarWidth');
-            showBaseline = get(axchild(i),'ShowBaseline'); % for whatever reason this does not work (showing it when BaseValue ~= 0)
+            showBaseline = get(axchild(i),'ShowBaseline');
             barBaseline = get(axchild(i),'BaseValue');
             barStyle = get(axchild(i),'BarLayout');
-
+            userData = get(axchild(i),'UserData');
 
             currentBarSetNumber = currentBarSetNumber + 1;
             if numChildBars > 1
-              if strcmp(barStyle,'grouped')
-                [barCenters,barWidth] = groupBarProperties(currentBarSetNumber,barCenters,numChildBars,barWidth);
+              if strcmp(barStyle,'grouped') && ~strcmpi(userData,'ungrouped') % grouped bars unless explicitly specified by UserData property
+                [barCenters,barWidth] = groupBarProperties(currentBarSetNumber,barCenters,numChildBars,barWidth,barSep);
               elseif strcmp(barStyle,'stacked')
                 if barBaseline ~= 0
                   warning('Ignoring Bar Baseline Value as it cannot be use with Stacked Layout')
@@ -2530,10 +2529,10 @@ function boundingBoxAxes = axchild2svg(fid,id,axIdString,ax,paperpos,axchild,axp
                 scolorname = searchcolor(id,barColors(iBar,:));
               end
 
-              posx = barCenters(iBar) + 0.5*barWidth*([-1,1]);
+              posx = barCenters(iBar) + barSep*barWidth*([-0.5,0.5]);
               if strcmp(get(ax,'XScale'),'log')
-                  posx(posx <= 0) = NaN;
-                  posx = log10(posx);
+                posx(posx <= 0) = NaN;
+                posx = log10(posx);
               end
               if strcmp(barStyle,'grouped')
                 posy = [barBaseline barHeight(iBar)];
@@ -2541,8 +2540,8 @@ function boundingBoxAxes = axchild2svg(fid,id,axIdString,ax,paperpos,axchild,axp
                 posy = [stackedBarYprev(iBar) stackedBarYref(iBar)];
               end
               if strcmp(get(ax,'YScale'),'log')
-                  posy(posy <= 0) = NaN;
-                  posy = log10(posy);
+                posy(posy <= 0) = NaN;
+                posy = log10(posy);
               end
               posz = [0 0];
               pattern = lineStyle2svg(linestyle, linewidth);
@@ -2555,8 +2554,7 @@ function boundingBoxAxes = axchild2svg(fid,id,axIdString,ax,paperpos,axchild,axp
             end
 
             %%% bar baseline %%%
-            % if strcmp(showBaseline,'on') && barBaseline ~= 0
-            if barBaseline ~= 0 && ~strcmp(barStyle,'stacked')
+            if (strcmp(showBaseline,'on') || barBaseline ~= 0) && ~strcmp(barStyle,'stacked')
               posx = get(ax,'xlim');
               posy = barBaseline*([1 1]);
               posz = [0 0];
@@ -2590,13 +2588,13 @@ function boundingBoxAxes = axchild2svg(fid,id,axIdString,ax,paperpos,axchild,axp
   end
 end
 
-function [barCenters,barWidth] = groupBarProperties(currentBarSetNumber,barCenters,numGroups,barWidth)
+function [barCenters,barWidth] = groupBarProperties(currentBarSetNumber,barCenters,numGroups,barWidth,barSep)
   toPower = 0.1;
   tanh_factor = 2.5;
   minGroupSep = 0.713 - 0.49*tanh(tanh_factor*(numGroups^toPower-2^toPower)/(30^toPower-2^toPower));
   groupWidth = 1-minGroupSep;
   offset = groupWidth*[-0.5:1/(numGroups-1):0.5];
-  barCenters = barCenters + offset(currentBarSetNumber);
+  barCenters = barCenters + barSep*offset(currentBarSetNumber);
   barWidth = min(diff(offset))*barWidth;
 end
 
