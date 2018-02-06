@@ -37,7 +37,14 @@ function result = dsAnalyze(src,varargin)
 %                             avoid overwrite in that case) (default: 0)
 %     'save_prefix'         : if 'varied_filename_flag'==1, add a string prefix 
 %                             to the name (default: '')
-%    2 ways to specify:
+%     'close_fig_flag'      : Close/hide figures as they are created. Can be specified
+%                             for all figs or for individual fig using plot_options.
+%                             Default value is same as 'save_results_flag'.
+%     'load_all_data_flag'  : whether to load all the data in studyinfo
+%                             at once {0 or 1} (default: 0)
+%     'verbose_flag'  : whether to display informative messages/logs (default: 0)
+%     'parfor_flag' : whether to use parfor to run analysis {0 or 1} (default: 0)
+%    3 ways to specify functions:
 %     1)
 %     'function_options'    : cell array of option cell arrays {'option1',value1,...}
 %                             in which each cell corresponds to the options for
@@ -56,10 +63,6 @@ function result = dsAnalyze(src,varargin)
 %                             in which case it must have 'plot' string.
 %     'function_options'    : cell array of option cell arrays {'option1',value1,...}
 %
-%     'load_all_data_flag'  : whether to load all the data in studyinfo
-%                             at once {0 or 1} (default: 0)
-%     'verbose_flag'  : whether to display informative messages/logs (default: 0)
-%     'parfor_flag' : whether to use parfor to run analysis {0 or 1} (default: 0)
 %
 % Outputs:
 %   - result: structure returned by the analysis function
@@ -414,7 +417,10 @@ plotFnInd = lastPlotIndex;
 analysisFnInd = lastAnalysisIndex;
 for fInd = 1:nFunc % loop over function inputs
   func = funcIn{fInd};
-
+  
+  if ~options.in_sim_flag
+    dsVprintf(options, 'Function (%i/%i): %s \n', fInd,nFunc,func2str(func));
+  end
   % confirm func is function handle or convert to one if possible
   func = parseFunc(func);
 
@@ -426,16 +432,11 @@ for fInd = 1:nFunc % loop over function inputs
   end
   
   % plot format
-  formatS = dsCheckOptions(options.function_options{fInd}, {'format',[],{'svg','jpg','eps','png','fig'}}, 0);
-  if isempty(formatS.format)
+  fopts = dsCheckOptions(options.function_options{fInd}, {'format',[],{'svg','jpg','eps','png','fig'}}, 0);
+  if isempty(fopts.format)
     plotFormat = options.format;
   else
-    plotFormat = formatS.format;
-  end
-
-  % change result_file if varied_filename_flag
-  if options.varied_filename_flag && isfield(data, 'varied')
-    options.result_file = filenameFromVaried(options.result_file, func, data, plotFnBool, options, varargin{:});
+    plotFormat = fopts.format;
   end
 
   % do analysis
@@ -478,6 +479,10 @@ for fInd = 1:nFunc % loop over function inputs
 
     % loop through results. all results may exist or need to be made during loop
     for iResult = 1:nResults
+      if ~options.in_sim_flag
+        dsVprintf(options, '  Result (%i/%i) \n', iResult,nResults);
+      end
+      
       extension = ['.' plotFormat]; % '.svg'; % {.jpg,.svg}
 
       if ~postHocBool % in sim
@@ -522,8 +527,15 @@ for fInd = 1:nFunc % loop over function inputs
           fName = [options.prefix '_sim' num2str(simID) '_plot' num2str(plotFnInd) '_' func2str(func)];
           
           % change result_file if varied_filename_flag
-          if options.varied_filename_flag && isfield(thisData, 'varied')
-            fName = filenameFromVaried(fName, func, thisData, plotFnBool, options, varargin{:});
+          fopts = dsCheckOptions(options.function_options{fInd}, {'varied_filename_flag',0,{0,1}}, 0);
+          if isempty(fopts.varied_filename_flag)
+            varied_filename_flag = options.varied_filename_flag;
+          else
+            varied_filename_flag = fopts.varied_filename_flag;
+          end
+          
+          if varied_filename_flag && isfield(thisData, 'varied')
+            fName = filenameFromVaried(fInd, fName, func, thisData, plotFnBool, options, varargin{:});
           end % varied_filename_flag
           
           % make fPath
@@ -627,6 +639,10 @@ for fInd = 1:nFunc % loop over function inputs
     end
 
     for iResult = 1:nResults
+      if ~options.in_sim_flag
+        dsVprintf(options, '  Result (%i/%i) \n', iResult,nResults);
+      end
+      
       if ~postHocBool % in sim
         fPath = options.result_file;
 
@@ -663,8 +679,15 @@ for fInd = 1:nFunc % loop over function inputs
           fName = [options.prefix '_sim' num2str(simID) '_analysis' num2str(analysisFnInd) '_' func2str(func) '.mat'];
           
           % change result_file if varied_filename_flag
-          if options.varied_filename_flag && isfield(thisData, 'varied')
-            fName = filenameFromVaried(fName, func, thisData, plotFnBool, options, varargin{:});
+          fopts = dsCheckOptions(options.function_options{fInd}, {'varied_filename_flag',0,{0,1}}, 0);
+          if isempty(fopts.varied_filename_flag)
+            varied_filename_flag = options.varied_filename_flag;
+          else
+            varied_filename_flag = fopts.varied_filename_flag;
+          end
+          
+          if varied_filename_flag && isfield(thisData, 'varied')
+            fName = filenameFromVaried(fInd, fName, func, thisData, plotFnBool, options, varargin{:});
           end % varied_filename_flag
           
           % make fDir
@@ -876,12 +899,14 @@ end
 end % parseFunc
 
 
-function filename = filenameFromVaried(filename, func, data, plotFnBool, options, varargin)
+function filename = filenameFromVaried(fInd, filename, func, data, plotFnBool, options, varargin)
 % NOTE: inputs are odd since called from different sources with different
 %       states.
 
 %% auto_gen_test_data_flag argin
+warning('off','catstruct:DuplicatesFound');
 options = catstruct(options, dsCheckOptions(varargin,{'auto_gen_test_data_flag',0,{0,1}},false));
+warning('on','catstruct:DuplicatesFound');
 if options.auto_gen_test_data_flag
   varargs = varargin;
   varargs{find(strcmp(varargs, 'auto_gen_test_data_flag'))+1} = 0;
@@ -889,8 +914,15 @@ if options.auto_gen_test_data_flag
   argin = [{filename}, {func}, {data}, {plotFnBool}, {options}, varargs]; % specific to this function
 end
 
-if isfield(options, 'save_prefix') && ~isempty(options.save_prefix)
-  prefix = options.save_prefix;
+fopts = dsCheckOptions(options.function_options{fInd}, {'save_prefix',[],[]}, 0);
+if isempty(fopts.save_prefix)
+  save_prefix = options.save_prefix;
+else
+  save_prefix = fopts.save_prefix;
+end
+
+if ~isempty(save_prefix)
+  prefix = save_prefix;
 else
   if plotFnBool
     plot_options = options.function_options{fInd};
@@ -899,15 +931,12 @@ else
       plot_options = options;
     end
 
-    fInd = regexp(options.result_file, 'plot(\d+)', 'tokens');
-    fInd = fInd{1}{1};
-
     % check if 'plot_type' given as part of plot_options
-    plot_options = dsCheckOptions(plot_options,{'plot_type',['plot' fInd],[]},false);
+    plot_options = dsCheckOptions(plot_options,{'plot_type',[options.prefix '_' func2str(func)],[]},false);
 
-    prefix = plot_options.plot_type; % will be waveform by default due to CheckOptions in main fn
+    prefix = plot_options.plot_type;
   else % ~plotFnBool
-    prefix = func2str(func);
+    prefix = [options.prefix '_' func2str(func)];
   end
 end
 
