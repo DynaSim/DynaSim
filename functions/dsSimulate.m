@@ -1098,7 +1098,7 @@ end % in_parfor_loop_flag
       end
       
       % only do dsAnalyze parfor if multiple data
-      dsAnalyze_parfor_flag = (length(tmpdata) ~= 1);
+      dsAnalyze_parfor_flag = double(length(tmpdata) ~= 1);
 
       % do post-simulation analysis and plotting
       if ~isempty(options.analysis_functions) || ~isempty(options.plot_functions)

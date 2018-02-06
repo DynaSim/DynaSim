@@ -228,6 +228,12 @@ end
 % make funcIn for dsSimulate Style
 if ~isempty(funcIn) % style 1
   plotFnBoolVec = [];
+  
+  % make sure there is one option cell array per function
+  if length(options.function_options) < length(funcIn)
+    % extend function_options with blank cells
+    options.function_options(length(options.function_options)+1:length(funcIn)) = {{}};
+  end
 elseif ( ~isempty(options.plot_functions) || ~isempty(options.analysis_functions) ) % style 2.1
   % functions
   funcIn = [options.plot_functions(:); options.analysis_functions(:)];
