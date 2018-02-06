@@ -1096,6 +1096,9 @@ end % in_parfor_loop_flag
         dsExportData(tmpdata,'filename',data_file,'format','mat','matCompatibility_flag',options.matCompatibility_flag,'verbose_flag',options.verbose_flag);
         %studyinfo=dsUpdateStudy(studyinfo.study_dir,'process_id',sim_id,'status','finished','duration',duration,'solve_file',options.solve_file,'email',options.email,'verbose_flag',options.verbose_flag,'model',model,'simulator_options',options);
       end
+      
+      % only do dsAnalyze parfor if multiple data
+      dsAnalyze_parfor_flag = (length(tmpdata) ~= 1);
 
       % do post-simulation analysis and plotting
       if ~isempty(options.analysis_functions) || ~isempty(options.plot_functions)
@@ -1105,7 +1108,7 @@ end % in_parfor_loop_flag
           
           for f=1:length(siminfo.result_functions)
             % saving handled internally to dsAnalyze
-            tmpresult = dsAnalyze(tmpdata, siminfo.result_functions{f},'result_file',siminfo.result_files{f},'save_data_flag',1,'save_results_flag',1, siminfo.result_options{f}{:}, 'parfor_flag',options.parfor_flag, 'in_sim_flag',1);
+            tmpresult = dsAnalyze(tmpdata, siminfo.result_functions{f},'result_file',siminfo.result_files{f},'save_data_flag',1,'save_results_flag',1, siminfo.result_options{f}{:}, 'parfor_flag',dsAnalyze_parfor_flag, 'in_sim_flag',1);
             
             % since the plots are saved, close all generated figures
             if all(ishandle(tmpresult)) % FIXME: dsPlot2 doesnt return handles, so won't close?
@@ -1117,11 +1120,11 @@ end % in_parfor_loop_flag
         else
           % do analysis and plotting without saving results
           if ~isempty(options.analysis_functions) && nargoutmain > 2
-            dsAnalyze(tmpdata, options.analysis_functions, 'result_file',[], 'save_data_flag',0, 'save_results_flag',options.save_results_flag, 'function_options',options.analysis_options, 'parfor_flag',options.parfor_flag, 'in_sim_flag',1);
+            dsAnalyze(tmpdata, options.analysis_functions, 'result_file',[], 'save_data_flag',0, 'save_results_flag',options.save_results_flag, 'function_options',options.analysis_options, 'parfor_flag',dsAnalyze_parfor_flag, 'in_sim_flag',1);
           end
 
           if ~isempty(options.plot_functions)
-            dsAnalyze(tmpdata, options.plot_functions, 'result_file',[], 'save_data_flag',0, 'save_results_flag',options.save_results_flag, 'function_options',options.plot_options, 'parfor_flag',options.parfor_flag, 'in_sim_flag',1);
+            dsAnalyze(tmpdata, options.plot_functions, 'result_file',[], 'save_data_flag',0, 'save_results_flag',options.save_results_flag, 'function_options',options.plot_options, 'parfor_flag',dsAnalyze_parfor_flag, 'in_sim_flag',1);
           end
         end % if options.save_data_flag || options.save_results_flag
       end % if ~isempty(options.analysis_functions) || ~isempty(options.plot_functions)
