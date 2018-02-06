@@ -788,6 +788,17 @@ for i=1:length(odes)
 end
 % #####################################################################
 
+
+%% Memory Check
+fprintf(fid,'%% ###########################################################\n');
+fprintf(fid,'%% Memory check:\n');
+fprintf(fid,'%% ###########################################################\n');
+fprintf(fid,'try \n');
+fprintf(fid,'  memoryUsed = memoryUsageCallerGB(); \n');
+fprintf(fid,'  fprintf(''Total Memory Used <= %%i GB \\n'', ceil(memoryUsed)); \n');
+fprintf(fid,'end \n');
+
+
 %% Numerical integration
 % write code to do numerical integration
 fprintf(fid,'%% ###########################################################\n');

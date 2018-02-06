@@ -426,6 +426,15 @@ if ~isempty(model.monitors)
   end
 end
 
+%% Memory Check
+fprintf(fid,'%% ###########################################################\n');
+fprintf(fid,'%% Memory check:\n');
+fprintf(fid,'%% ###########################################################\n');
+fprintf(fid,'try \n');
+fprintf(fid,'  memoryUsed = memoryUsageCallerGB(); \n');
+fprintf(fid,'  fprintf(''Total Memory Used <= %%i GB \\n'', ceil(memoryUsed)); \n');
+fprintf(fid,'end \n');
+
 %% Benchmark toc
 if options.benchmark_flag
   fprintf(fid, 'fprintf(''Sim Time: %%g seconds\\n'', toc);');
