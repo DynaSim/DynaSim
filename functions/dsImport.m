@@ -148,7 +148,7 @@ if isstruct(file) && isfield(file,'study_dir')
   num_files = length(data_files);
 
   for iFile = 1:num_files
-    fprintf('loading file %g/%g: %s\n',iFile,num_files,data_files{iFile});
+    dsVprintf(options, 'loading file %g/%g: %s\n',iFile,num_files,data_files{iFile});
     tmp_data=dsImport(data_files{iFile},keyvals{:});
     num_sets_per_file=length(tmp_data);
     modifications=sim_info(iFile).modifications;
