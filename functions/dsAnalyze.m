@@ -75,13 +75,16 @@ function result = dsAnalyze(src,varargin)
 % Author: Jason Sherfey, PhD <jssherfey@gmail.com>
 % Copyright (C) 2016 Jason Sherfey, Boston University, USA
 
+
 %% General cases:
 %   - data struct (likely from SimualteModel call)
 %   - data struct array
 %   - studyinfo with load_all_data_flag==0
 %   - studyinfo with load_all_data_flag==1
 
-% Dev note: calls to this fn
+
+
+% Dev note: calls to this fn (for dev branch on 2/16/18)
 % - from dsSimulate:
 %     if options.save_data_flag || options.save_results_flag
 %       siminfo=studyinfo.simulations(sim_ind);
@@ -955,20 +958,20 @@ end % filenameFromVaried
 
 function result = evalFnWithArgs(fInd, data, func, options, varargin)
 
-if strcmp(reportUI,'matlab')
-  p = gcp('nocreate');
-  
-  if options.parfor_flag && isempty(p)
-    warning('Only does parfor mode if parfor_flag is set and parpool is already running to avoid unnecessary overhead.')
-  end
-end
+% if strcmp(reportUI,'matlab')
+%   p = gcp('nocreate');
+%   
+%   if options.parfor_flag && isempty(p)
+%     warning('Only does parfor mode if parfor_flag is set and parpool is already running to avoid unnecessary overhead.')
+%   end
+% end
 
 try
   make_invis_bool = options.save_results_flag && (options.close_fig_flag ~= 0);
   
   if isempty(options.function_options)
     % Only do parfor mode if parfor_flag is set and parpool is already running. Otherwise, this will add unnecessary overhead.
-    if options.parfor_flag && ~isempty(p)
+    if options.parfor_flag % && ~isempty(p)
       parfor dInd = 1:length(data)
         result(dInd) = feval(func,data(dInd));
         
@@ -988,7 +991,7 @@ try
   else
     function_options = options.function_options{fInd};
 
-    if options.parfor_flag && ~isempty(p)
+    if options.parfor_flag % && ~isempty(p)
       parfor dInd = 1:length(data)
         result(dInd) = feval(func,data(dInd),function_options{:}); %#ok<PFBNS>
         
