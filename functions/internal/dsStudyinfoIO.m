@@ -111,9 +111,9 @@ switch OS
     common_lock_file=fullfile(study_dir,'locked');
 end
 % --------------------------------------------
-if verbose_flag
-  fprintf('created temporary lock file for this process: %s\n',lock_file);
-end
+%if verbose_flag
+  %fprintf('created temporary lock file for this process: %s\n',lock_file);
+%end
 
 % pause to allow lock files of simultaneous processes to appear
 % pause(.01); % wait 10ms
@@ -211,9 +211,9 @@ while ~done
     ind=find(~cellfun(@isempty,regexp({D.name},pat)));
     if ~isempty(ind)
       next_lock_file=D(ind).name; % file with next_id (^.?lock_*_<next_id>$)
-      if verbose_flag
-        fprintf('deleting stale temporary lock file: %s\n',next_lock_file);
-      end
+      %if verbose_flag
+        %fprintf('deleting stale temporary lock file: %s\n',next_lock_file);
+      %end
       delete(next_lock_file);
       delete(common_lock_file);
     end
@@ -227,25 +227,25 @@ while ~done
   % check if max attempts has been exceeded
   if cnt>max_num_timeouts
     % delete this process's lock file and give up on action
-    if verbose_flag
-      fprintf('deleting temporary lock file for this process: %s\n',lock_file);
-    end
+    %if verbose_flag
+      %fprintf('deleting temporary lock file for this process: %s\n',lock_file);
+    %end
     delete(lock_file);
     delete(common_lock_file);
     error('failed to access studyinfo file after %g timeouts.',max_num_timeouts);
   end
 end
 % remove temporary lock for this process
-if verbose_flag
-  fprintf('deleting temporary lock file for this process: %s\n',lock_file);
-end
+%if verbose_flag
+  %fprintf('deleting temporary lock file for this process: %s\n',lock_file);
+%end
 delete(lock_file);
 delete(common_lock_file);
 
 catch err
-  if verbose_flag
-    fprintf('deleting temporary lock file for this process: %s\n',lock_file);
-  end
+  %if verbose_flag
+    %fprintf('deleting temporary lock file for this process: %s\n',lock_file);
+  %end
   delete(lock_file);
   delete(common_lock_file);
   displayError(err);
