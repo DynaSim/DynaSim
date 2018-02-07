@@ -94,24 +94,32 @@ end
 if ischar(src)
   if isdir(src) % study directory
     study_dir = src;
-    file.study_dir = study_dir;
+    srcS.study_dir = study_dir;
   elseif strfind(src, 'studyinfo') %#ok<STRIFCND>
     filePath = fileparts2(src);
     if isempty(filePath)
       filePath = pwd;
     end
     study_dir = filePath;
-    file.study_dir = study_dir;
+    srcS.study_dir = study_dir;
   else
-    file = src; % path to data file
+    srcS = []; % path to data file
   end
+else
+  srcS = [];
 end
+% srcS will be populated with study_dir field if src is a string path to a dir or a studyinfo file
+% else it will be empty
 
-%% studyinfo input
-if isstruct(file) && isfield(file,'study_dir')
+%% load study_dir if possible
+if isstruct(srcS) && isfield(srcS,'study_dir')
   % "file" is a studyinfo structure.
   % retrieve most up-to-date studyinfo structure from studyinfo.mat file
-  studyinfo = dsCheckStudyinfo(file.study_dir,'process_id',options.process_id, varargin{:});
+  try
+    studyinfo = dsCheckStudyinfo(srcS.study_dir,'process_id',options.process_id, varargin{:});
+  catch
+    error('Input source is not a recognized type.')
+  end
 
   % compare simIDs to sim_id
   if ~isempty(options.simIDs)
@@ -130,7 +138,7 @@ if isstruct(file) && isfield(file,'study_dir')
     % convert original absolute paths to paths relative to study_dir
     for iFile = 1:length(data_files)
       [~,fname,fext] = fileparts2(data_files{iFile});
-      data_files{iFile} = fullfile(file.study_dir,'data',[fname fext]);
+      data_files{iFile} = fullfile(srcS.study_dir,'data',[fname fext]);
     end
 
     success = cellfun(@exist,data_files)==2;
@@ -149,7 +157,7 @@ if isstruct(file) && isfield(file,'study_dir')
 
   for iFile = 1:num_files
     dsVprintf(options, 'loading file %g/%g: %s\n',iFile,num_files,data_files{iFile});
-    tmp_data=dsImport(data_files{iFile},keyvals{:});
+    tmp_data = dsImport(data_files{iFile},keyvals{:});
     num_sets_per_file=length(tmp_data);
     modifications=sim_info(iFile).modifications;
     
@@ -196,15 +204,15 @@ if isstruct(file) && isfield(file,'study_dir')
   end
 
   return;
-else
-  studyinfo=[];
+else % no studyinfo
+  studyinfo = [];
 end
 
 %% cell of file paths input
 % check if input is a list of data files (TODO: eliminate duplicate code by
 % combining with the above recursive loading for studyinfo data_files)
-if iscellstr(file)
-  data_files=file;
+if iscellstr(src)
+  data_files=src;
   success=cellfun(@exist,data_files)==2;
   data_files=data_files(success);
   keyvals=dsOptions2Keyval(options);
@@ -230,18 +238,19 @@ if iscellstr(file)
       end
     end
   end
+  
   return;
 end
 
 %% char file path input
-if ischar(file)
-  [~,~,ext]=fileparts2(file);
+if ischar(src)
+  [~,~,ext] = fileparts2(src);
   switch lower(ext)
     case '.mat'
       % MAT-file contains data fields as separate variables (-v7.3 for HDF)
       if isempty(options.time_limits) && isempty(options.variables)
         % load full data set
-        data=load(file);
+        data = load(src);
 
         % if file only contains a structure called 'data' then return that
         if isfield(data,'data') && length(fieldnames(data))==1
@@ -250,7 +259,7 @@ if ischar(file)
       else
         % load partial data set
         % use matfile() to load HDF subsets given varargin options...
-        obj=matfile(file); % MAT-file object
+        obj=matfile(src); % MAT-file object
         varlist=who(obj); % variables stored in mat-file
         labels=obj.labels; % list of state variables and monitors
 
@@ -309,11 +318,11 @@ if ischar(file)
       end
     case '.csv'
       % assumes CSV file contains data organized according to output from dsWriteDynaSimSolver:
-      data=dsImportCSV(file);
+      data = dsImportCSV(src);
 
       if ~(isempty(options.time_limits) && isempty(options.variables))
         % limit to select subsets
-        data=dsSelect(data,varargin{:}); % todo: create dsSelect()
+        data = dsSelect(data,varargin{:}); % todo: create dsSelect()
       end
     otherwise
       error('file type not recognized. dsImport currently supports DynaSim data structure in MAT file, data values in CSV file.');
