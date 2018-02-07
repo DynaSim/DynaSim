@@ -520,7 +520,7 @@ for fInd = 1:nFunc % loop over function inputs
             
             thisResult = result(iResult);
           else % load data
-            thisData = loadDataFromSingleSim(src, simID, options, varargin{:});
+            thisData = loadDataFromSingleSim(studyinfo, simID, options, varargin{:});
             
             %skip if no data
             if isempty(thisData)
@@ -669,7 +669,7 @@ for fInd = 1:nFunc % loop over function inputs
           
           result = allResults(iResult);
         else % load data
-          thisData = loadDataFromSingleSim(src, simID, options, varargin{:});
+          thisData = loadDataFromSingleSim(studyinfo, simID, options, varargin{:});
 
           %skip if no data
           if isempty(thisData)
