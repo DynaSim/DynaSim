@@ -19,7 +19,7 @@ function [data,studyinfo] = dsImport(src,varargin)
 %     'process_id'  : process identifier for loading studyinfo if necessary
 %     'time_limits' : [beg,end] ms (see NOTE 2)
 %     'variables'   : cell array of matrix names (see NOTE 2)
-%     'simIDs'      : array of simIDs to import (default: [])
+%     'simIDs'      : numeric array of simIDs to import (default: [])
 %
 % Outputs:
 %   - DynaSim data structure:
@@ -92,7 +92,7 @@ end
 
 % check if input is a DynaSim study_dir or path to studyinfo
 if ischar(src)
-  if isdir(src) % study directory
+  if isdir(src) % assume char dir is study directory
     study_dir = src;
     srcS.study_dir = study_dir;
   elseif strfind(src, 'studyinfo') %#ok<STRIFCND>
@@ -103,10 +103,12 @@ if ischar(src)
     study_dir = filePath;
     srcS.study_dir = study_dir;
   else
-    srcS = []; % path to data file
+    srcS = []; % assume src is path to data file
   end
+elseif isstruct(src)
+  srcS = src; % src is studyinfo struct
 else
-  srcS = [];
+  srcS = []; % src is cellstr list of data files
 end
 % srcS will be populated with study_dir field if src is a string path to a dir or a studyinfo file
 % else it will be empty
@@ -243,7 +245,7 @@ if iscellstr(src)
 end
 
 %% char file path input
-if ischar(src)
+if ischar(src) % char path to single data file
   [~,~,ext] = fileparts2(src);
   switch lower(ext)
     case '.mat'
