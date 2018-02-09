@@ -1,4 +1,4 @@
-function [data,studyinfo] = dsImport(src,varargin)
+function [data,studyinfo,dataExist] = dsImport(src,varargin)
 %DSIMPORT - load data into DynaSim formatted data structure.
 %
 % Usage:
@@ -95,6 +95,10 @@ end
 
 if ischar(options.variables)
   options.variables = {options.variables};
+end
+
+if ~nargin || isempty(src)
+  src = pwd;
 end
 
 % check if input is a DynaSim study_dir or path to studyinfo
@@ -211,7 +215,7 @@ if isstruct(srcS) && isfield(srcS,'study_dir')
     
     tmp_data = dsImport(data_files{iFile},keyvals{:});
     num_sets_per_file = length(tmp_data);
-    modifications = sim_info(iFile).modifications;
+    modifications = studyinfo.simulations(iFile).modifications;
     
     if ~isfield(tmp_data,'varied') && ~isempty(modifications)
       % add varied info
