@@ -501,7 +501,7 @@ for fInd = 1:nFunc % loop over function inputs
 
         switch extension
           case '.svg'
-            plot2svg(fPath,thisResult);
+            plot2svg(fPath, thisResult, [], [], [], [], [], false);
           case '.jpg'
             print(thisResult,fPath,'-djpeg');
           case '.eps'

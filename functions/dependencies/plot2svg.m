@@ -1,4 +1,4 @@
-function varargout = plot2svg(filename, id, debug, legendicons, clippingmode, figuresize, pixelfiletype)
+function varargout = plot2svg(filename, id, debug, legendicons, clippingmode, figuresize, pixelfiletype, creditPrintBool)
   %  Matlab/GNU Octave FIG to SVG converter
   %
   %  Usage: plot2svg(filename, graphic handle, debug, legendicons, clippingmode, figuresize, pixelfiletype)
@@ -25,10 +25,22 @@ function varargout = plot2svg(filename, id, debug, legendicons, clippingmode, fi
   %   Matlab/Octave to SVG converter, Juerg Schwizer (converter@bluewin.ch).'])
   %   Forked FIG to SVG converter version, Salva Ardid (sardid@bu.edu).'])
   %   Most credit to Juerg Schwizer (converter@bluewin.ch).')
+  
+  % creditPrintBool - logical argument
+  %   By default, the function will make a credit display after every run. In a
+  %   for loop, it can be desirable to turn that off. This logical/boolean is
+  %   whether to print the credit or not.
+  
+  progversion = '4-Feb-2018';
+  
+  if nargin < 8 || isempty(creditPrintBool) || creditPrintBool==1
+%     disp(['   Matlab/Octave to SVG converter version ' progversion ', Juerg Schwizer (converter@bluewin.ch).'])
+    disp(['   Forked FIG to SVG converter version ' progversion ', Salva Ardid (sardid@bu.edu).'])
+    disp('   Most credit to Juerg Schwizer (converter@bluewin.ch).')
+  end
 
   global PLOT2SVG_globals
   global colorname
-  progversion = '4-Feb-2018';
   PLOT2SVG_globals.runningIdNumber = 0;
   PLOT2SVG_globals.UI = reportUI;
   PLOT2SVG_globals.octave = false;
