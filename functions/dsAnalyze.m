@@ -521,12 +521,19 @@ for fInd = 1:nFunc % loop over function inputs
 
       % store result
       if nargout
-        if options.argout_as_cell
-          allFnResults{fInd}{iResult} = thisResult;
+        if ~options.argout_as_cell && isstruct(result) && isfield(result,'time')
+          % dynasim type structure to store as struct array
+          allFnResults{fInd}(iResult) = result;
         else
-          allFnResults{fInd}(iResult) = thisResult;
+          if iscell(result) && length(result) == 1
+            % if single cell result, store as cell array cell
+            allFnResults{fInd}(iResult) = result;
+          else
+            % if not single cell result, store inside cell array cell
+            allFnResults{fInd}(iResult) = {result};
+          end
         end
-      end
+      end % if nargout
     end %nResults
     
   else % analysis function returned derived data
@@ -658,18 +665,20 @@ for fInd = 1:nFunc % loop over function inputs
       end
 
       % store result
-      if ~options.argout_as_cell && isstruct(result) && isfield(result,'time')
-        % dynasim type structure to store as struct array
-        allFnResults{fInd}(iResult) = result;
-      end
-      
-      if iscell(result) && length(result) == 1
-        % if single cell result, store as cell array cell
-        allFnResults{fInd}(iResult) = result;
-      else
-        % if not single cell result, store inside cell array cell
-        allFnResults{fInd}(iResult) = {result};
-      end
+      if nargout
+        if ~options.argout_as_cell && isstruct(result) && isfield(result,'time')
+          % dynasim type structure to store as struct array
+          allFnResults{fInd}(iResult) = result;
+        else
+          if iscell(result) && length(result) == 1
+            % if single cell result, store as cell array cell
+            allFnResults{fInd}(iResult) = result;
+          else
+            % if not single cell result, store inside cell array cell
+            allFnResults{fInd}(iResult) = {result};
+          end
+        end
+      end % if nargout
     end % nResults
   end % ishandle(result)
 end % fInd

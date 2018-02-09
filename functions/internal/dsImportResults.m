@@ -283,14 +283,14 @@ for iFn = 1:nResultFn
       if ~options.argout_as_cell && isstruct(thisFileContents.result) && isfield(thisFileContents.result,'time')
         % dynasim type structure to store as struct array
         thisFnResults(simInd) = thisFileContents.result;
-      end
-      
-      if iscell(thisFileContents.result) && length(thisFileContents.result) == 1
-        % if single cell result, store as cell array cell
-        thisFnResults(simInd) = thisFileContents.result;
       else
-        % if not single cell result, store inside cell array cell
-        thisFnResults(simInd) = {thisFileContents.result};
+        if iscell(thisFileContents.result) && length(thisFileContents.result) == 1
+          % if single cell result, store as cell array cell
+          thisFnResults(simInd) = thisFileContents.result;
+        else
+          % if not single cell result, store inside cell array cell
+          thisFnResults(simInd) = {thisFileContents.result};
+        end
       end
     end
     
