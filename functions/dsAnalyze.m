@@ -17,7 +17,7 @@ function result = dsAnalyze(src,varargin)
 %
 % Inputs:
 %   - First input/argument:
-%     - data: DynaSim data structure or data file path (s)
+%     - data: DynaSim data structure or data file path(s)
 %     - studyinfo: DynaSim studyinfo structure or path to studyinfo
 %     - study_dir: DynaSim study directory containing studyinfo.mat
 %   - func: function handle or cell array of function handles pointing to plot
@@ -43,7 +43,11 @@ function result = dsAnalyze(src,varargin)
 %     'load_all_data_flag'  : whether to load all the data in studyinfo
 %                             at once {0 or 1} (default: 0)
 %     'verbose_flag'  : whether to display informative messages/logs (default: 0)
-%     'parfor_flag' : whether to use parfor to run analysis {0 or 1} (default: 0)
+%     'parfor_flag'   : whether to use parfor to run analysis {0 or 1} (default: 0)
+%     'simIDs'        : numeric array of simIDs to analyze (default: [])
+%     'studyinfo_arg_flag': whether to add 'studyinfo' as a function option {0 or 1} (default: 0)
+%     'simID_arg_flag': whether to add 'simID' as a function option {0 or 1} (default: 0)
+%     'argout_as_cell': arg output as cell array {0,1} (default: 0)
 %    3 ways to specify functions:
 %     1)
 %     'function_options'    : cell array of option cell arrays {'option1',value1,...}
@@ -65,7 +69,8 @@ function result = dsAnalyze(src,varargin)
 %
 %
 % Outputs:
-%   - result: structure returned by the analysis function
+%   - result: for single fn, result is struct, cell array, or cell contents returned by the analysis function
+%             if postHoc, cell array of the form result{iFunc} containing previous for each fn
 %
 % TODO: annotate figures with data set-specific modifications
 %
@@ -74,6 +79,7 @@ function result = dsAnalyze(src,varargin)
 %
 % Author: Jason Sherfey, PhD <jssherfey@gmail.com>
 % Copyright (C) 2016 Jason Sherfey, Boston University, USA
+% Edited by Ben Polletta and Erik Roberts
 
 
 %% General cases:
@@ -138,6 +144,8 @@ options=dsCheckOptions(varargin,{...
   'result_functions',[],[],...
   'function_options',{},[],...
   'simIDs',[],[],...
+  'studyinfo_arg_flag',0,{0,1},...
+  'simID_arg_flag',0,{0,1},...
   'load_all_data_flag',0,{0,1},...
   'auto_gen_test_data_flag',0,{0,1},...
   'unit_test_flag',0,{0,1},...
@@ -148,6 +156,7 @@ options=dsCheckOptions(varargin,{...
   'plot_functions',[],[],...
   'plot_options',[],[],...
   'close_fig_flag',-1,{0,1},... % close figures as they are created. can be specified for all figs or for individual fig using plot_options. -1 means not set by user.
+  'argout_as_cell',0,{0,1},... % guarantee output as cell array and leave mising data as empty cells
   'auto_gen_test_data_flag',0,{0,1},...
   },false);
 
@@ -180,7 +189,7 @@ if options.parfor_flag && ~strcmp(reportUI,'matlab')
 end
 
 %% Parse src
-[data, studyinfo] = parseSrc(src, options, varargin{:});
+[data, studyinfo, options] = parseSrc(src, options, varargin{:});
 % Data at this point:
 %   - 'data' as single struct or struct array, or empty
 %   - 'studyinfo' struct or empty
@@ -189,17 +198,37 @@ if options.load_all_data_flag
   assert(~isempty(data));
   
   % convert data to double precision before analysis
-  dsVprintf(options, 'Converting data to double precision before analysis.\n')
+  if ~options.in_sim_flag
+    dsVprintf(options, 'Converting data to double precision before analysis.\n')
+  end
   data = convertDoublePrecision(data);
 end
 
-% check if study_dir defined
-if isempty(studyinfo)
-  studyinfoBool = false;
-else
-  studyinfoBool = true;
+if options.studyinfo_arg_flag
+  options.studyinfo = studyinfo;
 end
 
+% check if studyinfo found
+if isempty(studyinfo) % empty inSim
+  studyinfoBool = false;
+  
+  % these must be like this if not studyinfo
+  % TODO: add check and warning message
+  options.studyinfo_arg_flag = 0;
+  options.simID_arg_flag = 0;
+  options.simIDs = [];
+else
+  studyinfoBool = true;
+  
+  if ~isempty(options.simIDs)
+    % filter simulations in studyinfo to only given simIDs
+    studyinfo.simulations = studyinfo.simulations(options.simIDs);
+  end
+  
+  options.simIdVec = [studyinfo.simulations.sim_id];
+end
+
+% check if study_dir defined
 if ~isfield(studyinfo,'study_dir') || isempty(studyinfo.study_dir) || ~isdir(studyinfo.study_dir)
   studyinfo.study_dir = pwd;
 end
@@ -286,144 +315,13 @@ if nargout
   allFnResults = cell(nFunc,1);
 end
 
-%% Handle existing results
-% Check to see if results files exist. Deal with overwriting them, or
-% increasing index number. Note: if use same fn name, assume its a new call so
-% increment index. Only overwrite if all functions are the same as original.
-if options.save_results_flag && postHocBool
-  if studyinfoBool
-    if ~isempty(studyinfo.simulations(1).result_functions)
-      oldFns = sort(cellfun(@func2str, studyinfo.simulations(1).result_functions, 'Uni',0));
-      
-      files = studyinfo.simulations(1).result_files;
-    end
-  else
-    files = lscell(studyinfo.study_dir);
-  end
-  
-  % get filename without extension or parent path
-  files = cellfun(@fileNameFileparts, files, 'Uni',0);
-  
-  % get lastPlotIndex
-  plotFiles = regexpi(files, '_plot(\d+)_(.+)', 'tokens');
-  plotFiles = [plotFiles{:}];
-  if ~isempty(plotFiles)
-    plotIndFn = cat(1, plotFiles{:});
-    
-    plotInds = cellfun(@str2double, plotIndFn(:,1));
-    
-    lastPlotIndex = max(plotInds);
-  else
-    lastPlotIndex = 0;
-  end
-  
-  % get plots lastPlotIndex
-  plotsDir = fullfile(studyinfo.study_dir, 'plots');
-  if exist(plotsDir ,'dir')
-    plotFiles = lscell(plotsDir);
-    plotFiles = regexpi(plotFiles, '_plot(\d+)_(.+)', 'tokens');
-    plotFiles = [plotFiles{:}];
-    if ~isempty(plotFiles)
-      plotIndFn = cat(1, plotFiles{:});
-      
-      plotInds = cellfun(@str2double, plotIndFn(:,1));
-      
-      lastPlotIndex = max(lastPlotIndex, max(plotInds));
-    else
-      lastPlotIndex = lastPlotIndex;
-    end
-  end
-  
-  % get postHocPlots lastPlotIndex
-  postHocPlotsDir = fullfile(studyinfo.study_dir, 'postHocPlots');
-  if exist(postHocPlotsDir ,'dir')
-    plotFiles = lscell(postHocPlotsDir);
-    plotFiles = regexpi(plotFiles, '_plot(\d+)_(.+)', 'tokens');
-    plotFiles = [plotFiles{:}];
-    if ~isempty(plotFiles)
-      plotIndFn = cat(1, plotFiles{:});
-      
-      plotInds = cellfun(@str2double, plotIndFn(:,1));
-      
-      lastPlotIndex = max(lastPlotIndex, max(plotInds));
-    else
-      lastPlotIndex = lastPlotIndex;
-    end
-  end
-  
-  % get lastAnalysisIndex
-  analysisFiles = regexpi(files, '_analysis(\d+)_(.+)', 'tokens');
-  analysisFiles = [analysisFiles{:}];
-  if ~isempty(analysisFiles)
-    analysisIndFn = cat(1, analysisFiles{:});
-    
-    analysisInds = cellfun(@str2double, analysisIndFn(:,1));
-    
-    lastAnalysisIndex = max(analysisInds);
-  else
-    lastAnalysisIndex = 0;
-  end
-  
-  % get results lastAnalysisIndex
-  resultsDir = fullfile(studyinfo.study_dir, 'results');
-  if exist(resultsDir ,'dir')
-    analysisFiles = lscell(resultsDir);
-    analysisFiles = regexpi(analysisFiles, '_analysis(\d+)_(.+)', 'tokens');
-    analysisFiles = [analysisFiles{:}];
-    if ~isempty(analysisFiles)
-      analysisIndFn = cat(1, analysisFiles{:});
-      
-      analysisInds = cellfun(@str2double, analysisIndFn(:,1));
-      
-      lastAnalysisIndex = max(lastAnalysisIndex, max(analysisInds));
-    else
-      lastAnalysisIndex = lastAnalysisIndex;
-    end
-  end
-  
-  % get postHocResults lastAnalysisIndex
-  postHocResultsDir = fullfile(studyinfo.study_dir, 'postHocResults');
-  if exist(postHocResultsDir ,'dir')
-    analysisFiles = lscell(postHocResultsDir);
-    analysisFiles = regexpi(analysisFiles, '_analysis(\d+)_(.+)', 'tokens');
-    analysisFiles = [analysisFiles{:}];
-    if ~isempty(analysisFiles)
-      analysisIndFn = cat(1, analysisFiles{:});
-      
-      analysisInds = cellfun(@str2double, analysisIndFn(:,1));
-      
-      lastAnalysisIndex = max(lastAnalysisIndex, max(analysisInds));
-    else
-      lastAnalysisIndex = lastAnalysisIndex;
-    end
-  end
-  
-  if ~studyinfoBool
-    oldFns = sort([analysisIndFn(:,2); plotIndFn(:,2)]);
-  end
-  
-  if options.overwrite_flag && (~isempty(plotFiles) || ~isempty(analysisFiles))
-    % check if all functions the same as old ones
-    newFns = sort(cellfun(@func2str, funcIn, 'Uni',0));
-    
-    if isempty(setdiff(oldFns, oldFns))
-      dsVprintf(options, 'Overwriting old results and plot function indicies in new folders starting at index 0.');
-      
-      lastPlotIndex = 0;
-      lastAnalysisIndex = 0;
-    else
-      dsVprintf(options, 'Not overwriting old results and plot function indicies in new folders since functions are not the same, so incrementing index.');
-    end
-  end
-else % ~postHocBool
-  % setting to avoid errors
-  lastPlotIndex = 0;
-  lastAnalysisIndex = 0;
-end % if options.save_results_flag && postHocBool
+% Handle existing results
+[lastPlotIndex, lastAnalysisIndex] = findIndexFromExistingResults();
 
 %% Calc results
 plotFnInd = lastPlotIndex;
 analysisFnInd = lastAnalysisIndex;
+
 for fInd = 1:nFunc % loop over function inputs
   func = funcIn{fInd};
   
@@ -453,9 +351,9 @@ for fInd = 1:nFunc % loop over function inputs
   tstart = tic;
 
   %% Eval func
-  if ~isempty(data)
+  if ~isempty(data) % either in sim or posthoc with load_all_data_flag 
     result = evalFnWithArgs(fInd, data, func, options, varargin{:});
-  else
+  else % posthoc without load_all_data_flag
     result = [];
   end
 
@@ -467,7 +365,7 @@ for fInd = 1:nFunc % loop over function inputs
   elseif studyinfoBool
     nResults = length(studyinfo.simulations);
   else
-    error('Cannot determine nResults');
+    error('Cannot determine number of results');
   end
 
   dsVprintf(options, '    Elapsed time: %g sec\n',toc(tstart));
@@ -527,6 +425,10 @@ for fInd = 1:nFunc % loop over function inputs
               dsVprintf(options, '  Skipping simID=%i since no data.\n', simID);
               continue
             end
+
+            if options.simID_arg_flag
+              options.thisSimID = simID;
+            end
             
             % calc result for this data
             thisResult = evalFnWithArgs(fInd, thisData, func, options, varargin{:});
@@ -549,7 +451,7 @@ for fInd = 1:nFunc % loop over function inputs
           
           % make fPath
           fDir = fullfile(studyinfo.study_dir, 'postHocPlots');
-          if ~exist(fDir,'dir')
+          if ~exist(fDir,'dir') && options.save_results_flag
             mkdir(fDir)
           end
           
@@ -557,7 +459,7 @@ for fInd = 1:nFunc % loop over function inputs
         end
       else  % posthoc without studyinfo
         thisResult = result(iResult);
-        simID = iResult;
+        simID = iResult; % for skipping warning
 
         % make fName
         if isfield(options, 'result_file') && ~isempty(options.result_file)
@@ -569,7 +471,7 @@ for fInd = 1:nFunc % loop over function inputs
 
         % make fDir
         fDir = fullfile(studyinfo.study_dir, 'postHocPlots');
-        if ~exist(fDir,'dir')
+        if ~exist(fDir,'dir') && options.save_results_flag
           mkdir(fDir)
         end
       end % if ~postHocBool
@@ -583,7 +485,7 @@ for fInd = 1:nFunc % loop over function inputs
         if ~postHocBool
           dsVprintf(options, '  Skipping since no result.\n');
         else
-          dsVprintf(options, '  Skipping simID=%i since no result.\n', simID);
+          dsVprintf(options, '  Skipping id=%i since no result.\n', simID);
         end
 
         continue
@@ -619,7 +521,11 @@ for fInd = 1:nFunc % loop over function inputs
 
       % store result
       if nargout
-        allFnResults{fInd}{iResult} = thisResult;
+        if options.argout_as_cell
+          allFnResults{fInd}{iResult} = thisResult;
+        else
+          allFnResults{fInd}(iResult) = thisResult;
+        end
       end
     end %nResults
     
@@ -642,6 +548,7 @@ for fInd = 1:nFunc % loop over function inputs
     
     analysisFnInd = analysisFnInd + 1;
 
+    % switch names in postHoc
     if postHocBool
       allResults = result;
       clear result;
@@ -663,7 +570,7 @@ for fInd = 1:nFunc % loop over function inputs
         end
       elseif studyinfoBool % posthoc with studyinfo
         simID = studyinfo.simulations(iResult).sim_id;
-
+        
         if options.load_all_data_flag
           thisData = data(iResult);
           
@@ -675,6 +582,10 @@ for fInd = 1:nFunc % loop over function inputs
           if isempty(thisData)
             dsVprintf(options, '  Skipping simID=%i since no data.\n', simID);
             continue
+          end
+
+          if options.simID_arg_flag
+            options.thisSimID = simID;
           end
 
           % calc result for this data
@@ -701,7 +612,7 @@ for fInd = 1:nFunc % loop over function inputs
           
           % make fDir
           fDir = fullfile(studyinfo.study_dir, 'postHocResults');
-          if ~exist(fDir,'dir')
+          if ~exist(fDir,'dir') && options.save_results_flag
             mkdir(fDir)
           end
           
@@ -709,7 +620,7 @@ for fInd = 1:nFunc % loop over function inputs
         end
       else  % posthoc without studyinfo
         result = allResults(iResult);
-        simID = iResult;
+        simID = iResult; % for skipping warning
 
         % make fName
         if isfield(options, 'result_file') && ~isempty(options.result_file)
@@ -719,7 +630,7 @@ for fInd = 1:nFunc % loop over function inputs
           
           % make fDir
           fDir = fullfile(studyinfo.study_dir, 'postHocResults');
-          if ~exist(fDir,'dir')
+          if ~exist(fDir,'dir') && options.save_results_flag
             mkdir(fDir)
           end
           
@@ -732,7 +643,7 @@ for fInd = 1:nFunc % loop over function inputs
         if ~postHocBool
           dsVprintf(options, '  Skipping since no result.\n');
         else
-          dsVprintf(options, '  Skipping simID=%i since no result.\n', simID);
+          dsVprintf(options, '  Skipping id=%i since no result.\n', simID);
         end
 
         continue
@@ -747,16 +658,42 @@ for fInd = 1:nFunc % loop over function inputs
       end
 
       % store result
-      if nargout
-        allFnResults{fInd}{iResult} = result;
+      if ~options.argout_as_cell && isstruct(result) && isfield(result,'time')
+        % dynasim type structure to store as struct array
+        allFnResults{fInd}(iResult) = result;
+      end
+      
+      if iscell(result) && length(result) == 1
+        % if single cell result, store as cell array cell
+        allFnResults{fInd}(iResult) = result;
+      else
+        % if not single cell result, store inside cell array cell
+        allFnResults{fInd}(iResult) = {result};
       end
     end % nResults
   end % ishandle(result)
 end % fInd
 
-% if only 1 fn, dont return cell of cells
-if nargout && nFunc == 1
-  allFnResults = allFnResults{1};
+% get output arg for postHoc
+if nargout && postHocBool
+  % simplify output if possible
+  
+  for iFunc = 1:nFunc
+    % if only 1 data cell enter cell
+    if iscell(allFnResults{iFunc}) && (length(allFnResults{iFunc})==1)
+      allFnResults{iFunc} = allFnResults{iFunc}{1};
+    end
+  end
+  
+  % if only 1 function, enter cell
+  if nFunc == 1
+    allFnResults = allFnResults{1};
+  end
+  
+  result = allFnResults; % switch names again
+  clear allFnResults
+  
+  % output of form: result{iFunc}{iResult}
 end
 
 %% auto_gen_test_data_flag argout
@@ -766,6 +703,147 @@ if options.auto_gen_test_data_flag
   %dsUnitSaveAutoGenTestData(argin, argout); % TODO: check if needs to be saveAutoGenTestDir
 end
 
+%% Nested fn -------------------------------------------------------------------
+  function [lastPlotIndex, lastAnalysisIndex] = findIndexFromExistingResults()
+    % Handle existing results
+    % Check to see if results files exist. Deal with overwriting them, or
+    % increasing index number. Note: if use same fn name, assume its a new call so
+    % increment index. Only overwrite if all functions are the same as original.
+    if options.save_results_flag && postHocBool
+      if studyinfoBool
+        if ~isempty(studyinfo.simulations(1).result_functions)
+          oldFns = sort(cellfun(@func2str, studyinfo.simulations(1).result_functions, 'Uni',0));
+          
+          files = studyinfo.simulations(1).result_files; % studyinfoBool with prior result_functions
+        else
+          files = lscell(studyinfo.study_dir); % studyinfoBool but no result_functions
+        end
+      else
+        files = lscell(studyinfo.study_dir); % no studyinfoBool
+      end
+      
+      % get filename without extension or parent path
+      files = cellfun(@fileNameFileparts, files, 'Uni',0);
+      
+      % get lastPlotIndex
+      plotFiles = regexpi(files, '_plot(\d+)_(.+)', 'tokens');
+      plotFiles = [plotFiles{:}];
+      if ~isempty(plotFiles)
+        plotIndFn = cat(1, plotFiles{:});
+        
+        plotInds = cellfun(@str2double, plotIndFn(:,1));
+        
+        lastPlotIndex = max(plotInds);
+      else
+        lastPlotIndex = 0;
+      end
+      
+      % get plots lastPlotIndex
+      plotsDir = fullfile(studyinfo.study_dir, 'plots');
+      if exist(plotsDir ,'dir')
+        plotFiles = lscell(plotsDir);
+        plotFiles = regexpi(plotFiles, '_plot(\d+)_(.+)', 'tokens');
+        plotFiles = [plotFiles{:}];
+        if ~isempty(plotFiles)
+          plotIndFn = cat(1, plotFiles{:});
+          
+          plotInds = cellfun(@str2double, plotIndFn(:,1));
+          
+          lastPlotIndex = max(lastPlotIndex, max(plotInds));
+        else
+          lastPlotIndex = lastPlotIndex;
+        end
+      end
+      
+      % get postHocPlots lastPlotIndex
+      postHocPlotsDir = fullfile(studyinfo.study_dir, 'postHocPlots');
+      if exist(postHocPlotsDir ,'dir')
+        plotFiles = lscell(postHocPlotsDir);
+        plotFiles = regexpi(plotFiles, '_plot(\d+)_(.+)', 'tokens');
+        plotFiles = [plotFiles{:}];
+        if ~isempty(plotFiles)
+          plotIndFn = cat(1, plotFiles{:});
+          
+          plotInds = cellfun(@str2double, plotIndFn(:,1));
+          
+          lastPlotIndex = max(lastPlotIndex, max(plotInds));
+        else
+          lastPlotIndex = lastPlotIndex;
+        end
+      end
+      
+      % get lastAnalysisIndex
+      analysisFiles = regexpi(files, '_analysis(\d+)_(.+)', 'tokens');
+      analysisFiles = [analysisFiles{:}];
+      if ~isempty(analysisFiles)
+        analysisIndFn = cat(1, analysisFiles{:});
+        
+        analysisInds = cellfun(@str2double, analysisIndFn(:,1));
+        
+        lastAnalysisIndex = max(analysisInds);
+      else
+        lastAnalysisIndex = 0;
+      end
+      
+      % get results lastAnalysisIndex
+      resultsDir = fullfile(studyinfo.study_dir, 'results');
+      if exist(resultsDir ,'dir')
+        analysisFiles = lscell(resultsDir);
+        analysisFiles = regexpi(analysisFiles, '_analysis(\d+)_(.+)', 'tokens');
+        analysisFiles = [analysisFiles{:}];
+        if ~isempty(analysisFiles)
+          analysisIndFn = cat(1, analysisFiles{:});
+          
+          analysisInds = cellfun(@str2double, analysisIndFn(:,1));
+          
+          lastAnalysisIndex = max(lastAnalysisIndex, max(analysisInds));
+        else
+          lastAnalysisIndex = lastAnalysisIndex;
+        end
+      end
+      
+      % get postHocResults lastAnalysisIndex
+      postHocResultsDir = fullfile(studyinfo.study_dir, 'postHocResults');
+      if exist(postHocResultsDir ,'dir')
+        analysisFiles = lscell(postHocResultsDir);
+        analysisFiles = regexpi(analysisFiles, '_analysis(\d+)_(.+)', 'tokens');
+        analysisFiles = [analysisFiles{:}];
+        if ~isempty(analysisFiles)
+          analysisIndFn = cat(1, analysisFiles{:});
+          
+          analysisInds = cellfun(@str2double, analysisIndFn(:,1));
+          
+          lastAnalysisIndex = max(lastAnalysisIndex, max(analysisInds));
+        else
+          lastAnalysisIndex = lastAnalysisIndex;
+        end
+      end
+      
+      if ~studyinfoBool
+        oldFns = sort([analysisIndFn(:,2); plotIndFn(:,2)]);
+      end
+      
+      if options.overwrite_flag && (~isempty(plotFiles) || ~isempty(analysisFiles))
+        % check if all functions the same as old ones
+        newFns = sort(cellfun(@func2str, funcIn, 'Uni',0));
+        
+        if isempty(setdiff(oldFns, oldFns))
+          dsVprintf(options, 'Overwriting old results and plot function indicies in new folders starting at index 0.');
+          
+          lastPlotIndex = 0;
+          lastAnalysisIndex = 0;
+        else
+          dsVprintf(options, 'Not overwriting old results and plot function indicies in new folders since functions are not the same, so incrementing index.');
+        end
+      end
+    else % ~postHocBool
+      % setting to avoid errors
+      lastPlotIndex = 0;
+      lastAnalysisIndex = 0;
+    end % if options.save_results_flag && postHocBool
+  end % findIndexFromExistingResults
+% End Nested Fn ----------------------------------------------------------------
+
 end %main fn
 
 
@@ -773,11 +851,11 @@ end %main fn
 
 %% Local functions
 
-function [data, studyinfo] = parseSrc(src, options, varargin)
+function [data, studyinfo, options] = parseSrc(src, options, varargin)
 
 % if src is:
 % - data: data = src, studyinfo = []
-% - studydir and studyinfo: gest studyinfo, and if load_all_data_flag, loads data
+% - studydir and studyinfo: just studyinfo, and if load_all_data_flag, loads data
 
 %% auto_gen_test_data_flag argin
 warning('off','catstruct:DuplicatesFound');
@@ -798,9 +876,17 @@ end
 if isstruct(src) && isfield(src,'time') % data struct (single or array)
   data = src; % if length==1,then likely from SimulateModel call
   studyinfo = [];
+  
+  options.load_all_data_flag = 1; % data has been loaded
 elseif ischar(src) %string input
   if options.load_all_data_flag % load data
-    [data,studyinfo] = dsImport(src, varargin{:});
+    [data,studyinfo,dataExistBoolVec] = dsImport(src, varargin{:});
+    % if any data missing, will return struct with fewer entries, but gives
+    % dataExistBoolVec showing which data did exist
+    
+    if ~all(dataExistBoolVec)
+      error('Some data missing and handling this has not been implemented yet. Temporary solution is to pass in simIDs of existing data.')
+    end
   else % only load studyinfo
     data = [];
     studyinfo = dsCheckStudyinfo(src);
@@ -814,49 +900,6 @@ elseif ischar(src) %string input
   end
 end
 
-% Old Verbose Way with unnecessary checks
-% determine type of src
-% if ischar(src)
-%   if exist(src,'file') % data file or studyinfo.mat
-%     if strfind(src, 'studyinfo') %studyinfo.mat
-%       [data,studyinfo] = dsImport(src, varargin{:}); % load data
-%       studyinfo.study_dir = fileparts2(src);
-%     else % data file
-%       [data,studyinfo] = dsImport(src, varargin{:}); % load data
-%     end
-%   elseif isdir(src) % study_dir
-%     [data,studyinfo] = dsImport(src, varargin{:}); % load data
-%     studyinfo.study_dir = src;
-%   else
-%     try
-%       [data,studyinfo] = dsImport(src, varargin{:}); % load data
-%     catch
-%       error('Unknown source for first input/argument.')
-%     end
-%   end
-% elseif isstruct(src) && length(src)>1 % data file cell array
-%   data = src;
-% elseif isstruct(src) % single data struct or studyinfo struct
-%   if isfield(src,'time') % single data file
-%     data = src;
-%   else % studyinfo struct
-%     [data,studyinfo] = dsImport(src, varargin{:}); % load data
-%   end
-% elseif iscell(src) % cell array of files
-%   [data,studyinfo] = dsImport(src, varargin{:}); % load data
-% else
-%   try
-%     [data,studyinfo] = dsImport(src, varargin{:}); % load data
-%   catch
-%     error('Unknown source for first input/argument.')
-%   end
-% end
-%
-%
-% % make studyinfo if doesn't exist
-% if ~exist('studyinfo','var')
-%   studyinfo = [];
-% end
 
 %% auto_gen_test_data_flag argout
 if options.auto_gen_test_data_flag
@@ -963,54 +1006,75 @@ end % filenameFromVaried
 
 
 function result = evalFnWithArgs(fInd, data, func, options, varargin)
-
-% if strcmp(reportUI,'matlab')
-%   p = gcp('nocreate');
-%   
-%   if options.parfor_flag && isempty(p)
-%     warning('Only does parfor mode if parfor_flag is set and parpool is already running to avoid unnecessary overhead.')
-%   end
-% end
+% if not load_all_data_flag, will be only 1 dataset
 
 try
   make_invis_bool = options.save_results_flag && (options.close_fig_flag ~= 0);
   
+  if options.studyinfo_arg_flag
+    options.function_options{fInd}(end+1:end+2) = {'studyinfo',options.studyinfo};
+  end
+  
+  if options.simID_arg_flag
+    if options.load_all_data_flag
+      options.function_options{fInd}(end+1) = {'simID'};
+    else
+      options.function_options{fInd}(end+1:end+2) = {'simID',options.thisSimID};
+    end
+  end
+  
   if isempty(options.function_options)
     % Only do parfor mode if parfor_flag is set and parpool is already running. Otherwise, this will add unnecessary overhead.
     if options.parfor_flag % && ~isempty(p)
-      parfor dInd = 1:length(data)
-        result(dInd) = feval(func,data(dInd));
+      parfor iData = 1:length(data)
+        result(iData) = feval(func,data(iData));
         
-        if ishandle(result(dInd)) && make_invis_bool
-          set(result(dInd), 'Visible', 'off'); % cannot close yet until save, but can make invisible
+        if ishandle(result(iData)) && make_invis_bool
+          set(result(iData), 'Visible', 'off'); % cannot close yet until save, but can make invisible
         end
       end
     else
-      for dInd = 1:length(data)
-        result(dInd) = feval(func,data(dInd));
+      for iData = 1:length(data)
+        result(iData) = feval(func,data(iData));
         
-        if ishandle(result(dInd)) && make_invis_bool
-          set(result(dInd), 'Visible', 'off'); % cannot close yet until save, but can make invisible
+        if ishandle(result(iData)) && make_invis_bool
+          set(result(iData), 'Visible', 'off'); % cannot close yet until save, but can make invisible
         end
       end
     end % options.parfor_flag && ~isempty(p)
-  else
+  else % ~isempty(options.function_options)
     function_options = options.function_options{fInd};
+    
+    if options.load_all_data_flag && options.simID_arg_flag
+      addSimIdBool = 1;
+      
+      simIdVec = options.simIdVec;
+    else
+      addSimIdBool = 0;
+    end
 
     if options.parfor_flag % && ~isempty(p)
-      parfor dInd = 1:length(data)
-        result(dInd) = feval(func,data(dInd),function_options{:}); %#ok<PFBNS>
+      parfor iData = 1:length(data)
+        if ~addSimIdBool
+          result(iData) = feval(func, data(iData), function_options{:}); %#ok<PFBNS>
+        else
+          result(iData) = feval(func, data(iData), function_options{:}, simIdVec(iData));
+        end
         
-        if ishandle(result(dInd)) && make_invis_bool
-          set(result(dInd), 'Visible', 'off'); % cannot close yet until save, but can make invisible
+        if ishandle(result(iData)) && make_invis_bool
+          set(result(iData), 'Visible', 'off'); % cannot close yet until save, but can make invisible
         end
       end
     else
-      for dInd = 1:length(data)
-        result(dInd) = feval(func,data(dInd),function_options{:});
+      for iData = 1:length(data)
+        if ~addSimIdBool
+          result(iData) = feval(func, data(iData), function_options{:});
+        else
+          result(iData) = feval(func, data(iData), function_options{:}, simIdVec(iData));
+        end
         
-        if ishandle(result(dInd)) && make_invis_bool
-          set(result(dInd), 'Visible', 'off'); % cannot close yet until save, but can make invisible
+        if ishandle(result(iData)) && make_invis_bool
+          set(result(iData), 'Visible', 'off'); % cannot close yet until save, but can make invisible
         end
       end
     end % options.parfor_flag && ~isempty(p)
@@ -1024,13 +1088,15 @@ end % evalFnWithArgs
 
 
 function data = loadDataFromSingleSim(src, simID, options, varargin)
+
+% Dev Note: this block is probably not needed anymore, but should not break anything
 % check if iResult in options.simIDs
 if isempty(options.simIDs)
   simIDs = simID;
 else
   simIDs = intersect(simID, options.simIDs);
 
-  if isempty(simIDs) % skip if empty
+  if isempty(simIDs) % skip if simID not in options.simIDs
     return
   end
 end
@@ -1038,7 +1104,7 @@ end
 % check if src is data or other
 if isstruct(src) && isfield('time','src')
   data = src;
-  data = data(simID);
+  data = data(simID); % this may not work if a subset of data is given
 else
   % overwrite simIDs in varargin
   varargin(end+1:end+2) = {'simIDs', simIDs};

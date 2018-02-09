@@ -27,6 +27,8 @@ function results = dsImportResults(src, varargin)
 %                    name, e.g. 'study_sim1_analysis#_func.mat' as mat. If index not
 %                    specified and func name matches multiple functions, will
 %                    return results as as structure fields (see Outputs below).
+%     'simIDs'        : numeric array of simIDs to import results from (default: [])
+%     'as_cell'       : output as cell array {0,1} (default: 0)
 %
 % Outputs:
 %   - results: If multiple result function instances found, it will return structure 
@@ -34,17 +36,17 @@ function results = dsImportResults(src, varargin)
 %              instance, usually following analysis in name. Inside each field 
 %              is a cell array of results of length = num sims. If only 1
 %              function, then just returns the cell array for that function.
-%
+% 
+% Author: Jason Sherfey, PhD <jssherfey@gmail.com>
+% Updated: Erik Roberts
+% Copyright (C) 2016 Jason Sherfey, Boston University, USA
+
 % TODO:
 %   - This command breaks when "results" are figures e.g. outputs of dsPlot
 %   (dave, Feb 2017). Does not know how to "load" an image, nor does it
 %   recognize the image extensions. I wrote "dsImportPlots" as a way around this,
 %   but there might be better solutions for differentiating "plots" from other
 %   "results"
-% 
-% Author: Jason Sherfey, PhD <jssherfey@gmail.com>
-% Updated: Erik Roberts
-% Copyright (C) 2016 Jason Sherfey, Boston University, USA
 
 %% Check inputs
 if isempty(src)
@@ -65,6 +67,7 @@ options = dsCheckOptions(varargin,{...
   'func',[],[],...
   'import_scope','all',{'studyinfo','results','postHocResults','allResults','all'},...
   'simIDs',[],[],...
+  'as_cell',0,{0,1},... % guarantee output as cell array and leave mising data as empty cells
   'simplify2cell_bool',1,[0,1],... % used by gimbl-vis
   },false);
 
@@ -239,8 +242,7 @@ if ~isempty(options.simIDs)
     simInd = [simInd{:}];
     simInd = cellfun(@str2double, simInd);
     
-    result_files = result_files( ismember(simInd, options.simIDs) );
-    
+    result_files = result_files( ismember(simInd, options.simIDs) ); % filter result_files for simID number
   end
 end
 
@@ -277,12 +279,18 @@ for iFn = 1:nResultFn
       simInd = simInd{1};
       simInd = str2double(simInd);
       
-      % store result in cell
-      thisFnResults{simInd} = thisFileContents.result;
+      % store result
+      if ~options.argout_as_cell && isstruct(thisFileContents.result) && isfield(thisFileContents.result,'time')
+        % dynasim type structure to store as struct array
+        thisFnResults(simInd) = thisFileContents.result;
+      end
       
-      % if single cell, enter cell
-      if iscell(thisFnResults{simInd}) && length(thisFnResults{simInd}) == 1
-        thisFnResults{simInd} = thisFnResults{simInd}{1};
+      if iscell(thisFileContents.result) && length(thisFileContents.result) == 1
+        % if single cell result, store as cell array cell
+        thisFnResults(simInd) = thisFileContents.result;
+      else
+        % if not single cell result, store inside cell array cell
+        thisFnResults(simInd) = {thisFileContents.result};
       end
     end
     
@@ -294,7 +302,7 @@ for iFn = 1:nResultFn
   clear thisFnResults
 end % fn
 
-% convert to inner struct if only 1 fn
+% convert to inner struct fld if only 1 fn
 if nResultFn == 1 && options.simplify2cell_bool
   results = results.(fnIdStr{1});
 end
