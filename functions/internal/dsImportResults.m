@@ -28,6 +28,7 @@ function results = dsImportResults(src, varargin)
 %                    specified and func name matches multiple functions, will
 %                    return results as as structure fields (see Outputs below).
 %     'simIDs'        : numeric array of simIDs to import results from (default: [])
+%     'as_cell'       : output as cell array {0,1} (default: 0)
 %
 % Outputs:
 %   - results: If multiple result function instances found, it will return structure 
@@ -66,6 +67,7 @@ options = dsCheckOptions(varargin,{...
   'func',[],[],...
   'import_scope','all',{'studyinfo','results','postHocResults','allResults','all'},...
   'simIDs',[],[],...
+  'as_cell',0,{0,1},... % guarantee output as cell array and leave mising data as empty cells
   'simplify2cell_bool',1,[0,1],... % used by gimbl-vis
   },false);
 
@@ -277,13 +279,18 @@ for iFn = 1:nResultFn
       simInd = simInd{1};
       simInd = str2double(simInd);
       
-      % store result in cell
+      % store result
+      if ~options.argout_as_cell && isstruct(thisFileContents.result) && isfield(thisFileContents.result,'time')
+        % dynasim type structure to store as struct array
+        thisFnResults(simInd) = thisFileContents.result;
+      end
+      
       if iscell(thisFileContents.result) && length(thisFileContents.result) == 1
-        % if single cell result, store as cell
+        % if single cell result, store as cell array cell
         thisFnResults(simInd) = thisFileContents.result;
       else
-        % if not single cell result, store inside cell
-        thisFnResults{simInd} = thisFileContents.result;
+        % if not single cell result, store inside cell array cell
+        thisFnResults(simInd) = {thisFileContents.result};
       end
     end
     
@@ -295,7 +302,7 @@ for iFn = 1:nResultFn
   clear thisFnResults
 end % fn
 
-% convert to inner struct if only 1 fn
+% convert to inner struct fld if only 1 fn
 if nResultFn == 1 && options.simplify2cell_bool
   results = results.(fnIdStr{1});
 end
