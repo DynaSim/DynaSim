@@ -353,6 +353,10 @@ for fInd = 1:nFunc % loop over function inputs
   %% Eval func
   if ~isempty(data) % either in sim or posthoc with load_all_data_flag 
     result = evalFnWithArgs(fInd, data, func, options, varargin{:});
+    
+    if isempty(result)
+      error('result empty.')
+    end
   else % posthoc without load_all_data_flag
     result = [];
   end
@@ -889,9 +893,11 @@ if isstruct(src) && isfield(src,'time') % data struct (single or array)
   options.load_all_data_flag = 1; % data has been loaded
 elseif ischar(src) %string input
   if options.load_all_data_flag % load data
-    [data,studyinfo,dataExistBoolVec] = dsImport(src, varargin{:});
+    [data,~,dataExistBoolVec] = dsImport(src, varargin{:});
     % if any data missing, will return struct with fewer entries, but gives
     % dataExistBoolVec showing which data did exist
+    
+    studyinfo = dsCheckStudyinfo(src);
     
     if ~all(dataExistBoolVec)
       error('Some data missing and handling this has not been implemented yet. Temporary solution is to pass in simIDs of existing data.')
@@ -1032,7 +1038,7 @@ try
     end
   end
   
-  if isempty(options.function_options)
+  if isempty(options.function_options) || isempty(options.function_options{fInd})
     % Only do parfor mode if parfor_flag is set and parpool is already running. Otherwise, this will add unnecessary overhead.
     if options.parfor_flag % && ~isempty(p)
       parfor iData = 1:length(data)
@@ -1060,6 +1066,8 @@ try
       simIdVec = options.simIdVec;
     else
       addSimIdBool = 0;
+      
+      simIdVec = []; % define so parfor doesnt throw warning
     end
 
     if options.parfor_flag % && ~isempty(p)
