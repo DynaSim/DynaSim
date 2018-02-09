@@ -5,7 +5,7 @@ function dsExportData(data,varargin)
 %   dsExportData(data,varargin)
 %
 % Inputs:
-%   - data: DynaSim data structure (see dsCheckData)
+%   - data: DynaSim data structure (see dsCheckData) or any result data
 %   - options:
 %     'filename'    : name of output data file (default: 'data.mat')
 %     'format'      : mat. todo: csv, HDF. (default: 'mat')
