@@ -247,7 +247,7 @@ if isstruct(srcS) && isfield(srcS,'study_dir')
         data(1:total_num_sets) = tmp_data(1);
       else
         data = cell(num_files,1);
-        data{thisCellInd} = tmp_data;
+        data(thisCellInd) = {tmp_data};
       end
     end
     
@@ -258,7 +258,7 @@ if isstruct(srcS) && isfield(srcS,'study_dir')
       if iscell(tmp_data) && (length(tmp_data) == 1)
         data(thisCellInd) = tmp_data;
       else
-        data{thisCellInd} = tmp_data;
+        data(thisCellInd) = {tmp_data};
       end
     end
   end % iFile = 1:num_files
@@ -299,7 +299,7 @@ if iscellstr(src)
       if iscell(tmp_data) && (length(tmp_data) == 1)
         data(iFile) = tmp_data;
       else
-        data{iFile} = tmp_data;
+        data(iFile) = {tmp_data};
       end
     end
   end
