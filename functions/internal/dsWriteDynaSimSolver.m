@@ -790,15 +790,13 @@ end
 
 
 %% Memory Check
-fprintf(fid,'%% ###########################################################\n');
-fprintf(fid,'%% Memory check:\n');
-fprintf(fid,'%% ###########################################################\n');
 if ~options.mex_flag
+  fprintf(fid,'%% ###########################################################\n');
+  fprintf(fid,'%% Memory check:\n');
+  fprintf(fid,'%% ###########################################################\n');
   fprintf(fid,'try \n');
-end
-fprintf(fid,'  memoryUsed = memoryUsageCallerGB(); \n');
-fprintf(fid,'  fprintf(''Total Memory Used <= %%i GB \\n'', ceil(memoryUsed)); \n');
-if ~options.mex_flag
+  fprintf(fid,'  memoryUsed = memoryUsageCallerGB(); \n');
+  fprintf(fid,'  fprintf(''Total Memory Used <= %%i GB \\n'', ceil(memoryUsed)); \n');
   fprintf(fid,'end \n');
 end
 
