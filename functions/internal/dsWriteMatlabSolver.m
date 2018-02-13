@@ -430,10 +430,14 @@ end
 fprintf(fid,'%% ###########################################################\n');
 fprintf(fid,'%% Memory check:\n');
 fprintf(fid,'%% ###########################################################\n');
-fprintf(fid,'try \n');
+if ~options.mex_flag
+  fprintf(fid,'try \n');
+end
 fprintf(fid,'  memoryUsed = memoryUsageCallerGB(); \n');
 fprintf(fid,'  fprintf(''Total Memory Used <= %%i GB \\n'', ceil(memoryUsed)); \n');
-fprintf(fid,'end \n');
+if ~options.mex_flag
+  fprintf(fid,'end \n');
+end
 
 %% Benchmark toc
 if options.benchmark_flag
