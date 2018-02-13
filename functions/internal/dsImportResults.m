@@ -280,7 +280,7 @@ for iFn = 1:nResultFn
       simInd = str2double(simInd);
       
       % store result
-      if ~options.argout_as_cell && isstruct(thisFileContents.result) && isfield(thisFileContents.result,'time')
+      if ~options.as_cell && isstruct(thisFileContents.result) && isfield(thisFileContents.result,'time')
         % dynasim type structure to store as struct array
         thisFnResults(simInd) = thisFileContents.result;
       else
