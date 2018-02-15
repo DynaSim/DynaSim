@@ -297,6 +297,8 @@ dsPlot(data,'plot_type','rastergram'); % <-- Figure 5 in DynaSim paper
 dsPlotFR(data); % examine how mean firing rate changes with Iapp and tauD
 
 dsPlot(data,'plot_type','power');
+% Note: calculating the power spectrum requires the Signal Processing
+% Toolbox.
 
 % %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% RUNNING SIMULATIONS ON THE CLUSTER
