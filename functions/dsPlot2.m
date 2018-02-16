@@ -319,7 +319,7 @@ end
 
 
 
-%% If doing force overlay, move overlay population to the end
+%% If doing force last, move last population to the end
 if ~isempty(force_last)
 
     % If it's a stand-alone string, convert to cell array
@@ -357,7 +357,7 @@ if ~isempty(force_last)
 end
 
 
-%% If only one cell
+%% If only one neuron
 
 % If only 1 cell, move in 2nd cell
 if length(xp2.meta.datainfo(2).values) <= 1 && ~is_image
@@ -457,11 +457,13 @@ end
 % Set up legend entries
 subplot_options.legend1 = setup_legends(xp2);
 
-% Get axis lims
+% Set up x-axis limits
 if isempty(plot_options.xlims) && lock_axes && ~is_image
         xdat = xp2.meta.datainfo(1).values;
         plot_options.xlims = [min(xdat) max(xdat)];
 end
+
+% Set up y-axis limits
 if isempty(plot_options.ylims) && lock_axes && ~is_image
     switch plot_type
         case {'waveform','waveformErr'}
@@ -476,6 +478,7 @@ if isempty(plot_options.ylims) && lock_axes && ~is_image
     end
 end
 
+% Set up z-axis limits
 if isempty(plot_options.zlims) && lock_axes && ~is_image
     switch plot_type
         case 'imagesc'
