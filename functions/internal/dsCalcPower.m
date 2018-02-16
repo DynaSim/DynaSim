@@ -233,16 +233,21 @@ for v=1:length(options.variable)
     end
     % calculate MUA
     X=detrend(nanmean(dat(t1:t2,:),2)); % detrend the data
-
-    % calculate spectral estimate
-    if ~strcmp(reportUI,'matlab') && exist('pwelch') ~= 2 % 'pwelch is not in Octave's path
+    
+    if strcmp(reportUI,'matlab')
+      [tmpPxx,f] = pmtm(X, NW, NFFT, Fs); % calculate power
+    elseif exist('pwelch') == 2 % 'pwelch is in Octave's path
+      [tmpPxx,f] = pwelch(X,NFFT,[],NFFT,Fs); % calculate power in octave (pmtm is not implemented yet)
+    elseif exist('pwelch') ~= 2 % 'pwelch is not in Octave's path
       try
         pkg load signal; % trying to load octave forge 'signal' package before using pwelch function
+        fprintf('''pmtm'' function for spectral analysis not available in Octave, using pwelch.\n')
+        [tmpPxx,f] = pwelch(X,NFFT,[],NFFT,Fs); % calculate power in octave (pmtm is not implemented yet)
       catch
         error('pwelch function is needed for spectral analysis in Octave, please install the signal package from Octave Forge');
       end
     end
-    [tmpPxx,f] = pwelch(X,NFFT,[],NFFT,Fs); % calculate power
+    
     if all(isnan(tmpPxx(:)))
       tmpPxx=zeros(size(tmpPxx));
     end
