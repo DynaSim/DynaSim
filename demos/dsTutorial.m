@@ -456,7 +456,7 @@ title('E/I network'); xlabel('time (ms)'); ylabel('v'); legend('E (decay)','I (L
 
 % define equations of cell model (same for E and I populations)
 eqns={ 
-  'dv/dt=Iapp+@current/Cm+noise*randn(1,N_pop)*sqrt(dt)/dt';
+  'dv/dt=Iapp+@current/Cm+noise*randn(1,N_pop)';
   'monitor v.spikes(20), iGABAa.functions, iAMPA.functions'
 };
 s=[];
@@ -464,12 +464,12 @@ s.populations(1).name='E';
 s.populations(1).size=80; % # of cells in population
 s.populations(1).equations=eqns;
 s.populations(1).mechanism_list={'iNa','iK'};
-s.populations(1).parameters={'Iapp',5,'gNa',120,'gK',36,'Cm',1,'noise',4};
+s.populations(1).parameters={'Iapp',5,'gNa',120,'gK',36,'Cm',1,'noise',40};
 s.populations(2).name='I';
 s.populations(2).size=20;
 s.populations(2).equations=eqns;
 s.populations(2).mechanism_list={'iNa','iK'};
-s.populations(2).parameters={'Iapp',0,'gNa',120,'gK',36,'Cm',1,'noise',4};
+s.populations(2).parameters={'Iapp',0,'gNa',120,'gK',36,'Cm',1,'noise',40};
 s.connections(1).source='I';
 s.connections(1).target='E';
 s.connections(1).mechanism_list={'iGABAa'};
