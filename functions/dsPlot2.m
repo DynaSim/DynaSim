@@ -317,9 +317,20 @@ if ~isempty(options.dim_stacking)
     xp2.permute(options.dim_stacking);
 end
 
+%% Swap in power if calculating power
+if strcmp(plot_type,'power') && ~is_image
+    data_temp = dsMdd2ds(xp2);
+    data_temp = dsCheckData(data_temp,'remove_empties',1);
+    data_temp = dsCalcPower(data_temp);
+    for i = 1:length(data_temp)
+        data_temp(i) = overwritePowerData(data_temp(i),'SUA');
+    end
+    xp2 = ds2mdd(data_temp);
+    
+    clear data_temp
+end
 
-
-%% If doing force overlay, move overlay population to the end
+%% If doing force last, move last population to the end
 if ~isempty(force_last)
 
     % If it's a stand-alone string, convert to cell array
@@ -357,7 +368,7 @@ if ~isempty(force_last)
 end
 
 
-%% If only one cell
+%% If only one neuron
 
 % If only 1 cell, move in 2nd cell
 if length(xp2.meta.datainfo(2).values) <= 1 && ~is_image
@@ -453,15 +464,22 @@ if ~isempty(crop_range) &&  all(cellfun(@isnumeric,xp2.data(:))) && ~is_image
 
 end
 
-%% Set up legend entries and axis limits
+%% Set up legend entries, axis limits, and linewidth
 % Set up legend entries
 subplot_options.legend1 = setup_legends(xp2);
 
-% Get axis lims
+% Set up x-axis limits
 if isempty(plot_options.xlims) && lock_axes && ~is_image
+    if ~strcmp(plot_type,'power')
         xdat = xp2.meta.datainfo(1).values;
         plot_options.xlims = [min(xdat) max(xdat)];
+    else
+        % For plot type = power, set from 0-80
+        plot_options.xlims = [0 80];
+    end
 end
+
+% Set up y-axis limits
 if isempty(plot_options.ylims) && lock_axes && ~is_image
     switch plot_type
         case {'waveform','waveformErr'}
@@ -476,6 +494,7 @@ if isempty(plot_options.ylims) && lock_axes && ~is_image
     end
 end
 
+% Set up z-axis limits
 if isempty(plot_options.zlims) && lock_axes && ~is_image
     switch plot_type
         case 'imagesc'
@@ -487,6 +506,10 @@ if isempty(plot_options.zlims) && lock_axes && ~is_image
     end
 end
 
+if isempty(plot_options.LineWidth) && strcmp(plot_type,'power')
+    plot_options.LineWidth = 2;
+end
+
 %% Prepare plotting handles for specific plot types
 if is_image
     % Is an image
@@ -494,7 +517,7 @@ if is_image
     plot_options.scale = .5;           % Scale of .5 enforces some anti-aliasing
 else
     switch plot_type
-        case 'waveform'
+        case {'waveform','power'}
             % Is data
             data_plothandle = @xp1D_matrix_plot;
             if ~isempty(plot_handle); data_plothandle = plot_handle; end
@@ -521,7 +544,7 @@ else
                 plot_options.do_colorbar = options.show_colorbar;
             end
 
-        case {'power','rastergram','raster'}
+        case {'rastergram','raster'}
             % Disable legend when using dsPlot
             subplot_options.legend1 = [];
 
@@ -875,4 +898,26 @@ function leg1 = setup_legends(xp2)
     else
         error('should not reach');
     end
+end
+
+function d = overwritePowerData(d,chosen)
+    fields = fieldnames(d);
+    if strcmp(chosen,'SUA')
+        term = 'SUA';
+    elseif strcmp(chosen,'MUA')
+        term = 'MUA';
+        % In practice we'll only ever use SUA since we can get the same
+        % thing as MUA by just setting do_mean = true
+    else
+        error('Must choose either SUA or MUA');
+    end
+    
+    inds = find(cellfun(@(s) ~isempty(s),strfind(fields,term)));
+    inds = inds(:)';
+    
+    for i = inds
+        d.(strrep(fields{i},['_Power_' term],'')) = d.(fields{i}).Pxx;
+        d.time =  d.(fields{i}).frequency;
+    end
+
 end

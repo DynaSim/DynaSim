@@ -1042,7 +1042,7 @@ try
     % Only do parfor mode if parfor_flag is set and parpool is already running. Otherwise, this will add unnecessary overhead.
     if options.parfor_flag % && ~isempty(p)
       parfor iData = 1:length(data)
-        result(iData) = feval(func,data(iData));
+        result(iData) = feval(func,data(iData),varargin{:});
         
         if ishandle(result(iData)) && make_invis_bool
           set(result(iData), 'Visible', 'off'); % cannot close yet until save, but can make invisible
@@ -1050,10 +1050,18 @@ try
       end
     else
       for iData = 1:length(data)
-        result(iData) = feval(func,data(iData));
+        result(iData) = feval(func,data(iData),varargin{:});
         
-        if ishandle(result(iData)) && make_invis_bool
-          set(result(iData), 'Visible', 'off'); % cannot close yet until save, but can make invisible
+        try
+            % For dsPlot2
+            if ishandle(result(iData).hcurr) && make_invis_bool
+              set(result(iData).hcurr, 'Visible', 'off'); % cannot close yet until save, but can make invisible
+            end
+        catch
+            % For dsPlot
+            if ishandle(result(iData)) && make_invis_bool
+              set(result(iData), 'Visible', 'off'); % cannot close yet until save, but can make invisible
+            end
         end
       end
     end % options.parfor_flag && ~isempty(p)
