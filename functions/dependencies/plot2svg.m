@@ -1,46 +1,32 @@
-function varargout = plot2svg(filename, id, debug, legendicons, clippingmode, figuresize, pixelfiletype, creditPrintBool)
+function varargout = plot2svg(filename, id, debug, legendIcons, clippingMode, figureSize, pixelFileType, creditPrintBool)
   %  Matlab/GNU Octave FIG to SVG converter
   %
-  %  Usage: plot2svg(filename, graphic handle, debug, legendicons, clippingmode, figuresize, pixelfiletype)
+  %  Usage: plot2svg(filename, id, debug, legendIcons, clippingMode, figureSize, pixelFileType, creditPrintBool)
   %
   %         all arguments are optional
   %
-  %         filename: name of the svg file (including extension)
+  %         1. filename: name of the svg file (including extension)
   %         can be omitted (nargin < 1) or left empty ('' or []) and a system dialog will be prompted
   %
-  %         id: figure handle (if omitted or empty, current gcf is taken)
+  %         2. id: graphic handle (if omitted or empty, current gcf is taken)
   %
-  %         debug = 0 or 1 (enable to ease debugging of plot2svg functionality; 0 if omitted or empty)
+  %         3. debug = 0 or 1 (enable to ease debugging of plot2svg functionality; 0 if omitted or empty)
   %
-  %         legendicons: legend pieces (necessary in new matlab versions to respect legend appearance)
+  %         4. legendIcons: legend pieces (necessary in new matlab versions to respect legend appearance)
   %         can be omitted (nargin < 4) or left empty ('' or [])
   %
-  %         clippingmode = 0 (no clipping) or 1 (box on/off dependent clipping) or 2 (strict axes clipping) or 3 (axes+data dependent clipping)
-  %         clippingmode is set to 1 if argument is omitted or empty
+  %         5. clippingMode = 0 (no clipping) or 1 (box on/off dependent clipping) or 2 (strict axes clipping) or 3 (axes+data dependent clipping)
+  %         clippingMode is set to 1 if argument is omitted or empty
   %
-  %         figuresize = [width,height] (actual figure size if omitted or empty)
+  %         6. figureSize = [width,height] (actual figure size if omitted or empty)
   %
-  %         pixelfiletype = 'png' or 'jpg' (png used if omitted or empty)
-  %       
-  %   Matlab/Octave to SVG converter, Juerg Schwizer (converter@bluewin.ch).'])
-  %   Forked FIG to SVG converter version, Salva Ardid (sardid@bu.edu).'])
-  %   Most credit to Juerg Schwizer (converter@bluewin.ch).')
-  
-  % creditPrintBool - logical argument
-  %   By default, the function will make a credit display after every run. In a
-  %   for loop, it can be desirable to turn that off. This logical/boolean is
-  %   whether to print the credit or not.
-  
-  progversion = '4-Feb-2018';
-  
-  if nargin < 8 || isempty(creditPrintBool) || creditPrintBool==1
-%     disp(['   Matlab/Octave to SVG converter version ' progversion ', Juerg Schwizer (converter@bluewin.ch).'])
-    disp(['   Forked FIG to SVG converter version ' progversion ', Salva Ardid (sardid@bu.edu).'])
-    disp('   Most credit to Juerg Schwizer (converter@bluewin.ch).')
-  end
+  %         7. pixelFileType = 'png' or 'jpg' (png used if omitted or empty)
+  %
+  %         8. creditPrintBool - logical argument for whether to display credit information (1 if omitted or empty)
 
   global PLOT2SVG_globals
   global colorname
+  progversion = '24-Feb-2018';
   PLOT2SVG_globals.runningIdNumber = 0;
   PLOT2SVG_globals.UI = reportUI;
   PLOT2SVG_globals.octave = false;
@@ -48,10 +34,10 @@ function varargout = plot2svg(filename, id, debug, legendicons, clippingmode, fi
   PLOT2SVG_globals.ScreenPixelsPerInch = 96; % New default ppi
   PLOT2SVG_globals.resolutionScaling = 1;
   PLOT2SVG_globals.WN = 0;
-  if nargin < 5 || isempty(clippingmode)
+  if nargin < 5 || isempty(clippingMode)
     PLOT2SVG_globals.ClippingMode = 1; % nees revision -> note that it does not work fine with Inkscape pdf conversion for latex
   else
-    PLOT2SVG_globals.ClippingMode = clippingmode;
+    PLOT2SVG_globals.ClippingMode = clippingMode;
   end
 
   try
@@ -65,7 +51,10 @@ function varargout = plot2svg(filename, id, debug, legendicons, clippingmode, fi
   if nargout == 1
     varargout = {0};
   end
-  
+  if nargin < 8 || isempty(creditPrintBool) || creditPrintBool == 1
+    disp(['   Forked FIG to SVG converter version ' progversion ', maintained by Salva Ardid (sardid@bu.edu).'])
+    disp('   Most credit to Juerg Schwizer (converter@bluewin.ch).')
+  end
   if strcmp(PLOT2SVG_globals.UI,'octave')
     PLOT2SVG_globals.octave = true;
   end
@@ -137,7 +126,7 @@ function varargout = plot2svg(filename, id, debug, legendicons, clippingmode, fi
   end
 
   if nargin < 4 % No legend icons passed
-    legendicons = [];
+    legendIcons = [];
   end
 
   % needed to see annotation axes
@@ -146,15 +135,15 @@ function varargout = plot2svg(filename, id, debug, legendicons, clippingmode, fi
   originalFigureUnits = get(id,'Units');
   set(id,'Units','pixels');   % All data in the svg-file is saved in pixels
   paperpos = get(id,'Position');
-  if nargin >= 6 && ~isempty(figuresize)
-    paperpos(3) = param1(1);
-    paperpos(4) = param1(2);
+  if nargin >= 6 && ~isempty(figureSize)
+    paperpos(3) = figureSize(1);
+    paperpos(4) = figureSize(2);
   end
   paperpos = convertunit(paperpos, 'pixels', 'pixels');
-  if (nargin < 7) || isempty(pixelfiletype)
-    PLOT2SVG_globals.pixelfiletype = 'png';
+  if (nargin < 7) || isempty(pixelFileType)
+    PLOT2SVG_globals.pixelFileType = 'png';
   else
-    PLOT2SVG_globals.pixelfiletype = pixelfiletype;
+    PLOT2SVG_globals.pixelFileType = pixelFileType;
   end
   cmap = get(id,'Colormap');
   colorname = '';
@@ -224,19 +213,19 @@ function varargout = plot2svg(filename, id, debug, legendicons, clippingmode, fi
       legendLocation = get(ax(j),'Location');
       legendOrientation = get(ax(j),'Orientation');
       % The following is a trick to automatically get the distinct parts of a legend. However, there are some Matlab limitations, so for a proper legend, it's strongly encouraged to pass the legend icons to plot2svg (see warnind and explanations below)
-      if isempty(legendicons)
+      if isempty(legendIcons)
         % note though that when only a subset of the graph appears in the legend, this trick selects, with the exception of text, not the proper subset of the graph, but the first items that were plotted (Matlab's fault).
         % one way to workaround the issue is to just plot things in order in the original graph, as they appear in the legend, but that's not always optimal, continue reading:
         % an additional problem comes from lines appearing under patches, which could be fixed by adding zdata (different layers of depth in the xy projection from the z-axis), but this solution is only expected to work in svg 2, once z index is introduced (limitation of current svg implementation).
         % there are two possible solutions to this:
         % 1. Encouraged 'fix': pass the legend icons to plot2svg (see below to know how)
         % 2. Discouraged 'fix': plot those lines twice, before the patch, so they appear in the legend (matlab's fault), and after the patch, so they appear on top (svg 1.1 limitacion).
-        warning(sprintf('For proper results when lines and patches are present in a figure, pass the legend icons to plot2svg function as a fourth argument, e.g., plot2svg(''filename.svg'','''','''',legendicons)\nLegend icons can be grabbed by calling legend in the following way: [lgd,legendicons] = legend(...);'));
-        [~,legendicons] = legend(legendLabels,'Location',legendLocation,'Orientation',legendOrientation,'FontSize',legendFontSize,'LineWidth',legendLineWidth,'Color',legendColor,'EdgeColor',legendEdgeColor,'Box',legendBox);
+        warning(sprintf('For proper results when lines and patches are present in a figure, pass the legend icons to plot2svg function as a fourth argument, e.g., plot2svg(''filename.svg'','''','''',legendIcons)\nLegend icons can be grabbed by calling legend in the following way: [lgd,legendIcons] = legend(...);'));
+        [~,legendIcons] = legend(legendLabels,'Location',legendLocation,'Orientation',legendOrientation,'FontSize',legendFontSize,'LineWidth',legendLineWidth,'Color',legendColor,'EdgeColor',legendEdgeColor,'Box',legendBox);
       end
       if PLOT2SVG_globals.debugModeOn
-        for k = numel(legendicons):-1:1
-        iconType = get(legendicons(k),'Type');
+        for k = numel(legendIcons):-1:1
+        iconType = get(legendIcons(k),'Type');
         disp(['legend(',num2str(k),') = ', iconType]);
         end
       end
@@ -256,7 +245,7 @@ function varargout = plot2svg(filename, id, debug, legendicons, clippingmode, fi
           fcolorname, scolorname, legendLineWidth, legendBoundingBox(1), legendBoundingBox(2), legendBoundingBox(3), legendBoundingBox(4));
         fprintf(fid,'  </g>\n');
       end
-      axchild2svg(fid,id,legendIdString,ax(j),paperpos,legendicons,legendPosition,legendGroupax,projection,legendBoundingBox);
+      axchild2svg(fid,id,legendIdString,ax(j),paperpos,legendIcons,legendPosition,legendGroupax,projection,legendBoundingBox);
       fprintf(fid,'  </g>\n');
       end
     elseif strcmp(currentType,'uicontrol')
@@ -2400,7 +2389,7 @@ function boundingBoxAxes = axchild2svg(fid,id,axIdString,ax,paperpos,axchild,axp
               pointc = max(min(round(double(pointc)),size(cmap,1)),1);
           end
           % CameraUpVector = get(ax,'CameraUpVector');
-          filename = [PLOT2SVG_globals.basefilename sprintf('%03d',PLOT2SVG_globals.figurenumber) '.' PLOT2SVG_globals.pixelfiletype];
+          filename = [PLOT2SVG_globals.basefilename sprintf('%03d',PLOT2SVG_globals.figurenumber) '.' PLOT2SVG_globals.pixelFileType];
           PLOT2SVG_globals.figurenumber = PLOT2SVG_globals.figurenumber + 1;
           if isempty(PLOT2SVG_globals.basefilepath)
               current_path = pwd;
@@ -2425,13 +2414,13 @@ function boundingBoxAxes = axchild2svg(fid,id,axIdString,ax,paperpos,axchild,axp
           end
           if ndims(pointc) == 3
               % pointc is not indexed
-              imwrite(pointc,fullfile(PLOT2SVG_globals.basefilepath,filename),PLOT2SVG_globals.pixelfiletype);
+              imwrite(pointc,fullfile(PLOT2SVG_globals.basefilepath,filename),PLOT2SVG_globals.pixelFileType);
           else
               % pointc is probably indexed
               if PLOT2SVG_globals.octave
           pointc = max(2, pointc);
               end
-              imwrite(pointc,cmap,fullfile(PLOT2SVG_globals.basefilepath,filename),PLOT2SVG_globals.pixelfiletype);
+              imwrite(pointc,cmap,fullfile(PLOT2SVG_globals.basefilepath,filename),PLOT2SVG_globals.pixelFileType);
           end
               lx = (size(pointc,2)*halfwidthx)*axpos(3)*paperpos(3);
             ly = (size(pointc,1)*halfwidthy)*axpos(4)*paperpos(4);
@@ -2886,7 +2875,7 @@ function control2svg(fid,id,ax,paperpos)
   if isempty(pict.colormap)
       pict.colormap = colormap;
   end
-  filename = [PLOT2SVG_globals.basefilename sprintf('%03d',PLOT2SVG_globals.figurenumber) '.' PLOT2SVG_globals.pixelfiletype];
+  filename = [PLOT2SVG_globals.basefilename sprintf('%03d',PLOT2SVG_globals.figurenumber) '.' PLOT2SVG_globals.pixelFileType];
   PLOT2SVG_globals.figurenumber = PLOT2SVG_globals.figurenumber + 1;
   if isempty(PLOT2SVG_globals.basefilepath)
       current_path = pwd;
@@ -2900,7 +2889,7 @@ function control2svg(fid,id,ax,paperpos)
           error('Cannot write image file. Make sure that no image is opened in an other program.')
       end
   end
-  imwrite(pict.cdata,fullfile(PLOT2SVG_globals.basefilepath,filename),PLOT2SVG_globals.pixelfiletype);
+  imwrite(pict.cdata,fullfile(PLOT2SVG_globals.basefilepath,filename),PLOT2SVG_globals.pixelFileType);
   set(ax,'Units','normalized');
   posNorm = get(ax,'Position');
   posInches(1) = posNorm(1)*paperpos(3);
