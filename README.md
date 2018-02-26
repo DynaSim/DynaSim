@@ -14,13 +14,10 @@ systems in MATLAB and GNU Octave!
   2. Add to path using startup.m or Command Window:
       * `addpath(genpath('YOUR/PATH/TO/DynaSim'))`
 
-### Tutorial:
-
-- Get started with the [DynaSim tutorial](https://github.com/DynaSim/DynaSim/wiki/DynaSim-Getting-Started-Tutorial).
-
 ### Documentation:
 
 - Complete documentation is [available online](https://dynasim.github.io/docs).
+- Get started with the [DynaSim tutorial](https://github.com/DynaSim/DynaSim/wiki/DynaSim-Getting-Started-Tutorial).
 - A browsable function reference is [available here](https://dynasim.github.io/docs/function_reference).
 
 ### Other References:
