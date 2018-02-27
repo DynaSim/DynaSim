@@ -72,7 +72,9 @@ function result = dsAnalyze(src,varargin)
 %   - result: for single fn, result is struct, cell array, or cell contents returned by the analysis function
 %             if postHoc, cell array of the form result{iFunc} containing previous for each fn
 %
-% TODO: annotate figures with data set-specific modifications
+% TODO:
+%   - annotate figures with data set-specific modifications
+%   - multiple figure return
 %
 %
 % See also: dsSimulate
@@ -179,7 +181,7 @@ if (options.load_all_data_flag && ~options.parfor_flag)
 end
 
 %% Save data if no output is requested.
-if nargout < 1
+if nargout < 1 && ~options.in_sim_flag
   options.save_results_flag = 1;
   dsVprintf(options, 'Setting save_results_flag=1 since no nargout.\n')
 end
@@ -355,7 +357,7 @@ for fInd = 1:nFunc % loop over function inputs
     result = evalFnWithArgs(fInd, data, func, options, varargin{:});
     
     if isempty(result)
-      error('result empty.')
+      fprintf(2, 'Warning: Result empty for function, ''%s''. \n', func2str(func));
     end
   else % posthoc without load_all_data_flag
     result = [];
@@ -1026,7 +1028,7 @@ end % filenameFromVaried
 function result = evalFnWithArgs(fInd, data, func, options, varargin)
 % if not load_all_data_flag, will be only 1 dataset
 
-% try
+try
   make_invis_bool = options.save_results_flag && (options.close_fig_flag ~= 0);
   
   if options.studyinfo_arg_flag
@@ -1107,10 +1109,10 @@ function result = evalFnWithArgs(fInd, data, func, options, varargin)
       end
     end % options.parfor_flag && ~isempty(p)
   end % isempty(options.function_options)
-% catch err
-%   warning(err.message);
-%   result = [];
-% end
+catch err
+  warning(err.message);
+  result = [];
+end
 
 end % evalFnWithArgs
 

@@ -49,7 +49,7 @@ function results = dsImportResults(src, varargin)
 %   "results"
 
 %% Check inputs
-if isempty(src)
+if ~nargin || isempty(src)
   src = pwd;
 end
 
@@ -123,7 +123,6 @@ if any(strcmp(options.import_scope, {'studyinfo','all'}))
     end
     
     % get list of data_files from studyinfo
-    keyboard
     result_functions = studyinfo.simulations(1).result_functions;
     matches = cellfun(@(x) strcmp((x), (func)),result_functions);
     if ~any(matches)
@@ -185,6 +184,12 @@ end
 
 % now have num_sims and result_files, where num_sims >= length(result_files)
 
+%% check for result_files
+if isempty(result_files)
+  fprintf('No result files found.');
+  results = [];
+  return
+end
 
 %% Filter and Sort Results Files by Desired Function(s) and simID(s)
 % goal: filter files by given function(s) or take all functions. If multiple
