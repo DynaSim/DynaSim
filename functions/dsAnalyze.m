@@ -395,25 +395,28 @@ for fInd = 1:nFunc % loop over function inputs
       end
       
       extension = ['.' plotFormat]; % '.svg'; % {.jpg,.svg}
-
+      
       if ~postHocBool % in sim
-        % ensure extension is extension
-        fPath = options.result_file;
-        [parentPath, filename, orig_ext] = fileparts(fPath);
-        if length(orig_ext) > 4 % extra periods in name
-          orig_ext = fPath(end-3:end);
-          if ~strcmp(orig_ext, extension)
-            fPath = [fPath(1:end-4) extension];
-          end
-        else
-          if ~strcmp(orig_ext, extension)
-            fPath = fullfile(parentPath, [filename extension]);
+        if ~isempty(options.result_file)
+          % ensure extension is extension
+          fPath = options.result_file;
+          [parentPath, filename, orig_ext] = fileparts(fPath);
+          if length(orig_ext) > 4 % extra periods in name
+            orig_ext = fPath(end-3:end);
+            if ~strcmp(orig_ext, extension)
+              fPath = [fPath(1:end-4) extension];
+            end
+          else
+            if ~strcmp(orig_ext, extension)
+              fPath = fullfile(parentPath, [filename extension]);
+            end
           end
         end
+        
         thisResult = result;
       elseif studyinfoBool % posthoc with studyinfo
         simID = studyinfo.simulations(iResult).sim_id;
-
+        
         if isfield(options, 'result_file') && ~isempty(options.result_file)
           fPath = options.result_file;
         else
@@ -429,7 +432,7 @@ for fInd = 1:nFunc % loop over function inputs
               dsVprintf(options, '  Skipping simID=%i since no data.\n', simID);
               continue
             end
-
+            
             if options.simID_arg_flag
               options.thisSimID = simID;
             end
@@ -464,7 +467,7 @@ for fInd = 1:nFunc % loop over function inputs
       else  % posthoc without studyinfo
         thisResult = result(iResult);
         simID = iResult; % for skipping warning
-
+        
         % make fName
         if isfield(options, 'result_file') && ~isempty(options.result_file)
           fPath = options.result_file;
@@ -472,7 +475,7 @@ for fInd = 1:nFunc % loop over function inputs
           fName = [options.prefix '_data' num2str(iResult) '_plot' num2str(iResult) extension];
           fPath = fullfile(fDir,[fName extension]);
         end
-
+        
         % make fDir
         fDir = fullfile(studyinfo.study_dir, 'postHocPlots');
         if ~exist(fDir,'dir') && options.save_results_flag
