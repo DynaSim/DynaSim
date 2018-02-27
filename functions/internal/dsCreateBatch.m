@@ -43,6 +43,8 @@ isMatlab = strcmp(reportUI,'matlab'); % logical
 %% check inputs
 options=dsCheckOptions(varargin,{...
   'mex_flag',0,{0,1},...
+  'mex_dir_flag',1,{0,1},... % Flag to tell whether or not to search in mex_dir for pre-compiled solve files (solve*_mex*).
+  'mex_dir',[],[],... % Directory to search for pre-compiled mex files. Can be relative to 'study_dir' or absolute path.
   'parfor_flag',0,{0,1},...
   'num_cores',4,[],... % # cores for parallel processing (SCC supports 1-12)
   'sims_per_job',1,[],... % how many sims to run per cluster job
@@ -98,7 +100,7 @@ if isa(options.simulator_options.experiment,'function_handle') && options.mex_fl
 end
 
 %% create base solve_file (m- or MEX-file)
-solve_file = dsGetSolveFile(base_model,studyinfo,options.simulator_options);
+solve_file = dsGetSolveFile(base_model, studyinfo, options.simulator_options);
   % Note: also creates 'params.mat' file
 
 % copy params.mat from study_dir to batchdirs if one_solve_file_flag
