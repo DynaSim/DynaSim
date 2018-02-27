@@ -135,28 +135,34 @@ function modifications_set = dsVary2Modifications(vary,model)
 % check inputs
 if iscell(vary) && iscell(vary{1})
   % this is already a set of modifications varying things
-  modifications_set=vary;
+  modifications_set = vary;
   return;
 end
 
-if nargin<2, model=[]; end
+if nargin<2
+  model = [];
+end
+
 % todo: use model to get mechanism_list for special search spaces
 % (e.g., leave-one-out / -1).
 
 % expand each 'vary' specification (namespace,variable,values) into a list of modifications
 modification_sets = {};
 for i=1:size(vary,1)
-  modification_sets{i}=expand_vary(vary(i,:));
+  modification_sets{i}=expand_vary(vary(i,:), model);
   %modification_sets{i}{:}
 end
 
 % prepare cartesian product of all modification lists
 % get size of each set
 sizes=cellfun(@numel,modification_sets,'uni',0);
+
 % create matched-length vector for each set
 size_vectors=cellfun(@(x)1:x,sizes,'uni',0);
+
 % get indices for cartesian product of all sets
 cartprod=setprod(size_vectors{:});
+
 % combine sets
 modifications_set={};
 for i=1:size(cartprod,1)
@@ -167,23 +173,28 @@ for i=1:size(cartprod,1)
   modifications_set{i}=tmp;
 end
 
-function list = expand_vary(specification)
+function list = expand_vary(varyLine, model)
 % purpose: get list of modifications for this specification of things to vary.
 % standardize specification
-if length(specification)==2
+if length(varyLine)==2
   % convert 2-element specification to 3-element with empty object name
-  specification={'',specification{1},specification{2}};
+  varyLine={'',varyLine{1},varyLine{2}};
 end
 
 % set default object name
-if isempty(specification{1})
-  specification{1}='pop1'; % default population
+if isempty(varyLine{1})
+  if ~isempty(model)
+    % get name of first population
+    varyLine{1} = model.specification.populations(1).name;
+  else
+    varyLine{1} = 'pop1'; % default population
+  end
 end
 
 % expand elements in cell arrays
-namespace=expand_elem(specification{1});
-variable=expand_elem(specification{2});
-values=expand_elem(specification{3});
+namespace=expand_elem(varyLine{1});
+variable=expand_elem(varyLine{2});
+values=expand_elem(varyLine{3});
 
 % combine elements into list of modifications
 list={};
