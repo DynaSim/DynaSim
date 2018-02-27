@@ -380,6 +380,7 @@ switch options.plot_type
     xdata=data.time_FR;
     xlab='time (ms, bins)'; % x-axis label
 end
+
 if isempty(options.xlim)
   options.xlim=[min(xdata) max(xdata)];
 end

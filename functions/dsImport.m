@@ -166,19 +166,21 @@ if isstruct(srcS) && isfield(srcS,'study_dir')
     
     filesInDataDir = lscell(fullfile(srcS.study_dir, 'data'));
     
-    for iFile = find(~dataExist) % only look for missing files
-      [~,fname,~] = fileparts2(data_files{iFile});
+    if ~isempty(filesInDataDir)
+      for iFile = find(~dataExist) % only look for missing files
+        [~,fname,~] = fileparts2(data_files{iFile});
+        
+        simIDstr = regexpi(fname, 'sim(\d+)', 'tokens');
+        simIDstr = simIDstr{:};
+        simIDstr = simIDstr{:};
+        
+        thisDataFile = filesInDataDir{contains(filesInDataDir, ['sim' simIDstr])};
+        
+        data_files{iFile} = thisDataFile;
+      end
       
-      simIDstr = regexpi(fname, 'sim(\d+)', 'tokens');
-      simIDstr = simIDstr{:};
-      simIDstr = simIDstr{:};
-      
-      thisDataFile = filesInDataDir{contains(filesInDataDir, ['sim' simIDstr])};
-      
-      data_files{iFile} = thisDataFile;
+      dataExist = cellfun(@exist,data_files)==2;
     end
-    
-    dataExist = cellfun(@exist,data_files)==2;
   end
   
   if ~all(dataExist)
@@ -239,6 +241,7 @@ if isstruct(srcS) && isfield(srcS,'study_dir')
 
     % store this data
     if iFile == 1
+      % TODO: fix this if skips first file
       total_num_sets = num_sets_per_file * num_files;
       set_indices=0:num_sets_per_file:total_num_sets-1;
 
@@ -263,6 +266,14 @@ if isstruct(srcS) && isfield(srcS,'study_dir')
     end
   end % iFile = 1:num_files
 
+  if ~exist('data', 'var')
+    if options.as_cell
+      data = {};
+    else
+      data = [];
+    end
+  end
+  
   return;
 else % no studyinfo
   studyinfo = [];
