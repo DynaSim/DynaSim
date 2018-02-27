@@ -134,15 +134,19 @@ if options.save_parameters_flag
     vary = dsCheckOptions(varargin,{'vary',[],[],},false);
     vary = vary.vary;
 
-    mod_set = dsVary2Modifications(vary);
+    mod_set = dsVary2Modifications(vary, model);
     % The first 2 cols of modifications_set are idenitical to vary, it just
     % has the last column distributed out to the number of sims
+    
+    nMods = length(mod_set);
+    
+    % standardize and expand modifications
+    for iMod = 1:nMods
+      mod_set{iMod} = dsStandardizeModifications(mod_set{iMod}, model.specification, varargin{:});
+    end
 
-    % Get param names
-    iMod = 1;
-    % Split extra entries in first 2 cols of mods, so each row is a single pop and param
-    [~, first_mod_set] = dsApplyModifications(model, mod_set{iMod}, varargin{:});
-
+    first_mod_set = mod_set{1};
+    
     % replace '->' with '_'
     first_mod_set(:,1) = strrep(first_mod_set(:,1), '->', '_');
 
@@ -160,10 +164,28 @@ if options.save_parameters_flag
       % add param with correct namespace(s) to mod_params
       if ~any(strcmp(model.namespaces(:,2), this_mod_param))
         % find correct namespace(s) based on param and pop
-        namespaceInd = logical(~cellfun(@isempty, strfind(model.namespaces(:,2), [first_mod_set{iParamMod,1} '_'])) .* ...
-          ~cellfun(@isempty, strfind(model.namespaces(:,2), first_mod_set{iParamMod,3})));
+        namespaceInd = logical( contains(model.namespaces(:,2), [first_mod_set{iParamMod,1} '_']) .* ...
+          contains(model.namespaces(:,2), first_mod_set{iParamMod,3}) );
 
         numNamespaceMatches = sum(namespaceInd);
+        
+        % HACK
+        if numNamespaceMatches == 0 && contains(first_mod_set{iParamMod,1}, '_')
+          % check reverse connection
+          flippedNamespace = first_mod_set{iParamMod,1};
+          flippedNamespace = strsplit(flippedNamespace, '_');
+          flippedNamespace = [flippedNamespace{2} '_' flippedNamespace{1}];
+          
+          % find correct namespace(s) based on param and pop
+          namespaceInd = logical( contains(model.namespaces(:,2), [flippedNamespace '_']) .* ...
+          contains(model.namespaces(:,2), first_mod_set{iParamMod,3}) );
+
+          numNamespaceMatches = sum(namespaceInd);
+        end
+        
+        if ~any(numNamespaceMatches)
+          error('Cannot find mod: %s %s', first_mod_set{iParamMod,1}, first_mod_set{iParamMod,3});
+        end
 
         % add mech names using namespace
         mod_params(iRow:iRow+numNamespaceMatches-1) = model.namespaces(namespaceInd,2);
@@ -186,7 +208,7 @@ if options.save_parameters_flag
 
     % Get param values for each sim
     param_values = cell(nParamMods, length(mod_set));
-    for iMod = 1:length(mod_set)
+    for iMod = 1:nMods
       thisModValSet = mod_set{iMod}(:,3);
       
       % Get scalar values as vector
@@ -712,18 +734,22 @@ for i=1:length(odes)
         %     note: account for tau as variable defined elsewhere or numeric
         % look for: X(t-#)
         delay=cellstr2num(regexp(matches{k},'\(t-([\.\d]+)\)','tokens','once'));
+        
         if isempty(delay)
           % look for: X(t-#,:)
           delay=cellstr2num(regexp(matches{k},'\(t-([\.\d]+),:\)','tokens','once'));
         end
+        
         if isempty(delay)
           % look for: X(t-param)
           delay=regexp(matches{k},'\(t-([\w\.]+)\)','tokens','once');
         end
+        
         if isempty(delay)
           % look for: X(t-param,:)
           delay=regexp(matches{k},'\(t-([\w\.]+),:\)','tokens','once');
         end
+        
         if iscell(delay) && ischar(delay{1})
           delay=strrep(delay{1},parameter_prefix,''); % remove parameter prefix
           delay=strrep(delay,',:',''); % remove population dimension from index to delay matrix
@@ -734,6 +760,7 @@ for i=1:length(odes)
             error('delay parameter ''%s'' not found.',delay);
           end
         end
+        
         if ~isempty(delay) && isnumeric(delay)
           delay_samp = ceil(delay/options.dt);
           delayinfo(end+1).variable=state_variables{j};
@@ -760,9 +787,11 @@ if ~isempty(delayinfo)
     idx=ismember({delayinfo.variable},delay_vars{i});
     Dmax=max([delayinfo(idx).delay_samp]);
     delay_maxi(i)=Dmax;
+    
     % convert delay indices into delay vector indices based on max delay
     tmps=num2cell(Dmax-[delayinfo(idx).delay_samp]);
     [delayinfo(idx).delay_index]=deal(tmps{:});
+    
     % initialize delay matrix with max delay ICs and all time points
     fprintf(fid,'%s_delay = zeros(nsamp+%g,size(%s,2));\n',delayinfo(i).variable,Dmax,delayinfo(i).variable);
     fprintf(fid,'  %s_delay(1:%g,:) = repmat(%s(1,:),[%g 1]);\n',delayinfo(i).variable,Dmax,delayinfo(i).variable,Dmax);
