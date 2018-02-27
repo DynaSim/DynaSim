@@ -1026,7 +1026,7 @@ end % filenameFromVaried
 function result = evalFnWithArgs(fInd, data, func, options, varargin)
 % if not load_all_data_flag, will be only 1 dataset
 
-try
+% try
   make_invis_bool = options.save_results_flag && (options.close_fig_flag ~= 0);
   
   if options.studyinfo_arg_flag
@@ -1107,10 +1107,10 @@ try
       end
     end % options.parfor_flag && ~isempty(p)
   end % isempty(options.function_options)
-catch err
-  warning(err.message);
-  result = [];
-end
+% catch err
+%   warning(err.message);
+%   result = [];
+% end
 
 end % evalFnWithArgs
 
