@@ -65,6 +65,10 @@ if ~isempty(opts)
   options=orderfields(options,fields);
 end
 
+if isempty(options.studyinfo)
+  options.studyinfo = studyinfo;
+end
+
 if isempty(options.mex_dir)
     options.mex_dir = dsGetConfig('mex_path');
 end
@@ -177,8 +181,9 @@ if ~exist(solve_file,'file')
                 % should be able to handle: dsSimulate(@odefun,'tspan',tspan,'ic',ic)
   end
   solve_file=dsCompareSolveFiles(solve_file_m);               % First search in local solve folder...
+  
   if options.mex_flag && options.mex_dir_flag
-    solve_file=dsCompareSolveFiles(solve_file,options.mex_dir,options.verbose_flag); % Then search in mex_dir (if it exists and if mex_flag==1).
+    solve_file=dsCompareSolveFiles(solve_file, options.mex_dir, options.verbose_flag); % Then search in mex_dir (if it exists and if mex_flag==1).
   end
 else
   if options.verbose_flag
