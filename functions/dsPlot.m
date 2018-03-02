@@ -385,6 +385,13 @@ if isempty(options.xlim)
   options.xlim=[min(xdata) max(xdata)];
 end
 
+% set time_limits
+switch options.plot_type
+  case {'waveform', 'rates', 'rastergram','raster'}
+    options.xlim(1) = max(options.xlim(1), options.time_limits(1));
+    options.xlim(2) = min(options.xlim(2), options.time_limits(2));
+end
+
 MRPF = options.max_num_rows; % max rows per fig
 MTPP = options.max_num_overlaid; % max traces per plot
 
@@ -868,9 +875,9 @@ for iFigset = 1:num_fig_sets
             end
             
             if length(options.xlim)==2
-              sel=(xdata>=options.xlim(1)&xdata<=options.xlim(2));
+              sel = ( xdata >= options.xlim(1) ) & ( xdata <= options.xlim(2) );
             else
-              sel=1:length(xdata);
+              sel = 1:length(xdata);
             end
             
             % plot traces
@@ -943,12 +950,15 @@ for iFigset = 1:num_fig_sets
           %set(haxes(row),'YTickLabel','');
         end
         
+        % xlim
         xlim(thisAxes, options.xlim);
         
+        % ylab
         if ~strcmp(options.plot_type,'rastergram')
           ylabel(thisAxes, strrep(var,'_','\_'));
         end
         
+        % ylim
         if ~isempty(options.ylim)
           ylims=options.ylim;
         elseif shared_ylims_flag
@@ -978,6 +988,7 @@ for iFigset = 1:num_fig_sets
             end
           end
         end
+        
         % plot lines and text (used for power)
         if ~isempty(vlines)
           for k=1:length(vlines)
@@ -988,6 +999,7 @@ for iFigset = 1:num_fig_sets
             end
           end
         end
+        
         % add legend
         if ~isempty(legend_strings) && axis_counter==1
           legend(thisAxes, legend_strings);
