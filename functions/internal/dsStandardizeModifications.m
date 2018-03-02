@@ -56,6 +56,8 @@ if any(missing_objects)
   end
 end
 
+identLinkedMods = {};
+
 % support modifying multiple elements (of namespace or variable) simultaneously
 % approach -- add extra entry for each thing to modify
 % eg: expand {'(E,I)','Cm',2} to {'E','Cm',2; 'I','Cm',2}
@@ -65,7 +67,6 @@ if any(~cellfun(@isempty,regexp(modifications(:,1),'^\(.*\)$'))) || ...
   
   % loop over modifications
   modifications_expanded = {};
-  identLinkedMods = {};
   for iMod = 1:size(modifications,1)
     % check namespace for ()
     namespaces = regexp(modifications{iMod,1},'[\w\.\-<>]+','match');
