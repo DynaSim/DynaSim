@@ -1,5 +1,5 @@
 function result = dsAnalyze(src,varargin)
-%DSANALYZE - Apply an analysis function to DynaSim data, optionally saving data
+% DSANALYZE - Apply an analysis function to DynaSim data, optionally saving data
 %
 % Pass a single DynaSim data structure or an array of data structures to a
 % user-specified analysis function, add varied info to the results and
@@ -413,6 +413,11 @@ for fInd = 1:nFunc % loop over function inputs
               fPath = fullfile(parentPath, [filename extension]);
             end
           end
+          
+          % change result_file if varied_filename_flag
+          if options.varied_filename_flag && isfield(data, 'varied')
+            fPath = filenameFromVaried(fInd, fPath, func, data, plotFnBool, options, varargin{:});
+          end % varied_filename_flag
         end
         
         thisResult = result;
@@ -584,6 +589,11 @@ for fInd = 1:nFunc % loop over function inputs
         if ~strcmp(orig_ext, extension) %check for .mat extension
           fPath = [parentPath filename extension];
         end
+        
+        % change result_file if varied_filename_flag
+        if options.varied_filename_flag && isfield(data, 'varied')
+          fPath = filenameFromVaried(fInd, fPath, func, data, plotFnBool, options, varargin{:});
+        end % varied_filename_flag
       elseif studyinfoBool % posthoc with studyinfo
         simID = studyinfo.simulations(iResult).sim_id;
         
@@ -995,8 +1005,10 @@ end
 
 if ~isempty(save_prefix)
   prefix = save_prefix;
-else
+else % no prefix given
   if plotFnBool
+    % try to use use plot_type as prefix
+    
     plot_options = options.function_options{fInd};
     
     if isempty(plot_options)
@@ -1005,14 +1017,18 @@ else
 
     % check if 'plot_type' given as part of plot_options
     plot_options = dsCheckOptions(plot_options,{'plot_type',[options.prefix '_' func2str(func)],[]},false);
-
-    prefix = plot_options.plot_type;
+    
+    if ~isempty(plot_options.plot_type)
+      prefix = plot_options.plot_type; % use plot_type prefix
+    else
+      prefix = options.prefix; % use default prefix
+    end
   else % ~plotFnBool
-    prefix = [options.prefix '_' func2str(func)];
+    prefix = options.prefix; % use default prefix
   end
 end
 
-filename = dsNameFromVaried(data, prefix, filename);
+filename = dsNameFromVaried(data, filename, prefix, func2str(func));
 
 %% auto_gen_test_data_flag argout
 if options.auto_gen_test_data_flag
