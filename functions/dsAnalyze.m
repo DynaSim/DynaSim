@@ -7,13 +7,13 @@ function result = dsAnalyze(src,varargin)
 %
 % Usage:
 %  1) dsAnalyze Style: explicit func handle/cell of handles
-%   result = AnalyzeData(data,func,'option1',value1,...) % pass data or datafile name
-%   result = AnalyzeData(studyinfo,func,'option1',value1,...) % pass studyinfo struct
-%   result = AnalyzeData(study_dir,func,'option1',value1,...) % pass study_dir containing studyinfo.mat
+%   result = dsAnalyze(data,func,'option1',value1,...) % pass data or datafile name
+%   result = dsAnalyze(studyinfo,func,'option1',value1,...) % pass studyinfo struct
+%   result = dsAnalyze(study_dir,func,'option1',value1,...) % pass study_dir containing studyinfo.mat
 %  2) dsSimluate Style: implicit func through options.analysis_functions/options.plot_functions/options.result_functions
-%   result = AnalyzeData(data,'option1',value1,...) % pass data or datafile name
-%   result = AnalyzeData(studyinfo,'option1',value1,...) % pass studyinfo struct
-%   result = AnalyzeData(study_dir,'option1',value1,...) % pass study_dir containing studyinfo.mat
+%   result = dsAnalyze(data,'option1',value1,...) % pass data or datafile name
+%   result = dsAnalyze(studyinfo,'option1',value1,...) % pass studyinfo struct
+%   result = dsAnalyze(study_dir,'option1',value1,...) % pass study_dir containing studyinfo.mat
 %
 % Inputs:
 %   - First input/argument:
@@ -54,7 +54,7 @@ function result = dsAnalyze(src,varargin)
 %                             in which each cell corresponds to the options for
 %                             the corresponding function cell. if only passing a
 %                             single func, can specificy function options as
-%                             key,val list as varargin for AnalyzeData
+%                             key,val list as varargin for dsAnalyze
 %     2.1)
 %     'analysis_functions'  : cell array of analysis function handles
 %     'analysis_options'    : cell array of option cell arrays {'option1',value1,...}
