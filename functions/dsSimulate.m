@@ -30,7 +30,7 @@ function [data,studyinfo,result] = dsSimulate(model,varargin)
 %
 %   options to control saved data:
 %     'matCompatibility_flag': whether to save mat files in compatible mode, vs to prioritize > 2GB VARs {0 or 1} (default: 1)
-%     'save_results_flag': whether to save results of analysis and plotting
+%     'save_results_flag': whether to save results of analysis and plotting {0 or 1} (default: 0)
 %     'save_data_flag': whether to save simulated data to disk after completion {0 or 1} (default: 0)
 %     'overwrite_flag': whether to overwrite existing data and result files {0 or 1} (default: 0)
 %     'study_dir'     : relative or absolute path to output directory (default: current directory)

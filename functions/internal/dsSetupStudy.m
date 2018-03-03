@@ -1,5 +1,5 @@
 function [studyinfo,options] = dsSetupStudy(base_model,varargin)
-%SETUPSTUDY - Initialize DynaSim studyinfo structure, prepare list of output file names, and create output directories
+% dsSetupStudy - Initialize DynaSim studyinfo structure, prepare list of output file names, and create output directories
 %
 % TODO: break up this function into smaller functions
 %
