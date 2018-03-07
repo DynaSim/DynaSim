@@ -164,6 +164,20 @@ if options.auto_gen_test_data_flag
 end
 
 %% Cluster Params
+if options.in_clus_flag
+  options.load_all_data_flag = 1;
+  options.parfor_flag = 0;
+  
+  % do analysis, dont trigger additional submits
+  options.cluster_flag = 0;
+  
+  % get simIDs for this job
+  options.simIDs = options.SGE_TASK_ID:(options.SGE_TASK_ID + options.SGE_TASK_STEPSIZE);
+  
+  % don't exceed max simID
+  options.simIDs(options.simIDs > options.SGE_TASK_LAST) = [];
+end
+
 options.cluster_flag = options.cluster_flag * ~options.in_sim_flag; % ensure doesnt do cluster in sim
 if options.cluster_flag
   % DEV NOTES:
@@ -174,17 +188,6 @@ if options.cluster_flag
   
   % don't load data yet
   options.load_all_data_flag = 0;
-end
-
-if options.in_clus_flag
-  options.load_all_data_flag = 1;
-  options.parfor_flag = 0;
-  
-  % get simIDs for this job
-  options.simIDs = options.SGE_TASK_ID:(options.SGE_TASK_ID + options.SGE_TASK_STEPSIZE);
-  
-  % don't exceed max simID
-  options.simIDs(options.simIDs > options.SGE_TASK_LAST) = [];
 end
 
 %% Parse options
@@ -385,6 +388,8 @@ if options.cluster_flag
   else
     submitCluster();
   end
+  
+  result = []; % return null
   
   return
 end
@@ -966,8 +971,13 @@ end
     [~,home]=system('echo $HOME');
     main_batch_dir = fullfile(strtrim(home),'batchdirs');
     
+    % batch dir
     [~, study_dir_name]=fileparts(studyinfo.study_dir);
     specific_batch_dir = fullfile(main_batch_dir,study_dir_name);
+    
+    if ~isdir(specific_batch_dir)
+      mkdir(specific_batch_dir);
+    end
     
     % setup inputs
     if ismatlab()
