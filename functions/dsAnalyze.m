@@ -99,33 +99,6 @@ function result = dsAnalyze(src,varargin)
 %   - studyinfo with load_all_data_flag==0
 %   - studyinfo with load_all_data_flag==1
 
-
-
-% Dev note: calls to this fn (for dev branch on 2/16/18)
-% - from dsSimulate:
-%     if options.save_data_flag || options.save_results_flag
-%       siminfo=studyinfo.simulations(sim_ind);
-%
-%       for f=1:length(siminfo.result_functions)
-%         tmpresult=dsAnalyze(tmpdata,siminfo.result_functions{f},'result_file',siminfo.result_files{f},'save_data_flag',1,'save_results_flag',1,siminfo.result_options{f}{:},'parfor_flag',options.parfor_flag);
-% 
-%         % since the plots are saved, close all generated figures
-%         if all(ishandle(tmpresult))
-%           close(tmpresult);
-%         end
-%       end
-%     else
-%
-%     if ~isempty(options.analysis_functions) && nargoutmain > 2
-%       dsAnalyze(tmpdata, options.analysis_functions, 'result_file',[], 'save_data_flag',0, 'save_results_flag',options.save_results_flag, 'function_options',options.analysis_options, 'parfor_flag',options.parfor_flag);
-%     end
-% 
-%     if ~isempty(options.plot_functions)
-%       dsAnalyze(tmpdata, options.plot_functions, 'result_file',[], 'save_data_flag',0, 'save_results_flag',options.save_results_flag, 'function_options',options.plot_options, 'parfor_flag',options.parfor_flag);
-%     end
-% - from cluster job:
-%     dsAnalyze(data,siminfo.result_functions{i},'result_file',siminfo.result_files{i},'save_data_flag',1,siminfo.result_options{i}{:});
-
 %% localfn output
 if ~nargin
   output = localfunctions; % output var name specific to this fn
@@ -169,7 +142,6 @@ options=dsCheckOptions(varargin,{...
   'close_fig_flag',-1,{0,1},... % close figures as they are created. can be specified for all figs or for individual fig using plot_options. -1 means not set by user.
   'argout_as_cell',0,{0,1},... % guarantee output as cell array and leave mising data as empty cells
   'auto_gen_test_data_flag',0,{0,1},...
-  % these are for cluster
   'cluster_flag',0,{0,1},...
   'in_clus_flag',0,{0,1},...
   'sims_per_job',1,[],... % how many sims to run per cluster job
@@ -338,8 +310,8 @@ elseif ~isempty(options.result_functions) % style 2.2
   plotFnBoolVec = [];
   
   % options
-  if isempty(options.result_options)
-    options.result_options = {{}};
+  if isempty(options.function_options)
+    options.function_options = {{}};
   end
   
   % make sure there is one option cell array per function
