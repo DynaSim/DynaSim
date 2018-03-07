@@ -19,7 +19,7 @@ set varargin = "$4"
 echo "command = " $ui_command
 echo "src = " $src
 echo "cwd = " `pwd`
-echo "varargin = " $varargin
+echo "varargin = " "$varargin"
 echo "HOSTNAME = " $HOSTNAME
 echo "JOB_ID = " $JOB_ID
 echo "JOB_NAME = " $JOB_NAME
@@ -31,6 +31,7 @@ if (-e pbsout/${SGE_TASK_ID}.err) then
   rm -f pbsout/${SGE_TASK_ID}.err
 endif
 
+echo "$ui_command "'"'"dsAnalyze('${src}',${varargin},'SGE_TASK_ID',${SGE_TASK_ID},'SGE_TASK_STEPSIZE',${SGE_TASK_STEPSIZE},'SGE_TASK_LAST',${SGE_TASK_LAST})"'"'" -logfile logs/${JOB_NAME}_${SGE_TASK_ID}.log"
 $ui_command "dsAnalyze('${src}',${varargin},'SGE_TASK_ID',${SGE_TASK_ID},'SGE_TASK_STEPSIZE',${SGE_TASK_STEPSIZE},'SGE_TASK_LAST',${SGE_TASK_LAST})" -logfile "logs/${JOB_NAME}_${SGE_TASK_ID}.log"
 
 echo "finished"

@@ -153,6 +153,7 @@ options=dsCheckOptions(varargin,{...
   'SGE_TASK_ID',[],[],...
   'SGE_TASK_STEPSIZE',[],[],...
   'SGE_TASK_LAST',[],[],...
+  'local_debug_flag',0,{0,1},...
   },false);
 
 %% auto_gen_test_data_flag argin
@@ -167,12 +168,14 @@ end
 if options.in_clus_flag
   options.load_all_data_flag = 1;
   options.parfor_flag = 0;
+  options.save_results_flag = 1;
+  options.overwrite_flag = 1; % to avoid each job icrementing
   
   % do analysis, dont trigger additional submits
   options.cluster_flag = 0;
   
   % get simIDs for this job
-  options.simIDs = options.SGE_TASK_ID:(options.SGE_TASK_ID + options.SGE_TASK_STEPSIZE);
+  options.simIDs = options.SGE_TASK_ID:(options.SGE_TASK_ID + options.SGE_TASK_STEPSIZE - 1);
   
   % don't exceed max simID
   options.simIDs(options.simIDs > options.SGE_TASK_LAST) = [];
@@ -188,6 +191,12 @@ if options.cluster_flag
   
   % don't load data yet
   options.load_all_data_flag = 0;
+  
+  % to avoid each job icrementing
+  if ~options.overwrite_flag
+    options.overwrite_flag = 1;
+    fprintf('Setting "options.overwrite_flag=1" since "cluster_flag=1" \n');
+  end
 end
 
 %% Parse options
@@ -244,7 +253,7 @@ else
   
   if ~isempty(options.simIDs)
     % filter simulations in studyinfo to only given simIDs
-    studyinfo.simulations = studyinfo.simulations(options.simIDs);
+    studyinfo.simulations = studyinfo.simulations(options.simIDs); % this only works if simIDs match struct index
   end
   
   options.simIdVec = [studyinfo.simulations.sim_id];
@@ -373,14 +382,18 @@ end
 %% Cluster Flag Submit
 if options.cluster_flag
   %% check for qsub on system
-  [status,result]=system('which qsub');
+  [status,sysresult]=system('which qsub');
   
   if options.auto_gen_test_data_flag || options.unit_test_flag
     status = 0;
-    result = 1;
+    sysresult = 1;
   end
   
-  if isempty(result)
+  if options.local_debug_flag
+    sysresult = 1;
+  end
+  
+  if isempty(sysresult)
     [~,host] = system('hostname');
     fprintf('qsub not found on host (%s).\n', strtrim(host));
     fprintf('Jobs NOT submitted to cluster queue.\n');
@@ -1016,6 +1029,8 @@ end
     % prep arg4 for echo
     arg4 = strrep(arg4, ', ', ','); % remove comma spaces
     arg4 = strrep(arg4, '''', '\'''); % escape single quotes
+    arg4 = strrep(arg4, '{', '''{'''); % quote bracket for double quotes in qsub_jobs_analyze
+    arg4 = strrep(arg4, '}', '''}'''); % quote bracket for double quotes in qsub_jobs_analyze
     
     % qsub args
     num_simIDs = studyinfo.simulations(end).sim_id;
@@ -1033,20 +1048,20 @@ end
     end
     
     if ~options.auto_gen_test_data_flag && ~options.unit_test_flag
-      [status,result] = system(cmd);
+      [status,sysresult] = system(cmd);
     end
     
     % check status
     if status > 0
       if options.verbose_flag
         fprintf('Submit command failed: %s\n',cmd);
-        disp(result);
+        disp(sysresult);
       end
       return;
     else
       if options.verbose_flag
         fprintf('Submit command status: \n');
-        disp(result);
+        disp(sysresult);
       end
     end
     
