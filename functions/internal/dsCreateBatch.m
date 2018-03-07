@@ -49,7 +49,7 @@ options=dsCheckOptions(varargin,{...
   'num_cores',4,[],... % # cores for parallel processing (SCC supports 1-12)
   'sims_per_job',1,[],... % how many sims to run per cluster job
   'memory_limit','8G',[],... % how much memory to allocate per cluster job
-  'batch_dir',[],[],...
+  'batch_dir',[],[],... % EAR: i dont think this is used
   'simulator_options',[],[],...
   'verbose_flag',0,{0,1},...
   'overwrite_flag',0,{0,1},...
@@ -493,6 +493,8 @@ else % on cluster with qsub
         l_directives, batch_dir_abs_path, jobPrefix, num_simulations, options.sims_per_job, qsubStr); % qsub vars
       % NOTE: using num_simulations, not num_jobs, since the job_file will
       %   determine it's own sims to run
+      
+      num_jobs = ceil(num_simulations/options.sims_per_job); % update for later display
     elseif strcmp(options.qsub_mode, 'loop')
       cmd = sprintf('%s/qsub_jobs_loop ''%s'' %s ''%s'' ''%s''',...
         dsFnDirPath, batch_dir_abs_path, jobPrefix, ui_command, l_directives);
@@ -509,6 +511,7 @@ else % on cluster with qsub
       [status,result] = system(cmd);
     end
 
+    % check status
     if status > 0
       if options.verbose_flag
         fprintf('Submit command failed: %s\n',cmd);
