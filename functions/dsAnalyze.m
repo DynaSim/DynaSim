@@ -170,7 +170,6 @@ if options.cluster_flag
   %{
     TODO
     - check that options.cluster_flag doesnt trigger for insim
-    - check that dsSim options.study_dir is correct
   %}
   
   % don't load data yet
@@ -959,18 +958,19 @@ end
     dynasim_functions=fullfile(dynasim_path,'functions');
     
     if ~options.auto_gen_test_data_flag && ~options.unit_test_flag
-      dsFnDirPath = fileparts(mfilename('fullpath')); % path to functions dir containing qsub files
+      dsFnDirPath = fullfile(fileparts(mfilename('fullpath')), 'internal'); % path to functions dir containing qsub files
     else
       dsFnDirPath = 'dsFnPath';
     end
     
+    [~,home]=system('echo $HOME');
     main_batch_dir = fullfile(strtrim(home),'batchdirs');
     
-    [~, study_dir_name]=fileparts2(options.study_dir);
+    [~, study_dir_name]=fileparts(studyinfo.study_dir);
     specific_batch_dir = fullfile(main_batch_dir,study_dir_name);
     
     % setup inputs
-    if isMatlab
+    if ismatlab()
       if ~options.parfor_flag
         ui_command = 'matlab -nodisplay -nosplash -singleCompThread -r';
       else
@@ -997,15 +997,21 @@ end
     % shell script args
 %     arg1 = specific_batch_dir;
 %     arg2 = ui_command;
-    arg3 = options.study_dir; % src
-    arg4 = strjoin(varargin{:}, ','); % varargin
-    arg4 = [arg4 ' ''in_clus_flag'',1'];
+    arg3 = getAbsolutePath(studyinfo.study_dir); % src
+    arg4 = aschar(varargin);
+    arg4(1) = []; % remove leading '{'
+    arg4(end) = []; % remove trailing '}'
+    arg4 = [arg4 ', ''in_clus_flag'',1'];
+    
+    % prep arg4 for echo
+    arg4 = strrep(arg4, ', ', ','); % remove comma spaces
+    arg4 = strrep(arg4, '''', '\'''); % escape single quotes
     
     % qsub args
     num_simIDs = studyinfo.simulations(end).sim_id;
     jobPrefix = study_dir_name;
     
-    cmd = sprintf('echo "%s/qsub_jobs_analyze ''%s'' ''%s'' ''%s'' ''%s''" | qsub -V -hard %s -wd ''%s'' -N %s_analysis_job -t 1-%i:%i %s',...
+    cmd = sprintf('echo "%s/qsub_jobs_analyze ''%s'' ''%s'' ''%s'' %s" | qsub -V -hard %s -wd ''%s'' -N %s_analysis_job -t 1-%i:%i %s',...
       dsFnDirPath, specific_batch_dir, ui_command, arg3, arg4,... % echo vars
       l_directives, specific_batch_dir, jobPrefix, num_simIDs, options.sims_per_job, qsubStr); % qsub vars
     
