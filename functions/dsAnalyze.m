@@ -76,6 +76,9 @@ function result = dsAnalyze(src,varargin)
 %                         options specified by 1-3 characters as string. 'b' for job
 %                         begins, 'a' for job aborts, 'e' for job ends.
 %
+% Note: if function_options/plot_options cells exceed num functions, they will
+%       be copied to each fn.
+%
 %
 % Outputs:
 %   - result: for single fn, result is struct, cell array, or cell contents returned by the analysis function
@@ -279,6 +282,13 @@ if ~isempty(funcIn) % style 1
   if length(options.function_options) < length(funcIn)
     % extend function_options with blank cells
     options.function_options(length(options.function_options)+1:length(funcIn)) = {{}};
+  elseif length(options.function_options) > length(funcIn)
+    % copy function_options to each funcIn
+    
+    temp = options.function_options;
+    options.function_options = cell(size(funcIn));
+    [options.function_options{:}] = deal(temp);
+    clear temp
   end
 elseif ( ~isempty(options.plot_functions) || ~isempty(options.analysis_functions) ) % style 2.1
   % functions
@@ -298,10 +308,26 @@ elseif ( ~isempty(options.plot_functions) || ~isempty(options.analysis_functions
   if length(options.plot_options) < length(options.plot_functions)
     % extend plot_options with blank cells
     options.plot_options(length(options.plot_options)+1:length(options.plot_functions)) = {{}};
+  elseif length(options.plot_options) > length(options.plot_functions)
+    % copy plot_options to each plot_function
+    
+    temp = options.plot_options;
+    options.plot_options = cell(size(options.plot_functions));
+    [options.plot_options{:}] = deal(temp);
+    clear temp
   end
+  
+  % make sure there is one option cell array per function
   if length(options.analysis_options) < length(options.analysis_functions)
     % extend analysis_options with blank cells
     options.analysis_options(length(options.analysis_options)+1:length(options.analysis_functions)) = {{}};
+  elseif length(options.function_options) > length(options.result_functions)
+    % copy analysis_options to each result_function
+    
+    temp = options.function_options;
+    options.function_options = cell(size(options.result_functions));
+    [options.function_options{:}] = deal(temp);
+    clear temp
   end
   options.function_options = [options.plot_options(:); options.analysis_options(:)];
 elseif ~isempty(options.result_functions) % style 2.2
@@ -318,6 +344,13 @@ elseif ~isempty(options.result_functions) % style 2.2
   if length(options.function_options) < length(options.result_functions)
     % extend function_options with blank cells
     options.function_options(length(options.function_options)+1:length(options.result_functions)) = {{}};
+  elseif length(options.function_options) > length(options.result_functions)
+    % copy function_options to each result_function
+    
+    temp = options.function_options;
+    options.function_options = cell(size(options.result_functions));
+    [options.function_options{:}] = deal(temp);
+    clear temp
   end
 end
 
