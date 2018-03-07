@@ -67,6 +67,15 @@ function result = dsAnalyze(src,varargin)
 %                             in which case it must have 'plot' string.
 %     'function_options'    : cell array of option cell arrays {'option1',value1,...}
 %
+%     - options for cluster computing:
+%       'cluster_flag'  : whether to run simulations on a cluster submitted
+%                         using qsub (see dsCreateBatch) {0 or 1} (default: 0)
+%       'sims_per_job'  : number of simulations to run per cluster job (default: 1)
+%       'memory_limit'  : memory to allocate per cluster job (default: '8G')
+%       'email_notify'  : whether to receive email notification about jobs.
+%                         options specified by 1-3 characters as string. 'b' for job
+%                         begins, 'a' for job aborts, 'e' for job ends.
+%
 %
 % Outputs:
 %   - result: for single fn, result is struct, cell array, or cell contents returned by the analysis function
@@ -160,6 +169,15 @@ options=dsCheckOptions(varargin,{...
   'close_fig_flag',-1,{0,1},... % close figures as they are created. can be specified for all figs or for individual fig using plot_options. -1 means not set by user.
   'argout_as_cell',0,{0,1},... % guarantee output as cell array and leave mising data as empty cells
   'auto_gen_test_data_flag',0,{0,1},...
+  % these are for cluster
+  'cluster_flag',0,{0,1},...
+  'in_clus_flag',0,{0,1},...
+  'sims_per_job',1,[],... % how many sims to run per cluster job
+  'memory_limit','8G',[],... % how much memory to allocate per batch job
+  'email_notify',[],[],...
+  'SGE_TASK_ID',[],[],...
+  'SGE_TASK_STEPSIZE',[],[],...
+  'SGE_TASK_LAST',[],[],...
   },false);
 
 %% auto_gen_test_data_flag argin
@@ -168,6 +186,31 @@ if options.auto_gen_test_data_flag
   varargs{find(strcmp(varargs, 'auto_gen_test_data_flag'))+1} = 0;
   varargs(end+1:end+2) = {'unit_test_flag',1};
   argin = [{src},{funcIn}, varargs]; % specific to this function
+end
+
+%% Cluster Params
+options.cluster_flag = options.cluster_flag * ~options.in_sim_flag; % ensure doesnt do cluster in sim
+if options.cluster_flag
+  % DEV NOTES:
+  %{
+    TODO
+    - check that options.cluster_flag doesnt trigger for insim
+    - check that dsSim options.study_dir is correct
+  %}
+  
+  % don't load data yet
+  options.load_all_data_flag = 0;
+end
+
+if options.in_clus_flag
+  options.load_all_data_flag = 1;
+  options.parfor_flag = 0;
+  
+  % get simIDs for this job
+  options.simIDs = options.SGE_TASK_ID:(options.SGE_TASK_ID + options.SGE_TASK_STEPSIZE);
+  
+  % don't exceed max simID
+  options.simIDs(options.simIDs > options.SGE_TASK_LAST) = [];
 end
 
 %% Parse options
@@ -319,6 +362,28 @@ end
 
 % Handle existing results
 [lastPlotIndex, lastAnalysisIndex] = findIndexFromExistingResults();
+
+%% Cluster Flag Submit
+if options.cluster_flag
+  %% check for qsub on system
+  [status,result]=system('which qsub');
+  
+  if options.auto_gen_test_data_flag || options.unit_test_flag
+    status = 0;
+    result = 1;
+  end
+  
+  if isempty(result)
+    [~,host] = system('hostname');
+    fprintf('qsub not found on host (%s).\n', strtrim(host));
+    fprintf('Jobs NOT submitted to cluster queue.\n');
+    fprintf('Call dsAnalyze with "cluster_flag = 0" instead to run locally.\n');
+  else
+    submitCluster();
+  end
+  
+  return
+end
 
 %% Calc results
 plotFnInd = lastPlotIndex;
@@ -870,6 +935,104 @@ end
       lastAnalysisIndex = 0;
     end % if options.save_results_flag && postHocBool
   end % findIndexFromExistingResults
+
+
+  function submitCluster()
+    % goal: submit to sge using array syntax
+    % method:
+    %   1) use qsub_jobs_analyze based on dsSim array oneFile
+    %   2) call dsAnalyze in each job
+    
+    % 'qsub_jobs_analyze' args
+    % $1 is abs path to working dir in batchdir
+    % $2 is ui_command
+    % $3 is src, which should be a study_dir path
+    % $4 = varargin, the string list of arguments for dsAnalyze
+    
+    % locate DynaSim toolbox
+    dynasim_path = dsGetRootPath(); % root is one level up from directory containing this function
+    dynasim_functions=fullfile(dynasim_path,'functions');
+    
+    if ~options.auto_gen_test_data_flag && ~options.unit_test_flag
+      dsFnDirPath = fileparts(mfilename('fullpath')); % path to functions dir containing qsub files
+    else
+      dsFnDirPath = 'dsFnPath';
+    end
+    
+    main_batch_dir = fullfile(strtrim(home),'batchdirs');
+    
+    [~, study_dir_name]=fileparts2(options.study_dir);
+    specific_batch_dir = fullfile(main_batch_dir,study_dir_name);
+    
+    % setup inputs
+    if isMatlab
+      if ~options.parfor_flag
+        ui_command = 'matlab -nodisplay -nosplash -singleCompThread -r';
+      else
+        ui_command = 'matlab -nodisplay -nosplash -r';
+      end
+
+      if ~options.parfor_flag
+        l_directives = sprintf('-l mem_total=%s', options.memory_limit);
+      else
+        l_directives = sprintf('-l mem_total=%s -pe omp %i', options.memory_limit, options.num_cores);
+      end
+    else
+      ui_command = 'octave-cli --eval';
+      l_directives = ['-l centos7=TRUE -l mem_total=', options.memory_limit];
+    end
+    
+    % email string
+    if isempty(options.email_notify)
+      qsubStr = '';
+    else
+      qsubStr = ['-m ' options.email_notify];
+    end
+    
+    % shell script args
+%     arg1 = specific_batch_dir;
+%     arg2 = ui_command;
+    arg3 = options.study_dir; % src
+    arg4 = strjoin(varargin{:}, ','); % varargin
+    arg4 = [arg4 ' ''in_clus_flag'',1'];
+    
+    % qsub args
+    num_simIDs = studyinfo.simulations(end).sim_id;
+    jobPrefix = study_dir_name;
+    
+    cmd = sprintf('echo "%s/qsub_jobs_analyze ''%s'' ''%s'' ''%s'' ''%s''" | qsub -V -hard %s -wd ''%s'' -N %s_analysis_job -t 1-%i:%i %s',...
+      dsFnDirPath, specific_batch_dir, ui_command, arg3, arg4,... % echo vars
+      l_directives, specific_batch_dir, jobPrefix, num_simIDs, options.sims_per_job, qsubStr); % qsub vars
+    
+    % add shell script to linux path if not already there
+    setenv('PATH', [getenv('PATH') ':' dynasim_functions ':' fullfile(dynasim_functions, 'internal')]);
+    
+    if options.verbose_flag
+      fprintf('Submitting cluster analysis jobs with shell command: %s \n',cmd);
+    end
+    
+    if ~options.auto_gen_test_data_flag && ~options.unit_test_flag
+      [status,result] = system(cmd);
+    end
+    
+    % check status
+    if status > 0
+      if options.verbose_flag
+        fprintf('Submit command failed: %s\n',cmd);
+        disp(result);
+      end
+      return;
+    else
+      if options.verbose_flag
+        fprintf('Submit command status: \n');
+        disp(result);
+      end
+    end
+    
+    if options.verbose_flag
+      fprintf('%g jobs successfully submitted!\n', ceil(num_simIDs/options.sims_per_job) );
+    end
+  end
 % End Nested Fn ----------------------------------------------------------------
 
 end %main fn
