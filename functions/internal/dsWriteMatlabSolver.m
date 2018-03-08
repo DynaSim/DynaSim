@@ -449,7 +449,7 @@ if ~isempty(model.monitors)
 end
 
 %% Memory Check
-if ~options.mex_flag
+if ~options.mex_flag && options.verbose_flag
   fprintf(fid,'%% ###########################################################\n');
   fprintf(fid,'%% Memory check:\n');
   fprintf(fid,'%% ###########################################################\n');

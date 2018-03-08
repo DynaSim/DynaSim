@@ -49,7 +49,7 @@ options=dsCheckOptions(varargin,{...
   'num_cores',4,[],... % # cores for parallel processing (SCC supports 1-12)
   'sims_per_job',1,[],... % how many sims to run per cluster job
   'memory_limit','8G',[],... % how much memory to allocate per cluster job
-  'batch_dir',[],[],...
+  'batch_dir',[],[],... % EAR: i dont think this is used
   'simulator_options',[],[],...
   'verbose_flag',0,{0,1},...
   'overwrite_flag',0,{0,1},...
@@ -493,6 +493,8 @@ else % on cluster with qsub
         l_directives, batch_dir_abs_path, jobPrefix, num_simulations, options.sims_per_job, qsubStr); % qsub vars
       % NOTE: using num_simulations, not num_jobs, since the job_file will
       %   determine it's own sims to run
+      
+      num_jobs = ceil(num_simulations/options.sims_per_job); % update for later display
     elseif strcmp(options.qsub_mode, 'loop')
       cmd = sprintf('%s/qsub_jobs_loop ''%s'' %s ''%s'' ''%s''',...
         dsFnDirPath, batch_dir_abs_path, jobPrefix, ui_command, l_directives);
@@ -509,6 +511,7 @@ else % on cluster with qsub
       [status,result] = system(cmd);
     end
 
+    % check status
     if status > 0
       if options.verbose_flag
         fprintf('Submit command failed: %s\n',cmd);
@@ -653,7 +656,7 @@ end
     fprintf(fjob,'\t\tfprintf(''-----------------------------------------------------\\n'');\n');
     fprintf(fjob,'\t\tdata=dsSimulate(studyinfo.base_model,''modifications'',siminfo.modifications,''studyinfo'',studyinfo,''sim_id'',SimID,keyvals{:});\n');
     fprintf(fjob,'\t\tfor i=1:length(siminfo.result_functions)\n');
-    fprintf(fjob,'\t\t\tdsAnalyze(data, siminfo.result_functions{i}, ''result_file'',siminfo.result_files{i}, ''save_data_flag'',1, siminfo.result_options{i}{:}, ''in_sim_flag'',1);\n');
+    fprintf(fjob,'\t\t\tdsAnalyze(data, siminfo.result_functions{i}, ''result_file'',siminfo.result_files{i}, ''save_results_flag'',1, siminfo.result_options{i}{:}, ''in_sim_flag'',1);\n');
     fprintf(fjob,'\t\tend\n');
 
     % add error handling
