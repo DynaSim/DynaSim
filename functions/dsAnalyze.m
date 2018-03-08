@@ -27,8 +27,9 @@ function result = dsAnalyze(src,varargin)
 %   - options: (key/value pairs are passed on to the analysis function)
 %     'save_results_flag'   : whether to save result {0 or 1} (default: 0)
 %     'matCompatibility_flag': whether to save mat files in compatible mode, vs to prioritize > 2GB VARs {0 or 1} (default: 1)
-%     'overwrite_flag': whether to overwrite existing result files {0 or 1} (default: 0)
+%     'overwrite_flag'      : whether to overwrite existing result files {0 or 1} (default: 0)
 %     'result_file'         : where to save result (default: 'result.mat')
+%    'check_file_index_flag': look for existing files to set function index
 %     'format'              : format for saved plots if figures are generated
 %                             {'svg','jpg','eps','png'} (default: 'svg')
 %     'varied_filename_flag': whether to make filename based on the varied
@@ -67,6 +68,18 @@ function result = dsAnalyze(src,varargin)
 %                             in which case it must have 'plot' string.
 %     'function_options'    : cell array of option cell arrays {'option1',value1,...}
 %
+%     - options for cluster computing:
+%       'cluster_flag'  : whether to run simulations on a cluster submitted
+%                         using qsub (see dsCreateBatch) {0 or 1} (default: 0)
+%       'sims_per_job'  : number of simulations to run per cluster job (default: 1)
+%       'memory_limit'  : memory to allocate per cluster job (default: '8G')
+%       'email_notify'  : whether to receive email notification about jobs.
+%                         options specified by 1-3 characters as string. 'b' for job
+%                         begins, 'a' for job aborts, 'e' for job ends.
+%
+% Note: if function_options/plot_options cells exceed num functions, they will
+%       be copied to each fn.
+%
 %
 % Outputs:
 %   - result: for single fn, result is struct, cell array, or cell contents returned by the analysis function
@@ -90,33 +103,6 @@ function result = dsAnalyze(src,varargin)
 %   - studyinfo with load_all_data_flag==0
 %   - studyinfo with load_all_data_flag==1
 
-
-
-% Dev note: calls to this fn (for dev branch on 2/16/18)
-% - from dsSimulate:
-%     if options.save_data_flag || options.save_results_flag
-%       siminfo=studyinfo.simulations(sim_ind);
-%
-%       for f=1:length(siminfo.result_functions)
-%         tmpresult=dsAnalyze(tmpdata,siminfo.result_functions{f},'result_file',siminfo.result_files{f},'save_data_flag',1,'save_results_flag',1,siminfo.result_options{f}{:},'parfor_flag',options.parfor_flag);
-% 
-%         % since the plots are saved, close all generated figures
-%         if all(ishandle(tmpresult))
-%           close(tmpresult);
-%         end
-%       end
-%     else
-%
-%     if ~isempty(options.analysis_functions) && nargoutmain > 2
-%       dsAnalyze(tmpdata, options.analysis_functions, 'result_file',[], 'save_data_flag',0, 'save_results_flag',options.save_results_flag, 'function_options',options.analysis_options, 'parfor_flag',options.parfor_flag);
-%     end
-% 
-%     if ~isempty(options.plot_functions)
-%       dsAnalyze(tmpdata, options.plot_functions, 'result_file',[], 'save_data_flag',0, 'save_results_flag',options.save_results_flag, 'function_options',options.plot_options, 'parfor_flag',options.parfor_flag);
-%     end
-% - from cluster job:
-%     dsAnalyze(data,siminfo.result_functions{i},'result_file',siminfo.result_files{i},'save_data_flag',1,siminfo.result_options{i}{:});
-
 %% localfn output
 if ~nargin
   output = localfunctions; % output var name specific to this fn
@@ -139,6 +125,7 @@ options=dsCheckOptions(varargin,{...
   'save_results_flag',0,{0,1},...
   'matCompatibility_flag',1,{0,1},...  % whether to save mat files in compatible mode, vs to prioritize > 2GB VARs
   'overwrite_flag',0,{0,1},... % whether to overwrite existing data
+  'check_file_index_flag',0,{0,1},...
   'format','svg',{'svg','jpg','eps','png','fig'},...
   'varied_filename_flag',0,{0,1},...
   'plot_type','waveform',{'waveform','rastergram','raster','power','rates','imagesc','heatmapFR','heatmap_sortedFR','meanFR','meanFRdens','FRpanel'},...
@@ -160,6 +147,15 @@ options=dsCheckOptions(varargin,{...
   'close_fig_flag',-1,{0,1},... % close figures as they are created. can be specified for all figs or for individual fig using plot_options. -1 means not set by user.
   'argout_as_cell',0,{0,1},... % guarantee output as cell array and leave mising data as empty cells
   'auto_gen_test_data_flag',0,{0,1},...
+  'cluster_flag',0,{0,1},...
+  'in_clus_flag',0,{0,1},...
+  'sims_per_job',1,[],... % how many sims to run per cluster job
+  'memory_limit','8G',[],... % how much memory to allocate per batch job
+  'email_notify',[],[],...
+  'SGE_TASK_ID',[],[],...
+  'SGE_TASK_STEPSIZE',[],[],...
+  'SGE_TASK_LAST',[],[],...
+  'local_debug_flag',0,{0,1},...
   },false);
 
 %% auto_gen_test_data_flag argin
@@ -170,6 +166,46 @@ if options.auto_gen_test_data_flag
   argin = [{src},{funcIn}, varargs]; % specific to this function
 end
 
+%% Cluster Params
+if options.in_clus_flag
+  options.load_all_data_flag = 1;
+  options.parfor_flag = 0;
+  options.save_results_flag = 1;
+  options.check_file_index_flag = 0; % to avoid each job incrementing
+  options.close_fig_flag = 1; % close figures since in cluster
+  
+  % do analysis, dont trigger additional submits
+  options.cluster_flag = 0;
+  
+  % get simIDs for this job
+  options.simIDs = options.SGE_TASK_ID:(options.SGE_TASK_ID + options.SGE_TASK_STEPSIZE - 1);
+  
+  % don't exceed max simID
+  options.simIDs(options.simIDs > options.SGE_TASK_LAST) = [];
+  
+  varargin(end+1:end+2) = {'simIDs', options.simIDs}; % ensure correct import
+end
+
+options.cluster_flag = options.cluster_flag * ~options.in_sim_flag; % ensure doesnt do cluster in sim
+if options.cluster_flag
+  % DEV NOTES:
+  %{
+    TODO
+    - check that options.cluster_flag doesnt trigger for insim
+  %}
+  
+  % do not load data yet
+  options.load_all_data_flag = 0;
+  
+  options.close_fig_flag = 1; % close figures since in cluster
+  
+  % to avoid each job incrementing
+  if options.check_file_index_flag
+    options.check_file_index_flag = 0;
+    fprintf('Setting "options.check_file_index_flag=0" since "cluster_flag=1" \n');
+  end
+end
+
 %% Parse options
 if (options.parfor_flag && ~options.load_all_data_flag)
   warning('Since load_all_data_flag==0, setting parfor_flag==0');
@@ -178,6 +214,10 @@ end
 
 if (options.load_all_data_flag && ~options.parfor_flag)
   dsVprintf(options, 'Since load_all_data_flag==1, recommend setting parfor_flag==1 for speedup. \n');
+end
+
+if (options.check_file_index_flag && options.overwrite_flag)
+  dsVprintf(options, 'Since overwrite_flag==1, check_file_index_flag==1 is ignored. \n');
 end
 
 %% Save data if no output is requested.
@@ -224,7 +264,7 @@ else
   
   if ~isempty(options.simIDs)
     % filter simulations in studyinfo to only given simIDs
-    studyinfo.simulations = studyinfo.simulations(options.simIDs);
+    studyinfo.simulations = studyinfo.simulations(options.simIDs); % this only works if simIDs match struct index
   end
   
   options.simIdVec = [studyinfo.simulations.sim_id];
@@ -264,6 +304,13 @@ if ~isempty(funcIn) % style 1
   if length(options.function_options) < length(funcIn)
     % extend function_options with blank cells
     options.function_options(length(options.function_options)+1:length(funcIn)) = {{}};
+  elseif length(options.function_options) > length(funcIn)
+    % copy function_options to each funcIn
+    
+    temp = options.function_options;
+    options.function_options = cell(size(funcIn));
+    [options.function_options{:}] = deal(temp);
+    clear temp
   end
 elseif ( ~isempty(options.plot_functions) || ~isempty(options.analysis_functions) ) % style 2.1
   % functions
@@ -283,10 +330,26 @@ elseif ( ~isempty(options.plot_functions) || ~isempty(options.analysis_functions
   if length(options.plot_options) < length(options.plot_functions)
     % extend plot_options with blank cells
     options.plot_options(length(options.plot_options)+1:length(options.plot_functions)) = {{}};
+  elseif length(options.plot_options) > length(options.plot_functions)
+    % copy plot_options to each plot_function
+    
+    temp = options.plot_options;
+    options.plot_options = cell(size(options.plot_functions));
+    [options.plot_options{:}] = deal(temp);
+    clear temp
   end
+  
+  % make sure there is one option cell array per function
   if length(options.analysis_options) < length(options.analysis_functions)
     % extend analysis_options with blank cells
     options.analysis_options(length(options.analysis_options)+1:length(options.analysis_functions)) = {{}};
+  elseif length(options.function_options) > length(options.result_functions)
+    % copy analysis_options to each result_function
+    
+    temp = options.function_options;
+    options.function_options = cell(size(options.result_functions));
+    [options.function_options{:}] = deal(temp);
+    clear temp
   end
   options.function_options = [options.plot_options(:); options.analysis_options(:)];
 elseif ~isempty(options.result_functions) % style 2.2
@@ -295,14 +358,21 @@ elseif ~isempty(options.result_functions) % style 2.2
   plotFnBoolVec = [];
   
   % options
-  if isempty(options.result_options)
-    options.result_options = {{}};
+  if isempty(options.function_options)
+    options.function_options = {{}};
   end
   
   % make sure there is one option cell array per function
   if length(options.function_options) < length(options.result_functions)
     % extend function_options with blank cells
     options.function_options(length(options.function_options)+1:length(options.result_functions)) = {{}};
+  elseif length(options.function_options) > length(options.result_functions)
+    % copy function_options to each result_function
+    
+    temp = options.function_options;
+    options.function_options = cell(size(options.result_functions));
+    [options.function_options{:}] = deal(temp);
+    clear temp
   end
 end
 
@@ -319,6 +389,34 @@ end
 
 % Handle existing results
 [lastPlotIndex, lastAnalysisIndex] = findIndexFromExistingResults();
+
+%% Cluster Flag Submit
+if options.cluster_flag
+  %% check for qsub on system
+  [status,sysresult]=system('which qsub');
+  
+  if options.auto_gen_test_data_flag || options.unit_test_flag
+    status = 0;
+    sysresult = 1;
+  end
+  
+  if options.local_debug_flag
+    sysresult = 1;
+  end
+  
+  if isempty(sysresult)
+    [~,host] = system('hostname');
+    fprintf('qsub not found on host (%s).\n', strtrim(host));
+    fprintf('Jobs NOT submitted to cluster queue.\n');
+    fprintf('Call dsAnalyze with "cluster_flag = 0" instead to run locally.\n');
+  else
+    submitCluster();
+  end
+  
+  result = []; % return null
+  
+  return
+end
 
 %% Calc results
 plotFnInd = lastPlotIndex;
@@ -393,12 +491,14 @@ for fInd = 1:nFunc % loop over function inputs
     % loop through results. all results may exist or need to be made during loop
     for iResult = 1:nResults
       if ~options.in_sim_flag
-        dsVprintf(options, '  Result (%i/%i) \n', iResult,nResults);
+        dsVprintf(options, '  Result (%i/%i): ', iResult,nResults);
       end
       
       extension = ['.' plotFormat]; % '.svg'; % {.jpg,.svg}
       
       if ~postHocBool % in sim
+        dsVprintf(options, '\n');
+        
         if ~isempty(options.result_file)
           % ensure extension is extension
           fPath = options.result_file;
@@ -423,6 +523,8 @@ for fInd = 1:nFunc % loop over function inputs
         thisResult = result;
       elseif studyinfoBool % posthoc with studyinfo
         simID = studyinfo.simulations(iResult).sim_id;
+        
+        dsVprintf(options, 'simID=%i \n', simID);
         
         if isfield(options, 'result_file') && ~isempty(options.result_file)
           fPath = options.result_file;
@@ -505,7 +607,7 @@ for fInd = 1:nFunc % loop over function inputs
         continue
       end % if isempty(thisResult)
 
-      if options.save_results_flag
+      if options.save_results_flag && ~(exist(fPath, 'file') && ~options.overwrite_flag)
         set(thisResult, 'PaperPositionMode','auto');
         dsVprintf(options, '    Saving plot: %s\n',fPath);
 
@@ -523,6 +625,8 @@ for fInd = 1:nFunc % loop over function inputs
           otherwise
             error('Unknown plot extension. Try again with known extension. See help(dsAnalyze)')
         end
+      elseif exist('fPath', 'var') && exist(fPath, 'file') && ~options.overwrite_flag
+        dsVprintf(options, '  Skipping since file already exists: %s \n', fPath);
       end %save_results_flag
         
       if (options.save_results_flag && (options.close_fig_flag ~= 0)) || options.close_fig_flag==1
@@ -675,8 +779,10 @@ for fInd = 1:nFunc % loop over function inputs
         continue
       end % if isempty(result)
       
-      if options.save_results_flag  
+      if options.save_results_flag && ~(exist(fPath, 'file') && ~options.overwrite_flag)
         dsExportData(result, 'filename',fPath, 'result_flag',1, varargin{:});
+      elseif exist('fPath', 'var') && exist(fPath, 'file') && ~options.overwrite_flag
+        dsVprintf(options, '  Skipping since file already exists: %s \n', fPath);
       end % save_results_flag
         
       if ~options.load_all_data_flag
@@ -737,13 +843,15 @@ end
     % Check to see if results files exist. Deal with overwriting them, or
     % increasing index number. Note: if use same fn name, assume its a new call so
     % increment index. Only overwrite if all functions are the same as original.
-    if options.save_results_flag && postHocBool
+    if postHocBool && options.check_file_index_flag && options.save_results_flag
       if studyinfoBool
         if ~isempty(studyinfo.simulations(1).result_functions)
           oldFns = sort(cellfun(@func2str, studyinfo.simulations(1).result_functions, 'Uni',0));
           
           files = studyinfo.simulations(1).result_files; % studyinfoBool with prior result_functions
         else
+          oldFns = [];
+          
           files = lscell(studyinfo.study_dir); % studyinfoBool but no result_functions
         end
       else
@@ -851,25 +959,138 @@ end
         oldFns = sort([analysisIndFn(:,2); plotIndFn(:,2)]);
       end
       
-      if options.overwrite_flag && (~isempty(plotFiles) || ~isempty(analysisFiles))
-        % check if all functions the same as old ones
-        newFns = sort(cellfun(@func2str, funcIn, 'Uni',0));
-        
-        if isempty(setdiff(oldFns, oldFns))
-          dsVprintf(options, 'Overwriting old results and plot function indicies in new folders starting at index 0.');
-          
-          lastPlotIndex = 0;
-          lastAnalysisIndex = 0;
-        else
-          dsVprintf(options, 'Not overwriting old results and plot function indicies in new folders since functions are not the same, so incrementing index.');
-        end
-      end
+%       if options.check_file_index_flag && (~isempty(plotFiles) || ~isempty(analysisFiles))
+%         % check if all functions the same as old ones
+%         newFns = sort(cellfun(@func2str, funcIn, 'Uni',0));
+%         
+%         if isempty(setdiff(newFns, oldFns))
+%           dsVprintf(options, 'Overwriting old results and plot function indicies in new folders starting at index 0.');
+%           
+%           lastPlotIndex = 0;
+%           lastAnalysisIndex = 0;
+%         else
+%           dsVprintf(options, 'Not overwriting old results and plot function indicies in new folders since functions are not the same, so incrementing index. \n');
+%         end
+%         clear oldFns
+%       end
     else % ~postHocBool
       % setting to avoid errors
       lastPlotIndex = 0;
       lastAnalysisIndex = 0;
-    end % if options.save_results_flag && postHocBool
+    end % if postHocBool && options.check_file_index_flag && options.save_results_flag
   end % findIndexFromExistingResults
+
+
+  function submitCluster()
+    % goal: submit to sge using array syntax
+    % method:
+    %   1) use qsub_jobs_analyze based on dsSim array oneFile
+    %   2) call dsAnalyze in each job
+    
+    % 'qsub_jobs_analyze' args
+    % $1 is abs path to working dir in batchdir
+    % $2 is ui_command
+    % $3 is src, which should be a study_dir path
+    % $4 = varargin, the string list of arguments for dsAnalyze
+    
+    % locate DynaSim toolbox
+    dynasim_path = dsGetRootPath(); % root is one level up from directory containing this function
+    dynasim_functions=fullfile(dynasim_path,'functions');
+    
+    if ~options.auto_gen_test_data_flag && ~options.unit_test_flag
+      dsFnDirPath = fullfile(fileparts(mfilename('fullpath')), 'internal'); % path to functions dir containing qsub files
+    else
+      dsFnDirPath = 'dsFnPath';
+    end
+    
+    [~,home]=system('echo $HOME');
+    main_batch_dir = fullfile(strtrim(home),'batchdirs');
+    
+    % batch dir
+    [~, study_dir_name]=fileparts(studyinfo.study_dir);
+    specific_batch_dir = fullfile(main_batch_dir,study_dir_name);
+    
+    if ~isdir(specific_batch_dir)
+      mkdir(specific_batch_dir);
+    end
+    
+    % setup inputs
+    if ismatlab()
+      if ~options.parfor_flag
+        ui_command = 'matlab -nodisplay -nosplash -singleCompThread -r';
+      else
+        ui_command = 'matlab -nodisplay -nosplash -r';
+      end
+
+      if ~options.parfor_flag
+        l_directives = sprintf('-l mem_total=%s', options.memory_limit);
+      else
+        l_directives = sprintf('-l mem_total=%s -pe omp %i', options.memory_limit, options.num_cores);
+      end
+    else
+      ui_command = 'octave-cli --eval';
+      l_directives = ['-l centos7=TRUE -l mem_total=', options.memory_limit];
+    end
+    
+    % email string
+    if isempty(options.email_notify)
+      qsubStr = '';
+    else
+      qsubStr = ['-m ' options.email_notify];
+    end
+    
+    % shell script args
+%     arg1 = specific_batch_dir;
+%     arg2 = ui_command;
+    arg3 = getAbsolutePath(studyinfo.study_dir); % src
+    arg4 = aschar(varargin);
+    arg4(1) = []; % remove leading '{'
+    arg4(end) = []; % remove trailing '}'
+    arg4 = [arg4 ', ''in_clus_flag'',1'];
+    
+    % prep arg4 for echo
+    arg4 = strrep(arg4, ', ', ','); % remove comma spaces
+    arg4 = strrep(arg4, '''', '\'''); % escape single quotes
+    arg4 = strrep(arg4, '{', '''{'''); % quote bracket for double quotes in qsub_jobs_analyze
+    arg4 = strrep(arg4, '}', '''}'''); % quote bracket for double quotes in qsub_jobs_analyze
+    
+    % qsub args
+    num_simIDs = studyinfo.simulations(end).sim_id;
+    jobPrefix = study_dir_name;
+    
+    cmd = sprintf('echo "%s/qsub_jobs_analyze ''%s'' ''%s'' ''%s'' %s" | qsub -V -hard %s -wd ''%s'' -N %s_analysis_job -t 1-%i:%i %s',...
+      dsFnDirPath, specific_batch_dir, ui_command, arg3, arg4,... % echo vars
+      l_directives, specific_batch_dir, jobPrefix, num_simIDs, options.sims_per_job, qsubStr); % qsub vars
+    
+    % add shell script to linux path if not already there
+    setenv('PATH', [getenv('PATH') ':' dynasim_functions ':' fullfile(dynasim_functions, 'internal')]);
+    
+    if options.verbose_flag
+      fprintf('Submitting cluster analysis jobs with shell command: %s \n',cmd);
+    end
+    
+    if ~options.auto_gen_test_data_flag && ~options.unit_test_flag
+      [status,sysresult] = system(cmd);
+    end
+    
+    % check status
+    if status > 0
+      if options.verbose_flag
+        fprintf('Submit command failed: %s\n',cmd);
+        disp(sysresult);
+      end
+      return;
+    else
+      if options.verbose_flag
+        fprintf('Submit command status: \n');
+        disp(sysresult);
+      end
+    end
+    
+    if options.verbose_flag
+      fprintf('%g jobs successfully submitted!\n', ceil(num_simIDs/options.sims_per_job) );
+    end
+  end
 % End Nested Fn ----------------------------------------------------------------
 
 end %main fn
