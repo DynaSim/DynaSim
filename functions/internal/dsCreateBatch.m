@@ -656,7 +656,7 @@ end
     fprintf(fjob,'\t\tfprintf(''-----------------------------------------------------\\n'');\n');
     fprintf(fjob,'\t\tdata=dsSimulate(studyinfo.base_model,''modifications'',siminfo.modifications,''studyinfo'',studyinfo,''sim_id'',SimID,keyvals{:});\n');
     fprintf(fjob,'\t\tfor i=1:length(siminfo.result_functions)\n');
-    fprintf(fjob,'\t\t\tdsAnalyze(data, siminfo.result_functions{i}, ''result_file'',siminfo.result_files{i}, ''save_data_flag'',1, siminfo.result_options{i}{:}, ''in_sim_flag'',1);\n');
+    fprintf(fjob,'\t\t\tdsAnalyze(data, siminfo.result_functions{i}, ''result_file'',siminfo.result_files{i}, ''save_results_flag'',1, siminfo.result_options{i}{:}, ''in_sim_flag'',1);\n');
     fprintf(fjob,'\t\tend\n');
 
     % add error handling
