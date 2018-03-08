@@ -837,6 +837,8 @@ end
           
           files = studyinfo.simulations(1).result_files; % studyinfoBool with prior result_functions
         else
+          oldFns = [];
+          
           files = lscell(studyinfo.study_dir); % studyinfoBool but no result_functions
         end
       else
@@ -954,8 +956,9 @@ end
           lastPlotIndex = 0;
           lastAnalysisIndex = 0;
         else
-          dsVprintf(options, 'Not overwriting old results and plot function indicies in new folders since functions are not the same, so incrementing index.');
+          dsVprintf(options, 'Not overwriting old results and plot function indicies in new folders since functions are not the same, so incrementing index. \n');
         end
+        clear oldFns
       end
     else % ~postHocBool
       % setting to avoid errors

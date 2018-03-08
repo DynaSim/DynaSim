@@ -32,6 +32,6 @@ if (-e pbsout/${SGE_TASK_ID}.err) then
 endif
 
 echo "$ui_command "'"'"dsAnalyze('${src}',${varargin},'SGE_TASK_ID',${SGE_TASK_ID},'SGE_TASK_STEPSIZE',${SGE_TASK_STEPSIZE},'SGE_TASK_LAST',${SGE_TASK_LAST})"'"'" -logfile logs/${JOB_NAME}_${SGE_TASK_ID}.log"
-$ui_command "dsAnalyze('${src}',${varargin},'SGE_TASK_ID',${SGE_TASK_ID},'SGE_TASK_STEPSIZE',${SGE_TASK_STEPSIZE},'SGE_TASK_LAST',${SGE_TASK_LAST})" -logfile "logs/${JOB_NAME}_${SGE_TASK_ID}.log"
+$ui_command "dsAnalyze('${src}',${varargin},'SGE_TASK_ID',${SGE_TASK_ID},'SGE_TASK_STEPSIZE',${SGE_TASK_STEPSIZE},'SGE_TASK_LAST',${SGE_TASK_LAST});" -logfile "logs/${JOB_NAME}_${SGE_TASK_ID}.log"
 
 echo "finished"
