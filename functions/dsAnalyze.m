@@ -179,6 +179,8 @@ if options.in_clus_flag
   
   % don't exceed max simID
   options.simIDs(options.simIDs > options.SGE_TASK_LAST) = [];
+  
+  varargin(end+1:end+2) = {'simIDs', options.simIDs}; % ensure correct import
 end
 
 options.cluster_flag = options.cluster_flag * ~options.in_sim_flag; % ensure doesnt do cluster in sim
@@ -480,12 +482,14 @@ for fInd = 1:nFunc % loop over function inputs
     % loop through results. all results may exist or need to be made during loop
     for iResult = 1:nResults
       if ~options.in_sim_flag
-        dsVprintf(options, '  Result (%i/%i) \n', iResult,nResults);
+        dsVprintf(options, '  Result (%i/%i): ', iResult,nResults);
       end
       
       extension = ['.' plotFormat]; % '.svg'; % {.jpg,.svg}
       
       if ~postHocBool % in sim
+        dsVprintf(options, '\n');
+        
         if ~isempty(options.result_file)
           % ensure extension is extension
           fPath = options.result_file;
@@ -510,6 +514,8 @@ for fInd = 1:nFunc % loop over function inputs
         thisResult = result;
       elseif studyinfoBool % posthoc with studyinfo
         simID = studyinfo.simulations(iResult).sim_id;
+        
+        dsVprintf(options, 'simID=%i \n', simID);
         
         if isfield(options, 'result_file') && ~isempty(options.result_file)
           fPath = options.result_file;
@@ -942,7 +948,7 @@ end
         % check if all functions the same as old ones
         newFns = sort(cellfun(@func2str, funcIn, 'Uni',0));
         
-        if isempty(setdiff(oldFns, oldFns))
+        if isempty(setdiff(newFns, oldFns))
           dsVprintf(options, 'Overwriting old results and plot function indicies in new folders starting at index 0.');
           
           lastPlotIndex = 0;
