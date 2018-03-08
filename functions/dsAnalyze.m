@@ -27,8 +27,9 @@ function result = dsAnalyze(src,varargin)
 %   - options: (key/value pairs are passed on to the analysis function)
 %     'save_results_flag'   : whether to save result {0 or 1} (default: 0)
 %     'matCompatibility_flag': whether to save mat files in compatible mode, vs to prioritize > 2GB VARs {0 or 1} (default: 1)
-%     'overwrite_flag': whether to overwrite existing result files {0 or 1} (default: 0)
+%     'overwrite_flag'      : whether to overwrite existing result files {0 or 1} (default: 0)
 %     'result_file'         : where to save result (default: 'result.mat')
+%    'check_file_index_flag': look for existing files to set function index
 %     'format'              : format for saved plots if figures are generated
 %                             {'svg','jpg','eps','png'} (default: 'svg')
 %     'varied_filename_flag': whether to make filename based on the varied
@@ -124,6 +125,7 @@ options=dsCheckOptions(varargin,{...
   'save_results_flag',0,{0,1},...
   'matCompatibility_flag',1,{0,1},...  % whether to save mat files in compatible mode, vs to prioritize > 2GB VARs
   'overwrite_flag',0,{0,1},... % whether to overwrite existing data
+  'check_file_index_flag',0,{0,1},...
   'format','svg',{'svg','jpg','eps','png','fig'},...
   'varied_filename_flag',0,{0,1},...
   'plot_type','waveform',{'waveform','rastergram','raster','power','rates','imagesc','heatmapFR','heatmap_sortedFR','meanFR','meanFRdens','FRpanel'},...
@@ -169,7 +171,8 @@ if options.in_clus_flag
   options.load_all_data_flag = 1;
   options.parfor_flag = 0;
   options.save_results_flag = 1;
-  options.overwrite_flag = 1; % to avoid each job icrementing
+  options.check_file_index_flag = 0; % to avoid each job incrementing
+  options.close_fig_flag = 1; % close figures since in cluster
   
   % do analysis, dont trigger additional submits
   options.cluster_flag = 0;
@@ -191,13 +194,15 @@ if options.cluster_flag
     - check that options.cluster_flag doesnt trigger for insim
   %}
   
-  % don't load data yet
+  % do not load data yet
   options.load_all_data_flag = 0;
   
-  % to avoid each job icrementing
-  if ~options.overwrite_flag
-    options.overwrite_flag = 1;
-    fprintf('Setting "options.overwrite_flag=1" since "cluster_flag=1" \n');
+  options.close_fig_flag = 1; % close figures since in cluster
+  
+  % to avoid each job incrementing
+  if options.check_file_index_flag
+    options.check_file_index_flag = 0;
+    fprintf('Setting "options.check_file_index_flag=0" since "cluster_flag=1" \n');
   end
 end
 
@@ -209,6 +214,10 @@ end
 
 if (options.load_all_data_flag && ~options.parfor_flag)
   dsVprintf(options, 'Since load_all_data_flag==1, recommend setting parfor_flag==1 for speedup. \n');
+end
+
+if (options.check_file_index_flag && options.overwrite_flag)
+  dsVprintf(options, 'Since overwrite_flag==1, check_file_index_flag==1 is ignored. \n');
 end
 
 %% Save data if no output is requested.
@@ -598,7 +607,7 @@ for fInd = 1:nFunc % loop over function inputs
         continue
       end % if isempty(thisResult)
 
-      if options.save_results_flag
+      if options.save_results_flag && ~(exist(fPath, 'file') && ~options.overwrite_flag)
         set(thisResult, 'PaperPositionMode','auto');
         dsVprintf(options, '    Saving plot: %s\n',fPath);
 
@@ -616,6 +625,8 @@ for fInd = 1:nFunc % loop over function inputs
           otherwise
             error('Unknown plot extension. Try again with known extension. See help(dsAnalyze)')
         end
+      elseif exist('fPath', 'var') && exist(fPath, 'file') && ~options.overwrite_flag
+        dsVprintf(options, '  Skipping since file already exists: %s \n', fPath);
       end %save_results_flag
         
       if (options.save_results_flag && (options.close_fig_flag ~= 0)) || options.close_fig_flag==1
@@ -768,8 +779,10 @@ for fInd = 1:nFunc % loop over function inputs
         continue
       end % if isempty(result)
       
-      if options.save_results_flag  
+      if options.save_results_flag && ~(exist(fPath, 'file') && ~options.overwrite_flag)
         dsExportData(result, 'filename',fPath, 'result_flag',1, varargin{:});
+      elseif exist('fPath', 'var') && exist(fPath, 'file') && ~options.overwrite_flag
+        dsVprintf(options, '  Skipping since file already exists: %s \n', fPath);
       end % save_results_flag
         
       if ~options.load_all_data_flag
@@ -830,7 +843,7 @@ end
     % Check to see if results files exist. Deal with overwriting them, or
     % increasing index number. Note: if use same fn name, assume its a new call so
     % increment index. Only overwrite if all functions are the same as original.
-    if options.save_results_flag && postHocBool
+    if postHocBool && options.check_file_index_flag && options.save_results_flag
       if studyinfoBool
         if ~isempty(studyinfo.simulations(1).result_functions)
           oldFns = sort(cellfun(@func2str, studyinfo.simulations(1).result_functions, 'Uni',0));
@@ -946,25 +959,25 @@ end
         oldFns = sort([analysisIndFn(:,2); plotIndFn(:,2)]);
       end
       
-      if options.overwrite_flag && (~isempty(plotFiles) || ~isempty(analysisFiles))
-        % check if all functions the same as old ones
-        newFns = sort(cellfun(@func2str, funcIn, 'Uni',0));
-        
-        if isempty(setdiff(newFns, oldFns))
-          dsVprintf(options, 'Overwriting old results and plot function indicies in new folders starting at index 0.');
-          
-          lastPlotIndex = 0;
-          lastAnalysisIndex = 0;
-        else
-          dsVprintf(options, 'Not overwriting old results and plot function indicies in new folders since functions are not the same, so incrementing index. \n');
-        end
-        clear oldFns
-      end
+%       if options.check_file_index_flag && (~isempty(plotFiles) || ~isempty(analysisFiles))
+%         % check if all functions the same as old ones
+%         newFns = sort(cellfun(@func2str, funcIn, 'Uni',0));
+%         
+%         if isempty(setdiff(newFns, oldFns))
+%           dsVprintf(options, 'Overwriting old results and plot function indicies in new folders starting at index 0.');
+%           
+%           lastPlotIndex = 0;
+%           lastAnalysisIndex = 0;
+%         else
+%           dsVprintf(options, 'Not overwriting old results and plot function indicies in new folders since functions are not the same, so incrementing index. \n');
+%         end
+%         clear oldFns
+%       end
     else % ~postHocBool
       % setting to avoid errors
       lastPlotIndex = 0;
       lastAnalysisIndex = 0;
-    end % if options.save_results_flag && postHocBool
+    end % if postHocBool && options.check_file_index_flag && options.save_results_flag
   end % findIndexFromExistingResults
 
 
