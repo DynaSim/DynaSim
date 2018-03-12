@@ -178,10 +178,23 @@ if options.in_clus_flag
   options.cluster_flag = 0;
   
   % get simIDs for this job
-  options.simIDs = options.SGE_TASK_ID:(options.SGE_TASK_ID + options.SGE_TASK_STEPSIZE - 1);
+  thisJobSimIDs = options.SGE_TASK_ID:(options.SGE_TASK_ID + options.SGE_TASK_STEPSIZE - 1);
+  if isempty(options.simIDs)
+    options.simIDs = thisJobSimIDs;
+  else
+    options.simIDs = intersect(options.simIDs, thisJobSimIDs);
+  end
   
   % don't exceed max simID
   options.simIDs(options.simIDs > options.SGE_TASK_LAST) = [];
+  
+  % check if any simIDs to analyze
+  if isempty(options.simIDs)
+    % no IDs to analyze
+    dsVprintf(options, 'No simIDs for this job to analyze so exiting. \n');
+    
+    return
+  end
   
   varargin(end+1:end+2) = {'simIDs', options.simIDs}; % ensure correct import
 end
@@ -487,6 +500,9 @@ for fInd = 1:nFunc % loop over function inputs
     % will save plots, else return main fn since plot already open
     
     plotFnInd = plotFnInd + 1;
+    
+    
+    dsVprintf(options, '  Plot Function: %i \n', plotFnInd);
 
     % loop through results. all results may exist or need to be made during loop
     for iResult = 1:nResults
@@ -574,21 +590,23 @@ for fInd = 1:nFunc % loop over function inputs
           fPath = fullfile(fDir,[fName extension]);
         end
       else  % posthoc without studyinfo
+        dsVprintf(options, '\n');
+        
         thisResult = result(iResult);
         simID = iResult; % for skipping warning
-        
-        % make fName
-        if isfield(options, 'result_file') && ~isempty(options.result_file)
-          fPath = options.result_file;
-        else
-          fName = [options.prefix '_data' num2str(iResult) '_plot' num2str(iResult) extension];
-          fPath = fullfile(fDir,[fName extension]);
-        end
         
         % make fDir
         fDir = fullfile(studyinfo.study_dir, 'postHocPlots');
         if ~exist(fDir,'dir') && options.save_results_flag
           mkdir(fDir)
+        end
+        
+        % make fName
+        if isfield(options, 'result_file') && ~isempty(options.result_file)
+          fPath = options.result_file;
+        else
+          fName = [options.prefix '_data' num2str(iResult) '_plot' num2str(plotFnInd) '_' func2str(func)];
+          fPath = fullfile(fDir,[fName extension]);
         end
       end % if ~postHocBool
 
@@ -672,6 +690,8 @@ for fInd = 1:nFunc % loop over function inputs
     end %isstruct
     
     analysisFnInd = analysisFnInd + 1;
+    
+    dsVprintf(options, '  Analysis Function: %i \n', analysisFnInd);
 
     % switch names in postHoc
     if postHocBool
@@ -681,10 +701,12 @@ for fInd = 1:nFunc % loop over function inputs
 
     for iResult = 1:nResults
       if ~options.in_sim_flag
-        dsVprintf(options, '  Result (%i/%i) \n', iResult,nResults);
+        dsVprintf(options, '  Result (%i/%i): ', iResult,nResults);
       end
       
       if ~postHocBool % in sim
+        dsVprintf(options, '\n');
+        
         fPath = options.result_file;
 
         % ensure extension is '.mat'
@@ -700,6 +722,8 @@ for fInd = 1:nFunc % loop over function inputs
         end % varied_filename_flag
       elseif studyinfoBool % posthoc with studyinfo
         simID = studyinfo.simulations(iResult).sim_id;
+        
+        dsVprintf(options, 'simID=%i \n', simID);
         
         if options.load_all_data_flag
           thisData = data(iResult);
@@ -749,6 +773,8 @@ for fInd = 1:nFunc % loop over function inputs
           fPath = fullfile(fDir,fName);
         end
       else  % posthoc without studyinfo
+        dsVprintf(options, '\n');
+        
         result = allResults(iResult);
         simID = iResult; % for skipping warning
 
@@ -1050,9 +1076,13 @@ end
     
     % prep arg4 for echo
     arg4 = strrep(arg4, ', ', ','); % remove comma spaces
+    arg4 = strrep(arg4, '; ', ';'); % remove semicolon spaces
     arg4 = strrep(arg4, '''', '\'''); % escape single quotes
-    arg4 = strrep(arg4, '{', '''{'''); % quote bracket for double quotes in qsub_jobs_analyze
-    arg4 = strrep(arg4, '}', '''}'''); % quote bracket for double quotes in qsub_jobs_analyze
+    arg4 = strrep(arg4, ';', ''';'''); % quote semicolon for double quotes in qsub_jobs_analyze
+    arg4 = strrep(arg4, '{', '''{'''); % quote curly bracket for double quotes in qsub_jobs_analyze
+    arg4 = strrep(arg4, '}', '''}'''); % quote curly bracket for double quotes in qsub_jobs_analyze
+    arg4 = strrep(arg4, '[', '\['); % escape bracket
+    arg4 = strrep(arg4, ']', '\]'); % escape bracket
     
     % qsub args
     num_simIDs = studyinfo.simulations(end).sim_id;
