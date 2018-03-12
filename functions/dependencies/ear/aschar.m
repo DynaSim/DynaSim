@@ -10,11 +10,11 @@ function str = aschar(obj)
 %  > 1 el logical
 %  struct array
 
-if ischar(obj) && sum( size(obj) ~= 1 )==1
+if ischar(obj) && (sum( size(obj) ~= 1 ) <= 1)
   str = ['''' obj ''''];
 elseif isstring(obj)
   str = ['"' char(obj) '"'];
-elseif isnumeric(obj)
+elseif isnumeric(obj) && isscalar(obj)
   str = num2str(obj);
 elseif isnumeric(obj) && ~isscalar(obj) && ndims(obj) <= 2
   str = num2str(obj);
@@ -31,6 +31,8 @@ elseif isnumeric(obj) && ~isscalar(obj) && ndims(obj) <= 2
   end
   str(end-1:end) = []; % remove trailing '; '
   str = [str ']'];
+  
+  str = regexprep(str, '(\d)\s+', '$1, '); % replace whitespace with comma space
 elseif islogical(obj) && isscalar(obj)
   if obj
     str = 'true;';
