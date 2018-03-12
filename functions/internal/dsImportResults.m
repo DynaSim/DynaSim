@@ -186,7 +186,7 @@ end
 
 %% check for result_files
 if isempty(result_files)
-  fprintf('No result files found.');
+  fprintf('No result files found. \n');
   results = [];
   return
 end
