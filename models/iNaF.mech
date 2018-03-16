@@ -25,7 +25,7 @@ INaF(X,h) = -gNaF.*m0(X).^3.*h.*(X-E_NaF)
 
 % ODEs
 hNaF' = aH(X).*(1-hNaF)-bH(X).*hNaF
-hNaF(0)=IC+IC_noise.*rand(Npop,1)
+hNaF(0)=IC+IC_noise.*rand(1,Npop)
 
 % Interface
 @current += INaF(X,hNaF)
