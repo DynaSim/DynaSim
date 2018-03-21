@@ -1,4 +1,4 @@
-function data_out = dsCalcAverages(data,opts, varargin)
+function data_out = dsCalcAverages(data,varargin)
 %CALCAVERAGES - Average fields in a DynaSim data struct across neurons
 %
 % Usage:
@@ -6,8 +6,8 @@ function data_out = dsCalcAverages(data,opts, varargin)
 %
 % Inputs:
 %   - data: DynaSim data structure (see dsCheckData)
-%   - opts: Options structure
-%     'opts.save_std': Also creates new fields storing standard deviations
+%   - Variable arguments:
+%     'save_std': Also creates new fields storing standard deviations
 %                      (true or false)
 %
 % Outputs:
@@ -16,25 +16,26 @@ function data_out = dsCalcAverages(data,opts, varargin)
 %
 % See also: dsPlotFR, dsAnalyzeStudy, dsSimulate, dsCheckData, dsSelectVariables
 
+%% Options
+options = dsCheckOptions(varargin,{...
+    'auto_gen_test_data_flag',0,{0,1}, ...
+    'save_std',0,[0,1], ...
+    },false);
+
+
 %% auto_gen_test_data_flag argin
-options = dsCheckOptions(varargin,{'auto_gen_test_data_flag',0,{0,1}},false);
 if options.auto_gen_test_data_flag
   varargs = varargin;
   varargs{find(strcmp(varargs, 'auto_gen_test_data_flag'))+1} = 0;
   varargs(end+1:end+2) = {'unit_test_flag',1};
-  argin = [{data}, {opts}, varargs]; % specific to this function
+  argin = [{data}, varargs];
 end
 
 %% 1.0 Check inputs
-if nargin < 2
-    opts = struct;
-end
 
 data = dsCheckData(data, varargin{:});
 % note: calling dsCheckData() at beginning enables analysis function to
 % accept data matrix [time x cells] in addition to DynaSim data structure.
-
-opts = struct_addDef(opts,'save_std',0);
 
 %% do the averaging
 
@@ -50,7 +51,7 @@ for i = 1:length(data)
         data_out(i).(labels{j}) = mean(data(i).(labels{j}),2);
         
         % Save standard deviation also if requested
-        if opts.save_std
+        if options.save_std
             data_out(i).([labels{j} '_std']) = std(data(i).(labels{j}),0,2);
         end
     end
