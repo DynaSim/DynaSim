@@ -526,7 +526,7 @@ end
 
 function result = evalFnWithArgs(fInd, data, func, options, varargin)
 
-if strcmp(reportUI,'matlab')
+if strcmp(reportUI,'matlab') && options.parfor_flag
   p = gcp('nocreate');
 end
 
