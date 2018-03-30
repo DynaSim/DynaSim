@@ -5,7 +5,7 @@ function out = rng_wrapper(in,varargin)
 % Copyright (C) 2016 Jason Sherfey, Boston University, USA
 
 if strcmp(reportUI,'matlab')
-  if nargin==0
+  if nargin == 0
     out = rng;
   elseif isempty(varargin)
     out = rng(in);
@@ -13,12 +13,20 @@ if strcmp(reportUI,'matlab')
     out = rng(in,varargin{:});
   end
 else
-  if nargin==0
+  out.Type = 'twister'; % only one supported
+  if nargin == 0
     [rand_seed, randn_seed] = rng_octave;
-  elseif isempty(varargin)
-    [rand_seed, randn_seed] = rng_octave(in);
+    if rand_seed ~= randn_seed
+      rng_octave(rand_seed);
+    end
+    out.Seed = rand_seed;
+    out.State = rng_octave('state');
   else
-    [rand_seed, randn_seed] = rng_octave(in,varargin{:});
+    if ~isempty(varargin)
+      warning('varargin ignored: Octave only supports the twister generator');
+    end
+    [rand_seed, randn_seed] = rng_octave(in);
+    out.Seed = rand_seed;
+    out.State = rng_octave('state');
   end
-  out = [rand_seed, randn_seed];
 end
