@@ -21,7 +21,7 @@ IKDR(X,m) = -gKDR.*m.^4.*(X-E_KDR)
 
 % ODEs
 mKDR' = aM(X).*(1-mKDR)-bM(X).*mKDR
-mKDR(0)=IC+IC_noise.*rand(Npop,1)
+mKDR(0)=IC+IC_noise.*rand(1,Npop)
 
 % Interface
 @current += IKDR(X,mKDR)

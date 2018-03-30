@@ -324,6 +324,9 @@ if isempty(options.mex_dir)
     options.mex_dir = dsGetConfig('mex_path');
 end
 
+% replace ~/ with absolute path if present
+options.mex_dir = getAbsolutePath(options.mex_dir);
+
 if options.mex_flag && options.sparse_flag
   error('The Matlab Coder toolbox does not support sparse matrices. Choose either ''mex_flag'' or ''sparse_flag''.');
 end
@@ -1188,14 +1191,17 @@ end % in_parfor_loop_flag
     var_names=model.state_variables;
     [nvals_per_var,monitor_counts]=dsGetOutputCounts(model);
     num_state_variables=sum(nvals_per_var);
+    
     % check that the correct number of IC values was provided
     if length(options.ic)~=num_state_variables
       error('incorrect number of initial conditions. %g values are needed for %g state variables across %g cells',num_state_variables,length(model.state_variables),sum(pop_sizes));
     end
+    
     % organize user-supplied ICs into array for each state variable (assume
     cnt=0; all_ICs=[];
     for i=1:length(var_names)
       ICs=options.ic(cnt+(1:nvals_per_var(i)));
+      
       % store ICs as string for writing solve_ode and consistent evaluation
       all_ICs.(var_names{i})=sprintf('[%s]',num2str(ICs));
       cnt=cnt+nvals_per_var(i);

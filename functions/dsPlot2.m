@@ -217,7 +217,7 @@ figure_options = struct_addDef(figure_options,'max_num_newfigs',options.max_num_
 figure_options = struct_addDef(figure_options,'figwidth',options.figwidth);
 figure_options = struct_addDef(figure_options,'figheight',options.figheight);
 
-%% Pre-process raw data contained in xp.data (mean + downsample)
+%% Pre-process raw data contained in xp.data max_num_overlaied + mean
 % % Note: these options don't work if data are images
 % Apply max overlaid
 MTPP = options.max_num_overlaid; % max traces per plot
@@ -315,6 +315,27 @@ if ~isempty(options.dim_stacking)
         error('Incorrect number of dimensions specified. dim_stacking must be some permutation of the following: %s', sprintf('%s ',ax_names{1:end}));
     end
     xp2.permute(options.dim_stacking);
+end
+
+
+%% Crop data
+% This is inserted here because apparently the operation is slow and it's
+% faster to do this after we've already squeezed / selected. Need to do it
+% before power calculations below!
+if ~isempty(crop_range) &&  all(cellfun(@isnumeric,xp2.data(:))) && ~is_image
+    t_temp = xp2.meta.datainfo(1).values;
+    ind = (t_temp > crop_range(1) & t_temp <= crop_range(2));
+    for i = 1:numel(xp2.data)
+        if ~isempty(xp2.data{i}); xp2.data{i} = xp2.data{i}(ind,:); end
+    end
+    xp2.meta.datainfo(1).values = t_temp(ind);
+
+    % Also crop DynaSim metadata info about time.
+    t_temp2 = xp2.meta.dynasim.time;
+    ind = (t_temp2 > crop_range(1) & t_temp2 <= crop_range(2));
+    t_temp2 = t_temp2(ind);
+    xp2.meta.dynasim.time = t_temp2;
+
 end
 
 %% Swap in power if calculating power
@@ -444,25 +465,6 @@ end
             end
         end
     end
-
-%% Crop data
-% This is inserted here because apparently the operation is slow and it's
-% faster to do this after we've already squeezed / selected.
-if ~isempty(crop_range) &&  all(cellfun(@isnumeric,xp2.data(:))) && ~is_image
-    t_temp = xp2.meta.datainfo(1).values;
-    ind = (t_temp > crop_range(1) & t_temp <= crop_range(2));
-    for i = 1:numel(xp2.data)
-        if ~isempty(xp2.data{i}); xp2.data{i} = xp2.data{i}(ind,:); end
-    end
-    xp2.meta.datainfo(1).values = t_temp(ind);
-
-    % Also crop DynaSim metadata info about time.
-    t_temp2 = xp2.meta.dynasim.time;
-    ind = (t_temp2 > crop_range(1) & t_temp2 <= crop_range(2));
-    t_temp2 = t_temp2(ind);
-    xp2.meta.dynasim.time = t_temp2;
-
-end
 
 %% Set up legend entries, axis limits, and linewidth
 % Set up legend entries

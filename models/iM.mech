@@ -12,7 +12,7 @@ IM(X,m) = -gM.*m.*(X-E_M)
 
 % ODEs
 mM' = (aM(X).*(1-mM)-bM(X).*mM)
-mM(0)=IC+IC_noise.*rand(Npop,1)
+mM(0)=IC+IC_noise.*rand(1,Npop)
 
 % Interface
 @current += IM(X,mM)
