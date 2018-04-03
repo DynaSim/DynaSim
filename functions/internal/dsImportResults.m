@@ -65,7 +65,7 @@ end
 
 options = dsCheckOptions(varargin,{...
   'func',[],[],...
-  'import_scope','all',{'studyinfo','results','postHocResults','allResults','all'},...
+  'import_scope','all',{'studyinfo','results','postHocResults','allResults','all','custom'},...
   'simIDs',[],[],...
   'as_cell',0,{0,1},... % guarantee output as cell array and leave mising data as empty cells
   'simplify2cell_bool',1,[0,1],... % used by gimbl-vis
@@ -167,6 +167,24 @@ end
 % postHocResults dir
 if any(strcmp(options.import_scope, {'postHocResults','all','allResults'}))
   thisDir = fullfile(studyinfo.study_dir, 'postHocResults');
+  files = lscell(fullfile(thisDir, '*.mat'), 0);
+  
+  result_files = [result_files(:); files(:)];
+  
+  % get num_sims
+  simInd = regexpi(files, 'sim(\d+)', 'tokens');
+  simInd = [simInd{:}];
+  if ~isempty(simInd)
+    simInd = [simInd{:}];
+    simInd = cellfun(@str2double, simInd);
+    
+    num_sims = max(max(simInd), num_sims);
+  end
+end
+
+% custom dir
+if strcmp(options.import_scope, 'custom')
+  thisDir = src;
   files = lscell(fullfile(thisDir, '*.mat'), 0);
   
   result_files = [result_files(:); files(:)];
