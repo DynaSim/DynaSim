@@ -151,7 +151,7 @@ if any(strcmp(options.import_scope, {'results','all','allResults'}))
   thisDir = fullfile(studyinfo.study_dir, 'results');
   files = lscell(fullfile(thisDir, '*.mat'), 0);
   
-  result_files = [result_files(:), files(:)];
+  result_files = [result_files(:); files(:)];
   
   % get num_sims
   simInd = regexpi(files, 'sim(\d+)', 'tokens');
@@ -169,7 +169,7 @@ if any(strcmp(options.import_scope, {'postHocResults','all','allResults'}))
   thisDir = fullfile(studyinfo.study_dir, 'postHocResults');
   files = lscell(fullfile(thisDir, '*.mat'), 0);
   
-  result_files = [result_files(:), files(:)];
+  result_files = [result_files(:); files(:)];
   
   % get num_sims
   simInd = regexpi(files, 'sim(\d+)', 'tokens');
