@@ -13,21 +13,21 @@ systems in MATLAB and GNU Octave!
       * Download it as a [Zip file](https://github.com/DynaSim/DynaSim/archive/master.zip) or clone it from the Terminal: `git clone https://github.com/DynaSim/DynaSim.git`
   2. Add to path using startup.m or Command Window:
       * `addpath(genpath('YOUR/PATH/TO/DynaSim'))`
-      * `savepath`
-
-### Tutorial:
-
-- Get started with the [DynaSim tutorial](https://github.com/DynaSim/DynaSim/wiki/DynaSim-Getting-Started-Tutorial).
 
 ### Documentation:
 
 - Complete documentation is [available online](https://dynasim.github.io/docs).
+- Get started with the [DynaSim tutorial](https://github.com/DynaSim/DynaSim/wiki/DynaSim-Getting-Started-Tutorial).
 - A browsable function reference is [available here](https://dynasim.github.io/docs/function_reference).
+
+### Citation
+If you use DynaSim for your published research, please cite this introductory article:
+
+Sherfey JS, Soplata AE, Ardid S, Roberts EA, Stanley DA, Pittman-Polletta BR and Kopell NJ (2018) [DynaSim: A MATLAB Toolbox for Neural Modeling and Simulation](https://www.frontiersin.org/articles/10.3389/fninf.2018.00010/full). *Front. Neuroinform*. 12:10. doi: 10.3389/fninf.2018.00010
 
 ### Other References:
 
 - Example modeling projects: [PFC networks](https://github.com/jsherfey/PFC_models), [Thalamus](https://github.com/asoplata/ching2010_tcre_dynasim_mechanisms).
-  - See the [online documentation](https://dynasim.github.io/docs) for more.
 - Report issues [here](https://github.com/DynaSim/DynaSim/issues).
 
 ### Mailing lists:
