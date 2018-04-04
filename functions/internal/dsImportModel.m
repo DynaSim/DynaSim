@@ -106,6 +106,7 @@ end
       rem_inds=[]; % inds to user_keys not to be updated in this namespace
       key_inds=find(~cellfun(@isempty,regexp(user_keys,'\.'))); % indices into user_keys with .
       par_inds=2*key_inds-1; % indices into params for keys with .
+      
       % check whether MECH is in this namespace
       for i=1:length(key_inds)
         % split params key to obtain MECH and PARAM names
@@ -122,6 +123,7 @@ end
           rem_inds=[rem_inds key_inds(i)];
         end
       end
+      
       % exclude parameters not meant for this namespace
       if ~isempty(rem_inds)
         user_keys(rem_inds)=[];
@@ -179,9 +181,10 @@ end
       return;
     end
 
-    % prepend namespace to user-supplied params
+    % prepend namespace to all user-supplied params
     user_keys = cellfun(@(x)[namespace '_' x],params(1:2:end),'uni',0);
     user_vals = params(2:2:end);
+        % note: many of these likely wont exist for this mechanism
     
     % IC check: x(0)
     pattern='^\w+\(0\)';
@@ -199,6 +202,11 @@ end
         
         var = regexp(thisKey,'^(\w+)\(','tokens','once');
         state_variable = strtrim(var{1});
+        
+        % check if this state var exists
+        if ~any(strcmp(modl.state_variables, state_variable))
+          continue % skip since doesnt exist
+        end
         
         expression = num2str(thisVal);
 

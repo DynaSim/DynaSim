@@ -24,7 +24,7 @@ function netcon = netconNearestNeighbors(nNeighbors, nPre, nPost, removeRecurren
 % Outputs:
 %   netcon: the connection matrix
 
-if ~exist('removeRecurrentBool', 'var')
+if nargin < 4
   removeRecurrentBool = false;
 end
 
