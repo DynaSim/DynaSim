@@ -23,7 +23,7 @@ function dirList = lscell(arg, removePathBool, relativePathBool)
 %
 % See also: DIR
 
-% Dev Note: checked on Mac OS 10.12, Windows 10, Linux with Matlab 2017b
+% Dev Note: checked on Mac OS 10.12, Windows 10, Linux Mint with Matlab 2017b
 
 % parse args
 if ~nargin || isempty(arg)
