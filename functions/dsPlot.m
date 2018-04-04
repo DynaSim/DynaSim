@@ -28,6 +28,7 @@ function handles = dsPlot(data,varargin)
 %                         open new figures or subplots.
 %     'fig_handle'      : Parent figure handle to plot in.
 %     'ax_handle'       : Axes handle to plot in. If lock_gca, defaults to gca.
+%     'suppress_textstring' : Turns off plotting of text inside plots
 %     - NOTE: analysis options are available depending on plot_type
 %       - see see dsCalcFR options for plot_type 'rastergram' or 'rates'
 %       - see dsCalcPower options for plot_type 'power'
@@ -181,6 +182,7 @@ options=dsCheckOptions(varargin,{...
   'fig_handle',[],[],...
   'ax_handle',[],[],...
   'auto_gen_test_data_flag',0,{0,1},...
+  'suppress_textstring',0,{0,1},...
   },false);
 
 %% auto_gen_test_data_flag argin
@@ -865,6 +867,11 @@ for iFigset = 1:num_fig_sets
         %axes(haxes(axis_counter));
         set(thisHandle, 'CurrentAxes',haxes(axis_counter));
         thisAxes = haxes(axis_counter);
+        
+        % suppress text
+        if options.suppress_textstring
+            text_string = '';
+        end
         
         switch options.plot_type
           case {'waveform','power'}
