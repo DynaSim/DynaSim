@@ -13,7 +13,7 @@ function wprintf(varargin)
 
 str = sprintf(varargin{:});
 
-fprintf(2, ['\nWarning: ' str '\n\n'])
+fprintf(2, ['\nWarning: ' str '\n\n']);
 beep
 
 end
