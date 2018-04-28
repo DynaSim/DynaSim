@@ -155,6 +155,7 @@ end
   'save_res',[],[],...
   'Ndims_per_subplot',[],[],...
   'dim_stacking',[],[],...
+  'figure_handle',@xp_handles_newfig,[],...
   'subplot_handle',@xp_subplot_grid,[],...
   'plot_handle',[],[],...
   'plotFR_override',[],[false true],...
@@ -178,6 +179,7 @@ force_last = options.force_last;
 crop_range = options.crop_range;
 lock_axes = options.lock_axes;
 Ndims_per_subplot = options.Ndims_per_subplot;
+figure_handle = options.figure_handle;
 subplot_handle = options.subplot_handle;
 plot_handle = options.plot_handle;
 
@@ -623,24 +625,24 @@ end
 switch num_embedded_subplots
     case 0
         % Ordering of axis handles
-        function_handles = {@xp_handles_newfig, data_plothandle};   % Specifies the handles of the plotting functions
+        function_handles = {figure_handle, data_plothandle};   % Specifies the handles of the plotting functions
         dims_per_function_handle = [1,Ndims_per_subplot];
         function_args = {{figure_options},{plot_options}};
     case 1
         % Ordering of axis handles
-        function_handles = {@xp_handles_newfig, subplot_handle,data_plothandle};   % Specifies the handles of the plotting functions
+        function_handles = {figure_handle, subplot_handle,data_plothandle};   % Specifies the handles of the plotting functions
         dims_per_function_handle = [1,1,Ndims_per_subplot];
         function_args = {{figure_options},{subplot_options},{plot_options}};
 
     case 2
         % Ordering of axis handles
-        function_handles = {@xp_handles_newfig, subplot_handle,data_plothandle};   % Specifies the handles of the plotting functions
+        function_handles = {figure_handle, subplot_handle,data_plothandle};   % Specifies the handles of the plotting functions
         dims_per_function_handle = [1,2,Ndims_per_subplot];
         function_args = {{figure_options},{subplot_options},{plot_options}};
 
     case 3
         % Ordering of axis handles
-        function_handles = {@xp_handles_newfig, subplot_handle, subplot_handle,data_plothandle};   % Specifies the handles of the plotting functions
+        function_handles = {figure_handle, subplot_handle, subplot_handle,data_plothandle};   % Specifies the handles of the plotting functions
         dims_per_function_handle = [1,2,1,Ndims_per_subplot];
         subplot_options2 = subplot_options;
         subplot_options2.legend1 = [];
@@ -648,7 +650,7 @@ switch num_embedded_subplots
         function_args = {{figure_options},{subplot_options2},{subplot_options},{plot_options}};
     case 4
         % Ordering of axis handles
-        function_handles = {@xp_handles_newfig, subplot_handle, subplot_handle,data_plothandle};   % Specifies the handles of the plotting functions
+        function_handles = {figure_handle, subplot_handle, subplot_handle,data_plothandle};   % Specifies the handles of the plotting functions
         dims_per_function_handle = [1,2,2,Ndims_per_subplot];
         subplot_options2 = subplot_options;
         subplot_options2.legend1 = [];
@@ -676,7 +678,7 @@ function_args = function_args(available_dims);
 
 %% Run the plots!
 % Open new figure if necessary & plot the data
-if ~isequal(@xp_handles_newfig, function_handles{1})
+if ~isequal(figure_handle, function_handles{1})
     % Cheap hack to force it to create a new figure using our desired
     % parameters for instances when it wouldn't normally call
     % xp_handles_newfig.
