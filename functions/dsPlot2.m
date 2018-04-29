@@ -34,6 +34,8 @@ function [handles,xp] = dsPlot2(data,varargin)
 %     'do_zoom' - {false, true} - Turn on zoom function in subplot_grid
 %     'yscale' {'linear','log','log10'}, whether to plot linear or log scale
 %     'visible' {'on','off'}
+%     'lock_gca'        : Plots within currently active axis (gca); doesn't
+%                         open new figures or subplots.
 %     NOTE: analysis options available depending on plot_type
 %       see see dsCalcFR options for plot_type 'rastergram' or 'rates'
 %       see dsCalcPower options for plot_type 'power'
@@ -145,6 +147,7 @@ end
   'do_zoom',false,[false true],...
   'yscale','linear',{'linear','log','log10','log2'},...
   'visible','on',{'on','off'},...
+  'lock_gca',[false],[false, true],...
   'show_colorbar',false,[false true],...
   'ColorMap',[],[],...
   'save_figures',false,[false true],...
@@ -182,6 +185,7 @@ Ndims_per_subplot = options.Ndims_per_subplot;
 figure_handle = options.figure_handle;
 subplot_handle = options.subplot_handle;
 plot_handle = options.plot_handle;
+lock_gca = options.lock_gca;
 
 % Add default options to structures
 % Plot_options
@@ -205,6 +209,7 @@ plot_handle = options.plot_handle;
 subplot_options = struct_addDef(subplot_options,'subplotzoom_enabled',options.do_zoom);
 subplot_options = struct_addDef(subplot_options,'force_rowvect',true);
 subplot_options = struct_addDef(subplot_options,'autosuppress_interior_tics',true);
+subplot_options = struct_addDef(subplot_options,'legend1',[]);
 
 
 % Figure options
@@ -218,6 +223,13 @@ figure_options = struct_addDef(figure_options,'save_res',options.save_res);
 figure_options = struct_addDef(figure_options,'max_num_newfigs',options.max_num_newfigs);
 figure_options = struct_addDef(figure_options,'figwidth',options.figwidth);
 figure_options = struct_addDef(figure_options,'figheight',options.figheight);
+
+
+%% Autoset parameters
+if lock_gca
+    figure_options.suppress_newfig = true;    
+    subplot_options.suppress_subplot = true;
+end
 
 %% Pre-process raw data contained in xp.data max_num_overlaied + mean
 % % Note: these options don't work if data are images
@@ -470,7 +482,10 @@ end
 
 %% Set up legend entries, axis limits, and linewidth
 % Set up legend entries
-subplot_options.legend1 = setup_legends(xp2);
+if isempty(subplot_options.legend1)
+    subplot_options.legend1 = setup_legends(xp2);
+end
+
 
 % Set up x-axis limits
 if isempty(plot_options.xlims) && lock_axes && ~is_image
