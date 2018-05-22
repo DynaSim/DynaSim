@@ -9,7 +9,7 @@ function fnName = mfileFnName
 % Author: Erik Roberts
 
 
-filePath = mfilename('fullpath');
+filePath = evalin('caller', 'mfilename(''fullpath'');');
 
 if ~isempty(strfind(filePath, '+'))
   startInd = regexp(filePath, '\+', 'start');
