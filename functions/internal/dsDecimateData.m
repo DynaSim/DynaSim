@@ -1,8 +1,8 @@
 function data_out = dsDecimateData(data,ds, varargin)
-%DOWNSAMPLEDATA - Downsamples DynaSim data structre data
+% dsDecimateData - Downsamples DynaSim data structure data by removing values (decimation)
 %
 % Usage:
-%   data_out = dsCalcFR(data,'option',value)
+%   data_out = dsDecimateData(data,'option',value)
 %
 % Inputs:
 %   - data: DynaSim data structure (see dsCheckData)
