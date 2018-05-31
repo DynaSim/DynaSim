@@ -907,7 +907,8 @@ for iFigset = 1:num_fig_sets
                 spks=spikes{c}; % spikes for one cell
                 for k=1:length(spks) % loop over spikes for cell c
                   spk=spks(k); % time of spike k in cell c of population p
-                  line(thisAxes, [spk spk],[c+ypos-.5 c+ypos+.5],'color','k'); hold on
+                  axes(thisAxes);
+                  line([spk spk],[c+ypos-.5 c+ypos+.5],'color','k'); hold on
                 end
               end
               
@@ -918,7 +919,8 @@ for iFigset = 1:num_fig_sets
               % draw line separating populations
               if length(allspikes)>1
                 pos=c+ypos+.5;
-                line(thisAxes, [min(time) max(time)],[pos pos],'color','k','linewidth',3);
+                axes(thisAxes);
+                line([min(time) max(time)],[pos pos],'color','k','linewidth',3);
                 if p<length(allspikes)
                   % increment y-position for next population
                   ypos=ypos+c;
@@ -1000,7 +1002,8 @@ for iFigset = 1:num_fig_sets
         if ~isempty(vlines)
           for k=1:length(vlines)
             if ~isnan(vlines(k))
-              line(thisAxes, [vlines(k) vlines(k)],ylim,'color','k','linestyle','--');
+              axes(thisAxes);
+              line([vlines(k) vlines(k)],ylim,'color','k','linestyle','--');
               ymax=max(ylim);
               text(thisAxes, double(vlines(k) + 0.1*range(xlim)), 0.9*ymax, sprintf('MUA Sxx Peak F: %.f', vlines(k)))
             end
