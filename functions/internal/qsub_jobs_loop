@@ -12,6 +12,7 @@ set joblist = `cat scriptlist.txt`
 set jobPrefix = "$2"
 set ui_command = "$3"
 set l_directives = "$4"
+set cluster_matlab_version = "$5"
 
 foreach job ( $joblist )
   echo $job
@@ -21,8 +22,8 @@ foreach job ( $joblist )
   if (-e pbsout/$job.err) then
     rm -f pbsout/$job.err
   endif
-  echo "qsub_job ${batchdir} ${ui_command} ${job}" '|' qsub -V -hard $l_directives -cwd -N ${jobPrefix}_${job} -o pbsout/${job}.out -e pbsout/${job}.err
+  echo "qsub_job ${batchdir} ${ui_command} ${job} ${cluster_matlab_version}" '|' qsub -V -hard $l_directives -cwd -N ${jobPrefix}_${job} -o pbsout/${job}.out -e pbsout/${job}.err
   #echo "qsub_job ${batchdir} ${ui_command} ${job}" | qsub -V -hard $l_directives -cwd -N ${jobPrefix}_${job} -o pbsout/${job}.out -e pbsout/${job}.err
-  echo "qsub_job ${batchdir} "'"'"${ui_command}"'"'" ${job}" | qsub -V -hard $l_directives -cwd -N ${jobPrefix}_${job} -o pbsout/${job}.out -e pbsout/${job}.err
+  echo "qsub_job ${batchdir} "'"'"${ui_command}"'"'" ${job} ${cluster_matlab_version}" | qsub -V -hard $l_directives -cwd -N ${jobPrefix}_${job} -o pbsout/${job}.out -e pbsout/${job}.err
   sleep 0.25
 end
