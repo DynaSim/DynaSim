@@ -1027,7 +1027,8 @@ end
     % $1 is abs path to working dir in batchdir
     % $2 is ui_command
     % $3 is src, which should be a study_dir path
-    % $4 = varargin, the string list of arguments for dsAnalyze
+    % $4 is cluster_matlab_version
+    % $5 = varargin, the string list of arguments for dsAnalyze
     
     % locate DynaSim toolbox
     dynasim_path = dsGetRootPath(); % root is one level up from directory containing this function
@@ -1098,8 +1099,8 @@ end
     num_simIDs = studyinfo.simulations(end).sim_id;
     jobPrefix = study_dir_name;
     
-    cmd = sprintf('echo "%s/qsub_jobs_analyze ''%s'' ''%s'' ''%s'' %s" | qsub -V -hard %s -wd ''%s'' -N %s_analysis_job -t 1-%i:%i %s',...
-      dsFnDirPath, specific_batch_dir, ui_command, arg3, arg4,... % echo vars
+    cmd = sprintf('echo "%s/qsub_jobs_analyze ''%s'' ''%s'' ''%s'' %s %s" | qsub -V -hard %s -wd ''%s'' -N %s_analysis_job -t 1-%i:%i %s',...
+      dsFnDirPath, specific_batch_dir, ui_command, options.cluster_matlab_version, arg3, arg4,... % echo vars
       l_directives, specific_batch_dir, jobPrefix, num_simIDs, options.sims_per_job, qsubStr); % qsub vars
     
     % add shell script to linux path if not already there

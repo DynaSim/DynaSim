@@ -493,13 +493,13 @@ else % on cluster with qsub
     if strcmp(options.qsub_mode, 'array') && ~options.one_solve_file_flag
       % TODO: remove old error and output files; put e and o in their own dirs
       job_filename = 'sim_job';
-      cmd = sprintf('echo "%s/qsub_jobs_array ''%s'' %s ''%s''" | qsub -V -hard %s -wd ''%s'' -N %s_sim_job -t 1-%i %s',...
-        dsFnDirPath, batch_dir_abs_path, job_filename, ui_command,... % echo vars
+      cmd = sprintf('echo "%s/qsub_jobs_array ''%s'' %s ''%s'' %s" | qsub -V -hard %s -wd ''%s'' -N %s_sim_job -t 1-%i %s',...
+        dsFnDirPath, batch_dir_abs_path, job_filename, ui_command, options.cluster_matlab_version,... % echo vars
         l_directives, batch_dir_abs_path, jobPrefix, num_jobs, qsubStr); % qsub vars
     elseif strcmp(options.qsub_mode, 'array') && options.one_solve_file_flag
       [~, job_filename] = fileparts2(job_file); %remove path and extension
-      cmd = sprintf('echo "%s/qsub_jobs_array_one_file ''%s'' %s ''%s''" | qsub -V -hard %s -wd ''%s'' -N %s_sim_job -t 1-%i:%i %s',...
-        dsFnDirPath, batch_dir_abs_path, job_filename, ui_command,... % echo vars
+      cmd = sprintf('echo "%s/qsub_jobs_array_one_file ''%s'' %s ''%s'' %s" | qsub -V -hard %s -wd ''%s'' -N %s_sim_job -t 1-%i:%i %s',...
+        dsFnDirPath, batch_dir_abs_path, job_filename, ui_command, options.cluster_matlab_version,... % echo vars
         l_directives, batch_dir_abs_path, jobPrefix, num_simulations, options.sims_per_job, qsubStr); % qsub vars
       % NOTE: using num_simulations, not num_jobs, since the job_file will
       %   determine it's own sims to run
