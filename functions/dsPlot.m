@@ -905,11 +905,14 @@ for iFigset = 1:num_fig_sets
               spikes=allspikes{p}; % spikes for one population
               for c=1:length(spikes) % loop over cells in population p
                 spks=spikes{c}; % spikes for one cell
-                for k=1:length(spks) % loop over spikes for cell c
-                  spk=spks(k); % time of spike k in cell c of population p
-                  axes(thisAxes);
-                  line([spk spk],[c+ypos-.5 c+ypos+.5],'color','k'); hold on
-                end
+
+                xPoints = [spks, spks, NaN(size(spks))]';
+                xPoints = xPoints(:);
+
+                yPoints = [(c+ypos-.5)*ones(size(spks)), (c+ypos+.5)*ones(size(spks)), NaN(size(spks))]';
+                yPoints = yPoints(:);
+                
+                plot(thisAxes, xPoints,yPoints,'color','k'); hold on
               end
               
               % record position for population tick name
@@ -919,8 +922,7 @@ for iFigset = 1:num_fig_sets
               % draw line separating populations
               if length(allspikes)>1
                 pos=c+ypos+.5;
-                axes(thisAxes);
-                line([min(time) max(time)],[pos pos],'color','k','linewidth',3);
+                plot(thisAxes, [min(time) max(time)],[pos pos],'color','k','linewidth',3);
                 if p<length(allspikes)
                   % increment y-position for next population
                   ypos=ypos+c;
@@ -1002,8 +1004,7 @@ for iFigset = 1:num_fig_sets
         if ~isempty(vlines)
           for k=1:length(vlines)
             if ~isnan(vlines(k))
-              axes(thisAxes);
-              line([vlines(k) vlines(k)],ylim,'color','k','linestyle','--');
+              line(thisAxes, [vlines(k) vlines(k)],ylim,'color','k','linestyle','--');
               ymax=max(ylim);
               text(thisAxes, double(vlines(k) + 0.1*range(xlim)), 0.9*ymax, sprintf('MUA Sxx Peak F: %.f', vlines(k)))
             end
