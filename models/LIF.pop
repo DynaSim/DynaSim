@@ -1,7 +1,7 @@
 % usage: dsPlot(dsSimulate('LIF','vary',{'LIF','Iapp',2}))
 
 LIF: 
-dV/dt=(@current+E-V+R.*Iapp+@current)./tau; V(0)=reset
+dV/dt=(E-V+R.*Iapp+@current)./tau; V(0)=reset
 
 if(V>thresh)(V=reset)
 monitor V.spikes(thresh)

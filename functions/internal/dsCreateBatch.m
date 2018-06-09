@@ -22,6 +22,13 @@ function [studyinfo, cmd] = dsCreateBatch(base_model,modifications_set,varargin)
 %                         options specified by 1-3 characters as string. 'b' for job
 %                         begins, 'a' for job aborts, 'e' for job ends.
 %       'one_solve_file_flag': only use 1 file of each time when solving (default: 0)
+%       'cluster_matlab_version': what version of Matlab to use in cluster batch
+%                                 submission. Check
+%                                 http://sccsvc.bu.edu/software/#/package/matlab/
+%                                 for information on current available versions.
+%                                 {'2009b', '2013a', '2014a', '2015a', '2016a',
+%                                 '2016b', '2017a', '2017b', '2018a'} (default:
+%                                 '2013a')
 %     - options for parallel computing: (requires Parallel Computing Toolbox)
 %       - Note: parallel computing has been DISABLED for debugging...
 %       'parfor_flag' : whether to use parfor to run simulations {0 or 1} (default: 0)
@@ -57,6 +64,9 @@ options=dsCheckOptions(varargin,{...
   'qsub_mode','loop',{'loop','array'},... % whether to submit jobs as an array using qsub -t or in a for loop
   'email_notify',[],[],...
   'one_solve_file_flag',0,{0,1},... % use only 1 solve file of each type, but can't vary mechs yet
+  'cluster_matlab_version','2013a',{'2009b', '2013a', '2014a', '2015a',...
+                                    '2016a', '2016b', '2017a', '2017b',...
+                                    '2018a'},...
   'solver','rk4',{'euler','rk1','rk2','rk4','modified_euler','rungekutta','rk','ode23','ode45',...
     'ode1','ode2','ode3','ode4','ode5','ode8','ode113','ode15s','ode23s','ode23t','ode23tb'},... % DynaSim and built-in Matlab solvers
   'study_dir',[],[],... % for one_solve_file_flag
@@ -483,21 +493,22 @@ else % on cluster with qsub
     if strcmp(options.qsub_mode, 'array') && ~options.one_solve_file_flag
       % TODO: remove old error and output files; put e and o in their own dirs
       job_filename = 'sim_job';
-      cmd = sprintf('echo "%s/qsub_jobs_array ''%s'' %s ''%s''" | qsub -V -hard %s -wd ''%s'' -N %s_sim_job -t 1-%i %s',...
-        dsFnDirPath, batch_dir_abs_path, job_filename, ui_command,... % echo vars
+      cmd = sprintf('echo "%s/qsub_jobs_array ''%s'' %s ''%s'' %s" | qsub -V -hard %s -wd ''%s'' -N %s_sim_job -t 1-%i %s',...
+        dsFnDirPath, batch_dir_abs_path, job_filename, ui_command, options.cluster_matlab_version,... % echo vars
         l_directives, batch_dir_abs_path, jobPrefix, num_jobs, qsubStr); % qsub vars
     elseif strcmp(options.qsub_mode, 'array') && options.one_solve_file_flag
       [~, job_filename] = fileparts2(job_file); %remove path and extension
-      cmd = sprintf('echo "%s/qsub_jobs_array_one_file ''%s'' %s ''%s''" | qsub -V -hard %s -wd ''%s'' -N %s_sim_job -t 1-%i:%i %s',...
-        dsFnDirPath, batch_dir_abs_path, job_filename, ui_command,... % echo vars
+      cmd = sprintf('echo "%s/qsub_jobs_array_one_file ''%s'' %s ''%s'' %s" | qsub -V -hard %s -wd ''%s'' -N %s_sim_job -t 1-%i:%i %s',...
+        dsFnDirPath, batch_dir_abs_path, job_filename, ui_command, options.cluster_matlab_version,... % echo vars
         l_directives, batch_dir_abs_path, jobPrefix, num_simulations, options.sims_per_job, qsubStr); % qsub vars
       % NOTE: using num_simulations, not num_jobs, since the job_file will
       %   determine it's own sims to run
       
       num_jobs = ceil(num_simulations/options.sims_per_job); % update for later display
     elseif strcmp(options.qsub_mode, 'loop')
-      cmd = sprintf('%s/qsub_jobs_loop ''%s'' %s ''%s'' ''%s''',...
-        dsFnDirPath, batch_dir_abs_path, jobPrefix, ui_command, l_directives);
+      cmd = sprintf('%s/qsub_jobs_loop ''%s'' %s ''%s'' ''%s'' %s',...
+        dsFnDirPath, batch_dir_abs_path, jobPrefix, ui_command, l_directives,...
+        options.cluster_matlab_version);
     end
 
     % add shell script to linux path if not already there

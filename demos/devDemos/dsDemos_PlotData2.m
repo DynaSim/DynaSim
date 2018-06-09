@@ -141,6 +141,29 @@ dsPlot2(data,'population','E','variable','/v|I_iGABAa_s/','force_last','variable
 % dsPlot2(data,'population','E','variable','/iNa_m|I_iGABAa_s/','force_last','variables','do_overlay_shift',true);
 % dsPlot2(data,'population','I','variable','v');
 
+%% Overlay different types of plots
+% This code overlays a plot of E cell membrane potential with the GABA A
+% state variable.
+
+% First, plot a heatmap of GABA A state variable
+h = dsPlot2(data,'population','E','variable','iGABAa_s','plot_type','imagesc');
+
+% Extract the handle for the subplot_grid subplot
+fig_options.suppress_newfig = true;
+subplot_options.subplot_grid_handle = h.hsub{1}.hcurr;
+
+% Normalize Vm data between 0 and 20 (values of y-axis limits)
+norm_data = @(x) (x - min(x(:))) ./ (max(x(:)) - min(x(:))) * 20;
+myxp = dsAll2mdd(data);
+myxp.data = cellfun(norm_data,myxp.data,'UniformOutput',0);
+
+% Plot this data overlaid. We include the above axis handle in the options
+% structure of xp_subplot_grid.m
+h = dsPlot2(myxp,'population','E','plot_type','waveform',...
+    'figure_options',fig_options,...
+    'subplot_options',subplot_options);
+
+
 
 %% Import pre-saved images
 close all

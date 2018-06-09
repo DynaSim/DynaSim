@@ -5,7 +5,8 @@
 # $1 is abs path to working dir in batchdir
 # $2 is ui_command
 # $3 is src, which should be a study_dir path
-# $4 = varargin, the string list of arguments for dsAnalyze
+# $4 is cluster_matlab_version
+# $5 = varargin, the string list of arguments for dsAnalyze
 
 set batchdir = "$1"
 cd $batchdir
@@ -14,7 +15,11 @@ set ui_command = "$2"
 
 set src = "$3"
 
-set varargin = "$4"
+set cluster_matlab_version = "$4"
+
+set varargin = "$5"
+
+module load matlab/${cluster_matlab_version}
 
 echo "command = " $ui_command
 echo "src = " $src

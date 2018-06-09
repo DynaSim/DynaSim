@@ -76,7 +76,14 @@ function result = dsAnalyze(src,varargin)
 %       'email_notify'  : whether to receive email notification about jobs.
 %                         options specified by 1-3 characters as string. 'b' for job
 %                         begins, 'a' for job aborts, 'e' for job ends.
-%
+%       'cluster_matlab_version': what version of Matlab to use in cluster batch
+%                                 submission. Check
+%                                 http://sccsvc.bu.edu/software/#/package/matlab/
+%                                 for information on current available versions.
+%                                 {'2009b', '2013a', '2014a', '2015a', '2016a',
+%                                 '2016b', '2017a', '2017b', '2018a'} (default:
+%                                 '2013a')
+
 % Note: if function_options/plot_options cells exceed num functions, they will
 %       be copied to each fn.
 %
@@ -152,6 +159,9 @@ options=dsCheckOptions(varargin,{...
   'sims_per_job',1,[],... % how many sims to run per cluster job
   'memory_limit','8G',[],... % how much memory to allocate per batch job
   'email_notify',[],[],...
+  'cluster_matlab_version','2013a',{'2009b', '2013a', '2014a', '2015a',...
+                                    '2016a', '2016b', '2017a', '2017b',...
+                                    '2018a'},...
   'SGE_TASK_ID',[],[],...
   'SGE_TASK_STEPSIZE',[],[],...
   'SGE_TASK_LAST',[],[],...
@@ -1017,7 +1027,8 @@ end
     % $1 is abs path to working dir in batchdir
     % $2 is ui_command
     % $3 is src, which should be a study_dir path
-    % $4 = varargin, the string list of arguments for dsAnalyze
+    % $4 is cluster_matlab_version
+    % $5 = varargin, the string list of arguments for dsAnalyze
     
     % locate DynaSim toolbox
     dynasim_path = dsGetRootPath(); % root is one level up from directory containing this function
@@ -1088,8 +1099,8 @@ end
     num_simIDs = studyinfo.simulations(end).sim_id;
     jobPrefix = study_dir_name;
     
-    cmd = sprintf('echo "%s/qsub_jobs_analyze ''%s'' ''%s'' ''%s'' %s" | qsub -V -hard %s -wd ''%s'' -N %s_analysis_job -t 1-%i:%i %s',...
-      dsFnDirPath, specific_batch_dir, ui_command, arg3, arg4,... % echo vars
+    cmd = sprintf('echo "%s/qsub_jobs_analyze ''%s'' ''%s'' ''%s'' %s %s" | qsub -V -hard %s -wd ''%s'' -N %s_analysis_job -t 1-%i:%i %s',...
+      dsFnDirPath, specific_batch_dir, ui_command, options.cluster_matlab_version, arg3, arg4,... % echo vars
       l_directives, specific_batch_dir, jobPrefix, num_simIDs, options.sims_per_job, qsubStr); % qsub vars
     
     % add shell script to linux path if not already there

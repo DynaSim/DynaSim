@@ -125,6 +125,192 @@ if options.auto_gen_test_data_flag
   argin = [{specification}, varargs]; % specific to this function
 end
 
+% Check for and pre-process modular specification using strings
+% Syntax for groupings: POP:, POP(size=#):, POP(size=[#,#]):, POP[#,#]:, POP->POP:, POP<-POP:, MECH.mech:
+group_id_pattern='^[a-z_A-Z][a-z_A-Z0-9\-\>\<\.\[\]]*(\(size=[\[\d,\]]+\))?:';
+if (ischar(specification) && ~isempty(find(regexp(specification,group_id_pattern)==1,1))) || ...
+   (iscellstr(specification) && ~isempty(find(regexp(specification{1},group_id_pattern)==1,1)))
+  % Convert char and cellstr to single array of semicolon-delimited expressions (eqns)
+  if iscell(specification)
+    % convert cell array of equations into character array of strings
+    eqns=specification;
+    for k=1:length(eqns)
+      eqn=eqns{k};
+      if ~isempty(eqn) && ~strcmp(eqn(end),';')
+        eqns{k}(end+1)=';';
+      end
+    end
+    eqns=[eqns{:}];
+  else
+    eqns=specification;
+  end
+  % Convert to cell array of expressions
+  eqns_split=strtrim(regexp(eqns,';','split'));
+  % Check for group identifier at beginning of each expression
+  group_start_inds=find(~cellfun(@isempty,regexp(eqns_split,group_id_pattern)));
+  % Initialize modular specification structure
+  spec=[];
+  % Loop over groupings and add to specification structure
+  for g=1:length(group_start_inds)
+    this=eqns_split{group_start_inds(g)};
+    % Add grouping to spec structure
+    if ~isempty(regexp(this,'^\w+.mech:','once'))
+      % If Mechanism: 
+      % format: NAME.mech: equations
+      % Extract name
+      name=regexp(this,'^(\w+).mech:','tokens','once');
+      name=name{1};
+      % Extract equations
+      eq=strtrim(regexp(this,'^\w+.mech:(.+)','tokens','once'));
+      if ~isempty(eq), eq=[eq{1} ';']; end
+      if g<length(group_start_inds)
+        group_end=group_start_inds(g+1)-1;
+      else
+        group_end=length(eqns_split);
+      end
+      for i=group_start_inds(g)+1:group_end
+        eq=[eq eqns_split{i} ';'];
+      end
+      if ~isfield(spec,'mechanisms')
+        spec.mechanisms(1).name=name;
+      else
+        spec.mechanisms(end+1).name=name;
+      end
+      spec.mechanisms(end).equations=eq;
+    elseif ~isempty(regexp(this,'^\w+((->)|(<-))\w+:','once'))
+      % If Connection:
+      % Extract source and target
+      if ~isempty(regexp(this,'^\w+(->)\w+:','once'))
+        % source->target:
+        source=regexp(this,'^(\w+)->','tokens','once'); source=source{1};
+        target=regexp(this,'->(\w+):','tokens','once'); target=target{1};
+      else
+        % target<-source:
+        source=regexp(this,'<-(\w+):','tokens','once'); source=source{1};
+        target=regexp(this,'^(\w+)<-','tokens','once'); target=target{1};    
+      end
+      % create new connection element
+      if ~isfield(spec,'connections')
+        spec.connections(1).direction=[source '->' target];
+      else
+        spec.connections(end+1).direction=[source '->' target];        
+      end
+      % Combine all expressions in this group to check for reference to
+      % existing mechanism in this group.
+      if g<length(group_start_inds)
+        group_end=group_start_inds(g+1)-1;
+      else
+        group_end=length(eqns_split);
+      end
+      eq=strtrim(regexp(this,'[\w-<>]+:(.+)','tokens','once')); 
+      if ~isempty(eq), eq=[eq{1} ';']; end
+      for i=group_start_inds(g)+1:group_end
+        eq=[eq eqns_split{i} ';'];
+      end
+      % Check for reference to existing mechanism
+      if ~isempty(regexp(eq,'{.*}','once'))
+        % Parse string using existing mechanism
+        this_eqns=regexp(eq,';','split');
+        for i=1:length(this_eqns)
+          this_eq=this_eqns{i};
+          if isempty(this_eq), continue; end
+          if ~isempty(regexp(this_eq,'{.*}','once'))
+            % Extract mechanisms
+            mechanisms=regexp(this_eq,'{(.*)}','tokens','once');
+            mechanisms=regexp(mechanisms{1},',','split');
+            %mechanisms=regexp(this_eq,'[\w:@]+','match');
+            for j=1:length(mechanisms)
+              if ~isfield(spec.connections,'mechanism_list') || isempty(spec.connections(end).mechanism_list)
+                spec.connections(end).mechanism_list={mechanisms{j}};
+              else
+                spec.connections(end).mechanism_list{end+1}=mechanisms{j};                
+              end
+            end
+          elseif ~isempty(regexp(this_eq,'\w+=','once'))
+            % Extract parameters
+            key=regexp(this_eq,'(\w+)=','tokens','once'); key=key{1};
+            val=regexp(this_eq,'=(.+)','tokens','once'); 
+            try % convert to numeric
+              val=eval(val{1});
+            catch
+              val=val{1};
+            end
+            if ~isfield(spec.connections,'parameters') || isempty(spec.connections(end).parameters)
+              spec.connections(end).parameters={key,val};
+            else
+              spec.connections(end).parameters(end+1:end+2)={key,val};
+            end
+          end
+        end
+      else
+        % Create new mechanism
+        % Generate unique ID for this auto-created name
+        id=num2str(g);
+        % Auto-create name for connection mechanism
+        name=[source target id];
+        % Create new mechanism with extracted equations and auto-created name
+        if ~isfield(spec,'mechanisms')
+          spec.mechanisms(1).name=name;
+        else
+          spec.mechanisms(end+1).name=name;
+        end
+        spec.mechanisms(end).equations=eq;
+        % Add connection mechanism to this connection element
+        if ~isfield(spec.connections,'mechanism_list') || isempty(spec.connections(end).mechanism_list)
+          spec.connections(end).mechanism_list={name};
+        else
+          spec.connections(end).mechanism_list{end+1}=name;                
+        end
+      end
+    elseif ~isempty(regexp(this,'^\w+((\[[\d,]+\])|(\(size=[\[\d,\]]+\)))?:','once'))
+      % If Population:
+      % Extract name
+      name=regexp(this,'^(\w+)((\[[\d,]+\])|(\(size=[\[\d,\]]+\)))?:','tokens','once');
+      if isempty(name)
+        name=regexp(this,'^(\w+):','tokens','once');
+      end
+      name=name{1};
+      % Extract size (default=1)
+      sz=regexp(this,'^\w+\(size=([\[\d,\]]+)\):','tokens','once');
+        % POP(size=[#,#]):
+      if isempty(sz)
+        sz=regexp(this,'^\w+(\[[\d,]+\]):','tokens','once');
+          % POP[#,#]:
+      end
+      if isempty(sz)
+        sz=1;
+      else
+        sz=eval(sz{1});
+      end
+      % Extract equations
+      eq=strtrim(regexp(this,'^[a-z_A-Z][a-z_A-Z0-9\-\>\<\.]*\(size=[\[\d,\]]+\):(.+)','tokens','once'));
+      if isempty(eq)
+        eq=strtrim(regexp(this,'^[a-z_A-Z][a-z_A-Z0-9\-\>\<\.]*\[[\d,]+\]:(.+)','tokens','once'));
+      end
+      if isempty(eq)
+        eq=strtrim(regexp(this,'^[a-z_A-Z][a-z_A-Z0-9\-\>\<\.]*:(.+)','tokens','once'));
+      end
+      if ~isempty(eq), eq=[eq{1} ';']; end
+      if g<length(group_start_inds)
+        group_end=group_start_inds(g+1)-1;
+      else
+        group_end=length(eqns_split);
+      end
+      for i=group_start_inds(g)+1:group_end
+        eq=[eq eqns_split{i} ';'];
+      end
+      if ~isfield(spec,'populations')
+        spec.populations(1).name=name;
+      else
+        spec.populations(end+1).name=name;
+      end
+      spec.populations(end).size=sz;
+      spec.populations(end).equations=eq; 
+    end
+  end
+  specification=spec;
+end
+
 % check if input is a string or cell with equations and package in spec structure
 if ischar(specification) || iscell(specification)
   spec.populations.equations=specification;

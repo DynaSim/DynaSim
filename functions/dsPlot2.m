@@ -34,6 +34,8 @@ function [handles,xp] = dsPlot2(data,varargin)
 %     'do_zoom' - {false, true} - Turn on zoom function in subplot_grid
 %     'yscale' {'linear','log','log10'}, whether to plot linear or log scale
 %     'visible' {'on','off'}
+%     'lock_gca'        : Plots within currently active axis (gca); doesn't
+%                         open new figures or subplots.
 %     NOTE: analysis options available depending on plot_type
 %       see see dsCalcFR options for plot_type 'rastergram' or 'rates'
 %       see dsCalcPower options for plot_type 'power'
@@ -145,6 +147,7 @@ end
   'do_zoom',false,[false true],...
   'yscale','linear',{'linear','log','log10','log2'},...
   'visible','on',{'on','off'},...
+  'lock_gca',[false],[false, true],...
   'show_colorbar',false,[false true],...
   'ColorMap',[],[],...
   'save_figures',false,[false true],...
@@ -155,6 +158,7 @@ end
   'save_res',[],[],...
   'Ndims_per_subplot',[],[],...
   'dim_stacking',[],[],...
+  'figure_handle',@xp_handles_fignew,[],...
   'subplot_handle',@xp_subplot_grid,[],...
   'plot_handle',[],[],...
   'plotFR_override',[],[false true],...
@@ -178,8 +182,10 @@ force_last = options.force_last;
 crop_range = options.crop_range;
 lock_axes = options.lock_axes;
 Ndims_per_subplot = options.Ndims_per_subplot;
+figure_handle = options.figure_handle;
 subplot_handle = options.subplot_handle;
 plot_handle = options.plot_handle;
+lock_gca = options.lock_gca;
 
 % Add default options to structures
 % Plot_options
@@ -203,6 +209,7 @@ plot_handle = options.plot_handle;
 subplot_options = struct_addDef(subplot_options,'subplotzoom_enabled',options.do_zoom);
 subplot_options = struct_addDef(subplot_options,'force_rowvect',true);
 subplot_options = struct_addDef(subplot_options,'autosuppress_interior_tics',true);
+subplot_options = struct_addDef(subplot_options,'legend1',[]);
 
 
 % Figure options
@@ -216,6 +223,13 @@ figure_options = struct_addDef(figure_options,'save_res',options.save_res);
 figure_options = struct_addDef(figure_options,'max_num_newfigs',options.max_num_newfigs);
 figure_options = struct_addDef(figure_options,'figwidth',options.figwidth);
 figure_options = struct_addDef(figure_options,'figheight',options.figheight);
+
+
+%% Autoset parameters
+if lock_gca
+    figure_options.suppress_newfig = true;    
+    subplot_options.suppress_subplot = true;
+end
 
 %% Pre-process raw data contained in xp.data max_num_overlaied + mean
 % % Note: these options don't work if data are images
@@ -468,7 +482,10 @@ end
 
 %% Set up legend entries, axis limits, and linewidth
 % Set up legend entries
-subplot_options.legend1 = setup_legends(xp2);
+if isempty(subplot_options.legend1)
+    subplot_options.legend1 = setup_legends(xp2);
+end
+
 
 % Set up x-axis limits
 if isempty(plot_options.xlims) && lock_axes && ~is_image
@@ -623,24 +640,24 @@ end
 switch num_embedded_subplots
     case 0
         % Ordering of axis handles
-        function_handles = {@xp_handles_newfig, data_plothandle};   % Specifies the handles of the plotting functions
+        function_handles = {figure_handle, data_plothandle};   % Specifies the handles of the plotting functions
         dims_per_function_handle = [1,Ndims_per_subplot];
         function_args = {{figure_options},{plot_options}};
     case 1
         % Ordering of axis handles
-        function_handles = {@xp_handles_newfig, subplot_handle,data_plothandle};   % Specifies the handles of the plotting functions
+        function_handles = {figure_handle, subplot_handle,data_plothandle};   % Specifies the handles of the plotting functions
         dims_per_function_handle = [1,1,Ndims_per_subplot];
         function_args = {{figure_options},{subplot_options},{plot_options}};
 
     case 2
         % Ordering of axis handles
-        function_handles = {@xp_handles_newfig, subplot_handle,data_plothandle};   % Specifies the handles of the plotting functions
+        function_handles = {figure_handle, subplot_handle,data_plothandle};   % Specifies the handles of the plotting functions
         dims_per_function_handle = [1,2,Ndims_per_subplot];
         function_args = {{figure_options},{subplot_options},{plot_options}};
 
     case 3
         % Ordering of axis handles
-        function_handles = {@xp_handles_newfig, subplot_handle, subplot_handle,data_plothandle};   % Specifies the handles of the plotting functions
+        function_handles = {figure_handle, subplot_handle, subplot_handle,data_plothandle};   % Specifies the handles of the plotting functions
         dims_per_function_handle = [1,2,1,Ndims_per_subplot];
         subplot_options2 = subplot_options;
         subplot_options2.legend1 = [];
@@ -648,7 +665,7 @@ switch num_embedded_subplots
         function_args = {{figure_options},{subplot_options2},{subplot_options},{plot_options}};
     case 4
         % Ordering of axis handles
-        function_handles = {@xp_handles_newfig, subplot_handle, subplot_handle,data_plothandle};   % Specifies the handles of the plotting functions
+        function_handles = {figure_handle, subplot_handle, subplot_handle,data_plothandle};   % Specifies the handles of the plotting functions
         dims_per_function_handle = [1,2,2,Ndims_per_subplot];
         subplot_options2 = subplot_options;
         subplot_options2.legend1 = [];
@@ -676,14 +693,14 @@ function_args = function_args(available_dims);
 
 %% Run the plots!
 % Open new figure if necessary & plot the data
-if ~isequal(@xp_handles_newfig, function_handles{1})
+if ~isequal(figure_handle, function_handles{1})
     % Cheap hack to force it to create a new figure using our desired
     % parameters for instances when it wouldn't normally call
-    % xp_handles_newfig.
+    % xp_handles_fignew.
     xp3 = MDD;
     fhandle = @() recursivePlot(xp2,function_handles,dimensions,function_args);
     xp3 = xp3.importData({fhandle});
-    handles = xp_handles_newfig(xp3,figure_options);
+    handles = figure_handle(xp3,figure_options);
 else
     handles = xp2.recursivePlot(function_handles,dimensions,function_args);
 end
