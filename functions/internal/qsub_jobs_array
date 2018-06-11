@@ -14,6 +14,7 @@ set ui_command = "$3"
 
 set cluster_matlab_version = "$4"
 
+module unload matlab
 module load matlab/${cluster_matlab_version}
 
 echo "command = " ${job_filename}${SGE_TASK_ID}

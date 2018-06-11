@@ -19,6 +19,7 @@ set cluster_matlab_version = "$4"
 
 set varargin = "$5"
 
+module unload matlab
 module load matlab/${cluster_matlab_version}
 
 echo "command = " $ui_command
