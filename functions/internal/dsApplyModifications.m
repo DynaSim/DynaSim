@@ -1,5 +1,5 @@
 function [output,modifications] = dsApplyModifications(model, modifications, varargin)
-%APPLYMODIFICATIONS - Apply modifications to DynaSim specification or model structure
+%DSAPPLYMODIFICATIONS - Apply modifications to DynaSim specification or model structure
 %
 % dsApplyModifications returns the same kind of structure with
 % modifications applied. In all cases it first modifies the specification
@@ -294,17 +294,18 @@ for i=1:size(mods,1)
     end
   else % modify a single parameter in the populations.parameters cell array
     param_names=spec.(type)(index).parameters(1:2:end);
+    
     if isempty(spec.(type)(index).parameters)
       % no parameters set; start cell array of parameters
-      spec.(type)(index).parameters={fld,val};%toString(val2,precision)};
+      spec.(type)(index).parameters={fld,val};
     elseif ismember(fld,param_names)
       % parameter found in list; update its value
       val_pos=2*find(ismember(param_names,fld));
-      spec.(type)(index).parameters{val_pos}=val;%toString(val2,precision);
+      spec.(type)(index).parameters(val_pos)={val};
     else
       % parameter not in existing list; append to end
       spec.(type)(index).parameters{end+1}=fld;
-      spec.(type)(index).parameters{end+1}=val;%toString(val2,precision);
+      spec.(type)(index).parameters{end+1}=val;
     end
   end
 end
