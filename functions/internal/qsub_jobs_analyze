@@ -13,9 +13,9 @@ cd $batchdir
 
 set ui_command = "$2"
 
-set src = "$3"
+set cluster_matlab_version = "$3"
 
-set cluster_matlab_version = "$4"
+set src = "$4"
 
 set varargin = "$5"
 
