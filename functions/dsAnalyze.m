@@ -1099,7 +1099,7 @@ end
     num_simIDs = studyinfo.simulations(end).sim_id;
     jobPrefix = study_dir_name;
     
-    cmd = sprintf('echo "%s/qsub_jobs_analyze ''%s'' ''%s'' ''%s'' %s %s" | qsub -V -hard %s -wd ''%s'' -N %s_analysis_job -t 1-%i:%i %s',...
+    cmd = sprintf('echo "%s/qsub_jobs_analyze ''%s'' ''%s'' ''%s'' ''%s'' %s" | qsub -V -hard %s -wd ''%s'' -N %s_analysis_job -t 1-%i:%i %s',...
       dsFnDirPath, specific_batch_dir, ui_command, options.cluster_matlab_version, arg3, arg4,... % echo vars
       l_directives, specific_batch_dir, jobPrefix, num_simIDs, options.sims_per_job, qsubStr); % qsub vars
     
