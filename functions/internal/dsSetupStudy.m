@@ -174,7 +174,11 @@ if options.save_data_flag || options.save_results_flag || options.parfor_flag
         studyinfo.simulations(k).result_functions{end+1} = options.analysis_functions{kk};
         studyinfo.simulations(k).result_options{end+1} = options.analysis_options{kk};
 
-        fname = [options.prefix '_sim' num2str(k) '_analysis' num2str(kk) '_' func2str(options.analysis_functions{kk}) '.mat'];
+        % check for function-specific prefix
+        this_analysis_options = dsCheckOptions(options.analysis_options{kk}, {'prefix',options.prefix,[]},false);
+        prefix = this_analysis_options.prefix;
+        
+        fname = [prefix '_sim' num2str(k) '_analysis' num2str(kk) '_' func2str(options.analysis_functions{kk}) '.mat'];
         studyinfo.simulations(k).result_files{end+1} = fullfile(results_dir,fname);
       end
 
@@ -182,7 +186,12 @@ if options.save_data_flag || options.save_results_flag || options.parfor_flag
       for kk = 1:length(options.plot_functions)
         studyinfo.simulations(k).result_functions{end+1}=options.plot_functions{kk};
         studyinfo.simulations(k).result_options{end+1}=options.plot_options{kk};
-        fname=[options.prefix '_sim' num2str(k) '_plot' num2str(kk) '_' func2str(options.plot_functions{kk})];
+        
+        % check for function-specific prefix
+        this_plot_options = dsCheckOptions(options.plot_options{kk}, {'prefix',options.prefix,[]},false);
+        prefix = this_plot_options.prefix;
+        
+        fname=[prefix '_sim' num2str(k) '_plot' num2str(kk) '_' func2str(options.plot_functions{kk})];
         % note: extension will depend on output format (jpg,png,eps,svg)
         % and be set in dsAnalyze().
         studyinfo.simulations(k).result_files{end+1}=fullfile(plot_dir,fname);
