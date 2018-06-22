@@ -165,7 +165,7 @@ if options.save_parameters_flag
       if ~any(strcmp(model.namespaces(:,2), this_mod_param))
         % find correct namespace(s) based on param and pop
         namespaceInd = logical( contains(model.namespaces(:,2), [first_mod_set{iParamMod,1} '_']) .* ...
-          contains(model.namespaces(:,2), first_mod_set{iParamMod,3}) );
+          endsWith(model.namespaces(:,2), first_mod_set{iParamMod,3}) );
 
         numNamespaceMatches = sum(namespaceInd);
         
@@ -178,7 +178,7 @@ if options.save_parameters_flag
           
           % find correct namespace(s) based on param and pop
           namespaceInd = logical( contains(model.namespaces(:,2), [flippedNamespace '_']) .* ...
-          contains(model.namespaces(:,2), first_mod_set{iParamMod,3}) );
+          endsWith(model.namespaces(:,2), first_mod_set{iParamMod,3}) );
 
           numNamespaceMatches = sum(namespaceInd);
         end
