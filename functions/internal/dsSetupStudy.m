@@ -212,48 +212,56 @@ if options.save_data_flag || options.save_results_flag || options.parfor_flag
   end
   
   %% save run file
-  stack = dbstack;
-  firstFile = stack(end).file;
-  if ~contains(firstFile, 'dsSimulate')
-    runFile = firstFile;
-    runFilePath = which(firstFile);
-  else
-    runFilePath = '';
-  end
-  
-  solveDir = fullfile(options.study_dir, 'solve');
-  if ~isdir(solveDir)
-      mkdir(solveDir);
-  end
+  if options.copy_run_file_flag
+    stack = dbstack;
+    firstFile = stack(end).file;
+    if ~contains(firstFile, 'dsSimulate')
+      runFile = firstFile;
+      runFilePath = which(firstFile);
+    else
+      runFilePath = '';
+    end
     
-  if ~isempty(runFilePath)
-    dsVprintf(options, 'Copying run file ''%s'' into ''study_dir/solve'': %s \n', runFile,solveDir);
-    copyPath = fullfile(solveDir, runFile);
-    copyfile(runFilePath, copyPath);
+    solveDir = fullfile(options.study_dir, 'solve');
+    if ~isdir(solveDir)
+      mkdir(solveDir);
+    end
+    
+    if ~isempty(runFilePath)
+      dsVprintf(options, 'Copying run file ''%s'' into ''study_dir/solve'': %s \n', runFile,solveDir);
+      copyPath = fullfile(solveDir, runFile);
+      copyfile(runFilePath, copyPath);
+    end
   end
   
   %% save mech files
-  mechFiles = base_model.specification.populations.mechanism_list;
-  if ~isempty(mechFiles)
-    dsVprintf(options, 'Copying mech files into ''study_dir/solve/mechs''... \n');
-    
-    mechCopyDir = fullfile(options.study_dir, 'solve','mechs');
-    if ~isdir(mechCopyDir)
-      mkdir(mechCopyDir);
+  if options.copy_mech_files_flag
+    mechFiles = base_model.specification.populations.mechanism_list;
+    if ~isempty(mechFiles)
+      dsVprintf(options, 'Copying mech files into ''study_dir/solve/mechs''... \n');
+      
+      mechCopyDir = fullfile(options.study_dir, 'solve','mechs');
+      if ~isdir(mechCopyDir)
+        mkdir(mechCopyDir);
+      end
+      
+      for iFile = 1:length(mechFiles)
+        try
+          thisFilePath = mechFiles{iFile};
+          
+          thisFilePath = which(thisFilePath);
+          
+          [~, fileName,ext] = fileparts(thisFilePath);
+          
+          dsVprintf(options, '    %s \n', fileName);
+          
+          thisCopyPath = fullfile(mechCopyDir, [fileName, ext]);
+          
+          copyfile(thisFilePath, thisCopyPath);
+        end
+      end
     end
-    
-    for iFile = 1:length(mechFiles)
-      thisFilePath = mechFiles{iFile};
-      
-      [~, fileName,ext] = fileparts(thisFilePath);
-      
-      dsVprintf(options, '    %s \n', fileName);
-      
-      thisCopyPath = fullfile(mechCopyDir, [fileName, ext]);
-      
-      copyfile(thisFilePath, thisCopyPath);
-    end
-  end
+  end % options.copy_mech_files_flag
 
 else
   % set defaults for not saving anything
