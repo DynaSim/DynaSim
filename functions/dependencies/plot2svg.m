@@ -26,7 +26,7 @@ function varargout = plot2svg(filename, id, debug, legendIcons, clippingMode, fi
 
   global PLOT2SVG_globals
   global colorname
-  progversion = '20-Jun-2018';
+  progversion = '28-Jun-2018';
   PLOT2SVG_globals.runningIdNumber = 0;
   PLOT2SVG_globals.UI = reportUI;
   PLOT2SVG_globals.octave = false;
@@ -84,7 +84,9 @@ function varargout = plot2svg(filename, id, debug, legendIcons, clippingMode, fi
     f2 = figure('visible', 'off');
   end
   objects = allchild(f1);
+  paperpos = get(f1,'Position');
   copyobj(get(f1,'children'),f2);
+  set(f2,'Position',paperpos);
   if ~UIverlessthan('8.4.0')
     if ~isempty(xl.String)
      set(gca,'xlabel',xl)
