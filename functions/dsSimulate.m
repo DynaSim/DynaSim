@@ -301,6 +301,8 @@ options=dsCheckOptions(varargin,{...
                                     '2016a', '2016b', '2017a', '2017b',...
                                     '2018a'},...
   'in_parfor_loop_flag',0,{0,1},... % if inside parfor loop
+  'copy_run_file_flag',0,{0,1},... % copy mechanism files to study dir
+  'copy_mech_files_flag',0,{0,1},... % copy mechanism files to study dir
   'debug_flag',0,{0,1},...
   'auto_gen_test_data_flag',0,{0,1},...
   'unit_test_flag',0,{0,1},...
@@ -1286,16 +1288,41 @@ option_names = {...
   'compile_flag','mex_flag';
   };
 
-if any(ismember(option_names(:,1),options(1:2:end)))
-  for i=1:size(option_names,1)
-    % check if any options have this old name
-    if ismember(option_names{i,1},options(1:2:end))
-      ind=find(ismember(options(1:2:end),option_names{i,1}));
+if isempty(options)
+  return
+end
 
-      % replace old option name by new option name
-      options{2*ind-1}=option_names{i,2};
+if ~isstruct(options{1})
+  if any(ismember(option_names(:,1),options(1:2:end)))
+    for i=1:size(option_names,1)
+      % check if any options have this old name
+      if ismember(option_names{i,1},options(1:2:end))
+        ind=find(ismember(options(1:2:end),option_names{i,1}));
+        
+        % replace old option name by new option name
+        options{2*ind-1}=option_names{i,2};
+      end
     end
   end
+else % struct
+  options = options{1};
+  flds = fieldnames(options);
+  
+  [oldOpts,indOpt] = intersect(option_names(:,1), flds);
+  
+  if ~isempty(oldOpts)
+    for iOpt = 1:length(indOpt)
+      oldOptName = oldOpts{iOpt};
+      newOptName = option_names{indOpt(iOpt),2};
+
+      % replace old option name by new option name
+      options.(newOptName) = options.(oldOptName);
+      
+      options = rmfield(options, oldOptName);
+    end
+  end
+  
+  options = {options};
 end
 
 end
