@@ -138,9 +138,7 @@ if isempty(class) && ~isempty(regexp(string,pattern,'once'))
 end
 
 % parameter check: var=expression (string or numeric)
-%pattern='^(([\w\.]+)|(\[\w+\]))\s*=\s*((''.*'')|(\[?[\d\.-(Inf)(inf)]+\]?))$';
-% TODO: support scientific notation
-pattern='^(([\w\.]+)|(\[\w+\]))\s*=\s*((''.*'')|(\[?[+\d\.\-(Inf)(inf)]+\]?)|(\d+e[\-\+]?\d+))$';
+pattern='^(([\w\.]+)|(\[\w+\]))\s*=\s*((''.*'')|(\[?[+\d\.\-(Inf)(inf)]+\]?)|(\d*\.?\d*e[\-\+]?\d+))$';
 if isempty(class) && ~isempty(regexp(string,pattern,'once'))
   class='parameter';
 end

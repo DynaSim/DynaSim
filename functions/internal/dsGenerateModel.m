@@ -1,5 +1,5 @@
 function [model,name_map] = dsGenerateModel(specification, varargin)
-%GENERATEMODEL - Parse DynaSim specification and organize model data in DynaSim model structure
+%dsGenerateModel - Parse DynaSim specification and organize model data in DynaSim model structure
 %
 % Usage:
 %   [model,name_map]=dsGenerateModel(specification,'option',value,...)
@@ -154,12 +154,13 @@ if isfield(specification,'state_variables')
 %     specification=specification.specification;
 %   end
 end
+
 % standardize specification
-specification=dsCheckSpecification(specification, varargin{:}); % standardize & auto-populate as needed
+specification = dsCheckSpecification(specification, varargin{:}); % standardize & auto-populate as needed
 
 % Apply modifications to specification before generating model
 if ~isempty(options.modifications)
-  specification=dsApplyModifications(specification,options.modifications, varargin{:});
+  specification = dsApplyModifications(specification,options.modifications, varargin{:});
 end
 
 % specification metadata:
@@ -223,6 +224,7 @@ for i=1:npops
     name_map=cat(1,name_map,tmpmodel.namespaces);
     continue;
   end
+  
   % construct new population model
   PopScope=specification.populations(i).name;
     % NOTE: dsParseModelEquations adds a '_' suffix to the namespace; therefore,
@@ -251,7 +253,11 @@ for i=1:npops
     mechanism_=regexp(mechanism_,'@','split');
     mechanism=mechanism_{1};
 
-    if numel(mechanism_)>1, new_linker=mechanism_{2}; else new_linker=[]; end
+    if numel(mechanism_)>1
+      new_linker=mechanism_{2};
+    else
+      new_linker=[];
+    end
 
     % set mechanism namespace
     [~,MechID]=fileparts2(mechanism);
@@ -263,19 +269,23 @@ for i=1:npops
       % extract mechanism file name without path
       MechScope=[specification.populations(i).name '_' MechID];
     end
+    
     % use mechanism equations in specification if present
     if isfield(specification.populations,'mechanisms') && ~isempty(specification.populations(i).mechanisms)
       if ismember(MechID,{specification.populations(i).mechanisms.name})
         idx=ismember({specification.populations(i).mechanisms.name},MechID);
         mechanism=specification.populations(i).mechanisms(idx).equations;
       end
+      
       % parse mechanism equations
       if ~isempty(mechanism)
         [tmpmodel,tmpmap]=dsImportModel(mechanism,'namespace',MechScope,'ic_pop',specification.populations(i).name,'user_parameters',parameters);
+        
         % replace 1st linker name by the one in specification
         if ~isempty(new_linker) && ~isempty(tmpmodel.linkers)
           % first try to find 1st linker target starting with @
           links_at=find(~cellfun(@isempty,regexp({tmpmodel.linkers.target},'^@','once')));
+          
           if ~isempty(links_at)
             % use first link with target prepended by '@'
             link_ind=links_at(1);
@@ -283,8 +293,10 @@ for i=1:npops
             % use first link
             link_ind=1;
           end
+          
           tmpmodel.linkers(link_ind).target=['@' new_linker];
         end
+        
         % combine sub-model with other sub-models
         model=dsCombineModels(model,tmpmodel, varargin{:});
         name_map=cat(1,name_map,tmpmap);
@@ -310,6 +322,7 @@ for i=1:ncons
     % NOTE: in contrast to PopScope above, ConScope is never passed to
     % dsParseModelEquations; thus the '_' should be added here for consistency
     % with mechanism namespaces (which are modified by dsParseModelEquations).
+    
   for j=1:length(specification.connections(i).mechanism_list)
     mechanism_=specification.connections(i).mechanism_list{j};
 
@@ -372,6 +385,7 @@ for i=1:ncons
       end
     end
   end
+  
   % add reserved keywords (parameters and state variables) to name_map
   add_keywords(source,target,ConScope);
 end
@@ -384,6 +398,7 @@ if ~isempty(model.monitors)
   else
     function_names={};
   end
+  
   % get list of monitor names
   monitor_names=fieldnames(model.monitors);
 
@@ -667,19 +682,24 @@ if ~isempty(model.ODEs)
   model.ICs = orderfields(model.ICs,model.state_variables);
 end
 
+
 % 4.2 convert to numeric parameters
-c = struct2cell(model.parameters);
+paramCell = struct2cell(model.parameters);
 
 % get index of strings
-idx1=find(cellfun(@ischar,c));
+idx1 = find(cellfun(@ischar,paramCell));
 
 % which strings contain numeric values?
-idx2=find(cellfun(@isempty,regexp(c(idx1),'[a-z_A-Z]')) | ~cellfun(@isempty,regexp(c(idx1),'^\s*\[*\s*\+?inf\s*\]*\s*$','ignorecase')));
+idx2 = find(cellfun(@isempty,regexp(paramCell(idx1),'[a-z_A-Z]'))...
+  | ~cellfun(@isempty,regexp(paramCell(idx1),'^\s*\[*\s*\+?inf\s*\]*\s*$','ignorecase'))... % inf
+  | ~cellfun(@isempty,regexp(paramCell(idx1),'^\s*(\d*\.?\d*e[\-\+]?\d+)\s*$','ignorecase'))... % scientific notation
+  );
 
 % convert those strings which contain numeric values
-c(idx1(idx2)) = cellfun(@eval,c(idx1(idx2)),'uni',0);
+paramCell(idx1(idx2)) = cellfun(@eval,paramCell(idx1(idx2)),'uni',0);
 f = fieldnames(model.parameters);
-model.parameters = cell2struct(c,f,1);
+model.parameters = cell2struct(paramCell,f,1);
+
 
 % 4.3 store original specification
 model.specification = specification; % store specification to enable modifications to be applied later
