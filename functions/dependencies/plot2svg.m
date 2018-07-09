@@ -26,7 +26,7 @@ function varargout = plot2svg(filename, id, debug, legendIcons, clippingMode, fi
 
   global PLOT2SVG_globals
   global colorname
-  progversion = '28-Jun-2018';
+  progversion = '09-Jul-2018';
   PLOT2SVG_globals.runningIdNumber = 0;
   PLOT2SVG_globals.UI = reportUI;
   PLOT2SVG_globals.octave = false;
@@ -946,7 +946,7 @@ function group = colorbar_axes2svg(fid,id,ax,group,paperpos)
       else
           minor_axytick = [];
       end
-      PLOT2SVG_globals.BoxOn = strcmp(get(ax,'Box'),'on');
+      PLOT2SVG_globals.BoxOn = strcmp(get(ax,'Box'),'on')
       if strcmp(get(ax,'Box'),'on')
           axxindex_inner = find((axxtick > axlimori(1)) & (axxtick < (axlimori(1)+axlimori(4))));
           axyindex_inner = find((axytick > axlimori(2)) & (axytick < (axlimori(2)+axlimori(5))));
@@ -1234,7 +1234,13 @@ function group = axes2svg(fid,id,ax,group,paperpos)
   axlimx = get(ax,'XLim');
   axlimy = get(ax,'YLim');
   axlimz = get(ax,'ZLim');
-  [axinflimx, axinflimy, axinflimz] = AxesChildBounds(ax);
+  if isfield(PLOT2SVG_globals,'BoxOn') % only when axis is on
+    [axinflimx, axinflimy, axinflimz] = AxesChildBounds(ax);
+  else
+    axinflimx = axlimx;
+    axinflimy = axlimy;
+    axinflimz = axlimz;
+  end
   axlimx(isinf(axlimx)) = axinflimx(isinf(axlimx));
   axlimy(isinf(axlimy)) = axinflimy(isinf(axlimy));
   axlimz(isinf(axlimz)) = axinflimz(isinf(axlimz));
@@ -2031,9 +2037,9 @@ function boundingBoxAxes = axchild2svg(fid,id,axIdString,ax,paperpos,axchild,axp
             boundingBoxElement = boundingBoxAxes;
           end
           [filterString, boundingBox] = filter2svg(fid, axchild(i), boundingBoxAxes, boundingBoxElement);
-          if PLOT2SVG_globals.ClippingMode == 1 && ~PLOT2SVG_globals.BoxOn
+          if PLOT2SVG_globals.ClippingMode == 1 && isfield(PLOT2SVG_globals,'BoxOn') && ~PLOT2SVG_globals.BoxOn
             boundingBoxAxes = [boundingBoxAxes(1) min([boundingBoxAxes(2) boundingBoxElement(2)]) max([boundingBoxAxes(3)+max([boundingBoxAxes(1)-boundingBoxElement(1),0]) boundingBoxElement(3)+max([boundingBoxElement(1)-boundingBoxAxes(1),0])]) [boundingBoxAxes(4)+max([boundingBoxAxes(2)-boundingBoxElement(2),0])]];
-          elseif PLOT2SVG_globals.ClippingMode == 3
+          elseif PLOT2SVG_globals.ClippingMode == 3 || PLOT2SVG_globals.ClippingMode == 1 && ~isfield(PLOT2SVG_globals,'BoxOn')
             boundingBoxAxes = [min([boundingBoxAxes(1) boundingBoxElement(1)]) min([boundingBoxAxes(2) boundingBoxElement(2)]) max([boundingBoxAxes(3)+max([boundingBoxAxes(1)-boundingBoxElement(1),0]) boundingBoxElement(3)+max([boundingBoxElement(1)-boundingBoxAxes(1),0])]) max([boundingBoxAxes(4)+max([boundingBoxAxes(2)-boundingBoxElement(2),0]) boundingBoxElement(4)+max([boundingBoxElement(2)-boundingBoxAxes(2),0])])];
           end
           if strcmp(get(axchild(i),'Clipping'),'on') && PLOT2SVG_globals.ClippingMode ~= 0
@@ -2165,9 +2171,9 @@ function boundingBoxAxes = axchild2svg(fid,id,axIdString,ax,paperpos,axchild,axp
             boundingBoxElement = boundingBoxAxes;
           end
           [filterString, boundingBox] = filter2svg(fid, axchild(i), boundingBoxAxes, boundingBoxElement);
-          if PLOT2SVG_globals.ClippingMode == 1 && ~PLOT2SVG_globals.BoxOn
+          if PLOT2SVG_globals.ClippingMode == 1 && isfield(PLOT2SVG_globals,'BoxOn') && ~PLOT2SVG_globals.BoxOn
             boundingBoxAxes = [boundingBoxAxes(1) min([boundingBoxAxes(2) boundingBoxElement(2)]) max([boundingBoxAxes(3)+max([boundingBoxAxes(1)-boundingBoxElement(1),0]) boundingBoxElement(3)+max([boundingBoxElement(1)-boundingBoxAxes(1),0])]) [boundingBoxAxes(4)+max([boundingBoxAxes(2)-boundingBoxElement(2),0])]];
-          elseif PLOT2SVG_globals.ClippingMode == 3
+          elseif PLOT2SVG_globals.ClippingMode == 3 || PLOT2SVG_globals.ClippingMode == 1 && ~isfield(PLOT2SVG_globals,'BoxOn')
             boundingBoxAxes = [min([boundingBoxAxes(1) boundingBoxElement(1)]) min([boundingBoxAxes(2) boundingBoxElement(2)]) max([boundingBoxAxes(3)+max([boundingBoxAxes(1)-boundingBoxElement(1),0]) boundingBoxElement(3)+max([boundingBoxElement(1)-boundingBoxAxes(1),0])]) max([boundingBoxAxes(4)+max([boundingBoxAxes(2)-boundingBoxElement(2),0]) boundingBoxElement(4)+max([boundingBoxElement(2)-boundingBoxAxes(2),0])])];
           end
           if strcmp(get(axchild(i),'Clipping'),'on') && PLOT2SVG_globals.ClippingMode ~= 0
@@ -2346,9 +2352,9 @@ function boundingBoxAxes = axchild2svg(fid,id,axIdString,ax,paperpos,axchild,axp
             boundingBoxElement = boundingBoxAxes;
           end
           [filterString, boundingBox] = filter2svg(fid, axchild(i), boundingBoxAxes, boundingBoxElement);
-          if PLOT2SVG_globals.ClippingMode == 1 && ~PLOT2SVG_globals.BoxOn
+          if PLOT2SVG_globals.ClippingMode == 1 && isfield(PLOT2SVG_globals,'BoxOn') && ~PLOT2SVG_globals.BoxOn
             boundingBoxAxes = [boundingBoxAxes(1) min([boundingBoxAxes(2) boundingBoxElement(2)]) max([boundingBoxAxes(3)+max([boundingBoxAxes(1)-boundingBoxElement(1),0]) boundingBoxElement(3)+max([boundingBoxElement(1)-boundingBoxAxes(1),0])]) [boundingBoxAxes(4)+max([boundingBoxAxes(2)-boundingBoxElement(2),0])]];
-          elseif PLOT2SVG_globals.ClippingMode == 3
+          elseif PLOT2SVG_globals.ClippingMode == 3 || PLOT2SVG_globals.ClippingMode == 1 && ~isfield(PLOT2SVG_globals,'BoxOn')
             boundingBoxAxes = [min([boundingBoxAxes(1) boundingBoxElement(1)]) min([boundingBoxAxes(2) boundingBoxElement(2)]) max([boundingBoxAxes(3)+max([boundingBoxAxes(1)-boundingBoxElement(1),0]) boundingBoxElement(3)+max([boundingBoxElement(1)-boundingBoxAxes(1),0])]) max([boundingBoxAxes(4)+max([boundingBoxAxes(2)-boundingBoxElement(2),0]) boundingBoxElement(4)+max([boundingBoxElement(2)-boundingBoxAxes(2),0])])];
           end
           if strcmp(get(axchild(i),'Clipping'),'on') && PLOT2SVG_globals.ClippingMode ~= 0
@@ -2580,9 +2586,9 @@ function boundingBoxAxes = axchild2svg(fid,id,axIdString,ax,paperpos,axchild,axp
             boundingBoxElement = boundingBoxAxes;
           end
           [filterString, boundingBox] = filter2svg(fid, axchild(i), boundingBoxAxes, boundingBoxElement);
-          if PLOT2SVG_globals.ClippingMode == 1 && ~PLOT2SVG_globals.BoxOn
+          if PLOT2SVG_globals.ClippingMode == 1 && isfield(PLOT2SVG_globals,'BoxOn') && ~PLOT2SVG_globals.BoxOn
             boundingBoxAxes = [boundingBoxAxes(1) min([boundingBoxAxes(2) boundingBoxElement(2)]) max([boundingBoxAxes(3)+max([boundingBoxAxes(1)-boundingBoxElement(1),0]) boundingBoxElement(3)+max([boundingBoxElement(1)-boundingBoxAxes(1),0])]) [boundingBoxAxes(4)+max([boundingBoxAxes(2)-boundingBoxElement(2),0])]];
-          elseif PLOT2SVG_globals.ClippingMode == 3
+          elseif PLOT2SVG_globals.ClippingMode == 3 || PLOT2SVG_globals.ClippingMode == 1 && ~isfield(PLOT2SVG_globals,'BoxOn')
             boundingBoxAxes = [min([boundingBoxAxes(1) boundingBoxElement(1)]) min([boundingBoxAxes(2) boundingBoxElement(2)]) max([boundingBoxAxes(3)+max([boundingBoxAxes(1)-boundingBoxElement(1),0]) boundingBoxElement(3)+max([boundingBoxElement(1)-boundingBoxAxes(1),0])]) max([boundingBoxAxes(4)+max([boundingBoxAxes(2)-boundingBoxElement(2),0]) boundingBoxElement(4)+max([boundingBoxElement(2)-boundingBoxAxes(2),0])])];
           end
           if strcmp(get(axchild(i),'Clipping'),'on') && PLOT2SVG_globals.ClippingMode ~= 0
@@ -2715,9 +2721,9 @@ function boundingBoxAxes = axchild2svg(fid,id,axIdString,ax,paperpos,axchild,axp
             boundingBoxElement = boundingBoxAxes;
           end
           [filterString, boundingBox] = filter2svg(fid, axchild(i), boundingBoxAxes, boundingBoxElement);
-          if PLOT2SVG_globals.ClippingMode == 1 && ~PLOT2SVG_globals.BoxOn
+          if isfield(PLOT2SVG_globals,'BoxOn') && ~PLOT2SVG_globals.BoxOn
             boundingBoxAxes = [boundingBoxAxes(1) min([boundingBoxAxes(2) boundingBoxElement(2)]) max([boundingBoxAxes(3)+max([boundingBoxAxes(1)-boundingBoxElement(1),0]) boundingBoxElement(3)+max([boundingBoxElement(1)-boundingBoxAxes(1),0])]) [boundingBoxAxes(4)+max([boundingBoxAxes(2)-boundingBoxElement(2),0])]];
-          elseif PLOT2SVG_globals.ClippingMode == 3
+          elseif PLOT2SVG_globals.ClippingMode == 3 || PLOT2SVG_globals.ClippingMode == 1 && ~isfield(PLOT2SVG_globals,'BoxOn')
             boundingBoxAxes = [min([boundingBoxAxes(1) boundingBoxElement(1)]) min([boundingBoxAxes(2) boundingBoxElement(2)]) max([boundingBoxAxes(3)+max([boundingBoxAxes(1)-boundingBoxElement(1),0]) boundingBoxElement(3)+max([boundingBoxElement(1)-boundingBoxAxes(1),0])]) max([boundingBoxAxes(4)+max([boundingBoxAxes(2)-boundingBoxElement(2),0]) boundingBoxElement(4)+max([boundingBoxElement(2)-boundingBoxAxes(2),0])])];
           end
           if strcmp(get(axchild(i),'Clipping'),'on') && PLOT2SVG_globals.ClippingMode ~= 0
@@ -2785,9 +2791,9 @@ function boundingBoxAxes = axchild2svg(fid,id,axIdString,ax,paperpos,axchild,axp
             boundingBoxElement = boundingBoxAxes;
           end
           [filterString, boundingBox] = filter2svg(fid, axchild(i), boundingBoxAxes, boundingBoxElement);
-          if PLOT2SVG_globals.ClippingMode == 1 && ~PLOT2SVG_globals.BoxOn
+          if PLOT2SVG_globals.ClippingMode == 1 && isfield(PLOT2SVG_globals,'BoxOn') && ~PLOT2SVG_globals.BoxOn
             boundingBoxAxes = [boundingBoxAxes(1) min([boundingBoxAxes(2) boundingBoxElement(2)]) max([boundingBoxAxes(3)+max([boundingBoxAxes(1)-boundingBoxElement(1),0]) boundingBoxElement(3)+max([boundingBoxElement(1)-boundingBoxAxes(1),0])]) [boundingBoxAxes(4)+max([boundingBoxAxes(2)-boundingBoxElement(2),0])]];
-          elseif PLOT2SVG_globals.ClippingMode == 3
+          elseif PLOT2SVG_globals.ClippingMode == 3 || PLOT2SVG_globals.ClippingMode == 1 && ~isfield(PLOT2SVG_globals,'BoxOn')
             boundingBoxAxes = [min([boundingBoxAxes(1) boundingBoxElement(1)]) min([boundingBoxAxes(2) boundingBoxElement(2)]) max([boundingBoxAxes(3)+max([boundingBoxAxes(1)-boundingBoxElement(1),0]) boundingBoxElement(3)+max([boundingBoxElement(1)-boundingBoxAxes(1),0])]) max([boundingBoxAxes(4)+max([boundingBoxAxes(2)-boundingBoxElement(2),0]) boundingBoxElement(4)+max([boundingBoxElement(2)-boundingBoxAxes(2),0])])];
           end
           if strcmp(get(axchild(i),'Clipping'),'on') && PLOT2SVG_globals.ClippingMode ~= 0
@@ -4191,7 +4197,13 @@ function [projection, edges] = get_projection(ax,id)
     yi = get(ax,'YLim');
     zi = get(ax,'ZLim');
     projection.aspect_scaling = get(ax,'DataAspectRatio');
-    [xinfi, yinfi, zinfi] = AxesChildBounds(ax);
+    if isfield(PLOT2SVG_globals,'BoxOn') % only when axis is on
+      [xinfi, yinfi, zinfi] = AxesChildBounds(ax);
+    else
+      xinfi = xi;
+      yinfi = yi;
+      zinfi = zi;
+    end
     xi(isinf(xi)) = xinfi(isinf(xi));
     yi(isinf(yi)) = yinfi(isinf(yi));
     zi(isinf(zi)) = zinfi(isinf(zi));
