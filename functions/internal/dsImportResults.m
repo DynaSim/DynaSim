@@ -1,5 +1,5 @@
-function results = dsImportResults(src, varargin)
-%IMPORTRESULTS - Import analysis result of a simulation
+function [results, simIDs] = dsImportResults(src, varargin)
+%dsImportResults - Import analysis result of a simulation
 %
 % Usage:
 %   results = dsImportResults(src)
@@ -36,6 +36,8 @@ function results = dsImportResults(src, varargin)
 %              instance, usually following analysis in name. Inside each field 
 %              is a cell array of results of length = num sims. If only 1
 %              function, then just returns the cell array for that function.
+%   - simIDs: simIDs for each result value. Will be a mat vector or a struct of
+%             mat vectors with field names matching those of results variable.
 % 
 % Author: Jason Sherfey, PhD <jssherfey@gmail.com>
 % Updated: Erik Roberts
@@ -276,12 +278,20 @@ end
 
 results = struct();
 for iFn = 1:nResultFn
+  thisFnName = fnNameInd{iFn,2};
   thisFnRexStr = sprintf('analysis%s_%s', fnNameInd{iFn,2}, fnNameInd{iFn,1});
   
   thisFnFiles = result_files(contains(result_files, thisFnRexStr));
   nFiles = length(thisFnFiles);
   
   thisFnResults = cell(num_sims, 1);
+  
+  
+  % get simIDs from file paths
+  simInds = regexpi(thisFnFiles, 'sim(\d+)', 'tokens');
+  simInds = [simInds{:}];
+  simInds = [simInds{:}]; % note: removes missing entries
+  simInds = cellfun(@str2double, simInds);
   
   for iFile = 1:nFiles
     thisFilePath = thisFnFiles{iFile};
@@ -297,10 +307,7 @@ for iFn = 1:nResultFn
       thisFileContents = load(thisFilePath,'result');
       
       % get simInd
-      simInd = regexpi(thisFilePath, 'sim(\d+)', 'tokens');
-      simInd = simInd{1};
-      simInd = simInd{1};
-      simInd = str2double(simInd);
+      simInd = simInds(iFile);
       
       % store result
       if ~options.as_cell && isstruct(thisFileContents.result) && isfield(thisFileContents.result,'time')
@@ -320,6 +327,14 @@ for iFn = 1:nResultFn
     clear thisFilePath thisFileContents
     
   end % file
+  
+  % store sorted simIDs
+  simInds = sort(simInds);
+  if nResultFn == 1
+    simIDs = simInds;
+  else
+    simIDs.(thisFnName) = simInds;
+  end
   
   results.(fnIdStr{iFn}) = thisFnResults;
   clear thisFnResults
