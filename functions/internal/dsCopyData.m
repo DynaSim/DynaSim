@@ -1,16 +1,22 @@
-function dsCopyData(simIDs, sourceDir, targetDir)
+function dsCopyData(simIDs, sourceDir, targetDir, verbose_flag)
 % dsCopyData - copy DynaSim data to a new directory
 %
 % Usage:
 %   dsCopyData(simIDs, sourceDir, targetDir)
+%   dsCopyData(simIDs, sourceDir, targetDir, verbose_flag)
 %
 % Inputs:
 %   simIDs: mat vector of scalar simIDs
 %   sourceDir: relative or absolute path to source data directory
 %   targetDir: relative or absolute path to target data directory (does not need
 %              to exist yet)
+%   verbose_flag: logical, default=false
 %
 % Author: Erik Roberts
+
+if nargin < 4
+  verbose_flag = false;
+end
 
 % convert to absolute paths
 sourceDir = getAbsolutePath(sourceDir);
@@ -52,8 +58,25 @@ assert( numel(sourceFilepaths) == numel(targetFilepaths) );
 
 % copy files from source to target
 nFiles = numel(sourceFilepaths);
-for i = 1:nFiles
-  copyfile(sourceFilepaths{i}, targetFilepaths{i});
+tic;
+for iFile = 1:nFiles
+  if verbose_flag
+    fprintf('Copying file (%i/%i)', iFile, nFiles);
+  end
+  
+  copyfile(sourceFilepaths{iFile}, targetFilepaths{iFile});
+  
+  if verbose_flag
+    avgTimePerFile = toc/iFile;
+    nFilesLeft = nFiles-iFile;
+    secLeft = avgTimePerFile * nFilesLeft;
+    if secLeft < 60
+      fprintf('- ETA %.f sec \n', secLeft);
+    else
+      minLeft = secLeft / 60;
+      fprintf('- ETA %.f min \n', minLeft);
+    end
+  end
 end
 
 end
