@@ -174,9 +174,11 @@ if isstruct(srcS) && isfield(srcS,'study_dir')
         simIDstr = simIDstr{:};
         simIDstr = simIDstr{:};
         
-        thisDataFile = filesInDataDir{contains(filesInDataDir, ['sim' simIDstr])};
-        
-        data_files{iFile} = thisDataFile;
+        try
+          thisDataFile = filesInDataDir{contains(filesInDataDir, ['sim' simIDstr])};
+
+          data_files{iFile} = thisDataFile;
+        end
       end
       
       dataExist = cellfun(@exist,data_files)==2;
@@ -205,19 +207,22 @@ if isstruct(srcS) && isfield(srcS,'study_dir')
   % load each data set recursively
   keyvals = dsOptions2Keyval(options);
 
+  iLoadedFile = 0;
   for iFile = 1:num_files
-    thisDataExists = dataExist(dataExist);
+    thisDataExists = dataExist(iFile);
     
     if thisDataExists
-      dsVprintf(options, 'loading file (%g/%g): %s\n',iFile,num_files,data_files{iFile});
+      dsVprintf(options, '  loading file (%g/%g): %s\n',iFile,num_files,data_files{iFile});
     else
-      dsVprintf(options, 'skipping missing file (%g/%g): %s\n',iFile,num_files,data_files{iFile});
+      dsVprintf(options, '    skipping missing file (%g/%g): %s\n',iFile,num_files,data_files{iFile});
       continue
     end
     
+    iLoadedFile = iLoadedFile + 1;
+    
     tmp_data = dsImport(data_files{iFile},keyvals{:});
     num_sets_per_file = length(tmp_data);
-    modifications = studyinfo.simulations(iFile).modifications;
+    modifications = studyinfo.simulations(iLoadedFile).modifications;
     
     if ~isfield(tmp_data,'varied') && ~isempty(modifications)
       % add varied info
@@ -240,8 +245,7 @@ if isstruct(srcS) && isfield(srcS,'study_dir')
     end
 
     % store this data
-    if iFile == 1
-      % TODO: fix this if skips first file
+    if iLoadedFile == 1
       total_num_sets = num_sets_per_file * num_files;
       set_indices=0:num_sets_per_file:total_num_sets-1;
 
@@ -265,6 +269,16 @@ if isstruct(srcS) && isfield(srcS,'study_dir')
       end
     end
   end % iFile = 1:num_files
+  
+  % remove missing entries
+    % TODO: fix if missing entries and num_sets_per_file > 1
+  if ~all(dataExist)
+    if num_sets_per_file == 1
+      data(~dataExist) = [];
+    else
+      warning('Missing entries not removed, first found data copied into them. This behavior will be changed in a future DynaSim release.')
+    end
+  end
 
   if ~exist('data', 'var')
     if options.as_cell
