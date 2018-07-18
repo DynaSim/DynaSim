@@ -278,7 +278,7 @@ end
 
 results = struct();
 for iFn = 1:nResultFn
-  thisFnName = fnNameInd{iFn,2};
+  thisFnName = fnNameInd{iFn,1};
   thisFnRexStr = sprintf('analysis%s_%s', fnNameInd{iFn,2}, fnNameInd{iFn,1});
   
   thisFnFiles = result_files(contains(result_files, thisFnRexStr));
