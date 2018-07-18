@@ -692,7 +692,8 @@ idx1 = find(cellfun(@ischar,paramCell));
 % which strings contain numeric values?
 idx2 = find(cellfun(@isempty,regexp(paramCell(idx1),'[a-z_A-Z]'))...
   | ~cellfun(@isempty,regexp(paramCell(idx1),'^\s*\[*\s*\+?inf\s*\]*\s*$','ignorecase'))... % inf
-  | ~cellfun(@isempty,regexp(paramCell(idx1),'^\s*(\d*\.?\d*e[\-\+]?\d+)\s*$','ignorecase'))... % scientific notation
+  | ~cellfun(@isempty,regexp(paramCell(idx1),'^\s*([\-\+]?\d*\.?\d*e[\-\+]?\d+)\s*$','ignorecase'))... % scientific notation
+  | ~cellfun(@isempty,regexp(paramCell(idx1),'^\s*([\-\+]?\s*\(?\s*[\-\+]?\s*\d*\.?\d*\s*\)?\s*\.?[\^\/\*\+\-]\s*\(?\s*[\-\+]?\s*\d*\.?\d*\)?\s*)\s*$','ignorecase'))... % math 1 operator
   );
 
 % convert those strings which contain numeric values
