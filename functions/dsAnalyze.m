@@ -226,6 +226,13 @@ if options.cluster_flag
     options.check_file_index_flag = 0;
     fprintf('Setting "options.check_file_index_flag=0" since "cluster_flag=1" \n');
   end
+  
+  % handle fn
+  if ~isempty(funcIn)
+    options.result_functions = funcIn;
+    
+    varargin(end+1:end+2) = {'result_functions', options.result_functions}; % pass result_functions to clus node
+  end
 end
 
 %% Parse options
