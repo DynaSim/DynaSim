@@ -270,6 +270,10 @@ if isstruct(srcS) && isfield(srcS,'study_dir')
     end
   end % iFile = 1:num_files
   
+  if ~any(dataExist)
+    error('No Data Found to analyze.')
+  end
+  
   % remove missing entries
     % TODO: fix if missing entries and num_sets_per_file > 1
   if ~all(dataExist)
