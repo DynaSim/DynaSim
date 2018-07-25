@@ -1,5 +1,5 @@
 function spec = dsCheckSpecification(specification, varargin)
-%CHECKSPECIFICATION - standardize specification structure and auto-populate missing fields
+%dsCheckSpecification - standardize specification structure and auto-populate missing fields
 %
 % Usage:
 %   specification=dsCheckSpecification(specification)
@@ -130,6 +130,7 @@ end
 group_id_pattern='^[a-z_A-Z][a-z_A-Z0-9\-\>\<\.\[\]]*(\(size=[\[\d,\]]+\))?:';
 if (ischar(specification) && ~isempty(find(regexp(specification,group_id_pattern)==1,1))) || ...
    (iscellstr(specification) && ~isempty(find(regexp(specification{1},group_id_pattern)==1,1)))
+  
   % Convert char and cellstr to single array of semicolon-delimited expressions (eqns)
   if iscell(specification)
     % convert cell array of equations into character array of strings
@@ -144,38 +145,51 @@ if (ischar(specification) && ~isempty(find(regexp(specification,group_id_pattern
   else
     eqns=specification;
   end
+  
   % Convert to cell array of expressions
   eqns_split=strtrim(regexp(eqns,';','split'));
+  
   % Check for group identifier at beginning of each expression
   group_start_inds=find(~cellfun(@isempty,regexp(eqns_split,group_id_pattern)));
+  
   % Initialize modular specification structure
   spec=[];
+  
   % Loop over groupings and add to specification structure
   for g=1:length(group_start_inds)
     this=eqns_split{group_start_inds(g)};
+    
     % Add grouping to spec structure
     if ~isempty(regexp(this,'^\w+.mech:','once'))
       % If Mechanism: 
       % format: NAME.mech: equations
+      
       % Extract name
       name=regexp(this,'^(\w+).mech:','tokens','once');
       name=name{1};
+      
       % Extract equations
       eq=strtrim(regexp(this,'^\w+.mech:(.+)','tokens','once'));
-      if ~isempty(eq), eq=[eq{1} ';']; end
+      if ~isempty(eq)
+        eq=[eq{1} ';'];
+      end
+      
       if g<length(group_start_inds)
         group_end=group_start_inds(g+1)-1;
       else
         group_end=length(eqns_split);
       end
+      
       for i=group_start_inds(g)+1:group_end
         eq=[eq eqns_split{i} ';'];
       end
+      
       if ~isfield(spec,'mechanisms')
         spec.mechanisms(1).name=name;
       else
         spec.mechanisms(end+1).name=name;
       end
+      
       spec.mechanisms(end).equations=eq;
     elseif ~isempty(regexp(this,'^\w+((->)|(<-))\w+:','once'))
       % If Connection:
@@ -189,31 +203,43 @@ if (ischar(specification) && ~isempty(find(regexp(specification,group_id_pattern
         source=regexp(this,'<-(\w+):','tokens','once'); source=source{1};
         target=regexp(this,'^(\w+)<-','tokens','once'); target=target{1};    
       end
+      
       % create new connection element
       if ~isfield(spec,'connections')
         spec.connections(1).direction=[source '->' target];
       else
         spec.connections(end+1).direction=[source '->' target];        
       end
+      
       % Combine all expressions in this group to check for reference to
-      % existing mechanism in this group.
+      %   existing mechanism in this group.
       if g<length(group_start_inds)
         group_end=group_start_inds(g+1)-1;
       else
         group_end=length(eqns_split);
       end
+      
       eq=strtrim(regexp(this,'[\w-<>]+:(.+)','tokens','once')); 
-      if ~isempty(eq), eq=[eq{1} ';']; end
+      
+      if ~isempty(eq)
+        eq=[eq{1} ';'];
+      end
+      
       for i=group_start_inds(g)+1:group_end
         eq=[eq eqns_split{i} ';'];
       end
+      
       % Check for reference to existing mechanism
       if ~isempty(regexp(eq,'{.*}','once'))
         % Parse string using existing mechanism
         this_eqns=regexp(eq,';','split');
         for i=1:length(this_eqns)
           this_eq=this_eqns{i};
-          if isempty(this_eq), continue; end
+          
+          if isempty(this_eq)
+            continue;
+          end
+          
           if ~isempty(regexp(this_eq,'{.*}','once'))
             % Extract mechanisms
             mechanisms=regexp(this_eq,'{(.*)}','tokens','once');
@@ -230,11 +256,13 @@ if (ischar(specification) && ~isempty(find(regexp(specification,group_id_pattern
             % Extract parameters
             key=regexp(this_eq,'(\w+)=','tokens','once'); key=key{1};
             val=regexp(this_eq,'=(.+)','tokens','once'); 
+            
             try % convert to numeric
               val=eval(val{1});
             catch
               val=val{1};
             end
+            
             if ~isfield(spec.connections,'parameters') || isempty(spec.connections(end).parameters)
               spec.connections(end).parameters={key,val};
             else
@@ -246,15 +274,19 @@ if (ischar(specification) && ~isempty(find(regexp(specification,group_id_pattern
         % Create new mechanism
         % Generate unique ID for this auto-created name
         id=num2str(g);
+        
         % Auto-create name for connection mechanism
         name=[source target id];
+        
         % Create new mechanism with extracted equations and auto-created name
         if ~isfield(spec,'mechanisms')
           spec.mechanisms(1).name=name;
         else
           spec.mechanisms(end+1).name=name;
         end
+        
         spec.mechanisms(end).equations=eq;
+        
         % Add connection mechanism to this connection element
         if ~isfield(spec.connections,'mechanism_list') || isempty(spec.connections(end).mechanism_list)
           spec.connections(end).mechanism_list={name};
@@ -270,6 +302,7 @@ if (ischar(specification) && ~isempty(find(regexp(specification,group_id_pattern
         name=regexp(this,'^(\w+):','tokens','once');
       end
       name=name{1};
+      
       % Extract size (default=1)
       sz=regexp(this,'^\w+\(size=([\[\d,\]]+)\):','tokens','once');
         % POP(size=[#,#]):
@@ -277,28 +310,37 @@ if (ischar(specification) && ~isempty(find(regexp(specification,group_id_pattern
         sz=regexp(this,'^\w+(\[[\d,]+\]):','tokens','once');
           % POP[#,#]:
       end
+      
       if isempty(sz)
         sz=1;
       else
         sz=eval(sz{1});
       end
+      
       % Extract equations
       eq=strtrim(regexp(this,'^[a-z_A-Z][a-z_A-Z0-9\-\>\<\.]*\(size=[\[\d,\]]+\):(.+)','tokens','once'));
       if isempty(eq)
         eq=strtrim(regexp(this,'^[a-z_A-Z][a-z_A-Z0-9\-\>\<\.]*\[[\d,]+\]:(.+)','tokens','once'));
       end
+      
       if isempty(eq)
         eq=strtrim(regexp(this,'^[a-z_A-Z][a-z_A-Z0-9\-\>\<\.]*:(.+)','tokens','once'));
       end
-      if ~isempty(eq), eq=[eq{1} ';']; end
+      
+      if ~isempty(eq)
+        eq=[eq{1} ';'];
+      end
+      
       if g<length(group_start_inds)
         group_end=group_start_inds(g+1)-1;
       else
         group_end=length(eqns_split);
       end
+      
       for i=group_start_inds(g)+1:group_end
         eq=[eq eqns_split{i} ';'];
       end
+      
       if ~isfield(spec,'populations')
         spec.populations(1).name=name;
       else
@@ -398,6 +440,7 @@ for i=1:length(spec.populations)
     elseif exist([eqn '.pop'],'file')
       eqn=[eqn '.pop'];
     end
+    
     if exist(eqn,'file')
       % load equations from file
       spec.populations(i).equations=dsReadText(eqn);
@@ -482,12 +525,14 @@ for i=1:length(spec.populations)
           tmp=regexp(LHSs{k},'d\w+\[([\d,]+)\]/dt','tokens','once');
         end
         sz=cellfun(@str2double,regexp(tmp{1},',','split'));
+        
         % check that all vars in same population have same size
         if k==1
           sz_first=sz;
         elseif sz~=sz_first
           error('all variables in same population must have same size. split ODEs with different sizes into different populations.');
-        end        
+        end
+        
         % remove size from ODE in population equations
         old=LHSs{k};
         new=strrep(LHSs{k},['[' tmp{1} ']'],'');
@@ -561,20 +606,24 @@ for i=1:length(spec.populations)
         end
       end
     end
+    
     % extract population-level parameters from equations
     param_name={};
     param_value={};
     eqn=spec.populations(i).equations;
     p=getfield(dsParseModelEquations(eqn, varargin{:}),'parameters');
+    
     if ~isempty(p)
       param_name=cat(1,param_name,fieldnames(p));
       param_value=cat(1,param_value,struct2cell(p));
     end
+    
     % extract mechanism-specific parameters defined in master equations
     % eg) eqn='dv/dt=@current+10; monitor iAMPA.functions; iNa.IC_noise=10; iK.g=g; g=3';
     o=regexp(eqn,';\s*[a-zA-Z]+\w*\.[a-zA-Z]+\w*\s*=[a-z_A-Z0-9\.]+','match'); 
       % eg) '; MECH.PARAM=VALUE', assumes param is not defined at start of equation string
-    % add mechanism-specific keys (MECH.PARAM) and vals to p
+    
+      % add mechanism-specific keys (MECH.PARAM) and vals to p
     if ~isempty(o)
       % remove leading semicolons
       oo=regexprep(o,';',''); % {'MECH1.PARAM1=VAL1','MECH2.PARAM2=VAL2',..}
@@ -586,7 +635,8 @@ for i=1:length(spec.populations)
         eqn=strrep(eqn,o{l},'');
       end
       spec.populations(i).equations=eqn;
-    end    
+    end
+    
     % move user-defined parameters from equations to the parameters field
 %     if ~isempty(p)
 %       param_name=fieldnames(p);
@@ -605,7 +655,8 @@ for i=1:length(spec.populations)
           spec.populations(i).parameters{end+1}=value;
         end
       end
-    end    
+    end
+    
     % TODO: remove support for MECH.PARAM from dsParseModelEquations,
     % because that returns MECH_PARAM, whereas we now support MECH.PARAM.
     
@@ -661,6 +712,7 @@ for i=1:length(spec.populations)
       end
     end
   end
+  
   % expand mechanism list if any element is itself a list of mechanisms (eg, {'iCa','{CaBuffer,iCan}'} or '{CaBuffer,iCan}')
   spec.populations(i).mechanism_list=expand_list(spec.populations(i).mechanism_list, varargin{:});
 end
@@ -688,6 +740,7 @@ if ~isempty(spec.connections)
     spec.connections(1).parameters={};
   end
 end
+
 for i=1:length(spec.connections)
   if isempty(spec.connections(i).source) && length(spec.populations)==1
     spec.connections(i).source=spec.populations(1).name;
@@ -753,6 +806,7 @@ for f=1:length(files)
     spec.mechanisms(end).equations=read_mechanism_file(files{f});
   end
 end
+
 % make sure equations are all in a single string
 for m=1:length(spec.mechanisms)
   if iscellstr(spec.mechanisms(m).equations)
@@ -781,12 +835,15 @@ if ~isempty(files)
     fnames{f}=name;
   end
 end
+
 if ~isempty(spec.mechanisms)
   mnames={spec.mechanisms.name};
 else
   mnames={};
 end
+
 fields={'populations','connections'};
+
 % update population and connection mechanism lists
 for f=1:length(fields)
   object=fields{f};
@@ -801,14 +858,17 @@ for f=1:length(fields)
         index=find(ismember(fnames,mech),1,'first');
         spec.(object)(i).mechanism_list{j}=files{index};
       end
+      
       if ismember('@',mech) % remove linker alias
         mech=regexp(mech,'@','split');
         mech=mech{1};
       end
+      
       if isfield(spec.(object),'mechanisms') && ~isempty(spec.(object)(i).mechanisms) && ismember(mech,{spec.(object)(i).mechanisms.name})
         % mechanism already defined for this population, nothing else to do
         continue;
       end
+      
       if ismember(mech,mnames)
         % store mechanism equations in object-level specification
         index=find(ismember(mnames,mech),1,'first');

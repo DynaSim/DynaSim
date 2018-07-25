@@ -99,7 +99,7 @@ end
 
 % check if input is string or cell with equations or spec struct and convert to model structure
 if ischar(model) || iscell(model) || ~isfield(model,'state_variables')
-  model=dsGenerateModel(model);
+  model = dsGenerateModel(model);
 end
 
 % check back compatibility

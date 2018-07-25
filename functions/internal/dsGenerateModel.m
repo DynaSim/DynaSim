@@ -207,16 +207,16 @@ linker_pops={}; % list of populations associated with mechanism linkers
 for i=1:npops
   % does the population model already exist?
   if ~isempty(specification.populations(i).model)
-    tmpmodel=specification.populations(i).model; % get model structure
-    tmpname=tmpmodel.specification.populations.name; % assumes one population sub-model
+    tmpmodel = specification.populations(i).model; % get model structure
+    tmpname = tmpmodel.specification.populations.name; % assumes one population sub-model
 
     % adjust the name if necessary
     if ~strcmp(specification.populations(i).name,tmpname)
       % use the name in the specification
-      tmpmodel=dsApplyModifications(tmpmodel,{tmpname,'name',specification.populations(i).name}, varargin{:});
+      tmpmodel = dsApplyModifications(tmpmodel,{tmpname,'name',specification.populations(i).name}, varargin{:});
     elseif strcmp(tmpname,'pop1') % if default name
       % use default name for this population index
-      tmpmodel=dsApplyModifications(tmpmodel,{tmpname,'name',sprintf('pop%g',i)}, varargin{:});
+      tmpmodel = dsApplyModifications(tmpmodel,{tmpname,'name',sprintf('pop%g',i)}, varargin{:});
     end
 
     tmpmodel.linkers=[]; % remove old linkers from original model construction
@@ -247,11 +247,11 @@ for i=1:npops
 
   % 1.1.2 parse population mechanisms
   for j=1:nmechs
-    mechanism_=specification.populations(i).mechanism_list{j};
+    mechanism_ = specification.populations(i).mechanism_list{j};
 
     % support separation of linker names in pop equations vs mechanisms
-    mechanism_=regexp(mechanism_,'@','split');
-    mechanism=mechanism_{1};
+    mechanism_ = regexp(mechanism_,'@','split');
+    mechanism = mechanism_{1};
 
     if numel(mechanism_)>1
       new_linker=mechanism_{2};
@@ -263,23 +263,23 @@ for i=1:npops
     [~,MechID]=fileparts2(mechanism);
     if any(MechID==':')
       % exclude host name from namespace
-      tmp=regexp(MechID,':','split');
-      MechScope=[specification.populations(i).name '_' tmp{2}];
+      tmp = regexp(MechID,':','split');
+      MechScope = [specification.populations(i).name '_' tmp{2}];
     else
       % extract mechanism file name without path
-      MechScope=[specification.populations(i).name '_' MechID];
+      MechScope = [specification.populations(i).name '_' MechID];
     end
     
     % use mechanism equations in specification if present
     if isfield(specification.populations,'mechanisms') && ~isempty(specification.populations(i).mechanisms)
       if ismember(MechID,{specification.populations(i).mechanisms.name})
-        idx=ismember({specification.populations(i).mechanisms.name},MechID);
-        mechanism=specification.populations(i).mechanisms(idx).equations;
+        idx = ismember({specification.populations(i).mechanisms.name}, MechID);
+        mechanism = specification.populations(i).mechanisms(idx).equations;
       end
       
       % parse mechanism equations
       if ~isempty(mechanism)
-        [tmpmodel,tmpmap]=dsImportModel(mechanism,'namespace',MechScope,'ic_pop',specification.populations(i).name,'user_parameters',parameters);
+        [tmpmodel,tmpmap] = dsImportModel(mechanism,'namespace',MechScope,'ic_pop',specification.populations(i).name,'user_parameters',parameters);
         
         % replace 1st linker name by the one in specification
         if ~isempty(new_linker) && ~isempty(tmpmodel.linkers)
@@ -298,9 +298,9 @@ for i=1:npops
         end
         
         % combine sub-model with other sub-models
-        model=dsCombineModels(model,tmpmodel, varargin{:});
-        name_map=cat(1,name_map,tmpmap);
-        linker_pops=cat(2,linker_pops,repmat({specification.populations(i).name},[1 length(tmpmodel.linkers)]));
+        model = dsCombineModels(model,tmpmodel, varargin{:});
+        name_map = cat(1,name_map,tmpmap);
+        linker_pops = cat(2,linker_pops,repmat({specification.populations(i).name},[1 length(tmpmodel.linkers)]));
       end
     end
   end
@@ -433,91 +433,10 @@ if ~isempty(model.monitors)
   end
 end
 
-  % ----------------------------------
-  % NESTED FUNCTIONS
-  % ----------------------------------
-  function add_keywords(src,dst,namespace)
-    % NOTE: this needs to be coordinated with update_keywords() in dsSimulate()
-    %   for parameters
-    Nsrc=[src '_Npop'];
-    Ndst=[dst '_Npop'];
-
-    old={'Npre','N[1]','N_pre','Npost','N_post','N[0]','Npop','N_pop','tspike_pre','tspike_post','tspike'};
-    new={Nsrc,Nsrc,Nsrc,Ndst,Ndst,Ndst,Ndst,Ndst,[src '_tspike'],[dst '_tspike'],[dst '_tspike']};
-    for p=1:length(old)
-      name_map(end+1,:)={old{p},new{p},namespace,'parameters'};
-    end
-
-    % for state variables
-    new={};
-    old={};
-    src_excluded=~cellfun(@isempty,regexp(name_map(:,1),['pre' '$']));
-    dst_excluded=~cellfun(@isempty,regexp(name_map(:,1),['post' '$']));
-    excluded=src_excluded|dst_excluded;
-
-    PopScope=[src '_'];
-    var_idx=strcmp(PopScope,name_map(:,3)) & strcmp('state_variables',name_map(:,4)) & ~excluded;
-    if any(var_idx)
-      Xsrc_old_vars=name_map(var_idx,1);
-      Xsrc_new_vars=name_map(var_idx,2);
-      % default for IN is first Xsrc state var
-      Xsrc=Xsrc_new_vars{1};
-      old=cat(2,old,{'IN','Xpre','X_pre'});
-      new=cat(2,new,{Xsrc,Xsrc,Xsrc});
-    else
-      Xsrc_old_vars=[];
-      Xsrc_new_vars=[];
-      Xsrc=[];
-    end
-
-    PopScope=[dst '_'];
-    var_idx=strcmp(PopScope,name_map(:,3)) & strcmp('state_variables',name_map(:,4)) & ~excluded;
-    if any(var_idx)
-      Xdst_old_vars=name_map(var_idx,1);
-      Xdst_new_vars=name_map(var_idx,2);
-      % default for OUT and X is first Xdst state var
-      Xdst=Xdst_new_vars{1};
-      old=cat(2,old,{'OUT','X','Xpost','X_post'});
-      new=cat(2,new,{Xdst,Xdst,Xdst,Xdst});
-    else
-      Xdst_old_vars=[];
-      Xdst_new_vars=[];
-      Xdst=[];
-    end
-
-    % add variants [var_pre,var_post,varpre,varpost]
-    if ~isempty(Xsrc_old_vars)
-      [Xsrc_old_vars,IA]=setdiff(Xsrc_old_vars,old);
-      Xsrc_new_vars=Xsrc_new_vars(IA);
-    end
-
-    if ~isempty(Xdst_old_vars)
-      [Xdst_old_vars,IA]=setdiff(Xdst_old_vars,old);
-      Xdst_new_vars=Xdst_new_vars(IA);
-    end
-
-    for p=1:length(Xsrc_old_vars)
-      old{end+1}=[Xsrc_old_vars{p} '_pre'];
-      new{end+1}=Xsrc_new_vars{p};
-      old{end+1}=[Xsrc_old_vars{p} 'pre'];
-      new{end+1}=Xsrc_new_vars{p};
-    end
-
-    for p=1:length(Xdst_old_vars)
-      old{end+1}=[Xdst_old_vars{p} '_post'];
-      new{end+1}=Xdst_new_vars{p};
-      old{end+1}=[Xdst_old_vars{p} 'post'];
-      new{end+1}=Xdst_new_vars{p};
-    end
-
-    for p=1:length(old)
-      name_map(end+1,:)={old{p},new{p},namespace,'state_variables'};
-    end
-  end
 
 %% 2.0 propagate namespaces through variable and function names
 %      i.e., to establish uniqueness of names by adding namespace/namespace prefixes)
-model.specification=specification;
+model.specification = specification;
 model = dsPropagateNamespaces(model,name_map, varargin{:});
 
 %% 3.0 expand population equations according to mechanism linkers
@@ -534,12 +453,14 @@ all_conditionals_targets={};
 
 % add variables to linked expression if its a function without ()
 if ~isempty(model.functions) && ~isempty(model.linkers)
-  function_names=fieldnames(model.functions);
-  expressions={model.linkers.expression};
-  [~,I,J]=intersect(function_names,expressions);
+  function_names = fieldnames(model.functions);
+  expressions = {model.linkers.expression};
+  [~,I,J] = intersect(function_names,expressions);
+  
   for i=1:length(I)
-    e=model.functions.(function_names{I(i)}); % function expression (eg,'@(x,y,z)x-(y-z)')
-    v=regexp(e,'@(\([\w,]+\))','tokens','once'); % function input list (eg, '(x,y,z)')
+    e = model.functions.(function_names{I(i)}); % function expression (eg,'@(x,y,z)x-(y-z)')
+    v = regexp(e,'@(\([\w,]+\))','tokens','once'); % function input list (eg, '(x,y,z)')
+    
     if ~isempty(v)
       model.linkers(J(i)).expression=[model.linkers(J(i)).expression v{1}];
     end
@@ -547,11 +468,13 @@ if ~isempty(model.functions) && ~isempty(model.linkers)
 end
 
 % loop over linkers
-for i=1:length(model.linkers)
+for i = 1:length(model.linkers)
   % determine how to link
-  operation=model.linkers(i).operation;
-  oldstr=model.linkers(i).target;
-  newstr=model.linkers(i).expression;
+  operation = model.linkers(i).operation;
+  
+  oldstr = model.linkers(i).target;
+  newstr = model.linkers(i).expression;
+  
   switch operation % see dsClassifyEquation and dsParseModelEquations   % ('((\+=)|(-=)|(\*=)|(/=)|(=>))')
     case '+='
       operator='+';
@@ -564,45 +487,47 @@ for i=1:length(model.linkers)
     otherwise
       operator='+';
   end
+  
   % determine what to link (ie, link across everything belonging to the linker population)
   % explicitly constrain to linker population
-  expressions_in_pop=~cellfun(@isempty,regexp(name_map(:,3),['^' linker_pops{i} '_']));
+  expressions_in_pop = ~cellfun(@isempty,regexp(name_map(:,3),['^' linker_pops{i} '_']));
 
   if ~isempty(model.conditionals)
-    conditionals_in_pop=~cellfun(@isempty,regexp({model.conditionals.namespace},['^' linker_pops{i}]));
+    conditionals_in_pop = ~cellfun(@isempty,regexp({model.conditionals.namespace},['^' linker_pops{i}]));
   end
 
   if ~isempty(model.linkers)
-    linkers_in_pop=~cellfun(@isempty,regexp({model.linkers.namespace},['^' linker_pops{i}]));
+    linkers_in_pop = ~cellfun(@isempty,regexp({model.linkers.namespace},['^' linker_pops{i}]));
   end
 
   % constrain to namespace
-  names_in_namespace=cellfun(@(x,y)strncmp(y,x,length(y)),name_map(:,2),name_map(:,3));
+  names_in_namespace = cellfun(@(x,y)strncmp(y,x,length(y)),name_map(:,2),name_map(:,3));
 
   % get list of (functions,monitors,ODEs) belonging to the linker population
-  eqn_types={'ODEs','monitors','functions'};%{'monitors','ODEs'};
-  search_types={'state_variables','monitors','functions'};%{'monitors','state_variables'};
+  eqn_types = {'ODEs','monitors','functions'};%{'monitors','ODEs'};
+  search_types = {'state_variables','monitors','functions'};%{'monitors','state_variables'};
 
-  % indices to expressions in the linker population with the correct search_types and namespace
-  inds=find(expressions_in_pop&names_in_namespace&ismember(name_map(:,4),search_types));
+  % indices to expressions in the linker population with the correct
+  %  search_types and namespace (ie all potential locations for linker to be)
+  inds = find(expressions_in_pop & names_in_namespace & ismember(name_map(:,4),search_types));
 
   % eliminate duplicates (e.g., state_variables replacing OUT and X)
-  [jnk,ia,ib]=unique_wrapper(name_map(inds,2),'stable');
-  inds=inds(ia);
-  all_expression_inds=[all_expression_inds inds'];
-  all_expression_targets=cat(2,all_expression_targets,repmat({oldstr},[1 length(inds)]));
+  [~,ia] = unique_wrapper(name_map(inds,2),'stable');
+  inds = inds(ia);
+  all_expression_inds = [all_expression_inds inds'];
+  all_expression_targets = cat(2,all_expression_targets,repmat({oldstr},[1 length(inds)]));
 
-  % substitute link
-  for j=1:length(inds)
-    name=name_map{inds(j),2}; % name of variable as stored in model structure
-    type=name_map{inds(j),4}; % search_types
+  % check for and substitute link
+  for j = 1:length(inds)
+    name = name_map{inds(j),2}; % name of variable as stored in model structure
+    type = name_map{inds(j),4}; % search_types
     eqn_type=eqn_types{strcmp(type,search_types)}; % corresponding equation type
 
     % update expression with the current link
-    if isfield(model.(eqn_type),name)
+    if isfield(model.(eqn_type), name)
       % note: name will not be a field of eqn_type for special monitors
       % (e.g., monitor functions)
-      model.(eqn_type).(name)=linker_strrep(model.(eqn_type).(name),oldstr,newstr,operator);
+      model.(eqn_type).(name) = linker_strrep(model.(eqn_type).(name), oldstr, newstr, operator);
     end
   end
 
@@ -631,16 +556,20 @@ for i=1:length(model.linkers)
   end
 end
 
+% remove target placeholders from expressions
 if options.open_link_flag==0
-  % remove target placeholders from expressions and conditionals
   for i=1:length(all_expression_inds)
     oldstr=all_expression_targets{i};
     newstr='';
-    name=name_map{all_expression_inds(i),2};
-    type=name_map{all_expression_inds(i),4};
+    
+    name = name_map{all_expression_inds(i),2};
+    type = name_map{all_expression_inds(i),4};
+    
     eqn_type=eqn_types{strcmp(type,search_types)};
+    
     pattern = ['\)\.?[-\+\*/]' oldstr '\)']; % pattern accounts for all possible newstr defined for linking
     replace = [newstr '))'];
+    
     if isfield(model.(eqn_type),name) && ischar(model.(eqn_type).(name))
         % NOTE: name will not be a field of eqn_type for special monitors
         % (e.g., monitor functions)
@@ -649,12 +578,14 @@ if options.open_link_flag==0
   end
 end
 
+% remove target placeholders from conditionals
 if ~isempty(model.conditionals)
   for i=1:length(all_conditionals_inds)
     oldstr=all_conditionals_targets{i};
     newstr='';
     pattern = ['\)\.?[-\+\*/]' oldstr '\)']; % pattern accounts for all possible newstr defined for linking
     replace = [newstr '))'];
+    
     for field_index=1:length(fields)
       field=fields{field_index};
       if model.conditionals(all_conditionals_inds(i)).(field)
@@ -715,11 +646,98 @@ if options.auto_gen_test_data_flag
   dsUnitSaveAutoGenTestData(argin, argout);
 end
 
+
+
+
+% ----------------------------------
+% NESTED FUNCTIONS
+% ----------------------------------
+  function add_keywords(src,dst,namespace)
+    % NOTE: this needs to be coordinated with update_keywords() in dsSimulate()
+    %   for parameters
+    Nsrc=[src '_Npop'];
+    Ndst=[dst '_Npop'];
+    
+    old={'Npre','N[1]','N_pre','Npost','N_post','N[0]','Npop','N_pop','tspike_pre','tspike_post','tspike'};
+    new={Nsrc,Nsrc,Nsrc,Ndst,Ndst,Ndst,Ndst,Ndst,[src '_tspike'],[dst '_tspike'],[dst '_tspike']};
+    for p=1:length(old)
+      name_map(end+1,:)={old{p},new{p},namespace,'parameters'};
+    end
+    
+    % for state variables
+    new={};
+    old={};
+    src_excluded=~cellfun(@isempty,regexp(name_map(:,1),['pre' '$']));
+    dst_excluded=~cellfun(@isempty,regexp(name_map(:,1),['post' '$']));
+    excluded=src_excluded|dst_excluded;
+    
+    PopScope=[src '_'];
+    var_idx=strcmp(PopScope,name_map(:,3)) & strcmp('state_variables',name_map(:,4)) & ~excluded;
+    if any(var_idx)
+      Xsrc_old_vars=name_map(var_idx,1);
+      Xsrc_new_vars=name_map(var_idx,2);
+      % default for IN is first Xsrc state var
+      Xsrc=Xsrc_new_vars{1};
+      old=cat(2,old,{'IN','Xpre','X_pre'});
+      new=cat(2,new,{Xsrc,Xsrc,Xsrc});
+    else
+      Xsrc_old_vars=[];
+      Xsrc_new_vars=[];
+      Xsrc=[];
+    end
+    
+    PopScope=[dst '_'];
+    var_idx=strcmp(PopScope,name_map(:,3)) & strcmp('state_variables',name_map(:,4)) & ~excluded;
+    if any(var_idx)
+      Xdst_old_vars=name_map(var_idx,1);
+      Xdst_new_vars=name_map(var_idx,2);
+      % default for OUT and X is first Xdst state var
+      Xdst=Xdst_new_vars{1};
+      old=cat(2,old,{'OUT','X','Xpost','X_post'});
+      new=cat(2,new,{Xdst,Xdst,Xdst,Xdst});
+    else
+      Xdst_old_vars=[];
+      Xdst_new_vars=[];
+      Xdst=[];
+    end
+    
+    % add variants [var_pre,var_post,varpre,varpost]
+    if ~isempty(Xsrc_old_vars)
+      [Xsrc_old_vars,IA]=setdiff(Xsrc_old_vars,old);
+      Xsrc_new_vars=Xsrc_new_vars(IA);
+    end
+    
+    if ~isempty(Xdst_old_vars)
+      [Xdst_old_vars,IA]=setdiff(Xdst_old_vars,old);
+      Xdst_new_vars=Xdst_new_vars(IA);
+    end
+    
+    for p=1:length(Xsrc_old_vars)
+      old{end+1}=[Xsrc_old_vars{p} '_pre'];
+      new{end+1}=Xsrc_new_vars{p};
+      old{end+1}=[Xsrc_old_vars{p} 'pre'];
+      new{end+1}=Xsrc_new_vars{p};
+    end
+    
+    for p=1:length(Xdst_old_vars)
+      old{end+1}=[Xdst_old_vars{p} '_post'];
+      new{end+1}=Xdst_new_vars{p};
+      old{end+1}=[Xdst_old_vars{p} 'post'];
+      new{end+1}=Xdst_new_vars{p};
+    end
+    
+    for p=1:length(old)
+      name_map(end+1,:)={old{p},new{p},namespace,'state_variables'};
+    end
+  end
+
 end % main function
 
 
+
+
 %% SUBFUNCTIONS
-function str=linker_strrep(str,oldstr,newstr,operator)
+function str = linker_strrep(str,oldstr,newstr,operator)
   if isempty(str)
     return;
   end

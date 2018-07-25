@@ -644,7 +644,7 @@ end
     else
       fprintf(fjob,'\t\tstudyinfoFile = load(fullfile(''%s'',''studyinfo.mat''),''studyinfo'');\n',batch_dir);
     end
-    fprintf(fjob, 'studyinfo = studyinfoFile.studyinfo;\n');
+    fprintf(fjob, '\t\tstudyinfo = studyinfoFile.studyinfo;\n');
 
     % compare paths between compute machine and studyinfo startup
     fprintf(fjob,'\t\t[valid,message]=dsCheckHostPaths(studyinfo);\n');

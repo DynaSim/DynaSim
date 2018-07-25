@@ -1,8 +1,8 @@
 function model = dsPropagateFunctions(model, varargin)
-%PROPAGATEFUNCTIONS - eliminate internal function calls from model ODEs, ICs, monitors, and conditionals.
+%dsPropagateFunctions - eliminate internal function calls from model ODEs, ICs, monitors, and conditionals.
 %
 % Usage:
-%   model = SubstituteFunctions(model)
+%   model = dsPropagateFunctions(model)
 %
 % Input: DynaSim model structure
 %
@@ -128,9 +128,11 @@ function [expression,functions_were_found] = insert_functions(expression,functio
   end
 
   functions_were_found=0;
+  
   % get list of functions called by this target function
   words=unique(regexp(expression,'[a-zA-Z]+\w*','match'));
   found_functions=words(ismember(words,fieldnames(functions)));
+  
   if ~isempty(found_functions)
     functions_were_found=1;
     % substitute those found into this target functions
@@ -165,10 +167,10 @@ function [expression,functions_were_found] = insert_functions(expression,functio
       end
 
       % add escape character to regexp special characters
-      new_var_list{1}=regexprep(substr(lb(1)+1:R-1),'([\(\)\+\*\.\^])','\\$1');
+      new_var_list{1} = regexprep(substr(lb(1)+1:R-1),'([\(\)\+\*\.\^])','\\$1');
 
       % split variables on comma
-      new_vars=regexp(new_var_list{1},',','split');
+      new_vars = regexp(new_var_list{1},',','split');
 
       % found expression without the input variable list
       found_expression=regexp(found_expression,'^@\([^\)]+\)(.+)','tokens','once');

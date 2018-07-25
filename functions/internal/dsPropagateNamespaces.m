@@ -89,7 +89,7 @@ end
 target_types={'fixed_variables','functions','monitors','ODEs','ICs'};
 
 % loop over types of model data
-for type_index=1:length(target_types)
+for type_index = 1:length(target_types)
   type=target_types{type_index};%'fixed_variables';
   % info for this type
   s=model.(type);
