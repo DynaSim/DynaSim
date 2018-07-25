@@ -217,7 +217,7 @@ if options.save_parameters_flag
     end
 
     % Assign value vectors to params
-    for iParam = 1:nParamMods      
+    for iParam = 1:nParamMods
       p.(mod_params{iParam}) = param_values(iParam,:);
     end
   end % one_solve_file_flag

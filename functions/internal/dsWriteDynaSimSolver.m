@@ -221,7 +221,7 @@ if options.save_parameters_flag
     end
 
     % Assign value vectors to params
-    for iParam = 1:nParamMods      
+    for iParam = 1:nParamMods
       p.(mod_params{iParam}) = param_values(iParam,:);
     end
   end % one_solve_file_flag
@@ -570,7 +570,7 @@ if ~isempty(model.monitors)
             spike_buffer_size=eval(part2);
             % TODO: edit dsParseModelEquations to support (*,param)
           end
-        end          
+        end
       end
 
       % approach: add conditional check for upward threshold crossing
@@ -623,7 +623,7 @@ if ~isempty(model.monitors)
 
     elseif isempty(monitor_expression{i}) && isfield(model.functions,monitor_names{i}) % empty monitor RHS with LHS=function
       % set expression if monitoring function referenced by name
-      % Dev NOTE: this should no longer be triggered since has been added to dsParseModelEquations
+        % Dev NOTE: this should no longer be triggered since has been added to dsParseModelEquations
       tmp = regexp(model.functions.(monitor_names{i}),'@\([a-zA-Z][\w,]*\)\s*(.*)','tokens','once');
       monitor_expression{i} = tmp{1};
       model.monitors.(monitor_names{i}) = tmp{1};

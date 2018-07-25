@@ -182,6 +182,7 @@ for index=1:length(text) % loop over lines of text
     if ~isempty(comment)
       model.comments{end+1}=comment;
     end
+    
     continue;
   end
   
@@ -189,15 +190,21 @@ for index=1:length(text) % loop over lines of text
     case 'parameter'        % var=(string or number)
       rhs=regexp(line,'=(.+)$','tokens','once');
       lhs=regexp(line,'^([\w\.]+)\s*=','tokens','once');
+      
       lhs{1}=strrep(lhs{1},'.','_'); % e.g., Na.g --> Na_g
+      
       name=strtrim(lhs{1}); expression=rhs{1};
+      
       model.parameters(1).([namespace name]) = expression;
+      
       name_map(end+1,:) = {name,[namespace name],namespace,'parameters'};
+      
       if ~isempty(comment)
         model.comments{end+1}=sprintf('%s (parameter): %s',[namespace name],comment);
       end
     case 'fixed_variable'   % var=(expression with grouping or arithmetic), var(#), var([#]), var([# #]), var([#,#]), var(#:#), var(#:end), var([#:#]), var([#:end])
       lhs=regexp(line,'^(\w+)\s*=','tokens','once');
+      
       if ~isempty(lhs)
         rhs=regexp(line,'=(.+)$','tokens','once');
         name=strtrim(lhs{1}); expression=rhs{1};
@@ -239,7 +246,7 @@ for index=1:length(text) % loop over lines of text
         var=regexp(line,'^(\w+)''\s*=','tokens','once'); % x from x'=
       end
       rhs=regexp(line,'=(.+)$','tokens','once');
-      state_variable=strtrim(var{1}); expression=rhs{1};
+      state_variable = strtrim(var{1}); expression=rhs{1};
       model.ODEs(1).([namespace state_variable])=expression;
       if ~ismember([namespace state_variable],model.state_variables)
         name_map(end+1,:) = {state_variable,[namespace state_variable],namespace,'state_variables'};
@@ -279,7 +286,7 @@ for index=1:length(text) % loop over lines of text
           end
         end
         lines=tmp;
-      end      
+      end
       
       % loop over monitors in list
       for l=1:length(lines)
@@ -287,26 +294,28 @@ for index=1:length(text) % loop over lines of text
         line=lines{l};
         
         % split left and right parts of monitor
-        lhs=regexp(line,'^monitor ([\w,@\s\.]+)','tokens','once');
+        lhs=regexp(line,'^monitor\s*([\w,@\s\.]+)','tokens','once');
         if isempty(lhs)
           lhs=regexp(line,'([\w,@\s\.]+)','tokens','once');
         end
         rhs=regexp(line,'=(.+)$','tokens','once');
         
         % expand list of monitor names (e.g., monitor iNa.I, iK.I)
-        names=strtrim(regexp(lhs{1},',','split'));
+        names = strtrim(regexp(lhs{1},',','split'));
         for i=1:length(names) % loop over list of monitors on this line
-          name=names{i};
+          name = names{i};
           % process special monitors (those including '.', e.g., v.spikes(0))
-          % todo: clean up or generalize this procedure...
+          % TODO: clean up or generalize this procedure...
           if any(name=='.')
             % check for numeric monitor argument
             arg=regexp(line,[name '\(([-+]*\w+)\)'],'tokens','once');
+            
             % set argument as expression (see dsWriteDynaSimSolver() for usage as such)
             if ~isempty(arg)
               rhs=arg;
             else
               arg=regexp(line,[name '\(([-+\w,]+)\)'],'tokens','once');
+              
               if ~isempty(arg)
                 rhs={['(' arg{1} ')']};
               end
@@ -314,15 +323,26 @@ for index=1:length(text) % loop over lines of text
           end
           
           % convert into valid monitor name
-          name=strrep(name,'.','_'); % index sub-namespace (monitor Na.I)
+          name = strrep(name,'.','_'); % index sub-namespace (monitor Na.I)
+          scopeName = [namespace name];
           
-          if ~isempty(rhs), expression=rhs{1}; else expression=[]; end
+          % determine expression (ie rhs)
+          if ~isempty(rhs)
+            expression = rhs{1};
+          elseif isempty(rhs) && isfield(model.functions,scopeName) % empty monitor RHS with LHS=function
+            % set expression if monitoring function referenced by name
+            rhs = regexp(model.functions.(scopeName),'@\([a-zA-Z][\w,]*\)\s*(.*)','tokens','once');
+            expression = rhs{1};
+          else
+            expression=[];
+          end
           
-          model.monitors(1).([namespace name]) = expression;
-          name_map(end+1,:) = {name,[namespace name],namespace,'monitors'};
+          % store monitor
+          model.monitors(1).(scopeName) = expression;
+          name_map(end+1,:) = {name, scopeName, namespace, 'monitors'};
           
           if ~isempty(comment)
-            model.comments{end+1}=sprintf('%s (monitor): %s',[namespace name],comment);
+            model.comments{end+1}=sprintf('%s (monitor): %s', scopeName,comment);
           end
         end
       
