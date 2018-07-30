@@ -10,9 +10,10 @@ prob_cxn = [1]
 
 % fixed variables
 netcon = rand(N_pre,N_post)<=prob_cxn
+scaleFactor = sum(netcon);
 
 % functions
-IGABAa(X,s) = -gGABAa/N_pre.*(s*netcon).*(X-EGABAa)
+IGABAa(X,s) = -gGABAa./scaleFactor.*(s*netcon).*(X-EGABAa)
  
 % ODEs and ICs
 s' = -s./tauD + ((1-s)/tauR).*(1+tanh(X_pre/10))
@@ -22,4 +23,3 @@ monitor functions % always record the synaptic current
  
 % linkers
 @current += IGABAa(X_post,s)
-

@@ -46,11 +46,12 @@ IC_noise = 0
 % Connectivity
 % 'ones' so all-to-all connectivity
 netcon = ones(N_pre,N_post)
+scaleFactor = sum(netcon);
 
 % Functions
-% Note that because of `gGABAb/N_pre`, the total current to the target is scaled
+% Note that because of `gGABAb./sum(netcon)`, the total current to the target is scaled
 %   down by the number of source cells.
-IGABAb(X,g) = gGABAb/N_pre.*((g.^4./(g.^4 + 100))*netcon).*(X-EGABAb)
+IGABAb(X,g) = gGABAb./scaleFactor.*((g.^4./(g.^4 + 100))*netcon).*(X-EGABAb)
 
 % This way we record the synaptic currents!
 monitor functions
