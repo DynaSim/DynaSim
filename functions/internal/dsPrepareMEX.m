@@ -57,6 +57,8 @@ if ~exist(mexfileOutput,'file')
   
   makeMex(mfileInput, options); % mex-file solver for solve file
   
+  madeNewMexBool = true;
+  
   if options.verbose_flag
     fprintf('\tMEX generation complete!\n\tElapsed time: %g seconds.\n',toc(compile_start_time));
     %toc;
@@ -70,6 +72,7 @@ if ~exist(mexfileOutput,'file')
     rmdir(codemex_dir,'s');
   end
 else % mex file exists
+  madeNewMexBool = false;
   if options.verbose_flag
     fprintf('Using previous compiled file: %s\n',mexfileOutput);
   end
@@ -80,7 +83,7 @@ if ~isempty(mex_dir) && ~options.cluster_flag && options.mex_dir_flag
   [~,solvefile] = fileparts2(mfileInput);
   [~,mexfile] = fileparts2(mexfileOutput);
   
-  if isempty(dir(fullfile(mex_dir,[solvefile '.m'])))
+  if isempty(dir(fullfile(mex_dir,[solvefile '.m']))) || madeNewMexBool
     if options.verbose_flag
       fprintf('Solve file %s does not yet exist in mex_dir %s. Copying... \n',solvefile,mex_dir);
     end
@@ -88,7 +91,7 @@ if ~isempty(mex_dir) && ~options.cluster_flag && options.mex_dir_flag
     copyfile(mfileInput,mex_dir);
   end
   
-  if isempty(dir(fullfile(mex_dir,[mexfile '*'])))
+  if isempty(dir(fullfile(mex_dir,[mexfile '*']))) || madeNewMexBool
     if options.verbose_flag
       fprintf('Mex file %s does not yet exist in mex_dir %s. Copying... \n',mexfile,mex_dir);
     end
