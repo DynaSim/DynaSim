@@ -1069,8 +1069,8 @@ end % in_parfor_loop_flag
           else % output data already in a structure
             % save metadata file
             metadata_file = fullfile(fpath,'metadata.mat');
-            dsVprintf(options, 'Saving model metadata file: %s\n',metadata_file);
             createMetadata(metadata_file);
+            dsVprintf(options, 'Saved model metadata: %s\n',metadata_file);
 
             if ~options.one_solve_file_flag
               tmpdata = feval(fname);
