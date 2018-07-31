@@ -87,6 +87,7 @@ options=dsCheckOptions(varargin,{...
   'verbose_flag',1,{0,1},...
   'sparse_flag',0,{0,1},...
   'one_solve_file_flag',0,{0,1},... % use only 1 solve file of each type, but can't vary mechs yet
+  'independent_solve_file_flag',0,{0,1},... % solve file makes DS data structure without dsSimulate call
   'benchmark_flag',0,{0,1},...
   },false);
 model=dsCheckModel(model, varargin{:});
@@ -238,25 +239,29 @@ else
 end
 
 % 1.2 prepare list of outputs (state variables and monitors)
-tmp=cellfun(@(x)[x ','],model.state_variables,'uni',0);
-tmp=[tmp{:}];
-output_string=tmp(1:end-1);
-
-if ~isempty(model.monitors)
-  tmp=cellfun(@(x)[x ','],fieldnames(model.monitors),'uni',0);
+if ~options.independent_solve_file_flag
+  tmp=cellfun(@(x)[x ','],model.state_variables,'uni',0);
   tmp=[tmp{:}];
-  output_string=[output_string ',' tmp(1:end-1)];
+  output_string=tmp(1:end-1);
+  
+  if ~isempty(model.monitors)
+    tmp=cellfun(@(x)[x ','],fieldnames(model.monitors),'uni',0);
+    tmp=[tmp{:}];
+    output_string=[output_string ',' tmp(1:end-1)];
+  end
+  
+  if ~isempty(model.fixed_variables)
+    tmp=cellfun(@(x)[x ','],fieldnames(model.fixed_variables),'uni',0);
+    tmp=[tmp{:}];
+    output_string=[output_string ',' tmp(1:end-1)];
+  end
+  
+  output_string=['[T,' output_string ']']; % state vars, monitors, time vector
+else
+  output_string = 'data'; % data structure instead of arg list
 end
 
-if ~isempty(model.fixed_variables)
-  tmp=cellfun(@(x)[x ','],fieldnames(model.fixed_variables),'uni',0);
-  tmp=[tmp{:}];
-  output_string=[output_string ',' tmp(1:end-1)];
-end
-
-output_string=['[T,' output_string ']']; % state vars, monitors, time vector
-
-% HACK to get IC to work
+% 1.3 HACK to get IC to work
 if options.downsample_factor == 1
   for fieldNameC = fieldnames(model.ICs)'
     model.ICs.(fieldNameC{1}) = regexprep(model.ICs.(fieldNameC{1}), '_last', '(1,:)');
@@ -961,6 +966,36 @@ if options.disk_flag==1
   fprintf(fid,'%% ------------------------------------------------------------\n');
 end
 
+%% independent_solve_file_flag
+if options.independent_solve_file_flag
+  fprintf(fid,'\n');
+  
+  fprintf(fid,'%% ------------------------------------------------------------\n');
+  fprintf(fid,'%% Store Data in Structure:\n');
+  fprintf(fid,'%% ------------------------------------------------------------\n');
+  
+  if ~options.mex_flag
+    % load metadata
+    fprintf(fid,'%s = load(''metadata.mat'');\n', output_string);
+  end
+  
+  % add variables to struct output variable
+  fprintf(fid,'%s.%s = %s;\n', output_string, 'time', 'T');
+
+  fprintf(fid,'\n%% State variables:\n');
+  cellfun(@addVar2StructOutput, model.state_variables,'uni',0);
+  
+  if ~isempty(model.monitors)
+    fprintf(fid,'\n%% Monitors:\n');
+    cellfun(@addVar2StructOutput, fieldnames(model.monitors),'uni',0);
+  end
+  
+  if ~isempty(model.fixed_variables)
+    fprintf(fid,'\n%% Fixed Variables:\n');
+    cellfun(@addFixedVar2StructOutput, fieldnames(model.fixed_variables),'uni',0);
+  end
+end
+
 %% Benchmark toc
 if options.benchmark_flag
   fprintf(fid, 'fprintf(''Sim Time: %%g seconds\\n'', toc);');
@@ -980,6 +1015,14 @@ end
   % ########################################
   % NESTED FUNCTIONS
   % ########################################
+  function addVar2StructOutput(varName)
+    fprintf(fid,'%s.%s = %s;\n', output_string, varName, varName);
+  end
+
+  function addFixedVar2StructOutput(varName)
+    fprintf(fid,'%s.model.fixed_variables.%s = %s;\n', output_string, varName, varName);
+  end
+
   function update_vars(index_nexts_, varargin)
     switch options.solver
       case {'euler','rk1'}
