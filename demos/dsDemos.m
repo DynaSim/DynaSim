@@ -173,8 +173,8 @@ figure; plot(data.time,data.(data.labels{1}))
 xlabel('time (ms)'); ylabel('membrane potential (mV)'); title('Hodgkin-Huxley neuron')
 
 % View the mechanism files:
-[~,eqnfile]=dsLocateModelFiles('iNa.mech'); edit(eqnfile{1});
-[~,eqnfile]=dsLocateModelFiles('iK.mech');  edit(eqnfile{1});
+dsEditModelFiles('iNa.mech');
+dsEditModelFiles('iK.mech');
 % Mechanisms can be custom built; however, DynaSim does come pakaged with
 % some common ones like popular ion currents (see <dynasim>/models).
 
@@ -198,7 +198,7 @@ xlabel('time (ms)'); ylabel('membrane potential (mV)'); title('Predefined Intrin
 % structure (see below).
 
 % View the predefined population file:
-[~,eqnfile]=dsLocateModelFiles('IB.pop'); edit(eqnfile{1});
+dsEditModelFiles('IB.pop');
 
 % %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% BUILDING LARGE MODELS WITH MULTIPLE POPULATIONS AND CONNECTIONS
@@ -239,7 +239,7 @@ dsPlot(data); % <-- Figure 4 in DynaSim paper
 dsPlot(data,'variable',{'E_v','E_I_iGABAa_IGABAa'});
 
 % View the connection mechanism file:
-[~,eqnfile]=dsLocateModelFiles('iAMPA.mech'); edit(eqnfile{1});
+dsEditModelFiles('iAMPA.mech');
 
 %% Explore sPING in DynaSim GUI
 

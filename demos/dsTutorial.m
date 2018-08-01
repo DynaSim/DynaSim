@@ -203,8 +203,8 @@ data=dsSimulate('HH.pop');
 [~,eqnfile]=dsLocateModelFiles('HH.pop');  
   % note: can also be used to locate .pop and .mech model files
 % Open the model file:
-edit(eqnfile{1}); % compare to the above list of equations
-% tip: you can use dsLocateModelFiles to see what model files will be used
+dsEditModelFiles('HH.pop'); % compare to the above list of equations
+% tip: you can use dsLocateModelFiles/dsEditModelFiles to see what model files will be used
 % before simulation if you are unsure. DynaSim always searches the current
 % directory first, then (sub)directories of <DynaSim>/models, then the
 % complete Matlab path.
@@ -293,8 +293,8 @@ eqns={
   'bN(v) = .125*exp(-(v+65)/80)';
 };
 
-[~,eqnfile]=dsLocateModelFiles('iNa.mech'); edit(eqnfile{1});
-[~,eqnfile]=dsLocateModelFiles('iK.mech');  edit(eqnfile{1});
+dsEditModelFiles('iNa.mech');
+dsEditModelFiles('iK.mech');
   % note: "X" is an optional reserved variable that can be used in mechanism 
   % files as an alias to the first state variable in the top-level population
   % equations (e.g., "v" in the next HH model). Alternatively, the variable
@@ -515,7 +515,7 @@ sPING_model = data.model;
 % can be set as a numeric matrix or a string that evaluates to a numeric
 % matrix of the correct dimensions.
 
-[~,eqnfile]=dsLocateModelFiles('iAMPA.mech'); edit(eqnfile{1});
+dsEditModelFiles('iAMPA.mech');
 
 % equivalent compact population specification with E->I netcon=0
 s=[];
