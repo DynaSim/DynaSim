@@ -1,5 +1,5 @@
 function [paths,files] = dsLocateModelFiles(input)
-%LOCATEMODELFILES - locate mechanism files associated with DynaSim specifications.
+%dsLocateModelFiles - locate mechanism files associated with DynaSim specifications.
 %
 % Usage:
 %   [paths,files]=dsLocateModelFiles(input)
