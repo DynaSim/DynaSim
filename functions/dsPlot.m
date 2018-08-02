@@ -172,6 +172,7 @@ options=dsCheckOptions(varargin,{...
   'plot_time_axis_sec_flag',-1,{-1,0,1},... % -1 means auto choose
   'max_num_overlaid',50,[],...
   'max_num_rows',20,[],...
+  'max_num_figs',inf,[],...
   'xlim',[],[],...
   'ylim',[],[],...
   'yscale','linear',{'linear','log','log10','log2'},...
@@ -422,10 +423,15 @@ end
 
 MRPF = options.max_num_rows; % max rows per fig
 MTPP = options.max_num_overlaid; % max traces per plot
+MF = options.max_num_figs;
 
 % how many plots:
 if num_sims==1 && num_pops==1 && num_vars==1 && ~lock_gca
   num_fig_sets=1; num_figs=ceil(pop_sizes/MRPF); num_rows=min(pop_sizes,MRPF);
+
+  if num_figs > MF
+    num_figs = MF;
+  end
 elseif num_sims==1 && num_pops==1 && num_vars==1 && lock_gca
   num_fig_sets=1; num_figs=1; num_rows=1;
 elseif num_sims==1 && num_pops==1 && num_vars>1
@@ -565,6 +571,11 @@ for iFigset = 1:num_fig_sets
           switch options.plot_type
             case 'waveform'
               dat = data(sim_index).(var)(:,row);
+              
+              % HACK check nPlots
+              if num_figs*num_rows < size(data(sim_index).(var),2)
+                dat = data(sim_index).(var);
+              end
             case 'power'
               AuxData=data(sim_index).([var '_Power_MUA']).Pxx;
               vlines=data(sim_index).([var '_Power_MUA']).PeakFreq;
@@ -576,6 +587,11 @@ for iFigset = 1:num_fig_sets
               set_name=regexp(var,'^([a-zA-Z0-9]+)_','tokens','once');
               allspikes{1}{1} = data(sim_index).([var '_spike_times']){row};
                 % one pop, cell array of spike times for each cell in population
+                
+                % HACK check nPlots
+              if num_figs*num_rows < size(data(sim_index).([var '_spike_times']),2)
+                allspikes{1} = data(sim_index).([var '_spike_times']);
+              end
           end
           
           if num_rows>1
