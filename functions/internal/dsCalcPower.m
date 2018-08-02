@@ -14,8 +14,8 @@ function data = dsCalcPower(data, varargin)
 %     'freq_limits'           : [beg,end] (units of Hz), lower and upper bounds
 %     'smooth_factor'         : number of samples for smoothing the spectrum (default: 5)
 %                               - tip: set to 1 to avoid smoothing
-%     'resample_flag'         : whether to resample time series before power to 
-%                                speed up calc (default: 1)
+%     'resample_flag'         : whether to check to resample time series before 
+%                                power calc to speed up calc (default: 1)
 %   - options for peak detection:
 %     'min_peak_frequency'    : Hz, min frequency for peak detection (default: 2)
 %     'max_peak_frequency'    : Hz, max frequency for peak detection (default: 150)
@@ -70,7 +70,7 @@ options=dsCheckOptions(varargin,{...
   'min_peak_frequency',1,[],... % Hz, min frequency for peak detection
   'max_peak_frequency',200,[],... % Hz, max frequency for peak detection
   'freq_limits',[0 inf],[],... % bounds on freq
-  'resample_flag',1,{0,1},... % whether to resample time series before power to speed up calc
+  'resample_flag',1,{0,1},... % whether to resample time series before power calc to speed up calc
   'peak_threshold_prctile',95,[],... % percentile for setting power threshold for peak detection
   'peak_area_width',5,[],... % Hz, size of frequency bin (centered on peak) over which to calculate area under spectrum
   'exclude_data_flag',0,{0,1},...
@@ -108,15 +108,26 @@ max_peak_freq = options.max_peak_frequency; % max frequency for peak detection
 time = data.time; % time vector
 dt = time(2)-time(1); % time step
 
-if options.resample_flag
+if options.resample_flag && options.freq_limits(2) < inf
   oldFs = double( 1/(dt/1000) );
   newFs = 3 * max_peak_freq;
   
-  % resample time
-  [resampleNum,resampleDenom] = rat(newFs/oldFs); % fraction
-  time = resample(double(time), resampleNum, resampleDenom);
-  
-  dt = time(2)-time(1); % time step
+  if oldFs > newFs
+    % resample time
+    [resampleNum,resampleDenom] = rat(newFs/oldFs); % fraction
+    
+    if resampleNum < resampleDenom
+      time = resample(double(time), resampleNum, resampleDenom);
+      
+      dt = time(2)-time(1); % time step
+    else
+      options.resample_flag = 0;
+    end
+  else
+    options.resample_flag = 0;
+  end
+else
+  options.resample_flag = 0;
 end
 
 % ntime=length(time); % number of time points in full data set
