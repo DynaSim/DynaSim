@@ -1,5 +1,5 @@
 function data = dsCalcPower(data, varargin)
-%CALCPOWER - Compute spectral analysis of DynaSim data
+%dsCalcPower - Compute spectral analysis of DynaSim data
 %
 % Usage:
 %   data = dsCalcPower(data,'option',value)
@@ -163,8 +163,16 @@ for iVar = 1:length(options.variable)
   dat = data.(var);
   
   if ~isa(dat,'double')
+    if isa(dat, 'single')
+      dataPrecision = 'single';
+    else
+      dataPrecision = 'double';
+    end
+    
     % convert to double precision
     dat = double(dat);
+  else
+    dataPrecision = 'double';
   end
   
   % resample if needed
@@ -354,6 +362,13 @@ for iVar = 1:length(options.variable)
   f = f(freq_limits_sel);
   Pxx = Pxx(freq_limits_sel, :);
   Pxx_mean = Pxx_mean(freq_limits_sel, :);
+  
+  if strcmp(dataPrecision, 'single')
+    % convert to single precision
+    Pxx = single(Pxx);
+    Pxx_mean = single(Pxx_mean);
+    f = single(f);
+  end
   
 
   %% Add resulting power spectra to data structure
