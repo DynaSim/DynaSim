@@ -19,6 +19,7 @@ function handles = dsPlot(data,varargin)
 %     'xlim'            : x-axis limits {[XMIN XMAX]} (default: all data)
 %     'ylim'            : y-axis limits {[YMIN YMAX]} (default: all data)
 %     'yscale'          : whether to plot linear or log scale {'linear','log','log10'}
+%     'plot_time_axis_sec_flag': whether to convert time to sec. (default=-1 means automatically select)
 %     'figwidth'        : outerposition width
 %     'figheight'       : outerposition height
 %     'figx'            : outerposition x
@@ -168,6 +169,7 @@ options=dsCheckOptions(varargin,{...
   'plot_mode','trace',{'trace','image'},...
   'variable',[],[],...
   'time_limits',[-inf inf],[],...
+  'plot_time_axis_sec_flag',-1,{-1,0,1},... % -1 means auto choose
   'max_num_overlaid',50,[],...
   'max_num_rows',20,[],...
   'xlim',[],[],...
@@ -326,16 +328,34 @@ num_vars=length(variables);
 num_labels=length(var_fields); % number of labels to plot
 num_times=length(time);
 
+% auto pick options.plot_time_axis_sec_flag
+if options.plot_time_axis_sec_flag == -1
+  if isempty(options.time_limits)
+    time_end = max(time);
+  else
+    time_end = options.time_limits(end);
+  end
+  
+  % switch to sec if time_limits >= 10 sec
+  options.plot_time_axis_sec_flag =  (time_end >= 10e3);
+end
+
+if options.plot_time_axis_sec_flag
+  time = time / 1e3; % convert ms to sec
+end
+
 % set x-axis limits
 if isempty(options.time_limits)
-  options.time_limits=[min(time) max(time)];
+  options.time_limits = [min(time) max(time)];
+elseif options.plot_time_axis_sec_flag
+  options.time_limits = options.time_limits / 1e3; % convert ms to sec
 end
 
 % do any analysis if necessary and set x-data
 switch options.plot_type
   case 'waveform'   % plot VARIABLE
-    xdata=time;
-    xlab='time (ms)'; % x-axis label
+    xdata = time;
+    xlab = timeAxisLabel(options); % x-axis label
   case 'power'      % plot VARIABLE_Power_SUA.Pxx
     if any(cellfun(@isempty,regexp(var_fields,'.*_Power_SUA$')))
       data=dsCalcPower(data,varargin{:});
@@ -374,13 +394,19 @@ switch options.plot_type
       end
     end
     xdata=time;
-    xlab='time (ms)'; % x-axis label
+    xlab = timeAxisLabel(options); % x-axis label
   case 'rates'      % plot VARIABLE_FR
     if any(cellfun(@isempty,regexp(var_fields,'.*_FR$')))
-      data=dsCalcFR(data,varargin{:});
+      data = dsCalcFR(data,varargin{:});
     end
-    xdata=data.time_FR;
-    xlab='time (ms, bins)'; % x-axis label
+    
+    if options.plot_time_axis_sec_flag
+      xdata = data.time_FR / 1e3;
+      xlab='time (s, bins)'; % x-axis label
+    else
+      xdata=data.time_FR;
+      xlab='time (ms, bins)'; % x-axis label
+    end
 end
 
 if isempty(options.xlim)
@@ -538,7 +564,7 @@ for iFigset = 1:num_fig_sets
           var=var_fields{1};
           switch options.plot_type
             case 'waveform'
-              dat=data(sim_index).(var)(:,row);
+              dat = data(sim_index).(var)(:,row);
             case 'power'
               AuxData=data(sim_index).([var '_Power_MUA']).Pxx;
               vlines=data(sim_index).([var '_Power_MUA']).PeakFreq;
@@ -548,9 +574,10 @@ for iFigset = 1:num_fig_sets
               legend_strings={'SUA','MUA'};
             case {'rastergram','raster'}
               set_name=regexp(var,'^([a-zA-Z0-9]+)_','tokens','once');
-              allspikes{1}{1}=data(sim_index).([var '_spike_times']){row};
+              allspikes{1}{1} = data(sim_index).([var '_spike_times']){row};
                 % one pop, cell array of spike times for each cell in population
           end
+          
           if num_rows>1
             text_string{row,col}=sprintf('cell %g',row);
           end
@@ -901,9 +928,9 @@ for iFigset = 1:num_fig_sets
             ypos=0; % y-axis position tracker
             yticks=[]; % where to position population names
             yticklabels={}; % population names
-            for p=1:length(allspikes) % loop over populations
+            for p = 1:length(allspikes) % loop over populations
               spikes=allspikes{p}; % spikes for one population
-              for c=1:length(spikes) % loop over cells in population p
+              for c = 1:length(spikes) % loop over cells in population p
                 spks=spikes{c}; % spikes for one cell
 
                 xPoints = [spks, spks, NaN(size(spks))]';
@@ -923,6 +950,7 @@ for iFigset = 1:num_fig_sets
               if length(allspikes)>1
                 pos=c+ypos+.5;
                 plot(thisAxes, [min(time) max(time)],[pos pos],'color','k','linewidth',3);
+                
                 if p<length(allspikes)
                   % increment y-position for next population
                   ypos=ypos+c;
@@ -1060,6 +1088,19 @@ if options.auto_gen_test_data_flag
 
   dsUnitSaveAutoGenTestDir(argin, argout);
 end
+
+
+
+%% Nested fn
+  function tlab = timeAxisLabel(options)
+    if options.plot_time_axis_sec_flag
+      tlab='time (s)';
+    else
+      tlab='time (ms)';
+    end
+  end
+
+end % main
 
 % 1 sim, 1 pop, 1 var (X)
 % 	N=1		one fig, one row (plot var X)
