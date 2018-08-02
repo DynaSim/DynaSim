@@ -1171,6 +1171,14 @@ function print_conditional_update(fid,conditionals,index_nexts,state_variables, 
     % write conditional to solver function
     fprintf(fid,'  conditional_test=(%s);\n',condition);
     action=dsStrrep(action, '\(n,:', '(n,conditional_test', '', '', varargin{:});
+    indCondStr = strfind(action, '(n,conditional_test)');
+    if ~isempty(indCondStr)
+      condVariableName = action(1:indCondStr-1);
+      initialization = [action(1:indCondStr-1), ' = []'];
+      fprintf(fid,'  if ~exist(''%s'',''var'')\n', condVariableName);
+      fprintf(fid,'    %s;\n',initialization);
+      fprintf(fid,'  end;\n');
+    end
     fprintf(fid,'  if any(conditional_test), %s; ',action);
 
     if ~isempty(elseaction)
