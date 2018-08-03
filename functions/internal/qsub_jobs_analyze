@@ -30,6 +30,7 @@ echo "HOSTNAME = " $HOSTNAME
 echo "JOB_ID = " $JOB_ID
 echo "JOB_NAME = " $JOB_NAME
 
+# remove old pbdout
 if (-e pbsout/${SGE_TASK_ID}.out) then
   rm -f pbsout/${SGE_TASK_ID}.out
 endif
