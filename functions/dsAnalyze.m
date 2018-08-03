@@ -82,7 +82,7 @@ function result = dsAnalyze(src,varargin)
 %                                 for information on current available versions.
 %                                 {'2009b', '2013a', '2014a', '2015a', '2016a',
 %                                 '2016b', '2017a', '2017b', '2018a'} (default:
-%                                 '2013a')
+%                                 '2014a')
 
 % Note: if function_options/plot_options cells exceed num functions, they will
 %       be copied to each fn.
@@ -158,7 +158,7 @@ options=dsCheckOptions(varargin,{...
   'sims_per_job',1,[],... % how many sims to run per cluster job
   'memory_limit','8G',[],... % how much memory to allocate per batch job
   'email_notify',[],[],...
-  'cluster_matlab_version','2013a',{'2009b', '2013a', '2014a', '2015a',...
+  'cluster_matlab_version','2014a',{'2009b', '2013a', '2014a', '2015a',...
                                     '2016a', '2016b', '2017a', '2017b',...
                                     '2018a'},...
   'SGE_TASK_ID',[],[],...
@@ -455,7 +455,7 @@ for fInd = 1:nFunc % loop over function inputs
   func = funcIn{fInd};
   
   if ~options.in_sim_flag
-    dsVprintf(options, 'Function (%i/%i): %s \n', fInd,nFunc,func2str(func));
+    dsVprintf(options, '\nFunction (%i/%i): %s \n', fInd,nFunc,func2str(func));
   end
   % confirm func is function handle or convert to one if possible
   func = parseFunc(func);
@@ -523,7 +523,7 @@ for fInd = 1:nFunc % loop over function inputs
     % loop through results. all results may exist or need to be made during loop
     for iResult = 1:nResults
       if ~options.in_sim_flag
-        dsVprintf(options, '  Result (%i/%i): ', iResult,nResults);
+        dsVprintf(options, '    Result (%i/%i): ', iResult,nResults);
       end
       
       extension = ['.' plotFormat]; % '.svg'; % {.jpg,.svg}
@@ -567,13 +567,17 @@ for fInd = 1:nFunc % loop over function inputs
           if options.load_all_data_flag
             thisData = data(iResult);
             
-            thisResult = result(iResult);
+            if ~isempty(result) && (length(result) >= iResult)
+              thisResult = result(iResult);
+            else
+              thisResult = [];
+            end
           else % load data
             thisData = loadDataFromSingleSim(studyinfo, simID, options, varargin{:});
             
             %skip if no data
             if isempty(thisData)
-              dsVprintf(options, '  Skipping simID=%i since no data.\n', simID);
+              dsVprintf(options, '      Skipping simID=%i since no data.\n', simID);
               continue
             end
             
@@ -611,7 +615,11 @@ for fInd = 1:nFunc % loop over function inputs
       else  % posthoc without studyinfo
         dsVprintf(options, '\n');
         
-        thisResult = result(iResult);
+        if ~isempty(result) && (length(result) >= iResult)
+          thisResult = result(iResult);
+        else
+          thisResult = [];
+        end
         simID = iResult; % for skipping warning
         
         % make fDir
@@ -643,9 +651,9 @@ for fInd = 1:nFunc % loop over function inputs
       %skip if no result
       if isempty(thisResult)
         if ~postHocBool
-          dsVprintf(options, '  Skipping since no result.\n');
+          dsVprintf(options, '      Skipping since no result.\n');
         else
-          dsVprintf(options, '  Skipping id=%i since no result.\n', simID);
+          dsVprintf(options, '      Skipping id=%i since no result.\n', simID);
         end
 
         continue
@@ -670,7 +678,7 @@ for fInd = 1:nFunc % loop over function inputs
             error('Unknown plot extension. Try again with known extension. See help(dsAnalyze)')
         end
       elseif exist('fPath', 'var') && exist(fPath, 'file') && ~options.overwrite_flag
-        dsVprintf(options, '  Skipping since file already exists: %s \n', fPath);
+        dsVprintf(options, '      Skipping since file already exists: %s \n', fPath);
       end %save_results_flag
         
       if (options.save_results_flag && (options.close_fig_flag ~= 0)) || options.close_fig_flag==1
@@ -727,7 +735,7 @@ for fInd = 1:nFunc % loop over function inputs
 
     for iResult = 1:nResults
       if ~options.in_sim_flag
-        dsVprintf(options, '  Result (%i/%i): ', iResult,nResults);
+        dsVprintf(options, '    Result (%i/%i): ', iResult,nResults);
       end
       
       if ~postHocBool % in sim
@@ -754,13 +762,17 @@ for fInd = 1:nFunc % loop over function inputs
         if options.load_all_data_flag
           thisData = data(iResult);
           
-          result = allResults(iResult);
+          if ~isempty(allResults) && (length(allResults) >= iResult)
+            result = allResults(iResult);
+          else
+            result = [];
+          end
         else % load data
           thisData = loadDataFromSingleSim(studyinfo, simID, options, varargin{:});
 
           %skip if no data
           if isempty(thisData)
-            dsVprintf(options, '  Skipping simID=%i since no data.\n', simID);
+            dsVprintf(options, '      Skipping simID=%i since no data.\n', simID);
             continue
           end
 
@@ -800,7 +812,11 @@ for fInd = 1:nFunc % loop over function inputs
       else  % posthoc without studyinfo
         dsVprintf(options, '\n');
         
-        result = allResults(iResult);
+        if ~isempty(allResults) && (length(allResults) >= iResult)
+          result = allResults(iResult);
+        else
+          result = [];
+        end
         simID = iResult; % for skipping warning
 
         % make fName
@@ -829,9 +845,9 @@ for fInd = 1:nFunc % loop over function inputs
       %skip if no result
       if isempty(result)
         if ~postHocBool
-          dsVprintf(options, '  Skipping since no result.\n');
+          dsVprintf(options, '      Skipping since no result.\n');
         else
-          dsVprintf(options, '  Skipping id=%i since no result.\n', simID);
+          dsVprintf(options, '      Skipping id=%i since no result.\n', simID);
         end
 
         continue
@@ -840,7 +856,7 @@ for fInd = 1:nFunc % loop over function inputs
       if options.save_results_flag && ~(exist(fPath, 'file') && ~options.overwrite_flag)
         dsExportData(result, 'filename',fPath, 'result_flag',1, varargin{:});
       elseif exist('fPath', 'var') && exist(fPath, 'file') && ~options.overwrite_flag
-        dsVprintf(options, '  Skipping since file already exists: %s \n', fPath);
+        dsVprintf(options, '      Skipping since file already exists: %s \n', fPath);
       end % save_results_flag
         
       if ~options.load_all_data_flag
@@ -1103,6 +1119,12 @@ end
 %     arg2 = ui_command;
     arg3 = getAbsolutePath(studyinfo.study_dir); % src
     arg4 = aschar(varargin);
+    
+    % handle struct options
+    if length(varargin) == 1 && isstruct(varargin{1})
+      arg4 = ['{' arg4(9:end-2) '}'];
+    end
+    
     arg4(1) = []; % remove leading '{'
     arg4(end) = []; % remove trailing '}'
     arg4 = [arg4 ', ''in_clus_flag'',1'];
@@ -1114,8 +1136,6 @@ end
     arg4 = strrep(arg4, ';', ''';'''); % quote semicolon for double quotes in qsub_jobs_analyze
     arg4 = strrep(arg4, '{', '''{'''); % quote curly bracket for double quotes in qsub_jobs_analyze
     arg4 = strrep(arg4, '}', '''}'''); % quote curly bracket for double quotes in qsub_jobs_analyze
-    arg4 = strrep(arg4, '[', '\['); % escape bracket
-    arg4 = strrep(arg4, ']', '\]'); % escape bracket
     
     % qsub args
     num_simIDs = studyinfo.simulations(end).sim_id;
