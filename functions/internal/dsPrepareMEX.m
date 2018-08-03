@@ -60,43 +60,54 @@ if ~exist(mexfileOutput,'file')
   madeNewMexBool = true;
   
   if options.verbose_flag
-    fprintf('\tMEX generation complete!\n\tElapsed time: %g seconds.\n',toc(compile_start_time));
+    fprintf('\tMEX generation complete!\n\tElapsed time: %g seconds.\n', toc(compile_start_time));
     %toc;
   end
   
-  codemex_dir=fullfile(fileparts(mexfileOutput),'codemex');
+  codemex_dir = fullfile(fileparts(mexfileOutput),'codemex');
   if exist(codemex_dir,'dir')
     if options.verbose_flag
-      fprintf('\tRemoving temporary codemex directory: %s\n',codemex_dir);
+      fprintf('\tRemoving temporary codemex directory: %s\n', codemex_dir);
     end
+    
     rmdir(codemex_dir,'s');
   end
 else % mex file exists
   madeNewMexBool = false;
   if options.verbose_flag
-    fprintf('Using previous compiled file: %s\n',mexfileOutput);
+    fprintf('Using previous compiled file: %s\n', mexfileOutput);
   end
 end %if
 
 % If mex_dir is specified, back up the newly compiled mex files to this folder
-if ~isempty(mex_dir) && ~options.cluster_flag && options.mex_dir_flag
+if (~isempty(mex_dir) && options.mex_dir_flag && ~options.cluster_flag)... % non cluster
+    || (~isempty(mex_dir) && options.mex_dir_flag && options.cluster_flag && options.one_solve_file_flag) % cluster only if one_solve_file_flag
+  
   [~,solvefile] = fileparts2(mfileInput);
   [~,mexfile] = fileparts2(mexfileOutput);
   
-  if isempty(dir(fullfile(mex_dir,[solvefile '.m']))) || madeNewMexBool
+  if isempty(dir(fullfile(mex_dir, [solvefile '.m']))) || madeNewMexBool
     if options.verbose_flag
-      fprintf('Solve file %s does not yet exist in mex_dir %s. Copying... \n',solvefile,mex_dir);
+      fprintf('Solve file %s does not yet exist in mex_dir %s. Copying... \n', solvefile,mex_dir);
     end
-    if ~exist(mex_dir,'dir'); error('Cannot find %s! Make sure it exists and is specified as an *absolute* path',mex_dir); end
-    copyfile(mfileInput,mex_dir);
+    
+    if ~exist(mex_dir,'dir')
+      error('Cannot find %s! Make sure it exists and is specified as an *absolute* path', mex_dir);
+    end
+    
+    copyfile(mfileInput, mex_dir);
   end
   
-  if isempty(dir(fullfile(mex_dir,[mexfile '*']))) || madeNewMexBool
+  if isempty(dir(fullfile(mex_dir, [mexfile '*']))) || madeNewMexBool
     if options.verbose_flag
-      fprintf('Mex file %s does not yet exist in mex_dir %s. Copying... \n',mexfile,mex_dir);
+      fprintf('Mex file %s does not yet exist in mex_dir %s. Copying... \n', mexfile,mex_dir);
     end
-    if ~exist(mex_dir,'dir'); error('Cannot find %s! Make sure it exists and is specified as an *absolute* path',mex_dir); end
-    copyfile([mexfileOutput,'*'],mex_dir);
+    
+    if ~exist(mex_dir,'dir')
+      error('Cannot find %s! Make sure it exists and is specified as an *absolute* path', mex_dir)
+    end
+    
+    copyfile([mexfileOutput,'*'], mex_dir);
   end
 end
 
