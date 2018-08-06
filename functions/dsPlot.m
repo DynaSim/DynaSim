@@ -10,7 +10,7 @@ function handles = dsPlot(data,varargin)
 % Inputs:
 %   - data: DynaSim data structure (see dsCheckData)
 %   - options:
-%     'plot_type'       : what to plot {'waveform' (default),'rastergram','rates','power'}
+%     'plot_type'       : what to plot {'waveform' (default),'rastergram','power'}
 %     'variable'        : name of field containing data to plot (default: all
 %                         pops with state variable of variable in data.labels)
 %     'time_limits'     : in units of data.time {[beg,end]}
@@ -165,7 +165,7 @@ data=dsCheckData(data, varargin{:});
 
 % get options
 options=dsCheckOptions(varargin,{...
-  'plot_type','waveform',{'waveform','rastergram','raster','power','rates'},...
+  'plot_type','waveform',{'waveform','rastergram','raster','power'},... % ,'rates'
   'plot_mode','trace',{'trace','image'},...
   'variable',[],[],...
   'time_limits',[-inf inf],[],...
@@ -205,7 +205,7 @@ inds = arrayfun(@(s) ~isempty(s.(labels{1})),data);
 data = data(inds);
 
 
-fields=fieldnames(data);
+fields = fieldnames(data);
 if any(strcmp(fields, 'varied'))
   % get varied labels
   vary_labels = data(1).varied; % data(1).simulator_options.vary;
@@ -321,7 +321,7 @@ end
 pop_names=pop_names(pop_indices);
 
 % data set info
-time=data(1).time; % time vector
+time = data(1).time; % time vector
 pop_sizes=[data(1).model.specification.populations(pop_indices).size];
 num_pops=length(pop_names); % number of populations to plot
 num_sims=length(data); % number of simulations
@@ -331,11 +331,7 @@ num_times=length(time);
 
 % auto pick options.plot_time_axis_sec_flag
 if options.plot_time_axis_sec_flag == -1
-  if isempty(options.time_limits)
-    time_end = max(time);
-  else
-    time_end = options.time_limits(end);
-  end
+  time_end = max(time);
   
   % switch to sec if time_limits >= 10 sec
   options.plot_time_axis_sec_flag =  (time_end >= 10e3);
@@ -343,13 +339,6 @@ end
 
 if options.plot_time_axis_sec_flag
   time = time / 1e3; % convert ms to sec
-end
-
-% set x-axis limits
-if isempty(options.time_limits)
-  options.time_limits = [min(time) max(time)];
-elseif options.plot_time_axis_sec_flag
-  options.time_limits = options.time_limits / 1e3; % convert ms to sec
 end
 
 % do any analysis if necessary and set x-data
@@ -361,25 +350,33 @@ switch options.plot_type
     if any(cellfun(@isempty,regexp(var_fields,'.*_Power_SUA$')))
       data=dsCalcPower(data,varargin{:});
     end
+    
     xdata=data(1).([var_fields{1} '_Power_SUA']).frequency;
     xlab='frequency (Hz)'; % x-axis label
+    
     % set default x-limits for power spectrum
     if isempty(options.xlim)
-      options.xlim=[0 200]; % Hz
+      options.xlim = [0 200]; % Hz
     end
   case {'rastergram','raster'} % raster VARIABLE_spike_times
     if any(cellfun(@isempty,regexp(var_fields,'.*_spike_times$')))
-      spike_fields=cellfun(@(x)[x '_spikes'],var_fields,'uni',0);
-      idx=cellfun(@(x)isfield(data,x),spike_fields);
+      spike_fields = cellfun(@(x)[x '_spikes'],var_fields,'uni',0);
+      idx = cellfun(@(x)isfield(data,x),spike_fields);
+      
       if any(idx)
-        % get spike times from binary spike matrix
+        % get spike times from binary spike matrix if missing spike times
         inds=find(idx);
         for s=1:length(data) % sims
           for i=1:length(inds) % pops
             spike_fld=[var_fields{inds(i)} '_spikes'];
             spike_time_fld=[var_fields{inds(i)} '_spike_times'];
+            
             for j=1:size(data(s).(spike_fld),2) % cells
-              data(s).(spike_time_fld){j}=data(s).time((1==data(s).(spike_fld)(:,j)));
+              data(s).(spike_time_fld){j} = data(s).time( (1 == data(s).(spike_fld)(:,j)) );
+              
+              if options.plot_time_axis_sec_flag
+                data(s).(spike_time_fld){j} = data(s).(spike_time_fld){j} / 1e3;
+              end
             end % cells
           end % pops
         end % sims
@@ -391,10 +388,24 @@ switch options.plot_type
 %       end
       else
         % find spikes from threshold crossing
-        data=dsCalcFR(data,varargin{:});
+        data = dsCalcFR(data,varargin{:});
       end
     end
-    xdata=time;
+    
+    if options.plot_time_axis_sec_flag
+      % relabel spike times to sec
+      for s = 1:length(data) % sims
+        for iPop = 1:length(var_fields) % pops
+          spike_time_fld=[var_fields{iPop} '_spike_times'];
+          
+          for iCell = 1:size(data(s).(spike_time_fld),2) % cells
+            data(s).(spike_time_fld){iCell} = data(s).(spike_time_fld){iCell} / 1e3;
+          end % cells
+        end % pops
+      end % sims
+    end
+    
+    xdata = time;
     xlab = timeAxisLabel(options); % x-axis label
   case 'rates'      % plot VARIABLE_FR
     if any(cellfun(@isempty,regexp(var_fields,'.*_FR$')))
@@ -403,22 +414,33 @@ switch options.plot_type
     
     if options.plot_time_axis_sec_flag
       xdata = data.time_FR / 1e3;
-      xlab='time (s, bins)'; % x-axis label
+      xlab = 'time (s, bins)'; % x-axis label
     else
-      xdata=data.time_FR;
-      xlab='time (ms, bins)'; % x-axis label
+      xdata = data.time_FR;
+      xlab = 'time (ms, bins)'; % x-axis label
     end
 end
 
-if isempty(options.xlim)
-  options.xlim=[min(xdata) max(xdata)];
+% set x-axis limits
+if options.plot_time_axis_sec_flag
+  options.time_limits = options.time_limits / 1e3; % convert ms to sec
 end
 
 % set time_limits
 switch options.plot_type
   case {'waveform', 'rates', 'rastergram','raster'}
+    if isempty(options.xlim)
+      options.xlim = [min(xdata) max(xdata)];
+    elseif options.plot_time_axis_sec_flag
+      options.xlim = options.xlim / 1e3; % convert ms to sec
+    end
+    
     options.xlim(1) = max(options.xlim(1), options.time_limits(1));
     options.xlim(2) = min(options.xlim(2), options.time_limits(2));
+  otherwise
+    if isempty(options.xlim)
+      options.xlim = [min(xdata) max(xdata)];
+    end
 end
 
 MRPF = options.max_num_rows; % max rows per fig
@@ -465,9 +487,11 @@ if num_sims>1 && isfield(data,'varied')
   varied=data(1).varied;
   num_varied=length(varied); % number of model components varied across simulations
   num_sims=length(data); % number of data sets (one per simulation)
+  
   % collect info on parameters varied
   param_mat=zeros(num_sims,num_varied); % values for each simulation
   param_cell=cell(1,num_varied); % unique values for each parameter
+  
   % loop over varied components and collect values
   for j=1:num_varied
     if isnumeric(data(1).(varied{j}))
@@ -479,6 +503,7 @@ if num_sims>1 && isfield(data,'varied')
     end
   end
   param_size=cellfun(@length,param_cell); % number of unique values for each parameter
+  
   % varied parameter with most elements goes along the rows (everything else goes along columns)
   row_param_index=find(param_size==max(param_size),1,'first');
   row_param_name=varied{row_param_index};
@@ -486,14 +511,17 @@ if num_sims>1 && isfield(data,'varied')
   num_rows=length(row_param_values);
   %num_cols=num_sims/num_rows;
   num_figs=ceil(num_rows/MRPF);
+  
   % collect sims for each value of the row parameter
   indices={};
   for row=1:num_rows
     indices{row}=find(param_mat(:,row_param_index)==row_param_values(row));
   end
+  
   num_per_row=cellfun(@length,indices);
   num_cols=max(num_per_row);
   sim_indices=nan(num_cols,num_rows);
+  
   % arrange sim indices for each row in a matrix
   for row=1:num_rows
     sim_indices(1:num_per_row(row),row)=indices{row};
@@ -577,14 +605,14 @@ for iFigset = 1:num_fig_sets
                 dat = data(sim_index).(var);
               end
             case 'power'
-              AuxData=data(sim_index).([var '_Power_MUA']).Pxx;
-              vlines=data(sim_index).([var '_Power_MUA']).PeakFreq;
-              AuxDataName={'MUA Power'};
-              var=[var '_Power_SUA'];
-              dat=data(sim_index).(var).Pxx(:,row);
-              legend_strings={'SUA','MUA'};
+              AuxData = data(sim_index).([var '_Power_MUA']).Pxx;
+              vlines = data(sim_index).([var '_Power_MUA']).PeakFreq;
+              AuxDataName = {'MUA Power'};
+              var = [var '_Power_SUA'];
+              dat = data(sim_index).(var).Pxx(:,row);
+              legend_strings = {'SUA','MUA'};
             case {'rastergram','raster'}
-              set_name=regexp(var,'^([a-zA-Z0-9]+)_','tokens','once');
+              set_name = regexp(var,'^([a-zA-Z0-9]+)_','tokens','once');
               allspikes{1}{1} = data(sim_index).([var '_spike_times']){row};
                 % one pop, cell array of spike times for each cell in population
                 
@@ -600,19 +628,19 @@ for iFigset = 1:num_fig_sets
 
         elseif num_sims==1 && num_pops==1 && num_vars==1 && lock_gca
           % one population per row: dat = data(s=1).(var)(:,1:MTPP) where var=vars{v=r}
-          var=var_fields{1};
+          var = var_fields{1};
           switch options.plot_type
             case 'waveform'
-              dat=data(sim_index).(var);
+              dat = data(sim_index).(var);
             case 'power'
-              AuxData=data(sim_index).([var '_Power_MUA']).Pxx;
-              vlines=data(sim_index).([var '_Power_MUA']).PeakFreq;
-              AuxDataName={'MUA Power'};
-              var=[var '_Power_SUA'];
-              dat=data(sim_index).(var).Pxx;
+              AuxData = data(sim_index).([var '_Power_MUA']).Pxx;
+              vlines = data(sim_index).([var '_Power_MUA']).PeakFreq;
+              AuxDataName = {'MUA Power'};
+              var = [var '_Power_SUA'];
+              dat = data(sim_index).(var).Pxx;
             case {'rastergram','raster'}
-              set_name=regexp(var,'^([a-zA-Z0-9]+)_','tokens','once');
-              allspikes{1}=data(sim_index).([var '_spike_times']);
+              set_name = regexp(var,'^([a-zA-Z0-9]+)_','tokens','once');
+              allspikes{1} = data(sim_index).([var '_spike_times']);
           end
         % -----------------------------------------------------------------
         elseif num_sims==1 && num_pops==1 && num_vars>1
@@ -621,32 +649,32 @@ for iFigset = 1:num_fig_sets
           var=var_fields{row};
           switch options.plot_type
             case 'waveform'
-              dat=data(sim_index).(var);
+              dat = data(sim_index).(var);
             case 'power'
-              AuxData=data(sim_index).([var '_Power_MUA']).Pxx;
-              vlines=data(sim_index).([var '_Power_MUA']).PeakFreq;
-              AuxDataName={'MUA Power'};
-              var=[var '_Power_SUA'];
-              dat=data(sim_index).(var).Pxx;
+              AuxData = data(sim_index).([var '_Power_MUA']).Pxx;
+              vlines = data(sim_index).([var '_Power_MUA']).PeakFreq;
+              AuxDataName = {'MUA Power'};
+              var = [var '_Power_SUA'];
+              dat = data(sim_index).(var).Pxx;
             case {'rastergram','raster'}
-              set_name=regexp(var,'^([a-zA-Z0-9]+)_','tokens','once');
-              allspikes{1}=data(sim_index).([var '_spike_times']);
+              set_name = regexp(var,'^([a-zA-Z0-9]+)_','tokens','once');
+              allspikes{1} = data(sim_index).([var '_spike_times']);
           end
           shared_ylims_flag=0;
         % -----------------------------------------------------------------
         elseif num_sims==1 && num_pops>1 && num_vars==1 && ~lock_gca
         % -----------------------------------------------------------------
           % one population per row: dat = data(s=1).(var)(:,1:MTPP) where var=vars{v=r}
-          var=var_fields{row};
+          var = var_fields{row};
           switch options.plot_type
             case 'waveform'
-              dat=data(sim_index).(var);
+              dat = data(sim_index).(var);
             case 'power'
-              AuxData=data(sim_index).([var '_Power_MUA']).Pxx;
-              vlines=data(sim_index).([var '_Power_MUA']).PeakFreq;
-              AuxDataName={'MUA Power'};
-              var=[var '_Power_SUA'];
-              dat=data(sim_index).(var).Pxx;
+              AuxData = data(sim_index).([var '_Power_MUA']).Pxx;
+              vlines = data(sim_index).([var '_Power_MUA']).PeakFreq;
+              AuxDataName = {'MUA Power'};
+              var = [var '_Power_SUA'];
+              dat = data(sim_index).(var).Pxx;
             case {'rastergram','raster'}
               set_name=regexp(var,'^([a-zA-Z0-9]+)_','tokens','once');
               allspikes{1}=data(sim_index).([var '_spike_times']);
@@ -1018,8 +1046,8 @@ for iFigset = 1:num_fig_sets
           ylims=options.ylim;
         elseif shared_ylims_flag
           % update max/min
-          ylims(1)=min(ylims(1),min(dat(:)));
-          ylims(2)=max(ylims(2),max(dat(:)));
+          ylims(1) = min(ylims(1), min(dat(:)));
+          ylims(2) = max(ylims(2), max(dat(:)));
         else
           % set ylim to max/min of this data set
           ylims=[min(dat(:)) max(dat(:))];
