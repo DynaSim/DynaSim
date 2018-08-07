@@ -969,51 +969,51 @@ for iFigset = 1:num_fig_sets
             end
           case {'rastergram','raster'}
             % draw spikes
-            ypos=0; % y-axis position tracker
+            ypos = 0; % y-axis position tracker
             yticks=[]; % where to position population names
             yticklabels={}; % population names
-            for p = 1:length(allspikes) % loop over populations
-              spikes=allspikes{p}; % spikes for one population
-              for c = 1:length(spikes) % loop over cells in population p
-                spks=spikes{c}; % spikes for one cell
+            for iPop = 1:length(allspikes) % loop over populations
+              spikes = allspikes{iPop}; % spikes for one population
+              
+              for iCell = 1:length(spikes) % loop over cells in population p
+                spks = spikes{iCell}; % spikes for one cell
 
                 xPoints = [spks, spks, NaN(size(spks))]';
                 xPoints = xPoints(:);
 
-                yPoints = [(c+ypos-.5)*ones(size(spks)), (c+ypos+.5)*ones(size(spks)), NaN(size(spks))]';
+                yPoints = [(iCell+ypos-.5)*ones(size(spks)), (iCell+ypos+.5)*ones(size(spks)), NaN(size(spks))]';
                 yPoints = yPoints(:);
                 
-                plot(thisAxes, xPoints,yPoints,'color','k'); hold on
+                plot(thisAxes, xPoints,yPoints,'color','b'); hold on
               end
               
               % record position for population tick name
-              yticks(end+1)=ypos+c/2+.5;
-              yticklabels{end+1}=set_name{p};
+              yticks(end+1) = ypos + iCell/2 + .5;
+              yticklabels{end+1} = set_name{iPop};
               
               % draw line separating populations
-              if length(allspikes)>1
-                pos=c+ypos+.5;
+              if length(allspikes) > 1 && iPop < length(allspikes)
+                pos = iCell + ypos + .5;
                 plot(thisAxes, [min(time) max(time)],[pos pos],'color','k','linewidth',3);
                 
-                if p<length(allspikes)
-                  % increment y-position for next population
-                  ypos=ypos+c;
-                end
+                % increment y-position for next population
+                ypos = ypos + iCell;
               end
             end
             
             % artificially set "dat" to get correct ylims below
-            dat=[.5 ypos+c+.5];
-            shared_ylims_flag=0;
-            legend_strings='';
+            dat = [.5 ypos+iCell+.5];
+            shared_ylims_flag = 0;
+            legend_strings = '';
             
             % set y-ticks to population names
             set(thisAxes,'ytick',yticks,'yticklabel',yticklabels);
+            set(thisAxes,'ydir','reverse');
             
             % set x-ticks
             plot(thisAxes, [min(time) max(time)],[.5 .5],'w');
-            nticks=length(get(thisAxes,'xtick'));
-            xticks=linspace(options.xlim(1),options.xlim(2),nticks);
+            nticks = length(get(thisAxes,'xtick'));
+            xticks = linspace(options.xlim(1),options.xlim(2),nticks);
             set(thisAxes,'xtick',xticks,'xticklabel',xticks);
             %set(thisAxes,'xticklabel',get(thisAxes,'ytick'));
             set(thisAxes,'ticklength',get(thisAxes,'ticklength')/2) %make ticks shorter
