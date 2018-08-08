@@ -61,23 +61,26 @@ if ~exist(mexfileOutput,'file')
   madeNewMexBool = true;
   
   if options.verbose_flag
-    fprintf('\tMEX generation complete!\n\tElapsed time: %g seconds.\n', toc(compile_start_time));
-    %toc;
+    fprintf('    MEX generation complete! \n');
+    duration = toc(compile_start_time);
+    
+    if duration < 60
+      fprintf('    Elapsed time: %.1f seconds. \n', duration);
+    else
+      fprintf('    Elapsed time: %.1f minutes. \n', duration/60);
+    end
   end
   
   codemex_dir = fullfile(fileparts(mexfileOutput),'codemex');
   if exist(codemex_dir,'dir')
-    if options.verbose_flag
-      fprintf('\tRemoving temporary codemex directory: %s\n', codemex_dir);
-    end
+    dsVprintf(options, '    Removing temporary codemex directory: %s\n', codemex_dir);
     
     rmdir(codemex_dir,'s');
   end
 else % mex file exists
   madeNewMexBool = false;
-  if options.verbose_flag
-    fprintf('Using previous compiled file: %s\n', mexfileOutput);
-  end
+  
+  dsVprintf(options, 'Using previous compiled file: %s\n', mexfileOutput);
 end %if
 
 % If mex_dir is specified, back up the newly compiled mex files to this folder
@@ -88,9 +91,7 @@ if (~isempty(mex_dir) && options.mex_dir_flag && ~options.cluster_flag)... % non
   [~,mexfile] = fileparts2(mexfileOutput);
   
   if isempty(dir(fullfile(mex_dir, [solvefile '.m']))) || madeNewMexBool
-    if options.verbose_flag
-      fprintf('Solve file %s does not yet exist in mex_dir %s. Copying... \n', solvefile,mex_dir);
-    end
+    dsVprintf(options, 'Solve file %s does not yet exist in mex_dir %s. Copying... \n', solvefile,mex_dir);
     
     if ~exist(mex_dir,'dir')
       error('Cannot find %s! Make sure it exists and is specified as an *absolute* path', mex_dir);
@@ -100,9 +101,7 @@ if (~isempty(mex_dir) && options.mex_dir_flag && ~options.cluster_flag)... % non
   end
   
   if isempty(dir(fullfile(mex_dir, [mexfile '*']))) || madeNewMexBool
-    if options.verbose_flag
-      fprintf('Mex file %s does not yet exist in mex_dir %s. Copying... \n', mexfile,mex_dir);
-    end
+    dsVprintf(options, 'Mex file %s does not yet exist in mex_dir %s. Copying... \n', mexfile,mex_dir);
     
     if ~exist(mex_dir,'dir')
       error('Cannot find %s! Make sure it exists and is specified as an *absolute* path', mex_dir)

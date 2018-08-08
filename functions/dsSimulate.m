@@ -58,7 +58,7 @@ function [data,studyinfo,result] = dsSimulate(model,varargin)
 %                               for information on current available versions.
 %                               {'2009b', '2013a', '2014a', '2015a', '2016a',
 %                               '2016b', '2017a', '2017b', '2018a'} (default:
-%                               '2013a')
+%                               '2014a')
 %
 %   options for parallel computing: (requires Parallel Computing Toolbox)
 %     'parfor_flag' : whether to use parfor to run simulations {0 or 1} (default: 0)
@@ -297,7 +297,7 @@ options=dsCheckOptions(varargin,{...
   'plot_functions',[],[],...
   'plot_options',[],[],...
   'optimize_big_vary',0,{0,1},...
-  'cluster_matlab_version','2013a',{'2009b', '2013a', '2014a', '2015a',...
+  'cluster_matlab_version','2014a',{'2009b', '2013a', '2014a', '2015a',...
                                     '2016a', '2016b', '2017a', '2017b',...
                                     '2018a'},...
   'in_parfor_loop_flag',0,{0,1},... % if inside parfor loop
@@ -1080,7 +1080,7 @@ end % in_parfor_loop_flag
             end
           end % if ~options.independent_solve_file_flag
           
-          duration=toc(sim_start_time);
+          duration = toc(sim_start_time);
           
           % Prepare DynaSim data structure:
           % organize simulated data in data structure (move time to last)
@@ -1112,7 +1112,11 @@ end % in_parfor_loop_flag
           end
         end
         
-        dsVprintf(options, 'Elapsed time: %g seconds.\n',duration);
+        if duration < 60
+          dsVprintf(options, 'Elapsed time: %.1f seconds.\n', duration);
+        else
+          dsVprintf(options, 'Elapsed time: %.1f minutes.\n', duration/60);
+        end
       end % else for if isa(options.experiment,'function_handle')
       
       % Note: tmpdata is from a single sim in for loop

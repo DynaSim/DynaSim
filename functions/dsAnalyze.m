@@ -501,7 +501,12 @@ for fInd = 1:nFunc % loop over function inputs
     error('Cannot determine number of results');
   end
 
-  dsVprintf(options, '    Elapsed time: %g sec\n',toc(tstart));
+  duration = toc(tstart);
+  if duration < 60
+    dsVprintf(options, '    Elapsed time: %.1f seconds.\n', duration);
+  else
+    dsVprintf(options, '    Elapsed time: %.1f minutes.\n', duration/60);
+  end
 
   % Dave: Not all plotting functions will return a plot handle. For
   % example, dsPlot2 returns a nested structure of figure, axis, and plot
