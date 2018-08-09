@@ -25,7 +25,7 @@ options = opts.simulator_options;
 
 % Setup Study
 if options.verbose_flag
-  fprintf('PREPARING STUDY:\n');
+  fprintf('\nPREPARING STUDY:\n');
 end
 
 if options.save_data_flag || options.save_results_flag || options.parfor_flag

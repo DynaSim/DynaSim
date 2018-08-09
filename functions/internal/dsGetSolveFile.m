@@ -180,10 +180,10 @@ if ~exist(solve_file,'file')
                 % return @odefun with all substitutions. dsSimulate
                 % should be able to handle: dsSimulate(@odefun,'tspan',tspan,'ic',ic)
   end
-  solve_file=dsCompareSolveFiles(solve_file_m);               % First search in local solve folder...
+  solve_file = dsCompareSolveFiles(solve_file_m);               % First search in local solve folder...
   
   if options.mex_flag && options.mex_dir_flag
-    solve_file=dsCompareSolveFiles(solve_file, options.mex_dir, options.verbose_flag); % Then search in mex_dir (if it exists and if mex_flag==1).
+    solve_file = dsCompareSolveFiles(solve_file, options.mex_dir, options.verbose_flag); % Then search in mex_dir (if it exists and if mex_flag==1).
   end
 else
   if options.verbose_flag

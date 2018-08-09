@@ -1,5 +1,5 @@
 function solve_file_m = dsCompareSolveFiles(solve_file_m, mexPath, verbose_flag)
-%COMPARESOLVEFILES - looks for pre-existing m and mex files for this simulation
+%dsCompareSolveFiles - looks for pre-existing m and mex files for this simulation
 % This looks for an equivalent solve m-file in the solve directory or given mex
 % directory as 2nd argument. If a mex file is found, it will be copied to the solve dir.
 %
@@ -75,7 +75,6 @@ for f = 1:nFiles
     if checkMexPathBool
       % Copy solve file from mexPath into solve path
       copyfile(fullfile(mexPath,files{f}), solvePath);
-      
       
       % Look for mex file in mexPath
       [~,fname] = fileparts(files{f});

@@ -84,9 +84,9 @@ end
 
 %% Main function.
 %% Set up studyinfo structure, study directory and output file names
-[studyinfo,options.simulator_options]=dsSetupStudy(base_model,'modifications_set',modifications_set,'simulator_options',options.simulator_options,'process_id',options.process_id);
-study_file=fullfile(studyinfo.study_dir,'studyinfo.mat');
-num_simulations=length(modifications_set);
+[studyinfo,options.simulator_options] = dsSetupStudy(base_model,'modifications_set',modifications_set,'simulator_options',options.simulator_options,'process_id',options.process_id);
+study_file = fullfile(studyinfo.study_dir,'studyinfo.mat');
+num_simulations = length(modifications_set);
 
 %% check whether study has already completed
 % if options.overwrite_flag==0
@@ -138,6 +138,8 @@ if options.mex_flag
   % append extension to solve_file if regular mex (not non supported matlab solver mex)
   if ~any(strcmp(options.solver, {'ode113','ode15s','ode23s','ode23t','ode23tb'})) % not mex supported)
     full_solve_file=[solve_file '.' tmp{1}];
+    
+    options.simulator_options.solve_file = full_solve_file; % replace this filename with copied filename
 
     % remove '_mex' suffix from solve_file for compatibility with dsGetSolveFile()
     solve_file=regexp(solve_file,'(.+)_mex$','tokens','once');
@@ -148,7 +150,7 @@ if options.mex_flag
 else
   full_solve_file=solve_file;
 end
-studyinfo.base_solve_file=solve_file;
+studyinfo.base_solve_file = solve_file;
 
 %% set name of batch_dir for this study
 % get study-specific timestamp
