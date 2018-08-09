@@ -102,9 +102,13 @@ end
 if options.bin_size>1
   % convert from ms to time points
   options.bin_size=ceil(options.bin_size/dt);
+  
+  binMsBool = true;
 else
   % convert from fraction to time points
   options.bin_size=ceil(options.bin_size*ntime);
+  
+  binMsBool = false;
 end
 
 % constrain bin_size to entire data set
@@ -113,7 +117,7 @@ if options.bin_size>ntime
 end
 
 % check bin_shift
-if options.bin_shift > 1
+if options.bin_shift > 1 || binMsBool
   % convert from ms to time points
   options.bin_shift = ceil(options.bin_shift/dt);
 else
