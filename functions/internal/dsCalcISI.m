@@ -98,8 +98,10 @@ for v=1:length(options.variable)
   % extract this data set
   var=options.variable{v};
   dat=data.(var);
+  
   % determine how many cells are in this data set
   ncells=size(dat,2);
+  
   % loop over cells
   ISI_SUA=cell(1,ncells);
   spike_times=cell(1,ncells);
@@ -108,6 +110,7 @@ for v=1:length(options.variable)
     spike_inds=1+find((dat(2:end,i)>=options.threshold & dat(1:end-1,i)<options.threshold));
 %     spikes=zeros(ntime,1);
     spike_times{i}=time(spike_inds);
+    
     if length(spike_inds)>1
 %       spikes(spike_inds)=1;
       % calculate ISIs

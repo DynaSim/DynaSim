@@ -1,5 +1,5 @@
 function data = dsCalcFRmulti(data, varargin)
-%CALCFRMULTI - extends dsCalcFR to get SUA and MUA firing rates
+%dsCalcFRmulti - extends dsCalcFR to get SUA and MUA firing rates
 %
 % Usage:
 %   data = dsCalcFRmulti(data,'option',value)
@@ -38,10 +38,10 @@ function data = dsCalcFRmulti(data, varargin)
 %   s.populations(2).name='I';
 %   s.populations(2).equations='dv/dt=@current+10; {iNa,iK}; v(0)=-65';
 %   data=dsSimulate(s);
-%   data=dsCalcFR(data,'variable','*_v');
+%   data=dsCalcFRmulti(data,'variable','*_v');
 %   data % contains firing rates for E and I pops in .E_v_FR_SUA/MUA and .I_v_FR_SUA/MUA.
 %
-% See also: dsPlotFR, dsAnalyzeStudy, dsSimulate, dsCheckData, dsSelectVariables
+% See also: dsCalcFR. dsPlotFR, dsAnalyzeStudy, dsSimulate, dsCheckData, dsSelectVariables
 
 %% 1.0 Check inputs
 options=dsCheckOptions(varargin,{...
@@ -130,6 +130,7 @@ end
 % 3.1 calc bin info
 % samples at which bins begin
 bin_index_begs=t1:options.bin_shift:t2;
+
 % samples at which bins end
 bin_index_ends=bin_index_begs+options.bin_size;
 
@@ -157,8 +158,10 @@ for v=1:length(options.variable)
   % extract this data set
   var=options.variable{v};
   dat=data.(var);
+  
   % determine how many cells are in this data set
   ncells=size(dat,2);
+  
   % loop over cells
   FR_SUA=zeros(nbins,ncells);
   FR_MUA=zeros(nbins,1);
@@ -178,14 +181,14 @@ for v=1:length(options.variable)
     % calculate firing rates
     for bin=1:nbins
       % (# spikes in bin) / (duration of bin in seconds)
-      FR_SUA(bin,:)=sum(spikes(bin_index_begs(bin):bin_index_ends(bin), :))/bin_width;
-      FR_MUA(bin)=sum(sum(spikes(bin_index_begs(bin):bin_index_ends(bin), :))) / (bin_width * ncells); % MUA average
+      FR_SUA(bin,:) = sum(spikes(bin_index_begs(bin):bin_index_ends(bin), :))/bin_width;
+      FR_MUA(bin) = sum(sum(spikes(bin_index_begs(bin):bin_index_ends(bin), :))) / (bin_width * ncells); % MUA average
     end
   end
   
   % add firing rates to data structure
-  data.([var '_FR_SUA' options.output_suffix])=FR_SUA;
-  data.([var '_FR_MUA' options.output_suffix])=FR_MUA;
+  data.([var '_FR_SUA' options.output_suffix]) = FR_SUA;
+  data.([var '_FR_MUA' options.output_suffix]) = FR_MUA;
   %   data.([var '_spike_times'])=spike_times;
   if ~ismember([var '_FR_SUA' options.output_suffix], data.results)
     data.results{end+1}=[var '_FR_SUA' options.output_suffix];
@@ -196,7 +199,7 @@ for v=1:length(options.variable)
   end
 end
 % add bin times to data
-data.(['time_FR' options.output_suffix])=bin_times;
+data.(['time_FR' options.output_suffix]) = bin_times;
 if ~ismember(['time_FR' options.output_suffix], data.results)
   data.results{end+1}=['time_FR' options.output_suffix];
 end
