@@ -10,7 +10,7 @@ function handles = dsPlot(data,varargin)
 % Inputs:
 %   - data: DynaSim data structure (see dsCheckData)
 %   - options:
-%     'plot_type'       : what to plot {'waveform' (default),'rastergram','power'}
+%     'plot_type'       : what to plot {'waveform' (default),'rastergram','power','density'}
 %     'variable'        : name of field containing data to plot (default: all
 %                         pops with state variable of variable in data.labels)
 %     'time_limits'     : in units of data.time {[beg,end]}
@@ -31,8 +31,9 @@ function handles = dsPlot(data,varargin)
 %     'ax_handle'       : Axes handle to plot in. If lock_gca, defaults to gca.
 %     'suppress_textstring' : Turns off plotting of text inside plots
 %     - NOTE: analysis options are available depending on plot_type
-%       - see see dsCalcFR options for plot_type 'rastergram' or 'rates'
+%       - see dsCalcSpikeTimes options for plot_type 'rastergram'
 %       - see dsCalcPower options for plot_type 'power'
+%       - see dsCalcFR options for plot_type 'rates'
 %
 % Outputs:
 %   - handles: graphic handles to figures
@@ -165,7 +166,7 @@ data=dsCheckData(data, varargin{:});
 
 % get options
 options=dsCheckOptions(varargin,{...
-  'plot_type','waveform',{'waveform','rastergram','raster','power'},... % ,'rates'
+  'plot_type','waveform',{'waveform','rastergram','raster','power','density'},... % ,'rates'
   'plot_mode','trace',{'trace','image'},...
   'variable',[],[],...
   'time_limits',[-inf inf],[],...
@@ -288,25 +289,26 @@ lock_gca = options.lock_gca;
 %     options.variable=['*' var{1}];
 %   end
 % end
-var_fields=dsSelectVariables(data(1),options.variable, varargin{:});
-variables=cell(size(var_fields));
-for i=1:length(var_fields)
+var_fields = dsSelectVariables(data(1),options.variable, varargin{:});
+variables = cell(size(var_fields));
+for i = 1:length(var_fields)
   parent=dsGetParentNamespace(data(1).model,var_fields{i});
   var=regexp(var_fields{i},[parent '(.*)'],'tokens','once');
   variables{i}=var{1};
 end
-variables=unique(variables);
+variables = unique(variables);
 % tmp=regexp(var_fields,'_(.+)$','tokens','once');
 % variables=unique([tmp{:}]);
 
 % populations to plot
 pop_names={data(1).model.specification.populations.name}; % list of populations
+
 % restrict to populations with variables to plot
 pop_indices=[];     % indices of populations to plot
 pop_var_indices={}; % indices of var_fields to plot per population
   % pop_var_indices{pop}(variable): index into var_fields
   
-for i=1:length(pop_names)
+for i = 1:length(pop_names)
   % do any variables start with this population name?
   var_inds=find(~cellfun(@isempty,regexp(var_fields,['^' pop_names{i} '_'])));
   if any(var_inds)
@@ -322,12 +324,12 @@ pop_names=pop_names(pop_indices);
 
 % data set info
 time = data(1).time; % time vector
-pop_sizes=[data(1).model.specification.populations(pop_indices).size];
-num_pops=length(pop_names); % number of populations to plot
-num_sims=length(data); % number of simulations
-num_vars=length(variables);
-num_labels=length(var_fields); % number of labels to plot
-num_times=length(time);
+pop_sizes = [data(1).model.specification.populations(pop_indices).size];
+num_pops = length(pop_names); % number of populations to plot
+num_sims = length(data); % number of simulations
+num_vars = length(variables);
+num_labels = length(var_fields); % number of labels to plot
+num_times = length(time);
 
 % auto pick options.plot_time_axis_sec_flag
 if options.plot_time_axis_sec_flag == -1
@@ -348,11 +350,11 @@ switch options.plot_type
     xlab = timeAxisLabel(options); % x-axis label
   case 'power'      % plot VARIABLE_Power_SUA.Pxx
     if any(cellfun(@isempty,regexp(var_fields,'.*_Power_SUA$')))
-      data=dsCalcPower(data,varargin{:});
+      data = dsCalcPower(data,varargin{:});
     end
     
-    xdata=data(1).([var_fields{1} '_Power_SUA']).frequency;
-    xlab='frequency (Hz)'; % x-axis label
+    xdata = data(1).([var_fields{1} '_Power_SUA']).frequency;
+    xlab = 'frequency (Hz)'; % x-axis label
     
     % set default x-limits for power spectrum
     if isempty(options.xlim)
@@ -363,6 +365,7 @@ switch options.plot_type
       spike_fields = cellfun(@(x)[x '_spikes'],var_fields,'uni',0);
       idx = cellfun(@(x)isfield(data,x),spike_fields);
       
+      % get spike times
       if any(idx)
         % get spike times from binary spike matrix if missing spike times
         inds=find(idx);
@@ -380,15 +383,9 @@ switch options.plot_type
             end % cells
           end % pops
         end % sims
-%       rmfields=cellfun(@(x)[x '_spikes'],var_fields,'uni',0);
-%       idx=cellfun(@(x)isfield(data,x),rmfields);
-%       if any(idx)
-%          data=rmfield(data,rmfields);
-%          data.labels=setdiff(data.labels,rmfields,'stable');
-%       end
       else
         % find spikes from threshold crossing
-        data = dsCalcFR(data,varargin{:});
+        data = dsCalcSpikeTimes(data,varargin{:});
       end
     end
     
@@ -407,6 +404,11 @@ switch options.plot_type
     
     xdata = time;
     xlab = timeAxisLabel(options); % x-axis label
+  case 'density'
+    data = dsCalcSpikes(data,varargin{:});
+    
+    xdata = time;
+    xlab = timeAxisLabel(options); % x-axis label
   case 'rates'      % plot VARIABLE_FR
     if any(cellfun(@isempty,regexp(var_fields,'.*_FR$')))
       data = dsCalcFR(data,varargin{:});
@@ -419,6 +421,8 @@ switch options.plot_type
       xdata = data.time_FR;
       xlab = 'time (ms, bins)'; % x-axis label
     end
+  otherwise
+    error('Unknown plot type.')
 end
 
 % set x-axis limits
@@ -595,7 +599,7 @@ for iFigset = 1:num_fig_sets
         if num_sims==1 && num_pops==1 && num_vars==1 && ~lock_gca
         % -----------------------------------------------------------------
           % one cell per row: dat = data(s=1).(var)(:,c=r) where var=vars{v=1}
-          var=var_fields{1};
+          var = var_fields{1};
           switch options.plot_type
             case 'waveform'
               dat = data(sim_index).(var)(:,row);
@@ -620,6 +624,10 @@ for iFigset = 1:num_fig_sets
               if num_figs*num_rows < size(data(sim_index).([var '_spike_times']),2)
                 allspikes{1} = data(sim_index).([var '_spike_times']);
               end
+            case 'density'
+              dat = mean(data(sim_index).([var '_spikes']), 2);
+            otherwise
+              error('Unknown plot type.')
           end
           
           if num_rows>1
@@ -641,12 +649,16 @@ for iFigset = 1:num_fig_sets
             case {'rastergram','raster'}
               set_name = regexp(var,'^([a-zA-Z0-9]+)_','tokens','once');
               allspikes{1} = data(sim_index).([var '_spike_times']);
+            case 'density'
+              dat = mean(data(sim_index).([var '_spikes']), 2);
+            otherwise
+              error('Unknown plot type.')
           end
         % -----------------------------------------------------------------
         elseif num_sims==1 && num_pops==1 && num_vars>1
         % -----------------------------------------------------------------
           % one variable per row: dat = data(s=1).(var)(:,1:MTPP) where var=vars{v=r}
-          var=var_fields{row};
+          var = var_fields{row};
           switch options.plot_type
             case 'waveform'
               dat = data(sim_index).(var);
@@ -659,6 +671,10 @@ for iFigset = 1:num_fig_sets
             case {'rastergram','raster'}
               set_name = regexp(var,'^([a-zA-Z0-9]+)_','tokens','once');
               allspikes{1} = data(sim_index).([var '_spike_times']);
+            case 'density'
+              dat = mean(data(sim_index).([var '_spikes']), 2);
+            otherwise
+              error('Unknown plot type.')
           end
           shared_ylims_flag=0;
         % -----------------------------------------------------------------
@@ -676,8 +692,12 @@ for iFigset = 1:num_fig_sets
               var = [var '_Power_SUA'];
               dat = data(sim_index).(var).Pxx;
             case {'rastergram','raster'}
-              set_name=regexp(var,'^([a-zA-Z0-9]+)_','tokens','once');
-              allspikes{1}=data(sim_index).([var '_spike_times']);
+              set_name = regexp(var,'^([a-zA-Z0-9]+)_','tokens','once');
+              allspikes{1} = data(sim_index).([var '_spike_times']);
+            case 'density'
+              dat = mean(data(sim_index).([var '_spikes']), 2);
+            otherwise
+              error('Unknown plot type.')
           end
         % -----------------------------------------------------------------
         elseif num_sims==1 && num_pops>1 && num_vars==1 && lock_gca
@@ -696,8 +716,8 @@ for iFigset = 1:num_fig_sets
                 end
               end
               
-              for k=1:num_pops
-                dat(:,k)=nanmean(data(sim_index).(var_fields{k}),2);
+              for iPop = 1:num_pops
+                dat(:,iPop) = nanmean(data(sim_index).(var_fields{iPop}),2);
               end
               
               var=['<' variables{1} '>'];
@@ -714,24 +734,32 @@ for iFigset = 1:num_fig_sets
                 end
               end
               
-              for k=1:num_pops
-                dat(:,k)=nanmean(data(sim_index).([var_fields{k} '_Power_SUA']).Pxx,2);
-                AuxData(:,k)=data(sim_index).([var_fields{k} '_Power_MUA']).Pxx;
-                AuxDataName{end+1}=strrep([var_fields{k} '_Power_MUA'],'_','\_');
-                vlines(end+1)=data(sim_index).([var_fields{k} '_Power_MUA']).PeakFreq;
+              for iPop = 1:num_pops
+                dat(:,iPop)=nanmean(data(sim_index).([var_fields{iPop} '_Power_SUA']).Pxx,2);
+                AuxData(:,iPop)=data(sim_index).([var_fields{iPop} '_Power_MUA']).Pxx;
+                AuxDataName{end+1}=strrep([var_fields{iPop} '_Power_MUA'],'_','\_');
+                vlines(end+1)=data(sim_index).([var_fields{iPop} '_Power_MUA']).PeakFreq;
               end
               var=['<' variables{1} '_Power_SUA>'];
             case {'rastergram','raster'}
               set_name={};
               
-              for k=1:num_pops
-                tmp=regexp(var_fields{k},'^([a-zA-Z0-9]+)_','tokens','once');
-                set_name{k}=tmp{1};
-                allspikes{k}=data(sim_index).([var_fields{k} '_spike_times']);
+              for iPop=1:num_pops
+                tmp=regexp(var_fields{iPop},'^([a-zA-Z0-9]+)_','tokens','once');
+                set_name{iPop}=tmp{1};
+                allspikes{iPop}=data(sim_index).([var_fields{iPop} '_spike_times']);
               end
               
               var=['<' variables{1} '>'];
-
+            case 'density'
+              % calculate averages across populations
+              dat = nan(num_times, num_pops);
+              
+              for iPop = 1:num_pops
+                dat(:,iPop) = mean(data(sim_index).([var_fields{iPop} '_spikes']), 2);
+              end
+            otherwise
+              error('Unknown plot type.')
           end
         % -----------------------------------------------------------------
         elseif num_sims==1 && num_pops>1 && num_vars>1
@@ -753,6 +781,10 @@ for iFigset = 1:num_fig_sets
             case {'rastergram','raster'}
               set_name=regexp(var,'^([a-zA-Z0-9]+)_','tokens','once');
               allspikes{1}=data(sim_index).([var '_spike_times']);
+            case 'density'
+              dat = mean(data(sim_index).([var '_spikes']), 2);
+            otherwise
+              error('Unknown plot type.')
           end
         % -----------------------------------------------------------------
         elseif num_sims>1 && num_pops==1 && num_vars==1
@@ -771,6 +803,10 @@ for iFigset = 1:num_fig_sets
             case {'rastergram','raster'}
               set_name=regexp(var,'^([a-zA-Z0-9]+)_','tokens','once');
               allspikes{1}=data(sim_index).([var '_spike_times']);
+            case 'density'
+              dat = mean(data(sim_index).([var '_spikes']), 2);
+            otherwise
+              error('Unknown plot type.')
           end
         % -----------------------------------------------------------------
         elseif num_sims>1 && num_pops==1 && num_vars>1
@@ -792,6 +828,10 @@ for iFigset = 1:num_fig_sets
             case {'rastergram','raster'}
               set_name=regexp(var,'^([a-zA-Z0-9]+)_','tokens','once');
               allspikes{1}=data(sim_index).([var '_spike_times']);
+            case 'density'
+              dat = mean(data(sim_index).([var '_spikes']), 2);
+            otherwise
+              error('Unknown plot type.')
           end
         % -----------------------------------------------------------------
         elseif num_sims>1 && num_pops>1 && num_vars==1
@@ -808,8 +848,8 @@ for iFigset = 1:num_fig_sets
                   error('nanmean function is needed, please install the statistics package from Octave Forge');
                 end
               end
-              for k=1:num_pops
-                dat(:,k)=nanmean(data(sim_index).(var_fields{k}),2);
+              for iPop=1:num_pops
+                dat(:,iPop)=nanmean(data(sim_index).(var_fields{iPop}),2);
               end
               var=['<' variables{1} '>'];
             case 'power'
@@ -823,22 +863,30 @@ for iFigset = 1:num_fig_sets
                   error('nanmean function is needed, please install the statistics package from Octave Forge');
                 end
               end
-              for k=1:num_pops
-                dat(:,k)=nanmean(data(sim_index).([var_fields{k} '_Power_SUA']).Pxx,2);
-                AuxData(:,k)=data(sim_index).([var_fields{k} '_Power_MUA']).Pxx;
-                AuxDataName{end+1}=strrep([var_fields{k} '_Power_MUA'],'_','\_');
-                vlines(end+1)=data(sim_index).([var_fields{k} '_Power_MUA']).PeakFreq;
+              for iPop=1:num_pops
+                dat(:,iPop)=nanmean(data(sim_index).([var_fields{iPop} '_Power_SUA']).Pxx,2);
+                AuxData(:,iPop)=data(sim_index).([var_fields{iPop} '_Power_MUA']).Pxx;
+                AuxDataName{end+1}=strrep([var_fields{iPop} '_Power_MUA'],'_','\_');
+                vlines(end+1)=data(sim_index).([var_fields{iPop} '_Power_MUA']).PeakFreq;
               end
               var=['<' variables{1} '_Power_SUA>'];
             case {'rastergram','raster'}
               set_name={};
-              for k=1:num_pops
-                tmp=regexp(var_fields{k},'^([a-zA-Z0-9]+)_','tokens','once');
-                set_name{k}=tmp{1};
-                allspikes{k}=data(sim_index).([var_fields{k} '_spike_times']);
+              for iPop=1:num_pops
+                tmp=regexp(var_fields{iPop},'^([a-zA-Z0-9]+)_','tokens','once');
+                set_name{iPop}=tmp{1};
+                allspikes{iPop}=data(sim_index).([var_fields{iPop} '_spike_times']);
               end
               var=['<' variables{1} '>'];
-
+            case 'density'
+              % calculate averages across populations
+              dat = nan(num_times, num_pops);
+              
+              for iPop = 1:num_pops
+                dat(:,iPop) = mean(data(sim_index).([var_fields{iPop} '_spikes']), 2);
+              end
+            otherwise
+              error('Unknown plot type.')
           end
         % -----------------------------------------------------------------
         elseif num_sims>1 && num_pops>1 && num_vars>1
@@ -855,12 +903,12 @@ for iFigset = 1:num_fig_sets
                   error('nanmean function is needed, please install the statistics package from Octave Forge');
                 end
               end
-              for k=1:num_pops
-                if isnan(pop_var_indices{k}(iFigset))
+              for iPop=1:num_pops
+                if isnan(pop_var_indices{iPop}(iFigset))
                   continue;
                 end
-                var=var_fields{pop_var_indices{k}(iFigset)};
-                dat(:,k)=nanmean(data(sim_index).(var),2);
+                var=var_fields{pop_var_indices{iPop}(iFigset)};
+                dat(:,iPop)=nanmean(data(sim_index).(var),2);
               end
               var=['<' variables{iFigset} '>'];
             case 'power'
@@ -874,29 +922,38 @@ for iFigset = 1:num_fig_sets
                   error('nanmean function is needed, please install the statistics package from Octave Forge');
                 end
               end
-              for k=1:num_pops
-                if isnan(pop_var_indices{k}(iFigset))
+              for iPop=1:num_pops
+                if isnan(pop_var_indices{iPop}(iFigset))
                   continue;
                 end
-                var=var_fields{pop_var_indices{k}(iFigset)};
-                dat(:,k)=nanmean(data(sim_index).([var '_Power_SUA']).Pxx,2);
-                AuxData(:,k)=data(sim_index).([var '_Power_MUA']).Pxx;
+                var=var_fields{pop_var_indices{iPop}(iFigset)};
+                dat(:,iPop)=nanmean(data(sim_index).([var '_Power_SUA']).Pxx,2);
+                AuxData(:,iPop)=data(sim_index).([var '_Power_MUA']).Pxx;
                 AuxDataName{end+1}=strrep([var '_Power_MUA'],'_','\_');
                 vlines(end+1)=data(sim_index).([var '_Power_MUA']).PeakFreq;
               end
               var=['<' variables{iFigset} '_Power_SUA>'];
             case {'rastergram','raster'}
               set_name={};
-              for k=1:num_pops
-                if isnan(pop_var_indices{k}(iFigset))
+              for iPop=1:num_pops
+                if isnan(pop_var_indices{iPop}(iFigset))
                   continue;
                 end
-                var=var_fields{pop_var_indices{k}(iFigset)};
+                var=var_fields{pop_var_indices{iPop}(iFigset)};
                 tmp=regexp(var,'^([a-zA-Z0-9]+)_','tokens','once');
-                set_name{k}=tmp{1};
-                allspikes{k}=data(sim_index).([var '_spike_times']);
+                set_name{iPop}=tmp{1};
+                allspikes{iPop}=data(sim_index).([var '_spike_times']);
               end
               var=['<' variables{iFigset} '>'];
+            case 'density'
+              % calculate averages across populations
+              dat = nan(num_times, num_pops);
+              
+              for iPop = 1:num_pops
+                dat(:,iPop) = mean(data(sim_index).([var_fields{iPop} '_spikes']), 2);
+              end
+            otherwise
+              error('Unknown plot type.')
           end
         end
         % #################################################################
@@ -908,8 +965,8 @@ for iFigset = 1:num_fig_sets
           if num_sims>1
             % list the parameter varied along the rows first
             str=[row_param_name '=' num2str(row_param_values(row)) ': '];
-            for k=1:num_varied
-              fld=data(sim_index).varied{k};
+            for iPop=1:num_varied
+              fld=data(sim_index).varied{iPop};
               if ~strcmp(fld,row_param_name)
                 val=data(sim_index).(fld);
                 str=[str fld '=' num2str(val) ', '];
@@ -920,8 +977,8 @@ for iFigset = 1:num_fig_sets
             end
           else
             str='';
-            for k=1:length(data.varied)
-              fld=data(sim_index).varied{k};
+            for iPop=1:length(data.varied)
+              fld=data(sim_index).varied{iPop};
               str=[str fld '=' num2str(data(sim_index).(fld)) ', '];
             end
           end
@@ -1017,6 +1074,26 @@ for iFigset = 1:num_fig_sets
             set(thisAxes,'xtick',xticks,'xticklabel',xticks);
             %set(thisAxes,'xticklabel',get(thisAxes,'ytick'));
             set(thisAxes,'ticklength',get(thisAxes,'ticklength')/2) %make ticks shorter
+          case 'density'
+            % finish preparing data
+            if ~strcmp(options.yscale,'linear')
+              dat=feval(options.yscale,dat); % log or log10
+              % alternative approach: use semilogy for log10
+            end
+            
+            if length(options.xlim)==2
+              sel = ( xdata >= options.xlim(1) ) & ( xdata <= options.xlim(2) );
+            else
+              sel = 1:length(xdata);
+            end
+            
+            % plot traces
+            % select max subset allowed
+            dat = dat(:,1:min(size(dat,2),MTPP)); % select max subset to plot
+            stairs(thisAxes, xdata(sel),dat(sel,:));
+            set(thisAxes,'ticklength',get(thisAxes,'ticklength')/2) %make ticks shorter
+          otherwise
+              error('Unknown plot type.')
         end % end switch options.plot_type
         
         % plot auxiliary data
@@ -1037,8 +1114,14 @@ for iFigset = 1:num_fig_sets
         xlim(thisAxes, options.xlim);
         
         % ylab
-        if ~strcmp(options.plot_type,'rastergram')
-          ylabel(thisAxes, strrep(var,'_','\_'));
+        labelVar = var;
+        if iscell(labelVar)
+          labelVar = labelVar{1};
+        end
+        if strcmp(options.plot_type, 'density')
+          ylabel(thisAxes, strrep([labelVar ' Spike Density'],'_','\_'));
+        elseif ~any(strcmp(options.plot_type, {'rastergram','raster'}))
+          ylabel(thisAxes, strrep(labelVar,'_','\_'));
         end
         
         % ylim
@@ -1074,11 +1157,11 @@ for iFigset = 1:num_fig_sets
         
         % plot lines and text (used for power)
         if ~isempty(vlines)
-          for k=1:length(vlines)
-            if ~isnan(vlines(k))
-              line(thisAxes, [vlines(k) vlines(k)],ylim,'color','k','linestyle','--');
+          for iLine=1:length(vlines)
+            if ~isnan(vlines(iPop))
+              line(thisAxes, [vlines(iLine) vlines(iLine)],ylim,'color','k','linestyle','--');
               ymax=max(ylim);
-              text(thisAxes, double(vlines(k) + 0.1*range(xlim)), 0.9*ymax, sprintf('MUA Sxx Peak F: %.f', vlines(k)))
+              text(thisAxes, double(vlines(iLine) + 0.1*range(xlim)), 0.9*ymax, sprintf('MUA Sxx Peak F: %.f', vlines(iLine)))
             end
           end
         end
