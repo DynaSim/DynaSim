@@ -84,6 +84,7 @@ options=dsCheckOptions(varargin,{...
   'data_file','data.csv',[],... % name of data file if disk_flag=1
   'fileID',1,[],...
   'mex_flag',0,{0,1},... % whether to prepare script for being compiled using coder instead of interpreting Matlab
+  'cluster_flag',0,{0,1},...
   'verbose_flag',1,{0,1},...
   'sparse_flag',0,{0,1},...
   'one_solve_file_flag',0,{0,1},... % use only 1 solve file of each type, but can't vary mechs yet
@@ -328,6 +329,11 @@ else %options.disk_flag==0
       fprintf(fid, 'assert(isa(simID, ''double''));\n');
     end
   end
+end
+
+if options.mex_flag && options.one_solve_file_flag && options.cluster_flag
+  nSims = nMods;
+  fprintf(fid,'%% nSims = %i (needed for one_solve_file_flag mex differentiation)\n', nSims);
 end
 
 % Benchmark tic

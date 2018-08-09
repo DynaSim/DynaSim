@@ -1,5 +1,5 @@
 function modifications_set = dsVary2Modifications(vary,model)
-%VARY2MODIFICATIONS - convert specification of things to vary into a set of modifications indicating how to vary the desired things.
+%dsVary2Modifications - convert specification of things to vary into a set of modifications indicating how to vary the desired things.
 %
 % The returned set of modifications has one element per point in search space;
 % each element can be passed along with DynaSim model or specification to
@@ -143,13 +143,18 @@ if nargin<2
   model = [];
 end
 
-% todo: use model to get mechanism_list for special search spaces
+if isempty(vary)
+  modifications_set = [];
+  return
+end
+
+% TODO: use model to get mechanism_list for special search spaces
 % (e.g., leave-one-out / -1).
 
 % expand each 'vary' specification (namespace,variable,values) into a list of modifications
 modification_sets = {};
 for i=1:size(vary,1)
-  modification_sets{i}=expand_vary(vary(i,:), model);
+  modification_sets{i} = expand_vary(vary(i,:), model);
   %modification_sets{i}{:}
 end
 

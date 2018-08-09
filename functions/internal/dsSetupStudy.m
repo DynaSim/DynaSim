@@ -12,6 +12,9 @@ function [studyinfo,options] = dsSetupStudy(base_model,varargin)
 opts=dsCheckOptions(varargin,{...
   'modifications_set',[],[],... % search space
   'simulator_options',[],[],... % options from dsSimulate
+  'mex_flag',0,{0,1},...
+  'cluster_flag',0,{0,1},...
+  'one_solve_file_flag',0,{0,1},...
   'process_id',[],[],... % process identifier for loading studyinfo if necessary
   },false);
 
@@ -57,12 +60,19 @@ if options.save_data_flag || options.save_results_flag || options.parfor_flag
   % set solve_file name for this study
   if isempty(options.solve_file)
     % set default solve_file for this study
-    [~,fname]=fileparts(options.study_dir);
-    fname=['solve_ode_' fname];
+    [~,fname] = fileparts(options.study_dir);
+    fname = ['solve_ode_' fname];
 
     % replace non-word characters by underscores so that matlab can execute
     % the file as a Matlab function:
-    fname=regexprep(fname,'[^\w]','_');
+    fname = regexprep(fname,'[^\w]','_');
+    
+    % add #sims to name if mex_flag and one_solve_file_flag since #sims coded
+    % into file
+    if options.mex_flag && options.one_solve_file_flag && options.cluster_flag
+      nSims = length(modifications_set);
+      fname = sprintf('%s_%isims', fname, nSims);
+    end
 
     % store the solve file
     options.solve_file = fullfile(options.study_dir,'solve',[fname '.m']);

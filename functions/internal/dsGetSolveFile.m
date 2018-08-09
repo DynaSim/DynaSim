@@ -106,16 +106,16 @@ end
 
 if ~isempty(options.solve_file)
   % use user-provided solve_file
-  solve_file=options.solve_file;
+  solve_file = options.solve_file;
   % note: options.solve_file is used by cluster sim jobs (see dsCreateBatch())
 elseif isfield(studyinfo,'solve_file')
   % use study-associated solve_file
-  solve_file=studyinfo.solve_file;
+  solve_file = studyinfo.solve_file;
 elseif options.auto_gen_test_data_flag || options.unit_test_flag
-  solve_file='solve_ode.m';
+  solve_file = 'solve_ode.m';
 else
   % set default solve_file name
-  solve_file=['solve_ode_' datestr(now,'yyyymmddHHMMSS_FFF') '.m'];
+  solve_file = ['solve_ode_' datestr(now,'yyyymmddHHMMSS_FFF') '.m'];
 end
 
 if ~strcmp(reportUI,'matlab') && ~strcmp(solve_file,'solve_ode.m')
@@ -131,9 +131,9 @@ end
 if isempty(fpath)
   % add path to solve_file name
   if ~isempty(options.sim_id)
-    solve_file=fullfile(options.study_dir,'solve',['sim' num2str(options.sim_id)],[fname fext]);
+    solve_file = fullfile(options.study_dir,'solve',['sim' num2str(options.sim_id)],[fname fext]);
   else
-    solve_file=fullfile(options.study_dir,'solve',[fname fext]);
+    solve_file = fullfile(options.study_dir,'solve',[fname fext]);
   end
 
   % convert relative path to absolute path
