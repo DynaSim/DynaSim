@@ -405,7 +405,7 @@ switch options.plot_type
     xdata = time;
     xlab = timeAxisLabel(options); % x-axis label
   case 'density'
-    data = dsCalcSpikes(data,varargin{:});
+    data = dsCalcSpikes(data,varargin{:},'time_limits',[-inf inf]);
     
     xdata = time;
     xlab = timeAxisLabel(options); % x-axis label
@@ -432,7 +432,7 @@ end
 
 % set time_limits
 switch options.plot_type
-  case {'waveform', 'rates', 'rastergram','raster'}
+  case {'waveform', 'rates', 'rastergram','raster', 'density'}
     if isempty(options.xlim)
       options.xlim = [min(xdata) max(xdata)];
     elseif options.plot_time_axis_sec_flag
