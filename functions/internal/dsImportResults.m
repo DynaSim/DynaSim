@@ -1,4 +1,4 @@
-function [results, simIDs] = dsImportResults(src, varargin)
+function [results, simIDs, resultFiles] = dsImportResults(src, varargin)
 %dsImportResults - Import analysis result of a simulation
 %
 % Usage:
@@ -38,6 +38,8 @@ function [results, simIDs] = dsImportResults(src, varargin)
 %              function, then just returns the cell array for that function.
 %   - simIDs: simIDs for each result value. Will be a mat vector or a struct of
 %             mat vectors with field names matching those of results variable.
+%   - resultFiles: file paths for each result. Will be a cellstr vector or a struct of
+%                  cellstr vectors with field names matching those of results variable.
 % 
 % Author: Jason Sherfey, PhD <jssherfey@gmail.com>
 % Updated: Erik Roberts
@@ -334,6 +336,14 @@ for iFn = 1:nResultFn
     simIDs = simInds;
   else
     simIDs.(thisFnName) = simInds;
+  end
+  
+  if nargout > 2
+    if nResultFn == 1
+      resultFiles = thisFnFiles;
+    else
+      resultFiles.(thisFnName) = thisFnFiles;
+    end
   end
   
   results.(fnIdStr{iFn}) = thisFnResults;
