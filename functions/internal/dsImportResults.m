@@ -335,14 +335,14 @@ for iFn = 1:nResultFn
   if nResultFn == 1
     simIDs = simInds;
   else
-    simIDs.(thisFnName) = simInds;
+    simIDs.(fnIdStr{iFn}) = simInds;
   end
   
   if nargout > 2
     if nResultFn == 1
       resultFiles = thisFnFiles;
     else
-      resultFiles.(thisFnName) = thisFnFiles;
+      resultFiles.(fnIdStr{iFn}) = thisFnFiles;
     end
   end
   
