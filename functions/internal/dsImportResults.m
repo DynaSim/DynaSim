@@ -1,4 +1,4 @@
-function [results, simIDs, resultFiles] = dsImportResults(src, varargin)
+function [results, simIDs, filePaths, funNames, prefixes] = dsImportResults(src, varargin)
 %dsImportResults - Import analysis result of a simulation
 %
 % Usage:
@@ -38,8 +38,12 @@ function [results, simIDs, resultFiles] = dsImportResults(src, varargin)
 %              function, then just returns the cell array for that function.
 %   - simIDs: simIDs for each result value. Will be a mat vector or a struct of
 %             mat vectors with field names matching those of results variable.
-%   - resultFiles: file paths for each result. Will be a cellstr vector or a struct of
-%                  cellstr vectors with field names matching those of results variable.
+%   - filePaths: file paths for each result. Will be a cellstr vector or a struct of
+%                cellstr vectors with field names matching those of results variable.
+%   - funNames: function name for each result. Will be a cellstr vector or a struct of
+%               cellstr vectors with field names matching those of results variable.
+%   - prefixes: file prefixes for each result. Will be a cellstr vector or a struct of
+%               cellstr vectors with field names matching those of results variable.
 % 
 % Author: Jason Sherfey, PhD <jssherfey@gmail.com>
 % Updated: Erik Roberts
@@ -217,34 +221,76 @@ end
 % goal: filter files by given function(s) or take all functions. If multiple
 % functions, output needs to be different structure fields for each function.
 
-% get unique fns, using number index in case same name
-fnIndName = regexpi(result_files, '_analysis(\d+)_(.+).mat', 'tokens');
-fnIndName = [fnIndName{:}];
-fnIndName = cat(1, fnIndName{:});
-nF = size(fnIndName,1);
+% parse filenames
+filePrefixSimIndFnName = cellfun(@filepartsNameExt, result_files, 'uni',0);
+filePrefixSimIndFnName = regexpi(filePrefixSimIndFnName, '(.+)_sim(\d+)_analysis(\d+)_(.+).mat', 'tokens');
+filePrefixSimIndFnName = [filePrefixSimIndFnName{:}];
+filePrefixSimIndFnName = cat(1, filePrefixSimIndFnName{:});
+
+% make fn_# names
+nF = size(filePrefixSimIndFnName,1);
 fnIdStr = cell(nF,1);
 for iF = 1:nF
-  fnIdStr{iF} = cat(2,fnIndName{iF,2},fnIndName{iF,1});
+  fnIdStr{iF} = [filePrefixSimIndFnName{iF,4}, '_', filePrefixSimIndFnName{iF,3}];
 end
-clear nF fnIndName % since not unique yet
+resultLabels = fnIdStr;
+
+% check if overlapping fn/ind by appending sim id
+tempNames = strcat(resultLabels, '_', filePrefixSimIndFnName(:,2));
+if length(unique(tempNames)) < nF % then there is overlap
+  simInds = str2double(filePrefixSimIndFnName(:,2));
+  
+  % pick first simID
+  testSimID = simInds(1);
+  
+  % get all labels for that simID
+  overlappingResultLabels = fnIdStr(simInds == testSimID);
+  
+  % get non unique labels
+  [~,ia] = unique(overlappingResultLabels);
+  [overlappingResultLabels{ia}] = deal({});
+  
+  overlappingResultLabels = overlappingResultLabels(~cellfun(@isempty,overlappingResultLabels));
+  
+  % get prefixes
+  allPrefixes = filePrefixSimIndFnName(:,1);
+  
+  % make prefixes valid names
+  allPrefixes = matlab.lang.makeValidName(allPrefixes);
+  
+  for iLabel = 1:length(overlappingResultLabels)
+    thisLabel = overlappingResultLabels{iLabel};
+    
+    thisInds = strcmp(resultLabels, thisLabel);
+    
+    resultLabels(thisInds) = strcat(allPrefixes(thisInds), '_', resultLabels(thisInds));
+  end
+  
+  % check if overlapping fn/ind by appending sim id
+  tempNames = strcat(resultLabels, '_', filePrefixSimIndFnName(:,2));
+  
+  if length(unique(tempNames)) < nF % then there is overlap
+    warning('Overlapping output labels due to results with same function name and analysis index.')
+  end
+  
+  clear allPrefixes tempNames nF thisInds thisLabel iLabel overlappingResultLabels testSimID simInds
+end
 
 % Unique fn vars
-fnIdStr = unique(fnIdStr);
-nResultFn = length(fnIdStr);
+[uResultLabels, ia] = unique(resultLabels);
+uFnIdStr = fnIdStr(ia);
+resultFns = filePrefixSimIndFnName(ia,4);
+fnPrefixes = filePrefixSimIndFnName(ia,1);
 
-fnNameInd = regexpi(fnIdStr, '(\w+)(\d+)', 'tokens');
-fnNameInd = [fnNameInd{:}];
-fnNameInd = cat(1, fnNameInd{:});
-% now fnNameInd is for unique values
+nResultFn = length(uResultLabels);
 
 % filter for desired fn if given
 if ~isempty(func)
-  
   %loop over fn
   fnMatchInd = false(nResultFn,1);
   for iF = 1:nFnInput
     thisFn = func{iF};
-    fnMatchInd = fnMatchInd | contains(fnIdStr, thisFn);
+    fnMatchInd = fnMatchInd | strcmp(resultFns, thisFn);
   end
 else
   fnMatchInd = true(nResultFn,1);
@@ -252,9 +298,10 @@ end
 % fnMatchInd is true for all matching fn
 
 % fnNameInd fnNameInd for matching fn
-fnNameInd = fnNameInd(fnMatchInd,:);
-fnIdStr = fnIdStr(fnMatchInd);
-nResultFn = length(fnIdStr);
+uResultLabels = uResultLabels(fnMatchInd,:);
+uFnIdStr = uFnIdStr(fnMatchInd);
+resultFns = resultFns(fnMatchInd);
+nResultFn = length(uResultLabels);
 
 if ~any(fnMatchInd)
   wprintf('Did not find any files matching function inputs.')
@@ -280,14 +327,11 @@ end
 
 results = struct();
 for iFn = 1:nResultFn
-  thisFnName = fnNameInd{iFn,1};
-  thisFnRexStr = sprintf('analysis%s_%s', fnNameInd{iFn,2}, fnNameInd{iFn,1});
-  
-  thisFnFiles = result_files(contains(result_files, thisFnRexStr));
+  thisFunName = resultFns{iFn};
+  thisLabel = uResultLabels{iFn};
+
+  thisFnFiles = result_files( strcmp(resultLabels, thisLabel) );
   nFiles = length(thisFnFiles);
-  
-  thisFnResults = cell(num_sims, 1);
-  
   
   % get simIDs from file paths
   simInds = regexpi(thisFnFiles, 'sim(\d+)', 'tokens');
@@ -295,17 +339,24 @@ for iFn = 1:nResultFn
   simInds = [simInds{:}]; % note: removes missing entries
   simInds = cellfun(@str2double, simInds);
   
+  % sort filepaths
+  [simInds, sortedFileOrder] = sort(simInds);
+  thisFnFiles = thisFnFiles(sortedFileOrder);
+  
+  thisFnResults = cell(num_sims, 1);
+  
   for iFile = 1:nFiles
     thisFilePath = thisFnFiles{iFile};
+    existBool = exist(thisFilePath,'file');
     
     %check relative path for studyinfo paths since may be different system
-    if ~exist(thisFilePath,'file') && any(strcmp(options.import_scope, {'studyinfo','all'}))
+    if ~existBool && any(strcmp(options.import_scope, {'studyinfo','all'}))
       [~,fname,fext] = fileparts2(thisFilePath);
       thisFilePath = fullfile(studyinfo.study_dir,'results',[fname fext]);
     end
     
     % check if file exists
-    if exist(thisFilePath,'file')
+    if existBool
       thisFileContents = load(thisFilePath,'result');
       
       % get simInd
@@ -331,28 +382,47 @@ for iFn = 1:nResultFn
   end % file
   
   % store sorted simIDs
-  simInds = sort(simInds);
   if nResultFn == 1
     simIDs = simInds;
   else
-    simIDs.(fnIdStr{iFn}) = simInds;
+    simIDs.(thisLabel) = simInds;
   end
   
+  % store results file paths
   if nargout > 2
     if nResultFn == 1
-      resultFiles = thisFnFiles;
+      filePaths = thisFnFiles;
     else
-      resultFiles.(fnIdStr{iFn}) = thisFnFiles;
+      filePaths.(thisLabel) = thisFnFiles;
     end
   end
   
-  results.(fnIdStr{iFn}) = thisFnResults;
+  % store funNames
+  if nargout > 3
+    if nResultFn == 1
+      funNames = thisFunName;
+    else
+      funNames.(thisLabel) = thisFunName;
+    end
+  end
+  
+  % store prefixes
+  if nargout > 4
+    if nResultFn == 1
+      prefixes = fnPrefixes{iFn};
+    else
+      prefixes.(thisLabel) = fnPrefixes{iFn};
+    end
+  end
+  
+  % store results
+  results.(thisLabel) = thisFnResults;
   clear thisFnResults
 end % fn
 
 % convert to inner struct fld if only 1 fn
 if nResultFn == 1 && options.simplify2cell_bool
-  results = results.(fnIdStr{1});
+  results = results.(uResultLabels{1});
 end
 
 end % main fn
