@@ -441,6 +441,10 @@ switch options.plot_type
     
     options.xlim(1) = max(options.xlim(1), options.time_limits(1));
     options.xlim(2) = min(options.xlim(2), options.time_limits(2));
+  case 'power'
+    % find inner overlap of xlim and freq xdata
+    options.xlim(1) = max(options.xlim(1), xdata(1));
+    options.xlim(2) = min(options.xlim(2), xdata(end));
   otherwise
     if isempty(options.xlim)
       options.xlim = [min(xdata) max(xdata)];
@@ -486,49 +490,49 @@ if lock_gca && (num_sims>1 || num_vars>1)
 end
 
 % make subplot adjustments for varied parameters
-if num_sims>1 && isfield(data,'varied')
+if num_sims > 1 && isfield(data,'varied')
   % collect info on parameters varied
-  varied=data(1).varied;
-  num_varied=length(varied); % number of model components varied across simulations
-  num_sims=length(data); % number of data sets (one per simulation)
+  varied = data(1).varied;
+  num_varied = length(varied); % number of model components varied across simulations
+  num_sims = length(data); % number of data sets (one per simulation)
   
   % collect info on parameters varied
-  param_mat=zeros(num_sims,num_varied); % values for each simulation
-  param_cell=cell(1,num_varied); % unique values for each parameter
+  param_mat = zeros(num_sims,num_varied); % values for each simulation
+  param_cell = cell(1,num_varied); % unique values for each parameter
   
   % loop over varied components and collect values
   for j=1:num_varied
     if isnumeric(data(1).(varied{j}))
-      param_mat(:,j)=[data.(varied{j})]; % values for each simulation
-      param_cell{j}=unique([data.(varied{j})]); % unique values for each parameter
+      param_mat(:,j) = [data.(varied{j})]; % values for each simulation
+      param_cell{j} = unique([data.(varied{j})]); % unique values for each parameter
     else
       % TODO: handle sims varying non-numeric model components
       % (eg, mechanisms) (also in dsPlotFR and dsSelect)
     end
   end
-  param_size=cellfun(@length,param_cell); % number of unique values for each parameter
+  param_size = cellfun(@length,param_cell); % number of unique values for each parameter
   
   % varied parameter with most elements goes along the rows (everything else goes along columns)
-  row_param_index=find(param_size==max(param_size),1,'first');
-  row_param_name=varied{row_param_index};
-  row_param_values=param_cell{row_param_index};
-  num_rows=length(row_param_values);
+  row_param_index = find(param_size == max(param_size),1,'first');
+  row_param_name = varied{row_param_index};
+  row_param_values = param_cell{row_param_index};
+  num_rows = length(row_param_values);
   %num_cols=num_sims/num_rows;
-  num_figs=ceil(num_rows/MRPF);
+  num_figs = ceil(num_rows/MRPF);
   
   % collect sims for each value of the row parameter
   indices={};
   for row=1:num_rows
-    indices{row}=find(param_mat(:,row_param_index)==row_param_values(row));
+    indices{row} = find(param_mat(:,row_param_index) == row_param_values(row));
   end
   
-  num_per_row=cellfun(@length,indices);
-  num_cols=max(num_per_row);
-  sim_indices=nan(num_cols,num_rows);
+  num_per_row = cellfun(@length,indices);
+  num_cols = max(num_per_row);
+  sim_indices = nan(num_cols,num_rows);
   
   % arrange sim indices for each row in a matrix
   for row=1:num_rows
-    sim_indices(1:num_per_row(row),row)=indices{row};
+    sim_indices(1:num_per_row(row),row) = indices{row};
   end
 %   sim_indices=[];
 %   for row=1:num_rows
@@ -587,8 +591,8 @@ for iFigset = 1:num_fig_sets
     for row=1:num_rows
       for col=1:num_cols
         dat=[];
-        sim_index=sim_indices(col,row); % index into data array for this subplot
-        axis_counter=axis_counter+1; % number subplot axis we're on
+        sim_index = sim_indices(col,row); % index into data array for this subplot
+        axis_counter = axis_counter+1; % number subplot axis we're on
         if isnan(sim_index)
           continue;
         end
@@ -631,7 +635,7 @@ for iFigset = 1:num_fig_sets
           end
           
           if num_rows>1
-            text_string{row,col}=sprintf('cell %g',row);
+            text_string{row,col} = sprintf('cell %g',row);
           end
 
         elseif num_sims==1 && num_pops==1 && num_vars==1 && lock_gca
@@ -722,9 +726,10 @@ for iFigset = 1:num_fig_sets
               
               var=['<' variables{1} '>'];
             case 'power'
-              dat=nan(length(xdata),num_pops);
-              AuxData=nan(length(xdata),num_pops);
-              AuxDataName={}; vlines=[];
+              dat = nan(length(xdata),num_pops);
+              AuxData = nan(length(xdata),num_pops);
+              AuxDataName = {};
+              vlines=[];
               
               if ~strcmp(reportUI,'matlab') && exist('nanmean') ~= 2 % 'nanmean is not in Octave's path
                 try
@@ -735,10 +740,10 @@ for iFigset = 1:num_fig_sets
               end
               
               for iPop = 1:num_pops
-                dat(:,iPop)=nanmean(data(sim_index).([var_fields{iPop} '_Power_SUA']).Pxx,2);
-                AuxData(:,iPop)=data(sim_index).([var_fields{iPop} '_Power_MUA']).Pxx;
-                AuxDataName{end+1}=strrep([var_fields{iPop} '_Power_MUA'],'_','\_');
-                vlines(end+1)=data(sim_index).([var_fields{iPop} '_Power_MUA']).PeakFreq;
+                dat(:,iPop) = nanmean(data(sim_index).([var_fields{iPop} '_Power_SUA']).Pxx,2);
+                AuxData(:,iPop) = data(sim_index).([var_fields{iPop} '_Power_MUA']).Pxx;
+                AuxDataName{end+1} = strrep([var_fields{iPop} '_Power_MUA'],'_','\_');
+                vlines(end+1) = data(sim_index).([var_fields{iPop} '_Power_MUA']).PeakFreq;
               end
               var=['<' variables{1} '_Power_SUA>'];
             case {'rastergram','raster'}
@@ -895,7 +900,8 @@ for iFigset = 1:num_fig_sets
           switch options.plot_type
             case 'waveform'
               % calculate averages across populations
-              dat=nan(num_times,num_pops);
+              dat = nan(num_times,num_pops);
+              
               if ~strcmp(reportUI,'matlab') && exist('nanmean') ~= 2 % 'nanmean is not in Octave's path
                 try
                   pkg load statistics; % trying to load octave forge 'statistics' package before using nanmean function
@@ -903,18 +909,21 @@ for iFigset = 1:num_fig_sets
                   error('nanmean function is needed, please install the statistics package from Octave Forge');
                 end
               end
+              
               for iPop=1:num_pops
                 if isnan(pop_var_indices{iPop}(iFigset))
                   continue;
                 end
-                var=var_fields{pop_var_indices{iPop}(iFigset)};
-                dat(:,iPop)=nanmean(data(sim_index).(var),2);
+                
+                var = var_fields{pop_var_indices{iPop}(iFigset)};
+                dat(:,iPop) = nanmean(data(sim_index).(var),2);
               end
               var=['<' variables{iFigset} '>'];
             case 'power'
               dat=nan(length(xdata),num_pops);
               AuxData=nan(length(xdata),num_pops);
               AuxDataName={}; vlines=[];
+              
               if ~strcmp(reportUI,'matlab') && exist('nanmean') ~= 2 % 'nanmean is not in Octave's path
                 try
                   pkg load statistics; % trying to load octave forge 'statistics' package before using nanmean function
@@ -922,16 +931,19 @@ for iFigset = 1:num_fig_sets
                   error('nanmean function is needed, please install the statistics package from Octave Forge');
                 end
               end
-              for iPop=1:num_pops
+              
+              for iPop = 1:num_pops
                 if isnan(pop_var_indices{iPop}(iFigset))
                   continue;
                 end
-                var=var_fields{pop_var_indices{iPop}(iFigset)};
-                dat(:,iPop)=nanmean(data(sim_index).([var '_Power_SUA']).Pxx,2);
-                AuxData(:,iPop)=data(sim_index).([var '_Power_MUA']).Pxx;
-                AuxDataName{end+1}=strrep([var '_Power_MUA'],'_','\_');
-                vlines(end+1)=data(sim_index).([var '_Power_MUA']).PeakFreq;
+                
+                var = var_fields{pop_var_indices{iPop}(iFigset)};
+                dat(:,iPop) = nanmean(data(sim_index).([var '_Power_SUA']).Pxx,2);
+                AuxData(:,iPop) = data(sim_index).([var '_Power_MUA']).Pxx;
+                AuxDataName{end+1} = strrep([var '_Power_MUA'],'_','\_');
+                vlines(end+1) = data(sim_index).([var '_Power_MUA']).PeakFreq;
               end
+              
               var=['<' variables{iFigset} '_Power_SUA>'];
             case {'rastergram','raster'}
               set_name={};
@@ -939,10 +951,11 @@ for iFigset = 1:num_fig_sets
                 if isnan(pop_var_indices{iPop}(iFigset))
                   continue;
                 end
-                var=var_fields{pop_var_indices{iPop}(iFigset)};
-                tmp=regexp(var,'^([a-zA-Z0-9]+)_','tokens','once');
-                set_name{iPop}=tmp{1};
-                allspikes{iPop}=data(sim_index).([var '_spike_times']);
+                
+                var = var_fields{pop_var_indices{iPop}(iFigset)};
+                tmp = regexp(var,'^([a-zA-Z0-9]+)_','tokens','once');
+                set_name{iPop} = tmp{1};
+                allspikes{iPop} = data(sim_index).([var '_spike_times']);
               end
               var=['<' variables{iFigset} '>'];
             case 'density'
@@ -962,31 +975,36 @@ for iFigset = 1:num_fig_sets
         end
 
         if isfield(data,'varied')
-          if num_sims>1
+          if num_sims > 1
             % list the parameter varied along the rows first
-            str=[row_param_name '=' num2str(row_param_values(row)) ': '];
-            for iPop=1:num_varied
-              fld=data(sim_index).varied{iPop};
+            str = [row_param_name '=' num2str(row_param_values(row)) ': '];
+            
+            for iPop = 1:num_varied
+              fld = data(sim_index).varied{iPop};
+              
               if ~strcmp(fld,row_param_name)
-                val=data(sim_index).(fld);
-                str=[str fld '=' num2str(val) ', '];
+                val = data(sim_index).(fld);
+                str = [str fld '=' num2str(val) ', '];
               end
             end
-            if num_pops>1
-              legend_strings=cellfun(@(x)[x ' (mean)'],pop_names,'uni',0);
+            
+            if num_pops > 1
+              legend_strings = cellfun(@(x)[x ' (mean)'],pop_names,'uni',0);
             end
           else
             str='';
-            for iPop=1:length(data.varied)
-              fld=data(sim_index).varied{iPop};
-              str=[str fld '=' num2str(data(sim_index).(fld)) ', '];
+            
+            for iPop = 1:length(data.varied)
+              fld = data(sim_index).varied{iPop};
+              str = [str fld '=' num2str(data(sim_index).(fld)) ', '];
             end
           end
-          text_string{row,col}=['(' strrep(str(1:end-2),'_','\_') ')'];
+          
+          text_string{row,col} = ['(' strrep(str(1:end-2),'_','\_') ')'];
         end
         
         if ~isempty(AuxData) && length(legend_strings)<=max_legend_entries
-          legend_strings=cat(2,legend_strings,AuxDataName);
+          legend_strings = cat(2,legend_strings,AuxDataName);
         end
         
         %% plot data
@@ -1005,7 +1023,7 @@ for iFigset = 1:num_fig_sets
           case {'waveform','power'}
             % finish preparing data
             if ~strcmp(options.yscale,'linear')
-              dat=feval(options.yscale,dat); % log or log10
+              dat = feval(options.yscale,dat); % log or log10
               % alternative approach: use semilogy for log10
             end
             
@@ -1018,7 +1036,7 @@ for iFigset = 1:num_fig_sets
             % plot traces
             if strcmp(options.plot_mode,'trace')
               % select max subset allowed
-              dat=dat(:,1:min(size(dat,2),MTPP)); % select max subset to plot
+              dat = dat(:,1:min(size(dat,2),MTPP)); % select max subset to plot
               plot(thisAxes, xdata(sel),dat(sel,:));
               set(thisAxes,'ticklength',get(thisAxes,'ticklength')/2) %make ticks shorter
             else
@@ -1155,13 +1173,15 @@ for iFigset = 1:num_fig_sets
           end
         end
         
-        % plot lines and text (used for power)
-        if ~isempty(vlines)
-          for iLine=1:length(vlines)
-            if ~isnan(vlines(iPop))
-              line(thisAxes, [vlines(iLine) vlines(iLine)],ylim,'color','k','linestyle','--');
-              ymax=max(ylim);
-              text(thisAxes, double(vlines(iLine) + 0.1*range(xlim)), 0.9*ymax, sprintf('MUA Sxx Peak F: %.f', vlines(iLine)))
+        if ~shared_ylims_flag && isempty(options.ylim)
+          % plot lines and text (used for power)
+          if ~isempty(vlines)
+            for iPop = 1:length(vlines)
+              if ~isnan(vlines(iPop))
+                line(thisAxes, [vlines(iPop) vlines(iPop)],ylim,'color','k','linestyle','--');
+                ymax = max(ylim);
+                text(thisAxes, double(vlines(iPop) + 0.05*range(xlim)), 0.5*ymax, sprintf('MUA Sxx Peak F: %.f Hz', vlines(iPop)))
+              end
             end
           end
         end
@@ -1178,6 +1198,7 @@ for iFigset = 1:num_fig_sets
       if ylims(1)~=ylims(2)
         set(haxes,'ylim',ylims);
       end
+      
       if ~isempty(text_string)
         axis_counter=0;
         for row=1:num_rows
@@ -1195,6 +1216,18 @@ for iFigset = 1:num_fig_sets
             text_xpos=double(xmin+.05*(xmax-xmin));
             text_ypos=ymin+.9*(ymax-ymin);
             text(haxes(axis_counter), text_xpos,text_ypos,text_string{row,col});
+            
+            % plot lines and text (used for power)
+            if ~isempty(vlines)
+              thisAxes = get(thisHandle,'CurrentAxes');
+              for iPop = 1:length(vlines)
+                if ~isnan(vlines(iPop))
+                  line(thisAxes, [vlines(iPop) vlines(iPop)],ylim,'color','k','linestyle','--');
+                  ymax = max(ylim);
+                  text(thisAxes, double(vlines(iPop) + 0.05*range(xlim)), 0.5*ymax, sprintf('MUA Sxx Peak F: %.f Hz', vlines(iPop)))
+                end
+              end
+            end
           end
         end
       end
