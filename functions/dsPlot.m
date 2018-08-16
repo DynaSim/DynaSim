@@ -1180,7 +1180,7 @@ for iFigset = 1:num_fig_sets
               if ~isnan(vlines(iPop))
                 line(thisAxes, [vlines(iPop) vlines(iPop)],ylim,'color','k','linestyle','--');
                 ymax = max(ylim);
-                text(thisAxes, double(vlines(iPop) + 0.05*range(xlim)), 0.5*ymax, sprintf('MUA Sxx Peak F: %.f Hz', vlines(iPop)))
+                text(thisAxes, double(vlines(iPop) + 0.05*range(xlim)), 0.5*ymax, sprintf('MUA Sxx Peak Freq: %.1f Hz', vlines(iPop)))
               end
             end
           end
@@ -1224,7 +1224,7 @@ for iFigset = 1:num_fig_sets
                 if ~isnan(vlines(iPop))
                   line(thisAxes, [vlines(iPop) vlines(iPop)],ylim,'color','k','linestyle','--');
                   ymax = max(ylim);
-                  text(thisAxes, double(vlines(iPop) + 0.05*range(xlim)), 0.5*ymax, sprintf('MUA Sxx Peak F: %.f Hz', vlines(iPop)))
+                  text(thisAxes, double(vlines(iPop) + 0.05*range(xlim)), 0.5*ymax, sprintf('MUA Sxx Peak Freq: %.1f Hz', vlines(iPop)))
                 end
               end
             end
