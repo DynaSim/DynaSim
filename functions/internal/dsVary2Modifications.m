@@ -1,4 +1,4 @@
-function modifications_set = dsVary2Modifications(vary,model)
+function modifications_set = dsVary2Modifications(vary, model_or_spec)
 %dsVary2Modifications - convert specification of things to vary into a set of modifications indicating how to vary the desired things.
 %
 % The returned set of modifications has one element per point in search space;
@@ -7,8 +7,10 @@ function modifications_set = dsVary2Modifications(vary,model)
 % modifications set as an input, returns the input as an output.
 %
 % Usage:
-%   modifications_set=dsVary2Modifications(vary)
-%   modifications_set=dsVary2Modifications(modifications_set)
+%   modifications_set = dsVary2Modifications(vary)                % uses default pop name, 'pop1'
+%   modifications_set = dsVary2Modifications(modifications_set)   % returns input as output
+%   modifications_set = dsVary2Modifications(vary, model)         % model contains specification field
+%   modifications_set = dsVary2Modifications(vary, specification) % spec should have populations field
 %
 % Inputs:
 %   - vary: {object, variable, values; ...}
@@ -139,13 +141,20 @@ if iscell(vary) && iscell(vary{1})
   return;
 end
 
-if nargin<2
-  model = [];
+if nargin < 2
+  model_or_spec = [];
 end
 
 if isempty(vary)
   modifications_set = [];
   return
+end
+
+% parse model_or_spec arg
+if isfield(model_or_spec, 'specification')
+  specification = model_or_spec.specification;
+else
+  specification = model_or_spec;
 end
 
 % TODO: use model to get mechanism_list for special search spaces
@@ -154,7 +163,7 @@ end
 % expand each 'vary' specification (namespace,variable,values) into a list of modifications
 modification_sets = {};
 for i=1:size(vary,1)
-  modification_sets{i} = expand_vary(vary(i,:), model);
+  modification_sets{i} = expand_vary(vary(i,:), specification);
   %modification_sets{i}{:}
 end
 
@@ -178,7 +187,7 @@ for i=1:size(cartprod,1)
   modifications_set{i}=tmp;
 end
 
-function list = expand_vary(varyLine, model)
+function list = expand_vary(varyLine, specification)
 % purpose: get list of modifications for this specification of things to vary.
 % standardize specification
 if length(varyLine)==2
@@ -188,9 +197,9 @@ end
 
 % set default object name
 if isempty(varyLine{1})
-  if ~isempty(model)
+  if ~isempty(specification) && isfield(specification, 'populations')
     % get name of first population
-    varyLine{1} = model.specification.populations(1).name;
+    varyLine{1} = specification.populations(1).name;
   else
     varyLine{1} = 'pop1'; % default population
   end

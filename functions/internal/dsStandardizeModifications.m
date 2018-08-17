@@ -1,10 +1,15 @@
-function [modifications, identLinkedMods] = dsStandardizeModifications(modifications,specification, varargin)
+function [modifications, identLinkedMods] = dsStandardizeModifications(modifications, model_or_spec, varargin)
 % dsStandardizeModifications - convert all modifications into 3-column cell
 %                              matrix format (namespace,variable,value) and expand
 %
 % dsStandardizeModifications expands multiple namespace in one cell to multiple
 % cells, ensures source->target direction, moves specific mech to variable name from
 % namespace, and converts mech dot notation to underscores
+%
+% Usage:
+%   modifications = dsStandardizeModifications(modifications, specification)
+%   modifications = dsStandardizeModifications(modifications, model)
+%  [modifications, identLinkedMods] = dsStandardizeModifications(modifications, model_or_spec)
 %
 % Inputs:
 %   modifications: modifications structure
@@ -22,7 +27,14 @@ function [modifications, identLinkedMods] = dsStandardizeModifications(modificat
 %   E.R. Feb 2018: Moved to separate function
 
 if nargin < 2
-  specification = [];
+  model_or_spec = [];
+end
+
+% parse model_or_spec arg
+if isfield(model_or_spec, 'specification')
+  specification = model_or_spec.specification;
+else
+  specification = model_or_spec;
 end
 
 %% auto_gen_test_data_flag argin
@@ -31,7 +43,7 @@ if options.auto_gen_test_data_flag
   varargs = varargin;
   varargs{find(strcmp(varargs, 'auto_gen_test_data_flag'))+1} = 0;
   varargs(end+1:end+2) = {'unit_test_flag',1};
-  argin = [{modifications},{specification}, varargs]; % specific to this function
+  argin = [{modifications},{model_or_spec}, varargs]; % specific to this function
 end
 
 if isstruct(modifications)
