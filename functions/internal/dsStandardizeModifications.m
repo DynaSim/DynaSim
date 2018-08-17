@@ -19,7 +19,7 @@ function [modifications, identicalMods, nonLatticeMods] = dsStandardizeModificat
 %                  just need "specification.populations(1).name)".
 %
 % Outputs:
-%   modifications: standardized, expanded modifcations
+%   modifications: standardized, expanded modifications
 %   identicalMods: cell array of indicies of which mods are identically
 %                  linked/covaried, where each cell is a diff linked set
 %   nonLatticeMods: cell array of indicies of which mods are not identically
