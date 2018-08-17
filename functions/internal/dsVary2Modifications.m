@@ -157,6 +157,8 @@ else
   specification = model_or_spec;
 end
 
+% TODO: get namespace without specification as with dsStandardizeModifications
+
 % TODO: use model to get mechanism_list for special search spaces
 % (e.g., leave-one-out / -1).
 
