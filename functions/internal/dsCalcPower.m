@@ -17,8 +17,8 @@ function data = dsCalcPower(data, varargin)
 %     'resample_flag'         : whether to check to resample time series before 
 %                                power calc to speed up calc (default: 1)
 %   - options for peak detection:
-%     'min_peak_frequency'    : Hz, min frequency for peak detection (default: 2)
-%     'max_peak_frequency'    : Hz, max frequency for peak detection (default: 150)
+%     'min_peak_frequency'    : Hz, min frequency for peak detection (default: 1)
+%     'max_peak_frequency'    : Hz, max frequency for peak detection (default: 200)
 %     'peak_threshold_prctile': percentile for setting power threshold for peak
 %                               detection (default: 95)
 %     'peak_area_width'       : Hz, size of frequency bin (centered on peak)
