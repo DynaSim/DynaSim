@@ -21,10 +21,13 @@ function [modifications, identicalMods, nonLatticeMods] = dsStandardizeModificat
 % Outputs:
 %   modifications: standardized, expanded modifications
 %   identicalMods: cell array of indicies of which mods are identically
-%                  linked/covaried, where each cell is a diff linked set
+%                  linked/covaried, where each cell is a diff linked set.
 %   nonLatticeMods: cell array of indicies of which mods are not identically
 %                   linked/covaried, where each cell is a diff linked set.
 %                   i.e., for non-lattice/non-Cartesian product.
+%
+% Note: mods may still match multiple mechanisms causing additional
+%       identicalMods that this function doesn't check the namespace for
 
 % Dev Notes:
 %   E.R. Feb 2018: Moved to separate function
