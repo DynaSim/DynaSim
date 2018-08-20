@@ -104,6 +104,12 @@ if ~isempty(func)
       func{k} = func2str(func{k});
     end
   end
+else
+  % instantiate outputs
+  simIDs = [];
+  filePaths = [];
+  funNames = [];
+  prefixes = [];
 end
 
 nFnInput = length(func);
