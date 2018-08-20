@@ -1,3 +1,4 @@
+
 function [modifications, identicalMods, nonLatticeMods] = dsStandardizeModifications(modifications, model_or_spec, varargin)
 % dsStandardizeModifications - convert all modifications into 3-column cell
 %                              matrix format (namespace,variable,value) and expand
@@ -308,11 +309,15 @@ for iMod = 1:size(modifications,1)
   end
   
   % check for dot notation. Change POP.MECH to MECH_PARAM notation.
-  if any(obj=='.')
-    tmp=regexp(obj,'\.','split');
-    obj=tmp{1};
-    MECH=tmp{2};
-    fld=[MECH '_' fld];
+  if any(obj == '.')
+    tmp = regexp(obj,'\.','split');
+    obj = tmp{1};
+    MECH = tmp{2};
+    
+    % add MECH to param unless already present
+    if ~strcmp(MECH, fld(1:length(MECH)))
+      fld = [MECH '_' fld];
+    end
     
     % update modifications
     modifications{iMod,1} = obj; % population name or connection source-target
@@ -320,9 +325,9 @@ for iMod = 1:size(modifications,1)
   end
   
   % check for dot notation. Change MECH.PARAM to MECH_PARAM notation.
-  if any(fld=='.')
-    tmp=regexp(fld,'\.','split');
-    fld=[tmp{1} '_' tmp{2}];
+  if any(fld == '.')
+    tmp = regexp(fld,'\.','split');
+    fld = strjoin(tmp, '_');
     
     % update modifications
     modifications{iMod,2} = fld; % population name, size, or parameter name
