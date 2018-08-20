@@ -9,7 +9,7 @@ function data = dsCalcSpikeTimes(data, varargin)
 %   - options:
 %     'variable'         : name of field containing data on which to calculate
 %                          firing rates (default: *_spikes or first variable in data.labels)
-%     'threshold'        : scalar threshold value for detecting events (default: 0)
+%     'threshold'        : scalar threshold value for detecting events (default: 1e-5)
 %     'overwrite_flag'   : whether to overwrite existing spike_times fields (default: 0)
 %     'output_suffix'    : suffix to add to result field name (default: '', i.e. none)
 %     'exclude_data_flag': whether to remove simulated data from result
