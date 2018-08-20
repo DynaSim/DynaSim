@@ -351,20 +351,34 @@ if ischar(src) % char path to single data file
         if isfield(data,'data') && length(fieldnames(data))==1
           data=data.data;
         end
-      else
-        % load partial data set
+      else % load partial data set
         % use matfile() to load HDF subsets given varargin options...
-        obj=matfile(src); % MAT-file object
-        varlist=who(obj); % variables stored in mat-file
-        labels=obj.labels; % list of state variables and monitors
+        obj = matfile(src); % MAT-file object
+        varlist = who(obj); % variables stored in mat-file
+        labels = obj.labels; % list of state variables and monitors
 
-        if iscellstr(options.variables) % restrict variables to load
-          labels=labels(ismember(labels,options.variables));
+        if iscellstr(options.variables)
+          try
+            var2load = false(size(labels));
+            
+            for iVar = 1:numel(options.variables)
+              % pass var string through RE to use wildcards
+              thisSearch = regexp(labels, regexptranslate('wildcard',options.variables{iVar})); % returns cells
+              thisSearch = ~cellfun(@isempty, thisSearch); % convert to logical
+              var2load = var2load | thisSearch;
+            end
+            labels = labels(var2load); % restrict variables to load
+          catch
+            % revert to default mode
+            labels = labels(ismember(labels, options.variables));
+          end
+        else
+          warning('Not using options.variables');
         end
 
-        simulator_options=obj.simulator_options;
-        time=(simulator_options.tspan(1):simulator_options.dt:simulator_options.tspan(2))';
-        time=time(1:simulator_options.downsample_factor:length(time));
+        simulator_options = obj.simulator_options;
+        time = (simulator_options.tspan(1):simulator_options.dt:simulator_options.tspan(2))';
+        time = time(1:simulator_options.downsample_factor:length(time));
 
         if ~isempty(options.time_limits)
           % determine time indices to load
