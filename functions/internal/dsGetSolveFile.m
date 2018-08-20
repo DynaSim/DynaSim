@@ -53,6 +53,7 @@ options=dsCheckOptions(varargin,{...
   'mex_flag',0,{0,1},... % exist('codegen')==6, whether to compile using coder instead of interpreting Matlab
   'mex_dir_flag',1,{0,1},... % Flag to tell whether or not to search in mex_dir for pre-compiled solve files (solve*_mex*).
   'mex_dir',[],[],... % Directory to search for pre-compiled mex files. Can be relative to 'study_dir' or absolute path.
+  'one_solve_file_flag',0,{0,1},...
   'auto_gen_test_data_flag',0,{0,1},...
   'unit_test_flag',0,{0,1},...
   },false);
@@ -141,10 +142,11 @@ if isempty(fpath)
 end
 [fpath,fname,fext]=fileparts2(solve_file);
 
-% check that solve file name is less than max function name allwoed by matlab
-if length(fname)>(63-4) % subtract 4 to allow suffix '_mex'
-  fname=fname(1:(63-4));
-  solve_file=fullfile(fpath,[fname fext]);
+% check that solve file name is less than max function name allowed by matlab
+if length(fname) > (namelengthmax-4) % subtract 4 to allow suffix '_mex'
+  fname = fname(1:(namelengthmax-4));
+  solve_file = fullfile(fpath,[fname fext]);
+  warning('Trimming solve_file name to be less than software "namelengthmax". New Name: %s', fname);
 end
 
 % create directory for solve_file if it doesn't exist
