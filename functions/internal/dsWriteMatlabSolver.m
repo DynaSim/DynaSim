@@ -199,6 +199,10 @@ if options.save_parameters_flag
       end
     end
     
+    % remove empty (ie non-matched) params
+    mod_params = mod_params(~cellfun(@isempty, mod_params));
+    val2modMap = val2modMap(~isnan(val2modMap));
+    
     % update since may have increased due to multiple namespace matches for param
     nParamMods = size(mod_params, 1);
 

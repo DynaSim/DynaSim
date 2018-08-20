@@ -186,7 +186,7 @@ if options.save_parameters_flag
         end
         
         if ~any(numNamespaceMatches)
-          error('Cannot find mod: %s %s', first_mod_set{iParamMod,1}, first_mod_set{iParamMod,3});
+          warning('Cannot find mod: %s %s', first_mod_set{iParamMod,1}, first_mod_set{iParamMod,3});
         end
 
         % add mech names using namespace
@@ -204,6 +204,10 @@ if options.save_parameters_flag
         error('Multiple namespace matches.')
       end
     end
+    
+    % remove empty (ie non-matched) params
+    mod_params = mod_params(~cellfun(@isempty, mod_params));
+    val2modMap = val2modMap(~isnan(val2modMap));
     
     % update since may have increased due to multiple namespace matches for param
     nParamMods = size(mod_params, 1);
