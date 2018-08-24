@@ -24,6 +24,7 @@ function dsMergeResults(src, varargin)
 %                    specified and func name matches multiple functions, will
 %                    return results as as structure fields (see Outputs below).
 %     'simIDs'        : numeric array of simIDs to import results from (default: [])
+%     'moveDir'       : rel or abs path to move original data to (default: 'results_split')
 %     'delete_original': whether to delete original results (default: 0)
 %
 % Author: Erik Roberts
@@ -37,6 +38,7 @@ if ~nargin || isempty(src)
 end
 
 options = dsCheckOptions(varargin,{...
+  'moveDir', 'results_split', [],...
   'delete_original',0,{0,1},... % whether to delete original results (default: 0)
   },false);
 
@@ -61,17 +63,44 @@ if ~isempty(results)
     save(filePath, '-struct','results', '-hdf5'); % hdf5 format in Octave
   end
   
-  % delete filePaths
   if options.delete_original
+    % delete filePaths
     structfun(@cellDel, originalResultFilePaths);
+  elseif ~isempty(options.moveDir) % move filePaths
+    [~, pathInAbsBool] = getAbsolutePath(options.moveDir);
+    
+    % make moveDir absolute path
+    if ~pathInAbsBool
+      moveDir = fullfile(study_dir, options.moveDir);
+    else
+      moveDir = options.moveDir;
+    end
+    
+    % mkdir if ~exist
+    exist_mkdir(moveDir);
+    
+    % move filePaths
+    structfun(@cellMove, originalResultFilePaths);
   end
 else
   warning('No results found');
 end
 
+
+%% Nested fn
+  function cellMove(filePath)
+    cellfun(@moveFile, filePath);
+  end
+
+  function moveFile(filePath)
+    filename = filepartsNameExt(filePath);
+    newFilePath = fullfile(moveDir, filename);
+    movefile(filePath, newFilePath);
+  end
+
 end
 
 %% local fn
-function cellDel(x)
- cellfun(@delete, x);
+function cellDel(filePath)
+ cellfun(@delete, filePath);
 end
