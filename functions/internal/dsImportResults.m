@@ -1,5 +1,5 @@
 function [results, simIDs, filePaths, funNames, prefixes] = dsImportResults(src, varargin)
-%dsImportResults - Import analysis result of a simulation
+%dsImportResults - Import analysis results of a simulation
 %
 % Usage:
 %   results = dsImportResults(src)
@@ -29,13 +29,17 @@ function [results, simIDs, filePaths, funNames, prefixes] = dsImportResults(src,
 %                    return results as as structure fields (see Outputs below).
 %     'simIDs'        : numeric array of simIDs to import results from (default: [])
 %     'as_cell'       : output as cell array {0,1} (default: 0)
+%     'add_prefix'    : whether to add prefix to output struct field names
+%     'simplify2cell_bool' : whether to simplify struct to cell if only 1 result (default:1)
 %
 % Outputs:
 %   - results: If multiple result function instances found, it will return structure 
-%              with fields of 'funcName#', where number is the index number for a function 
+%              with fields of 'funcName__#', where number is the index number for a function 
 %              instance, usually following analysis in name. Inside each field 
-%              is a cell array of results of length = num sims. If only 1
-%              function, then just returns the cell array for that function.
+%              is a cell array of results of length = num sims.
+%              If add_prefix=1, it will return structure with fields of 'prefix__funcName__#'.
+%              If only 1 function, then just returns the cell array for that function,
+%              unless simplify2cell_bool=0.
 %   - simIDs: simIDs for each result value. Will be a mat vector or a struct of
 %             mat vectors with field names matching those of results variable.
 %   - filePaths: file paths for each result. Will be a cellstr vector or a struct of
@@ -76,7 +80,8 @@ options = dsCheckOptions(varargin,{...
   'import_scope','all',{'studyinfo','results','postHocResults','allResults','all','custom'},...
   'simIDs',[],[],...
   'as_cell',0,{0,1},... % guarantee output as cell array and leave mising data as empty cells
-  'simplify2cell_bool',1,[0,1],... % used by gimbl-vis
+  'add_prefix',0,{0,1},... %add prefix to output struct field names
+  'simplify2cell_bool',1,{0,1},... % whether to simplify struct to cell if only 1 result. used by gimbl-vis.
   },false);
 
 if ~funcVarBool
@@ -220,7 +225,14 @@ end
 if isempty(result_files)
   fprintf('No result files found. \n');
   results = [];
+  
   return
+elseif length(result_files) == 1
+  [~, filename] = fileparts(result_files{1});
+  if strcmp(filename, 'results_merged')
+    results = load(result_files{1});
+    return
+  end
 end
 
 %% Filter and Sort Results Files by Desired Function(s) and simID(s)
@@ -237,7 +249,7 @@ filePrefixSimIndFnName = cat(1, filePrefixSimIndFnName{:});
 nF = size(filePrefixSimIndFnName,1);
 fnIdStr = cell(nF,1);
 for iF = 1:nF
-  fnIdStr{iF} = [filePrefixSimIndFnName{iF,4}, '_', filePrefixSimIndFnName{iF,3}];
+  fnIdStr{iF} = [filePrefixSimIndFnName{iF,4}, '__', filePrefixSimIndFnName{iF,3}];
 end
 resultLabels = fnIdStr;
 
@@ -262,7 +274,11 @@ if length(unique(tempNames)) < nF % then there is overlap
   allPrefixes = filePrefixSimIndFnName(:,1);
   
   % make prefixes valid names
-  allPrefixes = matlab.lang.makeValidName(allPrefixes);
+  try
+    if strcmp(reportUI,'matlab')
+      allPrefixes = matlab.lang.makeValidName(allPrefixes);
+    end
+  end
   
   for iLabel = 1:length(overlappingResultLabels)
     thisLabel = overlappingResultLabels{iLabel};
@@ -387,6 +403,19 @@ for iFn = 1:nResultFn
     
   end % file
   
+  % fix label for var/field name
+  try
+    if strcmp(reportUI,'matlab')
+      thisLabel = matlab.lang.makeValidName(thisLabel);
+    end
+  end
+  
+  % add_prefix
+  thisPrefix = fnPrefixes{iFn};
+  if options.add_prefix
+    thisLabel = [thisPrefix '__' thisLabel];
+  end
+  
   % store sorted simIDs
   if nResultFn == 1
     simIDs = simInds;
@@ -415,9 +444,9 @@ for iFn = 1:nResultFn
   % store prefixes
   if nargout > 4
     if nResultFn == 1
-      prefixes = fnPrefixes{iFn};
+      prefixes = thisPrefix;
     else
-      prefixes.(thisLabel) = fnPrefixes{iFn};
+      prefixes.(thisLabel) = thisPrefix;
     end
   end
   
