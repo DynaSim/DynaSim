@@ -46,7 +46,7 @@ IC_noise = 0
 % Connectivity
 % 'ones' so all-to-all connectivity
 netcon = ones(N_pre,N_post)
-scaleFactor = sum(netcon);
+scalingFactor = max(sum(netcon), 1)
 
 % Functions
 % Note that because of `gGABAb./sum(netcon)`, the total current to the target is scaled

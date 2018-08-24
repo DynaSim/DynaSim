@@ -10,7 +10,7 @@ prob_cxn = [1]
 
 % fixed variables
 netcon = rand(N_pre,N_post)<=prob_cxn
-scaleFactor = sum(netcon);
+scalingFactor = max(sum(netcon), 1)
 
 % functions
 IGABAa(X,s) = -gGABAa./scaleFactor.*(s*netcon).*(X-EGABAa)
