@@ -28,6 +28,9 @@ end
 study_dir=fileparts2(study_file);
 if nargin<1, studyinfo=[]; end
 
+% allow spaces in study_dir path
+escaped_study_dir = strrep(study_dir, ' ', '\ ');
+
 % determine operating system
 [~,OS]=system('uname');
 OS=lower(strtrim(OS)); % operating system (uname: 'Linux', 'Darwin' (Mac), error (Windows))
@@ -44,7 +47,7 @@ if isempty(id)
   switch OS
     case {'linux','darwin'} % Linux or Mac
       % lock_file format: .lock_<timestamp>_<id>
-      [status,result]=system(['ls ' study_dir '/.lock_* 2>/dev/null']);
+      [status,result]=system(['ls ' escaped_study_dir '/.lock_* 2>/dev/null']);
       if status==0
         ids=regexp(result,'.lock_\d+_(\d+)','tokens');
         if ~isempty(ids), curr_ids=cellstr2num([ids{:}]); end
@@ -101,7 +104,7 @@ timestamp=datestr(now,'yyyymmddHHMMSSFFF'); % millisecond precision
 switch OS
   case {'linux','darwin'} % Linux or Mac
     lock_file=fullfile(study_dir,sprintf('.lock_%s_%i',timestamp,id));
-    [s,r]=system(['touch ' lock_file]);
+    [s,r]=system(['touch ' strrep(lock_file, ' ', '\ ')]);
     if s, error(r); end
     common_lock_file=fullfile(study_dir,'.locked');
   otherwise % Windows
@@ -130,13 +133,13 @@ done=0; % {0,1} whether the action has completed successfully
 while ~done
   % try accessing studyinfo file and remove stale lock file if necessary after timeout
   for idx=1:(timeout/delay)
-    next_id=NextStudyinfoID(study_dir,OS);
+    next_id=NextStudyinfoID(study_dir,escaped_study_dir,OS);
     % check if it's time for this process to perform its action
     if (id==next_id) && ~exist(common_lock_file,'file')
       % create common lock
       switch OS
         case {'linux','darwin'} % Linux or Mac
-          [s,r]=system(['touch ' common_lock_file]);
+          [s,r]=system(['touch ' strrep(common_lock_file, ' ', '\ ')]);
           if s, error(r); end
         otherwise
           fid=fopen(common_lock_file,'w');
@@ -221,6 +224,7 @@ while ~done
   if ~done
     if verbose_flag
       fprintf('TIMEOUT #%g while waiting to %s study file for process %g (next_id=%g).\n',cnt,action,id,next_id);
+      fprintf('Try using dsRemoveLockFiles if this persists. \n');
     end
     cnt=cnt+1;
   end
@@ -254,7 +258,7 @@ end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% SUBFUNCTIONS
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-function id=NextStudyinfoID(study_dir,OS)
+function id=NextStudyinfoID(study_dir,escaped_study_dir,OS)
 % purpose: determine the max existing lock id with min timestamp
 % i.e., get the max sim_id for all processes waiting to write to/read from
 % studyinfo.mat, as determined by the existence of .?lock_* files.
@@ -263,7 +267,7 @@ id=0; % next process id
 switch OS
   case {'linux','darwin'} % Linux or Mac
     % check if there are any lock files
-    [status,result]=system(['ls ' fullfile(study_dir,'.lock_* 2>/dev/null')]);
+    [status,result]=system(['ls ' fullfile(escaped_study_dir,'.lock_* 2>/dev/null')]);
     if status==0 % there exist lock files
       % get list of locked ids
       ids=regexp(result,'.lock_\d+_(\d+)','tokens');
