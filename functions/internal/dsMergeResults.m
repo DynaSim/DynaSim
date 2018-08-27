@@ -26,6 +26,7 @@ function dsMergeResults(src, varargin)
 %     'simIDs'        : numeric array of simIDs to import results from (default: [])
 %     'moveDir'       : rel or abs path to move original data to (default: 'results_split')
 %     'delete_original': whether to delete original results (default: 0)
+%     'verbose_flag' : whether to display informative messages/logs (default: 1)
 %
 % Author: Erik Roberts
 % Copyright (C) 2018
@@ -40,6 +41,7 @@ end
 options = dsCheckOptions(varargin,{...
   'moveDir', 'results_split', [],...
   'delete_original',0,{0,1},... % whether to delete original results (default: 0)
+  'verbose_flag',1,{0,1},...
   },false);
 
 % determine study_dir
@@ -51,6 +53,8 @@ elseif isstruct(src) && isfield(src,'study_dir')
   studyinfo = src;
   study_dir = studyinfo.study_dir;
 end
+
+dsPrintf(options, 'Importing results...\n');
 
 [results, ~, originalResultFilePaths] = dsImportResults(study_dir, varargin{:}, 'as_cell',1, 'add_prefix',1);
 
@@ -65,6 +69,7 @@ if ~isempty(results)
   
   if options.delete_original
     % delete filePaths
+    dsPrintf(options, 'Deleting original results...\n');
     structfun(@cellDel, originalResultFilePaths);
   elseif ~isempty(options.moveDir) % move filePaths
     [~, pathInAbsBool] = getAbsolutePath(options.moveDir);
@@ -79,6 +84,8 @@ if ~isempty(results)
     % mkdir if ~exist
     exist_mkdir(moveDir);
     
+    dsPrintf(options, 'Moving original results...\n');
+    
     % move filePaths
     structfun(@cellMove, originalResultFilePaths);
   end
@@ -86,6 +93,7 @@ else
   warning('No results found');
 end
 
+dsPrintf(options, 'Done merging results.\n');
 
 %% Nested fn
   function cellMove(filePath)
