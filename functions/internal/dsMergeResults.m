@@ -56,7 +56,7 @@ end
 
 dsPrintf(options, 'Importing results...\n');
 
-[results, ~, originalResultFilePaths] = dsImportResults(study_dir, varargin{:}, 'as_cell',1, 'add_prefix',1);
+[results, ~, originalResultFilePaths] = dsImportResults(study_dir, varargin{:}, 'as_cell',1, 'add_prefix',1, 'simplify2cell_bool',0);
 
 if ~isempty(results)
   % save struct fields to vars in mat file

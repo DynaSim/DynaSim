@@ -30,7 +30,7 @@ function [results, simIDs, filePaths, funNames, prefixes] = dsImportResults(src,
 %     'simIDs'        : numeric array of simIDs to import results from (default: [])
 %     'as_cell'       : output as cell array {0,1} (default: 0)
 %     'add_prefix'    : whether to add prefix to output struct field names
-%     'simplify2cell_bool' : whether to simplify struct to cell if only 1 result (default:1)
+%     'simplify2cell_bool' : whether to simplify output variable structs to cell if only 1 result (default:1)
 %
 % Outputs:
 %   - results: If multiple result function instances found, it will return structure 
@@ -417,7 +417,7 @@ for iFn = 1:nResultFn
   end
   
   % store sorted simIDs
-  if nResultFn == 1
+  if nResultFn == 1 && options.simplify2cell_bool
     simIDs = simInds;
   else
     simIDs.(thisLabel) = simInds;
@@ -425,7 +425,7 @@ for iFn = 1:nResultFn
   
   % store results file paths
   if nargout > 2
-    if nResultFn == 1
+    if nResultFn == 1 && options.simplify2cell_bool
       filePaths = thisFnFiles;
     else
       filePaths.(thisLabel) = thisFnFiles;
@@ -434,7 +434,7 @@ for iFn = 1:nResultFn
   
   % store funNames
   if nargout > 3
-    if nResultFn == 1
+    if nResultFn == 1 && options.simplify2cell_bool
       funNames = thisFunName;
     else
       funNames.(thisLabel) = thisFunName;
@@ -443,7 +443,7 @@ for iFn = 1:nResultFn
   
   % store prefixes
   if nargout > 4
-    if nResultFn == 1
+    if nResultFn == 1 && options.simplify2cell_bool
       prefixes = thisPrefix;
     else
       prefixes.(thisLabel) = thisPrefix;
@@ -457,7 +457,13 @@ end % fn
 
 % convert to inner struct fld if only 1 fn
 if nResultFn == 1 && options.simplify2cell_bool
-  results = results.(uResultLabels{1});
+    thisLabel = uResultLabels{1};
+    
+    if options.add_prefix
+        thisLabel = [thisPrefix '__' thisLabel];
+    end
+    
+    results = results.(thisLabel);
 end
 
 end % main fn
