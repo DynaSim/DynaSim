@@ -25,6 +25,8 @@ function dsMergeResults(src, varargin)
 %                    return results as as structure fields (see Outputs below).
 %     'simIDs'        : numeric array of simIDs to import results from (default: [])
 %     'moveDir'       : rel or abs path to move original data to (default: 'results_split')
+%     'moveAllContents': whether to move entire results dir to 'moveDir' (faster), vs.
+%                        just the filtered results put in 'results/results_merged.mat' (slower) (default: 0)
 %     'delete_original': whether to delete original results (default: 0)
 %     'verbose_flag' : whether to display informative messages/logs (default: 1)
 %
@@ -40,6 +42,7 @@ end
 
 options = dsCheckOptions(varargin,{...
   'moveDir', 'results_split', [],...
+  'moveAllContents',0,{0,1},...
   'delete_original',0,{0,1},... % whether to delete original results (default: 0)
   'verbose_flag',1,{0,1},...
   },false);
@@ -60,11 +63,12 @@ dsPrintf(options, 'Importing results...\n');
 
 if ~isempty(results)
   % save struct fields to vars in mat file
-  filePath = fullfile(study_dir, 'results', 'results_merged.mat');
+  resultsDir = fullfile(study_dir, 'results');
+  mergedFilePath = fullfile(resultsDir, 'results_merged.mat');
   if strcmp(reportUI,'matlab')
-    save(filePath, '-struct','results', '-v7.3');
+    save(mergedFilePath, '-struct','results', '-v7.3');
   else
-    save(filePath, '-struct','results', '-hdf5'); % hdf5 format in Octave
+    save(mergedFilePath, '-struct','results', '-hdf5'); % hdf5 format in Octave
   end
   
   if options.delete_original
@@ -86,8 +90,22 @@ if ~isempty(results)
     
     dsPrintf(options, 'Moving original results...\n');
     
-    % move filePaths
-    structfun(@cellMove, originalResultFilePaths);
+    if options.moveAllContents
+      % move entire results dir
+      
+      % rename resultsDir to moveDir
+      movefile(resultsDir, moveDir);
+      
+      % remake results dir
+      exist_mkdir(resultsDir);
+      
+      % move results_merged file back to results
+      tempMergedFilePath = fullfile(moveDir, 'results_merged.mat');
+      movefile(tempMergedFilePath, mergedFilePath);
+    else
+      % move individual filePaths
+      structfun(@cellMove, originalResultFilePaths);
+    end
   end
 else
   warning('No results found');
@@ -97,10 +115,10 @@ dsPrintf(options, 'Done merging results.\n');
 
 %% Nested fn
   function cellMove(filePath)
-    cellfun(@moveFile, filePath);
+    cellfun(@moveIndivFile, filePath);
   end
 
-  function moveFile(filePath)
+  function moveIndivFile(filePath)
     filename = filepartsNameExt(filePath);
     newFilePath = fullfile(moveDir, filename);
     movefile(filePath, newFilePath);
