@@ -85,14 +85,9 @@ if ~isempty(results)
       moveDir = options.moveDir;
     end
     
-    % mkdir if ~exist
-    exist_mkdir(moveDir);
-    
     dsPrintf(options, 'Moving original results...\n');
     
-    if options.moveAllContents
-      % move entire results dir
-      
+    if options.moveAllContents % move entire results dir
       % rename resultsDir to moveDir
       movefile(resultsDir, moveDir);
       
@@ -103,6 +98,9 @@ if ~isempty(results)
       tempMergedFilePath = fullfile(moveDir, 'results_merged.mat');
       movefile(tempMergedFilePath, mergedFilePath);
     else
+      % mkdir if ~exist
+      exist_mkdir(moveDir);
+    
       % move individual filePaths
       structfun(@cellMove, originalResultFilePaths);
     end
