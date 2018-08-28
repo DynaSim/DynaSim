@@ -663,17 +663,33 @@ end
     end
 
     % simulate model with proper modifications and options
-    fprintf(fjob,'\t\tsiminfo=studyinfo.simulations(SimID);\n');
-    fprintf(fjob,'\t\toptions=rmfield(siminfo.simulator_options,{''modifications'',''studyinfo'',''analysis_functions'',''plot_functions'',''sim_id''});\n');
-    fprintf(fjob,'\t\tkeyvals=dsOptions2Keyval(options);\n');
+    fprintf(fjob,'\t\tsiminfo = studyinfo.simulations(SimID);\n');
+    fprintf(fjob,'\t\toptions = rmfield(siminfo.simulator_options,{''modifications'',''studyinfo'',''analysis_functions'',''plot_functions'',''sim_id''});\n');
+    fprintf(fjob,'\t\tkeyvals = dsOptions2Keyval(options);\n');
+    
     fprintf(fjob,'\t\tfprintf(''-----------------------------------------------------\\n'');\n');
     fprintf(fjob,'\t\tfprintf(''Processing simulation %%g (%%g of %%g in this job)...\\n'',SimID,s,length(SimIDs));\n');
     fprintf(fjob,'\t\tfprintf(''-----------------------------------------------------\\n'');\n');
-    fprintf(fjob,'\t\tdata=dsSimulate(studyinfo.base_model,''modifications'',siminfo.modifications,''studyinfo'',studyinfo,''sim_id'',SimID,keyvals{:});\n');
-    fprintf(fjob,'\t\tfor i=1:length(siminfo.result_functions)\n');
-    fprintf(fjob,'\t\t\tdsAnalyze(data, siminfo.result_functions{i}, ''result_file'',siminfo.result_files{i}, ''save_results_flag'',1, siminfo.result_options{i}{:}, ''in_sim_flag'',1);\n');
-    fprintf(fjob,'\t\tend\n');
+    
+    fprintf(fjob,'\t\tdata = dsSimulate(studyinfo.base_model,''modifications'',siminfo.modifications,''studyinfo'',studyinfo,''sim_id'',SimID,keyvals{:});\n');
+    
+    fprintf(fjob,'\t\tnFn = length(siminfo.result_functions);\n');
+    
+    fprintf(fjob,'\t\tfor iFn = 1:nFn\n'); % for loop over fns
+    
+    fprintf(fjob,'\t\t\ttry\n'); % inner try
+    
+    fprintf(fjob,'\t\t\t\tfprintf(''Result fn: %%s (%%i/%%i)\\n'', func2str(siminfo.result_functions{iFn}), iFn, nFn)\n');
+    fprintf(fjob,'\t\t\t\tdsAnalyze(data, siminfo.result_functions{iFn}, ''result_file'',siminfo.result_files{iFn}, ''save_results_flag'',1, siminfo.result_options{iFn}{:}, ''in_sim_flag'',1);\n');
+    
+    fprintf(fjob,'\t\t\tcatch fnErr\n'); % catch inner error
+    fprintf(fjob,'\t\t\t\tdisplayError(fnErr);\n');
 
+    fprintf(fjob,'\t\t\tend\n'); % end inner try
+    
+    fprintf(fjob,'\t\tend\n'); % end for
+
+    
     % add error handling
     fprintf(fjob,'\tcatch err\n');
 
