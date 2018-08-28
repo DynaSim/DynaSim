@@ -8,8 +8,7 @@ function data = dsCalcPower(data, varargin)
 %   - data: DynaSim data structure (see dsCheckData)
 %   - options:
 %     'variable'              : name of field containing data on which to
-%                               calculate firing rates (default: *_spikes or
-%                               first variable in data.labels)
+%                               calculate power (default: first variable in data.labels)
 %     'time_limits'           : [beg,end] (units of data.time)
 %     'freq_limits'           : [beg,end] (units of Hz), lower and upper bounds
 %     'smooth_factor'         : number of samples for smoothing the spectrum (default: 5)
@@ -145,6 +144,14 @@ NFFT = 2^(nextpow2(nsamp-1)-1);%2); % <-- use higher resolution to capture STO f
 % WINDOW=2^(nextpow2(NFFT-1)-3);
 % NOVERLAP=[]; % spectral parameters
 NW = options.timeBandwidthProduct;
+
+%% 1.1.3 check for spike var
+if ~isempty(regexp(options.variable,'_spikes$', 'once'))
+    [tempVar,tempPop] = dsSelectVariables(data);
+    tempSuffix = strrep(tempVar{1}, tempPop{1}, '');
+    tmpVarStr = strrep(options.variable, '_spikes', tempSuffix);
+    data = dsCalcSpikes(data, varargin{:}, 'variable', tmpVarStr);
+end
 
 %% 2.0 set list of variables to process as cell array of strings
 options.variable = dsSelectVariables(data(1),options.variable, varargin{:});

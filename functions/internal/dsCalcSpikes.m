@@ -124,12 +124,22 @@ for iVar = 1:length(options.variable)
   if ~ismember(thisVarStr, data.results)
     data.results{end+1} = thisVarStr;
   end
+  
+  % check labels field for var
+  if ~ismember(thisVarStr, data.labels)
+    data.labels{end+1} = thisVarStr;
+  end
 end
 
 % check for removing data
 if options.exclude_data_flag
   for l = 1:length(data.labels)
-    data = rmfield(data, data.labels{l});
+    thisLabel = data.labels{l};
+    
+    % only remove non spike vars
+    if isempty(regexp(thisLabel,'_spikes$', 'once'))
+      data = rmfield(data, thisLabel);
+    end
   end
 end
 
