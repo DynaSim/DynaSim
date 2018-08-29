@@ -1314,25 +1314,46 @@ try
     % Only do parfor mode if parfor_flag is set and parpool is already running. Otherwise, this will add unnecessary overhead.
     if options.parfor_flag % && ~isempty(p)
       parfor iData = 1:length(data)
-        result(iData) = feval(func,data(iData),varargin{:});
+        tempResult = feval(func,data(iData),varargin{:});
+        
+        % only take first handle if multiple figures
+        result(iData) = tempResult(1);
         
         if ishandle(result(iData)) && make_invis_bool
           set(result(iData), 'Visible', 'off'); % cannot close yet until save, but can make invisible
+          
+          % close additional figures now
+          if length(tempResult) > 1
+            close(tempResult(2:end))
+          end
         end
       end
     else
       for iData = 1:length(data)
-        result(iData) = feval(func,data(iData),varargin{:});
+        tempResult = feval(func,data(iData),varargin{:});
+        
+        % only take first handle if multiple figures
+        result(iData) = tempResult(1);
         
         try
             % For dsPlot2
             if ishandle(result(iData).hcurr) && make_invis_bool
               set(result(iData).hcurr, 'Visible', 'off'); % cannot close yet until save, but can make invisible
+              
+              % close additional figures now
+              if length(tempResult) > 1
+                close(tempResult(2:end))
+              end
             end
         catch
             % For dsPlot
             if ishandle(result(iData)) && make_invis_bool
               set(result(iData), 'Visible', 'off'); % cannot close yet until save, but can make invisible
+              
+              % close additional figures now
+              if length(tempResult) > 1
+                close(tempResult(2:end))
+              end
             end
         end
       end
@@ -1353,25 +1374,41 @@ try
     if options.parfor_flag % && ~isempty(p)
       parfor iData = 1:length(data)
         if ~addSimIdBool
-          result(iData) = feval(func, data(iData), function_options{:}); %#ok<PFBNS>
+          tempResult = feval(func, data(iData), function_options{:}); %#ok<PFBNS>
         else
-          result(iData) = feval(func, data(iData), function_options{:}, simIdVec(iData));
+          tempResult = feval(func, data(iData), function_options{:}, simIdVec(iData));
         end
+        
+        % only take first handle if multiple figures
+        result(iData) = tempResult(1);
         
         if ishandle(result(iData)) && make_invis_bool
           set(result(iData), 'Visible', 'off'); % cannot close yet until save, but can make invisible
+          
+          % close additional figures now
+          if length(tempResult) > 1
+            close(tempResult(2:end))
+          end
         end
       end
     else
       for iData = 1:length(data)
         if ~addSimIdBool
-          result(iData) = feval(func, data(iData), function_options{:});
+          tempResult = feval(func, data(iData), function_options{:});
         else
-          result(iData) = feval(func, data(iData), function_options{:}, simIdVec(iData));
+          tempResult = feval(func, data(iData), function_options{:}, simIdVec(iData));
         end
+        
+        % only take first handle if multiple figures
+        result(iData) = tempResult(1);
         
         if ishandle(result(iData)) && make_invis_bool
           set(result(iData), 'Visible', 'off'); % cannot close yet until save, but can make invisible
+          
+          % close additional figures now
+          if length(tempResult) > 1
+            close(tempResult(2:end))
+          end
         end
       end
     end % options.parfor_flag && ~isempty(p)
