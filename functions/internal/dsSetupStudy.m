@@ -246,7 +246,14 @@ if options.save_data_flag || options.save_results_flag || options.parfor_flag
   
   %% save mech files
   if options.copy_mech_files_flag
-    mechFiles = base_model.specification.populations.mechanism_list;
+    % add pop mechs
+    mechFiles = horzcat(base_model.specification.populations.mechanism_list);
+    
+    % add connection mechs
+    if ~isempty(base_model.specification.connections)
+      mechFiles = horzcat(mechFiles, base_model.specification.connections.mechanism_list);
+    end
+    
     if ~isempty(mechFiles)
       dsVprintf(options, 'Copying mech files into ''study_dir/solve/mechs''... \n');
       
