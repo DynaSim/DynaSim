@@ -32,6 +32,7 @@ function result = dsAnalyze(src,varargin)
 %    'check_file_index_flag': look for existing files to set function index
 %     'format'              : format for saved plots if figures are generated
 %                             {'svg','jpg','eps','png'} (default: 'svg')
+%     'resolution'          : image resolution for 'print' function (default:'-r0')
 %     'varied_filename_flag': whether to make filename based on the varied
 %                             parameters and type of plot {0 or 1}. will overwrite
 %                             if multiple plots of same type (use custom 'prefix' to
@@ -134,6 +135,7 @@ options=dsCheckOptions(varargin,{...
   'overwrite_flag',0,{0,1},... % whether to overwrite existing data
   'check_file_index_flag',0,{0,1},...
   'format','png',{'svg','jpg','eps','png','fig'},...
+  'resolution','-r0',[],... % print resolution
   'varied_filename_flag',0,{0,1},...
   'plot_type','waveform',{'waveform','rastergram','raster','power','rates','imagesc','heatmapFR','heatmap_sortedFR','meanFR','meanFRdens','FRpanel','density'},...
   'result_functions',[],[],...
@@ -674,11 +676,11 @@ for fInd = 1:nFunc % loop over function inputs
           case '.svg'
             plot2svg(fPath, thisResult, [], [], [], [], [], false);
           case '.jpg'
-            print(thisResult,fPath,'-djpeg');
+            print(thisResult,fPath,'-djpeg', options.resolution);
           case '.eps'
-            print(thisResult,fPath,'-depsc');
+            print(thisResult,fPath,'-depsc', options.resolution);
           case '.png'
-            print(thisResult,fPath,'-dpng');
+            print(thisResult,fPath,'-dpng', options.resolution);
           case '.fig'
             savefig(thisResult,fPath);
           otherwise

@@ -20,10 +20,10 @@ function handles = dsPlot(data,varargin)
 %     'ylim'            : y-axis limits {[YMIN YMAX]} (default: all data)
 %     'yscale'          : whether to plot linear or log scale {'linear','log','log10'}
 %     'plot_time_axis_sec_flag': whether to convert time to sec. (default=-1 means automatically select)
-%     'figwidth'        : outerposition width
-%     'figheight'       : outerposition height
-%     'figx'            : outerposition x
-%     'figy'            : outerposition y
+%     'figwidth'        : outerposition width in normalized units
+%     'figheight'       : outerposition height in normalized units
+%     'figx'            : outerposition x in normalized units
+%     'figy'            : outerposition y in normalized units
 %     'visible'         : {'on','off'}
 %     'lock_gca'        : Plots within currently active axis (gca); doesn't
 %                         open new figures or subplots.
@@ -562,7 +562,7 @@ for iFigset = 1:num_fig_sets
           % up graphics objects and convert them to doubles
         
         % position axes
-        haxes = tight_subplot2(num_rows, num_cols, [.01 .03], [.05 .01], [.03 .01], thisHandle);
+        haxes = tight_subplot2(num_rows, num_cols, [.01 .03], [.05 .03], [.03 .03], thisHandle);
     else
         if isempty(options.ax_handle)
           haxes = gca;
