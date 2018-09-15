@@ -16,6 +16,8 @@ function handles = dsPlot(data,varargin)
 %     'time_limits'     : in units of data.time {[beg,end]}
 %     'max_num_overlaid': maximum # of waveforms to overlay per plot
 %     'max_num_rows'    : maximum # of subplot rows per figure
+%     'figure_options'  : option arguments passed to figure call
+%     'axes_options'    ; option arguments passed to axes call
 %     'xlim'            : x-axis limits {[XMIN XMAX]} (default: all data)
 %     'ylim'            : y-axis limits {[YMIN YMAX]} (default: all data)
 %     'yscale'          : whether to plot linear or log scale {'linear','log','log10'}
@@ -24,6 +26,7 @@ function handles = dsPlot(data,varargin)
 %     'figheight'       : outerposition height in normalized units
 %     'figx'            : outerposition x in normalized units
 %     'figy'            : outerposition y in normalized units
+%     'text_FontSize'   : FontSize of figure text
 %     'visible'         : {'on','off'}
 %     'lock_gca'        : Plots within currently active axis (gca); doesn't
 %                         open new figures or subplots.
@@ -174,6 +177,8 @@ options=dsCheckOptions(varargin,{...
   'max_num_overlaid',50,[],...
   'max_num_rows',20,[],...
   'max_num_figs',inf,[],...
+  'figure_options',{},{},... % option arguments passed to figure call
+  'axes_options',{},{},... % option arguments passed to axes call
   'xlim',[],[],...
   'ylim',[],[],...
   'yscale','linear',{'linear','log','log10','log2'},...
@@ -181,6 +186,7 @@ options=dsCheckOptions(varargin,{...
   'figheight',[1],[],...
   'figx',[0],[],...
   'figy',[0],[],...
+  'text_FontSize',12,[],... % FontSize of figure text
   'visible','on',{'on','off'},...
   'lock_gca',[false],[false, true],...
   'fig_handle',[],[],...
@@ -551,7 +557,7 @@ for iFigset = 1:num_fig_sets
     % create figure
     if ~lock_gca
         if isempty(options.fig_handle) || (iFig > 1)
-          thisHandle = figure('units','normalized','outerposition',[options.figx options.figy options.figwidth, options.figheight],'visible',options.visible);
+          thisHandle = figure('units','normalized','outerposition',[options.figx options.figy options.figwidth, options.figheight],'visible',options.visible, options.figure_options{:});
         else
           thisHandle = options.fig_handle; % use for first figure handle
         end
@@ -1165,9 +1171,9 @@ for iFigset = 1:num_fig_sets
               if any(strcmp(options.plot_type, {'rastergram','raster'}))
                 xlims = double(get(thisAxes,'xlim'));
                 ylims = double(get(thisAxes,'ylim'));
-                text(thisAxes, 0.05*xlims(end),0.9*ylims(end),text_string{row,col});
+                text(thisAxes, 0.05*xlims(end),0.9*ylims(end),text_string{row,col}, 'FontSize',options.text_FontSize);
               else
-                text(thisAxes, text_xpos,text_ypos,text_string{row,col});
+                text(thisAxes, text_xpos,text_ypos,text_string{row,col}, 'FontSize',options.text_FontSize);
               end
             end
           end
@@ -1180,7 +1186,7 @@ for iFigset = 1:num_fig_sets
               if ~isnan(vlines(iPop))
                 line(thisAxes, [vlines(iPop) vlines(iPop)],ylim,'color','k','linestyle','--');
                 ymax = max(ylim);
-                text(thisAxes, double(vlines(iPop) + 0.05*range(xlim)), 0.5*ymax, sprintf('MUA Sxx Peak Freq: %.1f Hz', vlines(iPop)))
+                text(thisAxes, double(vlines(iPop) + 0.05*range(xlim)), 0.5*ymax, sprintf('MUA Sxx Peak Freq: %.1f Hz', vlines(iPop)), 'FontSize',options.text_FontSize);
               end
             end
           end
@@ -1189,6 +1195,17 @@ for iFigset = 1:num_fig_sets
         % add legend
         if ~isempty(legend_strings) && axis_counter==1
           legend(thisAxes, legend_strings);
+        end
+        
+        % add axes_options to axes
+        if ~isempty(options.axes_options)
+          for iOpt = 1:2:floor(length(options.axes_options)/2)
+            key = options.axes_options{iOpt};
+            val = options.axes_options{iOpt+1};
+            try
+              set(thisAxes, key, val);
+            end
+          end
         end
       end % end loop over subplot columns
     end % end loop over subplot rows
@@ -1215,7 +1232,7 @@ for iFigset = 1:num_fig_sets
             ymin=min(ylim); ymax=max(ylim);
             text_xpos=double(xmin+.05*(xmax-xmin));
             text_ypos=ymin+.9*(ymax-ymin);
-            text(haxes(axis_counter), text_xpos,text_ypos,text_string{row,col});
+            text(haxes(axis_counter), text_xpos,text_ypos,text_string{row,col}, 'FontSize',options.text_FontSize);
             
             % plot lines and text (used for power)
             if ~isempty(vlines)
@@ -1224,7 +1241,7 @@ for iFigset = 1:num_fig_sets
                 if ~isnan(vlines(iPop))
                   line(thisAxes, [vlines(iPop) vlines(iPop)],ylim,'color','k','linestyle','--');
                   ymax = max(ylim);
-                  text(thisAxes, double(vlines(iPop) + 0.05*range(xlim)), 0.5*ymax, sprintf('MUA Sxx Peak Freq: %.1f Hz', vlines(iPop)))
+                  text(thisAxes, double(vlines(iPop) + 0.05*range(xlim)), 0.5*ymax, sprintf('MUA Sxx Peak Freq: %.1f Hz', vlines(iPop)), 'FontSize',options.text_FontSize)
                 end
               end
             end
