@@ -449,6 +449,16 @@ if options.cluster_flag
   return
 end
 
+%% postHocBool add functions to path if in clus
+if postHocBool && options.in_clus_flag
+  % locate DynaSim toolbox
+  dynasim_path = dsGetRootPath(); % root is one level up from directory containing this function
+  dynasim_functions=fullfile(dynasim_path,'functions');
+  
+  % add functions to path in case of personal analysis functions and dependencies
+  addpath(genpath(dynasim_functions));
+end
+
 %% Calc results
 plotFnInd = lastPlotIndex;
 analysisFnInd = lastAnalysisIndex;
@@ -863,7 +873,13 @@ for fInd = 1:nFunc % loop over function inputs
       end % if isempty(result)
       
       if options.save_results_flag && ~(exist(fPath, 'file') && ~options.overwrite_flag)
-        dsExportData(result, 'filename',fPath, 'result_flag',1, varargin{:});
+        if ~isempty(varargin) && isstruct(varargin{1})
+          tempOpts = [struct2KeyValueCell(varargin{1}) {'filename',fPath, 'result_flag',1}];
+          dsExportData(result, tempOpts{:});
+          clear tempOpts
+        else
+          dsExportData(result, 'filename',fPath, 'result_flag',1, varargin{:});
+        end
       elseif exist('fPath', 'var') && exist(fPath, 'file') && ~options.overwrite_flag
         dsVprintf(options, '      Skipping since file already exists: %s \n', fPath);
       end % save_results_flag
@@ -1443,7 +1459,11 @@ if isstruct(src) && isfield('time','src')
   data = data(simID); % this may not work if a subset of data is given
 else
   % overwrite simIDs in varargin
-  varargin(end+1:end+2) = {'simIDs', simIDs};
+  if ~isempty(varargin) && isstruct(varargin{1})
+    varargin{1}.simIDs = simIDs;
+  else
+    varargin(end+1:end+2) = {'simIDs', simIDs};
+  end
 
   data = dsImport(src, varargin{:}); % load data
 end
