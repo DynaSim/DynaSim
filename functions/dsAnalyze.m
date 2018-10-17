@@ -890,7 +890,7 @@ for fInd = 1:nFunc % loop over function inputs
 
       % store result
       if nargout
-        if ~options.argout_as_cell && isstruct(result) && isfield(result,'time')
+        if ~options.argout_as_cell && isstruct(result) % && isfield(result,'time')
           % dynasim type structure to store as struct array
           allFnResults{fInd}(iResult) = result;
         else
