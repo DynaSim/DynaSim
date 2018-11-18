@@ -1065,7 +1065,7 @@ for iFigset = 1:num_fig_sets
                 yPoints = [(iCell+ypos-.5)*ones(size(spks)), (iCell+ypos+.5)*ones(size(spks)), NaN(size(spks))]';
                 yPoints = yPoints(:);
                 
-                plot(thisAxes, xPoints,yPoints,'color','b'); hold on
+                plot(thisAxes, xPoints,yPoints,'color','k'); hold on
               end
               
               % record position for population tick name
