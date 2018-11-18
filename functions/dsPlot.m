@@ -1089,7 +1089,7 @@ for iFigset = 1:num_fig_sets
             
             % set y-ticks to population names
             set(thisAxes,'ytick',yticks,'yticklabel',yticklabels);
-            set(thisAxes,'ydir','reverse');
+            % set(thisAxes,'ydir','reverse');        % Comment out to no longer reverse y-axis
             
             % set x-ticks
             plot(thisAxes, [min(time) max(time)],[.5 .5],'w');
