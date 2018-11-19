@@ -504,10 +504,10 @@ dsPlot(data);
 % the specification.mechanisms field.
 
 ampa_with_delay={
-  'gSYN=.1; ESYN=0; tauD=2; tauR=0.4; delay=20'
+  'gSYN=.1; ESYN=0; tauD=2; tauR=0.2; delay=20'
   'netcon=ones(N_pre,N_post)'
   'ISYN(X,s)=gSYN.*(s*netcon).*(X-ESYN)'
-  'ds/dt=-s./tauD+((1-s)/tauR).*(1+tanh(X_pre(t-delay)/10)); s(0)=.1' % 20ms delay
+  'ds/dt=-s./tauD+1/2*(1+tanh(X_pre(t-delay)/10)).*((1-s)/tauR); s(0)=.1' % 20ms delay
   '@current += -ISYN(X_post,s)'
 };
 
