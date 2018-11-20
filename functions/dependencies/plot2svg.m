@@ -26,7 +26,7 @@ function varargout = plot2svg(filename, id, debug, legendIcons, clippingMode, fi
 
   global PLOT2SVG_globals
   global colorname
-  progversion = '19-Nov-2018';
+  progversion = '20-Nov-2018';
   PLOT2SVG_globals.runningIdNumber = 0;
   PLOT2SVG_globals.UI = reportUI;
   PLOT2SVG_globals.octave = false;
@@ -4038,14 +4038,6 @@ function label2svg(fid,axpos,id,x,y,tex,align,angle,valign,lines,font_color)
       case 'oblique', fangle = ' font-style = "oblique"';
   otherwise, fangle = '';  % default 'normal'
   end
-  % This does not seem to be needed anymore
-  % % Note: The attribute 'alignment-baseline' cannot be used as it is often
-  % % badly supported. Therefore, we use shifts.
-  % % SA: using 'dominant-baseline'
-  % if UIverlessthan('8.4.0') && ~PLOT2SVG_globals.WN
-  %   fprintf('   Warning: plot2svg does not support proper location of axes'' labels in Octave and Matlab versions < 2014b.\n')
-  %   PLOT2SVG_globals.WN = 1;
-  % end
   balign = 'auto';
   y_offset = '0.3em';
   switch lower(valign)
@@ -4062,7 +4054,7 @@ function label2svg(fid,axpos,id,x,y,tex,align,angle,valign,lines,font_color)
     case 'center', anchor = 'middle';
     otherwise, anchor = 'start'; % left alignment (default)
   end
-  if abs(angle) > 1e-10 && strcmp(valign,'top') && ~strcmp(get(id,'Type'),'text')
+  if abs(angle) > 1e-10 && ( strcmp(valign,'top') && ~strcmp(get(id,'Type'),'text') || strcmp(valign,'3d-bottom') )
     if angle > 1e-10
       anchor = 'end';
     else
@@ -4070,7 +4062,7 @@ function label2svg(fid,axpos,id,x,y,tex,align,angle,valign,lines,font_color)
     end
     dx = sin(angle * pi / 180) * convertunit(fontsize * (-0.5), 'points', 'pixels');
     dy = cos(angle * pi / 180) * convertunit(fontsize * 0, 'points', 'pixels');
-  elseif abs(angle) > 1e-10 && strcmp(valign,'bottom') && ~strcmp(get(id,'Type'),'text')
+  elseif abs(angle) > 1e-10 && ( strcmp(valign,'bottom') && ~strcmp(get(id,'Type'),'text') || strcmp(valign,'3d-top') )
     if angle > 1e-10
       anchor = 'start';
     else
@@ -4589,12 +4581,10 @@ function [projection, edges] = get_projection(ax,id)
         z = [zi(1) zi(1) zi(1) zi(1) zi(2) zi(2) zi(2) zi(2)]/projection.aspect_scaling(3);
     end
     if PLOT2SVG_globals.octave
-      try
-            projection.A = get(ax,'x_ViewTransform');
-            projection.A(3,:) = -projection.A(3,:);
-            projection.A(1:3,4) = 0;
-      catch
-            projection.A = eye(4);
+      if strcmp(get(ax,'Projection'),'orthographic')
+        projection.A = [cos(vi(1)*pi/180) sin(vi(1)*pi/180) 0 0; -sin(vi(1)*pi/180)*sin(vi(2)*pi/180) cos(vi(1)*pi/180)*sin(vi(2)*pi/180) cos(vi(2)*pi/180) 0; sin(vi(1)*pi/180)*cos(vi(2)*pi/180) -cos(vi(1)*pi/180)*cos(vi(2)*pi/180) sin(vi(2)*pi/180) 0; 0 0 0 1];
+      else
+        error('Unknown projection: %s', get(ax,'Projection'))
       end
     else
         if strcmp(get(ax,'Projection'),'orthographic')
