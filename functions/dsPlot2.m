@@ -709,7 +709,7 @@ end
 end
 
 
-function var_out = getdefaultstatevar(xp)
+function var_regex = getdefaultstatevar(xp)
     % search through and try to find the variable represnting voltage. If can't find
     % it, just return the first variable listed.
 
@@ -746,6 +746,11 @@ function var_out = getdefaultstatevar(xp)
     else
         var_out = vars_orig{1};
     end
+    
+    % Convert into a regex search for the string with exact match to
+    % var_out. This solves the issue of variables 'v' and 'v_spikes' being
+    % both simultaneously selected. See iss #544
+    var_regex = ['/^' var_out '$/'];
 end
 
 function [chosen_varied, options_varied ]= get_chosen_varied(varied_names,options_varied)
