@@ -50,7 +50,7 @@ function [data_table,column_titles,time] = dsData2Table(data,verbose_flag,maxrow
     labels = data(1).labels;
     labels = labels(cellfun(@isempty,strfind(labels,'time'))); % Remove time from labels
     % Spike monitors currently mess up dsPlot2 power plotting, waiting on bugfix
-    if data.simulator_options.dsPlot2_no_spikes
+    if data(1).simulator_options.dsPlot2_no_spikes
         labels = labels(cellfun(@isempty,strfind(labels,'spikes'))); % Remove spike monitors from labels
     end
     num_labels = length(labels);
