@@ -1185,9 +1185,10 @@ function print_conditional_update(fid,conditionals,index_nexts,state_variables, 
     if ~isempty(indCondStr)
       condVariableName = action(1:indCondStr-1);
       initialization = [action(1:indCondStr-1), ' = []'];
-      fprintf(fid,'  if ~exist(''%s'',''var'')\n', condVariableName);
-      fprintf(fid,'    %s;\n',initialization);
-      fprintf(fid,'  end;\n');
+      % * REMOVED BY DAVE - Enables monitor spikes to work with mex_flag turned on. See issue #546 (https://github.com/DynaSim/DynaSim/issues/546) *
+      %fprintf(fid,'  if ~exist(''%s'',''var'')\n', condVariableName);
+      %fprintf(fid,'    %s;\n',initialization);
+      %fprintf(fid,'  end;\n');
     end
     fprintf(fid,'  if any(conditional_test), %s; ',action);
 
