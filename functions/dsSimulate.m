@@ -66,8 +66,8 @@ function [data,studyinfo,result] = dsSimulate(model,varargin)
 %     *note: parallel computing has been disabled for debugging...
 %
 %   options for post-processing:
-%     'global_analysis_options': cell array of key-value argument pairs for all 
-%                                dsAnalyze calls, overwritten by specific 
+%     'global_analysis_options': cell array of key-value argument pairs for all
+%                                dsAnalyze calls, overwritten by specific
 %                                analysis_options or plot_options (default:{})
 %     'analysis_functions': cell array of analysis function handles
 %     'analysis_options'  : cell array of option cell arrays {'option1',value1,...}
@@ -334,7 +334,7 @@ end
 %% 0.3 Prepare solve options.
 
 if options.mex_flag && ~strcmp(reportUI,'matlab')
-  dsVprintf(options, 'Setting ''mex_flag'' to 0 in Octave.\n')
+  fprintf('Setting ''mex_flag'' to 0 in Octave.\n')
   options.mex_flag = 0;
   varargin = modify_varargin(varargin, 'mex_flag', options.mex_flag);
 end
@@ -586,9 +586,9 @@ if options.cluster_flag % will return
       break;
     end
   end
-  
+
   keyvals = dsOptions2Keyval(options);
-  
+
   % submit jobs
   studyinfo = dsCreateBatch(model,modifications_set,'simulator_options',options,'process_id',options.sim_id,keyvals{:});
 
@@ -609,7 +609,7 @@ if options.cluster_flag % will return
     if isfield(data, 'simulator_options')
       data = rmfield(data, 'simulator_options'); % specific to this function
     end
-    
+
     if ~isempty(studyinfo)
       studyinfo = []; % specific to this function
     end
@@ -700,7 +700,7 @@ if options.parfor_flag % will return after nested dsSimulate calls
 
   % Create array of random seeds
   seeds = repmat({options.random_seed},1,length(modifications_set));
-  
+
   % If random_seed is shuffle, generate a series of seeds here
   if strcmp(options.random_seed,'shuffle')
     rng_wrapper('shuffle');
@@ -709,12 +709,12 @@ if options.parfor_flag % will return after nested dsSimulate calls
       seeds{j} = double(sd.Seed) + j;   % Increment by 1 for each sim
     end
   end
-  
+
   % note that parfor currently acts just as a regular for in Octave
   if ~strcmp(reportUI,'matlab')
     disp('   Info for GNU Octave users: Do not expect any speed up by using DynaSim''s ''parfor_flag''. In GNU Octave, parfor loops currently default to regular for loops.');
   end
-  
+
   parfor sim=1:length(modifications_set)
     data(sim) = dsSimulate(model, 'modifications', modifications_set{sim}, keyvals{:},...
         'random_seed',seeds{sim},...                                      % Use unique random seed for each sim if shuffle
@@ -748,7 +748,7 @@ if options.parfor_flag % will return after nested dsSimulate calls
     if isfield(data, 'simulator_options')
       data = rmfield(data, 'simulator_options'); % specific to this function
     end
-    
+
     if ~isempty(studyinfo)
       studyinfo = []; % specific to this function
     end
@@ -774,7 +774,7 @@ if options.parfor_flag % will return after nested dsSimulate calls
     if isfield(data, 'simulator_options')
       data= rmfield(data, 'simulator_options'); % specific to this function
     end
-    
+
     if ~isempty(studyinfo)
       studyinfo = [];
     end
@@ -964,13 +964,13 @@ end % in_parfor_loop_flag
         tmpdata=feval(options.experiment,model,keyvals{:});
       else
         %% -- NOT AN EXPERIMENT (single simulation) --
-        
+
         %% 2.0 prepare solver function (solve_ode.m/mex)
         % - Matlab solver: create @odefun with vectorized state variables
         % - DynaSim solver: write solve_ode.m and params.mat  (based on dnsimulator())
         % check if model solver needs to be created
         % (i.e., if is first simulation or a search space varying mechanism list)
-        
+
         if sim==1 || ( ~isempty(modifications_set{1}) && is_varied_mech_list() )
           % prepare file that solves the model system
           if isempty(options.solve_file) || (~exist(options.solve_file,'file') &&...
@@ -1026,13 +1026,13 @@ end % in_parfor_loop_flag
         %% Solve System
         if options.disk_flag  % ### data stored on disk during simulation ###
           sim_start_time=tic;
-          
+
           if ~options.one_solve_file_flag
             save(param_file,'p','-v7'); % save params immediately before solving
           end
-          
+
           csv_data_file = feval(fname);  % returns name of file storing the simulated data
-          
+
           duration = toc(sim_start_time);
 
           if nargout>0 || options.save_data_flag
@@ -1085,15 +1085,15 @@ end % in_parfor_loop_flag
               tmpdata = feval(fname, sim_id);
             end
           end % if ~options.independent_solve_file_flag
-          
+
           duration = toc(sim_start_time);
-          
+
           % Prepare DynaSim data structure:
           % organize simulated data in data structure (move time to last)
           if ~options.independent_solve_file_flag || options.mex_flag
             tmpdata.labels = output_variables([2:length(output_variables)-num_fixed_variables 1]);
           end
-            
+
           if ~options.independent_solve_file_flag
             for i = 1:length(output_variables)
               if ~isempty(model.fixed_variables) && isfield(model.fixed_variables,output_variables{i})
@@ -1103,35 +1103,35 @@ end % in_parfor_loop_flag
                 % store state variables and monitors as data fields
                 tmpdata.(output_variables{i})=outputs{i};
               end
-              
+
               outputs{i}=[]; % clear assigned outputs from memory
             end % for i = 1:length(output_variables)
           end
         end % if options.disk_flag
-        
+
         if ~options.independent_solve_file_flag || options.mex_flag
           % add metadata to tmpdata
           tmpdata.simulator_options = options; % store simulator controls
-          
+
           if options.store_model_flag == 1  % optionally store the simulated model
             tmpdata.model = model;
           end
         end
-        
+
         if duration < 60
           dsVprintf(options, 'Elapsed time: %.1f seconds.\n', duration);
         else
           dsVprintf(options, 'Elapsed time: %.1f minutes.\n', duration/60);
         end
       end % else for if isa(options.experiment,'function_handle')
-      
+
       % Note: tmpdata is from a single sim in for loop
 
       if ~options.independent_solve_file_flag || options.mex_flag
         % create 'vary' field in data to store varied values
         tmpdata = dsModifications2Vary(tmpdata,options.modifications,options,modifications_set,sim);
       end
-      
+
       % change data precision if needed
       tmpdata = dsSavedDataPrecision(tmpdata,options);
 
@@ -1144,7 +1144,7 @@ end % in_parfor_loop_flag
         dsExportData(tmpdata,'filename',data_file,'format','mat','matCompatibility_flag',options.matCompatibility_flag,'verbose_flag',options.verbose_flag);
         %studyinfo=dsUpdateStudy(studyinfo.study_dir,'process_id',sim_id,'status','finished','duration',duration,'solve_file',options.solve_file,'email',options.email,'verbose_flag',options.verbose_flag,'model',model,'simulator_options',options);
       end
-      
+
       % only do dsAnalyze parfor if multiple data
       dsAnalyze_parfor_flag = double(length(tmpdata) ~= 1);
 
@@ -1153,11 +1153,11 @@ end % in_parfor_loop_flag
         if options.save_results_flag
           % do analysis and plotting while saving results
           siminfo = studyinfo.simulations(sim_ind);
-          
+
           for f=1:length(siminfo.result_functions)
             % saving handled internally to dsAnalyze
             tmpresult = dsAnalyze(tmpdata, siminfo.result_functions{f},'result_file',siminfo.result_files{f},'save_data_flag',1,'save_results_flag',1, options.global_analysis_options{:}, siminfo.result_options{f}{:}, 'parfor_flag',dsAnalyze_parfor_flag, 'in_sim_flag',1);
-            
+
             % since the plots are saved, close all generated figures
             if all(ishandle(tmpresult)) % FIXME: dsPlot2 doesnt return handles, so won't close?
               close(tmpresult);
@@ -1221,13 +1221,13 @@ end % in_parfor_loop_flag
     if options.store_model_flag == 1  % optionally store the simulated model
       initData.model = model;
     end
-    
+
     %  simulator_options
     initData.simulator_options = options;
-    
+
     %  varied
     initData = dsModifications2Vary(initData,options.modifications,options,modifications_set,sim);
-    
+
     %  labels
     if ~exist('output_variables', 'var')
       output_variables=cat(2,'time',model.state_variables);
@@ -1242,7 +1242,7 @@ end % in_parfor_loop_flag
       end
     end
     initData.labels = output_variables([2:length(output_variables)-num_fixed_variables 1]);
-    
+
     %  save metadata
     save(metadata_file, '-struct','initData','-v7');
     clear initData
@@ -1269,17 +1269,17 @@ end % in_parfor_loop_flag
     var_names=model.state_variables;
     [nvals_per_var,monitor_counts]=dsGetOutputCounts(model);
     num_state_variables=sum(nvals_per_var);
-    
+
     % check that the correct number of IC values was provided
     if length(options.ic)~=num_state_variables
       error('incorrect number of initial conditions. %g values are needed for %g state variables across %g cells',num_state_variables,length(model.state_variables),sum(pop_sizes));
     end
-    
+
     % organize user-supplied ICs into array for each state variable (assume
     cnt=0; all_ICs=[];
     for i=1:length(var_names)
       ICs=options.ic(cnt+(1:nvals_per_var(i)));
-      
+
       % store ICs as string for writing solve_ode and consistent evaluation
       all_ICs.(var_names{i})=sprintf('[%s]',num2str(ICs));
       cnt=cnt+nvals_per_var(i);
@@ -1364,7 +1364,7 @@ if ~isstruct(options{1})
       % check if any options have this old name
       if ismember(option_names{i,1},options(1:2:end))
         ind=find(ismember(options(1:2:end),option_names{i,1}));
-        
+
         % replace old option name by new option name
         options{2*ind-1}=option_names{i,2};
       end
@@ -1373,9 +1373,9 @@ if ~isstruct(options{1})
 else % struct
   options = options{1};
   flds = fieldnames(options);
-  
+
   [oldOpts,indOpt] = intersect(option_names(:,1), flds);
-  
+
   if ~isempty(oldOpts)
     for iOpt = 1:length(indOpt)
       oldOptName = oldOpts{iOpt};
@@ -1383,11 +1383,11 @@ else % struct
 
       % replace old option name by new option name
       options.(newOptName) = options.(oldOptName);
-      
+
       options = rmfield(options, oldOptName);
     end
   end
-  
+
   options = {options};
 end
 
