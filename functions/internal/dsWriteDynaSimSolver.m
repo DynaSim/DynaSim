@@ -128,7 +128,7 @@ if options.save_parameters_flag
   warning('off','catstruct:DuplicatesFound');
   p = catstruct(dsCheckSolverOptions(options),model.parameters);
 
-  
+
   %% 1.1c one_solve_file_flag
   if options.one_solve_file_flag
     % fill p flds that were varied with vectors of length = nSims
@@ -139,16 +139,16 @@ if options.save_parameters_flag
     mod_set = dsVary2Modifications(vary, model);
     % The first 2 cols of modifications_set are idenitical to vary, it just
     % has the last column distributed out to the number of sims
-    
+
     nMods = length(mod_set);
-    
+
     % standardize and expand modifications
     for iMod = 1:nMods
       mod_set{iMod} = dsStandardizeModifications(mod_set{iMod}, model.specification, varargin{:});
     end
 
     first_mod_set = mod_set{1};
-    
+
     % replace '->' with '_'
     first_mod_set(:,1) = strrep(first_mod_set(:,1), '->', '_');
 
@@ -170,30 +170,30 @@ if options.save_parameters_flag
           endsWith(model.namespaces(:,2), first_mod_set{iParamMod,3}) );
 
         numNamespaceMatches = sum(namespaceInd);
-        
+
         % HACK
         if numNamespaceMatches == 0 && contains(first_mod_set{iParamMod,1}, '_')
           % check reverse connection
           flippedNamespace = first_mod_set{iParamMod,1};
           flippedNamespace = strsplit(flippedNamespace, '_');
           flippedNamespace = [flippedNamespace{2} '_' flippedNamespace{1}];
-          
+
           % find correct namespace(s) based on param and pop
           namespaceInd = logical( contains(model.namespaces(:,2), [flippedNamespace '_']) .* ...
           endsWith(model.namespaces(:,2), first_mod_set{iParamMod,3}) );
 
           numNamespaceMatches = sum(namespaceInd);
         end
-        
+
         if ~any(numNamespaceMatches)
           warning('Cannot find mod: %s %s', first_mod_set{iParamMod,1}, first_mod_set{iParamMod,3});
         end
 
         % add mech names using namespace
         mod_params(iRow:iRow+numNamespaceMatches-1) = model.namespaces(namespaceInd,2);
-        
+
         val2modMap(iRow:iRow+numNamespaceMatches-1) = iParamMod;
-        
+
         iRow = iRow + numNamespaceMatches;
       elseif sum(strcmp(model.namespaces(:,2), this_mod_param)) == 1
         namespaceInd = strcmp(model.namespaces(:,2), this_mod_param);
@@ -204,11 +204,11 @@ if options.save_parameters_flag
         error('Multiple namespace matches.')
       end
     end
-    
+
     % remove empty (ie non-matched) params
     mod_params = mod_params(~cellfun(@isempty, mod_params));
     val2modMap = val2modMap(~isnan(val2modMap));
-    
+
     % update since may have increased due to multiple namespace matches for param
     nParamMods = size(mod_params, 1);
 
@@ -216,11 +216,11 @@ if options.save_parameters_flag
     param_values = cell(nParamMods, length(mod_set));
     for iMod = 1:nMods
       thisModValSet = mod_set{iMod}(:,3);
-      
+
       % Get scalar values as vector
       param_values(:, iMod) = thisModValSet(val2modMap);
     end
-    
+
     % convert to mat if mex_flag since can't have cell slicing for mex
     if options.mex_flag
       param_values = cell2mat(param_values);
@@ -231,8 +231,8 @@ if options.save_parameters_flag
       p.(mod_params{iParam}) = param_values(iParam,:);
     end
   end % one_solve_file_flag
-  
-  
+
+
 
   if options.verbose_flag
     fprintf('Saving params.mat\n');
@@ -248,19 +248,19 @@ if ~options.independent_solve_file_flag
   tmp=cellfun(@(x)[x ','],model.state_variables,'uni',0);
   tmp=[tmp{:}];
   output_string=tmp(1:end-1);
-  
+
   if ~isempty(model.monitors)
     tmp=cellfun(@(x)[x ','],fieldnames(model.monitors),'uni',0);
     tmp=[tmp{:}];
     output_string=[output_string ',' tmp(1:end-1)];
   end
-  
+
   if ~isempty(model.fixed_variables)
     tmp=cellfun(@(x)[x ','],fieldnames(model.fixed_variables),'uni',0);
     tmp=[tmp{:}];
     output_string=[output_string ',' tmp(1:end-1)];
   end
-  
+
   output_string=['[T,' output_string ']']; % state vars, monitors, time vector
 else
   output_string = 'data'; % data structure instead of arg list
@@ -408,7 +408,7 @@ if ~isempty(model.fixed_variables)
   fprintf(fid,'%% ------------------------------------------------------------\n');
   % 2.2 set random seed
   setup_randomseed(options,fid,rng_function,parameter_prefix)
-  
+
   names=fieldnames(model.fixed_variables);
   expressions=struct2cell(model.fixed_variables);
   for i=1:length(names)
@@ -552,14 +552,14 @@ if ~isempty(model.monitors)
 
       % default number of spike times to store for each cell
       spike_buffer_size=2;%5;%100;
-      
+
       % Support: monitor VAR.spikes(thresh,buffer_size)
       % - monitor VAR.spikes(#)
       % - monitor VAR.spikes(thresh)
       % - monitor VAR.spikes(thresh,#)
       % - monitor VAR.spikes(#,#)
       % - TODO: support: monitor VAR.spikes(thresh,buffer_size)
-      
+
       if isempty(monitor_expression{i})
         % monitor VAR.spikes
         spike_threshold=0;
@@ -753,22 +753,22 @@ for i=1:length(odes)
         %     note: account for tau as variable defined elsewhere or numeric
         % look for: X(t-#)
         delay=cellstr2num(regexp(matches{k},'\(t-([\.\d]+)\)','tokens','once'));
-        
+
         if isempty(delay)
           % look for: X(t-#,:)
           delay=cellstr2num(regexp(matches{k},'\(t-([\.\d]+),:\)','tokens','once'));
         end
-        
+
         if isempty(delay)
           % look for: X(t-param)
           delay=regexp(matches{k},'\(t-([\w\.]+)\)','tokens','once');
         end
-        
+
         if isempty(delay)
           % look for: X(t-param,:)
           delay=regexp(matches{k},'\(t-([\w\.]+),:\)','tokens','once');
         end
-        
+
         if iscell(delay) && ischar(delay{1})
           delay=strrep(delay{1},parameter_prefix,''); % remove parameter prefix
           delay=strrep(delay,',:',''); % remove population dimension from index to delay matrix
@@ -779,7 +779,7 @@ for i=1:length(odes)
             error('delay parameter ''%s'' not found.',delay);
           end
         end
-        
+
         if ~isempty(delay) && isnumeric(delay)
           delay_samp = ceil(delay/options.dt);
           delayinfo(end+1).variable=state_variables{j};
@@ -806,11 +806,11 @@ if ~isempty(delayinfo)
     idx=ismember({delayinfo.variable},delay_vars{i});
     Dmax=max([delayinfo(idx).delay_samp]);
     delay_maxi(i)=Dmax;
-    
+
     % convert delay indices into delay vector indices based on max delay
     tmps=num2cell(Dmax-[delayinfo(idx).delay_samp]);
     [delayinfo(idx).delay_index]=deal(tmps{:});
-    
+
     % initialize delay matrix with max delay ICs and all time points
     fprintf(fid,'%s_delay = zeros(nsamp+%g,size(%s,2));\n',delayinfo(i).variable,Dmax,delayinfo(i).variable);
     fprintf(fid,'  %s_delay(1:%g,:) = repmat(%s(1,:),[%g 1]);\n',delayinfo(i).variable,Dmax,delayinfo(i).variable,Dmax);
@@ -979,27 +979,27 @@ end
 %% independent_solve_file_flag
 if options.independent_solve_file_flag
   fprintf(fid,'\n');
-  
+
   fprintf(fid,'%% ------------------------------------------------------------\n');
   fprintf(fid,'%% Store Data in Structure:\n');
   fprintf(fid,'%% ------------------------------------------------------------\n');
-  
+
   if ~options.mex_flag
     % load metadata
     fprintf(fid,'%s = load(''metadata.mat'');\n', output_string);
   end
-  
+
   % add variables to struct output variable
   fprintf(fid,'%s.%s = %s;\n', output_string, 'time', 'T');
 
   fprintf(fid,'\n%% State variables:\n');
   cellfun(@addVar2StructOutput, model.state_variables,'uni',0);
-  
+
   if ~isempty(model.monitors)
     fprintf(fid,'\n%% Monitors:\n');
     cellfun(@addVar2StructOutput, fieldnames(model.monitors),'uni',0);
   end
-  
+
   if ~isempty(model.fixed_variables)
     fprintf(fid,'\n%% Fixed Variables:\n');
     cellfun(@addFixedVar2StructOutput, fieldnames(model.fixed_variables),'uni',0);
@@ -1182,13 +1182,12 @@ function print_conditional_update(fid,conditionals,index_nexts,state_variables, 
     fprintf(fid,'  conditional_test=(%s);\n',condition);
     action=dsStrrep(action, '\(n,:', '(n,conditional_test', '', '', varargin{:});
     indCondStr = strfind(action, '(n,conditional_test)');
-    if ~isempty(indCondStr)
+    if ~strcmp(reportUI,'matlab') && ~isempty(indCondStr)
       condVariableName = action(1:indCondStr-1);
       initialization = [action(1:indCondStr-1), ' = []'];
-      % * REMOVED BY DAVE - Enables monitor spikes to work with mex_flag turned on. See issue #546 (https://github.com/DynaSim/DynaSim/issues/546) *
-      %fprintf(fid,'  if ~exist(''%s'',''var'')\n', condVariableName);
-      %fprintf(fid,'    %s;\n',initialization);
-      %fprintf(fid,'  end;\n');
+      fprintf(fid,'  if ~exist(''%s'',''var'')\n', condVariableName);
+      fprintf(fid,'    %s;\n',initialization);
+      fprintf(fid,'  end;\n');
     end
     fprintf(fid,'  if any(conditional_test), %s; ',action);
 
