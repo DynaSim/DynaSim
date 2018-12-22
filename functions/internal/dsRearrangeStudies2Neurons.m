@@ -1,4 +1,4 @@
-function data_out = dsRearrangeStudies2Neurons(data)
+function data_out = dsRearrangeStudies2Neurons(data,varargin)
 %REARRANGESTUDIES2NEURONS - Takes a DynaSim data structure that is the result of a parameter sweep and rearranges it into a single (1D) data structure.
 %
 % Each "neuron" in this new data structure corresponds to a simulation in the
