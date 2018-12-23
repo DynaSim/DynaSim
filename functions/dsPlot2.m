@@ -320,15 +320,10 @@ xp2 = xp(chosen_all{:});
 %% Squeeze out unused dimensions
 % Squeeze to eliminate superfluous dimensions
 xp2 = xp2.squeeze;
-Nd = ndims(xp2);
 
 % Rearrange dimensions of xp2 for stacking
 if ~isempty(options.dim_stacking)
-    ax_names = xp2.exportAxisNames;
-    if length(options.dim_stacking) ~= length(ax_names) -1
-        error('Incorrect number of dimensions specified. dim_stacking must be some permutation of the following: %s', sprintf('%s ',ax_names{1:end}));
-    end
-    xp2.permute(options.dim_stacking);
+    xp2 = xp2.permute(options.dim_stacking);
 end
 
 
