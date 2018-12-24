@@ -18,7 +18,7 @@ output_directory = dsGetConfig('demos_path');
 
 % move to root directory where outputs will be saved
 mkdirSilent(output_directory);
-study_dir = fullfile(output_directory,'demo_sPING_100cells_5x1');
+
 
 
 %% Generate a sample dataset
@@ -62,12 +62,37 @@ vary={
   'E'   ,'Iapp',[1:5];      % amplitude of tonic input to E-cells
   'I->E','tauD',[10]       % inhibition decay time constant from I to E
   };
+
+study_dir = fullfile(output_directory,'demo_sPING_100cells_5x1');
+
 dsSimulate(s,'save_data_flag',1,'study_dir',study_dir,...
                 'vary',vary,'verbose_flag',1, 'downsample_factor', 10, ...
                 'save_results_flag',1,'parfor_flag',1,'plot_functions',{@dsPlot,@dsPlot,@dsPlotFR2},'plot_options',{{'format','png','visible','off','figwidth',0.5,'figheight',0.5}, ...
                 {'format','png','visible','off','plot_type','rastergram','figwidth',0.5,'figheight',0.5},...
                 {'format','png','visible','off'}} );
             
+zipfname = dsZipDemoData(study_dir);
+
+%% Generate another sample dataset
+
+% Vary two parameters (run a simulation for all combinations of values)
+vary={
+  'E'   ,'Iapp',[0:10:20];      % amplitude of tonic input to E-cells
+  %'I'   ,'Iapp',[0 5 10];      % amplitude of tonic input to I-cells
+  'I->E','tauD',[5:5:15]       % inhibition decay time constant from I to E
+  };
+
+study_dir = fullfile(output_directory,'demo_sPING_100cells_3x3');
+
+dsSimulate(s,'save_data_flag',1,'study_dir',study_dir,...
+                'vary',vary,'verbose_flag',1, 'downsample_factor', 10, ...
+                'save_results_flag',1,'parfor_flag',1,'plot_functions',{@dsPlot,@dsPlot,@dsPlotFR2},'plot_options',{{'format','png','visible','off','figwidth',0.5,'figheight',0.5}, ...
+                {'format','png','visible','off','plot_type','rastergram','figwidth',0.5,'figheight',0.5},...
+                {'format','png','visible','off'}} );
+
+zipfname = dsZipDemoData(study_dir);
+
+%% ********************************** Leftover stuff not used! ********************************** 
 
 %% Load the data
 
@@ -82,7 +107,7 @@ data_img = dsImportPlots(study_dir);
 % (For saving space)
 
 % Convert to MDD object
-xp = ds2MDD(data);
+xp = ds2mdd(data);
 
 % Num_cells_to_keep = 20;
 downsample_factor = 2;
@@ -102,7 +127,7 @@ data = ds.MDD2ds(xp);
 %% Package up the data
 
 % Stores it in the DynaSim demos archive for adding to repo
-zipfname = zipDemoData(study_dir);
+zipfname = dsZipDemoData(study_dir);
 % (can later recover this by running: dsUnzipDemoData(study_dir);)
 
 %% 
