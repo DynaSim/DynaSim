@@ -317,14 +317,20 @@ end
 xp2 = xp(chosen_all{:});
 
 
-%% Squeeze out unused dimensions
-% Squeeze to eliminate superfluous dimensions
-xp2 = xp2.squeeze;
 
-% Rearrange dimensions of xp2 for stacking
+% Rearrange dimensions of xp2
 if ~isempty(options.dim_stacking)
     xp2 = xp2.permute(options.dim_stacking);
 end
+
+
+%% Shift all unused (singleton) dimensions to the top.
+% This will preserve their values for use in the title or elsewhere. See
+% issue #552
+sz = size(xp2);
+singles = find(sz == 1);
+non_singles = find(sz ~= 1);
+xp2 = xp2.permute([singles,non_singles]);
 
 
 %% Crop data
