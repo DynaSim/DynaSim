@@ -689,18 +689,13 @@ ax_names = [xp2.exportAxisNames, 'data'];
 dimensions = get_dimensions(ax_names,dims_per_function_handle);
 
 
-% Remove any excess function handles that aren't needed
-available_dims = ~cellfun(@isempty,dimensions);
-function_handles = function_handles(available_dims);
-dimensions = dimensions(available_dims);
-function_args = function_args(available_dims);
-
 %% Run the plots!
 % Open new figure if necessary & plot the data
 if ~isequal(figure_handle, function_handles{1})
     % Cheap hack to force it to create a new figure using our desired
     % parameters for instances when it wouldn't normally call
     % xp_handles_fignew.
+    warning('Using old hack for opening a figure. Should not reach this code.');
     xp3 = MDD;
     fhandle = @() recursivePlot(xp2,function_handles,dimensions,function_args);
     xp3 = xp3.importData({fhandle});
