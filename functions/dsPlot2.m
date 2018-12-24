@@ -678,7 +678,7 @@ end
 % Linearize dimensions of xp2 that are in excess of the total number we can
 % plot
 targetNdims = sum(dims_per_function_handle)-1;         % There is 1 extra dim associated with "data", so need to subtract this one.
-xp2 = reduce_dims(xp2,targetNdims);
+xp2 = remove_excess_dims_start(xp2,targetNdims);
 
 % Add dummy dimensions that are in defecit of the total we want
 xp2 = add_dummy_dims(xp2,targetNdims);
@@ -821,10 +821,23 @@ function dimensions = get_dimensions(ax_names,dims_per_function_handle)
 
 end
 
-function xp2 = reduce_dims(xp2,targetNdims)
+function xp2 = remove_excess_dims_end(xp2,targetNdims)
+    % Merges any excess dims, starting from the end
     Nd = ndims(xp2);
     if Nd > targetNdims
         xp2 = xp2.mergeDims( [targetNdims:Nd] );
+        xp2 = xp2.squeezeRegexp('Dim');
+        Nd = ndims(xp2);
+
+        if Nd ~= targetNdims; error('something wrong'); end
+    end
+end
+
+function xp2 = remove_excess_dims_start(xp2,targetNdims)
+% Merges any excess dims, starting from the beginning
+    Nd = ndims(xp2);
+    if Nd > targetNdims
+        xp2 = xp2.mergeDims( [1:[Nd - targetNdims + 1]] );
         xp2 = xp2.squeezeRegexp('Dim');
         Nd = ndims(xp2);
 
