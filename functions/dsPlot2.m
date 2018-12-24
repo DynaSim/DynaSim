@@ -677,11 +677,11 @@ end
 %% Auto trim dimensions as needed
 % Linearize dimensions of xp2 that are in excess of the total number we can
 % plot
-maxNplotdims = sum(dims_per_function_handle)-1;         % There is 1 extra dim associated with "data", so need to subtract this one.
-xp2 = reduce_dims(xp2,maxNplotdims);
+targetNdims = sum(dims_per_function_handle)-1;         % There is 1 extra dim associated with "data", so need to subtract this one.
+xp2 = reduce_dims(xp2,targetNdims);
 
 % Add dummy dimensions that are in defecit of the total we want
-xp2 = add_dummy_dims(xp2,maxNplotdims);
+xp2 = add_dummy_dims(xp2,targetNdims);
 
 % Stack up available dimensions based on how much each axis handle can hold
 ax_names = [xp2.exportAxisNames, 'data'];
@@ -826,20 +826,20 @@ function dimensions = get_dimensions(ax_names,dims_per_function_handle)
 
 end
 
-function xp2 = reduce_dims(xp2,maxNplotdims)
+function xp2 = reduce_dims(xp2,targetNdims)
     Nd = ndims(xp2);
-    if Nd > maxNplotdims
-        xp2 = xp2.mergeDims( [maxNplotdims:Nd] );
+    if Nd > targetNdims
+        xp2 = xp2.mergeDims( [targetNdims:Nd] );
         xp2 = xp2.squeeze;
         Nd = ndims(xp2);
 
-        if Nd ~= maxNplotdims; error('something wrong'); end
+        if Nd ~= targetNdims; error('something wrong'); end
     end
 end
 
-function xp2 = add_dummy_dims(xp2,maxNplotdims)
+function xp2 = add_dummy_dims(xp2,targetNdims)
     Nd = ndims(xp2);
-    xp2 = xp2.permute([Nd+1:maxNplotdims, 1:Nd]);
+    xp2 = xp2.permute([Nd+1:targetNdims, 1:Nd]);
 end
 
 
