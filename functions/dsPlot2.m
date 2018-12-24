@@ -677,7 +677,7 @@ end
 %% Auto trim dimensions as needed
 % Linearize dimensions of xp2 that are in excess of the total number we can
 % plot
-maxNplotdims = sum(dims_per_function_handle)-1;
+maxNplotdims = sum(dims_per_function_handle)-1;         % There is 1 extra dim associated with "data", so need to subtract this one.
 xp2 = reduce_dims(xp2,maxNplotdims);
 
 % Stack up available dimensions based on how much each axis handle can hold
