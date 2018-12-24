@@ -429,13 +429,7 @@ if length(xp2.meta.datainfo(2).values) <= 1 && ~is_image
     xp2.meta.datainfo(2).values = packed_vars(:)';
 
     xp2 = xp2.packDim(ax2overlay,2);
-    
-    % Remove last dimension, since now empty. (I should make a more elegant
-    % way to do this.)
-    [data,axis_values,axis_names] = xp2.exportData; meta = xp2.meta;
-    xp2 = MDD.ImportData(data,axis_values(1:end-1),axis_names(1:end-1));
-    xp2.meta = meta;
-    clear meta data axis_values axis_names
+    xp2 = xp2.squeezeRegexp('Dim');
 end
 
 %% Set up do z-score & overlay shift
@@ -825,7 +819,7 @@ function xp2 = reduce_dims(xp2,targetNdims)
     Nd = ndims(xp2);
     if Nd > targetNdims
         xp2 = xp2.mergeDims( [targetNdims:Nd] );
-        xp2 = xp2.squeeze;
+        xp2 = xp2.squeezeRegexp('Dim');
         Nd = ndims(xp2);
 
         if Nd ~= targetNdims; error('something wrong'); end
