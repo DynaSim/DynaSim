@@ -716,7 +716,7 @@ function var_regex = getdefaultstatevar(xp)
     if isempty(xp.findaxis('variables'))
         % If reach here, it means variables is not used in the code. Just
         % return some dummy values and move on.
-        var_out = ':';
+        var_regex = ':';
         return;
     end
 
