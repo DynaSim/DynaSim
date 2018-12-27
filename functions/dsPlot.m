@@ -1050,7 +1050,8 @@ for iFigset = 1:num_fig_sets
             end
           case {'rastergram','raster'}
             % draw spikes
-            ypos = 0; % y-axis position tracker
+            tot_num_cells = sum(cellfun(@length,allspikes));
+            ypos = tot_num_cells; % y-axis position tracker
             yticks=[]; % where to position population names
             yticklabels={}; % population names
             for iPop = 1:length(allspikes) % loop over populations
@@ -1062,33 +1063,35 @@ for iFigset = 1:num_fig_sets
                 xPoints = [spks, spks, NaN(size(spks))]';
                 xPoints = xPoints(:);
 
-                yPoints = [(iCell+ypos-.5)*ones(size(spks)), (iCell+ypos+.5)*ones(size(spks)), NaN(size(spks))]';
+                                    % Centered at ypos for cell #1. Need to
+                                    % subtract 1 since iCell starts at 1.
+                yPoints = [(ypos-(iCell-1)-.5)*ones(size(spks)), (ypos-(iCell-1)+.5)*ones(size(spks)), NaN(size(spks))]';
                 yPoints = yPoints(:);
                 
                 plot(thisAxes, xPoints,yPoints,'color','k'); hold on
               end
               
               % record position for population tick name
-              yticks(end+1) = ypos + iCell/2 + .5;
+              yticks(end+1) = ypos - iCell/2 + .5;
               yticklabels{end+1} = set_name{iPop};
               
               % draw line separating populations
               if length(allspikes) > 1 && iPop < length(allspikes)
-                pos = iCell + ypos + .5;
+                pos = -iCell + ypos + .5;
                 plot(thisAxes, [min(time) max(time)],[pos pos],'color','k','linewidth',3);
                 
                 % increment y-position for next population
-                ypos = ypos + iCell;
+                ypos = ypos + -iCell;
               end
             end
             
             % artificially set "dat" to get correct ylims below
-            dat = [.5 ypos+iCell+.5];
+            dat = [.5 tot_num_cells+.5];
             shared_ylims_flag = 0;
             legend_strings = '';
             
             % set y-ticks to population names
-            set(thisAxes,'ytick',yticks,'yticklabel',yticklabels);
+            set(thisAxes,'ytick',fliplr(yticks),'yticklabel',fliplr(yticklabels));
             % set(thisAxes,'ydir','reverse');        % Comment out to no longer reverse y-axis
             
             % set x-ticks
