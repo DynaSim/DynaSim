@@ -551,13 +551,31 @@ mex_flag=1;       % takes longer to compile on 1st run; faster on subsequent run
 solver='euler';       % Euler integration requires fewer calculations than 4th-order Runge Kutta
 dt=.01;               % increase time step as long as solution converges
 
-eqns='dv/dt=@current+I; {iNa,iK}';
+eqns='dv/dt=@current+I+noise*randn(1,N_pop); {iNa,iK}';
+
+% create DynaSim specification structure
+s=[];
+s.populations(1).name='E';
+s.populations(1).size=5;
+s.populations(1).equations=eqns;
+s.populations(1).parameters={'noise',20};
 
 % run and compile MEX file
-data=dsSimulate(eqns,'vary',{'I',10},'downsample_factor',downsample_factor,...
-  'mex_flag',mex_flag,'solver',solver,'dt',dt);
+data=dsSimulate(s,'vary',{'I',10},'downsample_factor',downsample_factor,...
+  'mex_flag',mex_flag,'solver',solver,'dt',dt,...
+  'study_dir','demo_efficient_sim',...
+  'analysis_functions',{@dsCalcAverages},'analysis_options',{'save_std',1});
 dsPlot(data);
+
+% Instead of loading full dataset, just load output of analysis function,
+% which contains mean and standard deviation data.
+s = load(fullfile('demo_efficient_sim','results','study_sim1_analysis1_dsCalcAverages.mat'));
+dsPlot(s.result);
+dsPlot2(s.result,'variable','/iNa_m|iNa_h/');       % Plot several state variables using dsPlot2
+
 
 % sets of simulations:
 % multinode (on a cluster): cluster_flag=1;
 % multicore (local simulation): parfor_flag=1;
+
+
