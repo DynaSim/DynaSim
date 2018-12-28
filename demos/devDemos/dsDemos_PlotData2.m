@@ -76,7 +76,10 @@ dsPlot2(data,'max_num_overlaid',1,'varied1',1:3,'varied2',2:3)
 close all;
 
 % Overlays can also be doubly stacked. Note that both E and I cells are
-% shown on a single plot.
+% shown on a single plot. Ndims_per_subplot tells dsPlot2 to assign 2
+% dimensions to each subplot panel - in this case, both the populations
+% dimension (E and I populations) and the cells dimension (the first 5
+% cells of each population).
 
 dsPlot2(data,'max_num_overlaid',5,'force_last','populations','Ndims_per_subplot',2);
 
@@ -126,8 +129,6 @@ myxp.data = cellfun(norm_data,myxp.data,'UniformOutput',0);
 h = dsPlot2(myxp,'population','E','plot_type','waveform',...
     'figure_options',fig_options,...
     'subplot_options',subplot_options);
-
-
 
 %% Import pre-saved images
 close all
