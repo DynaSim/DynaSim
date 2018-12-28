@@ -25,11 +25,18 @@ if ~exist(study_dir,'dir')
 end
 
 % Load data in traditional DynaSim format
-data=dsImport(study_dir);
+data_full=dsImport(study_dir);
 
 % % Import saved plots from huge sweep of images
 % data_3D_plots = dsImportPlots(fullfile(output_directory,'demo_sPING_3b_3D'));
 
+%% Decimate data to increase speeds
+
+% Remove all but 5 cells at random, so as to increase speed
+data = dsDecimateCells(data_full,5);
+
+% Decimate the data by dropping every other data point
+data = dsDecimateData(data,2);
 
 %% Do some basic plots with dsPlot2
 
@@ -46,7 +53,7 @@ dsPlot2(data,'do_zoom',1,'population','E');
 
 % As above, but focus on only a subset of the varied data. Also, reduce the
 % total number of traces displayed.
-dsPlot2(data,'population','E','variable','v','E_Iapp',1:3,'varied2',[1,3],'do_zoom',1,'max_num_overlaid',10);
+dsPlot2(data,'population','E','variable','v','E_Iapp',1:3,'varied2',[1,3],'do_zoom',1,'max_num_overlaid',3);
 
 
 % All basic plot_types from dsPlot should work
@@ -54,8 +61,8 @@ dsPlot2(data,'population','E','variable','v','E_Iapp',1:3,'varied2',[1,3],'do_zo
 %     {'waveform','imagesc','rastergram','raster','power'}
 % And also from dsPlotFR2
 %     {'heatmapFR','heatmap_sortedFR','meanFR','meanFRdens'}
-dsPlot2(data,'population','all','plot_type','rastergram')              % Rastergram
-dsPlot2(data,'population','I','plot_type','heatmap_sortedFR')          % Firing rate (FR) heatmap
+dsPlot2(data_full,'population','all','plot_type','rastergram')              % Rastergram
+dsPlot2(data_full,'population','I','plot_type','heatmap_sortedFR')          % Firing rate (FR) heatmap
 
 
 %% Modifying overlaid traces
@@ -81,10 +88,10 @@ close all;
 % dimension (E and I populations) and the cells dimension (the first 5
 % cells of each population).
 
-dsPlot2(data,'max_num_overlaid',5,'force_last','populations','Ndims_per_subplot',2);
+dsPlot2(data,'force_last','populations','Ndims_per_subplot',2);
 
 % However, these can be messy, so the groups can be shifted up or down
-dsPlot2(data,'max_num_overlaid',5,'force_last','populations','do_overlay_shift',true,'Ndims_per_subplot',2);
+dsPlot2(data,'force_last','populations','do_overlay_shift',true,'Ndims_per_subplot',2);
 
     % Variables are stacked from top to bottom, so E cells are on top and I
     % cells underneath
@@ -113,7 +120,7 @@ dsPlot2(data,'population','E','variable','/v|I_iGABAa_s/','force_last','variable
 % state variable.
 
 % First, plot a heatmap of GABA A state variable
-h = dsPlot2(data,'population','E','variable','iGABAa_s','plot_type','imagesc');
+h = dsPlot2(data_full,'population','E','variable','iGABAa_s','plot_type','imagesc');
 
 % Extract the handle for the subplot_grid subplot
 fig_options.suppress_newfig = true;
@@ -121,7 +128,7 @@ subplot_options.subplot_grid_handle = h.hsub{1}.hcurr;
 
 % Normalize Vm data between 0 and 20 (values of y-axis limits)
 norm_data = @(x) (x - min(x(:))) ./ (max(x(:)) - min(x(:))) * 20;
-myxp = dsAll2mdd(data);
+myxp = dsAll2mdd(data_full);
 myxp.data = cellfun(norm_data,myxp.data,'UniformOutput',0);
 
 % Plot this data overlaid. We include the above axis handle in the options
@@ -196,8 +203,8 @@ close all
 
 % Plot membrane voltage for E and I cells across the parameter sweep
 % % (1 variable, 2 pops, varied1, varied2: Ndims = 3)
-dsPlot2(data,'num_embedded_subplots',2,'do_zoom',1,'max_num_overlaid',10);  % Default
-dsPlot2(data,'num_embedded_subplots',4,'do_zoom',1,'max_num_overlaid',10);  % Nested embedding
+dsPlot2(data,'num_embedded_subplots',2,'do_zoom',1);  % Default
+dsPlot2(data,'num_embedded_subplots',4,'do_zoom',1);  % Nested embedding
 
 % Note that in the prev example, although we set embedded subplots to 4, only
 % the first 3 are used. If excess subplots are requested and unused, they
@@ -220,4 +227,4 @@ dsPlot2(data,'num_embedded_subplots',3,'variable','iNa','varied1',2)
 % address this by producing single figures occupying very large canvases,
 % which can be zoomed to a high level of detail.
 % % (2 vars, 2 pops, varied1, varied2: Ndims = 4)
-dsPlot2(data,'max_num_overlaid',3,'num_embedded_subplots',4,'population','all','variable','/v|iNa_h/','varied1',2:3,'lock_axes',false);
+dsPlot2(data,'num_embedded_subplots',4,'population','all','variable','/v|iNa_h/','varied1',2:3,'lock_axes',false);
