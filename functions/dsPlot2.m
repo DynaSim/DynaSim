@@ -330,8 +330,16 @@ if ~isempty(dim_stacking)
     xp2 = xp2.permute(dim_stacking);
 end
 
+% Rearrange values in a given dimension
 if ~isempty(value_stacking)
     xp2 = xp2.axisSubset(value_stacking{1},value_stacking{2});
+    
+    % Recreate new labels list with correct ordering
+    xp2_temp = xp2.mergeDims({'population','variables'});
+    ax_ind_pop_var = xp2_temp.findaxis('populations_variables');
+    xp2.meta.dynasim.labels = [xp2_temp.axis(ax_ind_pop_var).values,'time'];
+    clear xp2_temp
+    
 end
 
 
