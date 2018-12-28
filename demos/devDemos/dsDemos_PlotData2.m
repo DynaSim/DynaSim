@@ -57,42 +57,6 @@ dsPlot2(data,'population','E','variable','v','E_Iapp',1:3,'varied2',[1,3],'do_zo
 dsPlot2(data,'population','all','plot_type','rastergram')              % Rastergram
 dsPlot2(data,'population','I','plot_type','heatmap_sortedFR')          % Firing rate (FR) heatmap
 
-%% Recursive plots with dsPlot2
-
-close all
-
-% The number of subplots packed into a single figure can be substantially
-% increased by recursive subplotting. This is controlled with the
-% "num_embedded_subplots" flag, which can range from 1-4.
-
-% Plot membrane voltage for E and I cells across the parameter sweep
-% % (1 variable, 2 pops, varied1, varied2: Ndims = 3)
-dsPlot2(data,'num_embedded_subplots',2,'do_zoom',1,'max_num_overlaid',10);  % Default
-dsPlot2(data,'num_embedded_subplots',4,'do_zoom',1,'max_num_overlaid',10);  % Nested embedding
-
-% Note that in the prev example, although we set embedded subplots to 4, only
-% the first 3 are used. If excess subplots are requested and unused, they
-% will be thrown out.
-% 
-% Setting num_embedded_subplots to provides the same data but in a different
-% arrangement.
-dsPlot2(data,'num_embedded_subplots',3,'do_zoom',1);
-
-% Depending on the data being plotted, different some arrangements can be
-% more useful than others. For example, this plot embeds varied as a
-% sub-subplot.
-% % (2 variables, 2 pops, varied2, (varied1 is fixed): Ndims = 3)
-dsPlot2(data,'num_embedded_subplots',3,'variable','iNa','varied1',2)
-
-% Lastly, 4 subplots can be nested together to view 4 dimensions
-% simultaneously. This can be increased to 5 with the overlay function
-% described below, and 6 if you count multiple figures. While these figures
-% may get crowded, the supersize_me flag, also described below, aims to 
-% address this by producing single figures occupying very large canvases,
-% which can be zoomed to a high level of detail.
-% % (2 vars, 2 pops, varied1, varied2: Ndims = 4)
-dsPlot2(data,'max_num_overlaid',3,'num_embedded_subplots',4,'population','all','variable','/v|iNa_h/','varied1',2:3,'lock_axes',false);
-
 
 %% Modifying overlaid traces
 
@@ -219,3 +183,40 @@ dsPlot2(data_img_sim2);
 % Merge
 data_img_merged = dsMergeData(data_img,data_img_sim2);
 dsPlot2(data_img_merged);
+
+
+%% Recursive plots with dsPlot2
+
+close all
+
+% The number of subplots packed into a single figure can be substantially
+% increased by recursive subplotting. This is controlled with the
+% "num_embedded_subplots" flag, which can range from 1-4.
+
+% Plot membrane voltage for E and I cells across the parameter sweep
+% % (1 variable, 2 pops, varied1, varied2: Ndims = 3)
+dsPlot2(data,'num_embedded_subplots',2,'do_zoom',1,'max_num_overlaid',10);  % Default
+dsPlot2(data,'num_embedded_subplots',4,'do_zoom',1,'max_num_overlaid',10);  % Nested embedding
+
+% Note that in the prev example, although we set embedded subplots to 4, only
+% the first 3 are used. If excess subplots are requested and unused, they
+% will be thrown out.
+% 
+% Setting num_embedded_subplots to provides the same data but in a different
+% arrangement.
+dsPlot2(data,'num_embedded_subplots',3,'do_zoom',1);
+
+% Depending on the data being plotted, different some arrangements can be
+% more useful than others. For example, this plot embeds varied as a
+% sub-subplot.
+% % (2 variables, 2 pops, varied2, (varied1 is fixed): Ndims = 3)
+dsPlot2(data,'num_embedded_subplots',3,'variable','iNa','varied1',2)
+
+% Lastly, 4 subplots can be nested together to view 4 dimensions
+% simultaneously. This can be increased to 5 with the overlay function
+% described below, and 6 if you count multiple figures. While these figures
+% may get crowded, the supersize_me flag, also described below, aims to 
+% address this by producing single figures occupying very large canvases,
+% which can be zoomed to a high level of detail.
+% % (2 vars, 2 pops, varied1, varied2: Ndims = 4)
+dsPlot2(data,'max_num_overlaid',3,'num_embedded_subplots',4,'population','all','variable','/v|iNa_h/','varied1',2:3,'lock_axes',false);
