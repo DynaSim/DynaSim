@@ -36,6 +36,10 @@ function [handles,xp] = dsPlot2(data,varargin)
 %     'visible' {'on','off'}
 %     'lock_gca'        : Plots within currently active axis (gca); doesn't
 %                         open new figures or subplots.
+%     'dim_stacking'    - Used to alter the default ordering of dimensions
+%     'value_stacking'  - Used to alter the default ordering of values
+%                         (e.g., populations or variables). Expected 1x2
+%                         cell array with format {dimension name, order}
 %     NOTE: analysis options available depending on plot_type
 %       see see dsCalcFR options for plot_type 'rastergram' or 'rates'
 %       see dsCalcPower options for plot_type 'power'
@@ -158,6 +162,7 @@ end
   'save_res',[],[],...
   'Ndims_per_subplot',[],[],...
   'dim_stacking',[],[],...
+  'value_stacking',{},{},...
   'figure_handle',@xp_handles_fignew,[],...
   'subplot_handle',@xp_subplot_grid,[],...
   'plot_handle',[],[],...
@@ -182,6 +187,8 @@ force_last = options.force_last;
 crop_range = options.crop_range;
 lock_axes = options.lock_axes;
 Ndims_per_subplot = options.Ndims_per_subplot;
+dim_stacking = options.dim_stacking;
+value_stacking = options.value_stacking;
 figure_handle = options.figure_handle;
 subplot_handle = options.subplot_handle;
 plot_handle = options.plot_handle;
@@ -319,8 +326,12 @@ xp2 = xp(chosen_all{:});
 
 
 % Rearrange dimensions of xp2
-if ~isempty(options.dim_stacking)
-    xp2 = xp2.permute(options.dim_stacking);
+if ~isempty(dim_stacking)
+    xp2 = xp2.permute(dim_stacking);
+end
+
+if ~isempty(value_stacking)
+    xp2 = xp2.axisSubset(value_stacking{1},value_stacking{2});
 end
 
 
@@ -411,7 +422,7 @@ if length(xp2.meta.datainfo(2).values) <= 1 && ~is_image
     % Move populations axis to the end if it exists
 
     ax2overlay = [];
-    if isempty(force_last) && isempty(options.dim_stacking)
+    if isempty(force_last) && isempty(dim_stacking)
         ax2overlay = xp2.findaxis('populations');           % If force_last or dim_stacking isn't specified, then choose populations
     end
 
@@ -573,7 +584,7 @@ else
             data_plothandle = @xp_PlotData;
             if ~isempty(plot_handle); data_plothandle = plot_handle; end
 
-            if any(strcmp(plot_type,{'rastergram','raster'})) && isempty(force_last) && isempty(options.dim_stacking)
+            if any(strcmp(plot_type,{'rastergram','raster'})) && isempty(force_last) && isempty(dim_stacking)
                 % Move populations axis to the end of xp2. (Only do this if
                 % we're not already overwriting dims stacking order).
                 ax_names = xp2.exportAxisNames;

@@ -91,6 +91,13 @@ dsPlot2(data,'max_num_overlaid',1,'dim_stacking',{'variables','populations','var
 % example, dsPlot2(data,'max_num_overlaid',1,'dim_stacking',{'populations','varied1','varied2'})
 % will produce an error.
 
+% Additionally, values within a dimension can be re-ordered using the 
+% value_stacking option. For example, the following plots I cells first and
+% E cells second.
+dsPlot2(data,'max_num_overlaid',1,'force_last','E_Iapp','value_stacking',{'populations',[2,1]});
+% Here, [2,1] denotes to select the second population first, and the first
+% second.
+
 
 %% Modifying overlaid traces
 
