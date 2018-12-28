@@ -1,61 +1,61 @@
-%% % % % % % % % dsPlot2 tutorial % % % % % % % %
-% % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % 
-% % Catch to prevent people from running entire script (F5)
-% error('Do not F5. This script is not meant to be run in its entirety.');
-% 
-% %% Set up paths 
-% % Get ready...
-% 
-% % Add DynaSim to path if it's not already there
-% if exist('setupDynaSimPath','file')
-%     setupDynaSimPath;
-% else
-%     error('Add the DynaSim folder to the MATLAB path - e.g. run addpath(genpath(DynaSimPath))');
-% end
-% 
-% % Set where to save outputs
-% output_directory = dsGetConfig('demos_path');
-% study_dir = fullfile(output_directory,'demo_sPING_100cells_3x3');
-% 
-% %% Import the data
-% 
-% % Make sure sample data exists; if not copy it into place
-% if ~exist(study_dir,'dir')
-%     dsUnzipDemoData(study_dir);
-% end
-% 
-% % Load data in traditional DynaSim format
-% data=dsImport(study_dir);
-% 
-% % % Import saved plots from huge sweep of images
-% % data_3D_plots = dsImportPlots(fullfile(output_directory,'demo_sPING_3b_3D'));
-% 
-% 
-% %% Do some basic plots with dsPlot2
-% 
-% close all
-% 
-% % Default settings
-% dsPlot2(data);
-% 
-% % Take mean
-% dsPlot2(data,'do_mean',1);
-% 
-% % Plot data, just E cells, with zoom turned on
-% dsPlot2(data,'do_zoom',1,'population','E');
-% 
-% % As above, but focus on only a subset of the varied data. Also, reduce the
-% % total number of traces displayed.
-% dsPlot2(data,'population','E','variable','v','E_Iapp',1:3,'varied2',[1,3],'do_zoom',1,'max_num_overlaid',10);
-% 
-% 
-% % All basic plot_types from dsPlot should work
-% % Options are availalbe from dsPlot:
-% %     {'waveform','imagesc','rastergram','raster','power'}
-% % And also from dsPlotFR2
-% %     {'heatmapFR','heatmap_sortedFR','meanFR','meanFRdens'}
-% dsPlot2(data,'population','all','plot_type','rastergram')              % Rastergram
-% dsPlot2(data,'population','I','plot_type','heatmap_sortedFR')          % Firing rate (FR) heatmap
+% % % % % % % % dsPlot2 tutorial % % % % % % % %
+% % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % 
+% Catch to prevent people from running entire script (F5)
+error('Do not F5. This script is not meant to be run in its entirety.');
+
+%% Set up paths 
+% Get ready...
+
+% Add DynaSim to path if it's not already there
+if exist('setupDynaSimPath','file')
+    setupDynaSimPath;
+else
+    error('Add the DynaSim folder to the MATLAB path - e.g. run addpath(genpath(DynaSimPath))');
+end
+
+% Set where to save outputs
+output_directory = dsGetConfig('demos_path');
+study_dir = fullfile(output_directory,'demo_sPING_100cells_3x3');
+
+%% Import the data
+
+% Make sure sample data exists; if not copy it into place
+if ~exist(study_dir,'dir')
+    dsUnzipDemoData(study_dir);
+end
+
+% Load data in traditional DynaSim format
+data=dsImport(study_dir);
+
+% % Import saved plots from huge sweep of images
+% data_3D_plots = dsImportPlots(fullfile(output_directory,'demo_sPING_3b_3D'));
+
+
+%% Do some basic plots with dsPlot2
+
+close all
+
+% Default settings
+dsPlot2(data);
+
+% Take mean
+dsPlot2(data,'do_mean',1);
+
+% Plot data, just E cells, with zoom turned on
+dsPlot2(data,'do_zoom',1,'population','E');
+
+% As above, but focus on only a subset of the varied data. Also, reduce the
+% total number of traces displayed.
+dsPlot2(data,'population','E','variable','v','E_Iapp',1:3,'varied2',[1,3],'do_zoom',1,'max_num_overlaid',10);
+
+
+% All basic plot_types from dsPlot should work
+% Options are availalbe from dsPlot:
+%     {'waveform','imagesc','rastergram','raster','power'}
+% And also from dsPlotFR2
+%     {'heatmapFR','heatmap_sortedFR','meanFR','meanFRdens'}
+dsPlot2(data,'population','all','plot_type','rastergram')              % Rastergram
+dsPlot2(data,'population','I','plot_type','heatmap_sortedFR')          % Firing rate (FR) heatmap
 
 %% Recursive plots with dsPlot2
 
