@@ -45,14 +45,16 @@ close all
 % Default settings
 dsPlot2(data);
 
-% Take mean
+% Take mean. Note that E and I cells are now collapsed into the same plot.
 dsPlot2(data,'do_mean',1);
 
 % Plot data, just E cells, with zoom turned on
 dsPlot2(data,'do_zoom',1,'population','E');
 
 % As above, but focus on only a subset of the varied data. Also, reduce the
-% total number of traces displayed.
+% total number of traces displayed with the max_num_overlaid option. Note
+% that varied2 is an alias for the second parameter varied, in this
+% case I_E_tauD.
 dsPlot2(data,'population','E','variable','v','E_Iapp',1:3,'varied2',[1,3],'do_zoom',1,'max_num_overlaid',3);
 
 
@@ -64,12 +66,37 @@ dsPlot2(data,'population','E','variable','v','E_Iapp',1:3,'varied2',[1,3],'do_zo
 dsPlot2(data_full,'population','all','plot_type','rastergram')              % Rastergram
 dsPlot2(data_full,'population','I','plot_type','heatmap_sortedFR')          % Firing rate (FR) heatmap
 
+%% Re-ordering plots
+
+% The order by which dimensions of the data are "stacked" into dsPlot2
+% figures is controlled by two options: force_last and dim_stacking
+
+% By default, if there is only 1 cell present in each population,
+% populations are overlaid in subplots
+dsPlot2(data,'max_num_overlaid',1);
+
+% However, this can be changed with the 'force_last' option. Now,
+% different strenght applied currents are now overlaid within subplots, and
+% each population gets its own axis.
+dsPlot2(data,'max_num_overlaid',1,'force_last','E_Iapp');
+
+% More detailed control can be obtained with the dim_stacking option, in
+% which the ordering of all dimensions can be controlled. The following
+% forces the varied2 parameter (synaptic decay time) to the bottom of the
+% stack as the overlay, and then populations and varied1 are the subplots.
+dsPlot2(data,'max_num_overlaid',1,'dim_stacking',{'variables','populations','varied1','varied2'});
+
+% Note that, with dim_stacking, since this is essentially a permute
+% operation, all dimensions present in the original data must be specified. For
+% example, dsPlot2(data,'max_num_overlaid',1,'dim_stacking',{'populations','varied1','varied2'})
+% will produce an error.
+
 
 %% Modifying overlaid traces
 
 close all
 
-% This provides an alternative method for stacking more data into a single
+% This section provides a method for stacking more data into a single
 % plot.
 
 % If there is only 1 cell from each population, dsPlot will overlay
@@ -82,15 +109,17 @@ dsPlot2(data,'max_num_overlaid',1,'varied1',1:3,'varied2',2:3)
 
 close all;
 
-% Overlays can also be doubly stacked. Note that both E and I cells are
-% shown on a single plot. Ndims_per_subplot tells dsPlot2 to assign 2
-% dimensions to each subplot panel - in this case, both the populations
-% dimension (E and I populations) and the cells dimension (the first 5
-% cells of each population).
-
+% Overlays can also be doubly stacked. 
 dsPlot2(data,'force_last','populations','Ndims_per_subplot',2);
 
-% However, these can be messy, so the groups can be shifted up or down
+% Here, Ndims_per_subplot tells dsPlot2 to assign 2
+% dimensions to each subplot panel - in this case, both the populations
+% dimension (E and I populations) and the cells dimension (the first 5
+% cells of each population). Although it is difficult to see, both E and I
+% cells are present in each individual subplot.
+
+% This can be cleaned up by shifting groups of cells up or down with the
+% do_overlay_shift option.
 dsPlot2(data,'force_last','populations','do_overlay_shift',true,'Ndims_per_subplot',2);
 
     % Variables are stacked from top to bottom, so E cells are on top and I
@@ -136,6 +165,8 @@ myxp.data = cellfun(norm_data,myxp.data,'UniformOutput',0);
 h = dsPlot2(myxp,'population','E','plot_type','waveform',...
     'figure_options',fig_options,...
     'subplot_options',subplot_options);
+
+
 
 %% Import pre-saved images
 close all
