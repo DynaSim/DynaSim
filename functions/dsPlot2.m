@@ -511,7 +511,10 @@ end
 if isempty(plot_options.xlims) && lock_axes && ~is_image
     if ~strcmp(plot_type,'power')
         xdat = xp2.meta.datainfo(1).values;
-        plot_options.xlims = [min(xdat) max(xdat)];
+        data_xlims = [min(xdat) max(xdat)];
+        if data_xlims(2) > data_xlims(1)                              % xlims needs to be an increasing vector
+            plot_options.xlims = data_xlims;
+        end
     else
         % For plot type = power, set from 0-80
         plot_options.xlims = [0 80];
@@ -528,8 +531,10 @@ if isempty(plot_options.ylims) && lock_axes && ~is_image
             data_all = vertcat(data_all{:});
             % Find the max and minima - these are the largest and smallest
             % values we could ever see.
-            data_lims = [min(data_all) max(data_all)];
-            plot_options.ylims = data_lims;
+            data_ylims = [min(data_all) max(data_all)];
+            if data_ylims(2) > data_ylims(1)                      % ylims needs to be an increasing vector
+                plot_options.ylims = data_ylims;
+            end
     end
 end
 
@@ -540,8 +545,8 @@ if isempty(plot_options.zlims) && lock_axes && ~is_image
             data_all = xp2.data(:);
             data_all = cellfunu(@(x) x(:), data_all);
             data_all = vertcat(data_all{:});
-            data_lims = [min(data_all) max(data_all)];
-            plot_options.zlims = data_lims;
+            data_ylims = [min(data_all) max(data_all)];
+            plot_options.zlims = data_ylims;
     end
 end
 
