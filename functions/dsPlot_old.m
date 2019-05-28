@@ -187,7 +187,6 @@ options=dsCheckOptions(varargin,{...
   'figx',[0],[],...
   'figy',[0],[],...
   'text_FontSize',12,[],... % FontSize of figure text
-  'axis_FontSize',14,[],... % FontSize of figure axis
   'visible','on',{'on','off'},...
   'lock_gca',[false],[false, true],...
   'fig_handle',[],[],...
@@ -569,7 +568,7 @@ for iFigset = 1:num_fig_sets
           % up graphics objects and convert them to doubles
         
         % position axes
-        haxes = tight_subplot2(num_rows, num_cols, [.01 .03], [.05 .03], [.05 .03], thisHandle);
+        haxes = tight_subplot2(num_rows, num_cols, [.01 .03], [.05 .03], [.03 .03], thisHandle);
     else
         if isempty(options.ax_handle)
           haxes = gca;
@@ -986,8 +985,8 @@ for iFigset = 1:num_fig_sets
             % list the parameter varied along the rows first
             str = [row_param_name '=' num2str(row_param_values(row)) ': '];
             
-            for iVar = 1:num_varied
-              fld = data(sim_index).varied{iVar};
+            for iPop = 1:num_varied
+              fld = data(sim_index).varied{iPop};
               
               if ~strcmp(fld,row_param_name)
                 val = data(sim_index).(fld);
@@ -1001,8 +1000,8 @@ for iFigset = 1:num_fig_sets
           else
             str='';
             
-            for iVar = 1:length(data(sim_index).varied)
-              fld = data(sim_index).varied{iVar};
+            for iPop = 1:length(data.varied)
+              fld = data(sim_index).varied{iPop};
               str = [str fld '=' num2str(data(sim_index).(fld)) ', '];
             end
           end
@@ -1051,7 +1050,8 @@ for iFigset = 1:num_fig_sets
             end
           case {'rastergram','raster'}
             % draw spikes
-            ypos = 0; % y-axis position tracker
+            tot_num_cells = sum(cellfun(@length,allspikes));
+            ypos = tot_num_cells; % y-axis position tracker
             yticks=[]; % where to position population names
             yticklabels={}; % population names
             for iPop = 1:length(allspikes) % loop over populations
@@ -1063,34 +1063,36 @@ for iFigset = 1:num_fig_sets
                 xPoints = [spks, spks, NaN(size(spks))]';
                 xPoints = xPoints(:);
 
-                yPoints = [(iCell+ypos-.5)*ones(size(spks)), (iCell+ypos+.5)*ones(size(spks)), NaN(size(spks))]';
+                                    % Centered at ypos for cell #1. Need to
+                                    % subtract 1 since iCell starts at 1.
+                yPoints = [(ypos-(iCell-1)-.5)*ones(size(spks)), (ypos-(iCell-1)+.5)*ones(size(spks)), NaN(size(spks))]';
                 yPoints = yPoints(:);
                 
-                plot(thisAxes, xPoints,yPoints,'color','b'); hold on
+                plot(thisAxes, xPoints,yPoints,'color','k'); hold on
               end
               
               % record position for population tick name
-              yticks(end+1) = ypos + iCell/2 + .5;
+              yticks(end+1) = ypos - iCell/2 + .5;
               yticklabels{end+1} = set_name{iPop};
               
               % draw line separating populations
               if length(allspikes) > 1 && iPop < length(allspikes)
-                pos = iCell + ypos + .5;
+                pos = -iCell + ypos + .5;
                 plot(thisAxes, [min(time) max(time)],[pos pos],'color','k','linewidth',3);
                 
                 % increment y-position for next population
-                ypos = ypos + iCell;
+                ypos = ypos + -iCell;
               end
             end
             
             % artificially set "dat" to get correct ylims below
-            dat = [.5 ypos+iCell+.5];
+            dat = [.5 tot_num_cells+.5];
             shared_ylims_flag = 0;
             legend_strings = '';
             
             % set y-ticks to population names
-            set(thisAxes,'ytick',yticks,'yticklabel',yticklabels);
-            set(thisAxes,'ydir','reverse');
+            set(thisAxes,'ytick',fliplr(yticks),'yticklabel',fliplr(yticklabels));
+            % set(thisAxes,'ydir','reverse');        % Comment out to no longer reverse y-axis
             
             % set x-ticks
             plot(thisAxes, [min(time) max(time)],[.5 .5],'w');
@@ -1199,7 +1201,6 @@ for iFigset = 1:num_fig_sets
         end
         
         % add axes_options to axes
-        set(thisAxes, 'FontSize', options.axis_FontSize);
         if ~isempty(options.axes_options)
           for iOpt = 1:2:floor(length(options.axes_options)/2)
             key = options.axes_options{iOpt};

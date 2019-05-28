@@ -118,11 +118,8 @@ if ~nargin
 end
 
 %% check input type
-if (nargin > 1) && (iscell(varargin{1}) || all(isfunction(varargin{1}))) || (nargin>1 && ~ischar(varargin{1}) && ischar(varargin{2}))
+if (nargin > 1) && (iscell(varargin{1}) || all(isfunction(varargin{1})))
   funcIn = varargin{1};
-  
-  assert(all(isfunction(funcIn)));
-  
   varargin(1) = [];
 else
   funcIn = [];
@@ -246,7 +243,7 @@ if (options.parfor_flag && ~options.load_all_data_flag)
   options.parfor_flag = 0;
 end
 
-if (options.sims_per_job>1 && options.load_all_data_flag && ~options.parfor_flag)
+if (options.load_all_data_flag && ~options.parfor_flag)
   dsVprintf(options, 'Since load_all_data_flag==1, recommend setting parfor_flag==1 for speedup. \n');
 end
 
@@ -893,7 +890,7 @@ for fInd = 1:nFunc % loop over function inputs
 
       % store result
       if nargout
-        if ~options.argout_as_cell && isstruct(result) && isfield(result,'time')
+        if ~options.argout_as_cell && isstruct(result) % && isfield(result,'time')
           % dynasim type structure to store as struct array
           allFnResults{fInd}(iResult) = result;
         else
@@ -1238,15 +1235,9 @@ if isstruct(src) && isfield(src,'time') % data struct (single or array)
   studyinfo = [];
   
   options.load_all_data_flag = 1; % data has been loaded
-else
-  if isstruct(src) && isfield(src,'study_dir') % studyinfo struct
-    importPath = src.study_dir;
-  elseif ischar(src) %string input
-    importPath = src;
-  end
-  
+elseif ischar(src) %string input
   if options.load_all_data_flag % load data
-    [data,~,dataExistBoolVec] = dsImport(importPath, varargin{:});
+    [data,~,dataExistBoolVec] = dsImport(src, varargin{:});
     % if any data missing, will return struct with fewer entries, but gives
     % dataExistBoolVec showing which data did exist
     
@@ -1260,13 +1251,11 @@ else
     studyinfo = dsCheckStudyinfo(src);
   end
 
-  if ischar(src)
-    % update study_dir
-    if exist(src, 'file') && contains(src, 'studyinfo') %studyinfo.mat
-      studyinfo.study_dir = fileparts2(src);
-    elseif isdir(src) % study_dir
-      studyinfo.study_dir = src;
-    end
+  % update study_dir
+  if exist(src, 'file') && contains(src, 'studyinfo') %studyinfo.mat
+    studyinfo.study_dir = fileparts2(src);
+  elseif isdir(src) % study_dir
+    studyinfo.study_dir = src;
   end
 end
 
