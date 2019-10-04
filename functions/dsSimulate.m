@@ -240,6 +240,8 @@ function [data,studyinfo,result] = dsSimulate(model,varargin)
 % Initialize outputs
 data=[];
 studyinfo=[];
+% defining sim_id in the parent function as requested by Matlab2019b:
+sim_id=[];
 
 % check path
 dynasim_path=fileparts(which(mfilename));
