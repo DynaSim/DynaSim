@@ -224,7 +224,7 @@ for i=1:npops
     name_map=cat(1,name_map,tmpmodel.namespaces);
     continue;
   end
-  
+
   % construct new population model
   PopScope=specification.populations(i).name;
     % NOTE: dsParseModelEquations adds a '_' suffix to the namespace; therefore,
@@ -269,23 +269,23 @@ for i=1:npops
       % extract mechanism file name without path
       MechScope = [specification.populations(i).name '_' MechID];
     end
-    
+
     % use mechanism equations in specification if present
     if isfield(specification.populations,'mechanisms') && ~isempty(specification.populations(i).mechanisms)
       if ismember(MechID,{specification.populations(i).mechanisms.name})
         idx = ismember({specification.populations(i).mechanisms.name}, MechID);
         mechanism = specification.populations(i).mechanisms(idx).equations;
       end
-      
+
       % parse mechanism equations
       if ~isempty(mechanism)
         [tmpmodel,tmpmap] = dsImportModel(mechanism,'namespace',MechScope,'ic_pop',specification.populations(i).name,'user_parameters',parameters);
-        
+
         % replace 1st linker name by the one in specification
         if ~isempty(new_linker) && ~isempty(tmpmodel.linkers)
           % first try to find 1st linker target starting with @
           links_at=find(~cellfun(@isempty,regexp({tmpmodel.linkers.target},'^@','once')));
-          
+
           if ~isempty(links_at)
             % use first link with target prepended by '@'
             link_ind=links_at(1);
@@ -293,10 +293,10 @@ for i=1:npops
             % use first link
             link_ind=1;
           end
-          
+
           tmpmodel.linkers(link_ind).target=['@' new_linker];
         end
-        
+
         % combine sub-model with other sub-models
         model = dsCombineModels(model,tmpmodel, varargin{:});
         name_map = cat(1,name_map,tmpmap);
@@ -322,7 +322,7 @@ for i=1:ncons
     % NOTE: in contrast to PopScope above, ConScope is never passed to
     % dsParseModelEquations; thus the '_' should be added here for consistency
     % with mechanism namespaces (which are modified by dsParseModelEquations).
-    
+
   for j=1:length(specification.connections(i).mechanism_list)
     mechanism_=specification.connections(i).mechanism_list{j};
 
@@ -385,7 +385,7 @@ for i=1:ncons
       end
     end
   end
-  
+
   % add reserved keywords (parameters and state variables) to name_map
   add_keywords(source,target,ConScope);
 end
@@ -398,7 +398,7 @@ if ~isempty(model.monitors)
   else
     function_names={};
   end
-  
+
   % get list of monitor names
   monitor_names=fieldnames(model.monitors);
 
@@ -456,11 +456,11 @@ if ~isempty(model.functions) && ~isempty(model.linkers)
   function_names = fieldnames(model.functions);
   expressions = {model.linkers.expression};
   [~,I,J] = intersect(function_names,expressions);
-  
+
   for i=1:length(I)
     e = model.functions.(function_names{I(i)}); % function expression (eg,'@(x,y,z)x-(y-z)')
     v = regexp(e,'@(\([\w,]+\))','tokens','once'); % function input list (eg, '(x,y,z)')
-    
+
     if ~isempty(v)
       model.linkers(J(i)).expression=[model.linkers(J(i)).expression v{1}];
     end
@@ -471,10 +471,10 @@ end
 for i = 1:length(model.linkers)
   % determine how to link
   operation = model.linkers(i).operation;
-  
+
   oldstr = model.linkers(i).target;
   newstr = model.linkers(i).expression;
-  
+
   switch operation % see dsClassifyEquation and dsParseModelEquations   % ('((\+=)|(-=)|(\*=)|(/=)|(=>))')
     case '+='
       operator='+';
@@ -487,7 +487,7 @@ for i = 1:length(model.linkers)
     otherwise
       operator='+';
   end
-  
+
   % determine what to link (ie, link across everything belonging to the linker population)
   % explicitly constrain to linker population
   expressions_in_pop = ~cellfun(@isempty,regexp(name_map(:,3),['^' linker_pops{i} '_']));
@@ -561,15 +561,15 @@ if options.open_link_flag==0
   for i=1:length(all_expression_inds)
     oldstr=all_expression_targets{i};
     newstr='';
-    
+
     name = name_map{all_expression_inds(i),2};
     type = name_map{all_expression_inds(i),4};
-    
+
     eqn_type=eqn_types{strcmp(type,search_types)};
-    
+
     pattern = ['\)\.?[-\+\*/]' oldstr '\)']; % pattern accounts for all possible newstr defined for linking
     replace = [newstr '))'];
-    
+
     if isfield(model.(eqn_type),name) && ischar(model.(eqn_type).(name))
         % NOTE: name will not be a field of eqn_type for special monitors
         % (e.g., monitor functions)
@@ -585,7 +585,7 @@ if ~isempty(model.conditionals)
     newstr='';
     pattern = ['\)\.?[-\+\*/]' oldstr '\)']; % pattern accounts for all possible newstr defined for linking
     replace = [newstr '))'];
-    
+
     for field_index=1:length(fields)
       field=fields{field_index};
       if model.conditionals(all_conditionals_inds(i)).(field)
@@ -657,20 +657,20 @@ end
     %   for parameters
     Nsrc=[src '_Npop'];
     Ndst=[dst '_Npop'];
-    
+
     old={'Npre','N[1]','N_pre','Npost','N_post','N[0]','Npop','N_pop','tspike_pre','tspike_post','tspike'};
     new={Nsrc,Nsrc,Nsrc,Ndst,Ndst,Ndst,Ndst,Ndst,[src '_tspike'],[dst '_tspike'],[dst '_tspike']};
     for p=1:length(old)
       name_map(end+1,:)={old{p},new{p},namespace,'parameters'};
     end
-    
+
     % for state variables
     new={};
     old={};
     src_excluded=~cellfun(@isempty,regexp(name_map(:,1),['pre' '$']));
     dst_excluded=~cellfun(@isempty,regexp(name_map(:,1),['post' '$']));
     excluded=src_excluded|dst_excluded;
-    
+
     PopScope=[src '_'];
     var_idx=strcmp(PopScope,name_map(:,3)) & strcmp('state_variables',name_map(:,4)) & ~excluded;
     if any(var_idx)
@@ -680,12 +680,18 @@ end
       Xsrc=Xsrc_new_vars{1};
       old=cat(2,old,{'IN','Xpre','X_pre'});
       new=cat(2,new,{Xsrc,Xsrc,Xsrc});
+      % adding access to all state variables
+      for ii = 1:numel(Xsrc_new_vars)
+        Xsrc=Xsrc_new_vars{ii};
+        old=cat(2,old,{['IN_stvar',num2str(ii)],['IN_stvar_',num2str(ii)],['Xpre_stvar',num2str(ii)],['Xpre_stvar_',num2str(ii)],['X_pre_stvar',num2str(ii)],['X_pre_stvar_',num2str(ii)]});
+        new=cat(2,new,{Xsrc,Xsrc,Xsrc,Xsrc,Xsrc,Xsrc});
+      end
     else
       Xsrc_old_vars=[];
       Xsrc_new_vars=[];
       Xsrc=[];
     end
-    
+
     PopScope=[dst '_'];
     var_idx=strcmp(PopScope,name_map(:,3)) & strcmp('state_variables',name_map(:,4)) & ~excluded;
     if any(var_idx)
@@ -695,37 +701,43 @@ end
       Xdst=Xdst_new_vars{1};
       old=cat(2,old,{'OUT','X','Xpost','X_post'});
       new=cat(2,new,{Xdst,Xdst,Xdst,Xdst});
+      % adding access to all state variables
+      for ii = 1:numel(Xdst_new_vars)
+        Xdst=Xdst_new_vars{ii};
+        old=cat(2,old,{['OUT_stvar',num2str(ii)],['OUT_stvar_',num2str(ii)],['X_stvar',num2str(ii)],['X_stvar_',num2str(ii)],['Xpost_stvar',num2str(ii)],['Xpost_stvar_',num2str(ii)],['X_post_stvar',num2str(ii)],['X_post_stvar_',num2str(ii)]});
+        new=cat(2,new,{Xdst,Xdst,Xdst,Xdst,Xdst,Xdst,Xdst,Xdst});
+      end
     else
       Xdst_old_vars=[];
       Xdst_new_vars=[];
       Xdst=[];
     end
-    
+
     % add variants [var_pre,var_post,varpre,varpost]
     if ~isempty(Xsrc_old_vars)
       [Xsrc_old_vars,IA]=setdiff(Xsrc_old_vars,old);
       Xsrc_new_vars=Xsrc_new_vars(IA);
     end
-    
+
     if ~isempty(Xdst_old_vars)
       [Xdst_old_vars,IA]=setdiff(Xdst_old_vars,old);
       Xdst_new_vars=Xdst_new_vars(IA);
     end
-    
+
     for p=1:length(Xsrc_old_vars)
       old{end+1}=[Xsrc_old_vars{p} '_pre'];
       new{end+1}=Xsrc_new_vars{p};
       old{end+1}=[Xsrc_old_vars{p} 'pre'];
       new{end+1}=Xsrc_new_vars{p};
     end
-    
+
     for p=1:length(Xdst_old_vars)
       old{end+1}=[Xdst_old_vars{p} '_post'];
       new{end+1}=Xdst_new_vars{p};
       old{end+1}=[Xdst_old_vars{p} 'post'];
       new{end+1}=Xdst_new_vars{p};
     end
-    
+
     for p=1:length(old)
       name_map(end+1,:)={old{p},new{p},namespace,'state_variables'};
     end
