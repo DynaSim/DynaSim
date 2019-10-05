@@ -13,16 +13,16 @@ function model = dsCheckModel(model, varargin)
 %     model.functions       : substructure with function definitions
 %     model.monitors        : substructure with monitor definitions
 %     model.state_variables : cell array listing state variables
-%     model.ODEs            : substructure with one ordinary differential 
+%     model.ODEs            : substructure with one ordinary differential
 %                             equation (ODE) per state variable
-%     model.ICs             : substructure with initial conditions (ICs) for 
+%     model.ICs             : substructure with initial conditions (ICs) for
 %                             each state variable
 %     model.conditionals(i) : structure array with each element indicating
-%                             conditional actions specified in subfields 
+%                             conditional actions specified in subfields
 %                             "condition","action","else" (see NOTE 1)
 %     model.linkers(i)      : structure array with each element indicating
-%                             an "expression" that should be inserted 
-%                             (according to "operation") into any equations 
+%                             an "expression" that should be inserted
+%                             (according to "operation") into any equations
 %                             where the "target" appears. (see NOTE 2)
 %       .target    : string giving the target where expression should be inserted
 %       .expression: string giving the expression to insert
@@ -66,12 +66,16 @@ function model = dsCheckModel(model, varargin)
 %     model=dsCheckModel(model)
 %
 % see also: dsGenerateModel, dsCheckSpecification, dsCheckData
-% 
+%
 % Author: Jason Sherfey, PhD <jssherfey@gmail.com>
 % Copyright (C) 2016 Jason Sherfey, Boston University, USA
 
-%% auto_gen_test_data_flag argin
-options = dsCheckOptions(varargin,{'auto_gen_test_data_flag',0,{0,1}},false);
+%% auto_gen_test_data_flag and stvar_alias_flag argin
+options = dsCheckOptions(varargin,{...
+  'auto_gen_test_data_flag',0,{0,1},...
+  'stvar_alias_flag',0,{0,1},...
+  },false);
+
 if options.auto_gen_test_data_flag
   varargs = varargin;
   varargs{find(strcmp(varargs, 'auto_gen_test_data_flag'))+1} = 0;
@@ -99,7 +103,7 @@ end
 
 % check if input is string or cell with equations or spec struct and convert to model structure
 if ischar(model) || iscell(model) || ~isfield(model,'state_variables')
-  model = dsGenerateModel(model);
+  model = dsGenerateModel(model, 'stvar_alias_flag', options.stvar_alias_flag);
 end
 
 % check back compatibility
@@ -108,7 +112,7 @@ model=backward_compatibility(model);
 %% auto_gen_test_data_flag argout
 if options.auto_gen_test_data_flag
   argout = {model}; % specific to this function
-  
+
   dsUnitSaveAutoGenTestData(argin, argout);
 end
 
@@ -118,7 +122,7 @@ end
 %     model.(field_order{i})=field_defaults{i};
 %   end
 % end
-% 
+%
 % % standardize field order
 % model=orderfields(model,field_order);
 
