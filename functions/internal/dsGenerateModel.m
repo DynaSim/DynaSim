@@ -15,6 +15,7 @@ function [model,name_map] = dsGenerateModel(specification, varargin)
 %     'modifications'  : specify modifications to apply to specification
 %                        before generating the model, see dsApplyModifications
 %                        for more details (default?: []).
+%     'stvar_alias_flag' : whether to replace X_stvar_# aliases by the actual state variables (default: 0)
 %     'open_link_flag' : whether to leave linker identifiers in place (default: 0)
 %     'auto_gen_test_data_flag': whether to save model for unit testing (default: 0)
 %
@@ -132,6 +133,7 @@ end
 
 options=dsCheckOptions(varargin,{...
   'modifications',[],[],...
+  'stvar_alias_flag',0,{0,1},...
   'open_link_flag',0,{0,1},...
   'auto_gen_test_data_flag',0,{0,1},...
   },false);
@@ -437,7 +439,9 @@ end
 %% 2.0 propagate namespaces through variable and function names
 %      i.e., to establish uniqueness of names by adding namespace/namespace prefixes)
 model.specification = specification;
-model = dsPropagateNamespaces(model,name_map, varargin{:});
+% from varargin remove 'stvar_alias_flag'
+varargin=dsRemoveKeyval(varargin,{'stvar_alias_flag'});
+model = dsPropagateNamespaces(model, name_map, varargin{:});
 
 %% 3.0 expand population equations according to mechanism linkers
 % purpose: expand population equations according to linkers
@@ -668,8 +672,13 @@ end
     % for state variables
     new={};
     old={};
-    src_excluded=~cellfun(@isempty,regexp(name_map(:,1),['pre' '$'])) | ~cellfun(@isempty,regexp(name_map(:,1),'stvar'));
-    dst_excluded=~cellfun(@isempty,regexp(name_map(:,1),['post' '$'])) | ~cellfun(@isempty,regexp(name_map(:,1),'stvar'));
+    if options.stvar_alias_flag
+      src_excluded=~cellfun(@isempty,regexp(name_map(:,1),['pre' '$'])) | ~cellfun(@isempty,regexp(name_map(:,1),'stvar'));
+      dst_excluded=~cellfun(@isempty,regexp(name_map(:,1),['post' '$'])) | ~cellfun(@isempty,regexp(name_map(:,1),'stvar'));
+    else
+      src_excluded=~cellfun(@isempty,regexp(name_map(:,1),['pre' '$']));
+      dst_excluded=~cellfun(@isempty,regexp(name_map(:,1),['post' '$']));
+    end
     excluded=src_excluded|dst_excluded;
 
     PopScope=[src '_'];
@@ -681,12 +690,14 @@ end
       Xsrc=Xsrc_new_vars{1};
       old=cat(2,old,{'IN','Xpre','X_pre'});
       new=cat(2,new,{Xsrc,Xsrc,Xsrc});
-      % adding access to all state variables
-      Xsrc_new_vars_unique = unique(Xsrc_new_vars);
-      for ii = 1:numel(Xsrc_new_vars_unique)
-        Xsrc=Xsrc_new_vars_unique{ii};
-        old=cat(2,old,{['IN_stvar',num2str(ii)],['IN_stvar_',num2str(ii)],['Xpre_stvar',num2str(ii)],['Xpre_stvar_',num2str(ii)],['X_pre_stvar',num2str(ii)],['X_pre_stvar_',num2str(ii)]});
-        new=cat(2,new,{Xsrc,Xsrc,Xsrc,Xsrc,Xsrc,Xsrc});
+      if options.stvar_alias_flag
+        % adding access to all state variables
+        Xsrc_new_vars_unique = unique(Xsrc_new_vars);
+        for ii = 1:numel(Xsrc_new_vars_unique)
+          Xsrc=Xsrc_new_vars_unique{ii};
+          old=cat(2,old,{['IN_stvar',num2str(ii)],['IN_stvar_',num2str(ii)],['Xpre_stvar',num2str(ii)],['Xpre_stvar_',num2str(ii)],['X_pre_stvar',num2str(ii)],['X_pre_stvar_',num2str(ii)]});
+          new=cat(2,new,{Xsrc,Xsrc,Xsrc,Xsrc,Xsrc,Xsrc});
+        end
       end
     else
       Xsrc_old_vars=[];
@@ -703,12 +714,14 @@ end
       Xdst=Xdst_new_vars{1};
       old=cat(2,old,{'OUT','X','Xpost','X_post'});
       new=cat(2,new,{Xdst,Xdst,Xdst,Xdst});
-      % adding access to all state variables
-      Xdst_new_vars_unique = unique(Xdst_new_vars);
-      for ii = 1:numel(Xdst_new_vars_unique)
-        Xdst=Xdst_new_vars_unique{ii};
-        old=cat(2,old,{['OUT_stvar',num2str(ii)],['OUT_stvar_',num2str(ii)],['X_stvar',num2str(ii)],['X_stvar_',num2str(ii)],['Xpost_stvar',num2str(ii)],['Xpost_stvar_',num2str(ii)],['X_post_stvar',num2str(ii)],['X_post_stvar_',num2str(ii)]});
-        new=cat(2,new,{Xdst,Xdst,Xdst,Xdst,Xdst,Xdst,Xdst,Xdst});
+      if options.stvar_alias_flag
+        % adding access to all state variables
+        Xdst_new_vars_unique = unique(Xdst_new_vars);
+        for ii = 1:numel(Xdst_new_vars_unique)
+          Xdst=Xdst_new_vars_unique{ii};
+          old=cat(2,old,{['OUT_stvar',num2str(ii)],['OUT_stvar_',num2str(ii)],['X_stvar',num2str(ii)],['X_stvar_',num2str(ii)],['Xpost_stvar',num2str(ii)],['Xpost_stvar_',num2str(ii)],['X_post_stvar',num2str(ii)],['X_post_stvar_',num2str(ii)]});
+          new=cat(2,new,{Xdst,Xdst,Xdst,Xdst,Xdst,Xdst,Xdst,Xdst});
+        end
       end
     else
       Xdst_old_vars=[];
