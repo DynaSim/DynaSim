@@ -660,6 +660,7 @@ end
 
     old={'Npre','N[1]','N_pre','Npost','N_post','N[0]','Npop','N_pop','tspike_pre','tspike_post','tspike'};
     new={Nsrc,Nsrc,Nsrc,Ndst,Ndst,Ndst,Ndst,Ndst,[src '_tspike'],[dst '_tspike'],[dst '_tspike']};
+
     for p=1:length(old)
       name_map(end+1,:)={old{p},new{p},namespace,'parameters'};
     end
@@ -667,8 +668,8 @@ end
     % for state variables
     new={};
     old={};
-    src_excluded=~cellfun(@isempty,regexp(name_map(:,1),['pre' '$']));
-    dst_excluded=~cellfun(@isempty,regexp(name_map(:,1),['post' '$']));
+    src_excluded=~cellfun(@isempty,regexp(name_map(:,1),['pre' '$'])) | ~cellfun(@isempty,regexp(name_map(:,1),'stvar'));
+    dst_excluded=~cellfun(@isempty,regexp(name_map(:,1),['post' '$'])) | ~cellfun(@isempty,regexp(name_map(:,1),'stvar'));
     excluded=src_excluded|dst_excluded;
 
     PopScope=[src '_'];
@@ -681,8 +682,9 @@ end
       old=cat(2,old,{'IN','Xpre','X_pre'});
       new=cat(2,new,{Xsrc,Xsrc,Xsrc});
       % adding access to all state variables
-      for ii = 1:numel(Xsrc_new_vars)
-        Xsrc=Xsrc_new_vars{ii};
+      Xsrc_new_vars_unique = unique(Xsrc_new_vars);
+      for ii = 1:numel(Xsrc_new_vars_unique)
+        Xsrc=Xsrc_new_vars_unique{ii};
         old=cat(2,old,{['IN_stvar',num2str(ii)],['IN_stvar_',num2str(ii)],['Xpre_stvar',num2str(ii)],['Xpre_stvar_',num2str(ii)],['X_pre_stvar',num2str(ii)],['X_pre_stvar_',num2str(ii)]});
         new=cat(2,new,{Xsrc,Xsrc,Xsrc,Xsrc,Xsrc,Xsrc});
       end
@@ -702,8 +704,9 @@ end
       old=cat(2,old,{'OUT','X','Xpost','X_post'});
       new=cat(2,new,{Xdst,Xdst,Xdst,Xdst});
       % adding access to all state variables
-      for ii = 1:numel(Xdst_new_vars)
-        Xdst=Xdst_new_vars{ii};
+      Xdst_new_vars_unique = unique(Xdst_new_vars);
+      for ii = 1:numel(Xdst_new_vars_unique)
+        Xdst=Xdst_new_vars_unique{ii};
         old=cat(2,old,{['OUT_stvar',num2str(ii)],['OUT_stvar_',num2str(ii)],['X_stvar',num2str(ii)],['X_stvar_',num2str(ii)],['Xpost_stvar',num2str(ii)],['Xpost_stvar_',num2str(ii)],['X_post_stvar',num2str(ii)],['X_post_stvar_',num2str(ii)]});
         new=cat(2,new,{Xdst,Xdst,Xdst,Xdst,Xdst,Xdst,Xdst,Xdst});
       end
@@ -742,7 +745,6 @@ end
       name_map(end+1,:)={old{p},new{p},namespace,'state_variables'};
     end
   end
-
 end % main function
 
 
