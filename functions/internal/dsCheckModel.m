@@ -159,6 +159,7 @@ for type_index=1:length(target_types)
       % reduces 3 conditional checks to 1 in most cases.
       if ~isempty(regexp(expressions{i},'\((\w+_)?(Npop|Npre|Npost),1\)','once'))
         updated=1;
+        fprintf('\nWarning: reversing the population dimension for internal DynaSim consistency in expression:%s. Fix your code to silence this warning.\n\n', expressions{i});
         if ~isempty(regexp(expressions{i},'\((\w+_)?Npop,1\)','once'))
           expressions{i}=regexprep(expressions{i},'\((\w+_)Npop,1\)','\(1,$1Npop\)');
         end
