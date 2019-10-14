@@ -183,8 +183,6 @@ function [expression,functions_were_found] = insert_functions(expression,functio
       found_expression=found_expression{2};
 
       if length(orig_vars)~=length(new_vars)
-      orig_vars
-      new_vars
         error('failed to match variables for function %s',found_function);
       end
 

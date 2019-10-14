@@ -393,6 +393,7 @@ for index=1:length(text) % loop over lines of text
 
       if ~isempty(lhs), target=strtrim(lhs{1}); else target=[]; end
 
+      % removing all whitespace from the expression
       if ~isempty(rhs), expression=regexprep(rhs{1},'\s',''); else expression=[]; end
 
       if expression(end)==';', expression=expression(1:end-1); end
