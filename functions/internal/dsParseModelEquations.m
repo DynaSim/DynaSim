@@ -40,7 +40,7 @@ function [model,name_map] = dsParseModelEquations(text,varargin)
 %     [model,map] = dsParseModelEquations(connection_mechanism,'namespace','pop_pop_mech')
 %
 % See also: dsClassifyEquation, dsGenerateModel, dsLocateModelFiles
-% 
+%
 % Author: Jason Sherfey, PhD <jssherfey@gmail.com>
 % Copyright (C) 2016 Jason Sherfey, Boston University, USA
 
@@ -119,23 +119,23 @@ if ischar(text) && exist(text,'file')
 %       %model=dsImportModel(text);
 %       %return;
 %   end
-%   
+%
 %   % load equations from file
 %   [text,res]=readtext(text,'\n','%'); % text: cell array of strings, one element per line in text file
-%   
+%
 %   % remove all lines without text
 %   text=text(res.stringMask);
-%   
+%
 %   % remove leading/trailing white space
 %   text=strtrim(text);
-%   
+%
 %   % end each line with semicolon
 %   for i=1:length(text)
 %     if ~isequal(text{i}(end),';')
 %       text{i}(end+1)=';';
 %     end
 %   end
-%   
+%
 %   % concatenate into a single string
 %   text=[text{:}]; % concatenate text from all lines
 end
@@ -146,7 +146,7 @@ if ischar(text)
   if text(end)==';'
     text=text(1:end-1);
   end
-  
+
   % account for the one exception where ';' does not delimit lines:
   % conditional actions with multiple statements (expr1; expr2)
   % approach: replace ';' by ',' here then reverse the replacement below
@@ -154,7 +154,7 @@ if ischar(text)
   pattern='(if\([^;]+\)\s*\([^;\)]+);([^;]+\))'; % if(condiiton)(action1;action2)
   replace='$1,$2';
   text=regexprep(text,pattern,replace,'ignorecase');
-  
+
   % now split string into cell array of lines
   text = strtrim(regexp(text,delimiter,'split'));
 end
@@ -182,29 +182,29 @@ for index=1:length(text) % loop over lines of text
     if ~isempty(comment)
       model.comments{end+1}=comment;
     end
-    
+
     continue;
   end
-  
+
   switch dsClassifyEquation(line,delimiter) % classify
     case 'parameter'        % var=(string or number)
       rhs=regexp(line,'=(.+)$','tokens','once');
       lhs=regexp(line,'^([\w\.]+)\s*=','tokens','once');
-      
+
       lhs{1}=strrep(lhs{1},'.','_'); % e.g., Na.g --> Na_g
-      
+
       name=strtrim(lhs{1}); expression=rhs{1};
-      
+
       model.parameters(1).([namespace name]) = expression;
-      
+
       name_map(end+1,:) = {name,[namespace name],namespace,'parameters'};
-      
+
       if ~isempty(comment)
         model.comments{end+1}=sprintf('%s (parameter): %s',[namespace name],comment);
       end
     case 'fixed_variable'   % var=(expression with grouping or arithmetic), var(#), var([#]), var([# #]), var([#,#]), var(#:#), var(#:end), var([#:#]), var([#:end])
       lhs=regexp(line,'^(\w+)\s*=','tokens','once');
-      
+
       if ~isempty(lhs)
         rhs=regexp(line,'=(.+)$','tokens','once');
         name=strtrim(lhs{1}); expression=rhs{1};
@@ -232,9 +232,12 @@ for index=1:length(text) % loop over lines of text
 %       end
       name=regexp(line,'^(.+)\(.*\)\s*=','tokens','once');
       vars=regexp(line,'\((.+)\)\s*=','tokens','once');
+      vars=regexprep(vars,'\s','');
       rhs=regexp(line,'=(.+)$','tokens','once');
+      rhs=regexprep(rhs,'\s','');
       name=strtrim(name{1});
-      expression=sprintf('@(%s)%s',vars{1},rhs{1});
+      % imposing a single whitespace delimiter
+      expression=sprintf('@(%s) %s',vars{1},rhs{1});
       model.functions(1).([namespace name]) = expression;
       name_map(end+1,:) = {name,[namespace name],namespace,'functions'};
       if ~isempty(comment)
@@ -260,12 +263,12 @@ for index=1:length(text) % loop over lines of text
       rhs=regexp(line,'=(.+)$','tokens','once');
       state_variable = strtrim(var{1});
       expression = rhs{1};
-      
+
       % convert scalars to vectors for when npop > 1 to permit compiler
       if ~isnan(str2double(expression))
         expression = [expression ' * ones(1,Npop)'];
       end
-      
+
       model.ICs(1).([namespace state_variable])=expression;
       if ~isempty(comment)
         model.comments{end+1}=sprintf('%s(0) (IC): %s',[namespace state_variable],comment);
@@ -273,7 +276,7 @@ for index=1:length(text) % loop over lines of text
     case 'monitor'          % monitor f=(expression or function)
       % split list of monitors
       lines=strtrim(regexp(line,',','split'));
-      
+
       % combine elements with args for same monitor (e.g., v.spikes(0,5))
       idx=~cellfun(@isempty,regexp(lines,'^\d'));
       if any(idx)
@@ -287,19 +290,19 @@ for index=1:length(text) % loop over lines of text
         end
         lines=tmp;
       end
-      
+
       % loop over monitors in list
       for l=1:length(lines)
         % process this monitor
         line=lines{l};
-        
+
         % split left and right parts of monitor
         lhs=regexp(line,'^monitor\s*([\w,@\s\.]+)','tokens','once');
         if isempty(lhs)
           lhs=regexp(line,'([\w,@\s\.]+)','tokens','once');
         end
         rhs=regexp(line,'=(.+)$','tokens','once');
-        
+
         % expand list of monitor names (e.g., monitor iNa.I, iK.I)
         names = strtrim(regexp(lhs{1},',','split'));
         for i=1:length(names) % loop over list of monitors on this line
@@ -309,23 +312,23 @@ for index=1:length(text) % loop over lines of text
           if any(name=='.')
             % check for numeric monitor argument
             arg=regexp(line,[name '\(([-+]*\w+)\)'],'tokens','once');
-            
+
             % set argument as expression (see dsWriteDynaSimSolver() for usage as such)
             if ~isempty(arg)
               rhs=arg;
             else
               arg=regexp(line,[name '\(([-+\w,]+)\)'],'tokens','once');
-              
+
               if ~isempty(arg)
                 rhs={['(' arg{1} ')']};
               end
             end
           end
-          
+
           % convert into valid monitor name
           name = strrep(name,'.','_'); % index sub-namespace (monitor Na.I)
           scopeName = [namespace name];
-          
+
           % determine expression (ie rhs)
           if ~isempty(rhs)
             expression = rhs{1};
@@ -336,18 +339,18 @@ for index=1:length(text) % loop over lines of text
           else
             expression=[];
           end
-          
+
           % store monitor
           model.monitors(1).(scopeName) = expression;
           name_map(end+1,:) = {name, scopeName, namespace, 'monitors'};
-          
+
           if ~isempty(comment)
             model.comments{end+1}=sprintf('%s (monitor): %s', scopeName,comment);
           end
         end
-      
+
       end
-      
+
     case 'conditional'      % if(conditions)(actions)
       groups=regexp(line,'\)\(','split');
       condition=regexp(groups{1},'^if\s*\((.*)','tokens','once');
@@ -355,57 +358,57 @@ for index=1:length(text) % loop over lines of text
         if groups{2}(end)==')'
           groups{2}=groups{2}(1:end-1);
         end
-        
+
         then_action=groups{2};
         else_action=[];
       elseif numel(groups==3)
         if groups{3}(end)==')'
           groups{3}=groups{3}(1:end-1);
         end
-        
+
         then_action=groups{2};
         else_action=groups{3};
       end
-      
+
       model.conditionals(end+1).namespace=namespace;
       model.conditionals(end).condition=condition{1};
       model.conditionals(end).action=strrep(then_action,',',';'); % restore semicolon-delimited multiple actions like if(x>1)(x=0;y=0)
-      
+
       if length(groups)>2
         model.conditionals(end).else=else_action;
       else
         model.conditionals(end).else=[];
       end
-      
+
       if ~isempty(comment)
         model.comments{end+1}=sprintf('%s conditional(%s): %s',namespace,condition,comment);
       end
-      
+
     case 'linker'           % [link ]? target operation expression (e.g., link target += f(x))
       % viable options: ((\+=)|(-=)|(\*=)|(/=)|(=>))
       line=regexprep(line,'^link (\s*\w)','$1');
       lhs=regexp(line,'^([^\+\-*/=]+)','tokens','once'); % +=
       rhs=regexp(line,'=>?(.+)$','tokens','once');
       model.linkers(end+1).namespace=namespace;
-      
+
       if ~isempty(lhs), target=strtrim(lhs{1}); else target=[]; end
-      
-      if ~isempty(rhs), expression=strtrim(rhs{1}); else expression=[]; end
-      
+
+      if ~isempty(rhs), expression=regexprep(rhs{1},'\s',''); else expression=[]; end
+
       if expression(end)==';', expression=expression(1:end-1); end
-      
+
       if isempty(target), target=expression; end % for sharing state var across mechanisms in same population
-      
+
       if isempty(expression), expression=target; end
-      
+
       model.linkers(end).target=target;
       model.linkers(end).expression=expression;
       model.linkers(end).operation='+=';
-      
+
       if ~isempty(comment)
         model.comments{end+1}=sprintf('%s linkers(%s->%s): %s',namespace,target,expression,comment);
       end
-      
+
       if ~isempty(comment)
         model.linkers(end).comment=comment;
       end
@@ -417,7 +420,7 @@ end
 %% auto_gen_test_data_flag argout
 if options.auto_gen_test_data_flag
   argout = {model, name_map}; % specific to this function
-  
+
   dsUnitSaveAutoGenTestData(argin, argout);
 end
 
