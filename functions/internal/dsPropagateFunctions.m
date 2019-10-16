@@ -154,6 +154,9 @@ function [expression,functions_were_found] = insert_functions(expression,functio
       % get arguments to function call, support function arguments
       %       new_var_list=regexp(expression,[found_function '\(*\(([^\)\(]+)\)'],'tokens','once');
       index=regexp(expression,[found_function '\('],'once');
+      if isempty(index)
+        continue
+      end
       substr=expression(index:end); % string starting with first function call
       lb=find(substr=='('); % indices to open parentheses
       rb=find(substr==')'); % indices to close parentheses
