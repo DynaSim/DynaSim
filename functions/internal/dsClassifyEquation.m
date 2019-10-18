@@ -151,7 +151,7 @@ if isempty(class) && ~isempty(regexp(string,pattern,'once','ignorecase'))
 end
 
 % function check: f(vars)=exression
-pattern='^\w+\([@a-zA-Z][\w,\s+@]*\)\s*='; % allowing whitespace between variables
+pattern='^\w+\([@a-zA-Z][\w,\s*@]*\)\s*='; % allowing whitespace between variables
 if isempty(class) && ~isempty(regexp(string,pattern,'once'))
   class='function';
 end
