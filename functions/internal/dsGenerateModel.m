@@ -592,8 +592,10 @@ if ~isempty(model.conditionals)
 
     for field_index=1:length(fields)
       field=fields{field_index};
-      if model.conditionals(all_conditionals_inds(i)).(field)
-        model.conditionals(all_conditionals_inds(i)).(field)=regexprep(model.conditionals(all_conditionals_inds(i)).(field),pattern,replace);
+      for i_conditional=1:numel(model.conditionals(all_conditionals_inds(i)).(field))
+        if model.conditionals(all_conditionals_inds(i)).(field){i_conditional}
+          model.conditionals(all_conditionals_inds(i)).(field){i_conditional}=regexprep(model.conditionals(all_conditionals_inds(i)).(field){i_conditional},pattern,replace);
+        end
       end
     end
   end

@@ -19,7 +19,7 @@ function model = dsPropagateNamespaces(model,map, varargin)
 % Example 1: TODO
 %
 % See also: dsGenerateModel, dsPropagateFunctions, dsParseModelEquations, dsGetParentNamespace
-% 
+%
 % Author: Jason Sherfey, PhD <jssherfey@gmail.com>
 % Copyright (C) 2016 Jason Sherfey, Boston University, USA
 
@@ -40,11 +40,11 @@ if ~iscell(map) || size(map,2)~=4
 end
 names_in_namespace=cellfun(@(x,y)strncmp(y,x,length(y)),map(:,2),map(:,3));
 [name_,name__]=dsGetNamespaces(model);
-% Purpose: add double underscores between model objects (i.e., separate 
+% Purpose: add double underscores between model objects (i.e., separate
 % populations and mechanisms in namespace). This enables retrieving model
 % object names from the namespace in dsGetParentNamespace for segregating
 % model elements in dsPropagateNamespaces. This is necessary if object
-% names contain underscores. Limitation: object names with double 
+% names contain underscores. Limitation: object names with double
 % underscores are not permitted.
 % Note: this approach to tracking objects with namespaces was chosen
 % because of its efficiency given code generation based on string
@@ -80,8 +80,13 @@ if ~isempty(model.conditionals)
   target_types={'condition','action','else'};
   for type_index=1:length(target_types)
     type=target_types{type_index};
-    tmp=propagate_namespaces({model.conditionals.(type)},namespaces,map,allowed_insert_types.conditionals);
-    [model.conditionals(1:length(model.conditionals)).(type)]=deal(tmp{:});
+    tmp1 = [model.conditionals.(type)];
+    for iconditional = 1:size(tmp1,1)
+      tmp2(iconditional,:)=propagate_namespaces(tmp1(iconditional,:),namespaces,map,allowed_insert_types.conditionals);
+      for imodel = 1:length(model.conditionals)
+        model.conditionals(imodel).(type)(iconditional) = tmp2(iconditional,imodel);
+      end
+    end
   end
 end
 
@@ -102,7 +107,7 @@ for type_index = 1:length(target_types)
       if numel(find(idx))>1
         % constrain to namespace-conserving entries
         tmp=map(idx&names_in_namespace,3);
-        
+
         % use the lowest level namespace (i.e., longest namespace name)
         l=cellfun(@length,tmp);
         tmp=tmp{l==max(l)};
@@ -113,7 +118,7 @@ for type_index = 1:length(target_types)
     end
     % update expressions for names of this type
     expressions=propagate_namespaces(expressions,namespaces,map,allowed_insert_types.(type));
-    
+
     % update model with expressions including namespaces
     model.(type)=cell2struct(expressions,fields,1);
   end
@@ -129,21 +134,21 @@ function expressions=propagate_namespaces(expressions,namespaces,map,insert_type
     end
     % get namespace for this expression
     this_namespace=namespaces{i};
-    
+
     % convert to double underscore version for segregating objects
     this_namespace__ = name__{strcmp(this_namespace,name_)};
-    
+
     % find parent namespaces (by segregating model objects delimited by underscores)
     parent_namespace = dsGetParentNamespace(this_namespace__, varargin{:});
-    
+
     % find where this and parent namespaces are in map array
     insert_type_constraint = ismember(map(:,4),insert_types);
     this_namespace_map_inds = find(strcmp(this_namespace,map(:,3)) & insert_type_constraint);
     parent_namespace_map_inds = find(strcmp(parent_namespace,map(:,3)) & insert_type_constraint);
-    
+
     % get list of words in this expression
     words=unique(regexp(expressions{i},'[a-zA-Z]+\w*','match'));
-    
+
     % loop over words
     for j=1:length(words)
       % search for words in parent namespace of map.names
@@ -151,13 +156,13 @@ function expressions=propagate_namespaces(expressions,namespaces,map,insert_type
         % word found in parent namespace of map
         ind=parent_namespace_map_inds(strcmp(words{j},map(parent_namespace_map_inds,1)));
         new_word=map{ind,2};
-        
+
         %if IC, need to take just first time index
         if exist('type','var') && strcmp(type, 'ICs') && strcmp(words{j}, 'X')
           new_word = [new_word '_last']; % HACK
         end
         % TODO: move this to dsWriteDynaSimSolver()
-        
+
         % replace found word in expression by map(names_bar|parent_namespace)
         expressions{i}=dsStrrep(expressions{i},words{j},new_word, '', '', varargin{:});
         % check whether new word is defined in model
@@ -186,7 +191,7 @@ function expressions=propagate_namespaces(expressions,namespaces,map,insert_type
         % word found in this namespace of map
         ind=this_namespace_map_inds(strcmp(words{j},map(this_namespace_map_inds,1)));
         new_word=map{ind,2};
-        
+
         % replace found word in expression by map(names_bar|this_namespace)
         expressions{i}=dsStrrep(expressions{i},words{j},new_word, '', '', varargin{:});
       end
@@ -197,7 +202,7 @@ end
 %% auto_gen_test_data_flag argout
 if options.auto_gen_test_data_flag
   argout = {model}; % specific to this function
-  
+
   dsUnitSaveAutoGenTestData(argin, argout);
 end
 
