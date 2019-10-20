@@ -90,18 +90,21 @@ if ~isempty(model.conditionals)
   target_types={'condition','action','else'};
   for type_index=1:length(target_types)
     type=target_types{type_index};
-    expressions={model.conditionals.(type)};
-
+    if ~iscell([model.conditionals.(type)])
+      expressions={model.conditionals.(type)};
+    else
+      expressions=[model.conditionals.(type)];
+    end
     % loop over conditional expressions from which to eliminate internal function calls
-    for i=1:length(expressions)
-      if isempty(expressions{i})
+    for iconditional=1:size(expressions,1)
+      if isempty(expressions{iconditional})
         continue;
       end
-
       % update expressions
-      expressions{i}=insert_functions(expressions{i},functions, varargin{:});
+      for imodel = 1:length(model.conditionals)
+        model.conditionals(imodel).(type){iconditional}=insert_functions(expressions{iconditional,imodel},functions, varargin{:});
+      end
     end
-    [model.conditionals(1:length(model.conditionals)).(type)]=deal(expressions{:});
   end
 end
 
@@ -157,7 +160,12 @@ function [expression,functions_were_found] = insert_functions(expression,functio
       if isempty(index)
         continue
       end
+      try
       substr=expression(index:end); % string starting with first function call
+      catch
+        expression
+        index
+      end
       lb=find(substr=='('); % indices to open parentheses
       rb=find(substr==')'); % indices to close parentheses
       ix=ones(size(lb)); % binary vector indicating open parentheses that have not been closed

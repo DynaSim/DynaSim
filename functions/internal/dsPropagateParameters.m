@@ -14,7 +14,7 @@ function model = dsPropagateParameters(model,varargin)
 % Output: DynaSim model structure with updated parameter in all equations
 %
 % See also: dsPropagateFunctions, dsWriteDynaSimSolver
-% 
+%
 % Author: Jason Sherfey, PhD <jssherfey@gmail.com>
 % Copyright (C) 2016 Jason Sherfey, Boston University, USA
 
@@ -60,19 +60,19 @@ target_types={'fixed_variables','functions','monitors','ODEs','ICs'};
 % loop over types of model data
 for type_index=1:length(target_types)
   type=target_types{type_index};
-  
+
   % info for this type
   s=model.(type);
   if isstruct(s)
     update_these=fieldnames(s);
     expressions=struct2cell(s);
-    
+
     % loop over target expressions from which to eliminate internal function calls
     for i=1:length(expressions)
       if isempty(expressions{i})
         continue;
       end
-      
+
       % update expressions of this type
       switch options.action
         case 'substitute'
@@ -83,7 +83,7 @@ for type_index=1:length(target_types)
           expressions{i}=insert_parameters(expressions{i},parameters, 'prop_suffix',options.prop_suffix, varargin{:});
       end
     end
-    
+
     % update model with expressions that have parameter values in them
     model.(type)=cell2struct(expressions,update_these,1);
   end
@@ -92,36 +92,37 @@ end
 %% 2.0 Propagate parameters through structure arrays (conditionals)
 if ~isempty(model.conditionals)
   target_types={'condition','action','else'};
-  
   for type_index=1:length(target_types)
     type=target_types{type_index};
-    expressions={model.conditionals.(type)};
-    
+    if ~iscell([model.conditionals.(type)])
+      expressions={model.conditionals.(type)};
+    else
+      expressions=[model.conditionals.(type)];
+    end
     % loop over conditional expressions from which to eliminate internal function calls
-    for i=1:length(expressions)
-      if isempty(expressions{i})
+    for iconditional=1:size(expressions,1)
+      if isempty(expressions{iconditional})
         continue;
       end
-      
-      % update expressions of this type
-      switch options.action
-        case 'substitute'
-          expressions{i}=insert_parameters(expressions{i},parameters, [],[], varargin{:});
-        case 'prepend'
-          expressions{i}=insert_parameters(expressions{i},parameters, 'prop_prefix',options.prop_prefix, varargin{:});
-        case 'postpend'
-          expressions{i}=insert_parameters(expressions{i},parameters, 'prop_suffix',options.prop_suffix, varargin{:});
+      % update expressions
+      for imodel = 1:length(model.conditionals)
+        switch options.action
+          case 'substitute'
+            model.conditionals(imodel).(type){iconditional}=insert_parameters(expressions{iconditional,imodel},parameters, [],[], varargin{:});
+          case 'prepend'
+            model.conditionals(imodel).(type){iconditional}=insert_parameters(expressions{iconditional,imodel},parameters, 'prop_prefix',options.prop_prefix, varargin{:});
+          case 'postpend'
+            model.conditionals(imodel).(type){iconditional}=insert_parameters(expressions{iconditional,imodel},parameters, 'prop_suffix',options.prop_suffix, varargin{:});
+        end
       end
     end
-    [model.conditionals(1:length(model.conditionals)).(type)]=deal(expressions{:});
   end
 end
-
 
 %% auto_gen_test_data_flag argout
 if options.auto_gen_test_data_flag
   argout = {model}; % specific to this function
-  
+
   dsUnitSaveAutoGenTestData(argin, argout);
 end
 
@@ -155,11 +156,11 @@ if ~isempty(found_parameters)
   for ff=1:length(found_parameters)
     % name of found parameter
     found_parameter=found_parameters{ff};
-    
+
     if isempty(attachType) % no prefix given, substitute value instead
       % found value to replace found parameter name in target
       found_value=parameters.(found_parameter);
-      
+
       % convert found value into string
       if isnumeric(found_value)
         if length(found_value)>1
@@ -185,7 +186,7 @@ if ~isempty(found_parameters)
       suffix = attachStr;
       found_value=[found_parameter suffix];
     end
-    
+
     if ~ischar(found_value)
       warning('failed to convert parameter ''%s'' to string and substitute into model equations:',found_parameter);
       found_value % TODO: check this
@@ -206,7 +207,7 @@ end
 %% auto_gen_test_data_flag argout
 if options.auto_gen_test_data_flag
   argout = {expression}; % specific to this function
-  
+
   dsUnitSaveAutoGenTestDataLocalFn(argin, argout); % localfn
 
 end
