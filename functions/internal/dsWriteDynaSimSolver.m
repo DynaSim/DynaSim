@@ -1188,11 +1188,11 @@ function print_conditional_update(fid,conditionals,index_nexts,state_variables, 
 
     % write conditional to solver function
     for j=1:length(condition)
-      fprintf(fid,['  conditional_test(',num2str(j),')=(%s);\n'],condition{j});
+      fprintf(fid,['  conditional_test=(%s);\n'],condition{j});
     end
     for j=1:length(condition)
-      action_j=dsStrrep(action{j}, ['\(n,:', '(n,conditional_test(',num2str(j),')'], '', '', varargin{:});
-      indCondStr = strfind(action_j, ['(n,conditional_test(',num2str(j),'))']);
+      action_j=dsStrrep(action{j}, '\(n,:', '\(n,conditional_test', '', '', varargin{:});
+      indCondStr = strfind(action_j, '(n,conditional_test)');
       if ~strcmp(reportUI,'matlab') && ~isempty(indCondStr)
         condVariableName = action_j(1:indCondStr-1);
         initialization = [action_j(1:indCondStr-1), ' = []'];
@@ -1201,14 +1201,14 @@ function print_conditional_update(fid,conditionals,index_nexts,state_variables, 
         fprintf(fid,'  end;\n');
       end
       if j==1
-        fprintf(fid,['  if all(conditional_test(',num2str(j),')), %s; '],action_j); % if not set, all should be default as it is in Matlab/Octave (a user can always override this setting any inside the conditional_test itself)
+        fprintf(fid,['  if (conditional_test), %s; '],action_j); % if not set, all should be default as it is in Matlab/Octave (a user can always override this setting any inside the conditional_test itself)
       else
-        fprintf(fid,['  elseif all(conditional_test(',num2str(j),')), %s; '],action_j); % if not set, all should be default as it is in Matlab/Octave (a user can always override this setting any inside the conditional_test itself)
+        fprintf(fid,['  elseif (conditional_test), %s; '],action_j); % if not set, all should be default as it is in Matlab/Octave (a user can always override this setting any inside the conditional_test itself)
       end
     end
 
     if ~isempty(elseaction)
-      elseaction=dsStrrep(elseaction{1}, '(n,:', '(n,conditional_test', '', '', varargin{:});
+      elseaction=dsStrrep(elseaction{1}, '\(n,:', '\(n,conditional_test', '', '', varargin{:});
       fprintf(fid, 'else, %s; ',elseaction);
     end
 
