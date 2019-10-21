@@ -157,8 +157,8 @@ if ischar(text)
 
   % column vectors interfere with the delimiter ';'
   % this can be avoided by replacing ';' by ',' and transposing
-  pattern='\[[^;\]]+;.+\]'; % selecting the column vector
-  replace='$0'''; % transposing
+  pattern='(\[[^;\]]+;.+\])'; % selecting the column vector
+  replace='$1'''; % transposing
   text=regexprep(text,pattern,replace,'ignorecase');
 
   pattern=';(?=((?!\[).)*?\])'; % selecting all ';' in the column vector
