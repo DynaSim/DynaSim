@@ -151,8 +151,18 @@ if ischar(text)
   % conditional actions with multiple statements (expr1; expr2)
   % approach: replace ';' by ',' here then reverse the replacement below
   % when storing the action in model.conditionals
-  pattern='(if\([^;]+\)\s*\([^;\)]+);([^;]+\))'; % if(condiiton)(action1;action2)
+  pattern='(if\([^;]+\)\s*\([^;\)]+);([^;]+\))'; % if(condition)(action1;action2)
   replace='$1,$2';
+  text=regexprep(text,pattern,replace,'ignorecase');
+
+  % column vectors interfere with the delimiter ';'
+  % this can be avoided by replacing ';' by ',' and transposing
+  pattern='\[[^;\]]+;.+\]'; % selecting the column vector
+  replace='$0'''; % transposing
+  text=regexprep(text,pattern,replace,'ignorecase');
+
+  pattern=';(?=((?!\[).)*?\])'; % selecting all ';' in the column vector
+  replace=','; % replacing them all by ','
   text=regexprep(text,pattern,replace,'ignorecase');
 
   % now split string into cell array of lines
