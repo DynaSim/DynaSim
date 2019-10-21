@@ -610,17 +610,19 @@ if ~isempty(model.monitors)
 
         if isnumeric(spike_threshold)
           model.conditionals(end).condition=...
-            sprintf('%s%s>=%g&%s%s<%g',var_spikes,index_curr,spike_threshold,var_spikes,index_last,spike_threshold);
+            sprintf('any(%s%s>=%g&%s%s<%g)',var_spikes,index_curr,spike_threshold,var_spikes,index_last,spike_threshold);
         else
           model.conditionals(end).condition=...
-            sprintf('%s%s>=%s&%s%s<%s',var_spikes,index_curr,spike_threshold,var_spikes,index_last,spike_threshold);
+            sprintf('any(%s%s>=%s&%s%s<%s)',var_spikes,index_curr,spike_threshold,var_spikes,index_last,spike_threshold);
         end
 
-        action1=sprintf('%s(n,conditional_test)=1',monitor_names{i});
-        action2=sprintf('inds=find(conditional_test); for j=1:length(inds), i=inds(j); %s(%s(i),i)=t; %s(i)=mod(-1+(%s(i)+1),%g)+1; end',var_tspikes,var_buffer_index,var_buffer_index,var_buffer_index,spike_buffer_size);
+        action1=sprintf('%s(n,conditional_indx)=1',monitor_names{i});
+        action2=sprintf('inds=find(conditional_indx); for j=1:length(inds), i=inds(j); %s(%s(i),i)=t; %s(i)=mod(-1+(%s(i)+1),%g)+1; end',var_tspikes,var_buffer_index,var_buffer_index,var_buffer_index,spike_buffer_size);
+
         model.conditionals(end).action=sprintf('%s;%s',action1,action2);
         model.conditionals(end).else=[];
         % move spike monitor to first position (ie.., to evaluate before other conditionals)
+
         model.conditionals=model.conditionals([length(model.conditionals) 1:length(model.conditionals)-1]);
         % remove from monitor list
         model.monitors=rmfield(model.monitors,monitor_names{i});
@@ -1153,9 +1155,9 @@ function print_conditional_update(fid,conditionals,index_nexts,state_variables, 
 
   switch index_nexts{1}(1)
     case '('
-      action_index='(n,conditional_test)';
+      action_index='(n,conditional_indx)';
     case '_'
-      action_index='_last(conditional_test)';
+      action_index='_last(conditional_indx)';
   end
 
   for i=1:length(conditionals)
@@ -1179,21 +1181,41 @@ function print_conditional_update(fid,conditionals,index_nexts,state_variables, 
     end
 
     % write conditional to solver function
-    fprintf(fid,'  conditional_test=(%s);\n',condition);
-    action=dsStrrep(action, '\(n,:', '(n,conditional_test', '', '', varargin{:});
-    indCondStr = strfind(action, '(n,conditional_test)');
-    if ~strcmp(reportUI,'matlab') && ~isempty(indCondStr)
-      condVariableName = action(1:indCondStr-1);
-      initialization = [action(1:indCondStr-1), ' = []'];
-      fprintf(fid,'  if ~exist(''%s'',''var'')\n', condVariableName);
-      fprintf(fid,'    %s;\n',initialization);
-      fprintf(fid,'  end;\n');
+    for j=1:length(condition)
+      fprintf(fid,['  conditional_test=(%s);\n'],condition{j});
+      if ~isempty(strfind(condition{j},'any('))
+        condition_indx = regexprep(condition{j},'^any\(','','once');
+        condition_indx = condition_indx(1:end-1);
+        fprintf(fid,['  conditional_indx=(%s);\n'],condition_indx);
+      elseif ~isempty(strfind(condition{j},'all('))
+        condition_indx = regexprep(condition{j},'^all\(','','once');
+        condition_indx = condition_indx(1:end-1);
+        fprintf(fid,['  conditional_indx=(%s);\n'],condition_indx);
+      else
+        fprintf(fid,['  conditional_indx=(%s);\n'],condition{j});
+      end
+    end
+    for j=1:length(condition)
+      action_j=dsStrrep(action{j}, '\(n,:', '\(n,conditional_indx', '', '', varargin{:});
+      indCondStr = strfind(action_j, '(n,conditional_indx)');
+      if ~strcmp(reportUI,'matlab') && ~isempty(indCondStr)
+        condVariableName = action_j(1:indCondStr-1);
+        initialization = [action_j(1:indCondStr-1), ' = []'];
+        fprintf(fid,'  if ~exist(''%s'',''var'')\n', condVariableName);
+        fprintf(fid,'    %s;\n',initialization);
+        fprintf(fid,'  end;\n');
+      end
+      if j==1
+        fprintf(fid,['  if conditional_test, %s; '],action_j);
+      else
+        fprintf(fid,['  elseif conditional_test, %s; '],action_j);
+      end
     end
     fprintf(fid,'  if any(conditional_test), %s; ',action);
 
     if ~isempty(elseaction)
-      elseaction=dsStrrep(elseaction, '(n,:', '(n,conditional_test', '', '', varargin{:});
-      fprintf('else %s; ',elseaction);
+      elseaction=dsStrrep(elseaction{1}, '\(n,:', '\(n,conditional_indx', '', '', varargin{:});
+      fprintf(fid, 'else, %s; ',elseaction);
     end
 
     fprintf(fid,'end\n');
