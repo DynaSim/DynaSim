@@ -402,7 +402,7 @@ dsPlot(dsSimulate(s,'time_limits',T));
 
 % Leaky integrate-and-fire neurons
 s.populations.equations='LIF';
-s.populations.parameters={'stim_amp',10,'noise_amp',1e3};
+s.populations.parameters={'stim_amp',15,'noise_amp',1e3};
 dsPlot(dsSimulate(s,'time_limits',T));
 
 % Izhikevich neurons
@@ -469,7 +469,7 @@ dsPlot(d);
 % 1 E-cell driving 1 I-cell
 LIF={
     'dV/dt=(E-V+R*I+noise*randn-@isyn)/tau; V(0)=-65'
-    'if(any(t<tspike+tref,1))(V=reset)'
+    'if(any(any(t<tspike+tref,1)))(V=reset)'
     'tau=10; tref=10; E=-70; thresh=-55; reset=-75; R=9; I=1.55; noise=100'
     'monitor V.spikes(thresh)'
      };
