@@ -151,7 +151,7 @@ if ischar(text)
   % conditional actions with multiple statements (expr1; expr2)
   % approach: replace ';' by ',' here then reverse the replacement below
   % when storing the action in model.conditionals
-  pattern='(if\([^;]+\)\s*\([^;\)]+);([^;]+\))'; % if(condition)(action1;action2)
+  pattern='(if\([^;]+\)\s*\([^;\)]+);([^;]+\))'; % if(condiiton)(action1;action2)
   replace='$1,$2';
   text=regexprep(text,pattern,replace,'ignorecase');
 
@@ -352,38 +352,37 @@ for index=1:length(text) % loop over lines of text
       end
 
     case 'conditional'      % if(conditions)(actions)
-      line = regexprep(line,'\s',''); % removing all whitespace
-      groups=regexp(line,'else','split');
-      else_action = [];
-      for g = 1:numel(groups)
-        subgroups=regexp(groups{g},'\)\(','split');
-        if length(subgroups)==2
-          condition(g)=regexp(subgroups{1},'^if\((.*)','tokens','once');
-          if ~isempty(comment)
-            icomment = length(model.comments);
-            model.comments{icomment+1}=sprintf('%s conditionals(%s): %s',namespace,condition{g},comment);
-          end
-          if subgroups{2}(end)==')'
-            subgroups{2}=subgroups{2}(1:end-1);
-          end
-          then_action{g}=subgroups{2};
-          then_action{g}=strrep(then_action{g},',',';'); % restore semicolon-delimited multiple actions like if(x>1)(x=0;y=0)
-        elseif length(subgroups)==1 % else conditional
-          if subgroups{1}(end)==')'
-            subgroups{1}=subgroups{1}(2:end-1);
-          end
-          else_action=subgroups(1);
-          if ~isempty(comment)
-            icomment = length(model.comments);
-            model.comments{icomment+1}=sprintf('%s else: %s',namespace,comment);
-          end
+      groups=regexp(line,'\)\(','split');
+      condition=regexp(groups{1},'^if\s*\((.*)','tokens','once');
+      if length(groups)==2
+        if groups{2}(end)==')'
+          groups{2}=groups{2}(1:end-1);
         end
+
+        then_action=groups{2};
+        else_action=[];
+      elseif numel(groups==3)
+        if groups{3}(end)==')'
+          groups{3}=groups{3}(1:end-1);
+        end
+
+        then_action=groups{2};
+        else_action=groups{3};
       end
 
       model.conditionals(end+1).namespace=namespace;
-      model.conditionals(end).condition=condition'; % need to set it in rows to avoid conflicting propagate names
-      model.conditionals(end).action=then_action'; % need to set it in rows to avoid conflicting propagate names
-      model.conditionals(end).else=else_action;
+      model.conditionals(end).condition=condition{1};
+      model.conditionals(end).action=strrep(then_action,',',';'); % restore semicolon-delimited multiple actions like if(x>1)(x=0;y=0)
+
+      if length(groups)>2
+        model.conditionals(end).else=else_action;
+      else
+        model.conditionals(end).else=[];
+      end
+
+      if ~isempty(comment)
+        model.comments{end+1}=sprintf('%s conditional(%s): %s',namespace,condition,comment);
+      end
 
     case 'linker'           % [link ]? target operation expression (e.g., link target += f(x))
       % viable options: ((\+=)|(-=)|(\*=)|(/=)|(=>))

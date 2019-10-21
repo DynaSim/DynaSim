@@ -1180,14 +1180,6 @@ function print_conditional_update(fid,conditionals,index_nexts,state_variables, 
       end
     end
 
-    if ~iscell(condition)
-      condition = {condition};
-      action = {action};
-      if ~isempty(elseaction)
-        elseaction = {elseaction};
-      end
-    end
-
     % write conditional to solver function
     for j=1:length(condition)
       fprintf(fid,['  conditional_test=(%s);\n'],condition{j});
@@ -1219,6 +1211,7 @@ function print_conditional_update(fid,conditionals,index_nexts,state_variables, 
         fprintf(fid,['  elseif conditional_test, %s; '],action_j);
       end
     end
+    fprintf(fid,'  if any(conditional_test), %s; ',action);
 
     if ~isempty(elseaction)
       elseaction=dsStrrep(elseaction{1}, '\(n,:', '\(n,conditional_indx', '', '', varargin{:});
