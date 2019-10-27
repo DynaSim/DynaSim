@@ -345,17 +345,17 @@ if options.benchmark_flag
   fprintf(fid, 'tic;');
 end
 
-% 2.3 load parameters
+% 2.2 load parameters
 if options.save_parameters_flag
+  fprintf(fid,'\n');
   fprintf(fid,'%% ------------------------------------------------------------\n');
   fprintf(fid,'%% Parameters:\n');
   fprintf(fid,'%% ------------------------------------------------------------\n');
   fprintf(fid,'params = load(''params.mat'',''p'');\n');
-
   if options.one_solve_file_flag && options.mex_flag
     fprintf(fid,'pVecs = params.p;\n');
   else
-     fprintf(fid,'p = params.p;\n');
+    fprintf(fid,'p = params.p;\n');
   end
 end
 
@@ -398,16 +398,20 @@ else
 end
 
 % write calculation of time vector and derived parameters: ntime, nsamp
-fprintf(fid,'ntime=length(T);\nnsamp=length(1:downsample_factor:ntime);\n');
+fprintf(fid,'ntime=length(T);\nnsamp=length(1:downsample_factor:ntime);\n\n');
+
+% 2.3 set random seed
+setup_randomseed(options,fid,rng_function,parameter_prefix);
 
 % 2.4 evaluate fixed variables
 if ~isempty(model.fixed_variables)
-  fprintf(fid,'\n\n');
+  fprintf(fid,'\n');
   fprintf(fid,'%% ------------------------------------------------------------\n');
   fprintf(fid,'%% Fixed variables:\n');
   fprintf(fid,'%% ------------------------------------------------------------\n');
-  % 2.2 set random seed
-  setup_randomseed(options,fid,rng_function,parameter_prefix)
+  % SA: no idea what is the benefit of resetting the random seed multiple times within the solve_ode file
+  % 2.3 set random seed
+  % setup_randomseed(options,fid,rng_function,parameter_prefix)
 
   names=fieldnames(model.fixed_variables);
   expressions=struct2cell(model.fixed_variables);
@@ -422,7 +426,7 @@ end
 
 % 2.5 evaluate function handles
 if ~isempty(model.functions) && options.reduce_function_calls_flag==0
-  fprintf(fid,'\n\n');
+  fprintf(fid,'\n');
   fprintf(fid,'%% ------------------------------------------------------------\n');
   fprintf(fid,'%% Functions:\n');
   fprintf(fid,'%% ------------------------------------------------------------\n');
@@ -434,14 +438,15 @@ if ~isempty(model.functions) && options.reduce_function_calls_flag==0
 end
 
 % 2.6 prepare storage
-fprintf(fid,'\n\n');
+fprintf(fid,'\n');
 fprintf(fid,'%% ------------------------------------------------------------\n');
 fprintf(fid,'%% Initial conditions:\n');
 fprintf(fid,'%% ------------------------------------------------------------\n');
 
-% 2.2 set random seed (do this a 2nd time, so earlier functions don't mess
+% SA: no idea what is the benefit of resetting the random seed multiple times within the solve_ode file
+% 2.3 set random seed (do this a 2nd time, so earlier functions don't mess
 % up the random seed)
-setup_randomseed(options,fid,rng_function,parameter_prefix)
+% setup_randomseed(options,fid,rng_function,parameter_prefix)
 
 % initialize time
 fprintf(fid,'t=0; k=1;\n');
@@ -841,7 +846,7 @@ end
 
 %% Memory Check
 if ~options.mex_flag && options.verbose_flag
-  fprintf(fid,'\n\n');
+  fprintf(fid,'\n');
   fprintf(fid,'%% ###########################################################\n');
   fprintf(fid,'%% Memory check:\n');
   fprintf(fid,'%% ###########################################################\n');
@@ -854,12 +859,15 @@ end
 
 %% Numerical integration
 % write code to do numerical integration
-fprintf(fid,'\n\n');
+fprintf(fid,'\n');
 fprintf(fid,'%% ###########################################################\n');
 fprintf(fid,'%% Numerical integration:\n');
 fprintf(fid,'%% ###########################################################\n');
+
+% SA: no idea what is the benefit of resetting the random seed multiple times within the solve_ode file
 % Set up random seed again, just incase.
-setup_randomseed(options,fid,rng_function,parameter_prefix)
+% setup_randomseed(options,fid,rng_function,parameter_prefix)
+
 fprintf(fid,'n=2;\n');
 fprintf(fid,'for k=2:ntime\n'); % time index
 fprintf(fid,'  t=T(k-1);\n');
@@ -1014,7 +1022,7 @@ if options.benchmark_flag
 end
 
 %% end solve function
-fprintf(fid,'\nend\n\n');
+fprintf(fid,'\nend\n');
 
 if ~strcmp(outfile,'"stdout"')
   fclose(fid);
@@ -1327,8 +1335,7 @@ end
 % --------------------------------------------------------------------------------
 %}
 function setup_randomseed(options,fid,rng_function,parameter_prefix)
-  %if ~strcmp(options.random_seed,'shuffle')
-  if 1
+  if ~strcmp(reportUI,'matlab') || ~strcmp(options.random_seed,'shuffle')
     % If not doing shuffle, proceed as normal to set random seed
     fprintf(fid,'%% seed the random number generator\n');
     if options.save_parameters_flag
@@ -1345,6 +1352,6 @@ function setup_randomseed(options,fid,rng_function,parameter_prefix)
     % file, and instead set it inside the dsSimulate parfor loop (see iss
     % #311 and here:
     % https://www.mathworks.com/matlabcentral/answers/180290-problem-with-rng-shuffle)
-    fprintf(fid,'%% random_seed was set to shuffle earlier. \n');
+    fprintf(fid,'%% the ''shuffle'' random seed has been set in advance to the parfor loop.\n');
   end
 end

@@ -155,12 +155,6 @@ if ischar(text)
   replace='$1,$2';
   text=regexprep(text,pattern,replace,'ignorecase');
 
-  % column vectors interfere with the delimiter ';'
-  % this can be avoided by replacing ';' by ',' and transposing
-  pattern='(\[[^;\]]+;.+\])'; % selecting the column vector
-  replace='$1'''; % transposing
-  text=regexprep(text,pattern,replace,'ignorecase');
-
   pattern=';(?=((?!\[).)*?\])'; % selecting all ';' in the column vector
   replace=','; % replacing them all by ','
   text=regexprep(text,pattern,replace,'ignorecase');
@@ -197,7 +191,7 @@ for index=1:length(text) % loop over lines of text
   end
 
   switch dsClassifyEquation(line,delimiter) % classify
-    case 'parameter'        % var=(string or number)
+    case 'parameter'        % var=(string, number or array)
       rhs=regexp(line,'=(.+)$','tokens','once');
       lhs=regexp(line,'^([\w\.]+)\s*=','tokens','once');
 
