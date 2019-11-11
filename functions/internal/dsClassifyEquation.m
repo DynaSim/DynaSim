@@ -171,10 +171,12 @@ end
 % fixed_variable (without indexing) check: var=(expression with grouping or arithmetic)
 pattern='^((\w+)|(\[\w+\]))\s*=';
 if isempty(class) && ~isempty(regexp(string,pattern,'once'))
-  pattern1='(.*[a-z_A-Z,<>(<=)(>=)]+.*$'; % [^\[\]])$'; % rhs contains: {}(),<>*/|
+  pattern1='(.*[a-z_A-Z,<>(<=)(>=)]+.*)$'; % rhs contains: []{}(),<>*/|   % '=\s*.*[a-z_A-Z,<>(<=)(>=)]+.*'
   pattern2='=\s*\d+e[\-\+]?\d+$'; % scientific notation (should be classified as parameter, not fixed_variable)
+  pattern3='(.*[\[\]]+.*)$'; % contains []
   if ~isempty(regexp(string,pattern1,'once')) && ...
-      isempty(regexp(string,pattern2,'once'))
+      isempty(regexp(string,pattern2,'once')) && ...
+      isempty(regexp(string,pattern3,'once'))
     class='fixed_variable';
   else % classifying explicit parameter arrays (X = [];) as parameters
     class='parameter';
