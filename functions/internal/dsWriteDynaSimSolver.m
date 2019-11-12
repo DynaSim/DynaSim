@@ -446,9 +446,26 @@ end
 
 %% STATE_VARIABLES
 fprintf(fid,'\n%% STATE_VARIABLES:\n');
+IC_expressions=struct2cell(model.ICs);
 nvals_per_var=zeros(1,length(state_variables)); % number of elements
 ndims_per_var=zeros(1,length(state_variables)); % number of dimensions
-IC_expressions=struct2cell(model.ICs);
+sizes_per_var=cell(1,length(state_variables));
+
+% try to determine size of each state variable by evaluating IC expressions
+try
+  tmp=cellfun(@eval,IC_expressions,'uni',0);
+  nvals_per_var=cellfun(@numel,tmp);
+  for i=1:length(tmp)
+    if size(tmp{i},1)==1 %|| size(tmp{i},2)==1
+      ndims_per_var(i)=1;
+      sizes_per_var{i}=length(tmp{i});
+    else
+      ndims_per_var(i)=ndims(tmp{i});
+      sizes_per_var{i}=size(tmp{i});
+    end
+  end
+end
+
 for i=1:length(state_variables)
   % initialize var_last
   if options.downsample_factor>1 || options.disk_flag==1
@@ -462,28 +479,74 @@ for i=1:length(state_variables)
     fprintf(fid,'for i=1:numel(%s), fprintf(fileID,''%%g%s'',%s(i)); end\n',var_last,separator,var_last);
   else
     % preallocate state variables
-    [pop_size,pop_name]=dsGetPopSizeFromName(model,state_variables{i});
-    ndims_per_var(i)=length(pop_size);
-    nvals_per_var(i)=prod(model.parameters.([pop_name '_Npop']));
+    try
+      [pop_size,pop_name,target]=dsGetPopSizeFromName(model,state_variables{i});
+    catch
+      keyboard
+    end
+    % set var sizes if evaluating IC expressions failed (see above)
+    if ndims_per_var(i)==0
+      ndims_per_var(i)=length(pop_size);
+    end
+    if nvals_per_var(i)==0
+      nvals_per_var(i)=prod(model.parameters.([pop_name '_Npop']));
+    end
+    if isempty(sizes_per_var{i})
+      sizes_per_var{i}=pop_size;
+    end
     if options.save_parameters_flag
-      % use pop size in saved params structure
+      % use pop size in saved params structure (this enables re-use of 
+      % a compiled MEX file as population size is varied)
       if ndims_per_var(i)==1
-        % 1D population (time index is first dimension)
-        fprintf(fid,'%s = zeros(nsamp,%s%s_Npop);\n',state_variables{i},parameter_prefix,pop_name);
+        % 1D variable (time index is first dimension)
+        if isequal(sizes_per_var{i},pop_size)
+          % case where assumptions in dsGetPopSizeFromName hold true
+          fprintf(fid,'%s = zeros(nsamp,%s%s_Npop);\n',state_variables{i},parameter_prefix,pop_name);
+        elseif isequal(sizes_per_var{i},model.parameters.([target '_Npop']))
+          % case where connection variable has size of target population
+          fprintf(fid,'%s = zeros(nsamp,%s%s_Npop);\n',state_variables{i},parameter_prefix,target);          
+        else
+          warning('Failed to find population with size of %s. Setting fixed size = [1 x %g].',state_variables{i},nvals_per_var(i));
+          fprintf(fid,'%s = zeros(nsamp,%g);\n',state_variables{i},nvals_per_var(i));
+        end
       else
-        % 2D population (time index is final dimension; will be shifted after simulation)
+        % 2D variable (time index is final dimension; will be shifted after simulation)
         % note: time index is last to avoid needing to squeeze() the matrix
-        fprintf(fid,'%s = zeros([%s%s_Npop,nsamp]);\n',state_variables{i},parameter_prefix,pop_name);
+        % note: supports var for either a 2D pop or relating two 1D pops
+        if isequal(sizes_per_var{i},pop_size)
+          % case where assumptions in dsGetPopSizeFromName hold true (i.e., state var for 2D pop)
+          fprintf(fid,'%s = zeros([%s%s_Npop,nsamp]);\n',state_variables{i},parameter_prefix,pop_name);
+        else
+          % other cases (e.g., 2D state variables for connection mechanisms)
+          A=model.parameters.([pop_name '_Npop']); % pre
+          B=model.parameters.([target '_Npop']);   % post
+          if isequal(sizes_per_var{i},[A B])
+            % connection variable with 2D [N_pre x N_post]
+            fprintf(fid,'%s = zeros([%s%s_Npop,%s%s_Npop,nsamp]);\n',state_variables{i},parameter_prefix,pop_name,parameter_prefix,target);
+          elseif isequal(sizes_per_var{i},[B A])
+            % connection variable with 2D [N_post x N_pre]
+            fprintf(fid,'%s = zeros([%s%s_Npop,%s%s_Npop,nsamp]);\n',state_variables{i},parameter_prefix,target,parameter_prefix,pop_name);
+          elseif isequal(sizes_per_var{i},[A A])
+            % connection variable with 2D [N_pre x N_pre]
+            fprintf(fid,'%s = zeros([%s%s_Npop,%s%s_Npop,nsamp]);\n',state_variables{i},parameter_prefix,pop_name,parameter_prefix,pop_name);
+          elseif isequal(sizes_per_var{i},[B B])
+            % connection variable with 2D [N_post x N_post]
+            fprintf(fid,'%s = zeros([%s%s_Npop,%s%s_Npop,nsamp]);\n',state_variables{i},parameter_prefix,target,parameter_prefix,target);
+          else            
+            warning('Failed to find pop or pop pairs with size of %s. Setting fixed size = [%s].',state_variables{i},num2str(sizes_per_var{i}));
+            fprintf(fid,'%s = zeros([[%s],nsamp]);\n',state_variables{i},num2str(sizes_per_var{i}));          
+          end   
+        end
       end
     else
       % hard-code the pop size
       if ndims_per_var(i)==1
         % 1D population (time index is first dimension)
-        fprintf(fid,'%s = zeros(nsamp,%g);\n',state_variables{i},model.parameters.([pop_name '_Npop']));
+        fprintf(fid,'%s = zeros(nsamp,%g);\n',state_variables{i},nvals_per_var(i));%model.parameters.([pop_name '_Npop']));
       else
         % 2D population (time index is final dimension; will be shifted after simulation)
         % note: time index is last to avoid needing to squeeze() the matrix
-        fprintf(fid,'%s = zeros([[%s],nsamp]);\n',state_variables{i},num2str(model.parameters.([pop_name '_Npop'])));
+        fprintf(fid,'%s = zeros([[%s],nsamp]);\n',state_variables{i},num2str(sizes_per_var{i}));%num2str(model.parameters.([pop_name '_Npop'])));
       end
     end
 
@@ -512,18 +575,93 @@ for i=1:length(state_variables)
   end %disk_flag
 end %state_variables
 
+% determine how to index each state variable based on how often state
+% variables are stored, whether they are written to disk or stored in
+% memory, and whether the state variable matrix is one- or two-dimensional
+index_lasts=cell(1,length(state_variables));
+index_nexts=cell(1,length(state_variables));
+index_temps=repmat({'_last'},[1 length(state_variables)]);
+for i=1:length(state_variables)
+  if options.downsample_factor==1 && options.disk_flag==0
+    % store state directly into state variables on each integration step
+    if nvals_per_var(i)>1 % use full 2D matrix indexing
+      if ndims_per_var(i)==1 % 1D population
+        index_lasts{i}='(n-1,:)';
+        index_nexts{i}='(n,:)';
+      elseif ndims_per_var(i)==2 % 2D population
+        index_lasts{i}='(:,:,n-1)';
+        index_nexts{i}='(:,:,n)';
+      end
+    else % use more concise 1D indexing because it is much faster for some Matlab-specific reason...
+      index_lasts{i}='(n-1)';
+      index_nexts{i}='(n)';
+    end
+  elseif options.downsample_factor>1 && options.disk_flag==0
+    % store state in var_last then update state variables on each downsample_factor integration step
+    index_lasts{i}='_last';
+    if nvals_per_var(i)>1
+      if ndims_per_var(i)==1 % 1D population
+        index_nexts{i}='(n,:)';
+      elseif ndims_per_var(i)==2 % 2D population
+        index_nexts{i}='(:,:,n)';
+      end
+    else
+      index_nexts{i}='(n)';
+    end
+  elseif options.disk_flag==1
+    % always store state in var_last and write on each downsample_factor integration step
+      index_lasts{i}='_last';
+      index_nexts{i}='_last';
+  end
+end
+
 %% MONITORS
+monitors_flag=0;
 if ~isempty(model.monitors)
+  monitors_flag=1;
   if strcmp(reportUI,'matlab') || options.disk_flag==1
     fprintf(fid,'\n%% MONITORS:\n');
   end
 
   monitor_names=fieldnames(model.monitors);
-  monitor_expression=struct2cell(model.monitors);
-
+  monitor_expressions=struct2cell(model.monitors);
+  index_nexts_mon=cell(1,length(monitor_names));
+  
+  
+  
+  
+  use_monitor_sizes = any(ndims_per_var>1);
+    % TODO: establish better condition for determining whether monitor sizes
+    % should be calculated by evaluating mon_f(IC) at this point. For now, it
+    % is done only if any state variables are 2D; otherwise, monitors are 
+    % assumed to have dimensions equal to state variables of the postsynaptic pop. 
+    % This would also be necessary for connection mechanisms with monitors 
+    % that are functions of presynaptic state variables when N_pre != N_post; 
+    % however, this case is not supported given the present condition.
+  nvals_per_mon=zeros(1,length(monitor_names)); % number of elements
+  ndims_per_mon=zeros(1,length(monitor_names)); % number of dimensions
+  sizes_per_mon=cell(1,length(monitor_names));
+  if use_monitor_sizes
+    % Try to determine size of each monitor be evaluating it given ICs; i.e., f(IC)
+    monitor_ics = init_calculate_monitors(model,p);
+    nvals_per_mon=cellfun(@numel,monitor_ics);
+    for i=1:length(monitor_ics)
+      if size(monitor_ics{i},1)==1 || size(monitor_ics{i},2)==1
+        ndims_per_mon(i)=1;
+        sizes_per_mon{i}=length(monitor_ics{i});
+      else
+        ndims_per_mon(i)=ndims(monitor_ics{i});
+        sizes_per_mon{i}=size(monitor_ics{i});
+      end
+    end
+  end
+  
+  spike_mon_inds=[];
   for i=1:length(monitor_names)
     if ~isempty(regexp(monitor_names{i},'_spikes$','once'))
-    % set expression if monitoring spikes
+      % Spike Monitor
+      spike_mon_inds=[spike_mon_inds i];
+      % set expression if monitoring spikes
       if options.disk_flag==1
         error('spike monitoring is not supported for writing data to disk at this time.');
         % todo: add support for spike monitoring with data written to
@@ -542,20 +680,20 @@ if ~isempty(model.monitors)
       % - monitor VAR.spikes(#,#)
       % - TODO: support: monitor VAR.spikes(thresh,buffer_size)
       
-      if isempty(monitor_expression{i})
+      if isempty(monitor_expressions{i})
         % monitor VAR.spikes
         spike_threshold=0;
       else
-        parts=regexp(monitor_expression{i},',','split');
+        parts=regexp(monitor_expressions{i},',','split');
         part1=strrep(parts{1},'(',''); % user provided spike threshold
         if isempty(regexp(part1,'[^\d]','once'))
           % monitor VAR.spikes(#)
           spike_threshold=str2num(part1);
-          monitor_expression{i}=[];
+          monitor_expressions{i}=[];
         else
           % monitor VAR.spikes(param
           spike_threshold=part1;
-          monitor_expression{i}=[];
+          monitor_expressions{i}=[];
         end
         if length(parts)>1 % user provided spike buffer size
           part2=strrep(parts{2},')','');
@@ -611,26 +749,77 @@ if ~isempty(model.monitors)
       % initialize spike buffer and buffer index
       if options.save_parameters_flag
         % tspike = -inf(buffer_size,npop):
-        fprintf(fid,'%s = -1e6*ones(%g,%s%s_Npop);\n',var_tspikes,spike_buffer_size,parameter_prefix,pop_name);
+        fprintf(fid,'%s = -1e32*ones(%g,%s%s_Npop);\n',var_tspikes,spike_buffer_size,parameter_prefix,pop_name);
         fprintf(fid,'%s = ones(1,%s%s_Npop);\n',var_buffer_index,parameter_prefix,pop_name);
       else
-        fprintf(fid,'%s = -1e6*ones(%g,%g);\n',var_tspikes,spike_buffer_size,model.parameters.([pop_name '_Npop']));
+        fprintf(fid,'%s = -1e32*ones(%g,%g);\n',var_tspikes,spike_buffer_size,model.parameters.([pop_name '_Npop']));
         fprintf(fid,'%s = ones(1,%g);\n',var_buffer_index,model.parameters.([pop_name '_Npop']));
       end
 
-    elseif isempty(monitor_expression{i}) && isfield(model.functions,monitor_names{i})
-    % set expression if monitoring function referenced by name
+    elseif isempty(monitor_expressions{i}) && isfield(model.functions,monitor_names{i})
+      % Function Monitor
+      % set expression if monitoring function referenced by name
       tmp=regexp(model.functions.(monitor_names{i}),'@\([a-zA-Z][\w,]*\)\s*(.*)','tokens','once');
-      monitor_expression{i}=tmp{1};
+      monitor_expressions{i}=tmp{1};
       model.monitors.(monitor_names{i})=tmp{1};
     end
+    
+    % Check monitor sizes
+    [~,source,target] = dsGetPopSizeFromName(model,monitor_names{i});
+    pop_name=target;
+    pop_size=model.parameters.([pop_name '_Npop']);
 
-    % initialize mon_last if not storing every time point and this is not a
-    % spike monitor
-    if (options.downsample_factor>1 || options.disk_flag==1) && isempty(regexp(monitor_names{i},'_spikes$','once'))
+    % set monitor sizes if evaluating mon_f(IC) expressions failed or wasn't done
+    if ndims_per_mon(i)==0
+      ndims_per_mon(i)=length(pop_size);
+    end
+    if nvals_per_mon(i)==0
+      nvals_per_mon(i)=prod(model.parameters.([pop_name '_Npop']));
+    end
+    if isempty(sizes_per_mon{i})
+      sizes_per_mon{i}=pop_size;
+    end
+    
+    % Determine form of indexing to use for this monitor
+    if ~use_monitor_sizes || ismember(i,spike_mon_inds)
+      % use default indices (assumes all monitors are for vector functions of
+      % postsynaptic state variales)
+      index_nexts_mon{i}=index_nexts{1};
+    else
+      if options.downsample_factor==1 && options.disk_flag==0
+        % store state directly into monitors on each integration step
+        if nvals_per_mon(i)>1 % use full 2D matrix indexing
+          if ndims_per_mon(i)==1 % 1D population
+            index_nexts_mon{i}='(n,:)';
+          elseif ndims_per_mon(i)==2 % 2D population
+            index_nexts_mon{i}='(:,:,n)';
+          end
+        else % use more concise 1D indexing because it is much faster for some Matlab-specific reason...
+          index_nexts_mon{i}='(n)';
+        end
+      elseif options.downsample_factor>1 && options.disk_flag==0
+        % store state in mon_last then update monitors on each downsample_factor integration step
+        if nvals_per_mon(i)>1
+          if ndims_per_mon(i)==1 % 1D population
+            index_nexts_mon{i}='(n,:)';
+          elseif ndims_per_mon(i)==2 % 2D population
+            index_nexts_mon{i}='(:,:,n)';
+          end
+        else
+          index_nexts_mon{i}='(n)';
+        end
+      elseif options.disk_flag==1
+        % always store state in mon_last and write on each downsample_factor integration step
+          index_nexts_mon{i}='_last';
+      end
+    end
+
+    % initialize mon_last if not storing every time point and this is not a spike monitor
+%     if (options.downsample_factor>1 || options.disk_flag==1) && isempty(regexp(monitor_names{i},'_spikes$','once'))
+    if (options.disk_flag==1) && isempty(regexp(monitor_names{i},'_spikes$','once'))
       % set mon_last=f(IC);
-      tmp=cell2struct({monitor_expression{i}},{monitor_names{i}},1);
-      print_monitor_update(fid,tmp,'_last',state_variables,'_last', varargin{:});
+      tmp_mon=cell2struct({monitor_expressions{i}},{monitor_names{i}},1);
+      print_monitor_update(fid,tmp_mon,'_last',state_variables,'_last', varargin{:});
     end
 
     if options.disk_flag==1
@@ -638,36 +827,124 @@ if ~isempty(model.monitors)
       mon_last=sprintf('%s_last',monitor_names{i});
       fprintf(fid,'for i=1:numel(%s), fprintf(fileID,''%%g%s'',%s(i)); end\n',mon_last,separator,mon_last);
     elseif strcmp(reportUI,'matlab')
-      % preallocate monitors
-      [~,~,pop_name] = dsGetPopSizeFromName(model,monitor_names{i});
-      if options.save_parameters_flag
-        fprintf(fid,'%s = zeros(nsamp,%s%s_Npop);\n',monitor_names{i},parameter_prefix,pop_name);
-      else
-        fprintf(fid,'%s = zeros(nsamp,%g);\n',monitor_names{i},model.parameters.([pop_name '_Npop']));
-      end
-%       parts=regexp(monitor_names{i},'_','split');
+      % %%%%%%%%%%%%%%%%%%%%
+      % Preallocate monitors
+      
 %       if options.save_parameters_flag
-%         fprintf(fid,'%s = zeros(nsamp,%s%s_Npop);\n',monitor_names{i},parameter_prefix,parts{1});
+%         fprintf(fid,'%s = zeros(nsamp,%s%s_Npop);\n',monitor_names{i},parameter_prefix,pop_name);
 %       else
-%         fprintf(fid,'%s = zeros(nsamp,%g);\n',monitor_names{i},model.parameters.([parts{1} '_Npop']));
+%         fprintf(fid,'%s = zeros(nsamp,%g);\n',monitor_names{i},model.parameters.([pop_name '_Npop']));
 %       end
+      
+      if options.save_parameters_flag
+        % use pop size in saved params structure (this enables re-use of 
+        % a compiled MEX file as population size is varied)
+        if ndims_per_mon(i)==1
+          % 1D monitor (time index is first dimension)
+          if isequal(sizes_per_mon{i},pop_size) || ismember(i,spike_mon_inds)
+            % case where assumptions in dsGetPopSizeFromName hold true
+            fprintf(fid,'%s = zeros(nsamp,%s%s_Npop);\n',monitor_names{i},parameter_prefix,pop_name);
+          elseif isequal(sizes_per_mon{i},model.parameters.([target '_Npop']))
+            % case where connection monitor has size of target population
+            fprintf(fid,'%s = zeros(nsamp,%s%s_Npop);\n',monitor_names{i},parameter_prefix,target);          
+          elseif isequal(sizes_per_mon{i},model.parameters.([source '_Npop']))
+            % case where connection monitor has size of source population
+            fprintf(fid,'%s = zeros(nsamp,%s%s_Npop);\n',monitor_names{i},parameter_prefix,source);          
+          else
+            warning('Failed to find population with size of %s. Setting fixed size = [1 x %g].',monitor_names{i},nvals_per_mon(i));
+            fprintf(fid,'%s = zeros(nsamp,%g);\n',monitor_names{i},nvals_per_mon(i));
+          end
+        else
+          % 2D monitor (time index is final dimension; will be shifted after simulation)
+          % note: time index is last to avoid needing to squeeze() the matrix
+          % note: supports mon for either a 2D pop or relating two 1D pops
+          if isequal(sizes_per_mon{i},pop_size)
+            % case where assumptions in dsGetPopSizeFromName hold true (i.e., monitor for 2D pop)
+            fprintf(fid,'%s = zeros([%s%s_Npop,nsamp]);\n',monitor_names{i},parameter_prefix,pop_name);
+          else
+            % other cases (e.g., 2D monitors for connection mechanisms)
+            A=model.parameters.([source '_Npop']);   % pre
+            B=model.parameters.([target '_Npop']);   % post
+            if isequal(sizes_per_mon{i},[A B])
+              % connection monitor with 2D [N_pre x N_post]
+              fprintf(fid,'%s = zeros([%s%s_Npop,%s%s_Npop,nsamp]);\n',monitor_names{i},parameter_prefix,source,parameter_prefix,target);
+            elseif isequal(sizes_per_mon{i},[B A])
+              % connection monitor with 2D [N_post x N_pre]
+              fprintf(fid,'%s = zeros([%s%s_Npop,%s%s_Npop,nsamp]);\n',monitor_names{i},parameter_prefix,target,parameter_prefix,source);
+            elseif isequal(sizes_per_mon{i},[A A])
+              % connection monitor with 2D [N_pre x N_pre]
+              fprintf(fid,'%s = zeros([%s%s_Npop,%s%s_Npop,nsamp]);\n',monitor_names{i},parameter_prefix,source,parameter_prefix,source);
+            elseif isequal(sizes_per_mon{i},[B B])
+              % connection monitor with 2D [N_post x N_post]
+              fprintf(fid,'%s = zeros([%s%s_Npop,%s%s_Npop,nsamp]);\n',monitor_names{i},parameter_prefix,target,parameter_prefix,target);
+            else            
+              warning('Failed to find pop or pop pairs with size of %s. Setting fixed size = [%s].',monitor_names{i},num2str(sizes_per_mon{i}));
+              fprintf(fid,'%s = zeros([[%s],nsamp]);\n',monitor_names{i},num2str(sizes_per_mon{i}));          
+            end   
+          end
+        end
+      else
+        % hard-code the pop size
+        if ndims_per_mon(i)==1
+          % 1D population (time index is first dimension)
+          fprintf(fid,'%s = zeros(nsamp,%g);\n',monitor_names{i},nvals_per_mon(i));%model.parameters.([pop_name '_Npop']));
+        else
+          % 2D population (time index is final dimension; will be shifted after simulation)
+          % note: time index is last to avoid needing to squeeze() the matrix
+          fprintf(fid,'%s = zeros([[%s],nsamp]);\n',monitor_names{i},num2str(sizes_per_mon{i}));%num2str(model.parameters.([pop_name '_Npop'])));
+        end
+      end
 
-      if isempty(monitor_expression{i})
+      if isempty(monitor_expressions{i})
         continue;
       end
 
-      % initialize monitors
+      % Initialize monitors
+
+%       if options.downsample_factor==1
+%         % set mon(1,:)=f(IC);
+%         tmp=cell2struct({monitor_expressions{i}},{monitor_names{i}},1);
+%         print_monitor_update(fid,tmp,'(1,:)',state_variables,'(1,:)', varargin{:});
+%       else
+%         % set mon(1,:)=mon_last;
+%         tmp=cell2struct({monitor_expressions{i}},{monitor_names{i}},1);
+%         print_monitor_update(fid,tmp,'(1,:)',state_variables,'_last', varargin{:});
+%       end
+
+      tmp_mon=cell2struct({monitor_expressions{i}},{monitor_names{i}},1);
       if options.downsample_factor==1
-        % set mon(1,:)=f(IC);
-        tmp=cell2struct({monitor_expression{i}},{monitor_names{i}},1);
-        print_monitor_update(fid,tmp,'(1,:)',state_variables,'(1,:)', varargin{:});
+        tmp_var_index=cellfun(@(x)strrep(x,'n','1'),index_nexts,'uni',0);
+        if ndims_per_mon(i)==1
+          % set mon(1,:)=f(IC);
+          print_monitor_update(fid,tmp_mon,'(1,:)',state_variables,tmp_var_index, varargin{:});
+%           print_monitor_update(fid,tmp,'(1,:)',state_variables,'(1,:)', varargin{:});
+        elseif ndims_per_mon(i)==2
+          % set mon(:,:,1)=f(IC);
+          print_monitor_update(fid,tmp_mon,'(:,:,1)',state_variables,tmp_var_index, varargin{:});          
+        else
+          error('only 1D and 2D populations are supported a this time.');
+        end
       else
-        % set mon(1,:)=mon_last;
-        tmp=cell2struct({monitor_expression{i}},{monitor_names{i}},1);
-        print_monitor_update(fid,tmp,'(1,:)',state_variables,'_last', varargin{:});
-      end
+        if ndims_per_mon(i)==1
+          % set mon(1,:)=mon_last;
+          print_monitor_update(fid,tmp_mon,'(1,:)',state_variables,'_last', varargin{:});
+        elseif ndims_per_mon(i)==2
+          % set mon(:,:,1)=var_last;
+          print_monitor_update(fid,tmp_mon,'(:,:,1)',state_variables,'_last', varargin{:});
+        else
+          error('only 1D and 2D populations are supported a this time.');
+        end
+      end      
     end %disk_flag
   end %monitor_names
+  % remove monitors from monitor spike vectors
+  if ~isempty(spike_mon_inds)
+    ndims_per_mon(spike_mon_inds)=[];
+    nvals_per_mon(spike_mon_inds)=[];
+    sizes_per_mon(spike_mon_inds)=[];
+    monitor_names(spike_mon_inds)=[];
+    index_nexts_mon(spike_mon_inds)=[];
+  end  
 end %monitors
 
 if options.disk_flag==1
@@ -675,45 +952,44 @@ if options.disk_flag==1
   fprintf(fid,'fprintf(fileID,''\\n'');\n');
 end
 
-% determine how to index each state variable based on how often state
-% variables are stored, whether they are written to disk or stored in
-% memory, and whether the state variable matrix is one- or two-dimensional
-index_lasts=cell(1,length(state_variables));
-index_nexts=cell(1,length(state_variables));
-index_temps=repmat({'_last'},[1 length(state_variables)]);
-for i=1:length(state_variables)
-  if options.downsample_factor==1 && options.disk_flag==0
-    % store state directly into state variables on each integration step
-    if nvals_per_var(i)>1 % use full 2D matrix indexing
-      if ndims_per_var(i)==1 % 1D population
-        index_lasts{i}='(n-1,:)';
-        index_nexts{i}='(n,:)';
-      elseif ndims_per_var(i)==2 % 2D population
-        index_lasts{i}='(:,:,n-1)';
-        index_nexts{i}='(:,:,n)';
-      end
-    else % use more concise 1D indexing because it is much faster for some Matlab-specific reason...
-      index_lasts{i}='(n-1)';
-      index_nexts{i}='(n)';
-    end
-  elseif options.downsample_factor>1 && options.disk_flag==0
-    % store state in var_last then update state variables on each downsample_factor integration step
-    index_lasts{i}='_last';
-    if nvals_per_var(i)>1
-      if ndims_per_var(i)==1 % 1D population
-        index_nexts{i}='(n,:)';
-      elseif ndims_per_var(i)==2 % 2D population
-        index_nexts{i}='(:,:,n)';
-      end
-    else
-      index_nexts{i}='(n)';
-    end
-  elseif options.disk_flag==1
-    % always store state in var_last and write on each downsample_factor integration step
-      index_lasts{i}='_last';
-      index_nexts{i}='_last';
-  end
-end
+% % determine form of indexing to use for monitors
+% if ~isempty(model.monitors)
+%   if ~use_monitor_sizes
+%     % use default indices (assumes all monitors are for vector functions of
+%     % postsynaptic state variales)
+%     index_nexts_mon=index_nexts;
+%   else
+%     index_nexts_mon=cell(1,length(monitor_names));
+%     for i=1:length(monitor_names)
+%       if options.downsample_factor==1 && options.disk_flag==0
+%         % store state directly into monitors on each integration step
+%         if nvals_per_mon(i)>1 % use full 2D matrix indexing
+%           if ndims_per_mon(i)==1 % 1D population
+%             index_nexts_mon{i}='(n,:)';
+%           elseif ndims_per_mon(i)==2 % 2D population
+%             index_nexts_mon{i}='(:,:,n)';
+%           end
+%         else % use more concise 1D indexing because it is much faster for some Matlab-specific reason...
+%           index_nexts_mon{i}='(n)';
+%         end
+%       elseif options.downsample_factor>1 && options.disk_flag==0
+%         % store state in mon_last then update monitors on each downsample_factor integration step
+%         if nvals_per_mon(i)>1
+%           if ndims_per_mon(i)==1 % 1D population
+%             index_nexts_mon{i}='(n,:)';
+%           elseif ndims_per_mon(i)==2 % 2D population
+%             index_nexts_mon{i}='(:,:,n)';
+%           end
+%         else
+%           index_nexts_mon{i}='(n)';
+%         end
+%       elseif options.disk_flag==1
+%         % always store state in mon_last and write on each downsample_factor integration step
+%           index_nexts_mon{i}='_last';
+%       end
+%     end
+%   end
+% end
 
 % add index to state variables in ODEs and look for delay differential equations
 delayinfo=[];
@@ -780,11 +1056,12 @@ if ~isempty(delayinfo)
   delay_vars=unique({delayinfo.variable});
   delay_maxi=zeros(size(delay_vars));
   for i=1:length(delay_vars)
+    delay_var=delay_vars{i};
     if i==1
       fprintf(fid,'%% DELAY MATRICES:\n');
     end
     % find max delay for this state variable
-    idx=ismember({delayinfo.variable},delay_vars{i});
+    idx=ismember({delayinfo.variable},delay_var);
     Dmax=max([delayinfo(idx).delay_samp]);
     delay_maxi(i)=Dmax;
     
@@ -793,8 +1070,8 @@ if ~isempty(delayinfo)
     [delayinfo(idx).delay_index]=deal(tmps{:});
     
     % initialize delay matrix with max delay ICs and all time points
-    fprintf(fid,'%s_delay = zeros(nsamp+%g,size(%s,2));\n',delayinfo(i).variable,Dmax,delayinfo(i).variable);
-    fprintf(fid,'  %s_delay(1:%g,:) = repmat(%s(1,:),[%g 1]);\n',delayinfo(i).variable,Dmax,delayinfo(i).variable,Dmax);
+    fprintf(fid,'%s_delay = zeros(nsamp+%g,size(%s,2));\n',delay_var,Dmax,delay_var);
+    fprintf(fid,'  %s_delay(1:%g,:) = repmat(%s(1,:),[%g 1]);\n',delay_var,Dmax,delay_var,Dmax);
   end
   % replace delays in ODEs with indices to delay matrices
   for i=1:length(delayinfo)
@@ -847,8 +1124,9 @@ if options.downsample_factor==1 && options.disk_flag==0 % store every time point
   % conditionals;     % var(k,:)->var(k,:) or var(k)->var(k)
   print_conditional_update(fid,model.conditionals,index_nexts,state_variables)
 
-  if strcmp(reportUI,'matlab') % update_monitors;  % mon(:,k-1)->mon(k,:) or mon(k-1)->mon(k)
-    print_monitor_update(fid,model.monitors,index_nexts,state_variables, [], varargin{:});
+  if strcmp(reportUI,'matlab') && monitors_flag % update_monitors;  % mon(:,k-1)->mon(k,:) or mon(k-1)->mon(k)
+%     print_monitor_update(fid,model.monitors,index_nexts_mon,state_variables, [], varargin{:});
+    print_monitor_update(fid,model.monitors,index_nexts_mon,state_variables,index_nexts, varargin{:});    
   end
 
   fprintf(fid,'  n=n+1;\n');
@@ -888,8 +1166,9 @@ else % store every downsample_factor time point in memory or on disk
   else            % store in memory
     % update_vars;    % var_last -> var(n,:) or var(n)
     print_var_update_last(fid,index_nexts,state_variables)
-    if strcmp(reportUI,'matlab') % update_monitors;% f(var_last) -> mon(n,:) or mon(n)
-      print_monitor_update(fid,model.monitors,index_nexts,state_variables, [], varargin{:});
+    if strcmp(reportUI,'matlab') && monitors_flag % update_monitors;% f(var_last) -> mon(n,:) or mon(n)
+%       print_monitor_update(fid,model.monitors,index_nexts_mon,state_variables, [], varargin{:});
+      print_monitor_update(fid,model.monitors,index_nexts_mon,state_variables,index_nexts, varargin{:});    
     end
   end %disk_flag
 
@@ -936,6 +1215,14 @@ if any(ndims_per_var>1) % is there at least one 2D population?
     if ndims_per_var(i)>1
       % move time index to first dimension
       fprintf(fid,'%s=shiftdim(%s,%g);\n',state_variables{i},state_variables{i},ndims_per_var(i));
+    end
+  end
+end
+if monitors_flag && any(ndims_per_mon>1) % is there at least one 2D population?
+  for i=1:length(monitor_names)
+    if ndims_per_mon(i)>1
+      % move time index to first dimension
+      fprintf(fid,'%s=shiftdim(%s,%g);\n',monitor_names{i},monitor_names{i},ndims_per_mon(i));
     end
   end
 end
@@ -1108,10 +1395,20 @@ function print_conditional_update(fid,conditionals,index_nexts,state_variables, 
     % write conditional to solver function
     fprintf(fid,'  conditional_test=(%s);\n',condition);
     action=dsStrrep(action, '\(n,:', '(n,conditional_test', '', '', varargin{:});
+    if ~isempty(regexp(condition,'(:,:,n)','once'))
+      % Use linear indices to update 2D state variable
+      var=regexp(action,'^[^\(]+','match','once');
+      indstr=sprintf('(find(conditional_test)+(n-1)*numel(%s)/nsamp)',var);
+      action=strrep(action,'(n,conditional_test)',indstr);
+    end
     fprintf(fid,'  if any(conditional_test), %s; ',action);
-
+    
     if ~isempty(elseaction)
       elseaction=dsStrrep(elseaction, '(n,:', '(n,conditional_test', '', '', varargin{:});
+      if ~isempty(regexp(condition,'(:,:,n)','once'))
+        % Use linear indices to update 2D state variable
+        elseaction=strrep(elseaction,'(n,conditional_test)',indstr);
+      end
       fprintf('else %s; ',elseaction);
     end
 
@@ -1119,58 +1416,148 @@ function print_conditional_update(fid,conditionals,index_nexts,state_variables, 
   end
 end
 
-function print_monitor_update(fid,monitors,index_nexts,state_variables,index_lasts, varargin)
-  if ~isempty(monitors) && iscell(index_nexts) % being called from within the integrator loop
-    fprintf(fid,'  %% ------------------------------------------------------------\n');
-    fprintf(fid,'  %% Update monitors:\n');
-    fprintf(fid,'  %% ------------------------------------------------------------\n');
-  end
-
-  if nargin<5 || isempty(index_lasts)
-    index_lasts=index_nexts;
-  end
-
-  % account for inputs from monitor initialization
-
-  if ~iscell(index_nexts), index_nexts={index_nexts}; end
-
-  if ~iscell(index_lasts), index_lasts={index_lasts}; end
-
-  if length(index_lasts)~=length(state_variables)
-    index_lasts=repmat(index_lasts,[1 length(state_variables)]);
-  end
-
-  if isequal(index_nexts{1},'(1,:)')
-    monitor_index='(1,:)';
-  else
-    switch index_nexts{1}(1)
-      case '('
-        monitor_index='(n,:)';
-      case '_'
-        monitor_index='_last';
-    end
-  end
-
-  % purpose: write statements to update monitors given current state variables
+function print_monitor_update(fid,monitors,index_nexts_mon,state_variables,index_nexts_var, varargin)
+  % Purpose: write statements to update monitors given current state variables
   %   note: only run this every time a point is recorded (not necessarily on
   %   every step of the integration).
   if isempty(monitors)
     return;
   end
-
-  monitor_name=fieldnames(monitors);
-  monitor_expression=struct2cell(monitors);
-
-  % add indexes to state variables in monitors
-  for i=1:length(monitor_name)
+  if iscell(index_nexts_var) % being called from within the integrator loop
+    fprintf(fid,'  %% ------------------------------------------------------------\n');
+    fprintf(fid,'  %% Update monitors:\n');
+    fprintf(fid,'  %% ------------------------------------------------------------\n');
+  end
+  
+  % Account for inputs from monitor initialization
+  if ~iscell(index_nexts_var), index_nexts_var={index_nexts_var}; end
+  if ~iscell(index_nexts_mon), index_nexts_mon={index_nexts_mon}; end  
+  if length(index_nexts_var)~=length(state_variables)
+    index_nexts_var=repmat(index_nexts_var,[1 length(state_variables)]);
+  end
+  
+  % Adjust indexing and print monitor updates
+  monitor_names=fieldnames(monitors);
+  monitor_expressions=struct2cell(monitors);
+  for i=1:length(monitor_names)
+    % add indexes to state variables in monitor expressions
     for j=1:length(state_variables)
-      %monitor_expression{i}=dsStrrep(monitor_expression{i}, state_variables{j}, [state_variables{j} index_lasts{j}], '', '', varargin{:});
-      monitor_expression{i}=dsStrrep(monitor_expression{i}, state_variables{j}, [state_variables{j} monitor_index], '', '', varargin{:});
+      monitor_expressions{i}=dsStrrep(monitor_expressions{i}, state_variables{j}, [state_variables{j} index_nexts_var{j}], '', '', varargin{:});
     end
 
     % write monitors to solver function
-    fprintf(fid,'  %s%s=%s;\n',monitor_name{i},monitor_index,monitor_expression{i});
+    fprintf(fid,'  %s%s=%s;\n',monitor_names{i},index_nexts_mon{i},monitor_expressions{i});
   end
+  
+end
+
+function setup_randomseed(options,fid,rng_function,parameter_prefix)
+  %if ~strcmp(options.random_seed,'shuffle')
+  if 1
+    % If not doing shuffle, proceed as normal to set random seed
+    fprintf(fid,'%% seed the random number generator\n');
+    if options.save_parameters_flag
+      fprintf(fid,'%s(%srandom_seed);\n',rng_function,parameter_prefix);
+    else
+      if ischar(options.random_seed)
+        fprintf(fid,'%s(''%s'');\n',rng_function,options.random_seed);
+      elseif isnumeric(options.random_seed)
+        fprintf(fid,'%s(%g);\n',rng_function,options.random_seed);
+      end
+    end
+  else
+    % If random_seed is shuffle, we'll skip setting it within the solve
+    % file, and instead set it inside the dsSimulate parfor loop (see iss
+    % #311 and here:
+    % https://www.mathworks.com/matlabcentral/answers/180290-problem-with-rng-shuffle)
+    fprintf(fid,'%% random_seed was set to shuffle earlier. \n');
+  end
+end
+
+function [monitor_ic,monitor_names,monitor_expressions] = init_calculate_monitors(model,p,propagate_flag)
+  % Initialize monitors (e.g., to determine their size)
+  % 
+  % Example: within dsWriteDynaSimSolver()
+  % ic=init_calculate_monitors(model,p);
+  % sz=cellfun(@size,ic,'uni',0)
+  % 
+  % Example: arbitrary model from command line:
+  % [ic,name,expr]=init_calculate_monitors(dsGenerateModel(eqns),[],1);
+
+  if isempty(model.monitors)
+    fprintf('this model does not have any monitors to initialize.\n');
+    monitor_ic=[]; monitor_names=[]; monitor_expressions=[];
+    return;
+  end
+
+  if nargin<3
+    propagate_flag=0;
+  end
+  if propagate_flag
+    model = dsCheckModel(model);
+    model = dsPropagateFunctions(model);
+    model = dsPropagateParameters(model,'action','prepend', 'prop_prefix','p.');
+  end
+
+  if nargin<2 || isempty(p)
+    p=model.parameters; 
+  end
+  if isfield(p,'downsample_factor')
+    downsample_factor=p.downsample_factor;
+  else
+    downsample_factor=1;
+  end
+  if isfield(p,'dt')
+    dt=p.dt;
+  else
+    dt=.01;
+  end
+  if ~isfield(p,'tspan')
+    p.tspan=[0 100];
+  end
+
+  T=(p.tspan(1):dt:p.tspan(2))';
+  ntime=length(T);
+  nsamp=length(1:downsample_factor:ntime);
+  t=0; k=1;
+
+  % Evaluate fixed variables:
+  types={'fixed_variables'};%{'parameters','fixed_variables'};%,'functions'};
+  for j=1:length(types)
+    type=types{j};
+    if ~isempty(model.(type))
+      flds=fieldnames(model.(type));
+      for i=1:length(flds)
+        val=model.(type).(flds{i});
+        if ~ischar(val)
+          val=toString(val,'compact');
+        end
+        % evaluate
+        eval(sprintf('%s = %s;',flds{i},val));
+      end
+    end
+  end
+
+  % Initialize state variables:
+  IC_expressions=struct2cell(model.ICs);
+  for i=1:length(model.state_variables)
+    eval(sprintf('%s = %s;',model.state_variables{i},IC_expressions{i}));
+  end
+
+  % Initialize monitors:
+  monitor_names=fieldnames(model.monitors);
+  monitor_expressions=struct2cell(model.monitors);
+  monitor_ic=cell(size(monitor_names));
+  for i=1:length(monitor_names)
+    if isempty(monitor_expressions{i}) && isfield(model.functions,monitor_names{i})
+      tmp=regexp(model.functions.(monitor_names{i}),'@\([a-zA-Z][\w,]*\)\s*(.*)','tokens','once');
+      monitor_expressions{i}=tmp{1};
+    end
+    if ~isempty(monitor_expressions{i})
+      monitor_ic{i}=eval(monitor_expressions{i});
+    end
+  end
+
 end
 
 %{
@@ -1222,25 +1609,3 @@ end
 % end
 % --------------------------------------------------------------------------------
 %}
-function setup_randomseed(options,fid,rng_function,parameter_prefix)
-  %if ~strcmp(options.random_seed,'shuffle')
-  if 1
-    % If not doing shuffle, proceed as normal to set random seed
-    fprintf(fid,'%% seed the random number generator\n');
-    if options.save_parameters_flag
-      fprintf(fid,'%s(%srandom_seed);\n',rng_function,parameter_prefix);
-    else
-      if ischar(options.random_seed)
-        fprintf(fid,'%s(''%s'');\n',rng_function,options.random_seed);
-      elseif isnumeric(options.random_seed)
-        fprintf(fid,'%s(%g);\n',rng_function,options.random_seed);
-      end
-    end
-  else
-    % If random_seed is shuffle, we'll skip setting it within the solve
-    % file, and instead set it inside the dsSimulate parfor loop (see iss
-    % #311 and here:
-    % https://www.mathworks.com/matlabcentral/answers/180290-problem-with-rng-shuffle)
-    fprintf(fid,'%% random_seed was set to shuffle earlier. \n');
-  end
-end
