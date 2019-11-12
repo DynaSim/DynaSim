@@ -34,6 +34,10 @@ if options.auto_gen_test_data_flag
 end
 labels=data(1).labels;
 
+% Temporary hack by JSS (20-Nov-2018)
+% remove VAR_spikes so dsCalcFR selects VAR instead of VAR_spikes
+labels = labels(cellfun(@isempty,regexp(labels,'_spikes$')));
+
 if nargin<2
   var_strings=[];
 end
