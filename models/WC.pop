@@ -2,8 +2,8 @@
 % usage: dsPlot(dsSimulate('WC'),'variable',{'E','I'});
 
 WC: 
-dE/dt = -E+f(px+a.*E-b.*I+@current); E(0)=.1
-dI/dt = -I+f(py+c.*E-d.*I); I(0)=.05
+dE/dt = -E+f(px+a.*E-b.*I+@current); E(0)=.1*ones(1,N_pop)
+dI/dt = -I+f(py+c.*E-d.*I); I(0)=.05*ones(1,N_pop)
 
 f(x)=1./(1+exp(-x))
 

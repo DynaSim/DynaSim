@@ -3,7 +3,7 @@
 % Usage: dsPlot(dsSimulate('FHN','vary',{'FHN','Iapp',.5}))
 
 FHN:
-dV/dt = f(V)-w+Iapp+@current; V(0)=0
+dV/dt = f(V)-w+Iapp+@current; V(0)=0*ones(1,N_pop)
 dw/dt = a.*(b.*V-c.*w+o); w(0)=0
 
 f(V)=V-V.^3/3

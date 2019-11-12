@@ -3,8 +3,8 @@
 % usage: dsPlot(dsSimulate('Izh','vary',{'Izh','Iapp',200}))
 
 Izh:
-dV/dt=(k.*(V-vr).*(V-vt)-u+I(t)+@current)./C; V(0)=vr
-du/dt=a.*(b.*(V-vr)-u); u(0)=0
+dV/dt=(k.*(V-vr).*(V-vt)-u+I(t)+@current)./C; V(0)=vr*ones(1,N_pop)
+du/dt=a.*(b.*(V-vr)-u); u(0)=0*ones(1,N_pop)
 
 if(V>vpeak)(V=c; u=u+d)
 monitor V.spikes(vpeak)
