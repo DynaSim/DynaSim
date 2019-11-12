@@ -84,9 +84,9 @@ ntime=t2-t1+1;
 % set defaults
 % default variable to process
 if isempty(options.variable)
-  if any(~cellfun(@isempty,regexp(data.labels,'_spikes$')))
+  if any(~cellfun(@isempty,regexp(data.labels,'_spike_times$')))
     % use results from DynaSim spike monitor
-    options.variable=data.labels(~cellfun(@isempty,regexp(data.labels,'_spikes$')));
+    options.variable=data.labels(~cellfun(@isempty,regexp(data.labels,'_spike_times$')));
     if length(options.variable)==1 % store in string
       options.variable=options.variable{1};
     end
