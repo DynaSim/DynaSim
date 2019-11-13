@@ -282,21 +282,9 @@ if (ischar(specification) && ~isempty(find(regexp(specification,group_id_pattern
         % Auto-create name for connection mechanism
         name=[source target id];
         
-        % Create new mechanism with extracted equations and auto-created name
-        if ~isfield(spec,'mechanisms')
-          spec.mechanisms(1).name=name;
-        else
-          spec.mechanisms(end+1).name=name;
-        end
+        % Create new mechanism and add to .connections
+        spec = add_con_mech(spec, name, eq);
         
-        spec.mechanisms(end).equations=eq;
-        
-        % Add connection mechanism to this connection element
-        if ~isfield(spec.connections,'mechanism_list') || isempty(spec.connections(end).mechanism_list)
-          spec.connections(end).mechanism_list={name};
-        else
-          spec.connections(end).mechanism_list{end+1}=name;                
-        end
       end
     elseif ~isempty(regexp(this,'^\w+((\[[\d,]+\])|(\(size=[\[\d,\]]+\)))?:','once'))
       % If Population:
@@ -355,6 +343,23 @@ if (ischar(specification) && ~isempty(find(regexp(specification,group_id_pattern
     end
   end
   specification=spec;
+end
+
+% check if structure with .connections.equations
+% if so: create connection mechanism and .connections.mechanism_list
+if isstruct(specification) && isfield(specification,'connections') && isfield(specification.connections,'equations')
+  for i = 1:length(specification.connections)
+    if ~isempty(specification.connections(i).equations)
+      % Auto-generate connection mechanism name
+      name = sprintf('ConMech%g',i);
+      % Equations for connection mechanism
+      eq = specification.connections(i).equations;
+      % Create new mechanism and add to .connections
+      specification = add_con_mech(specification, name, eq, i);
+    end
+  end
+  % remove .equations
+  specification.connections = rmfield(specification.connections,'equations');
 end
 
 % check if input is a string or cell with equations and package in spec structure
@@ -973,6 +978,26 @@ end % main fn
 
 
 %% local fns
+function spec = add_con_mech(spec, name, eq, index)
+% Create new mechanism and add to .connections
+if nargin<4, index = length(spec.connections); end
+  % Create new mechanism with extracted equations and auto-created name
+  if ~isfield(spec,'mechanisms')
+    spec.mechanisms(1).name=name;
+  else
+    spec.mechanisms(end+1).name=name;
+  end
+
+  spec.mechanisms(end).equations=eq;
+
+  % Add connection mechanism to this connection element
+  if ~isfield(spec.connections,'mechanism_list') || isempty(spec.connections(index).mechanism_list)
+    spec.connections(index).mechanism_list={name};
+  else
+    spec.connections(index).mechanism_list{end+1}=name;                
+  end
+end
+
 function txt=read_mechanism_file(file)
   fid=fopen(file,'rt');
   % read all text
