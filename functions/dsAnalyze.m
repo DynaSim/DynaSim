@@ -32,12 +32,12 @@ function result = dsAnalyze(src,varargin)
 %    'check_file_index_flag': look for existing files to set function index
 %     'format'              : format for saved plots if figures are generated
 %                             {'svg','jpg','eps','png'} (default: 'svg')
+%     'resolution'          : image resolution for 'print' function (default:'-r0')
 %     'varied_filename_flag': whether to make filename based on the varied
 %                             parameters and type of plot {0 or 1}. will overwrite
-%                             if multiple plots of same type (use 'save_prefix' to
+%                             if multiple plots of same type (use custom 'prefix' to
 %                             avoid overwrite in that case) (default: 0)
-%     'save_prefix'         : if 'varied_filename_flag'==1, add a string prefix 
-%                             to the name (default: '')
+%     'prefix'              : add a string prefix to the name (default: 'study')
 %     'close_fig_flag'      : Close/hide figures as they are created. Can be specified
 %                             for all figs or for individual fig using plot_options.
 %                             Default value is same as 'save_results_flag'.
@@ -55,7 +55,8 @@ function result = dsAnalyze(src,varargin)
 %                             in which each cell corresponds to the options for
 %                             the corresponding function cell. if only passing a
 %                             single func, can specificy function options as
-%                             key,val list as varargin for dsAnalyze
+%                             key,val list as varargin for dsAnalyze. Can pass a
+%                             custom 'prefix' here.
 %     2.1)
 %     'analysis_functions'  : cell array of analysis function handles
 %     'analysis_options'    : cell array of option cell arrays {'option1',value1,...}
@@ -76,7 +77,14 @@ function result = dsAnalyze(src,varargin)
 %       'email_notify'  : whether to receive email notification about jobs.
 %                         options specified by 1-3 characters as string. 'b' for job
 %                         begins, 'a' for job aborts, 'e' for job ends.
-%
+%       'cluster_matlab_version': what version of Matlab to use in cluster batch
+%                                 submission. Check
+%                                 http://sccsvc.bu.edu/software/#/package/matlab/
+%                                 for information on current available versions.
+%                                 {'2009b', '2013a', '2014a', '2015a', '2016a',
+%                                 '2016b', '2017a', '2017b', '2018a'} (default:
+%                                 '2014a')
+
 % Note: if function_options/plot_options cells exceed num functions, they will
 %       be copied to each fn.
 %
@@ -98,7 +106,7 @@ function result = dsAnalyze(src,varargin)
 
 
 %% General cases:
-%   - data struct (likely from SimualteModel call)
+%   - data struct (likely from SimulateModel call)
 %   - data struct array
 %   - studyinfo with load_all_data_flag==0
 %   - studyinfo with load_all_data_flag==1
@@ -126,10 +134,10 @@ options=dsCheckOptions(varargin,{...
   'matCompatibility_flag',1,{0,1},...  % whether to save mat files in compatible mode, vs to prioritize > 2GB VARs
   'overwrite_flag',0,{0,1},... % whether to overwrite existing data
   'check_file_index_flag',0,{0,1},...
-  'format','svg',{'svg','jpg','eps','png','fig'},...
+  'format','png',{'svg','jpg','eps','png','fig'},...
+  'resolution','-r0',[],... % print resolution
   'varied_filename_flag',0,{0,1},...
-  'plot_type','waveform',{'waveform','rastergram','raster','power','rates','imagesc','heatmapFR','heatmap_sortedFR','meanFR','meanFRdens','FRpanel'},...
-  'save_prefix',[],[],...
+  'plot_type','waveform',{'waveform','rastergram','raster','power','rates','imagesc','heatmapFR','heatmap_sortedFR','meanFR','meanFRdens','FRpanel','density'},...
   'result_functions',[],[],...
   'function_options',{},[],...
   'simIDs',[],[],...
@@ -152,6 +160,9 @@ options=dsCheckOptions(varargin,{...
   'sims_per_job',1,[],... % how many sims to run per cluster job
   'memory_limit','8G',[],... % how much memory to allocate per batch job
   'email_notify',[],[],...
+  'cluster_matlab_version','2014a',{'2009b', '2013a', '2014a', '2015a',...
+                                    '2016a', '2016b', '2017a', '2017b',...
+                                    '2018a'},...
   'SGE_TASK_ID',[],[],...
   'SGE_TASK_STEPSIZE',[],[],...
   'SGE_TASK_LAST',[],[],...
@@ -216,6 +227,13 @@ if options.cluster_flag
   if options.check_file_index_flag
     options.check_file_index_flag = 0;
     fprintf('Setting "options.check_file_index_flag=0" since "cluster_flag=1" \n');
+  end
+  
+  % handle fn
+  if ~isempty(funcIn)
+    options.result_functions = funcIn;
+    
+    varargin(end+1:end+2) = {'result_functions', options.result_functions}; % pass result_functions to clus node
   end
 end
 
@@ -431,6 +449,16 @@ if options.cluster_flag
   return
 end
 
+%% postHocBool add functions to path if in clus
+if postHocBool && options.in_clus_flag
+  % locate DynaSim toolbox
+  dynasim_path = dsGetRootPath(); % root is one level up from directory containing this function
+  dynasim_functions=fullfile(dynasim_path,'functions');
+  
+  % add functions to path in case of personal analysis functions and dependencies
+  addpath(genpath(dynasim_functions));
+end
+
 %% Calc results
 plotFnInd = lastPlotIndex;
 analysisFnInd = lastAnalysisIndex;
@@ -439,7 +467,7 @@ for fInd = 1:nFunc % loop over function inputs
   func = funcIn{fInd};
   
   if ~options.in_sim_flag
-    dsVprintf(options, 'Function (%i/%i): %s \n', fInd,nFunc,func2str(func));
+    dsVprintf(options, '\nFunction (%i/%i): %s \n', fInd,nFunc,func2str(func));
   end
   % confirm func is function handle or convert to one if possible
   func = parseFunc(func);
@@ -485,7 +513,14 @@ for fInd = 1:nFunc % loop over function inputs
     error('Cannot determine number of results');
   end
 
-  dsVprintf(options, '    Elapsed time: %g sec\n',toc(tstart));
+  if ~isempty(result)
+    duration = toc(tstart);
+    if duration < 60
+      dsVprintf(options, '    Elapsed time: %.1f seconds.\n', duration);
+    else
+      dsVprintf(options, '    Elapsed time: %.1f minutes.\n', duration/60);
+    end
+  end
 
   % Dave: Not all plotting functions will return a plot handle. For
   % example, dsPlot2 returns a nested structure of figure, axis, and plot
@@ -507,7 +542,7 @@ for fInd = 1:nFunc % loop over function inputs
     % loop through results. all results may exist or need to be made during loop
     for iResult = 1:nResults
       if ~options.in_sim_flag
-        dsVprintf(options, '  Result (%i/%i): ', iResult,nResults);
+        dsVprintf(options, '    Result (%i/%i): ', iResult,nResults);
       end
       
       extension = ['.' plotFormat]; % '.svg'; % {.jpg,.svg}
@@ -518,9 +553,12 @@ for fInd = 1:nFunc % loop over function inputs
         if ~isempty(options.result_file)
           % ensure extension is extension
           fPath = options.result_file;
+          
           [parentPath, filename, orig_ext] = fileparts(fPath);
+          
           if length(orig_ext) > 4 % extra periods in name
             orig_ext = fPath(end-3:end);
+            
             if ~strcmp(orig_ext, extension)
               fPath = [fPath(1:end-4) extension];
             end
@@ -532,7 +570,7 @@ for fInd = 1:nFunc % loop over function inputs
           
           % change result_file if varied_filename_flag
           if options.varied_filename_flag && isfield(data, 'varied')
-            fPath = filenameFromVaried(fInd, fPath, func, data, plotFnBool, options, varargin{:});
+            fPath = dsNameFromVaried(data, fPath, options.prefix, func2str(func));
           end % varied_filename_flag
         end
         
@@ -548,13 +586,17 @@ for fInd = 1:nFunc % loop over function inputs
           if options.load_all_data_flag
             thisData = data(iResult);
             
-            thisResult = result(iResult);
+            if ~isempty(result) && (length(result) >= iResult)
+              thisResult = result(iResult);
+            else
+              thisResult = [];
+            end
           else % load data
             thisData = loadDataFromSingleSim(studyinfo, simID, options, varargin{:});
             
             %skip if no data
             if isempty(thisData)
-              dsVprintf(options, '  Skipping simID=%i since no data.\n', simID);
+              dsVprintf(options, '      Skipping simID=%i since no data.\n', simID);
               continue
             end
             
@@ -566,19 +608,19 @@ for fInd = 1:nFunc % loop over function inputs
             thisResult = evalFnWithArgs(fInd, thisData, func, options, varargin{:});
           end % if ~options.load_all_data_flag
           
+          % get fn options
+          this_fn_options = dsCheckOptions(options.function_options{fInd}, {...
+            'prefix',options.prefix,[],...
+            'varied_filename_flag',options.varied_filename_flag,{0,1}...
+            }, false);
+          prefix = this_fn_options.prefix;
+          
           % make fPath
-          fName = [options.prefix '_sim' num2str(simID) '_plot' num2str(plotFnInd) '_' func2str(func)];
+          fName = [prefix '_sim' num2str(simID) '_plot' num2str(plotFnInd) '_' func2str(func)];
           
           % change result_file if varied_filename_flag
-          fopts = dsCheckOptions(options.function_options{fInd}, {'varied_filename_flag',0,{0,1}}, 0);
-          if isempty(fopts.varied_filename_flag)
-            varied_filename_flag = options.varied_filename_flag;
-          else
-            varied_filename_flag = fopts.varied_filename_flag;
-          end
-          
-          if varied_filename_flag && isfield(thisData, 'varied')
-            fName = filenameFromVaried(fInd, fName, func, thisData, plotFnBool, options, varargin{:});
+          if this_fn_options.varied_filename_flag && isfield(thisData, 'varied')
+            fName = dsNameFromVaried(data, fName, prefix, func2str(func));
           end % varied_filename_flag
           
           % make fPath
@@ -592,7 +634,11 @@ for fInd = 1:nFunc % loop over function inputs
       else  % posthoc without studyinfo
         dsVprintf(options, '\n');
         
-        thisResult = result(iResult);
+        if ~isempty(result) && (length(result) >= iResult)
+          thisResult = result(iResult);
+        else
+          thisResult = [];
+        end
         simID = iResult; % for skipping warning
         
         % make fDir
@@ -605,7 +651,14 @@ for fInd = 1:nFunc % loop over function inputs
         if isfield(options, 'result_file') && ~isempty(options.result_file)
           fPath = options.result_file;
         else
-          fName = [options.prefix '_data' num2str(iResult) '_plot' num2str(plotFnInd) '_' func2str(func)];
+          % get fn options
+          this_fn_options = dsCheckOptions(options.function_options{fInd}, {...
+            'prefix',options.prefix,[],...
+            'varied_filename_flag',options.varied_filename_flag,{0,1}...
+            }, false);
+          prefix = this_fn_options.prefix;
+          
+          fName = [prefix '_data' num2str(iResult) '_plot' num2str(plotFnInd) '_' func2str(func)];
           fPath = fullfile(fDir,[fName extension]);
         end
       end % if ~postHocBool
@@ -617,9 +670,9 @@ for fInd = 1:nFunc % loop over function inputs
       %skip if no result
       if isempty(thisResult)
         if ~postHocBool
-          dsVprintf(options, '  Skipping since no result.\n');
+          dsVprintf(options, '      Skipping since no result.\n');
         else
-          dsVprintf(options, '  Skipping id=%i since no result.\n', simID);
+          dsVprintf(options, '      Skipping id=%i since no result.\n', simID);
         end
 
         continue
@@ -633,18 +686,18 @@ for fInd = 1:nFunc % loop over function inputs
           case '.svg'
             plot2svg(fPath, thisResult, [], [], [], [], [], false);
           case '.jpg'
-            print(thisResult,fPath,'-djpeg');
+            print(thisResult,fPath,'-djpeg', options.resolution);
           case '.eps'
-            print(thisResult,fPath,'-depsc');
+            print(thisResult,fPath,'-depsc', options.resolution);
           case '.png'
-            print(thisResult,fPath,'-dpng');
+            print(thisResult,fPath,'-dpng', options.resolution);
           case '.fig'
             savefig(thisResult,fPath);
           otherwise
             error('Unknown plot extension. Try again with known extension. See help(dsAnalyze)')
         end
       elseif exist('fPath', 'var') && exist(fPath, 'file') && ~options.overwrite_flag
-        dsVprintf(options, '  Skipping since file already exists: %s \n', fPath);
+        dsVprintf(options, '      Skipping since file already exists: %s \n', fPath);
       end %save_results_flag
         
       if (options.save_results_flag && (options.close_fig_flag ~= 0)) || options.close_fig_flag==1
@@ -701,7 +754,7 @@ for fInd = 1:nFunc % loop over function inputs
 
     for iResult = 1:nResults
       if ~options.in_sim_flag
-        dsVprintf(options, '  Result (%i/%i): ', iResult,nResults);
+        dsVprintf(options, '    Result (%i/%i): ', iResult,nResults);
       end
       
       if ~postHocBool % in sim
@@ -718,7 +771,7 @@ for fInd = 1:nFunc % loop over function inputs
         
         % change result_file if varied_filename_flag
         if options.varied_filename_flag && isfield(data, 'varied')
-          fPath = filenameFromVaried(fInd, fPath, func, data, plotFnBool, options, varargin{:});
+          fPath = dsNameFromVaried(data, fPath, prefix, func2str(func));
         end % varied_filename_flag
       elseif studyinfoBool % posthoc with studyinfo
         simID = studyinfo.simulations(iResult).sim_id;
@@ -728,13 +781,17 @@ for fInd = 1:nFunc % loop over function inputs
         if options.load_all_data_flag
           thisData = data(iResult);
           
-          result = allResults(iResult);
+          if ~isempty(allResults) && (length(allResults) >= iResult)
+            result = allResults(iResult);
+          else
+            result = [];
+          end
         else % load data
           thisData = loadDataFromSingleSim(studyinfo, simID, options, varargin{:});
 
           %skip if no data
           if isempty(thisData)
-            dsVprintf(options, '  Skipping simID=%i since no data.\n', simID);
+            dsVprintf(options, '      Skipping simID=%i since no data.\n', simID);
             continue
           end
 
@@ -750,18 +807,17 @@ for fInd = 1:nFunc % loop over function inputs
         if isfield(options, 'result_file') && ~isempty(options.result_file)
           fPath = options.result_file;
         else
-          fName = [options.prefix '_sim' num2str(simID) '_analysis' num2str(analysisFnInd) '_' func2str(func) '.mat'];
+          % get fn options
+          this_fn_options = dsCheckOptions(options.function_options{fInd}, {...
+            'prefix',options.prefix,[],...
+            'varied_filename_flag',options.varied_filename_flag,{0,1}...
+            }, false);
+          prefix = this_fn_options.prefix;
           
-          % change result_file if varied_filename_flag
-          fopts = dsCheckOptions(options.function_options{fInd}, {'varied_filename_flag',0,{0,1}}, 0);
-          if isempty(fopts.varied_filename_flag)
-            varied_filename_flag = options.varied_filename_flag;
-          else
-            varied_filename_flag = fopts.varied_filename_flag;
-          end
-          
-          if varied_filename_flag && isfield(thisData, 'varied')
-            fName = filenameFromVaried(fInd, fName, func, thisData, plotFnBool, options, varargin{:});
+          fName = [prefix '_sim' num2str(simID) '_analysis' num2str(analysisFnInd) '_' func2str(func) '.mat'];
+
+          if this_fn_options.varied_filename_flag && isfield(thisData, 'varied')
+            fName = dsNameFromVaried(data, fName, prefix, func2str(func));
           end % varied_filename_flag
           
           % make fDir
@@ -775,14 +831,25 @@ for fInd = 1:nFunc % loop over function inputs
       else  % posthoc without studyinfo
         dsVprintf(options, '\n');
         
-        result = allResults(iResult);
+        if ~isempty(allResults) && (length(allResults) >= iResult)
+          result = allResults(iResult);
+        else
+          result = [];
+        end
         simID = iResult; % for skipping warning
 
         % make fName
         if isfield(options, 'result_file') && ~isempty(options.result_file)
           fPath = options.result_file;
         else
-          fName = [options.prefix '_data' num2str(iResult) '_analysis' num2str(analysisFnInd) '_' func2str(func) '.mat'];
+          % get fn options
+          this_fn_options = dsCheckOptions(options.function_options{fInd}, {...
+            'prefix',options.prefix,[],...
+            'varied_filename_flag',options.varied_filename_flag,{0,1}...
+            }, false);
+          prefix = this_fn_options.prefix;
+          
+          fName = [prefix '_data' num2str(iResult) '_analysis' num2str(analysisFnInd) '_' func2str(func) '.mat'];
           
           % make fDir
           fDir = fullfile(studyinfo.study_dir, 'postHocResults');
@@ -797,18 +864,24 @@ for fInd = 1:nFunc % loop over function inputs
       %skip if no result
       if isempty(result)
         if ~postHocBool
-          dsVprintf(options, '  Skipping since no result.\n');
+          dsVprintf(options, '      Skipping since no result.\n');
         else
-          dsVprintf(options, '  Skipping id=%i since no result.\n', simID);
+          dsVprintf(options, '      Skipping id=%i since no result.\n', simID);
         end
 
         continue
       end % if isempty(result)
       
       if options.save_results_flag && ~(exist(fPath, 'file') && ~options.overwrite_flag)
-        dsExportData(result, 'filename',fPath, 'result_flag',1, varargin{:});
+        if ~isempty(varargin) && isstruct(varargin{1})
+          tempOpts = [struct2KeyValueCell(varargin{1}) {'filename',fPath, 'result_flag',1}];
+          dsExportData(result, tempOpts{:});
+          clear tempOpts
+        else
+          dsExportData(result, 'filename',fPath, 'result_flag',1, varargin{:});
+        end
       elseif exist('fPath', 'var') && exist(fPath, 'file') && ~options.overwrite_flag
-        dsVprintf(options, '  Skipping since file already exists: %s \n', fPath);
+        dsVprintf(options, '      Skipping since file already exists: %s \n', fPath);
       end % save_results_flag
         
       if ~options.load_all_data_flag
@@ -817,7 +890,7 @@ for fInd = 1:nFunc % loop over function inputs
 
       % store result
       if nargout
-        if ~options.argout_as_cell && isstruct(result) && isfield(result,'time')
+        if ~options.argout_as_cell && isstruct(result) % && isfield(result,'time')
           % dynasim type structure to store as struct array
           allFnResults{fInd}(iResult) = result;
         else
@@ -1017,7 +1090,8 @@ end
     % $1 is abs path to working dir in batchdir
     % $2 is ui_command
     % $3 is src, which should be a study_dir path
-    % $4 = varargin, the string list of arguments for dsAnalyze
+    % $4 is cluster_matlab_version
+    % $5 = varargin, the string list of arguments for dsAnalyze
     
     % locate DynaSim toolbox
     dynasim_path = dsGetRootPath(); % root is one level up from directory containing this function
@@ -1070,6 +1144,12 @@ end
 %     arg2 = ui_command;
     arg3 = getAbsolutePath(studyinfo.study_dir); % src
     arg4 = aschar(varargin);
+    
+    % handle struct options
+    if length(varargin) == 1 && isstruct(varargin{1})
+      arg4 = ['{' arg4(9:end-2) '}'];
+    end
+    
     arg4(1) = []; % remove leading '{'
     arg4(end) = []; % remove trailing '}'
     arg4 = [arg4 ', ''in_clus_flag'',1'];
@@ -1081,15 +1161,13 @@ end
     arg4 = strrep(arg4, ';', ''';'''); % quote semicolon for double quotes in qsub_jobs_analyze
     arg4 = strrep(arg4, '{', '''{'''); % quote curly bracket for double quotes in qsub_jobs_analyze
     arg4 = strrep(arg4, '}', '''}'''); % quote curly bracket for double quotes in qsub_jobs_analyze
-    arg4 = strrep(arg4, '[', '\['); % escape bracket
-    arg4 = strrep(arg4, ']', '\]'); % escape bracket
     
     % qsub args
     num_simIDs = studyinfo.simulations(end).sim_id;
     jobPrefix = study_dir_name;
     
-    cmd = sprintf('echo "%s/qsub_jobs_analyze ''%s'' ''%s'' ''%s'' %s" | qsub -V -hard %s -wd ''%s'' -N %s_analysis_job -t 1-%i:%i %s',...
-      dsFnDirPath, specific_batch_dir, ui_command, arg3, arg4,... % echo vars
+    cmd = sprintf('echo "%s/qsub_jobs_analyze ''%s'' ''%s'' ''%s'' ''%s'' %s" | qsub -V -hard %s -wd ''%s'' -N %s_analysis_job -t 1-%i:%i %s',...
+      dsFnDirPath, specific_batch_dir, ui_command, options.cluster_matlab_version, arg3, arg4,... % echo vars
       l_directives, specific_batch_dir, jobPrefix, num_simIDs, options.sims_per_job, qsubStr); % qsub vars
     
     % add shell script to linux path if not already there
@@ -1232,66 +1310,6 @@ end
 end % parseFunc
 
 
-function filename = filenameFromVaried(fInd, filename, func, data, plotFnBool, options, varargin)
-% NOTE: inputs are odd since called from different sources with different
-%       states.
-
-%% auto_gen_test_data_flag argin
-warning('off','catstruct:DuplicatesFound');
-options = catstruct(options, dsCheckOptions(varargin,{'auto_gen_test_data_flag',0,{0,1}},false));
-warning('on','catstruct:DuplicatesFound');
-if options.auto_gen_test_data_flag
-  varargs = varargin;
-  varargs{find(strcmp(varargs, 'auto_gen_test_data_flag'))+1} = 0;
-  varargs(end+1:end+2) = {'unit_test_flag',1};
-  argin = [{filename}, {func}, {data}, {plotFnBool}, {options}, varargs]; % specific to this function
-end
-
-fopts = dsCheckOptions(options.function_options{fInd}, {'save_prefix',[],[]}, 0);
-if isempty(fopts.save_prefix)
-  save_prefix = options.save_prefix;
-else
-  save_prefix = fopts.save_prefix;
-end
-
-if ~isempty(save_prefix)
-  prefix = save_prefix;
-else % no prefix given
-  if plotFnBool
-    % try to use use plot_type as prefix
-    
-    plot_options = options.function_options{fInd};
-    
-    if isempty(plot_options)
-      plot_options = options;
-    end
-
-    % check if 'plot_type' given as part of plot_options
-    plot_options = dsCheckOptions(plot_options,{'plot_type',[options.prefix '_' func2str(func)],[]},false);
-    
-    if ~isempty(plot_options.plot_type)
-      prefix = plot_options.plot_type; % use plot_type prefix
-    else
-      prefix = options.prefix; % use default prefix
-    end
-  else % ~plotFnBool
-    prefix = options.prefix; % use default prefix
-  end
-end
-
-filename = dsNameFromVaried(data, filename, prefix, func2str(func));
-
-%% auto_gen_test_data_flag argout
-if options.auto_gen_test_data_flag
-  argout = {filename}; % specific to this function
-
-  %dsUnitSaveAutoGenTestDataLocalFn(argin, argout); % localfn
-end
-
-end % filenameFromVaried
-
-
-
 function result = evalFnWithArgs(fInd, data, func, options, varargin)
 % if not load_all_data_flag, will be only 1 dataset
 
@@ -1314,25 +1332,46 @@ try
     % Only do parfor mode if parfor_flag is set and parpool is already running. Otherwise, this will add unnecessary overhead.
     if options.parfor_flag % && ~isempty(p)
       parfor iData = 1:length(data)
-        result(iData) = feval(func,data(iData),varargin{:});
+        tempResult = feval(func,data(iData),varargin{:});
+        
+        % only take first handle if multiple figures
+        result(iData) = tempResult(1);
         
         if ishandle(result(iData)) && make_invis_bool
           set(result(iData), 'Visible', 'off'); % cannot close yet until save, but can make invisible
+          
+          % close additional figures now
+          if length(tempResult) > 1
+            close(tempResult(2:end))
+          end
         end
       end
     else
       for iData = 1:length(data)
-        result(iData) = feval(func,data(iData),varargin{:});
+        tempResult = feval(func,data(iData),varargin{:});
+        
+        % only take first handle if multiple figures
+        result(iData) = tempResult(1);
         
         try
             % For dsPlot2
             if ishandle(result(iData).hcurr) && make_invis_bool
               set(result(iData).hcurr, 'Visible', 'off'); % cannot close yet until save, but can make invisible
+              
+              % close additional figures now
+              if length(tempResult) > 1
+                close(tempResult(2:end))
+              end
             end
         catch
             % For dsPlot
             if ishandle(result(iData)) && make_invis_bool
               set(result(iData), 'Visible', 'off'); % cannot close yet until save, but can make invisible
+              
+              % close additional figures now
+              if length(tempResult) > 1
+                close(tempResult(2:end))
+              end
             end
         end
       end
@@ -1353,25 +1392,41 @@ try
     if options.parfor_flag % && ~isempty(p)
       parfor iData = 1:length(data)
         if ~addSimIdBool
-          result(iData) = feval(func, data(iData), function_options{:}); %#ok<PFBNS>
+          tempResult = feval(func, data(iData), function_options{:}); %#ok<PFBNS>
         else
-          result(iData) = feval(func, data(iData), function_options{:}, simIdVec(iData));
+          tempResult = feval(func, data(iData), function_options{:}, simIdVec(iData));
         end
+        
+        % only take first handle if multiple figures
+        result(iData) = tempResult(1);
         
         if ishandle(result(iData)) && make_invis_bool
           set(result(iData), 'Visible', 'off'); % cannot close yet until save, but can make invisible
+          
+          % close additional figures now
+          if length(tempResult) > 1
+            close(tempResult(2:end))
+          end
         end
       end
     else
       for iData = 1:length(data)
         if ~addSimIdBool
-          result(iData) = feval(func, data(iData), function_options{:});
+          tempResult = feval(func, data(iData), function_options{:});
         else
-          result(iData) = feval(func, data(iData), function_options{:}, simIdVec(iData));
+          tempResult = feval(func, data(iData), function_options{:}, simIdVec(iData));
         end
+        
+        % only take first handle if multiple figures
+        result(iData) = tempResult(1);
         
         if ishandle(result(iData)) && make_invis_bool
           set(result(iData), 'Visible', 'off'); % cannot close yet until save, but can make invisible
+          
+          % close additional figures now
+          if length(tempResult) > 1
+            close(tempResult(2:end))
+          end
         end
       end
     end % options.parfor_flag && ~isempty(p)
@@ -1404,7 +1459,11 @@ if isstruct(src) && isfield('time','src')
   data = data(simID); % this may not work if a subset of data is given
 else
   % overwrite simIDs in varargin
-  varargin(end+1:end+2) = {'simIDs', simIDs};
+  if ~isempty(varargin) && isstruct(varargin{1})
+    varargin{1}.simIDs = simIDs;
+  else
+    varargin(end+1:end+2) = {'simIDs', simIDs};
+  end
 
   data = dsImport(src, varargin{:}); % load data
 end

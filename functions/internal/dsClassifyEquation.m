@@ -138,9 +138,8 @@ if isempty(class) && ~isempty(regexp(string,pattern,'once'))
 end
 
 % parameter check: var=expression (string or numeric)
-%pattern='^(([\w\.]+)|(\[\w+\]))\s*=\s*((''.*'')|(\[?[\d\.-(Inf)(inf)]+\]?))$';
-% TODO: support scientific notation
-pattern='^(([\w\.]+)|(\[\w+\]))\s*=\s*((''.*'')|(\[?[+\d\.\-(Inf)(inf)]+\]?)|(\d+e[\-\+]?\d+))$';
+% patterns: words = string? | inf | digits | scientific, eg e | math with single operator, eg '*','/','^','-','+'
+pattern='^(([\w\.]+)|(\[\w+\]))\s*=\s*((''.*'')|(\[?[+\d\.\-(Inf)(inf)]+\]?)|([\-\+]?\d*\.?\d*e[\-\+]?\d+)|([\-\+]?\s*\(?\s*[\-\+]?\s*\d*\.?\d*\s*\)?\s*\.?[\^\/\*\+\-]\s*\(?\s*[\-\+]?\s*\d*\.?\d*\)?\s*)\s*)$';
 if isempty(class) && ~isempty(regexp(string,pattern,'once'))
   class='parameter';
 end
@@ -152,7 +151,7 @@ if isempty(class) && ~isempty(regexp(string,pattern,'once','ignorecase'))
 end
 
 % function check: f(vars)=exression
-pattern='^\w+\([@a-zA-Z][\w,@]*\)\s*=';
+pattern='^\w+\([@a-zA-Z][\w,\s*@]*\)\s*='; % allowing whitespace between variables
 if isempty(class) && ~isempty(regexp(string,pattern,'once'))
   class='function';
 end
@@ -174,9 +173,13 @@ pattern='^((\w+)|(\[\w+\]))\s*=';
 if isempty(class) && ~isempty(regexp(string,pattern,'once'))
   pattern1='(.*[a-z_A-Z,<>(<=)(>=)]+.*)$'; % rhs contains: []{}(),<>*/|   % '=\s*.*[a-z_A-Z,<>(<=)(>=)]+.*'
   pattern2='=\s*\d+e[\-\+]?\d+$'; % scientific notation (should be classified as parameter, not fixed_variable)
+  pattern3='(.*[\[\]]+.*)$'; % contains []
   if ~isempty(regexp(string,pattern1,'once')) && ...
-      isempty(regexp(string,pattern2,'once'))
+      isempty(regexp(string,pattern2,'once')) && ...
+      isempty(regexp(string,pattern3,'once'))
     class='fixed_variable';
+  else % classifying explicit parameter arrays (X = [];) as parameters
+    class='parameter';
   end
 end
 

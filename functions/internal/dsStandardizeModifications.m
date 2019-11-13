@@ -1,10 +1,16 @@
-function [modifications, identLinkedMods] = dsStandardizeModifications(modifications,specification, varargin)
+
+function [modifications, identicalMods, nonLatticeMods] = dsStandardizeModifications(modifications, model_or_spec, varargin)
 % dsStandardizeModifications - convert all modifications into 3-column cell
 %                              matrix format (namespace,variable,value) and expand
 %
 % dsStandardizeModifications expands multiple namespace in one cell to multiple
 % cells, ensures source->target direction, moves specific mech to variable name from
 % namespace, and converts mech dot notation to underscores
+%
+% Usage:
+%   modifications = dsStandardizeModifications(modifications, specification)
+%   modifications = dsStandardizeModifications(modifications, model)
+%  [modifications, identicalMods] = dsStandardizeModifications(modifications, model_or_spec)
 %
 % Inputs:
 %   modifications: modifications structure
@@ -14,15 +20,120 @@ function [modifications, identLinkedMods] = dsStandardizeModifications(modificat
 %                  just need "specification.populations(1).name)".
 %
 % Outputs:
-%   modifications: standardized, expanded modifcations
-%   identLinkedMods: cell array of indicies of which mods are identically
-%                    linked/covaried, where each cell is a diff linked set
+%   modifications: standardized, expanded modifications
+%   identicalMods: cell array of indicies of which mods are identically
+%                  linked/covaried, where each cell is a diff linked set.
+%   nonLatticeMods: cell array of indicies of which mods are not identically
+%                   linked/covaried, where each cell is a diff linked set.
+%                   i.e., for non-lattice/non-Cartesian product.
+%
+% Note: mods may still match multiple mechanisms causing additional
+%       identicalMods that this function doesn't check the namespace for
 
 % Dev Notes:
 %   E.R. Feb 2018: Moved to separate function
 
+%% Example:
+%{
+% p for pop, m for mech
+% mat in 3rd col cells: vars/mechs go down rows, namespaces/pops go along cols
+
+testmod = {
+   'p1',      '(m1,m2)',     1;
+   'p2',      '(m3,m4)',    [2;...
+                             3];
+   '(p3,p4)', 'm4',          4;
+   '(p5,p6)', 'm5',         [5,6];
+   '(p7,p8)', '(m6,m7)',     7;
+   '(p9,p10)','(m8,m9)',    [8,10;...
+                             9,11];
+   '(p11,p12)','(m10,m11)', [12,13];
+   '(p13,p14)','(m12,m13)', [14;...
+                             15];
+};
+    
+modOut = dsStandardizeModifications(testmod)
+
+
+modOut =
+    {'p1' }    {'m1'}    {[ 1]} % 1 - identicalMod
+    {'p1' }    {'m2'}    {[ 1]}
+
+    {'p2' }    {'m3'}    {[ 2]} % 3 - nonLatticeMod
+    {'p2' }    {'m4'}    {[ 3]}
+
+    {'p3' }    {'m4'}    {[ 4]} % 5 - identicalMod
+    {'p4' }    {'m4'}    {[ 4]}
+
+    {'p5' }    {'m5'}    {[ 5]} % 7 - nonLatticeMod
+    {'p6' }    {'m5'}    {[ 6]}
+
+    {'p7' }    {'m6'}    {[ 7]} % 9 - identicalMod
+    {'p7' }    {'m7'}    {[ 7]}
+    {'p8' }    {'m6'}    {[ 7]}
+    {'p8' }    {'m7'}    {[ 7]}
+
+    {'p9' }    {'m8'}    {[ 8]} % 13 - nonLatticeMod
+    {'p9' }    {'m9'}    {[ 9]}
+    {'p10'}    {'m8'}    {[10]}
+    {'p10'}    {'m9'}    {[11]}
+
+    {'p11'}    {'m10'}    {[12]} % 17 - nonLatticeMod
+    {'p11'}    {'m11'}    {[12]}
+    {'p12'}    {'m10'}    {[13]}
+    {'p12'}    {'m11'}    {[13]}
+
+    {'p13'}    {'m12'}    {[14]} % 21 - nonLatticeMod
+    {'p13'}    {'m13'}    {[15]}
+    {'p14'}    {'m12'}    {[14]}
+    {'p14'}    {'m13'}    {[15]}
+
+
+identModOut =
+
+  1×3 cell array
+
+    {1×2 double}    {1×2 double}    {1×4 double}
+
+identModOut = {
+     [1     2]
+     [5     6]
+     [9    10    11    12]
+}
+
+
+nonLatticeModOut =
+
+  1×5 cell array
+
+  Columns 1 through 4
+
+    {1×2 double}    {1×2 double}    {1×4 double}    {1×4 double}
+
+  Column 5
+
+    {1×4 double}
+
+nonLatticeModOut = {
+    [3     4]
+    [7     8]
+    [13    14    15    16]
+    [17    18    19    20]
+    [21    22    23    24]
+}
+
+%}
+
+%% Parse inputs
 if nargin < 2
-  specification = [];
+  model_or_spec = [];
+end
+
+% parse model_or_spec arg
+if isfield(model_or_spec, 'specification')
+  specification = model_or_spec.specification;
+else
+  specification = model_or_spec;
 end
 
 %% auto_gen_test_data_flag argin
@@ -31,7 +142,7 @@ if options.auto_gen_test_data_flag
   varargs = varargin;
   varargs{find(strcmp(varargs, 'auto_gen_test_data_flag'))+1} = 0;
   varargs(end+1:end+2) = {'unit_test_flag',1};
-  argin = [{modifications},{specification}, varargs]; % specific to this function
+  argin = [{modifications},{model_or_spec}, varargs]; % specific to this function
 end
 
 if isstruct(modifications)
@@ -56,7 +167,9 @@ if any(missing_objects)
   end
 end
 
-identLinkedMods = {};
+% instantiate
+identicalMods = {};
+nonLatticeMods = {};
 
 % support modifying multiple elements (of namespace or variable) simultaneously
 % approach -- add extra entry for each thing to modify
@@ -76,63 +189,92 @@ if any(~cellfun(@isempty,regexp(modifications(:,1),'^\(.*\)$'))) || ...
     
     thisModStartInd = size(modifications_expanded, 1) + 1;
     
-    if ischar(modifications{iMod,3})
+    thisModVal = modifications{iMod,3};
+    
+    if ischar(thisModVal)
       
       % expand list of modifications
       for iNamespace = 1:length(namespaces)
         for iVar = 1:length(variables)
-          modifications_expanded(end+1,1:3)={namespaces{iNamespace},variables{iVar},modifications{iMod,3}};
+          modifications_expanded(end+1,1:3)={namespaces{iNamespace},variables{iVar},thisModVal};
         end
       end
       
       % check for identical covary
      if length(variables)>1 || length(namespaces)>1
-       % determine identLinkedMods
-       identLinkedMods{end+1} = thisModStartInd : size(modifications_expanded, 1);
+       % determine identicalMods
+       identicalMods{end+1} = thisModStartInd : size(modifications_expanded, 1);
      end
       
-    elseif isnumeric(modifications{iMod,3})
+     
+    elseif isnumeric(thisModVal)
+      % Strategy: if multiple vars or pops for a row, 3rd column entry should be
+      % size [nMechs, nPops] for later expansion. If not that size, use repmat
+      % to fill it in. Filling it with repmat means there are some linked mods
+      % with identical values.
+      
+      % unique value given for each variables/mechs
+      uniqueValsForVarsBool = size(thisModVal, 1) == length(variables);
+      
+      % unique value given for each namespaces/pops
+      uniqueValsForNamespacesBool = size(thisModVal, 2) == length(namespaces);
       
       % check size of values matches number of namespaces, variables
-      if isscalar(modifications{iMod,3}) % in case number of values is one
-        modifications{iMod,3} = repmat(modifications{iMod,3},length(variables),length(namespaces));
+      if isscalar(thisModVal) % in case number of values is one
+        % repmat to size of pops and mechs to permit expansion below
+        modifications{iMod,3} = repmat(thisModVal,length(variables),length(namespaces));
         
         % check for identical covary
-        if length(variables)>1 || length(namespaces)>1
+        if (length(variables) > 1) || (length(namespaces) > 1)
           identCovaryBool = true;
         else
           identCovaryBool = false;
         end
+        
+        nonLatticeCovaryBool = false;
+
       else
-        if size(modifications{iMod,3},1) ~= length(variables) || size(modifications{iMod,3},2) ~= length(namespaces)
-          % in case values is number of variables x 1
-          if size(modifications{iMod,3},1) == length(variables) && size(modifications{iMod,3},2) == 1
-            modifications{iMod,3} = repmat(modifications{iMod,3},1,length(namespaces));
+        if ~uniqueValsForVarsBool || ~uniqueValsForNamespacesBool
+          
+          if uniqueValsForVarsBool && ~uniqueValsForNamespacesBool
+            % in case values is number of variables x 1
+            
+            % repmat to size of namespaces to permit expansion below
+            modifications{iMod,3} = repmat(thisModVal,1,length(namespaces));
+            
+          elseif uniqueValsForNamespacesBool && ~uniqueValsForVarsBool
             % in case values is 1 x number of namespaces
-          elseif size(modifications{iMod,3},2) == length(namespaces) && size(modifications{iMod,3},1) == 1
-            modifications{iMod,3} = repmat(modifications{iMod,3},length(variables),1);
-            % TODO: char inputs
-            % elseif ischar(modifications{i,3})
-            % string input
-          else % if ~ischar(modifications{i,3})
-            error(['Numerical values varied over must be in array format,',...
-              'where dimensions 1, 2, and 3 correspond to mechanisms, values, and populations varied over.'])
+            
+            % repmat to size of vars to permit expansion below
+            modifications{iMod,3} = repmat(thisModVal,length(variables),1);
+            
+          else
+            % this error is not for this function but for vary statement
+            error(['Numerical values varied over must be in array format, ',...
+              'where variables/mechanisms go down rows/dim1, namespaces/populations ',...
+              'go along columns/dim2'])
           end
         end
         
         identCovaryBool = false;
+        nonLatticeCovaryBool = true;
       end
       
       % expand list of modifications
       for iNamespace = 1:length(namespaces)
         for iVar = 1:length(variables)
-          modifications_expanded(end+1,1:3)={namespaces{iNamespace}, variables{iVar}, modifications{iMod,3}(iVar,iNamespace)};
+          modifications_expanded(end+1,1:3) = {namespaces{iNamespace}, variables{iVar}, modifications{iMod,3}(iVar,iNamespace)};
         end
       end
       
-     % determine identLinkedMods
+     % determine identicalMods
      if identCovaryBool
-       identLinkedMods{end+1} = thisModStartInd : size(modifications_expanded, 1);
+       identicalMods{end+1} = thisModStartInd : size(modifications_expanded, 1); % from start to new size after expanding
+     end
+     
+     % determine nonLatticeMods
+     if nonLatticeCovaryBool
+       nonLatticeMods{end+1} = thisModStartInd : size(modifications_expanded, 1); % from start to new size after expanding
      end
       
     end % ischar
@@ -146,8 +288,8 @@ end % if groups
 
 % standardize connection object
 for iMod = 1:size(modifications,1)
-  obj=modifications{iMod,1}; % population name or connection source-target
-  fld=modifications{iMod,2}; % population name, size, or parameter name
+  obj = modifications{iMod,1}; % population name or connection source-target
+  fld = modifications{iMod,2}; % population name, size, or parameter name
   
   % convert target<-source to source->target
   if any(strfind(obj,'<-'))
@@ -167,11 +309,15 @@ for iMod = 1:size(modifications,1)
   end
   
   % check for dot notation. Change POP.MECH to MECH_PARAM notation.
-  if any(obj=='.')
-    tmp=regexp(obj,'\.','split');
-    obj=tmp{1};
-    MECH=tmp{2};
-    fld=[MECH '_' fld];
+  if any(obj == '.')
+    tmp = regexp(obj,'\.','split');
+    obj = tmp{1};
+    MECH = tmp{2};
+    
+    % add MECH to param unless already present
+    if ~strcmp(MECH, fld(1:length(MECH)))
+      fld = [MECH '_' fld];
+    end
     
     % update modifications
     modifications{iMod,1} = obj; % population name or connection source-target
@@ -179,9 +325,9 @@ for iMod = 1:size(modifications,1)
   end
   
   % check for dot notation. Change MECH.PARAM to MECH_PARAM notation.
-  if any(fld=='.')
-    tmp=regexp(fld,'\.','split');
-    fld=[tmp{1} '_' tmp{2}];
+  if any(fld == '.')
+    tmp = regexp(fld,'\.','split');
+    fld = strjoin(tmp, '_');
     
     % update modifications
     modifications{iMod,2} = fld; % population name, size, or parameter name
@@ -195,7 +341,7 @@ if options.auto_gen_test_data_flag
   dsUnitSaveAutoGenTestDataLocalFn(argin, argout); % localfn
 end
 
-end
+end % main fn
 
 
 %% Local Fn
@@ -231,9 +377,9 @@ end
 % convert connection reference source-target to source->target
 if any(~cellfun(@isempty,regexp(modifications(:,1),'\w-\w')))
   % find elements to adjust
-  inds=find(~cellfun(@isempty,regexp(modifications(:,1),'\w-\w')));
-  for iMod=1:length(inds)
-    modifications{inds(iMod),1}=strrep(modifications{inds(iMod),1},'-','->');
+  inds = find(~cellfun(@isempty,regexp(modifications(:,1),'\w-\w')));
+  for iMod = 1:length(inds)
+    modifications{inds(iMod),1} = strrep(modifications{inds(iMod),1},'-','->');
   end
 end
 

@@ -173,8 +173,8 @@ figure; plot(data.time,data.(data.labels{1}))
 xlabel('time (ms)'); ylabel('membrane potential (mV)'); title('Hodgkin-Huxley neuron')
 
 % View the mechanism files:
-[~,eqnfile]=dsLocateModelFiles('iNa.mech'); edit(eqnfile{1});
-[~,eqnfile]=dsLocateModelFiles('iK.mech');  edit(eqnfile{1});
+dsEditModelFiles('iNa.mech');
+dsEditModelFiles('iK.mech');
 % Mechanisms can be custom built; however, DynaSim does come pakaged with
 % some common ones like popular ion currents (see <dynasim>/models).
 
@@ -198,7 +198,7 @@ xlabel('time (ms)'); ylabel('membrane potential (mV)'); title('Predefined Intrin
 % structure (see below).
 
 % View the predefined population file:
-[~,eqnfile]=dsLocateModelFiles('IB.pop'); edit(eqnfile{1});
+dsEditModelFiles('IB.pop');
 
 % %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% BUILDING LARGE MODELS WITH MULTIPLE POPULATIONS AND CONNECTIONS
@@ -239,7 +239,7 @@ dsPlot(data); % <-- Figure 4 in DynaSim paper
 dsPlot(data,'variable',{'E_v','E_I_iGABAa_IGABAa'});
 
 % View the connection mechanism file:
-[~,eqnfile]=dsLocateModelFiles('iAMPA.mech'); edit(eqnfile{1});
+dsEditModelFiles('iAMPA.mech');
 
 %% Explore sPING in DynaSim GUI
 
@@ -402,7 +402,7 @@ dsPlot(dsSimulate(s,'time_limits',T));
 
 % Leaky integrate-and-fire neurons
 s.populations.equations='LIF';
-s.populations.parameters={'stim_amp',10,'noise_amp',1e3};
+s.populations.parameters={'stim_amp',15,'noise_amp',1e3};
 dsPlot(dsSimulate(s,'time_limits',T));
 
 % Izhikevich neurons
@@ -469,7 +469,7 @@ dsPlot(d);
 % 1 E-cell driving 1 I-cell
 LIF={
     'dV/dt=(E-V+R*I+noise*randn-@isyn)/tau; V(0)=-65'
-    'if(any(t<tspike+tref,1))(V=reset)'
+    'if(any(any(t<tspike+tref,1)))(V=reset)'
     'tau=10; tref=10; E=-70; thresh=-55; reset=-75; R=9; I=1.55; noise=100'
     'monitor V.spikes(thresh)'
      };
@@ -504,10 +504,10 @@ dsPlot(data);
 % the specification.mechanisms field.
 
 ampa_with_delay={
-  'gAMPA=.1; EAMPA=0; tauD=2; tauR=0.4; delay=20'
+  'gAMPA=.1; EAMPA=0; tauD=2; tauR=0.2; delay=20'
   'netcon=ones(N_pre,N_post)'
   'IAMPA(X,s)=gAMPA.*(s*netcon).*(X-EAMPA)'
-  'ds/dt=-s./tauD+((1-s)/tauR).*(1+tanh(X_pre(t-delay)/10)); s(0)=.1' % 20ms delay
+  'ds/dt=-s./tauD+1/2*(1+tanh(X_pre(t-delay)/10)).*((1-s)/tauR); s(0)=.1' % 20ms delay
   '@current += -IAMPA(X_post,s)'
 };
 
@@ -551,13 +551,31 @@ mex_flag=1;       % takes longer to compile on 1st run; faster on subsequent run
 solver='euler';       % Euler integration requires fewer calculations than 4th-order Runge Kutta
 dt=.01;               % increase time step as long as solution converges
 
-eqns='dv/dt=@current+I; {iNa,iK}';
+eqns='dv/dt=@current+I+noise*randn(1,N_pop); {iNa,iK}';
+
+% create DynaSim specification structure
+s=[];
+s.populations(1).name='E';
+s.populations(1).size=5;
+s.populations(1).equations=eqns;
+s.populations(1).parameters={'noise',20};
 
 % run and compile MEX file
-data=dsSimulate(eqns,'vary',{'I',10},'downsample_factor',downsample_factor,...
-  'mex_flag',mex_flag,'solver',solver,'dt',dt);
+data=dsSimulate(s,'vary',{'I',10},'downsample_factor',downsample_factor,...
+  'mex_flag',mex_flag,'solver',solver,'dt',dt,...
+  'study_dir','demo_efficient_sim',...
+  'analysis_functions',{@dsCalcAverages},'analysis_options',{'save_std',1});
 dsPlot(data);
+
+% Instead of loading full dataset, just load output of analysis function,
+% which contains mean and standard deviation data.
+s = load(fullfile('demo_efficient_sim','results','study_sim1_analysis1_dsCalcAverages.mat'));
+dsPlot(s.result);
+dsPlot2(s.result,'variable','/iNa_m|iNa_h/');       % Plot several state variables using dsPlot2
+
 
 % sets of simulations:
 % multinode (on a cluster): cluster_flag=1;
 % multicore (local simulation): parfor_flag=1;
+
+

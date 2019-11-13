@@ -1,5 +1,5 @@
 function data = dsCalcFRmulti(data, varargin)
-%CALCFRMULTI - extends dsCalcFR to get SUA and MUA firing rates
+%dsCalcFRmulti - extends dsCalcFR to get SUA and MUA firing rates
 %
 % Usage:
 %   data = dsCalcFRmulti(data,'option',value)
@@ -38,18 +38,18 @@ function data = dsCalcFRmulti(data, varargin)
 %   s.populations(2).name='I';
 %   s.populations(2).equations='dv/dt=@current+10; {iNa,iK}; v(0)=-65';
 %   data=dsSimulate(s);
-%   data=dsCalcFR(data,'variable','*_v');
+%   data=dsCalcFRmulti(data,'variable','*_v');
 %   data % contains firing rates for E and I pops in .E_v_FR_SUA/MUA and .I_v_FR_SUA/MUA.
 %
-% See also: dsPlotFR, dsAnalyzeStudy, dsSimulate, dsCheckData, dsSelectVariables
+% See also: dsCalcFR. dsPlotFR, dsAnalyzeStudy, dsSimulate, dsCheckData, dsSelectVariables
 
 %% 1.0 Check inputs
 options=dsCheckOptions(varargin,{...
-  'variable',[],[],...
+  'variable','',[],...
   'time_limits',[-inf inf],[],...
   'threshold',1e-5,[],... % slightly above zero in case variable is point process *_spikes {0,1}
-  'bin_size',.05,[],...  % 30
-  'bin_shift',.01,[],... % 10
+  'bin_size',.05,[],...
+  'bin_shift',.01,[],...
   'exclude_data_flag',0,{0,1},...
   'output_suffix','',[],...
   'auto_gen_test_data_flag',0,{0,1},...
@@ -75,7 +75,7 @@ end
 
 % time info
 time = data.time;
-dt = time(2)-time(1);
+dt = time(2)-time(1); % ms
 ntime=length(time);
 t1=nearest(time,options.time_limits(1)); % index to first sample
 t2=nearest(time,options.time_limits(2)); % index to last sample
@@ -97,30 +97,36 @@ if isempty(options.variable)
 end
 
 % check bin_size
-if options.bin_size>1
-  % convert from ms to time points
-  options.bin_size=ceil(options.bin_size/dt);
+if options.bin_size > 1
+  % convert from ms to index points
+  options.bin_size = ceil(options.bin_size / dt);
+  
+  binMsBool = true;
 else
-  % convert from fraction to time points
-  options.bin_size=ceil(options.bin_size*ntime);
+  % convert from fraction to index points
+  options.bin_size = ceil(options.bin_size * ntime);
+  
+  binMsBool = false;
 end
 
+% now options.bin_size in units of index points
+
 % constrain bin_size to entire data set
-if options.bin_size>ntime
-  options.bin_size=ntime;
+if options.bin_size > ntime
+  options.bin_size = ntime;
 end
 
 % check bin_shift
-if options.bin_shift>1
-  % convert from ms to time points
-  options.bin_shift=ceil(options.bin_shift/dt);
+if options.bin_shift > 1 || binMsBool
+  % convert from ms to index points
+  options.bin_shift = ceil(options.bin_shift / dt);
 else
-  % convert from fraction to time points
-  options.bin_shift=ceil(options.bin_shift*ntime);
+  % convert from fraction to index points
+  options.bin_shift = ceil(options.bin_shift * ntime);
 end
 
 %% 2.0 set list of variables to process as cell array of strings
-options.variable=dsSelectVariables(data(1),options.variable, varargin{:});
+options.variable = dsSelectVariables(data(1),options.variable, varargin{:});
 
 %% 3.0 calculate firing rates for each variable
 if ~isfield(data,'results')
@@ -129,36 +135,39 @@ end
 
 % 3.1 calc bin info
 % samples at which bins begin
-bin_index_begs=t1:options.bin_shift:t2;
+bin_index_begs = t1:options.bin_shift:t2;
+
 % samples at which bins end
-bin_index_ends=bin_index_begs+options.bin_size;
+bin_index_ends = bin_index_begs + options.bin_size;
 
 if bin_index_ends(end)>t2
   if length(bin_index_ends) > 1 %multiple bins
-    % remove final bin if extends beyond data
-    bin_index_begs=bin_index_begs(bin_index_ends<=t2);
-    bin_index_ends=bin_index_ends(bin_index_ends<=t2);
+    % remove final bin if extends beyond data (index == t2)
+    bin_index_begs = bin_index_begs(bin_index_ends <= t2);
+    bin_index_ends = bin_index_ends(bin_index_ends <= t2);
   else %1 bin
     bin_index_ends = t2;
   end
 end
 
 % times at which bins begin
-bin_times=time(bin_index_begs);
+bin_times = time(bin_index_begs);
 
 % number of bins
-nbins=length(bin_index_begs);
+nbins = length(bin_index_begs);
 
 % time width of a single bin in seconds
-bin_width=(dt/1000)*options.bin_size;
+bin_width = (dt/1000)*options.bin_size;
 
 % 3.2 loop over variables to process
 for v=1:length(options.variable)
   % extract this data set
   var=options.variable{v};
   dat=data.(var);
+  
   % determine how many cells are in this data set
   ncells=size(dat,2);
+  
   % loop over cells
   FR_SUA=zeros(nbins,ncells);
   FR_MUA=zeros(nbins,1);
@@ -178,14 +187,14 @@ for v=1:length(options.variable)
     % calculate firing rates
     for bin=1:nbins
       % (# spikes in bin) / (duration of bin in seconds)
-      FR_SUA(bin,:)=sum(spikes(bin_index_begs(bin):bin_index_ends(bin), :))/bin_width;
-      FR_MUA(bin)=sum(sum(spikes(bin_index_begs(bin):bin_index_ends(bin), :))) / (bin_width * ncells); % MUA average
+      FR_SUA(bin,:) = sum(spikes(bin_index_begs(bin):bin_index_ends(bin), :))/bin_width;
+      FR_MUA(bin) = sum(sum(spikes(bin_index_begs(bin):bin_index_ends(bin), :))) / (bin_width * ncells); % MUA average
     end
   end
   
   % add firing rates to data structure
-  data.([var '_FR_SUA' options.output_suffix])=FR_SUA;
-  data.([var '_FR_MUA' options.output_suffix])=FR_MUA;
+  data.([var '_FR_SUA' options.output_suffix]) = FR_SUA;
+  data.([var '_FR_MUA' options.output_suffix]) = FR_MUA;
   %   data.([var '_spike_times'])=spike_times;
   if ~ismember([var '_FR_SUA' options.output_suffix], data.results)
     data.results{end+1}=[var '_FR_SUA' options.output_suffix];
@@ -196,7 +205,7 @@ for v=1:length(options.variable)
   end
 end
 % add bin times to data
-data.(['time_FR' options.output_suffix])=bin_times;
+data.(['time_FR' options.output_suffix]) = bin_times;
 if ~ismember(['time_FR' options.output_suffix], data.results)
   data.results{end+1}=['time_FR' options.output_suffix];
 end

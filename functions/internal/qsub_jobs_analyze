@@ -5,16 +5,22 @@
 # $1 is abs path to working dir in batchdir
 # $2 is ui_command
 # $3 is src, which should be a study_dir path
-# $4 = varargin, the string list of arguments for dsAnalyze
+# $4 is cluster_matlab_version
+# $5 = varargin, the string list of arguments for dsAnalyze
 
 set batchdir = "$1"
 cd $batchdir
 
 set ui_command = "$2"
 
-set src = "$3"
+set cluster_matlab_version = "$3"
 
-set varargin = "$4"
+set src = "$4"
+
+set varargin = "$5"
+
+module unload matlab
+module load matlab/${cluster_matlab_version}
 
 echo "command = " $ui_command
 echo "src = " $src
@@ -24,6 +30,7 @@ echo "HOSTNAME = " $HOSTNAME
 echo "JOB_ID = " $JOB_ID
 echo "JOB_NAME = " $JOB_NAME
 
+# remove old pbdout
 if (-e pbsout/${SGE_TASK_ID}.out) then
   rm -f pbsout/${SGE_TASK_ID}.out
 endif

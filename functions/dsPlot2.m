@@ -34,6 +34,12 @@ function [handles,xp] = dsPlot2(data,varargin)
 %     'do_zoom' - {false, true} - Turn on zoom function in subplot_grid
 %     'yscale' {'linear','log','log10'}, whether to plot linear or log scale
 %     'visible' {'on','off'}
+%     'lock_gca'        : Plots within currently active axis (gca); doesn't
+%                         open new figures or subplots.
+%     'dim_stacking'    - Used to alter the default ordering of dimensions
+%     'value_stacking'  - Used to alter the default ordering of values
+%                         (e.g., populations or variables). Expected 1x2
+%                         cell array with format {dimension name, order}
 %     NOTE: analysis options available depending on plot_type
 %       see see dsCalcFR options for plot_type 'rastergram' or 'rates'
 %       see dsCalcPower options for plot_type 'power'
@@ -145,6 +151,7 @@ end
   'do_zoom',false,[false true],...
   'yscale','linear',{'linear','log','log10','log2'},...
   'visible','on',{'on','off'},...
+  'lock_gca',[false],[false, true],...
   'show_colorbar',false,[false true],...
   'ColorMap',[],[],...
   'save_figures',false,[false true],...
@@ -155,6 +162,8 @@ end
   'save_res',[],[],...
   'Ndims_per_subplot',[],[],...
   'dim_stacking',[],[],...
+  'value_stacking',{},{},...
+  'figure_handle',@xp_handles_fignew,[],...
   'subplot_handle',@xp_subplot_grid,[],...
   'plot_handle',[],[],...
   'plotFR_override',[],[false true],...
@@ -178,8 +187,12 @@ force_last = options.force_last;
 crop_range = options.crop_range;
 lock_axes = options.lock_axes;
 Ndims_per_subplot = options.Ndims_per_subplot;
+dim_stacking = options.dim_stacking;
+value_stacking = options.value_stacking;
+figure_handle = options.figure_handle;
 subplot_handle = options.subplot_handle;
 plot_handle = options.plot_handle;
+lock_gca = options.lock_gca;
 
 % Add default options to structures
 % Plot_options
@@ -203,6 +216,7 @@ plot_handle = options.plot_handle;
 subplot_options = struct_addDef(subplot_options,'subplotzoom_enabled',options.do_zoom);
 subplot_options = struct_addDef(subplot_options,'force_rowvect',true);
 subplot_options = struct_addDef(subplot_options,'autosuppress_interior_tics',true);
+subplot_options = struct_addDef(subplot_options,'legend1',[]);
 
 
 % Figure options
@@ -216,6 +230,13 @@ figure_options = struct_addDef(figure_options,'save_res',options.save_res);
 figure_options = struct_addDef(figure_options,'max_num_newfigs',options.max_num_newfigs);
 figure_options = struct_addDef(figure_options,'figwidth',options.figwidth);
 figure_options = struct_addDef(figure_options,'figheight',options.figheight);
+
+
+%% Autoset parameters
+if lock_gca
+    figure_options.suppress_newfig = true;    
+    subplot_options.suppress_subplot = true;
+end
 
 %% Pre-process raw data contained in xp.data max_num_overlaied + mean
 % % Note: these options don't work if data are images
@@ -303,19 +324,32 @@ end
 xp2 = xp(chosen_all{:});
 
 
-%% Squeeze out unused dimensions
-% Squeeze to eliminate superfluous dimensions
-xp2 = xp2.squeeze;
-Nd = ndims(xp2);
 
-% Rearrange dimensions of xp2 for stacking
-if ~isempty(options.dim_stacking)
-    ax_names = xp2.exportAxisNames;
-    if length(options.dim_stacking) ~= length(ax_names) -1
-        error('Incorrect number of dimensions specified. dim_stacking must be some permutation of the following: %s', sprintf('%s ',ax_names{1:end}));
-    end
-    xp2.permute(options.dim_stacking);
+% Rearrange dimensions of xp2
+if ~isempty(dim_stacking)
+    xp2 = xp2.permute(dim_stacking);
 end
+
+% Rearrange values in a given dimension
+if ~isempty(value_stacking)
+    xp2 = xp2.axisSubset(value_stacking{1},value_stacking{2});
+    
+    % Recreate new labels list with correct ordering
+    xp2_temp = xp2.mergeDims({'population','variables'});
+    ax_ind_pop_var = xp2_temp.findaxis('populations_variables');
+    xp2.meta.dynasim.labels = [xp2_temp.axis(ax_ind_pop_var).values,'time'];
+    clear xp2_temp
+    
+end
+
+
+%% Shift all unused (singleton) dimensions to the top.
+% This will preserve their values for use in the title or elsewhere. See
+% issue #552
+sz = size(xp2);
+singles = find(sz == 1);
+non_singles = find(sz ~= 1);
+xp2 = xp2.permute([singles,non_singles]);
 
 
 %% Crop data
@@ -396,7 +430,7 @@ if length(xp2.meta.datainfo(2).values) <= 1 && ~is_image
     % Move populations axis to the end if it exists
 
     ax2overlay = [];
-    if isempty(force_last) && isempty(options.dim_stacking)
+    if isempty(force_last) && isempty(dim_stacking)
         ax2overlay = xp2.findaxis('populations');           % If force_last or dim_stacking isn't specified, then choose populations
     end
 
@@ -468,13 +502,19 @@ end
 
 %% Set up legend entries, axis limits, and linewidth
 % Set up legend entries
-subplot_options.legend1 = setup_legends(xp2);
+if isempty(subplot_options.legend1)
+    subplot_options.legend1 = setup_legends(xp2);
+end
+
 
 % Set up x-axis limits
 if isempty(plot_options.xlims) && lock_axes && ~is_image
     if ~strcmp(plot_type,'power')
         xdat = xp2.meta.datainfo(1).values;
-        plot_options.xlims = [min(xdat) max(xdat)];
+        data_xlims = [min(xdat) max(xdat)];
+        if data_xlims(2) > data_xlims(1)                              % xlims needs to be an increasing vector
+            plot_options.xlims = data_xlims;
+        end
     else
         % For plot type = power, set from 0-80
         plot_options.xlims = [0 80];
@@ -491,8 +531,10 @@ if isempty(plot_options.ylims) && lock_axes && ~is_image
             data_all = vertcat(data_all{:});
             % Find the max and minima - these are the largest and smallest
             % values we could ever see.
-            data_lims = [min(data_all) max(data_all)];
-            plot_options.ylims = data_lims;
+            data_ylims = [min(data_all) max(data_all)];
+            if data_ylims(2) > data_ylims(1)                      % ylims needs to be an increasing vector
+                plot_options.ylims = data_ylims;
+            end
     end
 end
 
@@ -503,8 +545,8 @@ if isempty(plot_options.zlims) && lock_axes && ~is_image
             data_all = xp2.data(:);
             data_all = cellfunu(@(x) x(:), data_all);
             data_all = vertcat(data_all{:});
-            data_lims = [min(data_all) max(data_all)];
-            plot_options.zlims = data_lims;
+            data_ylims = [min(data_all) max(data_all)];
+            plot_options.zlims = data_ylims;
     end
 end
 
@@ -555,7 +597,7 @@ else
             data_plothandle = @xp_PlotData;
             if ~isempty(plot_handle); data_plothandle = plot_handle; end
 
-            if any(strcmp(plot_type,{'rastergram','raster'})) && isempty(force_last) && isempty(options.dim_stacking)
+            if any(strcmp(plot_type,{'rastergram','raster'})) && isempty(force_last) && isempty(dim_stacking)
                 % Move populations axis to the end of xp2. (Only do this if
                 % we're not already overwriting dims stacking order).
                 ax_names = xp2.exportAxisNames;
@@ -623,24 +665,24 @@ end
 switch num_embedded_subplots
     case 0
         % Ordering of axis handles
-        function_handles = {@xp_handles_newfig, data_plothandle};   % Specifies the handles of the plotting functions
+        function_handles = {figure_handle, data_plothandle};   % Specifies the handles of the plotting functions
         dims_per_function_handle = [1,Ndims_per_subplot];
         function_args = {{figure_options},{plot_options}};
     case 1
         % Ordering of axis handles
-        function_handles = {@xp_handles_newfig, subplot_handle,data_plothandle};   % Specifies the handles of the plotting functions
+        function_handles = {figure_handle, subplot_handle,data_plothandle};   % Specifies the handles of the plotting functions
         dims_per_function_handle = [1,1,Ndims_per_subplot];
         function_args = {{figure_options},{subplot_options},{plot_options}};
 
     case 2
         % Ordering of axis handles
-        function_handles = {@xp_handles_newfig, subplot_handle,data_plothandle};   % Specifies the handles of the plotting functions
+        function_handles = {figure_handle, subplot_handle,data_plothandle};   % Specifies the handles of the plotting functions
         dims_per_function_handle = [1,2,Ndims_per_subplot];
         function_args = {{figure_options},{subplot_options},{plot_options}};
 
     case 3
         % Ordering of axis handles
-        function_handles = {@xp_handles_newfig, subplot_handle, subplot_handle,data_plothandle};   % Specifies the handles of the plotting functions
+        function_handles = {figure_handle, subplot_handle, subplot_handle,data_plothandle};   % Specifies the handles of the plotting functions
         dims_per_function_handle = [1,2,1,Ndims_per_subplot];
         subplot_options2 = subplot_options;
         subplot_options2.legend1 = [];
@@ -648,7 +690,7 @@ switch num_embedded_subplots
         function_args = {{figure_options},{subplot_options2},{subplot_options},{plot_options}};
     case 4
         % Ordering of axis handles
-        function_handles = {@xp_handles_newfig, subplot_handle, subplot_handle,data_plothandle};   % Specifies the handles of the plotting functions
+        function_handles = {figure_handle, subplot_handle, subplot_handle,data_plothandle};   % Specifies the handles of the plotting functions
         dims_per_function_handle = [1,2,2,Ndims_per_subplot];
         subplot_options2 = subplot_options;
         subplot_options2.legend1 = [];
@@ -659,8 +701,11 @@ end
 %% Auto trim dimensions as needed
 % Linearize dimensions of xp2 that are in excess of the total number we can
 % plot
-maxNplotdims = sum(dims_per_function_handle)-1;
-xp2 = reduce_dims(xp2,maxNplotdims);
+targetNdims = sum(dims_per_function_handle)-1;         % There is 1 extra dim associated with "data", so need to subtract this one.
+xp2 = remove_excess_dims_start(xp2,targetNdims);
+
+% Add dummy dimensions that are in defecit of the total we want
+xp2 = add_dummy_dims(xp2,targetNdims);
 
 % Stack up available dimensions based on how much each axis handle can hold
 ax_names = [xp2.exportAxisNames, 'data'];
@@ -668,22 +713,17 @@ ax_names = [xp2.exportAxisNames, 'data'];
 dimensions = get_dimensions(ax_names,dims_per_function_handle);
 
 
-% Remove any excess function handles that aren't needed
-available_dims = ~cellfun(@isempty,dimensions);
-function_handles = function_handles(available_dims);
-dimensions = dimensions(available_dims);
-function_args = function_args(available_dims);
-
 %% Run the plots!
 % Open new figure if necessary & plot the data
-if ~isequal(@xp_handles_newfig, function_handles{1})
+if ~isequal(figure_handle, function_handles{1})
     % Cheap hack to force it to create a new figure using our desired
     % parameters for instances when it wouldn't normally call
-    % xp_handles_newfig.
+    % xp_handles_fignew.
+    warning('Using old hack for opening a figure. Should not reach this code.');
     xp3 = MDD;
     fhandle = @() recursivePlot(xp2,function_handles,dimensions,function_args);
     xp3 = xp3.importData({fhandle});
-    handles = xp_handles_newfig(xp3,figure_options);
+    handles = figure_handle(xp3,figure_options);
 else
     handles = xp2.recursivePlot(function_handles,dimensions,function_args);
 end
@@ -692,7 +732,7 @@ end
 end
 
 
-function var_out = getdefaultstatevar(xp)
+function var_regex = getdefaultstatevar(xp)
     % search through and try to find the variable represnting voltage. If can't find
     % it, just return the first variable listed.
 
@@ -700,7 +740,7 @@ function var_out = getdefaultstatevar(xp)
     if isempty(xp.findaxis('variables'))
         % If reach here, it means variables is not used in the code. Just
         % return some dummy values and move on.
-        var_out = ':';
+        var_regex = ':';
         return;
     end
 
@@ -729,6 +769,11 @@ function var_out = getdefaultstatevar(xp)
     else
         var_out = vars_orig{1};
     end
+    
+    % Convert into a regex search for the string with exact match to
+    % var_out. This solves the issue of variables 'v' and 'v_spikes' being
+    % both simultaneously selected. See iss #544
+    var_regex = ['/^' var_out '$/'];
 end
 
 function [chosen_varied, options_varied ]= get_chosen_varied(varied_names,options_varied)
@@ -800,16 +845,35 @@ function dimensions = get_dimensions(ax_names,dims_per_function_handle)
 
 end
 
-function xp2 = reduce_dims(xp2,maxNplotdims)
+function xp2 = remove_excess_dims_end(xp2,targetNdims)
+    % Merges any excess dims, starting from the end
     Nd = ndims(xp2);
-    if Nd > maxNplotdims
-        xp2 = xp2.mergeDims( [maxNplotdims:Nd] );
-        xp2 = xp2.squeeze;
+    if Nd > targetNdims
+        xp2 = xp2.mergeDims( [targetNdims:Nd] );
+        xp2 = xp2.squeezeRegexp('Dim');
         Nd = ndims(xp2);
 
-        if Nd ~= maxNplotdims; error('something wrong'); end
+        if Nd ~= targetNdims; error('something wrong'); end
     end
 end
+
+function xp2 = remove_excess_dims_start(xp2,targetNdims)
+% Merges any excess dims, starting from the beginning
+    Nd = ndims(xp2);
+    if Nd > targetNdims
+        xp2 = xp2.mergeDims( [1:[Nd - targetNdims + 1]] );
+        xp2 = xp2.squeezeRegexp('Dim');
+        Nd = ndims(xp2);
+
+        if Nd ~= targetNdims; error('something wrong'); end
+    end
+end
+
+function xp2 = add_dummy_dims(xp2,targetNdims)
+    Nd = ndims(xp2);
+    xp2 = xp2.permute([Nd+1:targetNdims, 1:Nd]);
+end
+
 
 function varied_names = only_varieds(xp)
     % Get list of varied axis names

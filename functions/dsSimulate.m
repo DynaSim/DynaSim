@@ -52,6 +52,13 @@ function [data,studyinfo,result] = dsSimulate(model,varargin)
 %                       begins, 'a' for job aborts, 'e' for job ends.
 %     'one_solve_file_flag': only use 1 file of each time when solving (default: 0)
 %     'optimize_big_vary': Select best options for doing many sims {0 or 1} (default: 0)
+%     'cluster_matlab_version': what version of Matlab to use in cluster batch
+%                               submission. Check
+%                               http://sccsvc.bu.edu/software/#/package/matlab/
+%                               for information on current available versions.
+%                               {'2009b', '2013a', '2014a', '2015a', '2016a',
+%                               '2016b', '2017a', '2017b', '2018a'} (default:
+%                               '2014a')
 %
 %   options for parallel computing: (requires Parallel Computing Toolbox)
 %     'parfor_flag' : whether to use parfor to run simulations {0 or 1} (default: 0)
@@ -59,6 +66,9 @@ function [data,studyinfo,result] = dsSimulate(model,varargin)
 %     *note: parallel computing has been disabled for debugging...
 %
 %   options for post-processing:
+%     'global_analysis_options': cell array of key-value argument pairs for all
+%                                dsAnalyze calls, overwritten by specific
+%                                analysis_options or plot_options (default:{})
 %     'analysis_functions': cell array of analysis function handles
 %     'analysis_options'  : cell array of option cell arrays {'option1',value1,...}
 %     'plot_functions'    : cell array of plot function handles
@@ -72,6 +82,7 @@ function [data,studyinfo,result] = dsSimulate(model,varargin)
 %     'optimization'  : function handle of optimization function (see NOTE 2)
 %     'debug_flag'    : set to debug mode
 %     'benchmark_flag': set to benchmark mode. will add tic/toc to sims.
+%     'userdata'      : field for user to store anything (default: [])
 %
 % Outputs:
 %   DynaSim data structure:
@@ -229,6 +240,9 @@ function [data,studyinfo,result] = dsSimulate(model,varargin)
 % Initialize outputs
 data=[];
 studyinfo=[];
+% defining sim_id in the parent function as requested by Matlab2019b:
+sim_id=[];
+sim=[];
 
 % check path
 dynasim_path=fileparts(which(mfilename));
@@ -285,12 +299,21 @@ options=dsCheckOptions(varargin,{...
   'sim_id',[],[],... % sim id in an existing study
   'studyinfo',[],[],...
   'email',[],[],... % email to send notification upon study completion
+  'stvar_alias_flag',0,{0,1},... % whether to replace X_stvar_# aliases by the actual state variables (default: 0)
+  'global_analysis_options',{},{},...
   'analysis_functions',[],[],...
   'analysis_options',[],[],...
   'plot_functions',[],[],...
   'plot_options',[],[],...
   'optimize_big_vary',0,{0,1},...
+  'cluster_matlab_version','2014a',{'2009b', '2013a', '2014a', '2015a',...
+                                    '2016a', '2016b', '2017a', '2017b',...
+                                    '2018a'},...
   'in_parfor_loop_flag',0,{0,1},... % if inside parfor loop
+  'copy_run_file_flag',0,{0,1},... % copy mechanism files to study dir
+  'copy_mech_files_flag',0,{0,1},... % copy mechanism files to study dir
+  'independent_solve_file_flag',0,{0,1},... % solve file makes DS data structure without dsSimulate call
+  'userdata',[],[],...
   'debug_flag',0,{0,1},...
   'auto_gen_test_data_flag',0,{0,1},...
   'unit_test_flag',0,{0,1},...
@@ -315,15 +338,15 @@ end
 %% 0.3 Prepare solve options.
 
 if options.mex_flag && ~strcmp(reportUI,'matlab')
-  dsVprintf(options, 'Setting ''mex_flag'' to 0 in Octave.\n')
+  fprintf('Setting ''mex_flag'' to 0 in Octave.\n')
   options.mex_flag = 0;
   varargin = modify_varargin(varargin, 'mex_flag', options.mex_flag);
 end
 
+% mex_dir
 if isempty(options.mex_dir)
-    options.mex_dir = dsGetConfig('mex_path');
+  options.mex_dir = dsGetConfig('mex_path');
 end
-
 % replace ~/ with absolute path if present
 options.mex_dir = getAbsolutePath(options.mex_dir);
 
@@ -397,7 +420,7 @@ if isempty(options.sim_id) % not in part of a batch sim
     options.mex_flag = 1;
     options.downsample_factor = max(1/options.dt, options.downsample_factor); % at most 1000Hz sampling
     options.one_solve_file_flag = 1;
-    options.sims_per_job = 2;
+    options.sims_per_job = max(2, options.sims_per_job);
   end
 
   % check for one_solve_file_flag
@@ -567,9 +590,9 @@ if options.cluster_flag % will return
       break;
     end
   end
-  
+
   keyvals = dsOptions2Keyval(options);
-  
+
   % submit jobs
   studyinfo = dsCreateBatch(model,modifications_set,'simulator_options',options,'process_id',options.sim_id,keyvals{:});
 
@@ -590,7 +613,7 @@ if options.cluster_flag % will return
     if isfield(data, 'simulator_options')
       data = rmfield(data, 'simulator_options'); % specific to this function
     end
-    
+
     if ~isempty(studyinfo)
       studyinfo = []; % specific to this function
     end
@@ -681,7 +704,7 @@ if options.parfor_flag % will return after nested dsSimulate calls
 
   % Create array of random seeds
   seeds = repmat({options.random_seed},1,length(modifications_set));
-  
+
   % If random_seed is shuffle, generate a series of seeds here
   if strcmp(options.random_seed,'shuffle')
     rng_wrapper('shuffle');
@@ -690,12 +713,12 @@ if options.parfor_flag % will return after nested dsSimulate calls
       seeds{j} = double(sd.Seed) + j;   % Increment by 1 for each sim
     end
   end
-  
+
   % note that parfor currently acts just as a regular for in Octave
   if ~strcmp(reportUI,'matlab')
     disp('   Info for GNU Octave users: Do not expect any speed up by using DynaSim''s ''parfor_flag''. In GNU Octave, parfor loops currently default to regular for loops.');
   end
-  
+
   parfor sim=1:length(modifications_set)
     data(sim) = dsSimulate(model, 'modifications', modifications_set{sim}, keyvals{:},...
         'random_seed',seeds{sim},...                                      % Use unique random seed for each sim if shuffle
@@ -729,7 +752,7 @@ if options.parfor_flag % will return after nested dsSimulate calls
     if isfield(data, 'simulator_options')
       data = rmfield(data, 'simulator_options'); % specific to this function
     end
-    
+
     if ~isempty(studyinfo)
       studyinfo = []; % specific to this function
     end
@@ -755,7 +778,7 @@ if options.parfor_flag % will return after nested dsSimulate calls
     if isfield(data, 'simulator_options')
       data= rmfield(data, 'simulator_options'); % specific to this function
     end
-    
+
     if ~isempty(studyinfo)
       studyinfo = [];
     end
@@ -944,7 +967,8 @@ end % in_parfor_loop_flag
 
         tmpdata=feval(options.experiment,model,keyvals{:});
       else
-        %% NOT AN EXPERIMENT (single simulation)
+        %% -- NOT AN EXPERIMENT (single simulation) --
+
         %% 2.0 prepare solver function (solve_ode.m/mex)
         % - Matlab solver: create @odefun with vectorized state variables
         % - DynaSim solver: write solve_ode.m and params.mat  (based on dnsimulator())
@@ -957,6 +981,7 @@ end % in_parfor_loop_flag
               ~exist([options.solve_file '.mexa64'],'file') &&...
               ~exist([options.solve_file '.mexa32'],'file') &&...
               ~exist([options.solve_file '.mexmaci64'],'file'))
+
             options.solve_file = dsGetSolveFile(model,studyinfo,options); % store name of solver file in options struct
           end
 
@@ -1005,13 +1030,13 @@ end % in_parfor_loop_flag
         %% Solve System
         if options.disk_flag  % ### data stored on disk during simulation ###
           sim_start_time=tic;
-          
+
           if ~options.one_solve_file_flag
             save(param_file,'p','-v7'); % save params immediately before solving
           end
-          
+
           csv_data_file = feval(fname);  % returns name of file storing the simulated data
-          
+
           duration = toc(sim_start_time);
 
           if nargout>0 || options.save_data_flag
@@ -1044,49 +1069,73 @@ end % in_parfor_loop_flag
           end
 
           % feval solve file
-          if ~options.one_solve_file_flag
-            [outputs{1:length(output_variables)}] = feval(fname);
-          else % one_solve_file_flag
-            % pass sim_id for slicing params
-            [outputs{1:length(output_variables)}] = feval(fname, sim_id);
+          if ~options.independent_solve_file_flag
+            if ~options.one_solve_file_flag
+              [outputs{1:length(output_variables)}] = feval(fname);
+            else % one_solve_file_flag
+              % pass sim_id for slicing params
+              [outputs{1:length(output_variables)}] = feval(fname, sim_id);
+            end % if ~options.one_solve_file_flag
+          else % output data already in a structure
+            % save metadata file
+            metadata_file = fullfile(fpath,'metadata.mat');
+            createMetadata(metadata_file);
+            dsVprintf(options, 'Saved model metadata: %s\n',metadata_file);
+
+            if ~options.one_solve_file_flag
+              tmpdata = feval(fname);
+            else % one_solve_file_flag
+              % pass sim_id for slicing params
+              tmpdata = feval(fname, sim_id);
+            end
+          end % if ~options.independent_solve_file_flag
+
+          duration = toc(sim_start_time);
+
+          % Prepare DynaSim data structure:
+          % organize simulated data in data structure (move time to last)
+          if ~options.independent_solve_file_flag || options.mex_flag
+            tmpdata.labels = output_variables([2:length(output_variables)-num_fixed_variables 1]);
           end
 
-          duration=toc(sim_start_time);
+          if ~options.independent_solve_file_flag
+            for i = 1:length(output_variables)
+              if ~isempty(model.fixed_variables) && isfield(model.fixed_variables,output_variables{i})
+                % store fixed variables in model substructure
+                model.fixed_variables.(output_variables{i})=outputs{i};
+              else
+                % store state variables and monitors as data fields
+                tmpdata.(output_variables{i})=outputs{i};
+              end
 
-
-          % prepare DynaSim data structure
-          % organize simulated data in data structure (move time to last)
-          tmpdata.labels = output_variables([2:length(output_variables)-num_fixed_variables 1]);
-          for i = 1:length(output_variables)
-            if ~isempty(model.fixed_variables) && isfield(model.fixed_variables,output_variables{i})
-              % store fixed variables in model substructure
-              model.fixed_variables.(output_variables{i})=outputs{i};
-            else
-              % store state variables and monitors as data fields
-              tmpdata.(output_variables{i})=outputs{i};
-            end
-
-            outputs{i}=[]; % clear assigned outputs from memory
+              outputs{i}=[]; % clear assigned outputs from memory
+            end % for i = 1:length(output_variables)
           end
         end % if options.disk_flag
-        
 
-        dsVprintf(options, 'Elapsed time: %g seconds.\n',duration);
+        if ~options.independent_solve_file_flag || options.mex_flag
+          % add metadata to tmpdata
+          tmpdata.simulator_options = options; % store simulator controls
 
-        % add metadata to tmpdata
-        tmpdata.simulator_options = options; % store simulator controls
-
-        if options.store_model_flag==1  % optionally store the simulated model
-          tmpdata.model = model;
+          if options.store_model_flag == 1  % optionally store the simulated model
+            tmpdata.model = model;
+          end
         end
-        
+
+        if duration < 60
+          dsVprintf(options, 'Elapsed time: %.1f seconds.\n', duration);
+        else
+          dsVprintf(options, 'Elapsed time: %.1f minutes.\n', duration/60);
+        end
       end % else for if isa(options.experiment,'function_handle')
-      
+
       % Note: tmpdata is from a single sim in for loop
 
-      % create 'vary' field in data to store varied values
-      tmpdata = dsModifications2Vary(tmpdata,options.modifications,options,modifications_set,sim);
-      
+      if ~options.independent_solve_file_flag || options.mex_flag
+        % create 'vary' field in data to store varied values
+        tmpdata = dsModifications2Vary(tmpdata,options.modifications,options,modifications_set,sim);
+      end
+
       % change data precision if needed
       tmpdata = dsSavedDataPrecision(tmpdata,options);
 
@@ -1099,7 +1148,7 @@ end % in_parfor_loop_flag
         dsExportData(tmpdata,'filename',data_file,'format','mat','matCompatibility_flag',options.matCompatibility_flag,'verbose_flag',options.verbose_flag);
         %studyinfo=dsUpdateStudy(studyinfo.study_dir,'process_id',sim_id,'status','finished','duration',duration,'solve_file',options.solve_file,'email',options.email,'verbose_flag',options.verbose_flag,'model',model,'simulator_options',options);
       end
-      
+
       % only do dsAnalyze parfor if multiple data
       dsAnalyze_parfor_flag = double(length(tmpdata) ~= 1);
 
@@ -1108,11 +1157,11 @@ end % in_parfor_loop_flag
         if options.save_results_flag
           % do analysis and plotting while saving results
           siminfo = studyinfo.simulations(sim_ind);
-          
+
           for f=1:length(siminfo.result_functions)
             % saving handled internally to dsAnalyze
-            tmpresult = dsAnalyze(tmpdata, siminfo.result_functions{f},'result_file',siminfo.result_files{f},'save_data_flag',1,'save_results_flag',1, siminfo.result_options{f}{:}, 'parfor_flag',dsAnalyze_parfor_flag, 'in_sim_flag',1);
-            
+            tmpresult = dsAnalyze(tmpdata, siminfo.result_functions{f},'result_file',siminfo.result_files{f},'save_data_flag',1,'save_results_flag',1, options.global_analysis_options{:}, siminfo.result_options{f}{:}, 'parfor_flag',dsAnalyze_parfor_flag, 'in_sim_flag',1);
+
             % since the plots are saved, close all generated figures
             if all(ishandle(tmpresult)) % FIXME: dsPlot2 doesnt return handles, so won't close?
               close(tmpresult);
@@ -1123,11 +1172,11 @@ end % in_parfor_loop_flag
         else
           % do analysis and plotting without saving results
           if ~isempty(options.analysis_functions) && nargoutmain > 2
-            dsAnalyze(tmpdata, options.analysis_functions, 'result_file',[], 'save_data_flag',0, 'save_results_flag',options.save_results_flag, 'function_options',options.analysis_options, 'parfor_flag',dsAnalyze_parfor_flag, 'in_sim_flag',1);
+            dsAnalyze(tmpdata, options.analysis_functions, 'result_file',[], 'save_data_flag',0, 'save_results_flag',options.save_results_flag, options.global_analysis_options{:}, 'function_options',options.analysis_options, 'parfor_flag',dsAnalyze_parfor_flag, 'in_sim_flag',1);
           end
 
           if ~isempty(options.plot_functions)
-            dsAnalyze(tmpdata, options.plot_functions, 'result_file',[], 'save_data_flag',0, 'save_results_flag',options.save_results_flag, 'function_options',options.plot_options, 'parfor_flag',dsAnalyze_parfor_flag, 'in_sim_flag',1);
+            dsAnalyze(tmpdata, options.plot_functions, 'result_file',[], 'save_data_flag',0, 'save_results_flag',options.save_results_flag, options.global_analysis_options{:}, 'function_options',options.plot_options, 'parfor_flag',dsAnalyze_parfor_flag, 'in_sim_flag',1);
           end
         end % if options.save_data_flag || options.save_results_flag
       end % if ~isempty(options.analysis_functions) || ~isempty(options.plot_functions)
@@ -1170,6 +1219,39 @@ end % in_parfor_loop_flag
     end
   end
 
+  function createMetadata(metadata_file)
+    % Add variables to data ahead of time:
+    %  model
+    if options.store_model_flag == 1  % optionally store the simulated model
+      initData.model = model;
+    end
+
+    %  simulator_options
+    initData.simulator_options = options;
+
+    %  varied
+    initData = dsModifications2Vary(initData,options.modifications,options,modifications_set,sim);
+
+    %  labels
+    if ~exist('output_variables', 'var')
+      output_variables=cat(2,'time',model.state_variables);
+    end
+    if ~exist('num_fixed_variables', 'var')
+      if ~isempty(model.fixed_variables)
+        fields=fieldnames(model.fixed_variables)';
+        output_variables=cat(2,output_variables,fields);
+        num_fixed_variables=length(fields);
+      else
+        num_fixed_variables=0;
+      end
+    end
+    initData.labels = output_variables([2:length(output_variables)-num_fixed_variables 1]);
+
+    %  save metadata
+    save(metadata_file, '-struct','initData','-v7');
+    clear initData
+  end
+
   function cleanup(status)
     % remove temporary files and optionally store info for debugging
     % ...
@@ -1191,17 +1273,17 @@ end % in_parfor_loop_flag
     var_names=model.state_variables;
     [nvals_per_var,monitor_counts]=dsGetOutputCounts(model);
     num_state_variables=sum(nvals_per_var);
-    
+
     % check that the correct number of IC values was provided
     if length(options.ic)~=num_state_variables
       error('incorrect number of initial conditions. %g values are needed for %g state variables across %g cells',num_state_variables,length(model.state_variables),sum(pop_sizes));
     end
-    
+
     % organize user-supplied ICs into array for each state variable (assume
     cnt=0; all_ICs=[];
     for i=1:length(var_names)
       ICs=options.ic(cnt+(1:nvals_per_var(i)));
-      
+
       % store ICs as string for writing solve_ode and consistent evaluation
       all_ICs.(var_names{i})=sprintf('[%s]',num2str(ICs));
       cnt=cnt+nvals_per_var(i);
@@ -1276,16 +1358,41 @@ option_names = {...
   'compile_flag','mex_flag';
   };
 
-if any(ismember(option_names(:,1),options(1:2:end)))
-  for i=1:size(option_names,1)
-    % check if any options have this old name
-    if ismember(option_names{i,1},options(1:2:end))
-      ind=find(ismember(options(1:2:end),option_names{i,1}));
+if isempty(options)
+  return
+end
 
-      % replace old option name by new option name
-      options{2*ind-1}=option_names{i,2};
+if ~isstruct(options{1})
+  if any(ismember(option_names(:,1),options(1:2:end)))
+    for i=1:size(option_names,1)
+      % check if any options have this old name
+      if ismember(option_names{i,1},options(1:2:end))
+        ind=find(ismember(options(1:2:end),option_names{i,1}));
+
+        % replace old option name by new option name
+        options{2*ind-1}=option_names{i,2};
+      end
     end
   end
+else % struct
+  options = options{1};
+  flds = fieldnames(options);
+
+  [oldOpts,indOpt] = intersect(option_names(:,1), flds);
+
+  if ~isempty(oldOpts)
+    for iOpt = 1:length(indOpt)
+      oldOptName = oldOpts{iOpt};
+      newOptName = option_names{indOpt(iOpt),2};
+
+      % replace old option name by new option name
+      options.(newOptName) = options.(oldOptName);
+
+      options = rmfield(options, oldOptName);
+    end
+  end
+
+  options = {options};
 end
 
 end

@@ -1,5 +1,5 @@
 function [model,name_map] = dsGenerateModel(specification, varargin)
-%GENERATEMODEL - Parse DynaSim specification and organize model data in DynaSim model structure
+%dsGenerateModel - Parse DynaSim specification and organize model data in DynaSim model structure
 %
 % Usage:
 %   [model,name_map]=dsGenerateModel(specification,'option',value,...)
@@ -15,6 +15,7 @@ function [model,name_map] = dsGenerateModel(specification, varargin)
 %     'modifications'  : specify modifications to apply to specification
 %                        before generating the model, see dsApplyModifications
 %                        for more details (default?: []).
+%     'stvar_alias_flag' : whether to replace X_stvar_# aliases by the actual state variables (default: 0)
 %     'open_link_flag' : whether to leave linker identifiers in place (default: 0)
 %     'auto_gen_test_data_flag': whether to save model for unit testing (default: 0)
 %
@@ -132,6 +133,7 @@ end
 
 options=dsCheckOptions(varargin,{...
   'modifications',[],[],...
+  'stvar_alias_flag',0,{0,1},...
   'open_link_flag',0,{0,1},...
   'auto_gen_test_data_flag',0,{0,1},...
   },false);
@@ -154,12 +156,13 @@ if isfield(specification,'state_variables')
 %     specification=specification.specification;
 %   end
 end
+
 % standardize specification
-specification=dsCheckSpecification(specification, varargin{:}); % standardize & auto-populate as needed
+specification = dsCheckSpecification(specification, varargin{:}); % standardize & auto-populate as needed
 
 % Apply modifications to specification before generating model
 if ~isempty(options.modifications)
-  specification=dsApplyModifications(specification,options.modifications, varargin{:});
+  specification = dsApplyModifications(specification,options.modifications, varargin{:});
 end
 
 % specification metadata:
@@ -206,16 +209,16 @@ linker_pops={}; % list of populations associated with mechanism linkers
 for i=1:npops
   % does the population model already exist?
   if ~isempty(specification.populations(i).model)
-    tmpmodel=specification.populations(i).model; % get model structure
-    tmpname=tmpmodel.specification.populations.name; % assumes one population sub-model
+    tmpmodel = specification.populations(i).model; % get model structure
+    tmpname = tmpmodel.specification.populations.name; % assumes one population sub-model
 
     % adjust the name if necessary
     if ~strcmp(specification.populations(i).name,tmpname)
       % use the name in the specification
-      tmpmodel=dsApplyModifications(tmpmodel,{tmpname,'name',specification.populations(i).name}, varargin{:});
+      tmpmodel = dsApplyModifications(tmpmodel,{tmpname,'name',specification.populations(i).name}, varargin{:});
     elseif strcmp(tmpname,'pop1') % if default name
       % use default name for this population index
-      tmpmodel=dsApplyModifications(tmpmodel,{tmpname,'name',sprintf('pop%g',i)}, varargin{:});
+      tmpmodel = dsApplyModifications(tmpmodel,{tmpname,'name',sprintf('pop%g',i)}, varargin{:});
     end
 
     tmpmodel.linkers=[]; % remove old linkers from original model construction
@@ -223,6 +226,7 @@ for i=1:npops
     name_map=cat(1,name_map,tmpmodel.namespaces);
     continue;
   end
+
   % construct new population model
   PopScope=specification.populations(i).name;
     % NOTE: dsParseModelEquations adds a '_' suffix to the namespace; therefore,
@@ -245,37 +249,45 @@ for i=1:npops
 
   % 1.1.2 parse population mechanisms
   for j=1:nmechs
-    mechanism_=specification.populations(i).mechanism_list{j};
+    mechanism_ = specification.populations(i).mechanism_list{j};
 
     % support separation of linker names in pop equations vs mechanisms
-    mechanism_=regexp(mechanism_,'@','split');
-    mechanism=mechanism_{1};
+    mechanism_ = regexp(mechanism_,'@','split');
+    mechanism = mechanism_{1};
 
-    if numel(mechanism_)>1, new_linker=mechanism_{2}; else new_linker=[]; end
+    if numel(mechanism_)>1
+      new_linker=mechanism_{2};
+    else
+      new_linker=[];
+    end
 
     % set mechanism namespace
     [~,MechID]=fileparts2(mechanism);
     if any(MechID==':')
       % exclude host name from namespace
-      tmp=regexp(MechID,':','split');
-      MechScope=[specification.populations(i).name '_' tmp{2}];
+      tmp = regexp(MechID,':','split');
+      MechScope = [specification.populations(i).name '_' tmp{2}];
     else
       % extract mechanism file name without path
-      MechScope=[specification.populations(i).name '_' MechID];
+      MechScope = [specification.populations(i).name '_' MechID];
     end
+
     % use mechanism equations in specification if present
     if isfield(specification.populations,'mechanisms') && ~isempty(specification.populations(i).mechanisms)
       if ismember(MechID,{specification.populations(i).mechanisms.name})
-        idx=ismember({specification.populations(i).mechanisms.name},MechID);
-        mechanism=specification.populations(i).mechanisms(idx).equations;
+        idx = ismember({specification.populations(i).mechanisms.name}, MechID);
+        mechanism = specification.populations(i).mechanisms(idx).equations;
       end
+
       % parse mechanism equations
       if ~isempty(mechanism)
-        [tmpmodel,tmpmap]=dsImportModel(mechanism,'namespace',MechScope,'ic_pop',specification.populations(i).name,'user_parameters',parameters);
+        [tmpmodel,tmpmap] = dsImportModel(mechanism,'namespace',MechScope,'ic_pop',specification.populations(i).name,'user_parameters',parameters);
+
         % replace 1st linker name by the one in specification
         if ~isempty(new_linker) && ~isempty(tmpmodel.linkers)
           % first try to find 1st linker target starting with @
           links_at=find(~cellfun(@isempty,regexp({tmpmodel.linkers.target},'^@','once')));
+
           if ~isempty(links_at)
             % use first link with target prepended by '@'
             link_ind=links_at(1);
@@ -283,12 +295,14 @@ for i=1:npops
             % use first link
             link_ind=1;
           end
+
           tmpmodel.linkers(link_ind).target=['@' new_linker];
         end
+
         % combine sub-model with other sub-models
-        model=dsCombineModels(model,tmpmodel, varargin{:});
-        name_map=cat(1,name_map,tmpmap);
-        linker_pops=cat(2,linker_pops,repmat({specification.populations(i).name},[1 length(tmpmodel.linkers)]));
+        model = dsCombineModels(model,tmpmodel, varargin{:});
+        name_map = cat(1,name_map,tmpmap);
+        linker_pops = cat(2,linker_pops,repmat({specification.populations(i).name},[1 length(tmpmodel.linkers)]));
       end
     end
   end
@@ -310,6 +324,7 @@ for i=1:ncons
     % NOTE: in contrast to PopScope above, ConScope is never passed to
     % dsParseModelEquations; thus the '_' should be added here for consistency
     % with mechanism namespaces (which are modified by dsParseModelEquations).
+
   for j=1:length(specification.connections(i).mechanism_list)
     mechanism_=specification.connections(i).mechanism_list{j};
 
@@ -375,6 +390,7 @@ for i=1:ncons
       end
     end
   end
+
   % add reserved keywords (parameters and state variables) to name_map
   add_keywords(source,target,ConScope);
 end
@@ -387,6 +403,7 @@ if ~isempty(model.monitors)
   else
     function_names={};
   end
+
   % get list of monitor names
   monitor_names=fieldnames(model.monitors);
 
@@ -421,9 +438,227 @@ if ~isempty(model.monitors)
   end
 end
 
-  % ----------------------------------
-  % NESTED FUNCTIONS
-  % ----------------------------------
+
+%% 2.0 propagate namespaces through variable and function names
+%      i.e., to establish uniqueness of names by adding namespace/namespace prefixes)
+model.specification = specification;
+% from varargin remove 'stvar_alias_flag'
+varargin=dsRemoveKeyval(varargin,{'stvar_alias_flag'});
+model = dsPropagateNamespaces(model, name_map, varargin{:});
+
+%% 3.0 expand population equations according to mechanism linkers
+% purpose: expand population equations according to linkers
+% - link populations.equations to mechanism sub-models
+% - link mechanism functions and state variables across mechanisms in a given population
+
+% store indices to all expressions and conditionals that are linked (this
+% is necessary for efficiently removing linker targets from expressions after linking)
+all_expression_inds=[];
+all_expression_targets={};
+all_conditionals_inds=[];
+all_conditionals_targets={};
+
+% add variables to linked expression if its a function without ()
+if ~isempty(model.functions) && ~isempty(model.linkers)
+  function_names = fieldnames(model.functions);
+  expressions = {model.linkers.expression};
+  [~,I,J] = intersect(function_names,expressions);
+
+  for i=1:length(I)
+    e = model.functions.(function_names{I(i)}); % function expression (eg,'@(x,y,z)x-(y-z)')
+    v = regexp(e,'@(\([\w,]+\))','tokens','once'); % function input list (eg, '(x,y,z)')
+
+    if ~isempty(v)
+      model.linkers(J(i)).expression=[model.linkers(J(i)).expression v{1}];
+    end
+  end
+end
+
+% loop over linkers
+for i = 1:length(model.linkers)
+  % determine how to link
+  operation = model.linkers(i).operation;
+
+  oldstr = model.linkers(i).target;
+  newstr = model.linkers(i).expression;
+
+  switch operation % see dsClassifyEquation and dsParseModelEquations   % ('((\+=)|(-=)|(\*=)|(/=)|(=>))')
+    case '+='
+      operator='+';
+    case '-='
+      operator='-';
+    case '*='
+      operator='.*';
+    case '/='
+      operator='./';
+    otherwise
+      operator='+';
+  end
+
+  % determine what to link (ie, link across everything belonging to the linker population)
+  % explicitly constrain to linker population
+  expressions_in_pop = ~cellfun(@isempty,regexp(name_map(:,3),['^' linker_pops{i} '_']));
+
+  if ~isempty(model.conditionals)
+    conditionals_in_pop = ~cellfun(@isempty,regexp({model.conditionals.namespace},['^' linker_pops{i}]));
+  end
+
+  if ~isempty(model.linkers)
+    linkers_in_pop = ~cellfun(@isempty,regexp({model.linkers.namespace},['^' linker_pops{i}]));
+  end
+
+  % constrain to namespace
+  names_in_namespace = cellfun(@(x,y)strncmp(y,x,length(y)),name_map(:,2),name_map(:,3));
+
+  % get list of (functions,monitors,ODEs) belonging to the linker population
+  eqn_types = {'ODEs','monitors','functions'};%{'monitors','ODEs'};
+  search_types = {'state_variables','monitors','functions'};%{'monitors','state_variables'};
+
+  % indices to expressions in the linker population with the correct
+  %  search_types and namespace (ie all potential locations for linker to be)
+  inds = find(expressions_in_pop & names_in_namespace & ismember(name_map(:,4),search_types));
+
+  % eliminate duplicates (e.g., state_variables replacing OUT and X)
+  [~,ia] = unique_wrapper(name_map(inds,2),'stable');
+  inds = inds(ia);
+  all_expression_inds = [all_expression_inds inds'];
+  all_expression_targets = cat(2,all_expression_targets,repmat({oldstr},[1 length(inds)]));
+
+  % check for and substitute link
+  for j = 1:length(inds)
+    name = name_map{inds(j),2}; % name of variable as stored in model structure
+    type = name_map{inds(j),4}; % search_types
+    eqn_type=eqn_types{strcmp(type,search_types)}; % corresponding equation type
+
+    % update expression with the current link
+    if isfield(model.(eqn_type), name)
+      % note: name will not be a field of eqn_type for special monitors
+      % (e.g., monitor functions)
+      model.(eqn_type).(name) = linker_strrep(model.(eqn_type).(name), oldstr, newstr, operator);
+    end
+  end
+
+  if ~isempty(model.conditionals)
+    fields={'condition','action','else'};
+
+    % get list of conditionals belonging to the linker population
+    inds=find(conditionals_in_pop);
+    all_conditionals_inds=[all_conditionals_inds inds];
+    all_conditionals_targets=cat(2,all_conditionals_targets,repmat({oldstr},[1 length(inds)]));
+
+    % substitute link
+    for j=1:length(inds)
+      for field_index=1:length(fields)
+        field=fields{field_index};
+        model.conditionals(inds(j)).(field)=linker_strrep(model.conditionals(inds(j)).(field),oldstr,newstr,operator);
+      end
+    end
+  end
+
+  if ~isempty(model.linkers)
+    inds=find(linkers_in_pop);
+    for j=1:length(inds)
+      model.linkers(inds(j)).expression=linker_strrep(model.linkers(inds(j)).expression,oldstr,newstr,operator);
+    end
+  end
+end
+
+% remove target placeholders from expressions
+if options.open_link_flag==0
+  for i=1:length(all_expression_inds)
+    oldstr=all_expression_targets{i};
+    newstr='';
+
+    name = name_map{all_expression_inds(i),2};
+    type = name_map{all_expression_inds(i),4};
+
+    eqn_type=eqn_types{strcmp(type,search_types)};
+
+    pattern = ['\)\.?[-\+\*/]' oldstr '\)']; % pattern accounts for all possible newstr defined for linking
+    replace = [newstr '))'];
+
+    if isfield(model.(eqn_type),name) && ischar(model.(eqn_type).(name))
+        % NOTE: name will not be a field of eqn_type for special monitors
+        % (e.g., monitor functions)
+      model.(eqn_type).(name)=regexprep(model.(eqn_type).(name),pattern,replace);
+    end
+  end
+end
+
+% remove target placeholders from conditionals
+if ~isempty(model.conditionals)
+  for i=1:length(all_conditionals_inds)
+    oldstr=all_conditionals_targets{i};
+    newstr='';
+    pattern = ['\)\.?[-\+\*/]' oldstr '\)']; % pattern accounts for all possible newstr defined for linking
+    replace = [newstr '))'];
+
+    for field_index=1:length(fields)
+      field=fields{field_index};
+      if model.conditionals(all_conditionals_inds(i)).(field)
+        model.conditionals(all_conditionals_inds(i)).(field)=regexprep(model.conditionals(all_conditionals_inds(i)).(field),pattern,replace);
+      end
+    end
+  end
+end
+
+% ------------------------------------------
+% NOTE on non-ideal implementation of 3.0: model.linkers does not contain enough
+% information to determine the population to which it belongs in all cases
+% (due to namespace format differences for population vs connection mechanisms & models
+% with one vs more populations). consequently, had to perform linking in this
+% function using info stored above while parsing the model; ideally, the
+% linking could occur independently of this function, informed by info in
+% model.linkers, and be packaged in its own external function LinkMechanisms().
+% ------------------------------------------
+
+%% 4.0 finalize
+
+% 4.1 sort .ODEs and .ICs wrt .state_variables
+if ~isempty(model.ODEs)
+  model.ODEs = orderfields(model.ODEs,model.state_variables);
+  model.ICs = orderfields(model.ICs,model.state_variables);
+end
+
+
+% 4.2 convert to numeric parameters
+paramCell = struct2cell(model.parameters);
+
+% get index of strings
+idx1 = find(cellfun(@ischar,paramCell));
+
+% which strings contain numeric values?
+idx2 = find(cellfun(@isempty,regexp(paramCell(idx1),'[a-z_A-Z]'))...
+  | ~cellfun(@isempty,regexp(paramCell(idx1),'^\s*\[*\s*\+?inf\s*\]*\s*$','ignorecase'))... % inf
+  | ~cellfun(@isempty,regexp(paramCell(idx1),'^\s*([\-\+]?\d*\.?\d*e[\-\+]?\d+)\s*$','ignorecase'))... % scientific notation
+  | ~cellfun(@isempty,regexp(paramCell(idx1),'^\s*([\-\+]?\s*\(?\s*[\-\+]?\s*\d*\.?\d*\s*\)?\s*\.?[\^\/\*\+\-]\s*\(?\s*[\-\+]?\s*\d*\.?\d*\)?\s*)\s*$','ignorecase'))... % math 1 operator
+  );
+
+% convert those strings which contain numeric values
+paramCell(idx1(idx2)) = cellfun(@eval,paramCell(idx1(idx2)),'uni',0);
+f = fieldnames(model.parameters);
+model.parameters = cell2struct(paramCell,f,1);
+
+
+% 4.3 store original specification
+model.specification = specification; % store specification to enable modifications to be applied later
+model.namespaces = name_map; % store name_map for transparency
+
+model=dsCheckModel(model, varargin{:});
+
+%% auto_gen_test_data_flag argout
+if options.auto_gen_test_data_flag
+  argout = {model, name_map}; % specific to this function
+
+  dsUnitSaveAutoGenTestData(argin, argout);
+end
+
+
+
+
+% ----------------------------------
+% NESTED FUNCTIONS
+% ----------------------------------
   function add_keywords(src,dst,namespace)
     % NOTE: this needs to be coordinated with update_keywords() in dsSimulate()
     %   for parameters
@@ -432,6 +667,7 @@ end
 
     old={'Npre','N[1]','N_pre','Npost','N_post','N[0]','Npop','N_pop','tspike_pre','tspike_post','tspike'};
     new={Nsrc,Nsrc,Nsrc,Ndst,Ndst,Ndst,Ndst,Ndst,[src '_tspike'],[dst '_tspike'],[dst '_tspike']};
+
     for p=1:length(old)
       name_map(end+1,:)={old{p},new{p},namespace,'parameters'};
     end
@@ -439,8 +675,13 @@ end
     % for state variables
     new={};
     old={};
-    src_excluded=~cellfun(@isempty,regexp(name_map(:,1),['pre' '$']));
-    dst_excluded=~cellfun(@isempty,regexp(name_map(:,1),['post' '$']));
+    if options.stvar_alias_flag
+      src_excluded=~cellfun(@isempty,regexp(name_map(:,1),['pre' '$'])) | ~cellfun(@isempty,regexp(name_map(:,1),'stvar'));
+      dst_excluded=~cellfun(@isempty,regexp(name_map(:,1),['post' '$'])) | ~cellfun(@isempty,regexp(name_map(:,1),'stvar'));
+    else
+      src_excluded=~cellfun(@isempty,regexp(name_map(:,1),['pre' '$']));
+      dst_excluded=~cellfun(@isempty,regexp(name_map(:,1),['post' '$']));
+    end
     excluded=src_excluded|dst_excluded;
 
     PopScope=[src '_'];
@@ -452,6 +693,15 @@ end
       Xsrc=Xsrc_new_vars{1};
       old=cat(2,old,{'IN','Xpre','X_pre'});
       new=cat(2,new,{Xsrc,Xsrc,Xsrc});
+      if options.stvar_alias_flag
+        % adding access to all state variables
+        Xsrc_new_vars_unique = unique(Xsrc_new_vars);
+        for ii = 1:numel(Xsrc_new_vars_unique)
+          Xsrc=Xsrc_new_vars_unique{ii};
+          old=cat(2,old,{['IN_stvar',num2str(ii)],['IN_stvar_',num2str(ii)],['Xpre_stvar',num2str(ii)],['Xpre_stvar_',num2str(ii)],['X_pre_stvar',num2str(ii)],['X_pre_stvar_',num2str(ii)]});
+          new=cat(2,new,{Xsrc,Xsrc,Xsrc,Xsrc,Xsrc,Xsrc});
+        end
+      end
     else
       Xsrc_old_vars=[];
       Xsrc_new_vars=[];
@@ -467,6 +717,15 @@ end
       Xdst=Xdst_new_vars{1};
       old=cat(2,old,{'OUT','X','Xpost','X_post'});
       new=cat(2,new,{Xdst,Xdst,Xdst,Xdst});
+      if options.stvar_alias_flag
+        % adding access to all state variables
+        Xdst_new_vars_unique = unique(Xdst_new_vars);
+        for ii = 1:numel(Xdst_new_vars_unique)
+          Xdst=Xdst_new_vars_unique{ii};
+          old=cat(2,old,{['OUT_stvar',num2str(ii)],['OUT_stvar_',num2str(ii)],['X_stvar',num2str(ii)],['X_stvar_',num2str(ii)],['Xpost_stvar',num2str(ii)],['Xpost_stvar_',num2str(ii)],['X_post_stvar',num2str(ii)],['X_post_stvar_',num2str(ii)]});
+          new=cat(2,new,{Xdst,Xdst,Xdst,Xdst,Xdst,Xdst,Xdst,Xdst});
+        end
+      end
     else
       Xdst_old_vars=[];
       Xdst_new_vars=[];
@@ -502,206 +761,13 @@ end
       name_map(end+1,:)={old{p},new{p},namespace,'state_variables'};
     end
   end
-
-%% 2.0 propagate namespaces through variable and function names
-%      i.e., to establish uniqueness of names by adding namespace/namespace prefixes)
-model.specification=specification;
-model = dsPropagateNamespaces(model,name_map, varargin{:});
-
-%% 3.0 expand population equations according to mechanism linkers
-% purpose: expand population equations according to linkers
-% - link populations.equations to mechanism sub-models
-% - link mechanism functions and state variables across mechanisms in a given population
-
-% store indices to all expressions and conditionals that are linked (this
-% is necessary for efficiently removing linker targets from expressions after linking)
-all_expression_inds=[];
-all_expression_targets={};
-all_conditionals_inds=[];
-all_conditionals_targets={};
-
-% add variables to linked expression if its a function without ()
-if ~isempty(model.functions) && ~isempty(model.linkers)
-  function_names=fieldnames(model.functions);
-  expressions={model.linkers.expression};
-  [~,I,J]=intersect(function_names,expressions);
-  for i=1:length(I)
-    e=model.functions.(function_names{I(i)}); % function expression (eg,'@(x,y,z)x-(y-z)')
-    v=regexp(e,'@(\([\w,]+\))','tokens','once'); % function input list (eg, '(x,y,z)')
-    if ~isempty(v)
-      model.linkers(J(i)).expression=[model.linkers(J(i)).expression v{1}];
-    end
-  end
-end
-
-% loop over linkers
-for i=1:length(model.linkers)
-  % determine how to link
-  operation=model.linkers(i).operation;
-  oldstr=model.linkers(i).target;
-  newstr=model.linkers(i).expression;
-  switch operation % see dsClassifyEquation and dsParseModelEquations   % ('((\+=)|(-=)|(\*=)|(/=)|(=>))')
-    case '+='
-      operator='+';
-    case '-='
-      operator='-';
-    case '*='
-      operator='.*';
-    case '/='
-      operator='./';
-    otherwise
-      operator='+';
-  end
-  % determine what to link (ie, link across everything belonging to the linker population)
-  % explicitly constrain to linker population
-  expressions_in_pop=~cellfun(@isempty,regexp(name_map(:,3),['^' linker_pops{i} '_']));
-
-  if ~isempty(model.conditionals)
-    conditionals_in_pop=~cellfun(@isempty,regexp({model.conditionals.namespace},['^' linker_pops{i}]));
-  end
-
-  if ~isempty(model.linkers)
-    linkers_in_pop=~cellfun(@isempty,regexp({model.linkers.namespace},['^' linker_pops{i}]));
-  end
-
-  % constrain to namespace
-  names_in_namespace=cellfun(@(x,y)strncmp(y,x,length(y)),name_map(:,2),name_map(:,3));
-
-  % get list of (functions,monitors,ODEs) belonging to the linker population
-  eqn_types={'ODEs','monitors','functions'};%{'monitors','ODEs'};
-  search_types={'state_variables','monitors','functions'};%{'monitors','state_variables'};
-
-  % indices to expressions in the linker population with the correct search_types and namespace
-  inds=find(expressions_in_pop&names_in_namespace&ismember(name_map(:,4),search_types));
-
-  % eliminate duplicates (e.g., state_variables replacing OUT and X)
-  [jnk,ia,ib]=unique_wrapper(name_map(inds,2),'stable');
-  inds=inds(ia);
-  all_expression_inds=[all_expression_inds inds'];
-  all_expression_targets=cat(2,all_expression_targets,repmat({oldstr},[1 length(inds)]));
-
-  % substitute link
-  for j=1:length(inds)
-    name=name_map{inds(j),2}; % name of variable as stored in model structure
-    type=name_map{inds(j),4}; % search_types
-    eqn_type=eqn_types{strcmp(type,search_types)}; % corresponding equation type
-
-    % update expression with the current link
-    if isfield(model.(eqn_type),name)
-      % note: name will not be a field of eqn_type for special monitors
-      % (e.g., monitor functions)
-      model.(eqn_type).(name)=linker_strrep(model.(eqn_type).(name),oldstr,newstr,operator);
-    end
-  end
-
-  if ~isempty(model.conditionals)
-    fields={'condition','action','else'};
-
-    % get list of conditionals belonging to the linker population
-    inds=find(conditionals_in_pop);
-    all_conditionals_inds=[all_conditionals_inds inds];
-    all_conditionals_targets=cat(2,all_conditionals_targets,repmat({oldstr},[1 length(inds)]));
-
-    % substitute link
-    for j=1:length(inds)
-      for field_index=1:length(fields)
-        field=fields{field_index};
-        model.conditionals(inds(j)).(field)=linker_strrep(model.conditionals(inds(j)).(field),oldstr,newstr,operator);
-      end
-    end
-  end
-
-  if ~isempty(model.linkers)
-    inds=find(linkers_in_pop);
-    for j=1:length(inds)
-      model.linkers(inds(j)).expression=linker_strrep(model.linkers(inds(j)).expression,oldstr,newstr,operator);
-    end
-  end
-end
-
-if options.open_link_flag==0
-  % remove target placeholders from expressions and conditionals
-  for i=1:length(all_expression_inds)
-    oldstr=all_expression_targets{i};
-    newstr='';
-    name=name_map{all_expression_inds(i),2};
-    type=name_map{all_expression_inds(i),4};
-    eqn_type=eqn_types{strcmp(type,search_types)};
-    pattern = ['\)\.?[-\+\*/]' oldstr '\)']; % pattern accounts for all possible newstr defined for linking
-    replace = [newstr '))'];
-    if isfield(model.(eqn_type),name) && ischar(model.(eqn_type).(name))
-        % NOTE: name will not be a field of eqn_type for special monitors
-        % (e.g., monitor functions)
-      model.(eqn_type).(name)=regexprep(model.(eqn_type).(name),pattern,replace);
-    end
-  end
-end
-
-if ~isempty(model.conditionals)
-  for i=1:length(all_conditionals_inds)
-    oldstr=all_conditionals_targets{i};
-    newstr='';
-    pattern = ['\)\.?[-\+\*/]' oldstr '\)']; % pattern accounts for all possible newstr defined for linking
-    replace = [newstr '))'];
-    for field_index=1:length(fields)
-      field=fields{field_index};
-      if model.conditionals(all_conditionals_inds(i)).(field)
-        model.conditionals(all_conditionals_inds(i)).(field)=regexprep(model.conditionals(all_conditionals_inds(i)).(field),pattern,replace);
-      end
-    end
-  end
-end
-
-% ------------------------------------------
-% NOTE on non-ideal implementation of 3.0: model.linkers does not contain enough
-% information to determine the population to which it belongs in all cases
-% (due to namespace format differences for population vs connection mechanisms & models
-% with one vs more populations). consequently, had to perform linking in this
-% function using info stored above while parsing the model; ideally, the
-% linking could occur independently of this function, informed by info in
-% model.linkers, and be packaged in its own external function LinkMechanisms().
-% ------------------------------------------
-
-%% 4.0 finalize
-
-% 4.1 sort .ODEs and .ICs wrt .state_variables
-if ~isempty(model.ODEs)
-  model.ODEs = orderfields(model.ODEs,model.state_variables);
-  model.ICs = orderfields(model.ICs,model.state_variables);
-end
-
-% 4.2 convert to numeric parameters
-c = struct2cell(model.parameters);
-
-% get index of strings
-idx1=find(cellfun(@ischar,c));
-
-% which strings contain numeric values?
-idx2=find(cellfun(@isempty,regexp(c(idx1),'[a-z_A-Z]')) | ~cellfun(@isempty,regexp(c(idx1),'^\s*\[*\s*\+?inf\s*\]*\s*$','ignorecase')));
-
-% convert those strings which contain numeric values
-c(idx1(idx2)) = cellfun(@eval,c(idx1(idx2)),'uni',0);
-f = fieldnames(model.parameters);
-model.parameters = cell2struct(c,f,1);
-
-% 4.3 store original specification
-model.specification = specification; % store specification to enable modifications to be applied later
-model.namespaces = name_map; % store name_map for transparency
-
-model=dsCheckModel(model, varargin{:});
-
-%% auto_gen_test_data_flag argout
-if options.auto_gen_test_data_flag
-  argout = {model, name_map}; % specific to this function
-
-  dsUnitSaveAutoGenTestData(argin, argout);
-end
-
 end % main function
 
 
+
+
 %% SUBFUNCTIONS
-function str=linker_strrep(str,oldstr,newstr,operator)
+function str = linker_strrep(str,oldstr,newstr,operator)
   if isempty(str)
     return;
   end

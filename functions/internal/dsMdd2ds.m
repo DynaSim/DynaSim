@@ -28,14 +28,14 @@ function data = dsMdd2ds(obj,varargin)
 
 
 % Add dummy axis for variables if needed
-if isempty(obj.findaxis('variables'))
+if isempty(obj.findaxis('/^variables$/'))
     Na = length(obj.axis);
     obj.axis(Na+1).name = 'variables';
     obj.axis(Na+1).values = {guess_variable_name(obj)};
 end
 
 % Add dummy axis for populations if needed
-if isempty(obj.findaxis('populations'))
+if isempty(obj.findaxis('/^populations$/'))
     Na = length(obj.axis);
     obj.axis(Na+1).name = 'populations';
     obj.axis(Na+1).values = {guess_population_name(obj)};
@@ -45,8 +45,8 @@ end
 obj = obj.squeezeRegexp('Dim');
 
 % Find population and variable axes
-pop_axis = obj.findaxis('populations');
-var_axis = obj.findaxis('variables');
+pop_axis = obj.findaxis('/^populations$/');
+var_axis = obj.findaxis('/^variables$/');
 
 % Find varied axes
 varied_inds = true(1,ndims(obj)); varied_inds(pop_axis) = false; varied_inds(var_axis) = false;

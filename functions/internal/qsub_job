@@ -3,6 +3,10 @@
 set batchdir = "$1"
 set ui_command = "$2"
 set m_command = "$3"
+set cluster_matlab_version = "$4"
+
+module unload matlab
+module load matlab/${cluster_matlab_version}
 
 cd $batchdir
 echo "ui_command = " $ui_command

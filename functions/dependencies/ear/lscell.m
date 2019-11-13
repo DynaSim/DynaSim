@@ -23,7 +23,7 @@ function dirList = lscell(arg, removePathBool, relativePathBool)
 %
 % See also: DIR
 
-% Dev Note: checked on Mac OS 10.12, Windows 10, Linux with Matlab 2017b
+% Dev Note: checked on Mac OS 10.12, Windows 10, Linux Mint with Matlab 2017b
 
 % parse args
 if ~nargin || isempty(arg)
@@ -54,16 +54,14 @@ if strcmp(dirListS(1).name, '..')
   dirListS(1) = [];
 end
 
-nFiles = length(dirListS);
-
 % convert struct to cellstr
-dirList = cell(nFiles,1);
-for k = 1:nFiles
-  dirList{k} = fullfile(dirListS(k).folder, dirListS(k).name);
-end
+dirList = strcat({dirListS.folder}, filesep, {dirListS.name});
+
+% ensure column vector
+dirList = dirList(:);
 
 % remove extra cells with '..'
-  dirList(~cellfun(@isempty, regexp(dirList, '\.\.$'))) = [];
+dirList(~cellfun(@isempty, regexp(dirList, '\.\.$'))) = [];
 
 % remove trailing period and filesep from dirs
 if isunix || ismac

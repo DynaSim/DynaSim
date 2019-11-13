@@ -12,12 +12,18 @@ set job_filename = "$2"
 
 set ui_command = "$3"
 
+set cluster_matlab_version = "$4"
+
+module unload matlab
+module load matlab/${cluster_matlab_version}
+
 echo "command = " $job_filename
 echo "cwd = " `pwd`
 echo "HOSTNAME = " $HOSTNAME
 echo "JOB_ID = " $JOB_ID
 echo "JOB_NAME = " $JOB_NAME
 
+# remove old pbdout
 if (-e pbsout/${SGE_TASK_ID}.out) then
   rm -f pbsout/${SGE_TASK_ID}.out
 endif

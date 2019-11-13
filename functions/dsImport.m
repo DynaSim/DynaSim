@@ -174,9 +174,11 @@ if isstruct(srcS) && isfield(srcS,'study_dir')
         simIDstr = simIDstr{:};
         simIDstr = simIDstr{:};
         
-        thisDataFile = filesInDataDir{contains(filesInDataDir, ['sim' simIDstr])};
-        
-        data_files{iFile} = thisDataFile;
+        try
+          thisDataFile = filesInDataDir{contains(filesInDataDir, ['sim' simIDstr])};
+
+          data_files{iFile} = thisDataFile;
+        end
       end
       
       dataExist = cellfun(@exist,data_files)==2;
@@ -205,19 +207,22 @@ if isstruct(srcS) && isfield(srcS,'study_dir')
   % load each data set recursively
   keyvals = dsOptions2Keyval(options);
 
+  iLoadedFile = 0;
   for iFile = 1:num_files
-    thisDataExists = dataExist(dataExist);
+    thisDataExists = dataExist(iFile);
     
     if thisDataExists
-      dsVprintf(options, 'loading file (%g/%g): %s\n',iFile,num_files,data_files{iFile});
+      dsVprintf(options, '  loading file (%g/%g): %s\n',iFile,num_files,data_files{iFile});
     else
-      dsVprintf(options, 'skipping missing file (%g/%g): %s\n',iFile,num_files,data_files{iFile});
+      dsVprintf(options, '    skipping missing file (%g/%g): %s\n',iFile,num_files,data_files{iFile});
       continue
     end
     
+    iLoadedFile = iLoadedFile + 1;
+    
     tmp_data = dsImport(data_files{iFile},keyvals{:});
     num_sets_per_file = length(tmp_data);
-    modifications = studyinfo.simulations(iFile).modifications;
+    modifications = studyinfo.simulations(iLoadedFile).modifications;
     
     if ~isfield(tmp_data,'varied') && ~isempty(modifications)
       % add varied info
@@ -240,8 +245,7 @@ if isstruct(srcS) && isfield(srcS,'study_dir')
     end
 
     % store this data
-    if iFile == 1
-      % TODO: fix this if skips first file
+    if iLoadedFile == 1
       total_num_sets = num_sets_per_file * num_files;
       set_indices=0:num_sets_per_file:total_num_sets-1;
 
@@ -265,6 +269,20 @@ if isstruct(srcS) && isfield(srcS,'study_dir')
       end
     end
   end % iFile = 1:num_files
+  
+  if ~any(dataExist)
+    error('No Data Found to analyze.')
+  end
+  
+  % remove missing entries
+    % TODO: fix if missing entries and num_sets_per_file > 1
+  if ~all(dataExist)
+    if num_sets_per_file == 1
+      data(~dataExist) = [];
+    else
+      warning('Missing entries not removed, first found data copied into them. This behavior will be changed in a future DynaSim release.')
+    end
+  end
 
   if ~exist('data', 'var')
     if options.as_cell
@@ -333,20 +351,34 @@ if ischar(src) % char path to single data file
         if isfield(data,'data') && length(fieldnames(data))==1
           data=data.data;
         end
-      else
-        % load partial data set
+      else % load partial data set
         % use matfile() to load HDF subsets given varargin options...
-        obj=matfile(src); % MAT-file object
-        varlist=who(obj); % variables stored in mat-file
-        labels=obj.labels; % list of state variables and monitors
+        obj = matfile(src); % MAT-file object
+        varlist = who(obj); % variables stored in mat-file
+        labels = obj.labels; % list of state variables and monitors
 
-        if iscellstr(options.variables) % restrict variables to load
-          labels=labels(ismember(labels,options.variables));
+        if iscellstr(options.variables)
+          try
+            var2load = false(size(labels));
+            
+            for iVar = 1:numel(options.variables)
+              % pass var string through RE to use wildcards
+              thisSearch = regexp(labels, regexptranslate('wildcard',options.variables{iVar})); % returns cells
+              thisSearch = ~cellfun(@isempty, thisSearch); % convert to logical
+              var2load = var2load | thisSearch;
+            end
+            labels = labels(var2load); % restrict variables to load
+          catch
+            % revert to default mode
+            labels = labels(ismember(labels, options.variables));
+          end
+        else
+          warning('Not using options.variables');
         end
 
-        simulator_options=obj.simulator_options;
-        time=(simulator_options.tspan(1):simulator_options.dt:simulator_options.tspan(2))';
-        time=time(1:simulator_options.downsample_factor:length(time));
+        simulator_options = obj.simulator_options;
+        time = (simulator_options.tspan(1):simulator_options.dt:simulator_options.tspan(2))';
+        time = time(1:simulator_options.downsample_factor:length(time));
 
         if ~isempty(options.time_limits)
           % determine time indices to load

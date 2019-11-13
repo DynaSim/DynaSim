@@ -31,14 +31,14 @@ if isempty(str)
   return;
 end
 
-%% auto_gen_test_data_flag argin
-options = dsCheckOptions(varargin,{'auto_gen_test_data_flag',0,{0,1}},false);
-if options.auto_gen_test_data_flag
-  varargs = varargin;
-  varargs{find(strcmp(varargs, 'auto_gen_test_data_flag'))+1} = 0;
-  varargs(end+1:end+2) = {'unit_test_flag',1};
-  argin = [{str}, {oldstr}, {newstr}, {lpad}, {rpad}, varargs]; % specific to this function
-end
+% %% auto_gen_test_data_flag argin
+% options = dsCheckOptions(varargin,{'auto_gen_test_data_flag',0,{0,1}},false);
+% if options.auto_gen_test_data_flag
+%   varargs = varargin;
+%   varargs{find(strcmp(varargs, 'auto_gen_test_data_flag'))+1} = 0;
+%   varargs(end+1:end+2) = {'unit_test_flag',1};
+%   argin = [{str}, {oldstr}, {newstr}, {lpad}, {rpad}, varargs]; % specific to this function
+% end
 
 pat=['([^\w\.]{1})' oldstr '([^\w]{1})']; % in the middle
   % NOTE: exclude .oldstr for case where prefix has already been prepended and oldstr appears >1x in str
@@ -64,9 +64,9 @@ pat=['^' oldstr '$'];               % all there is
 rep=[lpad newstr rpad];
 str=regexprep(str,pat,rep);
 
-%% auto_gen_test_data_flag argout
-if options.auto_gen_test_data_flag
-  argout = {str}; % specific to this function
-  
-  dsUnitSaveAutoGenTestData(argin, argout);
-end
+% %% auto_gen_test_data_flag argout
+% if options.auto_gen_test_data_flag
+%   argout = {str}; % specific to this function
+%   
+%   dsUnitSaveAutoGenTestData(argin, argout);
+% end

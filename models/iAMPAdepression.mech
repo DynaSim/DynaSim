@@ -29,7 +29,7 @@ deprAMPANoiseIC = 0.1
 
 % Note that alpha rate here corresponds to the inverse of the rise  time constant, 1/tauR, and
 %        the beta rate here corresponds to the inverse of the decay time constant, 1/tauD
-alpha = 1.1  % ms^-1
+alpha = 2.2  % ms^-1
 beta  = 0.19 % ms^-1
 
 % Synaptic depression parameters:
@@ -58,7 +58,7 @@ monitor IAMPAdepr
 
 
 % ODEs and ICs
-s' = alpha.*(1 + tanh(X_pre./4)).*(1-s) - beta.*s
+s' = 1/2*alpha.*(1 + tanh(X_pre./4)).*(1-s) - beta.*s
 s(0) = sAMPAIC+sAMPANoiseIC.*rand(1,N_pre)
 
 % This represents the amount of synaptic resources available

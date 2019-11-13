@@ -1,5 +1,5 @@
 function solve_file_m = dsCompareSolveFiles(solve_file_m, mexPath, verbose_flag)
-%COMPARESOLVEFILES - looks for pre-existing m and mex files for this simulation
+%dsCompareSolveFiles - looks for pre-existing m and mex files for this simulation
 % This looks for an equivalent solve m-file in the solve directory or given mex
 % directory as 2nd argument. If a mex file is found, it will be copied to the solve dir.
 %
@@ -29,7 +29,7 @@ function solve_file_m = dsCompareSolveFiles(solve_file_m, mexPath, verbose_flag)
 
 if nargin < 2
   mexPath = solvePath;
-  
+
   checkMexPathBool = false;
 elseif strcmp(mexPath, solvePath)
   checkMexPathBool = false;
@@ -60,14 +60,14 @@ diff_file = [fname,'.diff'];
 for f = 1:nFiles
   % -B neglects empty lines, -b neglects in-between (>1) and trailing (all) whitespace, sed with regexp is used to neglect all leading whitespace
   [~,diffs] = system(['bash -c "diff -Bb <(sed ''s/^[ \t]*//'' ' solve_file_m ') <(sed ''s/^[ \t]*//'' ' fullfile(mexPath,files{f}) ')"']);
-  
+
   fid = fopen(diff_file,'wt');
-  
+
   % look for matching solve file
   if isempty(diffs)
     old_solve_file_m = solve_file_m;
     delete(old_solve_file_m);
-    
+
     % delete diff file since match found
     fclose(fid);
     delete(diff_file);
@@ -75,14 +75,13 @@ for f = 1:nFiles
     if checkMexPathBool
       % Copy solve file from mexPath into solve path
       copyfile(fullfile(mexPath,files{f}), solvePath);
-      
-      
+
       % Look for mex file in mexPath
       [~,fname] = fileparts(files{f});
       if ~isempty(dir(fullfile(mexPath, [fname '_mex*'])))
         % Copy mex file from mexPath into solve path
         copyfile(fullfile(mexPath,[fname '_mex*']),solvePath);
-        
+
         if verbose_flag
           fprintf('Copying mex file from %s to %s \n', fullfile(mexPath,[fname '_mex*']), solvePath);
         end
@@ -91,13 +90,16 @@ for f = 1:nFiles
 
     % assign newly found matching solve m-file
     solve_file_m = fullfile(solvePath,files{f});
-    
+
+    % avoiding matlab crashing when reusing a mex file from memory, i.e., when calling the same mex file two or more times in a row
+    clear mex;
+
     % stop for loop since found match
     break;
   else
     fprintf(fid,'%s\n',diffs);
   end
-  
+
   fclose(fid);
 end
 

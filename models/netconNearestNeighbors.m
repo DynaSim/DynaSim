@@ -1,6 +1,6 @@
 function netcon = netconNearestNeighbors(nNeighbors, nPre, nPost, removeRecurrentBool)
 %NETCONNEARESTNEIGHBORS - Calculate netcon for radius-type connections
-% Version 2
+% Version 3
 % Author: Erik Roberts
 % Some modifications by Austin Soplata (AES)
 %
@@ -9,24 +9,17 @@ function netcon = netconNearestNeighbors(nNeighbors, nPre, nPost, removeRecurren
 %     for connections where the two populations are of either the same or
 %     different sizes.
 %
-% Usage: netcon = netconNearestNeighbors(nNeighbors, nPre, nPost)
-%        netcon = netconNearestNeighbors(nNeighbors, nPre, nPost, removeRecurrentBool)
+% Usage: netcon = netconNearestNeighbors(nNeighbors, nPre, nPost, removeRecurrentBool)
 %
 % Inputs:
 %   nNeighbors: number of nearest neighbors to connect to, aka connective "diameter"
 %   nPre:  number of PREsynaptic neurons
 %   nPost: number of POSTsynaptic neurons
-%   removeRecurrentBool: Remove recurrent connections. Optional, default
-%       false. Only meant for when making a connection between a population
-%       and itself; will give an error when the source and target populations
-%       are of different sizes.
+%   removeRecurrentBool: Remove recurrent connections. Only meant for when
+%       making a connection between a population and itself.
 %
 % Outputs:
 %   netcon: the connection matrix
-
-if nargin < 4
-  removeRecurrentBool = false;
-end
 
 netcon = zeros(nPre, nPost);
 
@@ -41,7 +34,7 @@ if size(netcon,1) > nNeighbors && size(netcon,2) > nNeighbors
     % if height < width, then i needs to wrap around
     for i = 1:size(netcon,1)
       j = i-nHalf:i+nHalf;
-      % AES: didn't put the following into a function call for speed
+      % didn't put the following into a function call for speed
       if any(j <= 0)
         j(j <= 0) = j(j <= 0) + nPost;
       elseif any(j > nPost)
@@ -80,7 +73,8 @@ end
 
 % remove recurrent connections
 % AES: changed default check to positive
-% Note: This WILL break if it is used on populations of different sizes
+% AES: removed the former `exist` check since `exist` breaks MEX code gen
 if removeRecurrentBool
-  netcon = netcon - diag(diag(netcon));
+  % AES: Below should work for both square and non-square matrices
+  netcon = netcon - eye(size(netcon));
 end

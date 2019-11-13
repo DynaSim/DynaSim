@@ -47,26 +47,26 @@ switch lower(options.format)
       % split DynaSim data structure into separate variables saved to a
       % mat-file for subsequent loading with matfile()
       vars=fieldnames(data);
-      for i=1:length(vars)
-        eval(sprintf('%s=data.%s;',vars{i},vars{i}));
-      end
+      
       if options.matCompatibility_flag
         try
-          save(options.filename,vars{:},'-v7');
+          save(options.filename, '-struct',varName, '-v7');
         catch
           fprintf('Data is not ''-v7'' compatible. Setting ''matCompatibility_flag'' to 0.\n')
+          
           options.matCompatibility_flag = 0;
+          
           if strcmp(reportUI,'matlab')
-            save(options.filename,vars{:},'-v7.3');
+            save(options.filename, '-struct',varName, '-v7.3');
           else
-            save(options.filename,vars{:},'-hdf5'); % hdf5 format in Octave
+            save(options.filename, '-struct',varName, '-hdf5'); % hdf5 format in Octave
           end
         end
       else
         if strcmp(reportUI,'matlab')
-          save(options.filename,vars{:},'-v7.3');
+          save(options.filename, '-struct',varName, '-v7.3');
         else
-          save(options.filename,vars{:},'-hdf5'); % hdf5 format in Octave
+          save(options.filename, '-struct',varName, '-hdf5'); % hdf5 format in Octave
         end
       end % if options.matCompatibility_flag
     else % numel(data)~=1

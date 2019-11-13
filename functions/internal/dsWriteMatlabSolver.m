@@ -161,7 +161,7 @@ if options.save_parameters_flag
       if ~any(strcmp(model.namespaces(:,2), this_mod_param))
         % find correct namespace(s) based on param and pop
         namespaceInd = logical( contains(model.namespaces(:,2), [first_mod_set{iParamMod,1} '_']) .* ...
-          contains(model.namespaces(:,2), first_mod_set{iParamMod,3}) );
+          endsWith(model.namespaces(:,2), first_mod_set{iParamMod,3}) );
 
         numNamespaceMatches = sum(namespaceInd);
         
@@ -174,7 +174,7 @@ if options.save_parameters_flag
           
           % find correct namespace(s) based on param and pop
           namespaceInd = logical( contains(model.namespaces(:,2), [flippedNamespace '_']) .* ...
-          contains(model.namespaces(:,2), first_mod_set{iParamMod,3}) );
+          endsWith(model.namespaces(:,2), first_mod_set{iParamMod,3}) );
 
           numNamespaceMatches = sum(namespaceInd);
         end
@@ -199,6 +199,10 @@ if options.save_parameters_flag
       end
     end
     
+    % remove empty (ie non-matched) params
+    mod_params = mod_params(~cellfun(@isempty, mod_params));
+    val2modMap = val2modMap(~isnan(val2modMap));
+    
     % update since may have increased due to multiple namespace matches for param
     nParamMods = size(mod_params, 1);
 
@@ -217,7 +221,7 @@ if options.save_parameters_flag
     end
 
     % Assign value vectors to params
-    for iParam = 1:nParamMods      
+    for iParam = 1:nParamMods
       p.(mod_params{iParam}) = param_values(iParam,:);
     end
   end % one_solve_file_flag

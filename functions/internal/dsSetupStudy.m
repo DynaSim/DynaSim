@@ -12,6 +12,9 @@ function [studyinfo,options] = dsSetupStudy(base_model,varargin)
 opts=dsCheckOptions(varargin,{...
   'modifications_set',[],[],... % search space
   'simulator_options',[],[],... % options from dsSimulate
+  'mex_flag',0,{0,1},...
+  'cluster_flag',0,{0,1},...
+  'one_solve_file_flag',0,{0,1},...
   'process_id',[],[],... % process identifier for loading studyinfo if necessary
   },false);
 
@@ -25,7 +28,7 @@ options = opts.simulator_options;
 
 % Setup Study
 if options.verbose_flag
-  fprintf('PREPARING STUDY:\n');
+  fprintf('\nPREPARING STUDY:\n');
 end
 
 if options.save_data_flag || options.save_results_flag || options.parfor_flag
@@ -57,12 +60,19 @@ if options.save_data_flag || options.save_results_flag || options.parfor_flag
   % set solve_file name for this study
   if isempty(options.solve_file)
     % set default solve_file for this study
-    [~,fname]=fileparts(options.study_dir);
-    fname=['solve_ode_' fname];
+    [~,fname] = fileparts(options.study_dir);
+    fname = ['solve_ode_' fname];
 
     % replace non-word characters by underscores so that matlab can execute
     % the file as a Matlab function:
-    fname=regexprep(fname,'[^\w]','_');
+    fname = regexprep(fname,'[^\w]','_');
+    
+    % add #sims to name if mex_flag and one_solve_file_flag since #sims coded
+    % into file
+    if options.mex_flag && options.one_solve_file_flag && options.cluster_flag
+      nSims = length(modifications_set);
+      fname = sprintf('%s_%isims', fname, nSims);
+    end
 
     % store the solve file
     options.solve_file = fullfile(options.study_dir,'solve',[fname '.m']);
@@ -174,7 +184,11 @@ if options.save_data_flag || options.save_results_flag || options.parfor_flag
         studyinfo.simulations(k).result_functions{end+1} = options.analysis_functions{kk};
         studyinfo.simulations(k).result_options{end+1} = options.analysis_options{kk};
 
-        fname = [options.prefix '_sim' num2str(k) '_analysis' num2str(kk) '_' func2str(options.analysis_functions{kk}) '.mat'];
+        % check for function-specific prefix
+        this_analysis_options = dsCheckOptions(options.analysis_options{kk}, {'prefix',options.prefix,[]},false);
+        prefix = this_analysis_options.prefix;
+        
+        fname = [prefix '_sim' num2str(k) '_analysis' num2str(kk) '_' func2str(options.analysis_functions{kk}) '.mat'];
         studyinfo.simulations(k).result_files{end+1} = fullfile(results_dir,fname);
       end
 
@@ -182,7 +196,12 @@ if options.save_data_flag || options.save_results_flag || options.parfor_flag
       for kk = 1:length(options.plot_functions)
         studyinfo.simulations(k).result_functions{end+1}=options.plot_functions{kk};
         studyinfo.simulations(k).result_options{end+1}=options.plot_options{kk};
-        fname=[options.prefix '_sim' num2str(k) '_plot' num2str(kk) '_' func2str(options.plot_functions{kk})];
+        
+        % check for function-specific prefix
+        this_plot_options = dsCheckOptions(options.plot_options{kk}, {'prefix',options.prefix,[]},false);
+        prefix = this_plot_options.prefix;
+        
+        fname=[prefix '_sim' num2str(k) '_plot' num2str(kk) '_' func2str(options.plot_functions{kk})];
         % note: extension will depend on output format (jpg,png,eps,svg)
         % and be set in dsAnalyze().
         studyinfo.simulations(k).result_files{end+1}=fullfile(plot_dir,fname);
@@ -201,6 +220,66 @@ if options.save_data_flag || options.save_results_flag || options.parfor_flag
     study_file=fullfile(options.study_dir,'studyinfo.mat');
     dsStudyinfoIO(studyinfo,study_file,process_id,options.verbose_flag);
   end
+  
+  %% save run file
+  if options.copy_run_file_flag
+    stack = dbstack;
+    firstFile = stack(end).file;
+    if ~contains(firstFile, 'dsSimulate')
+      runFile = firstFile;
+      runFilePath = which(firstFile);
+    else
+      runFilePath = '';
+    end
+    
+    solveDir = fullfile(options.study_dir, 'solve');
+    if ~isdir(solveDir)
+      mkdir(solveDir);
+    end
+    
+    if ~isempty(runFilePath)
+      dsVprintf(options, 'Copying run file ''%s'' into ''study_dir/solve'': %s \n', runFile,solveDir);
+      copyPath = fullfile(solveDir, runFile);
+      copyfile(runFilePath, copyPath);
+    end
+  end
+  
+  %% save mech files
+  if options.copy_mech_files_flag
+    % add pop mechs
+    mechFiles = horzcat(base_model.specification.populations.mechanism_list);
+    
+    % add connection mechs
+    if ~isempty(base_model.specification.connections)
+      mechFiles = horzcat(mechFiles, base_model.specification.connections.mechanism_list);
+    end
+    
+    if ~isempty(mechFiles)
+      dsVprintf(options, 'Copying mech files into ''study_dir/solve/mechs''... \n');
+      
+      mechCopyDir = fullfile(options.study_dir, 'solve','mechs');
+      if ~isdir(mechCopyDir)
+        mkdir(mechCopyDir);
+      end
+      
+      for iFile = 1:length(mechFiles)
+        try
+          thisFilePath = mechFiles{iFile};
+          
+          thisFilePath = which(thisFilePath);
+          
+          [~, fileName,ext] = fileparts(thisFilePath);
+          
+          dsVprintf(options, '    %s \n', fileName);
+          
+          thisCopyPath = fullfile(mechCopyDir, [fileName, ext]);
+          
+          copyfile(thisFilePath, thisCopyPath);
+        end
+      end
+    end
+  end % options.copy_mech_files_flag
+
 else
   % set defaults for not saving anything
   if isempty(options.study_dir)

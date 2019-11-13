@@ -24,7 +24,7 @@ for i = 1:length(data)
     % Identify all fields in data containing simulated output
     labels = data(i).labels;
 
-    % Sweep through these fields and take average
+    % Sweep through these fields and do cropping
     for j = 1:length(labels)
         if ~isempty(data(i).(labels{j}))
             data_out(i).(labels{j}) = data(i).(labels{j})(inds,:);
