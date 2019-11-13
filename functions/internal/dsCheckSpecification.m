@@ -34,6 +34,10 @@ function spec = dsCheckSpecification(specification, varargin)
 %       .mechanism_list (required)   : list of mechanisms that link two populations
 %       .parameters (default: [])    : parameters to assign across all equations in
 %                                      mechanisms in this connection's mechanism_list.
+%     .mechanisms(i) (default: []): contains info on all population and
+%                                      connection mechanisms.
+%       .name
+%       .equations
 %
 % Notes:
 %   - NOTE 1: .equations can be an equation string, cell array listing equation
@@ -908,6 +912,54 @@ for f=1:length(fields)
       end
     end
   end
+end
+
+% Expand connection lists (A,B,...)->X to A->X, B->X, ...
+for i=1:length(spec.connections)
+  if any(spec.connections(i).source == ',')
+    srcs = spec.connections(i).source;
+    % remove parantheses
+    srcs = strrep(srcs,'(','');
+    srcs = strrep(srcs,')','');
+    % split sources
+    srcs = regexp(srcs,',','split');
+    % update source of this element
+    spec.connections(i).source = srcs{1};
+    % create new connections for other sources
+    newcons = repmat(spec.connections(i),[1 length(srcs)-1]);
+    for j=1:length(srcs)-1
+      newcons(j).source = srcs{j+1};
+    end
+    % append new connections
+    spec.connections = cat(2,spec.connections,newcons);
+  end
+end
+
+% Expand connection lists A->(X,Y,...) to A->X, A->Y, ...
+for i=1:length(spec.connections)
+  if any(spec.connections(i).target == ',')
+    dsts = spec.connections(i).target;
+    % remove parantheses
+    dsts = strrep(dsts,'(','');
+    dsts = strrep(dsts,')','');
+    % split targets
+    dsts = regexp(dsts,',','split');
+    % update source of this element
+    spec.connections(i).target = dsts{1};
+    % create new connections for other sources
+    newcons = repmat(spec.connections(i),[1 length(dsts)-1]);
+    for j=1:length(dsts)-1
+      newcons(j).target = dsts{j+1};
+    end
+    % append new connections
+    spec.connections = cat(2,spec.connections,newcons);
+  end
+end
+
+% remove whitespace from connection sources and targets
+for i=1:length(spec.connections)
+  spec.connections(i).source = strtrim(spec.connections(i).source);
+  spec.connections(i).target = strtrim(spec.connections(i).target);
 end
 
 %% auto_gen_test_data_flag argout
