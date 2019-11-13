@@ -296,7 +296,10 @@ dsPlot(data);
 dsPlot(data,'plot_type','rastergram'); % <-- Figure 5 in DynaSim paper
 dsPlotFR(data); % examine how mean firing rate changes with Iapp and tauD
 
-dsPlot(data,'plot_type','power');
+if 0 
+  % requires Signal Processing Toolbox function 'pmtm'
+  dsPlot(data,'plot_type','power');
+end
 
 % %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% RUNNING SIMULATIONS ON THE CLUSTER
@@ -571,7 +574,7 @@ dsPlot(data);
 % which contains mean and standard deviation data.
 s = load(fullfile('demo_efficient_sim','results','study_sim1_analysis1_dsCalcAverages.mat'));
 dsPlot(s.result);
-dsPlot2(s.result,'variable','/iNa_m|iNa_h/');       % Plot several state variables using dsPlot2
+%dsPlot2(s.result,'variable','/iNa_m|iNa_h/');       % Plot several state variables using dsPlot2
 
 
 % sets of simulations:
