@@ -1609,7 +1609,7 @@ function print_monitor_update(fid,monitors,index_nexts_mon,state_variables,index
   if isempty(monitors) && iscell(index_nexts) % being called from within the integrator loop
     return;
   end
-  if iscell(index_nexts_var) % being called from within the integrator loop
+  if iscell(index_nexts_mon) % iscell(index_nexts_var) % being called from within the integrator loop
     fprintf(fid,'\n');
     fprintf(fid,'  %% ------------------------------------------------------------\n');
     fprintf(fid,'  %% Update monitors:\n');
