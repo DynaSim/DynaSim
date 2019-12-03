@@ -930,25 +930,33 @@ if ~isempty(model.monitors)
       tmp_mon=cell2struct({monitor_expressions{i}},{monitor_names{i}},1);
       if options.downsample_factor==1
         tmp_var_index=cellfun(@(x)strrep(x,'n','1'),index_nexts,'uni',0);
-        if ndims_per_mon(i)==1
-          % set mon(1,:)=f(IC);
-          print_monitor_update(fid,tmp_mon,'(1,:)',state_variables,tmp_var_index, varargin{:});
-%           print_monitor_update(fid,tmp,'(1,:)',state_variables,'(1,:)', varargin{:});
-        elseif ndims_per_mon(i)==2
-          % set mon(:,:,1)=f(IC);
-          print_monitor_update(fid,tmp_mon,'(:,:,1)',state_variables,tmp_var_index, varargin{:});          
-        else
-          error('only 1D and 2D populations are supported a this time.');
+        if nvals_per_mon(i)>1 % use full 2D matrix indexing
+          if ndims_per_mon(i)==1
+            % set mon(1,:)=f(IC);
+            print_monitor_update(fid,tmp_mon,'(1,:)',state_variables,tmp_var_index, varargin{:});
+  %           print_monitor_update(fid,tmp,'(1,:)',state_variables,'(1,:)', varargin{:});
+          elseif ndims_per_mon(i)==2
+            % set mon(:,:,1)=f(IC);
+            print_monitor_update(fid,tmp_mon,'(:,:,1)',state_variables,tmp_var_index, varargin{:});          
+          else
+            error('only 1D and 2D populations are supported a this time.');
+          end
+        else % use more concise 1D indexing because it is much faster for some Matlab-specific reason...
+          print_monitor_update(fid,tmp_mon,'(1)',state_variables,tmp_var_index, varargin{:});
         end
       else
-        if ndims_per_mon(i)==1
-          % set mon(1,:)=mon_last;
-          print_monitor_update(fid,tmp_mon,'(1,:)',state_variables,'_last', varargin{:});
-        elseif ndims_per_mon(i)==2
-          % set mon(:,:,1)=var_last;
-          print_monitor_update(fid,tmp_mon,'(:,:,1)',state_variables,'_last', varargin{:});
+        if nvals_per_mon(i)>1 % use full 2D matrix indexing
+          if ndims_per_mon(i)==1
+            % set mon(1,:)=mon_last;
+            print_monitor_update(fid,tmp_mon,'(1,:)',state_variables,'_last', varargin{:});
+          elseif ndims_per_mon(i)==2
+            % set mon(:,:,1)=var_last;
+            print_monitor_update(fid,tmp_mon,'(:,:,1)',state_variables,'_last', varargin{:});
+          else
+            error('only 1D and 2D populations are supported a this time.');
+          end
         else
-          error('only 1D and 2D populations are supported a this time.');
+          print_monitor_update(fid,tmp_mon,'(1)',state_variables,'_last', varargin{:});
         end
       end      
     end %disk_flag
