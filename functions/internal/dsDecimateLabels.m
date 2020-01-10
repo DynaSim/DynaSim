@@ -35,3 +35,20 @@ for j = 1:length(data(1).labels)
 
 end
 
+
+
+%%
+% More condensed version
+data_decim = data;
+
+allfields = fieldnames(data_decim);
+
+data_decim2 = [];
+for i = 1:length(data_decim)
+    dpart = struct;
+    for j = 1:length(allfields)
+        dpart.(allfields{j}) = data_decim(i).(allfields{j});
+    end
+    data_decim2 = [data_decim2, dpart];
+end
+
