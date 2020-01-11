@@ -35,10 +35,17 @@ for j = 1:length(data(1).labels)
 
 end
 
+% Update labels
+for i = 1:length(data)
+    data(i).labels=labels2keep;
+end
+
+
 
 
 %%
-% More condensed version
+% More condensed version (I was thinking that this approach might be more
+% disk space efficient, but it turns out they are the same)
 data_decim = data;
 
 allfields = fieldnames(data_decim);
@@ -49,6 +56,12 @@ for i = 1:length(data_decim)
     for j = 1:length(allfields)
         dpart.(allfields{j}) = data_decim(i).(allfields{j});
     end
+    
     data_decim2 = [data_decim2, dpart];
+end
+
+% Update labels
+for i = 1:length(data_decim2)
+    data_decim2(i).labels=labels2keep;
 end
 
