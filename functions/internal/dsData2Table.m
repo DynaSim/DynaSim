@@ -48,7 +48,7 @@ function [data_table,column_titles,time] = dsData2Table(data,verbose_flag,maxrow
     % Get metadata for all data fields (e.g. populations / currents / state
     % variables) 
     labels = data(1).labels;
-    labels = labels(cellfun(@isempty,strfind(labels,'time'))); % Remove time from labels
+    labels = labels(~strcmp(labels,'time')); % Remove time from labels
     num_labels = length(labels);
     
     % Determine all unique populations
