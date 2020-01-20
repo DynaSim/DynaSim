@@ -1,4 +1,4 @@
-function xp = ds2mdd(data,merge_covaried_axes,merge_sparse_axes,varargin)
+function xp = ds2mdd(data,merge_covaried_axes,merge_sparse_axes,merge_everything,varargin)
     % Convert DynaSim data structure to xp format
 
     data = dsCheckData(data, varargin{:});
@@ -9,6 +9,17 @@ function xp = ds2mdd(data,merge_covaried_axes,merge_sparse_axes,varargin)
     
     if nargin < 3
         merge_sparse_axes = true;
+    end
+    
+    if nargin < 4
+        merge_everything = false;
+    end
+    
+    % If we're merging everything, set other merge flags to false, since
+    % we'll be merging them anyways
+    if merge_everything
+        merge_covaried_axes=false;
+        merge_sparse_axes=false;
     end
 
     if isempty(data)
@@ -53,6 +64,10 @@ function xp = ds2mdd(data,merge_covaried_axes,merge_sparse_axes,varargin)
     
     if merge_sparse_axes && isfield(data(1),'varied')
         [data, variedname_merged, varied_vals ] = dsAutoMergeVarieds(data);
+    end
+    
+    if merge_everything && isfield(data(1),'varied')
+        [data, variedname_merged, varied_vals ] = dsMergeVarieds(data,data(1).varied);
     end
     
 % % % % % % % % % % % % % % % Merging is complete % % % % % % % %

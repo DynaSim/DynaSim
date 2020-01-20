@@ -1,4 +1,4 @@
-function xp = dsImg2mdd(data_img,merge_covaried_axes,merge_sparse_axes,varargin)
+function xp = dsImg2mdd(data_img,merge_covaried_axes,merge_sparse_axes,merge_everything,varargin)
 
     if nargin < 2
         merge_covaried_axes = true;
@@ -6,6 +6,17 @@ function xp = dsImg2mdd(data_img,merge_covaried_axes,merge_sparse_axes,varargin)
     
     if nargin < 3
         merge_sparse_axes = true;
+    end
+    
+    if nargin < 4
+        merge_everything = false;
+    end
+    
+    % If we're merging everything, set other merge flags to false, since
+    % we'll be merging them anyways
+    if merge_everything
+        merge_covaried_axes=false;
+        merge_sparse_axes=false;
     end
     
     if isempty(data_img)
@@ -48,6 +59,10 @@ function xp = dsImg2mdd(data_img,merge_covaried_axes,merge_sparse_axes,varargin)
     
     if merge_sparse_axes && isfield(data_img(1),'varied')
         [data_img, variedname_merged, varied_vals ] = dsAutoMergeVarieds(data_img);
+    end
+    
+    if merge_everything && isfield(data_img(1),'varied')
+        [data_img, variedname_merged, varied_vals ] = dsMergeVarieds(data_img,data_img(1).varied);
     end
     
 % % % % % % % % % % % % % % % Merging is complete % % % % % % % %
