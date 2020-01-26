@@ -26,7 +26,7 @@ function varargout = fig2svg(filename, id, debug, legendIcons, clippingMode, fig
 
   global FIG2SVG_globals
   global colorname
-  release_version = '2019.12.0'; % year.month.incremental
+  release_version = '2020.01.0'; % year.month.incremental
   FIG2SVG_globals.runningIdNumber = 0;
   FIG2SVG_globals.UI = reportUI;
   FIG2SVG_globals.octave = false;
@@ -92,7 +92,7 @@ function varargout = fig2svg(filename, id, debug, legendIcons, clippingMode, fig
       copyobj(get(f1, 'children'), f2);
       if ~FIG2SVG_globals.octave
         paperpos = get(f1, 'Position');
-        set(f2, 'Position', paperpos)
+        % set(f2, 'Position', paperpos)
         if ~UIverlessthan('8.4.0')
           if ~isempty(xl.String)
             set(gca, 'xlabel', xl)
@@ -1984,7 +1984,7 @@ function group = axes2svg(fid, id, ax, group, paperpos)
           lim = [axlimz(1), axlimz(2)];
         end
         if z_axis_point_index == 1 || z_axis_point_index == 4
-          x_tick_end1 = interp1([0, 1], [x(z_axis_point_index), x(edge_neighbours(z_axis_point_index, 1))], ticklength*tick_ratio(3), 'linear', 'extrap')
+          x_tick_end1 = interp1([0, 1], [x(z_axis_point_index), x(edge_neighbours(z_axis_point_index, 1))], ticklength*tick_ratio(3), 'linear', 'extrap');
           x_tick_end2 = interp1([0, 1], [x(edge_neighbours(z_axis_point_index, 3)), x(edge_neighbours(edge_neighbours(z_axis_point_index, 3), 1))], ticklength*tick_ratio(3), 'linear', 'extrap');
           x_label_end1 = interp1([0, 1], [x(z_axis_point_index), x(edge_neighbours(z_axis_point_index, 1))], zlabel_distance, 'linear', 'extrap');
           x_label_end2 = interp1([0, 1], [x(edge_neighbours(z_axis_point_index, 3)), x(edge_neighbours(edge_neighbours(z_axis_point_index, 3), 1))], zlabel_distance, 'linear', 'extrap');
