@@ -2270,14 +2270,12 @@ function boundingBoxAxes = axchild2svg(fid, id, axIdString, ax, paperpos, axchil
         fprintf(fid, '<g>\n');
         switch marker
           case 'none'
-          case '.';
-            circle2svg(fid, x, y, markersize/3, 'none', markeredgecolorname, linewidth, 1, markerEdgeAlpha);
+          case '.', circle2svg(fid, x, y, markersize/3, 'none', markeredgecolorname, linewidth, 1, markerEdgeAlpha);
           case 'o', circle2svg(fid, x, y, markersize, markeredgecolorname, markerfacecolorname, linewidth, markerFaceAlpha, markerEdgeAlpha);
           case '+', patch2svg(fid, x'*ones(1, 5)+ones(length(linex), 1)*[-1, 1, NaN, 0, 0]*0.85*markersize, y'*ones(1, 5)+ones(length(liney), 1)*[0, 0, NaN, -1, 1]*0.85*markersize, markeredgecolorname, '-', linewidth, markeredgecolorname, markerFaceAlpha, markerEdgeAlpha, false);
-          case '*', patch2svg(fid, x'*ones(1, 11)+ones(length(linex), 1)*[-1, 1, NaN, 0, 0, NaN, -0.7, 0.7, NaN, -0.7, 0.7]*0.85*markersize, y'*ones(1, 11)+ones(length(liney), 1)*[0, 0, NaN, -1, 1, NaN, 0.7, -0.7, NaN, -0.7, 0.7]*0.85*markersize, markeredgecolorname, '-', linewidth, markeredgecolorname, markerFaceAlpha, markerEdgeAlpha, false);
-          case 'x', patch2svg(fid, x'*ones(1, 5)+ones(length(linex), 1)*[-0.7, 0.7, NaN, -0.7, 0.7]*0.8*markersize, y'*ones(1, 5)+ones(length(liney), 1)*[0.7, -0.7, NaN, -0.7, 0.7]*0.8*markersize, markeredgecolorname, '-', linewidth, markeredgecolorname, markerFaceAlpha, markerEdgeAlpha, false);
-
-            %% Octave keeps s, d, p and h in the HandleGraphics object, for the square, diamond, pentagram, and hexagram markers, respectively -- Jakob Malm
+          case '*', patch2svg(fid, x'*ones(1, 11)+ones(length(linex), 1)*[-0.85, 0.85, NaN, 0, 0, NaN, -0.7, 0.7, NaN, -0.7, 0.7]*1*markersize, y'*ones(1, 11)+ones(length(liney), 1)*[0, 0, NaN, -0.85, 0.85, NaN, 0.7, -0.7, NaN, -0.7, 0.7]*1*markersize, markeredgecolorname, '-', linewidth, markeredgecolorname, markerFaceAlpha, markerEdgeAlpha, false);
+          case 'x', patch2svg(fid, x'*ones(1, 5)+ones(length(linex), 1)*[-1, 1, NaN, -1, 1]*0.7*markersize, y'*ones(1, 5)+ones(length(liney), 1)*[1, -1, NaN, -1, 1]*0.7*markersize, markeredgecolorname, '-', linewidth, markeredgecolorname, markerFaceAlpha, markerEdgeAlpha, false);
+          %% Octave keeps s, d, p and h in the HandleGraphics object, for the square, diamond, pentagram, and hexagram markers, respectively -- Jakob Malm
           case {'square', 's'}, patch2svg(fid, x'*ones(1, 5)+ones(length(linex), 1)*[-1, -1, 1, 1, -1]*0.75*markersize, y'*ones(1, 5)+ones(length(liney), 1)*[-1, 1, 1, -1, -1]*0.75*markersize, markerfacecolorname, '-', linewidth, markeredgecolorname, markerFaceAlpha, markerEdgeAlpha, true);
           case {'diamond', 'd'}, patch2svg(fid, x'*ones(1, 5)+ones(length(linex), 1)*[-0.7071, 0, 0.7071, 0, -0.7071]*1.35*markersize, y'*ones(1, 5)+ones(length(liney), 1)*[0, 1, 0, -1, 0]*1.35*markersize, markerfacecolorname, '-', linewidth, markeredgecolorname, markerFaceAlpha, markerEdgeAlpha, true);
           case {'pentagram', 'p'}, patch2svg(fid, x'*ones(1, 11)+ones(length(linex), 1)*[0, 0.1180, 0.5, 0.1910, 0.3090, 0, -0.3090, -0.1910, -0.5, -0.1180, 0]*2*markersize, y'*ones(1, 11)+ones(length(liney), 1)*[-0.5257, -0.1625, -0.1625, 0.0621, 0.4253, 0.2008, 0.4253, 0.0621, -0.1625, -0.1625, -0.5257]*2*markersize, markerfacecolorname, '-', linewidth, markeredgecolorname, markerFaceAlpha, markerEdgeAlpha, true);
@@ -2400,14 +2398,12 @@ function boundingBoxAxes = axchild2svg(fid, id, axIdString, ax, paperpos, axchil
         fprintf(fid, '<g>\n');
         switch marker
           case 'none'
-          case '.';
-            circle2svg(fid, x, y, markersize/3, 'none', markeredgecolorname, linewidth, 1, markerEdgeAlpha);
+          case '.', circle2svg(fid, x, y, markersize/3, 'none', markeredgecolorname, linewidth, 1, markerEdgeAlpha);
           case 'o', circle2svg(fid, x, y, markersize, markeredgecolorname, markerfacecolorname, linewidth, markerFaceAlpha, markerEdgeAlpha);
-          case '+', scatterpatch2svg(fid, x'*ones(1, 5)+ones(length(linex), 1)*[-1, 1, NaN, 0, 0]*0.85*markersize, y'*ones(1, 5)+ones(length(liney), 1)*[0, 0, NaN, -1, 1]*0.85*markersize, markeredgecolorname, '-', linewidth, markeredgecolorname, markerFaceAlpha, markerEdgeAlpha, false);
-          case '*', scatterpatch2svg(fid, x'*ones(1, 11)+ones(length(linex), 1)*[-1, 1, NaN, 0, 0, NaN, -0.7, 0.7, NaN, -0.7, 0.7]*0.85*markersize, y'*ones(1, 11)+ones(length(liney), 1)*[0, 0, NaN, -1, 1, NaN, 0.7, -0.7, NaN, -0.7, 0.7]*0.85*markersize, markeredgecolorname, '-', linewidth, markeredgecolorname, markerFaceAlpha, markerEdgeAlpha, false);
-          case 'x', scatterpatch2svg(fid, x'*ones(1, 5)+ones(length(linex), 1)*[-0.7, 0.7, NaN, -0.7, 0.7]*0.8*markersize, y'*ones(1, 5)+ones(length(liney), 1)*[0.7, -0.7, NaN, -0.7, 0.7]*0.8*markersize, markeredgecolorname, '-', linewidth, markeredgecolorname, markerFaceAlpha, markerEdgeAlpha, false);
-
-            %% Octave keeps s, d, p and h in the HandleGraphics object, for the square, diamond, pentagram, and hexagram markers, respectively -- Jakob Malm
+          case '+', patch2svg(fid, x'*ones(1, 5)+ones(length(linex), 1)*[-1, 1, NaN, 0, 0]*0.85*markersize, y'*ones(1, 5)+ones(length(liney), 1)*[0, 0, NaN, -1, 1]*0.85*markersize, markeredgecolorname, '-', linewidth, markeredgecolorname, markerFaceAlpha, markerEdgeAlpha, false);
+          case '*', patch2svg(fid, x'*ones(1, 11)+ones(length(linex), 1)*[-0.85, 0.85, NaN, 0, 0, NaN, -0.7, 0.7, NaN, -0.7, 0.7]*1*markersize, y'*ones(1, 11)+ones(length(liney), 1)*[0, 0, NaN, -0.85, 0.85, NaN, 0.7, -0.7, NaN, -0.7, 0.7]*1*markersize, markeredgecolorname, '-', linewidth, markeredgecolorname, markerFaceAlpha, markerEdgeAlpha, false);
+          case 'x', patch2svg(fid, x'*ones(1, 5)+ones(length(linex), 1)*[-1, 1, NaN, -1, 1]*0.7*markersize, y'*ones(1, 5)+ones(length(liney), 1)*[1, -1, NaN, -1, 1]*0.7*markersize, markeredgecolorname, '-', linewidth, markeredgecolorname, markerFaceAlpha, markerEdgeAlpha, false);
+          %% Octave keeps s, d, p and h in the HandleGraphics object, for the square, diamond, pentagram, and hexagram markers, respectively -- Jakob Malm
           case {'square', 's'}, scatterpatch2svg(fid, x'*ones(1, 5)+ones(length(linex), 1)*[-1, -1, 1, 1, -1]*0.75*markersize, y'*ones(1, 5)+ones(length(liney), 1)*[-1, 1, 1, -1, -1]*0.75*markersize, markerfacecolorname, '-', linewidth, markeredgecolorname, markerFaceAlpha, markerEdgeAlpha, true);
           case {'diamond', 'd'}, scatterpatch2svg(fid, x'*ones(1, 5)+ones(length(linex), 1)*[-0.7071, 0, 0.7071, 0, -0.7071]*1.35*markersize, y'*ones(1, 5)+ones(length(liney), 1)*[0, 1, 0, -1, 0]*1.35*markersize, markerfacecolorname, '-', linewidth, markeredgecolorname, markerFaceAlpha, markerEdgeAlpha, true);
           case {'pentagram', 'p'}, scatterpatch2svg(fid, x'*ones(1, 11)+ones(length(linex), 1)*[0, 0.1180, 0.5, 0.1910, 0.3090, 0, -0.3090, -0.1910, -0.5, -0.1180, 0]*2*markersize, y'*ones(1, 11)+ones(length(liney), 1)*[-0.5257, -0.1625, -0.1625, 0.0621, 0.4253, 0.2008, 0.4253, 0.0621, -0.1625, -0.1625, -0.5257]*2*markersize, markerfacecolorname, '-', linewidth, markeredgecolorname, markerFaceAlpha, markerEdgeAlpha, true);
@@ -2760,14 +2756,12 @@ function boundingBoxAxes = axchild2svg(fid, id, axIdString, ax, paperpos, axchil
 
             switch marker
               case 'none'
-              case '.';
-                circle2svg(fid, xmarker, ymarker, markersize/3, 'none', markeredgecolorname, linewidth, 1, markerEdgeAlpha);
+              case '.', circle2svg(fid, xmarker, ymarker, markersize/3, 'none', markeredgecolorname, linewidth, 1, markerEdgeAlpha);
               case 'o', circle2svg(fid, xmarker, ymarker, markersize, markeredgecolorname, markerfacecolorname, linewidth, markerFaceAlpha, markerEdgeAlpha);
               case '+', patch2svg(fid, xmarker'*ones(1, 5)+ones(length(linex), 1)*[-1, 1, NaN, 0, 0]*0.85*markersize, ymarker'*ones(1, 5)+ones(length(liney), 1)*[0, 0, NaN, -1, 1]*0.85*markersize, markeredgecolorname, '-', linewidth, markeredgecolorname, markerFaceAlpha, markerEdgeAlpha, false);
-              case '*', patch2svg(fid, xmarker'*ones(1, 11)+ones(length(linex), 1)*[-1, 1, NaN, 0, 0, NaN, -0.7, 0.7, NaN, -0.7, 0.7]*0.85*markersize, ymarker'*ones(1, 11)+ones(length(liney), 1)*[0, 0, NaN, -1, 1, NaN, 0.7, -0.7, NaN, -0.7, 0.7]*0.85*markersize, markeredgecolorname, '-', linewidth, markeredgecolorname, markerFaceAlpha, markerEdgeAlpha, false);
-              case 'x', patch2svg(fid, xmarker'*ones(1, 5)+ones(length(linex), 1)*[-0.7, 0.7, NaN, -0.7, 0.7]*0.8*markersize, ymarker'*ones(1, 5)+ones(length(liney), 1)*[0.7, -0.7, NaN, -0.7, 0.7]*0.8*markersize, markeredgecolorname, '-', linewidth, markeredgecolorname, markerFaceAlpha, markerEdgeAlpha, false);
-
-                %% Octave keeps s, d, p and h in the HandleGraphics object, for the square, diamond, pentagram, and hexagram markers, respectively -- Jakob Malm
+              case '*', patch2svg(fid, xmarker'*ones(1, 11)+ones(length(linex), 1)*[-0.85, 0.85, NaN, 0, 0, NaN, -0.7, 0.7, NaN, -0.7, 0.7]*1*markersize, ymarker'*ones(1, 11)+ones(length(liney), 1)*[0, 0, NaN, -0.85, 0.85, NaN, 0.7, -0.7, NaN, -0.7, 0.7]*1*markersize, markeredgecolorname, '-', linewidth, markeredgecolorname, markerFaceAlpha, markerEdgeAlpha, false);
+              case 'x', patch2svg(fid, xmarker'*ones(1, 5)+ones(length(linex), 1)*[-1, 1, NaN, -1, 1]*0.7*markersize, ymarker'*ones(1, 5)+ones(length(liney), 1)*[1, -1, NaN, -1, 1]*0.7*markersize, markeredgecolorname, '-', linewidth, markeredgecolorname, markerFaceAlpha, markerEdgeAlpha, false);
+              %% Octave keeps s, d, p and h in the HandleGraphics object, for the square, diamond, pentagram, and hexagram markers, respectively -- Jakob Malm
               case {'square', 's'}, patch2svg(fid, xmarker'*ones(1, 5)+ones(length(linex), 1)*[-1, -1, 1, 1, -1]*0.75*markersize, ymarker'*ones(1, 5)+ones(length(liney), 1)*[-1, 1, 1, -1, -1]*0.75*markersize, markerfacecolorname, '-', linewidth, markeredgecolorname, markerFaceAlpha, markerEdgeAlpha, true);
               case {'diamond', 'd'}, patch2svg(fid, xmarker'*ones(1, 5)+ones(length(linex), 1)*[-0.7071, 0, 0.7071, 0, -0.7071]*1.35*markersize, ymarker'*ones(1, 5)+ones(length(liney), 1)*[0, 1, 0, -1, 0]*1.35*markersize, markerfacecolorname, '-', linewidth, markeredgecolorname, markerFaceAlpha, markerEdgeAlpha, true);
               case {'pentagram', 'p'}, patch2svg(fid, xmarker'*ones(1, 11)+ones(length(linex), 1)*[0, 0.1180, 0.5, 0.1910, 0.3090, 0, -0.3090, -0.1910, -0.5, -0.1180, 0]*2*markersize, ymarker'*ones(1, 11)+ones(length(liney), 1)*[-0.5257, -0.1625, -0.1625, 0.0621, 0.4253, 0.2008, 0.4253, 0.0621, -0.1625, -0.1625, -0.5257]*2*markersize, markerfacecolorname, '-', linewidth, markeredgecolorname, markerFaceAlpha, markerEdgeAlpha, true);
