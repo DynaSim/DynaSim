@@ -233,7 +233,7 @@ end
 end
 
 
-function spec = modify_specification(spec,mods, varargin)
+function spec = modify_specification(spec, mods, varargin)
 %% auto_gen_test_data_flag argin
 options = dsCheckOptions(varargin,{'auto_gen_test_data_flag',0,{0,1}},false);
 if options.auto_gen_test_data_flag
@@ -279,7 +279,7 @@ for i=1:size(mods,1)
     type='connections';
     names=con_names;
   else
-    warning('name of object to modify not found in populations or connections.');
+    warning(sprintf('name of object to modify (%s) not found in populations or connections.',obj));
     continue
   end
   
