@@ -9,6 +9,8 @@ echo "JOB_NAME = " $JOB_NAME
 #mat -r "$2"
 #/usr/local/bin/matlab -nojvm -nosplash -r "$2"
 #matlab -nodisplay -singleCompThread -r "$2"
-#/usr/local/apps/matlab-2014a/bin/matlab -nojvm -nosplash -r "$2"
-/usr/local/apps/matlab-2014a/bin/matlab -nodisplay -singleCompThread -r "$2"
+#/usr/local/apps/matlab-2019a/bin/matlab -nojvm -nosplash -r "$2"
+#/usr/local/apps/matlab-2019a/bin/
+module load matlab/2019a
+matlab -nodisplay -singleCompThread -r "$2"
 echo "finished"

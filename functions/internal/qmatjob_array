@@ -22,6 +22,8 @@ endif
 #mat -r "$2"
 #/usr/local/bin/matlab -nojvm -nosplash -r "$2${SGE_TASK_ID}"
 #matlab -nodisplay -singleCompThread -r "$2${SGE_TASK_ID}"
-#/usr/local/apps/matlab-2014b/bin/matlab -nojvm -nosplash -r "$2${SGE_TASK_ID}"
-/usr/local/apps/matlab-2014b/bin/matlab -nodisplay -singleCompThread -r "$2${SGE_TASK_ID}" -logfile "logs/$2${SGE_TASK_ID}.log"
+#/usr/local/apps/matlab-2019a/bin/matlab -nojvm -nosplash -r "$2${SGE_TASK_ID}"
+#/usr/local/apps/matlab-2019a/bin/
+module load matlab/2019a
+matlab -nodisplay -singleCompThread -r "$2${SGE_TASK_ID}" -logfile "logs/$2${SGE_TASK_ID}.log"
 echo "finished"
