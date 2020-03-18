@@ -541,9 +541,13 @@ for f=1:length(fields)
         mech=regexp(mech,'@','split');
         mech=mech{1};
       end
-      if isfield(spec.(object),'mechanisms') && ~isempty(spec.(object)(i).mechanisms) && ismember(mech,{spec.(object)(i).mechanisms.name})
-        % mechanism already defined for this population, nothing else to do
-        continue;
+      if isfield(spec.(object),'mechanisms')
+          if ~isempty(spec.(object)(i).mechanisms)
+              if ismember(mech,{spec.(object)(i).mechanisms.name})
+                  % mechanism already defined for this population, nothing else to do
+                  continue;
+              end
+          end
       end
       if ismember(mech,mnames)
         % store mechanism equations in object-level specification
