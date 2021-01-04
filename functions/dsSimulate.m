@@ -1271,9 +1271,12 @@ end % in_parfor_loop_flag
     % first, figure out how many IC values we need (i.e., how many state
     % variables we need across all cells).
     var_names=model.state_variables;
-    [nvals_per_var,monitor_counts]=dsGetOutputCounts(model);
+    %[nvals_per_var,monitor_counts]=dsGetOutputCounts(model);
+    IC_expressions=struct2cell(model.ICs);
+    tmp=cellfun(@eval,IC_expressions,'uni',0);
+    nvals_per_var=cellfun(@numel,tmp);
     num_state_variables=sum(nvals_per_var);
-
+    
     % check that the correct number of IC values was provided
     if length(options.ic)~=num_state_variables
       error('incorrect number of initial conditions. %g values are needed for %g state variables across %g cells',num_state_variables,length(model.state_variables),sum(pop_sizes));
