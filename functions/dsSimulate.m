@@ -555,12 +555,17 @@ if ~isempty(options.ic)
     % consistency (call here and in ProcessNumericICs <-- use code already there)
     % user provided structure with ICs
     warning('off','catstruct:DuplicatesFound');
-    model.ICs=catstruct(model.ICs,options.ic);
+    %model.ICs=catstruct(model.ICs,options.ic);
+    model.ICs=options.ic;
   elseif isnumeric(options.ic)
     % user provided numeric array with one value per state variable per
     % cell with state variables ordered according to model.state_variables.
     model.ICs=ProcessNumericICs;
+  else
+    error('"ic" must be structure or numeric array');
   end
+  % store custom ICs for restoration after modifications below
+  model_ICs = model.ICs;
 end
 
 % expand set of things to vary across simulations
@@ -940,6 +945,10 @@ end % in_parfor_loop_flag
       % apply modifications for this point in search space
       if ~isempty(modifications_set{sim})
         model=dsApplyModifications(base_model,modifications_set{sim}, varargin{:});
+        % restore custom ICs
+        if ~isempty(options.ic)
+          model.ICs = model_ICs;
+        end
       end
 
       % update studyinfo
@@ -1272,8 +1281,10 @@ end % in_parfor_loop_flag
     % variables we need across all cells).
     var_names=model.state_variables;
     %[nvals_per_var,monitor_counts]=dsGetOutputCounts(model);
-    IC_expressions=struct2cell(model.ICs);
-    tmp=cellfun(@eval,IC_expressions,'uni',0);
+    model_ = dsPropagateFunctions(model); % substitute auxiliary functions used in setting ICs
+    model_ = dsPropagateParameters(model_,'action','substitute'); % substitute parameters/pop sizes into IC expressions
+    IC_expressions=struct2cell(model_.ICs);
+    tmp=cellfun(@eval,IC_expressions,'uni',0); % evaluate IC expressions to determine true # of state variables
     nvals_per_var=cellfun(@numel,tmp);
     num_state_variables=sum(nvals_per_var);
     
