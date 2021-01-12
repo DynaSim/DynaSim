@@ -72,7 +72,7 @@ for type_index=1:length(target_types)
 
     % loop over target expressions from which to eliminate internal function calls
     for i=1:length(expressions)
-      if isempty(expressions{i})
+      if isempty(expressions{i}) || ~ischar(expressions{i})
         continue;
       end
 
