@@ -32,5 +32,5 @@ Sherfey JS, Soplata AE, Ardid S, Roberts EA, Stanley DA, Pittman-Polletta BR and
 
 ### Mailing lists:
 
-- Join the [user mailing list](http://groupspaces.com/dynasim) to ask questions and discuss DynaSim.
+- Join the [user mailing list](https://groups.google.com/g/dynasim-users) to ask questions and discuss DynaSim.
 - Join the [developer mailing list](https://groups.google.com/forum/#!forum/dynasim-developers) to participate in development discussion.
