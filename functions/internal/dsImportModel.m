@@ -46,7 +46,7 @@ end
 % download model if source host is known
 switch host
  case {'infbrain','infinitebrain','ib'}
-   source=downloadModel(ModelID);
+   source=downloadModel(ModelID,varargin);
 end
 
 % ------------------------------------------------------------------
@@ -191,7 +191,7 @@ function modl=add_missing_ICs(modl,popname)
     end
   end
 
-function source=downloadModel(ModelID)
+function source=downloadModel(ModelID,varargin)
 % Set path to your MySQL Connector/J JAR
 jarfile = '/usr/share/java/mysql-connector-java.jar';
 javaaddpath(jarfile); % WARNING: this might clear global variables
