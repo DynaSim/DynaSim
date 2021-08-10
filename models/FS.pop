@@ -2,7 +2,7 @@
 % usage: dsPlot(dsSimulate('FS','vary',{'FS','Iapp',10}))
 
 FS:
-dV/dt=(Iapp+@current+shift)./Cm; {iNaF,iKDR,ileak}@current; V(0)=-65; shift=-10; % shift prevents baseline spiking
+dV/dt=(Iapp+@current+shift)./Cm; {iNaF,iKDR,ileak}@current; V(0)=-65*ones(1,N_pop); shift=-10; % shift prevents baseline spiking
 gNaF=200; gKDR=20; Iapp=0;
 
 Cm=.9; Eleak=-65; gleak=1

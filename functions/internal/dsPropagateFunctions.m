@@ -1,15 +1,15 @@
 function model = dsPropagateFunctions(model, varargin)
-%PROPAGATEFUNCTIONS - eliminate internal function calls from model ODEs, ICs, monitors, and conditionals.
+%dsPropagateFunctions - eliminate internal function calls from model ODEs, ICs, monitors, and conditionals.
 %
 % Usage:
-%   model = SubstituteFunctions(model)
+%   model = dsPropagateFunctions(model)
 %
 % Input: DynaSim model structure
 %
 % Output: DynaSim model structure without internal function calls
 %
 % See also: dsSimulate, dsGenerateModel, dsPropagateNamespaces
-% 
+%
 % Author: Jason Sherfey, PhD <jssherfey@gmail.com>
 % Copyright (C) 2016 Jason Sherfey, Boston University, USA
 
@@ -43,16 +43,15 @@ end
 
 % approach for now: loop through function list, substitute functions into
 % functions; repeat until no functions have additional substitutions to do.
-keep_going=1;
+
+keep_going = (length(fieldnames(model.functions)) > 0);
 while keep_going
-  keep_going=0;
   update_these=fieldnames(model.functions);
   expressions=struct2cell(model.functions);
-  
+
   % loop over target functions from which to eliminate internal function calls
   for i=1:length(expressions)
-    functions=model.functions; % update functions on each iteration
-    [expressions{i},keep_going]=insert_functions(expressions{i},functions, varargin{:});
+    [expressions{i},keep_going]=insert_functions(expressions{i},model.functions, varargin{:});
     model.functions.(update_these{i})=expressions{i};
   end
 end
@@ -70,17 +69,17 @@ for type_index=1:length(target_types)
   if isstruct(s)
     update_these=fieldnames(s);
     expressions=struct2cell(s);
-    
+
     % loop over target expressions from which to eliminate internal function calls
     for i=1:length(expressions)
-      if isempty(expressions{i})
+      if isempty(expressions{i}) || ~ischar(expressions{i})
         continue;
       end
-      
+
       % update expressions of this type
       expressions{i}=insert_functions(expressions{i},functions, varargin{:});
     end
-    
+
     % update model with expressions that do not require internal function calls
     model.(type)=cell2struct(expressions,update_these,1);
   end
@@ -92,13 +91,13 @@ if ~isempty(model.conditionals)
   for type_index=1:length(target_types)
     type=target_types{type_index};
     expressions={model.conditionals.(type)};
-    
+
     % loop over conditional expressions from which to eliminate internal function calls
     for i=1:length(expressions)
       if isempty(expressions{i})
         continue;
       end
-      
+
       % update expressions
       expressions{i}=insert_functions(expressions{i},functions, varargin{:});
     end
@@ -109,7 +108,7 @@ end
 %% auto_gen_test_data_flag argout
 if options.auto_gen_test_data_flag
   argout = {model}; % specific to this function
-  
+
   dsUnitSaveAutoGenTestData(argin, argout);
 end
 
@@ -128,9 +127,11 @@ function [expression,functions_were_found] = insert_functions(expression,functio
   end
 
   functions_were_found=0;
+
   % get list of functions called by this target function
   words=unique(regexp(expression,'[a-zA-Z]+\w*','match'));
   found_functions=words(ismember(words,fieldnames(functions)));
+
   if ~isempty(found_functions)
     functions_were_found=1;
     % substitute those found into this target functions
@@ -142,13 +143,20 @@ function [expression,functions_were_found] = insert_functions(expression,functio
       found_expression=functions.(found_function);
 
       % variable names used in the original found function definition
-      orig_var_list=regexp(found_expression,'^@\(([^\)]+)\)','tokens','once');
+      % orig_var_list=regexp(found_expression,'^@\(([^\)]+)\)','tokens','once')
+      % this allows recursion, seems simpler and is Octave compatible
+      orig_var_list=regexp(found_expression,'\s','split','once');
+      % removing '@(' prefix and ')' suffix
+      orig_var_list={orig_var_list{1}(3:end-1)};
       orig_vars=regexp(orig_var_list{1},',','split'); % variables used in original function definition
 
       % variable names passed from the target function to the function found in it
       % get arguments to function call, support function arguments
       %       new_var_list=regexp(expression,[found_function '\(*\(([^\)\(]+)\)'],'tokens','once');
       index=regexp(expression,[found_function '\('],'once');
+      if isempty(index)
+        continue
+      end
       substr=expression(index:end); % string starting with first function call
       lb=find(substr=='('); % indices to open parentheses
       rb=find(substr==')'); % indices to close parentheses
@@ -165,14 +173,17 @@ function [expression,functions_were_found] = insert_functions(expression,functio
       end
 
       % add escape character to regexp special characters
-      new_var_list{1}=regexprep(substr(lb(1)+1:R-1),'([\(\)\+\*\.\^])','\\$1');
+      new_var_list{1} = regexprep(substr(lb(1)+1:R-1),'([\(\)\+\*\.\^])','\\$1');
 
       % split variables on comma
-      new_vars=regexp(new_var_list{1},',','split');
+      new_vars = regexp(substr(lb(1)+1:R-1),',','split');
 
       % found expression without the input variable list
-      found_expression=regexp(found_expression,'^@\([^\)]+\)(.+)','tokens','once');
-      found_expression=found_expression{1};
+      % found_expression=regexp(found_expression,'^@\([^\)]+\)\s(.+)','tokens','once');
+      % found_expression=found_expression{1};
+      % same as above but allowing recursion:
+      found_expression=regexp(found_expression,'\s','split','once');
+      found_expression=found_expression{2};
 
       if length(orig_vars)~=length(new_vars)
         error('failed to match variables for function %s',found_function);
@@ -181,6 +192,7 @@ function [expression,functions_were_found] = insert_functions(expression,functio
       % prepare found expression with variable names from the target function
       if ~isequal(orig_vars,new_vars)
         for v=1:length(orig_vars)
+          new_vars{v} = regexprep(new_vars{v},'([\(\)\+\*\.\^])','\\$1');
           found_expression=dsStrrep(found_expression,orig_vars{v},['(' new_vars{v} ')'], '', '', varargin{:});
         end
       end

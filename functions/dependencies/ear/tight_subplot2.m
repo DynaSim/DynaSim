@@ -7,11 +7,11 @@ function ha = tight_subplot2(Nh, Nw, gap, marg_h, marg_w, hFig)
 %   in:  Nh      number of axes in hight (vertical direction)
 %        Nw      number of axes in width (horizontaldirection)
 %        gap     gaps between the axes in normalized units (0...1)
-%                   or [gap_h gap_w] for different gaps in height and width 
+%                   or [gap_h gap_w] for different gaps in height and width
 %        marg_h  margins in height in normalized units (0...1)
-%                   or [lower upper] for different lower and upper margins 
+%                   or [lower upper] for different lower and upper margins
 %        marg_w  margins in width in normalized units (0...1)
-%                   or [left right] for different left and right margins 
+%                   or [left right] for different left and right margins
 %
 %  out:  ha     array of handles of the axes objects
 %                   starting from upper left corner, going row-wise as in
@@ -40,22 +40,30 @@ if numel(marg_h)==1
     marg_h = [marg_h marg_h];
 end
 
-axh = (1-sum(marg_h)-(Nh-1)*gap(1))/Nh; 
+axh = (1-sum(marg_h)-(Nh-1)*gap(1))/Nh;
 axw = (1-sum(marg_w)-(Nw-1)*gap(2))/Nw;
 
-py = 1-marg_h(2)-axh; 
+py = 1-marg_h(2)-axh;
 
 ha = zeros(Nh*Nw,1);
 ii = 0;
 for ih = 1:Nh
     px = marg_w(1);
-    
+
     for ix = 1:Nw
         ii = ii+1;
-        ha(ii) = axes(hFig, 'Units','normalized', ...
-            'Position',[px py axw axh], ...
-            'XTickLabel','', ...
-            'YTickLabel','');
+        if strcmp(reportUI,'matlab') && ~UIverlessthan('8.4.0')
+            ha(ii) = axes(hFig, 'Units','normalized', ...
+                'Position',[px py axw axh], ...
+                'XTickLabel','', ...
+                'YTickLabel','');
+        else
+            figure(hFig);
+            ha(ii) = axes('Units','normalized', ...
+                'Position',[px py axw axh], ...
+                'XTickLabel','', ...
+                'YTickLabel','');
+        end
         px = px+axw+gap(2);
     end
     py = py-axh-gap(1);

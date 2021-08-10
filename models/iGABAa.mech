@@ -3,7 +3,7 @@
 gGABAa = [0.25]
 EGABAa = [-80]
 tauD = [10]
-tauR = [0.4]
+tauR = [0.2]
 IC = [0.1]
 IC_noise = [0]
 

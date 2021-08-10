@@ -12,13 +12,10 @@ function keyval = dsOptions2Keyval(options)
 % Author: Jason Sherfey, PhD <jssherfey@gmail.com>
 % Copyright (C) 2016 Jason Sherfey, Boston University, USA
 
-% Grab the field names
-fields = fieldnames(options);
-keyval = {};
+% Vectorized code: Erik Roberts, 2018
 
-% Loop over the field names, grab the value, and append both to the output
-% list of key/value pairs
-for i=1:length(fields)
-  keyval{end+1} = fields{i};
-  keyval{end+1} = options.(fields{i});
-end;
+% make cell array with 2 rows: [keys; values]
+keyval = [fieldnames(options), struct2cell(options)]';
+
+% reshape to interdigitate keys and values as single row cell array
+keyval = keyval(:)';

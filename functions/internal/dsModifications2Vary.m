@@ -20,7 +20,7 @@ function data = dsModifications2Vary(data,modifications,options,modifications_se
     %
     %
     % Inputs (Optional):
-    %   options : Options structure containing experiment OR precision
+    %   options : Options structure containing experiment
     %   fields (see dsSimulate)
     %   modifications_set : Additional modifications, produced by
     %                       dsVary2Modifications(options.vary,model);
@@ -75,9 +75,12 @@ function data = dsModifications2Vary(data,modifications,options,modifications_se
         % convert arrows and periods to underscores
         fld=regexprep(fld,'(->)|(<-)|(-)|(\.)','_');
 
+        % replace initial condition parens with underscores
+        fld = strrep(fld, '(0)','_0_');
+        
         % remove brackets and parentheses
         fld=regexprep(fld,'[\[\]\(\)\{\}]','');
-
+        
         % remove spaces
         fld=regexprep(fld,'[\ ]','');
 
@@ -94,23 +97,15 @@ function data = dsModifications2Vary(data,modifications,options,modifications_se
         data(j).varied=varied;
       end
     end
-    % convert tmpdata to single precision
-    if nargin > 2
-        if strcmp(options.precision,'single')
-          for j=1:length(data)
-            for k=1:length(data(j).labels)
-              fld=data(j).labels{k};
-              data(j).(fld)=single(data(j).(fld));
-            end
-          end
-        end
-    end
 end
 
 function modifications=expand_modifications(mods)
 % purpose: expand simultaneous modifications into larger list
 modifications={};
 for i=1:size(mods,1)
+  % temp replace initial condition string for regexp
+  mods{i,2} = strrep(mods{i,2}, '(0)','__0__');
+  
   % get object list without grouping symbols: ()[]{}
   objects=regexp(mods{i,1},'[^\(\)\[\]\{\},]+','match');
   variables=regexp(mods{i,2},'[^\(\)\[\]\{\},]+','match');
@@ -118,6 +113,9 @@ for i=1:size(mods,1)
   for j=1:length(objects)
     for k=1:length(variables)
       thisMod = mods{i,3};
+      
+      % replace original initial condition string
+      variables{k} = strrep(variables{k},'__0__','(0)');
 
       if all(size(thisMod) == [1,1]) %same val for each obj and var
         modifications(end+1,1:3)={objects{j},variables{k},thisMod};

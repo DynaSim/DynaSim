@@ -56,7 +56,7 @@ function hxp = xp_PlotData (xp, op)
             end
         end
     end
-    hxp.hcurr = dsPlot(data,op.args{:},'lock_gca',true);
+    hxp.hcurr = dsPlot(data,op.args{:},'lock_gca',true,'suppress_textstring',1);
     
     if ~isempty(xlims); xlim(xlims); end
     if ~isempty(ylims); ylim(ylims); end

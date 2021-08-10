@@ -3,16 +3,17 @@
 gAMPA = [8]
 EAMPA = [0]
 tauD = [2]
-tauR = [0.4]
+tauR = [0.2]
 IC = [0.1]
 IC_noise = [0]
 prob_cxn = [1]
  
 % fixed variables
 netcon = rand(N_pre,N_post)<=prob_cxn
+scalingFactor = max(sum(netcon), 1)
 
 % functions
-IAMPA(X,s) = -gAMPA/N_pre.*(s*netcon).*(X-EAMPA)
+IAMPA(X,s) = -gAMPA./scaleFactor.*(s*netcon).*(X-EAMPA)
  
 % ODEs and ICs
 s' = -s./tauD + 1/2*(1+tanh(X_pre/10)).*((1-s)/tauR)

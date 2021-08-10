@@ -53,6 +53,7 @@ options=dsCheckOptions(varargin,{...
   'mex_flag',0,{0,1},... % exist('codegen')==6, whether to compile using coder instead of interpreting Matlab
   'mex_dir_flag',1,{0,1},... % Flag to tell whether or not to search in mex_dir for pre-compiled solve files (solve*_mex*).
   'mex_dir',[],[],... % Directory to search for pre-compiled mex files. Can be relative to 'study_dir' or absolute path.
+  'one_solve_file_flag',0,{0,1},...
   'auto_gen_test_data_flag',0,{0,1},...
   'unit_test_flag',0,{0,1},...
   },false);
@@ -63,6 +64,10 @@ if ~isempty(opts)
   warning('off','catstruct:DuplicatesFound');
   options=catstruct(options,opts);
   options=orderfields(options,fields);
+end
+
+if isempty(options.studyinfo)
+  options.studyinfo = studyinfo;
 end
 
 if isempty(options.mex_dir)
@@ -102,16 +107,16 @@ end
 
 if ~isempty(options.solve_file)
   % use user-provided solve_file
-  solve_file=options.solve_file;
+  solve_file = options.solve_file;
   % note: options.solve_file is used by cluster sim jobs (see dsCreateBatch())
 elseif isfield(studyinfo,'solve_file')
   % use study-associated solve_file
-  solve_file=studyinfo.solve_file;
+  solve_file = studyinfo.solve_file;
 elseif options.auto_gen_test_data_flag || options.unit_test_flag
-  solve_file='solve_ode.m';
+  solve_file = 'solve_ode.m';
 else
   % set default solve_file name
-  solve_file=['solve_ode_' datestr(now,'yyyymmddHHMMSS_FFF') '.m'];
+  solve_file = ['solve_ode_' datestr(now,'yyyymmddHHMMSS_FFF') '.m'];
 end
 
 if ~strcmp(reportUI,'matlab') && ~strcmp(solve_file,'solve_ode.m')
@@ -127,9 +132,9 @@ end
 if isempty(fpath)
   % add path to solve_file name
   if ~isempty(options.sim_id)
-    solve_file=fullfile(options.study_dir,'solve',['sim' num2str(options.sim_id)],[fname fext]);
+    solve_file = fullfile(options.study_dir,'solve',['sim' num2str(options.sim_id)],[fname fext]);
   else
-    solve_file=fullfile(options.study_dir,'solve',[fname fext]);
+    solve_file = fullfile(options.study_dir,'solve',[fname fext]);
   end
 
   % convert relative path to absolute path
@@ -137,10 +142,11 @@ if isempty(fpath)
 end
 [fpath,fname,fext]=fileparts2(solve_file);
 
-% check that solve file name is less than max function name allwoed by matlab
-if length(fname)>(63-4) % subtract 4 to allow suffix '_mex'
-  fname=fname(1:(63-4));
-  solve_file=fullfile(fpath,[fname fext]);
+% check that solve file name is less than max function name allowed by matlab
+if length(fname) > (namelengthmax-4) % subtract 4 to allow suffix '_mex'
+  fname = fname(1:(namelengthmax-4));
+  solve_file = fullfile(fpath,[fname fext]);
+  warning('Trimming solve_file name to be less than software "namelengthmax". New Name: %s', fname);
 end
 
 % create directory for solve_file if it doesn't exist
@@ -176,9 +182,10 @@ if ~exist(solve_file,'file')
                 % return @odefun with all substitutions. dsSimulate
                 % should be able to handle: dsSimulate(@odefun,'tspan',tspan,'ic',ic)
   end
-  solve_file=dsCompareSolveFiles(solve_file_m);               % First search in local solve folder...
+  solve_file = dsCompareSolveFiles(solve_file_m);               % First search in local solve folder...
+  
   if options.mex_flag && options.mex_dir_flag
-    solve_file=dsCompareSolveFiles(solve_file,options.mex_dir,options.verbose_flag); % Then search in mex_dir (if it exists and if mex_flag==1).
+    solve_file = dsCompareSolveFiles(solve_file, options.mex_dir, options.verbose_flag); % Then search in mex_dir (if it exists and if mex_flag==1).
   end
 else
   if options.verbose_flag

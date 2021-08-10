@@ -5,20 +5,17 @@ function out = rng_wrapper(in,varargin)
 % Copyright (C) 2016 Jason Sherfey, Boston University, USA
 
 if strcmp(reportUI,'matlab')
-  if nargin==0
-    out = rng;
-  elseif isempty(varargin)
-    out = rng(in);
-  else
-    out = rng(in,varargin{:});
+  if nargin > 0 && isempty(varargin)
+    rng(in);
+  elseif nargin > 0
+    rng(in,varargin{:});
   end
+  out = rng;
 else
-  if nargin==0
-    [rand_seed, randn_seed] = rng_octave;
-  elseif isempty(varargin)
-    [rand_seed, randn_seed] = rng_octave(in);
-  else
-    [rand_seed, randn_seed] = rng_octave(in,varargin{:});
+  if nargin > 0 && isempty(varargin)
+    rng_octave(in);
+  elseif nargin > 0
+    rng_octave(in,varargin{:});
   end
-  out = [rand_seed, randn_seed];
+  out = rng_octave;
 end

@@ -23,6 +23,7 @@ options=dsCheckOptions(keyvals,{...
   'verbose_flag',0,{0,1},... % set verbose to 1 by default
   'mex_dir_flag',1,{0,1},... % Flag to tell whether or not to search in mex_dir for pre-compiled solve files (solve*_mex*).
   'mex_dir',[],[],... % Directory to search for pre-compiled mex files. Can be relative to 'study_dir' or absolute path.
+  'one_solve_file_flag',0,{0,1},...
   'codegen_args',[],[],...
   'cluster_flag',0,{0,1},...
   },false);
@@ -57,43 +58,56 @@ if ~exist(mexfileOutput,'file')
   
   makeMex(mfileInput, options); % mex-file solver for solve file
   
+  madeNewMexBool = true;
+  
   if options.verbose_flag
-    fprintf('\tMEX generation complete!\n\tElapsed time: %g seconds.\n',toc(compile_start_time));
-    %toc;
+    fprintf('    MEX generation complete! \n');
+    duration = toc(compile_start_time);
+    
+    if duration < 60
+      fprintf('    Elapsed time: %.1f seconds. \n', duration);
+    else
+      fprintf('    Elapsed time: %.1f minutes. \n', duration/60);
+    end
   end
   
-  codemex_dir=fullfile(fileparts(mexfileOutput),'codemex');
+  codemex_dir = fullfile(fileparts(mexfileOutput),'codemex');
   if exist(codemex_dir,'dir')
-    if options.verbose_flag
-      fprintf('\tRemoving temporary codemex directory: %s\n',codemex_dir);
-    end
+    dsVprintf(options, '    Removing temporary codemex directory: %s\n', codemex_dir);
+    
     rmdir(codemex_dir,'s');
   end
 else % mex file exists
-  if options.verbose_flag
-    fprintf('Using previous compiled file: %s\n',mexfileOutput);
-  end
+  madeNewMexBool = false;
+  
+  dsVprintf(options, 'Using previous compiled file: %s\n', mexfileOutput);
 end %if
 
 % If mex_dir is specified, back up the newly compiled mex files to this folder
-if ~isempty(mex_dir) && ~options.cluster_flag && options.mex_dir_flag
+if (~isempty(mex_dir) && options.mex_dir_flag && ~options.cluster_flag)... % non cluster
+    || (~isempty(mex_dir) && options.mex_dir_flag && options.cluster_flag && options.one_solve_file_flag) % cluster only if one_solve_file_flag
+  
   [~,solvefile] = fileparts2(mfileInput);
   [~,mexfile] = fileparts2(mexfileOutput);
   
-  if isempty(dir(fullfile(mex_dir,[solvefile '.m'])))
-    if options.verbose_flag
-      fprintf('Solve file %s does not yet exist in mex_dir %s. Copying... \n',solvefile,mex_dir);
+  if isempty(dir(fullfile(mex_dir, [solvefile '.m']))) || madeNewMexBool
+    dsVprintf(options, 'Solve file %s does not yet exist in mex_dir %s. Copying... \n', solvefile,mex_dir);
+    
+    if ~exist(mex_dir,'dir')
+      error('Cannot find %s! Make sure it exists and is specified as an *absolute* path', mex_dir);
     end
-    if ~exist(mex_dir,'dir'); error('Cannot find %s! Make sure it exists and is specified as an *absolute* path',mex_dir); end
-    copyfile(mfileInput,mex_dir);
+    
+    copyfile(mfileInput, mex_dir);
   end
   
-  if isempty(dir(fullfile(mex_dir,[mexfile '*'])))
-    if options.verbose_flag
-      fprintf('Mex file %s does not yet exist in mex_dir %s. Copying... \n',mexfile,mex_dir);
+  if isempty(dir(fullfile(mex_dir, [mexfile '*']))) || madeNewMexBool
+    dsVprintf(options, 'Mex file %s does not yet exist in mex_dir %s. Copying... \n', mexfile,mex_dir);
+    
+    if ~exist(mex_dir,'dir')
+      error('Cannot find %s! Make sure it exists and is specified as an *absolute* path', mex_dir)
     end
-    if ~exist(mex_dir,'dir'); error('Cannot find %s! Make sure it exists and is specified as an *absolute* path',mex_dir); end
-    copyfile([mexfileOutput,'*'],mex_dir);
+    
+    copyfile([mexfileOutput,'*'], mex_dir);
   end
 end
 
@@ -109,10 +123,10 @@ cfg.DynamicMemoryAllocation = 'AllVariableSizeArrays';
 
 % Generate MEX function
 if isempty(options.codegen_args)
-  eval(['codegen -d codemex -config cfg ',file]);
+  eval(sprintf('codegen -d codemex -config cfg ''%s'' ', file));
 else % codegen_args specified
   %eval(sprintf('codegen -args %s -d codemex -config cfg %s', 'options.codegen_args', file));
-  eval(['codegen -args options.codegen_args -d codemex -config cfg ',file]);
+  eval(sprintf('codegen -args options.codegen_args -d codemex -config cfg ''%s'' ', file));
 end
 % TODO: convert eval to feval or call to codegen
 

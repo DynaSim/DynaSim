@@ -14,8 +14,8 @@
 ML: 
 dV/dt=(Iapp-Il(V)-Ik(V,w)-Ica(V)+@current)./c
 dw/dt=lamw(V).*(winf(V)-w)
-V(0)=-60.899
-w(0)=0.014873
+V(0)=-60.899*ones(1,N_pop)
+w(0)=0.014873*ones(1,N_pop)
 
 Ica(V)=gca.*minf(V).*(V-Vca)
 Ik(V,w)=gk.*w.*(V-Vk)

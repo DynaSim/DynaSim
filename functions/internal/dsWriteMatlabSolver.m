@@ -76,12 +76,12 @@ propagatedModel = dsPropagateParameters(propagatedModel, 'param_type', 'fixed_va
 parameter_prefix='p.';%'pset.p.';
 % state_variables=model.state_variables;
 
-% 1.1 eliminate internal (anonymous) function calls from model equations
+% 1.1a eliminate internal (anonymous) function calls from model equations
 % if options.reduce_function_calls_flag==1
   model=dsPropagateFunctions(model, varargin{:});
 % end
 
-% 1.1 prepare parameters
+% 1.1b prepare parameters
 if options.save_parameters_flag
   % add parameter struct prefix to parameters in model equations
   model=dsPropagateParameters(model,'action','prepend','prop_prefix',parameter_prefix, varargin{:});
@@ -122,22 +122,27 @@ if options.save_parameters_flag
     p.matlab_solver_options = options.matlab_solver_options;
   end
 
+
+  %% 1.1c one_solve_file_flag
   if options.one_solve_file_flag
     % fill p flds that were varied with vectors of length = nSims
 
-    vary=dsCheckOptions(varargin,{'vary',[],[],},false);
+    vary = dsCheckOptions(varargin,{'vary',[],[],},false);
     vary = vary.vary;
 
-    mod_set = dsVary2Modifications(vary);
+    mod_set = dsVary2Modifications(vary, model);
     % The first 2 cols of modifications_set are idenitical to vary, it just
     % has the last column distributed out to the number of sims
+    
+    nMods = length(mod_set);
+    
+    % standardize and expand modifications
+    for iMod = 1:nMods
+      mod_set{iMod} = dsStandardizeModifications(mod_set{iMod}, model.specification, varargin{:});
+    end
 
-
-    % Get param names
-    iMod = 1;
-    % Split extra entries in first 2 cols of mods, so each row is a single pop and param
-    [~, first_mod_set] = dsApplyModifications([],mod_set{iMod}, varargin{:});
-
+    first_mod_set = mod_set{1};
+    
     % replace '->' with '_'
     first_mod_set(:,1) = strrep(first_mod_set(:,1), '->', '_');
 
@@ -147,30 +152,72 @@ if options.save_parameters_flag
 
     % get param names
     mod_params = cell(nParamMods,1);
-    for iRow = 1:nParamMods
-      mod_params{iRow} = [first_mod_set{iRow,1:3}];
+    val2modMap = nan(nParamMods,1); % this connects the values from original mod set to expanded mod set
+    iRow = 1;
+    for iParamMod = 1:nParamMods
+      this_mod_param = [first_mod_set{iParamMod,1:3}];
 
-      %check if variable in namespace
-      if ~any(strcmp(model.namespaces(:,2), mod_params{iRow}))
-        % find correct entry based on param and pop
-        nsInd = logical(~cellfun(@isempty, strfind(model.namespaces(:,2), [first_mod_set{iRow,1} '_'])) .* ...
-          ~cellfun(@isempty, strfind(model.namespaces(:,2), first_mod_set{iRow,3})));
+      % add param with correct namespace(s) to mod_params
+      if ~any(strcmp(model.namespaces(:,2), this_mod_param))
+        % find correct namespace(s) based on param and pop
+        namespaceInd = logical( contains(model.namespaces(:,2), [first_mod_set{iParamMod,1} '_']) .* ...
+          endsWith(model.namespaces(:,2), first_mod_set{iParamMod,3}) );
 
-        assert(sum(nsInd) == 1)
+        numNamespaceMatches = sum(namespaceInd);
+        
+        % HACK
+        if numNamespaceMatches == 0 && contains(first_mod_set{iParamMod,1}, '_')
+          % check reverse connection
+          flippedNamespace = first_mod_set{iParamMod,1};
+          flippedNamespace = strsplit(flippedNamespace, '_');
+          flippedNamespace = [flippedNamespace{2} '_' flippedNamespace{1}];
+          
+          % find correct namespace(s) based on param and pop
+          namespaceInd = logical( contains(model.namespaces(:,2), [flippedNamespace '_']) .* ...
+          endsWith(model.namespaces(:,2), first_mod_set{iParamMod,3}) );
+
+          numNamespaceMatches = sum(namespaceInd);
+        end
+        
+        if ~any(numNamespaceMatches)
+          error('Cannot find mod: %s %s', first_mod_set{iParamMod,1}, first_mod_set{iParamMod,3});
+        end
 
         % add mech names using namespace
-        mod_params{iRow} = model.namespaces{nsInd,2};
+        mod_params(iRow:iRow+numNamespaceMatches-1) = model.namespaces(namespaceInd,2);
+        
+        val2modMap(iRow:iRow+numNamespaceMatches-1) = iParamMod;
+        
+        iRow = iRow + numNamespaceMatches;
+      elseif sum(strcmp(model.namespaces(:,2), this_mod_param)) == 1
+        namespaceInd = strcmp(model.namespaces(:,2), this_mod_param);
+        mod_params{iRow} = model.namespaces{namespaceInd,2};
+        val2modMap(iRow) = iParamMod;
+        iRow = iRow + 1;
+      else
+        error('Multiple namespace matches.')
       end
     end
+    
+    % remove empty (ie non-matched) params
+    mod_params = mod_params(~cellfun(@isempty, mod_params));
+    val2modMap = val2modMap(~isnan(val2modMap));
+    
+    % update since may have increased due to multiple namespace matches for param
+    nParamMods = size(mod_params, 1);
 
     % Get param values for each sim
-    param_values = nan(nParamMods, length(mod_set));
-    for iMod = 1:length(mod_set)
-      % Split extra entries in first 2 cols of mods, so each row is a single pop and param
-      [~, mod_set{iMod}] = dsApplyModifications([],mod_set{iMod}, varargin{:});
-
+    param_values = cell(nParamMods, length(mod_set));
+    for iMod = 1:nMods
+      thisModValSet = mod_set{iMod}(:,3);
+      
       % Get scalar values as vector
-      param_values(:, iMod) = [mod_set{iMod}{:,3}];
+      param_values(:, iMod) = thisModValSet(val2modMap);
+    end
+    
+    % convert to mat if mex_flag since can't have cell slicing for mex
+    if options.mex_flag
+      param_values = cell2mat(param_values);
     end
 
     % Assign value vectors to params
@@ -178,6 +225,8 @@ if options.save_parameters_flag
       p.(mod_params{iParam}) = param_values(iParam,:);
     end
   end % one_solve_file_flag
+  
+  
 
   if options.verbose_flag
     fprintf('saving params.mat\n');
@@ -262,8 +311,8 @@ if options.one_solve_file_flag
     fprintf(fid,'flds = fields(rmfield(p,''tspan''));\n'); % remove tspan
     fprintf(fid,'for fld = flds''\n');
     fprintf(fid,'  fld = fld{1};\n');
-    fprintf(fid,'  if isnumeric(p.(fld)) && length(p.(fld)) > 1\n');
-    fprintf(fid,'    p.(fld) = p.(fld)(simID);\n');
+    fprintf(fid,'  if iscell(p.(fld)) && length(p.(fld)) > 1\n');
+    fprintf(fid,'    p.(fld) = p.(fld){simID};\n');
     fprintf(fid,'  end\n');
     fprintf(fid,'end\n\n');
   else %mex_flag
@@ -401,6 +450,17 @@ if ~isempty(model.monitors)
     thisMonFcn = thisMonFcn{1};
     fprintf(fid,'%s = %s;\n', thisMonName, thisMonFcn);
   end
+end
+
+%% Memory Check
+if ~options.mex_flag && options.verbose_flag
+  fprintf(fid,'%% ###########################################################\n');
+  fprintf(fid,'%% Memory check:\n');
+  fprintf(fid,'%% ###########################################################\n');
+  fprintf(fid,'try \n');
+  fprintf(fid,'  memoryUsed = memoryUsageCallerGB(); \n');
+  fprintf(fid,'  fprintf(''Total Memory Used <= %%i GB \\n'', ceil(memoryUsed)); \n');
+  fprintf(fid,'end \n');
 end
 
 %% Benchmark toc

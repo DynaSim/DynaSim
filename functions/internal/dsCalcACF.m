@@ -43,7 +43,7 @@ function data = dsCalcACF(data, varargin)
 
 %% 1.0 Check inputs
 options=dsCheckOptions(varargin,{...
-  'variable',[],[],...
+  'variable','',[],...
   'threshold',1e-5,[],... % slightly above zero in case variable is point process *_spikes {0,1}
   'exclude_data_flag',0,{0,1},...
   'numLags',1000,[],...
@@ -94,7 +94,7 @@ end
 numLags = min(options.numLags, ntime-1);
 
 %% 2.0 set list of variables to process as cell array of strings
-options.variable=dsSelectVariables(data(1).labels,options.variable, varargin{:});
+options.variable=dsSelectVariables(data(1),options.variable, varargin{:});
 
 %% 3.0 calculate ACFs for each variable
 if ~isfield(data,'results')

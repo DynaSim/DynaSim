@@ -714,31 +714,38 @@ default_visible='on';
 % Create panels (parent: psimview):
 % p_sim_plots
 handles.p_sim_plots=uipanel('parent',handles.psimview,'units','normalized','position',[0 .15 1 .85],'backgroundcolor','w','title','','visible','on');
+
 % p_quicksim_settings
 handles.p_quicksim_settings=uipanel('parent',handles.psimview,'units','normalized','position',[0 0 .25 .15],'backgroundcolor','w','title','','visible','on');
+
 % p_runsim_settings
 handles.p_runsim_settings=uipanel('parent',handles.psimview,'units','normalized','position',[.25 0 .75 .15],'backgroundcolor','w','title','','visible','on');
+
 
 % Create controls for interactive plotting (parent: p_sim_plots)
 for i=1:cfg.max_num_plots
   % list_vars: listbox for pop-specific variables
   handles.list_vars(i)=uicontrol('units','normalized','position',[.01 yp+(i-1)*dy .14 -.8*dy],'parent',handles.p_sim_plots,'BackgroundColor',[.9 .9 .9],'style','listbox','value',1,'string',[],'Max',100,'Callback',@UpdateSimView,'TooltipString','Left-click to select variable to plot','visible',default_visible);
+  
   % list_cells: listbox for pop-specific cell indices
   handles.list_cells(i)=uicontrol('units','normalized','position',[.15 yp+(i-1)*dy .05 -.8*dy],'parent',handles.p_sim_plots,'BackgroundColor',[.9 .9 .9],'style','listbox','value',[],'string',[],'Max',1000,'Callback',@UpdateSimView,'TooltipString','Left-click to select cells to plot','visible',default_visible);
+  
   % axes_data_image: axis for plotting images
   handles.axes_data_image(i)=subplot('position',[.23 yp+(i-1)*dy .72 -.8*dy],'parent',handles.p_sim_plots,'visible','off','tag','simview_image');
   handles.img_data(i) = imagesc(cfg.t,1:length(cfg.IC),cfg.Y); axis xy; %colorbar
   set(handles.img_data(i),'visible','off','tag','simview_image');
+  
   % axes_data_trace: axis for plotting traces
-  %handles.axes_data_trace(i)=subplot('position',[.23 yp+(i-1)*dy .72 -.8*dy],'xdata',cfg.t,'ydata',cfg.Y(:,1),'parent',handles.p_sim_plots,'linewidth',3,'color','w','visible',default_visible,'tag','simview_trace');
   handles.axes_data_trace(i)=subplot('position',[.23 yp+(i-1)*dy .72 -.8*dy], 'parent',handles.p_sim_plots,'tag','simview_trace');
   % edit_ymax: max y-limits
   callback=sprintf('global handles; set(handles.axes_data_trace(%g),''ylim'',[str2double(get(handles.edit_ymin(%g),''string'')) str2double(get(gco,''string''))]); set(handles.axes_data_image(%g),''clim'',[str2double(get(handles.edit_ymin(%g),''string'')) str2double(get(gco,''string''))]); cfg.ymax(%g)=str2double(get(gco,''string''));',i,i,i,i,i);
   handles.edit_ymax(i)=uicontrol('style','edit','parent',handles.p_sim_plots,'tag','ymax','units','normalized','position',[.955 .95+dy*(i-1)-.01 .037 .03],'backgroundcolor','w','string',cfg.ymax(i),'HorizontalAlignment','left','Callback',callback,'fontsize',8);
+  
   % edit_ymin: min y-limits
   callback=sprintf('global handles; set(handles.axes_data_trace(%g),''ylim'',[str2double(get(gco,''string'')) str2double(get(handles.edit_ymax(%g),''string''))]); set(handles.axes_data_image(%g),''clim'',[str2double(get(gco,''string'')) str2double(get(handles.edit_ymax(%g),''string''))]); cfg.ymin(%g)=str2double(get(gco,''string''));',i,i,i,i,i);
   handles.edit_ymin(i)=uicontrol('style','edit','parent',handles.p_sim_plots,'tag','ymin','units','normalized','position',[.955 .95+dy*(i-1)+.8*dy+.03-.01 .037 .03],'backgroundcolor','w','string',cfg.ymin(i),'HorizontalAlignment','left','Callback',callback,'fontsize',8);
   handles.btn_sim_autoscale(i)=uicontrol('style','pushbutton','parent',handles.p_sim_plots,'units','normalized','position',[.96 .95+dy*(i-1)+.8*dy/2 .027 .05],'fontsize',12,'fontweight','bold','fontname','Blue Highway','String',char(cfg.autoscale_charcode),'callback',{@AutoscaleSimPlot,i},'visible',default_visible);%,'backgroundcolor',cfg.ButtonColor,'ForegroundColor',cfg.ButtonFontColor);
+  
   % ref: how to display pic on button: https://www.mathworks.com/matlabcentral/newsreader/view_thread/51230
     % for charcode=1:10000,fprintf('%g: %s\n',charcode,char(charcode)); end
     % up/down arrows: 5864, 8597, 8645, 8661
@@ -753,17 +760,21 @@ for i=1:cfg.max_num_plots
 %   pic_arrow=1-ind2rgb(pic_arrow,gray);
 %   handles.btn_sim_autoscale(i)=uicontrol('style','pushbutton','parent',handles.p_sim_plots,'units','normalized','position',[.955 .95+dy*(i-1)+.8*dy/2 .037 .08],'fontsize',12,'fontweight','bold','Cdata',pic_arrow,'callback',@QuickSim);%,'backgroundcolor',cfg.ButtonColor,'ForegroundColor',cfg.ButtonFontColor);
 end
+
 handles.line_data=[];
 % Create controls with default settings for QuickSim (parent: p_quicksim_settings)
 % btn_quicksim
 handles.btn_quicksim=uicontrol('style','pushbutton','parent',handles.p_quicksim_settings,'units','normalized','position',[.15 .55 .7 .3],'fontsize',12,'fontweight','bold','string','QuickSim','callback',@QuickSim,'backgroundcolor',cfg.ButtonColor,'ForegroundColor',cfg.ButtonFontColor);
+
 % edit_t0
 handles.edit_t0 = uicontrol('style','edit','parent',handles.p_quicksim_settings,'units','normalized','position',[.15 .15 .3 .3],'fontsize',12,'string','0','HorizontalAlignment','left','backgroundcolor','w','callback','global cfg; cfg.t0=str2num(get(gcbo,''string''));');
 uicontrol('style','text','parent',handles.p_quicksim_settings,'units','normalized','position',[.05 .1 .1 .3],'fontsize',10,'string','t0','HorizontalAlignment','center','backgroundcolor','w','callback','global cfg; cfg.dt=str2num(get(gcbo,''string''));');
+
 % edit_tf
 handles.edit_tf = uicontrol('style','edit','parent',handles.p_quicksim_settings,'units','normalized','position',[.55 .15 .3 .3],'fontsize',12,'string','200','HorizontalAlignment','left','backgroundcolor','w','callback','global cfg; cfg.tf=str2num(get(gcbo,''string''));');
 uicontrol('style','text','parent',handles.p_quicksim_settings,'units','normalized','position',[.45 .1 .1 .3],'fontsize',10,'string','tf','HorizontalAlignment','center','backgroundcolor','w','callback','global cfg; cfg.dt=str2num(get(gcbo,''string''));');
 handles.check_compile = uicontrol('style','checkbox','parent',handles.p_quicksim_settings,'units','normalized','position',[.15 .05 .85 .1],'string','compile','value',0,'backgroundcolor','w');
+
 
 % Create controls with default settings for running sims (parent: p_runsim_settings)
 % btn_start (string: start/pause/resume)
@@ -801,7 +812,9 @@ uicontrol('style','pushbutton','parent',handles.p_runsim_settings,'units','norma
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 function UpdateSimView(src,evnt)
 % Purpose: update Sim View controls (except plotted data)
+
 global handles cfg MODEL
+
 % update plot type
 if nargin>0 && isequal(src,handles.radio_plot_type)
   % hide all sim view plot objects
@@ -809,10 +822,12 @@ if nargin>0 && isequal(src,handles.radio_plot_type)
   for i=1:length(Children)
     set(findobj('tag',get(Children(i),'userdata')),'visible','off');
   end
+  
   % show plot objects for the select type
   SelectedObject=get(handles.radio_plot_type,'SelectedObject');
   set(findobj('tag',get(SelectedObject,'userdata')),'visible','on');
 end
+
 % get selection info
 pop_names=get(handles.list_pops,'string');
 sel_pop_inds=get(handles.list_pops,'value');
@@ -822,7 +837,8 @@ all_state_vars=MODEL.state_variables;
 if ~isempty(MODEL.monitors)
   all_state_vars=cat(2,all_state_vars,fieldnames(MODEL.monitors)');
 end
-%
+
+
 for plot_index=1:num_plots
   pop_name=sel_pop_names{plot_index};
   % get vars for this pop
@@ -844,6 +860,7 @@ for plot_index=1:num_plots
     set(handles.list_cells(plot_index),'value',sel_cell_inds);
   end
 end
+
 % display all axes with select pops to plot
 for plot_index=1:num_plots
   switch get(get(handles.radio_plot_type,'SelectedObject'),'String')
@@ -863,6 +880,7 @@ for plot_index=1:num_plots
   set(handles.list_cells(plot_index),'visible','on');
   set(handles.btn_sim_autoscale(plot_index),'visible','on');
 end
+
 % hide all available axes without select pops to plot
 for plot_index=num_plots+1:cfg.max_num_plots
   set(handles.edit_ymax(plot_index),'visible','off');
@@ -878,6 +896,7 @@ for plot_index=num_plots+1:cfg.max_num_plots
   set(handles.img_data(plot_index),'visible','off');
   set(handles.btn_sim_autoscale(plot_index),'visible','off');
 end
+
 % update plotted data
 UpdateSimPlots;
 
@@ -887,8 +906,10 @@ function UpdateSimPlots(src,evnt)
 global handles cfg
 sel_pop_inds=get(handles.list_pops,'value');
 num_plots=min(length(sel_pop_inds),cfg.max_num_plots);
+
 % what kind of plot? (trace, image)
 plot_type=get(get(handles.radio_plot_type,'SelectedObject'),'String');
+
 % loop over populations to plot
 for plot_index=1:num_plots
   % select data to plot for this population
@@ -1365,195 +1386,195 @@ if exist(datafile,'file')
 end
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-function eqns=dsExtractModelStrings(MODEL,display_mode,display_flag)
-% Purpose: construct string to display DynaSim model equations:
-%   ODEs
-%   ICs
-%   conditionals
-%   functions
-%   fixed_variables
-%   parameters
-%   monitors
-%   comments
-%
-% display_mode {'model' (default),'specification','odefun','xpp'}
-% OPTIONS (todo: add options 2 and 3):
-% 1. Display resulting model equations from DynaSim model structure
-% 2. Display ODEFUN (function handle string for ODE system: @(X,t)...)
-%     tip: use fun=str2func(eqns{1}) to obtain function handle from output
-%          and ic=eval(eqns{2}) to obtain initial condition vector.
-% 3. Display script defining the DynaSim specification structure
-% 4. Display XPP .ode model implementation (see notes below)
-%
-% Example: display DynaSim model equations
-% dsExtractModelStrings(MODEL,'model',1);
-%
-% Example: display and use script defining DynaSim specification structure
-% eqns=dsExtractModelStrings(MODEL,'specification',1);
-% spec=eval(eqns); % note: equivalent to MODEL.specification
-%
-% Example: integrate system using built-in Matlab solver
-%   eqns=dsExtractModelStrings(MODEL,'odefun',0);
-%   fun=eval(eqns{1});
-%   ic=eqns{2};
-%   [t,y]=ode23(fun,[0 100],ic);
-%   figure; plot(t,y);
-
-if nargin<3
-  display_flag=0;
-end
-if nargin<2 || isempty(display_mode)
-  display_mode='model';
-end
-
-eqns={};
-switch lower(display_mode)
-  case 'model' % Display resulting model equations from DynaSim model structure
-    % standardize DynaSim model structure
-    MODEL=dsCheckModel(MODEL);
-    % ODEs and ICs:
-    if ~isempty(MODEL.state_variables)
-      eqns{end+1}='% DIFFERENTIAL EQUATIONS:';
-      vars=MODEL.state_variables;
-      for i=1:length(vars)
-        eqns{end+1}=sprintf('%%  %s'' = %s',vars{i},MODEL.ODEs.(vars{i}));
-      end
-      eqns{end+1}='%';
-      eqns{end+1}='% Initial conditions:';
-      for i=1:length(vars)
-        eqns{end+1}=sprintf('%%  %s(0) = %s',vars{i},MODEL.ICs.(vars{i}));
-      end
-      eqns{end+1}='';
-    end
-    % conditionals
-    if ~isempty(MODEL.conditionals)
-      eqns{end+1}='% CONDITIONALS:';
-      for i=1:length(MODEL.conditionals)
-        str=sprintf('  if(%s)then(%s)',MODEL.conditionals(i).condition,MODEL.conditionals(i).action);
-        if ~isempty(MODEL.conditionals(i).else)
-          str=sprintf('%selse(%s)',str,MODEL.conditionals(i).else);
-        end
-        eqns{end+1}=sprintf('\t%s',str);
-      end
-      eqns{end+1}='';
-    end
-    types={'parameters','fixed_variables','functions'};%,'monitors'
-    type_headers={'% PARAMETERS:','% FIXED VARIABLES:','% FUNCTIONS:','% MONITORS:'};
-    for p=1:length(types)
-      type=types{p};
-      header=type_headers{p};
-      if ~isempty(MODEL.(type))
-        eqns{end+1}=header;
-        fields=fieldnames(MODEL.(type));
-        for i=1:length(fields)
-          val=MODEL.(type).(fields{i});
-          if ~ischar(val)
-            val=toString(val,'compact');
-          end
-          eqns{end+1}=sprintf('  %s = %s',fields{i},val);
-        end
-      end
-      eqns{end+1}='';
-    end
-  case 'odefun' % Display ODEFUN (function handle string for ODE system: @(X,t)...)
-    % Approach:
-    % 1. evaluate params -> fixed_vars -> funcs
-    % 2. evaluate ICs to get (# elems) per state var
-    % 3. prepare state vector X
-    % 4. replace state vars in ODEs by X
-    % 5. combine X ODEs into ODEFUN
-
-    % evaluate params -> fixed_vars -> funcs
-    types={'parameters','fixed_variables','functions'};
-    for p=1:length(types)
-      type=types{p};
-      if ~isempty(MODEL.(type))
-        fields=fieldnames(MODEL.(type));
-        for i=1:length(fields)
-          val=MODEL.(type).(fields{i});
-          if ~ischar(val)
-            val=toString(val,'compact');
-          end
-          % evaluate
-          eval(sprintf('%s = %s;',fields{i},val));
-        end
-      end
-    end
-
-    % evaluate ICs to get (# elems) per state var and set up generic state var X
-    num_vars=length(MODEL.state_variables);
-    num_elems=zeros(1,num_vars);
-    old_vars=MODEL.state_variables;
-    new_vars=cell(1,num_vars);
-    new_inds=cell(1,num_vars);
-    all_ICs=cell(1,num_vars);
-    IC_names={};
-    state_var_index=0;
-    for i=1:num_vars
-      var=MODEL.state_variables{i};
-      % evaluate ICs to get (# elems) per state var
-      ic=eval([MODEL.ICs.(var) ';']);
-      num_elems(i)=length(ic);
-      % set state var indices a variables for generic state vector X
-      all_ICs{i}=ic;
-      IC_names{i}=repmat({var},[1 num_elems(i)]);
-      new_inds{i}=state_var_index+(1:length(ic));
-      new_vars{i}=sprintf('X(%g:%g)',new_inds{i}(1),new_inds{i}(end));
-      state_var_index=state_var_index+length(ic);
-    end
-
-    % prepare ODE system (comma-separated ODEs)
-    ODEs=strtrim(struct2cell(MODEL.ODEs));
-    idx=cellfun(@isempty,regexp(ODEs,';$')); % lines that need semicolons
-    ODEs(idx)=cellfun(@(x)[x ';'],ODEs(idx),'uni',0);
-    ODEs=[ODEs{:}]; % concatenate ODEs into a single string
-    ODEs=strrep(ODEs,';',','); % replace semicolons by commas
-
-    % substitute in generic state vector X
-    for i=1:num_vars
-      ODEs=dynasim_strrep(ODEs,old_vars{i},new_vars{i});
-    end
-
-    % prepare outputs (function handle string, ICs, and element names for
-    % mapping each X(i) to a particular state variable):
-    ODEFUN = eval(['@(t,X) [' ODEs '];']);
-    IC=cat(2,all_ICs{:});
-    elem_names=cat(2,IC_names{:});
-
-    eqns{1}=ODEFUN;
-    eqns{2}=IC;
-    eqns{3}=elem_names;
-
-    %{
-      % usage:
-
-      eqns=dsExtractModelStrings(MODEL,'odefun',0);
-      ODEFUN=eqns{1};
-      IC=eqns{2};
-      elem_names=eqns{3};
-
-      dt=.01; t=0:dt:100;
-      y=zeros(length(t),length(IC));
-      y(1,:)=IC;
-      for i=2:length(t)
-        y(i,:)=y(i-1,:)+dt*ODEFUN(t,y(i-1,:));
-      end
-      figure; plot(t,y); legend(elem_names{:},'Location','EastOutside');
-
-      y=IC;
-      for i=1:1e4
-        y=y+dt*ODEFUN(0,y);
-      end;
-
-    %}
-
-  otherwise
-    error('options ''specification'' and ''xpp'' not implemented yet.');
-end
-
-if display_flag
-  cellfun(@disp,eqns);
-end
+% function eqns=dsExtractModelStrings(MODEL,display_mode,display_flag)
+% % Purpose: construct string to display DynaSim model equations:
+% %   ODEs
+% %   ICs
+% %   conditionals
+% %   functions
+% %   fixed_variables
+% %   parameters
+% %   monitors
+% %   comments
+% %
+% % display_mode {'model' (default),'specification','odefun','xpp'}
+% % OPTIONS (todo: add options 2 and 3):
+% % 1. Display resulting model equations from DynaSim model structure
+% % 2. Display ODEFUN (function handle string for ODE system: @(X,t)...)
+% %     tip: use fun=str2func(eqns{1}) to obtain function handle from output
+% %          and ic=eval(eqns{2}) to obtain initial condition vector.
+% % 3. Display script defining the DynaSim specification structure
+% % 4. Display XPP .ode model implementation (see notes below)
+% %
+% % Example: display DynaSim model equations
+% % dsExtractModelStrings(MODEL,'model',1);
+% %
+% % Example: display and use script defining DynaSim specification structure
+% % eqns=dsExtractModelStrings(MODEL,'specification',1);
+% % spec=eval(eqns); % note: equivalent to MODEL.specification
+% %
+% % Example: integrate system using built-in Matlab solver
+% %   eqns=dsExtractModelStrings(MODEL,'odefun',0);
+% %   fun=eval(eqns{1});
+% %   ic=eqns{2};
+% %   [t,y]=ode23(fun,[0 100],ic);
+% %   figure; plot(t,y);
+% 
+% if nargin<3
+%   display_flag=0;
+% end
+% if nargin<2 || isempty(display_mode)
+%   display_mode='model';
+% end
+% 
+% eqns={};
+% switch lower(display_mode)
+%   case 'model' % Display resulting model equations from DynaSim model structure
+%     % standardize DynaSim model structure
+%     MODEL=dsCheckModel(MODEL);
+%     % ODEs and ICs:
+%     if ~isempty(MODEL.state_variables)
+%       eqns{end+1}='% DIFFERENTIAL EQUATIONS:';
+%       vars=MODEL.state_variables;
+%       for i=1:length(vars)
+%         eqns{end+1}=sprintf('%%  %s'' = %s',vars{i},MODEL.ODEs.(vars{i}));
+%       end
+%       eqns{end+1}='%';
+%       eqns{end+1}='% Initial conditions:';
+%       for i=1:length(vars)
+%         eqns{end+1}=sprintf('%%  %s(0) = %s',vars{i},MODEL.ICs.(vars{i}));
+%       end
+%       eqns{end+1}='';
+%     end
+%     % conditionals
+%     if ~isempty(MODEL.conditionals)
+%       eqns{end+1}='% CONDITIONALS:';
+%       for i=1:length(MODEL.conditionals)
+%         str=sprintf('  if(%s)then(%s)',MODEL.conditionals(i).condition,MODEL.conditionals(i).action);
+%         if ~isempty(MODEL.conditionals(i).else)
+%           str=sprintf('%selse(%s)',str,MODEL.conditionals(i).else);
+%         end
+%         eqns{end+1}=sprintf('\t%s',str);
+%       end
+%       eqns{end+1}='';
+%     end
+%     types={'parameters','fixed_variables','functions'};%,'monitors'
+%     type_headers={'% PARAMETERS:','% FIXED VARIABLES:','% FUNCTIONS:','% MONITORS:'};
+%     for p=1:length(types)
+%       type=types{p};
+%       header=type_headers{p};
+%       if ~isempty(MODEL.(type))
+%         eqns{end+1}=header;
+%         fields=fieldnames(MODEL.(type));
+%         for i=1:length(fields)
+%           val=MODEL.(type).(fields{i});
+%           if ~ischar(val)
+%             val=toString(val,'compact');
+%           end
+%           eqns{end+1}=sprintf('  %s = %s',fields{i},val);
+%         end
+%       end
+%       eqns{end+1}='';
+%     end
+%   case 'odefun' % Display ODEFUN (function handle string for ODE system: @(X,t)...)
+%     % Approach:
+%     % 1. evaluate params -> fixed_vars -> funcs
+%     % 2. evaluate ICs to get (# elems) per state var
+%     % 3. prepare state vector X
+%     % 4. replace state vars in ODEs by X
+%     % 5. combine X ODEs into ODEFUN
+% 
+%     % evaluate params -> fixed_vars -> funcs
+%     types={'parameters','fixed_variables','functions'};
+%     for p=1:length(types)
+%       type=types{p};
+%       if ~isempty(MODEL.(type))
+%         fields=fieldnames(MODEL.(type));
+%         for i=1:length(fields)
+%           val=MODEL.(type).(fields{i});
+%           if ~ischar(val)
+%             val=toString(val,'compact');
+%           end
+%           % evaluate
+%           eval(sprintf('%s = %s;',fields{i},val));
+%         end
+%       end
+%     end
+% 
+%     % evaluate ICs to get (# elems) per state var and set up generic state var X
+%     num_vars=length(MODEL.state_variables);
+%     num_elems=zeros(1,num_vars);
+%     old_vars=MODEL.state_variables;
+%     new_vars=cell(1,num_vars);
+%     new_inds=cell(1,num_vars);
+%     all_ICs=cell(1,num_vars);
+%     IC_names={};
+%     state_var_index=0;
+%     for i=1:num_vars
+%       var=MODEL.state_variables{i};
+%       % evaluate ICs to get (# elems) per state var
+%       ic=eval([MODEL.ICs.(var) ';']);
+%       num_elems(i)=length(ic);
+%       % set state var indices a variables for generic state vector X
+%       all_ICs{i}=ic;
+%       IC_names{i}=repmat({var},[1 num_elems(i)]);
+%       new_inds{i}=state_var_index+(1:length(ic));
+%       new_vars{i}=sprintf('X(%g:%g)',new_inds{i}(1),new_inds{i}(end));
+%       state_var_index=state_var_index+length(ic);
+%     end
+% 
+%     % prepare ODE system (comma-separated ODEs)
+%     ODEs=strtrim(struct2cell(MODEL.ODEs));
+%     idx=cellfun(@isempty,regexp(ODEs,';$')); % lines that need semicolons
+%     ODEs(idx)=cellfun(@(x)[x ';'],ODEs(idx),'uni',0);
+%     ODEs=[ODEs{:}]; % concatenate ODEs into a single string
+%     ODEs=strrep(ODEs,';',','); % replace semicolons by commas
+% 
+%     % substitute in generic state vector X
+%     for i=1:num_vars
+%       ODEs=dynasim_strrep(ODEs,old_vars{i},new_vars{i});
+%     end
+% 
+%     % prepare outputs (function handle string, ICs, and element names for
+%     % mapping each X(i) to a particular state variable):
+%     ODEFUN = eval(['@(t,X) [' ODEs '];']);
+%     IC=cat(2,all_ICs{:});
+%     elem_names=cat(2,IC_names{:});
+% 
+%     eqns{1}=ODEFUN;
+%     eqns{2}=IC;
+%     eqns{3}=elem_names;
+% 
+%     %{
+%       % usage:
+% 
+%       eqns=dsExtractModelStrings(MODEL,'odefun',0);
+%       ODEFUN=eqns{1};
+%       IC=eqns{2};
+%       elem_names=eqns{3};
+% 
+%       dt=.01; t=0:dt:100;
+%       y=zeros(length(t),length(IC));
+%       y(1,:)=IC;
+%       for i=2:length(t)
+%         y(i,:)=y(i-1,:)+dt*ODEFUN(t,y(i-1,:));
+%       end
+%       figure; plot(t,y); legend(elem_names{:},'Location','EastOutside');
+% 
+%       y=IC;
+%       for i=1:1e4
+%         y=y+dt*ODEFUN(0,y);
+%       end;
+% 
+%     %}
+% 
+%   otherwise
+%     error('options ''specification'' and ''xpp'' not implemented yet.');
+% end
+% 
+% if display_flag
+%   cellfun(@disp,eqns);
+% end
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 function undo(src,evnt)

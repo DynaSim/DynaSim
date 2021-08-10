@@ -23,7 +23,8 @@ function data = dsCheckData(data, varargin)
 % Copyright (C) 2016 Jason Sherfey, Boston University, USA
 
 %% auto_gen_test_data_flag argin
-options = dsCheckOptions(varargin,{'auto_gen_test_data_flag',0,{0,1}},false);
+options = dsCheckOptions(varargin,{'remove_empties',0,{0,1},...
+    'auto_gen_test_data_flag',0,{0,1}},false);
 if options.auto_gen_test_data_flag
   varargs = varargin;
   varargs{find(strcmp(varargs, 'auto_gen_test_data_flag'))+1} = 0;
@@ -32,6 +33,26 @@ if options.auto_gen_test_data_flag
 end
 
 %%
+
+% Remove any empty fields (these can be created as a byproduct of dsMdd2ds)
+if options.remove_empties
+    
+    % Work with the first array index. If it's empty in here, remove it
+    % from all structs in the array
+    d = data(1);
+    fields = fieldnames(d);
+    for i = 1:length(fields)
+        if isempty(d.(fields{i}))
+            data = rmfield(data,fields{i});
+            for j = 1:length(data)
+                ind = find(strcmp(data(j).labels,fields{i}));
+                data(j).labels = data(j).labels([1:ind-1,ind+1:end]);
+            end
+        end
+    end
+end
+
+
 % check data type
 if iscell(data) && isnumeric(data{1})
   % assume cell array of data matrices [time x cells]

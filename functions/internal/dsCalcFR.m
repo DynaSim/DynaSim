@@ -1,5 +1,5 @@
 function data = dsCalcFR(data, varargin)
-%CALCFR - Calculate firing rage for DynaSim data
+%dsCalcFR - Calculate firing rage for DynaSim data
 %
 % Usage:
 %   data = dsCalcFR(data,'option',value)
@@ -14,6 +14,7 @@ function data = dsCalcFR(data, varargin)
 %                          [ms or fraction of data set] (default: 5% of the data set)
 %     'bin_shift'        : how much to shift the bin before calculating rate
 %                          again [ms or fraction of data set] (default: 1% of the data set)
+%     'output_suffix'    : suffix to add to result field name (default: '', i.e. none)
 %     'exclude_data_flag': whether to remove simulated data from result
 %                          structure (default: 0)
 %
@@ -39,14 +40,14 @@ function data = dsCalcFR(data, varargin)
 %   data=dsCalcFR(data,'variable','*_v');
 %   data % contains firing rates for E and I pops in .E_v_FR and .I_v_FR.
 %
-% See also: dsPlotFR, dsAnalyzeStudy, dsSimulate, dsCheckData, dsSelectVariables
+% See also: dsCalcFRmulti, dsPlotFR, dsAnalyzeStudy, dsSimulate, dsCheckData, dsSelectVariables
 % 
 % Author: Jason Sherfey, PhD <jssherfey@gmail.com>
 % Copyright (C) 2016 Jason Sherfey, Boston University, USA
 
 %% 1.0 Check inputs
 options=dsCheckOptions(varargin,{...
-  'variable',[],[],...
+  'variable','',[],...
   'time_limits',[-inf inf],[],...
   'threshold',1e-5,[],... % slightly above zero in case variable is point process *_spikes {0,1}
   'bin_size',.05,[],...
@@ -77,17 +78,17 @@ end
 % time info
 time = data.time;
 dt = time(2)-time(1);
-t1=nearest(time,options.time_limits(1)); % index to first sample
-t2=nearest(time,options.time_limits(2)); % index to last sample
-ntime=t2-t1+1;
+t1 = nearest(time,options.time_limits(1)); % index to first sample
+t2 = nearest(time,options.time_limits(2)); % index to last sample
+ntime = t2-t1+1;
 
 % set defaults
 % default variable to process
 if isempty(options.variable)
-  if any(~cellfun(@isempty,regexp(data.labels,'_spikes$')))
+  if any(~cellfun(@isempty,regexp(data.labels,'_spike_times$')))
     % use results from DynaSim spike monitor
-    options.variable=data.labels(~cellfun(@isempty,regexp(data.labels,'_spikes$')));
-    if length(options.variable)==1 % store in string
+    options.variable=data.labels(~cellfun(@isempty,regexp(data.labels,'_spike_times$')));
+    if length(options.variable) == 1 % store in string
       options.variable=options.variable{1};
     end
   else
@@ -100,9 +101,13 @@ end
 if options.bin_size>1
   % convert from ms to time points
   options.bin_size=ceil(options.bin_size/dt);
+  
+  binMsBool = true;
 else
   % convert from fraction to time points
   options.bin_size=ceil(options.bin_size*ntime);
+  
+  binMsBool = false;
 end
 
 % constrain bin_size to entire data set
@@ -111,16 +116,16 @@ if options.bin_size>ntime
 end
 
 % check bin_shift
-if options.bin_shift>1
+if options.bin_shift > 1 || binMsBool
   % convert from ms to time points
-  options.bin_shift=ceil(options.bin_shift/dt);
+  options.bin_shift = ceil(options.bin_shift/dt);
 else
   % convert from fraction to time points
-  options.bin_shift=ceil(options.bin_shift*ntime);
+  options.bin_shift = ceil(options.bin_shift*ntime);
 end
 
 %% 2.0 set list of variables to process as cell array of strings
-options.variable=dsSelectVariables(data(1).labels,options.variable, varargin{:});
+options.variable=dsSelectVariables(data(1),options.variable, varargin{:});
 
 %% 3.0 calculate firing rates for each variable
 if ~isfield(data,'results')
@@ -129,64 +134,93 @@ end
 
 % 3.1 calc bin info
 % samples at which bins begin
-bin_index_begs=t1:options.bin_shift:t2;
-% samples at which bins end
-bin_index_ends=bin_index_begs+options.bin_size;
+bin_index_begs = t1:options.bin_shift:t2;
 
-if bin_index_ends(end)>t2
+% samples at which bins end
+bin_index_ends = bin_index_begs+options.bin_size;
+
+if bin_index_ends(end) > t2
   if length(bin_index_ends) > 1 %multiple bins
     % remove final bin if extends beyond data
-    bin_index_begs=bin_index_begs(bin_index_ends<=t2);
-    bin_index_ends=bin_index_ends(bin_index_ends<=t2);
+    bin_index_begs = bin_index_begs(bin_index_ends<=t2);
+    bin_index_ends = bin_index_ends(bin_index_ends<=t2);
   else %1 bin
     bin_index_ends = t2;
   end
 end
 
 % times at which bins begin
-bin_times=time(bin_index_begs);
+bin_times = time(bin_index_begs);
+
 % number of bins
-nbins=length(bin_index_begs);
+nbins = length(bin_index_begs);
+
 % time width of a single bin in seconds
-bin_width=(dt/1000)*options.bin_size;
+bin_width = (dt/1000)*options.bin_size;
 
 % 3.2 loop over variables to process
-for v=1:length(options.variable)
+for iVar = 1:length(options.variable)
+  % get variable name
+  var = options.variable{iVar};
+  thisVarStr = [var '_FR' options.output_suffix];
+  
+  if isfield(data, thisVarStr) && ~options.overwrite_flag
+    continue
+  end
+  
   % extract this data set
-  var=options.variable{v};
-  dat=data.(var);
+  dat = data.(var);
+  
   % determine how many cells are in this data set
-  ncells=size(dat,2);
+  nCells = size(dat,2);
+  
   % loop over cells
-  FR=zeros(nbins,ncells);
-  spike_times=cell(1,ncells);
-  for i=1:ncells
+  FR = zeros(nbins,nCells);
+  spike_times = cell(1,nCells);
+  
+  for iCell = 1:nCells
     % get spikes in this cell
-    spike_inds=1+find((dat(2:end,i)>=options.threshold & dat(1:end-1,i)<options.threshold));
-    spikes=zeros(ntime,1);
-    spike_times{i}=time(spike_inds);
+    spike_inds = 1+find((dat(2:end,iCell)>=options.threshold & dat(1:end-1,iCell)<options.threshold));
+    spikes = zeros(ntime,1);
+    spike_times{iCell} = time(spike_inds);
+    
     if any(spike_inds)
-      spikes(spike_inds)=1;
+      spikes(spike_inds) = 1;
+      
       % calculate firing rates
       for bin=1:nbins
         % (# spikes in bin) / (duration of bin in seconds)
-        FR(bin,i)=sum(spikes(bin_index_begs(bin):bin_index_ends(bin)))/bin_width;
+        FR(bin,iCell) = sum(spikes(bin_index_begs(bin):bin_index_ends(bin)))/bin_width;
       end
     end
   end
+  
   % add firing rates to data structure
-  data.([var '_FR' options.output_suffix])=FR;
-  data.([var '_spike_times' options.output_suffix])=spike_times;
-  if ~ismember([var '_FR'],data.results)
-    data.results{end+1}=[var '_FR' options.output_suffix];
-    data.results{end+1}=[var '_spike_times' options.output_suffix];
+  data.(thisVarStr) = FR;
+  if ~ismember(thisVarStr,data.results)
+    data.results{end+1} = thisVarStr;
+  end
+  
+  % add spike times to data structure
+  thisVarStr = [var '_spike_times' options.output_suffix];
+  if ~isfield(data, thisVarStr) || options.overwrite_flag
+    data.(thisVarStr) = spike_times;
+  end
+  if ~ismember(thisVarStr, data.results)
+    data.results{end+1} = thisVarStr;
   end
 end
+
 % add bin times to data
-data.(['time_FR' options.output_suffix])=bin_times;
-if ~ismember(['time_FR' options.output_suffix],data.results)
-  data.results{end+1}=['time_FR' options.output_suffix];
+thisVarStr = ['time_FR' options.output_suffix];
+if ~isfield(data, thisVarStr) || options.overwrite_flag
+  data.(thisVarStr) = bin_times;
 end
+if ~ismember(thisVarStr, data.results)
+  data.results{end+1} = thisVarStr;
+end
+
+% check for removing data
 if options.exclude_data_flag
   for l=1:length(data.labels)
     data=rmfield(data,data.labels{l});
