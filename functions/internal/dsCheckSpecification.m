@@ -655,7 +655,7 @@ for i=1:length(spec.populations)
         try
           value=eval(param_value{l});
         catch
-          error('Values of this type are not supported for parameters set in equations.');
+          %error('Values of this type are not supported for parameters set in equations.');
         end
         if isempty(spec.populations(i).parameters)
           spec.populations(i).parameters={param_name{l},value};
