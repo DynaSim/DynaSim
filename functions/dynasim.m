@@ -737,7 +737,6 @@ for i=1:cfg.max_num_plots
   
   % axes_data_trace: axis for plotting traces
   handles.axes_data_trace(i)=subplot('position',[.23 yp+(i-1)*dy .72 -.8*dy], 'parent',handles.p_sim_plots,'tag','simview_trace');
-  
   % edit_ymax: max y-limits
   callback=sprintf('global handles; set(handles.axes_data_trace(%g),''ylim'',[str2double(get(handles.edit_ymin(%g),''string'')) str2double(get(gco,''string''))]); set(handles.axes_data_image(%g),''clim'',[str2double(get(handles.edit_ymin(%g),''string'')) str2double(get(gco,''string''))]); cfg.ymax(%g)=str2double(get(gco,''string''));',i,i,i,i,i);
   handles.edit_ymax(i)=uicontrol('style','edit','parent',handles.p_sim_plots,'tag','ymax','units','normalized','position',[.955 .95+dy*(i-1)-.01 .037 .03],'backgroundcolor','w','string',cfg.ymax(i),'HorizontalAlignment','left','Callback',callback,'fontsize',8);
