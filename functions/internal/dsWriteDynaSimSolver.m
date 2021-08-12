@@ -1492,17 +1492,17 @@ function print_conditional_update(fid,conditionals,index_nexts,state_variables, 
     for j=1:length(condition)
       fprintf(fid,['  conditional_test=any(%s);\n'],condition{j}); % JSS edit
       %fprintf(fid,['  conditional_test=(%s);\n'],condition{j});
-      if ~isempty(strfind(condition{j},'any('))
-        condition_indx = regexprep(condition{j},'^any\(','','once');
-        condition_indx = condition_indx(1:end-1);
-        fprintf(fid,['  conditional_indx=(%s);\n'],condition_indx);
-      elseif ~isempty(strfind(condition{j},'all('))
-        condition_indx = regexprep(condition{j},'^all\(','','once');
-        condition_indx = condition_indx(1:end-1);
-        fprintf(fid,['  conditional_indx=(%s);\n'],condition_indx);
-      else
+%       if ~isempty(strfind(condition{j},'any('))
+%         condition_indx = regexprep(condition{j},'^any\(','','once');
+%         condition_indx = condition_indx(1:end-1);
+%         fprintf(fid,['  conditional_indx=(%s);\n'],condition_indx);
+%       elseif ~isempty(strfind(condition{j},'all('))
+%         condition_indx = regexprep(condition{j},'^all\(','','once');
+%         condition_indx = condition_indx(1:end-1);
+%         fprintf(fid,['  conditional_indx=(%s);\n'],condition_indx);
+%       else
         fprintf(fid,['  conditional_indx=(%s);\n'],condition{j});
-      end
+%       end
     end
     for j=1:length(condition)
       action_j=dsStrrep(action{j}, '\(n,:', '\(n,conditional_indx', '', '', varargin{:});

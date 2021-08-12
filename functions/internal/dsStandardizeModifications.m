@@ -91,9 +91,9 @@ modOut =
 
 identModOut =
 
-  1×3 cell array
+  1ï¿½3 cell array
 
-    {1×2 double}    {1×2 double}    {1×4 double}
+    {1ï¿½2 double}    {1ï¿½2 double}    {1ï¿½4 double}
 
 identModOut = {
      [1     2]
@@ -104,15 +104,15 @@ identModOut = {
 
 nonLatticeModOut =
 
-  1×5 cell array
+  1ï¿½5 cell array
 
   Columns 1 through 4
 
-    {1×2 double}    {1×2 double}    {1×4 double}    {1×4 double}
+    {1ï¿½2 double}    {1ï¿½2 double}    {1ï¿½4 double}    {1ï¿½4 double}
 
   Column 5
 
-    {1×4 double}
+    {1ï¿½4 double}
 
 nonLatticeModOut = {
     [3     4]
@@ -220,6 +220,7 @@ if any(~cellfun(@isempty,regexp(modifications(:,1),'^\(.*\)$'))) || ...
       uniqueValsForNamespacesBool = size(thisModVal, 2) == length(namespaces);
       
       % check size of values matches number of namespaces, variables
+      type_detected_flag = 1;
       if isscalar(thisModVal) % in case number of values is one
         % repmat to size of pops and mechs to permit expansion below
         modifications{iMod,3} = repmat(thisModVal,length(variables),length(namespaces));
@@ -249,10 +250,13 @@ if any(~cellfun(@isempty,regexp(modifications(:,1),'^\(.*\)$'))) || ...
             modifications{iMod,3} = repmat(thisModVal,length(variables),1);
             
           else
-            % this error is not for this function but for vary statement
-            error(['Numerical values varied over must be in array format, ',...
-              'where variables/mechanisms go down rows/dim1, namespaces/populations ',...
-              'go along columns/dim2'])
+            % this is a non-scalar value set as a modification
+            modifications{iMod,3} = thisModVal;
+            type_detected_flag = 0;
+%             % this error is not for this function but for vary statement
+%             error(['Numerical values varied over must be in array format, ',...
+%               'where variables/mechanisms go down rows/dim1, namespaces/populations ',...
+%               'go along columns/dim2'])
           end
         end
         
@@ -263,7 +267,12 @@ if any(~cellfun(@isempty,regexp(modifications(:,1),'^\(.*\)$'))) || ...
       % expand list of modifications
       for iNamespace = 1:length(namespaces)
         for iVar = 1:length(variables)
-          modifications_expanded(end+1,1:3) = {namespaces{iNamespace}, variables{iVar}, modifications{iMod,3}(iVar,iNamespace)};
+          if type_detected_flag
+            modifications_expanded(end+1,1:3) = {namespaces{iNamespace}, variables{iVar}, modifications{iMod,3}(iVar,iNamespace)};
+          else
+            % support arbitrary assignments
+            modifications_expanded(end+1,1:3) = {namespaces{iNamespace}, variables{iVar}, modifications{iMod,3}};
+          end
         end
       end
       
