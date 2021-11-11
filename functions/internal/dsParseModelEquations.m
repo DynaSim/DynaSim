@@ -340,8 +340,8 @@ for index=1:length(text) % loop over lines of text
             % set expression if monitoring function referenced by name
             rhs = regexp(model.functions.(scopeName),'@\([a-zA-Z][\w,]*\)\s*(.*)','tokens','once');
             expression = rhs{1};
-          else
-            expression=[];
+          else % This case creates trouble (simulation crash due to, e.g. monitors of state variables), best thing is to ignore this case entirely
+            continue; % expression=[];
           end
 
           % store monitor
