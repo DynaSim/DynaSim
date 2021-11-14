@@ -1118,21 +1118,6 @@ for i=1:length(odes)
     error('Referencing non-existing linkers: %s –. Please fix your Dynasim mechanisms.\n\n', wrong_linkers);
   end
 end
-% #####################################################################
-% % #####################################################################
-% % remove unused @linkers from ODEs
-% for i=1:length(odes)
-%   if any(odes{i}=='@')
-%     tmp=regexp(odes{i},'@([\w_]+)','tokens');
-%     if ~isempty(tmp)
-%       tmp=[tmp{:}];
-%       for j=1:length(tmp)
-%         odes{i}=strrep(odes{i},['@' tmp{j}],'0');
-%       end
-%     end
-%   end
-% end
-% % #####################################################################
 
 
 %% Memory Check
