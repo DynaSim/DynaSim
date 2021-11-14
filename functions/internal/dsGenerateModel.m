@@ -780,7 +780,8 @@ function str = linker_strrep(str,oldstr,newstr,operator)
 
   % check if anything besides a single variable:
   if isempty(regexp(newstr,'[^a-z_A-Z\d]+','once'))
-    str=dsStrrep(str,oldstr,newstr);
+    rep=['((' newstr ')' operator oldstr ')'];
+    str=dsStrrep(str,oldstr,rep);
   else
     % otherwise do substitution with operator and parenthesis
     pat=['([^\w]+)' oldstr '([^\w]+)']; % in the middle
