@@ -82,6 +82,7 @@ function [data,studyinfo,result] = dsSimulate(model,varargin)
 %     'optimization'  : function handle of optimization function (see NOTE 2)
 %     'debug_flag'    : set to debug mode
 %     'benchmark_flag': set to benchmark mode. will add tic/toc to sims.
+%     'simlog_flag': set to simlog mode. will display sim info in the console (interval, solver, dt and progress).
 %     'userdata'      : field for user to store anything (default: [])
 %
 % Outputs:

@@ -90,6 +90,7 @@ options=dsCheckOptions(varargin,{...
   'one_solve_file_flag',0,{0,1},... % use only 1 solve file of each type, but can't vary mechs yet
   'independent_solve_file_flag',0,{0,1},... % solve file makes DS data structure without dsSimulate call
   'benchmark_flag',0,{0,1},...
+  'simLog_flag',1,{0,1},...
   },false);
 model=dsCheckModel(model, varargin{:});
 separator=','; % ',', '\\t'
@@ -1141,8 +1142,19 @@ fprintf(fid,'%% Numerical integration:\n');
 fprintf(fid,'%% ###########################################################\n');
 
 % SA: no idea what is the benefit of resetting the random seed multiple times within the solve_ode file
-% Set up random seed again, just incase.
+% Set up random seed again, just in case.
 % setup_randomseed(options,fid,rng_function,parameter_prefix)
+
+% simLog
+if options.simLog_flag
+  fprintf(fid,'nreports = 5; logTimes = 1:(ntime-1)/nreports:ntime;\n');
+  fprintf(fid,'fprintf(''\\nSimulation interval: %%g-%%g\\n'',p.tspan(1),p.tspan(2));\n');
+  fprintf(fid,'fprintf(''Starting integration (%s, dt=%%g)\\n'',p.dt);\n',options.solver);
+  fprintf(fid,'tstart = uint64(0);\n');
+  if options.mex_flag
+    fprintf(fid,'coder.extrinsic(''dsSimLog'');\n');
+  end
+end
 
 fprintf(fid,'n=2;\n');
 fprintf(fid,'for k=2:ntime\n'); % time index
@@ -1160,6 +1172,9 @@ if options.downsample_factor==1 && options.disk_flag==0 % store every time point
   end
 
   fprintf(fid,'  n=n+1;\n');
+  if options.simLog_flag
+    fprintf(fid,'    tstart = dsSimLog(k,logTimes,T,tstart);\n');
+  end
 else % store every downsample_factor time point in memory or on disk
   % update_vars;      % var_last->var_last
   update_vars(index_temps, varargin{:});
@@ -1206,6 +1221,9 @@ else % store every downsample_factor time point in memory or on disk
 
   fprintf(fid,'\n');
   fprintf(fid,'    n=n+1;\n');
+  if options.simLog_flag
+    fprintf(fid,'    tstart = dsSimLog(k,logTimes,T,tstart);\n');
+  end
   fprintf(fid,'  end\n');
 end
 
