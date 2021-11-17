@@ -301,10 +301,17 @@ for index=1:length(text) % loop over lines of text
         line=lines{l};
 
         % split left and right parts of monitor
-        lhs=regexp(line,'^[monitor\s]*([\w,@\s\.]+)','tokens','once');
+        % lhs=regexp(line,'^[monitor\s]*([\w,@\s\.]+)','tokens','once')
+        lhs=regexp(line,'^monitor\s*([\w,@\s\.]+)','tokens','once');
+        if isempty(lhs)
+          lhs=regexp(line,'\s*([\w,@\s\.]+)','tokens','once');
+        end
         rhs=regexp(line,'=(.+)$','tokens','once');
         if isempty(rhs) % useful when monitoring functions with linkers
-          lhs_=regexp(line,'^[monitor\s]*(\w+\([\w,@\s\.]+\))','tokens','once');
+          lhs_=regexp(line,'^monitor\s*(\w+\([\w,@\s\.]+\))','tokens','once');
+          if isempty(lhs_)
+            lhs_=regexp(line,'\s*(\w+\([\w,@\s\.]+\))','tokens','once');
+          end
         end
 
         % expand list of monitor names (e.g., monitor iNa.I, iK.I)
