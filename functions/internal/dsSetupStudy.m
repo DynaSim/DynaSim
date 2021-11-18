@@ -50,7 +50,7 @@ if options.save_data_flag || options.save_results_flag || options.parfor_flag
   options.study_dir = getAbsolutePath(options.study_dir);
 
   % create study_dir if it doesn't exist
-  if ~isdir(options.study_dir)
+  if ~isfolder(options.study_dir)
     if options.verbose_flag
       fprintf('Creating study directory: %s\n',options.study_dir);
     end
@@ -66,7 +66,7 @@ if options.save_data_flag || options.save_results_flag || options.parfor_flag
     % replace non-word characters by underscores so that matlab can execute
     % the file as a Matlab function:
     fname = regexprep(fname,'[^\w]','_');
-    
+
     % add #sims to name if mex_flag and one_solve_file_flag since #sims coded
     % into file
     if options.mex_flag && options.one_solve_file_flag && options.cluster_flag
@@ -79,7 +79,7 @@ if options.save_data_flag || options.save_results_flag || options.parfor_flag
   end
 
   % initialize studyinfo if not already initialized
-  if ischar(options.study_dir) && isdir(options.study_dir) && exist(fullfile(options.study_dir,'studyinfo.mat'),'file')
+  if ischar(options.study_dir) && isfolder(options.study_dir) && exist(fullfile(options.study_dir,'studyinfo.mat'),'file')
     % studyinfo file already exists
     studyinfo=dsCheckStudyinfo(options.study_dir,'process_id',process_id, varargin{:});
     orig_studyinfo=studyinfo;
@@ -118,7 +118,7 @@ if options.save_data_flag || options.save_results_flag || options.parfor_flag
   end
 
   % create study_dir if it doesn't exist
-  if ~isdir(options.study_dir)
+  if ~isfolder(options.study_dir)
     if options.verbose_flag
       fprintf('Creating study directory: %s\n',options.study_dir);
     end
@@ -127,7 +127,7 @@ if options.save_data_flag || options.save_results_flag || options.parfor_flag
 
   % create models dir if it doesn't exist and saving model
 %   models_dir = fullfile(options.study_dir,'models');
-%   if ~isdir(models_dir)
+%   if ~isfolder(models_dir)
 %     if options.verbose_flag
 %       fprintf('creating models directory: %s\n',models_dir);
 %     end
@@ -136,16 +136,16 @@ if options.save_data_flag || options.save_results_flag || options.parfor_flag
 
   % create data dir if it doesn't exist
   data_dir = fullfile(options.study_dir,'data');
-  if ~isdir(data_dir)
+  if ~isfolder(data_dir)
     if options.verbose_flag
       fprintf('Creating data directory: %s\n',data_dir);
     end
     mkdir(data_dir);
   end
-  
+
   % create results dir if it doesn't exist
   results_dir = fullfile(options.study_dir,'results');
-  if ~isdir(results_dir)
+  if ~isfolder(results_dir)
     if options.verbose_flag
       fprintf('Creating results directory: %s\n',results_dir);
     end
@@ -156,7 +156,7 @@ if options.save_data_flag || options.save_results_flag || options.parfor_flag
   % create figure dir if it doesn't exist and is needed
   if ~isempty(options.plot_functions)
     plot_dir = fullfile(options.study_dir,'plots');
-    if ~isdir(plot_dir)
+    if ~isfolder(plot_dir)
       if options.verbose_flag
         fprintf('Creating plot directory: %s\n',plot_dir);
       end
@@ -170,11 +170,11 @@ if options.save_data_flag || options.save_results_flag || options.parfor_flag
     if length(studyinfo.simulations)<k || isempty(studyinfo.simulations(k).status)
       studyinfo.simulations(k).sim_id=k;
       studyinfo.simulations(k).modifications=modifications_set{k};
-      
+
       % set file names for data (in data_dir)
       fname=[options.prefix '_sim' num2str(k) '_data.mat'];
       studyinfo.simulations(k).data_file=fullfile(data_dir,fname);
-      
+
       fname=[options.prefix '_sim' num2str(k) '_model.mat'];
       %studyinfo.simulations(k).modified_model_file=fullfile(models_dir,fname);
       studyinfo.simulations(k).status='initialized';
@@ -187,7 +187,7 @@ if options.save_data_flag || options.save_results_flag || options.parfor_flag
         % check for function-specific prefix
         this_analysis_options = dsCheckOptions(options.analysis_options{kk}, {'prefix',options.prefix,[]},false);
         prefix = this_analysis_options.prefix;
-        
+
         fname = [prefix '_sim' num2str(k) '_analysis' num2str(kk) '_' func2str(options.analysis_functions{kk}) '.mat'];
         studyinfo.simulations(k).result_files{end+1} = fullfile(results_dir,fname);
       end
@@ -196,11 +196,11 @@ if options.save_data_flag || options.save_results_flag || options.parfor_flag
       for kk = 1:length(options.plot_functions)
         studyinfo.simulations(k).result_functions{end+1}=options.plot_functions{kk};
         studyinfo.simulations(k).result_options{end+1}=options.plot_options{kk};
-        
+
         % check for function-specific prefix
         this_plot_options = dsCheckOptions(options.plot_options{kk}, {'prefix',options.prefix,[]},false);
         prefix = this_plot_options.prefix;
-        
+
         fname=[prefix '_sim' num2str(k) '_plot' num2str(kk) '_' func2str(options.plot_functions{kk})];
         % note: extension will depend on output format (jpg,png,eps,svg)
         % and be set in dsAnalyze().
@@ -220,7 +220,7 @@ if options.save_data_flag || options.save_results_flag || options.parfor_flag
     study_file=fullfile(options.study_dir,'studyinfo.mat');
     dsStudyinfoIO(studyinfo,study_file,process_id,options.verbose_flag);
   end
-  
+
   %% save run file
   if options.copy_run_file_flag
     stack = dbstack;
@@ -231,49 +231,49 @@ if options.save_data_flag || options.save_results_flag || options.parfor_flag
     else
       runFilePath = '';
     end
-    
+
     solveDir = fullfile(options.study_dir, 'solve');
-    if ~isdir(solveDir)
+    if ~isfolder(solveDir)
       mkdir(solveDir);
     end
-    
+
     if ~isempty(runFilePath)
       dsVprintf(options, 'Copying run file ''%s'' into ''study_dir/solve'': %s \n', runFile,solveDir);
       copyPath = fullfile(solveDir, runFile);
       copyfile(runFilePath, copyPath);
     end
   end
-  
+
   %% save mech files
   if options.copy_mech_files_flag
     % add pop mechs
     mechFiles = horzcat(base_model.specification.populations.mechanism_list);
-    
+
     % add connection mechs
     if ~isempty(base_model.specification.connections)
       mechFiles = horzcat(mechFiles, base_model.specification.connections.mechanism_list);
     end
-    
+
     if ~isempty(mechFiles)
       dsVprintf(options, 'Copying mech files into ''study_dir/solve/mechs''... \n');
-      
+
       mechCopyDir = fullfile(options.study_dir, 'solve','mechs');
-      if ~isdir(mechCopyDir)
+      if ~isfolder(mechCopyDir)
         mkdir(mechCopyDir);
       end
-      
+
       for iFile = 1:length(mechFiles)
         try
           thisFilePath = mechFiles{iFile};
-          
+
           thisFilePath = which(thisFilePath);
-          
+
           [~, fileName,ext] = fileparts(thisFilePath);
-          
+
           dsVprintf(options, '    %s \n', fileName);
-          
+
           thisCopyPath = fullfile(mechCopyDir, [fileName, ext]);
-          
+
           copyfile(thisFilePath, thisCopyPath);
         end
       end
@@ -287,7 +287,7 @@ else
     options.study_dir = pwd; % this is where /solve/solve_ode.m will be created
   end
 
-  if ~isdir(options.study_dir) % in case user provides different location to save solvers
+  if ~isfolder(options.study_dir) % in case user provides different location to save solvers
     if options.verbose_flag
       fprintf('Creating study directory: %s\n',options.study_dir);
     end

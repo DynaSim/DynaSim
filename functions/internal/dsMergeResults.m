@@ -48,7 +48,7 @@ options = dsCheckOptions(varargin,{...
   },false);
 
 % determine study_dir
-if isdir(src)
+if isfolder(src)
   study_dir = src;
 elseif isfile(src)
   study_dir = fileparts(src);
@@ -70,37 +70,37 @@ if ~isempty(results)
   else
     save(mergedFilePath, '-struct','results', '-hdf5'); % hdf5 format in Octave
   end
-  
+
   if options.delete_original
     % delete filePaths
     dsPrintf(options, 'Deleting original results...\n');
     structfun(@cellDel, originalResultFilePaths);
   elseif ~isempty(options.moveDir) % move filePaths
     [~, pathInAbsBool] = getAbsolutePath(options.moveDir);
-    
+
     % make moveDir absolute path
     if ~pathInAbsBool
       moveDir = fullfile(study_dir, options.moveDir);
     else
       moveDir = options.moveDir;
     end
-    
+
     dsPrintf(options, 'Moving original results...\n');
-    
+
     if options.moveAllContents % move entire results dir
       % rename resultsDir to moveDir
       movefile(resultsDir, moveDir);
-      
+
       % remake results dir
       exist_mkdir(resultsDir);
-      
+
       % move results_merged file back to results
       tempMergedFilePath = fullfile(moveDir, 'results_merged.mat');
       movefile(tempMergedFilePath, mergedFilePath);
     else
       % mkdir if ~exist
       exist_mkdir(moveDir);
-    
+
       % move individual filePaths
       structfun(@cellMove, originalResultFilePaths);
     end

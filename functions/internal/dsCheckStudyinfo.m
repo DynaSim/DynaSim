@@ -79,7 +79,7 @@ function studyinfo = dsCheckStudyinfo(studyinfo, varargin)
 %     studyinfo=dsCheckStudyinfo(studyinfo)
 %
 % See also: dsSetupStudy, dsSimulate, dsCreateBatch, dsImport, dsAnalyzeStudy
-% 
+%
 % Author: Jason Sherfey, PhD <jssherfey@gmail.com>
 % Copyright (C) 2016 Jason Sherfey, Boston University, USA
 
@@ -113,7 +113,7 @@ analysis_field_order={'analysis_id','function','analysis_options','stop_time','d
 study_dir=pwd;
 
 % check if study_dir was provided
-if ischar(studyinfo) && isdir(studyinfo)
+if ischar(studyinfo) && isfolder(studyinfo)
   study_dir=studyinfo;
   studyinfo=fullfile(study_dir,'studyinfo.mat');
 end
@@ -171,7 +171,7 @@ if ~isfield(studyinfo,'dynasim_hash')
   % return to original directory
   cd(cwd);
 end
-if ~isfield(studyinfo,'user_name')  
+if ~isfield(studyinfo,'user_name')
   try
     user_name = getenv('USER');
   catch

@@ -1,7 +1,7 @@
 function m2html(varargin)
 %M2HTML - Documentation Generator for Matlab M-files and Toolboxes in HTML
 %  M2HTML by itself generates an HTML documentation of the Matlab M-files found
-%  in the direct subdirectories of the current directory. HTML files are 
+%  in the direct subdirectories of the current directory. HTML files are
 %  written in a 'doc' directory (created if necessary). All the others options
 %  are set to default (in brackets in the following).
 %  M2HTML('PropertyName1',PropertyValue1,'PropertyName2',PropertyValue2,...)
@@ -19,7 +19,7 @@ function m2html(varargin)
 %    o syntaxHighlighting - Source Code Syntax Highlighting [ {on} | off ]
 %    o tabs - Replace '\t' (horizontal tab) in source code by n white space
 %        characters [ 0 ... {4} ... n ]
-%    o globalHypertextLinks - Hypertext links among separate Matlab 
+%    o globalHypertextLinks - Hypertext links among separate Matlab
 %        directories [ on | {off} ]
 %    o todo - Create a TODO list in each directory summarizing all the
 %        '% TODO %' lines found in Matlab code [ on | {off}]
@@ -30,9 +30,9 @@ function m2html(varargin)
 %    o template - HTML template name to use [ {'blue'} | 'frame' | ... ]
 %    o search - Add a PHP search engine [ on | {off}] - beta version!
 %    o ignoredDir - List of directories to be ignored [ {'.svn' 'cvs'} ]
-%    o save - Save current state after M-files parsing in 'm2html.mat' 
+%    o save - Save current state after M-files parsing in 'm2html.mat'
 %        in directory htmlDir [ on | {off}]
-%    o load - Load a previously saved '.mat' M2HTML state to generate HTML 
+%    o load - Load a previously saved '.mat' M2HTML state to generate HTML
 %        files once again with possibly other options [ <none> ]
 %    o verbose - Verbose mode [ {on} | off ]
 %
@@ -56,12 +56,12 @@ function m2html(varargin)
 %  modify it under the terms of the GNU General Public License
 %  as published by the Free Software Foundation; either version 2
 %  of the License, or any later version.
-% 
+%
 %  This program is distributed in the hope that it will be useful,
 %  but WITHOUT ANY WARRANTY; without even the implied warranty of
 %  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 %  GNU General Public License for more details.
-% 
+%
 %  You should have received a copy of the GNU General Public License
 %  along with this program; if not, write to the Free Software
 %  Foundation Inc, 59 Temple Pl. - Suite 330, Boston, MA 02111-1307, USA.
@@ -77,7 +77,7 @@ function m2html(varargin)
 %     * Matlab documentation on M-file Programming:
 %  <http://www.mathworks.com/access/helpdesk/help/techdoc/matlab_prog/ch_funh8.html>
 
-%  This function uses the Template class so that you can fully customize 
+%  This function uses the Template class so that you can fully customize
 %  the output. You can modify .tpl files in templates/blue/ or create new
 %  templates in a new directory.
 %  See the template class documentation for more details.
@@ -87,7 +87,7 @@ function m2html(varargin)
 %  <http://www.artefact.tk/software/matlab/m2html/>
 
 %  Other Matlab to HTML converters available on the web:
-%  1/ mat2html.pl, J.C. Kantor, in Perl, 1995: 
+%  1/ mat2html.pl, J.C. Kantor, in Perl, 1995:
 %     <http://fresh.t-systems-sfr.com/unix/src/www/mat2html>
 %  2/ htmltools, B. Alsberg, in Matlab, 1997:
 %     <http://www.mathworks.com/matlabcentral/fileexchange/loadFile.do?objectId=175>
@@ -250,7 +250,7 @@ for i=1:2:length(paramlist)
 			if ischar(pvalue)
                 if exist(pvalue) == 7 % directory provided
                     pvalue = fullfile(pvalue,'m2html.mat');
-                end         
+                end
 				try
 					load(pvalue);
 				catch
@@ -336,7 +336,7 @@ end
 %-------------------------------------------------------------------------------
 if ~options.load
 	if strcmp(options.mFiles,'.')
-		d = dir(pwd); d = {d([d.isdir]).name};
+		d = dir(pwd); d = {d([d.isfolder]).name};
 		options.mFiles = {d{~ismember(d,{'.' '..' options.ignoredDir{:}})}};
 	end
 	mfiles = getmfiles(options.mFiles,{},options.recursive,options.ignoredDir);
@@ -373,22 +373,22 @@ end
 %-------------------------------------------------------------------------------
 %- Create output directory, if necessary
 %-------------------------------------------------------------------------------
-if isempty(dir(options.htmlDir))										       
-	%- Create the top level output directory							       
-	if options.verbose  												       
-		fprintf('Creating directory %s...\n',options.htmlDir);  		       
-	end 																       
-	if options.htmlDir(end) == filesep, 								       
-		options.htmlDir(end) = [];  									       
-	end 																       
-	[pathdir, namedir] = fileparts(options.htmlDir);					       
-	if isempty(pathdir) 												       
-		[status, msg] = mkdir(escapeblank(namedir)); 								       
-	else																       
-		[status, msg] = mkdir(escapeblank(pathdir), escapeblank(namedir));						       
-	end 																       
-	if ~status, error(msg); end 														       
-end 																	       
+if isempty(dir(options.htmlDir))
+	%- Create the top level output directory
+	if options.verbose
+		fprintf('Creating directory %s...\n',options.htmlDir);
+	end
+	if options.htmlDir(end) == filesep,
+		options.htmlDir(end) = [];
+	end
+	[pathdir, namedir] = fileparts(options.htmlDir);
+	if isempty(pathdir)
+		[status, msg] = mkdir(escapeblank(namedir));
+	else
+		[status, msg] = mkdir(escapeblank(pathdir), escapeblank(namedir));
+	end
+	if ~status, error(msg); end
+end
 
 %-------------------------------------------------------------------------------
 %- Get synopsis, H1 line, script/function, subroutines, cross-references, todo
@@ -573,7 +573,7 @@ fclose(fid);
 %-------------------------------------------------------------------------------
 % Get list of files
 d = dir(options.template);
-d = {d(~[d.isdir]).name};
+d = {d(~[d.isfolder]).name};
 % Copy files
 for i=1:length(d)
 	[p, n, ext] = fileparts(d{i});
@@ -625,18 +625,18 @@ if options.search
 		docinfo{i,2} = fullurl(mdirs{i}, [names{i} options.extension]);
 	end
 	doxywrite(fullfile(options.htmlDir,idx_search),statlist,statinfo,docinfo);
-	
+
 	%- Create the PHP template
 	tpl = template(options.template,'remove');
 	tpl = set(tpl,'file','TPL_SEARCH',tpl_search);
-	
+
 	%- Open for writing the PHP search script
-	curfile = fullfile(options.htmlDir, php_search); 
+	curfile = fullfile(options.htmlDir, php_search);
 	if options.verbose
 		fprintf('Creating PHP script %s...\n',curfile);
 	end
 	fid = openfile(curfile,'w');
-	
+
 	%- Set template fields
 	tpl = set(tpl,'var','INDEX',[options.indexFile options.extension]);
 	tpl = set(tpl,'var','MASTERPATH','./');
@@ -644,7 +644,7 @@ if options.search
 								datestr(now,13)]);
 	tpl = set(tpl,'var','IDXFILE',idx_search);
 	tpl = set(tpl,'var','PHPFILE',php_search);
-	
+
 	%- Print the template in the HTML file
 	tpl = parse(tpl,'OUT','TPL_SEARCH');
 	fprintf(fid,'%s',get(tpl,'OUT'));
@@ -738,7 +738,7 @@ for i=1:length(mdir)
 	tpl = set(tpl,'var','INDEX',     [options.indexFile options.extension]);
 	tpl = set(tpl,'var','MASTERPATH',backtomaster(mdir{i}));
 	tpl = set(tpl,'var','MDIR',      mdir{i});
-	
+
 	%- Display Matlab m-files, their H1 line and their Mex status
 	tpl = set(tpl,'var','rows-m','');
 	for j=1:length(mdirs)
@@ -754,7 +754,7 @@ for i=1:length(mdir)
 			tpl = parse(tpl,'rows-m','row-m',1);
 		end
 	end
-	
+
 	%- Display other Matlab-specific files (.mat,.mdl,.p)
 	tpl = set(tpl,'var','other','');
 	tpl = set(tpl,'var','rows-other','');
@@ -767,12 +767,12 @@ for i=1:length(mdir)
 	if ~isempty(w)
 		tpl = parse(tpl,'other','othermatlab');
 	end
-	
+
 	%- Display subsequent directories and classes
 	tpl = set(tpl,'var','subdirs','');
 	tpl = set(tpl,'var','subfold','');
 	d = dir(mdir{i});
-	d = {d([d.isdir]).name};
+	d = {d([d.isfolder]).name};
 	d = {d{~ismember(d,{'.' '..' options.ignoredDir{:}})}};
 	for j=1:length(d)
 		if ismember(fullfile(mdir{i},d{j}),mdir)
@@ -787,7 +787,7 @@ for i=1:length(mdir)
 	if ~isempty(d)
 		tpl = parse(tpl,'subfold','subfolder');
 	end
-	
+
 	%- Link to the TODO list if necessary
 	tpl = set(tpl,'var','todolists','');
 	if options.todo
@@ -796,14 +796,14 @@ for i=1:length(mdir)
 			tpl = parse(tpl,'todolists','todolist',1);
 		end
 	end
-	
+
 	%- Link to the dependency graph if necessary
 	tpl = set(tpl,'var','graphs','');
 	if options.graph
 		tpl = set(tpl,'var','LGRAPH',[dotbase options.extension]);
 		tpl = parse(tpl,'graphs','graph',1);
 	end
-	
+
 	%- Print the template in the HTML file
 	tpl = parse(tpl,'OUT','TPL_MDIR');
 	fprintf(fid,'%s',get(tpl,'OUT'));
@@ -834,13 +834,13 @@ if options.todo
 				fprintf('Creating HTML file %s...\n',curfile);
 			end
 			fid = openfile(curfile,'w');
-			
+
 			%- Set template fields
 			tpl = set(tpl,'var','INDEX',[options.indexFile options.extension]);
 			tpl = set(tpl,'var','MASTERPATH', backtomaster(mdir{i}));
 			tpl = set(tpl,'var','MDIR',       mdir{i});
 			tpl = set(tpl,'var','filelists',  '');
-	
+
 			for k=1:length(mfilestodo)
 				tpl = set(tpl,'var','MFILE',names{mfilestodo(k)});
 				tpl = set(tpl,'var','rows','');
@@ -856,7 +856,7 @@ if options.todo
 				end
 				tpl = parse(tpl,'filelists','filelist',1);
 			end
-	
+
 			%- Print the template in the HTML file
 			tpl = parse(tpl,'OUT','TPL_TODO');
 			fprintf(fid,'%s',get(tpl,'OUT'));
@@ -880,7 +880,7 @@ if options.graph
 	tpl = set(tpl,'file','TPL_GRAPH',tpl_graph);
 	tpl = set(tpl,'var','DATE',[datestr(now,8) ' ' datestr(now,1) ' ' ...
 								datestr(now,13)]);
-	
+
     %- Create a full dependency graph for all directories if possible
     if options.globalHypertextLinks & length(mdir) > 1
         mdotfile = fullfile(options.htmlDir,[dotbase '.dot']);
@@ -906,7 +906,7 @@ if options.graph
 		fprintf(fid,'%s', get(tpl,'OUT'));
         fclose(fid);
     end
-    
+
     %- Create a dependency graph for each output directory
 	for i=1:length(mdir)
 		mdotfile = fullfile(options.htmlDir,mdir{i},[dotbase '.dot']);
@@ -980,10 +980,10 @@ nblinetot = 0;
 for i=1:length(mdir)
 	for j=1:length(mdirs)
 		if strcmp(mdirs{j},mdir{i})
-		
+
 			curfile = fullfile(options.htmlDir,mdir{i},...
 							   [names{j} options.extension]);
-							   
+
 			%- Copy M-file for download, if necessary
 			if options.download
 				if options.verbose
@@ -994,7 +994,7 @@ for i=1:length(mdir)
 					fullfile(options.htmlDir,mdir{i}));
 				error(errmsg);
 			end
-			
+
 			%- Open for writing the HTML file
 			if options.verbose
 				fprintf('Creating HTML file %s...\n',curfile);
@@ -1005,10 +1005,10 @@ for i=1:length(mdir)
                         'overwritten by Matlab function %s.\n'], ...
                         [options.indexFile options.extension], mfiles{j});
             end
-            
+
 			%- Open for reading the M-file
 			fid2 = openfile(mfiles{j},'r');
-			
+
 			%- Set some template fields
 			tpl = set(tpl,'var','INDEX', [options.indexFile options.extension]);
 			tpl = set(tpl,'var','MASTERPATH',       backtomaster(mdir{i}));
@@ -1036,7 +1036,7 @@ for i=1:length(mdir)
 				tpl = set(tpl,'var','PATHDIR',s{k});
 				tpl = parse(tpl,'pl','pathline',1);
 			end
-			
+
 			%- Handle mex files
 			tpl = set(tpl,'var','mex', '');
 			samename = dir(fullfile(mdir{i},[names{j}	'.*']));
@@ -1061,7 +1061,7 @@ for i=1:length(mdir)
 				tpl = set(tpl,'var','PLATFORMS', mexplatforms(1:end-2));
 				tpl = parse(tpl,'mex','mexfile');
 			end
-			
+
 			%- Set description template field
 			descr = '';
 			flagsynopcont = 0;
@@ -1117,7 +1117,7 @@ for i=1:length(mdir)
 			end
 			tpl = set(tpl,'var','DESCRIPTION',...
 				horztab(descr,options.tabs));
-			
+
 			%- Set cross-references template fields:
 			%  Function called
 			ind = find(hrefs(j,:) == 1);
@@ -1155,7 +1155,7 @@ for i=1:length(mdir)
 				tpl = set(tpl,'var','H1LINE_CALLED', h1line{ind(k)});
 				tpl = parse(tpl,'crossrefcalleds','crossrefcalled',1);
 			end
-			
+
 			%- Set subfunction template field
 			tpl = set(tpl,'var',{'subf' 'onesubf'},{'' ''});
 			if ~isempty(subroutine{j}) & options.source
@@ -1167,13 +1167,13 @@ for i=1:length(mdir)
 				tpl = parse(tpl,'subf','subfunction');
 			end
 			subname = extractname(subroutine{j});
-			
+
 			%- Link to M-file (for download)
 			tpl = set(tpl,'var','downloads','');
 			if options.download
 				tpl = parse(tpl,'downloads','download',1);
 			end
-			
+
 			%- Display source code with cross-references
 			if options.source & ~strcmpi(names{j},'contents')
 				fseek(fid2,0,-1);
@@ -1303,7 +1303,7 @@ function mfiles = getmfiles(mdirs, mfiles, recursive, ignoredDir)
 			mfiles{end+1} = mdirs{i};
 		elseif exist(currentdir) == 7 % Directory
 			d = dir(fullfile(currentdir, '*.m'));
-			d = {d(~[d.isdir]).name};
+			d = {d(~[d.isfolder]).name};
 			for j=1:length(d)
 				%- don't take care of files containing ','
 				%  probably a sccs file...
@@ -1313,7 +1313,7 @@ function mfiles = getmfiles(mdirs, mfiles, recursive, ignoredDir)
 			end
 			if recursive
 				d = dir(currentdir);
-				d = {d([d.isdir]).name};
+				d = {d([d.isfolder]).name};
 				d = {d{~ismember(d,{'.' '..' ignoredDir{:}})}};
 				for j=1:length(d)
 					mfiles = getmfiles(cellstr(fullfile(mdirs{i},d{j})), ...
@@ -1324,7 +1324,7 @@ function mfiles = getmfiles(mdirs, mfiles, recursive, ignoredDir)
 			fprintf('Warning: Unprocessed file %s.\n',mdirs{i});
 			if ~isempty(strmatch('/',mdirs{i})) | findstr(':',mdirs{i})
 				fprintf('         Use relative paths in ''mfiles'' option\n');
-			end 
+			end
 		end
 	end
 
@@ -1339,23 +1339,23 @@ function calldot(dotexec, mdotfile, mapfile, pngfile, opt)
         %  <http://www.artefact.tk/software/matlab/m2html/faq.php>
 
 %         eval(['!"' dotexec '" ' opt ' -Tcmap -Tpng "' mdotfile ...
-%               '" -o "' mapfile ... 
+%               '" -o "' mapfile ...
 %               '" -o "' pngfile '"']);
         system([dotexec opt ' -Tcmap -Tpng "' mdotfile ...
-              '" -o "' mapfile ... 
+              '" -o "' mapfile ...
               '" -o "' pngfile '"']);
         % use '!' rather than 'system' for backward compability with Matlab 5.3
     catch % use of '!' prevents errors to be catched...
         fprintf('<dot> failed.');
     end
-    
+
 %===============================================================================
 function s = backtomaster(mdir)
 	%- Provide filesystem path to go back to the root folder
 
 	ldir = splitpath(mdir);
 	s = repmat('../',1,length(ldir));
-	
+
 %===============================================================================
 function ldir = splitpath(p)
 	%- Split a filesystem path into parts using filesep as separator
@@ -1394,13 +1394,13 @@ function name = extractname(synopsis)
 %===============================================================================
 function f = fullurl(varargin)
 	%- Build full url from parts (using '/' and not filesep)
-	
+
 	f = strrep(fullfile(varargin{:}),'\','/');
 
 %===============================================================================
 function str = escapeblank(str)
 	%- Escape white spaces using '\'
-	
+
 	str = deblank(fliplr(deblank(fliplr(str))));
 	str = strrep(str,' ','\ ');
 
@@ -1408,18 +1408,18 @@ function str = escapeblank(str)
 function str = entity(str)
 	%- Escape HTML special characters
 	%- See http://www.w3.org/TR/html4/charset.html#h-5.3.2
-	
+
 	str = strrep(str,'&','&amp;');
 	str = strrep(str,'<','&lt;');
 	str = strrep(str,'>','&gt;');
 	str = strrep(str,'"','&quot;');
-	
+
 %===============================================================================
 function str = horztab(str,n)
-	%- For browsers, the horizontal tab character is the smallest non-zero 
+	%- For browsers, the horizontal tab character is the smallest non-zero
 	%- number of spaces necessary to line characters up along tab stops that are
 	%- every 8 characters: behaviour obtained when n = 0.
-	
+
 	if n > 0
 		str = strrep(str,sprintf('\t'),blanks(n));
 	end

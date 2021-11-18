@@ -154,17 +154,17 @@ if nArg == 2
    if isa(Opt, 'struct') == 0   % Bad type of 2nd input:
       Error_L('BadInput2', '2nd input [Opt] must be a struct.');
    end
-   
+
    % Specify hash algorithm:
    if isfield(Opt, 'Method')  && ~isempty(Opt.Method)   % Short-circuiting
       Method = upper(Opt.Method);
    end
-   
+
    % Specify output format:
    if isfield(Opt, 'Format') && ~isempty(Opt.Format)    % Short-circuiting
       OutFormat = Opt.Format;
    end
-   
+
    % Check if the Input type is specified - default: 'array':
    if isfield(Opt, 'Input') && ~isempty(Opt.Input)      % Short-circuiting
       if strcmpi(Opt.Input, 'File')
@@ -172,7 +172,7 @@ if nArg == 2
             Error_L('CannotOpen', '1st input FileName must be a string');
          end
          isFile = true;
-         
+
       elseif strncmpi(Opt.Input, 'bin', 3)  % Accept 'binary' also
          if (isnumeric(Data) || ischar(Data) || islogical(Data)) == 0 || ...
                issparse(Data)
@@ -180,7 +180,7 @@ if nArg == 2
                '1st input must be numeric, CHAR or LOGICAL for binary input.');
          end
          isBin = true;
-         
+
       elseif strncmpi(Opt.Input, 'asc', 3)  % 8-bit ASCII characters
          if ~ischar(Data)
             Error_L('BadDataType', ...
@@ -190,18 +190,18 @@ if nArg == 2
          Data  = uint8(Data);
       end
    end
-   
+
 elseif nArg == 0  % Reply version of this function:
    R = Version_L;
-   
+
    if nargout == 0
       disp(R);
    else
       Hash = R;
    end
-   
+
    return;
-   
+
 elseif nArg ~= 1  % Bad number of arguments:
    Error_L('BadNInput', '1 or 2 inputs required.');
 end
@@ -226,7 +226,7 @@ if isFile
          Error_L('FileNotFound', 'File not found: %s.', Data);
       end
    end
-   
+
    % Read file in chunks to save memory and Java heap space:
    Chunk = 1e6;      % Fastest for 1e6 on Win7/64, HDD
    Count = Chunk;    % Dummy value to satisfy WHILE condition
@@ -237,10 +237,10 @@ if isFile
       end
    end
    fclose(FID);
-   
+
    % Calculate the hash:
    Hash = typecast(Engine.digest, 'uint8');
-   
+
 elseif isBin             % Contents of an elementary array, type tested already:
    if isempty(Data)      % Nothing to do, Engine.update fails for empty input!
       Hash = typecast(Engine.digest, 'uint8');
@@ -295,7 +295,7 @@ function Engine = CoreHash(Data, Engine)
 % >= v016: [class, ndims, size, data]
 Engine.update([uint8(class(Data)), ...
               typecast(uint64([ndims(Data), size(Data)]), 'uint8')]);
-           
+
 if issparse(Data)                    % Sparse arrays to struct:
    [S.Index1, S.Index2, S.Value] = find(Data);
    Engine                        = CoreHash(S, Engine);
@@ -336,7 +336,7 @@ else  % Most likely a user-defined object:
          '%s: Cannot create elementary array for type: %s\n  %s', ...
          mfilename, class(Data), ME.message);
    end
-   
+
    try
       Engine = CoreHash(BasicData, Engine);
    catch ME
@@ -398,11 +398,11 @@ function DataBin = ConvertObject(DataObj)
 
 try    % Perhaps a direct conversion is implemented:
    DataBin = uint8(DataObj);
-   
+
    % Matt Raum had this excellent idea - unfortunately this function is
    % undocumented and might not be supported in te future:
    % DataBin = getByteStreamFromArray(DataObj);
-   
+
 catch  % Or perhaps this is better:
    WarnS   = warning('off', 'MATLAB:structOnObject');
    DataBin = struct(DataObj);
@@ -433,7 +433,7 @@ function Ex = FileExist_L(FileName)
 % A more reliable version of EXIST(FileName, 'file'):
 dirFile = dir(FileName);
 if length(dirFile) == 1
-   Ex = ~(dirFile.isdir);
+   Ex = ~(dirFile.isfolder);
 else
    Ex = false;
 end

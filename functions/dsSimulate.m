@@ -82,7 +82,7 @@ function [data,studyinfo,result] = dsSimulate(model,varargin)
 %     'optimization'  : function handle of optimization function (see NOTE 2)
 %     'debug_flag'    : set to debug mode
 %     'benchmark_flag': set to benchmark mode. will add tic/toc to sims.
-%     'simlog_flag': set to simlog mode. will display sim info in the console (interval, solver, dt and progress).
+%     'sim_log_flag': set to simlog mode. will display sim info in the console (interval, solver, dt and progress).
 %     'userdata'      : field for user to store anything (default: [])
 %
 % Outputs:
@@ -319,6 +319,7 @@ options=dsCheckOptions(varargin,{...
   'auto_gen_test_data_flag',0,{0,1},...
   'unit_test_flag',0,{0,1},...
   'benchmark_flag',0,{0,1},...
+  'sim_log_flag',0,{0,1},...
   },false);
 % more options: remove_solve_dir, remove_batch_dir, post_downsample_factor
 
@@ -1288,7 +1289,7 @@ end % in_parfor_loop_flag
     tmp=cellfun(@eval,IC_expressions,'uni',0); % evaluate IC expressions to determine true # of state variables
     nvals_per_var=cellfun(@numel,tmp);
     num_state_variables=sum(nvals_per_var);
-    
+
     % check that the correct number of IC values was provided
     if length(options.ic)~=num_state_variables
       error('incorrect number of initial conditions. %g values are needed for %g state variables across %g cells',num_state_variables,length(model.state_variables),sum(pop_sizes));

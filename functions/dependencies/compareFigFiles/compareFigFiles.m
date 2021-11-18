@@ -75,7 +75,7 @@ function [diffStruct,consolidatedData1,consolidatedData2] = compareFigFiles(name
     if nargin < 3, suppressPrintBool = false; end
 
     % Parse folder/file args
-    if isdir(name1) && isdir(name2)
+    if isfolder(name1) && isfolder(name2)
         % Treat as a folder comparison
         %clc  % this might be useful when there are numerous files being compared...
         files = dir(fullfile(name1, '*.fig'));
@@ -92,13 +92,13 @@ function [diffStruct,consolidatedData1,consolidatedData2] = compareFigFiles(name
             end
         end
 
-    elseif isdir(name1)  % but not isdir(name2)
+    elseif isfolder(name1)  % but not isfolder(name2)
         % Compare name2.fig to the same file in the name1 folder
         [fpath,fname,fext] = fileparts(name2); %#ok<ASGLU>
         otherFile = fullfile(name1, [fname,fext]);
         [diffStruct_I,consolidatedData1_I,consolidatedData2_I] = compareSingleFigFiles(otherFile, name2);
 
-    elseif isdir(name2)  % but not isdir(name1)
+    elseif isfolder(name2)  % but not isfolder(name1)
         % Compare name1.fig to the same file in the name2 folder
         [fpath,fname,fext] = fileparts(name1); %#ok<ASGLU>
         otherFile = fullfile(name2, [fname,fext]);
@@ -108,7 +108,7 @@ function [diffStruct,consolidatedData1,consolidatedData2] = compareFigFiles(name
         % Compare single .fig files
         [diffStruct_I,consolidatedData1_I,consolidatedData2_I] = compareSingleFigFiles(name1, name2);
     end
-    
+
     % close hidden figures
     close all;
 
@@ -118,9 +118,9 @@ function [diffStruct,consolidatedData1,consolidatedData2] = compareFigFiles(name
         consolidatedData1 = consolidatedData1_I;
         consolidatedData2 = consolidatedData2_I;
     end
-    
+
   %% nested functions
-  
+
   % Compare 2 FIG files, reporting their differences
   function [diffStruct,consolidatedData1,consolidatedData2] = compareSingleFigFiles(fig1Filename, fig2Filename)
     fig1Filename = normalizeFigFilename(fig1Filename);
@@ -152,7 +152,7 @@ end
 function data = getFigData(figFilename)
     % Load the FIG file as a MAT file (see http://undocumentedmatlab.com/blog/fig-files-format/)
     data = load(figFilename,'-mat');
-    
+
     flds = fieldnames(data);
     for fld = flds(:)'
       if ~isempty(data.(fld{1}))
@@ -252,19 +252,19 @@ function [objectC,IA,IB] = objdiff(objectA,objectB,varargin)
 %     >> objectA = struct('a',3, 'b',5, 'd',9);
 %     >> objectB = struct('a','ert', 'c',struct('t',pi), 'd',9);
 %     >> objectC = objdiff(objectA, objectB)  % a=different, b=new in objectA, c=new in objectB, d=same
-%     objectC = 
+%     objectC =
 %         a: {[3]  'ert'}
 %         b: {[5]  {}}
 %         c: {{}  [1x1 struct]}
 %
 %     >> objectC = objdiff(java.awt.Color.red, java.awt.Color.blue)
-%     objectC = 
+%     objectC =
 %         Blue: {[0]  [255]}
 %          RGB: {[-65536]  [-16776961]}
 %          Red: {[255]  [0]}
 %
 %     >> objectC = objdiff(0,gcf)  % 0 is the root handle
-%     objectC = 
+%     objectC =
 %           children: {[2x1 struct]  []}
 %             handle: {[0]  [1]}
 %         properties: {[1x1 struct]  [1x1 struct]}
