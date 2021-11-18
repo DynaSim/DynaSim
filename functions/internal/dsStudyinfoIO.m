@@ -22,7 +22,7 @@ if nargin<4, verbose_flag=0; end
 if nargin<3, id=[]; end
 if nargin<2 || isempty(study_file)
   study_file='studyinfo.mat';
-elseif isdir(study_file)
+elseif isfolder(study_file)
   study_file=fullfile(study_file,'studyinfo.mat');
 end
 study_dir=fileparts2(study_file);
@@ -81,7 +81,7 @@ if isempty(studyinfo)
       id=MIN_LOAD_ID; % value greater than the max # of batch processes (i.e., greater than the max process ID)
     end
   end
-  
+
   if ~exist(study_file,'file')
     error('studyinfo.mat file not found: %s',study_file);
   end

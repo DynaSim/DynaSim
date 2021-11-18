@@ -140,7 +140,7 @@ if options.mex_flag
   % append extension to solve_file if regular mex (not non supported matlab solver mex)
   if ~any(strcmp(options.solver, {'ode113','ode15s','ode23s','ode23t','ode23tb'})) % not mex supported)
     full_solve_file=[solve_file '.' tmp{1}];
-    
+
     options.simulator_options.solve_file = full_solve_file; % replace this filename with copied filename
 
     % remove '_mex' suffix from solve_file for compatibility with dsGetSolveFile()
@@ -443,7 +443,7 @@ if isempty(result)
   fprintf('Jobs NOT submitted to cluster queue.\n');
 else % on cluster with qsub
   % submit jobs (e.g., fScripjobs_memlimit batch_dir 32G)
-  
+
   % check status of study
   [~,s]=dsMonitorStudy(studyinfo.study_dir,'verbose_flag',0);
 
@@ -490,7 +490,7 @@ else % on cluster with qsub
     else
       qsubStr = ['-m ' options.email_notify];
     end
-    
+
     % submit commands
     jobPrefix = batch_dir_name;
     batch_dir_abs_path = batch_dir;
@@ -507,7 +507,7 @@ else % on cluster with qsub
         l_directives, batch_dir_abs_path, jobPrefix, num_simulations, options.sims_per_job, qsubStr); % qsub vars
       % NOTE: using num_simulations, not num_jobs, since the job_file will
       %   determine it's own sims to run
-      
+
       num_jobs = ceil(num_simulations/options.sims_per_job); % update for later display
     elseif strcmp(options.qsub_mode, 'loop')
       cmd = sprintf('%s/qsub_jobs_loop ''%s'' %s ''%s'' ''%s'' %s',...
@@ -588,7 +588,7 @@ end
 
     [~, job_filename] = fileparts(job_file); %remove path and extension
 
-    
+
     if ~options.one_solve_file_flag
       % function declaration
       fprintf(fjob, 'function %s\n\n', job_filename);
@@ -609,7 +609,7 @@ end
       fprintf(fjob,'SimIDs = simIDstart:min(simIDlast,simIDstart+simIDstep-1);\n');
     end % if ~options.one_solve_file_flag
 
-    
+
     % add paths
     for p=1:length(addpaths)
       if ~isempty(addpaths{p})
@@ -666,30 +666,30 @@ end
     fprintf(fjob,'\t\tsiminfo = studyinfo.simulations(SimID);\n');
     fprintf(fjob,'\t\toptions = rmfield(siminfo.simulator_options,{''modifications'',''studyinfo'',''analysis_functions'',''plot_functions'',''sim_id''});\n');
     fprintf(fjob,'\t\tkeyvals = dsOptions2Keyval(options);\n');
-    
+
     fprintf(fjob,'\t\tfprintf(''-----------------------------------------------------\\n'');\n');
     fprintf(fjob,'\t\tfprintf(''Processing simulation %%g (%%g of %%g in this job)...\\n'',SimID,s,length(SimIDs));\n');
     fprintf(fjob,'\t\tfprintf(''-----------------------------------------------------\\n'');\n');
-    
+
     fprintf(fjob,'\t\tdata = dsSimulate(studyinfo.base_model,''modifications'',siminfo.modifications,''studyinfo'',studyinfo,''sim_id'',SimID,keyvals{:});\n');
-    
+
     fprintf(fjob,'\t\tnFn = length(siminfo.result_functions);\n');
-    
+
     fprintf(fjob,'\t\tfor iFn = 1:nFn\n'); % for loop over fns
-    
+
     fprintf(fjob,'\t\t\ttry\n'); % inner try
-    
+
     fprintf(fjob,'\t\t\t\tfprintf(''Result fn: %%s (%%i/%%i)\\n'', func2str(siminfo.result_functions{iFn}), iFn, nFn)\n');
     fprintf(fjob,'\t\t\t\tdsAnalyze(data, siminfo.result_functions{iFn}, ''result_file'',siminfo.result_files{iFn}, ''save_results_flag'',1, siminfo.result_options{iFn}{:}, ''in_sim_flag'',1);\n');
-    
+
     fprintf(fjob,'\t\t\tcatch fnErr\n'); % catch inner error
     fprintf(fjob,'\t\t\t\tdisplayError(fnErr);\n');
 
     fprintf(fjob,'\t\t\tend\n'); % end inner try
-    
+
     fprintf(fjob,'\t\tend\n'); % end for
 
-    
+
     % add error handling
     fprintf(fjob,'\tcatch err\n');
 

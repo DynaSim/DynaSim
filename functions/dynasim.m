@@ -726,26 +726,26 @@ handles.p_runsim_settings=uipanel('parent',handles.psimview,'units','normalized'
 for i=1:cfg.max_num_plots
   % list_vars: listbox for pop-specific variables
   handles.list_vars(i)=uicontrol('units','normalized','position',[.01 yp+(i-1)*dy .14 -.8*dy],'parent',handles.p_sim_plots,'BackgroundColor',[.9 .9 .9],'style','listbox','value',1,'string',[],'Max',100,'Callback',@UpdateSimView,'TooltipString','Left-click to select variable to plot','visible',default_visible);
-  
+
   % list_cells: listbox for pop-specific cell indices
   handles.list_cells(i)=uicontrol('units','normalized','position',[.15 yp+(i-1)*dy .05 -.8*dy],'parent',handles.p_sim_plots,'BackgroundColor',[.9 .9 .9],'style','listbox','value',[],'string',[],'Max',1000,'Callback',@UpdateSimView,'TooltipString','Left-click to select cells to plot','visible',default_visible);
-  
+
   % axes_data_image: axis for plotting images
   handles.axes_data_image(i)=subplot('position',[.23 yp+(i-1)*dy .72 -.8*dy],'parent',handles.p_sim_plots,'visible','off','tag','simview_image');
   handles.img_data(i) = imagesc(cfg.t,1:length(cfg.IC),cfg.Y); axis xy; %colorbar
   set(handles.img_data(i),'visible','off','tag','simview_image');
-  
+
   % axes_data_trace: axis for plotting traces
   handles.axes_data_trace(i)=subplot('position',[.23 yp+(i-1)*dy .72 -.8*dy], 'parent',handles.p_sim_plots,'tag','simview_trace');
   % edit_ymax: max y-limits
   callback=sprintf('global handles; set(handles.axes_data_trace(%g),''ylim'',[str2double(get(handles.edit_ymin(%g),''string'')) str2double(get(gco,''string''))]); set(handles.axes_data_image(%g),''clim'',[str2double(get(handles.edit_ymin(%g),''string'')) str2double(get(gco,''string''))]); cfg.ymax(%g)=str2double(get(gco,''string''));',i,i,i,i,i);
   handles.edit_ymax(i)=uicontrol('style','edit','parent',handles.p_sim_plots,'tag','ymax','units','normalized','position',[.955 .95+dy*(i-1)-.01 .037 .03],'backgroundcolor','w','string',cfg.ymax(i),'HorizontalAlignment','left','Callback',callback,'fontsize',8);
-  
+
   % edit_ymin: min y-limits
   callback=sprintf('global handles; set(handles.axes_data_trace(%g),''ylim'',[str2double(get(gco,''string'')) str2double(get(handles.edit_ymax(%g),''string''))]); set(handles.axes_data_image(%g),''clim'',[str2double(get(gco,''string'')) str2double(get(handles.edit_ymax(%g),''string''))]); cfg.ymin(%g)=str2double(get(gco,''string''));',i,i,i,i,i);
   handles.edit_ymin(i)=uicontrol('style','edit','parent',handles.p_sim_plots,'tag','ymin','units','normalized','position',[.955 .95+dy*(i-1)+.8*dy+.03-.01 .037 .03],'backgroundcolor','w','string',cfg.ymin(i),'HorizontalAlignment','left','Callback',callback,'fontsize',8);
   handles.btn_sim_autoscale(i)=uicontrol('style','pushbutton','parent',handles.p_sim_plots,'units','normalized','position',[.96 .95+dy*(i-1)+.8*dy/2 .027 .05],'fontsize',12,'fontweight','bold','fontname','Blue Highway','String',char(cfg.autoscale_charcode),'callback',{@AutoscaleSimPlot,i},'visible',default_visible);%,'backgroundcolor',cfg.ButtonColor,'ForegroundColor',cfg.ButtonFontColor);
-  
+
   % ref: how to display pic on button: https://www.mathworks.com/matlabcentral/newsreader/view_thread/51230
     % for charcode=1:10000,fprintf('%g: %s\n',charcode,char(charcode)); end
     % up/down arrows: 5864, 8597, 8645, 8661
@@ -822,7 +822,7 @@ if nargin>0 && isequal(src,handles.radio_plot_type)
   for i=1:length(Children)
     set(findobj('tag',get(Children(i),'userdata')),'visible','off');
   end
-  
+
   % show plot objects for the select type
   SelectedObject=get(handles.radio_plot_type,'SelectedObject');
   set(findobj('tag',get(SelectedObject,'userdata')),'visible','on');
@@ -1419,14 +1419,14 @@ end
 % %   ic=eqns{2};
 % %   [t,y]=ode23(fun,[0 100],ic);
 % %   figure; plot(t,y);
-% 
+%
 % if nargin<3
 %   display_flag=0;
 % end
 % if nargin<2 || isempty(display_mode)
 %   display_mode='model';
 % end
-% 
+%
 % eqns={};
 % switch lower(display_mode)
 %   case 'model' % Display resulting model equations from DynaSim model structure
@@ -1483,7 +1483,7 @@ end
 %     % 3. prepare state vector X
 %     % 4. replace state vars in ODEs by X
 %     % 5. combine X ODEs into ODEFUN
-% 
+%
 %     % evaluate params -> fixed_vars -> funcs
 %     types={'parameters','fixed_variables','functions'};
 %     for p=1:length(types)
@@ -1500,7 +1500,7 @@ end
 %         end
 %       end
 %     end
-% 
+%
 %     % evaluate ICs to get (# elems) per state var and set up generic state var X
 %     num_vars=length(MODEL.state_variables);
 %     num_elems=zeros(1,num_vars);
@@ -1522,37 +1522,37 @@ end
 %       new_vars{i}=sprintf('X(%g:%g)',new_inds{i}(1),new_inds{i}(end));
 %       state_var_index=state_var_index+length(ic);
 %     end
-% 
+%
 %     % prepare ODE system (comma-separated ODEs)
 %     ODEs=strtrim(struct2cell(MODEL.ODEs));
 %     idx=cellfun(@isempty,regexp(ODEs,';$')); % lines that need semicolons
 %     ODEs(idx)=cellfun(@(x)[x ';'],ODEs(idx),'uni',0);
 %     ODEs=[ODEs{:}]; % concatenate ODEs into a single string
 %     ODEs=strrep(ODEs,';',','); % replace semicolons by commas
-% 
+%
 %     % substitute in generic state vector X
 %     for i=1:num_vars
 %       ODEs=dynasim_strrep(ODEs,old_vars{i},new_vars{i});
 %     end
-% 
+%
 %     % prepare outputs (function handle string, ICs, and element names for
 %     % mapping each X(i) to a particular state variable):
 %     ODEFUN = eval(['@(t,X) [' ODEs '];']);
 %     IC=cat(2,all_ICs{:});
 %     elem_names=cat(2,IC_names{:});
-% 
+%
 %     eqns{1}=ODEFUN;
 %     eqns{2}=IC;
 %     eqns{3}=elem_names;
-% 
+%
 %     %{
 %       % usage:
-% 
+%
 %       eqns=dsExtractModelStrings(MODEL,'odefun',0);
 %       ODEFUN=eqns{1};
 %       IC=eqns{2};
 %       elem_names=eqns{3};
-% 
+%
 %       dt=.01; t=0:dt:100;
 %       y=zeros(length(t),length(IC));
 %       y(1,:)=IC;
@@ -1560,18 +1560,18 @@ end
 %         y(i,:)=y(i-1,:)+dt*ODEFUN(t,y(i-1,:));
 %       end
 %       figure; plot(t,y); legend(elem_names{:},'Location','EastOutside');
-% 
+%
 %       y=IC;
 %       for i=1:1e4
 %         y=y+dt*ODEFUN(0,y);
 %       end;
-% 
+%
 %     %}
-% 
+%
 %   otherwise
 %     error('options ''specification'' and ''xpp'' not implemented yet.');
 % end
-% 
+%
 % if display_flag
 %   cellfun(@disp,eqns);
 % end

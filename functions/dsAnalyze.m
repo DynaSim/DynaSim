@@ -184,10 +184,10 @@ if options.in_clus_flag
   options.save_results_flag = 1;
   options.check_file_index_flag = 0; % to avoid each job incrementing
   options.close_fig_flag = 1; % close figures since in cluster
-  
+
   % do analysis, dont trigger additional submits
   options.cluster_flag = 0;
-  
+
   % get simIDs for this job
   thisJobSimIDs = options.SGE_TASK_ID:(options.SGE_TASK_ID + options.SGE_TASK_STEPSIZE - 1);
   if isempty(options.simIDs)
@@ -195,18 +195,18 @@ if options.in_clus_flag
   else
     options.simIDs = intersect(options.simIDs, thisJobSimIDs);
   end
-  
+
   % don't exceed max simID
   options.simIDs(options.simIDs > options.SGE_TASK_LAST) = [];
-  
+
   % check if any simIDs to analyze
   if isempty(options.simIDs)
     % no IDs to analyze
     dsVprintf(options, 'No simIDs for this job to analyze so exiting. \n');
-    
+
     return
   end
-  
+
   varargin(end+1:end+2) = {'simIDs', options.simIDs}; % ensure correct import
 end
 
@@ -217,22 +217,22 @@ if options.cluster_flag
     TODO
     - check that options.cluster_flag doesnt trigger for insim
   %}
-  
+
   % do not load data yet
   options.load_all_data_flag = 0;
-  
+
   options.close_fig_flag = 1; % close figures since in cluster
-  
+
   % to avoid each job incrementing
   if options.check_file_index_flag
     options.check_file_index_flag = 0;
     fprintf('Setting "options.check_file_index_flag=0" since "cluster_flag=1" \n');
   end
-  
+
   % handle fn
   if ~isempty(funcIn)
     options.result_functions = funcIn;
-    
+
     varargin(end+1:end+2) = {'result_functions', options.result_functions}; % pass result_functions to clus node
   end
 end
@@ -269,7 +269,7 @@ end
 
 if options.load_all_data_flag
   assert(~isempty(data));
-  
+
   % convert data to double precision before analysis
   if ~options.in_sim_flag
     dsVprintf(options, 'Converting data to double precision before analysis.\n')
@@ -284,7 +284,7 @@ end
 % check if studyinfo found
 if isempty(studyinfo) % empty inSim
   studyinfoBool = false;
-  
+
   % these must be like this if not studyinfo
   % TODO: add check and warning message
   options.studyinfo_arg_flag = 0;
@@ -292,17 +292,17 @@ if isempty(studyinfo) % empty inSim
   options.simIDs = [];
 else
   studyinfoBool = true;
-  
+
   if ~isempty(options.simIDs)
     % filter simulations in studyinfo to only given simIDs
     studyinfo.simulations = studyinfo.simulations(options.simIDs); % this only works if simIDs match struct index
   end
-  
+
   options.simIdVec = [studyinfo.simulations.sim_id];
 end
 
 % check if study_dir defined
-if ~isfield(studyinfo,'study_dir') || isempty(studyinfo.study_dir) || ~isdir(studyinfo.study_dir)
+if ~isfield(studyinfo,'study_dir') || isempty(studyinfo.study_dir) || ~isfolder(studyinfo.study_dir)
   studyinfo.study_dir = pwd;
 end
 
@@ -321,7 +321,7 @@ if isempty(funcIn)
   if ~isempty(options.analysis_functions) && ~iscell(options.analysis_functions)
     options.analysis_functions = {options.analysis_functions};
   end
-  
+
   if ~isempty(options.result_functions) && ~iscell(options.result_functions)
     options.result_functions = {options.result_functions};
   end
@@ -330,14 +330,14 @@ end
 % make funcIn for dsSimulate Style
 if ~isempty(funcIn) % style 1
   plotFnBoolVec = [];
-  
+
   % make sure there is one option cell array per function
   if length(options.function_options) < length(funcIn)
     % extend function_options with blank cells
     options.function_options(length(options.function_options)+1:length(funcIn)) = {{}};
   elseif length(options.function_options) > length(funcIn)
     % copy function_options to each funcIn
-    
+
     temp = options.function_options;
     options.function_options = cell(size(funcIn));
     [options.function_options{:}] = deal(temp);
@@ -348,7 +348,7 @@ elseif ( ~isempty(options.plot_functions) || ~isempty(options.analysis_functions
   funcIn = [options.plot_functions(:); options.analysis_functions(:)];
   plotFnBoolVec = false(size(funcIn));
   plotFnBoolVec(1:length(options.plot_functions)) = true; % specify which fn were plot fn
-  
+
   % options
   if isempty(options.plot_options)
     options.plot_options = {{}};
@@ -356,27 +356,27 @@ elseif ( ~isempty(options.plot_functions) || ~isempty(options.analysis_functions
   if isempty(options.analysis_options)
     options.analysis_options = {{}};
   end
-  
+
   % make sure there is one option cell array per function
   if length(options.plot_options) < length(options.plot_functions)
     % extend plot_options with blank cells
     options.plot_options(length(options.plot_options)+1:length(options.plot_functions)) = {{}};
   elseif length(options.plot_options) > length(options.plot_functions)
     % copy plot_options to each plot_function
-    
+
     temp = options.plot_options;
     options.plot_options = cell(size(options.plot_functions));
     [options.plot_options{:}] = deal(temp);
     clear temp
   end
-  
+
   % make sure there is one option cell array per function
   if length(options.analysis_options) < length(options.analysis_functions)
     % extend analysis_options with blank cells
     options.analysis_options(length(options.analysis_options)+1:length(options.analysis_functions)) = {{}};
   elseif length(options.function_options) > length(options.result_functions)
     % copy analysis_options to each result_function
-    
+
     temp = options.function_options;
     options.function_options = cell(size(options.result_functions));
     [options.function_options{:}] = deal(temp);
@@ -387,19 +387,19 @@ elseif ~isempty(options.result_functions) % style 2.2
   % functions
   funcIn = options.result_functions;
   plotFnBoolVec = [];
-  
+
   % options
   if isempty(options.function_options)
     options.function_options = {{}};
   end
-  
+
   % make sure there is one option cell array per function
   if length(options.function_options) < length(options.result_functions)
     % extend function_options with blank cells
     options.function_options(length(options.function_options)+1:length(options.result_functions)) = {{}};
   elseif length(options.function_options) > length(options.result_functions)
     % copy function_options to each result_function
-    
+
     temp = options.function_options;
     options.function_options = cell(size(options.result_functions));
     [options.function_options{:}] = deal(temp);
@@ -425,16 +425,16 @@ end
 if options.cluster_flag
   %% check for qsub on system
   [status,sysresult]=system('which qsub');
-  
+
   if options.auto_gen_test_data_flag || options.unit_test_flag
     status = 0;
     sysresult = 1;
   end
-  
+
   if options.local_debug_flag
     sysresult = 1;
   end
-  
+
   if isempty(sysresult)
     [~,host] = system('hostname');
     fprintf('qsub not found on host (%s).\n', strtrim(host));
@@ -443,9 +443,9 @@ if options.cluster_flag
   else
     submitCluster();
   end
-  
+
   result = []; % return null
-  
+
   return
 end
 
@@ -454,7 +454,7 @@ if postHocBool && options.in_clus_flag
   % locate DynaSim toolbox
   dynasim_path = dsGetRootPath(); % root is one level up from directory containing this function
   dynasim_functions=fullfile(dynasim_path,'functions');
-  
+
   % add functions to path in case of personal analysis functions and dependencies
   addpath(genpath(dynasim_functions));
 end
@@ -465,7 +465,7 @@ analysisFnInd = lastAnalysisIndex;
 
 for fInd = 1:nFunc % loop over function inputs
   func = funcIn{fInd};
-  
+
   if ~options.in_sim_flag
     dsVprintf(options, '\nFunction (%i/%i): %s \n', fInd,nFunc,func2str(func));
   end
@@ -478,7 +478,7 @@ for fInd = 1:nFunc % loop over function inputs
   else
     plotFnBool = ~isempty(regexpi(func2str(func), 'plot'));
   end
-  
+
   % plot format
   fopts = dsCheckOptions(options.function_options{fInd}, {'format',[],{'svg','jpg','eps','png','fig'}}, 0);
   if isempty(fopts.format)
@@ -492,9 +492,9 @@ for fInd = 1:nFunc % loop over function inputs
   tstart = tic;
 
   %% Eval func
-  if ~isempty(data) % either in sim or posthoc with load_all_data_flag 
+  if ~isempty(data) % either in sim or posthoc with load_all_data_flag
     result = evalFnWithArgs(fInd, data, func, options, varargin{:});
-    
+
     if isempty(result)
       fprintf(2, 'Warning: Result empty for function, ''%s''. \n', func2str(func));
     end
@@ -533,10 +533,10 @@ for fInd = 1:nFunc % loop over function inputs
   if ~iscell(result) && ((~isempty(data) && all(ishandle(result))) || plotFnBool) % analysis function returned a graphics handle or has plot in fn name or given in plot_functions field
     %% Plot Function
     % will save plots, else return main fn since plot already open
-    
+
     plotFnInd = plotFnInd + 1;
-    
-    
+
+
     dsVprintf(options, '  Plot Function: %i \n', plotFnInd);
 
     % loop through results. all results may exist or need to be made during loop
@@ -544,21 +544,21 @@ for fInd = 1:nFunc % loop over function inputs
       if ~options.in_sim_flag
         dsVprintf(options, '    Result (%i/%i): ', iResult,nResults);
       end
-      
+
       extension = ['.' plotFormat]; % '.svg'; % {.jpg,.svg}
-      
+
       if ~postHocBool % in sim
         dsVprintf(options, '\n');
-        
+
         if ~isempty(options.result_file)
           % ensure extension is extension
           fPath = options.result_file;
-          
+
           [parentPath, filename, orig_ext] = fileparts(fPath);
-          
+
           if length(orig_ext) > 4 % extra periods in name
             orig_ext = fPath(end-3:end);
-            
+
             if ~strcmp(orig_ext, extension)
               fPath = [fPath(1:end-4) extension];
             end
@@ -567,25 +567,25 @@ for fInd = 1:nFunc % loop over function inputs
               fPath = fullfile(parentPath, [filename extension]);
             end
           end
-          
+
           % change result_file if varied_filename_flag
           if options.varied_filename_flag && isfield(data, 'varied')
             fPath = dsNameFromVaried(data, fPath, options.prefix, func2str(func));
           end % varied_filename_flag
         end
-        
+
         thisResult = result;
       elseif studyinfoBool % posthoc with studyinfo
         simID = studyinfo.simulations(iResult).sim_id;
-        
+
         dsVprintf(options, 'simID=%i \n', simID);
-        
+
         if isfield(options, 'result_file') && ~isempty(options.result_file)
           fPath = options.result_file;
         else
           if options.load_all_data_flag
             thisData = data(iResult);
-            
+
             if ~isempty(result) && (length(result) >= iResult)
               thisResult = result(iResult);
             else
@@ -593,60 +593,60 @@ for fInd = 1:nFunc % loop over function inputs
             end
           else % load data
             thisData = loadDataFromSingleSim(studyinfo, simID, options, varargin{:});
-            
+
             %skip if no data
             if isempty(thisData)
               dsVprintf(options, '      Skipping simID=%i since no data.\n', simID);
               continue
             end
-            
+
             if options.simID_arg_flag
               options.thisSimID = simID;
             end
-            
+
             % calc result for this data
             thisResult = evalFnWithArgs(fInd, thisData, func, options, varargin{:});
           end % if ~options.load_all_data_flag
-          
+
           % get fn options
           this_fn_options = dsCheckOptions(options.function_options{fInd}, {...
             'prefix',options.prefix,[],...
             'varied_filename_flag',options.varied_filename_flag,{0,1}...
             }, false);
           prefix = this_fn_options.prefix;
-          
+
           % make fPath
           fName = [prefix '_sim' num2str(simID) '_plot' num2str(plotFnInd) '_' func2str(func)];
-          
+
           % change result_file if varied_filename_flag
           if this_fn_options.varied_filename_flag && isfield(thisData, 'varied')
             fName = dsNameFromVaried(data, fName, prefix, func2str(func));
           end % varied_filename_flag
-          
+
           % make fPath
           fDir = fullfile(studyinfo.study_dir, 'postHocPlots');
           if ~exist(fDir,'dir') && options.save_results_flag
             mkdir(fDir)
           end
-          
+
           fPath = fullfile(fDir,[fName extension]);
         end
       else  % posthoc without studyinfo
         dsVprintf(options, '\n');
-        
+
         if ~isempty(result) && (length(result) >= iResult)
           thisResult = result(iResult);
         else
           thisResult = [];
         end
         simID = iResult; % for skipping warning
-        
+
         % make fDir
         fDir = fullfile(studyinfo.study_dir, 'postHocPlots');
         if ~exist(fDir,'dir') && options.save_results_flag
           mkdir(fDir)
         end
-        
+
         % make fName
         if isfield(options, 'result_file') && ~isempty(options.result_file)
           fPath = options.result_file;
@@ -657,7 +657,7 @@ for fInd = 1:nFunc % loop over function inputs
             'varied_filename_flag',options.varied_filename_flag,{0,1}...
             }, false);
           prefix = this_fn_options.prefix;
-          
+
           fName = [prefix '_data' num2str(iResult) '_plot' num2str(plotFnInd) '_' func2str(func)];
           fPath = fullfile(fDir,[fName extension]);
         end
@@ -699,7 +699,7 @@ for fInd = 1:nFunc % loop over function inputs
       elseif exist('fPath', 'var') && exist(fPath, 'file') && ~options.overwrite_flag
         dsVprintf(options, '      Skipping since file already exists: %s \n', fPath);
       end %save_results_flag
-        
+
       if (options.save_results_flag && (options.close_fig_flag ~= 0)) || options.close_fig_flag==1
         close(thisResult)
       end
@@ -724,7 +724,7 @@ for fInd = 1:nFunc % loop over function inputs
         end
       end % if nargout
     end %nResults
-    
+
   else % analysis function returned derived data
     %% Analysis Function
     if isstruct(result)
@@ -741,9 +741,9 @@ for fInd = 1:nFunc % loop over function inputs
         end
       end %iResult
     end %isstruct
-    
+
     analysisFnInd = analysisFnInd + 1;
-    
+
     dsVprintf(options, '  Analysis Function: %i \n', analysisFnInd);
 
     % switch names in postHoc
@@ -756,10 +756,10 @@ for fInd = 1:nFunc % loop over function inputs
       if ~options.in_sim_flag
         dsVprintf(options, '    Result (%i/%i): ', iResult,nResults);
       end
-      
+
       if ~postHocBool % in sim
         dsVprintf(options, '\n');
-        
+
         fPath = options.result_file;
 
         % ensure extension is '.mat'
@@ -768,19 +768,19 @@ for fInd = 1:nFunc % loop over function inputs
         if ~strcmp(orig_ext, extension) %check for .mat extension
           fPath = [parentPath filename extension];
         end
-        
+
         % change result_file if varied_filename_flag
         if options.varied_filename_flag && isfield(data, 'varied')
           fPath = dsNameFromVaried(data, fPath, prefix, func2str(func));
         end % varied_filename_flag
       elseif studyinfoBool % posthoc with studyinfo
         simID = studyinfo.simulations(iResult).sim_id;
-        
+
         dsVprintf(options, 'simID=%i \n', simID);
-        
+
         if options.load_all_data_flag
           thisData = data(iResult);
-          
+
           if ~isempty(allResults) && (length(allResults) >= iResult)
             result = allResults(iResult);
           else
@@ -802,7 +802,7 @@ for fInd = 1:nFunc % loop over function inputs
           % calc result for this data
           result = evalFnWithArgs(fInd, thisData, func, options, varargin{:});
         end % if options.load_all_data_flag
-        
+
         % make fPath
         if isfield(options, 'result_file') && ~isempty(options.result_file)
           fPath = options.result_file;
@@ -813,24 +813,24 @@ for fInd = 1:nFunc % loop over function inputs
             'varied_filename_flag',options.varied_filename_flag,{0,1}...
             }, false);
           prefix = this_fn_options.prefix;
-          
+
           fName = [prefix '_sim' num2str(simID) '_analysis' num2str(analysisFnInd) '_' func2str(func) '.mat'];
 
           if this_fn_options.varied_filename_flag && isfield(thisData, 'varied')
             fName = dsNameFromVaried(data, fName, prefix, func2str(func));
           end % varied_filename_flag
-          
+
           % make fDir
           fDir = fullfile(studyinfo.study_dir, 'postHocResults');
           if ~exist(fDir,'dir') && options.save_results_flag
             mkdir(fDir)
           end
-          
+
           fPath = fullfile(fDir,fName);
         end
       else  % posthoc without studyinfo
         dsVprintf(options, '\n');
-        
+
         if ~isempty(allResults) && (length(allResults) >= iResult)
           result = allResults(iResult);
         else
@@ -848,15 +848,15 @@ for fInd = 1:nFunc % loop over function inputs
             'varied_filename_flag',options.varied_filename_flag,{0,1}...
             }, false);
           prefix = this_fn_options.prefix;
-          
+
           fName = [prefix '_data' num2str(iResult) '_analysis' num2str(analysisFnInd) '_' func2str(func) '.mat'];
-          
+
           % make fDir
           fDir = fullfile(studyinfo.study_dir, 'postHocResults');
           if ~exist(fDir,'dir') && options.save_results_flag
             mkdir(fDir)
           end
-          
+
           fPath = fullfile(fDir,fName);
         end
       end % if ~postHocBool
@@ -871,7 +871,7 @@ for fInd = 1:nFunc % loop over function inputs
 
         continue
       end % if isempty(result)
-      
+
       if options.save_results_flag && ~(exist(fPath, 'file') && ~options.overwrite_flag)
         if ~isempty(varargin) && isstruct(varargin{1})
           tempOpts = [struct2KeyValueCell(varargin{1}) {'filename',fPath, 'result_flag',1}];
@@ -883,7 +883,7 @@ for fInd = 1:nFunc % loop over function inputs
       elseif exist('fPath', 'var') && exist(fPath, 'file') && ~options.overwrite_flag
         dsVprintf(options, '      Skipping since file already exists: %s \n', fPath);
       end % save_results_flag
-        
+
       if ~options.load_all_data_flag
         data = [];
       end
@@ -910,22 +910,22 @@ end % fInd
 % get output arg for postHoc
 if nargout && postHocBool
   % simplify output if possible
-  
+
   for iFunc = 1:nFunc
     % if only 1 data cell enter cell
     if iscell(allFnResults{iFunc}) && (length(allFnResults{iFunc})==1)
       allFnResults{iFunc} = allFnResults{iFunc}{1};
     end
   end
-  
+
   % if only 1 function, enter cell
   if nFunc == 1
     allFnResults = allFnResults{1};
   end
-  
+
   result = allFnResults; % switch names again
   clear allFnResults
-  
+
   % output of form: result{iFunc}{iResult}
 end
 
@@ -946,33 +946,33 @@ end
       if studyinfoBool
         if ~isempty(studyinfo.simulations(1).result_functions)
           oldFns = sort(cellfun(@func2str, studyinfo.simulations(1).result_functions, 'Uni',0));
-          
+
           files = studyinfo.simulations(1).result_files; % studyinfoBool with prior result_functions
         else
           oldFns = [];
-          
+
           files = lscell(studyinfo.study_dir); % studyinfoBool but no result_functions
         end
       else
         files = lscell(studyinfo.study_dir); % no studyinfoBool
       end
-      
+
       % get filename without extension or parent path
       files = cellfun(@fileNameFileparts, files, 'Uni',0);
-      
+
       % get lastPlotIndex
       plotFiles = regexpi(files, '_plot(\d+)_(.+)', 'tokens');
       plotFiles = [plotFiles{:}];
       if ~isempty(plotFiles)
         plotIndFn = cat(1, plotFiles{:});
-        
+
         plotInds = cellfun(@str2double, plotIndFn(:,1));
-        
+
         lastPlotIndex = max(plotInds);
       else
         lastPlotIndex = 0;
       end
-      
+
       % get plots lastPlotIndex
       plotsDir = fullfile(studyinfo.study_dir, 'plots');
       if exist(plotsDir ,'dir')
@@ -981,15 +981,15 @@ end
         plotFiles = [plotFiles{:}];
         if ~isempty(plotFiles)
           plotIndFn = cat(1, plotFiles{:});
-          
+
           plotInds = cellfun(@str2double, plotIndFn(:,1));
-          
+
           lastPlotIndex = max(lastPlotIndex, max(plotInds));
         else
           lastPlotIndex = lastPlotIndex;
         end
       end
-      
+
       % get postHocPlots lastPlotIndex
       postHocPlotsDir = fullfile(studyinfo.study_dir, 'postHocPlots');
       if exist(postHocPlotsDir ,'dir')
@@ -998,28 +998,28 @@ end
         plotFiles = [plotFiles{:}];
         if ~isempty(plotFiles)
           plotIndFn = cat(1, plotFiles{:});
-          
+
           plotInds = cellfun(@str2double, plotIndFn(:,1));
-          
+
           lastPlotIndex = max(lastPlotIndex, max(plotInds));
         else
           lastPlotIndex = lastPlotIndex;
         end
       end
-      
+
       % get lastAnalysisIndex
       analysisFiles = regexpi(files, '_analysis(\d+)_(.+)', 'tokens');
       analysisFiles = [analysisFiles{:}];
       if ~isempty(analysisFiles)
         analysisIndFn = cat(1, analysisFiles{:});
-        
+
         analysisInds = cellfun(@str2double, analysisIndFn(:,1));
-        
+
         lastAnalysisIndex = max(analysisInds);
       else
         lastAnalysisIndex = 0;
       end
-      
+
       % get results lastAnalysisIndex
       resultsDir = fullfile(studyinfo.study_dir, 'results');
       if exist(resultsDir ,'dir')
@@ -1028,15 +1028,15 @@ end
         analysisFiles = [analysisFiles{:}];
         if ~isempty(analysisFiles)
           analysisIndFn = cat(1, analysisFiles{:});
-          
+
           analysisInds = cellfun(@str2double, analysisIndFn(:,1));
-          
+
           lastAnalysisIndex = max(lastAnalysisIndex, max(analysisInds));
         else
           lastAnalysisIndex = lastAnalysisIndex;
         end
       end
-      
+
       % get postHocResults lastAnalysisIndex
       postHocResultsDir = fullfile(studyinfo.study_dir, 'postHocResults');
       if exist(postHocResultsDir ,'dir')
@@ -1045,26 +1045,26 @@ end
         analysisFiles = [analysisFiles{:}];
         if ~isempty(analysisFiles)
           analysisIndFn = cat(1, analysisFiles{:});
-          
+
           analysisInds = cellfun(@str2double, analysisIndFn(:,1));
-          
+
           lastAnalysisIndex = max(lastAnalysisIndex, max(analysisInds));
         else
           lastAnalysisIndex = lastAnalysisIndex;
         end
       end
-      
+
       if ~studyinfoBool
         oldFns = sort([analysisIndFn(:,2); plotIndFn(:,2)]);
       end
-      
+
 %       if options.check_file_index_flag && (~isempty(plotFiles) || ~isempty(analysisFiles))
 %         % check if all functions the same as old ones
 %         newFns = sort(cellfun(@func2str, funcIn, 'Uni',0));
-%         
+%
 %         if isempty(setdiff(newFns, oldFns))
 %           dsVprintf(options, 'Overwriting old results and plot function indicies in new folders starting at index 0.');
-%           
+%
 %           lastPlotIndex = 0;
 %           lastAnalysisIndex = 0;
 %         else
@@ -1085,35 +1085,35 @@ end
     % method:
     %   1) use qsub_jobs_analyze based on dsSim array oneFile
     %   2) call dsAnalyze in each job
-    
+
     % 'qsub_jobs_analyze' args
     % $1 is abs path to working dir in batchdir
     % $2 is ui_command
     % $3 is src, which should be a study_dir path
     % $4 is cluster_matlab_version
     % $5 = varargin, the string list of arguments for dsAnalyze
-    
+
     % locate DynaSim toolbox
     dynasim_path = dsGetRootPath(); % root is one level up from directory containing this function
     dynasim_functions=fullfile(dynasim_path,'functions');
-    
+
     if ~options.auto_gen_test_data_flag && ~options.unit_test_flag
       dsFnDirPath = fullfile(fileparts(mfilename('fullpath')), 'internal'); % path to functions dir containing qsub files
     else
       dsFnDirPath = 'dsFnPath';
     end
-    
+
     [~,home]=system('echo $HOME');
     main_batch_dir = fullfile(strtrim(home),'batchdirs');
-    
+
     % batch dir
     [~, study_dir_name]=fileparts(studyinfo.study_dir);
     specific_batch_dir = fullfile(main_batch_dir,study_dir_name);
-    
-    if ~isdir(specific_batch_dir)
+
+    if ~isfolder(specific_batch_dir)
       mkdir(specific_batch_dir);
     end
-    
+
     % setup inputs
     if ismatlab()
       if ~options.parfor_flag
@@ -1131,29 +1131,29 @@ end
       ui_command = 'octave-cli --eval';
       l_directives = ['-l centos7=TRUE -l mem_total=', options.memory_limit];
     end
-    
+
     % email string
     if isempty(options.email_notify)
       qsubStr = '';
     else
       qsubStr = ['-m ' options.email_notify];
     end
-    
+
     % shell script args
 %     arg1 = specific_batch_dir;
 %     arg2 = ui_command;
     arg3 = getAbsolutePath(studyinfo.study_dir); % src
     arg4 = aschar(varargin);
-    
+
     % handle struct options
     if length(varargin) == 1 && isstruct(varargin{1})
       arg4 = ['{' arg4(9:end-2) '}'];
     end
-    
+
     arg4(1) = []; % remove leading '{'
     arg4(end) = []; % remove trailing '}'
     arg4 = [arg4 ', ''in_clus_flag'',1'];
-    
+
     % prep arg4 for echo
     arg4 = strrep(arg4, ', ', ','); % remove comma spaces
     arg4 = strrep(arg4, '; ', ';'); % remove semicolon spaces
@@ -1161,26 +1161,26 @@ end
     arg4 = strrep(arg4, ';', ''';'''); % quote semicolon for double quotes in qsub_jobs_analyze
     arg4 = strrep(arg4, '{', '''{'''); % quote curly bracket for double quotes in qsub_jobs_analyze
     arg4 = strrep(arg4, '}', '''}'''); % quote curly bracket for double quotes in qsub_jobs_analyze
-    
+
     % qsub args
     num_simIDs = studyinfo.simulations(end).sim_id;
     jobPrefix = study_dir_name;
-    
+
     cmd = sprintf('echo "%s/qsub_jobs_analyze ''%s'' ''%s'' ''%s'' ''%s'' %s" | qsub -V -hard %s -wd ''%s'' -N %s_analysis_job -t 1-%i:%i %s',...
       dsFnDirPath, specific_batch_dir, ui_command, options.cluster_matlab_version, arg3, arg4,... % echo vars
       l_directives, specific_batch_dir, jobPrefix, num_simIDs, options.sims_per_job, qsubStr); % qsub vars
-    
+
     % add shell script to linux path if not already there
     setenv('PATH', [getenv('PATH') ':' dynasim_functions ':' fullfile(dynasim_functions, 'internal')]);
-    
+
     if options.verbose_flag
       fprintf('Submitting cluster analysis jobs with shell command: %s \n',cmd);
     end
-    
+
     if ~options.auto_gen_test_data_flag && ~options.unit_test_flag
       [status,sysresult] = system(cmd);
     end
-    
+
     % check status
     if status > 0
       if options.verbose_flag
@@ -1194,7 +1194,7 @@ end
         disp(sysresult);
       end
     end
-    
+
     if options.verbose_flag
       fprintf('%g jobs successfully submitted!\n', ceil(num_simIDs/options.sims_per_job) );
     end
@@ -1233,16 +1233,16 @@ end
 if isstruct(src) && isfield(src,'time') % data struct (single or array)
   data = src; % if length==1,then likely from SimulateModel call
   studyinfo = [];
-  
+
   options.load_all_data_flag = 1; % data has been loaded
 elseif ischar(src) %string input
   if options.load_all_data_flag % load data
     [data,~,dataExistBoolVec] = dsImport(src, varargin{:});
     % if any data missing, will return struct with fewer entries, but gives
     % dataExistBoolVec showing which data did exist
-    
+
     studyinfo = dsCheckStudyinfo(src);
-    
+
     if ~all(dataExistBoolVec)
       error('Some data missing and handling this has not been implemented yet. Temporary solution is to pass in simIDs of existing data.')
     end
@@ -1254,7 +1254,7 @@ elseif ischar(src) %string input
   % update study_dir
   if exist(src, 'file') && contains(src, 'studyinfo') %studyinfo.mat
     studyinfo.study_dir = fileparts2(src);
-  elseif isdir(src) % study_dir
+  elseif isfolder(src) % study_dir
     studyinfo.study_dir = src;
   end
 end
@@ -1286,7 +1286,7 @@ elseif ischar(funcIn)
   nFunc = 1;
 else
   nFunc = numel(funcIn);
-  
+
   % convert to fn handle if strings
   if all(cellfun(@ischar, funcIn))
     funcIn = cellfun(@str2func, funcIn, 'Uni',0);
@@ -1315,11 +1315,11 @@ function result = evalFnWithArgs(fInd, data, func, options, varargin)
 
 try
   make_invis_bool = options.save_results_flag && (options.close_fig_flag ~= 0);
-  
+
   if options.studyinfo_arg_flag
     options.function_options{fInd}(end+1:end+2) = {'studyinfo',options.studyinfo};
   end
-  
+
   if options.simID_arg_flag
     if options.load_all_data_flag
       options.function_options{fInd}(end+1) = {'simID'};
@@ -1327,19 +1327,19 @@ try
       options.function_options{fInd}(end+1:end+2) = {'simID',options.thisSimID};
     end
   end
-  
+
   if isempty(options.function_options) || isempty(options.function_options{fInd})
     % Only do parfor mode if parfor_flag is set and parpool is already running. Otherwise, this will add unnecessary overhead.
     if options.parfor_flag % && ~isempty(p)
       parfor iData = 1:length(data)
         tempResult = feval(func,data(iData),varargin{:});
-        
+
         % only take first handle if multiple figures
         result(iData) = tempResult(1);
-        
+
         if ishandle(result(iData)) && make_invis_bool
           set(result(iData), 'Visible', 'off'); % cannot close yet until save, but can make invisible
-          
+
           % close additional figures now
           if length(tempResult) > 1
             close(tempResult(2:end))
@@ -1349,15 +1349,15 @@ try
     else
       for iData = 1:length(data)
         tempResult = feval(func,data(iData),varargin{:});
-        
+
         % only take first handle if multiple figures
         result(iData) = tempResult(1);
-        
+
         try
             % For dsPlot2
             if ishandle(result(iData).hcurr) && make_invis_bool
               set(result(iData).hcurr, 'Visible', 'off'); % cannot close yet until save, but can make invisible
-              
+
               % close additional figures now
               if length(tempResult) > 1
                 close(tempResult(2:end))
@@ -1367,7 +1367,7 @@ try
             % For dsPlot
             if ishandle(result(iData)) && make_invis_bool
               set(result(iData), 'Visible', 'off'); % cannot close yet until save, but can make invisible
-              
+
               % close additional figures now
               if length(tempResult) > 1
                 close(tempResult(2:end))
@@ -1378,14 +1378,14 @@ try
     end % options.parfor_flag && ~isempty(p)
   else % ~isempty(options.function_options)
     function_options = options.function_options{fInd};
-    
+
     if options.load_all_data_flag && options.simID_arg_flag
       addSimIdBool = 1;
-      
+
       simIdVec = options.simIdVec;
     else
       addSimIdBool = 0;
-      
+
       simIdVec = []; % define so parfor doesnt throw warning
     end
 
@@ -1396,13 +1396,13 @@ try
         else
           tempResult = feval(func, data(iData), function_options{:}, simIdVec(iData));
         end
-        
+
         % only take first handle if multiple figures
         result(iData) = tempResult(1);
-        
+
         if ishandle(result(iData)) && make_invis_bool
           set(result(iData), 'Visible', 'off'); % cannot close yet until save, but can make invisible
-          
+
           % close additional figures now
           if length(tempResult) > 1
             close(tempResult(2:end))
@@ -1416,13 +1416,13 @@ try
         else
           tempResult = feval(func, data(iData), function_options{:}, simIdVec(iData));
         end
-        
+
         % only take first handle if multiple figures
         result(iData) = tempResult(1);
-        
+
         if ishandle(result(iData)) && make_invis_bool
           set(result(iData), 'Visible', 'off'); % cannot close yet until save, but can make invisible
-          
+
           % close additional figures now
           if length(tempResult) > 1
             close(tempResult(2:end))

@@ -31,7 +31,7 @@ if ischar(options.variables)
 end
 
 % check if input is a DynaSim studyinfo structure
-if ischar(file) && isdir(file) % study directory
+if ischar(file) && isfolder(file) % study directory
   study_dir = file;
   clear file
   file.study_dir = study_dir;
@@ -41,13 +41,13 @@ if isstruct(file) && isfield(file,'study_dir')
   % "file" is a studyinfo structure.
   % retrieve most up-to-date studyinfo structure from studyinfo.mat file
   studyinfo = dsCheckStudyinfo(file.study_dir,'process_id',options.process_id, varargin{:});
-  
+
   % compare simIDs to sim_id
   if ~isempty(options.simIDs)
      [~,~,simsInds] = intersect(options.simIDs, [studyinfo.simulations.sim_id]);
   end
-  
-  % 
+
+  %
   for i = 1:length(studyinfo.simulations)
       for j = 1:length(studyinfo.simulations(i).result_files)
           rf_orig = studyinfo.simulations(i).result_files{j};
@@ -58,7 +58,7 @@ if isstruct(file) && isfield(file,'study_dir')
           studyinfo.simulations(i).result_files{j} = rf_new;
       end
   end
-  
+
   % get list of data_files from studyinfo
   if isempty(options.simIDs)
     result_firsts = arrayfun(@(s) s.result_files{1},studyinfo.simulations,'UniformOutput',0);
@@ -67,7 +67,7 @@ if isstruct(file) && isfield(file,'study_dir')
     result_firsts = arrayfun(@(s) s.result_files{1},studyinfo.simulations(simsInds),'UniformOutput',0);
     sim_info = studyinfo.simulations(simsInds);
   end
-  
+
   % Keep only successful files
   success = cellfun(@(x) ~isempty(dir([x '*'])),result_firsts);
   sim_info = sim_info(success);
@@ -83,7 +83,7 @@ if isstruct(file) && isfield(file,'study_dir')
         % Get plot files
         result_files = sim_info(i).result_files;
 
-        % Add extension to file names as needed 
+        % Add extension to file names as needed
         result_files2 = cellfun(@(x) ls([x, '*']),result_files,'UniformOutput',0);
         result_files3 = cellfun(@(x) x(1:end-1),result_files2,'UniformOutput',0);      % ls returns strings with trailing spaces at the end. Need to remove these.
         tmp_data.plot_files = result_files3;

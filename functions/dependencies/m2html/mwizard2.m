@@ -3,7 +3,7 @@ function mwizard(file)
 %  MWIZARD launches a Matlab GUI front-end to edit parameters
 %  that are then used by M2HTML to generate HTML documentation.
 %  MWIZARD(FILE) allows to specify a mat-file FILE from which
-%  default parameters are extracted and can be updated.  
+%  default parameters are extracted and can be updated.
 %
 %  For more information, please read the M2HTML tutorial and FAQ at:
 %    <http://www.artefact.tk/software/matlab/m2html/>
@@ -17,12 +17,12 @@ function mwizard(file)
 %  modify it under the terms of the GNU General Public License
 %  as published by the Free Software Foundation; either version 2
 %  of the License, or any later version.
-% 
+%
 %  This program is distributed in the hope that it will be useful,
 %  but WITHOUT ANY WARRANTY; without even the implied warranty of
 %  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 %  GNU General Public License for more details.
-% 
+%
 %  You should have received a copy of the GNU General Public License
 %  along with this program; if not, write to the Free Software
 %  Foundation Inc, 59 Temple Pl. - Suite 330, Boston, MA 02111-1307, USA.
@@ -69,7 +69,7 @@ h = figure('Resize',      'on',...
 		   'Name',        ':: M2HTML Wizard ::',...
 		   'Position',    [200 200 500 650],...
 		   'Tag',         mfilename);
-		   
+
 set(h, 'CloseRequestFcn', {@doClose,h});
 
 %===============================================================================
@@ -81,7 +81,7 @@ wincolor = struct('bg',    [0.9 0.9 0.9], ...
                   'title', [0.8 0.8 0.9]);
 
 set(h, 'Color', wincolor.bg);
-              
+
 %-------------------------------------------------------------------------------
 %- Menu
 %-------------------------------------------------------------------------------
@@ -116,7 +116,7 @@ uipushtool('CData',icons.saveAsIcon,...
 	'ToolTipString','Save File As',...
 	'ClickedCallback',{@doSaveAsFile,h},...
 	'Tag','SaveAsTool');
-	
+
 uipushtool('CData',icons.wheelIcon,...
 	'enable','on',...
 	'Separator','on',...
@@ -164,13 +164,13 @@ uicontrol('Style','Frame',...
 	'Units','Normalized',...
 	'Position',[0.02,0.74,0.96,0.16],...
 	'BackgroundColor',wincolor.fg);
-	
+
 uicontrol('Style','Frame',...
 	'Units','Normalized',...
 	'HorizontalAlignment','center',...
 	'Position',[0.02,0.87,0.96,0.03],...
 	'BackgroundColor',wincolor.title);
-	
+
 uicontrol('Style','Text',...
 	'Units','Normalized',...
 	'String','M-Files Input',...
@@ -282,7 +282,7 @@ uicontrol('Style','Frame',...
 	'HorizontalAlignment','center',...
 	'Position',[0.02,0.69,0.96,0.03],...
 	'BackgroundColor',wincolor.title);
-	
+
 uicontrol('Style','Text',...
 	'Units','Normalized',...
 	'String','HTML Output',...
@@ -370,7 +370,7 @@ uicontrol('Style','Frame',...
 	'HorizontalAlignment','center',...
 	'Position',[0.02,0.51,0.96,0.03],...
 	'BackgroundColor',wincolor.title);
-	
+
 uicontrol('Style','Text',...
 	'Units','Normalized',...
 	'String','Other Options',...
@@ -595,18 +595,18 @@ axes('XLim',[0 100],...
 x = 0; % between 0 and 100
 xpatch = [0 x x 0];
 ypatch = [0 0 1 1];
-  
+
 p = patch(xpatch,ypatch,'r',...
     'EdgeColor','r',...
     'Visible','on',...
     'EraseMode','none',...
 	'Tag','waitbarmisc');
-  
+
 l = line([100 0 0 100 100], [0 0 1 1 0], ...
     'EraseMode','none', ...
     'Visible','on',...
     'Color',get(gca,'XColor'));
-  
+
 % for i=10:5:100
 %     set(p,'Xdata',[0 i i 0]); pause(0.02);
 % end
@@ -637,7 +637,7 @@ function doClose(fig,evd,h)
 	if status
 		delete(h);
 	end
-	
+
 function doNewFile(fig,evd,h)
 	status = doCheckSave(h);
 	if status
@@ -693,7 +693,7 @@ function doRunFile(fig,evd,h)
 		m2html('load',file,'recursive',r{opt.recursive+1});
         % 'recursive' is specified to force m2html to parse M-files
 	end
-	
+
 function status = doCheckSave(h)
 	file = getappdata(h,'file');
 	if isempty(file), file = 'Untitled'; end
@@ -742,21 +742,21 @@ function varargout = initOptions(h)
         'rootdir', pwd,...
 		'ignoredDir', {{'.svn' 'cvs'}}, ...
         'language','english');
-	
+
     if nargin == 1,
 	    setappdata(h,'options',options);
     else
-        varargout{1} = options;    
+        varargout{1} = options;
     end
 
 function refreshOptions(h)
     opt = getappdata(h,'options');
     handles = getappdata(h,'handles');
-    
+
     doInitTpl(handles.template,    0, h);
     doInitMfiles(handles.mfiles,   0, h);
     doInitHTMLDir(handles.htmldir, 0, h)
-    
+
     set(handles.recursive,       'Value',  opt.recursive);
     set(handles.graph,           'Value',  opt.graph); %doInitGraphs(handles.graph,0,h);
     set(handles.save,            'Value',  opt.save);
@@ -767,12 +767,12 @@ function refreshOptions(h)
     set(handles.highlight,       'Value',  opt.syntaxHighlighting);
     set(handles.source,          'Value',  opt.source);
     set(handles.globalhypertext, 'Value',  opt.globalHypertextLinks);
-    
+
     set(handles.index,           'String', opt.indexFile);
     set(handles.extension,       'String', opt.extension(2:end)); %remove the '.'
     set(handles.tabs,            'String', num2str(opt.tabs));
 %     if ~strcmp(opt.rootdir, pwd)
-%         warning('[M2HTML] You should ''cd %s'' before...',opt.rootdir);    
+%         warning('[M2HTML] You should ''cd %s'' before...',opt.rootdir);
 %     end
     set(handles.rootdir,         'String', opt.rootdir); % need to 'cd' if different...
     set(handles.column,          'String', num2str(4)); %- not saved... default here
@@ -781,7 +781,7 @@ function refreshOptions(h)
     else
         set(handles.load,        'String', '');
     end
-    
+
     set(handles.textmisc,        'String', ...
         'Click on the wheel in the toolbar to launch M2HTML...'); %- not saved... default here
     set(handles.waitbarmisc,     'EraseMode','normal');
@@ -806,7 +806,7 @@ function doInitTpl(fig,evd,h)
     %- problems when templates are still in full format
     opt = getappdata(h,'options');
 	d = dir(fullfile(fileparts(which(mfilename)),'templates'));
-	d = {d([d.isdir]).name};
+	d = {d([d.isfolder]).name};
 	d = {d{~ismember(d,{'.' '..'})}};
 	if ~isempty(d)
 		tpl = sprintf('%s|',d{:});
@@ -833,7 +833,7 @@ function doInitTpl(fig,evd,h)
         set(fig,'String',['{' s '}']);
         return;
     end
-    d = dir(opt.rootdir); d = {d([d.isdir]).name};
+    d = dir(opt.rootdir); d = {d([d.isfolder]).name};
     d = {d{~ismember(d,{'.' '..'})}};
     if length(d) == 0
         warning('[M2HTML] No subsequent directory found. Check your cwd.');
@@ -848,7 +848,7 @@ function doInitTpl(fig,evd,h)
         opt.mFiles = d;
     end
     setappdata(h,'options',opt);
-    
+
 function doInitGraphs(fig,evd,h)
     opt = getappdata(h,'options');
     [s, w] = system('dot -V');
@@ -877,9 +877,9 @@ function doBrowseButton(fig,evd,h)
     if ~d, return; end;
     opt.rootdir = d;
     set(handles.rootdir,'String',d);
-    
+
     % set mfiles
-    d = dir(opt.rootdir); d = {d([d.isdir]).name};
+    d = dir(opt.rootdir); d = {d([d.isfolder]).name};
     d = {d{~ismember(d,{'.' '..'})}};
     if length(d) == 0
         warning('[M2HTML] No subsequent directory found. Check your cwd.');
@@ -893,21 +893,21 @@ function doBrowseButton(fig,evd,h)
         set(handles.mfiles,'String',['{' s '}']);
         opt.mFiles = d;
     end
-    
+
     % set htmldir
     [path,name] = fileparts(opt.htmlDir);
     opt.htmlDir = fullfile(opt.rootdir, name);
     set(handles.htmldir,'String',opt.htmlDir);
-    
+
     setappdata(h,'options',opt);
-        
+
 function doSelectMfiles(fig,evd,h)
     opt = getappdata(h,'options');
     handles = getappdata(h,'handles');
-    
-    d = dir(opt.rootdir); d = {d([d.isdir]).name};
+
+    d = dir(opt.rootdir); d = {d([d.isfolder]).name};
     d = {d{~ismember(d,{'.' '..'})}};
-    
+
     [i,v] = listdlg('ListString',d,...
         'PromptString','Select folder(s):',...
         'Name',':: M2HTML :: M-files',...
@@ -939,7 +939,7 @@ function doSetIndex(fig,evd,h)
 	opt = getappdata(h,'options');
 	opt.indexFile = get(fig,'String');
 	setappdata(h,'options',opt);
-	
+
 function doSetExtension(fig,evd,h)
 	opt = getappdata(h,'options');
 	e = get(fig,'String');
@@ -948,7 +948,7 @@ function doSetExtension(fig,evd,h)
 	end
 	opt.extension = e;
 	setappdata(h,'options',opt);
-	
+
 function doSetTemplate(fig,evd,h)
     opt = getappdata(h,'options');
     s = get(fig,'String');
@@ -1018,8 +1018,8 @@ function doSetLoadMat(fig,evd,h)
 function doSetTabs(fig,evd,h)
 	opt = getappdata(h,'options');
 	t = str2num(get(fig,'String'));
-	if t >= 0 & length(t) == 1 
-		opt.tabs = t; 
+	if t >= 0 & length(t) == 1
+		opt.tabs = t;
 	else
 		set(fig,'String',num2str(opt.tabs));
 	end
@@ -1029,7 +1029,7 @@ function doSetNbColumns(fig,evd,h)
 	opt = getappdata(h,'options');
 	disp 'Not available';
 	setappdata(h,'options',opt);
-    
+
 %===============================================================================
 
 function text2 = shortenText(text, l)
