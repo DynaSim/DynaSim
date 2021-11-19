@@ -915,17 +915,6 @@ if ~isempty(model.monitors)
       end
 
       % Initialize monitors
-
-%       if options.downsample_factor==1
-%         % set mon(1,:)=f(IC);
-%         tmp=cell2struct({monitor_expressions{i}},{monitor_names{i}},1);
-%         print_monitor_update(fid,tmp,'(1,:)',state_variables,'(1,:)', varargin{:});
-%       else
-%         % set mon(1,:)=mon_last;
-%         tmp=cell2struct({monitor_expressions{i}},{monitor_names{i}},1);
-%         print_monitor_update(fid,tmp,'(1,:)',state_variables,'_last', varargin{:});
-%       end
-
       tmp_mon=cell2struct({monitor_expressions{i}},{monitor_names{i}},1);
       if options.downsample_factor==1
         tmp_var_index=cellfun(@(x)strrep(x,'n','1'),index_nexts,'uni',0);
@@ -974,45 +963,6 @@ if options.disk_flag==1
   % go to new line for next time point
   fprintf(fid,'fprintf(fileID,''\\n'');\n');
 end
-
-% % determine form of indexing to use for monitors
-% if ~isempty(model.monitors)
-%   if ~use_monitor_sizes
-%     % use default indices (assumes all monitors are for vector functions of
-%     % postsynaptic state variales)
-%     index_nexts_mon=index_nexts;
-%   else
-%     index_nexts_mon=cell(1,length(monitor_names));
-%     for i=1:length(monitor_names)
-%       if options.downsample_factor==1 && options.disk_flag==0
-%         % store state directly into monitors on each integration step
-%         if nvals_per_mon(i)>1 % use full 2D matrix indexing
-%           if ndims_per_mon(i)==1 % 1D population
-%             index_nexts_mon{i}='(n,:)';
-%           elseif ndims_per_mon(i)==2 % 2D population
-%             index_nexts_mon{i}='(:,:,n)';
-%           end
-%         else % this seems to be residual % use more concise 1D indexing because it is much faster for some Matlab-specific reason...
-%           index_nexts_mon{i}='(n)';
-%         end
-%       elseif options.downsample_factor>1 && options.disk_flag==0
-%         % store state in mon_last then update monitors on each downsample_factor integration step
-%         if nvals_per_mon(i)>1
-%           if ndims_per_mon(i)==1 % 1D population
-%             index_nexts_mon{i}='(n,:)';
-%           elseif ndims_per_mon(i)==2 % 2D population
-%             index_nexts_mon{i}='(:,:,n)';
-%           end
-%         else
-%           index_nexts_mon{i}='(n)';
-%         end
-%       elseif options.disk_flag==1
-%         % always store state in mon_last and write on each downsample_factor integration step
-%           index_nexts_mon{i}='_last';
-%       end
-%     end
-%   end
-% end
 
 % add index to state variables in ODEs and look for delay differential equations
 delayinfo=[];
@@ -1472,15 +1422,6 @@ function print_conditional_update(fid,conditionals,index_nexts,state_variables, 
     end
 
     % write conditional to solver function
-% <<<<<<< HEAD
-%     fprintf(fid,'  conditional_test=(%s);\n',condition);
-%     action=dsStrrep(action, '\(n,:', '(n,conditional_test', '', '', varargin{:});
-%     if ~isempty(regexp(condition,'(:,:,n)','once'))
-%       % Use linear indices to update 2D state variable
-%       var=regexp(action,'^[^\(]+','match','once');
-%       indstr=sprintf('(find(conditional_test)+(n-1)*numel(%s)/nsamp)',var);
-%       action=strrep(action,'(n,conditional_test)',indstr);
-% =======
     if ~iscell(condition)
       condition = {condition};
     end
@@ -1544,62 +1485,6 @@ function print_conditional_update(fid,conditionals,index_nexts,state_variables, 
   end
 end
 
-
-
-% function print_monitor_update(fid,monitors,index_nexts,state_variables,index_lasts, varargin)
-%   % Purpose: write statements to update monitors given current state variables
-%   %   note: only run this every time a point is recorded (not necessarily on
-%   %   every step of the integration).
-%   if isempty(monitors) || isempty(index_nexts)
-%     return;
-%   end
-%   if ~isempty(monitors) && iscell(index_nexts) % being called from within the integrator loop
-%     fprintf(fid,'\n');
-%     fprintf(fid,'  %% ------------------------------------------------------------\n');
-%     fprintf(fid,'  %% Update monitors:\n');
-%     fprintf(fid,'  %% ------------------------------------------------------------\n');
-%   end
-%
-%   if nargin<5 || isempty(index_lasts)
-%     index_lasts=index_nexts;
-%   end
-%
-%   % account for inputs from monitor initialization
-%
-%   if ~iscell(index_nexts), index_nexts={index_nexts}; end
-%
-%   if ~iscell(index_lasts), index_lasts={index_lasts}; end
-%
-%   if length(index_lasts)~=length(state_variables)
-%     index_lasts=repmat(index_lasts,[1 length(state_variables)]);
-%   end
-%
-%   if isequal(index_nexts{1},'(1,:)')
-%     monitor_index='(1,:)';
-%   else
-%     switch index_nexts{1}(1)
-%       case '('
-%         monitor_index='(n,:)';
-%       case '_'
-%         monitor_index='_last';
-%     end
-%   end
-%
-%   monitor_name=fieldnames(monitors);
-%   monitor_expression=struct2cell(monitors);
-%
-%   % add indexes to state variables in monitors
-%   for i=1:length(monitor_name)
-%     for j=1:length(state_variables)
-%       %monitor_expression{i}=dsStrrep(monitor_expression{i}, state_variables{j}, [state_variables{j} index_lasts{j}], '', '', varargin{:});
-%       monitor_expression{i}=dsStrrep(monitor_expression{i}, state_variables{j}, [state_variables{j} monitor_index], '', '', varargin{:});
-%     end
-%
-%     % write monitors to solver function
-%     fprintf(fid,'    %s%s =%s;\n',monitor_name{i},monitor_index,monitor_expression{i});
-%   end
-% end
-
 function print_monitor_update(fid,monitors,index_nexts_mon,state_variables,index_nexts_var, varargin)
   % Purpose: write statements to update monitors given current state variables
   %   note: only run this every time a point is recorded (not necessarily on
@@ -1635,47 +1520,6 @@ function print_monitor_update(fid,monitors,index_nexts_mon,state_variables,index
   end
 
 end
-
-% <<<<<<< HEAD
-% function print_monitor_update(fid,monitors,index_nexts_mon,state_variables,index_nexts_var, varargin)
-%   % Purpose: write statements to update monitors given current state variables
-%   %   note: only run this every time a point is recorded (not necessarily on
-%   %   every step of the integration).
-%   if isempty(monitors)
-%     return;
-%   end
-%   if iscell(index_nexts_var) % being called from within the integrator loop
-% =======
-% function print_monitor_update(fid,monitors,index_nexts,state_variables,index_lasts, varargin)
-%   if ~isempty(monitors) && iscell(index_nexts) % being called from within the integrator loop
-%     fprintf(fid,'\n');
-% >>>>>>> 373a2a043ace458a8c023c6b2eefb03272fb27e6
-%     fprintf(fid,'  %% ------------------------------------------------------------\n');
-%     fprintf(fid,'  %% Update monitors:\n');
-%     fprintf(fid,'  %% ------------------------------------------------------------\n');
-%   end
-%
-%   % Account for inputs from monitor initialization
-%   if ~iscell(index_nexts_var), index_nexts_var={index_nexts_var}; end
-%   if ~iscell(index_nexts_mon), index_nexts_mon={index_nexts_mon}; end
-%   if length(index_nexts_var)~=length(state_variables)
-%     index_nexts_var=repmat(index_nexts_var,[1 length(state_variables)]);
-%   end
-%
-%   % Adjust indexing and print monitor updates
-%   monitor_names=fieldnames(monitors);
-%   monitor_expressions=struct2cell(monitors);
-%   for i=1:length(monitor_names)
-%     % add indexes to state variables in monitor expressions
-%     for j=1:length(state_variables)
-%       monitor_expressions{i}=dsStrrep(monitor_expressions{i}, state_variables{j}, [state_variables{j} index_nexts_var{j}], '', '', varargin{:});
-%     end
-%
-%     % write monitors to solver function
-%     fprintf(fid,'  %s%s=%s;\n',monitor_names{i},index_nexts_mon{i},monitor_expressions{i});
-%   end
-%
-% end
 
 function [monitor_ic,monitor_names,monitor_expressions] = init_calculate_monitors(model,p,propagate_flag)
   % Initialize monitors (e.g., to determine their size)
