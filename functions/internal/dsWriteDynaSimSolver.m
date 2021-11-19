@@ -616,7 +616,7 @@ for i=1:length(state_variables)
         index_lasts{i}='(:,:,n-1)';
         index_nexts{i}='(:,:,n)';
       end
-    % else % use more concise 1D indexing because it is much faster for some Matlab-specific reason...
+    % else % this seems to be residual % use more concise 1D indexing because it is much faster for some Matlab-specific reason...
     %   index_lasts{i}='(n-1)';
     %   index_nexts{i}='(n)';
     % end
@@ -816,7 +816,7 @@ if ~isempty(model.monitors)
           elseif ndims_per_mon(i)==2 % 2D population
             index_nexts_mon{i}='(:,:,n)';
           end
-        % else % use more concise 1D indexing because it is much faster for some Matlab-specific reason...
+        % else % this seems to be residual % use more concise 1D indexing because it is much faster for some Matlab-specific reason...
         %   index_nexts_mon{i}='(n)';
         % end
       elseif options.downsample_factor>1 && options.disk_flag==0
@@ -940,7 +940,7 @@ if ~isempty(model.monitors)
           else
             error('only 1D and 2D populations are supported at this time.');
           end
-        % else % use more concise 1D indexing because it is much faster for some Matlab-specific reason...
+        % else % this seems to be residual % use more concise 1D indexing because it is much faster for some Matlab-specific reason...
         %   print_monitor_update(fid,tmp_mon,'(1)',state_variables,tmp_var_index, varargin{:});
         % end
       else
@@ -992,7 +992,7 @@ end
 %           elseif ndims_per_mon(i)==2 % 2D population
 %             index_nexts_mon{i}='(:,:,n)';
 %           end
-%         else % use more concise 1D indexing because it is much faster for some Matlab-specific reason...
+%         else % this seems to be residual % use more concise 1D indexing because it is much faster for some Matlab-specific reason...
 %           index_nexts_mon{i}='(n)';
 %         end
 %       elseif options.downsample_factor>1 && options.disk_flag==0
