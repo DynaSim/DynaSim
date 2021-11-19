@@ -1492,7 +1492,7 @@ function print_monitor_update(fid,nwsp,monitors,index_nexts_mon,state_variables,
     end
 
     % write monitors to solver function
-    fprintf(fid,'%s%s%s=%s;\n',sprintf(blanks(nwsp)),monitor_names{i},index_nexts_mon{i},monitor_expressions{i});
+    fprintf(fid,'%s%s%s=%s;\n',blanks(nwsp),monitor_names{i},index_nexts_mon{i},monitor_expressions{i});
   end
 
 end
