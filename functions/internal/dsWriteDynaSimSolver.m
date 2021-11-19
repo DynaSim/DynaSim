@@ -578,10 +578,10 @@ for i=1:length(state_variables)
     if options.downsample_factor==1
       if ndims_per_var(i)==1
         % set var(1,:)=IC;
-        fprintf(fid,'  %s(1,:) = %s;\n',state_variables{i},IC_expressions{i});
+        fprintf(fid,'%s(1,:) = %s;\n',state_variables{i},IC_expressions{i});
       elseif ndims_per_var(i)==2
         % set var(:,:,1)=IC;
-        fprintf(fid,'  %s(:,:,1) = %s;\n',state_variables{i},IC_expressions{i});
+        fprintf(fid,'%s(:,:,1) = %s;\n',state_variables{i},IC_expressions{i});
       else
         error('only 1D and 2D populations are supported a this time.');
       end
@@ -608,34 +608,25 @@ index_temps=repmat({'_last'},[1 length(state_variables)]);
 for i=1:length(state_variables)
   if options.downsample_factor==1 && options.disk_flag==0
     % store state directly into state variables on each integration step
-    % if nvals_per_var(i)>1 % use full 2D matrix indexing
-      if ndims_per_var(i)==1 % 1D population
-        index_lasts{i}='(n-1,:)';
-        index_nexts{i}='(n,:)';
-      elseif ndims_per_var(i)==2 % 2D population
-        index_lasts{i}='(:,:,n-1)';
-        index_nexts{i}='(:,:,n)';
-      end
-    % else % this seems to be residual % use more concise 1D indexing because it is much faster for some Matlab-specific reason...
-    %   index_lasts{i}='(n-1)';
-    %   index_nexts{i}='(n)';
-    % end
+    if ndims_per_var(i)==1 % 1D population
+      index_lasts{i}='(n-1,:)';
+      index_nexts{i}='(n,:)';
+    elseif ndims_per_var(i)==2 % 2D population
+      index_lasts{i}='(:,:,n-1)';
+      index_nexts{i}='(:,:,n)';
+    end
   elseif options.downsample_factor>1 && options.disk_flag==0
     % store state in var_last then update state variables on each downsample_factor integration step
     index_lasts{i}='_last';
-    % if nvals_per_var(i)>1
-      if ndims_per_var(i)==1 % 1D population
-        index_nexts{i}='(n,:)';
-      elseif ndims_per_var(i)==2 % 2D population
-        index_nexts{i}='(:,:,n)';
-      end
-    % else
-    %   index_nexts{i}='(n)';
-    % end
+    if ndims_per_var(i)==1 % 1D population
+      index_nexts{i}='(n,:)';
+    elseif ndims_per_var(i)==2 % 2D population
+      index_nexts{i}='(:,:,n)';
+    end
   elseif options.disk_flag==1
     % always store state in var_last and write on each downsample_factor integration step
-      index_lasts{i}='_last';
-      index_nexts{i}='_last';
+    index_lasts{i}='_last';
+    index_nexts{i}='_last';
   end
 end
 
@@ -730,8 +721,8 @@ if ~isempty(model.monitors)
       % approach: add conditional check for upward threshold crossing
       parent=dsGetParentNamespace(model,monitor_names{i});
       pop_name=parent(1:end-1); % remove trailing _
-%       pop_name=regexp(monitor_names{i},'_','split');
-%       pop_name=pop_name{1};
+      % pop_name=regexp(monitor_names{i},'_','split');
+      % pop_name=pop_name{1};
       var_spikes=regexp(monitor_names{i},'(.*)_spikes$','tokens','once');
       var_spikes=var_spikes{1}; % variable to monitor
       var_tspikes=[pop_name '_tspike']; % only allow one event type to be tracked per population (i.e., it is ok to use pop_name, like 'E', as namespace instead of pop_var, like 'E_v')
@@ -810,38 +801,30 @@ if ~isempty(model.monitors)
     else
       if options.downsample_factor==1 && options.disk_flag==0
         % store state directly into monitors on each integration step
-        % if nvals_per_mon(i)>1 % use full 2D matrix indexing
-          if ndims_per_mon(i)==1 % 1D population
-            index_nexts_mon{i}='(n,:)';
-          elseif ndims_per_mon(i)==2 % 2D population
-            index_nexts_mon{i}='(:,:,n)';
-          end
-        % else % this seems to be residual % use more concise 1D indexing because it is much faster for some Matlab-specific reason...
-        %   index_nexts_mon{i}='(n)';
-        % end
+        if ndims_per_mon(i)==1 % 1D population
+          index_nexts_mon{i}='(n,:)';
+        elseif ndims_per_mon(i)==2 % 2D population
+          index_nexts_mon{i}='(:,:,n)';
+        end
       elseif options.downsample_factor>1 && options.disk_flag==0
         % store state in mon_last then update monitors on each downsample_factor integration step
-        % if nvals_per_mon(i)>1
-          if ndims_per_mon(i)==1 % 1D population
-            index_nexts_mon{i}='(n,:)';
-          elseif ndims_per_mon(i)==2 % 2D population
-            index_nexts_mon{i}='(:,:,n)';
-          end
-        % else
-        %   index_nexts_mon{i}='(n)';
-        % end
+        if ndims_per_mon(i)==1 % 1D population
+          index_nexts_mon{i}='(n,:)';
+        elseif ndims_per_mon(i)==2 % 2D population
+          index_nexts_mon{i}='(:,:,n)';
+        end
       elseif options.disk_flag==1
         % always store state in mon_last and write on each downsample_factor integration step
-          index_nexts_mon{i}='_last';
+        index_nexts_mon{i}='_last';
       end
     end
 
     % initialize mon_last if not storing every time point and this is not a spike monitor
-%     if (options.downsample_factor>1 || options.disk_flag==1) && isempty(regexp(monitor_names{i},'_spikes$','once'))
+    % if (options.downsample_factor>1 || options.disk_flag==1) && isempty(regexp(monitor_names{i},'_spikes$','once'))
     if (options.disk_flag==1) && isempty(regexp(monitor_names{i},'_spikes$','once'))
       % set mon_last=f(IC);
       tmp_mon=cell2struct({monitor_expressions{i}},{monitor_names{i}},1);
-      print_monitor_update(fid,tmp_mon,'_last',state_variables,'_last', varargin{:});
+      print_monitor_update(fid,2,tmp_mon,'_last',state_variables,'_last', varargin{:});
     end
 
     if options.disk_flag==1
@@ -918,33 +901,25 @@ if ~isempty(model.monitors)
       tmp_mon=cell2struct({monitor_expressions{i}},{monitor_names{i}},1);
       if options.downsample_factor==1
         tmp_var_index=cellfun(@(x)strrep(x,'n','1'),index_nexts,'uni',0);
-        % if nvals_per_mon(i)>1 % use full 2D matrix indexing
-          if ndims_per_mon(i)==1
-            % set mon(1,:)=f(IC);
-            print_monitor_update(fid,tmp_mon,'(1,:)',state_variables,tmp_var_index, varargin{:});
-  %           print_monitor_update(fid,tmp,'(1,:)',state_variables,'(1,:)', varargin{:});
-          elseif ndims_per_mon(i)==2
-            % set mon(:,:,1)=f(IC);
-            print_monitor_update(fid,tmp_mon,'(:,:,1)',state_variables,tmp_var_index, varargin{:});
-          else
-            error('only 1D and 2D populations are supported at this time.');
-          end
-        % else % this seems to be residual % use more concise 1D indexing because it is much faster for some Matlab-specific reason...
-        %   print_monitor_update(fid,tmp_mon,'(1)',state_variables,tmp_var_index, varargin{:});
-        % end
-      else
-        if nvals_per_mon(i)>1 % use full 2D matrix indexing
-          if ndims_per_mon(i)==1
-            % set mon(1,:)=mon_last;
-            print_monitor_update(fid,tmp_mon,'(1,:)',state_variables,'_last', varargin{:});
-          elseif ndims_per_mon(i)==2
-            % set mon(:,:,1)=var_last;
-            print_monitor_update(fid,tmp_mon,'(:,:,1)',state_variables,'_last', varargin{:});
-          else
-            error('only 1D and 2D populations are supported a this time.');
-          end
+        if ndims_per_mon(i)==1
+          % set mon(1,:)=f(IC);
+          print_monitor_update(fid,0,tmp_mon,'(1,:)',state_variables,tmp_var_index,varargin{:});
+          % print_monitor_update(fid,0,tmp,'(1,:)',state_variables,'(1,:)', varargin{:});
+        elseif ndims_per_mon(i)==2
+          % set mon(:,:,1)=f(IC);
+          print_monitor_update(fid,0,tmp_mon,'(:,:,1)',state_variables,tmp_var_index,varargin{:});
         else
-          print_monitor_update(fid,tmp_mon,'(1)',state_variables,'_last', varargin{:});
+          error('only 1D and 2D populations are supported at this time.');
+        end
+      else
+        if ndims_per_mon(i)==1
+          % set mon(1,:)=mon_last;
+          print_monitor_update(fid,0,tmp_mon,'(1,:)',state_variables,'_last',varargin{:});
+        elseif ndims_per_mon(i)==2
+          % set mon(:,:,1)=var_last;
+          print_monitor_update(fid,0,tmp_mon,'(:,:,1)',state_variables,'_last',varargin{:});
+        else
+          error('only 1D and 2D populations are supported a this time.');
         end
       end
     end %disk_flag
@@ -979,8 +954,8 @@ for i=1:length(odes)
       matches=regexp(odes{i},[tmp '\(t-[\w\.,:]+\)'],'match');
       for k=1:length(matches)
         % determine amount of delay for each occurrence of a delay to this state variable
-        %     note: account for user-specified X(t-tau) and X(t-tau,:)
-        %     note: account for tau as variable defined elsewhere or numeric
+        %   note: account for user-specified X(t-tau) and X(t-tau,:)
+        %   note: account for tau as variable defined elsewhere or numeric
         % look for: X(t-#)
         delay=cellstr2num(regexp(matches{k},'\(t-([\.\d]+)\)','tokens','once'));
 
@@ -1044,7 +1019,7 @@ if ~isempty(delayinfo)
 
     % initialize delay matrix with max delay ICs and all time points
     fprintf(fid,'%s_delay = zeros(nsamp+%g,size(%s,2));\n',delay_var,Dmax,delay_var);
-    fprintf(fid,'  %s_delay(1:%g,:) = repmat(%s(1,:),[%g 1]);\n',delay_var,Dmax,delay_var,Dmax);
+    fprintf(fid,'%s_delay(1:%g,:) = repmat(%s(1,:),[%g 1]);\n',delay_var,Dmax,delay_var,Dmax);
   end
   % replace delays in ODEs with indices to delay matrices
   for i=1:length(delayinfo)
@@ -1115,8 +1090,8 @@ if options.downsample_factor==1 && options.disk_flag==0 % store every time point
   print_conditional_update(fid,model.conditionals,index_nexts,state_variables)
 
   if monitors_flag % update_monitors;  % mon(:,k-1)->mon(k,:) or mon(k-1)->mon(k)
-%     print_monitor_update(fid,model.monitors,index_nexts_mon,state_variables, [], varargin{:});
-    print_monitor_update(fid,model.monitors,index_nexts_mon,state_variables,index_nexts, varargin{:});
+    % print_monitor_update(fid,2,model.monitors,index_nexts_mon,state_variables, [], varargin{:});
+    print_monitor_update(fid,2,model.monitors,index_nexts_mon,state_variables,index_nexts, varargin{:});
   end
 
   fprintf(fid,'  n=n+1;\n');
@@ -1162,8 +1137,8 @@ else % store every downsample_factor time point in memory or on disk
     % update_vars;    % var_last -> var(n,:) or var(n)
     print_var_update_last(fid,index_nexts,state_variables)
     if monitors_flag % update_monitors;% f(var_last) -> mon(n,:) or mon(n)
-%       print_monitor_update(fid,model.monitors,index_nexts_mon,state_variables, [], varargin{:});
-      print_monitor_update(fid,model.monitors,index_nexts_mon,state_variables,index_nexts, varargin{:});
+      % print_monitor_update(fid,2,model.monitors,index_nexts_mon,state_variables, [], varargin{:});
+      print_monitor_update(fid,2,model.monitors,index_nexts_mon,state_variables,index_nexts, varargin{:});
     end
   end %disk_flag
 
@@ -1347,8 +1322,8 @@ end
 function print_var_update(fid,index_nexts,index_lasts,update_term,state_variables)
   % purpose: write statements to update state variables according to their dynamics
   % example:
-  %   update_term='(dt/6)*(%s_k1+2*(%s_k2+%s_k3)+%s_k4)';
-  %   state_variable='A_v';
+  % update_term='(dt/6)*(%s_k1+2*(%s_k2+%s_k3)+%s_k4)';
+  % state_variable='A_v';
 
   if ~isempty(state_variables)
     fprintf(fid,'\n');
@@ -1384,7 +1359,7 @@ end
 
 function print_conditional_update(fid,conditionals,index_nexts,state_variables, varargin)
   % purpose: write statements to perform conditional actions (that may
-  %   include updating state variables).
+  %  include updating state variables).
   if ~isempty(conditionals)
     fprintf(fid,'\n');
     fprintf(fid,'  %% ------------------------------------------------------------\n');
@@ -1430,8 +1405,8 @@ function print_conditional_update(fid,conditionals,index_nexts,state_variables, 
     end
     for j=1:length(condition)
       fprintf(fid,['  conditional_test=any(%s);\n'],condition{j}); % JSS edit
-      %fprintf(fid,['  conditional_test=(%s);\n'],condition{j});
-%       if ~isempty(strfind(condition{j},'any('))
+      % fprintf(fid,['  conditional_test=(%s);\n'],condition{j});
+%     if ~isempty(strfind(condition{j},'any('))
 %         condition_indx = regexprep(condition{j},'^any\(','','once');
 %         condition_indx = condition_indx(1:end-1);
 %         fprintf(fid,['  conditional_indx=(%s);\n'],condition_indx);
@@ -1485,10 +1460,11 @@ function print_conditional_update(fid,conditionals,index_nexts,state_variables, 
   end
 end
 
-function print_monitor_update(fid,monitors,index_nexts_mon,state_variables,index_nexts_var, varargin)
+function print_monitor_update(fid,nwsp,monitors,index_nexts_mon,state_variables,index_nexts_var,varargin)
   % Purpose: write statements to update monitors given current state variables
   %   note: only run this every time a point is recorded (not necessarily on
   %   every step of the integration).
+
   if isempty(monitors) && iscell(index_nexts) % being called from within the integrator loop
     return;
   end
@@ -1516,7 +1492,7 @@ function print_monitor_update(fid,monitors,index_nexts_mon,state_variables,index
     end
 
     % write monitors to solver function
-    fprintf(fid,'  %s%s=%s;\n',monitor_names{i},index_nexts_mon{i},monitor_expressions{i});
+    fprintf(fid,'%s%s%s=%s;\n',sprintf(blanks(nwsp)),monitor_names{i},index_nexts_mon{i},monitor_expressions{i});
   end
 
 end
