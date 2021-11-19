@@ -608,7 +608,7 @@ index_temps=repmat({'_last'},[1 length(state_variables)]);
 for i=1:length(state_variables)
   if options.downsample_factor==1 && options.disk_flag==0
     % store state directly into state variables on each integration step
-    if nvals_per_var(i)>1 % use full 2D matrix indexing
+    % if nvals_per_var(i)>1 % use full 2D matrix indexing
       if ndims_per_var(i)==1 % 1D population
         index_lasts{i}='(n-1,:)';
         index_nexts{i}='(n,:)';
@@ -616,22 +616,22 @@ for i=1:length(state_variables)
         index_lasts{i}='(:,:,n-1)';
         index_nexts{i}='(:,:,n)';
       end
-    else % use more concise 1D indexing because it is much faster for some Matlab-specific reason...
-      index_lasts{i}='(n-1)';
-      index_nexts{i}='(n)';
-    end
+    % else % this seems to be residual % use more concise 1D indexing because it is much faster for some Matlab-specific reason...
+    %   index_lasts{i}='(n-1)';
+    %   index_nexts{i}='(n)';
+    % end
   elseif options.downsample_factor>1 && options.disk_flag==0
     % store state in var_last then update state variables on each downsample_factor integration step
     index_lasts{i}='_last';
-    if nvals_per_var(i)>1
+    % if nvals_per_var(i)>1
       if ndims_per_var(i)==1 % 1D population
         index_nexts{i}='(n,:)';
       elseif ndims_per_var(i)==2 % 2D population
         index_nexts{i}='(:,:,n)';
       end
-    else
-      index_nexts{i}='(n)';
-    end
+    % else
+    %   index_nexts{i}='(n)';
+    % end
   elseif options.disk_flag==1
     % always store state in var_last and write on each downsample_factor integration step
       index_lasts{i}='_last';
@@ -810,26 +810,26 @@ if ~isempty(model.monitors)
     else
       if options.downsample_factor==1 && options.disk_flag==0
         % store state directly into monitors on each integration step
-        if nvals_per_mon(i)>1 % use full 2D matrix indexing
+        % if nvals_per_mon(i)>1 % use full 2D matrix indexing
           if ndims_per_mon(i)==1 % 1D population
             index_nexts_mon{i}='(n,:)';
           elseif ndims_per_mon(i)==2 % 2D population
             index_nexts_mon{i}='(:,:,n)';
           end
-        else % use more concise 1D indexing because it is much faster for some Matlab-specific reason...
-          index_nexts_mon{i}='(n)';
-        end
+        % else % this seems to be residual % use more concise 1D indexing because it is much faster for some Matlab-specific reason...
+        %   index_nexts_mon{i}='(n)';
+        % end
       elseif options.downsample_factor>1 && options.disk_flag==0
         % store state in mon_last then update monitors on each downsample_factor integration step
-        if nvals_per_mon(i)>1
+        % if nvals_per_mon(i)>1
           if ndims_per_mon(i)==1 % 1D population
             index_nexts_mon{i}='(n,:)';
           elseif ndims_per_mon(i)==2 % 2D population
             index_nexts_mon{i}='(:,:,n)';
           end
-        else
-          index_nexts_mon{i}='(n)';
-        end
+        % else
+        %   index_nexts_mon{i}='(n)';
+        % end
       elseif options.disk_flag==1
         % always store state in mon_last and write on each downsample_factor integration step
           index_nexts_mon{i}='_last';
@@ -929,7 +929,7 @@ if ~isempty(model.monitors)
       tmp_mon=cell2struct({monitor_expressions{i}},{monitor_names{i}},1);
       if options.downsample_factor==1
         tmp_var_index=cellfun(@(x)strrep(x,'n','1'),index_nexts,'uni',0);
-        if nvals_per_mon(i)>1 % use full 2D matrix indexing
+        % if nvals_per_mon(i)>1 % use full 2D matrix indexing
           if ndims_per_mon(i)==1
             % set mon(1,:)=f(IC);
             print_monitor_update(fid,tmp_mon,'(1,:)',state_variables,tmp_var_index, varargin{:});
@@ -940,9 +940,9 @@ if ~isempty(model.monitors)
           else
             error('only 1D and 2D populations are supported at this time.');
           end
-        else % use more concise 1D indexing because it is much faster for some Matlab-specific reason...
-          print_monitor_update(fid,tmp_mon,'(1)',state_variables,tmp_var_index, varargin{:});
-        end
+        % else % this seems to be residual % use more concise 1D indexing because it is much faster for some Matlab-specific reason...
+        %   print_monitor_update(fid,tmp_mon,'(1)',state_variables,tmp_var_index, varargin{:});
+        % end
       else
         if nvals_per_mon(i)>1 % use full 2D matrix indexing
           if ndims_per_mon(i)==1
@@ -992,7 +992,7 @@ end
 %           elseif ndims_per_mon(i)==2 % 2D population
 %             index_nexts_mon{i}='(:,:,n)';
 %           end
-%         else % use more concise 1D indexing because it is much faster for some Matlab-specific reason...
+%         else % this seems to be residual % use more concise 1D indexing because it is much faster for some Matlab-specific reason...
 %           index_nexts_mon{i}='(n)';
 %         end
 %       elseif options.downsample_factor>1 && options.disk_flag==0
