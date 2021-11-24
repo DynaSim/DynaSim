@@ -1171,6 +1171,14 @@ function RunSim(src,evnt)
 % Purpose: control ongoing simulation that updates cfg.Y and cfg.t
 global cfg handles t
 
+if ~strcmp(reportUI,'matlab')
+  try
+    pkg load statistics;
+  catch
+    error('DynaSim GUI requires Octave''s ''statistics'' package, please install it from Octave Forge');
+  end
+end
+
 set(handles.btn_start,'visible','off');
 set(handles.btn_pause,'visible','on');
 set(handles.btn_stop,'visible','on');
