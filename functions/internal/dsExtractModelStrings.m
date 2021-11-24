@@ -84,7 +84,7 @@ switch lower(display_mode)
           if ~ischar(val)
             val=toString(val,'compact');
           end
-          eqns{end+1}=sprintf('  %s = %s',fields{i},val);
+          eqns{end+1}=sprintf('%s = %s',fields{i},val);
         end
       end
       eqns{end+1}='';
