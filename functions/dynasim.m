@@ -7,12 +7,16 @@
 % Author: Jason Sherfey, PhD <jssherfey@gmail.com>
 % Copyright (C) 2016 Jason Sherfey, Boston University, USA
 
-function dynasim(spec)
+function dynasim(spec,async_flag)
 
 global handles SPEC MODEL cfg LASTSPEC LASTCFG
 handles=[];
 
-if nargin==0 % default model
+if nargin < 2
+  async_flag = true;
+end
+
+if nargin==0 || isempty(spec) % default model
   %SPEC=dsCheckSpecification([]);
   ina={
     'INa(v,m,h) = -gNa.*m.^3.*h.*(v-50); gNa=120';  % sodium current
@@ -78,8 +82,8 @@ if nargin==0 % default model
   s.mechanisms(5).name='input1';
   s.mechanisms(5).equations=input;
   spec=s;
-
 end
+
 % check specification
 SPEC=dsCheckSpecification(spec);
 % remove global population params (already applied to pop(#).mechanisms(#).equation)
@@ -189,6 +193,10 @@ uimenu(file_m,'Label','Exit','Callback','global handles cfg; set(handles.fig_mai
 % uimenu(plot_m,'Label','visualizer','Callback','global CURRSPEC; if ismember(''sim_data'',evalin(''base'',''who'')), visualizer(evalin(''base'',''sim_data'')); else disp(''load data to plot''); end');
 
 InitializeMainGUI;
+
+if ~async_flag
+  waitfor(handles.fig_main,'visible','off')
+end
 
 %% Set up GUI Model Builder
 function InitializeMainGUI % (todo: called by GUI Launcher)
