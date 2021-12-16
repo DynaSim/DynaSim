@@ -1,0 +1,37 @@
+% GABA connections
+
+% Parameters
+g_gaba = 0.1            % mS/cm^2
+E_gaba = -80            % mV, Michelle's paper % -76 % mV, rev Cl- Ade et al. 2008
+tau_gaba = 13           % ms, Michelle's paper % Taverna et al. 2008
+alpha_gaba = 1          % scaling factor
+conn_prob_gaba = 0.3    % it varies, see Taverna et al. 2008
+IC_gaba = 0             % 1e-4
+IC_noise_gaba = 0
+
+% STD parameters         % fitted from Tecuapetla et al., PNAS 2007)
+deltaD_gaba = 0.35
+tauD_gaba = 210          % ms
+alphaD_gaba = 4.61       % scaling factor to achieve D -> delta*D on each spike
+
+% Sparse connectivity
+nRndConn_gaba = round(conn_prob_gaba*Npre)
+indPre_gaba = round(1+(Npre-1)*rand(Npost,nRndConn_gaba))     % presynaptic indexes so that each postsynaptic neuron receives nRndConn_gaba random connections allowing for presynaptic repetition
+netcon_gaba = hist(indPre_gaba',1:Npre)                       % using hist to count how many synapses per connections (transposing is needed because hist acts on the first dimension and I need to compute it over the second dimension)
+
+% ALL-2-ALL connectivity
+% netcon_gaba = conn_prob_gaba*ones(Npost,Npre)
+
+i_gabaRecSPN(OUT,s) = -g_gaba.*(s_gaba*netcon_gaba).*(OUT-E_gaba)
+
+% ODEs
+d_gaba' = (1-d_gaba)./tauD_gaba + 0.5*alphaD_gaba*(1+tanh(IN/4)).*d_gaba*(deltaD_gaba-1)   % derivative of D
+s_gaba' = -s_gaba./tau_gaba + 2*alpha_gaba*(1+tanh(IN/4)).*(1-s_gaba).*d_gaba              % IN refers to the presynaptic V
+s_gaba(0) = IC_gaba+IC_noise_gaba.*rand(1,Npre)
+d_gaba(0) = ones(1,Npre)
+
+% Linker
+@current += i_gabaRecSPN(OUT,s_gaba) % OUT refers to the postsynaptic V
+
+% Monitor
+monitor i_gabaRecSPN
