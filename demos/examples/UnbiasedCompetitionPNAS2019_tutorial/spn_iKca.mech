@@ -1,0 +1,24 @@
+% Hodgkin-Huxley outward calcium-dependent potassium current
+
+% Parameters
+g_kca = 0.2
+E_kca = -80
+caConcentration_offset_kca = 0.075
+caConcentration_slope_kca = 0.01      % 0.1*caConcentration_offset_kca
+tau_offset_kca = 120                  % 130
+tau_scaling_kca = 0                   % 90 % tau_offset_kca-30 % tau_offset_kca-20
+
+% Functions and HH ca-dependent potassium current
+minf_kca(ca) = 1./(1+exp(-((ca)-caConcentration_offset_kca)/caConcentration_slope_kca))
+tau_kca(ca) = tau_offset_kca-tau_scaling_kca*minf_kca(ca)
+i_kca(V,m_kca) = - g_kca*m_kca.*(V-E_kca)
+
+% ODEs and ICs
+m_kca' = (minf_kca(@cab)-m_kca)./tau_kca(@cab)
+m_kca(0) = 0
+
+% Linker
+@current += i_kca(V,m_kca)
+
+% Monitor
+monitor i_kca

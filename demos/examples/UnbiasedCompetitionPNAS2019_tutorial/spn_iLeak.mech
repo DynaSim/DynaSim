@@ -1,0 +1,14 @@
+% Hodgkin-Huxley leak current
+
+% Parameters
+g_l = 0.1     % mS/cm^2, 0.1 for D2 MSN and 0.125 for D1 MSN Gertler et al. 2008
+E_l = -67     % mV, Michelle's paper
+
+% Current function
+i_l(V) = -g_l*(V-E_l)
+
+% Linker
+@current += i_l(V)
+
+% Monitor
+monitor i_l

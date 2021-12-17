@@ -1,0 +1,42 @@
+% Poisson input
+
+% Poisson parameters
+baseline_poisson=30e3           % sp/s, baseline rate
+DC_poisson=0                    % sp/s, steady component of the signal
+AC_poisson=0                    % sp/s, oscillatory component of the signal
+f_poisson=0                     % Hz, modulation frequency of the signal
+fsigma_poisson=0.03             % normalized sigma for the frequency jittering
+phi_poisson=0                   % radians, phase at which the signal begins
+connsigma_poisson=0.001         % slope of the connectivity transition between subpopulations
+slopedutycycle_poisson=1        % slope of the oscillatory duty cycle
+thresholddutycycle_poisson=0    % threshold of the oscillatory duty cycle (-1: all up, 0: half-half, +1: all down)
+latency_poisson=0               % ms, exponential rising time on onset
+onset_poisson=0                 % ms, start time of signal
+offset_poisson=0                % ms, stop time of signal
+
+% Synaptic parameters
+g_poisson=3.5e-4                % mS/cm^2, max synaptic conductance
+E_poisson=0                     % mV, synaptic reversal potential
+tau_poisson=2                   % ms, synaptic time constant
+kick_poisson=1                  % synaptic kick
+
+% Poisson conductance
+% s_poisson=getPoissonGating(baseline_poisson,DC_poisson,AC_poisson,f_poisson,phi_poisson,latency_poisson,onset_poisson,offset_poisson,tau_poisson,T,Npop)
+
+% s_poisson=getPoissonSinGating(onset_poisson,offset_poisson,latency_poisson,f_poisson,fsigma_poisson,phi_poisson,connsigma_poisson,baseline_poisson,DC_poisson,AC_poisson,tau_poisson,kick_poisson,T,Npop)
+
+s_poisson=getPoissonDutyCycleGating(onset_poisson,offset_poisson,latency_poisson,f_poisson,fsigma_poisson,phi_poisson,connsigma_poisson,baseline_poisson,DC_poisson,AC_poisson,slopedutycycle_poisson,thresholddutycycle_poisson,tau_poisson,kick_poisson,T,Npop)
+
+% Scaled conductance
+% g_poisson(t)=g_poisson.*s_poisson(k,:)
+g_poisson(t)=g_poisson.*s_poisson(1+floor(t/(0.5*dt)),:) % RK steps of 0.5dt
+
+% Input synaptic current
+I_poisson(X)=-g_poisson(t).*(X-E_poisson)
+
+% monitor
+monitor g_poisson
+monitor I_poisson
+
+% linker
+@current += I_poisson(X)
