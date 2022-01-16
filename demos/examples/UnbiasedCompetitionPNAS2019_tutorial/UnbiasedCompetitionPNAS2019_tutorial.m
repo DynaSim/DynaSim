@@ -19,9 +19,9 @@
 % into the model, run the simulation and visualize the results.
 % * *Reference:*
 %% 
-% # "Ardid, Sherfey, McCarthy, Hass, Pittman-Polletta, & Kopell (2019). Biased 
-% competition in the absence of input bias revealed through corticostriatal computation", 
-% published in Proceedings of the National Academy of Sciences, USA.
+% # Ardid S, Sherfey JS, McCarthy MM, Hass J, Pittman-Polletta BR, Kopell N. 
+% Biased competition in the absence of input bias revealed through corticostriatal 
+% computation. Proc Natl Acad Sci U S A. 2019;116(17):8564-8569. doi:10.1073/pnas.1812535116
 %% Background
 % We conceptualize Unbiased Competition as biased competition in the absence 
 % of input bias, in contraposition to the traditional Biased Competition conception, 
@@ -51,13 +51,13 @@ transient = 500    % Transient time
 % Model specification
 % We start defining the ordinary differential equations (ODEs) we want to simulate. 
 % Later on, we will embed these equations into the model specification, which 
-% we define in Section Define populations and connections. In this case we integrate 
-% each cell's voltage (state variable V) according to its input currents. For 
-% this, we use a DynaSim linker (@current) that will be internally replaced by 
-% the sum of all the input terms. We also need to define the initial conditions 
-% of the state variable (V), i.e., its initial value. Finally, we use a DynaSim 
-% monitor to tell DynaSim to save the data of the total current (@current) at 
-% each time step. 
+% we define in Section Population specification. In this case we integrate each 
+% cell's voltage (state variable V) according to its input currents. For this, 
+% we use a DynaSim linker (@current) that will be internally replaced by the sum 
+% of all the input terms. We also need to define the initial conditions of the 
+% state variable (V), i.e., its initial value. Finally, we use a DynaSim monitor 
+% to tell DynaSim to save the data of the total current (@current) at each time 
+% step.
 
 eqns = {
          'dV/dt = @current'             % Ordinary Differential Equation (ODE)
@@ -72,15 +72,15 @@ nSPNs = 150;     % Number of individual SPN cells
 multiplicity = [nSPNs,nSPNs]     % Total number of SPN cells of each type [D1 SNPs, D2 SPNs] in the model
 
 % Parameters of intrinsic currents
-% Section Define populations and connections specifies the list of mechanisms 
-% each cell type possesses. These mechanisms are fully specified in separate files. 
-% DynaSim users can access a repertoire of mechanisms in DynaSim's library, but 
-% sometimes we need to create our own. In such a case, the path to the mechanisms 
-% needs to be 'visible', either because is local to the live script (same folder), 
-% or because the mechanisms folders have been previously added to the path. Most 
-% of the parameters of the mechanisms have been set in their respective files 
-% (we encourage the reader to open and inspect those files). Here we will override 
-% only those parameters that take different values in D1 and D2 SPNs.
+% Section Population specification sets the list of mechanisms each cell type 
+% possesses. These mechanisms are fully specified in separate files. DynaSim users 
+% can access a repertoire of mechanisms in DynaSim's library, but sometimes we 
+% need to create our own. In such a case, the path to the mechanisms needs to 
+% be 'visible', either because is local to the live script (same folder), or because 
+% the mechanisms folders have been previously added to the path. Most of the parameters 
+% of the mechanisms have been set in their respective files (we encourage the 
+% reader to open and inspect those files). Here we will override only those parameters 
+% that take different values in D1 and D2 SPNs.
 
 % Leak current parameters
 g_l_D1 = 0.096      % mS/cm^2, Leak conductance for D1 SPNs 
@@ -182,10 +182,10 @@ s.connections(4).mechanism_list = {'spn_iGABA'};
 s.connections(4).parameters = {'conn_prob_gaba',conn_prob_gaba_D2toD2,'g_gaba',g_gaba_D2,'tau_gaba',tau_gaba_D2,'tauD_gaba',tauD_D2};
 % Run the simulation
 % Once the model is properly specified, we proceed to run the simulation according 
-% to the simulation parameters and model specification. For this we use the 'vary' 
-% argument in DynaSim, so we can run 3 related simulations in 1 call. Specifically, 
-% we vary the strength of the asynchronous input coming from PFC, as explained 
-% above.
+% to the simulation parameters, population specification, and connections specification. 
+% For this we use the 'vary' argument in DynaSim, so we can run 3 related simulations 
+% in 1 call. Specifically, we vary the strength of the asynchronous input coming 
+% from PFC, as explained above.
 
 % Simulate pfc DC input variation
 pfcInp_DC = [pfcInp_DC_spont, pfcInp_DC_red, pfcInp_DC_ref];
@@ -223,18 +223,18 @@ for iSim = 1:numel(pfcInp_DC)
     tl = tOn + [transient, duration];
     rate = plotRaster(multiplicity,tl,raster);
     prev_title = get(gca,'title');
-    title([pfcInp_DCcond_labels{iSim} ': ' prev_title.String]);
+    title([pfcInp_DCcond_labels{iSim} ': ' prev_title.String])
 
     instFR_D1(iSim,:) = 1e3*NWepanechnikovKernelRegrRaster(data_DCcond(iSim).time,raster{1},pool,kwidth,Ts,flag_interp);
     instFR_D2(iSim,:) = 1e3*NWepanechnikovKernelRegrRaster(data_DCcond(iSim).time,raster{2},pool,kwidth,Ts,flag_interp);
     
     figure
     plot(data_DCcond(iSim).time,instFR_D1(iSim,:),data_DCcond(iSim).time,instFR_D2(iSim,:),'LineWidth',lineWidth)
-    set(gca,'fontSize',fontSize,'LineWidth',lineWidth,'TickDir','out','Box','on');
+    set(gca,'fontSize',fontSize,'LineWidth',lineWidth,'TickDir','out','Box','on')
     xlim(tl)
     xlabel('Time (ms)','fontSize',fontSize)
     ylabel('Instantaneous FR (sp/s)','fontSize',fontSize)
-    title(prev_title.String,'fontSize',fontSize,'FontWeight','Normal');
+    title(prev_title.String,'fontSize',fontSize,'FontWeight','Normal')
     drawnow
 end
 
@@ -243,11 +243,11 @@ end
 for iSim = 1:numel(pfcInp_DC)
     figure
     plot(data_DCcond(iSim).time,data_DCcond(iSim).D1_SPN_V(:,randi(multiplicity(1))),data_DCcond(iSim).time,data_DCcond(iSim).D2_SPN_V(:,randi(multiplicity(2))),'LineWidth',lineWidth)
-    set(gca,'fontSize',fontSize,'LineWidth',lineWidth,'TickDir','out','Box','on');
+    set(gca,'fontSize',fontSize,'LineWidth',lineWidth,'TickDir','out','Box','on')
     xlim(tl)
     xlabel('Time (ms)','fontSize',fontSize)
     ylabel('Voltage (mV)','fontSize',fontSize)
-    title(pfcInp_DCcond_labels{iSim},'fontSize',fontSize,'FontWeight','Normal');
+    title(pfcInp_DCcond_labels{iSim},'fontSize',fontSize,'FontWeight','Normal')
 end
 %% 2. How to change the dynamics of the model
 % Here, we show how to activate the oscillatory component of the external Poisson 
@@ -299,8 +299,6 @@ data_ACcond = dsSimulate(s,'time_limits',tspan,'dt',dt,'solver',solver);
 % two populations (D1 SPNs in blue, and D2 SPNs in red), as well as individual 
 % voltage traces in the synchronous condition:
 
-%% Visualization
-
 % Raster plots (Fig. 3A) and instantaneous firing rates (as in Fig 3B and Fig. 4)
 
 raster{1} = computeRaster(data_ACcond.time,data_ACcond.D1_SPN_V);
@@ -308,18 +306,18 @@ raster{2} = computeRaster(data_ACcond.time,data_ACcond.D2_SPN_V);
 tl = tOn + [transient, duration];
 rate = plotRaster(multiplicity,tl,raster);
 prev_title = get(gca,'title');
-title([pfcInp_ACcond_label ': ' prev_title.String]);
+title([pfcInp_ACcond_label ': ' prev_title.String])
 
 instFR_D1(iSim,:) = 1e3*NWepanechnikovKernelRegrRaster(data_ACcond.time,raster{1},pool,kwidth,Ts,flag_interp);
 instFR_D2(iSim,:) = 1e3*NWepanechnikovKernelRegrRaster(data_ACcond.time,raster{2},pool,kwidth,Ts,flag_interp);
     
 figure
 plot(data_DCcond(iSim).time,instFR_D1(iSim,:),data_DCcond(iSim).time,instFR_D2(iSim,:),'LineWidth',lineWidth)
-set(gca,'fontSize',fontSize,'LineWidth',lineWidth,'TickDir','out','Box','on');
+set(gca,'fontSize',fontSize,'LineWidth',lineWidth,'TickDir','out','Box','on')
 xlim(tl)
 xlabel('Time (ms)','fontSize',fontSize)
 ylabel('Instantaneous FR (sp/s)','fontSize',fontSize)
-title(prev_title.String,'fontSize',fontSize,'FontWeight','Normal');
+title(prev_title.String,'fontSize',fontSize,'FontWeight','Normal')
 drawnow
 
 % Single-cell voltage traces (randomly picked)
