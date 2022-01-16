@@ -29,7 +29,7 @@ function rate = plotRaster(multiplicity,t,rst,xl,display_flag)
                33/255    113/255   181/255
                239/255   59/255    44/255
              ];
-    figure('visible','on')
+    figure % ('visible','on') %% this interferes with the live script spirit
     hold on
     set(gca,'layer','top')
   end
