@@ -1,0 +1,15 @@
+%% Background input %%
+
+% Parameters
+bckg_mean  = 0.334   % nA
+bckg_sigma = 9e-3    % nA
+bckg_tau   = 2e-3    % s
+
+% ODE
+i_bckg' = 1/bckg_tau*( - (i_bckg - bckg_mean) + bckg_sigma*sqrt(bckg_tau/dt)*randn(1,Npop) ) % note that we use sqrt(*1/dt) instead of sqrt(*dt) because the integration method adds *dt
+
+% IC
+i_bckg(0) = bckg_mean*ones(1,Npop)
+
+% Linker
+@i_total += i_bckg

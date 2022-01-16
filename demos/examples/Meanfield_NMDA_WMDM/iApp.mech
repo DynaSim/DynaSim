@@ -1,0 +1,16 @@
+%% Applied input %%
+
+% Parameters
+app_evidence   = 0          % nA
+app_contrast   = 0          % value in [-1,+1]*100 (alike to positive/negative correlations: +1 for full contrast [pref], 0 for no contrast, -1 for full contrast [null])
+app_onset      = 0          % s
+app_offset     = 0          % s
+
+% Function
+i_app(t) = (t >= app_onset)*(t <= app_offset)*app_evidence*(1 + app_contrast/100)*ones(1,Npop)
+
+% Linker
+@i_total += i_app(t)
+
+% Monitor
+monitor i_app
