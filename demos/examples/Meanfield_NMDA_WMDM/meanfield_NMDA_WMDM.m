@@ -46,8 +46,8 @@ addpath(genpath(dynasim_path));
 
 %% Simulation parameters
 
-tstart = 0;        % simulation onset
-duration = 5;      % simulation duration
+tstart = -0.5;        % simulation onset
+duration = 4;      % simulation duration
 dt = 0.1e-3;       % fixed time step, s
 solver = 'euler';  % solver
 compile_flag = 0;  % whether to compile simulation
@@ -92,13 +92,13 @@ s.populations(1).name = 'A';
 s.populations(1).size = multiplicity(1);
 s.populations(1).equations = eqns;
 s.populations(1).mechanism_list = {'fIcurve','iBckg','iApp'};
-s.populations(1).parameters = {'tau_sNMDA', 60e-3, 'gamma_sNMDA', 0.641,'app_evidence', 0.0295, 'app_onset', 1, 'app_offset', 1.5};
+s.populations(1).parameters = {'tau_sNMDA', 60e-3, 'gamma_sNMDA', 0.641,'app_evidence', 0.0295, 'app_onset', 0, 'app_offset', 0.5};
 
 s.populations(2).name = 'B';
 s.populations(2).size = multiplicity(2);
 s.populations(2).equations = eqns;
 s.populations(2).mechanism_list = {'fIcurve','iBckg','iApp'};
-s.populations(2).parameters = {'tau_sNMDA', 60e-3, 'gamma_sNMDA', 0.641, 'app_evidence', 0.0295, 'app_onset', 3, 'app_offset', 3.5};
+s.populations(2).parameters = {'tau_sNMDA', 60e-3, 'gamma_sNMDA', 0.641, 'app_evidence', 0.0295, 'app_onset', 2, 'app_offset', 2.5};
 % Connections specification
 % Here we set the recurrent synaptic connections among the populations and specify 
 % their synaptic mechanism:
@@ -145,17 +145,23 @@ data = dsSimulate(s,'vary',vary,solver_options{:});
 % blue) and B (in red) as in Fig 2A and 2B of the paper:
 
 fontSize = 16;
-lineWidth = 1;
+LineWidth = 1;
 
-figure
+% figure
 for iSim = 1:numel(data)
-  subplot(numel(data),1,iSim)
-  plot(data(iSim).time, data(iSim).A_fIcurve_FR, data(iSim).time, data(iSim).B_fIcurve_FR,'LineWidth',lineWidth)
-  set(gca,'fontSize',fontSize,'LineWidth',lineWidth,'TickDir','out','Box','on')
+  % subplot(numel(data),1,iSim)
+  figure
+  hold on
+  plot(data(iSim).time, data(iSim).A_fIcurve_FR, 'color', [55, 126, 184]/255, 'LineWidth', LineWidth)
+  plot(data(iSim).time, data(iSim).B_fIcurve_FR, 'color', [211,66,66]/255, 'LineWidth', LineWidth)
+  xlim([tstart, tstart + duration])
+  ylim([0 60])
+  set(gca,'fontSize',fontSize,'LineWidth',LineWidth,'Ytick',[0:20:60],'TickDir','out','Box','on')
   xlabel('Time (ms)','fontSize',fontSize)
   ylabel('Rate (sp/s)','fontSize',fontSize)
+  
 end
-%% 2. Two modules
+%% 2. Two interacting modules
 % Here, we show how to create DynaSim specification structure for the two modules 
 % (PPC->PFC) using dsCombineSpecification.
 % Population and connection specification
@@ -185,11 +191,11 @@ s = dsCombineSpecifications(s1,s2);
 % We replicate Fig. 2 E and F in the paper. For this we need to readjust population 
 % parameters and connectivity strengths as follows:
 
-s.populations(1).parameters = {'tau_sNMDA', 60e-3, 'gamma_sNMDA', 0.641, 'app_evidence', 0.0118, 'app_onset', 0.5, 'app_offset', 2};
-s.populations(2).parameters = {'tau_sNMDA', 60e-3, 'gamma_sNMDA', 0.641, 'app_evidence', 0.0118, 'app_onset', 0.5, 'app_offset', 2};
+s.populations(1).parameters = {'tau_sNMDA', 60e-3, 'gamma_sNMDA', 0.641, 'app_evidence', 0.0118, 'app_onset', 0, 'app_offset', 1.5};
+s.populations(2).parameters = {'tau_sNMDA', 60e-3, 'gamma_sNMDA', 0.641, 'app_evidence', 0.0118, 'app_onset', 0, 'app_offset', 1.5};
 
-s.populations(3).parameters = {'tau_sNMDA', 60e-3, 'gamma_sNMDA', 0.641};
-s.populations(4).parameters = {'tau_sNMDA', 60e-3, 'gamma_sNMDA', 0.641};
+s.populations(3).parameters = {'tau_sNMDA', 60e-3, 'gamma_sNMDA', 0.641, 'app_evidence', 0.0118, 'app_onset', 0, 'app_offset', 1.5};
+s.populations(4).parameters = {'tau_sNMDA', 60e-3, 'gamma_sNMDA', 0.641, 'app_evidence', 0.0118, 'app_onset', 0, 'app_offset', 1.5};
 
 Js_PPC = Js(1);
 Jsame_PPC = 0.5*(Jt + Js_PPC);
@@ -234,18 +240,18 @@ Js_PFCtoPPC = 0.04; % nA
 Jsame_PFCtoPPC = 0.5*(Jt_long_range + Js_PFCtoPPC);
 Jdiff_PFCtoPPC = 0.5*(Jt_long_range - Js_PFCtoPPC);
 
-s.connections(9).direction='PFC_A->PPC_A';
-s.connections(9).mechanism_list='iSynap';
-s.connections(9).parameters = {'J', Jsame_PFCtoPPC};
-s.connections(10).direction='PFC_A->PPC_B';
-s.connections(10).mechanism_list='iSynap';
-s.connections(10).parameters = {'J', Jdiff_PFCtoPPC};
-s.connections(11).direction='PFC_B->PPC_A';
-s.connections(11).mechanism_list='iSynap';
-s.connections(11).parameters = {'J', Jdiff_PFCtoPPC};
-s.connections(12).direction='PFC_B->PPC_B';
-s.connections(12).mechanism_list='iSynap';
-s.connections(12).parameters = {'J', Jsame_PFCtoPPC};
+s.connections(13).direction='PFC_A->PPC_A';
+s.connections(13).mechanism_list='iSynap';
+s.connections(13).parameters = {'J', Jsame_PFCtoPPC};
+s.connections(14).direction='PFC_A->PPC_B';
+s.connections(14).mechanism_list='iSynap';
+s.connections(14).parameters = {'J', Jdiff_PFCtoPPC};
+s.connections(15).direction='PFC_B->PPC_A';
+s.connections(15).mechanism_list='iSynap';
+s.connections(15).parameters = {'J', Jdiff_PFCtoPPC};
+s.connections(16).direction='PFC_B->PPC_B';
+s.connections(16).mechanism_list='iSynap';
+s.connections(16).parameters = {'J', Jsame_PFCtoPPC};
 % Run the simulations and visualize the results
 % Finally, we are in the position to specify the new simulation parameters, 
 % run the simulations and visualize the results.
@@ -255,27 +261,125 @@ duration = 2;      % new simulation duration
 solver_options = {'time_limits',[tstart,duration],'solver',solver,'dt',dt,'compile_flag',compile_flag,'sim_log_flag',sim_log_flag,'verbose_flag',verbose_flag};
 
 % nsims simulations with different random seed
-nsims = 1; % 100
+nsims = 10; % 100
 
-figure
+DM_threshold = 25; % sp/s
+inds_thresholds = inf(nsims,2);
+threshold_winners = zeros(nsims,2);
+
+fh1 = figure;
+hold on
+xlim([tstart, tstart + duration])
+ylim([0 DM_threshold])
+set(gca,'fontSize',fontSize,'LineWidth',LineWidth,'XTick',[0 1],'TickDir','out','Box','on')
+xlabel('Time (ms)','fontSize',fontSize)
+ylabel('PPC Rate (sp/s)','fontSize',fontSize)
+
+
+fh2 = figure;
+hold on
+xlim([tstart, tstart + duration])
+ylim([0 DM_threshold])
+set(gca,'fontSize',fontSize,'LineWidth',LineWidth,'XTick',[0 1],'TickDir','out','Box','on')
+xlabel('Time (ms)','fontSize',fontSize)
+ylabel('PFC Rate (sp/s)','fontSize',fontSize)
+
 for iSim = 1:nsims
   data_2modules(iSim) = dsSimulate(s,solver_options{:});
 
-  subplot(211)
-  hold on
-  plot(data_2modules(iSim).time, data_2modules(iSim).PPC_A_fIcurve_FR, data_2modules(iSim).time, data_2modules(iSim).PPC_B_fIcurve_FR,'LineWidth',lineWidth)
-  ylim([0 25])
-  set(gca,'fontSize',fontSize,'LineWidth',lineWidth,'TickDir','out','Box','on')
-  xlabel('Time (ms)','fontSize',fontSize)
-  ylabel('Rate (sp/s)','fontSize',fontSize)
+  x = data_2modules(iSim).time;
+  yA = data_2modules(iSim).PPC_A_fIcurve_FR;
+  ind_thresholdA = find(yA >= DM_threshold, 1);
+  if isempty(ind_thresholdA)
+    ind_thresholdA = inf;
+  end
+  yB = data_2modules(iSim).PPC_B_fIcurve_FR;
+  ind_thresholdB = find(yB >= DM_threshold, 1);
+  if isempty(ind_thresholdB)
+    ind_thresholdB = inf;
+  end
+  if ind_thresholdA <= ind_thresholdB
+    inds_thresholds(iSim, 1) = ind_thresholdA;
+    if isinf(ind_thresholdA)
+      ind_thresholdA = numel(x);
+    end
+    x = x(1:ind_thresholdA);
+    y1 = yA(1:ind_thresholdA);
+    y2 = yB(1:ind_thresholdA);
+  else
+    inds_thresholds(iSim, 1) = ind_thresholdB;
+    threshold_winners(iSim, 1) = 1;
+    x = x(1:ind_thresholdB);
+    y1 = yB(1:ind_thresholdB);
+    y2 = yA(1:ind_thresholdB);
+  end
 
-  subplot(212)
-  hold on
-  plot(data_2modules(iSim).time, data_2modules(iSim).PFC_A_fIcurve_FR, data_2modules(iSim).time, data_2modules(iSim).PFC_B_fIcurve_FR,'LineWidth',lineWidth)
-  ylim([0 25])
-  set(gca,'fontSize',fontSize,'LineWidth',lineWidth,'TickDir','out','Box','on')
-  xlabel('Time (ms)','fontSize',fontSize)
-  ylabel('Rate (sp/s)','fontSize',fontSize)
+  figure(fh1)
+  ph = plot(x, y1, 'color', [55, 126, 184]/255, 'LineWidth', LineWidth);
+  ph.Color = [ph.Color 0.1];
+  ph = plot(x, y2, 'color', [211, 66, 66]/255, 'LineWidth', LineWidth);
+  ph.Color = [ph.Color 0.05];
 
+  x = data_2modules(iSim).time;
+  yA = data_2modules(iSim).PFC_A_fIcurve_FR;
+  ind_thresholdA = find(yA >= DM_threshold, 1);
+  if isempty(ind_thresholdA)
+    ind_thresholdA = inf;
+  end
+  yB = data_2modules(iSim).PFC_B_fIcurve_FR;
+  ind_thresholdB = find(yB >= DM_threshold, 1);
+  if isempty(ind_thresholdB)
+    ind_thresholdB = inf;
+  end
+  if ind_thresholdA <= ind_thresholdB
+    inds_thresholds(iSim, 2) = ind_thresholdA;
+    if isinf(ind_thresholdA)
+      ind_thresholdA = numel(x);
+    end
+    x = x(1:ind_thresholdA);
+    y1 = yA(1:ind_thresholdA);
+    y2 = yB(1:ind_thresholdA);
+  else
+    inds_thresholds(iSim, 2) = ind_thresholdB;
+    threshold_winners(iSim, 2) = 1;
+    x = x(1:ind_thresholdB);
+    y1 = yB(1:ind_thresholdB);
+    y2 = yA(1:ind_thresholdB);
+  end
+
+  figure(fh2)
+  ph = plot(x, y1, 'color', [55, 126, 184]/255, 'LineWidth', LineWidth);
+  ph.Color = [ph.Color 0.05];
+  ph = plot(x, y2, 'color', [211, 66, 66]/255, 'LineWidth', LineWidth);
+  ph.Color = [ph.Color 0.05];
+  
   drawnow
 end
+
+inds_thresholdsPPC = inds_thresholds(:, 1);
+[~, ind_medianPPC] = sort(inds_thresholdsPPC);
+data_medianPPC = data_2modules(ind_medianPPC(round(0.5*nsims)));
+median_ind_threshold = inds_thresholdsPPC(ind_medianPPC(round(0.5*nsims)));
+x = data_medianPPC.time(1:median_ind_threshold);
+if threshold_winners(ind_medianPPC(round(0.5*nsims)), 1) 
+  y = data_medianPPC.PPC_B_fIcurve_FR(1:median_ind_threshold);
+else
+  y = data_medianPPC.PPC_A_fIcurve_FR(1:median_ind_threshold);
+end
+
+figure(fh1)
+plot(x, y, 'k', 'LineWidth', 2*LineWidth)
+
+inds_thresholdsPFC = inds_thresholds(:, 2);
+[~, ind_medianPFC] = sort(inds_thresholdsPFC);
+data_medianPFC = data_2modules(ind_medianPFC(round(0.5*nsims)));
+median_ind_threshold = inds_thresholdsPFC(ind_medianPFC(round(0.5*nsims)));
+x = data_medianPFC.time(1:median_ind_threshold);
+if threshold_winners(ind_medianPFC(round(0.5*nsims)), 2) 
+  y = data_medianPFC.PFC_B_fIcurve_FR(1:median_ind_threshold);
+else
+  y = data_medianPFC.PFC_A_fIcurve_FR(1:median_ind_threshold);
+end
+
+figure(fh2)
+plot(x, y, 'k', 'LineWidth', 2*LineWidth)
