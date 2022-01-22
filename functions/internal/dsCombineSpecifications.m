@@ -21,13 +21,13 @@ function spec=dsCombineSpecifications(spec,varargin)
 % Author: Jason Sherfey, PhD <jssherfey@gmail.com>
 % Copyright (C) 2017 Jason Sherfey, Boston University, USA
 
-spec=dsCheckSpecification(spec);
-
-for i=1:length(varargin)
-  s=dsCheckSpecification(varargin{i});
-  spec.populations=cat(2,spec.populations,s.populations);
-  spec.connections=cat(2,spec.connections,s.connections);
-  spec.mechanisms=cat(2,spec.mechanisms,s.mechanisms);
+for i=1:length(varargin)  
+  s=varargin{i};  
+  spec.populations=cat(2,spec.populations,s.populations);  
+  spec.connections=cat(2,spec.connections,s.connections);  
+  if isfield(spec,'mechanisms')    
+    spec.mechanisms=cat(2,spec.mechanisms,s.mechanisms);  
+  end
 end
 
 % unique-ify population names
