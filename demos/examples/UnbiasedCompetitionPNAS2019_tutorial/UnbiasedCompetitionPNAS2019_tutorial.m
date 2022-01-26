@@ -280,20 +280,20 @@ end
 dutyPercentage_pfcInp = 50;
 thresholdDUTY = cos(pi*dutyPercentage_pfcInp/100);
 % Parameters
-% Here we adjust the parameters of the model to add the proper values for the 
-% synchronous (oscillatory) input from PFC:
+% Here we update the parameters of the specification to add the proper values 
+% for the synchronous (oscillatory) input from PFC:
 
 %% Updating the population parameters from previous ones
 
 update_parameters = {'(D1_SPN,D2_SPN)','f_pfc_poisson',frequency;'(D1_SPN,D2_SPN)','DC_pfc_poisson',pfcInp_DC;'(D1_SPN,D2_SPN)','AC_pfc_poisson',pfcInp_AC';'(D1_SPN,D2_SPN)','thresholddutycycle_pfc_poisson',thresholdDUTY};
-model = dsApplyModifications(data_DCcond(1).model, update_parameters);
+s = dsApplyModifications(s, update_parameters);
 % Run the simulation
 % With the model specified, we proceed to run the simulation.
 
 %% Simulate the model
 
 % Simulate pfc AC input variation
-data_ACcond = dsSimulate(model,'time_limits',tspan,'dt',dt,'solver',solver);
+data_ACcond = dsSimulate(s,'time_limits',tspan,'dt',dt,'solver',solver);
 % Visualize the results
 % Finally, we display the raster plots and instantaneous firing rates of the 
 % two populations (D1 SPNs in blue, and D2 SPNs in red), as well as individual 
