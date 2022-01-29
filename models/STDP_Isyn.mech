@@ -1,0 +1,79 @@
+% Reference: http://www.scholarpedia.org/article/Spike-timing_dependent_plasticity#Online_implementation_of_STDP_models
+
+% AMPA synaptic parameters
+gAmpa = [1]       % mS/cm2, maximal conductance
+EAMPA = [0]         % mV, reversal potential
+tauAMPAr = [0.4]% [0.5]    %rise time constant: 0.5for pry, 0.3for interneuron
+tauAMPAd = [7]% [7]%  %     %decay time constant: 7ms for pyramidal, 2.4for interneuron
+IC = [0]
+IC_noise = [0]
+
+% NMDA Synaptic parameters and auxiliary functions (see Methods in Neuronal Modeling, Chapter 1)
+gNmda = [.1]        % mS/cm2, maximal conductance
+ENMDA = [0]         % mV, reversal potential
+tauNMDAd = 125 % 100 %285;     % 151.5=1/beta=(1/(.0066[1/ms]))       % ms, decay time constant
+tauNMDAr =3.76 %10.6;3.76    % 13.89 = 1/alpha=1/(.072[1/(mM*ms)]) 	% ms, rise time constant
+Tmax = 1            % mM, maximal transmitter concentration
+Vpp = [2]           % mV
+Kp = [5] %5
+NT(X) = Tmax./(1+exp(-(X-Vpp)/Kp)) 		 % sigmoidal neurotransmitter concentration [T] increasing rapidly to Tmax with presynaptic voltage above 0mV (i.e., Vpre spike)
+MgBlock(X) = 1./(1+0.33*exp(-0.06*X))  % .33 sigmoidal Magnesium block for NMDA synapse
+
+% Network Connectivity
+netcon = ones(N_pre,N_post) % default connectivity matrix (all-to-all)
+
+% Presynaptic spike detection
+sAMPA' = -sAMPA./tauAMPAd + 5.*(1+tanh(X_pre/4)).*((1-sAMPA)/tauAMPAr)
+sAMPA(0) = IC+IC_noise.*rand(1,N_pre)
+sNMDA' = NT(X_pre).*(1-sNMDA)/tauNMDAr-sNMDA/tauNMDAd 	% first-order kinetics for two-state (open/closed) scheme. [s]=fraction of receptors in open state
+sNMDA(0) = IC+IC_noise*rand(1,N_pre)
+
+% Synaptic conductance and currents
+g_ampa(sAMPA) = gAmpa.*sAMPA
+g_nmda(sNMDA) = gNmda.*sNMDA
+
+IAMPA(X,W,sAMPA) = g_ampa(sAMPA)*(w.*netcon).*(X-EAMPA)
+INMDA(X,sNMDA)   = g_nmda(sNMDA)*(w_nmda.*netcon).*(X-ENMDA).*MgBlock(X)
+
+% STDP
+taux=10
+tauy=10
+wmax=1
+IC_w=.5
+w_nmda=IC_w
+rx=10
+ry=10
+alpha=.5
+delay_pre=0
+delay_post=0
+
+ax(x)=(1-x).^alpha % incremental increase in presynaptic trace with nearest-neighbor spike-interaction
+ay(y)=(1-y).^alpha % incremental increase in postsynaptic trace
+Ax(w)=(wmax-w)*rx % soft bounds
+Ay(w)=w*ry      % soft bounds
+detection_interval = 1.1*dt
+dx/dt=-x./taux+ax(x).*sum((t-tspike_pre-delay_pre)<detection_interval)
+dy/dt=-y./tauy+ay(y).*sum((t-tspike_post-delay_post)<detection_interval)
+%dw/dt=Ax(w).*x.*sum((t-tspike_post-delay_post)<detection_interval) - Ay(w).*y.*sum((t-tspike_pre-delay_pre)<detection_interval)
+%x(0)=.1; y(0)=.1; w(0)=IC_w+IC_noise.*rand(N_pre,N_post)
+
+dw/dt=Ax(w).*repmat(x,[Npost 1])'.*repmat(sum((t-tspike_post-delay_post)<detection_interval),[Npre 1]) - Ay(w).*repmat(y,[Npre 1]).*repmat(sum((t-tspike_pre-delay_pre)<detection_interval),[Npost 1])'
+x(0)=.1*ones(1,N_pre); 
+y(0)=.1*ones(1,N_post); 
+w(0)=.5*IC_w+IC_noise.*rand(N_pre,N_post)
+
+% Network Connectivity
+netcon = ones(N_pre,N_post) % default connectivity matrix (all-to-all)
+
+monitor ay,Ax,Ay % functions
+@current += -IAMPA(X_post,w,sAMPA)-INMDA(X_post,sNMDA)
+
+
+% synaptic current
+%gSYN=0; ESYN=0; tauD=2; tauR=0.4; delay=0
+%f(X) = 1*(exp(-X/tauD)-exp(-X/tauR)).*(X>0)
+%Isyn(X,w) = gSYN.*sum(f(t-tspike_pre-delay))*(w.*netcon).*(X-ESYN)
+%dx/dt=-x./taux+ax(x).*sum((t-tspike_pre-delay)<dt)
+%dy/dt=-y./tauy+ay(y).*sum((t-tspike_post-delay)<dt)
+%dw/dt=Ax(w).*x.*sum((t-tspike_post-delay)<dt) - Ay(w).*y.*sum((t-tspike_pre-delay)<dt)
+

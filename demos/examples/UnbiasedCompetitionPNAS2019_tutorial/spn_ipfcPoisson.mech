@@ -1,0 +1,42 @@
+% Poisson input
+
+% Poisson parameters
+baseline_pfc_poisson=0              % sp/s, baseline rate
+DC_pfc_poisson=0                    % sp/s, steady component of the signal
+AC_pfc_poisson=0                    % sp/s, oscillatory component of the signal
+f_pfc_poisson=0                     % Hz, modulation frequency of the signal
+fsigma_pfc_poisson=0.03             % normalized sigma for the frequency jittering
+phi_pfc_poisson=0                   % radians, phase at which the signal begins
+connsigma_pfc_poisson=0.001         % slope of the connectivity transition between subpopulations
+slopedutycycle_pfc_poisson=1        % slope of the oscillatory duty cycle
+thresholddutycycle_pfc_poisson=0    % threshold of the oscillatory duty cycle (-1: all up, 0: half-half, +1: all down)
+latency_pfc_poisson=40              % ms, exponential rising time on onset
+onset_pfc_poisson=0                 % ms, start time of signal
+offset_pfc_poisson=0                % ms, stop time of signal
+
+% Synaptic parameters
+g_pfc_poisson=3.5e-4                % mS/cm^2, max synaptic conductance
+E_pfc_poisson=0                     % mV, synaptic reversal potential
+tau_pfc_poisson=2                   % ms, synaptic time constant
+kick_pfc_poisson=1                  % synaptic kick
+
+% Poisson conductance
+% s_pfc_poisson=getPoissonGating(baseline_pfc_poisson,DC_pfc_poisson,AC_pfc_poisson,f_pfc_poisson,phi_pfc_poisson,latency_pfc_poisson,onset_pfc_poisson,offset_pfc_poisson,tau_pfc_poisson,T,Npop)
+
+% s_pfc_poisson=getPoissonSinGating(onset_pfc_poisson,offset_pfc_poisson,latency_pfc_poisson,f_pfc_poisson,fsigma_pfc_poisson,phi_pfc_poisson,connsigma_pfc_poisson,baseline_pfc_poisson,DC_pfc_poisson,AC_pfc_poisson,tau_pfc_poisson,kick_pfc_poisson,T,Npop)
+
+s_pfc_poisson=getPoissonDutyCycleGating(onset_pfc_poisson,offset_pfc_poisson,latency_pfc_poisson,f_pfc_poisson,fsigma_pfc_poisson,phi_pfc_poisson,connsigma_pfc_poisson,baseline_pfc_poisson,DC_pfc_poisson,AC_pfc_poisson,slopedutycycle_pfc_poisson,thresholddutycycle_pfc_poisson,tau_pfc_poisson,kick_pfc_poisson,T,Npop)
+
+% Scaled conductance
+% g_pfc_poisson(t)=g_pfc_poisson.*s_pfc_poisson(k,:)
+g_pfc_poisson(t)=g_pfc_poisson.*s_pfc_poisson(1+floor(t/(0.5*dt)),:) % RK steps of 0.5dt
+
+% Input synaptic current
+I_pfc_poisson(X)=-g_pfc_poisson(t).*(X-E_pfc_poisson)
+
+% monitor
+monitor g_pfc_poisson
+monitor I_pfc_poisson
+
+% linker
+@current += I_pfc_poisson(X)

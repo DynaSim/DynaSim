@@ -279,7 +279,7 @@ for index=1:length(text) % loop over lines of text
       end
     case 'monitor'          % monitor f=(expression or function)
       % split list of monitors
-      lines=strtrim(regexp(line,',','split'));
+      lines=strtrim(regexp(line,',(?![^()]*+\))','split')); % this only considers commas outside parentheses
 
       % combine elements with args for same monitor (e.g., v.spikes(0,5))
       idx=~cellfun(@isempty,regexp(lines,'^\d'));
@@ -301,11 +301,18 @@ for index=1:length(text) % loop over lines of text
         line=lines{l};
 
         % split left and right parts of monitor
+        % lhs=regexp(line,'^[monitor\s]*([\w,@\s\.]+)','tokens','once')
         lhs=regexp(line,'^monitor\s*([\w,@\s\.]+)','tokens','once');
         if isempty(lhs)
-          lhs=regexp(line,'([\w,@\s\.]+)','tokens','once');
+          lhs=regexp(line,'\s*([\w,@\s\.]+)','tokens','once');
         end
         rhs=regexp(line,'=(.+)$','tokens','once');
+        if isempty(rhs) % useful when monitoring functions with linkers
+          lhs_=regexp(line,'^monitor\s*(\w+\([\w,@\s\.]+\))','tokens','once');
+          if isempty(lhs_)
+            lhs_=regexp(line,'\s*(\w+\([\w,@\s\.]+\))','tokens','once');
+          end
+        end
 
         % expand list of monitor names (e.g., monitor iNa.I, iK.I)
         names = strtrim(regexp(lhs{1},',','split'));
@@ -336,6 +343,11 @@ for index=1:length(text) % loop over lines of text
           % determine expression (ie rhs)
           if ~isempty(rhs)
             expression = rhs{1};
+          elseif isempty(rhs) && ~isempty(lhs) && strcmp(lhs{1}(1),'@') % empty monitor RHS with LHS=@linker
+            expression = lhs{1};
+            scopeName = [namespace lhs{1}(2:end)];
+          elseif isempty(rhs) && isfield(model.functions,scopeName) && ~isempty(lhs_) && ~strcmp(lhs_{1},lhs{1}) % empty monitor RHS with LHS=function(@linker)
+            expression = lhs_{1};
           elseif isempty(rhs) && isfield(model.functions,scopeName) % empty monitor RHS with LHS=function
             % set expression if monitoring function referenced by name
             rhs = regexp(model.functions.(scopeName),'@\([a-zA-Z][\w,]*\)\s*(.*)','tokens','once');

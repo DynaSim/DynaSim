@@ -21,7 +21,7 @@ function [pathstr, name, ext] = fileparts2(file)
 %
 % Author: Erik Roberts
 
-if isdir(file) && file(end) ~= filesep
+if isfolder(file) && file(end) ~= filesep
   file(end+1) = filesep;
 end
 

@@ -1,0 +1,24 @@
+% Hodgkin-Huxley inward high-threshold calcium current
+
+% Parameters
+g_cat = .02
+E_cat = 120
+offset_cat = 0
+
+% Rate functions and HH Ca current function
+alpha_m_cat(V) = 1.6./(1+exp(-.072*(V-offset_cat-65)))
+beta_m_cat(V) = 0.02*(V-offset_cat-51.1)./(exp((V-offset_cat-51.1)/5)-1)
+minf_cat(V) = alpha_m_cat(V)./(alpha_m_cat(V)+beta_m_cat(V))
+tau_cat(V) = 1./(alpha_m_cat(V)+beta_m_cat(V))
+i_cat(V,m) = -g_cat*(m_cat.^2).*(V-E_cat)
+
+% ODEs and initial conditions
+m_cat' = (minf_cat(V)-m_cat)./tau_cat(V)
+m_cat(0) = 0
+
+% Linkers
+@current += i_cat(V,m)
+@ica += i_cat(V,m)
+
+% Monitor
+monitor i_cat

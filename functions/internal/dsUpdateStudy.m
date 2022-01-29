@@ -126,7 +126,7 @@ if ~isempty(options.status) && ~isempty(studyinfo.simulations)
       end
       studyinfo.simulations(sim_ind).duration=duration;
       % copy cluster logs to study directory
-      if isdir(studyinfo.simulations(sim_ind).batch_dir)
+      if isfolder(studyinfo.simulations(sim_ind).batch_dir)
         log_dir=fullfile(studyinfo.study_dir,'logs');
         log_file=fullfile(studyinfo.simulations(sim_ind).batch_dir,'pbsout',['sim_job' num2str(options.process_id) '.out']);
         if exist(log_file,'file')
@@ -149,7 +149,7 @@ if ~isempty(options.status) && ~isempty(studyinfo.simulations)
         % usage: displayError(studyinfo.simulations(k).error_log);
       studyinfo.simulations(sim_ind).error_log=lasterr;
       % copy cluster logs to study directory
-      if isdir(studyinfo.simulations(sim_ind).batch_dir)
+      if isfolder(studyinfo.simulations(sim_ind).batch_dir)
         log_dir=fullfile(studyinfo.study_dir,'logs');
         log_file=fullfile(studyinfo.simulations(sim_ind).batch_dir,'pbsout',['sim_job' num2str(options.process_id) '.out']);
         errfile=fullfile(studyinfo.simulations(sim_ind).batch_dir,'pbsout',['sim_job' num2str(options.process_id) '.err']);

@@ -20,7 +20,7 @@ function [data,studyinfo,dataExist] = dsImport(src,varargin)
 %     'time_limits' : [beg,end] ms (see NOTE 2)
 %     'variables'   : cell array of matrix names (see NOTE 2)
 %     'simIDs'      : numeric array of simIDs to import (default: [])
-%     'as_cell'     : guarantee output as cell array and leave mising data as 
+%     'as_cell'     : guarantee output as cell array and leave mising data as
 %                     empty cells as long as 'simIDs' not given {0,1} (default: 0)
 %                     Note: is not implemented for data_file input.
 %
@@ -52,7 +52,7 @@ function [data,studyinfo,dataExist] = dsImport(src,varargin)
 %   extracted using dsSelect with appropriate options.
 %
 %   - NOTE 3: if 'as_cell'==0, missing data will not be left empty in the results
-%   data output. if you need to know which are missing and have them left empty, 
+%   data output. if you need to know which are missing and have them left empty,
 %   use 'as_cell'==1 and check for empty cells.
 %
 % Examples:
@@ -69,7 +69,7 @@ function [data,studyinfo,dataExist] = dsImport(src,varargin)
 % - achieve by calling function dsSelect() at end of this function.
 
 % See also: dsSimulate, dsExportData, dsCheckData, dsSelect
-% 
+%
 % Author: Jason Sherfey, PhD <jssherfey@gmail.com>
 % Copyright (C) 2016 Jason Sherfey, Boston University, USA
 
@@ -103,7 +103,7 @@ end
 
 % check if input is a DynaSim study_dir or path to studyinfo
 if ischar(src)
-  if isdir(src) % assume char dir is study directory
+  if isfolder(src) % assume char dir is study directory
     study_dir = src;
     srcS.study_dir = study_dir;
   elseif strfind(src, 'studyinfo') %#ok<STRIFCND>
@@ -140,19 +140,19 @@ if isstruct(srcS) && isfield(srcS,'study_dir')
   else
     simsInds = true(length(studyinfo.simulations),1); % vector of all logical true
   end
-  
+
   % filter studyinfo.simulations for simIDs
   studyinfo.simulations = studyinfo.simulations(simsInds);
   clear simsInds
 
   % get list of data_files from studyinfo
   data_files = {studyinfo.simulations.data_file}; % filter for only simIDs
-  
+
   dataExist = cellfun(@exist,data_files)==2;
 
   if ~all(dataExist)
     % convert original absolute paths to paths relative to study_dir for missing files
-    
+
     for iFile = find(~dataExist) % only look for missing files
       [~,fname,fext] = fileparts2(data_files{iFile});
       data_files{iFile} = fullfile(srcS.study_dir,'data',[fname fext]);
@@ -160,38 +160,38 @@ if isstruct(srcS) && isfield(srcS,'study_dir')
 
     dataExist = cellfun(@exist,data_files)==2;
   end
-  
+
   if ~all(dataExist)
     % try regexp matching of sim# for files in 'data' folder
-    
+
     filesInDataDir = lscell(fullfile(srcS.study_dir, 'data'));
-    
+
     if ~isempty(filesInDataDir)
       for iFile = find(~dataExist) % only look for missing files
         [~,fname,~] = fileparts2(data_files{iFile});
-        
+
         simIDstr = regexpi(fname, 'sim(\d+)', 'tokens');
         simIDstr = simIDstr{:};
         simIDstr = simIDstr{:};
-        
+
         try
           thisDataFile = filesInDataDir{contains(filesInDataDir, ['sim' simIDstr])};
 
           data_files{iFile} = thisDataFile;
         end
       end
-      
+
       dataExist = cellfun(@exist,data_files)==2;
     end
   end
-  
+
   if ~all(dataExist)
     warnStr = strjoin(data_files(~dataExist), '\t\t\t');
     warning('These data files not found... \n \t\t\t%s \n', warnStr);
   end
 
   num_files = length(data_files);
-  
+
   if options.as_cell
     % get outputCellInd
     if isempty(options.simIDs)
@@ -200,30 +200,30 @@ if isstruct(srcS) && isfield(srcS,'study_dir')
       outputCellInd = 1:num_files;
     end
   end
-  
+
   % filter studyinfo for files that exist
   studyinfo.simulations = studyinfo.simulations(dataExist); % remove missing data
-  
+
   % load each data set recursively
   keyvals = dsOptions2Keyval(options);
 
   iLoadedFile = 0;
   for iFile = 1:num_files
     thisDataExists = dataExist(iFile);
-    
+
     if thisDataExists
       dsVprintf(options, '  loading file (%g/%g): %s\n',iFile,num_files,data_files{iFile});
     else
       dsVprintf(options, '    skipping missing file (%g/%g): %s\n',iFile,num_files,data_files{iFile});
       continue
     end
-    
+
     iLoadedFile = iLoadedFile + 1;
-    
+
     tmp_data = dsImport(data_files{iFile},keyvals{:});
     num_sets_per_file = length(tmp_data);
     modifications = studyinfo.simulations(iLoadedFile).modifications;
-    
+
     if ~isfield(tmp_data,'varied') && ~isempty(modifications)
       % add varied info
       % this is necessary here when loading .csv data lacking metadata
@@ -232,14 +232,14 @@ if isstruct(srcS) && isfield(srcS,'study_dir')
 
       for j = 1:size(modifications,1)
         varied=[modifications{j,1} '_' modifications{j,2}];
-        
+
         for k = 1:num_sets_per_file
           tmp_data(k).varied{end+1} = varied;
           tmp_data(k).(varied) = modifications{j,3};
         end
       end
     end
-    
+
     if options.as_cell
       thisCellInd = outputCellInd(iFile);
     end
@@ -257,7 +257,7 @@ if isstruct(srcS) && isfield(srcS,'study_dir')
         data(thisCellInd) = {tmp_data};
       end
     end
-    
+
     % replace i-th set of data sets by these data sets
     if ~options.as_cell
       data(set_indices(iFile)+(1:num_sets_per_file)) = tmp_data;
@@ -269,11 +269,11 @@ if isstruct(srcS) && isfield(srcS,'study_dir')
       end
     end
   end % iFile = 1:num_files
-  
+
   if ~any(dataExist)
     error('No Data Found to analyze.')
   end
-  
+
   % remove missing entries
     % TODO: fix if missing entries and num_sets_per_file > 1
   if ~all(dataExist)
@@ -291,7 +291,7 @@ if isstruct(srcS) && isfield(srcS,'study_dir')
       data = [];
     end
   end
-  
+
   return;
 else % no studyinfo
   studyinfo = [];
@@ -310,7 +310,7 @@ if iscellstr(src)
   % load each data set recursively
   for iFile = 1:length(data_files)
     tmp_data = dsImport(data_files{iFile},keyvals{:});
-    
+
     % make data var
     if (iFile == 1)
       % preallocate full data matrix based on first data file
@@ -320,7 +320,7 @@ if iscellstr(src)
         data = cell(length(data_files), 1);
       end
     end
-    
+
     % store this data: replace i-th data element by this data set
     if ~options.as_cell
       data(iFile) = tmp_data;
@@ -332,7 +332,7 @@ if iscellstr(src)
       end
     end
   end
-  
+
   return;
 end
 
@@ -360,7 +360,7 @@ if ischar(src) % char path to single data file
         if iscellstr(options.variables)
           try
             var2load = false(size(labels));
-            
+
             for iVar = 1:numel(options.variables)
               % pass var string through RE to use wildcards
               thisSearch = regexp(labels, regexptranslate('wildcard',options.variables{iVar})); % returns cells

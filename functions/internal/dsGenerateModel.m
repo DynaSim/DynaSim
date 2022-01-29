@@ -519,7 +519,8 @@ for i = 1:length(model.linkers)
   inds = find(expressions_in_pop & names_in_namespace & ismember(name_map(:,4),search_types));
 
   % eliminate duplicates (e.g., state_variables replacing OUT and X)
-  [~,ia] = unique_wrapper(name_map(inds,2),'stable');
+  composed_name_map(inds,1) = cellfun(@(x,y) {[x ' ' y]},name_map(inds,2),name_map(inds,4),'UniformOutput',true);
+  [~,ia] = unique_wrapper(composed_name_map(inds),'stable');
   inds = inds(ia);
   all_expression_inds = [all_expression_inds inds'];
   all_expression_targets = cat(2,all_expression_targets,repmat({oldstr},[1 length(inds)]));
@@ -780,7 +781,8 @@ function str = linker_strrep(str,oldstr,newstr,operator)
 
   % check if anything besides a single variable:
   if isempty(regexp(newstr,'[^a-z_A-Z\d]+','once'))
-    str=dsStrrep(str,oldstr,newstr);
+    rep=['((' newstr ')' operator oldstr ')'];
+    str=dsStrrep(str,oldstr,rep);
   else
     % otherwise do substitution with operator and parenthesis
     pat=['([^\w]+)' oldstr '([^\w]+)']; % in the middle

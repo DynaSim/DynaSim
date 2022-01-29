@@ -1,0 +1,16 @@
+%% fIcurve %%
+
+% Parameters
+fIcurve_a = 270    % Hz/nA
+fIcurve_b = 108    % Hz
+fIcurve_c = 0.154  % s
+
+% Function
+fIcurve(input) = (fIcurve_a*input - fIcurve_b)./(1 - exp( -fIcurve_c*(fIcurve_a*input - fIcurve_b)))
+
+% Linkers
+@FR += fIcurve(@i_total)
+
+% Monitors
+monitor @FR, @i_total
+

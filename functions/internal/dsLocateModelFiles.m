@@ -12,12 +12,12 @@ function [paths,files] = dsLocateModelFiles(input)
 %   - files: full names of files containing mechanism sub-models
 %
 % See also (used by): dsParseModelEquations, dsCheckHostPaths, dsCreateBatch
-% 
+%
 % Author: Jason Sherfey, PhD <jssherfey@gmail.com>
 % Copyright (C) 2016 Jason Sherfey, Boston University, USA
 
 % First looks for absolute path , then in current dir, then ds models dir,
-% then in ds models sub dirs, then in full matlab path. First looks for string, 
+% then in ds models sub dirs, then in full matlab path. First looks for string,
 % then extensions .eqns, .mech, .txt, and .m (in that order).
 
 % extract list of mechanisms from input
@@ -30,20 +30,20 @@ elseif isstruct(input)
   if isfield(input,'specification')
     % extract specification from DynaSim model structure
     input=input.specification;
-  elseif isfield(input,'model') && isfield(input.model,'specification') 
+  elseif isfield(input,'model') && isfield(input.model,'specification')
     % extract specification from DynaSim data structure
     input=input.model.specification;
-  elseif isfield(input,'base_model') && isfield(input.base_model,'specification') 
+  elseif isfield(input,'base_model') && isfield(input.base_model,'specification')
     % extract specification from DynaSim studyinfo structure
     input=input.base_model.specification;
   else
     % this is probably a specification structure
   end
-  
+
   mechanism_list={};
   if isfield(input,'populations') && isstruct(input.populations)
     % extract mechanism_list from populations in DynaSim specification structure
-    
+
     m={};
     for i=1:length(input.populations)
       for j=1:length(input.populations(i).mechanism_list)
@@ -55,7 +55,7 @@ elseif isstruct(input)
         end
       end
     end
-    
+
     if ~isempty(m)
       if iscell(m{1})
         m=unique_wrapper([m{:}],'stable');
@@ -64,7 +64,7 @@ elseif isstruct(input)
       end
       mechanism_list=cat(2,mechanism_list,m);
     end
-    
+
     % add equations to mechanism_list in case it contains a .eqns file
     for i=1:length(input.populations)
       if ~isempty(input.populations(i).equations)
@@ -72,7 +72,7 @@ elseif isstruct(input)
       end
     end
   end
-  
+
   if isfield(input,'connections') && isstruct(input.connections)
     % extract mechanism_list connections in DynaSim specification structure
     m={};
@@ -94,14 +94,14 @@ elseif isstruct(input)
         m=unique_wrapper(m,'stable');
       end
       mechanism_list=cat(2,mechanism_list,m);
-    end        
+    end
   end
-  
+
   % remove mechanisms present in specification structure
   if ~isempty(mechanism_list) && isfield(input,'mechanisms') && isfield(input.mechanisms,'name')
     mech_names=regexp(mechanism_list,'^[^@]+','match');
     mechanism_list=mechanism_list(~ismember([mech_names{:}],{input.mechanisms.name}));
-  end    
+  end
 end
 
 % remove @ pointers from mechanism identifiers
@@ -149,7 +149,7 @@ if iscellstr(mechanism_list)
         % prepend current search path to mech string
         mech = fullfile(search_paths{s}, mechanism_list{f});
       end
-      
+
       % see if any extension matches current mech string
       if exist(mech,'file')
         file = mech;
@@ -164,20 +164,20 @@ if iscellstr(mechanism_list)
       else
         file = '';
       end
-      
+
       % use 'which' to get full filename of file in Matlab path
       file = which(file);
-      
+
       if s == num_paths && isempty(file)
         % looked through all paths at this point
         % if still empty, then wrong name or not on path
-        warning('Could not find mechanism ''%s'' on path (with standard extensions).', mech);
+        error('Could not find mechanism: ''%s''. Please revise your code for a potential typo in the mechanism name and assure that the mechanism file is on path.', mech);
       end
-      
+
       if ~isempty(file)
         % add mech filepath to files cell array
         files{end+1}=file;
-        
+
         % stop searching through paths for mech
         break;
       end

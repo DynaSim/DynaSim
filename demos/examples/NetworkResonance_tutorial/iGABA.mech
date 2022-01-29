@@ -1,0 +1,24 @@
+% iGABA: synaptic current, fast threshold modulation with inhibitory GABA-ergic parameters (GABA-A model)
+% parameters
+gGABA = [0.25]		% mS/cm2, maximal conductance
+EGABA = [-75]		% mV, reversal potential
+tauGABA = [5]		% ms, decay time constant
+tauGABAr = [0.4]	% ms, rise time constant
+IC = [0]
+IC_noise = [0]
+
+% fixed variables
+netcon = ones(N_pre,N_post) % default connectivity matrix (all-to-all)
+
+% functions
+IGABA(X,s) = (gGABA.*(s*netcon).*(X-EGABA))
+ 
+% ODEs and ICs
+s' = -s./tauGABA + ((1-s)/tauGABAr).*(1+tanh(X_pre/10))
+s(0) = IC+IC_noise.*rand(1,N_pre)
+
+%monitor functions % always record the synaptic current
+ 
+% linkers
+@current += -IGABA(X_post,s)
+

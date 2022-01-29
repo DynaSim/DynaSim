@@ -1,0 +1,14 @@
+%% Synaptic input %%
+
+% Parameters
+J = 0 % nA
+netcon = ones(N_pre,N_post)
+
+% Function
+i_synaptic(sNMDA_pre) = J*(sNMDA_pre*netcon)
+
+% Linker
+@i_total += i_synaptic(sNMDA_pre)
+
+% Monitor
+monitor i_synaptic

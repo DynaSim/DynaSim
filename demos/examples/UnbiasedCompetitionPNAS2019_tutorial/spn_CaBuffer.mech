@@ -1,0 +1,16 @@
+% Ca Buffer
+
+% Parameters
+inf_caConcentration = 0   % mM, equilibrium Ca2+ concentration
+tau_caConcentration = 50  % 100 % ms, decay time constant
+caf_caConcentration = 18  % 20 % 24 % calcium accumulation factor
+
+% NOTE: small tau_caConcentration -> caConcentration follows i_cat with
+% minimal calcium accumulation
+
+% ODE and Initial condition
+caConcentration' = -caConcentration/tau_caConcentration + caf_caConcentration.*(@ica)
+caConcentration(0) = 0
+
+% Linkers
+@cab += caConcentration
