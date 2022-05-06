@@ -27,7 +27,7 @@ m = DynaLearn(); % ~ 1sec
 m = m.dlLoad('models/dlDemoPredictivePFC'); % ~ 10sec
 m.dlSimulate(); % ~ 40sec
 
- %% Continue simulation: Vary example
+ %% Input (trial) parameter initialization
 
 clc;
 g_poisson = 5.7e-4;
@@ -141,8 +141,7 @@ targetParams1 = [{'MSE', 1, 6, 0.25}; {'MSE', 2, 3, 0.25}; {'MSE', 3, 3, 0.25}; 
 targetParams2 = [{'MSE', 2, 6, 0.25}; {'MSE', 1, 3, 0.25}; {'MSE', 3, 3, 0.25}; {'Compare', [2, 1, 3], 0, 0.15}; {'Diff', [1, 3], 0, 0.05}]; % B
 targetParams3 = [{'MSE', 3, 6, 0.25}; {'MSE', 2, 3, 0.25}; {'MSE', 1, 3, 0.25}; {'Compare', [3, 1, 2], 0, 0.15}; {'Diff', [1, 2], 0, 0.05}]; % C
 
-%% Trial: training script 
-% TODO ->>> (similar inputs-outputs problem)
+%% Trial: training script
 
 clc;
 dlInputParameters = {vary1, vary2, vary3};
