@@ -34,7 +34,7 @@ classdef DynaLearn < matlab.mixin.SetGet
         dlLastLambda = 1e-3;
         
         dlDeltaRatio = 1;
-        dlLastDelta = 1;
+        dlLastDelta = -1;
         dlLambdaCap = 1e-2;
         
     end
@@ -468,6 +468,9 @@ classdef DynaLearn < matlab.mixin.SetGet
             out = obj.dlLastLambda * obj.dlDeltaRatio;
             if ~ (out < 1e-2 && out > 0)
                 
+                obj.dlDeltaRatio = 1;
+                obj.dlLastDelta = -1;
+                
                 fprintf("--->Warning! Lambda (%f) exceeded the limit (%f). Consider divergence problems.\n", out, obj.dlLambdaCap);
                 fprintf("--->To avoid problems, previous lambda will be used for the next update.\n");
                 out = obj.dlLastLambda; 
@@ -654,7 +657,7 @@ classdef DynaLearn < matlab.mixin.SetGet
                 
             for i = 1:dlEpochs
                 
-                fprintf("\tEpoch no. %d\n", i);
+                fprintf("\tEpoch no. %d (Total iterations for this model : %d)\n", i, obj.dlTrialNumber);
                 for j = 1:dlBatchs
                 
                     fprintf("\t\tBatch no. %d\t", j);

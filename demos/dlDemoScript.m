@@ -169,9 +169,10 @@ dlTrainOptions('dlAdaptiveLambda') = 1; % Adaptive lambda parameter; recommended
 % dlTrainOptions() = '';
 % dlTrainOptions() = '';
 
-% m.dlResetTraining(); % Reset logs and optimal states
+dlTrainOptions('dlLambdaCap') = 1e-1; % Only if Adaptive lambda is active, recommended to set a upper-bound (UB) or ignore to use default UB (0.01).
+
+% m.dlResetTraining(); % Reset logs and optimal state error
 m.dlTrain(dlInputParameters, dlOutputParameters, dlTargetParameters, dlTrainOptions);
-% m.dlLoadOptimal();  % Load the current optimal state (if exists)
 
 %% Run a simulation (without training)
 
