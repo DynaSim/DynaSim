@@ -16,7 +16,7 @@ s = dlDemoPredictivePFC(Ne, Ni, Nio, noise_rate);
 
 %% Create DynaLearn Class (First time)
 
-m = DynaLearn(s, 'models/dlDemoPredictivePFC'); % ~ 120min
+% m = DynaLearn(s, 'models/dlPredictivePFCDemo'); % ~ 120min
 m.dlSimulate(); % ~ 40sec
 m.dlSave(); % < 1sec
 
@@ -25,7 +25,7 @@ m.dlSave(); % < 1sec
 clc;
 m = DynaLearn(); % ~ 1sec
 m = m.dlLoad('models/dlPredictivePFCDemo'); % ~ 10sec
-m.dlSimulate(); % ~ 40sec
+% m.dlSimulate(); % ~ 40sec
 
  %% Continue simulation: Vary example
 

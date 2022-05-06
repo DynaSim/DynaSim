@@ -67,7 +67,7 @@ classdef DynaLearn < matlab.mixin.SetGet
 %                 set(obj, 'mex_func_name', mexn_);
                 
                 obj.dlInit(obj.dlStudyDir);
-                set(obj, 'dlConnections', obj.dlGetConnectionsList());
+%                 set(obj, 'dlConnections', obj.dlGetConnectionsList());
                     
             else
                 disp('Invalid use of DynaNet; pass a DynaSim struct and then address of parameters dataset file.');
