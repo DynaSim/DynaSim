@@ -48,10 +48,10 @@ function [S,dynrate,spikeevents] = getPoissonDutyCycleGating(tOn,tOff,latency_,f
       % freq modulation
       numFreqs = 1000;
       step = 2*pi/numFreqs;
-      Ph = load('sinPhases'); % from test.m in this directory
-      % phase_ic = 0:step:2*pi*(1-1/numFreqs);
-      % shuffle = randperm(numFreqs);
-      % Ph.phase_ic = phase_ic(shuffle);
+      %Ph = load('sinPhases'); % from test.m in this directory
+      phase_ic = 0:step:2*pi*(1-1/numFreqs);
+      shuffle = randperm(numFreqs);
+      Ph.phase_ic = phase_ic(shuffle);
       % save('sinPhases','Ph')
       freqSigma = normFreqSigma(i)*freq(i);
       freqSet = -freq(i)/5:2*freq(i)/5/(numFreqs-1):freq(i)/5;
