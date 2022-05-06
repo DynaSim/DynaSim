@@ -16,3 +16,6 @@ docs/offline_function_reference/
 docs/_online_docs/
 testCoverage/
 solve/
+
+dlTempFunc.m
+dlTempFuncParamsChanger.m
