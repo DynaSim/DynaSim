@@ -35,6 +35,7 @@ classdef DynaLearn < matlab.mixin.SetGet
         
         dlDeltaRatio = 1;
         dlLastDelta = 1;
+        dlLambdaCap = 1e-2;
         
     end
     
@@ -465,6 +466,13 @@ classdef DynaLearn < matlab.mixin.SetGet
         function out = dlAdaptiveLambda(obj)
             
             out = obj.dlLastLambda * obj.dlDeltaRatio;
+            if ~ (out < 1e-2 && out > 0)
+                
+                fprintf("--->Warning! Lambda (%f) exceeded the limit (%f). Consider divergence problems.\n", out, obj.dlLambdaCap);
+                fprintf("--->To avoid problems, previous lambda will be used for the next update.\n");
+                out = obj.dlLastLambda; 
+                
+            end
             
         end
         
@@ -631,7 +639,11 @@ classdef DynaLearn < matlab.mixin.SetGet
             if dlAdaptiveLambda == 1
                
                 fprintf("->Adaptive lambda is active. Lambda (learning rate) will be changed based on volatility of model error.\n");
-                
+                try
+                    obj.dlLambdaCap = dlTrainOptions('dlLambdaCap');
+                catch
+                    fprintf("-->Reminder: you have choosen adaptive lambda but forgot to determine a lambda cap. default dlLambdaCap = %f\n", obj.dlLambdaCap);
+                end
             end
             
             if dlOutputLogFlag == 1
