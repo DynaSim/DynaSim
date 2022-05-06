@@ -150,26 +150,24 @@ dlTargetParameters = {targetParams1, targetParams2, targetParams3};
 dlOutputParameters = outputParams;
 
 dlTrainOptions = containers.Map();
-dlTrainOptions('dlEpochs') = 4;
+dlTrainOptions('dlEpochs') = 2;
 dlTrainOptions('dlBatchs') = 3;
-dlTrainOptions('dlLambda') = 0.0007;
+dlTrainOptions('dlLambda') = 0.001;
 
 dlTrainOptions('dlCheckpoint') = 'true';
 dlTrainOptions('dlCheckpointCoefficient') = 2; % e.g sqrt(2), sqrt(3), 2, sqrt(5) ... 
 dlTrainOptions('dlUpdateMode') = 'batch';
-dlTrainOptions('dlLearningRule') = 'DeltaRule'; % BioDeltaRule, RWDelta, ...
+dlTrainOptions('dlLearningRule') = 'BioDeltaRule'; % DeltaRule, BioDeltaRule, RWDelta, ...
 
 dlTrainOptions('dlSimulationFlag') = 1; % Manully turning simulation, on or off (on is default and recommended)
 dlTrainOptions('dlOutputLogFlag') = 1; % Autosaving trial outputs, on or off (off is default and recommended) % TODO Output/Random/SameValueProblem
 dlTrainOptions('dlOfflineOutputGenerator') = 0; % Just for debugging, generates random outputs based on last outputs. 
 dlTrainOptions('dlAdaptiveLambda') = 1; % Adaptive lambda parameter; recommended for long simulations.
 
+dlTrainOptions('dlLambdaCap') = 3e-2; % Only if Adaptive lambda is active, recommended to set a upper-bound (UB) or ignore to use default UB (0.01).
 % dlTrainOptions('dlMetaLearningRule') = 'TODO'; %%% 
 % dlTrainOptions() = '';
 % dlTrainOptions() = '';
-% dlTrainOptions() = '';
-
-dlTrainOptions('dlLambdaCap') = 1e-1; % Only if Adaptive lambda is active, recommended to set a upper-bound (UB) or ignore to use default UB (0.01).
 
 % m.dlResetTraining(); % Reset logs and optimal state error
 m.dlTrain(dlInputParameters, dlOutputParameters, dlTargetParameters, dlTrainOptions);

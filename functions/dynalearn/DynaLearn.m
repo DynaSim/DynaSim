@@ -466,7 +466,7 @@ classdef DynaLearn < matlab.mixin.SetGet
         function out = dlAdaptiveLambda(obj)
             
             out = obj.dlLastLambda * obj.dlDeltaRatio;
-            if ~ (out < 1e-2 && out > 0)
+            if ~ (out < obj.dlLambdaCap && out > 0)
                 
                 obj.dlDeltaRatio = 1;
                 obj.dlLastDelta = -1;
@@ -778,6 +778,10 @@ classdef DynaLearn < matlab.mixin.SetGet
 
                     rng('shuffle');
                     w = val{i, 1};
+                    disp(w);
+                    disp(dlLambda);
+                    disp(error);
+                    disp(1-w);
                     delta = (1-w).*(randn(size(w)))*error*dlLambda;
                     wn = w + delta;
                     
@@ -795,7 +799,6 @@ classdef DynaLearn < matlab.mixin.SetGet
             else
                 
                 disp("TODO train step and learning 'else' part");
-                disp(error);
                 
             end
             
@@ -805,7 +808,7 @@ classdef DynaLearn < matlab.mixin.SetGet
                     
             else
                 
-                obj.dlDeltaRatio = (obj.dlLastDelta / deltaL)^0.5;
+                obj.dlDeltaRatio = min((obj.dlLastDelta / deltaL)^0.5, 2);
                 obj.dlLastDelta = deltaL;
                 
             end
@@ -828,6 +831,14 @@ classdef DynaLearn < matlab.mixin.SetGet
                     c = [c; cl(i)];
                 end
             end
+            
+        end
+        
+        function dlPlotErrors(obj)
+           
+            figure('position', [0, 0, 1400, 700]);
+            plot(obj.dlErrorsLog);grid("on");
+            title("Errors in trials");
             
         end
         
