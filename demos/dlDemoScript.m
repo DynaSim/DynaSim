@@ -12,7 +12,7 @@ clc;
 Ne = 20;Ni = 4;Nio = 10;noise_rate = 13;
 % s = NeoCortex(Ne, Ni, Nio, noise_rate);
 % s = dlDemoPING(5, 1, 2, noise_rate); % 14 Mins on mex generator
-% s = dlDemoPredictivePFC(Ne, Ni, Nio, noise_rate);
+s = dlDemoPredictivePFC(Ne, Ni, Nio, noise_rate);
 
 %% Create DynaLearn Class (First time)
 
@@ -24,10 +24,10 @@ m.dlSave(); % < 1sec
 
 clc;
 m = DynaLearn(); % ~ 1sec
-m = m.dlLoad('models/dlDemoPredictivePFC'); % ~ 10sec
+m = m.dlLoad('models/dlPredictivePFCDemo'); % ~ 10sec
 m.dlSimulate(); % ~ 40sec
 
- %% Input (trial) parameter initialization
+ %% Continue simulation: Vary example
 
 clc;
 g_poisson = 5.7e-4;
@@ -141,7 +141,8 @@ targetParams1 = [{'MSE', 1, 6, 0.25}; {'MSE', 2, 3, 0.25}; {'MSE', 3, 3, 0.25}; 
 targetParams2 = [{'MSE', 2, 6, 0.25}; {'MSE', 1, 3, 0.25}; {'MSE', 3, 3, 0.25}; {'Compare', [2, 1, 3], 0, 0.15}; {'Diff', [1, 3], 0, 0.05}]; % B
 targetParams3 = [{'MSE', 3, 6, 0.25}; {'MSE', 2, 3, 0.25}; {'MSE', 1, 3, 0.25}; {'Compare', [3, 1, 2], 0, 0.15}; {'Diff', [1, 2], 0, 0.05}]; % C
 
-%% Trial: training script
+%% Trial: training script 
+% TODO ->>> (similar inputs-outputs problem)
 
 clc;
 dlInputParameters = {vary1, vary2, vary3};
@@ -164,11 +165,13 @@ dlTrainOptions('dlOfflineOutputGenerator') = 0; % Just for debugging, generates 
 dlTrainOptions('dlAdaptiveLambda') = 1; % Adaptive lambda parameter; recommended for long simulations.
 
 % dlTrainOptions('dlMetaLearningRule') = 'TODO'; %%% 
+% dlTrainOptions() = '';
+% dlTrainOptions() = '';
+% dlTrainOptions() = '';
+
 % m.dlResetTraining(); % Reset logs and optimal states
 m.dlTrain(dlInputParameters, dlOutputParameters, dlTargetParameters, dlTrainOptions);
 % m.dlLoadOptimal();  % Load the current optimal state (if exists)
-
-% Pull Dev- / Pull RQ.
 
 %% Run a simulation (without training)
 
@@ -179,4 +182,4 @@ m.dlPlotAllPotentials('lfp');
 m.dlRunSimulation(dlInputParameters{3}, dlOutputParameters);
 m.dlPlotAllPotentials('lfp');
 
-%%
+%% End of Demo

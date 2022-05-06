@@ -244,50 +244,52 @@ classdef DynaLearn < matlab.mixin.SetGet
             dlPotentials = obj.dlOutputs(dlPotentialIndices);
             dlLabels = obj.dlVariables(dlPotentialIndices);
             
-            figure();
-            patch([3 7 7 3], [-30 -30 +30 +30], [0.5 0.9 0.9]);hold("on");
+
             t = dlPotentials{1, 1};
             n = size(dlPotentials, 2);
+            m = ceil(n/6);
             
-            if strcmpi(mode, 'ifr')
-                
-                for i = 2:n
+            for k = 1:m
+                figure('Position', [0, 0, 1400, 700]);
+    %             patch([3 7 7 3], [-30 -30 +30 +30], [0.5 0.9 0.9]);hold("on");
 
-                    x = dlPotentials{1, i};
-                    raster = computeRaster(t, x);
-                    subplot(ceil(n/2), 2, i-1);
+                if strcmpi(mode, 'ifr')
 
-                    if size(raster, 1) > 0
+                    for i = 2:n
 
-                        pool = 1:size(x, 2);
-                        O1 = 5e2 * NWepanechnikovKernelRegrRaster(t, raster, pool, 25, 1, 1);
-                        plot(t, O1, 'o');
+                        x = dlPotentials{1, i};
+                        raster = computeRaster(t, x);
+                        subplot(3, 2, mod(i-2, 6)+1);
+
+                        if size(raster, 1) > 0
+
+                            pool = 1:size(x, 2);
+                            O1 = 5e2 * NWepanechnikovKernelRegrRaster(t, raster, pool, 25, 1, 1);
+                            plot(t, O1, 'o');grid("on");
+
+                        end
+
+                        ylabel(dlLabels(i));
 
                     end
 
-                    ylabel(dlLabels(i));
+                    title(mode + "(s)");xlabel("time (ms)");
+
+                else
+
+                    for i = 2:n
+
+                        x = dlPotentials{1, i};
+                        subplot(3, 2, mod(i-2, 6)+1);
+                        plot(t, x);grid("on");
+                        ylabel(dlLabels(i));
+
+                    end
+
+                    grid("on");title(mode + "(s)");xlabel("time (ms)");
 
                 end
-                
-                grid("on");title("iFR(s)");xlabel("time (ms)");
-                fprintf("Done.\n");
-                
-            else
-                
-                for i = 2:n
-
-                    x = dlPotentials{1, i};
-                    subplot(ceil(n/2), 2, i-1);
-                    plot(t, x);
-                    ylabel(dlLabels(i));
-
-                end
-                
-                grid("on");title("Voltage(s)");xlabel("time (ms)");
-                fprintf("Done.\n");
-                
             end
-
         end
 
         
