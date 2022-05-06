@@ -250,16 +250,16 @@ classdef DynaLearn < matlab.mixin.SetGet
             m = ceil(n/6);
             
             for k = 1:m
-                figure('Position', [0, 0, 1400, 700]);
-    %             patch([3 7 7 3], [-30 -30 +30 +30], [0.5 0.9 0.9]);hold("on");
-
+                
+                figure('Position', [0, 0, 1400, 700*(min(k*6, n-1) - (k-1)*6)/(6)]);
+                
                 if strcmpi(mode, 'ifr')
 
-                    for i = 2:n
+                    for i = (k-1)*6+1:min((k*6), n-1)
 
-                        x = dlPotentials{1, i};
+                        x = dlPotentials{1, i+1};
                         raster = computeRaster(t, x);
-                        subplot(3, 2, mod(i-2, 6)+1);
+                        subplot((min(k*6, n-1) - (k-1)*6), 1, mod(i-1, (min(k*6, n-1) - (k-1)*6))+1);
 
                         if size(raster, 1) > 0
 
@@ -269,25 +269,29 @@ classdef DynaLearn < matlab.mixin.SetGet
 
                         end
 
-                        ylabel(dlLabels(i));
+                        ylabel(dlLabels(i+1));
 
                     end
 
-                    title(mode + "(s)");xlabel("time (ms)");
+                    xlabel(mode + " in time (ms)");
 
-                else
+                elseif strcmpi(mode, 'lfp')
 
-                    for i = 2:n
+                    for i = (k-1)*6+1:min((k*6), n-1)
 
-                        x = dlPotentials{1, i};
-                        subplot(3, 2, mod(i-2, 6)+1);
+                        x = dlPotentials{1, i+1};
+                        subplot((min(k*6, n-1) - (k-1)*6), 1, mod(i-1, (min(k*6, n-1) - (k-1)*6))+1);
                         plot(t, x);grid("on");
-                        ylabel(dlLabels(i));
+                        ylabel(dlLabels(i+1));
 
                     end
 
-                    grid("on");title(mode + "(s)");xlabel("time (ms)");
-
+                    xlabel(mode + " in time (ms)");
+                    
+                else
+                    
+                    fprintf("--->Mode %s is not recognised. Try 'lfp' or other available options.\n", mode)
+                    
                 end
             end
         end

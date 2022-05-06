@@ -255,7 +255,7 @@ classdef DynaLearn < matlab.mixin.SetGet
 
                 if strcmpi(mode, 'ifr')
 
-                    for i = 2:n
+                    for i = (m-1)*6:(m*6)-1
 
                         x = dlPotentials{1, i};
                         raster = computeRaster(t, x);
@@ -265,7 +265,7 @@ classdef DynaLearn < matlab.mixin.SetGet
 
                             pool = 1:size(x, 2);
                             O1 = 5e2 * NWepanechnikovKernelRegrRaster(t, raster, pool, 25, 1, 1);
-                            plot(t, O1, 'o');
+                            plot(t, O1, 'o');grid("on");
 
                         end
 
@@ -281,7 +281,7 @@ classdef DynaLearn < matlab.mixin.SetGet
 
                         x = dlPotentials{1, i};
                         subplot(3, 2, mod(i-2, 6)+1);
-                        plot(t, x);
+                        plot(t, x);grid("on");
                         ylabel(dlLabels(i));
 
                     end
