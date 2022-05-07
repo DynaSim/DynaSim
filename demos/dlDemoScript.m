@@ -159,12 +159,12 @@ dlTargetParameters = {targetParams1, targetParams2, targetParams3};
 dlOutputParameters = outputParams;
 
 dlTrainOptions = containers.Map();
-dlTrainOptions('dlEpochs') = 30;
+dlTrainOptions('dlEpochs') = 3;
 dlTrainOptions('dlBatchs') = 3;
-dlTrainOptions('dlLambda') = 0.001;
+dlTrainOptions('dlLambda') = 0.000001;
 
 dlTrainOptions('dlCheckpoint') = 'true';
-dlTrainOptions('dlCheckpointCoefficient') = 2; % e.g sqrt(2), sqrt(3), 2, sqrt(5) ... 
+dlTrainOptions('dlCheckpointCoefficient') = 1.74; % e.g sqrt(2), sqrt(3), 2, sqrt(5) ... 
 dlTrainOptions('dlUpdateMode') = 'batch';
 dlTrainOptions('dlLearningRule') = 'BioDeltaRule'; % DeltaRule, BioDeltaRule, RWDelta, ...
 
@@ -174,11 +174,10 @@ dlTrainOptions('dlOfflineOutputGenerator') = 0; % Just for debugging, generates 
 dlTrainOptions('dlAdaptiveLambda') = 1; % Adaptive lambda parameter; recommended for long simulations.
 
 dlTrainOptions('dlLambdaCap') = 3e-2; % Only if Adaptive lambda is active, recommended to set a upper-bound (UB) or ignore to use default UB (0.01).
-% dlTrainOptions('dlMetaLearningRule') = 'TODO'; %%% 
-% dlTrainOptions() = '';
-% dlTrainOptions() = '';
+% dlTrainOptions('dlMetaLearningRule') = 'true'; % TODOs!
 
-% m.dlResetTraining(); % Reset logs and optimal state error
+% m.dlResetTraining(); % Reset logs and optimal state error (not the optimal state file)
+m.dlLoadOptimal();  % Load the current optimal state (if exists)
 m.dlTrain(dlInputParameters, dlOutputParameters, dlTargetParameters, dlTrainOptions);
 
 %% Run a simulation (without training)
@@ -190,4 +189,8 @@ m.dlPlotAllPotentials('lfp');
 m.dlRunSimulation(dlInputParameters{3}, dlOutputParameters);
 m.dlPlotAllPotentials('lfp');
 
-%% End of Demo
+%% Errors log plot
+
+m.dlPlotErrors();
+
+%% End of Demo (7th of May 2022)

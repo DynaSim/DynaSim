@@ -867,7 +867,7 @@ classdef DynaLearn < matlab.mixin.SetGet
             try
                 obj.dlLoadCheckPoint('/Optimal');
             catch
-                fprintf("--->No oprimal file exists. first run a training session with an active checkpoint flag.\n");
+                fprintf("--->No oprimal file exists. first run a training session with an active checkpoint flag to save an optimal checkpoint.\n");
             end
             
         end
