@@ -778,10 +778,6 @@ classdef DynaLearn < matlab.mixin.SetGet
 
                     rng('shuffle');
                     w = val{i, 1};
-                    disp(w);
-                    disp(dlLambda);
-                    disp(error);
-                    disp(1-w);
                     delta = (1-w).*(randn(size(w)))*error*dlLambda;
                     wn = w + delta;
                     
