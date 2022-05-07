@@ -159,7 +159,7 @@ dlTargetParameters = {targetParams1, targetParams2, targetParams3};
 dlOutputParameters = outputParams;
 
 dlTrainOptions = containers.Map();
-dlTrainOptions('dlEpochs') = 1;
+dlTrainOptions('dlEpochs') = 5;
 dlTrainOptions('dlBatchs') = 3;
 dlTrainOptions('dlLambda') = 0.001;
 
