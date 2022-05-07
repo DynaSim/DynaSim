@@ -26,8 +26,8 @@ m.dlSave(); % < 1sec
 clc;
 % m = DynaLearn(); % ~ 1sec
 % m = m.dlLoad('models/dlDemoPING'); % ~ 10sec
-% m = m.dlLoad('models/dlDemoPredictivePFC'); % ~ 10sec
-m.dlSimulate(); % ~ 40sec
+m = m.dlLoad('models/dlDemoPredictivePFC'); % ~ 10sec
+% m.dlSimulate(); % ~ 40sec
 
 %% Simulation and general plotting
 
@@ -146,9 +146,9 @@ trialParams3('SC2_ctx_iPoisson_onset_poisson') = 250;
 trialParams3('SC2_ctx_iPoisson_offset_poisson') = 350;
 
 outputParams = [{'DeepE_V', 1:4, [200 400], 'afr'}; {'DeepE_V', 5:8, [200 400], 'afr'}; {'DeepE_V', 9:12, [200 400], 'afr'}; {'DeepE_V', 13:16, [200 400], 'afr'}; {'DeepE_V', 17:20, [200 400], 'afr'}];
-targetParams1 = [{'MSE', 1, 6, 0.25}; {'MSE', 2, 3, 0.25}; {'MSE', 3, 3, 0.25}; {'Compare', [1, 2, 3], 0, 0.15}; {'Diff', [2, 3], 0, 0.05}]; % A 
-targetParams2 = [{'MSE', 2, 6, 0.25}; {'MSE', 1, 3, 0.25}; {'MSE', 3, 3, 0.25}; {'Compare', [2, 1, 3], 0, 0.15}; {'Diff', [1, 3], 0, 0.05}]; % B
-targetParams3 = [{'MSE', 3, 6, 0.25}; {'MSE', 2, 3, 0.25}; {'MSE', 1, 3, 0.25}; {'Compare', [3, 1, 2], 0, 0.15}; {'Diff', [1, 2], 0, 0.05}]; % C
+targetParams1 = [{'MSE', 1, 12, 0.25}; {'MSE', 2, 6, 0.25}; {'MSE', 3, 6, 0.25}; {'Compare', [1, 2, 3], 0, 0.15}; {'Diff', [2, 3], 0, 0.05}]; % A 
+targetParams2 = [{'MSE', 2, 12, 0.25}; {'MSE', 1, 6, 0.25}; {'MSE', 3, 6, 0.25}; {'Compare', [2, 1, 3], 0, 0.15}; {'Diff', [1, 3], 0, 0.05}]; % B
+targetParams3 = [{'MSE', 3, 12, 0.25}; {'MSE', 2, 6, 0.25}; {'MSE', 1, 6, 0.25}; {'Compare', [3, 1, 2], 0, 0.15}; {'Diff', [1, 2], 0, 0.05}]; % C
 
 %% Trial: training script 
 % TODO ->>> (similar inputs-outputs problem)
@@ -159,7 +159,7 @@ dlTargetParameters = {targetParams1, targetParams2, targetParams3};
 dlOutputParameters = outputParams;
 
 dlTrainOptions = containers.Map();
-dlTrainOptions('dlEpochs') = 5;
+dlTrainOptions('dlEpochs') = 30;
 dlTrainOptions('dlBatchs') = 3;
 dlTrainOptions('dlLambda') = 0.001;
 
