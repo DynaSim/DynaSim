@@ -328,7 +328,7 @@ classdef DynaLearn < matlab.mixin.SetGet
            
         end
         
-        function out = dlApplyIFRKernel(obj, dlOutput)
+        function out = dlApplyIFRKernel(obj, dlOutput) % TODO: sampling rate change and adjustments
               
             x = dlOutput;
             t = linspace(0, size(x, 1), size(x, 1))*obj.dldT*obj.dlDownSampleFactor;
@@ -337,7 +337,7 @@ classdef DynaLearn < matlab.mixin.SetGet
             if size(raster, 1) > 0
 
                 pool = 1:size(x, 2);
-                out = 5e2 * NWepanechnikovKernelRegrRaster(t, raster, pool, 25, 1, 1);
+                out = 1.1e3 * NWepanechnikovKernelRegrRaster(t, raster, pool, 25, 1, 1);
                 
             else 
 
