@@ -24,10 +24,17 @@ m.dlSave(); % < 1sec
 %% Load DynaLearn Class (previously saved file is required, default is dlFileBase.mat)
 
 clc;
-m = DynaLearn(); % ~ 1sec
+% m = DynaLearn(); % ~ 1sec
 % m = m.dlLoad('models/dlDemoPING'); % ~ 10sec
-m = m.dlLoad('models/dlDemoPredictivePFC'); % ~ 10sec
+% m = m.dlLoad('models/dlDemoPredictivePFC'); % ~ 10sec
 m.dlSimulate(); % ~ 40sec
+
+%% Simulation and general plotting
+
+clc;
+m.dlSimulate(); % (optional) simulate it , ~ seconds runtime
+m.dlPlotAllPotentials('ifr'); % Plot all potential (voltages) as IFR plots ('ifr') or LFP ('lfp').
+m.dlPlotAllPotentials('lfp'); % Local field potential
 
  %% Continue simulation: trialParams example
 

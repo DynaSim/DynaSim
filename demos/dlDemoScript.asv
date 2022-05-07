@@ -11,23 +11,30 @@ clc;
 
 Ne = 20;Ni = 4;Nio = 10;noise_rate = 13;
 % s = NeoCortex(Ne, Ni, Nio, noise_rate);
-s = dlDemoPING(3, 1, 2, noise_rate); % 14 Mins on mex generator
-% s = dlDemoPredictivePFC(Ne, Ni, Nio, noise_rate);
+% s = dlDemoPING(3, 1, 2, noise_rate); % 14 Mins on mex generator
+s = dlDemoPredictivePFC(Ne, Ni, Nio, noise_rate);
 
 %% Create DynaLearn Class (First time)
 
-m = DynaLearn(s, 'models/dlDemoPING'); % ~ 120min
-% m = DynaLearn(s, 'models/dlDemoPredictivePFC'); % ~ 120min
+% m = DynaLearn(s, 'models/dlDemoPING'); % ~ 120min
+m = DynaLearn(s, 'models/dlDemoPredictivePFC'); % ~ 120min
 m.dlSimulate(); % ~ 40sec
 m.dlSave(); % < 1sec
 
 %% Load DynaLearn Class (previously saved file is required, default is dlFileBase.mat)
 
 clc;
-m = DynaLearn(); % ~ 1sec
-m = m.dlLoad('models/dlPredictivePFCDemo'); % ~ 10sec
-m = m.dlLoad('models/dlPredictivePFCDemo'); % ~ 10sec
+% m = DynaLearn(); % ~ 1sec
+% m = m.dlLoad('models/dlDemoPING'); % ~ 10sec
+% m = m.dlLoad('models/dlDemoPredictivePFC'); % ~ 10sec
 m.dlSimulate(); % ~ 40sec
+
+%% Simulati
+
+clc;
+m.dlSimulate(); % (optional) simulate it , ~ seconds runtime
+m.dlPlotAllPotentials('ifr'); % Plot all potential (voltages) as IFR plots ('ifr') or LFP ('lfp').
+m.dlPlotAllPotentials('lfp'); % Local field potential
 
  %% Continue simulation: trialParams example
 
