@@ -1,0 +1,24 @@
+% iAMPA: synaptic current, fast threshold modulation with excitatory AMPAergic parameters
+% parameters
+gAMPA = [0.1] 	 % mS/cm2, maximal conductance
+EAMPA = [0] 	 % mV, reversal potential
+tauAMPA = [2]	 % ms, decay time constant
+tauAMPAr = [0.4] % ms, rise time constant
+IC = [0]
+IC_noise = [0]
+ 
+% fixed variables
+netcon = ones(N_pre,N_post) % default connectivity matrix (all-to-all)
+
+% functions
+IAMPA(X,s) = (gAMPA.*(s*netcon).*(X-EAMPA))
+ 
+% ODEs and ICs
+s' = -s./tauAMPA + ((1-s)/tauAMPAr).*(1+tanh(X_pre/10))
+s(0) = IC+IC_noise.*rand(1,N_pre)
+
+%monitor functions % always record the synaptic current
+ 
+% linkers
+@current += -IAMPA(X_post,s)
+ 
