@@ -44,7 +44,7 @@ classdef DynaLearn < matlab.mixin.SetGet
 
         function obj = DynaLearn(varargin) % Constructors, will be expanded
             
-            disp("Creating Dyna model object ... ");
+            fprintf("\n\n@DS.DL:Creating Dyna model object ... ");
             set(obj, 'dlPathToFile', 'DynaSim/models/dlBaseModel');
             
             if nargin == 0
@@ -78,20 +78,31 @@ classdef DynaLearn < matlab.mixin.SetGet
                 set(obj, 'dlStudyDir', data_);
                 set(obj, 'dlSimulationTool', mode_);
                 
-                if strcmpi(obj.dlSimulateTool, "mex")
+                if strcmpi(obj.dlSimulationTool, "mex")
                     obj.dlInit(obj.dlStudyDir);
+                elseif strcmpi(obj.dlSimulationTool, "raw")
+                    obj.dlRawInit(obj.dlStudyDir);
+                else
+                    fprintf("\n->Simulation tool ""%s"" is not valid. Try ""mex"" or ""raw"".\n ***No model created, try again.\n", mode_);
+                    return
                 end
                 
             else
-                disp('Invalid use of DynaNet; pass a DynaSim struct and then address of parameters dataset file.');
+                fprintf("\n Invalid use of DynaNet; try one of the following ways:\n 1.Call with no inputs <> (for demo or reloading).\n 2.Call with <DynaSim struct>.\n 3.Call with <DynaSim struct, studydir>.\n 4.Call with <DynaSim Struct, studydir, simulation tool mode>.\n");
+                return
             end
           
             [out, vars] = dsGetOutputList(obj.dlModel);
             set(obj, 'dlOutputs', out);
             set(obj, 'dlVariables', vars);
-            obj.dlMexBridgeInit();
             
-            disp("DynaLearn model created.");
+            if strcmpi(obj.dlSimulationTool, "mex")
+                obj.dlMexBridgeInit();
+            elseif strcmpi(obj.dlSimulationTool, "raw")
+                obj.dlRawInit(obj.dlStudyDir);
+            end
+            
+            fprintf("\n@DS.DL:DynaLearn model created.\n");
             
         end
 
