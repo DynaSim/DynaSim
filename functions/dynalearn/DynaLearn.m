@@ -99,7 +99,7 @@ classdef DynaLearn < matlab.mixin.SetGet
             if strcmpi(obj.dlSimulationTool, "mex")
                 obj.dlMexBridgeInit();
             elseif strcmpi(obj.dlSimulationTool, "raw")
-                obj.dlRawInit(obj.dlStudyDir);
+                obj.dlRawBridgeInit();
             end
             
             fprintf("\n@DS.DL:DynaLearn model created.\n");
@@ -250,6 +250,21 @@ classdef DynaLearn < matlab.mixin.SetGet
             
         end
         
+        function [s] = dlGetRawName(obj)
+            
+            obj.dlPath = [obj.dlStudyDir, '/solve'];
+            addpath(obj.dlPath);
+            d = dir(obj.dlPath);
+            
+            for i = 1:size(d, 1)
+                if contains(d(i).name, '.m')
+                    s = d(i).name;
+                    s = s(1:end-2);
+                end
+            end
+            
+        end
+        
         function dlInit(obj, studydir) % Initializer with mex
             
             tspan = [0 10]; % Base time span for class construction and initialization.
@@ -273,6 +288,13 @@ classdef DynaLearn < matlab.mixin.SetGet
         function dlMexBridgeInit(obj)
            
             set(obj, 'dlMexFuncName', obj.dlGetMexName());
+            dsMexBridge('dlTempFunc.m', obj.dlMexFuncName);
+            
+        end
+        
+        function dlRawBridgeInit(obj)
+           
+            set(obj, 'dlMexFuncName', obj.dlGetRawName());
             dsMexBridge('dlTempFunc.m', obj.dlMexFuncName);
             
         end
