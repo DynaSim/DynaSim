@@ -36,6 +36,7 @@ classdef DynaLearn < matlab.mixin.SetGet
         dlDeltaRatio = 1;
         dlLastDelta = -1;
         dlLambdaCap = 1e-2;
+        dlSimulationTool = "mex";
         
     end
     
@@ -53,23 +54,34 @@ classdef DynaLearn < matlab.mixin.SetGet
             elseif nargin == 1
 
                 model_ = varargin{1};
+                
                 set(obj, 'dlModel', model_);
                 obj.dlInit(obj.dlStudyDir);
-                set(obj, 'dlConnections', obj.dlGetConnectionsList());
                     
             elseif nargin == 2
                     
                 model_ = varargin{1};  
                 data_ = varargin{2};
-%                 mexn_ = varargin{3};
                 
                 set(obj, 'dlModel', model_);
                 set(obj, 'dlStudyDir', data_);
-%                 set(obj, 'mex_func_name', mexn_);
                 
                 obj.dlInit(obj.dlStudyDir);
-%                 set(obj, 'dlConnections', obj.dlGetConnectionsList());
-                    
+                 
+            elseif nargin == 3
+                
+                model_ = varargin{1};  
+                data_ = varargin{2};
+                mode_ = varargin{3};
+                
+                set(obj, 'dlModel', model_);
+                set(obj, 'dlStudyDir', data_);
+                set(obj, 'dlSimulationTool', mode_);
+                
+                if strcmpi(obj.dlSimulateTool, "mex")
+                    obj.dlInit(obj.dlStudyDir);
+                end
+                
             else
                 disp('Invalid use of DynaNet; pass a DynaSim struct and then address of parameters dataset file.');
             end
@@ -155,6 +167,12 @@ classdef DynaLearn < matlab.mixin.SetGet
              
         end
         
+        function set.dlSimulationTool(obj, val)
+             
+            obj.dlSimulationTool = val;
+             
+        end
+        
         function dlSave(obj)
         
             dlSaveFileNamePath = [obj.dlStudyDir, '/dlFile.mat'];
@@ -221,12 +239,22 @@ classdef DynaLearn < matlab.mixin.SetGet
             
         end
         
-        function dlInit(obj, studydir) % Initializer TODO
+        function dlInit(obj, studydir) % Initializer with mex
             
             tspan = [0 10]; % Base time span for class construction and initialization.
             simulator_options = {'tspan', tspan, 'solver', 'rk1', 'dt', obj.dldT, ...
                         'downsample_factor', obj.dlDownSampleFactor, 'verbose_flag', 1, ...
                         'study_dir', studydir, 'mex_flag', 1};
+            obj.dsData = dsSimulate(obj.dlModel, 'vary', [], simulator_options{:});
+            
+        end
+        
+        function dlRawInit(obj, studydir) % Initializer without mex
+            
+            tspan = [0 10]; % Base time span for class construction and initialization.
+            simulator_options = {'tspan', tspan, 'solver', 'rk1', 'dt', obj.dldT, ...
+                        'downsample_factor', obj.dlDownSampleFactor, 'verbose_flag', 1, ...
+                        'study_dir', studydir, 'mex_flag', 0};
             obj.dsData = dsSimulate(obj.dlModel, 'vary', [], simulator_options{:});
             
         end

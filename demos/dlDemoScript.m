@@ -11,13 +11,13 @@ clc;
 
 Ne = 24;Ni = 4;Nio = 10;noise_rate = 13;
 % s = NeoCortex(Ne, Ni, Nio, noise_rate);
-% s = dlDemoPING(3, 1, 2, noise_rate); % 14 Mins on mex generator
-s = dlDemoPredictivePFC(Ne, Ni, Nio, noise_rate);
+s = dlDemoPING(2, 1, 2, noise_rate); % 14 Mins on mex generator
+% s = dlDemoPredictivePFC(Ne, Ni, Nio, noise_rate);
 
 %% Create DynaLearn Class (First time)
 
 % m = DynaLearn(s, 'models/dlDemoPING'); % ~ 120min
-m = DynaLearn(s, 'models/dlDemoPredictivePFC'); % ~ 120min
+m = DynaLearn(s, 'models/dlTestPING'); % ~ 120min
 m.dlSimulate(); % ~ 40sec
 m.dlSave(); % < 1sec
 
