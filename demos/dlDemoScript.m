@@ -11,14 +11,14 @@ clc;
 
 Ne = 24;Ni = 4;Nio = 10;noise_rate = 13;
 % s = NeoCortex(Ne, Ni, Nio, noise_rate);
-s = dlDemoPING(2, 1, 2, noise_rate); % 14 Mins on mex generator
-% s = dlDemoPredictivePFC(Ne, Ni, Nio, noise_rate);
+% s = dlDemoPING(2, 1, 2, noise_rate); % 14 Mins on mex generator
+s = dlDemoPredictivePFC(Ne, Ni, Nio, noise_rate);
 
 %% Create DynaLearn Class (First time)
 
 % m = DynaLearn(s, 'models/dlDemoPING'); % ~ 120min
 % m = DynaLearn(s, 'models/dlTestPING'); % ~ 120min
-% m = DynaLearn(s, 'models/dlTestPING', 'raw'); % ~ 120min
+m = DynaLearn(s, 'models/dlTestPredictivePFC', 'raw'); % ~ 120min
 m.dlSimulate(); % ~ 40sec
 m.dlSave(); % < 1sec
 
@@ -33,6 +33,10 @@ m = m.dlLoad('models/dlDemoPredictivePFC'); % ~ 10sec
 %% Simulation and general plotting
 
 clc;
+Params = containers.Map();
+Params('tspan') = [0 500];
+m.dlUpdateParams(Params);
+
 m.dlSimulate(); % (optional) simulate it , ~ seconds runtime
 m.dlPlotAllPotentials('ifr'); % Plot all potential (voltages) as IFR plots ('ifr') or LFP ('lfp').
 m.dlPlotAllPotentials('lfp'); % Local field potential
@@ -178,15 +182,17 @@ dlTrainOptions('dlLambdaCap') = 3e-2; % Only if Adaptive lambda is active, recom
 % dlTrainOptions('dlMetaLearningRule') = 'true'; % TODOs!
 
 % m.dlResetTraining(); % Reset logs and optimal state error (not the optimal state file)
-m.dlLoadOptimal();  % Load the current optimal state (if exists)
+% m.dlLoadOptimal();  % Load the current optimal state (if exists)
 m.dlTrain(dlInputParameters, dlOutputParameters, dlTargetParameters, dlTrainOptions);
 
 %% Run a simulation (without training)
 
 m.dlRunSimulation(dlInputParameters{1}, dlOutputParameters);
 m.dlPlotAllPotentials('lfp');
+%%
 m.dlRunSimulation(dlInputParameters{2}, dlOutputParameters);
 m.dlPlotAllPotentials('lfp');
+%%
 m.dlRunSimulation(dlInputParameters{3}, dlOutputParameters);
 m.dlPlotAllPotentials('lfp');
 
