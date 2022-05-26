@@ -134,9 +134,9 @@ dlTargetParameters = {targetParams1, targetParams2, targetParams3};
 dlOutputParameters = outputParams;
 
 dlTrainOptions = containers.Map();
-dlTrainOptions('dlEpochs') = 10;
+dlTrainOptions('dlEpochs') = 147;
 dlTrainOptions('dlBatchs') = 3;
-dlTrainOptions('dlLambda') = 0.000001;
+dlTrainOptions('dlLambda') = 0.00001;
 
 dlTrainOptions('dlCheckpoint') = 'true';
 dlTrainOptions('dlCheckpointCoefficient') = 1.74; % e.g sqrt(2), sqrt(3), 2, sqrt(5) ... 
