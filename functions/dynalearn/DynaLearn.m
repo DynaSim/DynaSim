@@ -508,7 +508,7 @@ classdef DynaLearn < matlab.mixin.SetGet
                     
                     j = dlOutputIndices;
                     TempError = abs(obj.dlLastOutputs{j(1)} - obj.dlLastOutputs{j(2)});
-                    
+                
                 else
                     
                     fprintf("Undefined error type ""%s""\n", dlErrorType);
@@ -852,6 +852,10 @@ classdef DynaLearn < matlab.mixin.SetGet
             elseif strcmpi(dlLearningRule, 'RWDeltaRule')
             
                 disp("TODO Rascorla-Wagner delta rule");
+                
+            elseif strcmpi(dlLearningRule, 'NewRule')
+            
+                disp("TODO new rule");
                 
             else
                 

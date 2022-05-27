@@ -18,7 +18,7 @@ Ne = 24;Ni = 4;Nio = 10;noise_rate = 13;
 
 % m = DynaLearn(s, 'models/dlDemoPING'); % ~ 120min
 % m = DynaLearn(s, 'models/dlDemoPredictivePFC'); % ~ 120min
-% m = DynaLearn(s, 'models/dlTestPredictivePFC', 'raw'); % ~ 120min
+m = DynaLearn(s, 'models/dlTestPredictivePFC', 'raw'); % ~ 120min
 m.dlSimulate(); % ~ 40sec
 % m.dlSave(); % < 1sec
 
@@ -134,7 +134,7 @@ dlTargetParameters = {targetParams1, targetParams2, targetParams3};
 dlOutputParameters = outputParams;
 
 dlTrainOptions = containers.Map();
-dlTrainOptions('dlEpochs') = 147;
+dlTrainOptions('dlEpochs') = 10;
 dlTrainOptions('dlBatchs') = 3;
 dlTrainOptions('dlLambda') = 0.00001;
 
@@ -152,8 +152,8 @@ dlTrainOptions('dlLambdaCap') = 3e-2; % Only if Adaptive lambda is active, recom
 % dlTrainOptions('dlMetaLearningRule') = 'true'; % TODOs!
 
 % m.dlResetTraining(); % Reset logs and optimal state error (not the optimal state file)
-% m.dlLoadOptimal();  % Load the current optimal state (if exists)
-m.dlTrain(dlInputParameters, dlOutputParameters, dlTargetParameters, dlTrainOptions);
+m.dlLoadOptimal();  % Load the current optimal state (if exists)
+% m.dlTrain(dlInputParameters, dlOutputParameters, dlTargetParameters, dlTrainOptions);
 
 %% Run a simulation (without training)
 
