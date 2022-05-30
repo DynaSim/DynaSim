@@ -228,7 +228,12 @@ classdef DynaLearn < matlab.mixin.SetGet
             [out, vars] = dsGetOutputList(obj.dlModel);
             set(obj, 'dlOutputs', out);
             set(obj, 'dlVariables', vars);
-            obj.dlMexBridgeInit()
+            
+            if strcmpi("mex", obj.dlSimulationTool)
+                obj.dlMexBridgeInit();
+            elseif strcmpi("raw", obj.dlSimulationTool)
+                obj.dlRawBridgeInit();
+            end
             
             obj.dlTrialNumber = 0;
             fprintf("\nReinitialized.\n");
@@ -326,7 +331,7 @@ classdef DynaLearn < matlab.mixin.SetGet
                         if size(raster, 1) > 0
 
                             pool = 1:size(x, 2);
-                            O1 = 5e2 * NWepanechnikovKernelRegrRaster(t, raster, pool, 25, 1, 1);
+                            O1 = 5e2 * NWepanechnikovKernelRegrRaster(t, raster, pool, 49, 1, 1);
                             plot(t, O1, 'o');grid("on");
 
                         end
@@ -900,6 +905,21 @@ classdef DynaLearn < matlab.mixin.SetGet
             figure('position', [0, 0, 1400, 700]);
             plot(obj.dlErrorsLog);grid("on");
             title("Errors in trials");
+            
+        end
+        
+        function dlPlotBatchErrors(obj, dlBatchs)
+           
+            figure('position', [0, 0, 1400, 700]);
+            n = max(size(obj.dlErrorsLog));
+            x = zeros(1, ceil(n/dlBatchs));
+            
+            for i = 0:dlBatchs:n-dlBatchs
+                x(ceil((i+1)/dlBatchs)) = mean(obj.dlErrorsLog(i+1:i+dlBatchs));
+            end
+            
+            plot(x);grid("on");
+            title("Errors in batchs");
             
         end
         

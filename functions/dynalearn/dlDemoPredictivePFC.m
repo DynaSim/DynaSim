@@ -2,23 +2,17 @@ function y = dlDemoPredictivePFC(Ne, Ni, Nio, noise_rate)
 
     fprintf("Initialization...\n");
 
-    % Population sizes
-
-%     Ne = 24;     % # of E cells per layer
-%     Ni = 4;  % # of I cells per layer
-%     Nio = 10; % # of Input cells
-
     k1 = 0.1; % Diff. for normal weights (uniform random)
-    k2 = 0.2; % Min connectivity weight
+    k2 = 0.1; % Min connectivity weight
     k3 = 0.1; % Diff. for strengthen weights
-    k4 = 0.9; % Min. for strengthen weights
+    k4 = 0.74; % Min. for strengthen weights
 
     % Connectivity matrices
 
     % E->I
-    Kei = k1*rand(Ne, Ni) + 0.3; % all-to-all, connectivity from E cells to I cells; mid, sup, deep
+    Kei = k1*rand(Ne, Ni) + 0.1; % all-to-all, connectivity from E cells to I cells; mid, sup, deep
     % I->E
-    Kie = k1*rand(Ni, Ne) + 0.3; % all-to-all, connectivity from I cells to E cells; mid, sup, deep
+    Kie = k1*rand(Ni, Ne) + 0.1; % all-to-all, connectivity from I cells to E cells; mid, sup, deep
 
     % E->E
     Kee = k1*rand(Ne, Ne) + k2; % recurrent E-to-E: mid, sup, deep
@@ -27,7 +21,7 @@ function y = dlDemoPredictivePFC(Ne, Ni, Nio, noise_rate)
 %     Kffie = k1*rand(Ni, Ne) + k2; % feedforward I-to-E: mid->deep
 
     kzio = zeros(Nio, Nio);
-    KdeepEI = Kie * 1.5;
+    KdeepEI = Kie * 1.47;
 
     a1 = 1;a2 = ceil(1*Ne/6);
     b1 = ceil(1 + 1*Ne/6);b2 = ceil(2*Ne/6);
@@ -49,7 +43,7 @@ function y = dlDemoPredictivePFC(Ne, Ni, Nio, noise_rate)
     KmidEsupE(cx1_1:cx1_2, cnx1_1:cnx3_2) = k3*rand((a2-a1+1), (cnx3_2 - cnx1_1 + 1)) + k4; % Cx1 -> X1, X2, X3
     KmidEsupE(cx2_1:cx2_2, cny1_1:cny3_2) = k3*rand((a2-a1+1), (cny3_2 - cny1_1 + 1)) + k4; % Cx2 -> Y1, Y2, Y3
 
-    KsupEdeepE = Kee*0.3;
+    KsupEdeepE = Kee * 0.3;
     KsupEdeepE(cnx1_1:cnx1_2, a1:a2) = k3*rand((cnx1_2 - cnx1_1 + 1), (a2 - a1 + 1)) + k4; % X1 -> O1
     KsupEdeepE(cnx2_1:cnx2_2, b1:b2) = k3*rand((cnx2_2 - cnx2_1 + 1), (b2 - b1 + 1)) + k4; % X2 -> O2
     KsupEdeepE(cnx3_1:cnx3_2, c1:c2) = k3*rand((cnx3_2 - cnx3_1 + 1), (c2 - c1 + 1)) + k4; % X3 -> O3
@@ -57,17 +51,17 @@ function y = dlDemoPredictivePFC(Ne, Ni, Nio, noise_rate)
     KsupEdeepE(cny2_1:cny2_2, b1:b2) = k3*rand((cny2_2 - cny2_1 + 1), (b2 - b1 + 1)) + k4; % Y2 -> O2
     KsupEdeepE(cny3_1:cny3_2, c1:c2) = k3*rand((cny3_2 - cny3_1 + 1), (c2 - c1 + 1)) + k4; % Y3 -> O1
 
-    KmidEdeepE = Kee*0.3;
-    KmidIdeepE = Kie*0.3;
+    KmidEdeepE = Kee * 0.3;
+    KmidIdeepE = Kie * 0.3;
 %     KmidIdeepE(1, cx1_1:cx2_2) = 0.1*rand(1, (b2-a1+1)) + 0.6; % !(A & Cx1) -> O2 
 %     KmidIdeepE(2, a1:b2) = 0.1*rand(1, (b2-a1+1)) + 0.6; % !(A & Cx2) -> O1
 %     KmidIdeepE(3, cx1_1:cx2_2) = 0.1*rand(1, (b2-a1+1)) + 0.6; % !(B & Cx2) -> O2
 %     KmidIdeepE(4, a1:b2) = 0.1*rand(1, (b2-a1+1)) + 0.6; % !(B & Cx1) -> O1
 
     % Time constants
-    tauGABA_gamma = 4.8; % ms, decay time constant of inhibition for gamma (50Hz)
-    tauGABA_beta = 38.4; % ms, decay time constant of inhibition for beta (25Hz)
-    tauAMPA = 4.8; % ms, decay time constant of fast excitation (AMPA)
+    tauGABA_gamma = 4.9; % ms, decay time constant of inhibition for gamma (50Hz)
+    tauGABA_beta = 37.4; % ms, decay time constant of inhibition for beta (25Hz)
+    tauAMPA = 4.9; % ms, decay time constant of fast excitation (AMPA)
 %     tauAMPA_beta = 38.4;
 
     % Maximal synaptic strengths
@@ -76,13 +70,13 @@ function y = dlDemoPredictivePFC(Ne, Ni, Nio, noise_rate)
     gGABAa_ffie = .2*(20/Ne); % feedforward I->E, mid->deep
     gAMPA_in = .2*(20/Ne);
 
-    gAMPA_ee = 0.11*(20/Ne); % E->E within layer
-    gGABAa_ie = 4*(20/Ne); % I->E within layer
-    gGABAa_ii = 0.11*(20/Ne); % I->I within layer
-%     noise_rate = 12;
-
+    gAMPA_ee = 0.11*(21/Ne); % E->E within layer
+    gGABAa_ie = 4*(21/Ne); % I->E within layer
+    gGABAa_ii = 0.11*(21/Ne); % I->I within layer
+    
     % neuronal dynamics
-    eqns = 'dV/dt = (Iapp + @current + noise*randn(1, Npop))/C; Iapp=0; noise=0; C=1; V(0) = -rand(1, Npop)*20;';
+    eqns = 'dV/dt = (Iapp + @current + noise*randn(1, Npop))/C; Iapp=0; noise=0; C=1; V(0) = -rand(1, Npop)*17;';
+    eqns2 = 'dV/dt = (Iapp + noise*randn(1, Npop))/C; Iapp=0; noise=0; C=1; V(0) = -rand(1, Npop)*17;';
 
     % SPN
 %     g_l_D1 = 0.096;      % mS/cm^2, Leak conductance for D1 SPNs 
@@ -140,14 +134,14 @@ function y = dlDemoPredictivePFC(Ne, Ni, Nio, noise_rate)
     % E-cells
     IOping.populations(1).name = 'E';
     IOping.populations(1).size = Nio;
-    IOping.populations(1).equations = eqns;
+    IOping.populations(1).equations = eqns2;
     IOping.populations(1).mechanism_list = cell_type;
     IOping.populations(1).parameters = {'Iapp',1,'noise', 2, 'g_poisson',g_poisson,'onset_poisson',0,'offset_poisson',0};
 
     % I-cells
     IOping.populations(2).name = 'I';
     IOping.populations(2).size = Nio;
-    IOping.populations(2).equations = eqns;
+    IOping.populations(2).equations = eqns2;
     IOping.populations(2).mechanism_list = cell_type;
     IOping.populations(2).parameters = {'Iapp',1,'noise', 2, 'g_poisson',g_poisson,'onset_poisson',0,'offset_poisson',0};
 
