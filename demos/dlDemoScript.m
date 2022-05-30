@@ -4,27 +4,28 @@
 % memoize.m -> suspended due to an error
 % dsModel: 
 
-%% Model parameters
+%% Model parameters, Uncomment one of the following lanes to run an example.
 
 clear;
 clc;
 
-Ne = 20;Ni = 4;Nio = 10;noise_rate = 13;
+Ne = 24;Ni = 4;Nio = 10;noise_rate = 13;
 % s = NeoCortex(Ne, Ni, Nio, noise_rate);
-% s = dlDemoPING(3, 1, 2, noise_rate); % 14 Mins on mex generator
-s = dlDemoPredictivePFC(Ne, Ni, Nio, noise_rate);
+s = dlDemoPING(2, 1, 2, noise_rate); % 14 Mins on mex generator
+% s = dlDemoPredictivePFC(Ne, Ni, Nio, noise_rate);
 
 %% Create DynaLearn Class (First time)
 
 % m = DynaLearn(s, 'models/dlDemoPING'); % ~ 120min
-m = DynaLearn(s, 'models/dlDemoPredictivePFC'); % ~ 120min
+% m = DynaLearn(s, 'models/dlDemoPredictivePFC'); % ~ 120min
+m = DynaLearn(s, 'models/dlTestPredictivePFC', 'raw'); % ~ 120min
 m.dlSimulate(); % ~ 40sec
-m.dlSave(); % < 1sec
+% m.dlSave(); % < 1sec
 
 %% Load DynaLearn Class (previously saved file is required, default is dlFileBase.mat)
 
 clc;
-% m = DynaLearn(); % ~ 1sec
+m = DynaLearn(); % ~ 1sec
 % m = m.dlLoad('models/dlDemoPING'); % ~ 10sec
 m = m.dlLoad('models/dlDemoPredictivePFC'); % ~ 10sec
 % m.dlSimulate(); % ~ 40sec
@@ -32,6 +33,10 @@ m = m.dlLoad('models/dlDemoPredictivePFC'); % ~ 10sec
 %% Simulation and general plotting
 
 clc;
+Params = containers.Map();
+Params('tspan') = [0 500];
+m.dlUpdateParams(Params);
+
 m.dlSimulate(); % (optional) simulate it , ~ seconds runtime
 m.dlPlotAllPotentials('ifr'); % Plot all potential (voltages) as IFR plots ('ifr') or LFP ('lfp').
 m.dlPlotAllPotentials('lfp'); % Local field potential
@@ -39,9 +44,6 @@ m.dlPlotAllPotentials('lfp'); % Local field potential
  %% Continue simulation: trialParams example
 
 clc;
-g_poisson = 5.7e-4;
-dc_poisson = 9e6;
-
 trialParams1 = containers.Map();
 trialParams2 = containers.Map();
 trialParams3 = containers.Map();
@@ -50,56 +52,29 @@ trialParams1('tspan') = [0 500];
 trialParams2('tspan') = [0 500];
 trialParams3('tspan') = [0 500];
 
-trialParams('SA1_ctx_iPoisson_g_poisson') = g_poisson;
-trialParams('SA2_ctx_iPoisson_g_poisson') = g_poisson;
-trialParams('SB1_ctx_iPoisson_g_poisson') = g_poisson;
-trialParams('SB2_ctx_iPoisson_g_poisson') = g_poisson;
-trialParams('SC1_ctx_iPoisson_g_poisson') = g_poisson;
-trialParams('SC2_ctx_iPoisson_g_poisson') = g_poisson;
-
-trialParams('SA1_ctx_iPoisson_DC_poisson') = dc_poisson;
-trialParams('SA2_ctx_iPoisson_DC_poisson') = dc_poisson;
-trialParams('SB1_ctx_iPoisson_DC_poisson') = dc_poisson;
-trialParams('SB2_ctx_iPoisson_DC_poisson') = dc_poisson;
-trialParams('SC1_ctx_iPoisson_DC_poisson') = dc_poisson;
-trialParams('SC2_ctx_iPoisson_DC_poisson') = dc_poisson;
-
-trialParams('SA1_ctx_iPoisson_onset_poisson') = 150;
-trialParams('SA1_ctx_iPoisson_offset_poisson') = 250;
-trialParams('SA2_ctx_iPoisson_onset_poisson') = 250;
-trialParams('SA2_ctx_iPoisson_offset_poisson') = 350;
-
-trialParams('SB1_ctx_iPoisson_onset_poisson') = 250;
-trialParams('SB1_ctx_iPoisson_offset_poisson') = 250;
-trialParams('SB2_ctx_iPoisson_onset_poisson') = 350;
-trialParams('SB2_ctx_iPoisson_offset_poisson') = 350;
-
-trialParams('SC1_ctx_iPoisson_onset_poisson') = 250;
-trialParams('SC1_ctx_iPoisson_offset_poisson') = 250;
-trialParams('SC2_ctx_iPoisson_onset_poisson') = 350;
-trialParams('SC2_ctx_iPoisson_offset_poisson') = 350;
+g_poisson = 6e-4;dc_poisson = 7e5;
 
 trialParams1('SA1_ctx_iPoisson_DC_poisson') = dc_poisson;
 trialParams1('SA2_ctx_iPoisson_DC_poisson') = dc_poisson;
-trialParams1('SB1_ctx_iPoisson_DC_poisson') = dc_poisson;
-trialParams1('SB2_ctx_iPoisson_DC_poisson') = dc_poisson;
-trialParams1('SC1_ctx_iPoisson_DC_poisson') = dc_poisson;
-trialParams1('SC2_ctx_iPoisson_DC_poisson') = dc_poisson;
+trialParams1('SB1_ctx_iPoisson_DC_poisson') = 0;
+trialParams1('SB2_ctx_iPoisson_DC_poisson') = 0;
+trialParams1('SC1_ctx_iPoisson_DC_poisson') = 0;
+trialParams1('SC2_ctx_iPoisson_DC_poisson') = 0;
 
 trialParams1('SA1_ctx_iPoisson_onset_poisson') = 150;
 trialParams1('SA1_ctx_iPoisson_offset_poisson') = 250;
 trialParams1('SA2_ctx_iPoisson_onset_poisson') = 250;
 trialParams1('SA2_ctx_iPoisson_offset_poisson') = 350;
 
-trialParams1('SB1_ctx_iPoisson_onset_poisson') = 250;
-trialParams1('SB1_ctx_iPoisson_offset_poisson') = 250;
-trialParams1('SB2_ctx_iPoisson_onset_poisson') = 350;
-trialParams1('SB2_ctx_iPoisson_offset_poisson') = 350;
+trialParams1('SB1_ctx_iPoisson_onset_poisson') = 0;
+trialParams1('SB1_ctx_iPoisson_offset_poisson') = 0;
+trialParams1('SB2_ctx_iPoisson_onset_poisson') = 0;
+trialParams1('SB2_ctx_iPoisson_offset_poisson') = 0;
 
-trialParams1('SC1_ctx_iPoisson_onset_poisson') = 250;
-trialParams1('SC1_ctx_iPoisson_offset_poisson') = 250;
-trialParams1('SC2_ctx_iPoisson_onset_poisson') = 350;
-trialParams1('SC2_ctx_iPoisson_offset_poisson') = 350;
+trialParams1('SC1_ctx_iPoisson_onset_poisson') = 0;
+trialParams1('SC1_ctx_iPoisson_offset_poisson') = 0;
+trialParams1('SC2_ctx_iPoisson_onset_poisson') = 0;
+trialParams1('SC2_ctx_iPoisson_offset_poisson') = 0;
 
 trialParams2('SA1_ctx_iPoisson_DC_poisson') = dc_poisson;
 trialParams2('SA2_ctx_iPoisson_DC_poisson') = dc_poisson;
@@ -146,9 +121,9 @@ trialParams3('SC2_ctx_iPoisson_onset_poisson') = 250;
 trialParams3('SC2_ctx_iPoisson_offset_poisson') = 350;
 
 outputParams = [{'DeepE_V', 1:4, [200 400], 'afr'}; {'DeepE_V', 5:8, [200 400], 'afr'}; {'DeepE_V', 9:12, [200 400], 'afr'}; {'DeepE_V', 13:16, [200 400], 'afr'}; {'DeepE_V', 17:20, [200 400], 'afr'}];
-targetParams1 = [{'MSE', 1, 12, 0.25}; {'MSE', 2, 6, 0.25}; {'MSE', 3, 6, 0.25}; {'Compare', [1, 2, 3], 0, 0.15}; {'Diff', [2, 3], 0, 0.05}]; % A 
-targetParams2 = [{'MSE', 2, 12, 0.25}; {'MSE', 1, 6, 0.25}; {'MSE', 3, 6, 0.25}; {'Compare', [2, 1, 3], 0, 0.15}; {'Diff', [1, 3], 0, 0.05}]; % B
-targetParams3 = [{'MSE', 3, 12, 0.25}; {'MSE', 2, 6, 0.25}; {'MSE', 1, 6, 0.25}; {'Compare', [3, 1, 2], 0, 0.15}; {'Diff', [1, 2], 0, 0.05}]; % C
+targetParams1 = [{'MSE', 1, 25, 0.25}; {'MSE', 2, 12, 0.25}; {'MSE', 3, 12, 0.25}; {'Compare', [1, 2, 3], 0, 0.15}; {'Diff', [2, 3], 0, 0.05}]; % A 
+targetParams2 = [{'MSE', 2, 25, 0.25}; {'MSE', 1, 12, 0.25}; {'MSE', 3, 12, 0.25}; {'Compare', [2, 1, 3], 0, 0.15}; {'Diff', [1, 3], 0, 0.05}]; % B
+targetParams3 = [{'MSE', 3, 25, 0.25}; {'MSE', 2, 12, 0.25}; {'MSE', 1, 12, 0.25}; {'Compare', [3, 1, 2], 0, 0.15}; {'Diff', [1, 2], 0, 0.05}]; % C
 
 %% Trial: training script 
 % TODO ->>> (similar inputs-outputs problem)
@@ -159,9 +134,9 @@ dlTargetParameters = {targetParams1, targetParams2, targetParams3};
 dlOutputParameters = outputParams;
 
 dlTrainOptions = containers.Map();
-dlTrainOptions('dlEpochs') = 3;
+dlTrainOptions('dlEpochs') = 10;
 dlTrainOptions('dlBatchs') = 3;
-dlTrainOptions('dlLambda') = 0.000001;
+dlTrainOptions('dlLambda') = 0.00001;
 
 dlTrainOptions('dlCheckpoint') = 'true';
 dlTrainOptions('dlCheckpointCoefficient') = 1.74; % e.g sqrt(2), sqrt(3), 2, sqrt(5) ... 
@@ -178,14 +153,16 @@ dlTrainOptions('dlLambdaCap') = 3e-2; % Only if Adaptive lambda is active, recom
 
 % m.dlResetTraining(); % Reset logs and optimal state error (not the optimal state file)
 m.dlLoadOptimal();  % Load the current optimal state (if exists)
-m.dlTrain(dlInputParameters, dlOutputParameters, dlTargetParameters, dlTrainOptions);
+% m.dlTrain(dlInputParameters, dlOutputParameters, dlTargetParameters, dlTrainOptions);
 
 %% Run a simulation (without training)
 
 m.dlRunSimulation(dlInputParameters{1}, dlOutputParameters);
 m.dlPlotAllPotentials('lfp');
+%%
 m.dlRunSimulation(dlInputParameters{2}, dlOutputParameters);
 m.dlPlotAllPotentials('lfp');
+%%
 m.dlRunSimulation(dlInputParameters{3}, dlOutputParameters);
 m.dlPlotAllPotentials('lfp');
 

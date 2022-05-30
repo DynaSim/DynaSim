@@ -36,6 +36,7 @@ classdef DynaLearn < matlab.mixin.SetGet
         dlDeltaRatio = 1;
         dlLastDelta = -1;
         dlLambdaCap = 1e-2;
+        dlSimulationTool = "mex";
         
     end
     
@@ -43,7 +44,7 @@ classdef DynaLearn < matlab.mixin.SetGet
 
         function obj = DynaLearn(varargin) % Constructors, will be expanded
             
-            disp("Creating Dyna model object ... ");
+            fprintf("\n\n@DS.DL:Creating Dyna model object ... ");
             set(obj, 'dlPathToFile', 'DynaSim/models/dlBaseModel');
             
             if nargin == 0
@@ -53,33 +54,55 @@ classdef DynaLearn < matlab.mixin.SetGet
             elseif nargin == 1
 
                 model_ = varargin{1};
+                
                 set(obj, 'dlModel', model_);
                 obj.dlInit(obj.dlStudyDir);
-                set(obj, 'dlConnections', obj.dlGetConnectionsList());
                     
             elseif nargin == 2
                     
                 model_ = varargin{1};  
                 data_ = varargin{2};
-%                 mexn_ = varargin{3};
                 
                 set(obj, 'dlModel', model_);
                 set(obj, 'dlStudyDir', data_);
-%                 set(obj, 'mex_func_name', mexn_);
                 
                 obj.dlInit(obj.dlStudyDir);
-%                 set(obj, 'dlConnections', obj.dlGetConnectionsList());
-                    
+                 
+            elseif nargin == 3
+                
+                model_ = varargin{1};  
+                data_ = varargin{2};
+                mode_ = varargin{3};
+                
+                set(obj, 'dlModel', model_);
+                set(obj, 'dlStudyDir', data_);
+                set(obj, 'dlSimulationTool', mode_);
+                
+                if strcmpi(obj.dlSimulationTool, "mex")
+                    obj.dlInit(obj.dlStudyDir);
+                elseif strcmpi(obj.dlSimulationTool, "raw")
+                    obj.dlRawInit(obj.dlStudyDir);
+                else
+                    fprintf("\n->Simulation tool ""%s"" is not valid. Try ""mex"" or ""raw"".\n ***No model created, try again.\n", mode_);
+                    return
+                end
+                
             else
-                disp('Invalid use of DynaNet; pass a DynaSim struct and then address of parameters dataset file.');
+                fprintf("\n Invalid use of DynaNet; try one of the following ways:\n 1.Call with no inputs <> (for demo or reloading).\n 2.Call with <DynaSim struct>.\n 3.Call with <DynaSim struct, studydir>.\n 4.Call with <DynaSim Struct, studydir, simulation tool mode>.\n");
+                return
             end
           
             [out, vars] = dsGetOutputList(obj.dlModel);
             set(obj, 'dlOutputs', out);
             set(obj, 'dlVariables', vars);
-            obj.dlMexBridgeInit();
             
-            disp("DynaLearn model created.");
+            if strcmpi(obj.dlSimulationTool, "mex")
+                obj.dlMexBridgeInit();
+            elseif strcmpi(obj.dlSimulationTool, "raw")
+                obj.dlRawBridgeInit();
+            end
+            
+            fprintf("\n@DS.DL:DynaLearn model created.\n");
             
         end
 
@@ -155,6 +178,12 @@ classdef DynaLearn < matlab.mixin.SetGet
              
         end
         
+        function set.dlSimulationTool(obj, val)
+             
+            obj.dlSimulationTool = val;
+             
+        end
+        
         function dlSave(obj)
         
             dlSaveFileNamePath = [obj.dlStudyDir, '/dlFile.mat'];
@@ -221,7 +250,22 @@ classdef DynaLearn < matlab.mixin.SetGet
             
         end
         
-        function dlInit(obj, studydir) % Initializer TODO
+        function [s] = dlGetRawName(obj)
+            
+            obj.dlPath = [obj.dlStudyDir, '/solve'];
+            addpath(obj.dlPath);
+            d = dir(obj.dlPath);
+            
+            for i = 1:size(d, 1)
+                if contains(d(i).name, '.m')
+                    s = d(i).name;
+                    s = s(1:end-2);
+                end
+            end
+            
+        end
+        
+        function dlInit(obj, studydir) % Initializer with mex
             
             tspan = [0 10]; % Base time span for class construction and initialization.
             simulator_options = {'tspan', tspan, 'solver', 'rk1', 'dt', obj.dldT, ...
@@ -231,9 +275,26 @@ classdef DynaLearn < matlab.mixin.SetGet
             
         end
         
+        function dlRawInit(obj, studydir) % Initializer without mex
+            
+            tspan = [0 10]; % Base time span for class construction and initialization.
+            simulator_options = {'tspan', tspan, 'solver', 'rk1', 'dt', obj.dldT, ...
+                        'downsample_factor', obj.dlDownSampleFactor, 'verbose_flag', 1, ...
+                        'study_dir', studydir, 'mex_flag', 0};
+            obj.dsData = dsSimulate(obj.dlModel, 'vary', [], simulator_options{:});
+            
+        end
+        
         function dlMexBridgeInit(obj)
            
             set(obj, 'dlMexFuncName', obj.dlGetMexName());
+            dsMexBridge('dlTempFunc.m', obj.dlMexFuncName);
+            
+        end
+        
+        function dlRawBridgeInit(obj)
+           
+            set(obj, 'dlMexFuncName', obj.dlGetRawName());
             dsMexBridge('dlTempFunc.m', obj.dlMexFuncName);
             
         end
@@ -447,7 +508,7 @@ classdef DynaLearn < matlab.mixin.SetGet
                     
                     j = dlOutputIndices;
                     TempError = abs(obj.dlLastOutputs{j(1)} - obj.dlLastOutputs{j(2)});
-                    
+                
                 else
                     
                     fprintf("Undefined error type ""%s""\n", dlErrorType);
@@ -791,6 +852,10 @@ classdef DynaLearn < matlab.mixin.SetGet
             elseif strcmpi(dlLearningRule, 'RWDeltaRule')
             
                 disp("TODO Rascorla-Wagner delta rule");
+                
+            elseif strcmpi(dlLearningRule, 'NewRule')
+            
+                disp("TODO new rule");
                 
             else
                 

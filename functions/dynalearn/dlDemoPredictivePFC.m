@@ -4,7 +4,7 @@ function y = dlDemoPredictivePFC(Ne, Ni, Nio, noise_rate)
 
     % Population sizes
 
-%     Ne = 20;     % # of E cells per layer
+%     Ne = 24;     % # of E cells per layer
 %     Ni = 4;  % # of I cells per layer
 %     Nio = 10; % # of Input cells
 
@@ -29,11 +29,11 @@ function y = dlDemoPredictivePFC(Ne, Ni, Nio, noise_rate)
     kzio = zeros(Nio, Nio);
     KdeepEI = Kie * 1.5;
 
-    a1 = 1;a2 = ceil(1*Ne/5);
-    b1 = ceil(1 + 1*Ne/5);b2 = ceil(2*Ne/5);
-    c1 = ceil(1 + 2*Ne/5);c2 = ceil(3*Ne/5);
-    cx1_1 = ceil(1 + 3*Ne/5);cx1_2 = ceil(4*Ne/5);
-    cx2_1 = ceil(1 + 4*Ne/5);cx2_2 = ceil(5*Ne/5);
+    a1 = 1;a2 = ceil(1*Ne/6);
+    b1 = ceil(1 + 1*Ne/6);b2 = ceil(2*Ne/6);
+    c1 = ceil(1 + 2*Ne/6);c2 = ceil(3*Ne/6);
+    cx1_1 = ceil(1 + 3*Ne/6);cx1_2 = ceil(4*Ne/6);
+    cx2_1 = ceil(1 + 4*Ne/6);cx2_2 = ceil(5*Ne/6);
     
     cnx1_1 = 1;cnx1_2 = ceil(1*Ne/6);
     cnx2_1 = ceil(1 + 1*Ne/6);cnx2_2 = ceil(2*Ne/6);
