@@ -304,7 +304,7 @@ classdef DynaLearn < matlab.mixin.SetGet
             
         end
         
-        function dlPlotAllPotentials(obj, mode)
+        function dlPlotAllPotentials(obj, mode, opts)
            
             dlPotentialIndices = contains(obj.dlVariables, '_V');
             dlPotentialIndices(1) = 1;
@@ -354,6 +354,53 @@ classdef DynaLearn < matlab.mixin.SetGet
                     end
 
                     xlabel(mode + " in time (ms)");
+                    
+                elseif strcmpi(mode, 'avglfp')
+
+                    for i = (k-1)*6+1:min((k*6), 6)
+
+                        x = dlPotentials{1, i+1};
+                        subplot((min(k*6, n-1) - (k-1)*6), 1, mod(i-1, (min(k*6, n-1) - (k-1)*6))+1);
+                        plot(t, mean(x, 2));grid("on");
+                        ylabel(dlLabels(i+1));
+
+                    end
+
+                    disp("Temp edit for 6 subplots");
+                    xlabel(mode + " in time (ms)");
+                    return
+                    
+                elseif strcmpi(mode, 'avgfft')
+
+                    dtf = ceil(1 / (obj.dldT*obj.dlDownSampleFactor));
+                    
+                    lf = opts("lf")*dtf;
+                    hf = opts("hf")*dtf;
+                    freqCap = 0;
+                    
+                    for i = (k-1)*6+1:min((k*6), 6)
+
+                        x = dlPotentials{1, i+1};
+                        fqs = linspace(1, 500, max(size(x)));
+                        subplot((min(k*6, n-1) - (k-1)*6), 1, mod(i-1, (min(k*6, n-1) - (k-1)*6))+1);
+                        ffts = abs(fft(mean(x, 2))) * min(size(x)) / 1000;
+                        
+                        plot(fqs(lf:hf), ffts(lf:hf));grid("on");
+                        
+                        if freqCap == 0
+                            freqCap = max(ffts(lf:hf))*1.2;
+                            ylim([0, freqCap]);
+                        else
+                            ylim([0, freqCap]);
+                        end
+                        
+                        ylabel(dlLabels(i+1));
+
+                    end
+
+                    disp("Temp edit for 6 subplots; average fft");
+                    xlabel(mode + " in frequency (Hz)");
+                    return
                     
                 else
                     
@@ -829,7 +876,10 @@ classdef DynaLearn < matlab.mixin.SetGet
                     rng('shuffle');
                     w = val{i, 1};
                     delta = (randn(size(w)))*error*dlLambda;
-                    wn = w + delta;
+                    
+                    if ~contains(lab{i, 1}, 'IO')
+                        wn = w + delta;
+                    end
                     
                     wn(wn < 0) = 0;
                     wn(wn > 1) = 1;
@@ -845,7 +895,10 @@ classdef DynaLearn < matlab.mixin.SetGet
                     rng('shuffle');
                     w = val{i, 1};
                     delta = (1-w).*(randn(size(w)))*error*dlLambda;
-                    wn = w + delta;
+                    
+                    if ~contains(lab{i, 1}, 'IO')
+                        wn = w + delta;
+                    end
                     
                     wn(wn < 0) = 0;
                     wn(wn > 1) = 1;

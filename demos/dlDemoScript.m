@@ -5,7 +5,7 @@
 clear;
 clc;
 
-Ne = 24;Ni = 4;Nio = 10;noise_rate = 7;
+Ne = 24;Ni = 6;Nio = 12;noise_rate = 7;
 % s = NeoCortex(Ne, Ni, Nio, noise_rate);
 % s = dlDemoPING(2, 1, 2, noise_rate); % 14 Mins on mex generator
 s = dlDemoPredictivePFC(Ne, Ni, Nio, noise_rate);
@@ -13,11 +13,11 @@ s = dlDemoPredictivePFC(Ne, Ni, Nio, noise_rate);
 %% Create DynaLearn Class (First time)
 
 % m = DynaLearn(s, 'models/dlDemoPING'); % ~ 120min
-m = DynaLearn(s, 'models/dlDemoPredictivePFC'); % ~ 120min
+% m = DynaLearn(s, 'models/dlDemoPredictivePFC'); % ~ 120min
 
 % m = DynaLearn(s, 'models/dlTestPredictivePFC', 'raw'); % ~ 42sec
-m.dlSimulate(); % ~ 40sec
-m.dlSave(); % < 1sec
+% m.dlSimulate(); % ~ 40sec
+% m.dlSave(); % < 1sec
 
 %% Load DynaLearn Class (previously saved file is required, default is dlFileBase.mat)
 
@@ -32,7 +32,7 @@ m = m.dlLoad('models/dlDemoPredictivePFC'); % ~ 10sec
 
 clc;
 Params = containers.Map();
-Params('tspan') = [0 500];
+Params('tspan') = [0 1000];
 m.dlUpdateParams(Params);
 
 m.dlSimulate(); % (optional) simulate it , ~ seconds runtime
@@ -50,73 +50,73 @@ trialParams1('tspan') = [0 500];
 trialParams2('tspan') = [0 500];
 trialParams3('tspan') = [0 500];
 
-g_poisson = 6e-4;dc_poisson = 7e5;
+g_poisson = 6e-4;dc_poisson = 7e7;
 
-trialParams1('SA1_ctx_iPoisson_DC_poisson') = dc_poisson;
-trialParams1('SA2_ctx_iPoisson_DC_poisson') = dc_poisson;
-trialParams1('SB1_ctx_iPoisson_DC_poisson') = 0;
-trialParams1('SB2_ctx_iPoisson_DC_poisson') = 0;
-trialParams1('SC1_ctx_iPoisson_DC_poisson') = 0;
-trialParams1('SC2_ctx_iPoisson_DC_poisson') = 0;
+trialParams1('IO_SA1_ctx_iPoisson_DC_poisson') = dc_poisson;
+trialParams1('IO_SA2_ctx_iPoisson_DC_poisson') = dc_poisson;
+trialParams1('IO_SB1_ctx_iPoisson_DC_poisson') = 0;
+trialParams1('IO_SB2_ctx_iPoisson_DC_poisson') = 0;
+trialParams1('IO_SC1_ctx_iPoisson_DC_poisson') = 0;
+trialParams1('IO_SC2_ctx_iPoisson_DC_poisson') = 0;
 
-trialParams1('SA1_ctx_iPoisson_onset_poisson') = 150;
-trialParams1('SA1_ctx_iPoisson_offset_poisson') = 250;
-trialParams1('SA2_ctx_iPoisson_onset_poisson') = 250;
-trialParams1('SA2_ctx_iPoisson_offset_poisson') = 350;
+trialParams1('IO_SA1_ctx_iPoisson_onset_poisson') = 150;
+trialParams1('IO_SA1_ctx_iPoisson_offset_poisson') = 250;
+trialParams1('IO_SA2_ctx_iPoisson_onset_poisson') = 250;
+trialParams1('IO_SA2_ctx_iPoisson_offset_poisson') = 350;
 
-trialParams1('SB1_ctx_iPoisson_onset_poisson') = 0;
-trialParams1('SB1_ctx_iPoisson_offset_poisson') = 0;
-trialParams1('SB2_ctx_iPoisson_onset_poisson') = 0;
-trialParams1('SB2_ctx_iPoisson_offset_poisson') = 0;
+trialParams1('IO_SB1_ctx_iPoisson_onset_poisson') = 0;
+trialParams1('IO_SB1_ctx_iPoisson_offset_poisson') = 0;
+trialParams1('IO_SB2_ctx_iPoisson_onset_poisson') = 0;
+trialParams1('IO_SB2_ctx_iPoisson_offset_poisson') = 0;
 
-trialParams1('SC1_ctx_iPoisson_onset_poisson') = 0;
-trialParams1('SC1_ctx_iPoisson_offset_poisson') = 0;
-trialParams1('SC2_ctx_iPoisson_onset_poisson') = 0;
-trialParams1('SC2_ctx_iPoisson_offset_poisson') = 0;
+trialParams1('IO_SC1_ctx_iPoisson_onset_poisson') = 0;
+trialParams1('IO_SC1_ctx_iPoisson_offset_poisson') = 0;
+trialParams1('IO_SC2_ctx_iPoisson_onset_poisson') = 0;
+trialParams1('IO_SC2_ctx_iPoisson_offset_poisson') = 0;
 
-trialParams2('SA1_ctx_iPoisson_DC_poisson') = 0;
-trialParams2('SA2_ctx_iPoisson_DC_poisson') = 0;
-trialParams2('SB1_ctx_iPoisson_DC_poisson') = dc_poisson;
-trialParams2('SB2_ctx_iPoisson_DC_poisson') = dc_poisson;
-trialParams2('SC1_ctx_iPoisson_DC_poisson') = 0;
-trialParams2('SC2_ctx_iPoisson_DC_poisson') = 0;
+trialParams2('IO_SA1_ctx_iPoisson_DC_poisson') = 0;
+trialParams2('IO_SA2_ctx_iPoisson_DC_poisson') = 0;
+trialParams2('IO_SB1_ctx_iPoisson_DC_poisson') = dc_poisson;
+trialParams2('IO_SB2_ctx_iPoisson_DC_poisson') = dc_poisson;
+trialParams2('IO_SC1_ctx_iPoisson_DC_poisson') = 0;
+trialParams2('IO_SC2_ctx_iPoisson_DC_poisson') = 0;
 
-trialParams2('SA1_ctx_iPoisson_onset_poisson') = 250;
-trialParams2('SA1_ctx_iPoisson_offset_poisson') = 250;
-trialParams2('SA2_ctx_iPoisson_onset_poisson') = 350;
-trialParams2('SA2_ctx_iPoisson_offset_poisson') = 350;
+trialParams2('IO_SA1_ctx_iPoisson_onset_poisson') = 250;
+trialParams2('IO_SA1_ctx_iPoisson_offset_poisson') = 250;
+trialParams2('IO_SA2_ctx_iPoisson_onset_poisson') = 350;
+trialParams2('IO_SA2_ctx_iPoisson_offset_poisson') = 350;
 
-trialParams2('SB1_ctx_iPoisson_onset_poisson') = 150;
-trialParams2('SB1_ctx_iPoisson_offset_poisson') = 250;
-trialParams2('SB2_ctx_iPoisson_onset_poisson') = 250;
-trialParams2('SB2_ctx_iPoisson_offset_poisson') = 350;
+trialParams2('IO_SB1_ctx_iPoisson_onset_poisson') = 150;
+trialParams2('IO_SB1_ctx_iPoisson_offset_poisson') = 250;
+trialParams2('IO_SB2_ctx_iPoisson_onset_poisson') = 250;
+trialParams2('IO_SB2_ctx_iPoisson_offset_poisson') = 350;
 
-trialParams2('SC1_ctx_iPoisson_onset_poisson') = 250;
-trialParams2('SC1_ctx_iPoisson_offset_poisson') = 250;
-trialParams2('SC2_ctx_iPoisson_onset_poisson') = 350;
-trialParams2('SC2_ctx_iPoisson_offset_poisson') = 350;
+trialParams2('IO_SC1_ctx_iPoisson_onset_poisson') = 250;
+trialParams2('IO_SC1_ctx_iPoisson_offset_poisson') = 250;
+trialParams2('IO_SC2_ctx_iPoisson_onset_poisson') = 350;
+trialParams2('IO_SC2_ctx_iPoisson_offset_poisson') = 350;
 
-trialParams3('SA1_ctx_iPoisson_DC_poisson') = 0;
-trialParams3('SA2_ctx_iPoisson_DC_poisson') = 0;
-trialParams3('SB1_ctx_iPoisson_DC_poisson') = 0;
-trialParams3('SB2_ctx_iPoisson_DC_poisson') = 0;
-trialParams3('SC1_ctx_iPoisson_DC_poisson') = dc_poisson;
-trialParams3('SC2_ctx_iPoisson_DC_poisson') = dc_poisson;
+trialParams3('IO_SA1_ctx_iPoisson_DC_poisson') = 0;
+trialParams3('IO_SA2_ctx_iPoisson_DC_poisson') = 0;
+trialParams3('IO_SB1_ctx_iPoisson_DC_poisson') = 0;
+trialParams3('IO_SB2_ctx_iPoisson_DC_poisson') = 0;
+trialParams3('IO_SC1_ctx_iPoisson_DC_poisson') = dc_poisson;
+trialParams3('IO_SC2_ctx_iPoisson_DC_poisson') = dc_poisson;
 
-trialParams3('SA1_ctx_iPoisson_onset_poisson') = 250;
-trialParams3('SA1_ctx_iPoisson_offset_poisson') = 250;
-trialParams3('SA2_ctx_iPoisson_onset_poisson') = 350;
-trialParams3('SA2_ctx_iPoisson_offset_poisson') = 350;
+trialParams3('IO_SA1_ctx_iPoisson_onset_poisson') = 250;
+trialParams3('IO_SA1_ctx_iPoisson_offset_poisson') = 250;
+trialParams3('IO_SA2_ctx_iPoisson_onset_poisson') = 350;
+trialParams3('IO_SA2_ctx_iPoisson_offset_poisson') = 350;
 
-trialParams3('SB1_ctx_iPoisson_onset_poisson') = 250;
-trialParams3('SB1_ctx_iPoisson_offset_poisson') = 250;
-trialParams3('SB2_ctx_iPoisson_onset_poisson') = 350;
-trialParams3('SB2_ctx_iPoisson_offset_poisson') = 350;
+trialParams3('IO_SB1_ctx_iPoisson_onset_poisson') = 250;
+trialParams3('IO_SB1_ctx_iPoisson_offset_poisson') = 250;
+trialParams3('IO_SB2_ctx_iPoisson_onset_poisson') = 350;
+trialParams3('IO_SB2_ctx_iPoisson_offset_poisson') = 350;
 
-trialParams3('SC1_ctx_iPoisson_onset_poisson') = 150;
-trialParams3('SC1_ctx_iPoisson_offset_poisson') = 250;
-trialParams3('SC2_ctx_iPoisson_onset_poisson') = 250;
-trialParams3('SC2_ctx_iPoisson_offset_poisson') = 350;
+trialParams3('IO_SC1_ctx_iPoisson_onset_poisson') = 150;
+trialParams3('IO_SC1_ctx_iPoisson_offset_poisson') = 250;
+trialParams3('IO_SC2_ctx_iPoisson_onset_poisson') = 250;
+trialParams3('IO_SC2_ctx_iPoisson_offset_poisson') = 350;
 
 outputParams = [{'DeepE_V', 1:4, [240 360], 'afr'}; {'DeepE_V', 5:8, [240 360], 'afr'}; {'DeepE_V', 9:12, [240 360], 'afr'}; {'DeepE_V', 13:16, [240 360], 'afr'}; {'DeepE_V', 17:20, [240 360], 'afr'}];
 targetParams1 = [{'MSE', 1, 17, 0.25}; {'MSE', 2, 14, 0.25}; {'MSE', 3, 14, 0.25}; {'Compare', [1, 2, 3], 0, 0.15}; {'Diff', [2, 3], 0, 0.05}]; % A 
@@ -131,9 +131,9 @@ dlTargetParameters = {targetParams1, targetParams2, targetParams3};
 dlOutputParameters = outputParams;
 
 dlTrainOptions = containers.Map();
-dlTrainOptions('dlEpochs') = 10;
+dlTrainOptions('dlEpochs') = 1;
 dlTrainOptions('dlBatchs') = 3;
-dlTrainOptions('dlLambda') = 0.000001;
+dlTrainOptions('dlLambda') = 0.0;
 
 dlTrainOptions('dlCheckpoint') = 'true';
 dlTrainOptions('dlCheckpointCoefficient') = 1.74; % e.g sqrt(2), sqrt(3), 2, sqrt(5) ... 
@@ -157,10 +157,18 @@ m.dlTrain(dlInputParameters, dlOutputParameters, dlTargetParameters, dlTrainOpti
 for i = 1:1
     m.dlRunSimulation(dlInputParameters{i}, dlOutputParameters);
 end
-
+%%
+m.dlPlotAllPotentials('avglfp');
 %%
 
-m.dlPlotAllPotentials('lfp');
+opts = containers.Map();
+% opts("lf") = 50;
+% opts("hf") = 100;
+% m.dlPlotAllPotentials('avgfft', opts);
+
+opts("lf") = 20;
+opts("hf") = 50;
+m.dlPlotAllPotentials('avgfft', opts);
 
 %% Errors log plot
 

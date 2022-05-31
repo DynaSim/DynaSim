@@ -76,7 +76,7 @@ function y = dlDemoPredictivePFC(Ne, Ni, Nio, noise_rate)
     
     % neuronal dynamics
     eqns = 'dV/dt = (Iapp + @current + noise*randn(1, Npop))/C; Iapp=0; noise=0; C=1; V(0) = -rand(1, Npop)*17;';
-    eqns2 = 'dV/dt = (Iapp + noise*randn(1, Npop))/C; Iapp=0; noise=0; C=1; V(0) = -rand(1, Npop)*17;';
+    eqns2 = 'dV/dt = (Iapp + @current + noise*randn(1, Npop))/C; Iapp=0; noise=0; C=1; V(0) = -rand(1, Npop)*17;';
 
     % SPN
 %     g_l_D1 = 0.096;      % mS/cm^2, Leak conductance for D1 SPNs 
@@ -147,29 +147,29 @@ function y = dlDemoPredictivePFC(Ne, Ni, Nio, noise_rate)
 
     % E/I connectivity
     IOping.connections(1).direction = 'E->I';
-    IOping.connections(1).mechanism_list = {'iAMPActx'};
+    IOping.connections(1).mechanism_list = {'iPoisson'};
     IOping.connections(1).parameters = {'gAMPA',gAMPA_ei,'tauAMPA',tauAMPA,'netcon',kzio};
 
     IOping.connections(2).direction = 'E->E';
-    IOping.connections(2).mechanism_list = {'iAMPActx'};
+    IOping.connections(2).mechanism_list = {'iPoisson'};
     IOping.connections(2).parameters = {'gAMPA',gAMPA_ee,'tauAMPA',tauAMPA,'netcon',kzio};
 
     IOping.connections(3).direction = 'I->E';
-    IOping.connections(3).mechanism_list = {'iGABActx'};
+    IOping.connections(3).mechanism_list = {'iPoisson'};
     IOping.connections(3).parameters = {'gGABAa',gGABAa_ie,'tauGABA',tauGABA_gamma,'netcon',kzio};
 
     IOping.connections(4).direction = 'I->I';
-    IOping.connections(4).mechanism_list = {'iGABActx'};
+    IOping.connections(4).mechanism_list = {'iPoisson'};
     IOping.connections(4).parameters = {'gGABAa',gGABAa_ii,'tauGABA',tauGABA_gamma,'netcon',kzio};
 
     % create independent layers
     sup = dsApplyModifications(ping,{'E','name','supE'; 'I','name','supI'}); % superficial layer (~gamma)
     mid = dsApplyModifications(ping,{'E','name','midE'; 'I','name','midI'}); % middle layer (~gamma)
     deep = dsApplyModifications(ping,{'E','name','deepE'; 'I','name','deepI'}); % deep layer (~beta)
-    stimuli1 = dsApplyModifications(IOping,{'E','name','SA1'; 'I','name','SB1'}); % I/O layer (stimuli)
-    stimuli2 = dsApplyModifications(IOping,{'E','name','SC1'; 'I','name','SA2'}); % I/O layer (stimuli)
-    stimuli3 = dsApplyModifications(IOping,{'E','name','SB2'; 'I','name','SC2'}); % I/O layer (stimuli)
-    contex = dsApplyModifications(IOping,{'E','name','Cx1'; 'I','name','Cx2'}); % I/O layer (contex)
+    stimuli1 = dsApplyModifications(IOping,{'E','name','IO_SA1'; 'I','name','IO_SB1'}); % I/O layer (stimuli)
+    stimuli2 = dsApplyModifications(IOping,{'E','name','IO_SC1'; 'I','name','IO_SA2'}); % I/O layer (stimuli)
+    stimuli3 = dsApplyModifications(IOping,{'E','name','IO_SB2'; 'I','name','IO_SC2'}); % I/O layer (stimuli)
+    contex = dsApplyModifications(IOping,{'E','name','IO_Cx1'; 'I','name','IO_Cx2'}); % I/O layer (contex)
 
     % update deep layer parameters to produce beta rhythm (25Hz)
     deep = dsApplyModifications(deep,{'deepI->deepE','tauGABA',tauGABA_beta});
@@ -184,61 +184,61 @@ function y = dlDemoPredictivePFC(Ne, Ni, Nio, noise_rate)
     
     % Input SA -> midE [1-4]
     Aconn = tempconn;
-    Aconn(:, a1:a2) =  1;
+    Aconn(:, a1:a2) =  0.47;
 
     c = length(s.connections) + 1;
-    s.connections(c).direction = 'SA1->midE';
-    s.connections(c).mechanism_list={'iAMPActx'};
+    s.connections(c).direction = 'IO_SA1->midE';
+    s.connections(c).mechanism_list={'iPoisson'};
     s.connections(c).parameters={'gAMPA',gAMPA_in,'tauAMPA',tauAMPA,'netcon',Aconn};
 
     c = length(s.connections) + 1;
-    s.connections(c).direction = 'SA2->midE';
-    s.connections(c).mechanism_list={'iAMPActx'};
+    s.connections(c).direction = 'IO_SA2->midE';
+    s.connections(c).mechanism_list={'iPoisson'};
     s.connections(c).parameters={'gAMPA',gAMPA_in,'tauAMPA',tauAMPA,'netcon',Aconn};
     
     % Input SB -> midE [5-8]
     Bconn = tempconn;
-    Bconn(:, b1:b2) =  1;
+    Bconn(:, b1:b2) =  0.47;
     
     c = length(s.connections)+1;
-    s.connections(c).direction = 'SB1->midE';
+    s.connections(c).direction = 'IO_SB1->midE';
     s.connections(c).mechanism_list={'iAMPActx'};
     s.connections(c).parameters={'gAMPA',gAMPA_in,'tauAMPA',tauAMPA,'netcon',Bconn};
     
     c = length(s.connections)+1;
-    s.connections(c).direction = 'SB2->midE';
+    s.connections(c).direction = 'IO_SB2->midE';
     s.connections(c).mechanism_list={'iAMPActx'};
     s.connections(c).parameters={'gAMPA',gAMPA_in,'tauAMPA',tauAMPA,'netcon',Bconn};
 
     % Input SC -> midE [9-12]
     Cconn = tempconn;
-    Cconn(:, c1:c2) =  1;
+    Cconn(:, c1:c2) =  0.47;
     
     c = length(s.connections)+1;
-    s.connections(c).direction = 'SC1->midE';
+    s.connections(c).direction = 'IO_SC1->midE';
     s.connections(c).mechanism_list={'iAMPActx'};
     s.connections(c).parameters={'gAMPA',gAMPA_in,'tauAMPA',tauAMPA,'netcon',Cconn};
     
     c = length(s.connections)+1;
-    s.connections(c).direction = 'SC2->midE';
+    s.connections(c).direction = 'IO_SC2->midE';
     s.connections(c).mechanism_list={'iAMPActx'};
     s.connections(c).parameters={'gAMPA',gAMPA_in,'tauAMPA',tauAMPA,'netcon',Cconn};
     
     % Contex Cx1 -> midE [13-16]
     Cx1conn = tempconn;
-    Cx1conn(:, cx1_1:cx1_2) =  1;
+    Cx1conn(:, cx1_1:cx1_2) =  0.47;
 
     c = length(s.connections)+1;
-    s.connections(c).direction = 'Cx1->midE';
+    s.connections(c).direction = 'IO_Cx1->midE';
     s.connections(c).mechanism_list={'iAMPActx'};
     s.connections(c).parameters={'gAMPA',gAMPA_in,'tauAMPA',tauAMPA,'netcon',Cx1conn};
 
     % Contex Cx2 -> midE [17-20]
     Cx2conn = tempconn;
-    Cx2conn(:, cx2_1:cx2_2) =  1;
+    Cx2conn(:, cx2_1:cx2_2) =  0.47;
 
     c = length(s.connections)+1;
-    s.connections(c).direction = 'Cx2->midE';
+    s.connections(c).direction = 'IO_Cx2->midE';
     s.connections(c).mechanism_list={'iAMPActx'};
     s.connections(c).parameters={'gAMPA',gAMPA_in,'tauAMPA',tauAMPA,'netcon',Cx2conn};
 
