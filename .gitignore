@@ -23,3 +23,5 @@ dlTempFunc.m
 dlTempFuncParamsChanger.m
 
 !models/*
+!models/*/
+!models/*/*/
