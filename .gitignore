@@ -22,4 +22,4 @@ dsConfig.txt
 dlTempFunc.m
 dlTempFuncParamsChanger.m
 
-!models/*.mat
+!models/*
