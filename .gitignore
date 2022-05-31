@@ -1,6 +1,5 @@
 *~
 *.png
-*.mat
 *.zip
 *.asv
 
@@ -23,5 +22,3 @@ dlTempFunc.m
 dlTempFuncParamsChanger.m
 
 !models/*
-!models/*/
-!models/*/*/
