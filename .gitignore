@@ -7,8 +7,6 @@
 .directory
 .DS_Store
 
-models/personal
-functions/personal
 outputs
 _ignore
 unitTestData/
