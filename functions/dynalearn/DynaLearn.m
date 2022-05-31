@@ -24,7 +24,7 @@ classdef DynaLearn < matlab.mixin.SetGet
         dlMexFuncName = []; % Name of Mex function (e.g **********_mex.mex64
         
         dlPath = []; % Path which contains params.mat, mexfuncs, solver ...
-        dlPathToFile = 'DynaSim/models/dlBaseModel';
+        dlPathToFile = 'models/dlBaseModel';
         dlBaseVoltage = -77.4;
         dldT = .01; % Time step in ODEs (dt)
         
@@ -45,7 +45,7 @@ classdef DynaLearn < matlab.mixin.SetGet
         function obj = DynaLearn(varargin) % Constructors, will be expanded
             
             fprintf("\n\n@DS.DL:Creating Dyna model object ... ");
-            set(obj, 'dlPathToFile', 'DynaSim/models/dlBaseModel');
+            set(obj, 'dlPathToFile', 'models/dlBaseModel');
             
             if nargin == 0
                 
@@ -215,6 +215,9 @@ classdef DynaLearn < matlab.mixin.SetGet
             o = load(obj.dlPathToFile);
             fprintf("DL object loaded from %s \n", PathToFile);
             obj = o.obj;
+            
+            set(obj, 'dlPathToFile', [PathToFile, '/dlFile.mat']);
+            set(obj, 'dlPath', [PathToFile, '/solve']);
             
             fprintf("Params.mat file loaded from %s \n", PathToFile);
             p = load([PathToFile, '/solve/params.mat']);

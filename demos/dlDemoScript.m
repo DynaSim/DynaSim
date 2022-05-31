@@ -15,8 +15,8 @@ s = dlDemoPredictivePFC(Ne, Ni, Nio, noise_rate);
 % m = DynaLearn(s, 'models/dlDemoPING'); % ~ 120min
 % m = DynaLearn(s, 'models/dlDemoPredictivePFC'); % ~ 120min
 
-% m = DynaLearn(s, 'models/dlTestPredictivePFC', 'raw'); % ~ 42sec
-% m.dlSimulate(); % ~ 40sec
+m = DynaLearn(s, 'models/dlTestPredictivePFC', 'raw'); % ~ 42sec
+m.dlSimulate(); % ~ 40sec
 % m.dlSave(); % < 1sec
 
 %% Load DynaLearn Class (previously saved file is required, default is dlFileBase.mat)
@@ -25,6 +25,7 @@ clc;
 m = DynaLearn(); % ~ 1sec
 % m = m.dlLoad('models/dlDemoPING'); % ~ 10sec
 m = m.dlLoad('models/dlDemoPredictivePFC'); % ~ 10sec
+% m = m.dlLoad('models/dlDemoPredictivePFC2'); % ~ 10sec
 % m = m.dlLoad('models/dlTestPredictivePFC'); % ~ 10sec
 % m.dlSimulate(); % ~ 40sec
 
@@ -50,7 +51,7 @@ trialParams1('tspan') = [0 500];
 trialParams2('tspan') = [0 500];
 trialParams3('tspan') = [0 500];
 
-g_poisson = 6e-4;dc_poisson = 7e7;
+g_poisson = 6e-5;dc_poisson = 4e7;
 
 trialParams1('IO_SA1_ctx_iPoisson_DC_poisson') = dc_poisson;
 trialParams1('IO_SA2_ctx_iPoisson_DC_poisson') = dc_poisson;
@@ -132,7 +133,7 @@ dlOutputParameters = outputParams;
 
 dlTrainOptions = containers.Map();
 dlTrainOptions('dlEpochs') = 1;
-dlTrainOptions('dlBatchs') = 3;
+dlTrainOptions('dlBatchs') = 1;
 dlTrainOptions('dlLambda') = 0.0;
 
 dlTrainOptions('dlCheckpoint') = 'true';
@@ -150,15 +151,16 @@ dlTrainOptions('dlLambdaCap') = 3e-2; % Only if Adaptive lambda is active, recom
 
 % m.dlResetTraining(); % Reset logs and optimal state error (not the optimal state file)
 % m.dlLoadOptimal();  % Load the current optimal state (if exists)
-m.dlTrain(dlInputParameters, dlOutputParameters, dlTargetParameters, dlTrainOptions);
+% m.dlTrain(dlInputParameters, dlOutputParameters, dlTargetParameters, dlTrainOptions);
 
 %% Run a simulation (without training)
 
 for i = 1:1
     m.dlRunSimulation(dlInputParameters{i}, dlOutputParameters);
 end
+
 %%
-m.dlPlotAllPotentials('avglfp');
+m.dlPlotAllPotentials('lfp');
 %%
 
 opts = containers.Map();
