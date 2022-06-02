@@ -740,10 +740,10 @@ if ~isempty(model.monitors)
 
         if isnumeric(spike_threshold)
           model.conditionals(end).condition=...
-            sprintf('any(%s%s>=%g&%s%s<%g)',var_spikes,index_curr,spike_threshold,var_spikes,index_last,spike_threshold);
+            sprintf('(%s%s>=%g&%s%s<%g)',var_spikes,index_curr,spike_threshold,var_spikes,index_last,spike_threshold);
         else
           model.conditionals(end).condition=...
-            sprintf('any(%s%s>=%s&%s%s<%s)',var_spikes,index_curr,spike_threshold,var_spikes,index_last,spike_threshold);
+            sprintf('(%s%s>=%s&%s%s<%s)',var_spikes,index_curr,spike_threshold,var_spikes,index_last,spike_threshold);
         end
 
         action1=sprintf('%s(n,conditional_indx)=1',monitor_names{i});
@@ -1404,7 +1404,7 @@ function print_conditional_update(fid,conditionals,index_nexts,state_variables, 
       action = {action};
     end
     for j=1:length(condition)
-      fprintf(fid,['  conditional_test=any(%s);\n'],condition{j}); % JSS edit
+      fprintf(fid,['  conditional_test=any(any(%s));\n'],condition{j}); % JSS edit
       % fprintf(fid,['  conditional_test=(%s);\n'],condition{j});
 %     if ~isempty(strfind(condition{j},'any('))
 %         condition_indx = regexprep(condition{j},'^any\(','','once');
