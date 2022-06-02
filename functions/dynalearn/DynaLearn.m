@@ -24,7 +24,7 @@ classdef DynaLearn < matlab.mixin.SetGet
         dlMexFuncName = []; % Name of Mex function (e.g **********_mex.mex64
         
         dlPath = []; % Path which contains params.mat, mexfuncs, solver ...
-        dlPathToFile = 'DynaSim/models/dlBaseModel';
+        dlPathToFile = 'models/dlBaseModel';
         dlBaseVoltage = -77.4;
         dldT = .01; % Time step in ODEs (dt)
         
@@ -45,7 +45,7 @@ classdef DynaLearn < matlab.mixin.SetGet
         function obj = DynaLearn(varargin) % Constructors, will be expanded
             
             fprintf("\n\n@DS.DL:Creating Dyna model object ... ");
-            set(obj, 'dlPathToFile', 'DynaSim/models/dlBaseModel');
+            set(obj, 'dlPathToFile', 'models/dlBaseModel');
             
             if nargin == 0
                 
@@ -216,6 +216,9 @@ classdef DynaLearn < matlab.mixin.SetGet
             fprintf("DL object loaded from %s \n", PathToFile);
             obj = o.obj;
             
+            set(obj, 'dlPathToFile', [PathToFile, '/dlFile.mat']);
+            set(obj, 'dlPath', [PathToFile, '/solve']);
+            
             fprintf("Params.mat file loaded from %s \n", PathToFile);
             p = load([PathToFile, '/solve/params.mat']);
             save([obj.dlPath, '/params.mat'], '-struct', 'p');
@@ -228,7 +231,12 @@ classdef DynaLearn < matlab.mixin.SetGet
             [out, vars] = dsGetOutputList(obj.dlModel);
             set(obj, 'dlOutputs', out);
             set(obj, 'dlVariables', vars);
-            obj.dlMexBridgeInit()
+            
+            if strcmpi("mex", obj.dlSimulationTool)
+                obj.dlMexBridgeInit();
+            elseif strcmpi("raw", obj.dlSimulationTool)
+                obj.dlRawBridgeInit();
+            end
             
             obj.dlTrialNumber = 0;
             fprintf("\nReinitialized.\n");
@@ -299,7 +307,7 @@ classdef DynaLearn < matlab.mixin.SetGet
             
         end
         
-        function dlPlotAllPotentials(obj, mode)
+        function dlPlotAllPotentials(obj, mode, opts)
            
             dlPotentialIndices = contains(obj.dlVariables, '_V');
             dlPotentialIndices(1) = 1;
@@ -326,7 +334,7 @@ classdef DynaLearn < matlab.mixin.SetGet
                         if size(raster, 1) > 0
 
                             pool = 1:size(x, 2);
-                            O1 = 5e2 * NWepanechnikovKernelRegrRaster(t, raster, pool, 25, 1, 1);
+                            O1 = 5e2 * NWepanechnikovKernelRegrRaster(t, raster, pool, 49, 1, 1);
                             plot(t, O1, 'o');grid("on");
 
                         end
@@ -349,6 +357,53 @@ classdef DynaLearn < matlab.mixin.SetGet
                     end
 
                     xlabel(mode + " in time (ms)");
+                    
+                elseif strcmpi(mode, 'avglfp')
+
+                    for i = (k-1)*6+1:min((k*6), 6)
+
+                        x = dlPotentials{1, i+1};
+                        subplot((min(k*6, n-1) - (k-1)*6), 1, mod(i-1, (min(k*6, n-1) - (k-1)*6))+1);
+                        plot(t, mean(x, 2));grid("on");
+                        ylabel(dlLabels(i+1));
+
+                    end
+
+                    disp("Temp edit for 6 subplots");
+                    xlabel(mode + " in time (ms)");
+                    return
+                    
+                elseif strcmpi(mode, 'avgfft')
+
+                    dtf = ceil(1 / (obj.dldT*obj.dlDownSampleFactor));
+                    
+                    lf = opts("lf")*dtf;
+                    hf = opts("hf")*dtf;
+                    freqCap = 0;
+                    
+                    for i = (k-1)*6+1:min((k*6), 6)
+
+                        x = dlPotentials{1, i+1};
+                        fqs = linspace(1, 500, max(size(x)));
+                        subplot((min(k*6, n-1) - (k-1)*6), 1, mod(i-1, (min(k*6, n-1) - (k-1)*6))+1);
+                        ffts = abs(fft(mean(x, 2))) * min(size(x)) / 1000;
+                        
+                        plot(fqs(lf:hf), ffts(lf:hf));grid("on");
+                        
+                        if freqCap == 0
+                            freqCap = max(ffts(lf:hf))*1.2;
+                            ylim([0, freqCap]);
+                        else
+                            ylim([0, freqCap]);
+                        end
+                        
+                        ylabel(dlLabels(i+1));
+
+                    end
+
+                    disp("Temp edit for 6 subplots; average fft");
+                    xlabel(mode + " in frequency (Hz)");
+                    return
                     
                 else
                     
@@ -824,7 +879,10 @@ classdef DynaLearn < matlab.mixin.SetGet
                     rng('shuffle');
                     w = val{i, 1};
                     delta = (randn(size(w)))*error*dlLambda;
-                    wn = w + delta;
+                    
+                    if ~contains(lab{i, 1}, 'IO')
+                        wn = w + delta;
+                    end
                     
                     wn(wn < 0) = 0;
                     wn(wn > 1) = 1;
@@ -840,7 +898,10 @@ classdef DynaLearn < matlab.mixin.SetGet
                     rng('shuffle');
                     w = val{i, 1};
                     delta = (1-w).*(randn(size(w)))*error*dlLambda;
-                    wn = w + delta;
+                    
+                    if ~contains(lab{i, 1}, 'IO')
+                        wn = w + delta;
+                    end
                     
                     wn(wn < 0) = 0;
                     wn(wn > 1) = 1;
@@ -900,6 +961,21 @@ classdef DynaLearn < matlab.mixin.SetGet
             figure('position', [0, 0, 1400, 700]);
             plot(obj.dlErrorsLog);grid("on");
             title("Errors in trials");
+            
+        end
+        
+        function dlPlotBatchErrors(obj, dlBatchs)
+           
+            figure('position', [0, 0, 1400, 700]);
+            n = max(size(obj.dlErrorsLog));
+            x = zeros(1, ceil(n/dlBatchs));
+            
+            for i = 0:dlBatchs:n-dlBatchs
+                x(ceil((i+1)/dlBatchs)) = mean(obj.dlErrorsLog(i+1:i+dlBatchs));
+            end
+            
+            plot(x);grid("on");
+            title("Errors in batchs");
             
         end
         

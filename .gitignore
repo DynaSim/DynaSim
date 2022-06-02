@@ -1,14 +1,11 @@
 *~
 *.png
-*.mat
 *.zip
 *.asv
 
 .directory
 .DS_Store
 
-models/personal
-functions/personal
 outputs
 _ignore
 unitTestData/
@@ -17,10 +14,11 @@ docs/offline_function_reference/
 docs/_online_docs/
 testCoverage/
 Users/
-solve/
 
 dsVars.txt
 dsConfig.txt
 
 dlTempFunc.m
 dlTempFuncParamsChanger.m
+
+!models/

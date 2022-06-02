@@ -1,26 +1,24 @@
 %% 3-layer neocortical model of PFC / Predictive task
 
-% Manually determined weights version. 
-% memoize.m -> suspended due to an error
-% dsModel: 
-
 %% Model parameters, Uncomment one of the following lanes to run an example.
 
 clear;
 clc;
 
-Ne = 24;Ni = 4;Nio = 10;noise_rate = 13;
+Ne = 24;Ni = 6;Nio = 12;noise_rate = 7;
 % s = NeoCortex(Ne, Ni, Nio, noise_rate);
-s = dlDemoPING(2, 1, 2, noise_rate); % 14 Mins on mex generator
-% s = dlDemoPredictivePFC(Ne, Ni, Nio, noise_rate);
+% s = dlDemoPING(2, 1, 2, noise_rate); % 14 Mins on mex generator
+s = dlDemoPredictivePFC(Ne, Ni, Nio, noise_rate);
 
 %% Create DynaLearn Class (First time)
 
 % m = DynaLearn(s, 'models/dlDemoPING'); % ~ 120min
-% m = DynaLearn(s, 'models/dlDemoPredictivePFC'); % ~ 120min
-m = DynaLearn(s, 'models/dlTestPredictivePFC', 'raw'); % ~ 120min
+% m = DynaLearn(s, 'models/dlDemoPredictivePFC2'); % ~ 120min
+m = DynaLearn(s, 'models/dlDemoPredictivePFC2'); % ~ 120min
+
+% m = DynaLearn(s, 'models/dlTestPredictivePFC', 'raw'); % ~ 42sec
 m.dlSimulate(); % ~ 40sec
-% m.dlSave(); % < 1sec
+m.dlSave(); % < 1sec
 
 %% Load DynaLearn Class (previously saved file is required, default is dlFileBase.mat)
 
@@ -28,13 +26,15 @@ clc;
 m = DynaLearn(); % ~ 1sec
 % m = m.dlLoad('models/dlDemoPING'); % ~ 10sec
 m = m.dlLoad('models/dlDemoPredictivePFC'); % ~ 10sec
+% m = m.dlLoad('models/dlDemoPredictivePFC2'); % ~ 10sec
+% m = m.dlLoad('models/dlTestPredictivePFC'); % ~ 10sec
 % m.dlSimulate(); % ~ 40sec
 
 %% Simulation and general plotting
 
 clc;
 Params = containers.Map();
-Params('tspan') = [0 500];
+Params('tspan') = [0 1000];
 m.dlUpdateParams(Params);
 
 m.dlSimulate(); % (optional) simulate it , ~ seconds runtime
@@ -125,8 +125,12 @@ targetParams1 = [{'MSE', 1, 25, 0.25}; {'MSE', 2, 12, 0.25}; {'MSE', 3, 12, 0.25
 targetParams2 = [{'MSE', 2, 25, 0.25}; {'MSE', 1, 12, 0.25}; {'MSE', 3, 12, 0.25}; {'Compare', [2, 1, 3], 0, 0.15}; {'Diff', [1, 3], 0, 0.05}]; % B
 targetParams3 = [{'MSE', 3, 25, 0.25}; {'MSE', 2, 12, 0.25}; {'MSE', 1, 12, 0.25}; {'Compare', [3, 1, 2], 0, 0.15}; {'Diff', [1, 2], 0, 0.05}]; % C
 
+outputParams = [{'DeepE_V', 1:4, [240 360], 'afr'}; {'DeepE_V', 5:8, [240 360], 'afr'}; {'DeepE_V', 9:12, [240 360], 'afr'}; {'DeepE_V', 13:16, [240 360], 'afr'}; {'DeepE_V', 17:20, [240 360], 'afr'}];
+targetParams1 = [{'MSE', 1, 17, 0.25}; {'MSE', 2, 14, 0.25}; {'MSE', 3, 14, 0.25}; {'Compare', [1, 2, 3], 0, 0.15}; {'Diff', [2, 3], 0, 0.05}]; % A 
+targetParams2 = [{'MSE', 2, 17, 0.25}; {'MSE', 1, 14, 0.25}; {'MSE', 3, 14, 0.25}; {'Compare', [2, 1, 3], 0, 0.15}; {'Diff', [1, 3], 0, 0.05}]; % B
+targetParams3 = [{'MSE', 3, 17, 0.25}; {'MSE', 2, 14, 0.25}; {'MSE', 1, 14, 0.25}; {'Compare', [3, 1, 2], 0, 0.15}; {'Diff', [1, 2], 0, 0.05}]; % C
+
 %% Trial: training script 
-% TODO ->>> (similar inputs-outputs problem)
 
 clc;
 dlInputParameters = {trialParams1, trialParams2, trialParams3};
@@ -134,9 +138,9 @@ dlTargetParameters = {targetParams1, targetParams2, targetParams3};
 dlOutputParameters = outputParams;
 
 dlTrainOptions = containers.Map();
-dlTrainOptions('dlEpochs') = 10;
-dlTrainOptions('dlBatchs') = 3;
-dlTrainOptions('dlLambda') = 0.00001;
+dlTrainOptions('dlEpochs') = 1;
+dlTrainOptions('dlBatchs') = 1;
+dlTrainOptions('dlLambda') = 0.0;
 
 dlTrainOptions('dlCheckpoint') = 'true';
 dlTrainOptions('dlCheckpointCoefficient') = 1.74; % e.g sqrt(2), sqrt(3), 2, sqrt(5) ... 
@@ -146,28 +150,38 @@ dlTrainOptions('dlLearningRule') = 'BioDeltaRule'; % DeltaRule, BioDeltaRule, RW
 dlTrainOptions('dlSimulationFlag') = 1; % Manully turning simulation, on or off (on is default and recommended)
 dlTrainOptions('dlOutputLogFlag') = 1; % Autosaving trial outputs, on or off (off is default and recommended) % TODO Output/Random/SameValueProblem
 dlTrainOptions('dlOfflineOutputGenerator') = 0; % Just for debugging, generates random outputs based on last outputs. 
-dlTrainOptions('dlAdaptiveLambda') = 1; % Adaptive lambda parameter; recommended for long simulations.
+dlTrainOptions('dlAdaptiveLambda') = 0; % Adaptive lambda parameter; recommended for long simulations.
 
 dlTrainOptions('dlLambdaCap') = 3e-2; % Only if Adaptive lambda is active, recommended to set a upper-bound (UB) or ignore to use default UB (0.01).
 % dlTrainOptions('dlMetaLearningRule') = 'true'; % TODOs!
 
 % m.dlResetTraining(); % Reset logs and optimal state error (not the optimal state file)
-m.dlLoadOptimal();  % Load the current optimal state (if exists)
+% m.dlLoadOptimal();  % Load the current optimal state (if exists)
 % m.dlTrain(dlInputParameters, dlOutputParameters, dlTargetParameters, dlTrainOptions);
 
 %% Run a simulation (without training)
 
-m.dlRunSimulation(dlInputParameters{1}, dlOutputParameters);
+for i = 1:1
+    m.dlRunSimulation(dlInputParameters{i}, dlOutputParameters);
+end
+
+%%
 m.dlPlotAllPotentials('lfp');
 %%
-m.dlRunSimulation(dlInputParameters{2}, dlOutputParameters);
-m.dlPlotAllPotentials('lfp');
-%%
-m.dlRunSimulation(dlInputParameters{3}, dlOutputParameters);
-m.dlPlotAllPotentials('lfp');
+
+opts = containers.Map();
+% opts("lf") = 50;
+% opts("hf") = 100;
+% m.dlPlotAllPotentials('avgfft', opts);
+
+opts("lf") = 20;
+opts("hf") = 50;
+m.dlPlotAllPotentials('avgfft', opts);
 
 %% Errors log plot
 
-m.dlPlotErrors();
+clc;
+m.dlPlotBatchErrors(3);
+% m.dlPlotErrors();
 
 %% End of Demo (7th of May 2022)
