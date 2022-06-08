@@ -909,7 +909,46 @@ classdef DynaLearn < matlab.mixin.SetGet
                     deltaL = deltaL + sum(sum(abs(delta)));
                     
                 end
-                
+
+            elseif strcmpi(dlLearningRule, 'UncertaintyReduction')
+
+                dlLambdaCap = 1; % allowing learning rates to be in [0,1]
+                dlAdaptiveLambda = 0; % disabling adaptive lambda as this learning rule controls the lambda values through uncertainty reduction
+                uncBaseline = 0.5; % reference value for uncertainty reduction (point of maximum uncertainty)
+                scalingFactor = max([uncBaseline, 1-uncBaseline]); % used to keep uncReduct in [0,1]
+                stochasticFactor = 0.2; % stochastic modulation
+
+                dlLambda0 = dlLambda;
+                for i = l'
+                    rng('shuffle'); %% TODO we shouldn't shuffle all the time
+                    w = val{i, 1};
+
+                    % lambda update from previous w
+                    if isscalar(dlLambda0) % first time
+                        mu = dlLambda0; %% TODO add mu as a dl parameter?
+                        lambda = dlLambda0*ones(size(w));
+                    else % subsequent times
+                        lambda = dlLambda{i, 1};
+                    end
+                    uncReduct = abs(w-uncBaseline)/scalingFactor; % Uncertainty reduction in [0,1]
+                    % adapting lambda based on uncertainty reduction (the lower the uncertainty, the faster it adapts)
+                    lambda = lambda + mu*(uncReduct-lambda); % adapting lambda based on uncertainty reduction
+
+                    % w update based on the new lambda
+                    delta = (1 + stochasticFactor*randn(size(w))).*lambda.*(1-w)*error; % stochastic delta
+                    wn = w + delta;
+
+                    % rectifying values that are out of the [0,1] bounds
+                    wn(wn < 0) = 0;
+                    wn(wn > 1) = 1;
+
+                    % saving
+                    val{i, 1} = wn;
+                    dlLambda{i, 1} = lambda;
+
+                    deltaL = deltaL + sum(sum(abs(delta)));
+                end
+
             elseif strcmpi(dlLearningRule, 'RWDeltaRule')
             
                 disp("TODO Rascorla-Wagner delta rule");
