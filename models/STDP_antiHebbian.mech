@@ -1,0 +1,63 @@
+% AntiHebbian STDP 
+% References:
+% http://www.scholarpedia.org/article/Spike-timing_dependent_plasticity#Online_implementation_of_STDP_models
+% Morrison, A., Markus D., and Gerstner, W. (2008). Phenomenological models of synaptic plasticity based on spike timing." Biological Cybernetics 98: 459-478.
+
+taux=20 % 10
+tauy=20 % 10
+rx=1
+ry=1
+alpha=0.5
+wmax=1
+wmin=0
+w0=0.5
+tauw=inf % 60
+forward_delay_pre=0 % sum of axon delay and synaptic transmission
+backward_delay_post=0 % AP backpropagation
+tspk_pre=inf*ones(1,Npre)
+tspk_post=inf*ones(1,Npost)
+
+% Initial conditions
+x(0)=zeros(1,N_pre) % 0.1*ones(1,N_pre)
+y(0)=zeros(1,N_post) % 0.1*ones(1,N_post)
+w(0)=0.5*ones(N_pre,N_post)
+
+ax(x)=(1-x).^alpha % incremental increase in presynaptic trace with nearest-neighbor spike-interaction
+ay(y)=(1-y).^alpha % incremental increase in postsynaptic trace
+% A(w) below has to be (wmax-w)*r for potentiation and (wmin-w)*r for depression
+Ax(w)= (wmin-w)*rx % (wmax-w)*rx    % soft bounds
+Ay(w)= (wmax-w)*ry % (wmin-w)*ry    % soft bounds
+
+% IMPORTANT NOTE: Currently DynaSim only supports STDP with euler integration method (for further information read the notes below)
+% NOTE1: (discrete numerical integration of the Dirac delta) = (Kronecker delta)/dt
+% NOTE2: DiracDeltaK doesn't work in RK2 and RK4 because each spike is added multiple times (2 in RK2 and 4 in RK4)
+% NOTE3: NOTE2 does not apply to DiracDeltaT, yet DiracDeltaT is not ideal either because the effect of the spike is discounted (1/6 in RK4), or needs to be shifted dt/2 in some cases (RK2) to get the full effect of the spike, before {x,y} signals decay
+% NOTE4: Hence the best numerical integration method currently for STDP in DynaSim is actually Euler, and the more sophisticated methods (RK2/RK4) give non-reliable results
+% NOTE5: Best option to get reliable results also in RK methods is probably to parse the Dirac delta functions (K version below) and introduce their contribution at the end of the update (independently of the integration method)
+
+% ### if you want spike times sampled with Fs=1/dt, use:
+
+DiracDeltaK_pre(k) = sum(k==round(([tspike_pre ; tspk_pre] + max([dt, forward_delay_pre]))/dt)+2, 1)/dt % the max function is introduced because the monitor operates after state variables are updated, so neuron spikes won't be seen until the following dt
+DiracDeltaK_post(k) = sum(k==round(([tspike_post ; tspk_post] + max([dt, backward_delay_post]))/dt)+2, 1)/dt
+% the index of spikes are shifted:
+% +1, because arrays in Matlab start at position 1
+% +1, because in DynaSim t=0 is set at second position (ICs occupy the first position)
+
+% ### if you want float precision spike times, use:
+
+DiracDeltaT_pre(t) = sum(abs(t - ([tspike_pre; tspk_pre] + max([dt, forward_delay_pre]))) <= eps(t), 1)/dt
+DiracDeltaT_post(t) = sum(abs(t - ([tspike_post; tspk_post] + max([dt, backward_delay_post]))) <= eps(t), 1)/dt
+
+dx/dt=-x/taux + ax(x).*DiracDeltaK_pre(k)
+dy/dt=-y/tauy + ay(y).*DiracDeltaK_post(k)
+dw/dt=-(w-w0)/tauw + Ax(w).*repmat(x', [1 Npost]).*repmat(DiracDeltaK_post(k-1), [Npre 1]) + Ay(w).*repmat(y, [Npre 1]).*repmat(DiracDeltaK_pre(k-1), [Npost 1])' % w(n) depends on x and y at (n-1), hence Dirac delta is consequently shifted by one step with respect to those
+
+%dx/dt=-x/taux + ax(x).*DiracDeltaT_pre(t)
+%dy/dt=-y/tauy + ay(y).*DiracDeltaT_post(t)
+%dw/dt=-(w-w0)/tauw + Ax(w).*repmat(x', [1 Npost]).*repmat(DiracDeltaT_post(t-dt), [Npre 1]) + Ay(w).*repmat(y, [Npre 1]).*repmat(DiracDeltaT_pre(t-dt), [Npost 1])' % w(n) depends on x and y at (n-1), hence Dirac delta is consequently shifted by one dt with respect to those
+
+% limitation: currently it's not possible to monitor a function that includes a tspike monitor
+% TODO: check whether maybe because the population name is not propagated soon enough
+monitor ax,ay,Ax,Ay % DiracDeltaK_pre,DiracDeltaK_post,DiracDeltaT_pre,DiracDeltaT_post
+
+@weights += w

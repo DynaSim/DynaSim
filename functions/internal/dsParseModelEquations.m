@@ -147,6 +147,16 @@ if ischar(text)
     text=text(1:end-1);
   end
 
+  % temporarily replace ';' in [] with ? (i.e., to allow column vector)
+  % note: this solution does not work for arrays in arrays (eg [*[*]*])
+  begs = regexp(text,'\[[^\]]+\]','start');
+  ends = regexp(text,'\[[^\]]+\]','end');
+  for i = 1:length(begs)
+    text(begs(i):ends(i)) = strrep(text(begs(i):ends(i)),';','?');
+  end
+  % ? is replaced by semicolons below
+  % tip - search: 'restore semicolons in arrays' for all locations below
+  
   % account for the one exception where ';' does not delimit lines:
   % conditional actions with multiple statements (expr1; expr2)
   % approach: replace ';' by ',' here then reverse the replacement below
@@ -158,9 +168,10 @@ if ischar(text)
   pattern=';(?=((?!\[).)*?\])'; % selecting all ';' in the column vector
   replace=','; % replacing them all by ','
   text=regexprep(text,pattern,replace,'ignorecase');
-
+  
   % now split string into cell array of lines
   text = strtrim(regexp(text,delimiter,'split'));
+    
 end
 if ~iscellstr(text)
   error('input not recognized. equations must be provided in single string, cell array of strings, or a text file');
@@ -198,7 +209,10 @@ for index=1:length(text) % loop over lines of text
       lhs{1}=strrep(lhs{1},'.','_'); % e.g., Na.g --> Na_g
 
       name=strtrim(lhs{1}); expression=rhs{1};
-
+      
+      % restore semicolons in arrays
+      expression = strrep(expression,'?',';');
+      
       model.parameters(1).([namespace name]) = expression;
 
       name_map(end+1,:) = {name,[namespace name],namespace,'parameters'};
@@ -211,7 +225,11 @@ for index=1:length(text) % loop over lines of text
 
       if ~isempty(lhs)
         rhs=regexp(line,'=(.+)$','tokens','once');
-        name=strtrim(lhs{1}); expression=rhs{1};
+        name=strtrim(lhs{1}); expression=rhs{1};      
+        
+        % restore semicolons in arrays
+        expression = strrep(expression,'?',';');
+        
         model.fixed_variables(1).([namespace name]) = expression;
         name_map(end+1,:) = {name,[namespace name],namespace,'fixed_variables'};
       else
@@ -220,7 +238,11 @@ for index=1:length(text) % loop over lines of text
         name=strtrim(lhs{1});
         if isfield(model.fixed_variables(1),[namespace name])
           % add update to fixed variable definition
-          expression=[model.fixed_variables(1).([namespace name]) ';' line];
+          expression=[model.fixed_variables(1).([namespace name]) ';' line]; 
+          
+          % restore semicolons in arrays
+          expression = strrep(expression,'?',';');
+          
           model.fixed_variables(1).([namespace name]) = expression;
         else
           warning('failed to set fixed variable.');
@@ -242,6 +264,10 @@ for index=1:length(text) % loop over lines of text
       name=strtrim(name{1});
       % imposing a single whitespace delimiter
       expression=sprintf('@(%s) %s',vars{1},rhs{1});
+      
+      % restore semicolons in arrays
+      expression = strrep(expression,'?',';');
+      
       model.functions(1).([namespace name]) = expression;
       name_map(end+1,:) = {name,[namespace name],namespace,'functions'};
       if ~isempty(comment)
@@ -254,6 +280,10 @@ for index=1:length(text) % loop over lines of text
       end
       rhs=regexp(line,'=(.+)$','tokens','once');
       state_variable = strtrim(var{1}); expression=rhs{1};
+      
+      % restore semicolons in arrays
+      expression = strrep(expression,'?',';');
+
       model.ODEs(1).([namespace state_variable])=expression;
       if ~ismember([namespace state_variable],model.state_variables)
         name_map(end+1,:) = {state_variable,[namespace state_variable],namespace,'state_variables'};
@@ -272,6 +302,9 @@ for index=1:length(text) % loop over lines of text
       if ~isnan(str2double(expression))
         expression = [expression ' * ones(1,Npop)'];
       end
+      
+      % restore semicolons in arrays
+      expression = strrep(expression,'?',';');
 
       model.ICs(1).([namespace state_variable])=expression;
       if ~isempty(comment)
@@ -355,6 +388,9 @@ for index=1:length(text) % loop over lines of text
           else % This case creates trouble (simulation crash due to, e.g. monitors of state variables), best thing is to ignore this case entirely
             continue; % expression=[];
           end
+      
+          % restore semicolons in arrays
+          expression = strrep(expression,'?',';');
 
           % store monitor
           model.monitors(1).(scopeName) = expression;
@@ -368,6 +404,10 @@ for index=1:length(text) % loop over lines of text
       end
 
     case 'conditional'      % if(conditions)(actions)
+      
+      % restore semicolons in arrays
+      lines = strrep(line,'?',';');
+      
       groups=regexp(line,'\)\(','split');
       condition=regexp(groups{1},'^if\s*\((.*)','tokens','once');
       if length(groups)==2
@@ -418,6 +458,9 @@ for index=1:length(text) % loop over lines of text
 
       if isempty(expression), expression=target; end
 
+      % restore semicolons in arrays
+      expression = strrep(expression,'?',';');
+      
       model.linkers(end).target=target;
       model.linkers(end).expression=expression;
       model.linkers(end).operation='+=';
