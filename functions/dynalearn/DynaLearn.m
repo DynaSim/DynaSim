@@ -909,7 +909,109 @@ classdef DynaLearn < matlab.mixin.SetGet
                     deltaL = deltaL + sum(sum(abs(delta)));
                     
                 end
-                
+
+            %%% What follows are 4 Learning Rules (3 for E-cells and 1 for I-cells; WIP) from Clopath's paper:
+            % Aljadeff et al. Cortical credit assignment by Hebbian, neuromodulatory and inhibitory plasticity. arXiv:1911.00307, 2019
+            % In this study the final weight update is respectively:
+            % wE(n+1) = min( [wE(n) + sum(delta_wE)]_+ , wE_max)
+            % wI(n+1) = min( [wI(n) + sum(delta_wI)]_+ , wI_max)
+            % Table 2 in the paper shows parameter values (PDF pg 21)
+            % Model constraints can be seen paper's Table 1 (PDF pg 20)
+            % Most important constraints (see further explanations below):
+            % rho_NE < rho_ACh
+            % 5A_ACh < A_NE
+            % alpha_NE > alpha_ACh
+            % alpha_ACh > alpha_Hebbian
+            elseif strcmpi(dlLearningRule, 'ACh') % WIP
+                % ACh learning rule for E-cells from Clopath's paper (LTP and LTD)
+                % xE and Y sampled from Bernoulli distribution (they are 1 with probability f and 0 with probability 1-f)
+                % xE: input (in Clopath's paper it was binary and stimulus specific)
+                % yE: output (in Clopath's paper it was binary from the Heaviside step function)
+                % f: reference spike prob for neuromodulation plasticity
+                % eta: gating for ACh plasticity (input-output pairing, it was binary in Clopath's paper: 0/1)
+                % alpha: learning rate for ACh plasticity
+                % beta: LTD/LTP scaling factor
+                % single expression for balanced LTD/LTP ('*' represents matrix multiplication):
+                % delta = eta·alpha·(yE-f)*(xE - beta·<yE>/(1-<yE>)·(1-xE))
+
+                % comments/things to consider:
+                % - with f~0, no LTD even if y = 0
+                % - the factor <yE>/(1-<yE>) ensures that for beta=1 potentiation and depression are balanced on average (not sure this is <yE> or f)
+                % - pairing: if target is Y = 1, pairing prob is rho, sampling from that, eta will be 0/1, if Y = 0, then eta = 0
+                % - M: if paired (eta=1) disinhibition (sampled rectified Gaussian distribution of mean and std = A)
+            elseif strcmpi(dlLearningRule, 'NE') % WIP
+                % NE learning rule for E-cells from Clopath's paper (only LTP and not stimulus specific)
+                % xE sampled from Bernoulli distribution (they are 1 with probability f and 0 with probability 1-f)
+                % xE: input (in Clopath's paper it was binary and stimulus specific)
+                % yE: output (in Clopath's paper it was binary from the Heaviside step function)
+                % f: reference spike prob for neuromodulation plasticity
+                % eta: gating for NE plasticity (input-output pairing, it was binary in Clopath's paper: 0/1)
+                % alpha: learning rate for NE plasticity
+                % expression:
+                % delta = eta·alpha·(yE-f)*xE
+
+                % comments/things to consider:
+                % - pairing: with rho prob indep of target Y
+                % - M: if paired (eta=1) disinhibition (sampled rectified Gaussian distribution of mean and std = A)
+            elseif strcmpi(dlLearningRule, 'Hebbian') % WIP
+                % Hebbian learning rule for E-cells from Clopath's paper (not gated)
+                % xE sampled from Bernoulli distribution (they are 1 with probability f and 0 with probability 1-f)
+                % xE: input (in Clopath's paper it was binary and stimulus specific)
+                % yE: output (in Clopath's paper it was binary from the Heaviside step function)
+                % alpha: learning rate for Hebbian plasticity
+                % expression:
+                % delta = alpha·(yE-<yE>)*xE
+            elseif strcmpi(dlLearningRule, 'Inhibitory') % WIP
+                % learning rule for I-cells from Clopath's paper (based on detailed E-I balance)
+                % xE and xI sampled from Bernoulli distribution (they are 1 with probability f and 0 with probability 1-f)
+                % xE: input (in Clopath's paper it was binary and stimulus specific)
+                % xI: input (in Clopath's paper it was binary and stimulus specific)
+                % excitatory current iE = wE*xE
+                % inhibitory current iI = wI*xI
+                % E/I balance line (reference): iI = a·iE + b (with a < 1)
+                % alpha: learning rate for Inhibitory plasticity
+                % expression:
+                % delta = alpha·((a·iE + b)-iI)*xI
+
+            elseif strcmpi(dlLearningRule, 'UncertaintyReduction')
+
+                dlLambdaCap = 1; % allowing learning rates to be in [0,1]
+                dlAdaptiveLambda = 0; % disabling adaptive lambda as this learning rule controls the lambda values through uncertainty reduction
+                uncBaseline = 0.5; % reference value for uncertainty reduction (point of maximum uncertainty)
+                scalingFactor = max([uncBaseline, 1-uncBaseline]); % used to keep uncReduct in [0,1]
+                stochasticFactor = 0.2; % stochastic modulation
+
+                dlLambda0 = dlLambda;
+                for i = l'
+                    rng('shuffle'); %% TODO we shouldn't shuffle all the time
+                    w = val{i, 1};
+
+                    % lambda update from previous w
+                    if isscalar(dlLambda0) % first time
+                        mu = dlLambda0; %% TODO add mu as a dl parameter?
+                        lambda = dlLambda0*ones(size(w));
+                    else % subsequent times
+                        lambda = dlLambda{i, 1};
+                    end
+                    uncReduct = abs(w-uncBaseline)/scalingFactor; % Uncertainty reduction in [0,1]
+                    % adapting lambda based on uncertainty reduction (the lower the uncertainty, the faster it adapts)
+                    lambda = lambda + mu*(uncReduct-lambda); % adapting lambda based on uncertainty reduction
+
+                    % w update based on the new lambda
+                    delta = (1 + stochasticFactor*randn(size(w))).*lambda.*(1-w)*error; % stochastic delta
+                    wn = w + delta;
+
+                    % rectifying values that are out of the [0,1] bounds
+                    wn(wn < 0) = 0;
+                    wn(wn > 1) = 1;
+
+                    % saving
+                    val{i, 1} = wn;
+                    dlLambda{i, 1} = lambda;
+
+                    deltaL = deltaL + sum(sum(abs(delta)));
+                end
+
             elseif strcmpi(dlLearningRule, 'RWDeltaRule')
             
                 disp("TODO Rascorla-Wagner delta rule");

@@ -107,15 +107,25 @@ if ischar(model) || iscell(model) || ~isfield(model,'state_variables')
 end
 
 % Move fixed_variables assigned matrices to parameters
-names = fieldnames(model.fixed_variables);
-expressions = struct2cell(model.fixed_variables);
-pattern = '[^\[\]\+\-\d\se\.;]+';
-for i = 1:length(names)
-  if isempty(regexp(expressions{i},pattern,'once')) && ~isfield(model.parameters,names{i})
-    % store numeric value as parameter
-    model.parameters.(names{i}) = eval(expressions{i});
-    % remove string from fixed variables
-    model.fixed_variables = rmfield(model.fixed_variables,names{i});
+if ~isempty(fieldnames(model.fixed_variables))
+  names = fieldnames(model.fixed_variables);
+  expressions = struct2cell(model.fixed_variables);
+  pattern = '[^\[\]\+\-\d\se\.;]+';
+  for i = 1:length(names)
+    if ischar(expressions{i}) && isempty(regexp(expressions{i},pattern,'once')) && ~isfield(model.parameters,names{i})
+      % store numeric value as parameter
+      model.parameters.(names{i}) = eval(expressions{i});
+      % remove string from fixed variables
+      model.fixed_variables = rmfield(model.fixed_variables,names{i});
+    elseif isnumeric(expressions{i}) && ~isfield(model.parameters,names{i})
+      % store numeric value as parameter
+      model.parameters.(names{i}) = expressions{i};
+      % remove string from fixed variables
+      model.fixed_variables = rmfield(model.fixed_variables,names{i});      
+    end
+  end
+  if isempty(fieldnames(model.fixed_variables))
+    model.fixed_variables = struct('');
   end
 end
 
