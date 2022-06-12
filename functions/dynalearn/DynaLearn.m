@@ -38,6 +38,9 @@ classdef DynaLearn < matlab.mixin.SetGet
         dlLambdaCap = 1e-2;
         dlSimulationTool = "mex";
         
+        dlGraph = []; 
+        % TODO
+        
     end
     
     methods
@@ -102,6 +105,7 @@ classdef DynaLearn < matlab.mixin.SetGet
                 obj.dlRawBridgeInit();
             end
             
+            obj.dlGraphConstructor();
             fprintf("\n@DS.DL:DynaLearn model created.\n");
             
         end
@@ -239,6 +243,7 @@ classdef DynaLearn < matlab.mixin.SetGet
             end
             
             obj.dlTrialNumber = 0;
+            obj.dlGraphConstructor();
             fprintf("\nReinitialized.\n");
             
         end
@@ -1112,6 +1117,30 @@ classdef DynaLearn < matlab.mixin.SetGet
             catch
                 fprintf("--->No oprimal file exists. first run a training session with an active checkpoint flag to save an optimal checkpoint.\n");
             end
+            
+        end
+        
+        function dlGraphConstructor(obj) 
+            
+            e = size(obj.dlModel.connections, 2);
+            v = size(obj.dlModel.populations, 2);
+            obj.dlGraph.edges = {};
+            obj.dlGraph.vertices = {};
+            
+            for i = 1:e
+                
+                obj.dlGraph.edges(i).source = obj.dlModel.connections(i).source;
+                obj.dlGraph.edges(i).target = obj.dlModel.connections(i).target;
+                
+            end
+            
+            for i = 1:v
+               
+                obj.dlGraph.vertices(i).name = obj.dlModel.populations(i).name;
+                
+            end
+            
+            disp("TODO struct - index, type, lists ...");
             
         end
         
