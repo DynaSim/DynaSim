@@ -1023,7 +1023,75 @@ classdef DynaLearn < matlab.mixin.SetGet
                 
             elseif strcmpi(dlLearningRule, 'NewRule')
             
-                disp("TODO new rule");
+                % This section is only implemented to show how to use the
+                % obj.dlGraph for local learning purposes. >>>>>>>>>>>>>>
+                connectionCount = size(obj.dlGraph.edges, 2); % Number of edges or connections in model
+                populationCount = size(obj.dlGraph.vertices, 2); % Number of vertices or populations in model
+                
+                fprintf("\n->NewRule for learning method is only an example of dlGraph and does nothing meaningfull\n");
+                
+                for i = 1:connectionCount % Traverse all connections (edges)
+                    
+                    if contains(obj.dlGraph.edges(i).type, 'GABA')
+                        fprintf("\n %s to %s is Inhibitory Connection!", obj.dlGraph.edges(i).source, obj.dlGraph.edges(i).target); % Displays if the connection type is GABA/inhibitory
+                    elseif contains(obj.dlGraph.edges(i).type, 'AMPA')
+                        fprintf("\n %s to %s is Excitatory Connection!", obj.dlGraph.edges(i).source, obj.dlGraph.edges(i).target); % Displays if the connection type is AMPA/excitatory
+                    end
+                    
+                    u = obj.dlGraph.IndexMap(obj.dlGraph.edges(i).target); % find connection(i) target's index in vertices
+                    IndexInOutputs = find(strcmpi(string(obj.dlVariables), obj.dlGraph.vertices(u).name + "_V")); % find its voltage in the current outputs
+                    w = val{IndexInOutputs, 1}; % extract its W
+                    delta = (1-w).*(randn(size(w)))*error*dlLambda; % Do some calculation
+                    
+                    if ~contains(lab{IndexInOutputs, 1}, 'IO') % Check if it has/has'nt some keyword
+                        wn = w + delta;
+                    end
+                    
+                    wn(wn < 0) = 0; % Apply some treshold (just for example)
+                    wn(wn > 1) = 1;
+                    val{IndexInOutputs, 1} = wn; % Put new W in the old W
+                    
+                end
+                
+                for i = 1:populationCount % Traverse all populations (vertices)
+                    
+                    rng('shuffle');
+                    
+                    preSynaptic = obj.dlGraph.vertices(i).PreIndices; % find vertex(i) presynaptic indices in vertices
+                    postSynaptic = obj.dlGraph.vertices(i).PostIndices; % find vertex(i) postsynaptic indices in vertices
+                    preSynapticConnections = obj.dlGraph.vertices(i).PreEdgeIndices; % find vertex(i) presynaptic edge (connection) indices in obj.dlGraph.edges
+                    postSynapticConnections = obj.dlGraph.vertices(i).PostEdgeIndices; % find vertex(i) postsynaptic edge (connection) indices in obj.dlGraph.edges
+                    
+                    PreIndexInOutputs = [];
+                    PostIndexInOutputs = [];
+                    
+                    for j = preSynaptic
+                        PreIndexInOutputs = [PreIndexInOutputs, find(strcmpi(string(obj.dlVariables), obj.dlGraph.vertices(j).name + "_V"))]; % find presynaptic voltages' indices in the current outputs
+                    end
+                    
+                    for j = postSynaptic
+                        PostIndexInOutputs = [PostIndexInOutputs, find(strcmpi(string(obj.dlVariables), obj.dlGraph.vertices(j).name + "_V"))]; % find postsynaptic voltages' indices in the current outputs
+                    end
+                    
+                    w = 0;
+                    for j = PreIndexInOutputs
+                        w = w + mean(mean(val{j, 1})); % use and do some operation on Presynaptic Ws
+                    end
+                    for j = PostIndexInOutputs
+                        w = w + mean(mean(val{j, 1})); % use and do some operation on Presynaptic Ws
+                    end
+                    
+                    delta = (1-w).*(randn(size(w)))*error*dlLambda; % Do some calculation
+                    
+                    if ~contains(lab{IndexInOutputs, 1}, 'IO') % Check if it has/has'nt some keyword
+                        wn = w + delta;
+                    end
+                    
+                    wn(wn < 0) = 0; % Apply some treshold (just for example)
+                    wn(wn > 1) = 1;
+                    val{IndexInOutputs, 1} = wn; % Put new W in the old W
+                    
+                end
                 
             else
                 
@@ -1157,14 +1225,18 @@ classdef DynaLearn < matlab.mixin.SetGet
                 
                 if ~obj.dlGraph.vertices(obj.dlGraph.IndexMap(obj.dlGraph.edges(i).source)).PostIndices
                     obj.dlGraph.vertices(obj.dlGraph.IndexMap(obj.dlGraph.edges(i).source)).PostIndices = obj.dlGraph.IndexMap(obj.dlGraph.edges(i).target);
+                    obj.dlGraph.vertices(obj.dlGraph.IndexMap(obj.dlGraph.edges(i).source)).PostEdgeIndices = i;
                 else
                     obj.dlGraph.vertices(obj.dlGraph.IndexMap(obj.dlGraph.edges(i).source)).PostIndices = cat(2, obj.dlGraph.vertices(obj.dlGraph.IndexMap(obj.dlGraph.edges(i).source)).PostIndices, obj.dlGraph.IndexMap(obj.dlGraph.edges(i).target));
+                    obj.dlGraph.vertices(obj.dlGraph.IndexMap(obj.dlGraph.edges(i).source)).PostEdgeIndices = cat(2, obj.dlGraph.vertices(obj.dlGraph.IndexMap(obj.dlGraph.edges(i).source)).PostEdgeIndices, i);
                 end
 
                 if ~obj.dlGraph.vertices(obj.dlGraph.IndexMap(obj.dlGraph.edges(i).target)).PreIndices
                     obj.dlGraph.vertices(obj.dlGraph.IndexMap(obj.dlGraph.edges(i).target)).PreIndices = obj.dlGraph.IndexMap(obj.dlGraph.edges(i).source);
+                    obj.dlGraph.vertices(obj.dlGraph.IndexMap(obj.dlGraph.edges(i).target)).PreEdgeIndices = i;
                 else
                     obj.dlGraph.vertices(obj.dlGraph.IndexMap(obj.dlGraph.edges(i).target)).PreIndices = cat(2, obj.dlGraph.vertices(obj.dlGraph.IndexMap(obj.dlGraph.edges(i).target)).PreIndices, obj.dlGraph.IndexMap(obj.dlGraph.edges(i).source));
+                    obj.dlGraph.vertices(obj.dlGraph.IndexMap(obj.dlGraph.edges(i).target)).PreEdgeIndices = cat(2, obj.dlGraph.vertices(obj.dlGraph.IndexMap(obj.dlGraph.edges(i).target)).PreEdgeIndices, i);
                 end
                 
                 try
@@ -1173,7 +1245,7 @@ classdef DynaLearn < matlab.mixin.SetGet
                 
                 catch
                     
-                    obj.dlGraph.edges(i).type = "null"; % No type in connection, almost never happens after last debug
+                    obj.dlGraph.edges(i).type = "null";
                 
                 end
                 

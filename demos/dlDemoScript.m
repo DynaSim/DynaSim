@@ -133,16 +133,16 @@ dlTargetParameters = {targetParams1, targetParams2, targetParams3};
 dlOutputParameters = outputParams;
 
 dlTrainOptions = containers.Map();
-dlTrainOptions('dlEpochs') = 2;
+dlTrainOptions('dlEpochs') = 1;
 dlTrainOptions('dlBatchs') = 3;
 dlTrainOptions('dlLambda') = 1e-5;
 
 dlTrainOptions('dlCheckpoint') = 'true';
 dlTrainOptions('dlCheckpointCoefficient') = 1.74; % e.g sqrt(2), sqrt(3), 2, sqrt(5) ... 
 dlTrainOptions('dlUpdateMode') = 'batch';
-dlTrainOptions('dlLearningRule') = 'BioDeltaRule'; % DeltaRule, BioDeltaRule, RWDelta, ...
+dlTrainOptions('dlLearningRule') = 'NewRule'; % DeltaRule, BioDeltaRule, RWDelta, ...
 
-dlTrainOptions('dlSimulationFlag') = 1; % Manully turning simulation, on or off (on is default and recommended)
+dlTrainOptions('dlSimulationFlag') = 0; % Manully turning simulation, on or off (on is default and recommended)
 dlTrainOptions('dlOutputLogFlag') = 1; % Autosaving trial outputs, on or off (off is default and recommended) % TODO Output/Random/SameValueProblem
 dlTrainOptions('dlOfflineOutputGenerator') = 0; % Just for debugging, generates random outputs based on last outputs. 
 dlTrainOptions('dlAdaptiveLambda') = 0; % Adaptive lambda parameter; recommended for long simulations.
