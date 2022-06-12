@@ -1122,27 +1122,64 @@ classdef DynaLearn < matlab.mixin.SetGet
         
         function dlGraphConstructor(obj) 
             
+            fprintf("--->Constructing graph ...");
             e = size(obj.dlModel.connections, 2);
             v = size(obj.dlModel.populations, 2);
+            
             obj.dlGraph.edges = {};
             obj.dlGraph.vertices = {};
-            
-            for i = 1:e
-                
-                obj.dlGraph.edges(i).source = obj.dlModel.connections(i).source;
-                obj.dlGraph.edges(i).target = obj.dlModel.connections(i).target;
-                
-            end
+            obj.dlGraph.IndexMap = containers.Map();
             
             for i = 1:v
                
+                obj.dlGraph.IndexMap(obj.dlModel.populations(i).name) = i;
                 obj.dlGraph.vertices(i).name = obj.dlModel.populations(i).name;
-                find(fieldnames(obj.dlVariables) == obj.dlModel.populations(i).name)
-                obj.dlGraph.vertices(i).VoltageIndex = obj.dlModel.populations(i).name;
+%               IndexInOutputs = find(strcmpi(string(obj.dlVariables), obj.dlGraph.vertices(i).name + "_V"));
+                obj.dlGraph.vertices(i).PreIndices = 0;
+                obj.dlGraph.vertices(i).PostIndices = 0;
                 
             end
             
-            disp("TODO struct - index, type, lists ...");
+            for i = 1:e
+                
+                try
+                    
+                    s = string(split(obj.dlModel.connections(i).direction, "->"));
+                    obj.dlGraph.edges(i).source = s(1);
+                    obj.dlGraph.edges(i).target = s(2);
+                
+                catch
+                    
+                    obj.dlGraph.edges(i).source = obj.dlModel.connections(i).source;
+                    obj.dlGraph.edges(i).target = obj.dlModel.connections(i).target;
+                
+                end
+                
+                if ~obj.dlGraph.vertices(obj.dlGraph.IndexMap(obj.dlGraph.edges(i).source)).PostIndices
+                    obj.dlGraph.vertices(obj.dlGraph.IndexMap(obj.dlGraph.edges(i).source)).PostIndices = obj.dlGraph.IndexMap(obj.dlGraph.edges(i).target);
+                else
+                    obj.dlGraph.vertices(obj.dlGraph.IndexMap(obj.dlGraph.edges(i).source)).PostIndices = cat(2, obj.dlGraph.vertices(obj.dlGraph.IndexMap(obj.dlGraph.edges(i).source)).PostIndices, obj.dlGraph.IndexMap(obj.dlGraph.edges(i).target));
+                end
+
+                if ~obj.dlGraph.vertices(obj.dlGraph.IndexMap(obj.dlGraph.edges(i).target)).PreIndices
+                    obj.dlGraph.vertices(obj.dlGraph.IndexMap(obj.dlGraph.edges(i).target)).PreIndices = obj.dlGraph.IndexMap(obj.dlGraph.edges(i).source);
+                else
+                    obj.dlGraph.vertices(obj.dlGraph.IndexMap(obj.dlGraph.edges(i).target)).PreIndices = cat(2, obj.dlGraph.vertices(obj.dlGraph.IndexMap(obj.dlGraph.edges(i).target)).PreIndices, obj.dlGraph.IndexMap(obj.dlGraph.edges(i).source));
+                end
+                
+                try
+                    
+                    obj.dlGraph.edges(i).type = obj.dlModel.connections(i).mechanisms.name;
+                
+                catch
+                    
+                    obj.dlGraph.edges(i).type = "null"; % No type in connection, almost never happens after last debug
+                
+                end
+                
+            end
+            
+            fprintf(" Done.\n");
             
         end
         
