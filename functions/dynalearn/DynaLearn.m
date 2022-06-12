@@ -1137,6 +1137,8 @@ classdef DynaLearn < matlab.mixin.SetGet
             for i = 1:v
                
                 obj.dlGraph.vertices(i).name = obj.dlModel.populations(i).name;
+                find(fieldnames(obj.dlVariables) == obj.dlModel.populations(i).name)
+                obj.dlGraph.vertices(i).VoltageIndex = obj.dlModel.populations(i).name;
                 
             end
             
