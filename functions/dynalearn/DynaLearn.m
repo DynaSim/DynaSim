@@ -1038,19 +1038,27 @@ classdef DynaLearn < matlab.mixin.SetGet
                         fprintf("\n %s to %s is Excitatory Connection!", obj.dlGraph.edges(i).source, obj.dlGraph.edges(i).target); % Displays if the connection type is AMPA/excitatory
                     end
                     
+                    v = obj.dlGraph.IndexMap(obj.dlGraph.edges(i).source); % find source ...
                     u = obj.dlGraph.IndexMap(obj.dlGraph.edges(i).target); % find connection(i) target's index in vertices
+                    
                     IndexInOutputs = find(strcmpi(string(obj.dlVariables), obj.dlGraph.vertices(u).name + "_V")); % find its voltage in the current outputs
-                    w = val{IndexInOutputs, 1}; % extract its W
-                    delta = (1-w).*(randn(size(w)))*error*dlLambda; % Do some calculation
+                    lkey = obj.dlGraph.vertices(u).name + "_" + obj.dlGraph.vertices(v).name + "_" + obj.dlGraph.edges(i).type + "_netcon"; % netcon's label in params.mat
+                    WIndexInParams = find(strcmpi(string(lab), lkey)); % Find index of W in params.mat labels
                     
-                    if ~contains(lab{IndexInOutputs, 1}, 'IO') % Check if it has/has'nt some keyword
+                    V = obj.dlOutputs{1, IndexInOutputs}; % extract its V
+                    v = mean(mean(V));
+                    delta = (1-v).*(randn(size(v)))*error*dlLambda; % Do some calculation
+                    
+                    try
+                        w = val{WIndexInParams, 1};
                         wn = w + delta;
+                        wn(wn < 0) = 0; % Apply some treshold (just for example)
+                        wn(wn > 1) = 1;
+                        val{WIndexInParams, 1} = wn; % Put new W in the old W
+                    catch
+%                         fprintf("\nNo specific type for connection, probably input or output"); % Commented for shorter log
                     end
-                    
-                    wn(wn < 0) = 0; % Apply some treshold (just for example)
-                    wn(wn > 1) = 1;
-                    val{IndexInOutputs, 1} = wn; % Put new W in the old W
-                    
+                        
                 end
                 
                 for i = 1:populationCount % Traverse all populations (vertices)

@@ -54,71 +54,71 @@ trialParams3('tspan') = [0 500];
 
 g_poisson = 6e-4;dc_poisson = 7e5;
 
-trialParams1('IO_SA1_ctx_iPoisson_DC_poisson') = dc_poisson;
-trialParams1('IO_SA2_ctx_iPoisson_DC_poisson') = dc_poisson;
-trialParams1('IO_SB1_ctx_iPoisson_DC_poisson') = 0;
-trialParams1('IO_SB2_ctx_iPoisson_DC_poisson') = 0;
-trialParams1('IO_SC1_ctx_iPoisson_DC_poisson') = 0;
-trialParams1('IO_SC2_ctx_iPoisson_DC_poisson') = 0;
+trialParams1('SA1_ctx_iPoisson_DC_poisson') = dc_poisson;
+trialParams1('SA2_ctx_iPoisson_DC_poisson') = dc_poisson;
+trialParams1('SB1_ctx_iPoisson_DC_poisson') = 0;
+trialParams1('SB2_ctx_iPoisson_DC_poisson') = 0;
+trialParams1('SC1_ctx_iPoisson_DC_poisson') = 0;
+trialParams1('SC2_ctx_iPoisson_DC_poisson') = 0;
 
-trialParams1('IO_SA1_ctx_iPoisson_onset_poisson') = 150;
-trialParams1('IO_SA1_ctx_iPoisson_offset_poisson') = 250;
-trialParams1('IO_SA2_ctx_iPoisson_onset_poisson') = 250;
-trialParams1('IO_SA2_ctx_iPoisson_offset_poisson') = 350;
+trialParams1('SA1_ctx_iPoisson_onset_poisson') = 150;
+trialParams1('SA1_ctx_iPoisson_offset_poisson') = 250;
+trialParams1('SA2_ctx_iPoisson_onset_poisson') = 250;
+trialParams1('SA2_ctx_iPoisson_offset_poisson') = 350;
 
-trialParams1('IO_SB1_ctx_iPoisson_onset_poisson') = 0;
-trialParams1('IO_SB1_ctx_iPoisson_offset_poisson') = 0;
-trialParams1('IO_SB2_ctx_iPoisson_onset_poisson') = 0;
-trialParams1('IO_SB2_ctx_iPoisson_offset_poisson') = 0;
+trialParams1('SB1_ctx_iPoisson_onset_poisson') = 0;
+trialParams1('SB1_ctx_iPoisson_offset_poisson') = 0;
+trialParams1('SB2_ctx_iPoisson_onset_poisson') = 0;
+trialParams1('SB2_ctx_iPoisson_offset_poisson') = 0;
 
-trialParams1('IO_SC1_ctx_iPoisson_onset_poisson') = 0;
-trialParams1('IO_SC1_ctx_iPoisson_offset_poisson') = 0;
-trialParams1('IO_SC2_ctx_iPoisson_onset_poisson') = 0;
-trialParams1('IO_SC2_ctx_iPoisson_offset_poisson') = 0;
+trialParams1('SC1_ctx_iPoisson_onset_poisson') = 0;
+trialParams1('SC1_ctx_iPoisson_offset_poisson') = 0;
+trialParams1('SC2_ctx_iPoisson_onset_poisson') = 0;
+trialParams1('SC2_ctx_iPoisson_offset_poisson') = 0;
 
-trialParams2('IO_SA1_ctx_iPoisson_DC_poisson') = dc_poisson;
-trialParams2('IO_SA2_ctx_iPoisson_DC_poisson') = dc_poisson;
-trialParams2('IO_SB1_ctx_iPoisson_DC_poisson') = dc_poisson;
-trialParams2('IO_SB2_ctx_iPoisson_DC_poisson') = dc_poisson;
-trialParams2('IO_SC1_ctx_iPoisson_DC_poisson') = dc_poisson;
-trialParams2('IO_SC2_ctx_iPoisson_DC_poisson') = dc_poisson;
+trialParams2('SA1_ctx_iPoisson_DC_poisson') = dc_poisson;
+trialParams2('SA2_ctx_iPoisson_DC_poisson') = dc_poisson;
+trialParams2('SB1_ctx_iPoisson_DC_poisson') = dc_poisson;
+trialParams2('SB2_ctx_iPoisson_DC_poisson') = dc_poisson;
+trialParams2('SC1_ctx_iPoisson_DC_poisson') = dc_poisson;
+trialParams2('SC2_ctx_iPoisson_DC_poisson') = dc_poisson;
 
-trialParams2('IO_SA1_ctx_iPoisson_onset_poisson') = 250;
-trialParams2('IO_SA1_ctx_iPoisson_offset_poisson') = 250;
-trialParams2('IO_SA2_ctx_iPoisson_onset_poisson') = 350;
-trialParams2('IO_SA2_ctx_iPoisson_offset_poisson') = 350;
+trialParams2('SA1_ctx_iPoisson_onset_poisson') = 250;
+trialParams2('SA1_ctx_iPoisson_offset_poisson') = 250;
+trialParams2('SA2_ctx_iPoisson_onset_poisson') = 350;
+trialParams2('SA2_ctx_iPoisson_offset_poisson') = 350;
 
-trialParams2('IO_SB1_ctx_iPoisson_onset_poisson') = 150;
-trialParams2('IO_SB1_ctx_iPoisson_offset_poisson') = 250;
-trialParams2('IO_SB2_ctx_iPoisson_onset_poisson') = 250;
-trialParams2('IO_SB2_ctx_iPoisson_offset_poisson') = 350;
+trialParams2('SB1_ctx_iPoisson_onset_poisson') = 150;
+trialParams2('SB1_ctx_iPoisson_offset_poisson') = 250;
+trialParams2('SB2_ctx_iPoisson_onset_poisson') = 250;
+trialParams2('SB2_ctx_iPoisson_offset_poisson') = 350;
 
-trialParams2('IO_SC1_ctx_iPoisson_onset_poisson') = 250;
-trialParams2('IO_SC1_ctx_iPoisson_offset_poisson') = 250;
-trialParams2('IO_SC2_ctx_iPoisson_onset_poisson') = 350;
-trialParams2('IO_SC2_ctx_iPoisson_offset_poisson') = 350;
+trialParams2('SC1_ctx_iPoisson_onset_poisson') = 250;
+trialParams2('SC1_ctx_iPoisson_offset_poisson') = 250;
+trialParams2('SC2_ctx_iPoisson_onset_poisson') = 350;
+trialParams2('SC2_ctx_iPoisson_offset_poisson') = 350;
 
-trialParams3('IO_SA1_ctx_iPoisson_DC_poisson') = dc_poisson;
-trialParams3('IO_SA2_ctx_iPoisson_DC_poisson') = dc_poisson;
-trialParams3('IO_SB1_ctx_iPoisson_DC_poisson') = dc_poisson;
-trialParams3('IO_SB2_ctx_iPoisson_DC_poisson') = dc_poisson;
-trialParams3('IO_SC1_ctx_iPoisson_DC_poisson') = dc_poisson;
-trialParams3('IO_SC2_ctx_iPoisson_DC_poisson') = dc_poisson;
+trialParams3('SA1_ctx_iPoisson_DC_poisson') = dc_poisson;
+trialParams3('SA2_ctx_iPoisson_DC_poisson') = dc_poisson;
+trialParams3('SB1_ctx_iPoisson_DC_poisson') = dc_poisson;
+trialParams3('SB2_ctx_iPoisson_DC_poisson') = dc_poisson;
+trialParams3('SC1_ctx_iPoisson_DC_poisson') = dc_poisson;
+trialParams3('SC2_ctx_iPoisson_DC_poisson') = dc_poisson;
 
-trialParams3('IO_SA1_ctx_iPoisson_onset_poisson') = 250;
-trialParams3('IO_SA1_ctx_iPoisson_offset_poisson') = 250;
-trialParams3('IO_SA2_ctx_iPoisson_onset_poisson') = 350;
-trialParams3('IO_SA2_ctx_iPoisson_offset_poisson') = 350;
+trialParams3('SA1_ctx_iPoisson_onset_poisson') = 250;
+trialParams3('SA1_ctx_iPoisson_offset_poisson') = 250;
+trialParams3('SA2_ctx_iPoisson_onset_poisson') = 350;
+trialParams3('SA2_ctx_iPoisson_offset_poisson') = 350;
 
-trialParams3('IO_SB1_ctx_iPoisson_onset_poisson') = 250;
-trialParams3('IO_SB1_ctx_iPoisson_offset_poisson') = 250;
-trialParams3('IO_SB2_ctx_iPoisson_onset_poisson') = 350;
-trialParams3('IO_SB2_ctx_iPoisson_offset_poisson') = 350;
+trialParams3('SB1_ctx_iPoisson_onset_poisson') = 250;
+trialParams3('SB1_ctx_iPoisson_offset_poisson') = 250;
+trialParams3('SB2_ctx_iPoisson_onset_poisson') = 350;
+trialParams3('SB2_ctx_iPoisson_offset_poisson') = 350;
 
-trialParams3('IO_SC1_ctx_iPoisson_onset_poisson') = 150;
-trialParams3('IO_SC1_ctx_iPoisson_offset_poisson') = 250;
-trialParams3('IO_SC2_ctx_iPoisson_onset_poisson') = 250;
-trialParams3('IO_SC2_ctx_iPoisson_offset_poisson') = 350;
+trialParams3('SC1_ctx_iPoisson_onset_poisson') = 150;
+trialParams3('SC1_ctx_iPoisson_offset_poisson') = 250;
+trialParams3('SC2_ctx_iPoisson_onset_poisson') = 250;
+trialParams3('SC2_ctx_iPoisson_offset_poisson') = 350;
 
 outputParams = [{'DeepE_V', 1:4, [200 400], 'afr'}; {'DeepE_V', 5:8, [200 400], 'afr'}; {'DeepE_V', 9:12, [200 400], 'afr'}; {'DeepE_V', 13:16, [200 400], 'afr'}; {'DeepE_V', 17:20, [200 400], 'afr'}];
 targetParams1 = [{'MSE', 1, 25, 0.25}; {'MSE', 2, 12, 0.25}; {'MSE', 3, 12, 0.25}; {'Compare', [1, 2, 3], 0, 0.15}; {'Diff', [2, 3], 0, 0.05}]; % A 
