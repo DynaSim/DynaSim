@@ -49,16 +49,16 @@ function y = dlModelPredictivePFC(Ne, Ni, Nio, NoiseRate)
     KsupEdeepE(cnx1_1:cnx1_2, a1:a2) = k3*rand((cnx1_2 - cnx1_1 + 1), (a2 - a1 + 1)) + k4; % X1 -> O1
     KsupEdeepE(cnx2_1:cnx2_2, b1:b2) = k3*rand((cnx2_2 - cnx2_1 + 1), (b2 - b1 + 1)) + k4; % X2 -> O2
     KsupEdeepE(cnx3_1:cnx3_2, c1:c2) = k3*rand((cnx3_2 - cnx3_1 + 1), (c2 - c1 + 1)) + k4; % X3 -> O3
-    KsupEdeepE(cny1_1:cny1_2, a1:a2) = k3*rand((cny1_2 - cny1_1 + 1), (a2 - a1 + 1)) + k4; % Y1 -> O3
-    KsupEdeepE(cny2_1:cny2_2, b1:b2) = k3*rand((cny2_2 - cny2_1 + 1), (b2 - b1 + 1)) + k4; % Y2 -> O2
-    KsupEdeepE(cny3_1:cny3_2, c1:c2) = k3*rand((cny3_2 - cny3_1 + 1), (c2 - c1 + 1)) + k4; % Y3 -> O1
+%     KsupEdeepE(cny1_1:cny1_2, a1:a2) = k3*rand((cny1_2 - cny1_1 + 1), (a2 - a1 + 1)) + k4; % Y1 -> O3
+%     KsupEdeepE(cny2_1:cny2_2, b1:b2) = k3*rand((cny2_2 - cny2_1 + 1), (b2 - b1 + 1)) + k4; % Y2 -> O2
+%     KsupEdeepE(cny3_1:cny3_2, c1:c2) = k3*rand((cny3_2 - cny3_1 + 1), (c2 - c1 + 1)) + k4; % Y3 -> O1
 
     KmidEdeepE = Kee * 0.3;
     KmidIdeepE = Kie * 0.3;
 
     % Time constants
     tauGABA_gamma = 4.1; % ms, decay time constant of inhibition for gamma (50Hz)
-    tauGABA_beta = 47.1; % ms, decay time constant of inhibition for beta (25Hz)
+    tauGABA_beta = 36.1; % ms, decay time constant of inhibition for beta (25Hz)
     tauAMPA = 4.7; % ms, decay time constant of fast excitation (AMPA)
     %     tauAMPA_beta = 38.4;
 
@@ -73,8 +73,8 @@ function y = dlModelPredictivePFC(Ne, Ni, Nio, NoiseRate)
     gGABAa_ii = 0.11*(21/Ne); % I->I within layer
 
     % neuronal dynamics
-    eqns = 'dV/dt = (Iapp + @current + noise*randn(1, Npop))/C; Iapp=0; noise=0; C=1; V(0) = -rand(1, Npop)*47;';
-    eqns2 = 'dV/dt = (100*sin(f1*t)*(heaviside(t - t1) - heaviside(t - t2)) + noise*randn(1, Npop))/C; V(t2) = -60; f1=4; t1=10; t2=100; noise=0; C=1; V(0) = -60 - rand(1, Npop)*4;';
+    eqns = 'dV/dt = (Iapp + @current + noise*randn(1, Npop))/C; Iapp=0; noise=0; C=1; V(0) = -rand(1, Npop)*17;';
+    eqns2 = 'dV/dt = (100*(exp(- (t - t1).^2) - exp(- (t - t2).^2)) + noise*randn(1, Npop))/C; f1=4; t1=10; t2=100; noise=0; C=1; V(0) = -60 - rand(1, Npop)*14;';
 
     g_poisson = 6.7e-5;
 
@@ -92,7 +92,7 @@ function y = dlModelPredictivePFC(Ne, Ni, Nio, NoiseRate)
     ping.populations(1).size = Ne;
     ping.populations(1).equations = eqns;
     ping.populations(1).mechanism_list = cell_type;
-    ping.populations(1).parameters = {'Iapp', 4,'noise', NoiseRate*3, 'g_poisson',g_poisson,'onset_poisson',0,'offset_poisson',0};
+    ping.populations(1).parameters = {'Iapp', 4,'noise', NoiseRate*2, 'g_poisson',g_poisson,'onset_poisson',0,'offset_poisson',0};
 
     % I-cells
     ping.populations(2).name = 'I';
@@ -126,14 +126,14 @@ function y = dlModelPredictivePFC(Ne, Ni, Nio, NoiseRate)
     IOping.populations(1).size = Nio;
     IOping.populations(1).equations = eqns2;
     IOping.populations(1).mechanism_list = cell_type;
-    IOping.populations(1).parameters = {'f1', 1,'noise', 14, 'g_poisson',g_poisson, 't1', 200, 't2', 300};
+    IOping.populations(1).parameters = {'f1', 1,'noise', 4, 'g_poisson',g_poisson, 't1', 200, 't2', 200};
 
     % I-cells
     IOping.populations(2).name = 'I';
     IOping.populations(2).size = Nio;
     IOping.populations(2).equations = eqns2;
     IOping.populations(2).mechanism_list = cell_type;
-    IOping.populations(2).parameters = {'f1', 1,'noise', 14, 'g_poisson',g_poisson, 't1', 200, 't2', 300};
+    IOping.populations(2).parameters = {'f1', 1,'noise', 4, 'g_poisson',g_poisson, 't1', 200, 't2', 200};
 
     % E/I connectivity
     IOping.connections(1).direction = 'E->I';

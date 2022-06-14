@@ -11,7 +11,8 @@ T=(p.tspan(1):dt:p.tspan(2))';
 ntime=length(T);
 nsamp=length(1:downsample_factor:ntime);
 
-% the 'shuffle' random seed has been set in advance.
+% seed the random number generator
+rng(p.random_seed);
 
 % ------------------------------------------------------------
 % Fixed variables:
@@ -55,7 +56,7 @@ midE_IO_SA2_iPoisson_s = getPoissonGating(p.midE_IO_SA2_iPoisson_baseline,p.midE
 t=0; k=1;
 
 % STATE_VARIABLES:
-supE_V_last =  -rand(1, p.supE_Npop)*47;
+supE_V_last =  -rand(1, p.supE_Npop)*17;
 supE_V = zeros(nsamp,p.supE_Npop);
 supE_V(1,:) = supE_V_last;
 supE_iNa_m_last = p.supE_iNa_m_IC+p.supE_iNa_IC_noise*rand(1,p.supE_Npop);
@@ -67,7 +68,7 @@ supE_iNa_h(1,:) = supE_iNa_h_last;
 supE_iK_n_last = p.supE_iK_n_IC+p.supE_iK_IC_noise*rand(1,p.supE_Npop);
 supE_iK_n = zeros(nsamp,p.supE_Npop);
 supE_iK_n(1,:) = supE_iK_n_last;
-supI_V_last =  -rand(1, p.supI_Npop)*47;
+supI_V_last =  -rand(1, p.supI_Npop)*17;
 supI_V = zeros(nsamp,p.supI_Npop);
 supI_V(1,:) = supI_V_last;
 supI_iNa_m_last = p.supI_iNa_m_IC+p.supI_iNa_IC_noise*rand(1,p.supI_Npop);
@@ -79,7 +80,7 @@ supI_iNa_h(1,:) = supI_iNa_h_last;
 supI_iK_n_last = p.supI_iK_n_IC+p.supI_iK_IC_noise*rand(1,p.supI_Npop);
 supI_iK_n = zeros(nsamp,p.supI_Npop);
 supI_iK_n(1,:) = supI_iK_n_last;
-midE_V_last =  -rand(1, p.midE_Npop)*47;
+midE_V_last =  -rand(1, p.midE_Npop)*17;
 midE_V = zeros(nsamp,p.midE_Npop);
 midE_V(1,:) = midE_V_last;
 midE_iNa_m_last = p.midE_iNa_m_IC+p.midE_iNa_IC_noise*rand(1,p.midE_Npop);
@@ -91,7 +92,7 @@ midE_iNa_h(1,:) = midE_iNa_h_last;
 midE_iK_n_last = p.midE_iK_n_IC+p.midE_iK_IC_noise*rand(1,p.midE_Npop);
 midE_iK_n = zeros(nsamp,p.midE_Npop);
 midE_iK_n(1,:) = midE_iK_n_last;
-midI_V_last =  -rand(1, p.midI_Npop)*47;
+midI_V_last =  -rand(1, p.midI_Npop)*17;
 midI_V = zeros(nsamp,p.midI_Npop);
 midI_V(1,:) = midI_V_last;
 midI_iNa_m_last = p.midI_iNa_m_IC+p.midI_iNa_IC_noise*rand(1,p.midI_Npop);
@@ -103,7 +104,7 @@ midI_iNa_h(1,:) = midI_iNa_h_last;
 midI_iK_n_last = p.midI_iK_n_IC+p.midI_iK_IC_noise*rand(1,p.midI_Npop);
 midI_iK_n = zeros(nsamp,p.midI_Npop);
 midI_iK_n(1,:) = midI_iK_n_last;
-deepE_V_last =  -rand(1, p.deepE_Npop)*47;
+deepE_V_last =  -rand(1, p.deepE_Npop)*17;
 deepE_V = zeros(nsamp,p.deepE_Npop);
 deepE_V(1,:) = deepE_V_last;
 deepE_iNa_m_last = p.deepE_iNa_m_IC+p.deepE_iNa_IC_noise*rand(1,p.deepE_Npop);
@@ -115,7 +116,7 @@ deepE_iNa_h(1,:) = deepE_iNa_h_last;
 deepE_iK_n_last = p.deepE_iK_n_IC+p.deepE_iK_IC_noise*rand(1,p.deepE_Npop);
 deepE_iK_n = zeros(nsamp,p.deepE_Npop);
 deepE_iK_n(1,:) = deepE_iK_n_last;
-deepI_V_last =  -rand(1, p.deepI_Npop)*47;
+deepI_V_last =  -rand(1, p.deepI_Npop)*17;
 deepI_V = zeros(nsamp,p.deepI_Npop);
 deepI_V(1,:) = deepI_V_last;
 deepI_iNa_m_last = p.deepI_iNa_m_IC+p.deepI_iNa_IC_noise*rand(1,p.deepI_Npop);
@@ -127,7 +128,7 @@ deepI_iNa_h(1,:) = deepI_iNa_h_last;
 deepI_iK_n_last = p.deepI_iK_n_IC+p.deepI_iK_IC_noise*rand(1,p.deepI_Npop);
 deepI_iK_n = zeros(nsamp,p.deepI_Npop);
 deepI_iK_n(1,:) = deepI_iK_n_last;
-IO_SA1_V_last =  -60 - rand(1, p.IO_SA1_Npop)*4;
+IO_SA1_V_last =  -60 - rand(1, p.IO_SA1_Npop)*14;
 IO_SA1_V = zeros(nsamp,p.IO_SA1_Npop);
 IO_SA1_V(1,:) = IO_SA1_V_last;
 IO_SA1_iNa_m_last = p.IO_SA1_iNa_m_IC+p.IO_SA1_iNa_IC_noise*rand(1,p.IO_SA1_Npop);
@@ -139,7 +140,7 @@ IO_SA1_iNa_h(1,:) = IO_SA1_iNa_h_last;
 IO_SA1_iK_n_last = p.IO_SA1_iK_n_IC+p.IO_SA1_iK_IC_noise*rand(1,p.IO_SA1_Npop);
 IO_SA1_iK_n = zeros(nsamp,p.IO_SA1_Npop);
 IO_SA1_iK_n(1,:) = IO_SA1_iK_n_last;
-IO_SB1_V_last =  -60 - rand(1, p.IO_SB1_Npop)*4;
+IO_SB1_V_last =  -60 - rand(1, p.IO_SB1_Npop)*14;
 IO_SB1_V = zeros(nsamp,p.IO_SB1_Npop);
 IO_SB1_V(1,:) = IO_SB1_V_last;
 IO_SB1_iNa_m_last = p.IO_SB1_iNa_m_IC+p.IO_SB1_iNa_IC_noise*rand(1,p.IO_SB1_Npop);
@@ -151,7 +152,7 @@ IO_SB1_iNa_h(1,:) = IO_SB1_iNa_h_last;
 IO_SB1_iK_n_last = p.IO_SB1_iK_n_IC+p.IO_SB1_iK_IC_noise*rand(1,p.IO_SB1_Npop);
 IO_SB1_iK_n = zeros(nsamp,p.IO_SB1_Npop);
 IO_SB1_iK_n(1,:) = IO_SB1_iK_n_last;
-IO_SC1_V_last =  -60 - rand(1, p.IO_SC1_Npop)*4;
+IO_SC1_V_last =  -60 - rand(1, p.IO_SC1_Npop)*14;
 IO_SC1_V = zeros(nsamp,p.IO_SC1_Npop);
 IO_SC1_V(1,:) = IO_SC1_V_last;
 IO_SC1_iNa_m_last = p.IO_SC1_iNa_m_IC+p.IO_SC1_iNa_IC_noise*rand(1,p.IO_SC1_Npop);
@@ -163,7 +164,7 @@ IO_SC1_iNa_h(1,:) = IO_SC1_iNa_h_last;
 IO_SC1_iK_n_last = p.IO_SC1_iK_n_IC+p.IO_SC1_iK_IC_noise*rand(1,p.IO_SC1_Npop);
 IO_SC1_iK_n = zeros(nsamp,p.IO_SC1_Npop);
 IO_SC1_iK_n(1,:) = IO_SC1_iK_n_last;
-IO_SA2_V_last =  -60 - rand(1, p.IO_SA2_Npop)*4;
+IO_SA2_V_last =  -60 - rand(1, p.IO_SA2_Npop)*14;
 IO_SA2_V = zeros(nsamp,p.IO_SA2_Npop);
 IO_SA2_V(1,:) = IO_SA2_V_last;
 IO_SA2_iNa_m_last = p.IO_SA2_iNa_m_IC+p.IO_SA2_iNa_IC_noise*rand(1,p.IO_SA2_Npop);
@@ -175,7 +176,7 @@ IO_SA2_iNa_h(1,:) = IO_SA2_iNa_h_last;
 IO_SA2_iK_n_last = p.IO_SA2_iK_n_IC+p.IO_SA2_iK_IC_noise*rand(1,p.IO_SA2_Npop);
 IO_SA2_iK_n = zeros(nsamp,p.IO_SA2_Npop);
 IO_SA2_iK_n(1,:) = IO_SA2_iK_n_last;
-IO_SB2_V_last =  -60 - rand(1, p.IO_SB2_Npop)*4;
+IO_SB2_V_last =  -60 - rand(1, p.IO_SB2_Npop)*14;
 IO_SB2_V = zeros(nsamp,p.IO_SB2_Npop);
 IO_SB2_V(1,:) = IO_SB2_V_last;
 IO_SB2_iNa_m_last = p.IO_SB2_iNa_m_IC+p.IO_SB2_iNa_IC_noise*rand(1,p.IO_SB2_Npop);
@@ -187,7 +188,7 @@ IO_SB2_iNa_h(1,:) = IO_SB2_iNa_h_last;
 IO_SB2_iK_n_last = p.IO_SB2_iK_n_IC+p.IO_SB2_iK_IC_noise*rand(1,p.IO_SB2_Npop);
 IO_SB2_iK_n = zeros(nsamp,p.IO_SB2_Npop);
 IO_SB2_iK_n(1,:) = IO_SB2_iK_n_last;
-IO_SC2_V_last =  -60 - rand(1, p.IO_SC2_Npop)*4;
+IO_SC2_V_last =  -60 - rand(1, p.IO_SC2_Npop)*14;
 IO_SC2_V = zeros(nsamp,p.IO_SC2_Npop);
 IO_SC2_V(1,:) = IO_SC2_V_last;
 IO_SC2_iNa_m_last = p.IO_SC2_iNa_m_IC+p.IO_SC2_iNa_IC_noise*rand(1,p.IO_SC2_Npop);
@@ -199,7 +200,7 @@ IO_SC2_iNa_h(1,:) = IO_SC2_iNa_h_last;
 IO_SC2_iK_n_last = p.IO_SC2_iK_n_IC+p.IO_SC2_iK_IC_noise*rand(1,p.IO_SC2_Npop);
 IO_SC2_iK_n = zeros(nsamp,p.IO_SC2_Npop);
 IO_SC2_iK_n(1,:) = IO_SC2_iK_n_last;
-IO_Cx1_V_last =  -60 - rand(1, p.IO_Cx1_Npop)*4;
+IO_Cx1_V_last =  -60 - rand(1, p.IO_Cx1_Npop)*14;
 IO_Cx1_V = zeros(nsamp,p.IO_Cx1_Npop);
 IO_Cx1_V(1,:) = IO_Cx1_V_last;
 IO_Cx1_iNa_m_last = p.IO_Cx1_iNa_m_IC+p.IO_Cx1_iNa_IC_noise*rand(1,p.IO_Cx1_Npop);
@@ -211,7 +212,7 @@ IO_Cx1_iNa_h(1,:) = IO_Cx1_iNa_h_last;
 IO_Cx1_iK_n_last = p.IO_Cx1_iK_n_IC+p.IO_Cx1_iK_IC_noise*rand(1,p.IO_Cx1_Npop);
 IO_Cx1_iK_n = zeros(nsamp,p.IO_Cx1_Npop);
 IO_Cx1_iK_n(1,:) = IO_Cx1_iK_n_last;
-IO_Cx2_V_last =  -60 - rand(1, p.IO_Cx2_Npop)*4;
+IO_Cx2_V_last =  -60 - rand(1, p.IO_Cx2_Npop)*14;
 IO_Cx2_V = zeros(nsamp,p.IO_Cx2_Npop);
 IO_Cx2_V(1,:) = IO_Cx2_V_last;
 IO_Cx2_iNa_m_last = p.IO_Cx2_iNa_m_IC+p.IO_Cx2_iNa_IC_noise*rand(1,p.IO_Cx2_Npop);
@@ -385,14 +386,6 @@ midE_IO_SA2_iPoisson_gPoisson = zeros(nsamp,p.midE_Npop);
 midE_IO_SA2_iPoisson_gPoisson(1,:)=p.midE_IO_SA2_iPoisson_gext.*midE_IO_SA2_iPoisson_s(k,:);
 
 % ###########################################################
-% Memory check:
-% ###########################################################
-try 
-  memoryUsed = memoryUsageCallerGB(); 
-  fprintf('Total Memory Used <= %i GB \n', ceil(memoryUsed)); 
-end 
-
-% ###########################################################
 % Numerical integration:
 % ###########################################################
 n=2;
@@ -406,7 +399,6 @@ for k=2:ntime
   supI_iNa_m_k1 = (((2.5-.1*(supI_V_last+65))./(exp(2.5-.1*(supI_V_last+65))-1))).*(1-supI_iNa_m_last)-((4*exp(-(supI_V_last+65)/18))).*supI_iNa_m_last;
   supI_iNa_h_k1 = ((.07*exp(-(supI_V_last+65)/20))).*(1-supI_iNa_h_last)-((1./(exp(3-.1*(supI_V_last+65))+1))).*supI_iNa_h_last;
   supI_iK_n_k1 = (((.1-.01*(supI_V_last+65))./(exp(1-.1*(supI_V_last+65))-1))).*(1-supI_iK_n_last)-((.125*exp(-(supI_V_last+65)/80))).*supI_iK_n_last;
-  disp(p);  
   midE_V_k1 = (p.midE_Iapp + ((((-p.midE_iNa_gNa.*midE_iNa_m_last.^3.*midE_iNa_h_last.*(midE_V_last-p.midE_iNa_ENa))))+((((-p.midE_iK_gK.*midE_iK_n_last.^4.*(midE_V_last-p.midE_iK_EK))))+((((-((p.midE_ctx_iPoisson_g_poisson.*midE_ctx_iPoisson_s_poisson(1+floor(t/(0.5*dt)),:))).*(midE_V_last-p.midE_ctx_iPoisson_E_poisson))))+((-(((p.midE_midE_iAMPActx_gAMPA.*(midE_midE_iAMPActx_s_last*p.midE_midE_iAMPActx_netcon).*(midE_V_last-p.midE_midE_iAMPActx_EAMPA)))))+((((-p.midE_midI_iGABActx_gGABAa.*(midE_midI_iGABActx_s_last*p.midE_midI_iGABActx_netcon).*(midE_V_last-p.midE_midI_iGABActx_EGABAa))))+((((-((p.midE_IO_SA1_iPoisson_gext.*midE_IO_SA1_iPoisson_s(k,:))).*(midE_V_last-p.midE_IO_SA1_iPoisson_Eext))))+((((-((p.midE_IO_SA2_iPoisson_gext.*midE_IO_SA2_iPoisson_s(k,:))).*(midE_V_last-p.midE_IO_SA2_iPoisson_Eext))))+((-(((p.midE_IO_SB1_iAMPActx_gAMPA.*(midE_IO_SB1_iAMPActx_s_last*p.midE_IO_SB1_iAMPActx_netcon).*(midE_V_last-p.midE_IO_SB1_iAMPActx_EAMPA)))))+((-(((p.midE_IO_SB2_iAMPActx_gAMPA.*(midE_IO_SB2_iAMPActx_s_last*p.midE_IO_SB2_iAMPActx_netcon).*(midE_V_last-p.midE_IO_SB2_iAMPActx_EAMPA)))))+((-(((p.midE_IO_SC1_iAMPActx_gAMPA.*(midE_IO_SC1_iAMPActx_s_last*p.midE_IO_SC1_iAMPActx_netcon).*(midE_V_last-p.midE_IO_SC1_iAMPActx_EAMPA)))))+((-(((p.midE_IO_SC2_iAMPActx_gAMPA.*(midE_IO_SC2_iAMPActx_s_last*p.midE_IO_SC2_iAMPActx_netcon).*(midE_V_last-p.midE_IO_SC2_iAMPActx_EAMPA)))))+((-(((p.midE_IO_Cx1_iAMPActx_gAMPA.*(midE_IO_Cx1_iAMPActx_s_last*p.midE_IO_Cx1_iAMPActx_netcon).*(midE_V_last-p.midE_IO_Cx1_iAMPActx_EAMPA)))))+((-(((p.midE_IO_Cx2_iAMPActx_gAMPA.*(midE_IO_Cx2_iAMPActx_s_last*p.midE_IO_Cx2_iAMPActx_netcon).*(midE_V_last-p.midE_IO_Cx2_iAMPActx_EAMPA)))))))))))))))))) + p.midE_noise*randn(1, p.midE_Npop))/p.midE_C;
   midE_iNa_m_k1 = (((2.5-.1*(midE_V_last+65))./(exp(2.5-.1*(midE_V_last+65))-1))).*(1-midE_iNa_m_last)-((4*exp(-(midE_V_last+65)/18))).*midE_iNa_m_last;
   midE_iNa_h_k1 = ((.07*exp(-(midE_V_last+65)/20))).*(1-midE_iNa_h_last)-((1./(exp(3-.1*(midE_V_last+65))+1))).*midE_iNa_h_last;
@@ -423,35 +415,35 @@ for k=2:ntime
   deepI_iNa_m_k1 = (((2.5-.1*(deepI_V_last+65))./(exp(2.5-.1*(deepI_V_last+65))-1))).*(1-deepI_iNa_m_last)-((4*exp(-(deepI_V_last+65)/18))).*deepI_iNa_m_last;
   deepI_iNa_h_k1 = ((.07*exp(-(deepI_V_last+65)/20))).*(1-deepI_iNa_h_last)-((1./(exp(3-.1*(deepI_V_last+65))+1))).*deepI_iNa_h_last;
   deepI_iK_n_k1 = (((.1-.01*(deepI_V_last+65))./(exp(1-.1*(deepI_V_last+65))-1))).*(1-deepI_iK_n_last)-((.125*exp(-(deepI_V_last+65)/80))).*deepI_iK_n_last;
-  IO_SA1_V_k1 = (100*sin(p.IO_SA1_f1*t)*(heaviside(t - p.IO_SA1_t1) - heaviside(t - p.IO_SA1_t2)) + p.IO_SA1_noise*randn(1, p.IO_SA1_Npop))/p.IO_SA1_C;
+  IO_SA1_V_k1 = (100*(exp(- (t - p.IO_SA1_t1).^2) - exp(- (t - p.IO_SA1_t2).^2)) + p.IO_SA1_noise*randn(1, p.IO_SA1_Npop))/p.IO_SA1_C;
   IO_SA1_iNa_m_k1 = (((2.5-.1*(IO_SA1_V_last+65))./(exp(2.5-.1*(IO_SA1_V_last+65))-1))).*(1-IO_SA1_iNa_m_last)-((4*exp(-(IO_SA1_V_last+65)/18))).*IO_SA1_iNa_m_last;
   IO_SA1_iNa_h_k1 = ((.07*exp(-(IO_SA1_V_last+65)/20))).*(1-IO_SA1_iNa_h_last)-((1./(exp(3-.1*(IO_SA1_V_last+65))+1))).*IO_SA1_iNa_h_last;
   IO_SA1_iK_n_k1 = (((.1-.01*(IO_SA1_V_last+65))./(exp(1-.1*(IO_SA1_V_last+65))-1))).*(1-IO_SA1_iK_n_last)-((.125*exp(-(IO_SA1_V_last+65)/80))).*IO_SA1_iK_n_last;
-  IO_SB1_V_k1 = (100*sin(p.IO_SB1_f1*t)*(heaviside(t - p.IO_SB1_t1) - heaviside(t - p.IO_SB1_t2)) + p.IO_SB1_noise*randn(1, p.IO_SB1_Npop))/p.IO_SB1_C;
+  IO_SB1_V_k1 = (100*(exp(- (t - p.IO_SB1_t1).^2) - exp(- (t - p.IO_SB1_t2).^2)) + p.IO_SB1_noise*randn(1, p.IO_SB1_Npop))/p.IO_SB1_C;
   IO_SB1_iNa_m_k1 = (((2.5-.1*(IO_SB1_V_last+65))./(exp(2.5-.1*(IO_SB1_V_last+65))-1))).*(1-IO_SB1_iNa_m_last)-((4*exp(-(IO_SB1_V_last+65)/18))).*IO_SB1_iNa_m_last;
   IO_SB1_iNa_h_k1 = ((.07*exp(-(IO_SB1_V_last+65)/20))).*(1-IO_SB1_iNa_h_last)-((1./(exp(3-.1*(IO_SB1_V_last+65))+1))).*IO_SB1_iNa_h_last;
   IO_SB1_iK_n_k1 = (((.1-.01*(IO_SB1_V_last+65))./(exp(1-.1*(IO_SB1_V_last+65))-1))).*(1-IO_SB1_iK_n_last)-((.125*exp(-(IO_SB1_V_last+65)/80))).*IO_SB1_iK_n_last;
-  IO_SC1_V_k1 = (100*sin(p.IO_SC1_f1*t)*(heaviside(t - p.IO_SC1_t1) - heaviside(t - p.IO_SC1_t2)) + p.IO_SC1_noise*randn(1, p.IO_SC1_Npop))/p.IO_SC1_C;
+  IO_SC1_V_k1 = (100*(exp(- (t - p.IO_SC1_t1).^2) - exp(- (t - p.IO_SC1_t2).^2)) + p.IO_SC1_noise*randn(1, p.IO_SC1_Npop))/p.IO_SC1_C;
   IO_SC1_iNa_m_k1 = (((2.5-.1*(IO_SC1_V_last+65))./(exp(2.5-.1*(IO_SC1_V_last+65))-1))).*(1-IO_SC1_iNa_m_last)-((4*exp(-(IO_SC1_V_last+65)/18))).*IO_SC1_iNa_m_last;
   IO_SC1_iNa_h_k1 = ((.07*exp(-(IO_SC1_V_last+65)/20))).*(1-IO_SC1_iNa_h_last)-((1./(exp(3-.1*(IO_SC1_V_last+65))+1))).*IO_SC1_iNa_h_last;
   IO_SC1_iK_n_k1 = (((.1-.01*(IO_SC1_V_last+65))./(exp(1-.1*(IO_SC1_V_last+65))-1))).*(1-IO_SC1_iK_n_last)-((.125*exp(-(IO_SC1_V_last+65)/80))).*IO_SC1_iK_n_last;
-  IO_SA2_V_k1 = (100*sin(p.IO_SA2_f1*t)*(heaviside(t - p.IO_SA2_t1) - heaviside(t - p.IO_SA2_t2)) + p.IO_SA2_noise*randn(1, p.IO_SA2_Npop))/p.IO_SA2_C;
+  IO_SA2_V_k1 = (100*(exp(- (t - p.IO_SA2_t1).^2) - exp(- (t - p.IO_SA2_t2).^2)) + p.IO_SA2_noise*randn(1, p.IO_SA2_Npop))/p.IO_SA2_C;
   IO_SA2_iNa_m_k1 = (((2.5-.1*(IO_SA2_V_last+65))./(exp(2.5-.1*(IO_SA2_V_last+65))-1))).*(1-IO_SA2_iNa_m_last)-((4*exp(-(IO_SA2_V_last+65)/18))).*IO_SA2_iNa_m_last;
   IO_SA2_iNa_h_k1 = ((.07*exp(-(IO_SA2_V_last+65)/20))).*(1-IO_SA2_iNa_h_last)-((1./(exp(3-.1*(IO_SA2_V_last+65))+1))).*IO_SA2_iNa_h_last;
   IO_SA2_iK_n_k1 = (((.1-.01*(IO_SA2_V_last+65))./(exp(1-.1*(IO_SA2_V_last+65))-1))).*(1-IO_SA2_iK_n_last)-((.125*exp(-(IO_SA2_V_last+65)/80))).*IO_SA2_iK_n_last;
-  IO_SB2_V_k1 = (100*sin(p.IO_SB2_f1*t)*(heaviside(t - p.IO_SB2_t1) - heaviside(t - p.IO_SB2_t2)) + p.IO_SB2_noise*randn(1, p.IO_SB2_Npop))/p.IO_SB2_C;
+  IO_SB2_V_k1 = (100*(exp(- (t - p.IO_SB2_t1).^2) - exp(- (t - p.IO_SB2_t2).^2)) + p.IO_SB2_noise*randn(1, p.IO_SB2_Npop))/p.IO_SB2_C;
   IO_SB2_iNa_m_k1 = (((2.5-.1*(IO_SB2_V_last+65))./(exp(2.5-.1*(IO_SB2_V_last+65))-1))).*(1-IO_SB2_iNa_m_last)-((4*exp(-(IO_SB2_V_last+65)/18))).*IO_SB2_iNa_m_last;
   IO_SB2_iNa_h_k1 = ((.07*exp(-(IO_SB2_V_last+65)/20))).*(1-IO_SB2_iNa_h_last)-((1./(exp(3-.1*(IO_SB2_V_last+65))+1))).*IO_SB2_iNa_h_last;
   IO_SB2_iK_n_k1 = (((.1-.01*(IO_SB2_V_last+65))./(exp(1-.1*(IO_SB2_V_last+65))-1))).*(1-IO_SB2_iK_n_last)-((.125*exp(-(IO_SB2_V_last+65)/80))).*IO_SB2_iK_n_last;
-  IO_SC2_V_k1 = (100*sin(p.IO_SC2_f1*t)*(heaviside(t - p.IO_SC2_t1) - heaviside(t - p.IO_SC2_t2)) + p.IO_SC2_noise*randn(1, p.IO_SC2_Npop))/p.IO_SC2_C;
+  IO_SC2_V_k1 = (100*(exp(- (t - p.IO_SC2_t1).^2) - exp(- (t - p.IO_SC2_t2).^2)) + p.IO_SC2_noise*randn(1, p.IO_SC2_Npop))/p.IO_SC2_C;
   IO_SC2_iNa_m_k1 = (((2.5-.1*(IO_SC2_V_last+65))./(exp(2.5-.1*(IO_SC2_V_last+65))-1))).*(1-IO_SC2_iNa_m_last)-((4*exp(-(IO_SC2_V_last+65)/18))).*IO_SC2_iNa_m_last;
   IO_SC2_iNa_h_k1 = ((.07*exp(-(IO_SC2_V_last+65)/20))).*(1-IO_SC2_iNa_h_last)-((1./(exp(3-.1*(IO_SC2_V_last+65))+1))).*IO_SC2_iNa_h_last;
   IO_SC2_iK_n_k1 = (((.1-.01*(IO_SC2_V_last+65))./(exp(1-.1*(IO_SC2_V_last+65))-1))).*(1-IO_SC2_iK_n_last)-((.125*exp(-(IO_SC2_V_last+65)/80))).*IO_SC2_iK_n_last;
-  IO_Cx1_V_k1 = (100*sin(p.IO_Cx1_f1*t)*(heaviside(t - p.IO_Cx1_t1) - heaviside(t - p.IO_Cx1_t2)) + p.IO_Cx1_noise*randn(1, p.IO_Cx1_Npop))/p.IO_Cx1_C;
+  IO_Cx1_V_k1 = (100*(exp(- (t - p.IO_Cx1_t1).^2) - exp(- (t - p.IO_Cx1_t2).^2)) + p.IO_Cx1_noise*randn(1, p.IO_Cx1_Npop))/p.IO_Cx1_C;
   IO_Cx1_iNa_m_k1 = (((2.5-.1*(IO_Cx1_V_last+65))./(exp(2.5-.1*(IO_Cx1_V_last+65))-1))).*(1-IO_Cx1_iNa_m_last)-((4*exp(-(IO_Cx1_V_last+65)/18))).*IO_Cx1_iNa_m_last;
   IO_Cx1_iNa_h_k1 = ((.07*exp(-(IO_Cx1_V_last+65)/20))).*(1-IO_Cx1_iNa_h_last)-((1./(exp(3-.1*(IO_Cx1_V_last+65))+1))).*IO_Cx1_iNa_h_last;
   IO_Cx1_iK_n_k1 = (((.1-.01*(IO_Cx1_V_last+65))./(exp(1-.1*(IO_Cx1_V_last+65))-1))).*(1-IO_Cx1_iK_n_last)-((.125*exp(-(IO_Cx1_V_last+65)/80))).*IO_Cx1_iK_n_last;
-  IO_Cx2_V_k1 = (100*sin(p.IO_Cx2_f1*t)*(heaviside(t - p.IO_Cx2_t1) - heaviside(t - p.IO_Cx2_t2)) + p.IO_Cx2_noise*randn(1, p.IO_Cx2_Npop))/p.IO_Cx2_C;
+  IO_Cx2_V_k1 = (100*(exp(- (t - p.IO_Cx2_t1).^2) - exp(- (t - p.IO_Cx2_t2).^2)) + p.IO_Cx2_noise*randn(1, p.IO_Cx2_Npop))/p.IO_Cx2_C;
   IO_Cx2_iNa_m_k1 = (((2.5-.1*(IO_Cx2_V_last+65))./(exp(2.5-.1*(IO_Cx2_V_last+65))-1))).*(1-IO_Cx2_iNa_m_last)-((4*exp(-(IO_Cx2_V_last+65)/18))).*IO_Cx2_iNa_m_last;
   IO_Cx2_iNa_h_k1 = ((.07*exp(-(IO_Cx2_V_last+65)/20))).*(1-IO_Cx2_iNa_h_last)-((1./(exp(3-.1*(IO_Cx2_V_last+65))+1))).*IO_Cx2_iNa_h_last;
   IO_Cx2_iK_n_k1 = (((.1-.01*(IO_Cx2_V_last+65))./(exp(1-.1*(IO_Cx2_V_last+65))-1))).*(1-IO_Cx2_iK_n_last)-((.125*exp(-(IO_Cx2_V_last+65)/80))).*IO_Cx2_iK_n_last;
