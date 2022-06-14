@@ -887,13 +887,12 @@ classdef DynaLearn < matlab.mixin.SetGet
                     
                     if ~contains(lab{i, 1}, 'IO')
                         wn = w + delta;
-                    end
-                    
-                    wn(wn < 0) = 0;
-                    wn(wn > 1) = 1;
-                    val{i, 1} = wn;
-                    deltaL = deltaL + sum(sum(abs(delta)));
-                    
+
+                        wn(wn < 0) = 0;
+                        wn(wn > 1) = 1;
+                        val{i, 1} = wn;
+                        deltaL = deltaL + sum(sum(abs(delta)));
+                    end           
                 end
                 
             elseif strcmpi(dlLearningRule, 'BioDeltaRule')
@@ -905,14 +904,16 @@ classdef DynaLearn < matlab.mixin.SetGet
                     delta = (1-w).*(randn(size(w)))*error*dlLambda;
                     
                     if ~contains(lab{i, 1}, 'IO')
+
                         wn = w + delta;
+                    
+                        wn(wn < 0) = 0;
+                        wn(wn > 1) = 1;
+                        val{i, 1} = wn;
+                        deltaL = deltaL + sum(sum(abs(delta)));
+
                     end
-                    
-                    wn(wn < 0) = 0;
-                    wn(wn > 1) = 1;
-                    val{i, 1} = wn;
-                    deltaL = deltaL + sum(sum(abs(delta)));
-                    
+
                 end
 
             %%% What follows are 4 Learning Rules (3 for E-cells and 1 for I-cells; WIP) from Clopath's paper:

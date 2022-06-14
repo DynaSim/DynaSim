@@ -21,5 +21,6 @@ dsConfig.txt
 dlFile.mat
 dlTempFunc.m
 dlTempFuncParamsChanger.m
+dlModelTestBench.m
 
 !models/

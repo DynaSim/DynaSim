@@ -1,27 +1,29 @@
-function y = dlDemoPredictivePFC(Ne, Ni, Nio, noise_rate)
+function y = dlDemoPredictivePFC(Ne, Ni, Nio, NoiseRate)
 
-    fprintf("Initialization...\n");
+    fprintf("\n->Initialization of dlPFC Laminar Model: ");
+    fprintf("\n-->Excitatory layer neuronal population size = %d (recommended to be multiple of 6), ", Ne);
+    fprintf("\n-->Inhibitory layer neuronal population size = %d (recommended to be multiple of 6 and at least 3 times smaller than Excitatory size), ", Ni);
+    fprintf("\n-->Input layer (terminal) neuronal population size = %d (arbitrary, better to be close to Inhibitory layer size), ", Nio);
+    fprintf("\n-->Overall noise rate = %.4f, ", NoiseRate);
 
-    k1 = 0.1; % Diff. for normal weights (uniform random)
-    k2 = 0.1; % Min connectivity weight
-    k3 = 0.1; % Diff. for strengthen weights
+    k1 = 0.07; % Diff. for normal weights (uniform random)
+    k2 = 0.04; % Min connectivity weight
+    k3 = 0.17; % Diff. for strengthen weights
     k4 = 0.74; % Min. for strengthen weights
 
     % Connectivity matrices
 
     % E->I
-    Kei = k1*rand(Ne, Ni) + 0.1; % all-to-all, connectivity from E cells to I cells; mid, sup, deep
+    Kei = k1*rand(Ne, Ni) + k2; % All-to-all, connectivity from E cells to I cells; mid, sup, deep
     % I->E
-    Kie = k1*rand(Ni, Ne) + 0.1; % all-to-all, connectivity from I cells to E cells; mid, sup, deep
+    Kie = k1*rand(Ni, Ne) + k2; % All-to-all, connectivity from I cells to E cells; mid, sup, deep
 
     % E->E
-    Kee = k1*rand(Ne, Ne) + k2; % recurrent E-to-E: mid, sup, deep
-    Kii = k1*rand(Ni, Ni) + k2; % recurrent I-to-I: mid, sup, deep
-%     Kffee = k1*rand(Ne, Ne) + k2; % feedforward E-to-E: mid->sup, sup->deep
-%     Kffie = k1*rand(Ni, Ne) + k2; % feedforward I-to-E: mid->deep
-
-    kzio = zeros(Nio, Nio);
-    KdeepEI = Kie * 1.47;
+    Kee = k1*rand(Ne, Ne) + k2; % Recurrent E-to-E: mid, sup, deep
+    Kii = k1*rand(Ni, Ni) + k2; % Recurrent I-to-I: mid, sup, deep
+    
+    kzio = zeros(Nio, Nio); % Null (zero) matrix for disconnections
+    KdeepEI = Kie * 4;
 
     a1 = 1;a2 = ceil(1*Ne/6);
     b1 = ceil(1 + 1*Ne/6);b2 = ceil(2*Ne/6);
@@ -76,8 +78,8 @@ function y = dlDemoPredictivePFC(Ne, Ni, Nio, noise_rate)
     
     % neuronal dynamics
     eqns = 'dV/dt = (Iapp + @current + noise*randn(1, Npop))/C; Iapp=0; noise=0; C=1; V(0) = -rand(1, Npop)*17;';
-    eqns2 = 'dV/dt = (Iapp + @current + noise*randn(1, Npop))/C; Iapp=0; noise=0; C=1; V(0) = -rand(1, Npop)*17;';
-
+    eqns2 = 'dV/dt = (Iapp + @current + noise*randn(1, Npop))/C; Iapp=0; noise=0; C=1; V(0) = -rand(1, Npop)*47;';
+    
     % SPN
 %     g_l_D1 = 0.096;      % mS/cm^2, Leak conductance for D1 SPNs 
 %     g_l_D2 = 0.1;        % mS/cm^2, Leak conductance for D2 SPNs
@@ -102,14 +104,14 @@ function y = dlDemoPredictivePFC(Ne, Ni, Nio, noise_rate)
     ping.populations(1).size = Ne;
     ping.populations(1).equations = eqns;
     ping.populations(1).mechanism_list = cell_type;
-    ping.populations(1).parameters = {'Iapp', 3,'noise', noise_rate*3, 'g_poisson',g_poisson,'onset_poisson',0,'offset_poisson',0};
+    ping.populations(1).parameters = {'Iapp', 3,'noise', NoiseRate*3, 'g_poisson',g_poisson,'onset_poisson',0,'offset_poisson',0};
 
     % I-cells
     ping.populations(2).name = 'I';
     ping.populations(2).size = Ni;
     ping.populations(2).equations = eqns;
     ping.populations(2).mechanism_list = cell_type;
-    ping.populations(2).parameters = {'Iapp',0,'noise', noise_rate, 'g_poisson',g_poisson,'onset_poisson',0,'offset_poisson',0};
+    ping.populations(2).parameters = {'Iapp',0,'noise', NoiseRate, 'g_poisson',g_poisson,'onset_poisson',0,'offset_poisson',0};
 
     % E/I connectivity
     ping.connections(1).direction = 'E->I';
@@ -179,7 +181,7 @@ function y = dlDemoPredictivePFC(Ne, Ni, Nio, noise_rate)
     s = dsCombineSpecifications(sup, mid, deep, stimuli1, stimuli2, stimuli3, contex);
 
     % connect the layers and inputs
-    fprintf("Connecting separate layers and inputs...\n");
+    fprintf("\n--->Connecting separate layers and inputs:");
     tempconn = zeros(Nio, Ne);
     
     % Input SA -> midE [1-4]
@@ -270,6 +272,6 @@ function y = dlDemoPredictivePFC(Ne, Ni, Nio, noise_rate)
     % deepE [Ne/2+1-Ne] as O2
     y = s;
     
-    fprintf("Initialization done.\n");
+    fprintf("\n->Initialization of dlPFC done. \n");
 
 end

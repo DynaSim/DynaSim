@@ -1,14 +1,28 @@
 %% 3-layer neocortical model of PFC / Predictive task
 
+clc;
+fn1 = fieldnames(a1);
+vl1 = struct2cell(a1);
+
+fn2 = fieldnames(a2);
+vl2 = struct2cell(a2);
+
+ncons = find(contains(fn1, '_netcon'));
+for i = ncons'
+    x = size(vl1{i, 1});
+    y = size(vl2{i, 1});
+    fprintf("%d %d %s %s\n", x(1), x(2), fn1{i, 1}, fn2{i, 1});
+end
+
 %% Model parameters, Uncomment one of the following lanes to run an example.
 
 clear;
 clc;
 
-Ne = 24;Ni = 6;Nio = 6;noise_rate = 7;
-% s0 = NeoCortex(Ne, Ni, Nio, noise_rate);
-s1 = dlDemoPING(2, 1, 2, noise_rate);
-% s2 = dlDemoPredictivePFC(Ne, Ni, Nio, noise_rate);
+Ne = 24;Ni = 6;Nin = 6;noise_rate = 7;
+% s1 = dlDemoPING(2, 1, 2, noise_rate); % Basic PING test model
+% s2 = dlDemoPredictivePFC(Ne, Ni, Nin, noise_rate); % Predictive PFC demo
+s3 = dlModelPredictivePFC(Ne, Ni, Nin, noise_rate); % Predictive PFC model with specific parameters
 
 %% Create DynaLearn Class (First time)
 
@@ -16,7 +30,8 @@ s1 = dlDemoPING(2, 1, 2, noise_rate);
 % m = DynaLearn(s2, 'models/dlDemoPredictivePFC'); % ~ 150min
 % m = DynaLearn(s2, 'models/dlDemoPredictivePFC2'); % ~ 180min, 2nd version
 
-m = DynaLearn(s2, 'models/dlTestPredictivePFC', 'raw'); % ~ 42sec
+% m = DynaLearn(s2, 'models/dlTestPredictivePFC', 'raw'); % ~ 42sec
+m = DynaLearn(s3, 'models/dlModelPredictivePFC', 'raw'); % ~ 42sec
 % m.dlSimulate(); % ~ 40sec
 m.dlSave(); % < 1sec
 
@@ -25,7 +40,8 @@ m.dlSave(); % < 1sec
 clc;
 m = DynaLearn(); % ~ 1sec
 % m = m.dlLoad('models/dlDemoPING'); % ~ 10sec
-m = m.dlLoad('models/dlDemoPredictivePFC'); % ~ 10sec
+% m = m.dlLoad('models/dlDemoPredictivePFC'); % ~ 10sec
+m = m.dlLoad('models/dlModelPredictivePFC'); % ~ 10sec
 % m = m.dlLoad('models/dlDemoPredictivePFC2'); % ~ 10sec
 % m = m.dlLoad('models/dlTestPredictivePFC'); % ~ 10sec
 % m.dlSimulate(); % ~ 40sec
@@ -44,83 +60,10 @@ m.dlPlotAllPotentials('lfp'); % Local field potential
  %% Continue simulation: trialParams example
 
 clc;
-trialParams1 = containers.Map();
-trialParams2 = containers.Map();
-trialParams3 = containers.Map();
+% [trialParams1, trialParams2, trialParams3] = dlDemoThreePatternOld();
+[trialParams1, trialParams2, trialParams3] = dlDemoThreePatternNew();
 
-trialParams1('tspan') = [0 500];
-trialParams2('tspan') = [0 500];
-trialParams3('tspan') = [0 500];
-
-g_poisson = 6e-4;dc_poisson = 7e5;
-
-trialParams1('SA1_ctx_iPoisson_DC_poisson') = dc_poisson;
-trialParams1('SA2_ctx_iPoisson_DC_poisson') = dc_poisson;
-trialParams1('SB1_ctx_iPoisson_DC_poisson') = 0;
-trialParams1('SB2_ctx_iPoisson_DC_poisson') = 0;
-trialParams1('SC1_ctx_iPoisson_DC_poisson') = 0;
-trialParams1('SC2_ctx_iPoisson_DC_poisson') = 0;
-
-trialParams1('SA1_ctx_iPoisson_onset_poisson') = 150;
-trialParams1('SA1_ctx_iPoisson_offset_poisson') = 250;
-trialParams1('SA2_ctx_iPoisson_onset_poisson') = 250;
-trialParams1('SA2_ctx_iPoisson_offset_poisson') = 350;
-
-trialParams1('SB1_ctx_iPoisson_onset_poisson') = 0;
-trialParams1('SB1_ctx_iPoisson_offset_poisson') = 0;
-trialParams1('SB2_ctx_iPoisson_onset_poisson') = 0;
-trialParams1('SB2_ctx_iPoisson_offset_poisson') = 0;
-
-trialParams1('SC1_ctx_iPoisson_onset_poisson') = 0;
-trialParams1('SC1_ctx_iPoisson_offset_poisson') = 0;
-trialParams1('SC2_ctx_iPoisson_onset_poisson') = 0;
-trialParams1('SC2_ctx_iPoisson_offset_poisson') = 0;
-
-trialParams2('SA1_ctx_iPoisson_DC_poisson') = dc_poisson;
-trialParams2('SA2_ctx_iPoisson_DC_poisson') = dc_poisson;
-trialParams2('SB1_ctx_iPoisson_DC_poisson') = dc_poisson;
-trialParams2('SB2_ctx_iPoisson_DC_poisson') = dc_poisson;
-trialParams2('SC1_ctx_iPoisson_DC_poisson') = dc_poisson;
-trialParams2('SC2_ctx_iPoisson_DC_poisson') = dc_poisson;
-
-trialParams2('SA1_ctx_iPoisson_onset_poisson') = 250;
-trialParams2('SA1_ctx_iPoisson_offset_poisson') = 250;
-trialParams2('SA2_ctx_iPoisson_onset_poisson') = 350;
-trialParams2('SA2_ctx_iPoisson_offset_poisson') = 350;
-
-trialParams2('SB1_ctx_iPoisson_onset_poisson') = 150;
-trialParams2('SB1_ctx_iPoisson_offset_poisson') = 250;
-trialParams2('SB2_ctx_iPoisson_onset_poisson') = 250;
-trialParams2('SB2_ctx_iPoisson_offset_poisson') = 350;
-
-trialParams2('SC1_ctx_iPoisson_onset_poisson') = 250;
-trialParams2('SC1_ctx_iPoisson_offset_poisson') = 250;
-trialParams2('SC2_ctx_iPoisson_onset_poisson') = 350;
-trialParams2('SC2_ctx_iPoisson_offset_poisson') = 350;
-
-trialParams3('SA1_ctx_iPoisson_DC_poisson') = dc_poisson;
-trialParams3('SA2_ctx_iPoisson_DC_poisson') = dc_poisson;
-trialParams3('SB1_ctx_iPoisson_DC_poisson') = dc_poisson;
-trialParams3('SB2_ctx_iPoisson_DC_poisson') = dc_poisson;
-trialParams3('SC1_ctx_iPoisson_DC_poisson') = dc_poisson;
-trialParams3('SC2_ctx_iPoisson_DC_poisson') = dc_poisson;
-
-trialParams3('SA1_ctx_iPoisson_onset_poisson') = 250;
-trialParams3('SA1_ctx_iPoisson_offset_poisson') = 250;
-trialParams3('SA2_ctx_iPoisson_onset_poisson') = 350;
-trialParams3('SA2_ctx_iPoisson_offset_poisson') = 350;
-
-trialParams3('SB1_ctx_iPoisson_onset_poisson') = 250;
-trialParams3('SB1_ctx_iPoisson_offset_poisson') = 250;
-trialParams3('SB2_ctx_iPoisson_onset_poisson') = 350;
-trialParams3('SB2_ctx_iPoisson_offset_poisson') = 350;
-
-trialParams3('SC1_ctx_iPoisson_onset_poisson') = 150;
-trialParams3('SC1_ctx_iPoisson_offset_poisson') = 250;
-trialParams3('SC2_ctx_iPoisson_onset_poisson') = 250;
-trialParams3('SC2_ctx_iPoisson_offset_poisson') = 350;
-
-outputParams = [{'DeepE_V', 1:4, [200 400], 'afr'}; {'DeepE_V', 5:8, [200 400], 'afr'}; {'DeepE_V', 9:12, [200 400], 'afr'}; {'DeepE_V', 13:16, [200 400], 'afr'}; {'DeepE_V', 17:20, [200 400], 'afr'}];
+outputParams = [{'DeepE_V', 1:4, [300 400], 'afr'}; {'DeepE_V', 5:8, [300 400], 'afr'}; {'DeepE_V', 9:12, [300 400], 'afr'}; {'DeepE_V', 13:16, [300 400], 'afr'}; {'DeepE_V', 17:20, [300 400], 'afr'}];
 targetParams1 = [{'MSE', 1, 25, 0.25}; {'MSE', 2, 12, 0.25}; {'MSE', 3, 12, 0.25}; {'Compare', [1, 2, 3], 0, 0.15}; {'Diff', [2, 3], 0, 0.05}]; % A 
 targetParams2 = [{'MSE', 2, 25, 0.25}; {'MSE', 1, 12, 0.25}; {'MSE', 3, 12, 0.25}; {'Compare', [2, 1, 3], 0, 0.15}; {'Diff', [1, 3], 0, 0.05}]; % B
 targetParams3 = [{'MSE', 3, 25, 0.25}; {'MSE', 2, 12, 0.25}; {'MSE', 1, 12, 0.25}; {'Compare', [3, 1, 2], 0, 0.15}; {'Diff', [1, 2], 0, 0.05}]; % C
@@ -133,16 +76,16 @@ dlTargetParameters = {targetParams1, targetParams2, targetParams3};
 dlOutputParameters = outputParams;
 
 dlTrainOptions = containers.Map();
-dlTrainOptions('dlEpochs') = 1;
+dlTrainOptions('dlEpochs') = 2;
 dlTrainOptions('dlBatchs') = 3;
 dlTrainOptions('dlLambda') = 1e-5;
 
 dlTrainOptions('dlCheckpoint') = 'true';
 dlTrainOptions('dlCheckpointCoefficient') = 1.74; % e.g sqrt(2), sqrt(3), 2, sqrt(5) ... 
 dlTrainOptions('dlUpdateMode') = 'batch';
-dlTrainOptions('dlLearningRule') = 'NewRule'; % DeltaRule, BioDeltaRule, RWDelta, ...
+dlTrainOptions('dlLearningRule') = 'BioDeltaRule'; % DeltaRule, BioDeltaRule, RWDelta, ...
 
-dlTrainOptions('dlSimulationFlag') = 0; % Manully turning simulation, on or off (on is default and recommended)
+dlTrainOptions('dlSimulationFlag') = 1; % Manully turning simulation, on or off (on is default and recommended)
 dlTrainOptions('dlOutputLogFlag') = 1; % Autosaving trial outputs, on or off (off is default and recommended) % TODO Output/Random/SameValueProblem
 dlTrainOptions('dlOfflineOutputGenerator') = 0; % Just for debugging, generates random outputs based on last outputs. 
 dlTrainOptions('dlAdaptiveLambda') = 0; % Adaptive lambda parameter; recommended for long simulations.
@@ -153,15 +96,24 @@ dlTrainOptions('dlLambdaCap') = 3e-2; % Only if Adaptive lambda is active, recom
 % m.dlResetTraining(); % Reset logs and optimal state error (not the optimal state file)
 % m.dlLoadOptimal();  % Load the current optimal state (if exists)
 m.dlTrain(dlInputParameters, dlOutputParameters, dlTargetParameters, dlTrainOptions);
+% Raw simulation on (20*3 = 60) iterations
+%% Errors log plot
+
+clc;
+m.dlPlotBatchErrors(3);
+
+%% Plot Local-field potentials
+
+clc;
+m.dlPlotAllPotentials('lfp');
 
 %% Run a simulation (without training)
 
-for i = 1:1
+for i = 1:3
     m.dlRunSimulation(dlInputParameters{i}, dlOutputParameters);
+    m.dlPlotAllPotentials('lfp');
 end
 
-%%
-m.dlPlotAllPotentials('lfp');
 %%
 
 opts = containers.Map();
@@ -173,10 +125,4 @@ opts("lf") = 20;
 opts("hf") = 50;
 m.dlPlotAllPotentials('avgfft', opts);
 
-%% Errors log plot
-
-clc;
-m.dlPlotBatchErrors(3);
-% m.dlPlotErrors();
-
-%% End of Demo (7th of May 2022)
+%% End of Demo (14th of June 2022)
