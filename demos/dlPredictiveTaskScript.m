@@ -34,7 +34,6 @@ targetParams3 = [{'MSE', 3, 21, 0.25}; {'MSE', 2, 14, 0.25}; {'MSE', 1, 14, 0.25
 
 %% Trial: training script preparation, 50-block and 50-trial
 
-% TODO block vs trial
 dlInputParameters = {trialParams1, trialParams2, trialParams3};
 dlTargetParameters = {targetParams1, targetParams2, targetParams3};
 dlOutputParameters = outputParams;
@@ -43,8 +42,8 @@ dlOutputParameters = outputParams;
 
 dlTrainOptions = containers.Map();
 dlTrainOptions('dlEpochs') = 1;
-dlTrainOptions('dlBatchs') = 3;
-dlTrainOptions('dlLambda') = 0;
+dlTrainOptions('dlBatchs') = 1;
+dlTrainOptions('dlLambda') = 1e-5;
     
 dlTrainOptions('dlCheckpoint') = 'true';
 dlTrainOptions('dlCheckpointCoefficient') = 1.94; % e.g sqrt(2), sqrt(3), 2, sqrt(5) ... 
@@ -59,12 +58,21 @@ dlTrainOptions('dlAdaptiveLambda') = 0; % Adaptive lambda parameter; recommended
 dlTrainOptions('dlLambdaCap') = 3e-2; % Only if Adaptive lambda is active, recommended to set a upper-bound (UB) or ignore to use default UB (0.01).
 % dlTrainOptions('dlMetaLearningRule') = 'true'; % TODOs!
 
-%% Train
+%% Train test
 
 % m.dlResetTraining(); % Reset logs and optimal state error (not the optimal state file)
 % m.dlLoadOptimal();  % Load the current optimal state (if exists)
 m.dlTrain(dlInputParameters, dlOutputParameters, dlTargetParameters, dlTrainOptions);
 % Raw simulation on (20*3 = 60) iterations
+
+%% Block phase
+
+m.dlTrain(B1, dlOutputParameters, T1, dlTrainOptions);
+m.dlTrain(TrB1, dlOutputParameters, TrT1, dlTrainOptions);
+m.dlTrain(B2, dlOutputParameters, T2, dlTrainOptions);
+m.dlTrain(TrB1, dlOutputParameters, TrT1, dlTrainOptions);
+m.dlTrain(B3, dlOutputParameters, T3, dlTrainOptions);
+m.dlTrain(TrB1, dlOutputParameters, TrT1, dlTrainOptions);
 
 %% Errors log plot
 

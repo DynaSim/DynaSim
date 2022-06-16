@@ -193,6 +193,7 @@ classdef DynaLearn < matlab.mixin.SetGet
             dlSaveFileNamePath = [obj.dlStudyDir, '/dlFile.mat'];
             p = load([obj.dlPath, '/params.mat']);
             save([obj.dlStudyDir, '/params.mat'], '-struct', 'p');
+            obj.dlOutputs = [];
             save(dlSaveFileNamePath, 'obj');
             
         end
@@ -805,7 +806,7 @@ classdef DynaLearn < matlab.mixin.SetGet
                         
                             if obj.dlLastError < obj.dlOptimalError
 
-                                obj.dlOptimalError = dlAvgError;
+                                obj.dlOptimalError = obj.dlLastError;
                                 obj.dlSaveOptimal();
 
                                 obj.dlUpdateError = obj.dlLastError;
