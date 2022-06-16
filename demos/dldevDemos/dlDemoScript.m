@@ -5,10 +5,10 @@
 clear;
 clc;
 
-Ne = 24;Ni = 6;Nin = 6;noise_rate = 7;
-% s1 = dlDemoPING(2, 1, 2, noise_rate); % Basic PING test model
-% s2 = dlDemoPredictivePFC(Ne, Ni, Nin, noise_rate); % Predictive PFC demo
-s3 = dlModelPredictivePFC(Ne, Ni, Nin, noise_rate); % Predictive PFC model with specific parameters
+Ne = 24;Ni = 6;Nin = 6;NoiseRate = 7;
+% s1 = dlDemoPING(2, 1, 2, NoiseRate); % Basic PING test model
+% s2 = dlDemoPredictivePFC(Ne, Ni, Nin, NoiseRate); % Predictive PFC demo
+s3 = dlModelPredictivePFC(Ne, Ni, Nin, NoiseRate); % Predictive PFC model with specific parameters
 
 %% Create DynaLearn Class (First time)
 

@@ -9,8 +9,8 @@
 %% Model parameters
 
 clear;clc;
-Ne = 24;Ni = 6;Nin = 6;noise_rate = 5;
-s3 = dlModelPredictivePFC(Ne, Ni, Nin, noise_rate); % Predictive PFC model with specific parameters
+Ne = 24;Ni = 6;Nin = 6;NoiseRate = 5;
+s3 = dlModelPredictivePFC(Ne, Ni, Nin, NoiseRate); % Predictive PFC model with specific parameters
 
 %% Create DynaLearn Class (Only first time, if file does not exist already)
 
@@ -46,7 +46,7 @@ dlTrainOptions('dlBatchs') = 50;
 dlTrainOptions('dlLambda') = 1e-5;
     
 dlTrainOptions('dlCheckpoint') = 'true';
-dlTrainOptions('dlCheckpointCoefficient') = 1.94; % e.g sqrt(2), sqrt(3), 2, sqrt(5) ... 
+dlTrainOptions('dlCheckpointCoefficient') = 14.47; % e.g sqrt(2), sqrt(3), 2, sqrt(5) ... 
 dlTrainOptions('dlUpdateMode') = 'trial';
 dlTrainOptions('dlLearningRule') = 'BioDeltaRule'; % DeltaRule, BioDeltaRule, RWDelta, ...
 
@@ -65,8 +65,9 @@ dlTrainOptions('dlLambdaCap') = 3e-2; % Only if Adaptive lambda is active, recom
 m.dlTrain(dlInputParameters, dlOutputParameters, dlTargetParameters, dlTrainOptions);
 % Raw simulation on (20*3 = 60) iterations
 
-%% Block phase
+%% Block-trial phase
 
+clc;
 m.dlTrain(B1, dlOutputParameters, T1, dlTrainOptions);
 m.dlTrain(TrB, dlOutputParameters, TrT, dlTrainOptions);
 m.dlTrain(B2, dlOutputParameters, T2, dlTrainOptions);
@@ -77,7 +78,7 @@ m.dlTrain(TrB, dlOutputParameters, TrT, dlTrainOptions);
 %% Errors log plot
 
 % clc;
-m.dlPlotBatchErrors(3);
+m.dlPlotBatchErrors(1);
 
 %% Plot Local-field potentials
 
@@ -88,7 +89,6 @@ m.dlPlotAllPotentials('lfp');
 
 for i = 1:3
     m.dlRunSimulation(dlInputParameters{i}, dlOutputParameters);
-%     m.dlPlotAllPotentials('lfp');
 end
 
 %%
