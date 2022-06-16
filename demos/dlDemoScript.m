@@ -63,7 +63,7 @@ dlTargetParameters = {targetParams1, targetParams2, targetParams3};
 dlOutputParameters = outputParams;
 
 dlTrainOptions = containers.Map();
-dlTrainOptions('dlEpochs') = 600;
+dlTrainOptions('dlEpochs') = 100;
 dlTrainOptions('dlBatchs') = 3;
 dlTrainOptions('dlLambda') = 1e-5;
 
@@ -89,7 +89,7 @@ m.dlTrain(dlInputParameters, dlOutputParameters, dlTargetParameters, dlTrainOpti
 
 %% Errors log plot
 
-clc;
+% clc;
 m.dlPlotBatchErrors(3);
 
 %% Plot Local-field potentials

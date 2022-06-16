@@ -8,49 +8,49 @@ function [trialParams1, trialParams2, trialParams3] = dlDemoThreePatternNew()
     trialParams2('tspan') = [0 500];
     trialParams3('tspan') = [0 500];
 
-    trialParams1('IO_SA1_t1') = 200;
-    trialParams1('IO_SA1_t2') = 300;    
-    trialParams1('IO_SA2_t1') = 300;
-    trialParams1('IO_SA2_t2') = 400;
+    trialParams1('IO_SA1_t1') = 70;
+    trialParams1('IO_SA1_t2') = 250;    
+    trialParams1('IO_SA2_t1') = 250;
+    trialParams1('IO_SA2_t2') = 430;
 
-    trialParams1('IO_SB1_t1') = 200;
-    trialParams1('IO_SB1_t2') = 300;    
-    trialParams1('IO_SB2_t1') = 300;
-    trialParams1('IO_SB2_t2') = 300;
+    trialParams1('IO_SB1_t1') = 70;
+    trialParams1('IO_SB1_t2') = 250;    
+    trialParams1('IO_SB2_t1') = 250;
+    trialParams1('IO_SB2_t2') = 250;
     
-    trialParams1('IO_SC1_t1') = 200;
-    trialParams1('IO_SC1_t2') = 300;    
-    trialParams1('IO_SC2_t1') = 300;
-    trialParams1('IO_SC2_t2') = 300;
+    trialParams1('IO_SC1_t1') = 70;
+    trialParams1('IO_SC1_t2') = 250;    
+    trialParams1('IO_SC2_t1') = 250;
+    trialParams1('IO_SC2_t2') = 250;
     
-    trialParams2('IO_SA1_t1') = 200;
-    trialParams2('IO_SA1_t2') = 300;    
-    trialParams2('IO_SA2_t1') = 300;
-    trialParams2('IO_SA2_t2') = 300;
+    trialParams2('IO_SA1_t1') = 70;
+    trialParams2('IO_SA1_t2') = 250;    
+    trialParams2('IO_SA2_t1') = 250;
+    trialParams2('IO_SA2_t2') = 250;
 
-    trialParams2('IO_SB1_t1') = 200;
-    trialParams2('IO_SB1_t2') = 300;    
-    trialParams2('IO_SB2_t1') = 300;
-    trialParams2('IO_SB2_t2') = 400;
+    trialParams2('IO_SB1_t1') = 700;
+    trialParams2('IO_SB1_t2') = 250;    
+    trialParams2('IO_SB2_t1') = 250;
+    trialParams2('IO_SB2_t2') = 430;
     
-    trialParams2('IO_SC1_t1') = 200;
-    trialParams2('IO_SC1_t2') = 300;    
-    trialParams2('IO_SC2_t1') = 300;
-    trialParams2('IO_SC2_t2') = 300;
+    trialParams2('IO_SC1_t1') = 70;
+    trialParams2('IO_SC1_t2') = 250;    
+    trialParams2('IO_SC2_t1') = 250;
+    trialParams2('IO_SC2_t2') = 250;
     
-    trialParams3('IO_SA1_t1') = 200;
-    trialParams3('IO_SA1_t2') = 300;    
-    trialParams3('IO_SA2_t1') = 300;
-    trialParams3('IO_SA2_t2') = 300;
+    trialParams3('IO_SA1_t1') = 70;
+    trialParams3('IO_SA1_t2') = 250;    
+    trialParams3('IO_SA2_t1') = 250;
+    trialParams3('IO_SA2_t2') = 250;
 
-    trialParams3('IO_SB1_t1') = 200;
-    trialParams3('IO_SB1_t2') = 300;    
-    trialParams3('IO_SB2_t1') = 300;
-    trialParams3('IO_SB2_t2') = 300;
+    trialParams3('IO_SB1_t1') = 70;
+    trialParams3('IO_SB1_t2') = 250;    
+    trialParams3('IO_SB2_t1') = 250;
+    trialParams3('IO_SB2_t2') = 250;
     
-    trialParams3('IO_SC1_t1') = 200;
-    trialParams3('IO_SC1_t2') = 300;    
-    trialParams3('IO_SC2_t1') = 300;
-    trialParams3('IO_SC2_t2') = 400;
+    trialParams3('IO_SC1_t1') = 70;
+    trialParams3('IO_SC1_t2') = 250;    
+    trialParams3('IO_SC2_t1') = 250;
+    trialParams3('IO_SC2_t2') = 430;
     
 end

@@ -801,11 +801,42 @@ classdef DynaLearn < matlab.mixin.SetGet
                     
                     if strcmpi(dlUpdateMode, 'trial')
                         
-                        obj.dlUpdateError = obj.dlLastError;
-                        if dlAdaptiveLambda == 1
-                            dlLambda = obj.dlAdaptiveLambda();
+                        if strcmpi(dlCheckpoint, 'true')
+                        
+                            if obj.dlLastError < obj.dlOptimalError
+
+                                obj.dlOptimalError = dlAvgError;
+                                obj.dlSaveOptimal();
+
+                                obj.dlUpdateError = obj.dlLastError;
+                                if dlAdaptiveLambda == 1
+                                    dlLambda = obj.dlAdaptiveLambda();
+                                end
+                                obj.dlTrainStep(dlLearningRule, dlLambda);
+
+                            elseif obj.dlLastError > dlCheckpointCoefficient*obj.dlOptimalError
+
+                                obj.dlLoadOptimal();
+
+                            else
+                                
+                                obj.dlUpdateError = obj.dlLastError;
+                                if dlAdaptiveLambda == 1
+                                    dlLambda = obj.dlAdaptiveLambda();
+                                end
+                                obj.dlTrainStep(dlLearningRule, dlLambda);
+
+                            end
+                            
+                        else
+                            
+                            obj.dlUpdateError = obj.dlLastError;
+                            if dlAdaptiveLambda == 1
+                                dlLambda = obj.dlAdaptiveLambda();
+                            end
+                            obj.dlTrainStep(dlLearningRule, dlLambda);
+                        
                         end
-                        obj.dlTrainStep(dlLearningRule, dlLambda);
                         
                     end
                     
