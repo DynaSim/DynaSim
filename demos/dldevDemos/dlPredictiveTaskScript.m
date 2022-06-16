@@ -70,12 +70,25 @@ m.dlTrain(dlInputParameters, dlOutputParameters, dlTargetParameters, dlTrainOpti
 %% Block-trial phase
 
 clc;
-m.dlTrain(B1, dlOutputParameters, T1, dlTrainOptions);
-m.dlTrain(TrB, dlOutputParameters, TrT, dlTrainOptions);
-m.dlTrain(B2, dlOutputParameters, T2, dlTrainOptions);
-m.dlTrain(TrB, dlOutputParameters, TrT, dlTrainOptions);
-m.dlTrain(B3, dlOutputParameters, T3, dlTrainOptions);
-m.dlTrain(TrB, dlOutputParameters, TrT, dlTrainOptions);
+dlTrainOptions('dlLambda') = 3e-6;
+dlTrainOptions('dlUpdateMode') = 'trial';
+dlTrainOptions('dlEpochs') = 1;
+dlTrainOptions('dlBatchs') = 50;
+
+dlTrainOptions('dlCheckpointCoefficient') = 4;
+m.dlTrain(TBdata.B1, dlOutputParameters, TBdata.T1, dlTrainOptions);
+dlTrainOptions('dlCheckpointCoefficient') = 7;
+m.dlTrain(TBdata.TrB, dlOutputParameters, TBdata.TrT, dlTrainOptions);
+
+dlTrainOptions('dlCheckpointCoefficient') = 4; 
+m.dlTrain(TBdata.B2, dlOutputParameters, TBdata.T2, dlTrainOptions);
+dlTrainOptions('dlCheckpointCoefficient') = 7; 
+m.dlTrain(TBdata.TrB, dlOutputParameters, TBdata.TrT, dlTrainOptions);
+
+dlTrainOptions('dlCheckpointCoefficient') = 4;
+m.dlTrain(TBdata.B3, dlOutputParameters, TBdata.T3, dlTrainOptions);
+dlTrainOptions('dlCheckpointCoefficient') = 7;
+m.dlTrain(TBdata.TrB, dlOutputParameters, TBdata.TrT, dlTrainOptions);
 
 %% Errors log plot
 
