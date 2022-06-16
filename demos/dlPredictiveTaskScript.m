@@ -42,7 +42,7 @@ dlOutputParameters = outputParams;
 
 dlTrainOptions = containers.Map();
 dlTrainOptions('dlEpochs') = 1;
-dlTrainOptions('dlBatchs') = 1;
+dlTrainOptions('dlBatchs') = 50;
 dlTrainOptions('dlLambda') = 1e-5;
     
 dlTrainOptions('dlCheckpoint') = 'true';
@@ -68,11 +68,11 @@ m.dlTrain(dlInputParameters, dlOutputParameters, dlTargetParameters, dlTrainOpti
 %% Block phase
 
 m.dlTrain(B1, dlOutputParameters, T1, dlTrainOptions);
-m.dlTrain(TrB1, dlOutputParameters, TrT1, dlTrainOptions);
+m.dlTrain(TrB, dlOutputParameters, TrT, dlTrainOptions);
 m.dlTrain(B2, dlOutputParameters, T2, dlTrainOptions);
-m.dlTrain(TrB1, dlOutputParameters, TrT1, dlTrainOptions);
+m.dlTrain(TrB, dlOutputParameters, TrT, dlTrainOptions);
 m.dlTrain(B3, dlOutputParameters, T3, dlTrainOptions);
-m.dlTrain(TrB1, dlOutputParameters, TrT1, dlTrainOptions);
+m.dlTrain(TrB, dlOutputParameters, TrT, dlTrainOptions);
 
 %% Errors log plot
 
