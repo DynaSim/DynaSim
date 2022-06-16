@@ -395,8 +395,8 @@ classdef DynaLearn < matlab.mixin.SetGet
                         fqs = linspace(1, 500, max(size(x)));
                         subplot((min(k*6, n-1) - (k-1)*6), 1, mod(i-1, (min(k*6, n-1) - (k-1)*6))+1);
                         ffts = abs(fft(mean(x, 2))) * min(size(x)) / 1000;
-                        
-                        plot(fqs(lf:hf), ffts(lf:hf));grid("on");
+                        yf = smooth(ffts(lf:hf));
+                        area(fqs(lf:hf), yf);grid("on");
                         
                         if freqCap == 0
                             freqCap = max(ffts(lf:hf))*1.2;
