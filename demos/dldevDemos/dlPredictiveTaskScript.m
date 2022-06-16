@@ -38,7 +38,7 @@ dlInputParameters = {trialParams1, trialParams2, trialParams3};
 dlTargetParameters = {targetParams1, targetParams2, targetParams3};
 dlOutputParameters = outputParams;
 
-[B1, B2, B3, T1, T2, T3, TrB, TrT] = dlTrialBlockGenerator(dlInputParameters, dlTargetParameters, 50, 50);
+TBdata = dlTrialBlockGenerator(dlInputParameters, dlTargetParameters, 50, 50);
 
 dlTrainOptions = containers.Map();
 dlTrainOptions('dlEpochs') = 1;
@@ -46,24 +46,25 @@ dlTrainOptions('dlBatchs') = 50;
 dlTrainOptions('dlLambda') = 1e-5;
     
 dlTrainOptions('dlCheckpoint') = 'true';
-dlTrainOptions('dlCheckpointCoefficient') = 14.47; % e.g sqrt(2), sqrt(3), 2, sqrt(5) ... 
-dlTrainOptions('dlUpdateMode') = 'trial';
-dlTrainOptions('dlLearningRule') = 'BioDeltaRule'; % DeltaRule, BioDeltaRule, RWDelta, ...
+dlTrainOptions('dlCheckpointCoefficient') = 2.74; % A.K.A exploration rate 
+dlTrainOptions('dlUpdateMode') = 'batch';
+dlTrainOptions('dlLearningRule') = 'BioDeltaRule'; % Delta rule with a basic change based on biophysical properties 
 
-dlTrainOptions('dlSimulationFlag') = 1; % Manully turning simulation, on or off (on is default and recommended)
-dlTrainOptions('dlOutputLogFlag') = 1; % Autosaving trial outputs, on or off (off is default and recommended) % TODO Output/Random/SameValueProblem
-dlTrainOptions('dlOfflineOutputGenerator') = 0; % Just for debugging, generates random outputs based on last outputs. 
+dlTrainOptions('dlSimulationFlag') = 1;
+dlTrainOptions('dlOutputLogFlag') = 1;
+dlTrainOptions('dlOfflineOutputGenerator') = 0;
 dlTrainOptions('dlAdaptiveLambda') = 0; % Adaptive lambda parameter; recommended for long simulations.
 
 dlTrainOptions('dlLambdaCap') = 3e-2; % Only if Adaptive lambda is active, recommended to set a upper-bound (UB) or ignore to use default UB (0.01).
-% dlTrainOptions('dlMetaLearningRule') = 'true'; % TODOs!
 
 %% Train test
+% Initial training on the model to reach a plausible local minimia like
+% the task in the paper the model should also learn the basics of the task.
+% We shortly train the model by cues to put it close to a local minimia.
 
-% m.dlResetTraining(); % Reset logs and optimal state error (not the optimal state file)
-% m.dlLoadOptimal();  % Load the current optimal state (if exists)
+dlTrainOptions('dlEpochs') = 97;
+dlTrainOptions('dlBatchs') = 3;
 m.dlTrain(dlInputParameters, dlOutputParameters, dlTargetParameters, dlTrainOptions);
-% Raw simulation on (20*3 = 60) iterations
 
 %% Block-trial phase
 
