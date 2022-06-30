@@ -9,18 +9,18 @@
 %% Model parameters
 
 clear;clc;
-Ne = 24;Ni = 6;Nin = 6;NoiseRate = 5;
+Ne = 24;Ni = 6;Nin = 7;NoiseRate = 5;
 s3 = dlModelPredictivePFC(Ne, Ni, Nin, NoiseRate); % Predictive PFC model with specific parameters
 
 %% Create DynaLearn Class (Only first time, if file does not exist already)
 
-% m = DynaLearn(s3, 'models/dlModelPredictivePFC2'); % ~180 min, MEXGEN
+% m = DynaLearn(s3, 'models/dlModelPredictivePFC3'); % ~70 min, MEXGEN
 % m.dlSave(); % < 1sec
 
 %% Load DynaLearn Class
 
 m = DynaLearn(); % ~ 1sec
-m = m.dlLoad('models/dlModelPredictivePFC2'); % ~ 10sec
+m = m.dlLoad('models/dlModelPredictivePFC3'); % ~ 10sec
 % m.dlSimulate(); % ~ 40sec
 
  %% Continue simulation: trialParams example
@@ -28,9 +28,9 @@ m = m.dlLoad('models/dlModelPredictivePFC2'); % ~ 10sec
 [trialParams1, trialParams2, trialParams3] = dlDemoThreePattern();
 
 outputParams = [{'DeepE_V', 1:4, [300 500], 'afr'}; {'DeepE_V', 5:8, [300 500], 'afr'}; {'DeepE_V', 9:12, [300 500], 'afr'}];
-targetParams1 = [{'MSE', 1, 18, 0.2}; {'MSE', 2, 12, 0.2}; {'MSE', 3, 12, 0.2}; {'Compare', [1, 2], 0, 0.3}; {'Compare', [1, 3], 0, 0.3}; {'Diff', [2, 3], 0, 0.04}]; % A 
-targetParams2 = [{'MSE', 2, 18, 0.2}; {'MSE', 1, 12, 0.2}; {'MSE', 3, 12, 0.2}; {'Compare', [2, 1], 0, 0.3}; {'Compare', [2, 3], 0, 0.3}; {'Diff', [1, 3], 0, 0.04}]; % B
-targetParams3 = [{'MSE', 3, 18, 0.2}; {'MSE', 2, 12, 0.2}; {'MSE', 1, 12, 0.2}; {'Compare', [3, 1], 0, 0.3}; {'Compare', [3, 2], 0, 0.3}; {'Diff', [1, 2], 0, 0.04}]; % C
+targetParams1 = [{'MSE', 1, 24, 0.2}; {'MSE', 2, 15, 0.2}; {'MSE', 3, 15, 0.2}; {'Compare', [1, 2], 0, 0.3}; {'Compare', [1, 3], 0, 0.3}; {'Diff', [2, 3], 0, 0.04}]; % A 
+targetParams2 = [{'MSE', 2, 24, 0.2}; {'MSE', 1, 15, 0.2}; {'MSE', 3, 15, 0.2}; {'Compare', [2, 1], 0, 0.3}; {'Compare', [2, 3], 0, 0.3}; {'Diff', [1, 3], 0, 0.04}]; % B
+targetParams3 = [{'MSE', 3, 24, 0.2}; {'MSE', 2, 15, 0.2}; {'MSE', 1, 15, 0.2}; {'Compare', [3, 1], 0, 0.3}; {'Compare', [3, 2], 0, 0.3}; {'Diff', [1, 2], 0, 0.04}]; % C
 
 %% Trial: training script preparation, 50-block and 50-trial
 
@@ -41,12 +41,12 @@ dlOutputParameters = outputParams;
 TBdata = dlTrialBlockGenerator(dlInputParameters, dlTargetParameters, 50, 50);
 
 dlTrainOptions = containers.Map();
-dlTrainOptions('dlEpochs') = 1;
-dlTrainOptions('dlBatchs') = 50;
+dlTrainOptions('dlEpochs') = 500;
+dlTrainOptions('dlBatchs') = 3;
 dlTrainOptions('dlLambda') = 1e-5;
     
 dlTrainOptions('dlCheckpoint') = 'true';
-dlTrainOptions('dlCheckpointCoefficient') = 2.74; % A.K.A exploration rate 
+dlTrainOptions('dlCheckpointCoefficient') = 1.74; % A.K.A exploration rate 
 dlTrainOptions('dlUpdateMode') = 'batch';
 dlTrainOptions('dlLearningRule') = 'BioDeltaRule'; % Delta rule with a basic change based on biophysical properties 
 
@@ -62,9 +62,11 @@ dlTrainOptions('dlLambdaCap') = 3e-2; % Only if Adaptive lambda is active, recom
 % the task in the paper the model should also learn the basics of the task.
 % We shortly train the model by cues to put it close to a local minimia.
 
-dlTrainOptions('dlLambda') = 2e-5;
-dlTrainOptions('dlEpochs') = 97;
+dlTrainOptions('dlCheckpointCoefficient') = 1.74;
+dlTrainOptions('dlLambda') = 6e-6;
+dlTrainOptions('dlEpochs') = 1000;
 dlTrainOptions('dlBatchs') = 3;
+
 m.dlTrain(dlInputParameters, dlOutputParameters, dlTargetParameters, dlTrainOptions);
 
 %% Block-trial phase
@@ -104,7 +106,7 @@ m.dlPlotAllPotentials('lfp');
 
 for i = 1:3
     m.dlRunSimulation(dlInputParameters{i}, dlOutputParameters);
-    m.dlPlotAllPotentials('lfp');
+%     m.dlPlotAllPotentials('lfp');
 end
 
 %%
