@@ -14,13 +14,15 @@ s3 = dlModelPredictivePFC(Ne, Ni, Nin, NoiseRate); % Predictive PFC model with s
 
 %% Create DynaLearn Class (Only first time, if file does not exist already)
 
-% m = DynaLearn(s3, 'models/dlModelPredictivePFC3'); % ~70 min, MEXGEN
-% m.dlSave(); % < 1sec
+m = DynaLearn(s3, 'models/dlModelPredictivePFC4', 'mex'); % ~70 min, MEXGEN or ~1 min, RAWGEN
+m.dlSave(); % < 1sec
 
 %% Load DynaLearn Class
 
 m = DynaLearn(); % ~ 1sec
-m = m.dlLoad('models/dlModelPredictivePFC3'); % ~ 10sec
+% m = m.dlLoad('models/dlModelPredictivePFC3'); % ~ 10sec, Trained for ~1200 trials
+m = m.dlLoad('models/dlModelPredictivePFC4'); % ~ 10sec, New! keeping track of its activity in Gamma/Beta **
+
 % m.dlSimulate(); % ~ 40sec
 
  %% Continue simulation: trialParams example
@@ -28,9 +30,9 @@ m = m.dlLoad('models/dlModelPredictivePFC3'); % ~ 10sec
 [trialParams1, trialParams2, trialParams3] = dlDemoThreePattern();
 
 outputParams = [{'DeepE_V', 1:4, [300 500], 'afr'}; {'DeepE_V', 5:8, [300 500], 'afr'}; {'DeepE_V', 9:12, [300 500], 'afr'}];
-targetParams1 = [{'MSE', 1, 24, 0.2}; {'MSE', 2, 15, 0.2}; {'MSE', 3, 15, 0.2}; {'Compare', [1, 2], 0, 0.3}; {'Compare', [1, 3], 0, 0.3}; {'Diff', [2, 3], 0, 0.04}]; % A 
-targetParams2 = [{'MSE', 2, 24, 0.2}; {'MSE', 1, 15, 0.2}; {'MSE', 3, 15, 0.2}; {'Compare', [2, 1], 0, 0.3}; {'Compare', [2, 3], 0, 0.3}; {'Diff', [1, 3], 0, 0.04}]; % B
-targetParams3 = [{'MSE', 3, 24, 0.2}; {'MSE', 2, 15, 0.2}; {'MSE', 1, 15, 0.2}; {'Compare', [3, 1], 0, 0.3}; {'Compare', [3, 2], 0, 0.3}; {'Diff', [1, 2], 0, 0.04}]; % C
+targetParams1 = [{'MSE', 1, 24, 0.2}; {'MSE', 2, 15, 0.2}; {'MSE', 3, 12, 0.2}; {'Compare', [1, 2], 0, 0.3}; {'Compare', [1, 3], 0, 0.3}; {'Diff', [2, 3], 0, 0.04}]; % A 
+targetParams2 = [{'MSE', 2, 18, 0.2}; {'MSE', 1, 20, 0.2}; {'MSE', 3, 9, 0.2}; {'Compare', [2, 1], 0, 0.3}; {'Compare', [2, 3], 0, 0.3}; {'Diff', [1, 3], 0, 0.04}]; % B
+targetParams3 = [{'MSE', 3, 15, 0.2}; {'MSE', 2, 15, 0.2}; {'MSE', 1, 20, 0.2}; {'Compare', [3, 1], 0, 0.3}; {'Compare', [3, 2], 0, 0.3}; {'Diff', [1, 2], 0, 0.04}]; % C
 
 %% Trial: training script preparation, 50-block and 50-trial
 
@@ -62,10 +64,21 @@ dlTrainOptions('dlLambdaCap') = 3e-2; % Only if Adaptive lambda is active, recom
 % the task in the paper the model should also learn the basics of the task.
 % We shortly train the model by cues to put it close to a local minimia.
 
-dlTrainOptions('dlCheckpointCoefficient') = 1.74;
 dlTrainOptions('dlLambda') = 6e-6;
-dlTrainOptions('dlEpochs') = 1000;
+dlTrainOptions('dlEpochs') = 10;
 dlTrainOptions('dlBatchs') = 3;
+
+argsPSR = struct();
+
+argsPSR.lf1 = 10;
+argsPSR.hf1 = 20;
+argsPSR.lf2 = 40;
+argsPSR.hf2 = 60;
+
+dlTrainOptions('dlCustomLog') = "dlPowerSpectrumRatio"; % Name of a function which is in the path
+dlTrainOptions('dlCustomLogArgs') = argsPSR;
+
+%%
 
 m.dlTrain(dlInputParameters, dlOutputParameters, dlTargetParameters, dlTrainOptions);
 
@@ -136,3 +149,35 @@ for i = ncons'
     y = size(vl2{i, 1});
     fprintf("%d %d %s %s\n", x(1), x(2), fn1{i, 1}, fn2{i, 1});
 end
+
+%% G/B ratio log
+
+dtf = ceil(1 / (obj.dldT*obj.dlDownSampleFactor));
+
+lf = opts("lf")*dtf;
+hf = opts("hf")*dtf; 
+freqCap = 0;
+
+for i = (k-1)*6+1:min((k*6), 6)
+
+    x = dlPotentials{1, i+1};
+    fqs = linspace(1, 500, max(size(x)));
+    subplot((min(k*6, n-1) - (k-1)*6), 1, mod(i-1, (min(k*6, n-1) - (k-1)*6))+1);
+    ffts = abs(fft(mean(x, 2))) * min(size(x)) / 1000;
+    yf = smooth(ffts(lf:hf));
+    area(fqs(lf:hf), yf);grid("on");
+
+    if freqCap == 0
+        freqCap = max(ffts(lf:hf))*1.2;
+        ylim([0, freqCap]);
+    else
+        ylim([0, freqCap]);
+    end
+
+    ylabel(dlLabels(i+1));
+
+end
+
+disp("Temp edit for 6 subplots; average fft");
+xlabel(mode + " in frequency (Hz)");
+                    

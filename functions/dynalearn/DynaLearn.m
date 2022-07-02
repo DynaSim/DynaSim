@@ -386,7 +386,7 @@ classdef DynaLearn < matlab.mixin.SetGet
                     dtf = ceil(1 / (obj.dldT*obj.dlDownSampleFactor));
                     
                     lf = opts("lf")*dtf;
-                    hf = opts("hf")*dtf;
+                    hf = opts("hf")*dtf; 
                     freqCap = 0;
                     
                     for i = (k-1)*6+1:min((k*6), 6)
@@ -499,8 +499,17 @@ classdef DynaLearn < matlab.mixin.SetGet
                 
                 dlTimeKernel = ceil(dlOutputParameters{i, 3}/(obj.dldT*obj.dlDownSampleFactor));
                 dlOutputType = dlOutputParameters{i, 4};
+                
+%                 try
+                
                 dlTempOutputs = obj.dlLastOutputs{i}(dlTimeKernel(1):dlTimeKernel(2), dlOutputParameters{i, 2});
-         
+%                 
+%                 catch
+%                     
+%                     fprintf("\n---> No previous output found, seems like this session is initial.\n");
+%                     
+%                 end    
+                
                 if strcmpi(dlOutputType, 'ifr')
 
                     obj.dlLastOutputs{i} = obj.dlApplyIFRKernel(dlTempOutputs);

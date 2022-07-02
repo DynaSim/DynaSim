@@ -57,9 +57,9 @@ function y = dlModelPredictivePFC(Ne, Ni, Nio, NoiseRate)
     KmidIdeepE = Kie * 0.3;
 
     % Time constants
-    tauGABA_gamma = 4.1; % ms, decay time constant of inhibition for gamma (50Hz)
-    tauGABA_beta = 36.1; % ms, decay time constant of inhibition for beta (25Hz)
-    tauAMPA = 4.7; % ms, decay time constant of fast excitation (AMPA)
+    tauGABA_gamma = 4.07; % ms, decay time constant of inhibition for gamma (50Hz)
+    tauGABA_beta = 37.07; % ms, decay time constant of inhibition for beta (25Hz)
+    tauAMPA = 4.47; % ms, decay time constant of fast excitation (AMPA)
     %     tauAMPA_beta = 38.4;
 
     % Maximal synaptic strengths
@@ -73,8 +73,8 @@ function y = dlModelPredictivePFC(Ne, Ni, Nio, NoiseRate)
     gGABAa_ii = 0.11*(21/Ne); % I->I within layer
 
     % neuronal dynamics
-    eqns = 'dV/dt = (Iapp + @current + noise*randn(1, Npop))/C; Iapp=0; noise=0; C=1; V(0) = -rand(1, Npop)*17;';
-    eqns2 = 'dV/dt = (100*(exp(- (t - t1).^2) - exp(- (t - t2).^2)) + noise*randn(1, Npop))/C; f1=4; t1=10; t2=100; noise=0; C=1; V(0) = -60 - rand(1, Npop)*14;';
+    eqns = 'dV/dt = (Iapp + @current + noise*randn(1, Npop))/C; Iapp=0; noise=0; C=1; V(0) = -rand(1, Npop)*27;';
+    eqns2 = 'dV/dt = (rand(1) + 4.5)*(20*(exp(- (t - t1).^2) - exp(- (t - t2).^2)) + noise*randn(1, Npop))/C; f1=4; t1=10; t2=100; noise=0; C=1; V(0) = -60 - rand(1, Npop)*17;';
 
     g_poisson = 6.7e-5;
 
