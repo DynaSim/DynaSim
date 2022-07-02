@@ -63,7 +63,7 @@ dlTrainOptions('dlLambdaCap') = 3e-2; % Only if Adaptive lambda is active, recom
 % We shortly train the model by cues to put it close to a local minimia.
 
 dlTrainOptions('dlLambda') = 6e-6;
-dlTrainOptions('dlEpochs') = 3;
+dlTrainOptions('dlEpochs') = 5;
 dlTrainOptions('dlBatchs') = 3;
 
 argsPSR = struct();
@@ -78,6 +78,7 @@ dlTrainOptions('dlCustomLogArgs') = argsPSR; % Arguments of your custom function
 
 %%
 
+clc;
 m.dlTrain(dlInputParameters, dlOutputParameters, dlTargetParameters, dlTrainOptions);
 
 %% Block-trial phase

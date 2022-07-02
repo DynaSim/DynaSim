@@ -640,6 +640,8 @@ classdef DynaLearn < matlab.mixin.SetGet
         
         function dlTrain(obj, dlInputParameters, dlOutputParameters, dlTargetParameters, dlTrainOptions) 
             
+            fprintf("-> Training started:\n");
+            
             try
                
                 dlSimulationFlag = dlTrainOptions('dlSimulationFlag');
@@ -782,7 +784,7 @@ classdef DynaLearn < matlab.mixin.SetGet
                
                 if dlOfflineOutputGenerator == 1
                
-                    fprintf("->Offline output generator (random) is activated but ignored as simulation is active. \n");
+                    fprintf("-->Offline output generator (random) is activated but ignored as simulation is active. \n");
                 
                 end
                 
@@ -790,26 +792,26 @@ classdef DynaLearn < matlab.mixin.SetGet
             
             if dlAdaptiveLambda == 1
                
-                fprintf("->Adaptive lambda is active. Lambda (learning rate) will be changed based on volatility of model error.\n");
+                fprintf("-->Adaptive lambda is active. Lambda (learning rate) will be changed based on volatility of model error.\n");
                 try
                     obj.dlLambdaCap = dlTrainOptions('dlLambdaCap');
                 catch
-                    fprintf("-->Reminder: you have choosen adaptive lambda but forgot to determine a lambda cap. default dlLambdaCap = %f\n", obj.dlLambdaCap);
+                    fprintf("--->Reminder: you have choosen adaptive lambda but forgot to determine a lambda cap. default dlLambdaCap = %f\n", obj.dlLambdaCap);
                 end
             end
             
             if dlOutputLogFlag == 1
                
-                fprintf("->Outputs log will be saved.\n");
+                fprintf("-->Outputs log will be saved.\n");
                 
             end            
                 
             for i = 1:dlEpochs
                 
-                fprintf("\tEpoch no. %d (Total iterations for this model : %d)\n", i, obj.dlTrialNumber);
+                fprintf("\t->Epoch no. %d (Total iterations for this model : %d)\n", i, obj.dlTrialNumber);
                 for j = 1:dlBatchs
                 
-                    fprintf("\t\tBatch no. %d\t", j);
+                    fprintf("\t-->Batch no. %d of %d\t", j, dlBatchs);
                     set(obj, 'dlTrialNumber', obj.dlTrialNumber + 1);
                     obj.dlUpdateParams(dlInputParameters{j});
                     
@@ -830,7 +832,7 @@ classdef DynaLearn < matlab.mixin.SetGet
                     end
                     
                     obj.dlCalculateError(dlTargetParameters{j});
-                    fprintf("\tError = %f\n", obj.dlLastError);
+                    fprintf("\t--->Error of this trial = %f\n", obj.dlLastError);
                     
                     if dlOutputLogFlag
                         obj.dlOutputLog = [obj.dlOutputLog; obj.dlLastOutputs];
@@ -880,7 +882,7 @@ classdef DynaLearn < matlab.mixin.SetGet
                 end
                 
                 dlAvgError = mean(obj.dlErrorsLog(end-2:end));
-                fprintf("\t\tEpoch's Average Error = %f, Last lambda = %f\n", dlAvgError, dlLambda);
+                fprintf("\t-->Epoch's Average Error = %f, Last lambda = %f\n", dlAvgError, dlLambda);
                 
                 if strcmpi(dlCheckpoint, 'true')
                     
@@ -1236,7 +1238,7 @@ classdef DynaLearn < matlab.mixin.SetGet
             fprintf("Updating parameters of %s", obj.dlPath);
             dsParamsModifier('dlTempFuncParamsChanger.m', map);
             dlTempFuncParamsChanger(obj.dlPath);
-            fprintf("\tUpdated.\t"); 
+%             fprintf("\tUpdated.\t"); 
             
         end
         

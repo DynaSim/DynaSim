@@ -33,7 +33,7 @@ function y = dlPowerSpectrumRatio(dlObj, opts)
             yf1 = smooth(ffts(lf1:hf1));
             yf2 = smooth(ffts(lf2:hf2));
             y(i) = mean(yf1) / mean(yf2);
-            fprintf("---> %s 's power ratio [%.2f-%.2f]Hz/[%.2f-%.2f]Hz = %.3f\n", dlLabels{1, i+1}, opts.lf1, opts.hf1, opts.lf2, opts.hf2, y(i));
+%             fprintf("---> %s 's power ratio [%.2f-%.2f]Hz/[%.2f-%.2f]Hz = %.3f\n", dlLabels{1, i+1}, opts.lf1, opts.hf1, opts.lf2, opts.hf2, y(i));
             
 %             area(fqs(lf1:hf1), yf1);grid("on");
 %             area(fqs(lf2:hf2), yf2);grid("on");
