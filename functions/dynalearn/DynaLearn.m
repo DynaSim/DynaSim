@@ -40,6 +40,7 @@ classdef DynaLearn < matlab.mixin.SetGet
         
         dlGraph = []; 
         dlCustomLog = [];
+        dlCustomLogLabel = [];
         
     end
     
@@ -204,13 +205,13 @@ classdef DynaLearn < matlab.mixin.SetGet
         
             p = load([obj.dlPath, '/params.mat']);
             save([obj.dlStudyDir, dlCheckPointPath, 'params.mat'], '-struct', 'p');
-            fprintf("Checkpoint file saved in %s \n", [obj.dlStudyDir, dlCheckPointPath]);
+            fprintf("\t\tCheckpoint file saved in %s \n", [obj.dlStudyDir, dlCheckPointPath]);
             
         end
         
         function obj = dlLoadCheckPoint(obj, dlCheckPointPath)
             
-            fprintf("Checkpoint file loaded from %s \n", [obj.dlStudyDir, dlCheckPointPath]);
+            fprintf("\t\tCheckpoint file loaded from %s \n", [obj.dlStudyDir, dlCheckPointPath]);
             p = load([obj.dlStudyDir, dlCheckPointPath, 'params.mat']);
             save([obj.dlPath, '/params.mat'], '-struct', 'p');
             
@@ -826,9 +827,9 @@ classdef DynaLearn < matlab.mixin.SetGet
                        
                         logfuncname = dlCustomLogFlag;           
                         dlLogFuncBridge(logfuncname);
-                        cLog = dlLogTempFunc(obj, dlCustomLogArgs);
+                        [cLog, cLabel] = dlLogTempFunc(obj, dlCustomLogArgs);
                         obj.dlCustomLog = [obj.dlCustomLog, cLog];
-                        
+                        obj.dlCustomLogLabel = cLabel;
                     end
                     
                     obj.dlCalculateError(dlTargetParameters{j});

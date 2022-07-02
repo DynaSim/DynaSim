@@ -1,4 +1,4 @@
-function y = dlPowerSpectrumRatio(dlObj, opts)
+function [y, l] = dlPowerSpectrumRatio(dlObj, opts)
 
 % opts : struct with fields -> <lf1,hf1,lf2,hf2>
 
@@ -50,6 +50,7 @@ function y = dlPowerSpectrumRatio(dlObj, opts)
         end
     end
     
+    l = dlLabels;
 %     fprintf("\n->Power spectrum ratios.");
 
 end

@@ -62,8 +62,8 @@ dlTrainOptions('dlLambdaCap') = 3e-2; % Only if Adaptive lambda is active, recom
 % the task in the paper the model should also learn the basics of the task.
 % We shortly train the model by cues to put it close to a local minimia.
 
-dlTrainOptions('dlLambda') = 6e-6;
-dlTrainOptions('dlEpochs') = 5;
+dlTrainOptions('dlLambda') = 6e-5;
+dlTrainOptions('dlEpochs') = 10;
 dlTrainOptions('dlBatchs') = 3;
 
 argsPSR = struct();
@@ -84,7 +84,7 @@ m.dlTrain(dlInputParameters, dlOutputParameters, dlTargetParameters, dlTrainOpti
 %% Block-trial phase
 
 clc;
-dlTrainOptions('dlLambda') = 3e-6;
+dlTrainOptions('dlLambda') = 3e-5;
 dlTrainOptions('dlUpdateMode') = 'trial';
 dlTrainOptions('dlEpochs') = 1;
 dlTrainOptions('dlBatchs') = 50;
