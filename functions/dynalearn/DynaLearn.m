@@ -39,7 +39,7 @@ classdef DynaLearn < matlab.mixin.SetGet
         dlSimulationTool = "mex";
         
         dlGraph = []; 
-        % TODO
+        dlCustomLog = [];
         
     end
     
@@ -629,11 +629,11 @@ classdef DynaLearn < matlab.mixin.SetGet
         
         function dlRunSimulation(obj, dlVaryList, dlOutputParameters)
            
-            fprintf("\n\tSingle trial running: \n");
+            fprintf("\n\t->Single trial running: \n");
             obj.dlUpdateParams(dlVaryList);
             obj.dlSimulate();
             obj.dlCalculateOutputs(dlOutputParameters);
-            fprintf("\n\tSimulation outputs: ");
+            fprintf("\n\t-->Simulation outputs: ");
             disp(obj.dlLastOutputs);
             
         end
@@ -676,8 +676,8 @@ classdef DynaLearn < matlab.mixin.SetGet
                 
             catch
                 
-                dlEpochs = 10;
-                fprintf("->Number of epochs was not determined in options map. Default dlEpochs = 10\n");
+                dlEpochs = 5;
+                fprintf("-->Number of epochs was not determined in options map. Default dlEpochs = 5\n");
                 
             end
             
@@ -688,7 +688,7 @@ classdef DynaLearn < matlab.mixin.SetGet
             catch
                 
                 dlBatchs = size(dlInputParameters, 2);
-                fprintf("->Batchs was not determined in options map, default dlBatchs = size(dlVaryList, 2)\n");
+                fprintf("-->Batchs was not determined in options map, default dlBatchs = size(dlVaryList, 2)\n");
                 
             end
             
@@ -699,7 +699,7 @@ classdef DynaLearn < matlab.mixin.SetGet
             catch
                 
                 dlLambda = 0.001;
-                fprintf("->Lambda was not determined in options map, default dlLambda = 1e-3\n");
+                fprintf("-->Lambda was not determined in options map, default dlLambda = 1e-3\n");
                 
             end
             
@@ -710,7 +710,7 @@ classdef DynaLearn < matlab.mixin.SetGet
             catch
                 
                 dlLearningRule = 'DeltaRule';
-                fprintf("->Learning rule was not determined in options map, default dlLearningRule = 'DeltaRule'\n");
+                fprintf("-->Learning rule was not determined in options map, default dlLearningRule = 'DeltaRule'\n");
                 
             end
             
@@ -721,7 +721,7 @@ classdef DynaLearn < matlab.mixin.SetGet
             catch
                 
                 dlUpdateMode = 'batch';
-                fprintf("->Update mode was not determined in options map, default dlUpdateMode = 'batch'\n");
+                fprintf("-->Update mode was not determined in options map, default dlUpdateMode = 'batch'\n");
                 
             end
             
@@ -737,12 +737,24 @@ classdef DynaLearn < matlab.mixin.SetGet
             
             try
                
+                dlCustomLogFlag = dlTrainOptions('dlCustomLog');
+                dlCustomLogArgs = dlTrainOptions('dlCustomLogArgs');
+                fprintf("-->Custom log function '%s' will be called on every trial.\n", dlTrainOptions('dlCustomLog'));
+                
+            catch
+                
+                dlCustomLogFlag = "n";
+                
+            end
+            
+            try
+               
                 dlCheckpoint = dlTrainOptions('dlCheckpoint');
                 
             catch
                 
                 dlCheckpoint = 'true';
-                fprintf("->Checkpoint flag was not determined in options map, default dlCheckpoint = 'true'\n");
+                fprintf("-->Checkpoint flag was not determined in options map, default dlCheckpoint = 'true'\n");
                 
             end
             
@@ -753,16 +765,16 @@ classdef DynaLearn < matlab.mixin.SetGet
             catch
                 
                 dlCheckpointCoefficient = 2.0;
-                fprintf("->Checkpoint Coefficient for optimal state saving and loading was not determined in options map, default dlCheckpointCoefficient = 2\n");
+                fprintf("-->Checkpoint Coefficient for optimal state saving and loading was not determined in options map, default dlCheckpointCoefficient = 2\n");
                 
             end
             
             if dlSimulationFlag ~= 1
                
-                fprintf("->Simulation has been manually deactivated for this run.\n");
+                fprintf("-->Simulation has been manually deactivated for this run.\n");
                 if dlOfflineOutputGenerator == 1
                
-                    fprintf("->Offline output generator (random) is activated. Outputs are only for debugging approaches. \n");
+                    fprintf("--->Offline output generator (random) is activated. Outputs are only for debugging approaches.\n");
                 
                 end
                 
@@ -806,6 +818,15 @@ classdef DynaLearn < matlab.mixin.SetGet
                         obj.dlCalculateOutputs(dlOutputParameters);
                     elseif dlOfflineOutputGenerator == 1
                         obj.dlOutputGenerator();
+                    end
+                    
+                    if ~strcmpi(dlCustomLogFlag, "n")
+                       
+                        logfuncname = dlCustomLogFlag;           
+                        dlLogFuncBridge(logfuncname);
+                        cLog = dlLogTempFunc(obj, dlCustomLogArgs);
+                        obj.dlCustomLog = [obj.dlCustomLog, cLog];
+                        
                     end
                     
                     obj.dlCalculateError(dlTargetParameters{j});

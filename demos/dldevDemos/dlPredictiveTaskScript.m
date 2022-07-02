@@ -19,13 +19,13 @@ m.dlSave(); % < 1sec
 
 %% Load DynaLearn Class
 
+clear;clc;
 m = DynaLearn(); % ~ 1sec
 % m = m.dlLoad('models/dlModelPredictivePFC3'); % ~ 10sec, Trained for ~1200 trials
 m = m.dlLoad('models/dlModelPredictivePFC4'); % ~ 10sec, New! keeping track of its activity in Gamma/Beta **
-
 % m.dlSimulate(); % ~ 40sec
 
- %% Continue simulation: trialParams example
+%% Trial: training script preparation, 50-block and 50-trial
 
 [trialParams1, trialParams2, trialParams3] = dlDemoThreePattern();
 
@@ -33,8 +33,6 @@ outputParams = [{'DeepE_V', 1:4, [300 500], 'afr'}; {'DeepE_V', 5:8, [300 500], 
 targetParams1 = [{'MSE', 1, 24, 0.2}; {'MSE', 2, 15, 0.2}; {'MSE', 3, 12, 0.2}; {'Compare', [1, 2], 0, 0.3}; {'Compare', [1, 3], 0, 0.3}; {'Diff', [2, 3], 0, 0.04}]; % A 
 targetParams2 = [{'MSE', 2, 18, 0.2}; {'MSE', 1, 20, 0.2}; {'MSE', 3, 9, 0.2}; {'Compare', [2, 1], 0, 0.3}; {'Compare', [2, 3], 0, 0.3}; {'Diff', [1, 3], 0, 0.04}]; % B
 targetParams3 = [{'MSE', 3, 15, 0.2}; {'MSE', 2, 15, 0.2}; {'MSE', 1, 20, 0.2}; {'Compare', [3, 1], 0, 0.3}; {'Compare', [3, 2], 0, 0.3}; {'Diff', [1, 2], 0, 0.04}]; % C
-
-%% Trial: training script preparation, 50-block and 50-trial
 
 dlInputParameters = {trialParams1, trialParams2, trialParams3};
 dlTargetParameters = {targetParams1, targetParams2, targetParams3};
@@ -65,7 +63,7 @@ dlTrainOptions('dlLambdaCap') = 3e-2; % Only if Adaptive lambda is active, recom
 % We shortly train the model by cues to put it close to a local minimia.
 
 dlTrainOptions('dlLambda') = 6e-6;
-dlTrainOptions('dlEpochs') = 10;
+dlTrainOptions('dlEpochs') = 3;
 dlTrainOptions('dlBatchs') = 3;
 
 argsPSR = struct();
@@ -76,7 +74,7 @@ argsPSR.lf2 = 40;
 argsPSR.hf2 = 60;
 
 dlTrainOptions('dlCustomLog') = "dlPowerSpectrumRatio"; % Name of a function which is in the path
-dlTrainOptions('dlCustomLogArgs') = argsPSR;
+dlTrainOptions('dlCustomLogArgs') = argsPSR; % Arguments of your custom function
 
 %%
 
