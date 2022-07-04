@@ -30,17 +30,20 @@ classdef DynaLearn < matlab.mixin.SetGet
         
         dlDownSampleFactor = 10; 
         dlOptimalError = 1e9;
+        dlLastOptimalTrial = 1;
         dlUpdateError = 0;
-        dlLastLambda = 1e-3;
         
+        dlLastLambda = 1e-3;
         dlDeltaRatio = 1;
         dlLastDelta = -1;
         dlLambdaCap = 1e-2;
-        dlSimulationTool = "mex";
         
         dlGraph = []; 
         dlCustomLog = [];
         dlCustomLogLabel = [];
+        dlSimulationTool = "mex";
+        
+%         dlXcSTDP = 0;
         
     end
     

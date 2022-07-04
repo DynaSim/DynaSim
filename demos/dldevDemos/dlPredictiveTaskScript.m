@@ -42,19 +42,20 @@ TBdata = dlTrialBlockGenerator(dlInputParameters, dlTargetParameters, 50, 50);
 
 dlTrainOptions = containers.Map();
 dlTrainOptions('dlEpochs') = 500;
-dlTrainOptions('dlBatchs') = 3;
-dlTrainOptions('dlLambda') = 1e-5;
+dlTrainOptions('dlBatchs') = 3; % If your scenario requires 
+dlTrainOptions('dlLambda') = 1e-5; % Higher lambda means more changes based on error, lower may cause model to learn slower or nothing.
     
-dlTrainOptions('dlCheckpoint') = 'true';
-dlTrainOptions('dlCheckpointCoefficient') = 1.74; % A.K.A exploration rate 
-dlTrainOptions('dlUpdateMode') = 'batch';
-dlTrainOptions('dlLearningRule') = 'BioDeltaRule'; % Delta rule with a basic change based on biophysical properties 
+dlTrainOptions('dlCheckpoint') = 'true'; % If current step's error is higher based on a threshold, reload last optimal state and continue from that point
+dlTrainOptions('dlCheckpointCoefficient') = 1.74; % A.K.A exploration rate
+dlTrainOptions('dlBadTrialEliminatorFlag') = 1; % A.K.A backtrack of only usefull trials
+dlTrainOptions('dlUpdateMode') = 'batch'; % Update on each trial's result or based on batch group results
 
+dlTrainOptions('dlLearningRule') = 'BioDeltaRule'; % Delta rule with a basic change based on biophysical properties 
 dlTrainOptions('dlSimulationFlag') = 1;
 dlTrainOptions('dlOutputLogFlag') = 1;
 dlTrainOptions('dlOfflineOutputGenerator') = 0;
-dlTrainOptions('dlAdaptiveLambda') = 0; % Adaptive lambda parameter; recommended for long simulations.
 
+dlTrainOptions('dlAdaptiveLambda') = 0; % Adaptive lambda parameter; recommended for long simulations.
 dlTrainOptions('dlLambdaCap') = 3e-2; % Only if Adaptive lambda is active, recommended to set a upper-bound (UB) or ignore to use default UB (0.01).
 
 %% Train test
@@ -63,15 +64,15 @@ dlTrainOptions('dlLambdaCap') = 3e-2; % Only if Adaptive lambda is active, recom
 % We shortly train the model by cues to put it close to a local minimia.
 
 dlTrainOptions('dlLambda') = 6e-5;
-dlTrainOptions('dlEpochs') = 10;
+dlTrainOptions('dlEpochs') = 1;
 dlTrainOptions('dlBatchs') = 3;
 
 argsPSR = struct();
 
-argsPSR.lf1 = 10;
-argsPSR.hf1 = 20;
+argsPSR.lf1 = 8;
+argsPSR.hf1 = 32;
 argsPSR.lf2 = 40;
-argsPSR.hf2 = 60;
+argsPSR.hf2 = 100;
 
 dlTrainOptions('dlCustomLog') = "dlPowerSpectrumRatio"; % Name of a function which is in the path
 dlTrainOptions('dlCustomLogArgs') = argsPSR; % Arguments of your custom function
@@ -81,6 +82,17 @@ dlTrainOptions('dlCustomLogArgs') = argsPSR; % Arguments of your custom function
 clc;
 m.dlTrain(dlInputParameters, dlOutputParameters, dlTargetParameters, dlTrainOptions);
 
+%%
+
+clc;
+figure();
+for k = 1:6
+    subplot(3, 2, k);
+    plot(m.dlCustomLog(k, :));
+    ylabel("Beta/Gamma" + m.dlCustomLogLabel(k+1));
+    xlabel("Trial");grid("on");
+end
+
 %% Block-trial phase
 
 clc;
@@ -89,19 +101,29 @@ dlTrainOptions('dlUpdateMode') = 'trial';
 dlTrainOptions('dlEpochs') = 1;
 dlTrainOptions('dlBatchs') = 50;
 
-dlTrainOptions('dlCheckpointCoefficient') = 4;
+argsPSR = struct();
+
+argsPSR.lf1 = 8;
+argsPSR.hf1 = 32;
+argsPSR.lf2 = 40;
+argsPSR.hf2 = 100;
+
+dlTrainOptions('dlCustomLog') = "dlPowerSpectrumRatio"; % Name of a function which is in the path
+dlTrainOptions('dlCustomLogArgs') = argsPSR; % Arguments of your custom function
+
+dlTrainOptions('dlCheckpointCoefficient') = 2.4;
 m.dlTrain(TBdata.B1, dlOutputParameters, TBdata.T1, dlTrainOptions);
-dlTrainOptions('dlCheckpointCoefficient') = 7;
+dlTrainOptions('dlCheckpointCoefficient') = 4.7;
 m.dlTrain(TBdata.TrB, dlOutputParameters, TBdata.TrT, dlTrainOptions);
 
-dlTrainOptions('dlCheckpointCoefficient') = 4; 
+dlTrainOptions('dlCheckpointCoefficient') = 2.4; 
 m.dlTrain(TBdata.B2, dlOutputParameters, TBdata.T2, dlTrainOptions);
-dlTrainOptions('dlCheckpointCoefficient') = 7; 
+dlTrainOptions('dlCheckpointCoefficient') = 4.7; 
 m.dlTrain(TBdata.TrB, dlOutputParameters, TBdata.TrT, dlTrainOptions);
 
-dlTrainOptions('dlCheckpointCoefficient') = 4;
+dlTrainOptions('dlCheckpointCoefficient') = 2.4;
 m.dlTrain(TBdata.B3, dlOutputParameters, TBdata.T3, dlTrainOptions);
-dlTrainOptions('dlCheckpointCoefficient') = 7;
+dlTrainOptions('dlCheckpointCoefficient') = 4.7;
 m.dlTrain(TBdata.TrB, dlOutputParameters, TBdata.TrT, dlTrainOptions);
 
 %% Errors log plot
