@@ -28,12 +28,12 @@ classdef DynaLearn < matlab.mixin.SetGet
         dlBaseVoltage = -77.4;
         dldT = .01; % Time step in ODEs (dt)
         
-        dlDownSampleFactor = 10; 
-        dlOptimalError = 1e9;
-        dlLastOptimalTrial = 1;
-        dlUpdateError = 0;
+        dlDownSampleFactor = 10; % dS parameter for downsampling computations
+        dlOptimalError = 1e9; % dL optimal error of training, initially it is just an irrelevant high number
+        dlLastOptimalTrial = 1; % The trial witl best results
+        dlUpdateError = 0; % The error which is used to update last state
         
-        dlLastLambda = 1e-3;
+        dlLastLambda = 1e-3; % Last lambda parameter
         dlDeltaRatio = 1;
         dlLastDelta = -1;
         dlLambdaCap = 1e-2;
@@ -204,17 +204,25 @@ classdef DynaLearn < matlab.mixin.SetGet
             
         end
         
-        function dlSaveCheckPoint(obj, dlCheckPointPath)
+        function dlSaveCheckPoint(obj, dlCheckPointPath) % TODO save object logs in checkpoints test*
         
+            fprintf("\t\tCheckpoint file saved in %s \n", [obj.dlStudyDir, dlCheckPointPath]);
             p = load([obj.dlPath, '/params.mat']);
             save([obj.dlStudyDir, dlCheckPointPath, 'params.mat'], '-struct', 'p');
-            fprintf("\t\tCheckpoint file saved in %s \n", [obj.dlStudyDir, dlCheckPointPath]);
+            
+            tempdlO = obj.dlOutputs;
+            obj.dlOutputs = [];
+            save([obj.dlStudyDir, dlCheckPointPath, 'object.mat'], 'obj');
+            obj.dlOutputs = tempdlO;
             
         end
         
-        function obj = dlLoadCheckPoint(obj, dlCheckPointPath)
+        function out = dlLoadCheckPoint(obj, dlCheckPointPath) % TODO eliminate test*
             
             fprintf("\t\tCheckpoint file loaded from %s \n", [obj.dlStudyDir, dlCheckPointPath]);
+            dlObj = load([obj.dlStudyDir, dlCheckPointPath, 'object.mat']);
+            out = dlObj.obj;
+            
             p = load([obj.dlStudyDir, dlCheckPointPath, 'params.mat']);
             save([obj.dlPath, '/params.mat'], '-struct', 'p');
             
@@ -606,7 +614,16 @@ classdef DynaLearn < matlab.mixin.SetGet
         
         function out = dlAdaptiveLambda(obj)
             
-            out = obj.dlLastLambda * obj.dlDeltaRatio;
+            if obj.dlDeltaRatio > 1
+                out = obj.dlLastLambda * 1.1009;
+            elseif obj.dlDeltaRatio < 1
+                out = obj.dlLastLambda * 0.9084;
+            else
+                out = obj.dlLastLambda;
+            end
+            
+%             out = obj.dlLastLambda * obj.dlDeltaRatio;
+            
             if ~ (out < obj.dlLambdaCap && out > 0)
                 
                 obj.dlDeltaRatio = 1;

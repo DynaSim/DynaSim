@@ -9,20 +9,23 @@
 %% Model parameters
 
 clear;clc;
-Ne = 24;Ni = 6;Nin = 7;NoiseRate = 5;
+Ne = 48;Ni = 12;Nin = 6;NoiseRate = 6;
 s3 = dlModelPredictivePFC(Ne, Ni, Nin, NoiseRate); % Predictive PFC model with specific parameters
 
 %% Create DynaLearn Class (Only first time, if file does not exist already)
 
-m = DynaLearn(s3, 'models/dlModelPredictivePFC4', 'mex'); % ~70 min, MEXGEN or ~1 min, RAWGEN
+m = DynaLearn(s3, 'models/dlModelPredictivePFC5', 'mex'); % ~70 min, MEXGEN or ~1 min, RAWGEN
 m.dlSave(); % < 1sec
 
 %% Load DynaLearn Class
 
 clear;clc;
+
 m = DynaLearn(); % ~ 1sec
 % m = m.dlLoad('models/dlModelPredictivePFC3'); % ~ 10sec, Trained for ~1200 trials
-m = m.dlLoad('models/dlModelPredictivePFC4'); % ~ 10sec, New! keeping track of its activity in Gamma/Beta **
+% m = m.dlLoad('models/dlModelPredictivePFC4'); % ~ 10sec, New! keeping track of its activity in Gamma/Beta **
+m = m.dlLoad('models/dlModelPredictivePFC5'); % ~ 10sec, New larger model; keeping track of its activity in Gamma/Beta **
+
 % m.dlSimulate(); % ~ 40sec
 
 %% Trial: training script preparation, 50-block and 50-trial
@@ -30,9 +33,9 @@ m = m.dlLoad('models/dlModelPredictivePFC4'); % ~ 10sec, New! keeping track of i
 [trialParams1, trialParams2, trialParams3] = dlDemoThreePattern();
 
 outputParams = [{'DeepE_V', 1:4, [300 500], 'afr'}; {'DeepE_V', 5:8, [300 500], 'afr'}; {'DeepE_V', 9:12, [300 500], 'afr'}];
-targetParams1 = [{'MSE', 1, 24, 0.2}; {'MSE', 2, 15, 0.2}; {'MSE', 3, 12, 0.2}; {'Compare', [1, 2], 0, 0.3}; {'Compare', [1, 3], 0, 0.3}; {'Diff', [2, 3], 0, 0.04}]; % A 
-targetParams2 = [{'MSE', 2, 18, 0.2}; {'MSE', 1, 20, 0.2}; {'MSE', 3, 9, 0.2}; {'Compare', [2, 1], 0, 0.3}; {'Compare', [2, 3], 0, 0.3}; {'Diff', [1, 3], 0, 0.04}]; % B
-targetParams3 = [{'MSE', 3, 15, 0.2}; {'MSE', 2, 15, 0.2}; {'MSE', 1, 20, 0.2}; {'Compare', [3, 1], 0, 0.3}; {'Compare', [3, 2], 0, 0.3}; {'Diff', [1, 2], 0, 0.04}]; % C
+targetParams1 = [{'MSE', 1, 27, 0.2}; {'MSE', 2, 20, 0.2}; {'MSE', 3, 20, 0.2}; {'Compare', [1, 2], 0, 0.3}; {'Compare', [1, 3], 0, 0.3}; {'Diff', [2, 3], 0, 0.04}]; % A 
+targetParams2 = [{'MSE', 2, 27, 0.2}; {'MSE', 1, 20, 0.2}; {'MSE', 3, 20, 0.2}; {'Compare', [2, 1], 0, 0.3}; {'Compare', [2, 3], 0, 0.3}; {'Diff', [1, 3], 0, 0.04}]; % B
+targetParams3 = [{'MSE', 3, 27, 0.2}; {'MSE', 2, 20, 0.2}; {'MSE', 1, 20, 0.2}; {'Compare', [3, 1], 0, 0.3}; {'Compare', [3, 2], 0, 0.3}; {'Diff', [1, 2], 0, 0.04}]; % C
 
 dlInputParameters = {trialParams1, trialParams2, trialParams3};
 dlTargetParameters = {targetParams1, targetParams2, targetParams3};
@@ -40,9 +43,9 @@ dlOutputParameters = outputParams;
 
 TBdata = dlTrialBlockGenerator(dlInputParameters, dlTargetParameters, 50, 50);
 
-dlTrainOptions = containers.Map();
-dlTrainOptions('dlEpochs') = 500;
-dlTrainOptions('dlBatchs') = 3; % If your scenario requires 
+dlTrainOptions = containers.Map(); % Train options; MUST be a map data structure
+dlTrainOptions('dlEpochs') = 500; % % Number of epochs (A.K.A total iterations)
+dlTrainOptions('dlBatchs') = 3; % If a scenario requires the training to be based on a group parameter (e.g mean of errors) use a dlBatch > 1 and set update mode later to batch. 
 dlTrainOptions('dlLambda') = 1e-5; % Higher lambda means more changes based on error, lower may cause model to learn slower or nothing.
     
 dlTrainOptions('dlCheckpoint') = 'true'; % If current step's error is higher based on a threshold, reload last optimal state and continue from that point
@@ -51,28 +54,27 @@ dlTrainOptions('dlBadTrialEliminatorFlag') = 1; % A.K.A backtrack of only useful
 dlTrainOptions('dlUpdateMode') = 'batch'; % Update on each trial's result or based on batch group results
 
 dlTrainOptions('dlLearningRule') = 'BioDeltaRule'; % Delta rule with a basic change based on biophysical properties 
-dlTrainOptions('dlSimulationFlag') = 1;
-dlTrainOptions('dlOutputLogFlag') = 1;
-dlTrainOptions('dlOfflineOutputGenerator') = 0;
+dlTrainOptions('dlSimulationFlag') = 1; % If 0, will not run simulations (only for debugging purposes)
+dlTrainOptions('dlOutputLogFlag') = 1; % If 0, will not keep outputs
+dlTrainOptions('dlOfflineOutputGenerator') = 0; % If 1, will generate fake-random outputs (only for debugging purposes)
 
-dlTrainOptions('dlAdaptiveLambda') = 0; % Adaptive lambda parameter; recommended for long simulations.
+dlTrainOptions('dlAdaptiveLambda') = 1; % Adaptive lambda parameter; recommended for long simulations.
 dlTrainOptions('dlLambdaCap') = 3e-2; % Only if Adaptive lambda is active, recommended to set a upper-bound (UB) or ignore to use default UB (0.01).
 
-%% Train test
 % Initial training on the model to reach a plausible local minimia like
 % the task in the paper the model should also learn the basics of the task.
 % We shortly train the model by cues to put it close to a local minimia.
 
-dlTrainOptions('dlLambda') = 6e-5;
-dlTrainOptions('dlEpochs') = 1;
+dlTrainOptions('dlLambda') = 7e-5;
+dlTrainOptions('dlEpochs') = 3;
 dlTrainOptions('dlBatchs') = 3;
 
 argsPSR = struct();
 
-argsPSR.lf1 = 8;
-argsPSR.hf1 = 32;
-argsPSR.lf2 = 40;
-argsPSR.hf2 = 100;
+argsPSR.lf1 = 7;
+argsPSR.hf1 = 31;
+argsPSR.lf2 = 47;
+argsPSR.hf2 = 74;
 
 dlTrainOptions('dlCustomLog') = "dlPowerSpectrumRatio"; % Name of a function which is in the path
 dlTrainOptions('dlCustomLogArgs') = argsPSR; % Arguments of your custom function

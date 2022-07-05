@@ -73,7 +73,7 @@ function y = dlModelPredictivePFC(Ne, Ni, Nio, NoiseRate)
     gGABAa_ii = 0.11*(21/Ne); % I->I within layer
 
     % neuronal dynamics
-    eqns = 'dV/dt = (Iapp + @current + noise*randn(1, Npop))/C; Iapp=0; noise=0; C=1; V(0) = -rand(1, Npop)*27;';
+    eqns = 'dV/dt = (Iapp + @current + noise*randn(1, Npop))/C; Iapp=0; noise=0; C=1; V(0) = -rand(1, Npop)*74;';
     eqns2 = 'dV/dt = (rand(1) + 4.5)*(20*(exp(- (t - t1).^2) - exp(- (t - t2).^2)) + noise*randn(1, Npop))/C; f1=4; t1=10; t2=100; noise=0; C=1; V(0) = -60 - rand(1, Npop)*17;';
 
     g_poisson = 6.7e-5;
