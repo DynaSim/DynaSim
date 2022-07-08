@@ -41,7 +41,7 @@ dlInputParameters = {trialParams1, trialParams2, trialParams3};
 dlTargetParameters = {targetParams1, targetParams2, targetParams3};
 dlOutputParameters = outputParams;
 
-TBdata = dlTrialBlockGenerator(dlInputParameters, dlTargetParameters, 50, 50);
+TBdata = dlTrialBlockGenerator(dlInputParameters, dlTargetParameters, 200, 2000);
 
 dlTrainOptions = containers.Map(); % Train options; MUST be a map data structure
 dlTrainOptions('dlEpochs') = 500; % % Number of epochs (A.K.A total iterations)
@@ -88,20 +88,31 @@ m.dlTrain(dlInputParameters, dlOutputParameters, dlTargetParameters, dlTrainOpti
 
 clc;
 figure();
-for k = 1:6
-    subplot(3, 2, k);
-    plot(m.dlCustomLog(k, :));
-    ylabel("Beta/Gamma" + m.dlCustomLogLabel(k+1));
-    xlabel("Trial");grid("on");
+tlab = ["A", "Unpred.", "B", "Unpred", "C", "Unpred"];
+w = 200;
+
+for k = 1:3
+    
+    subplot(3, 1, k);
+    for l = 0:5
+        fill([l*w, l*w, l*w+w, l*w+w], [0, 20, 20, 0], [1, cos(l*0.15), sin(l*0.15)], 'DisplayName', tlab(l+1));hold('on');
+        text(l*w+10, 19, tlab(l+1));
+    end
+    
+    plot(m.dlCustomLog(k*2-1, :), 'DisplayName', 'E');
+    plot(m.dlCustomLog(k*2, :), 'DisplayName', 'I');
+    xlim([0, w*6.5]);
+    xlabel("$S(\frac{\beta}{\gamma}) \: of \: " + m.dlCustomLogLabel(k*2) + "\: \& \:" + m.dlCustomLogLabel(k*2+1) + "$", 'Interpreter', 'latex');
+    grid("on");legend();
 end
 
 %% Block-trial phase
 
 clc;
-dlTrainOptions('dlLambda') = 3e-5;
+dlTrainOptions('dlLambda') = 1e-4;
 dlTrainOptions('dlUpdateMode') = 'trial';
 dlTrainOptions('dlEpochs') = 1;
-dlTrainOptions('dlBatchs') = 50;
+dlTrainOptions('dlBatchs') = 200;
 
 argsPSR = struct();
 
@@ -115,23 +126,52 @@ dlTrainOptions('dlCustomLogArgs') = argsPSR; % Arguments of your custom function
 
 dlTrainOptions('dlCheckpointCoefficient') = 2.4;
 m.dlTrain(TBdata.B1, dlOutputParameters, TBdata.T1, dlTrainOptions);
+
+m.dlOptimalError = 1e9;
 dlTrainOptions('dlCheckpointCoefficient') = 4.7;
 m.dlTrain(TBdata.TrB, dlOutputParameters, TBdata.TrT, dlTrainOptions);
 
+m.dlOptimalError = 1e9;
 dlTrainOptions('dlCheckpointCoefficient') = 2.4; 
 m.dlTrain(TBdata.B2, dlOutputParameters, TBdata.T2, dlTrainOptions);
+
+m.dlOptimalError = 1e9;
 dlTrainOptions('dlCheckpointCoefficient') = 4.7; 
 m.dlTrain(TBdata.TrB, dlOutputParameters, TBdata.TrT, dlTrainOptions);
 
+m.dlOptimalError = 1e9;
 dlTrainOptions('dlCheckpointCoefficient') = 2.4;
 m.dlTrain(TBdata.B3, dlOutputParameters, TBdata.T3, dlTrainOptions);
+
+m.dlOptimalError = 1e9;
 dlTrainOptions('dlCheckpointCoefficient') = 4.7;
 m.dlTrain(TBdata.TrB, dlOutputParameters, TBdata.TrT, dlTrainOptions);
 
 %% Errors log plot
 
 % clc;
-m.dlPlotBatchErrors(3);
+
+wk = 4;
+figure('position', [0, 0, 1400, 700]);
+n = max(size(m.dlErrorsLog));
+x = zeros(1, ceil(n/wk));
+
+for i = 0:wk:n-wk
+    x(ceil((i+1)/wk)) = mean(m.dlErrorsLog(i+1:i+wk));
+end
+
+w = 50;
+for k = 1:6
+    
+    for l = 0:5
+        fill([l*w, l*w, l*w+w, l*w+w], [0, 100, 100, 0], [sin(l*0.2), 1, cos(l*0.2)]);hold('on');
+        text(l*w+10, 89, tlab(l+1));
+    end
+end
+
+plot(x);grid("on");
+title("Errors in batchs");
+% m.dlPlotBatchErrors(2);
 
 %% Plot Local-field potentials
 
@@ -147,13 +187,14 @@ end
 
 %%
 
+clc;
 opts = containers.Map();
 % opts("lf") = 50;
 % opts("hf") = 100;
 % m.dlPlotAllPotentials('avgfft', opts);
 
-opts("lf") = 20;
-opts("hf") = 50;
+opts("lf") = 50;
+opts("hf") = 100;
 m.dlPlotAllPotentials('avgfft', opts);
 
 %% End of Demo (14th of June 2022)

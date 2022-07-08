@@ -333,7 +333,7 @@ classdef DynaLearn < matlab.mixin.SetGet
             dlPotentialIndices(1) = 1;
             dlPotentials = obj.dlOutputs(dlPotentialIndices);
             dlLabels = obj.dlVariables(dlPotentialIndices);
-            
+%             disp(dlPotentials);
 
             t = dlPotentials{1, 1};
             n = size(dlPotentials, 2);
@@ -407,18 +407,22 @@ classdef DynaLearn < matlab.mixin.SetGet
                         fqs = linspace(1, 500, max(size(x)));
                         subplot((min(k*6, n-1) - (k-1)*6), 1, mod(i-1, (min(k*6, n-1) - (k-1)*6))+1);
                         ffts = abs(fft(mean(x, 2))) * min(size(x)) / 1000;
-                        yf = smooth(ffts(lf:hf));
-                        area(fqs(lf:hf), yf);grid("on");
                         
-                        if freqCap == 0
-                            freqCap = max(ffts(lf:hf))*1.2;
-                            ylim([0, freqCap]);
-                        else
-                            ylim([0, freqCap]);
-                        end
-                        
-                        ylabel(dlLabels(i+1));
+                        try
+                            yf = smooth(ffts(lf:hf));
+                            area(fqs(lf:hf), yf);grid("on");
 
+                            if freqCap == 0
+                                freqCap = max(ffts(lf:hf))*1.2;
+                                ylim([0, freqCap]);
+                            else
+                                ylim([0, freqCap]);
+                            end
+
+                            ylabel(dlLabels(i+1));
+                        catch
+                           fprintf(" Error in plotter* "); 
+                        end
                     end
 
                     disp("Temp edit for 6 subplots; average fft");
@@ -1270,6 +1274,8 @@ classdef DynaLearn < matlab.mixin.SetGet
             obj.dlOutputLog = [];
             obj.dlErrorsLog = [];
             
+            obj.dlCustomLog = [];
+            obj.dlCustomLogLabel = [];
         end
         
         function dlSaveOptimal(obj)
