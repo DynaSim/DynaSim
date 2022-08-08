@@ -1,0 +1,24 @@
+% Hodgkin-Huxley inward fast sodium current
+
+% Parameters
+g_na = 100     % max sodium conductance (mS/cm^2)
+E_na = 50      % mV, rev Na+ Gertler et al. 2008
+
+% Rate functions and HH Na current function.
+alpha_m_na(V) = 0.32*(V+54)./(1-exp(-(V+54)/4))
+beta_m_na(V) = 0.28*(V+27)./(exp((V+27)/5)-1)
+alpha_h_na(V) = 0.128*exp(-(V+50)/18)
+beta_h_na(V) = 4./(1+exp(-(V+27)/5))
+i_Na(V,m_na,h_na) = -g_na*m_na.^3.*h_na.*(V-E_na)
+
+% ODEs and ICs
+m_na' = alpha_m_na(V).*(1-m_na)-beta_m_na(V).*m_na % activation
+h_na' = alpha_h_na(V).*(1-h_na)-beta_h_na(V).*h_na % inactivation
+m_na(0) = 0
+h_na(0) = 0
+
+% Linkers
+@current += i_Na(V,m_na,h_na)
+
+% monitor
+monitor i_Na

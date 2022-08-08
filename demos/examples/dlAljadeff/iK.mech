@@ -1,0 +1,21 @@
+% Hodgkin-Huxley outward fast delayed rectifier potassium current
+
+% Parameters
+g_k = 80
+E_k = -100
+V_IC = 0
+
+% Rate functions and HH k Current function
+alpha_m_k(V) = 0.032*(V+52)./(1-exp(-(V+52)/5))
+beta_m_k(V) = 0.5*exp(-(V+57)/40)
+i_k(V,m_k) = -g_k*m_k.^4.*(V-E_k)
+
+% ODEs and ICs
+m_k' = alpha_m_k(V).*(1-m_k)-beta_m_k(V).*m_k % activation
+m_k(0) = 0
+
+% Linkers
+@current += i_k(V,m_k)
+
+% Monitor
+monitor i_k
