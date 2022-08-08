@@ -35,7 +35,4 @@ g_nmda(sNMDA) = gNmda.*sNMDA
 IAMPA(X,w,sAMPA) = g_ampa(sAMPA)*(w.*netcon).*(X-EAMPA)
 INMDA(X,sNMDA)   = g_nmda(sNMDA)*netcon.*(X-ENMDA).*MgBlock(X)
 
-% Network Connectivity
-netcon = ones(N_pre,N_post) % default connectivity matrix (all-to-all)
-
 @current += -IAMPA(X_post,@weights,sAMPA)-INMDA(X_post,sNMDA)
