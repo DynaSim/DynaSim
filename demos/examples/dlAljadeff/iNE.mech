@@ -1,0 +1,19 @@
+% NE neuromodulation
+%% Reference: Aljadeff et al. Cortical credit assignment by Hebbian, neuromodulatory and inhibitory plasticity. arXiv:1911.00307, 2019
+
+% Parameters
+rho_NE = 0
+A_NE   = 0
+
+eta_NE = rand(1, Npop) <= rho_NE
+rnd_sample = randn(1, Npop)
+M_NE = A_NE*(1 + rnd_sample).*(rnd_sample > -1)
+
+% Current function
+i_NE(t) = eta_NE.*M_NE
+
+% Linker
+@current += i_NE(t)
+
+% Monitor
+monitor i_NE

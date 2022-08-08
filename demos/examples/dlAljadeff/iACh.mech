@@ -1,0 +1,20 @@
+% ACh neuromodulation
+%% Reference: Aljadeff et al. Cortical credit assignment by Hebbian, neuromodulatory and inhibitory plasticity. arXiv:1911.00307, 2019
+
+% Parameters
+Y_ACh   = 0
+rho_ACh = 0
+A_ACh   = 0
+
+eta_ACh = rand(1, Npop) <= rho_ACh
+rnd_sample = randn(1, Npop)
+M_ACh = A_ACh*(1 + rnd_sample).*(rnd_sample > -1)
+
+% Current function
+i_ACh(t) = Y_ACh*eta_ACh.*M_ACh
+
+% Linker
+@current += i_ACh(t)
+
+% Monitor
+monitor i_ACh
