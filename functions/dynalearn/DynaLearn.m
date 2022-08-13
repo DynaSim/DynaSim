@@ -1245,7 +1245,7 @@ classdef DynaLearn < matlab.mixin.SetGet
                    lambda = lambda + mu*(uncReduct-lambda); % adapting lambda based on uncertainty reduction
 
                    % w update based on the new lambda
-                   delta = (1 + stochasticFactor*randn(size(w))).*lambda.*(exp(−abs(error)) -w); % stochastic delta
+                   delta = (1 + stochasticFactor*randn(size(w))).*lambda.*(exp(-abs(error)) - w); % stochastic delta
                    wn = w + delta;
                    % rectifying values that are out of the [0,1] bounds
                    wn(wn < 0) = 0;
