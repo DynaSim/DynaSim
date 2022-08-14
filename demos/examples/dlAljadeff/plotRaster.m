@@ -19,7 +19,7 @@ function rate = plotRaster(t,rst,xl,display_flag)
     lineWidth = 1;
     fontSize = 16;
     colors = [33, 113, 181; 239, 59, 44]./255;
-    figure('visible','on')
+    figure%('visible','on')
     hold on
     set(gca,'layer','top')
   end
