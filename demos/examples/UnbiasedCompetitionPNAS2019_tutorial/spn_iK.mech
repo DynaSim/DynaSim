@@ -19,5 +19,4 @@ m_k(0) = 0
 @iK += i_k(V,m_k)
 
 % Monitor
-monitor @iK     % apparently working
-%monitor i_K    % it doesn't work
+monitor @iK

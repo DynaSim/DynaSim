@@ -1,18 +1,17 @@
-function rate = plotRaster(multiplicity,t,rst,xl,display_flag)
-  rate = [];
-  if isempty(rst)
-    return
+function rate = plotRaster(rst,pool,tl,display_flag)
+
+  if nargin < 3 || (isempty(pool) | isempty(tl))
+    error('you should supply at least 3 input arguments, a cell array for the raster/-s, a dimensionally consistent cell array pool, and the time limits: [ti, tf]. Optionally, you can enable/disable the display of the raster plot. Default is display on. If you are only interested in the avg. FR computation, set the fourth input argument to false/off/0.')
   end
 
-  if nargin < 4 || isempty(xl)
-    xl = [t(1) t(end)];
+  rate = 0;
+  if isempty(rst)
+    return;
   end
-  if nargin < 5
+
+  if nargin < 4
     display_flag = true;
   end
-
-  npopulations = size(multiplicity, 2);
-  width = 1;
 
   if display_flag
     lineWidth = 1;
@@ -34,25 +33,30 @@ function rate = plotRaster(multiplicity,t,rst,xl,display_flag)
     set(gca,'layer','top')
   end
 
+  npopulations = numel(rst);
+  for i = 1:npopulations
+    Npool(i) = numel(pool{i});
+  end
+
   for ipopulation = 1:npopulations
     raster = rst{ipopulation};
     if ~isempty(raster)
       tSpikes = raster(:,1);
-      raster = raster(tSpikes >= xl(1) & tSpikes <= xl(2),:);
+      raster = raster(tSpikes >= tl(1) & tSpikes <= tl(2),:);
       neuronTag = raster(:,2);
-      rate(ipopulation) = sum(raster(neuronTag <= width*multiplicity(ipopulation),1) >= xl(1) & raster(neuronTag <= width*multiplicity(ipopulation),1) <= xl(2))/(1e-3*diff(xl))/(width*multiplicity(ipopulation)); % in sp/s
+      rate(ipopulation) = sum(raster(ismember(neuronTag,pool{ipopulation}),1) >= tl(1) & raster(ismember(neuronTag,pool{ipopulation}),1) <= tl(2))/(1e-3*diff(tl))/Npool(ipopulation); % in sp/s
     else
       rate(ipopulation) = 0;
     end
 
     if display_flag
-      plot(raster(:,1),raster(:,2)-0.5,'ko','markerfacecolor',colors(ipopulation,:),'markerSize',4,'linewidth',lineWidth)
-      if multiplicity(ipopulation) >= 75
-        set(gca,'fontSize',fontSize,'LineWidth',lineWidth,'TickDir','out','Box','on','YTick',0:25:multiplicity(ipopulation));
-      elseif multiplicity(ipopulation) >= 30
-        set(gca,'fontSize',fontSize,'LineWidth',lineWidth,'TickDir','out','Box','on','YTick',0:10:multiplicity(ipopulation));
+      plot(raster(:,1),raster(:,2),'ko','markerfacecolor',colors(ipopulation,:),'markerSize',4,'linewidth',lineWidth)
+      if max(Npool) >= 75
+        set(gca,'fontSize',fontSize,'LineWidth',lineWidth,'TickDir','out','Box','on','YTick',0:25:max(Npool));
+      elseif max(Npool) >= 30
+        set(gca,'fontSize',fontSize,'LineWidth',lineWidth,'TickDir','out','Box','on','YTick',0:10:max(Npool));
       else
-        set(gca,'fontSize',fontSize,'LineWidth',lineWidth,'TickDir','out','Box','on','YTick',0:5:multiplicity(ipopulation));
+        set(gca,'fontSize',fontSize,'LineWidth',lineWidth,'TickDir','out','Box','on','YTick',0:max(Npool)/2:max(Npool));
       end
         if ~exist('rate_label','var')
         rate_label = ['FR_', num2str(ipopulation), ' = ', num2str(rate(ipopulation),2),' sp/s'];
@@ -63,14 +67,14 @@ function rate = plotRaster(multiplicity,t,rst,xl,display_flag)
   end
 
   if display_flag
-    xlim(xl)
-    if max(multiplicity) > 1
-      ylim([1,max(multiplicity)])
+    xlim(tl)
+    if max(Npool) > 1
+      ylim([0,max(Npool)+1])
     else
      ylim([0.5 1.5])
     end
     xlabel('Time (ms)','fontSize',fontSize)
-    ylabel('SPNs','fontSize',fontSize)
+    ylabel('Neurons','fontSize',fontSize)
     if ~isempty(rate_label)
         title(rate_label,'fontSize',fontSize,'FontWeight','Normal')
     end

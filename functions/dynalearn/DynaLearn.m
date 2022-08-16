@@ -13,7 +13,7 @@ classdef DynaLearn < matlab.mixin.SetGet
         dlErrorsLog = []; % Log of errors since first trial.
         dlConnections = []; % List of connection names.
     
-        dlTrialNumber = 0; % Last trial; how many times this model have been trianed with stimuli.
+        dlTrialNumber = 0; % Last trial; how many times this model have been trained with stimuli.
         dlLastOutputs = []; % Last output (eg. spike vector) of this model.
         dlLastError = 0; % Last error of this model for target, equivalent to the last value of errors_log property
         dlOutputLog = []; % Last expected output that this model should've generated.
@@ -40,6 +40,11 @@ classdef DynaLearn < matlab.mixin.SetGet
         dlDeltaRatio = 1;
         dlLastDelta = -1;
         dlLambdaCap = 1e-2;
+
+        % MetaLR
+        dlMetaMu = 0.01;
+        dlMetaLR = 0.01;
+        error0 = nan;
         
         dlGraph = []; 
         dlCustomLog = [];
@@ -476,6 +481,19 @@ classdef DynaLearn < matlab.mixin.SetGet
            
         end
         
+        function out = dlMeanFR(obj, dlOutput) % TODO: sampling rate change and adjustments
+            x = dlOutput;
+            t = linspace(0, size(x, 1), size(x, 1))*obj.dldT*obj.dlDownSampleFactor;
+            raster = computeRaster(t, x);
+
+            if size(raster, 1) > 0
+                nPop = size(x,2);
+                out = size(raster,1)/(1e-3*(t(end)-t(1)))/nPop;
+            else
+                out = 0;
+            end
+        end
+
         function out = dlApplyIFRKernel(obj, dlOutput) % TODO: sampling rate change and adjustments
               
             x = dlOutput;
@@ -542,6 +560,10 @@ classdef DynaLearn < matlab.mixin.SetGet
 
                     obj.dlLastOutputs{i} = obj.dlApplyAverageFRKernel(dlTempOutputs);
 
+                elseif strcmpi(dlOutputType, '<fr>')
+
+                    obj.dlLastOutputs{i} = obj.dlMeanFR(dlTempOutputs);
+
                 else
 
                     fprintf("\tThis output type is not recognized. Trying to run ""%s.m"" ...\n", dlOutputType);
@@ -579,6 +601,10 @@ classdef DynaLearn < matlab.mixin.SetGet
                    
                     TempError = abs(obj.dlLastOutputs{dlOutputIndices} - dlOutputTargets);
                     
+                elseif strcmpi(dlErrorType, 'Error') % Raw error keeping sign
+
+                    TempError = obj.dlLastOutputs{dlOutputIndices} - dlOutputTargets;
+
                 elseif strcmpi(dlErrorType, 'MSE')
                     
                     TempError = abs(obj.dlLastOutputs{dlOutputIndices} - dlOutputTargets)^2;
@@ -915,7 +941,11 @@ classdef DynaLearn < matlab.mixin.SetGet
                 end
                 
                 if ~isempty(obj.dlErrorsLog)
-                    dlAvgError = mean(obj.dlErrorsLog(end-2:end));
+                    if numel(obj.dlErrorsLog) > 2
+                        dlAvgError = mean(obj.dlErrorsLog(end-2:end));
+                    else
+                        dlAvgError = mean(obj.dlErrorsLog);
+                    end
                     fprintf("\t-->Epoch's Average Error = %f, Last lambda = %f\n", dlAvgError, dlLambda);
                 end
                 
@@ -979,198 +1009,206 @@ classdef DynaLearn < matlab.mixin.SetGet
 
             %%% Local plasticity rules
 
-            kernel = 'L'; % 'E'; % 'G'; % Laplacian, Epanechnikov or Gaussian
-            uscaling = 1e3; % unit scaling from kernel regression from kHz to Hz
-            kwidth = 500; % width of kernel regression in ms
-            Ts = 1;  % subsampling period in ms
-            flag_interp = 1;
+            try
+                Local_LR_Params = dlTrainOptions('Local_LR_Params');
+                localFlag = true;
+            catch
+                localFlag = false;
+            end
 
-            Local_LR_Params = dlTrainOptions('Local_LR_Params');
+            if localFlag
 
-            for iLocalParams = 1:numel(Local_LR_Params) % e.g., {E->E, I->E}
-                LocalParams = Local_LR_Params{iLocalParams};
+                kernel = 'L'; % 'E'; % 'G'; % Laplacian, Epanechnikov or Gaussian
+                uscaling = 1e3; % unit scaling from kernel regression from kHz to Hz
+                kwidth = 500; % width of kernel regression in ms
+                Ts = 1;  % subsampling period in ms
+                flag_interp = 1;
 
-                learningRules = LocalParams.learningRules;
-                connection_type = LocalParams.connection_type;
-                source = LocalParams.source;
-                target = LocalParams.target;
-                fr_norm = LocalParams.fr_norm;
+                for iLocalParams = 1:numel(Local_LR_Params) % e.g., {E->E, I->E}
+                    LocalParams = Local_LR_Params{iLocalParams};
 
-                w_min = LocalParams.w_min;
-                w_max = LocalParams.w_max;
-                voltage = LocalParams.voltage;
+                    learningRules = LocalParams.learningRules;
+                    connection_type = LocalParams.connection_type;
+                    source = LocalParams.source;
+                    target = LocalParams.target;
+                    fr_norm = LocalParams.fr_norm;
 
-                % Connection index
-                i_conn = find(ismember([obj.dlGraph.edges.target], target) & ismember([obj.dlGraph.edges.source], source) & ismember([obj.dlGraph.edges.type], connection_type));
+                    w_min = LocalParams.w_min;
+                    w_max = LocalParams.w_max;
+                    voltage = LocalParams.voltage;
 
-                % Indices into dlGraph for presynaptic and postsynaptic populations
-                i_pre = obj.dlGraph.IndexMap(obj.dlGraph.edges(i_conn).source);
-                i_post = obj.dlGraph.IndexMap(obj.dlGraph.edges(i_conn).target);
+                    % Connection index
+                    i_conn = find(ismember([obj.dlGraph.edges.target], target) & ismember([obj.dlGraph.edges.source], source) & ismember([obj.dlGraph.edges.type], connection_type));
 
-                % Indices to V
-                i_Vpre = find(strcmpi(string(obj.dlVariables), obj.dlGraph.vertices(i_pre).name + "_" + voltage));
-                i_Vpost = find(strcmpi(string(obj.dlVariables), obj.dlGraph.vertices(i_post).name + "_" + voltage));
+                    % Indices into dlGraph for presynaptic and postsynaptic populations
+                    i_pre = obj.dlGraph.IndexMap(obj.dlGraph.edges(i_conn).source);
+                    i_post = obj.dlGraph.IndexMap(obj.dlGraph.edges(i_conn).target);
 
-                % Voltages
-                Vpre = obj.dlOutputs{i_Vpre};
-                Vpost = obj.dlOutputs{i_Vpost};
+                    % Indices to V
+                    i_Vpre = find(strcmpi(string(obj.dlVariables), obj.dlGraph.vertices(i_pre).name + "_" + voltage));
+                    i_Vpost = find(strcmpi(string(obj.dlVariables), obj.dlGraph.vertices(i_post).name + "_" + voltage));
 
-                % retrieve iFRs:
-                t = obj.dlOutputs{1};
-                raster = computeRaster(t, Vpre);
-                x = zeros(size(Vpre));
-                if size(raster, 1) > 0
-                    % pool = 1:size(Vpre, 2);
-                    % x = uscaling*NWKraster(t, raster, pool, kwidth, Ts, flag_interp, kernel);
-                    for ipool = 1:size(Vpre, 2)
-                        x(:,ipool) = uscaling*NWKraster(t, raster, ipool, kwidth, Ts, flag_interp, kernel);
-                    end
-                end
-                x = x/fr_norm;
-                X = mean(x,1);
+                    % Voltages
+                    Vpre = obj.dlOutputs{i_Vpre};
+                    Vpost = obj.dlOutputs{i_Vpost};
 
-                raster = computeRaster(t, Vpost);
-                y = zeros(size(Vpost));
-                if size(raster, 1) > 0
-                    % pool = 1:size(Vpost, 2);
-                    % y = uscaling*NWKraster(t, raster, pool, kwidth, Ts, flag_interp, kernel);
-                    for ipool = 1:size(Vpost, 2)
-                        y(:,ipool) = uscaling*NWKraster(t, raster, ipool, kwidth, Ts, flag_interp, kernel);
-                    end
-                end
-                y = y/fr_norm;
-                Y = mean(y,1);
-
-                % Label of netcon in params.mat
-                lkey = obj.dlGraph.vertices(i_post).name + "_" + obj.dlGraph.vertices(i_pre).name + "_" + obj.dlGraph.edges(i_conn).type + "_netcon";
-
-                % Connectivity matrix
-                ind_w = find(strcmpi(string(lab), lkey)); % Find index of W in params.mat labels
-                w = val{ind_w}; % previous connectivity matrix
-
-                if isempty(find(strcmpi(string(obj.dlWeightsVariables), lkey)))
-                    obj.dlWeightsVariables{numel(obj.dlWeightsVariables)+1} = lkey;
-                    obj.dlWeightsValues{numel(obj.dlWeightsValues)+1}(:,:,1) = w;
-                end
-
-                local_delta = zeros(size(w));
-
-                for iLearningRule = 1:numel(learningRules) % e.g., {ACh, NE, Hebbian} or {Inhibitory}
-                    learningRule = learningRules{iLearningRule};
-
-                    %%% What follows are 4 Local Learning Rules (3 for E-cells {Ach, NE, and Hebbian} and 1 for I-cells {Inhibitory}) from Aljadeff et al., arXiv 2019:
-                    % Aljadeff et al. Cortical credit assignment by Hebbian, neuromodulatory and inhibitory plasticity. arXiv:1911.00307, 2019
-
-                    if strcmpi(learningRule, 'ACh')
-                        % ACh learning rule based on Aljadeff et al., arXiv 2019 (LTP and LTD)
-                        % x: presynaptic activity
-                        % y: postsynaptic activity
-                        % y_ref: reference firing rate for neuromodulation plasticity (with y_ref~0, no LTD even if y = 0)
-                        % rho: input-output pairing probability, e.g. based on selectivity similarity
-                        % Y: binary signal that enables ACh neuromodulation as a whole
-                        % eta: if pairing is enabled, eta activates ACh plasticity based on rho
-                        % alpha: learning rate for ACh plasticity
-                        % beta: LTD/LTP scaling factor
-                        % single expression for balanced LTD/LTP ('*' represents matrix multiplication):
-                        % delta = eta·alpha·(y-y_ref)*(x - beta·f/(1-f)·(1-x))
-
-                        if ~LocalParams.Y_ACh
-                            continue
+                    % retrieve iFRs:
+                    t = obj.dlOutputs{1};
+                    raster = computeRaster(t, Vpre);
+                    x = zeros(size(Vpre));
+                    if size(raster, 1) > 0
+                        % pool = 1:size(Vpre, 2);
+                        % x = uscaling*NWKraster(t, raster, pool, kwidth, Ts, flag_interp, kernel);
+                        for ipool = 1:size(Vpre, 2)
+                            x(:,ipool) = uscaling*NWKraster(t, raster, ipool, kwidth, Ts, flag_interp, kernel);
                         end
-
-                        rho_ACh = LocalParams.rho_ACh;
-                        alpha_ACh = LocalParams.alpha_ACh;
-                        y_ref_ACh = LocalParams.y_ref_ACh;
-                        beta_ACh = LocalParams.beta_ACh;
-                        f_ref = LocalParams.f_ref;
-
-                        % eta_ACh = rand(1, size(w,2)) <= rho_ACh;
-                        eta_ACh_name = LocalParams.eta_ACh;
-                        i_eta_ACh = find(strcmpi(string(obj.dlVariables), obj.dlGraph.vertices(i_post).name + "_" + eta_ACh_name));
-                        eta_ACh = obj.dlOutputs{i_eta_ACh};
-
-                        local_delta = local_delta + alpha_ACh*(X' - beta_ACh*f_ref/(1-f_ref).*(1-X'))*(eta_ACh.*(Y-y_ref_ACh));
-
-                    elseif strcmpi(learningRule, 'NE')
-                        % NE learning rule based on Aljadeff et al., arXiv 2019 (only LTP and not stimulus specific)
-                        % x: presynaptic activity
-                        % y: postsynaptic activity
-                        % y_ref: reference firing rate for neuromodulation plasticity
-                        % rho: input-output pairing probability, e.g. based on selectivity similarity
-                        % eta: enables NE plasticity based on rho
-                        % alpha: learning rate for NE plasticity
-                        % expression:
-                        % delta = eta·alpha·(y-y_ref)*x
-
-                        rho_NE = LocalParams.rho_NE;
-                        alpha_NE = LocalParams.alpha_NE;
-                        y_ref_NE = LocalParams.y_ref_NE;
-
-                        % eta_NE = rand(1, size(w,2)) <= rho_NE;
-                        eta_NE_name = LocalParams.eta_NE;
-                        i_eta_NE = find(strcmpi(string(obj.dlVariables), obj.dlGraph.vertices(i_post).name + "_" + eta_NE_name));
-                        eta_NE = obj.dlOutputs{i_eta_NE};
-
-                        local_delta = local_delta + alpha_NE*X'*(eta_NE.*(Y-y_ref_NE));
-
-                    elseif strcmpi(learningRule, 'Hebbian')
-                        % Hebbian learning rule based on Aljadeff et al., arXiv 2019 (not gated)
-                        % x: presynaptic activity
-                        % y: postsynaptic activity
-                        % f_ref: reference firing rate for neuromodulation plasticity
-                        % alpha: learning rate for Hebbian plasticity
-                        % expression:
-                        % delta = alpha·(y-f_ref)*x
-
-                        alpha_Hebbian = LocalParams.alpha_Hebbian;
-                        y_ref_Hebbian = LocalParams.y_ref_Hebbian;
-
-                        local_delta = local_delta + alpha_Hebbian*X'*(Y-y_ref_Hebbian);
-
-                    elseif strcmpi(learningRule, 'Inhibitory')
-                        % learning rule for I-cells based on Aljadeff et al., arXiv 2019 (based on detailed E-I balance)
-                        % x: presynaptic activity
-                        % excitatory current iE: all excitatory currents to E-cells
-                        % inhibitory current iI: all inhibitory currents to E-cells
-                        % E/I balance line (reference): iI = a·iE + b (with a <= 1)
-                        % alpha: learning rate for Inhibitory plasticity
-                        % expression:
-                        % delta = alpha·((a·iE + b)-iI)*x
-
-                        a_Inhibitory = LocalParams.a_Inhibitory;
-                        b_Inhibitory = LocalParams.b_Inhibitory;
-                        alpha_Inhibitory = LocalParams.alpha_Inhibitory;
-
-                        % Variables
-                        iE_name = LocalParams.iE;
-                        iI_name = LocalParams.iI;
-
-                        % Indices to postsynaptic iE and iI
-                        i_iE = find(strcmpi(string(obj.dlVariables), [obj.dlGraph.vertices(i_post).name, '_', iE_name]));
-                        i_iI = find(strcmpi(string(obj.dlVariables), [obj.dlGraph.vertices(i_post).name, '_', iI_name]));
-
-                        % Currents
-                        iE = mean(obj.dlOutputs{i_iE},1);
-                        iI = mean(obj.dlOutputs{i_iI},1);
-
-                        local_delta = local_delta + alpha_Inhibitory*X'*((a_Inhibitory*iE + b_Inhibitory) - iI);
-                    else
-                        error('unknown local plasticity rule');
                     end
-                end
-                % Update weights
-                w = w + local_delta;
-                if any(w < w_min)
-                    warning('weights below lower bound, rectifying')
-                    w(w < w_min) = w_min;
-                end
-                if any(w > w_max)
-                    warning('weights above upper bound, rectifying')
-                    w(w > w_max) = w_max;
-                end
-                val{ind_w} = w;
-                i_w = find(strcmpi(string(obj.dlWeightsVariables), lkey));
-                obj.dlWeightsValues{i_w}(:,:,end+1) = w;
+                    x = x/fr_norm;
+                    X = mean(x,1);
+
+                    raster = computeRaster(t, Vpost);
+                    y = zeros(size(Vpost));
+                    if size(raster, 1) > 0
+                        % pool = 1:size(Vpost, 2);
+                        % y = uscaling*NWKraster(t, raster, pool, kwidth, Ts, flag_interp, kernel);
+                        for ipool = 1:size(Vpost, 2)
+                            y(:,ipool) = uscaling*NWKraster(t, raster, ipool, kwidth, Ts, flag_interp, kernel);
+                        end
+                    end
+                    y = y/fr_norm;
+                    Y = mean(y,1);
+
+                    % Label of netcon in params.mat
+                    lkey = obj.dlGraph.vertices(i_post).name + "_" + obj.dlGraph.vertices(i_pre).name + "_" + obj.dlGraph.edges(i_conn).type + "_netcon";
+
+                    % Connectivity matrix
+                    ind_w = find(strcmpi(string(lab), lkey)); % Find index of W in params.mat labels
+                    w = val{ind_w}; % previous connectivity matrix
+
+                    if isempty(find(strcmpi(string(obj.dlWeightsVariables), lkey)))
+                        obj.dlWeightsVariables{numel(obj.dlWeightsVariables)+1} = lkey;
+                        obj.dlWeightsValues{numel(obj.dlWeightsValues)+1}(:,:,1) = w;
+                    end
+
+                    local_delta = zeros(size(w));
+
+                    for iLearningRule = 1:numel(learningRules) % e.g., {ACh, NE, Hebbian} or {Inhibitory}
+                        learningRule = learningRules{iLearningRule};
+
+                        %%% What follows are 4 Local Learning Rules (3 for E-cells {Ach, NE, and Hebbian} and 1 for I-cells {Inhibitory}) from Aljadeff et al., arXiv 2019:
+                        % Aljadeff et al. Cortical credit assignment by Hebbian, neuromodulatory and inhibitory plasticity. arXiv:1911.00307, 2019
+
+                        if strcmpi(learningRule, 'ACh')
+                            % ACh learning rule based on Aljadeff et al., arXiv 2019 (LTP and LTD)
+                            % x: presynaptic activity
+                            % y: postsynaptic activity
+                            % y_ref: reference firing rate for neuromodulation plasticity (with y_ref~0, no LTD even if y = 0)
+                            % rho: input-output pairing probability, e.g. based on selectivity similarity
+                            % Y: binary signal that enables ACh neuromodulation as a whole
+                            % eta: if pairing is enabled, eta activates ACh plasticity based on rho
+                            % alpha: learning rate for ACh plasticity
+                            % beta: LTD/LTP scaling factor
+                            % single expression for balanced LTD/LTP ('*' represents matrix multiplication):
+                            % delta = eta·alpha·(y-y_ref)*(x - beta·f/(1-f)·(1-x))
+
+                            if ~LocalParams.Y_ACh
+                                continue
+                            end
+
+                            rho_ACh = LocalParams.rho_ACh;
+                            alpha_ACh = LocalParams.alpha_ACh;
+                            y_ref_ACh = LocalParams.y_ref_ACh;
+                            beta_ACh = LocalParams.beta_ACh;
+                            f_ref = LocalParams.f_ref;
+
+                            % eta_ACh = rand(1, size(w,2)) <= rho_ACh;
+                            eta_ACh_name = LocalParams.eta_ACh;
+                            i_eta_ACh = find(strcmpi(string(obj.dlVariables), obj.dlGraph.vertices(i_post).name + "_" + eta_ACh_name));
+                            eta_ACh = obj.dlOutputs{i_eta_ACh};
+
+                            local_delta = local_delta + alpha_ACh*(X' - beta_ACh*f_ref/(1-f_ref).*(1-X'))*(eta_ACh.*(Y-y_ref_ACh));
+
+                        elseif strcmpi(learningRule, 'NE')
+                            % NE learning rule based on Aljadeff et al., arXiv 2019 (only LTP and not stimulus specific)
+                            % x: presynaptic activity
+                            % y: postsynaptic activity
+                            % y_ref: reference firing rate for neuromodulation plasticity
+                            % rho: input-output pairing probability, e.g. based on selectivity similarity
+                            % eta: enables NE plasticity based on rho
+                            % alpha: learning rate for NE plasticity
+                            % expression:
+                            % delta = eta·alpha·(y-y_ref)*x
+
+                            rho_NE = LocalParams.rho_NE;
+                            alpha_NE = LocalParams.alpha_NE;
+                            y_ref_NE = LocalParams.y_ref_NE;
+
+                            % eta_NE = rand(1, size(w,2)) <= rho_NE;
+                            eta_NE_name = LocalParams.eta_NE;
+                            i_eta_NE = find(strcmpi(string(obj.dlVariables), obj.dlGraph.vertices(i_post).name + "_" + eta_NE_name));
+                            eta_NE = obj.dlOutputs{i_eta_NE};
+
+                            local_delta = local_delta + alpha_NE*X'*(eta_NE.*(Y-y_ref_NE));
+
+                        elseif strcmpi(learningRule, 'Hebbian')
+                            % Hebbian learning rule based on Aljadeff et al., arXiv 2019 (not gated)
+                            % x: presynaptic activity
+                            % y: postsynaptic activity
+                            % f_ref: reference firing rate for neuromodulation plasticity
+                            % alpha: learning rate for Hebbian plasticity
+                            % expression:
+                            % delta = alpha·(y-f_ref)*x
+
+                            alpha_Hebbian = LocalParams.alpha_Hebbian;
+                            y_ref_Hebbian = LocalParams.y_ref_Hebbian;
+
+                            local_delta = local_delta + alpha_Hebbian*X'*(Y-y_ref_Hebbian);
+
+                        elseif strcmpi(learningRule, 'Inhibitory')
+                            % learning rule for I-cells based on Aljadeff et al., arXiv 2019 (based on detailed E-I balance)
+                            % x: presynaptic activity
+                            % excitatory current iE: all excitatory currents to E-cells
+                            % inhibitory current iI: all inhibitory currents to E-cells
+                            % E/I balance line (reference): iI = a·iE + b (with a <= 1)
+                            % alpha: learning rate for Inhibitory plasticity
+                            % expression:
+                            % delta = alpha·((a·iE + b)-iI)*x
+
+                            a_Inhibitory = LocalParams.a_Inhibitory;
+                            b_Inhibitory = LocalParams.b_Inhibitory;
+                            alpha_Inhibitory = LocalParams.alpha_Inhibitory;
+
+                            % Variables
+                            iE_name = LocalParams.iE;
+                            iI_name = LocalParams.iI;
+
+                            % Indices to postsynaptic iE and iI
+                            i_iE = find(strcmpi(string(obj.dlVariables), [obj.dlGraph.vertices(i_post).name, '_', iE_name]));
+                            i_iI = find(strcmpi(string(obj.dlVariables), [obj.dlGraph.vertices(i_post).name, '_', iI_name]));
+
+                            % Currents
+                            iE = mean(obj.dlOutputs{i_iE},1);
+                            iI = mean(obj.dlOutputs{i_iI},1);
+
+                            local_delta = local_delta + alpha_Inhibitory*X'*((a_Inhibitory*iE + b_Inhibitory) - iI);
+                        else
+                            error('unknown local plasticity rule');
+                        end
+                    end
+                    % Update weights
+                    w = w + local_delta;
+                    if any(w < w_min)
+                        warning('weights below lower bound, rectifying')
+                        w(w < w_min) = w_min;
+                    end
+                    if any(w > w_max)
+                        warning('weights above upper bound, rectifying')
+                        w(w > w_max) = w_max;
+                    end
+                    val{ind_w} = w;
+                    i_w = find(strcmpi(string(obj.dlWeightsVariables), lkey));
+                    obj.dlWeightsValues{i_w}(:,:,end+1) = w;
+               end
            end
 
            %%% Non-local plasticity rules
@@ -1222,41 +1260,51 @@ classdef DynaLearn < matlab.mixin.SetGet
 
            elseif strcmpi(dlLearningRule, 'UncertaintyReduction')
 
-               dlLambdaCap = 1; % allowing learning rates to be in [0,1]
-               dlAdaptiveLambda = 0; % disabling adaptive lambda as this learning rule controls the lambda values through uncertainty reduction
+               error = obj.dlLastError; %TODO ask Hammed about the difference wrt obj.dlUpdateError
+
+               metaLR0 = obj.dlMetaLR;
+               if isscalar(metaLR0)
+                   obj.error0 = error;
+               end
                uncBaseline = 0.5; % reference value for uncertainty reduction (point of maximum uncertainty)
                scalingFactor = max([uncBaseline, 1-uncBaseline]); % used to keep uncReduct in [0,1]
                stochasticFactor = 0.2; % stochastic modulation
 
-               dlLambda0 = dlLambda;
                for i = l'
                    rng('shuffle'); %% TODO we shouldn't shuffle all the time
-                   w = val{i, 1};
+
+                   w = val{i};
 
                    % lambda update from previous w
-                   if isscalar(dlLambda0) % first time
-                       mu = dlLambda0; %% TODO add mu as a dl parameter?
-                       lambda = dlLambda0*ones(size(w));
+                   if isscalar(metaLR0) % first time
+                       alpha = metaLR0*ones(size(w));
                    else % subsequent times
-                       lambda = dlLambda{i, 1};
+                       alpha = metaLR0{i};
                    end
                    uncReduct = abs(w-uncBaseline)/scalingFactor; % Uncertainty reduction in [0,1]
                    % adapting lambda based on uncertainty reduction (the lower the uncertainty, the faster it adapts)
-                   lambda = lambda + mu*(uncReduct-lambda); % adapting lambda based on uncertainty reduction
+                   alpha = alpha + obj.dlMetaMu*(uncReduct-alpha); % adapting lambda based on uncertainty reduction
 
                    % w update based on the new lambda
-                   delta = (1 + stochasticFactor*randn(size(w))).*lambda.*(exp(-abs(error)) - w); % stochastic delta
-                   wn = w + delta;
+                   delta = (1 + stochasticFactor*randn(size(w))).*alpha.*((1-exp(-abs(error/obj.error0))) - w); % stochastic delta
+                   w = w + delta;
                    % rectifying values that are out of the [0,1] bounds
-                   wn(wn < 0) = 0;
-                   wn(wn > 1) = 1;
+                   if any(w < 0)
+                       warning('weights below lower bound, rectifying')
+                       w(w < 0) = 0;
+                   end
+                   if any(w > 1)
+                       warning('weights above upper bound, rectifying')
+                       w(w > 1) = 1;
+                   end
 
                    % saving
-                   val{i, 1} = wn;
-                   dlLambda{i, 1} = lambda;
+                   val{i} = w;
+                   metaLR{i} = alpha;
 
-                   deltaL = deltaL + sum(sum(abs(delta)));
+                   deltaL = deltaL + sum(abs(delta(:)));
                end
+               obj.dlMetaLR = metaLR;
 
            elseif strcmpi(dlLearningRule, 'RWDeltaRule')
             
@@ -1270,7 +1318,7 @@ classdef DynaLearn < matlab.mixin.SetGet
                 populationCount = size(obj.dlGraph.vertices, 2); % Number of vertices or populations in model
                 
                 fprintf("\n->NewRule for learning method is only an example of dlGraph and does nothing meaningfull\n");
-                
+
                 for i = 1:connectionCount % Traverse all connections (edges)
                     
                     if contains(obj.dlGraph.edges(i).type, 'GABA')
@@ -1496,7 +1544,6 @@ classdef DynaLearn < matlab.mixin.SetGet
                 
                 try
                     
-                    % obj.dlGraph.edges(i).type = obj.dlModel.connections(i).mechanisms.name;
                     obj.dlGraph.edges(i).type = obj.dlModel.connections(i).mechanism_list;
                 
                 catch

@@ -126,12 +126,13 @@ spec.connections(4).parameters = {'gGABAa',gGABAa_ii,'tauR',tauR_GABA,'tauD',tau
 data = dsSimulate(spec,'time_limits',tspan,'dt',0.01,'solver','euler','downsample_factor',10,'verbose_flag',1);
 
 raster{1} = computeRaster(data.time,data.E_V);
+pool{1}   = 1:Ne;
 raster{2} = computeRaster(data.time,data.I_V);
+pool{2}   = 1:Ni;
 
 tl          = tspan;
 uscaling    = 1e3; % unit scaling from kernel regression from kHz to Hz
 kwidth      = 100; % width of kernel regression in ms
-pool        = [Ne Ni];
 time        = data.time;
 dt          = time(2)-time(1);
 Ts          = 1; % subsampling period in ms
@@ -140,9 +141,9 @@ kernel      = 'L'; % 'E'; % 'G'; % for Laplacian, Epanechnikov (default) and Gau
 ifr         = [];
 if ~all(cellfun(@isempty,raster))
     raster = raster(~cellfun(@isempty,raster));
-    rate = plotRaster(tl,raster);
+    rate = plotRaster(raster,pool,tl);
     for ipop = 1:numel(raster)
-        [ifr(:,ipop), t] = NWKraster(time, raster{ipop}, 1:pool(ipop), kwidth, Ts, flag_interp, kernel);
+        [ifr(:,ipop), t] = NWKraster(time, raster{ipop}, pool{ipop}, kwidth, Ts, flag_interp, kernel);
     end
     ifr = uscaling*ifr;
 
@@ -318,9 +319,9 @@ raster{2} = computeRaster(data.time,data.I_V);
 ifr = [];
 if ~all(cellfun(@isempty,raster))
     raster = raster(~cellfun(@isempty,raster));
-    rate = plotRaster(tl,raster);
+    rate = plotRaster(raster,pool,tl);
     for ipop = 1:numel(raster)
-        [ifr(:,ipop), t] = NWKraster(time, raster{ipop}, 1:pool(ipop), kwidth, Ts, flag_interp, kernel);
+        [ifr(:,ipop), t] = NWKraster(time, raster{ipop}, pool{ipop}, kwidth, Ts, flag_interp, kernel);
     end
     ifr = uscaling*ifr;
 
