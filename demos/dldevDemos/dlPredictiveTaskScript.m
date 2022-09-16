@@ -9,12 +9,16 @@
 %% Model parameters
 
 clear;clc;
-Ne = 48;Ni = 12;Nin = 6;NoiseRate = 6;
-s3 = dlModelPredictivePFC(Ne, Ni, Nin, NoiseRate); % Predictive PFC model with specific parameters
+NeS = 71;NiS = 14;
+NeM = 47;NiM = 7;
+NeD = 47;NiD = 4;
+
+Nin = 6;NoiseRate = 7;
+s3 = dlLaminarCortexNet(NeS, NiS, NeM, NiM, NeD, NiD, Nin, NoiseRate); % Predictive PFC model with specific parameters
 
 %% Create DynaLearn Class (Only first time, if file does not exist already)
 
-m = DynaLearn(s3, 'models/dlModelPredictivePFC5', 'mex'); % ~70 min, MEXGEN or ~1 min, RAWGEN
+tic;m = DynaLearn(s3, 'models/dlModelPredictivePFC', 'mex');toc; % ~70 min, MEXGEN or ~1 min, RAWGEN
 m.dlSave(); % < 1sec
 
 %% Load DynaLearn Class
