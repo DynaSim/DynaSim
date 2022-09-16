@@ -8,17 +8,21 @@
 
 %% Model parameters
 
-clear;clc;
+clc;
 NeS = 71;NiS = 14;
 NeM = 47;NiM = 7;
 NeD = 47;NiD = 4;
 
-Nin = 6;NoiseRate = 7;
-s3 = dlLaminarCortexNet(NeS, NiS, NeM, NiM, NeD, NiD, Nin, NoiseRate); % Predictive PFC model with specific parameters
+Nin = 6;
+Nout = 6;
+NoiseRate = 7;
+Nstim = 3;
+
+s = dlLaminarCortexNet(NeS, NiS, NeM, NiM, NeD, NiD, Nin, Nout, Nstim, NoiseRate); % Predictive PFC model with specific parameters
 
 %% Create DynaLearn Class (Only first time, if file does not exist already)
 
-tic;m = DynaLearn(s3, 'models/dlModelPredictivePFC', 'mex');toc; % ~70 min, MEXGEN or ~1 min, RAWGEN
+tic;m = DynaLearn(s, 'models/dlModelPredictivePFC', 'mex');toc; % ~70 min, MEXGEN or ~1 min, RAWGEN
 m.dlSave(); % < 1sec
 
 %% Load DynaLearn Class
@@ -249,3 +253,4 @@ end
 disp("Temp edit for 6 subplots; average fft");
 xlabel(mode + " in frequency (Hz)");
                     
+%% End
