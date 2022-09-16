@@ -8,21 +8,38 @@
 
 %% Model parameters
 
-clc;
-NeS = 71;NiS = 14;
-NeM = 47;NiM = 7;
-NeD = 47;NiD = 4;
+clear;clc;
 
-Nin = 6;
-Nout = 6;
-NoiseRate = 7;
-Nstim = 3;
+%%% Area PFC layer sizes (relative)
+NeS_PFC = 71;NiS_PFC = 14;
+NeM_PFC = 47;NiM_PFC = 7;
+NeD_PFC = 47;NiD_PFC = 4;
 
-s = dlLaminarCortexNet(NeS, NiS, NeM, NiM, NeD, NiD, Nin, Nout, Nstim, NoiseRate); % Predictive PFC model with specific parameters
+Nin_PFC = 6;
+Nout_PFC = 6;
+NoiseRate_PFC = 7;
+Nstim_PFC = 3;
+
+%%% Area V4 layer sizes (relative) 
+NeS_V4 = 77;NiS_V4 = 17;
+NeM_V4 = 49;NiM_V4 = 11;
+NeD_V4 = 41;NiD_V4 = 7;
+
+Nin_V4 = 6;
+Nout_V4 = 6;
+NoiseRate_V4 = 4;
+Nstim_V4 = 3;
+
+dsCellPFC = dlLaminarCortexNet(NeS_PFC, NiS_PFC, NeM_PFC, NiM_PFC, NeD_PFC, ...
+    NiD_PFC, Nin_PFC, Nout_PFC, Nstim_PFC, NoiseRate_PFC, "PFC"); % Laminar PFC model with specific parameters
+dsCellV4 = dlLaminarCortexNet(NeS_V4, NiS_V4, NeM_V4, NiM_V4, NeD_V4, ...
+    NiD_V4, Nin_V4, Nout_V4, Nstim_V4, NoiseRate_V4, "V4"); % Laminar V4 model with specific parameters
+
+dsModel = dsCombineSpecifications(dsCellV4, dsCellPFC); % Full model
 
 %% Create DynaLearn Class (Only first time, if file does not exist already)
 
-tic;m = DynaLearn(s, 'models/dlModelPredictivePFC', 'mex');toc; % ~70 min, MEXGEN or ~1 min, RAWGEN
+tic;m = DynaLearn(dsCellPFC, 'models/dlModelPredictivePFC', 'mex');toc; % ~70 min, MEXGEN or ~1 min, RAWGEN
 m.dlSave(); % < 1sec
 
 %% Load DynaLearn Class
