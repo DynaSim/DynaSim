@@ -77,7 +77,23 @@ if ~isstruct(options) % if arguments given as list
 else
   input_fields  = fieldnames(options);
 end
+
 valid_fields    = options_schema(1:3:end);
+
+for i = 1:size(input_fields, 2)
+    input_fields{1, i} = char(input_fields{1, i});
+end
+for i = 1:size(valid_fields, 2)
+    input_fields{1, i} = char(valid_fields{1, i});
+end
+
+% disp([size(input_fields), size(valid_fields)]);
+% fprintf("\n-------\n");
+% disp(input_fields);
+% fprintf("\n-------\n");
+% disp(valid_fields);
+% fprintf("\n-------\n");
+
 unknown_fields  = setdiff(input_fields, valid_fields);
 
 %   Validate that there are no extraneous params sent in

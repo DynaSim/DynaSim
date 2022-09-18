@@ -30,17 +30,40 @@ Nout_V4 = 6;
 NoiseRate_V4 = 4;
 Nstim_V4 = 3;
 
+%%% Call Laminar Cortex Constructor Functions
 dsCellPFC = dlLaminarCortexNet(NeS_PFC, NiS_PFC, NeM_PFC, NiM_PFC, NeD_PFC, ...
-    NiD_PFC, Nin_PFC, Nout_PFC, Nstim_PFC, NoiseRate_PFC, "PFC"); % Laminar PFC model with specific parameters
+    NiD_PFC, Nin_PFC, Nout_PFC, Nstim_PFC, NoiseRate_PFC, 'PFC'); % Laminar PFC model with specific parameters
 dsCellV4 = dlLaminarCortexNet(NeS_V4, NiS_V4, NeM_V4, NiM_V4, NeD_V4, ...
-    NiD_V4, Nin_V4, Nout_V4, Nstim_V4, NoiseRate_V4, "V4"); % Laminar V4 model with specific parameters
+    NiD_V4, Nin_V4, Nout_V4, Nstim_V4, NoiseRate_V4, 'V4'); % Laminar V4 model with specific parameters
 
+%%% Connect two models; consider adding connections later (TODO:ADD_CONN)
 dsModel = dsCombineSpecifications(dsCellV4, dsCellPFC); % Full model
+
+%%% Connecting two models
+connectionWeigth1 = 0.21*rand(NeD_V4, NeM_PFC) + 0.27;
+c = length(dsModel.connections) + 1;
+connection1.direction = [dsCellV4.populations(5).name, '->', dsCellPFC.populations(3).name];
+
+connection1.source = dsCellV4.populations(5).name;
+connection1.target = dsCellPFC.populations(3).name;
+connection1.mechanism_list={'iPoisson'};
+connection1.parameters={'gAMPA', .24, 'tauAMPA', 4.17, 'netcon', connectionWeigth1};
+
+connectionWeigth2 = 0.27*rand(NiD_V4, NiM_PFC) + 0.21;
+c = length(dsModel.connections) + 1;
+connection2.direction = [dsCellV4.populations(6).name, '->', dsCellPFC.populations(4).name];
+
+connection2.source = dsCellV4.populations(6).name;
+connection2.target = dsCellPFC.populations(4).name;
+connection2.mechanism_list={'iPoisson'};
+connection2.parameters={'gAMPA', .27, 'tauAMPA', 3.74, 'netcon', connectionWeigth2};
+
+dsModel = dlConnectModels({dsCellV4, dsCellPFC}, {connection1, connection2});
 
 %% Create DynaLearn Class (Only first time, if file does not exist already)
 
-tic;m = DynaLearn(dsCellPFC, 'models/dlModelPredictivePFC', 'mex');toc; % ~70 min, MEXGEN or ~1 min, RAWGEN
-m.dlSave(); % < 1secq
+tic;m = DynaLearn(dsModel, 'models/dlModelPredictivePFC', 'mex');toc; % ~70 min, MEXGEN or ~1 min, RAWGEN
+m.dlSave(); % < 1sec
 
 %% Load DynaLearn Class
 

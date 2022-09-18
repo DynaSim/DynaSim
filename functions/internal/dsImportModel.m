@@ -53,7 +53,7 @@ end
 %% 2.0 Convert to DynaSim model structure
 % if DynaSim .mech, .eqns, .txt:
   % parse model equations
-  [model,map] = dsParseModelEquations(source, "namespace", options.namespace, varargin{:});
+  [model,map] = dsParseModelEquations(source, 'namespace', char(options.namespace), varargin{:});
   
 % if DynaSim .mat: load MAT-file
 % ... load(source) ...
@@ -100,6 +100,12 @@ end
     user_keys=cellfun(@(x)[namespace '_' x],params(1:2:end),'uni',0);
     user_vals=params(2:2:end);
     
+%     disp(user_keys{1, 1});
+    for i = 1:size(user_keys, 2)
+        user_keys{1, i} = char(user_keys{1, i});
+    end
+%     disp(user_keys{1, 1});
+
     % check for mechanism-specific parameters
     if any(~cellfun(@isempty,regexp(user_keys,'\.')))
       % at least one key has MECH.PARAM
