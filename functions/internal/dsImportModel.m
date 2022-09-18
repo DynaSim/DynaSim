@@ -53,7 +53,7 @@ end
 %% 2.0 Convert to DynaSim model structure
 % if DynaSim .mech, .eqns, .txt:
   % parse model equations
-  [model,map] = dsParseModelEquations(source,'namespace',options.namespace, varargin{:});
+  [model,map] = dsParseModelEquations(source, "namespace", options.namespace, varargin{:});
   
 % if DynaSim .mat: load MAT-file
 % ... load(source) ...

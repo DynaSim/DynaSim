@@ -40,7 +40,7 @@ dsModel = dsCombineSpecifications(dsCellV4, dsCellPFC); % Full model
 %% Create DynaLearn Class (Only first time, if file does not exist already)
 
 tic;m = DynaLearn(dsCellPFC, 'models/dlModelPredictivePFC', 'mex');toc; % ~70 min, MEXGEN or ~1 min, RAWGEN
-m.dlSave(); % < 1sec
+m.dlSave(); % < 1secq
 
 %% Load DynaLearn Class
 
