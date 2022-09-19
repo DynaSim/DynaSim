@@ -507,11 +507,11 @@ classdef DynaLearn < matlab.mixin.SetGet
             x = dlOutput;
             t = linspace(0, size(x, 1), size(x, 1))*obj.dldT*obj.dlDownSampleFactor;
             raster = computeRaster(t, x);
-
+            pool = 1:size(x, 2);
+            
             if size(raster, 1) > 0
 
-                pool = 1:size(x, 2);
-                out = 1.1e3 * NWepanechnikovKernelRegrRaster(t, raster, pool, 25, 1, 1);
+                out = 1.1e3 * dlNWRasterToIFR(t, raster, pool, 25, 1, 1);
                 
             else 
 

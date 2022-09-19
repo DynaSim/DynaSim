@@ -9,7 +9,7 @@
 % @June2022
 % @HNXJ
 
-dsBaseModel = dlLaminarCortexNet(2, 1, 2, 1, 2, 3, 3, 3, 3, 1, 'BASE'); % Base model, only for developer options; no scientific use
+% dsBaseModel = dlLaminarCortexNet(2, 1, 2, 1, 2, 3, 3, 3, 3, 1, 'BASE'); % Base model, only for developer options; no scientific use
 
 %% Model parameters
 
