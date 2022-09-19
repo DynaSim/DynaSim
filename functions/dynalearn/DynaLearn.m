@@ -641,8 +641,14 @@ classdef DynaLearn < matlab.mixin.SetGet
                 
                 elseif strcmpi(dlErrorType, 'TotalSpikesPenalty')
                     
-                    TempError = mean(obj.dlLastOutputs{dlOutputIndices});
-                
+                    TempError = 0;
+
+                    for j = dlOutputIndices
+
+                      TempError = squeeze(TempError  + obj.dlLastOutputs{j});
+
+                    end
+
                 else
                     
                     fprintf("Undefined error type ""%s""\n", dlErrorType);

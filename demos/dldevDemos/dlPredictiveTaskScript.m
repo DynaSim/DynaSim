@@ -81,7 +81,7 @@ dsModel = dlConnectModels({dsCellV4, dsCellPFC}, {connection1, connection2, conn
 % Try to use this section only first time or If you have lost your file and
 % you want a new model.
 
-m = DynaLearn(dsModel, 'models/dlPredictiveCorticalCircuitModel1', 'mex'); % ~10 min or less, MEXGEN or < 20 sec, RAWGEN.
+% m = DynaLearn(dsModel, 'models/dlPredictiveCorticalCircuitModel1', 'mex'); % ~10 min or less, MEXGEN or < 20 sec, RAWGEN.
 % m = DynaLearn(dsBaseModel, 'models/dlBaseModel', 'mex');
 m.dlSave(); % < 1sec
 
@@ -96,9 +96,9 @@ m = m.dlLoad('models/dlPredictiveCorticalCircuitModel1'); % ~ 10sec, New larger 
 [trialParams1, trialParams2, trialParams3] = dlDemoThreePattern();
 
 outputParams = [{'deepExPFC_V', 1:10, [300 600], 'afr'}; {'deepExPFC_V', 11:20, [300 600], 'afr'}; {'deepExPFC_V', 21:30, [300 600], 'afr'}];
-targetParams1 = [{'TotalSpikesPenalty', [1, 2, 3], 0, 0.6}; {'MSE', 1, 27, 0.15}; {'MSE', 2, 20, 0.15}; {'MSE', 3, 20, 0.15}; {'Compare', [1, 2], 0, 0.15}; {'Compare', [1, 3], 0, 0.15}; {'Diff', [2, 3], 0, 0.1}]; % A 
-targetParams2 = [{'TotalSpikesPenalty', [1, 2, 3], 0, 0.6}; {'MSE', 2, 27, 0.2}; {'MSE', 1, 20, 0.2}; {'MSE', 3, 20, 0.2}; {'Compare', [2, 1], 0, 0.3}; {'Compare', [2, 3], 0, 0.3}; {'Diff', [1, 3], 0, 0.04}]; % B
-targetParams3 = [{'TotalSpikesPenalty', [1, 2, 3], 0, 0.6}; {'MSE', 3, 27, 0.2}; {'MSE', 2, 20, 0.2}; {'MSE', 1, 20, 0.2}; {'Compare', [3, 1], 0, 0.3}; {'Compare', [3, 2], 0, 0.3}; {'Diff', [1, 2], 0, 0.04}]; % C
+targetParams1 = [{'TotalSpikesPenalty', [1, 2, 3], 0, 0.3}; {'MSE', 1, 27, 0.15}; {'MSE', 2, 20, 0.15}; {'MSE', 3, 20, 0.15}; {'Compare', [1, 2], 0, 0.15}; {'Compare', [1, 3], 0, 0.15}; {'Diff', [2, 3], 0, 0.1}]; % A 
+targetParams2 = [{'TotalSpikesPenalty', [1, 2, 3], 0, 0.3}; {'MSE', 2, 27, 0.2}; {'MSE', 1, 20, 0.2}; {'MSE', 3, 20, 0.2}; {'Compare', [2, 1], 0, 0.3}; {'Compare', [2, 3], 0, 0.3}; {'Diff', [1, 3], 0, 0.04}]; % B
+targetParams3 = [{'TotalSpikesPenalty', [1, 2, 3], 0, 0.3}; {'MSE', 3, 27, 0.2}; {'MSE', 2, 20, 0.2}; {'MSE', 1, 20, 0.2}; {'Compare', [3, 1], 0, 0.3}; {'Compare', [3, 2], 0, 0.3}; {'Diff', [1, 2], 0, 0.04}]; % C
 
 dlInputParameters = {trialParams1, trialParams2, trialParams3};
 dlTargetParameters = {targetParams1, targetParams2, targetParams3};
