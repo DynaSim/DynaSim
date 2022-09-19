@@ -105,9 +105,9 @@ function y = dlLaminarCortexNet(NeSuperficial, NiSuperficial, NeMid, NiMid, NeDe
 %     KsupEdeepE(cny3_1:cny3_2, c1:c2) = k3*rand((cny3_2 - cny3_1 + 1), (c2 - c1 + 1)) + k4; % Y3 -> O1
 
     % Time constants
-    tauGABA_gamma = 4.07; % ms, decay time constant of inhibition for gamma (50Hz)
-    tauGABA_beta = 37.07; % ms, decay time constant of inhibition for beta (25Hz)
-    tauAMPA = 4.47; % ms, decay time constant of fast excitation (AMPA)
+    tauGABA_gamma = 17.14; % ms, decay time constant of inhibition for gamma (around 50Hz)
+    tauGABA_beta = 47.74; % ms, decay time constant of inhibition for beta (around 25Hz)
+    tauAMPA = 24.96; % ms, decay time constant of fast excitation (AMPA)
     %     tauAMPA_beta = 38.4;
 
     % Maximal synaptic strengths

@@ -65,21 +65,21 @@ dsModel = dlConnectModels({dsCellV4, dsCellPFC}, {connection1, connection2});
 % Try to use this section only first time or If you have lost your file and
 % you want a new model.
 
-% m = DynaLearn(dsModel, 'models/dlPredictiveCorticalCircuitModel', 'mex'); % ~10 min or less, MEXGEN or < 20 sec, RAWGEN.
+m = DynaLearn(dsModel, 'models/dlPredictiveCorticalCircuitModel2', 'mex'); % ~10 min or less, MEXGEN or < 20 sec, RAWGEN.
 % m = DynaLearn(dsBaseModel, 'models/dlBaseModel', 'mex');
-% m.dlSave(); % < 1sec
+m.dlSave(); % < 1sec
 
 %% Load DynaLearn Class
 
 clear;clc;
 m = DynaLearn(); % ~ 1sec
-m = m.dlLoad('models/dlPredictiveCorticalCircuitModel'); % ~ 10sec, New larger model; keeping track of its activity in Gamma/Beta **
+m = m.dlLoad('models/dlPredictiveCorticalCircuitModel2'); % ~ 10sec, New larger model; keeping track of its activity in Gamma/Beta **
 
 %% Trial: training script preparation, 50-block and 50-trial
 
 [trialParams1, trialParams2, trialParams3] = dlDemoThreePattern();
 
-outputParams = [{'deepExPFC_V', 1:4, [300 500], 'afr'}; {'deepExPFC_V', 5:8, [300 500], 'afr'}; {'deepExPFC_V', 9:12, [300 500], 'afr'}];
+outputParams = [{'deepExPFC_V', 1:4, [300 600], 'afr'}; {'deepExPFC_V', 5:8, [300 600], 'afr'}; {'deepExPFC_V', 9:12, [300 600], 'afr'}];
 targetParams1 = [{'MSE', 1, 27, 0.2}; {'MSE', 2, 20, 0.2}; {'MSE', 3, 20, 0.2}; {'Compare', [1, 2], 0, 0.3}; {'Compare', [1, 3], 0, 0.3}; {'Diff', [2, 3], 0, 0.04}]; % A 
 targetParams2 = [{'MSE', 2, 27, 0.2}; {'MSE', 1, 20, 0.2}; {'MSE', 3, 20, 0.2}; {'Compare', [2, 1], 0, 0.3}; {'Compare', [2, 3], 0, 0.3}; {'Diff', [1, 3], 0, 0.04}]; % B
 targetParams3 = [{'MSE', 3, 27, 0.2}; {'MSE', 2, 20, 0.2}; {'MSE', 1, 20, 0.2}; {'Compare', [3, 1], 0, 0.3}; {'Compare', [3, 2], 0, 0.3}; {'Diff', [1, 2], 0, 0.04}]; % C
@@ -113,23 +113,23 @@ dlTrainOptions('dlLambdaCap') = 3e-2; % Only if Adaptive lambda is active, recom
 % We shortly train the model by cues to put it close to a local minimia.
 
 dlTrainOptions('dlLambda') = 7e-5;
-dlTrainOptions('dlEpochs') = 3;
+dlTrainOptions('dlEpochs') = 10;
 dlTrainOptions('dlBatchs') = 3;
 
-argsPSR = struct();
+argsPowSpectRatio = struct();
 
-argsPSR.lf1 = 7;
-argsPSR.hf1 = 31;
-argsPSR.lf2 = 47;
-argsPSR.hf2 = 74;
+argsPowSpectRatio.lf1 = 7;
+argsPowSpectRatio.hf1 = 31;
+argsPowSpectRatio.lf2 = 47;
+argsPowSpectRatio.hf2 = 74;
 
 dlTrainOptions('dlCustomLog') = "dlPowerSpectrumRatio"; % Name of a function which is in the path
-dlTrainOptions('dlCustomLogArgs') = argsPSR; % Arguments of your custom function
+dlTrainOptions('dlCustomLogArgs') = argsPowSpectRatio; % Arguments of your custom function
 
 %%
 
-clc;
-m.dlTrain(dlInputParameters, dlOutputParameters, dlTargetParameters, dlTrainOptions);
+clc;tic;
+m.dlTrain(dlInputParameters, dlOutputParameters, dlTargetParameters, dlTrainOptions);toc;
 
 %%
 
