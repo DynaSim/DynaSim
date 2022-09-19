@@ -3,7 +3,9 @@ classdef DynaLearn < matlab.mixin.SetGet
     %
     % DynaModel; variational version
     % An integrated class for interactive and trainable DynaSim network models
-    % Current learning method: Reinforcement learning - Delta rule
+    % Current learning methods: Reinforcement learning - Delta rule -
+    % Uncertainty reduction - Plasticities (in tutorials). Consider that
+    % toolbox is under developement.
     %
     
     properties
@@ -59,7 +61,7 @@ classdef DynaLearn < matlab.mixin.SetGet
 
         function obj = DynaLearn(varargin) % Constructors, will be expanded
             
-            fprintf("\n\n@DS.DL:Creating Dyna model object ... ");
+            fprintf("\n\n@DS.DL:Creating Dyna model object ... \n");
             set(obj, 'dlPathToFile', 'models/dlBaseModel');
             
             if nargin == 0
@@ -276,9 +278,13 @@ classdef DynaLearn < matlab.mixin.SetGet
             obj.dlPath = [obj.dlStudyDir, '/solve'];
             addpath(obj.dlPath);
             d = dir(obj.dlPath);
+            s = "";
             
             for i = 1:size(d, 1)
-                if contains(d(i).name, 'mexw64')
+                if contains(d(i).name, 'mexmaci64')
+                    s = d(i).name;
+                    s = s(1:end-10);
+                elseif contains(d(i).name, 'mexw64')
                     s = d(i).name;
                     s = s(1:end-7);
                 end
@@ -291,6 +297,7 @@ classdef DynaLearn < matlab.mixin.SetGet
             obj.dlPath = [obj.dlStudyDir, '/solve'];
             addpath(obj.dlPath);
             d = dir(obj.dlPath);
+            s = "";
             
             for i = 1:size(d, 1)
                 if contains(d(i).name, '.m')
@@ -453,9 +460,10 @@ classdef DynaLearn < matlab.mixin.SetGet
             try
               set(obj, 'dlOutputs', dlTempFunc(obj.dlOutputs));
             catch
+              fprintf("\n-->Warning! Reinitializing because 'Tempfunc' may not work properly. This may cause a problem later.\n")
               obj.dlReInit();
             end
-%             disp("Done."); 
+            disp("Done."); 
       
         end
         

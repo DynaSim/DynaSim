@@ -1,10 +1,15 @@
 %% Simulation of predictive task implemented on DynaSim/DynaLearn via Reinforcement learning 
 
-% Based on [Bastos2020:Layer and rhythm specificity for predictive routing, A.M Bastos et. al, 2020]
-% Requirement: DynaSim/dev latest version
-% Minimum MatLab version: R2019a
-% 5th of July, 2022
+% Based on papers: 
+% [Layer and rhythm specificity for predictive routing, A.M Bastos et. al, 2020]
+% [, 20xx] *TODO:Add Jason's paper info
+% [, 20xx] *TODO:Add Salva and Suzanna's paper info
+% Requirement: DynaSim/dev_2022 latest version
+% Minimum MatLab version: R2021a
+% @June2022
 % @HNXJ
+
+dsBaseModel = dlLaminarCortexNet(2, 1, 2, 1, 2, 3, 3, 3, 3, 1, 'BASE'); % Base model, only for developer options; no scientific use
 
 %% Model parameters
 
@@ -36,51 +41,45 @@ dsCellPFC = dlLaminarCortexNet(NeS_PFC, NiS_PFC, NeM_PFC, NiM_PFC, NeD_PFC, ...
 dsCellV4 = dlLaminarCortexNet(NeS_V4, NiS_V4, NeM_V4, NiM_V4, NeD_V4, ...
     NiD_V4, Nin_V4, Nout_V4, Nstim_V4, NoiseRate_V4, 'V4'); % Laminar V4 model with specific parameters
 
-%%% Connect two models; consider adding connections later (TODO:ADD_CONN)
-dsModel = dsCombineSpecifications(dsCellV4, dsCellPFC); % Full model
-
-%%% Connecting two models
-connectionWeigth1 = 0.21*rand(NeD_V4, NeM_PFC) + 0.27;
-c = length(dsModel.connections) + 1;
+%%% Connecting two models: Define connections
+connectionWeigth1 = 0.21*rand(dsCellV4.populations(5).size, dsCellPFC.populations(3).size) + 0.27;
 connection1.direction = [dsCellV4.populations(5).name, '->', dsCellPFC.populations(3).name];
 
 connection1.source = dsCellV4.populations(5).name;
 connection1.target = dsCellPFC.populations(3).name;
-connection1.mechanism_list={'iPoisson'};
+connection1.mechanism_list={'iAMPActx'};
 connection1.parameters={'gAMPA', .24, 'tauAMPA', 4.17, 'netcon', connectionWeigth1};
 
-connectionWeigth2 = 0.27*rand(NiD_V4, NiM_PFC) + 0.21;
-c = length(dsModel.connections) + 1;
+connectionWeigth2 = 0.27*rand(dsCellV4.populations(6).size, dsCellPFC.populations(4).size) + 0.21;
 connection2.direction = [dsCellV4.populations(6).name, '->', dsCellPFC.populations(4).name];
 
 connection2.source = dsCellV4.populations(6).name;
 connection2.target = dsCellPFC.populations(4).name;
-connection2.mechanism_list={'iPoisson'};
+connection2.mechanism_list={'iAMPActx'};
 connection2.parameters={'gAMPA', .27, 'tauAMPA', 3.74, 'netcon', connectionWeigth2};
 
+%%% Finalization
 dsModel = dlConnectModels({dsCellV4, dsCellPFC}, {connection1, connection2});
 
-%% Create DynaLearn Class (Only first time, if file does not exist already)
+%% Create DynaLearn Class 
+% Try to use this section only first time or If you have lost your file and
+% you want a new model.
 
-tic;m = DynaLearn(dsModel, 'models/dlModelPredictivePFC', 'mex');toc; % ~70 min, MEXGEN or ~1 min, RAWGEN
-m.dlSave(); % < 1sec
+% m = DynaLearn(dsModel, 'models/dlPredictiveCorticalCircuitModel', 'mex'); % ~10 min or less, MEXGEN or < 20 sec, RAWGEN.
+% m = DynaLearn(dsBaseModel, 'models/dlBaseModel', 'mex');
+% m.dlSave(); % < 1sec
 
 %% Load DynaLearn Class
 
 clear;clc;
-
 m = DynaLearn(); % ~ 1sec
-% m = m.dlLoad('models/dlModelPredictivePFC3'); % ~ 10sec, Trained for ~1200 trials
-% m = m.dlLoad('models/dlModelPredictivePFC4'); % ~ 10sec, New! keeping track of its activity in Gamma/Beta **
-m = m.dlLoad('models/dlModelPredictivePFC5'); % ~ 10sec, New larger model; keeping track of its activity in Gamma/Beta **
-
-% m.dlSimulate(); % ~ 40sec
+m = m.dlLoad('models/dlPredictiveCorticalCircuitModel'); % ~ 10sec, New larger model; keeping track of its activity in Gamma/Beta **
 
 %% Trial: training script preparation, 50-block and 50-trial
 
 [trialParams1, trialParams2, trialParams3] = dlDemoThreePattern();
 
-outputParams = [{'DeepE_V', 1:4, [300 500], 'afr'}; {'DeepE_V', 5:8, [300 500], 'afr'}; {'DeepE_V', 9:12, [300 500], 'afr'}];
+outputParams = [{'deepExPFC_V', 1:4, [300 500], 'afr'}; {'deepExPFC_V', 5:8, [300 500], 'afr'}; {'deepExPFC_V', 9:12, [300 500], 'afr'}];
 targetParams1 = [{'MSE', 1, 27, 0.2}; {'MSE', 2, 20, 0.2}; {'MSE', 3, 20, 0.2}; {'Compare', [1, 2], 0, 0.3}; {'Compare', [1, 3], 0, 0.3}; {'Diff', [2, 3], 0, 0.04}]; % A 
 targetParams2 = [{'MSE', 2, 27, 0.2}; {'MSE', 1, 20, 0.2}; {'MSE', 3, 20, 0.2}; {'Compare', [2, 1], 0, 0.3}; {'Compare', [2, 3], 0, 0.3}; {'Diff', [1, 3], 0, 0.04}]; % B
 targetParams3 = [{'MSE', 3, 27, 0.2}; {'MSE', 2, 20, 0.2}; {'MSE', 1, 20, 0.2}; {'Compare', [3, 1], 0, 0.3}; {'Compare', [3, 2], 0, 0.3}; {'Diff', [1, 2], 0, 0.04}]; % C

@@ -1,5 +1,6 @@
 function [outputs, output_variables] = dsGetOutputList(spec)
 
+    outputs = 0;
     model = dsGenerateModel(spec);
     output_variables = cat(2, 'time', model.state_variables);
     
