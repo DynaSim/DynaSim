@@ -65,7 +65,7 @@ dsModel = dlConnectModels({dsCellV4, dsCellPFC}, {connection1, connection2});
 % Try to use this section only first time or If you have lost your file and
 % you want a new model.
 
-m = DynaLearn(dsModel, 'models/dlPredictiveCorticalCircuitModel2', 'mex'); % ~10 min or less, MEXGEN or < 20 sec, RAWGEN.
+% m = DynaLearn(dsModel, 'models/dlPredictiveCorticalCircuitModel2', 'mex'); % ~10 min or less, MEXGEN or < 20 sec, RAWGEN.
 % m = DynaLearn(dsBaseModel, 'models/dlBaseModel', 'mex');
 m.dlSave(); % < 1sec
 
@@ -113,7 +113,7 @@ dlTrainOptions('dlLambdaCap') = 3e-2; % Only if Adaptive lambda is active, recom
 % We shortly train the model by cues to put it close to a local minimia.
 
 dlTrainOptions('dlLambda') = 7e-5;
-dlTrainOptions('dlEpochs') = 10;
+dlTrainOptions('dlEpochs') = 100;
 dlTrainOptions('dlBatchs') = 3;
 
 argsPowSpectRatio = struct();
@@ -128,8 +128,8 @@ dlTrainOptions('dlCustomLogArgs') = argsPowSpectRatio; % Arguments of your custo
 
 %%
 
-clc;tic;
-m.dlTrain(dlInputParameters, dlOutputParameters, dlTargetParameters, dlTrainOptions);toc;
+clc;
+m.dlTrain(dlInputParameters, dlOutputParameters, dlTargetParameters, dlTrainOptions); % <16 sec per trial
 
 %%
 
