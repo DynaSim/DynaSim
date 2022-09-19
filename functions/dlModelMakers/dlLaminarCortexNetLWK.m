@@ -1,12 +1,17 @@
-function y = dlLaminarCortexNet(ModelParameters, populationName)
+function y = dlLaminarCortexNetLWK(ModelParameters, populationName)
 
     NeSuperficial = ModelParameters.NeSuperficial;
-    NiSuperficial = ModelParameters.NiSuperficial;
+    NSomSuperficial = ModelParameters.NSomSuperficial;
+    NPvSuperficial = ModelParameters.NPvSuperficial;
+
     NeMid = ModelParameters.NeMid;
-    NiMid = ModelParameters.NiMid;
+    NSomMid = 0*ModelParameters.NSomMid; % Kopell model; no SOM in mid
+    NPvMid = ModelParameters.NPvMid;
 
     NeDeep = ModelParameters.NeDeep;
-    NiDeep = ModelParameters.NiDeep;
+    NSomDeep = ModelParameters.NSomDeep;
+    NPvDeep = ModelParameters.NPVDeep;
+
     Nin = ModelParameters.Nin;
     Nout = ModelParameters.Nout;
 
@@ -14,20 +19,20 @@ function y = dlLaminarCortexNet(ModelParameters, populationName)
     NoiseRate = ModelParameters.NoiseRate;
 
     fprintf("\n>Initialization of dlLaminarCortex Model: ");
-    fprintf("\n->Based on Bastos2012");
-    fprintf("\n-->Superficial (L1-3) excitatory neurons count = %d , inhibitory = %d ", NeSuperficial, NiSuperficial); % S
-    fprintf("\n-->Middle (L4) excitatory neurons count = %d , inhibitory = %d ", NeMid, NiMid); % M
-    fprintf("\n-->Deep (L5-6) excitatory neurons count = %d , inhibitory = %d ", NeDeep, NiDeep); % D 
+    fprintf("\n->Based on Lee&Whittington&Kopell2013");
+    fprintf("\n-->Superficial (L1-3) excitatory neurons count = %d , SOM inhibitory = %d , PV inhibitory = %d ", NeSuperficial, NSomSuperficial, NPvSuperficial); % S
+    fprintf("\n-->Middle (L4) excitatory neurons count = %d , SOM inhibitory = %d , PV inhibitory = %d ", NeMid, NSomMid, NPvMid); % M
+    fprintf("\n-->Deep (L5-6) excitatory neurons count = %d , SOM inhibitory = %d , PV inhibitory = %d ", NeDeep, NSomDeep, NPvDeep); % D 
 
     fprintf("\n-->Input connections count (terminal) size = %d ", Nin); % Inputs / Stimuli
     fprintf("\n-->Output connections count (terminal) size = %d ", Nout); % Outputs / Probes
     fprintf("\n-->Overall noise rate = %.4f", NoiseRate); % Randomness / Stochasticity
     fprintf("\n--->Population name is %s", populationName); % Name tag or suffix for all names of this dsModel
 
+    fprintf("\n-->As this is a Kopell model, We change Number of SOM cells in mid layer to be 0.");
+
     k1 = 0.07; % Diff. for normal weights (uniform random)
     k2 = 0.04; % Min connectivity weight
-%     k3 = 0.17; % Diff. for strengthen weights
-%     k4 = 0.74; % Min. for strengthen weights
 
     NeAvg = (NeSuperficial + NeMid + NeDeep) / 3;
 %     NiAvg = (NiSuperficial + NiMid + NiDeep) / 3;
