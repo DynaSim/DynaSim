@@ -508,7 +508,7 @@ classdef DynaLearn < matlab.mixin.SetGet
             t = linspace(0, size(x, 1), size(x, 1))*obj.dldT*obj.dlDownSampleFactor;
             raster = computeRaster(t, x);
             pool = 1:size(x, 2);
-            
+
             if size(raster, 1) > 0
 
                 out = 1.1e3 * dlNWRasterToIFR(t, raster, pool, 25, 1, 1);
@@ -638,6 +638,10 @@ classdef DynaLearn < matlab.mixin.SetGet
                     
                     j = dlOutputIndices;
                     TempError = abs(obj.dlLastOutputs{j(1)} - obj.dlLastOutputs{j(2)});
+                
+                elseif strcmpi(dlErrorType, 'TotalSpikesPenalty')
+                    
+                    TempError = mean(obj.dlLastOutputs{dlOutputIndices});
                 
                 else
                     
@@ -871,7 +875,7 @@ classdef DynaLearn < matlab.mixin.SetGet
                 
             for i = 1:dlEpochs
                 
-                fprintf("\t->Epoch no. %d (Total iterations for this model : %d)\n", i, obj.dlTrialNumber);
+                fprintf("   ->Epoch no. %d (Total iterations for this model : %d)\n", i, obj.dlTrialNumber);
                 for j = 1:dlBatchs
                 
                     fprintf("\t-->Batch no. %d of %d\t", j, dlBatchs);

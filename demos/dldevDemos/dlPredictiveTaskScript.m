@@ -42,30 +42,46 @@ dsCellV4 = dlLaminarCortexNet(NeS_V4, NiS_V4, NeM_V4, NiM_V4, NeD_V4, ...
     NiD_V4, Nin_V4, Nout_V4, Nstim_V4, NoiseRate_V4, 'V4'); % Laminar V4 model with specific parameters
 
 %%% Connecting two models: Define connections
-connectionWeigth1 = 0.21*rand(dsCellV4.populations(5).size, dsCellPFC.populations(3).size) + 0.27;
-connection1.direction = [dsCellV4.populations(5).name, '->', dsCellPFC.populations(3).name];
+connectionWeigth1 = 0.21*rand(dsCellV4.populations(1).size, dsCellPFC.populations(3).size) + 0.27;
+connection1.direction = [dsCellV4.populations(1).name, '->', dsCellPFC.populations(3).name];
 
-connection1.source = dsCellV4.populations(5).name;
+connection1.source = dsCellV4.populations(1).name;
 connection1.target = dsCellPFC.populations(3).name;
 connection1.mechanism_list={'iAMPActx'};
 connection1.parameters={'gAMPA', .24, 'tauAMPA', 4.17, 'netcon', connectionWeigth1};
 
-connectionWeigth2 = 0.27*rand(dsCellV4.populations(6).size, dsCellPFC.populations(4).size) + 0.21;
-connection2.direction = [dsCellV4.populations(6).name, '->', dsCellPFC.populations(4).name];
+connectionWeigth2 = 0.27*rand(dsCellV4.populations(2).size, dsCellPFC.populations(4).size) + 0.21;
+connection2.direction = [dsCellV4.populations(2).name, '->', dsCellPFC.populations(4).name];
 
-connection2.source = dsCellV4.populations(6).name;
+connection2.source = dsCellV4.populations(2).name;
 connection2.target = dsCellPFC.populations(4).name;
 connection2.mechanism_list={'iAMPActx'};
 connection2.parameters={'gAMPA', .27, 'tauAMPA', 3.74, 'netcon', connectionWeigth2};
 
+connectionWeigth3 = 0.27*rand(dsCellPFC.populations(6).size, dsCellV4.populations(4).size) + 0.21;
+connection3.direction = [dsCellPFC.populations(6).name, '->', dsCellV4.populations(4).name];
+
+connection3.source = dsCellPFC.populations(6).name;
+connection3.target = dsCellV4.populations(4).name;
+connection3.mechanism_list={'iAMPActx'};
+connection3.parameters={'gAMPA', .27, 'tauAMPA', 3.74, 'netcon', connectionWeigth3};
+
+connectionWeigth4 = 0.27*rand(dsCellPFC.populations(5).size, dsCellV4.populations(3).size) + 0.21;
+connection4.direction = [dsCellPFC.populations(5).name, '->', dsCellV4.populations(3).name];
+
+connection4.source = dsCellPFC.populations(5).name;
+connection4.target = dsCellV4.populations(3).name;
+connection4.mechanism_list={'iAMPActx'};
+connection4.parameters={'gAMPA', .27, 'tauAMPA', 3.74, 'netcon', connectionWeigth4};
+
 %%% Finalization
-dsModel = dlConnectModels({dsCellV4, dsCellPFC}, {connection1, connection2});
+dsModel = dlConnectModels({dsCellV4, dsCellPFC}, {connection1, connection2, connection3, connection4});
 
 %% Create DynaLearn Class 
 % Try to use this section only first time or If you have lost your file and
 % you want a new model.
 
-% m = DynaLearn(dsModel, 'models/dlPredictiveCorticalCircuitModel2', 'mex'); % ~10 min or less, MEXGEN or < 20 sec, RAWGEN.
+m = DynaLearn(dsModel, 'models/dlPredictiveCorticalCircuitModel1', 'mex'); % ~10 min or less, MEXGEN or < 20 sec, RAWGEN.
 % m = DynaLearn(dsBaseModel, 'models/dlBaseModel', 'mex');
 m.dlSave(); % < 1sec
 
@@ -73,16 +89,16 @@ m.dlSave(); % < 1sec
 
 clear;clc;
 m = DynaLearn(); % ~ 1sec
-m = m.dlLoad('models/dlPredictiveCorticalCircuitModel2'); % ~ 10sec, New larger model; keeping track of its activity in Gamma/Beta **
+m = m.dlLoad('models/dlPredictiveCorticalCircuitModel1'); % ~ 10sec, New larger model; keeping track of its activity in Gamma/Beta **
 
 %% Trial: training script preparation, 50-block and 50-trial
 
 [trialParams1, trialParams2, trialParams3] = dlDemoThreePattern();
 
-outputParams = [{'deepExPFC_V', 1:4, [300 600], 'afr'}; {'deepExPFC_V', 5:8, [300 600], 'afr'}; {'deepExPFC_V', 9:12, [300 600], 'afr'}];
-targetParams1 = [{'MSE', 1, 27, 0.2}; {'MSE', 2, 20, 0.2}; {'MSE', 3, 20, 0.2}; {'Compare', [1, 2], 0, 0.3}; {'Compare', [1, 3], 0, 0.3}; {'Diff', [2, 3], 0, 0.04}]; % A 
-targetParams2 = [{'MSE', 2, 27, 0.2}; {'MSE', 1, 20, 0.2}; {'MSE', 3, 20, 0.2}; {'Compare', [2, 1], 0, 0.3}; {'Compare', [2, 3], 0, 0.3}; {'Diff', [1, 3], 0, 0.04}]; % B
-targetParams3 = [{'MSE', 3, 27, 0.2}; {'MSE', 2, 20, 0.2}; {'MSE', 1, 20, 0.2}; {'Compare', [3, 1], 0, 0.3}; {'Compare', [3, 2], 0, 0.3}; {'Diff', [1, 2], 0, 0.04}]; % C
+outputParams = [{'deepExPFC_V', 1:10, [300 600], 'afr'}; {'deepExPFC_V', 11:20, [300 600], 'afr'}; {'deepExPFC_V', 21:30, [300 600], 'afr'}];
+targetParams1 = [{'TotalSpikesPenalty', [1, 2, 3], 0, 0.6}; {'MSE', 1, 27, 0.15}; {'MSE', 2, 20, 0.15}; {'MSE', 3, 20, 0.15}; {'Compare', [1, 2], 0, 0.15}; {'Compare', [1, 3], 0, 0.15}; {'Diff', [2, 3], 0, 0.1}]; % A 
+targetParams2 = [{'TotalSpikesPenalty', [1, 2, 3], 0, 0.6}; {'MSE', 2, 27, 0.2}; {'MSE', 1, 20, 0.2}; {'MSE', 3, 20, 0.2}; {'Compare', [2, 1], 0, 0.3}; {'Compare', [2, 3], 0, 0.3}; {'Diff', [1, 3], 0, 0.04}]; % B
+targetParams3 = [{'TotalSpikesPenalty', [1, 2, 3], 0, 0.6}; {'MSE', 3, 27, 0.2}; {'MSE', 2, 20, 0.2}; {'MSE', 1, 20, 0.2}; {'Compare', [3, 1], 0, 0.3}; {'Compare', [3, 2], 0, 0.3}; {'Diff', [1, 2], 0, 0.04}]; % C
 
 dlInputParameters = {trialParams1, trialParams2, trialParams3};
 dlTargetParameters = {targetParams1, targetParams2, targetParams3};
@@ -113,7 +129,7 @@ dlTrainOptions('dlLambdaCap') = 3e-2; % Only if Adaptive lambda is active, recom
 % We shortly train the model by cues to put it close to a local minimia.
 
 dlTrainOptions('dlLambda') = 7e-5;
-dlTrainOptions('dlEpochs') = 100;
+dlTrainOptions('dlEpochs') = 10;
 dlTrainOptions('dlBatchs') = 3;
 
 argsPowSpectRatio = struct();
