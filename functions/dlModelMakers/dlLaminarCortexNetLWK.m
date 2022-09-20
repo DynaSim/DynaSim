@@ -46,34 +46,55 @@ function y = dlLaminarCortexNetLWK(ModelParameters, populationName)
     KsupEsupPv = k1*rand(NeSuperficial, NPvSuperficial) + k2;
     % sE->dE
     KsupEdeepE = k1*rand(NeSuperficial, NeDeep) + k2;
+
     % sIsom->sE
     KsupSomsupE = k1*rand(NSomSuperficial, NeSuperficial) + k2;
     % sIsom->sIpv
     KsupSomsupPv = k1*rand(NSomSuperficial, NPvSuperficial) + k2;
 
-    % sE->sE / sI->sI
-    KeeSS = k1*rand(NeSuperficial, NeSuperficial) + k2; % Recurrent E-to-E: mid, sup, deep separately
-    KiiSS = k1*rand(NPvSuperficial, NPvSuperficial) + k2; % Recurrent I-to-I: mid, sup, deep separately∂
+    % sIpv->sE
+    KsupPvsupE = k1*rand(NPvSuperficial, NeSuperficial) + k2;
+    % sIpv->sIsom
+    KsupPvsupSom = k1*rand(NPvSuperficial, NSomSuperficial) + k2;
 
-    % mE->mI
-    KeiMM = k1*rand(NeMid, NiMid) + k2; % All-to-all, connectivity from E cells to I cells; mid, sup, deep
-    % mI->mE
-    KieMM = k1*rand(NiMid, NeMid) + k2; % All-to-all, connectivity from I cells to E cells; mid, sup, deep
+    % mE->sIsom
+    KmidEsupSom = k1*rand(NeMid, NSomSuperficial) + k2;
+    % mE->mIpv
+    KmidEmidPv = k1*rand(NeMid, NPvMid) + k2;
+    % mE->sE
+    KmidEsupE = k1*rand(NeMid, NeSuperficial) + k2;
+    % mE->dE
+    KmidEdeepE = k1*rand(NeMid, NeDeep) + k2;
+    % mE->dIpv
+    KmidEdeepPv = k1*rand(NeMid, NPvDeep) + k2;
 
-    % mE->mE / mI->mI
-    KeeMM = k1*rand(NeMid, NeMid) + k2; % Recurrent E-to-E: mid, sup, deep separately
-    KiiMM = k1*rand(NiMid, NiMid) + k2; % Recurrent I-to-I: mid, sup, deep separately
+    % mIpv->sE
+    KmidPvsupE = k1*rand(NPvMid, NeSuperficial) + k2;
+    % mIpv->mE
+    KmidPvmidSom = k1*rand(NPvMid, NSomMid) + k2;
 
-    % dE->dI
-    KeiDD = k1*rand(NeDeep, NiDeep) + k2; % All-to-all, connectivity from E cells to I cells; mid, sup, deep
-    % dI->dE
-    KieDD = 4*k1*rand(NiDeep, NeDeep) + k2; % All-to-all, connectivity from I cells to E cells; mid, sup, deep
+    % dE->dIsom
+    KdeepEdeepSom = k1*rand(NeDeep, NSomDeep) + k2;
+    % dE->sIsom
+    KdeepEsupSom = k1*rand(NeDeep, NSomSuperficial) + k2;
+    % dE->dIpv
+    KdeepEdeepPv = k1*rand(NeDeep, NPvDeep) + k2;
+    % dE->sIpv
+    KdeepEsupPv = k1*rand(NeDeep, NPvSuperficial) + k2;
 
-    % dE->dE / dI->dI
-    KeeDD = k1*rand(NeDeep, NeDeep) + k2; % Recurrent E-to-E: mid, sup, deep separately
-    KiiDD = k1*rand(NiDeep, NiDeep) + k2; % Recurrent I-to-I: mid, sup, deep separately
+    % dIpv->dE
+    KdeepPvdeepE = k1*rand(NPvDeep, NeDeep) + k2;
+    % dIpv->dISom
+    KdeepPvdeepSom = k1*rand(NPvDeep, NSomDeep) + k2;
+
+    % dIsom->dE
+    KdeepSomdeepE = k1*rand(NSomDeep, NeDeep) + k2;
+    % dIsom->dIpv
+    KdeepSomsupPv = k1*rand(NSomDeep, NPvDeep) + k2;
+    % dIsom->mIpv
+    KdeepSommidPv = k1*rand(NSomDeep, NPvMid) + k2;
     
-    kzio = zeros(Nin, Nin); % Null (zero) matrix for disconnections of Input layer.
+    KnullIO = zeros(Nin, Nin); % Null (zero) matrix for disconnections of Input layer.
 
     % Sub indices for layer decompostion based in I/O (task specific)
     subLayerIndicesInS = zeros(2, Nin);
@@ -110,11 +131,6 @@ function y = dlLaminarCortexNetLWK(ModelParameters, populationName)
 
     end
 
-    KmidEsupE = 0.3 * (k1*rand(NeMid, NeSuperficial) + k2);    
-    KmidEdeepE = 0.3 * (k1*rand(NeMid, NeDeep) + k2);
-    KmidIdeepE = 0.3 * (k1*rand(NiMid, NeDeep) + k2);
-    KsupEdeepE = 0.3 * (k1*rand(NeSuperficial, NeDeep) + k2);
-
 %     KmidEsupE(subLayerIndicesInM(1, 1):subLayerIndicesInM(2, 1), [subLayerIndicesInS(1, 1):subLayerIndicesInS(2, 1), subLayerIndicesInS(1, 4):subLayerIndicesInS(2, 4)]) = k3*rand((subLayerIndicesInM(2, 1) - subLayerIndicesInM(1, 1) + 1), (subLayerIndicesInS(2, 1) - subLayerIndicesInS(1, 1) + subLayerIndicesInS(2, 4) - subLayerIndicesInS(1, 4) + 2)) + k4; % A -> X1, Y1
 %     KmidEsupE(subLayerIndicesInM(1, 2):subLayerIndicesInM(2, 2), [subLayerIndicesInS(1, 2):subLayerIndicesInS(2, 2), subLayerIndicesInS(1, 5):subLayerIndicesInS(2, 5)]) = k3*rand((subLayerIndicesInM(2, 2) - subLayerIndicesInM(1, 2) + 1), (subLayerIndicesInS(2, 2) - subLayerIndicesInS(1, 2) + subLayerIndicesInS(2, 5) - subLayerIndicesInS(1, 5) + 2)) + k4; % B -> X2, Y2
 %     KmidEsupE(subLayerIndicesInM(1, 3):subLayerIndicesInM(2, 3), [subLayerIndicesInS(1, 3):subLayerIndicesInS(2, 3), subLayerIndicesInS(1, 6):subLayerIndicesInS(2, 6)]) = k3*rand((subLayerIndicesInM(2, 3) - subLayerIndicesInM(1, 3) + 1), (subLayerIndicesInS(2, 3) - subLayerIndicesInS(1, 3) + subLayerIndicesInS(2, 6) - subLayerIndicesInS(1, 6) + 2)) + k4; % C -> X3, Y3
@@ -150,10 +166,8 @@ function y = dlLaminarCortexNetLWK(ModelParameters, populationName)
     eqns2 = 'dV/dt = (rand(1) + 4.5)*(20*(exp(- (t - t1).^2) - exp(- (t - t2).^2)) + noise*randn(1, Npop))/C; f1=4; t1=10; t2=100; noise=0; C=1; V(0) = -60 - rand(1, Npop)*17;';
 
     % cell type
-    %     spn_cells = {'spn_iNa','spn_iK','spn_iLeak','spn_iM','spn_iCa','spn_CaBuffer','spn_iKca'};
     ctx_cells = {'iNa','iK'};
-
-    cell_type = ctx_cells; % choose spn_cells and ctx_cells
+    cell_type = ctx_cells;
 
     % BUILDING
     % Structures: SUPERFICIAL LAYER (1-2)
@@ -166,14 +180,21 @@ function y = dlLaminarCortexNetLWK(ModelParameters, populationName)
     pingS.populations(1).mechanism_list = cell_type;
     pingS.populations(1).parameters = {'Iapp', 4,'noise', NoiseRate*2};
 
-    % I-cells
-    pingS.populations(2).name = ['supI', populationName];
-    pingS.populations(2).size = NiSuperficial;
+    % I-cells-SOM
+    pingS.populations(2).name = ['supISOM', populationName];
+    pingS.populations(2).size = NSomSuperficial;
     pingS.populations(2).equations = eqns;
     pingS.populations(2).mechanism_list = cell_type;
     pingS.populations(2).parameters = {'Iapp',0,'noise', NoiseRate};
 
-    % E/I connectivity
+    % I-cells-PV
+    pingS.populations(3).name = ['supIPV', populationName];
+    pingS.populations(3).size = NPvSuperficial;
+    pingS.populations(3).equations = eqns;
+    pingS.populations(3).mechanism_list = cell_type;
+    pingS.populations(3).parameters = {'Iapp',0,'noise', NoiseRate};
+
+    % Interlayer connections
     pingS.connections(1).direction = [pingS.populations(1).name, '->', pingS.populations(2).name];
     pingS.connections(1).source = pingS.populations(1).name;
     pingS.connections(1).target = pingS.populations(2).name;
