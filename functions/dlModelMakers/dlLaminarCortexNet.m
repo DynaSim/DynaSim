@@ -14,6 +14,7 @@ function y = dlLaminarCortexNet(ModelParameters, populationName)
     NoiseRate = ModelParameters.NoiseRate;
 
     fprintf("\n>Initialization of dlLaminarCortex Model: ");
+
     fprintf("\n->Based on Bastos2012");
     fprintf("\n-->Superficial (L1-3) excitatory neurons count = %d , inhibitory = %d ", NeSuperficial, NiSuperficial); % S
     fprintf("\n-->Middle (L4) excitatory neurons count = %d , inhibitory = %d ", NeMid, NiMid); % M
@@ -316,23 +317,8 @@ function y = dlLaminarCortexNet(ModelParameters, populationName)
         IOping{i}.connections(4).parameters = {'gGABAa',gGABAa_ii,'tauGABA',tauGABA_gamma,'netcon',kzio};
         
     end
-    
-    % create independent layers
-%     sup = dsApplyModifications(pingS,{'E','name','supE'; 'I','name','supI'}); % superficial layer (~gamma)
-%     mid = dsApplyModifications(pingM,{'E','name','midE'; 'I','name','midI'}); % middle layer (~gamma)
-%     deep = dsApplyModifications(pingD,{'E','name','deepE'; 'I','name','deepI'}); % deep layer (~beta)
-%     stimuli1 = dsApplyModifications(IOping,{'E','name','IO_SA1'; 'I','name','IO_SB1'}); % I/O layer (stimuli)
-%     stimuli2 = dsApplyModifications(IOping,{'E','name','IO_SC1'; 'I','name','IO_SA2'}); % I/O layer (stimuli)
-%     stimuli3 = dsApplyModifications(IOping,{'E','name','IO_SB2'; 'I','name','IO_SC2'}); % I/O layer (stimuli)
-%     contex = dsApplyModifications(IOping,{'E','name','IO_Cx1'; 'I','name','IO_Cx2'}); % I/O layer (context)
 
-    % create full cortical specification
-    
-%     y = stimuli1;
-% 
-% end
-
-    s = dsCombineSpecifications(pingS, pingM, pingD, IOping{1}, IOping{2}, IOping{3});
+    s = dsCombineSpecifications(pingS, pingM, pingD, IOping{:});
 
     % connect the layers and inputs
     fprintf("\n--->Connecting separate layers and inputs:");

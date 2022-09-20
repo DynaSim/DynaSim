@@ -10,7 +10,7 @@ function y = dlLaminarCortexNetLWK(ModelParameters, populationName)
 
     NeDeep = ModelParameters.NeDeep;
     NSomDeep = ModelParameters.NSomDeep;
-    NPvDeep = ModelParameters.NPVDeep;
+    NPvDeep = ModelParameters.NPvDeep;
 
     Nin = ModelParameters.Nin;
     Nout = ModelParameters.Nout;
@@ -19,6 +19,8 @@ function y = dlLaminarCortexNetLWK(ModelParameters, populationName)
     NoiseRate = ModelParameters.NoiseRate;
 
     fprintf("\n>Initialization of dlLaminarCortex Model: ");
+    fprintf("\n-->As this is a Kopell model, We change/force Number of SOM cells in mid layer to be 0.");
+
     fprintf("\n->Based on Lee&Whittington&Kopell2013");
     fprintf("\n-->Superficial (L1-3) excitatory neurons count = %d , SOM inhibitory = %d , PV inhibitory = %d ", NeSuperficial, NSomSuperficial, NPvSuperficial); % S
     fprintf("\n-->Middle (L4) excitatory neurons count = %d , SOM inhibitory = %d , PV inhibitory = %d ", NeMid, NSomMid, NPvMid); % M
@@ -29,8 +31,6 @@ function y = dlLaminarCortexNetLWK(ModelParameters, populationName)
     fprintf("\n-->Overall noise rate = %.4f", NoiseRate); % Randomness / Stochasticity
     fprintf("\n--->Population name is %s", populationName); % Name tag or suffix for all names of this dsModel
 
-    fprintf("\n-->As this is a Kopell model, We change Number of SOM cells in mid layer to be 0.");
-
     k1 = 0.07; % Diff. for normal weights (uniform random)
     k2 = 0.04; % Min connectivity weight
 
@@ -40,14 +40,20 @@ function y = dlLaminarCortexNetLWK(ModelParameters, populationName)
     populationName = ['x', populationName];
     % Connectivity matrices
 
-    % sE->sI
-    KeiSS = k1*rand(NeSuperficial, NiSuperficial) + k2; % All-to-all, connectivity from E cells to I cells; mid, sup, deep
-    % sI->sE
-    KieSS = k1*rand(NiSuperficial, NeSuperficial) + k2; % All-to-all, connectivity from I cells to E cells; mid, sup, deep
+    % sE->sIsom
+    KsupEsupSom = k1*rand(NeSuperficial, NSomSuperficial) + k2;
+    % sE->sIpv
+    KsupEsupPv = k1*rand(NeSuperficial, NPvSuperficial) + k2;
+    % sE->dE
+    KsupEdeepE = k1*rand(NeSuperficial, NeDeep) + k2;
+    % sIsom->sE
+    KsupSomsupE = k1*rand(NSomSuperficial, NeSuperficial) + k2;
+    % sIsom->sIpv
+    KsupSomsupPv = k1*rand(NSomSuperficial, NPvSuperficial) + k2;
 
     % sE->sE / sI->sI
     KeeSS = k1*rand(NeSuperficial, NeSuperficial) + k2; % Recurrent E-to-E: mid, sup, deep separately
-    KiiSS = k1*rand(NiSuperficial, NiSuperficial) + k2; % Recurrent I-to-I: mid, sup, deep separately
+    KiiSS = k1*rand(NPvSuperficial, NPvSuperficial) + k2; % Recurrent I-to-I: mid, sup, deep separately∂
 
     % mE->mI
     KeiMM = k1*rand(NeMid, NiMid) + k2; % All-to-all, connectivity from E cells to I cells; mid, sup, deep

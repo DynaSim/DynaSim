@@ -51,7 +51,7 @@ function dsParamsModifier(tempfuncname, map)
         end
         
         fprintf(fileID, '\telse\n');
-        fprintf(fileID, '\t\tfprintf("\n----->Warning: Parameter or variable ''%s'' not found in params.mat file. Check if you are refering to a correct variable.\\n");\n', labels{1, i});
+        fprintf(fileID, '\t\tfprintf("\\n----->Warning: Parameter or variable ''%s'' not found in params.mat file. Check if you are refering to a correct variable.\\n");\n', labels{1, i});
         fprintf(fileID, '\tend\n\n');
         
     end
