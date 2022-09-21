@@ -53,7 +53,8 @@ ModelParametersV4.Nstim = 3;
 dsCellPFC = dlLaminarCortexNetLWK(ModelParametersPFC, 'PFC'); % Laminar PFC model with specific parameters
 dsCellV4 = dlLaminarCortexNetLWK(ModelParametersV4, 'V4'); % Laminar V4 model with specific parameters
 
-%%% Connecting two models: Define connections
+%%% Connecting two models: Define connections between two areas
+% 
 connectionWeigth1 = 0.21*rand(dsCellV4.populations(1).size, dsCellPFC.populations(3).size) + 0.27;
 connection1.direction = [dsCellV4.populations(1).name, '->', dsCellPFC.populations(3).name];
 
@@ -93,7 +94,7 @@ dsModel = dlConnectModels({dsCellV4, dsCellPFC}, {connection1, connection2, conn
 % Try to use this section only first time or If you have lost your file and
 % you want a new model.
 
-m = DynaLearn(dsModel, 'models/dlPredictiveCorticalCircuitModelLWK1', 'mex'); % ~10 min or less, MEXGEN or < 20 sec, RAWGEN.
+m = DynaLearn(dsCellPFC, 'models/dlPredictiveCorticalCircuitModelLWK1', 'mex'); % ~10 min or less, MEXGEN or < 20 sec, RAWGEN.
 % m = DynaLearn(dsBaseModel, 'models/dlBaseModel', 'mex');
 m.dlSave(); % < 1sec
 

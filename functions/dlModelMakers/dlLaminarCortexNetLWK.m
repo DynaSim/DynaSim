@@ -132,23 +132,20 @@ function y = dlLaminarCortexNetLWK(ModelParameters, populationName)
     end
 
     % Time constants
-    tauGABA_gamma = 17.14; % ms, decay time constant of inhibition for gamma (around 50Hz)
-    tauGABA_beta = 47.74; % ms, decay time constant of inhibition for beta (around 25Hz)
-    tauAMPA = 24.96; % ms, decay time constant of fast excitation (AMPA)
+    tauGABA_Pv = 17.14; % ms, decay time constant of inhibition for gamma (around 50Hz)
+    tauGABA_Som = 47.74; % ms, decay time constant of inhibition for beta (around 25Hz)
+    tauAMPA_E = 24.96; % ms, decay time constant of fast excitation (AMPA)
 
     % Maximal synaptic strengths
-    gAMPA_ei = .2*(21/NeAvg); % E->I within layer
-    gAMPA_ffee = .2*(21/NeAvg); % feedforward E->E, mid->sup, sup->deep
-    gGABAa_ffie = .2*(21/NeAvg); % feedforward I->E, mid->deep
-    gAMPA_in = .2*(21/NeAvg);
-
-    gAMPA_ee = 0.11*(21/NeAvg); % E->E within layer
-    gGABAa_ie = 3*(21/NeAvg); % I->E within layer
-    gGABAa_ii = 0.11*(21/NeAvg); % I->I within layer
+    gAMPA_EI = .2*(41/NeAvg); % E->I(SOM-PV) 
+    gAMPA_EE = .2*(41/NeAvg); % E->E
+    gGABA_SE = .2*(21/NeAvg); % (SOM)->E
+    gGABA_PE = .2*(41/NeAvg); % (PV)->E
+    gGABA_II = .1*(21/NeAvg); % I->I within layer
 
     % neuronal dynamics
     eqns = 'dV/dt = (Iapp + @current + noise*randn(1, Npop))/C; Iapp=0; noise=0; C=1; V(0) = -rand(1, Npop)*74;';
-    eqns2 = 'dV/dt = (rand(1) + 4.5)*(20*(exp(- (t - t1).^2) - exp(- (t - t2).^2)) + noise*randn(1, Npop))/C; f1=4; t1=10; t2=100; noise=0; C=1; V(0) = -60 - rand(1, Npop)*17;';
+    eqns_stimuli = 'dV/dt = (rand(1) + 4.5)*(20*(exp(- (t - t1).^2) - exp(- (t - t2).^2)) + noise*randn(1, Npop))/C; f1=4; t1=10; t2=100; noise=0; C=1; V(0) = -60 - rand(1, Npop)*17;';
 
     % cell type
     ctx_cells = {'iNa','iK'};
@@ -184,13 +181,13 @@ function y = dlLaminarCortexNetLWK(ModelParameters, populationName)
     pingS.connections(1).source = pingS.populations(1).name;
     pingS.connections(1).target = pingS.populations(2).name;
     pingS.connections(1).mechanism_list = {'iAMPActx'};
-    pingS.connections(1).parameters = {'gAMPA',gAMPA_ei,'tauAMPA',tauAMPA,'netcon',KsupEsupSom};
+    pingS.connections(1).parameters = {'gAMPA',gAMPA_EI,'tauAMPA',tauAMPA_E,'netcon',KsupEsupSom};
 
     pingS.connections(2).direction = [pingS.populations(1).name, '->', pingS.populations(3).name];
     pingS.connections(2).source = pingS.populations(1).name;
     pingS.connections(2).target = pingS.populations(3).name;
     pingS.connections(2).mechanism_list = {'iAMPActx'};
-    pingS.connections(2).parameters = {'gAMPA',gAMPA_ei,'tauAMPA',tauAMPA,'netcon',KsupEsupPv};
+    pingS.connections(2).parameters = {'gAMPA',gAMPA_EI,'tauAMPA',tauAMPA_E,'netcon',KsupEsupPv};
 
     pingS.connections(3).direction = [pingS.populations(1).name, '->', pingS.populations(2).name];
     pingS.connections(3).source = pingS.populations(1).name;
@@ -208,25 +205,25 @@ function y = dlLaminarCortexNetLWK(ModelParameters, populationName)
     pingS.connections(5).source = pingS.populations(2).name;
     pingS.connections(5).target = pingS.populations(1).name;
     pingS.connections(5).mechanism_list = {'iGABActx'};
-    pingS.connections(5).parameters = {'gGABAa',gGABAa_ie,'tauGABA',tauGABA_gamma,'netcon',KsupSomsupE};
+    pingS.connections(5).parameters = {'gGABAa',gGABA_SE,'tauGABA',tauGABA_Som,'netcon',KsupSomsupE};
 
     pingS.connections(6).direction = [pingS.populations(2).name, '->', pingS.populations(3).name];
     pingS.connections(6).source = pingS.populations(2).name;
     pingS.connections(6).target = pingS.populations(3).name;
     pingS.connections(6).mechanism_list = {'iGABActx'};
-    pingS.connections(6).parameters = {'gGABAa',gGABAa_ie,'tauGABA',tauGABA_gamma,'netcon',KsupSomsupPv};
+    pingS.connections(6).parameters = {'gGABAa',gGABA_II,'tauGABA',tauGABA_Som,'netcon',KsupSomsupPv};
 
     pingS.connections(7).direction = [pingS.populations(3).name, '->', pingS.populations(1).name];
     pingS.connections(7).source = pingS.populations(3).name;
     pingS.connections(7).target = pingS.populations(1).name;
     pingS.connections(7).mechanism_list = {'iGABActx'};
-    pingS.connections(7).parameters = {'gGABAa',gGABAa_ie,'tauGABA',tauGABA_gamma,'netcon',KsupPvsupE};
+    pingS.connections(7).parameters = {'gGABAa',gGABA_PE,'tauGABA',tauGABA_Pv,'netcon',KsupPvsupE};
 
     pingS.connections(8).direction = [pingS.populations(3).name, '->', pingS.populations(2).name];
     pingS.connections(8).source = pingS.populations(3).name;
     pingS.connections(8).target = pingS.populations(2).name;
     pingS.connections(8).mechanism_list = {'iGABActx'};
-    pingS.connections(8).parameters = {'gGABAa',gGABAa_ie,'tauGABA',tauGABA_gamma,'netcon',KsupPvsupSom};
+    pingS.connections(8).parameters = {'gGABAa',gGABA_II,'tauGABA',tauGABA_Pv,'netcon',KsupPvsupSom};
 
     % Structures: MIDDLE LAYER (4)
     pingM=[];
@@ -250,13 +247,13 @@ function y = dlLaminarCortexNetLWK(ModelParameters, populationName)
     pingM.connections(1).source = pingM.populations(1).name;
     pingM.connections(1).target = pingM.populations(2).name;
     pingM.connections(1).mechanism_list = {'iAMPActx'};
-    pingM.connections(1).parameters = {'gAMPA',gAMPA_ei,'tauAMPA',tauAMPA,'netcon',KmidEmidPv};
+    pingM.connections(1).parameters = {'gAMPA',gAMPA_EI,'tauAMPA',tauAMPA_E,'netcon',KmidEmidPv};
 
     pingM.connections(2).direction = [pingM.populations(2).name, '->', pingM.populations(1).name];
     pingM.connections(2).source = pingM.populations(2).name;
     pingM.connections(2).target = pingM.populations(1).name;
     pingM.connections(2).mechanism_list = {'iGABActx'};
-    pingM.connections(2).parameters = {'gGABAa',gGABAa_ie,'tauGABA',tauGABA_gamma,'netcon',KmidPvmidE};
+    pingM.connections(2).parameters = {'gGABAa',gGABA_PE,'tauGABA',tauGABA_Pv,'netcon',KmidPvmidE};
 
     % Structures: DEEP LAYER (5-6)
     pingD=[];
@@ -287,37 +284,37 @@ function y = dlLaminarCortexNetLWK(ModelParameters, populationName)
     pingD.connections(1).source = pingD.populations(1).name;
     pingD.connections(1).target = pingD.populations(2).name;
     pingD.connections(1).mechanism_list = {'iAMPActx'};
-    pingD.connections(1).parameters = {'gAMPA',gAMPA_ei,'tauAMPA',tauAMPA,'netcon',KdeepEdeepSom};
+    pingD.connections(1).parameters = {'gAMPA',gAMPA_EI,'tauAMPA',tauAMPA_E,'netcon',KdeepEdeepSom};
 
     pingD.connections(2).direction = [pingD.populations(1).name, '->', pingD.populations(3).name];
     pingD.connections(2).source = pingD.populations(1).name;
     pingD.connections(2).target = pingD.populations(3).name;
     pingD.connections(2).mechanism_list = {'iAMPActx'};
-    pingD.connections(2).parameters = {'gAMPA',gAMPA_ei,'tauAMPA',tauAMPA,'netcon',KdeepEdeepPv};
+    pingD.connections(2).parameters = {'gAMPA',gAMPA_EI,'tauAMPA',tauAMPA_E,'netcon',KdeepEdeepPv};
 
     pingD.connections(3).direction = [pingD.populations(2).name, '->', pingD.populations(1).name];
     pingD.connections(3).source = pingD.populations(2).name;
     pingD.connections(3).target = pingD.populations(1).name;
     pingD.connections(3).mechanism_list = {'iGABActx'};
-    pingD.connections(3).parameters = {'gGABAa',gGABAa_ie,'tauGABA',tauGABA_gamma,'netcon',KdeepSomdeepE};
+    pingD.connections(3).parameters = {'gGABAa',gGABA_SE,'tauGABA',tauGABA_Som,'netcon',KdeepSomdeepE};
 
     pingD.connections(4).direction = [pingD.populations(2).name, '->', pingD.populations(3).name];
     pingD.connections(4).source = pingD.populations(2).name;
     pingD.connections(4).target = pingD.populations(3).name;
     pingD.connections(4).mechanism_list = {'iGABActx'};
-    pingD.connections(4).parameters = {'gGABAa',gGABAa_ie,'tauGABA',tauGABA_gamma,'netcon',KdeepSomdeepPv};
+    pingD.connections(4).parameters = {'gGABAa',gGABA_II,'tauGABA',tauGABA_Som,'netcon',KdeepSomdeepPv};
 
-    pingD.connections(7).direction = [pingD.populations(3).name, '->', pingD.populations(1).name];
-    pingD.connections(7).source = pingD.populations(3).name;
-    pingD.connections(7).target = pingD.populations(1).name;
-    pingD.connections(7).mechanism_list = {'iGABActx'};
-    pingD.connections(7).parameters = {'gGABAa',gGABAa_ie,'tauGABA',tauGABA_gamma,'netcon',KdeepPvdeepE};
+    pingD.connections(5).direction = [pingD.populations(3).name, '->', pingD.populations(1).name];
+    pingD.connections(5).source = pingD.populations(3).name;
+    pingD.connections(5).target = pingD.populations(1).name;
+    pingD.connections(5).mechanism_list = {'iGABActx'};
+    pingD.connections(5).parameters = {'gGABAa',gGABA_PE,'tauGABA',tauGABA_Pv,'netcon',KdeepPvdeepE};
 
-    pingD.connections(8).direction = [pingD.populations(3).name, '->', pingD.populations(2).name];
-    pingD.connections(8).source = pingD.populations(3).name;
-    pingD.connections(8).target = pingD.populations(2).name;
-    pingD.connections(8).mechanism_list = {'iGABActx'};
-    pingD.connections(8).parameters = {'gGABAa',gGABAa_ie,'tauGABA',tauGABA_gamma,'netcon',KdeepPvdeepSom};
+    pingD.connections(6).direction = [pingD.populations(3).name, '->', pingD.populations(2).name];
+    pingD.connections(6).source = pingD.populations(3).name;
+    pingD.connections(6).target = pingD.populations(2).name;
+    pingD.connections(6).mechanism_list = {'iGABActx'};
+    pingD.connections(6).parameters = {'gGABAa',gGABA_II,'tauGABA',tauGABA_Pv,'netcon',KdeepPvdeepSom};
 
     % PING template
     IOping = cell(Nstim, 1);
@@ -325,16 +322,16 @@ function y = dlLaminarCortexNetLWK(ModelParameters, populationName)
     for i = 1:Nstim
 
         % E-cells
-        IOping{i}.populations(1).name = ['E', char(64+i), populationName];
+        IOping{i}.populations(1).name = ['Stim', char(64+i), populationName];
         IOping{i}.populations(1).size = Nin;
-        IOping{i}.populations(1).equations = eqns2;
+        IOping{i}.populations(1).equations = eqns_stimuli;
         IOping{i}.populations(1).mechanism_list = cell_type;
         IOping{i}.populations(1).parameters = {'f1', 1,'noise', 4};
     
         % I-cells
-        IOping{i}.populations(2).name = ['I', char(64+i), populationName];
+        IOping{i}.populations(2).name = ['Stim', char(64+i), populationName];
         IOping{i}.populations(2).size = Nin;
-        IOping{i}.populations(2).equations = eqns2;
+        IOping{i}.populations(2).equations = eqns_stimuli;
         IOping{i}.populations(2).mechanism_list = cell_type;
         IOping{i}.populations(2).parameters = {'f1', 1,'noise', 4};
     
@@ -343,25 +340,25 @@ function y = dlLaminarCortexNetLWK(ModelParameters, populationName)
         IOping{i}.connections(1).source = IOping{i}.populations(1).name;
         IOping{i}.connections(1).target = IOping{i}.populations(2).name;
         IOping{i}.connections(1).mechanism_list = {'iAMPActx'};
-        IOping{i}.connections(1).parameters = {'gAMPA',gAMPA_ei,'tauAMPA',tauAMPA,'netcon',KnullIO};
+        IOping{i}.connections(1).parameters = {'gAMPA',gAMPA_EE,'tauAMPA',tauAMPA_E,'netcon',KnullIO};
     
         IOping{i}.connections(2).direction = [IOping{i}.populations(1).name, '->', IOping{i}.populations(1).name];
         IOping{i}.connections(2).source = IOping{i}.populations(1).name;
         IOping{i}.connections(2).target = IOping{i}.populations(1).name;
         IOping{i}.connections(2).mechanism_list = {'iAMPActx'};
-        IOping{i}.connections(2).parameters = {'gAMPA',gAMPA_ee,'tauAMPA',tauAMPA,'netcon',KnullIO};
+        IOping{i}.connections(2).parameters = {'gAMPA',gAMPA_EE,'tauAMPA',tauAMPA_E,'netcon',KnullIO};
     
         IOping{i}.connections(3).direction = [IOping{i}.populations(2).name, '->', IOping{i}.populations(1).name];
         IOping{i}.connections(3).source = IOping{i}.populations(2).name;
         IOping{i}.connections(3).target = IOping{i}.populations(1).name;
         IOping{i}.connections(3).mechanism_list = {'iAMPActx'};
-        IOping{i}.connections(3).parameters = {'gGABAa',gGABAa_ie,'tauGABA',tauGABA_gamma,'netcon',KnullIO};
+        IOping{i}.connections(3).parameters = {'gAMPA',gAMPA_EE, 'tauAMPA',tauAMPA_E,'netcon',KnullIO};
     
         IOping{i}.connections(4).direction = [IOping{i}.populations(2).name, '->', IOping{i}.populations(2).name];
         IOping{i}.connections(4).source = IOping{i}.populations(2).name;
         IOping{i}.connections(4).target = IOping{i}.populations(2).name;
         IOping{i}.connections(4).mechanism_list = {'iAMPActx'};
-        IOping{i}.connections(4).parameters = {'gGABAa',gGABAa_ii,'tauGABA',tauGABA_gamma,'netcon',KnullIO};
+        IOping{i}.connections(4).parameters = {'gAMPA',gGABA_II,'tauAMPA',tauAMPA_E,'netcon',KnullIO};
         
     end
 
@@ -383,14 +380,14 @@ function y = dlLaminarCortexNetLWK(ModelParameters, populationName)
         s.connections(c).source = IOping{k}.populations(1).name;
         s.connections(c).target = pingM.populations(1).name;
         s.connections(c).mechanism_list={'iAMPActx'};
-        s.connections(c).parameters={'gAMPA',gAMPA_in,'tauAMPA',tauAMPA,'netcon',Aconn};
+        s.connections(c).parameters={'gAMPA',gAMPA_EE,'tauAMPA',tauAMPA_E,'netcon',Aconn};
     
         c = length(s.connections) + 1;
         s.connections(c).direction = [IOping{k}.populations(2).name, '->', pingM.populations(1).name];
         s.connections(c).source = IOping{k}.populations(2).name;
         s.connections(c).target = pingM.populations(1).name;
         s.connections(c).mechanism_list={'iAMPActx'};
-        s.connections(c).parameters={'gAMPA',gAMPA_in,'tauAMPA',tauAMPA,'netcon',Aconn};
+        s.connections(c).parameters={'gAMPA',gAMPA_EE,'tauAMPA',tauAMPA_E,'netcon',Aconn};
 
     end
     
@@ -400,7 +397,7 @@ function y = dlLaminarCortexNetLWK(ModelParameters, populationName)
     s.connections(c).source = pingS.populations(1).name;
     s.connections(c).target = pingD.populations(1).name;
     s.connections(c).mechanism_list={'iAMPActx'};
-    s.connections(c).parameters={'gAMPA',gAMPA_ffee,'tauAMPA',tauAMPA,'netcon',KsupEdeepE};
+    s.connections(c).parameters={'gAMPA',gAMPA_EE,'tauAMPA',tauAMPA_E,'netcon',KsupEdeepE};
 
     % midEsupSom
     c = length(s.connections)+1;
@@ -408,7 +405,7 @@ function y = dlLaminarCortexNetLWK(ModelParameters, populationName)
     s.connections(c).source = pingM.populations(1).name;
     s.connections(c).target = pingS.populations(2).name;
     s.connections(c).mechanism_list={'iAMPActx'};
-    s.connections(c).parameters={'gAMPA',gAMPA_ffee,'tauAMPA',tauAMPA,'netcon',KmidEsupSom};
+    s.connections(c).parameters={'gAMPA',gAMPA_EE,'tauAMPA',tauAMPA_E,'netcon',KmidEsupSom};
 
     % midEsupE
     c = length(s.connections)+1;
@@ -416,7 +413,7 @@ function y = dlLaminarCortexNetLWK(ModelParameters, populationName)
     s.connections(c).source = pingM.populations(1).name;
     s.connections(c).target = pingS.populations(1).name;
     s.connections(c).mechanism_list={'iAMPActx'};
-    s.connections(c).parameters={'gAMPA',gAMPA_ffee,'tauAMPA',tauAMPA,'netcon',KmidEsupE};
+    s.connections(c).parameters={'gAMPA',gAMPA_EE,'tauAMPA',tauAMPA_E,'netcon',KmidEsupE};
 
     % midEdeepE
     c = length(s.connections)+1;
@@ -424,7 +421,7 @@ function y = dlLaminarCortexNetLWK(ModelParameters, populationName)
     s.connections(c).source = pingM.populations(1).name;
     s.connections(c).target = pingD.populations(1).name;
     s.connections(c).mechanism_list={'iAMPActx'};
-    s.connections(c).parameters={'gAMPA',gAMPA_ffee,'tauAMPA',tauAMPA,'netcon',KmidEdeepE};
+    s.connections(c).parameters={'gAMPA',gAMPA_EE,'tauAMPA',tauAMPA_E,'netcon',KmidEdeepE};
 
     % midEdeepPv
     c = length(s.connections)+1;
@@ -432,7 +429,7 @@ function y = dlLaminarCortexNetLWK(ModelParameters, populationName)
     s.connections(c).source = pingM.populations(1).name;
     s.connections(c).target = pingD.populations(3).name;
     s.connections(c).mechanism_list={'iAMPActx'};
-    s.connections(c).parameters={'gAMPA',gAMPA_ffee,'tauAMPA',tauAMPA,'netcon',KmidEdeepPv};
+    s.connections(c).parameters={'gAMPA',gAMPA_EE,'tauAMPA',tauAMPA_E,'netcon',KmidEdeepPv};
 
     % midPvsupE
     c = length(s.connections)+1;
@@ -440,7 +437,7 @@ function y = dlLaminarCortexNetLWK(ModelParameters, populationName)
     s.connections(c).source = pingM.populations(2).name;
     s.connections(c).target = pingS.populations(1).name;
     s.connections(c).mechanism_list={'iGABActx'};
-    s.connections(c).parameters={'gGABAa',gGABAa_ie,'tauGABA',tauGABA_gamma,'netcon', KmidPvsupE};
+    s.connections(c).parameters={'gGABAa',gGABA_PE,'tauGABA',tauGABA_Pv,'netcon', KmidPvsupE};
 
     % deepEsupSom
     c = length(s.connections)+1;
@@ -448,7 +445,15 @@ function y = dlLaminarCortexNetLWK(ModelParameters, populationName)
     s.connections(c).source = pingD.populations(1).name;
     s.connections(c).target = pingS.populations(2).name;
     s.connections(c).mechanism_list={'iAMPActx'};
-    s.connections(c).parameters={'gAMPA',gAMPA_ffee,'tauAMPA',tauAMPA,'netcon',KdeepEsupSom};
+    s.connections(c).parameters={'gAMPA',gAMPA_EE,'tauAMPA',tauAMPA_E,'netcon',KdeepEsupSom};
+
+    % deepEsupPv
+    c = length(s.connections)+1;
+    s.connections(c).direction = [pingD.populations(1).name, '->', pingS.populations(3).name];
+    s.connections(c).source = pingD.populations(1).name;
+    s.connections(c).target = pingS.populations(3).name;
+    s.connections(c).mechanism_list={'iAMPActx'};
+    s.connections(c).parameters={'gAMPA',gAMPA_EI,'tauAMPA',tauAMPA_E,'netcon',KdeepEsupPv};
 
     % deepSommidPv 
     c = length(s.connections)+1;
@@ -456,7 +461,7 @@ function y = dlLaminarCortexNetLWK(ModelParameters, populationName)
     s.connections(c).source = pingD.populations(2).name;
     s.connections(c).target = pingM.populations(2).name;
     s.connections(c).mechanism_list={'iGABActx'};
-    s.connections(c).parameters={'gGABAa',gGABAa_ie,'tauGABA',tauGABA_gamma,'netcon', KdeepSommidPv};
+    s.connections(c).parameters={'gGABAa',gGABA_II,'tauGABA',tauGABA_Som,'netcon', KdeepSommidPv};
 
     % Outputs: deepE is the recommended output layer.
     y = s;
