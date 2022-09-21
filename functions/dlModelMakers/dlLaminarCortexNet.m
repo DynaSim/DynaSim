@@ -278,14 +278,14 @@ function y = dlLaminarCortexNet(ModelParameters, populationName)
     for i = 1:Nstim
 
         % E-cells
-        IOping{i}.populations(1).name = ['E', char(64+i), populationName];
+        IOping{i}.populations(1).name = ['PreStimuli', char(64+i), populationName];
         IOping{i}.populations(1).size = Nin;
         IOping{i}.populations(1).equations = eqns2;
         IOping{i}.populations(1).mechanism_list = cell_type;
         IOping{i}.populations(1).parameters = {'f1', 1,'noise', 4};
     
         % I-cells
-        IOping{i}.populations(2).name = ['I', char(64+i), populationName];
+        IOping{i}.populations(2).name = ['PostStimuli', char(64+i), populationName];
         IOping{i}.populations(2).size = Nin;
         IOping{i}.populations(2).equations = eqns2;
         IOping{i}.populations(2).mechanism_list = cell_type;

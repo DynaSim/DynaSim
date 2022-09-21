@@ -191,13 +191,13 @@ function y = dlLaminarCortexNetLWK(ModelParameters, populationName)
     pingS.connections(3).direction = [pingS.populations(1).name, '->', pingS.populations(2).name];
     pingS.connections(3).source = pingS.populations(1).name;
     pingS.connections(3).target = pingS.populations(2).name;
-    pingS.connections(3).mechanism_list = {'iAMPActx'};
+    pingS.connections(3).mechanism_list = {'iNMDActx'};
     pingS.connections(3).parameters = {'netcon',KsupEsupSom};
 
     pingS.connections(4).direction = [pingS.populations(1).name, '->', pingS.populations(3).name];
     pingS.connections(4).source = pingS.populations(1).name;
     pingS.connections(4).target = pingS.populations(3).name;
-    pingS.connections(4).mechanism_list = {'iAMPActx'};
+    pingS.connections(4).mechanism_list = {'iNMDActx'};
     pingS.connections(4).parameters = {'netcon',KsupEsupPv};
 
     pingS.connections(5).direction = [pingS.populations(2).name, '->', pingS.populations(1).name];
@@ -321,43 +321,24 @@ function y = dlLaminarCortexNetLWK(ModelParameters, populationName)
     for i = 1:Nstim
 
         % E-cells
-        IOping{i}.populations(1).name = ['Stim', char(64+i), populationName];
+        IOping{i}.populations(1).name = ['PreStimuli', char(64+i), populationName];
         IOping{i}.populations(1).size = Nin;
         IOping{i}.populations(1).equations = eqns_stimuli;
         IOping{i}.populations(1).mechanism_list = cell_type;
         IOping{i}.populations(1).parameters = {'f1', 1,'noise', 4};
     
         % I-cells
-        IOping{i}.populations(2).name = ['Stim', char(64+i), populationName];
+        IOping{i}.populations(2).name = ['PostStimuli', char(64+i), populationName];
         IOping{i}.populations(2).size = Nin;
         IOping{i}.populations(2).equations = eqns_stimuli;
         IOping{i}.populations(2).mechanism_list = cell_type;
         IOping{i}.populations(2).parameters = {'f1', 1,'noise', 4};
-    
-        % E/I connectivity
+
         IOping{i}.connections(1).direction = [IOping{i}.populations(1).name, '->', IOping{i}.populations(2).name];
         IOping{i}.connections(1).source = IOping{i}.populations(1).name;
         IOping{i}.connections(1).target = IOping{i}.populations(2).name;
         IOping{i}.connections(1).mechanism_list = {'iAMPActx'};
-        IOping{i}.connections(1).parameters = {'gAMPA',gAMPA_EE,'tauAMPA',tauAMPA_E,'netcon',KnullIO};
-    
-        IOping{i}.connections(2).direction = [IOping{i}.populations(1).name, '->', IOping{i}.populations(1).name];
-        IOping{i}.connections(2).source = IOping{i}.populations(1).name;
-        IOping{i}.connections(2).target = IOping{i}.populations(1).name;
-        IOping{i}.connections(2).mechanism_list = {'iAMPActx'};
-        IOping{i}.connections(2).parameters = {'gAMPA',gAMPA_EE,'tauAMPA',tauAMPA_E,'netcon',KnullIO};
-    
-        IOping{i}.connections(3).direction = [IOping{i}.populations(2).name, '->', IOping{i}.populations(1).name];
-        IOping{i}.connections(3).source = IOping{i}.populations(2).name;
-        IOping{i}.connections(3).target = IOping{i}.populations(1).name;
-        IOping{i}.connections(3).mechanism_list = {'iAMPActx'};
-        IOping{i}.connections(3).parameters = {'gAMPA',gAMPA_EE, 'tauAMPA',tauAMPA_E,'netcon',KnullIO};
-    
-        IOping{i}.connections(4).direction = [IOping{i}.populations(2).name, '->', IOping{i}.populations(2).name];
-        IOping{i}.connections(4).source = IOping{i}.populations(2).name;
-        IOping{i}.connections(4).target = IOping{i}.populations(2).name;
-        IOping{i}.connections(4).mechanism_list = {'iAMPActx'};
-        IOping{i}.connections(4).parameters = {'gAMPA',gGABA_II,'tauAMPA',tauAMPA_E,'netcon',KnullIO};
+        IOping{i}.connections(1).parameters = {'gAMPA', 1e-7,'tauGABA', 1e+4,'netcon', KnullIO};
         
     end
 

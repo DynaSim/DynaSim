@@ -89,7 +89,8 @@ dsModel = dlConnectModels({dsCellV4, dsCellPFC}, {connection1, connection2, conn
 % Try to use this section only first time or If you have lost your file and
 % you want a new model.
 
-m = DynaLearn(dsModel, 'models/dlPredictiveCorticalCircuitModel1', 'mex'); % ~10 min or less, MEXGEN or < 20 sec, RAWGEN.
+clc;
+m = DynaLearn(dsModel, 'models/dlPredictiveCorticalCircuitModel0', 'mex'); % ~10 min or less, MEXGEN or < 20 sec, RAWGEN.
 % m = DynaLearn(dsBaseModel, 'models/dlBaseModel', 'mex');
 m.dlSave(); % < 1sec
 
