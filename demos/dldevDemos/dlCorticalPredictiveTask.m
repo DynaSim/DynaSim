@@ -54,47 +54,42 @@ dsCellPFC = dlLaminarCortexNetLWK(ModelParametersPFC, 'PFC'); % Laminar PFC mode
 dsCellV4 = dlLaminarCortexNetLWK(ModelParametersV4, 'V4'); % Laminar V4 model with specific parameters
 
 %%% Connecting two models: Define connections between two areas
-% 
-connectionWeigth1 = 0.21*rand(dsCellV4.populations(1).size, dsCellPFC.populations(3).size) + 0.27;
-connection1.direction = [dsCellV4.populations(1).name, '->', dsCellPFC.populations(3).name];
+% supEV4->midEPFC
+connectionWeigth1 = 0.21*rand(dsCellV4.populations(1).size, dsCellPFC.populations(4).size) + 0.27;
+connection1.direction = [dsCellV4.populations(1).name, '->', dsCellPFC.populations(4).name];
 
 connection1.source = dsCellV4.populations(1).name;
-connection1.target = dsCellPFC.populations(3).name;
+connection1.target = dsCellPFC.populations(4).name;
 connection1.mechanism_list={'iAMPActx'};
 connection1.parameters={'gAMPA', .24, 'tauAMPA', 4.17, 'netcon', connectionWeigth1};
 
-connectionWeigth2 = 0.27*rand(dsCellV4.populations(2).size, dsCellPFC.populations(4).size) + 0.21;
-connection2.direction = [dsCellV4.populations(2).name, '->', dsCellPFC.populations(4).name];
+% supEV4->midPVPFC
+connectionWeigth2 = 0.21*rand(dsCellV4.populations(1).size, dsCellPFC.populations(5).size) + 0.27;
+connection2.direction = [dsCellV4.populations(1).name, '->', dsCellPFC.populations(5).name];
 
-connection2.source = dsCellV4.populations(2).name;
-connection2.target = dsCellPFC.populations(4).name;
+connection2.source = dsCellV4.populations(1).name;
+connection2.target = dsCellPFC.populations(5).name;
 connection2.mechanism_list={'iAMPActx'};
-connection2.parameters={'gAMPA', .27, 'tauAMPA', 3.74, 'netcon', connectionWeigth2};
+connection2.parameters={'gAMPA', .24, 'tauAMPA', 4.17, 'netcon', connectionWeigth2};
 
-connectionWeigth3 = 0.27*rand(dsCellPFC.populations(6).size, dsCellV4.populations(4).size) + 0.21;
-connection3.direction = [dsCellPFC.populations(6).name, '->', dsCellV4.populations(4).name];
+% deepEPFC->supSOMV4
+connectionWeigth3 = 0.27*rand(dsCellPFC.populations(6).size, dsCellV4.populations(2).size) + 0.21;
+connection3.direction = [dsCellPFC.populations(6).name, '->', dsCellV4.populations(2).name];
 
 connection3.source = dsCellPFC.populations(6).name;
-connection3.target = dsCellV4.populations(4).name;
+connection3.target = dsCellV4.populations(2).name;
 connection3.mechanism_list={'iAMPActx'};
 connection3.parameters={'gAMPA', .27, 'tauAMPA', 3.74, 'netcon', connectionWeigth3};
 
-connectionWeigth4 = 0.27*rand(dsCellPFC.populations(5).size, dsCellV4.populations(3).size) + 0.21;
-connection4.direction = [dsCellPFC.populations(5).name, '->', dsCellV4.populations(3).name];
-
-connection4.source = dsCellPFC.populations(5).name;
-connection4.target = dsCellV4.populations(3).name;
-connection4.mechanism_list={'iAMPActx'};
-connection4.parameters={'gAMPA', .27, 'tauAMPA', 3.74, 'netcon', connectionWeigth4};
-
 %%% Finalization
-dsModel = dlConnectModels({dsCellV4, dsCellPFC}, {connection1, connection2, connection3, connection4});
+dsModel = dlConnectModels({dsCellV4, dsCellPFC}, {connection1, connection2, connection3});
 
 %% Create DynaLearn Class 
 % Try to use this section only first time or If you have lost your file and
 % you want a new model.
 
-m = DynaLearn(dsCellPFC, 'models/dlPredictiveCorticalCircuitModelLWK1', 'mex'); % ~10 min or less, MEXGEN or < 20 sec, RAWGEN.
+clc;
+m = DynaLearn(dsModel, 'models/dlPredictiveCorticalCircuitModelLWK1', 'mex'); % ~10 min or less, MEXGEN or < 20 sec, RAWGEN.
 % m = DynaLearn(dsBaseModel, 'models/dlBaseModel', 'mex');
 m.dlSave(); % < 1sec
 
