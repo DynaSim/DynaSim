@@ -617,11 +617,9 @@ end
 
 % 4.1 sort .ODEs and .ICs wrt .state_variables
 if ~isempty(model.ODEs)
-  disp(model.ODEs);
   model.ODEs = orderfields(model.ODEs,model.state_variables);
   model.ICs = orderfields(model.ICs,model.state_variables);
 end
-
 
 % 4.2 convert to numeric parameters
 paramCell = struct2cell(model.parameters);

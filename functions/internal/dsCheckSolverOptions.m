@@ -24,7 +24,7 @@ options=dsCheckOptions(keyvals,{...
 
 field_order={'tspan','downsample_factor','random_seed','solver','disk_flag',...
   'dt','datafile','mex_flag','verbose_flag','matlab_solver_options', 'vary',...
-  'ic', 'study_dir'};
+  'ic', 'study_dir', 'mex_dir'};
 
 if options.mex_flag==1
   % <-- copied from dsWriteDynaSimSolver.m -->
@@ -40,6 +40,9 @@ end
 % fprintf("\n---");
 % disp(field_order);
 % fprintf("\n---");
+
+% disp(options);
+% disp(field_order);
 options=orderfields(options,field_order);
 
 % Remove matlab_solver_options if empty

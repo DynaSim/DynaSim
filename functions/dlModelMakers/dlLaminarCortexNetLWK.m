@@ -35,7 +35,6 @@ function y = dlLaminarCortexNetLWK(ModelParameters, populationName)
     k2 = 0.04; % Min connectivity weight
 
     NeAvg = (NeSuperficial + NeMid + NeDeep) / 3;
-%     NiAvg = (NiSuperficial + NiMid + NiDeep) / 3;
 
     populationName = ['x', populationName];
     % Connectivity matrices
@@ -192,13 +191,13 @@ function y = dlLaminarCortexNetLWK(ModelParameters, populationName)
     pingS.connections(3).direction = [pingS.populations(1).name, '->', pingS.populations(2).name];
     pingS.connections(3).source = pingS.populations(1).name;
     pingS.connections(3).target = pingS.populations(2).name;
-    pingS.connections(3).mechanism_list = {'iNMDActx'};
+    pingS.connections(3).mechanism_list = {'iAMPActx'};
     pingS.connections(3).parameters = {'netcon',KsupEsupSom};
 
     pingS.connections(4).direction = [pingS.populations(1).name, '->', pingS.populations(3).name];
     pingS.connections(4).source = pingS.populations(1).name;
     pingS.connections(4).target = pingS.populations(3).name;
-    pingS.connections(4).mechanism_list = {'iNMDActx'};
+    pingS.connections(4).mechanism_list = {'iAMPActx'};
     pingS.connections(4).parameters = {'netcon',KsupEsupPv};
 
     pingS.connections(5).direction = [pingS.populations(2).name, '->', pingS.populations(1).name];
