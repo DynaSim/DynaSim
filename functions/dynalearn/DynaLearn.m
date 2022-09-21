@@ -281,13 +281,24 @@ classdef DynaLearn < matlab.mixin.SetGet
             s = "";
             
             for i = 1:size(d, 1)
+
                 if contains(d(i).name, 'mexmaci64')
+
                     s = d(i).name;
                     s = s(1:end-10);
+
                 elseif contains(d(i).name, 'mexw64')
+
                     s = d(i).name;
                     s = s(1:end-7);
+
+                elseif contains(d(i).name, 'mexa64')
+
+                    s = d(i).name;
+                    s = s(1:end-7);
+
                 end
+
             end
             
         end
@@ -323,7 +334,7 @@ classdef DynaLearn < matlab.mixin.SetGet
             tspan = [0 10]; % Base time span for class construction and initialization.
             simulator_options = {'tspan', tspan, 'solver', 'rk1', 'dt', obj.dldT, ...
                         'downsample_factor', obj.dlDownSampleFactor, 'verbose_flag', 1, ...
-                        'study_dir', studydir, 'mex_flag', 0};
+                        'study_dir', studydir, 'mex_flag', 0, 'mex_dir', obj.dlPath};
             obj.dsData = dsSimulate(obj.dlModel, 'vary', [], simulator_options{:});
             
         end
@@ -1475,10 +1486,9 @@ classdef DynaLearn < matlab.mixin.SetGet
         
         function dlUpdateParams(obj, map) 
             
-            fprintf("Updating parameters of %s", obj.dlPath);
+            fprintf("Updating parameters of %s > ", obj.dlPath);
             dsParamsModifier('dlTempFuncParamsChanger.m', map);
             dlTempFuncParamsChanger(obj.dlPath);
-%             fprintf("\tUpdated.\t"); 
             
         end
         

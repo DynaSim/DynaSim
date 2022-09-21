@@ -153,7 +153,9 @@ dlTrainOptions('dlCustomLogArgs') = argsPowSpectRatio; % Arguments of your custo
 %%
 
 clc;
+tic;
 m.dlTrain(dlInputParameters, dlOutputParameters, dlTargetParameters, dlTrainOptions); % <16 sec per trial
+toc;
 
 %%
 
