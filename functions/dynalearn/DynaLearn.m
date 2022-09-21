@@ -321,7 +321,7 @@ classdef DynaLearn < matlab.mixin.SetGet
         
         function dlInit(obj, studydir) % Initializer with mex
             
-            tspan = [0 10]; % Base time span for class construction and initialization.
+            tspan = [0 1000]; % Base time span for class construction and initialization.
             simulator_options = {'tspan', tspan, 'solver', 'rk1', 'dt', obj.dldT, ...
                         'downsample_factor', obj.dlDownSampleFactor, 'verbose_flag', 1, ...
                         'study_dir', studydir, 'mex_flag', 1, 'mex_dir', obj.dlPath};
@@ -331,7 +331,7 @@ classdef DynaLearn < matlab.mixin.SetGet
         
         function dlRawInit(obj, studydir) % Initializer without mex
             
-            tspan = [0 10]; % Base time span for class construction and initialization.
+            tspan = [0 1000]; % Base time span for class construction and initialization.
             simulator_options = {'tspan', tspan, 'solver', 'rk1', 'dt', obj.dldT, ...
                         'downsample_factor', obj.dlDownSampleFactor, 'verbose_flag', 1, ...
                         'study_dir', studydir, 'mex_flag', 0, 'mex_dir', obj.dlPath};
@@ -380,7 +380,7 @@ classdef DynaLearn < matlab.mixin.SetGet
                         if size(raster, 1) > 0
 
                             pool = 1:size(x, 2);
-                            O1 = 5e2 * NWepanechnikovKernelRegrRaster(t, raster, pool, 49, 1, 1);
+                            O1 = 5e2 * dlNWRasterToIFR(t, raster, pool, 49, 1, 1);
                             plot(t, O1, 'o');grid("on");
 
                         end
@@ -433,7 +433,7 @@ classdef DynaLearn < matlab.mixin.SetGet
                         fqs = linspace(1, 500, max(size(x)));
                         subplot((min(k*6, n-1) - (k-1)*6), 1, mod(i-1, (min(k*6, n-1) - (k-1)*6))+1);
                         ffts = abs(fft(mean(x, 2))) * min(size(x)) / 1000;
-                        
+
                         try
                             yf = smooth(ffts(lf:hf));
                             area(fqs(lf:hf), yf);grid("on");

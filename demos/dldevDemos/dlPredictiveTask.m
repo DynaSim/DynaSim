@@ -137,7 +137,7 @@ dlTrainOptions('dlLambdaCap') = 3e-2; % Only if Adaptive lambda is active, recom
 % We shortly train the model by cues to put it close to a local minimia.
 
 dlTrainOptions('dlLambda') = 7e-5;
-dlTrainOptions('dlEpochs') = 10;
+dlTrainOptions('dlEpochs') = 2;
 dlTrainOptions('dlBatchs') = 3;
 
 argsPowSpectRatio = struct();
@@ -266,9 +266,9 @@ opts = containers.Map();
 % opts("hf") = 100;
 % m.dlPlotAllPotentials('avgfft', opts);
 
-opts("lf") = 50;
-opts("hf") = 100;
-m.dlPlotAllPotentials('avgfft', opts);
+opts("lf") = 32;
+opts("hf") = 150;
+m.dlPlotAllPotentials('lfp', opts);
 
 %% End of Demo (14th of June 2022)
 % Appendix
