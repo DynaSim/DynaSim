@@ -553,7 +553,7 @@ classdef DynaLearn < matlab.mixin.SetGet
                 catch
 
                     fprintf("\n-->Check your model or output parameters, there is a problem about their name. Session is going to be invalid.\n");
-                    error("\n@ds.dl: Model parameters do not match outputs or its variables.\n").
+                    error("\n@ds.dl: Model parameters do not match outputs or its variables.\n");
 
                 end
                 
