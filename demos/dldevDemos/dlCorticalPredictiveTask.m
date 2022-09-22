@@ -89,7 +89,7 @@ dsModel = dlConnectModels({dsCellV4, dsCellPFC}, {connection1, connection2, conn
 % you want a new model.
 
 clc;
-m = DynaLearn(dsCellV4, 'models/dlPredictiveCorticalCircuitModelLWK1', 'mex'); % ~10 min or less, MEXGEN or < 20 sec, RAWGEN.
+m = DynaLearn(dsModel, 'models/dlPredictiveCorticalCircuitModelLWK1', 'mex'); % ~10 min or less, MEXGEN or < 20 sec, RAWGEN.
 % m = DynaLearn(dsBaseModel, 'models/dlBaseModel', 'mex');
 m.dlSave(); % < 1sec
 
@@ -97,16 +97,21 @@ m.dlSave(); % < 1sec
 
 clear;clc;
 m = DynaLearn(); % ~ 1sec
-m = m.dlLoad('models/dlPredictiveCorticalCircuitModel1'); % ~ 10sec, New larger model; keeping track of its activity in Gamma/Beta **
+m = m.dlLoad('models/dlPredictiveCorticalCircuitModelLWK1'); % ~ 10sec, New larger model; keeping track of its activity in Gamma/Beta **
 
 %% Trial: training script preparation, 50-block and 50-trial
 
 [trialParams1, trialParams2, trialParams3] = dlDemoThreePattern();
 
-outputParams = [{'deepExPFC_V', 1:10, [300 600], 'afr'}; {'deepExPFC_V', 11:20, [300 600], 'afr'}; {'deepExPFC_V', 21:30, [300 600], 'afr'}];
-targetParams1 = [{'TotalSpikesPenalty', [1, 2, 3], 0, 0.3}; {'MSE', 1, 27, 0.15}; {'MSE', 2, 20, 0.15}; {'MSE', 3, 20, 0.15}; {'Compare', [1, 2], 0, 0.15}; {'Compare', [1, 3], 0, 0.15}; {'Diff', [2, 3], 0, 0.1}]; % A 
-targetParams2 = [{'TotalSpikesPenalty', [1, 2, 3], 0, 0.3}; {'MSE', 2, 27, 0.2}; {'MSE', 1, 20, 0.2}; {'MSE', 3, 20, 0.2}; {'Compare', [2, 1], 0, 0.3}; {'Compare', [2, 3], 0, 0.3}; {'Diff', [1, 3], 0, 0.04}]; % B
-targetParams3 = [{'TotalSpikesPenalty', [1, 2, 3], 0, 0.3}; {'MSE', 3, 27, 0.2}; {'MSE', 2, 20, 0.2}; {'MSE', 1, 20, 0.2}; {'Compare', [3, 1], 0, 0.3}; {'Compare', [3, 2], 0, 0.3}; {'Diff', [1, 2], 0, 0.04}]; % C
+outputParams = [{'deepExPFC_V', 1:10, [300 700], 'afr'}; {'deepExPFC_V',...
+    11:20, [300 700], 'afr'}; {'deepExPFC_V', 21:30, [300 700], 'afr'}; ...
+    {'midExPFC_V', 1:27, [300 700], 'afr'}; {'supExPFC_V', 1:41, [300 700], 'afr'}; ...
+    {'deepExV4_V', 1:64, [300 700], 'afr'}; {'midExV4_V', 1:24, [300 700], 'afr'}; ...
+    {'supExV4_V', 1:51, [300 700], 'afr'}];
+
+targetParams1 = [{'TotalSpikesPenalty', 1:8, 0, 0.3}; {'MSE', 1, 27, 0.3}; {'MSE', 2, 20, 0.1}; {'MSE', 3, 20, 0.1}; {'Compare', [1, 2], 0, 0.15}; {'Compare', [1, 3], 0, 0.15}; {'Diff', [2, 3], 0, 0.04}]; % A 
+targetParams2 = [{'TotalSpikesPenalty', 1:8, 0, 0.3}; {'MSE', 2, 27, 0.3}; {'MSE', 1, 20, 0.1}; {'MSE', 3, 20, 0.1}; {'Compare', [2, 1], 0, 0.15}; {'Compare', [2, 3], 0, 0.15}; {'Diff', [1, 3], 0, 0.04}]; % B
+targetParams3 = [{'TotalSpikesPenalty', 1:8, 0, 0.3}; {'MSE', 3, 27, 0.3}; {'MSE', 2, 20, 0.1}; {'MSE', 1, 20, 0.1}; {'Compare', [3, 1], 0, 0.15}; {'Compare', [3, 2], 0, 0.15}; {'Diff', [1, 2], 0, 0.04}]; % C
 
 dlInputParameters = {trialParams1, trialParams2, trialParams3};
 dlTargetParameters = {targetParams1, targetParams2, targetParams3};
@@ -152,8 +157,10 @@ dlTrainOptions('dlCustomLogArgs') = argsPowSpectRatio; % Arguments of your custo
 
 %%
 
+tic;
 clc;
 m.dlTrain(dlInputParameters, dlOutputParameters, dlTargetParameters, dlTrainOptions); % <16 sec per trial
+toc;
 
 %%
 
