@@ -66,7 +66,7 @@ classdef DynaLearn < matlab.mixin.SetGet
             
             if nargin == 0
                 
-                obj = obj.dlLoad(obj.dlPathToFile);
+                return
                 
             elseif nargin == 1
 

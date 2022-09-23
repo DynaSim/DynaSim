@@ -131,16 +131,16 @@ function y = dlLaminarCortexNetLWK(ModelParameters, populationName)
     end
 
     % Time constants
-    tauGABA_Pv = 17.14; % ms, decay time constant of inhibition for gamma (around 50Hz)
-    tauGABA_Som = 47.74; % ms, decay time constant of inhibition for beta (around 25Hz)
-    tauAMPA_E = 24.96; % ms, decay time constant of fast excitation (AMPA)
+    tauGABA_Pv = 41.47; % ms, decay time constant of inhibition for gamma (around 50Hz)
+    tauGABA_Som = 147.74; % ms, decay time constant of inhibition for beta (around 25Hz)
+    tauAMPA_E = 47.74; % ms, decay time constant of fast excitation (AMPA)
 
     % Maximal synaptic strengths
-    gAMPA_EI = .2*(41/NeAvg); % E->I(SOM-PV) 
-    gAMPA_EE = .2*(41/NeAvg); % E->E
-    gGABA_SE = .2*(21/NeAvg); % (SOM)->E
-    gGABA_PE = .2*(41/NeAvg); % (PV)->E
-    gGABA_II = .1*(21/NeAvg); % I->I within layer
+    gAMPA_EI = .2*(21/NeAvg); % E->I(SOM-PV) 
+    gAMPA_EE = .2*(21/NeAvg); % E->E
+    gGABA_SE = .2*(17/NeAvg); % (SOM)->E
+    gGABA_PE = .2*(17/NeAvg); % (PV)->E
+    gGABA_II = .1*(14/NeAvg); % I->I within layer
 
     % neuronal dynamics
     eqns = 'dV/dt = (Iapp + @current + noise*randn(1, Npop))/C; Iapp=0; noise=0; C=1; V(0) = -rand(1, Npop)*74;';
@@ -159,21 +159,21 @@ function y = dlLaminarCortexNetLWK(ModelParameters, populationName)
     pingS.populations(1).size = NeSuperficial;
     pingS.populations(1).equations = eqns;
     pingS.populations(1).mechanism_list = cell_type;
-    pingS.populations(1).parameters = {'Iapp', 4,'noise', NoiseRate*2};
+    pingS.populations(1).parameters = {'Iapp', 5,'noise', NoiseRate*2};
 
     % I-cells-SOM
     pingS.populations(2).name = ['supISOM', populationName];
     pingS.populations(2).size = NSomSuperficial;
     pingS.populations(2).equations = eqns;
     pingS.populations(2).mechanism_list = cell_type;
-    pingS.populations(2).parameters = {'Iapp',0,'noise', NoiseRate};
+    pingS.populations(2).parameters = {'Iapp', 1,'noise', NoiseRate};
 
     % I-cells-PV
     pingS.populations(3).name = ['supIPV', populationName];
     pingS.populations(3).size = NPvSuperficial;
     pingS.populations(3).equations = eqns;
     pingS.populations(3).mechanism_list = cell_type;
-    pingS.populations(3).parameters = {'Iapp',0,'noise', NoiseRate};
+    pingS.populations(3).parameters = {'Iapp', 2,'noise', NoiseRate};
     
     % Interlayer connections - Superficial
     pingS.connections(1).direction = [pingS.populations(1).name, '->', pingS.populations(2).name];
