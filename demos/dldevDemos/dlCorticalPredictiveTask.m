@@ -267,10 +267,6 @@ end
 
 clc;
 opts = containers.Map();
-% opts("lf") = 50;
-% opts("hf") = 100;
-% m.dlPlotAllPotentials('avgfft', opts);
-
 opts("lf") = 50;
 opts("hf") = 100;
 m.dlPlotAllPotentials('avgfft', opts);
