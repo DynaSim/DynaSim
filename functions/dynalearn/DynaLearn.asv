@@ -207,9 +207,7 @@ classdef DynaLearn < matlab.mixin.SetGet
             dlSaveFileNamePath = [obj.dlStudyDir, '/dlFile.mat'];
             p = load([obj.dlPath, '/params.mat']);
             save([obj.dlStudyDir, '/params.mat'], '-struct', 'p');
-            
             obj.dlOutputs = [];
-            obj.dlOutputLog = [];
             
             save(dlSaveFileNamePath, 'obj');
             fprintf("\n->Model saved in ""%s"".\n", dlSaveFileNamePath);
@@ -224,7 +222,6 @@ classdef DynaLearn < matlab.mixin.SetGet
             
             tempdlO = obj.dlOutputs;
             obj.dlOutputs = [];
-            obj.dlOutputLog = [];
             save([obj.dlStudyDir, dlCheckPointPath, 'object.mat'], 'obj');
             obj.dlOutputs = tempdlO;
             
@@ -909,24 +906,17 @@ classdef DynaLearn < matlab.mixin.SetGet
                 
                     fprintf("\t-->Batch no. %d of %d\t", j, dlBatchs);
                     set(obj, 'dlTrialNumber', obj.dlTrialNumber + 1);
-
                     if ~isempty(dlInputParameters)
-
                         obj.dlUpdateParams(dlInputParameters{j});
-                        
                     end
                     
                     if dlSimulationFlag == 1
-
                         obj.dlSimulate();
                         if ~isempty(dlOutputParameters)
                             obj.dlCalculateOutputs(dlOutputParameters);
                         end
-
                     elseif dlOfflineOutputGenerator == 1
-
                         obj.dlOutputGenerator();
-
                     end
                     
                     if ~strcmpi(dlCustomLogFlag, "n")
