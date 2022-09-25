@@ -108,9 +108,9 @@ outputParams = [{'deepExPFC_V', 1:10, [300 700], 'afr'}; {'deepExPFC_V',...
     {'deepExV4_V', 1:64, [300 700], 'afr'}; {'midExV4_V', 1:24, [300 700], 'afr'}; ...
     {'supExV4_V', 1:51, [300 700], 'afr'}];
 
-targetParams1 = [{'TotalSpikesPenalty', 1:8, 0, 0.3}; {'MSE', 1, 27, 0.3}; {'MSE', 2, 20, 0.1}; {'MSE', 3, 20, 0.1}; {'Compare', [1, 2], 0, 0.15}; {'Compare', [1, 3], 0, 0.15}; {'Diff', [2, 3], 0, 0.04}]; % A 
-targetParams2 = [{'TotalSpikesPenalty', 1:8, 0, 0.3}; {'MSE', 2, 27, 0.3}; {'MSE', 1, 20, 0.1}; {'MSE', 3, 20, 0.1}; {'Compare', [2, 1], 0, 0.15}; {'Compare', [2, 3], 0, 0.15}; {'Diff', [1, 3], 0, 0.04}]; % B
-targetParams3 = [{'TotalSpikesPenalty', 1:8, 0, 0.3}; {'MSE', 3, 27, 0.3}; {'MSE', 2, 20, 0.1}; {'MSE', 1, 20, 0.1}; {'Compare', [3, 1], 0, 0.15}; {'Compare', [3, 2], 0, 0.15}; {'Diff', [1, 2], 0, 0.04}]; % C
+targetParams1 = [{'TotalSpikesPenalty', 1:8, 0, 0.03}; {'MSE', 1, 27, 0.3}; {'MSE', 2, 20, 0.1}; {'MSE', 3, 20, 0.1}; {'Compare', [1, 2], 0, 0.15}; {'Compare', [1, 3], 0, 0.15}; {'Diff', [2, 3], 0, 0.04}]; % A 
+targetParams2 = [{'TotalSpikesPenalty', 1:8, 0, 0.03}; {'MSE', 2, 27, 0.3}; {'MSE', 1, 20, 0.1}; {'MSE', 3, 20, 0.1}; {'Compare', [2, 1], 0, 0.15}; {'Compare', [2, 3], 0, 0.15}; {'Diff', [1, 3], 0, 0.04}]; % B
+targetParams3 = [{'TotalSpikesPenalty', 1:8, 0, 0.03}; {'MSE', 3, 27, 0.3}; {'MSE', 2, 20, 0.1}; {'MSE', 1, 20, 0.1}; {'Compare', [3, 1], 0, 0.15}; {'Compare', [3, 2], 0, 0.15}; {'Diff', [1, 2], 0, 0.04}]; % C
 
 dlInputParameters = {trialParams1, trialParams2, trialParams3};
 dlTargetParameters = {targetParams1, targetParams2, targetParams3};
@@ -148,60 +148,44 @@ argsPowSpectRatio = struct();
 
 argsPowSpectRatio.lf1 = 7;
 argsPowSpectRatio.hf1 = 31;
-argsPowSpectRatio.lf2 = 47;
-argsPowSpectRatio.hf2 = 74;
+argsPowSpectRatio.lf2 = 41;
+argsPowSpectRatio.hf2 = 91;
 
 dlTrainOptions('dlCustomLog') = "dlPowerSpectrumRatio"; % Name of a function which is in the path
 dlTrainOptions('dlCustomLogArgs') = argsPowSpectRatio; % Arguments of your custom function
 
-%%
+%% Pre-training : Train model to a "non-far" point.
+
+clc;
+
+dlTrainOptions('dlLambda') = 4e-7;
+dlTrainOptions('dlEpochs') = 10;
 
 tic;
-clc;
 m.dlTrain(dlInputParameters, dlOutputParameters, dlTargetParameters, dlTrainOptions); % <16 sec per trial
 toc;
-
-%%
-
-clc;
-figure();
-tlab = ["A", "Unpred.", "B", "Unpred", "C", "Unpred"];
-w = 200;
-
-for k = 1:3
-    
-    subplot(3, 1, k);
-    for l = 0:5
-        fill([l*w, l*w, l*w+w, l*w+w], [0, 20, 20, 0], [1, cos(l*0.15), sin(l*0.15)], 'DisplayName', tlab(l+1));hold('on');
-        text(l*w+10, 19, tlab(l+1));
-    end
-    
-    plot(m.dlCustomLog(k*2-1, :), 'DisplayName', 'E');
-    plot(m.dlCustomLog(k*2, :), 'DisplayName', 'I');
-    xlim([0, w*6.5]);
-    xlabel("$S(\frac{\beta}{\gamma}) \: of \: " + m.dlCustomLogLabel(k*2) + "\: \& \:" + m.dlCustomLogLabel(k*2+1) + "$", 'Interpreter', 'latex');
-    grid("on");legend();
-end
 
 %% Block-trial phase
 
 clc;
-dlTrainOptions('dlLambda') = 1e-4;
+dlTrainOptions('dlLambda') = 1e-5;
+dlTrainOptions('dlAdaptiveLambda') = 0; % Adaptive lambda parameter; recommended for long simulations.
 dlTrainOptions('dlUpdateMode') = 'trial';
-dlTrainOptions('dlEpochs') = 1;
-dlTrainOptions('dlBatchs') = 200;
+dlTrainOptions('dlEpochs') = 5;
+dlTrainOptions('dlBatchs') = 100;
 
+% m.dlResetTraining();
 argsPSR = struct();
 
-argsPSR.lf1 = 8;
-argsPSR.hf1 = 32;
-argsPSR.lf2 = 40;
-argsPSR.hf2 = 100;
+argsPSR.lf1 = 7;
+argsPSR.hf1 = 31;
+argsPSR.lf2 = 44;
+argsPSR.hf2 = 77;
 
 dlTrainOptions('dlCustomLog') = "dlPowerSpectrumRatio"; % Name of a function which is in the path
 dlTrainOptions('dlCustomLogArgs') = argsPSR; % Arguments of your custom function
 
-dlTrainOptions('dlCheckpointCoefficient') = 2.4;
+dlTrainOptions('dlCheckpointCoefficient') = 1.7;
 m.dlTrain(TBdata.B1, dlOutputParameters, TBdata.T1, dlTrainOptions);
 
 m.dlOptimalError = 1e9;
@@ -209,7 +193,7 @@ dlTrainOptions('dlCheckpointCoefficient') = 4.7;
 m.dlTrain(TBdata.TrB, dlOutputParameters, TBdata.TrT, dlTrainOptions);
 
 m.dlOptimalError = 1e9;
-dlTrainOptions('dlCheckpointCoefficient') = 2.4; 
+dlTrainOptions('dlCheckpointCoefficient') = 1.7; 
 m.dlTrain(TBdata.B2, dlOutputParameters, TBdata.T2, dlTrainOptions);
 
 m.dlOptimalError = 1e9;
@@ -217,7 +201,7 @@ dlTrainOptions('dlCheckpointCoefficient') = 4.7;
 m.dlTrain(TBdata.TrB, dlOutputParameters, TBdata.TrT, dlTrainOptions);
 
 m.dlOptimalError = 1e9;
-dlTrainOptions('dlCheckpointCoefficient') = 2.4;
+dlTrainOptions('dlCheckpointCoefficient') = 1.7;
 m.dlTrain(TBdata.B3, dlOutputParameters, TBdata.T3, dlTrainOptions);
 
 m.dlOptimalError = 1e9;
@@ -228,7 +212,7 @@ m.dlTrain(TBdata.TrB, dlOutputParameters, TBdata.TrT, dlTrainOptions);
 
 % clc;
 
-wk = 4;
+wk = 1;
 figure('position', [0, 0, 1400, 700]);
 n = max(size(m.dlErrorsLog));
 x = zeros(1, ceil(n/wk));
@@ -236,19 +220,21 @@ x = zeros(1, ceil(n/wk));
 for i = 0:wk:n-wk
     x(ceil((i+1)/wk)) = mean(m.dlErrorsLog(i+1:i+wk));
 end
+tlab = ["A", "U1", "B", "U2", "C", "U3"];
+w = 100;
+errorcap = max(x);
 
-w = 50;
 for k = 1:6
     
     for l = 0:5
-        fill([l*w, l*w, l*w+w, l*w+w], [0, 100, 100, 0], [sin(l*0.2), 1, cos(l*0.2)]);hold('on');
-        text(l*w+10, 89, tlab(l+1));
+        fill([l*w, l*w, l*w+w, l*w+w], [0, errorcap*1.2, errorcap*1.2, 0], [sin(l*0.2), 1, cos(l*0.2)]);hold('on');
+        text(l*w+10, errorcap*1.1, tlab(l+1));
+        ylim([0 errorcap*1.2]);
     end
 end
 
 plot(x);grid("on");
-title("Errors in batchs");
-% m.dlPlotBatchErrors(2);
+title("Errors in trials");
 
 %% Plot Local-field potentials
 
@@ -289,7 +275,7 @@ end
 
 %% G/B ratio log
 
-dtf = ceil(1 / (obj.dldT*obj.dlDownSampleFactor));
+dtf = ceil(1 / (m.dldT*m.dlDownSampleFactor));
 
 lf = opts("lf")*dtf;
 hf = opts("hf")*dtf; 
