@@ -98,7 +98,7 @@ clear;clc;
 m = DynaLearn(); % ~ 1sec
 m = m.dlLoad('models/dlPredictiveCorticalCircuitModelLWK1'); % ~ 10sec, New larger model; keeping track of its activity in Gamma/Beta **
 
-%% Trial: training script preparation, 50-block and 50-trial
+%% Trial: training  script preparation, 50-block and 50-trial
 
 [trialParams1, trialParams2, trialParams3] = dlDemoThreePattern();
 
@@ -108,9 +108,9 @@ outputParams = [{'deepExPFC_V', 1:10, [300 700], 'afr'}; {'deepExPFC_V',...
     {'deepExV4_V', 1:64, [300 700], 'afr'}; {'midExV4_V', 1:24, [300 700], 'afr'}; ...
     {'supExV4_V', 1:51, [300 700], 'afr'}];
 
-targetParams1 = [{'TotalSpikesPenalty', 1:8, 0, 0.03}; {'MSE', 1, 27, 0.3}; {'MSE', 2, 20, 0.1}; {'MSE', 3, 20, 0.1}; {'Compare', [1, 2], 0, 0.15}; {'Compare', [1, 3], 0, 0.15}; {'Diff', [2, 3], 0, 0.04}]; % A 
-targetParams2 = [{'TotalSpikesPenalty', 1:8, 0, 0.03}; {'MSE', 2, 27, 0.3}; {'MSE', 1, 20, 0.1}; {'MSE', 3, 20, 0.1}; {'Compare', [2, 1], 0, 0.15}; {'Compare', [2, 3], 0, 0.15}; {'Diff', [1, 3], 0, 0.04}]; % B
-targetParams3 = [{'TotalSpikesPenalty', 1:8, 0, 0.03}; {'MSE', 3, 27, 0.3}; {'MSE', 2, 20, 0.1}; {'MSE', 1, 20, 0.1}; {'Compare', [3, 1], 0, 0.15}; {'Compare', [3, 2], 0, 0.15}; {'Diff', [1, 2], 0, 0.04}]; % C
+targetParams1 = [{'TotalSpikesPenalty', 1:8, 300, 0.07}; {'MSE', 1, 27, 0.3}; {'MSE', 2, 20, 0.1}; {'MSE', 3, 20, 0.1}; {'Compare', [1, 2], 0, 0.05}; {'Compare', [1, 3], 0, 0.05}; {'Diff', [2, 3], 0, 0.01}]; % A 
+targetParams2 = [{'TotalSpikesPenalty', 1:8, 300, 0.07}; {'MSE', 2, 27, 0.3}; {'MSE', 1, 20, 0.1}; {'MSE', 3, 20, 0.1}; {'Compare', [2, 1], 0, 0.05}; {'Compare', [2, 3], 0, 0.05}; {'Diff', [1, 3], 0, 0.01}]; % B
+targetParams3 = [{'TotalSpikesPenalty', 1:8, 300, 0.07}; {'MSE', 3, 27, 0.3}; {'MSE', 2, 20, 0.1}; {'MSE', 1, 20, 0.1}; {'Compare', [3, 1], 0, 0.05}; {'Compare', [3, 2], 0, 0.05}; {'Diff', [1, 2], 0, 0.01}]; % C
 
 dlInputParameters = {trialParams1, trialParams2, trialParams3};
 dlTargetParameters = {targetParams1, targetParams2, targetParams3};
@@ -158,14 +158,19 @@ dlTrainOptions('dlCustomLogArgs') = argsPowSpectRatio; % Arguments of your custo
 
 clc;
 
-dlTrainOptions('dlLambda') = 4e-7;
-dlTrainOptions('dlEpochs') = 10;
+dlTrainOptions('dlLambda') = 7e-4;
+dlTrainOptions('dlEpochs') = 5;
+m.dlOptimalError = 1e7;
 
 tic;
 m.dlTrain(dlInputParameters, dlOutputParameters, dlTargetParameters, dlTrainOptions); % <16 sec per trial
 toc;
 
 %% Block-trial phase
+
+% TODO: Remove "far" trials from training by backtrack.
+% TODO: Add raster plotter.
+% TODO: Add live runs (continouos task) option.
 
 clc;
 dlTrainOptions('dlLambda') = 1e-5;
@@ -174,7 +179,7 @@ dlTrainOptions('dlUpdateMode') = 'trial';
 dlTrainOptions('dlEpochs') = 5;
 dlTrainOptions('dlBatchs') = 100;
 
-% m.dlResetTraining();
+m.dlResetTraining();
 argsPSR = struct();
 
 argsPSR.lf1 = 7;
@@ -212,16 +217,16 @@ m.dlTrain(TBdata.TrB, dlOutputParameters, TBdata.TrT, dlTrainOptions);
 
 % clc;
 
-wk = 1;
+wk = 3;
 figure('position', [0, 0, 1400, 700]);
 n = max(size(m.dlErrorsLog));
 x = zeros(1, ceil(n/wk));
 
 for i = 0:wk:n-wk
-    x(ceil((i+1)/wk)) = mean(m.dlErrorsLog(i+1:i+wk));
+    x(ceil((i+1)/wk)) = min(m.dlErrorsLog(i+1:i+wk));
 end
 tlab = ["A", "U1", "B", "U2", "C", "U3"];
-w = 100;
+w = 200;
 errorcap = max(x);
 
 for k = 1:6
@@ -239,7 +244,8 @@ title("Errors in trials");
 %% Plot Local-field potentials
 
 clc;
-m.dlPlotAllPotentials('lfp');
+m.dlPlotAllPotentials('avglfp');
+% m.dlPlotAllPotentials('raster');
 
 %% Run a simulation (without training)
 
