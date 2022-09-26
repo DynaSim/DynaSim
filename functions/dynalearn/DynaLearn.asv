@@ -54,9 +54,9 @@ classdef DynaLearn < matlab.mixin.SetGet
         dlSimulationTool = "mex";
         
 %         dlXcSTDP = 0;
-        
+
     end
-    
+
     methods
 
         function obj = DynaLearn(varargin) % Constructors, will be expanded
@@ -207,7 +207,9 @@ classdef DynaLearn < matlab.mixin.SetGet
             dlSaveFileNamePath = [obj.dlStudyDir, '/dlFile.mat'];
             p = load([obj.dlPath, '/params.mat']);
             save([obj.dlStudyDir, '/params.mat'], '-struct', 'p');
+            
             obj.dlOutputs = [];
+            obj.dlOutputLog = [];
             
             save(dlSaveFileNamePath, 'obj');
             fprintf("\n->Model saved in ""%s"".\n", dlSaveFileNamePath);
@@ -222,6 +224,7 @@ classdef DynaLearn < matlab.mixin.SetGet
             
             tempdlO = obj.dlOutputs;
             obj.dlOutputs = [];
+            obj.dlOutputLog = [];
             save([obj.dlStudyDir, dlCheckPointPath, 'object.mat'], 'obj');
             obj.dlOutputs = tempdlO;
             
@@ -359,7 +362,6 @@ classdef DynaLearn < matlab.mixin.SetGet
             dlPotentialIndices(1) = 1;
             dlPotentials = obj.dlOutputs(dlPotentialIndices);
             dlLabels = obj.dlVariables(dlPotentialIndices);
-%             disp(dlPotentials);
 
             t = dlPotentials{1, 1};
             n = size(dlPotentials, 2);
@@ -454,7 +456,29 @@ classdef DynaLearn < matlab.mixin.SetGet
                     disp("Temp edit for 6 subplots; average fft");
                     xlabel(mode + " in frequency (Hz)");
                     return
-                    
+                 
+                elseif strcmpi(mode, 'raster')
+
+                    for i = (k-1)*6+1:min((k*6), n-1)
+
+                        x = dlPotentials{1, i+1};
+                        raster = computeRaster(t, x);
+                        subplot((min(k*6, n-1) - (k-1)*6), 1, mod(i-1, (min(k*6, n-1) - (k-1)*6))+1);
+                        rasterVector = zeros(size(t));
+
+                        try
+                            rasterVector(ceil(raster(:, 2)/obj.dldT)) = raster();
+                        catch
+                            continue
+                        end
+
+                        stem(t, rasterVector, '.');
+                        ylabel(dlLabels(i+1));
+
+                    end
+
+                    xlabel(mode + " in time (ms)");
+
                 else
                     
                     fprintf("--->Mode %s is not recognised. Try 'lfp' or other available options.\n", mode)
@@ -666,8 +690,10 @@ classdef DynaLearn < matlab.mixin.SetGet
                     for j = dlOutputIndices
 
                       TempError = squeeze(TempError  + obj.dlLastOutputs{j});
-
+        
                     end
+
+                    TempError = abs(TempError - dlOutputTargets);
 
                 else
                     
@@ -906,17 +932,24 @@ classdef DynaLearn < matlab.mixin.SetGet
                 
                     fprintf("\t-->Batch no. %d of %d\t", j, dlBatchs);
                     set(obj, 'dlTrialNumber', obj.dlTrialNumber + 1);
+
                     if ~isempty(dlInputParameters)
+
                         obj.dlUpdateParams(dlInputParameters{j});
+
                     end
                     
                     if dlSimulationFlag == 1
+
                         obj.dlSimulate();
                         if ~isempty(dlOutputParameters)
                             obj.dlCalculateOutputs(dlOutputParameters);
                         end
+
                     elseif dlOfflineOutputGenerator == 1
+
                         obj.dlOutputGenerator();
+
                     end
                     
                     if ~strcmpi(dlCustomLogFlag, "n")

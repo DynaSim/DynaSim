@@ -25,6 +25,7 @@ classdef DynaLearn < matlab.mixin.SetGet
         dlVariables = []; % Mex variable labels
         dlMexFuncName = []; % Name of Mex function (e.g **********_mex.mex64
 
+        dlLastBatchSize = 1;
         dlWeightsValues = []; % Weights values history {[Npre,Npost,1+Epochs]}
         dlWeightsVariables = []; % Weights variables
         
@@ -54,9 +55,9 @@ classdef DynaLearn < matlab.mixin.SetGet
         dlSimulationTool = "mex";
         
 %         dlXcSTDP = 0;
-        
+
     end
-    
+
     methods
 
         function obj = DynaLearn(varargin) % Constructors, will be expanded
@@ -236,6 +237,7 @@ classdef DynaLearn < matlab.mixin.SetGet
             dlObj = load([obj.dlStudyDir, dlCheckPointPath, 'object.mat']);
             out = dlObj.obj;
             
+            obj.dlErrorsLog = obj.dlErrorsLog(1:end-obj.dlLastBatchSize);
             p = load([obj.dlStudyDir, dlCheckPointPath, 'params.mat']);
             save([obj.dlPath, '/params.mat'], '-struct', 'p');
             
@@ -362,7 +364,6 @@ classdef DynaLearn < matlab.mixin.SetGet
             dlPotentialIndices(1) = 1;
             dlPotentials = obj.dlOutputs(dlPotentialIndices);
             dlLabels = obj.dlVariables(dlPotentialIndices);
-%             disp(dlPotentials);
 
             t = dlPotentials{1, 1};
             n = size(dlPotentials, 2);
@@ -457,7 +458,29 @@ classdef DynaLearn < matlab.mixin.SetGet
                     disp("Temp edit for 6 subplots; average fft");
                     xlabel(mode + " in frequency (Hz)");
                     return
-                    
+                 
+                elseif strcmpi(mode, 'raster')
+
+                    for i = (k-1)*6+1:min((k*6), n-1)
+
+                        x = dlPotentials{1, i+1};
+                        raster = computeRaster(t, x);
+                        subplot((min(k*6, n-1) - (k-1)*6), 1, mod(i-1, (min(k*6, n-1) - (k-1)*6))+1);
+                        rasterVector = zeros(size(t));
+
+                        try
+                            rasterVector(ceil(raster(:, 2)/obj.dldT)) = raster(:, 1);
+                        catch
+                            continue
+                        end
+
+                        stem(t, rasterVector, '.');
+                        ylabel(dlLabels(i+1));
+
+                    end
+
+                    xlabel(mode + " in time (ms)");
+
                 else
                     
                     fprintf("--->Mode %s is not recognised. Try 'lfp' or other available options.\n", mode)
@@ -669,8 +692,10 @@ classdef DynaLearn < matlab.mixin.SetGet
                     for j = dlOutputIndices
 
                       TempError = squeeze(TempError  + obj.dlLastOutputs{j});
-
+        
                     end
+
+                    TempError = abs(TempError - dlOutputTargets);
 
                 else
                     
@@ -782,11 +807,13 @@ classdef DynaLearn < matlab.mixin.SetGet
             try
                
                 dlBatchs = dlTrainOptions('dlBatchs');
+                obj.dlLastBatchSize = dlBatchs;
                 
             catch
                 
                 dlBatchs = size(dlInputParameters, 2);
                 fprintf("-->Batchs was not determined in options map, default dlBatchs = size(dlVaryList, 2)\n");
+                obj.dlLastBatchSize = dlBatchs;
                 
             end
             
@@ -913,7 +940,7 @@ classdef DynaLearn < matlab.mixin.SetGet
                     if ~isempty(dlInputParameters)
 
                         obj.dlUpdateParams(dlInputParameters{j});
-                        
+
                     end
                     
                     if dlSimulationFlag == 1
@@ -1531,9 +1558,13 @@ classdef DynaLearn < matlab.mixin.SetGet
         function dlLoadOptimal(obj)
             
             try
+
                 obj.dlLoadCheckPoint('/Optimal');
+
             catch
+
                 fprintf("--->No oprimal file exists. first run a training session with an active checkpoint flag to save an optimal checkpoint.\n");
+          
             end
             
         end
