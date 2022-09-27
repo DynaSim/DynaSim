@@ -14,39 +14,42 @@
 
 clear;clc;
 
+TotalSize = [25, 50, 100, 200];
+Currentsize = TotalSize(4);
+
 %%% Create model parameters struct
 ModelParametersPFC = struct();
 
 %%% Area PFC layer sizes (relative)
-ModelParametersPFC.NeSuperficial = 41;
-ModelParametersPFC.NSomSuperficial = 4;
-ModelParametersPFC.NPvSuperficial = 11;
-ModelParametersPFC.NeMid = 27;
+ModelParametersPFC.NeSuperficial = ceil(0.3*Currentsize);
+ModelParametersPFC.NSomSuperficial = ceil(0.02*Currentsize);
+ModelParametersPFC.NPvSuperficial = ceil(0.04*Currentsize);
+ModelParametersPFC.NeMid = ceil(0.14*Currentsize);
 ModelParametersPFC.NSomMid = 0;
-ModelParametersPFC.NPvMid = 4;
-ModelParametersPFC.NeDeep = 74;
-ModelParametersPFC.NSomDeep = 3;
-ModelParametersPFC.NPvDeep = 1;
+ModelParametersPFC.NPvMid = ceil(0.02*Currentsize);
+ModelParametersPFC.NeDeep = ceil(0.45*Currentsize);
+ModelParametersPFC.NSomDeep = ceil(0.02*Currentsize);
+ModelParametersPFC.NPvDeep = ceil(0.01*Currentsize);
 
 ModelParametersPFC.Nin = 6;
 ModelParametersPFC.Nout = 6;
-ModelParametersPFC.NoiseRate = 4.4;
+ModelParametersPFC.NoiseRate = 10.5; % 15%
 ModelParametersPFC.Nstim = 3;
 
 %%% Area V4 layer sizes (relative) 
-ModelParametersV4.NeSuperficial = 51;
-ModelParametersV4.NSomSuperficial = 4;
-ModelParametersV4.NPvSuperficial = 11;
-ModelParametersV4.NeMid = 24;
+ModelParametersV4.NeSuperficial = ceil(0.25*Currentsize);
+ModelParametersV4.NSomSuperficial = ceil(0.03*Currentsize);
+ModelParametersV4.NPvSuperficial = ceil(0.07*Currentsize);
+ModelParametersV4.NeMid = ceil(0.12*Currentsize);
 ModelParametersV4.NSomMid = 0;
-ModelParametersV4.NPvMid = 5;
-ModelParametersV4.NeDeep = 64;
-ModelParametersV4.NSomDeep = 5;
-ModelParametersV4.NPvDeep = 2;
+ModelParametersV4.NPvMid = ceil(0.03*Currentsize);
+ModelParametersV4.NeDeep = ceil(0.45*Currentsize);
+ModelParametersV4.NSomDeep = ceil(0.03*Currentsize);
+ModelParametersV4.NPvDeep = ceil(0.02*Currentsize);
 
 ModelParametersV4.Nin = 6;
 ModelParametersV4.Nout = 6;
-ModelParametersV4.NoiseRate = 7.7;
+ModelParametersV4.NoiseRate = 14; % 20%
 ModelParametersV4.Nstim = 3;
 
 %%% Call Laminar Cortex Constructor Functions
@@ -61,7 +64,7 @@ connection1.direction = [dsCellV4.populations(1).name, '->', dsCellPFC.populatio
 connection1.source = dsCellV4.populations(1).name;
 connection1.target = dsCellPFC.populations(4).name;
 connection1.mechanism_list={'iAMPActx'};
-connection1.parameters={'gAMPA', .24, 'tauAMPA', 4.17, 'netcon', connectionWeigth1};
+connection1.parameters={'gAMPA', .24, 'tauAMPA', 4, 'netcon', connectionWeigth1};
 
 % supEV4->midPVPFC
 connectionWeigth2 = 0.21*rand(dsCellV4.populations(1).size, dsCellPFC.populations(5).size) + 0.27;
@@ -70,7 +73,7 @@ connection2.direction = [dsCellV4.populations(1).name, '->', dsCellPFC.populatio
 connection2.source = dsCellV4.populations(1).name;
 connection2.target = dsCellPFC.populations(5).name;
 connection2.mechanism_list={'iAMPActx'};
-connection2.parameters={'gAMPA', .24, 'tauAMPA', 4.17, 'netcon', connectionWeigth2};
+connection2.parameters={'gAMPA', .24, 'tauAMPA', 4, 'netcon', connectionWeigth2};
 
 % deepEPFC->supSOMV4
 connectionWeigth3 = 0.27*rand(dsCellPFC.populations(6).size, dsCellV4.populations(2).size) + 0.21;
@@ -79,7 +82,16 @@ connection3.direction = [dsCellPFC.populations(6).name, '->', dsCellV4.populatio
 connection3.source = dsCellPFC.populations(6).name;
 connection3.target = dsCellV4.populations(2).name;
 connection3.mechanism_list={'iAMPActx'};
-connection3.parameters={'gAMPA', .27, 'tauAMPA', 3.74, 'netcon', connectionWeigth3};
+connection3.parameters={'gAMPA', .27, 'tauAMPA', 4, 'netcon', connectionWeigth3};
+
+% deepEPFC->supEV4
+connectionWeigth4 = 0.27*rand(dsCellPFC.populations(6).size, dsCellV4.populations(1).size) + 0.21;
+connection3.direction = [dsCellPFC.populations(6).name, '->', dsCellV4.populations(1).name];
+
+connection3.source = dsCellPFC.populations(6).name;
+connection3.target = dsCellV4.populations(1).name;
+connection3.mechanism_list={'iAMPActx'};
+connection3.parameters={'gAMPA', .27, 'tauAMPA', 4, 'netcon', connectionWeigth4};
 
 %%% Finalization
 dsModel = dlConnectModels({dsCellV4, dsCellPFC}, {connection1, connection2, connection3});
@@ -89,37 +101,37 @@ dsModel = dlConnectModels({dsCellV4, dsCellPFC}, {connection1, connection2, conn
 % you want a new model.
 
 clc;
-m = DynaLearn(dsModel, 'models/dlPredictiveCorticalCircuitModelLWK1', 'mex'); % ~10 min or less, MEXGEN or < 20 sec, RAWGEN.
+m = DynaLearn(dsModel, 'models/dlPredictiveCorticalCircuitModelLWK2', 'mex'); % ~10 min or less, MEXGEN or < 20 sec, RAWGEN.
 m.dlSave(); % < 1sec
 
 %% Load DynaLearn Class
 
 clear;clc;
 m = DynaLearn(); % ~ 1sec
-m = m.dlLoad('models/dlPredictiveCorticalCircuitModelLWK1'); % ~ 10sec, New larger model; keeping track of its activity in Gamma/Beta **
+m = m.dlLoad('models/dlPredictiveCorticalCircuitModelLWK2'); % ~ 10sec, New larger model; keeping track of its activity in Gamma/Beta **
 
 %% Trial: training  script preparation, 50-block and 50-trial
 
 [trialParams1, trialParams2, trialParams3] = dlDemoThreePattern();
 
-outputParams = [{'deepExPFC_V', 1:10, [300 700], 'afr'}; {'deepExPFC_V',...
-    11:20, [300 700], 'afr'}; {'deepExPFC_V', 21:30, [300 700], 'afr'}; ...
-    {'midExPFC_V', 1:27, [300 700], 'afr'}; {'supExPFC_V', 1:41, [300 700], 'afr'}; ...
-    {'deepExV4_V', 1:64, [300 700], 'afr'}; {'midExV4_V', 1:24, [300 700], 'afr'}; ...
-    {'supExV4_V', 1:51, [300 700], 'afr'}];
+outputParams = [{'deepExPFC_V', 1:10, [400 700], 'afr'}; {'deepExPFC_V',...
+    11:20, [400 700], 'afr'}; {'deepExPFC_V', 21:30, [400 700], 'afr'}; ...
+    {'midExPFC_V', 1:27, [200 800], 'afr'}; {'supExPFC_V', 1:41, [200 800], 'afr'}; ...
+    {'deepExV4_V', 1:64, [200 800], 'afr'}; {'midExV4_V', 1:24, [200 800], 'afr'}; ...
+    {'supExV4_V', 1:50, [200 800], 'afr'}];
 
-targetParams1 = [{'TotalSpikesPenalty', 1:8, 300, 0.07}; {'MSE', 1, 27, 0.3}; {'MSE', 2, 20, 0.1}; {'MSE', 3, 20, 0.1}; {'Compare', [1, 2], 0, 0.05}; {'Compare', [1, 3], 0, 0.05}; {'Diff', [2, 3], 0, 0.01}]; % A 
-targetParams2 = [{'TotalSpikesPenalty', 1:8, 300, 0.07}; {'MSE', 2, 27, 0.3}; {'MSE', 1, 20, 0.1}; {'MSE', 3, 20, 0.1}; {'Compare', [2, 1], 0, 0.05}; {'Compare', [2, 3], 0, 0.05}; {'Diff', [1, 3], 0, 0.01}]; % B
-targetParams3 = [{'TotalSpikesPenalty', 1:8, 300, 0.07}; {'MSE', 3, 27, 0.3}; {'MSE', 2, 20, 0.1}; {'MSE', 1, 20, 0.1}; {'Compare', [3, 1], 0, 0.05}; {'Compare', [3, 2], 0, 0.05}; {'Diff', [1, 2], 0, 0.01}]; % C
+targetParams1 = [{'TotalSpikesPenalty', 4:8, 250, 0.1}; {'MSE', 1, 27, 0.03}; {'MSE', 2, 20, 0.01}; {'MSE', 3, 20, 0.01}; {'Compare', [1, 2], 0, 0.2}; {'Compare', [1, 3], 0, 0.2}; {'Diff', [2, 3], 0, 0.01}]; % A 
+targetParams2 = [{'TotalSpikesPenalty', 4:8, 250, 0.1}; {'MSE', 2, 27, 0.03}; {'MSE', 1, 20, 0.01}; {'MSE', 3, 20, 0.01}; {'Compare', [2, 1], 0, 0.2}; {'Compare', [2, 3], 0, 0.2}; {'Diff', [1, 3], 0, 0.01}]; % B
+targetParams3 = [{'TotalSpikesPenalty', 4:8, 250, 0.1}; {'MSE', 3, 27, 0.03}; {'MSE', 2, 20, 0.01}; {'MSE', 1, 20, 0.01}; {'Compare', [3, 1], 0, 0.2}; {'Compare', [3, 2], 0, 0.2}; {'Diff', [1, 2], 0, 0.01}]; % C
 
 dlInputParameters = {trialParams1, trialParams2, trialParams3};
 dlTargetParameters = {targetParams1, targetParams2, targetParams3};
 dlOutputParameters = outputParams;
 
-TBdata = dlTrialBlockGenerator(dlInputParameters, dlTargetParameters, 200, 2000);
+TBdata = dlTrialBlockGenerator(dlInputParameters, dlTargetParameters, 50, 50);
 
 dlTrainOptions = containers.Map(); % Train options; MUST be a map data structure
-dlTrainOptions('dlEpochs') = 500; % % Number of epochs (A.K.A total iterations)
+dlTrainOptions('dlEpochs') = 100; % % Number of epochs (A.K.A total iterations)
 dlTrainOptions('dlBatchs') = 3; % If a scenario requires the training to be based on a group parameter (e.g mean of errors) use a dlBatch > 1 and set update mode later to batch. 
 dlTrainOptions('dlLambda') = 1e-5; % Higher lambda means more changes based on error, lower may cause model to learn slower or nothing.
     
@@ -134,13 +146,13 @@ dlTrainOptions('dlOutputLogFlag') = 1; % If 0, will not keep outputs
 dlTrainOptions('dlOfflineOutputGenerator') = 0; % If 1, will generate fake-random outputs (only for debugging purposes)
 
 dlTrainOptions('dlAdaptiveLambda') = 1; % Adaptive lambda parameter; recommended for long simulations.
-dlTrainOptions('dlLambdaCap') = 3e-2; % Only if Adaptive lambda is active, recommended to set a upper-bound (UB) or ignore to use default UB (0.01).
+dlTrainOptions('dlLambdaCap') = 3e-3; % Only if Adaptive lambda is active, recommended to set a upper-bound (UB) or ignore to use default UB (0.01).
 
 % Initial training on the model to reach a plausible local minimia like
 % the task in the paper the model should also learn the basics of the task.
 % We shortly train the model by cues to put it close to a local minimia.
 
-dlTrainOptions('dlLambda') = 7e-5;
+dlTrainOptions('dlLambda') = 7e-4;
 dlTrainOptions('dlEpochs') = 10;
 dlTrainOptions('dlBatchs') = 3;
 
@@ -159,8 +171,9 @@ dlTrainOptions('dlCustomLogArgs') = argsPowSpectRatio; % Arguments of your custo
 clc;
 
 dlTrainOptions('dlLambda') = 7e-4;
-dlTrainOptions('dlEpochs') = 5;
+dlTrainOptions('dlEpochs') = 10;
 m.dlOptimalError = 1e7;
+m.dlResetTraining();
 
 tic;
 m.dlTrain(dlInputParameters, dlOutputParameters, dlTargetParameters, dlTrainOptions); % <16 sec per trial
@@ -173,7 +186,7 @@ toc;
 % TODO: Add live runs (continouos task) option.
 
 clc;
-dlTrainOptions('dlLambda') = 1e-5;
+dlTrainOptions('dlLambda') = 5e-5;
 dlTrainOptions('dlAdaptiveLambda') = 0; % Adaptive lambda parameter; recommended for long simulations.
 dlTrainOptions('dlUpdateMode') = 'trial';
 dlTrainOptions('dlEpochs') = 5;
@@ -183,9 +196,9 @@ m.dlResetTraining();
 argsPSR = struct();
 
 argsPSR.lf1 = 7;
-argsPSR.hf1 = 31;
-argsPSR.lf2 = 44;
-argsPSR.hf2 = 77;
+argsPSR.hf1 = 28;
+argsPSR.lf2 = 35;
+argsPSR.hf2 = 140;
 
 dlTrainOptions('dlCustomLog') = "dlPowerSpectrumRatio"; % Name of a function which is in the path
 dlTrainOptions('dlCustomLogArgs') = argsPSR; % Arguments of your custom function
@@ -193,31 +206,36 @@ dlTrainOptions('dlCustomLogArgs') = argsPSR; % Arguments of your custom function
 dlTrainOptions('dlCheckpointCoefficient') = 1.7;
 m.dlTrain(TBdata.B1, dlOutputParameters, TBdata.T1, dlTrainOptions);
 
+m.dlErrorsLog = [m.dlErrorsLog, -1];  
 m.dlOptimalError = 1e9;
-dlTrainOptions('dlCheckpointCoefficient') = 4.7;
+dlTrainOptions('dlCheckpointCoefficient') = 2.4;
 m.dlTrain(TBdata.TrB, dlOutputParameters, TBdata.TrT, dlTrainOptions);
 
+m.dlErrorsLog = [m.dlErrorsLog, -1]; 
 m.dlOptimalError = 1e9;
 dlTrainOptions('dlCheckpointCoefficient') = 1.7; 
 m.dlTrain(TBdata.B2, dlOutputParameters, TBdata.T2, dlTrainOptions);
 
+m.dlErrorsLog = [m.dlErrorsLog, -1]; 
 m.dlOptimalError = 1e9;
-dlTrainOptions('dlCheckpointCoefficient') = 4.7; 
+dlTrainOptions('dlCheckpointCoefficient') = 2.4; 
 m.dlTrain(TBdata.TrB, dlOutputParameters, TBdata.TrT, dlTrainOptions);
 
+m.dlErrorsLog = [m.dlErrorsLog, -1]; 
 m.dlOptimalError = 1e9;
 dlTrainOptions('dlCheckpointCoefficient') = 1.7;
 m.dlTrain(TBdata.B3, dlOutputParameters, TBdata.T3, dlTrainOptions);
 
+m.dlErrorsLog = [m.dlErrorsLog, -1]; 
 m.dlOptimalError = 1e9;
-dlTrainOptions('dlCheckpointCoefficient') = 4.7;
+dlTrainOptions('dlCheckpointCoefficient') = 2.4;
 m.dlTrain(TBdata.TrB, dlOutputParameters, TBdata.TrT, dlTrainOptions);
 
 %% Errors log plot
 
 % clc;
 
-wk = 3;
+wk = 1;
 figure('position', [0, 0, 1400, 700]);
 n = max(size(m.dlErrorsLog));
 x = zeros(1, ceil(n/wk));
@@ -249,7 +267,7 @@ m.dlPlotAllPotentials('avglfp');
 
 %% Run a simulation (without training)
 
-for i = 1:3
+for i = 2:2
     m.dlRunSimulation(dlInputParameters{i}, dlOutputParameters);
 %     m.dlPlotAllPotentials('lfp');
 end
@@ -260,7 +278,7 @@ clc;
 opts = containers.Map();
 opts("lf") = 50;
 opts("hf") = 100;
-m.dlPlotAllPotentials('avgfft', opts);
+% m.dlPlotAllPotentials('avgfft', opts);
 
 %% End of Demo (14th of June 2022)
 % Appendix
@@ -281,6 +299,12 @@ end
 
 %% G/B ratio log
 
+argsPSR = struct();
+
+argsPSR.lf1 = 7;
+argsPSR.hf1 = 28;
+argsPSR.lf2 = 35;
+argsPSR.hf2 = 140;
 dtf = ceil(1 / (m.dldT*m.dlDownSampleFactor));
 
 lf = opts("lf")*dtf;
@@ -308,6 +332,33 @@ for i = (k-1)*6+1:min((k*6), 6)
 end
 
 disp("Temp edit for 6 subplots; average fft");
-xlabel(mode + " in frequency (Hz)");
-                    
+xlabel(" in frequency (Hz)");
+
+%%
+
+clc;
+for i = 1:7
+
+    subplot(3, 2, mod(i, 6)+1);
+    plot(m.dlCustomLog(i, :));
+    xlabel(m.dlModel.populations(i).name);
+    hold('on');grid("on");
+
+end
+
+%%
+
+clc;
+i = 1;
+while i < 6
+    disp(i);
+    d = rand();
+    if d > 0.74
+        i = i - 2;
+    else
+        i = i + 2;
+    end
+end
+
+
 %% End

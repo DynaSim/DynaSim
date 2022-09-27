@@ -25,6 +25,7 @@ classdef DynaLearn < matlab.mixin.SetGet
         dlVariables = []; % Mex variable labels
         dlMexFuncName = []; % Name of Mex function (e.g **********_mex.mex64
 
+        dlLastErrorsLog = 1;
         dlWeightsValues = []; % Weights values history {[Npre,Npost,1+Epochs]}
         dlWeightsVariables = []; % Weights variables
         
@@ -236,6 +237,7 @@ classdef DynaLearn < matlab.mixin.SetGet
             dlObj = load([obj.dlStudyDir, dlCheckPointPath, 'object.mat']);
             out = dlObj.obj;
             
+            obj.dlErrorsLog = obj.dlLastErrorsLog;
             p = load([obj.dlStudyDir, dlCheckPointPath, 'params.mat']);
             save([obj.dlPath, '/params.mat'], '-struct', 'p');
             
@@ -408,7 +410,7 @@ classdef DynaLearn < matlab.mixin.SetGet
                     
                 elseif strcmpi(mode, 'avglfp')
 
-                    for i = (k-1)*6+1:min((k*6), 6)
+                    for i = (k-1)*6+1:min((k*6), n-1)
 
                         x = dlPotentials{1, i+1};
                         subplot((min(k*6, n-1) - (k-1)*6), 1, mod(i-1, (min(k*6, n-1) - (k-1)*6))+1);
@@ -467,7 +469,7 @@ classdef DynaLearn < matlab.mixin.SetGet
                         rasterVector = zeros(size(t));
 
                         try
-                            rasterVector(ceil(raster(:, 2)/obj.dldT)) = raster();
+                            rasterVector(ceil(raster(:, 2)/obj.dldT)) = raster(:, 1);
                         catch
                             continue
                         end
@@ -590,7 +592,7 @@ classdef DynaLearn < matlab.mixin.SetGet
                 dlTimeKernel = ceil(dlOutputParameters{i, 3}/(obj.dldT*obj.dlDownSampleFactor));
                 dlOutputType = dlOutputParameters{i, 4};
                 
-%                 try
+                try
                 
                 dlTempOutputs = obj.dlLastOutputs{i}(dlTimeKernel(1):dlTimeKernel(2), dlOutputParameters{i, 2});
 %                 
@@ -805,7 +807,7 @@ classdef DynaLearn < matlab.mixin.SetGet
             try
                
                 dlBatchs = dlTrainOptions('dlBatchs');
-                
+
             catch
                 
                 dlBatchs = size(dlInputParameters, 2);
@@ -925,9 +927,12 @@ classdef DynaLearn < matlab.mixin.SetGet
                 
             end            
                 
-            for i = 1:dlEpochs
+            i = 0;
+
+            while i < dlEpochs
                 
-                fprintf("   ->Epoch no. %d (Total iterations for this model : %d)\n", i, obj.dlTrialNumber);
+                fprintf("   ->Epoch no. %d (Total iterations for this model : %d)\n", i+1, obj.dlTrialNumber);
+
                 for j = 1:dlBatchs
                 
                     fprintf("\t-->Batch no. %d of %d\t", j, dlBatchs);
@@ -1068,6 +1073,9 @@ classdef DynaLearn < matlab.mixin.SetGet
                     end
                     
                 end
+                
+                i = ceil(size(obj.dlErrorsLog, 2) / dlBatchs);
+
             end
             
         end
@@ -1547,6 +1555,7 @@ classdef DynaLearn < matlab.mixin.SetGet
         
         function dlSaveOptimal(obj)
            
+            obj.dlLastErrorsLog = obj.dlErrorsLog;
             obj.dlSaveCheckPoint('/Optimal');
             
         end
@@ -1554,9 +1563,13 @@ classdef DynaLearn < matlab.mixin.SetGet
         function dlLoadOptimal(obj)
             
             try
+
                 obj.dlLoadCheckPoint('/Optimal');
+
             catch
+
                 fprintf("--->No oprimal file exists. first run a training session with an active checkpoint flag to save an optimal checkpoint.\n");
+          
             end
             
         end
