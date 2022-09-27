@@ -1,5 +1,4 @@
 %% 3-layer neocortical model of PFC / Predictive task
-
 %% Model parameters, Uncomment one of the following lanes to run an example.
 
 clear;
