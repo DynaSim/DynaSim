@@ -114,15 +114,15 @@ m = m.dlLoad('models/dlPredictiveCorticalCircuitModelLWK2'); % ~ 10sec, New larg
 
 [trialParams1, trialParams2, trialParams3] = dlDemoThreePattern();
 
-outputParams = [{'deepExPFC_V', 1:10, [400 700], 'afr'}; {'deepExPFC_V',...
-    11:20, [400 700], 'afr'}; {'deepExPFC_V', 21:30, [400 700], 'afr'}; ...
+outputParams = [{'deepExPFC_V', 1:10, [400 700], 'alfp'}; {'deepExPFC_V',...
+    11:20, [400 700], 'alfp'}; {'deepExPFC_V', 21:30, [400 700], 'alfp'}; ...
     {'midExPFC_V', 1:27, [200 800], 'afr'}; {'supExPFC_V', 1:41, [200 800], 'afr'}; ...
     {'deepExV4_V', 1:64, [200 800], 'afr'}; {'midExV4_V', 1:24, [200 800], 'afr'}; ...
     {'supExV4_V', 1:50, [200 800], 'afr'}];
 
-targetParams1 = [{'TotalSpikesPenalty', 4:8, 250, 0.1}; {'MSE', 1, 27, 0.03}; {'MSE', 2, 20, 0.01}; {'MSE', 3, 20, 0.01}; {'Compare', [1, 2], 0, 0.2}; {'Compare', [1, 3], 0, 0.2}; {'Diff', [2, 3], 0, 0.01}]; % A 
-targetParams2 = [{'TotalSpikesPenalty', 4:8, 250, 0.1}; {'MSE', 2, 27, 0.03}; {'MSE', 1, 20, 0.01}; {'MSE', 3, 20, 0.01}; {'Compare', [2, 1], 0, 0.2}; {'Compare', [2, 3], 0, 0.2}; {'Diff', [1, 3], 0, 0.01}]; % B
-targetParams3 = [{'TotalSpikesPenalty', 4:8, 250, 0.1}; {'MSE', 3, 27, 0.03}; {'MSE', 2, 20, 0.01}; {'MSE', 1, 20, 0.01}; {'Compare', [3, 1], 0, 0.2}; {'Compare', [3, 2], 0, 0.2}; {'Diff', [1, 2], 0, 0.01}]; % C
+targetParams1 = [{'TotalSpikesPenalty', 4:8, 240, 0.1}; {'MSE', 1, 40, 0.07}; {'MSE', 2, 20, 0.04}; {'MSE', 3, 20, 0.04}; {'Compare', [1, 2], 0, 0.2}; {'Compare', [1, 3], 0, 0.2}; {'Diff', [2, 3], 0, 0.01}]; % A 
+targetParams2 = [{'TotalSpikesPenalty', 4:8, 240, 0.1}; {'MSE', 2, 40, 0.07}; {'MSE', 1, 20, 0.04}; {'MSE', 3, 20, 0.04}; {'Compare', [2, 1], 0, 0.2}; {'Compare', [2, 3], 0, 0.2}; {'Diff', [1, 3], 0, 0.01}]; % B
+targetParams3 = [{'TotalSpikesPenalty', 4:8, 240, 0.1}; {'MSE', 3, 40, 0.07}; {'MSE', 2, 20, 0.04}; {'MSE', 1, 20, 0.04}; {'Compare', [3, 1], 0, 0.2}; {'Compare', [3, 2], 0, 0.2}; {'Diff', [1, 2], 0, 0.01}]; % C
 
 dlInputParameters = {trialParams1, trialParams2, trialParams3};
 dlTargetParameters = {targetParams1, targetParams2, targetParams3};
@@ -137,7 +137,6 @@ dlTrainOptions('dlLambda') = 1e-5; % Higher lambda means more changes based on e
     
 dlTrainOptions('dlCheckpoint') = 'true'; % If current step's error is higher based on a threshold, reload last optimal state and continue from that point
 dlTrainOptions('dlCheckpointCoefficient') = 1.74; % A.K.A exploration rate
-dlTrainOptions('dlBadTrialEliminatorFlag') = 1; % A.K.A backtrack of only usefull trials
 dlTrainOptions('dlUpdateMode') = 'batch'; % Update on each trial's result or based on batch group results
 
 dlTrainOptions('dlLearningRule') = 'BioDeltaRule'; % Delta rule with a basic change based on biophysical properties 
@@ -145,8 +144,8 @@ dlTrainOptions('dlSimulationFlag') = 1; % If 0, will not run simulations (only f
 dlTrainOptions('dlOutputLogFlag') = 1; % If 0, will not keep outputs
 dlTrainOptions('dlOfflineOutputGenerator') = 0; % If 1, will generate fake-random outputs (only for debugging purposes)
 
-dlTrainOptions('dlAdaptiveLambda') = 1; % Adaptive lambda parameter; recommended for long simulations.
-dlTrainOptions('dlLambdaCap') = 3e-3; % Only if Adaptive lambda is active, recommended to set a upper-bound (UB) or ignore to use default UB (0.01).
+dlTrainOptions('dlAdaptiveLambda') = 0; % Adaptive lambda parameter; recommended for long simulations.
+dlTrainOptions('dlLambdaCap') = 8e-3; % Only if Adaptive lambda is active, recommended to set a upper-bound (UB) or ignore to use default UB (0.01).
 
 % Initial training on the model to reach a plausible local minimia like
 % the task in the paper the model should also learn the basics of the task.
@@ -159,9 +158,9 @@ dlTrainOptions('dlBatchs') = 3;
 argsPowSpectRatio = struct();
 
 argsPowSpectRatio.lf1 = 7;
-argsPowSpectRatio.hf1 = 31;
-argsPowSpectRatio.lf2 = 41;
-argsPowSpectRatio.hf2 = 91;
+argsPowSpectRatio.hf1 = 28;
+argsPowSpectRatio.lf2 = 35;
+argsPowSpectRatio.hf2 = 140;
 
 dlTrainOptions('dlCustomLog') = "dlPowerSpectrumRatio"; % Name of a function which is in the path
 dlTrainOptions('dlCustomLogArgs') = argsPowSpectRatio; % Arguments of your custom function
@@ -170,14 +169,17 @@ dlTrainOptions('dlCustomLogArgs') = argsPowSpectRatio; % Arguments of your custo
 
 clc;
 
-dlTrainOptions('dlLambda') = 7e-4;
+dlTrainOptions('dlLambda') = 5e-5;
 dlTrainOptions('dlEpochs') = 10;
 m.dlOptimalError = 1e7;
-m.dlResetTraining();
+% m.dlResetTraining();
 
 tic;
 m.dlTrain(dlInputParameters, dlOutputParameters, dlTargetParameters, dlTrainOptions); % <16 sec per trial
 toc;
+
+% disp(m.dlCurrentSessionValidTrials);
+% disp(size(m.dlErrorsLog));
 
 %% Block-trial phase
 
@@ -189,7 +191,7 @@ clc;
 dlTrainOptions('dlLambda') = 5e-5;
 dlTrainOptions('dlAdaptiveLambda') = 0; % Adaptive lambda parameter; recommended for long simulations.
 dlTrainOptions('dlUpdateMode') = 'trial';
-dlTrainOptions('dlEpochs') = 10;
+dlTrainOptions('dlEpochs') = 1;
 dlTrainOptions('dlBatchs') = 50;
 
 m.dlResetTraining();
@@ -263,7 +265,6 @@ title("Errors in trials");
 
 clc;
 m.dlPlotAllPotentials('avglfp');
-% m.dlPlotAllPotentials('raster');
 
 %% Raw run of a simulation (without training)
 

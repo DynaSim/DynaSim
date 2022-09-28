@@ -25,6 +25,7 @@ classdef DynaLearn < matlab.mixin.SetGet
         dlVariables = []; % Mex variable labels
         dlMexFuncName = []; % Name of Mex function (e.g **********_mex.mex64
 
+        dlCurrentSessionValidTrials = 0;
         dlLastErrorsLog = 1;
         dlWeightsValues = []; % Weights values history {[Npre,Npost,1+Epochs]}
         dlWeightsVariables = []; % Weights variables
@@ -600,6 +601,10 @@ classdef DynaLearn < matlab.mixin.SetGet
                 elseif strcmpi(dlOutputType, 'lfp')
 
                     obj.dlLastOutputs{i} = obj.dlApplyKernel(dlTempOutputs, dlTimeKernel);
+                    
+                elseif strcmpi(dlOutputType, 'alfp')
+
+                    obj.dlLastOutputs{i} = mean(var(dlTempOutputs));
 
                 elseif strcmpi(dlOutputType, 'afr')
 
@@ -686,7 +691,7 @@ classdef DynaLearn < matlab.mixin.SetGet
         
                     end
 
-                    TempError = abs(TempError - dlOutputTargets);
+                    TempError = abs(TempError - dlOutputTargets)^2;
 
                 else
                     
@@ -1065,9 +1070,11 @@ classdef DynaLearn < matlab.mixin.SetGet
                     
                 end
                 
-                i = ceil(size(obj.dlErrorsLog, 2) / dlBatchs);
+                i = ceil((size(obj.dlErrorsLog, 2) - obj.dlCurrentSessionValidTrials)/dlBatchs);
 
             end
+
+            obj.dlCurrentSessionValidTrials = size(obj.dlErrorsLog, 2);
             
         end
         
@@ -1542,6 +1549,7 @@ classdef DynaLearn < matlab.mixin.SetGet
             
             obj.dlCustomLog = [];
             obj.dlCustomLogLabel = [];
+            obj.dlCurrentSessionValidTrials = 0;
         end
         
         function dlSaveOptimal(obj)
