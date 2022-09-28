@@ -189,8 +189,8 @@ clc;
 dlTrainOptions('dlLambda') = 5e-5;
 dlTrainOptions('dlAdaptiveLambda') = 0; % Adaptive lambda parameter; recommended for long simulations.
 dlTrainOptions('dlUpdateMode') = 'trial';
-dlTrainOptions('dlEpochs') = 5;
-dlTrainOptions('dlBatchs') = 100;
+dlTrainOptions('dlEpochs') = 10;
+dlTrainOptions('dlBatchs') = 50;
 
 m.dlResetTraining();
 argsPSR = struct();
@@ -265,100 +265,31 @@ clc;
 m.dlPlotAllPotentials('avglfp');
 % m.dlPlotAllPotentials('raster');
 
-%% Run a simulation (without training)
+%% Raw run of a simulation (without training)
 
-for i = 2:2
+clc;
+tic;
+for i = 1:3
+
     m.dlRunSimulation(dlInputParameters{i}, dlOutputParameters);
-%     m.dlPlotAllPotentials('lfp');
-end
-
-%%
-
-clc;
-opts = containers.Map();
-opts("lf") = 50;
-opts("hf") = 100;
-% m.dlPlotAllPotentials('avgfft', opts);
-
-%% End of Demo (14th of June 2022)
-% Appendix
-
-clc;
-fn1 = fieldnames(a1);
-vl1 = struct2cell(a1);
-
-fn2 = fieldnames(a2);
-vl2 = struct2cell(a2);
-
-ncons = find(contains(fn1, '_netcon'));
-for i = ncons'
-    x = size(vl1{i, 1});
-    y = size(vl2{i, 1});
-    fprintf("%d %d %s %s\n", x(1), x(2), fn1{i, 1}, fn2{i, 1});
-end
-
-%% G/B ratio log
-
-argsPSR = struct();
-
-argsPSR.lf1 = 7;
-argsPSR.hf1 = 28;
-argsPSR.lf2 = 35;
-argsPSR.hf2 = 140;
-dtf = ceil(1 / (m.dldT*m.dlDownSampleFactor));
-
-lf = opts("lf")*dtf;
-hf = opts("hf")*dtf; 
-freqCap = 0;
-
-for i = (k-1)*6+1:min((k*6), 6)
-
-    x = dlPotentials{1, i+1};
-    fqs = linspace(1, 500, max(size(x)));
-    subplot((min(k*6, n-1) - (k-1)*6), 1, mod(i-1, (min(k*6, n-1) - (k-1)*6))+1);
-    ffts = abs(fft(mean(x, 2))) * min(size(x)) / 1000;
-    yf = smooth(ffts(lf:hf));
-    area(fqs(lf:hf), yf);grid("on");
-
-    if freqCap == 0
-        freqCap = max(ffts(lf:hf))*1.2;
-        ylim([0, freqCap]);
-    else
-        ylim([0, freqCap]);
-    end
-
-    ylabel(dlLabels(i+1));
 
 end
+toc;
 
-disp("Temp edit for 6 subplots; average fft");
-xlabel(" in frequency (Hz)");
-
-%%
+%% Beta to Gamma ratio in trials during predictive task training
 
 clc;
-for i = 1:7
+cnt = 1;
+for i = [2:9, 16:23]
 
-    subplot(3, 2, mod(i, 6)+1);
-    plot(m.dlCustomLog(i, :));
-    xlabel(m.dlModel.populations(i).name);
+    subplot(4, 2, mod(cnt-1, 8)+1);
+    plot(m.dlCustomLog(i, :), 'DisplayName', m.dlCustomLogLabel{i});
+    xlabel(m.dlCustomLogLabel(i));
+    legend();
+
     hold('on');grid("on");
+    cnt = cnt + 1;
 
 end
-
-%%
-
-clc;
-i = 1;
-while i < 6
-    disp(i);
-    d = rand();
-    if d > 0.74
-        i = i - 2;
-    else
-        i = i + 2;
-    end
-end
-
 
 %% End
