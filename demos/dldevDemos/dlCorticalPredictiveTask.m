@@ -205,29 +205,35 @@ argsPSR.hf2 = 140;
 dlTrainOptions('dlCustomLog') = "dlPowerSpectrumRatio"; % Name of a function which is in the path
 dlTrainOptions('dlCustomLogArgs') = argsPSR; % Arguments of your custom function
 
+disp("----------A-----------");
 dlTrainOptions('dlCheckpointCoefficient') = 1.7;
 m.dlTrain(TBdata.B1, dlOutputParameters, TBdata.T1, dlTrainOptions);
 
+disp("----------U1----------");
 m.dlErrorsLog = [m.dlErrorsLog, -1];  
 m.dlOptimalError = 1e9;
 dlTrainOptions('dlCheckpointCoefficient') = 7.4;
 m.dlTrain(TBdata.TrB, dlOutputParameters, TBdata.TrT, dlTrainOptions);
 
+disp("----------B-----------");
 m.dlErrorsLog = [m.dlErrorsLog, -1]; 
 m.dlOptimalError = 1e9;
 dlTrainOptions('dlCheckpointCoefficient') = 1.7; 
 m.dlTrain(TBdata.B2, dlOutputParameters, TBdata.T2, dlTrainOptions);
 
+disp("----------U2----------");
 m.dlErrorsLog = [m.dlErrorsLog, -1]; 
 m.dlOptimalError = 1e9;
 dlTrainOptions('dlCheckpointCoefficient') = 7.4; 
 m.dlTrain(TBdata.TrB, dlOutputParameters, TBdata.TrT, dlTrainOptions);
 
+disp("----------C----------");
 m.dlErrorsLog = [m.dlErrorsLog, -1]; 
 m.dlOptimalError = 1e9;
 dlTrainOptions('dlCheckpointCoefficient') = 1.7;
 m.dlTrain(TBdata.B3, dlOutputParameters, TBdata.T3, dlTrainOptions);
 
+disp("----------U3----------");
 m.dlErrorsLog = [m.dlErrorsLog, -1]; 
 m.dlOptimalError = 1e9;
 dlTrainOptions('dlCheckpointCoefficient') = 7.4;
