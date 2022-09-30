@@ -191,7 +191,7 @@ clc;
 dlTrainOptions('dlLambda') = 5e-5;
 dlTrainOptions('dlAdaptiveLambda') = 0; % Adaptive lambda parameter; recommended for long simulations.
 dlTrainOptions('dlUpdateMode') = 'trial';
-dlTrainOptions('dlEpochs') = 1;
+dlTrainOptions('dlEpochs') = 2;
 dlTrainOptions('dlBatchs') = 50;
 
 m.dlResetTraining();
@@ -210,7 +210,7 @@ m.dlTrain(TBdata.B1, dlOutputParameters, TBdata.T1, dlTrainOptions);
 
 m.dlErrorsLog = [m.dlErrorsLog, -1];  
 m.dlOptimalError = 1e9;
-dlTrainOptions('dlCheckpointCoefficient') = 2.4;
+dlTrainOptions('dlCheckpointCoefficient') = 7.4;
 m.dlTrain(TBdata.TrB, dlOutputParameters, TBdata.TrT, dlTrainOptions);
 
 m.dlErrorsLog = [m.dlErrorsLog, -1]; 
@@ -220,7 +220,7 @@ m.dlTrain(TBdata.B2, dlOutputParameters, TBdata.T2, dlTrainOptions);
 
 m.dlErrorsLog = [m.dlErrorsLog, -1]; 
 m.dlOptimalError = 1e9;
-dlTrainOptions('dlCheckpointCoefficient') = 2.4; 
+dlTrainOptions('dlCheckpointCoefficient') = 7.4; 
 m.dlTrain(TBdata.TrB, dlOutputParameters, TBdata.TrT, dlTrainOptions);
 
 m.dlErrorsLog = [m.dlErrorsLog, -1]; 
@@ -230,7 +230,7 @@ m.dlTrain(TBdata.B3, dlOutputParameters, TBdata.T3, dlTrainOptions);
 
 m.dlErrorsLog = [m.dlErrorsLog, -1]; 
 m.dlOptimalError = 1e9;
-dlTrainOptions('dlCheckpointCoefficient') = 2.4;
+dlTrainOptions('dlCheckpointCoefficient') = 7.4;
 m.dlTrain(TBdata.TrB, dlOutputParameters, TBdata.TrT, dlTrainOptions);
 
 %% Errors log plot
@@ -246,7 +246,7 @@ for i = 0:wk:n-wk
     x(ceil((i+1)/wk)) = min(m.dlErrorsLog(i+1:i+wk));
 end
 tlab = ["A", "U1", "B", "U2", "C", "U3"];
-w = 200;
+w = 35;
 errorcap = max(x);
 
 for k = 1:6
@@ -264,7 +264,7 @@ title("Errors in trials");
 %% Plot Local-field potentials
 
 clc;
-m.dlPlotAllPotentials('avglfp');
+m.dlPlotAllPotentials('lfp');
 
 %% Raw run of a simulation (without training)
 
@@ -277,20 +277,77 @@ for i = 1:3
 end
 toc;
 
-%% Beta to Gamma ratio in trials during predictive task training
+%% Beta to Gamma ratio (relative) in trials during predictive task training
 
 clc;
+
+w = 50;
 cnt = 1;
-for i = [2:9, 16:23]
+tlab = ["A", "U1", "B", "U2", "C", "U3"];
+figure("Position", [0 0 1500 1000]);
+    
+for i = 1:8
 
+    for l = 0:5    
+
+        subplot(4, 2, i);
+        fill([l*w, l*w, l*w+w, l*w+w], [0, 1.1, 1.1, 0], [sin(l*0.2), 1, cos(l*0.2)], "DisplayName", tlab(l+1));
+        hold('on');
+
+    end
+
+end
+
+for i = [2:5, 16:19]
+
+    q = m.dlCustomLog(i, :) - min(m.dlCustomLog(i, :));
+    q = q / max(q);
     subplot(4, 2, mod(cnt-1, 8)+1);
-    plot(m.dlCustomLog(i, :), 'DisplayName', m.dlCustomLogLabel{i});
+    plot(q, 'DisplayName', m.dlCustomLogLabel{i});
+    
     xlabel(m.dlCustomLogLabel(i));
-    legend();
-
+    legend(); 
     hold('on');grid("on");
     cnt = cnt + 1;
 
 end
+
+text(-141, -.5, "Relative Beta to Gamma ratio.");
+
+%%
+
+w = 50;
+cnt = 1;
+tlab = ["A", "U1", "B", "U2", "C", "U3"];
+figure("Position", [0 0 1500 1000]);
+    
+for i = 1:4
+
+    for l = 0:5    
+
+        subplot(2, 2, i);
+        fill([l*w, l*w, l*w+w, l*w+w], [0, 1.1, 1.1, 0], [sin(l*0.2), 1, cos(l*0.2)], "DisplayName", tlab(l+1));
+        hold('on');
+
+    end
+
+end
+
+for i = [6:9, 20:23]
+
+    q = m.dlCustomLog(i, :);
+%     q = m.dlCustomLog(i, :) - min(m.dlCustomLog(i, :));
+%     q = q / max(q);
+    subplot(2, 2, mod(cnt-1, 4)+1);
+    plot(q, 'DisplayName', m.dlCustomLogLabel{i});
+    
+    xlabel(m.dlCustomLogLabel(i));
+    legend(); 
+    hold('on');grid("on");
+    cnt = cnt + 1;
+
+end
+
+text(-141, -.5, "Relative Beta to Gamma ratio.");
 
 %% End

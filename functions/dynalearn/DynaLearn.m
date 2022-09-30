@@ -925,7 +925,7 @@ classdef DynaLearn < matlab.mixin.SetGet
                 
             i = 0;
 
-            while i < dlEpochs
+            while i < dlEpochs*dlBatchs
                 
                 fprintf("   ->Epoch no. %d (Total iterations for this model : %d)\n", i+1, obj.dlTrialNumber);
 
@@ -1070,7 +1070,7 @@ classdef DynaLearn < matlab.mixin.SetGet
                     
                 end
                 
-                i = ceil((size(obj.dlErrorsLog, 2) - obj.dlCurrentSessionValidTrials)/dlBatchs);
+                i = size(obj.dlErrorsLog, 2) - obj.dlCurrentSessionValidTrials;
 
             end
 
