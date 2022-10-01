@@ -15,7 +15,7 @@
 clear;clc;
 
 TotalSize = [25, 50, 100, 200];
-Currentsize = TotalSize(4);
+Currentsize = TotalSize(3);
 
 %%% Create model parameters struct
 ModelParametersPFC = struct();
@@ -101,28 +101,30 @@ dsModel = dlConnectModels({dsCellV4, dsCellPFC}, {connection1, connection2, conn
 % you want a new model.
 
 clc;
-m = DynaLearn(dsModel, 'models/dlPredictiveCorticalCircuitModelLWK2', 'mex'); % ~10 min or less, MEXGEN or < 20 sec, RAWGEN.
+m = DynaLearn(dsModel, 'models/dlPredictiveCorticalCircuitModelLWK3', 'mex'); % ~10 min or less, MEXGEN or < 20 sec, RAWGEN.
 m.dlSave(); % < 1sec
 
 %% Load DynaLearn Class
 
-clear;clc;
+clc;
 m = DynaLearn(); % ~ 1sec
-m = m.dlLoad('models/dlPredictiveCorticalCircuitModelLWK2'); % ~ 10sec, New larger model; keeping track of its activity in Gamma/Beta **
+m = m.dlLoad('models/dlPredictiveCorticalCircuitModelLWK3'); % ~ 10sec, New larger model; keeping track of its activity in Gamma/Beta **
 
 %% Trial: training  script preparation, 50-block and 50-trial
 
 [trialParams1, trialParams2, trialParams3] = dlDemoThreePattern();
 
-outputParams = [{'deepExPFC_V', 1:10, [400 700], 'alfp'}; {'deepExPFC_V',...
-    11:20, [400 700], 'alfp'}; {'deepExPFC_V', 21:30, [400 700], 'alfp'}; ...
-    {'midExPFC_V', 1:27, [200 800], 'afr'}; {'supExPFC_V', 1:41, [200 800], 'afr'}; ...
-    {'deepExV4_V', 1:64, [200 800], 'afr'}; {'midExV4_V', 1:24, [200 800], 'afr'}; ...
-    {'supExV4_V', 1:50, [200 800], 'afr'}];
+outputParams = [{'deepExPFC_V', 1:10, [400 600], 'alfp'}; {'deepExPFC_V',11:20, [400 600], 'alfp'}; {'deepExPFC_V', 21:30, [400 600], 'alfp'}; ...
+    {'supExPFC_V', 1:ModelParametersPFC.NeSuperficial, [200 800], 'afr'}; ...
+    {'midExPFC_V', 1:ModelParametersPFC.NeMid, [200 800], 'afr'}; ...
+    {'deepExPFC_V', 1:ModelParametersPFC.NeDeep, [200 800], 'afr'}; ...
+    {'supExV4_V', 1:ModelParametersV4.NeSuperficial, [200 800], 'afr'}; ...
+    {'midExV4_V', 1:ModelParametersV4.NeMid, [200 800], 'afr'}; ...
+    {'deepExV4_V', 1:ModelParametersV4.NeDeep, [200 800], 'afr'}];
 
-targetParams1 = [{'TotalSpikesPenalty', 4:8, 240, 0.1}; {'MSE', 1, 40, 0.07}; {'MSE', 2, 20, 0.04}; {'MSE', 3, 20, 0.04}; {'Compare', [1, 2], 0, 0.2}; {'Compare', [1, 3], 0, 0.2}; {'Diff', [2, 3], 0, 0.01}]; % A 
-targetParams2 = [{'TotalSpikesPenalty', 4:8, 240, 0.1}; {'MSE', 2, 40, 0.07}; {'MSE', 1, 20, 0.04}; {'MSE', 3, 20, 0.04}; {'Compare', [2, 1], 0, 0.2}; {'Compare', [2, 3], 0, 0.2}; {'Diff', [1, 3], 0, 0.01}]; % B
-targetParams3 = [{'TotalSpikesPenalty', 4:8, 240, 0.1}; {'MSE', 3, 40, 0.07}; {'MSE', 2, 20, 0.04}; {'MSE', 1, 20, 0.04}; {'Compare', [3, 1], 0, 0.2}; {'Compare', [3, 2], 0, 0.2}; {'Diff', [1, 2], 0, 0.01}]; % C
+targetParams1 = [{'TotalSpikesPenalty', 4:9, 160, 0.14}; {'MSE', 1, 40, 0.17}; {'MSE', 2, 20, 0.08}; {'MSE', 3, 20, 0.08}; {'Compare', [1, 2], 0, 0.04}; {'Compare', [1, 3], 0, 0.04}; {'Diff', [2, 3], 0, 0.01}]; % A 
+targetParams2 = [{'TotalSpikesPenalty', 4:9, 160, 0.14}; {'MSE', 2, 40, 0.17}; {'MSE', 1, 20, 0.08}; {'MSE', 3, 20, 0.08}; {'Compare', [2, 1], 0, 0.04}; {'Compare', [2, 3], 0, 0.04}; {'Diff', [1, 3], 0, 0.01}]; % B
+targetParams3 = [{'TotalSpikesPenalty', 4:9, 160, 0.14}; {'MSE', 3, 40, 0.17}; {'MSE', 2, 20, 0.08}; {'MSE', 1, 20, 0.08}; {'Compare', [3, 1], 0, 0.04}; {'Compare', [3, 2], 0, 0.04}; {'Diff', [1, 2], 0, 0.01}]; % C
 
 dlInputParameters = {trialParams1, trialParams2, trialParams3};
 dlTargetParameters = {targetParams1, targetParams2, targetParams3};
@@ -140,7 +142,7 @@ dlTrainOptions('dlCheckpointCoefficient') = 1.74; % A.K.A exploration rate
 dlTrainOptions('dlUpdateMode') = 'batch'; % Update on each trial's result or based on batch group results
 
 dlTrainOptions('dlLearningRule') = 'BioDeltaRule'; % Delta rule with a basic change based on biophysical properties 
-dlTrainOptions('dlSimulationFlag') = 1; % If 0, will not run simulations (only for debugging purposes)
+dlTrainOptions('dlSimulationFlag') = 0; % If 0, will not run simulations (only for debugging purposes)
 dlTrainOptions('dlOutputLogFlag') = 1; % If 0, will not keep outputs
 dlTrainOptions('dlOfflineOutputGenerator') = 0; % If 1, will generate fake-random outputs (only for debugging purposes)
 
@@ -252,7 +254,7 @@ for i = 0:wk:n-wk
     x(ceil((i+1)/wk)) = min(m.dlErrorsLog(i+1:i+wk));
 end
 tlab = ["A", "U1", "B", "U2", "C", "U3"];
-w = 35;
+w = 100;
 errorcap = max(x);
 
 for k = 1:6
