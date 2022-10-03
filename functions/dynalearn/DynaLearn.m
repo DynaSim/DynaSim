@@ -1549,6 +1549,7 @@ classdef DynaLearn < matlab.mixin.SetGet
             obj.dlOutputLog = [];
             obj.dlErrorsLog = [];
             
+%             obj.dl
             obj.dlCustomLog = [];
             obj.dlCustomLogLabel = [];
             obj.dlCurrentSessionValidTrials = 0;

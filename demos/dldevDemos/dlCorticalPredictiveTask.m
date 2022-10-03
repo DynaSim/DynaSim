@@ -191,7 +191,7 @@ toc;
 % TODO: Add live runs (continouos task) option.
 
 clc;
-dlTrainOptions('dlLambda') = 2e-5;
+dlTrainOptions('dlLambda') = 1e-7;
 dlTrainOptions('dlAdaptiveLambda') = 0; % Adaptive lambda parameter; recommended for long simulations.
 dlTrainOptions('dlUpdateMode') = 'trial';
 dlTrainOptions('dlEpochs') = 10;
