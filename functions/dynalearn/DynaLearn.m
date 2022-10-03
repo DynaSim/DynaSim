@@ -27,6 +27,7 @@ classdef DynaLearn < matlab.mixin.SetGet
 
         dlCurrentSessionValidTrials = 0;
         dlLastErrorsLog = 1;
+        dlLastCustomLog = 1;
         dlWeightsValues = []; % Weights values history {[Npre,Npost,1+Epochs]}
         dlWeightsVariables = []; % Weights variables
         
@@ -239,6 +240,7 @@ classdef DynaLearn < matlab.mixin.SetGet
             out = dlObj.obj;
             
             obj.dlErrorsLog = obj.dlLastErrorsLog;
+            obj.dlCustomLog = obj.dlLastCustomLog;
             p = load([obj.dlStudyDir, dlCheckPointPath, 'params.mat']);
             save([obj.dlPath, '/params.mat'], '-struct', 'p');
             
@@ -1555,6 +1557,7 @@ classdef DynaLearn < matlab.mixin.SetGet
         function dlSaveOptimal(obj)
            
             obj.dlLastErrorsLog = obj.dlErrorsLog;
+            obj.dlLastCustomLog = obj.dlCustomLog;
             obj.dlSaveCheckPoint('/Optimal');
             
         end
