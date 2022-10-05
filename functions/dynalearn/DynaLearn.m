@@ -54,7 +54,7 @@ classdef DynaLearn < matlab.mixin.SetGet
         error0 = nan;
         
         dlGraph = []; 
-        dlCustomLog = [];
+        dlCustomLog = {};
         dlCustomLogLabel = [];
         dlSimulationTool = "mex";
         
@@ -240,10 +240,10 @@ classdef DynaLearn < matlab.mixin.SetGet
             fprintf("\t\tCheckpoint file loaded from %s \n", [obj.dlStudyDir, dlCheckPointPath]);
             dlObj = load([obj.dlStudyDir, dlCheckPointPath, 'object.mat']);
             out = dlObj.obj;
-            
+
             if obj.dlExcludeDiverge == 1
 
-                obj.dlErrorsLog = obj.dlLastErrorsLog;
+                obj.dlErrorsLog = [obj.dlLastErrorsLog, obj.dlOptimalError];
                 obj.dlCustomLog = obj.dlLastCustomLog;
 
             else
@@ -252,6 +252,7 @@ classdef DynaLearn < matlab.mixin.SetGet
                 obj.dlCustomLog = obj.dlCustomLog;
 
             end
+
             p = load([obj.dlStudyDir, dlCheckPointPath, 'params.mat']);
             save([obj.dlPath, '/params.mat'], '-struct', 'p');
             
@@ -687,7 +688,7 @@ classdef DynaLearn < matlab.mixin.SetGet
                         x(c) = obj.dlLastOutputs{j};
                         
                         if c > 1
-                            TempError = TempError + dlRampFunc(x(c) - x(c-1)).^2;
+                            TempError = TempError + dlRampFunc(x(c) - x(c-1)).^4;
                         end
                         
                         c = c + 1;
@@ -709,7 +710,7 @@ classdef DynaLearn < matlab.mixin.SetGet
         
                     end
 
-                    fprintf("\t=>TotalEnergyFactor: %d \n", TempError);
+                    fprintf(" Ep=%d ", TempError);
                     TempError = abs(TempError - dlOutputTargets)^2;
 
                 else
@@ -898,7 +899,7 @@ classdef DynaLearn < matlab.mixin.SetGet
             
             try
                
-                obj.dlExcludeDiverge = dlTrainOptions('dlExludeDiverge');
+                obj.dlExcludeDiverge = dlTrainOptions('dlExcludeDiverge');
                 
             catch
                 
@@ -915,6 +916,17 @@ classdef DynaLearn < matlab.mixin.SetGet
                 
                 dlCheckpointCoefficient = 2.0;
                 fprintf("-->Checkpoint Coefficient for optimal state saving and loading was not determined in options map, default dlCheckpointCoefficient = 2\n");
+                
+            end
+
+            try
+               
+                dlCheckpointLengthCap = dlTrainOptions('dlCheckpointLengthCap');
+                
+            catch
+                
+                dlCheckpointLengthCap = 1000;
+                fprintf("-->Checkpoint LengthCap for optimal state saving and loading was not determined in options map, default value = 2\n");
                 
             end
             
@@ -954,6 +966,7 @@ classdef DynaLearn < matlab.mixin.SetGet
             end            
                 
             i = 0;
+            dlCurrentCheckpointLength = 0;
 
             while i < dlEpochs*dlBatchs
                 
@@ -961,6 +974,8 @@ classdef DynaLearn < matlab.mixin.SetGet
                 
                 for j = 1:dlBatchs
                 
+                    dlCurrentCheckpointLength = dlCurrentCheckpointLength + 1;
+                    
                     if i >= dlEpochs*dlBatchs
 
                         break;
@@ -968,6 +983,7 @@ classdef DynaLearn < matlab.mixin.SetGet
                     end
 
                     fprintf("     --> Tri. %d, Cap. %d\n", i, dlEpochs*dlBatchs);
+                    fprintf("     --> ChL. %d, Cap. %d\n", dlCurrentCheckpointLength, dlCheckpointLengthCap);
                     fprintf("\t-->Batch no. %d of %d\t", j, dlBatchs);
                     set(obj, 'dlTrialNumber', obj.dlTrialNumber + 1);
 
@@ -992,13 +1008,19 @@ classdef DynaLearn < matlab.mixin.SetGet
                     
                     if ~strcmpi(dlCustomLogFlag, "n")
 
+                        if isempty(obj.dlCustomLog)
+
+                            obj.dlCustomLog = cell(max(size(dlCustomLogFlag)), 1);
+
+                        end
+
                         for customLogCount = 1:max(size(dlCustomLogFlag))
 
-                            logfuncname = dlCustomLogFlag;           
+                            logfuncname = dlCustomLogFlag(customLogCount);           
                             dlLogFuncBridge(logfuncname);
                             [cLog, cLabel] = dlLogTempFunc(obj, dlCustomLogArgs);
 
-                            obj.dlCustomLog{customLogCount} = [obj.dlCustomLog, cLog];
+                            obj.dlCustomLog{customLogCount, :} = [obj.dlCustomLog{customLogCount, :}, cLog];
                             obj.dlCustomLogLabel{customLogCount} = cLabel;
 
                         end
@@ -1007,7 +1029,7 @@ classdef DynaLearn < matlab.mixin.SetGet
 
                     if ~isempty(dlTargetParameters)
                         obj.dlCalculateError(dlTargetParameters{j});
-                        fprintf("\t--->Error of this trial = %f\n", obj.dlLastError);
+                        fprintf("\n\t--->Error of this trial = %f\n", obj.dlLastError);
                     end
                     
                     if dlOutputLogFlag
@@ -1027,11 +1049,21 @@ classdef DynaLearn < matlab.mixin.SetGet
                                 if dlAdaptiveLambda == 1
                                     dlLambda = obj.dlAdaptiveLambda();
                                 end
+
+                                dlCurrentCheckpointLength = 0;
                                 obj.dlTrainStep(dlLearningRule, dlLambda, dlTrainOptions);
 
                             elseif obj.dlLastError > dlCheckpointCoefficient*obj.dlOptimalError
 
+                                disp("CoeffcCap")
                                 obj.dlLoadOptimal();
+                                dlCurrentCheckpointLength = 0;
+
+                            elseif dlCheckpointLengthCap < dlCurrentCheckpointLength
+
+                                disp("LengthCap*");
+                                obj.dlLoadOptimal();
+                                dlCurrentCheckpointLength = 0;
 
                             else
                                 
@@ -1074,13 +1106,16 @@ classdef DynaLearn < matlab.mixin.SetGet
 
                         obj.dlOptimalError = dlAvgError;
                         obj.dlSaveOptimal();
+                        dlCurrentCheckpointLength = 0;
 
                         if strcmpi(dlUpdateMode, 'batch')
 
                             obj.dlUpdateError = dlAvgError;
+
                             if dlAdaptiveLambda == 1
                                 dlLambda = obj.dlAdaptiveLambda();
                             end
+
                             obj.dlTrainStep(dlLearningRule, dlLambda, dlTrainOptions);
 
                         end
@@ -1088,6 +1123,13 @@ classdef DynaLearn < matlab.mixin.SetGet
                     elseif dlAvgError > dlCheckpointCoefficient*obj.dlOptimalError
 
                         obj.dlLoadOptimal();
+                        dlCurrentCheckpointLength = 0;
+
+                    elseif dlCheckpointLengthCap < dlCurrentCheckpointLength
+
+                        disp("LengthCap*");
+                        obj.dlLoadOptimal();
+                        dlCurrentCheckpointLength = 0;
 
                     else
 
@@ -1384,10 +1426,8 @@ classdef DynaLearn < matlab.mixin.SetGet
 
                        if ~excludeList(i)
 
-                           disp(lab{i, 1});
-
                            if ~contains(lab{i, 1}, 'Stim')
-        
+
                                wn = w + delta;
                             
                                wn(wn < 0) = 0;
@@ -1655,6 +1695,20 @@ classdef DynaLearn < matlab.mixin.SetGet
           
             end
             
+        end
+
+        function dlLoadOptimalLC(obj)
+
+            try
+
+                obj.dlLoadCheckPoint('/Optimal');
+
+            catch
+
+                fprintf("--->No oprimal file exists. first run a training session with an active checkpoint flag to save an optimal checkpoint.\n");
+          
+            end
+
         end
         
         function dlGraphConstructor(obj) 

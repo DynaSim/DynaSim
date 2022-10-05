@@ -32,7 +32,7 @@ function y = dlLaminarCortexNetLWK(ModelParameters, populationName)
     fprintf("\n--->Population name is %s", populationName); % Name tag or suffix for all names of this dsModel
 
     k1 = 0.07; % Diff. for normal weights (uniform random)
-    k2 = 0.04; % Min connectivity weight
+    k2 = 0.47; % Min connectivity weight
 
     NeAvg = (NeSuperficial + NeMid + NeDeep) / 3;
 
@@ -353,7 +353,7 @@ function y = dlLaminarCortexNetLWK(ModelParameters, populationName)
     for k = 1:Nstim
 
         Aconn = tempconn;
-        Aconn(:, subLayerIndicesInM(1, k):subLayerIndicesInM(2, k)) =  0.47;
+        Aconn(:, subLayerIndicesInM(1, k):subLayerIndicesInM(2, k)) =  0.94;
     
         c = length(s.connections) + 1;
         s.connections(c).direction = [IOping{k}.populations(1).name, '->', pingM.populations(1).name];

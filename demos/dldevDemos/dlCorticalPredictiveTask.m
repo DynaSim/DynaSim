@@ -106,6 +106,8 @@ m.dlSave(); % < 1sec
 
 %% Load DynaLearn Class
 
+clc;
+% model_size_id = 1;
 m = DynaLearn(); % ~ 1sec
 m = m.dlLoad(char("models/dlPredictiveCorticalCircuitModelLWK" + string(model_size_id))); % ~ 10sec, New larger model; keeping track of its activity in Gamma/Beta **
 
@@ -131,7 +133,7 @@ dlInputParameters = {trialParams1, trialParams2, trialParams3};
 dlTargetParameters = {targetParams1, targetParams2, targetParams3};
 dlOutputParameters = outputParams;
 
-TBdata = dlTrialBlockGenerator(dlInputParameters, dlTargetParameters, 200, 200);
+TBdata = dlTrialBlockGenerator(dlInputParameters, dlTargetParameters, 20, 20);
 
 dlTrainOptions = containers.Map(); % Train options; MUST be a map data structure
 dlTrainOptions('dlEpochs') = 100; % % Number of epochs (A.K.A total iterations)
@@ -140,6 +142,7 @@ dlTrainOptions('dlLambda') = 1e-5; % Higher lambda means more changes based on e
     
 dlTrainOptions('dlCheckpoint') = 'true'; % If current step's error is higher based on a threshold, reload last optimal state and continue from that point
 dlTrainOptions('dlCheckpointCoefficient') = 2.047; % A.K.A exploration rate
+dlTrainOptions('dlCheckpointLengthCap') = 7; % If more than 7 steps with no progress passed, return to last checkpoint.
 dlTrainOptions('dlUpdateMode') = 'batch'; % Update on each trial's result or based on batch group results
 
 dlTrainOptions('dlLearningRule') = 'BioDeltaRule'; % Delta rule with a basic change based on biophysical properties 
@@ -148,34 +151,34 @@ dlTrainOptions('dlOutputLogFlag') = 1; % If 0, will not keep outputs
 dlTrainOptions('dlOfflineOutputGenerator') = 0; % If 1, will generate fake-random outputs (only for debugging purposes)
 
 dlTrainOptions('dlAdaptiveLambda') = 0; % Adaptive lambda parameter; recommended for long simulations.
-dlTrainOptions('dlLambdaCap') = 8e-3; % Only if Adaptive lambda is active, recommended to set a upper-bound (UB) or ignore to use default UB (0.01).
+dlTrainOptions('dlLambdaCap') = 100; % Only if Adaptive lambda is active, recommended to set a upper-bound (UB) or ignore to use default UB (0.01).
 dlTrainOptions('dlExcludeDiverge') = 1; % Exclude non-optimals from model log
-dlTrainOptions('dlTrainExcludeList') = {'xPFC', 'xV4'}; % Exclude populations from training
-
-% Initial training on the model to reach a plausible local minimia like
-% the task in the paper the model should also learn the basics of the task.
-% We shortly train the model by cues to put it close to a local minimia.
+dlTrainOptions('dlTrainExcludeList') = {'xPFC', 'xVf4'}; % Exclude populations from training
 
 dlTrainOptions('dlLambda') = 7e-4;
 dlTrainOptions('dlEpochs') = 10;
 dlTrainOptions('dlBatchs') = 3;
 
 argsPowSpectRatio = struct();
+argsNull = [];
 
 argsPowSpectRatio.lf1 = 7;
 argsPowSpectRatio.hf1 = 28;
 argsPowSpectRatio.lf2 = 35;
 argsPowSpectRatio.hf2 = 140;
 
-dlTrainOptions('dlCustomLog') = "dlPowerSpectrumRatio"; % Name of a function which is in the path
-dlTrainOptions('dlCustomLogArgs') = argsPowSpectRatio; % Arguments of your custom function
+dlTrainOptions('dlCustomLog') = ["dlPowerSpectrumRatio", "dlAccuracyBastos2020Task"]; % Name of a function which is in the path
+dlTrainOptions('dlCustomLogArgs') = [argsPowSpectRatio, argsNull]; % Arguments of your custom function
 
 %% Pre-training : Train model to a "non-far" point.
 
 clc;
 
-dlTrainOptions('dlLambda') = 1e-5;
-dlTrainOptions('dlEpochs') = 10;
+dlTrainOptions('dlLambda') = 7e-1;
+dlTrainOptions('dlEpochs') = 100;
+dlTrainOptions('dlCheckpointCoefficient') = 1.4; 
+dlTrainOptions('dlCheckpointLengthCap') = 14;
+
 m.dlOptimalError = 1e7;
 % m.dlResetTraining();
 
@@ -196,11 +199,11 @@ toc;
 
 clc;
 
-dlTrainOptions('dlLambda') = 1e-4; % 1e-11(1) -> 1e-4 (4)
-dlTrainOptions('dlAdaptiveLambda') = 1; % Adaptive lambda parameter; recommended for long simulations.
+dlTrainOptions('dlLambda') = 7e-1; % 1e-11(1) -> 1e-4 (4)
+dlTrainOptions('dlAdaptiveLambda') = 0; % Adaptive lambda parameter; recommended for long simulations.
 dlTrainOptions('dlUpdateMode') = 'trial';
-dlTrainOptions('dlEpochs') = 10;
-dlTrainOptions('dlBatchs') = 10;
+dlTrainOptions('dlEpochs') = 20;
+dlTrainOptions('dlBatchs') = 20;
 
 m.dlResetTraining();
 argsPSR = struct();
@@ -222,7 +225,7 @@ for cnt = 1:1
     disp("----------U1----------");
     m.dlErrorsLog = [m.dlErrorsLog, -1];  
     m.dlOptimalError = 1e9;
-    dlTrainOptions('dlCheckpointCoefficient') = 2.1;
+    dlTrainOptions('dlCheckpointCoefficient') = 1.7;
     m.dlTrain(TBdata.TrB, dlOutputParameters, TBdata.TrT, dlTrainOptions);
     
     disp("----------B-----------");
@@ -234,7 +237,7 @@ for cnt = 1:1
     disp("----------U2----------");
     m.dlErrorsLog = [m.dlErrorsLog, -1]; 
     m.dlOptimalError = 1e9;
-    dlTrainOptions('dlCheckpointCoefficient') = 2.1; 
+    dlTrainOptions('dlCheckpointCoefficient') = 1.7; 
     m.dlTrain(TBdata.TrB, dlOutputParameters, TBdata.TrT, dlTrainOptions);
     
     disp("----------C----------");
@@ -246,7 +249,7 @@ for cnt = 1:1
     disp("----------U3----------");
     m.dlErrorsLog = [m.dlErrorsLog, -1]; 
     m.dlOptimalError = 1e9;
-    dlTrainOptions('dlCheckpointCoefficient') = 2.1;
+    dlTrainOptions('dlCheckpointCoefficient') = 1.7;
     m.dlTrain(TBdata.TrB, dlOutputParameters, TBdata.TrT, dlTrainOptions);
 
 end
