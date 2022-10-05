@@ -26,6 +26,8 @@ classdef DynaLearn < matlab.mixin.SetGet
         dlMexFuncName = []; % Name of Mex function (e.g **********_mex.mex64
 
         dlCurrentSessionValidTrials = 0;
+        dlExcludeDiverge = 1;
+
         dlLastErrorsLog = 1;
         dlLastCustomLog = 1;
         dlWeightsValues = []; % Weights values history {[Npre,Npost,1+Epochs]}
@@ -239,8 +241,17 @@ classdef DynaLearn < matlab.mixin.SetGet
             dlObj = load([obj.dlStudyDir, dlCheckPointPath, 'object.mat']);
             out = dlObj.obj;
             
-            obj.dlErrorsLog = obj.dlLastErrorsLog;
-            obj.dlCustomLog = obj.dlLastCustomLog;
+            if obj.dlExcludeDiverge == 1
+
+                obj.dlErrorsLog = obj.dlLastErrorsLog;
+                obj.dlCustomLog = obj.dlLastCustomLog;
+
+            else
+
+                obj.dlErrorsLog = obj.dlErrorsLog;
+                obj.dlCustomLog = obj.dlCustomLog;
+
+            end
             p = load([obj.dlStudyDir, dlCheckPointPath, 'params.mat']);
             save([obj.dlPath, '/params.mat'], '-struct', 'p');
             
@@ -530,6 +541,7 @@ classdef DynaLearn < matlab.mixin.SetGet
         end
         
         function out = dlMeanFR(obj, dlOutput) % TODO: sampling rate change and adjustments
+            
             x = dlOutput;
             t = linspace(0, size(x, 1), size(x, 1))*obj.dldT*obj.dlDownSampleFactor;
             raster = computeRaster(t, x);
@@ -540,6 +552,7 @@ classdef DynaLearn < matlab.mixin.SetGet
             else
                 out = 0;
             end
+
         end
 
         function out = dlApplyIFRKernel(obj, dlOutput) % TODO: sampling rate change and adjustments
@@ -604,9 +617,9 @@ classdef DynaLearn < matlab.mixin.SetGet
 
                     obj.dlLastOutputs{i} = obj.dlApplyKernel(dlTempOutputs, dlTimeKernel);
                     
-                elseif strcmpi(dlOutputType, 'alfp')
+                elseif strcmpi(dlOutputType, 'astd')
 
-                    obj.dlLastOutputs{i} = mean(var(dlTempOutputs));
+                    obj.dlLastOutputs{i} = mean(std(dlTempOutputs), 'all');
 
                 elseif strcmpi(dlOutputType, 'afr')
 
@@ -631,8 +644,11 @@ classdef DynaLearn < matlab.mixin.SetGet
                         obj.dlLastOutputs{i} = "NaN";
 
                     end
+
                 end
+
             end
+
         end
         
         function dlCalculateError(obj, dlTargetParams)
@@ -693,6 +709,7 @@ classdef DynaLearn < matlab.mixin.SetGet
         
                     end
 
+                    fprintf("\t=>TotalEnergyFactor: %d \n", TempError);
                     TempError = abs(TempError - dlOutputTargets)^2;
 
                 else
@@ -860,7 +877,7 @@ classdef DynaLearn < matlab.mixin.SetGet
                
                 dlCustomLogFlag = dlTrainOptions('dlCustomLog');
                 dlCustomLogArgs = dlTrainOptions('dlCustomLogArgs');
-                fprintf("-->Custom log function '%s' will be called on every trial.\n", dlTrainOptions('dlCustomLog'));
+                fprintf("-->Custom log functions will be called on every trial.\n");
                 
             catch
                 
@@ -879,6 +896,17 @@ classdef DynaLearn < matlab.mixin.SetGet
                 
             end
             
+            try
+               
+                obj.dlExcludeDiverge = dlTrainOptions('dlExludeDiverge');
+                
+            catch
+                
+                obj.dlExcludeDiverge = 1;
+                fprintf("-->ExcludeDiverge was not determined in options map, default dlExcludeDiverge = 1\n");
+                
+            end
+
             try
                
                 dlCheckpointCoefficient = dlTrainOptions('dlCheckpointCoefficient');
@@ -930,9 +958,16 @@ classdef DynaLearn < matlab.mixin.SetGet
             while i < dlEpochs*dlBatchs
                 
                 fprintf("   ->Sel. Total trials %d (Total iterations for this model : %d)\n", max(size(obj.dlLastErrorsLog)), obj.dlTrialNumber);
-
+                
                 for j = 1:dlBatchs
                 
+                    if i >= dlEpochs*dlBatchs
+
+                        break;
+
+                    end
+
+                    fprintf("     --> Tri. %d, Cap. %d\n", i, dlEpochs*dlBatchs);
                     fprintf("\t-->Batch no. %d of %d\t", j, dlBatchs);
                     set(obj, 'dlTrialNumber', obj.dlTrialNumber + 1);
 
@@ -956,12 +991,20 @@ classdef DynaLearn < matlab.mixin.SetGet
                     end
                     
                     if ~strcmpi(dlCustomLogFlag, "n")
-                        logfuncname = dlCustomLogFlag;           
-                        dlLogFuncBridge(logfuncname);
-                        [cLog, cLabel] = dlLogTempFunc(obj, dlCustomLogArgs);
-                        obj.dlCustomLog = [obj.dlCustomLog, cLog];
-                        obj.dlCustomLogLabel = cLabel;
+
+                        for customLogCount = 1:max(size(dlCustomLogFlag))
+
+                            logfuncname = dlCustomLogFlag;           
+                            dlLogFuncBridge(logfuncname);
+                            [cLog, cLabel] = dlLogTempFunc(obj, dlCustomLogArgs);
+
+                            obj.dlCustomLog{customLogCount} = [obj.dlCustomLog, cLog];
+                            obj.dlCustomLogLabel{customLogCount} = cLabel;
+
+                        end
+
                     end
+
                     if ~isempty(dlTargetParameters)
                         obj.dlCalculateError(dlTargetParameters{j});
                         fprintf("\t--->Error of this trial = %f\n", obj.dlLastError);
@@ -1011,6 +1054,8 @@ classdef DynaLearn < matlab.mixin.SetGet
                         end
                         
                     end
+
+                    i = size(obj.dlErrorsLog, 2) - obj.dlCurrentSessionValidTrials;
                     
                 end
                 
@@ -1323,15 +1368,49 @@ classdef DynaLearn < matlab.mixin.SetGet
                    rng('shuffle');
                    w = val{i, 1};
                    delta = (1-w).*(randn(size(w)))*error*dlLambda;
-                    
-                   if ~contains(lab{i, 1}, 'IO')
+                   
+                   try
 
-                       wn = w + delta;
-                    
-                       wn(wn < 0) = 0;
-                       wn(wn > 1) = 1;
-                       val{i, 1} = wn;
-                       deltaL = deltaL + sum(sum(abs(delta)));
+                        excludeList = contains(lab, dlTrainOptions('dlTrainExcludeList'));
+                        excludeFlag = 1;
+
+                   catch
+
+                        excludeFlag = 0;
+
+                   end
+
+                   if excludeFlag
+
+                       if ~excludeList(i)
+
+                           disp(lab{i, 1});
+
+                           if ~contains(lab{i, 1}, 'Stim')
+        
+                               wn = w + delta;
+                            
+                               wn(wn < 0) = 0;
+                               wn(wn > 1) = 1;
+                               val{i, 1} = wn;
+                               deltaL = deltaL + sum(sum(abs(delta)));
+        
+                           end
+
+                       end
+
+                   else
+
+                       if ~contains(lab{i, 1}, 'Stim')
+    
+                           wn = w + delta;
+                        
+                           wn(wn < 0) = 0;
+                           wn(wn > 1) = 1;
+                           val{i, 1} = wn;
+                           deltaL = deltaL + sum(sum(abs(delta)));
+    
+                       end
 
                    end
 
@@ -1549,10 +1628,11 @@ classdef DynaLearn < matlab.mixin.SetGet
             obj.dlOutputLog = [];
             obj.dlErrorsLog = [];
             
-%             obj.dl
+            obj.dlLastErrorsLog = [];
             obj.dlCustomLog = [];
             obj.dlCustomLogLabel = [];
             obj.dlCurrentSessionValidTrials = 0;
+            
         end
         
         function dlSaveOptimal(obj)

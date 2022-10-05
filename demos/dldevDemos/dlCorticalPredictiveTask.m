@@ -14,8 +14,9 @@
 
 clear;clc;
 
-TotalSize = [25, 50, 100, 200];
-Currentsize = TotalSize(1);
+model_size_id = 1;
+TotalSize = [75, 100, 200];
+Currentsize = TotalSize(model_size_id);
 
 %%% Create model parameters struct
 ModelParametersPFC = struct();
@@ -85,8 +86,7 @@ connection3.mechanism_list={'iAMPActx'};
 connection3.parameters={'gAMPA', .27, 'tauAMPA', 4, 'netcon', connectionWeigth3};
 
 % deepEPFC->supEV4
-set1 = [2:5, 16:19];
-set2 = [6:9, 20:23];connectionWeigth4 = 0.27*rand(dsCellPFC.populations(6).size, dsCellV4.populations(1).size) + 0.21;
+connectionWeigth4 = 0.27*rand(dsCellPFC.populations(6).size, dsCellV4.populations(1).size) + 0.21;
 connection3.direction = [dsCellPFC.populations(6).name, '->', dsCellV4.populations(1).name];
 
 connection3.source = dsCellPFC.populations(6).name;
@@ -101,37 +101,37 @@ dsModel = dlConnectModels({dsCellV4, dsCellPFC}, {connection1, connection2, conn
 % Try to use this section only first time or If you have lost your file and
 % you want a new model.
 
-m = DynaLearn(dsModel, 'models/dlPredictiveCorticalCircuitModelLWK1', 'mex'); % ~10 min or less, MEXGEN or < 20 sec, RAWGEN.
+m = DynaLearn(dsModel, char("models/dlPredictiveCorticalCircuitModelLWK" + string(model_size_id)), 'mex'); % ~10 min or less, MEXGEN or < 20 sec, RAWGEN.
 m.dlSave(); % < 1sec
 
 %% Load DynaLearn Class
 
 m = DynaLearn(); % ~ 1sec
-m = m.dlLoad('models/dlPredictiveCorticalCircuitModelLWK1'); % ~ 10sec, New larger model; keeping track of its activity in Gamma/Beta **
+m = m.dlLoad(char("models/dlPredictiveCorticalCircuitModelLWK" + string(model_size_id))); % ~ 10sec, New larger model; keeping track of its activity in Gamma/Beta **
 
 %% Trial: training  script preparation, 50-block and 50-trial
 
 [trialParams1, trialParams2, trialParams3] = dlDemoThreePattern();
 
-outputParams = [{'deepExPFC_V', 1:floor(ModelParametersPFC.NeDeep/3), [400 600] ...
-    , 'alfp'}; {'deepExPFC_V',ceil(ModelParametersPFC.NeDeep/3):floor(2*ModelParametersPFC.NeDeep/3), ...
-    [400 600], 'alfp'}; {'deepExPFC_V', ceil(2*ModelParametersPFC.NeDeep/3):ModelParametersPFC.NeDeep, [400 600], 'alfp'}; ...
-    {'supExPFC_V', 1:ModelParametersPFC.NeSuperficial, [200 800], 'afr'}; ...
-    {'midExPFC_V', 1:ModelParametersPFC.NeMid, [200 800], 'afr'}; ...
-    {'deepExPFC_V', 1:ModelParametersPFC.NeDeep, [200 800], 'afr'}; ...
-    {'supExV4_V', 1:ModelParametersV4.NeSuperficial, [200 800], 'afr'}; ...
-    {'midExV4_V', 1:ModelParametersV4.NeMid, [200 800], 'afr'}; ...
-    {'deepExV4_V', 1:ModelParametersV4.NeDeep, [200 800], 'afr'}];
+outputParams = [{'deepExPFC_V', 1:floor(ModelParametersPFC.NeDeep/3), [500 750] ...
+    , 'astd'}; {'deepExPFC_V',ceil(ModelParametersPFC.NeDeep/3):floor(2*ModelParametersPFC.NeDeep/3), ...
+    [500 750], 'astd'}; {'deepExPFC_V', ceil(2*ModelParametersPFC.NeDeep/3):ModelParametersPFC.NeDeep, [500 750], 'astd'}; ...
+    {'supExPFC_V', 1:ModelParametersPFC.NeSuperficial, [200 900], 'astd'}; ...
+    {'midExPFC_V', 1:ModelParametersPFC.NeMid, [200 900], 'astd'}; ...
+    {'deepExPFC_V', 1:ModelParametersPFC.NeDeep, [200 900], 'astd'}; ...
+    {'supExV4_V', 1:ModelParametersV4.NeSuperficial, [200 900], 'astd'}; ...
+    {'midExV4_V', 1:ModelParametersV4.NeMid, [200 900], 'astd'}; ...
+    {'deepExV4_V', 1:ModelParametersV4.NeDeep, [200 900], 'astd'}];
 
-targetParams1 = [{'TotalSpikesPenalty', 4:9, 160, 0.14}; {'MSE', 1, 40, 0.17}; {'MSE', 2, 20, 0.08}; {'MSE', 3, 20, 0.08}; {'Compare', [1, 2], 0, 0.04}; {'Compare', [1, 3], 0, 0.04}; {'Diff', [2, 3], 0, 0.01}]; % A 
-targetParams2 = [{'TotalSpikesPenalty', 4:9, 160, 0.14}; {'MSE', 2, 40, 0.17}; {'MSE', 1, 20, 0.08}; {'MSE', 3, 20, 0.08}; {'Compare', [2, 1], 0, 0.04}; {'Compare', [2, 3], 0, 0.04}; {'Diff', [1, 3], 0, 0.01}]; % B
-targetParams3 = [{'TotalSpikesPenalty', 4:9, 160, 0.14}; {'MSE', 3, 40, 0.17}; {'MSE', 2, 20, 0.08}; {'MSE', 1, 20, 0.08}; {'Compare', [3, 1], 0, 0.04}; {'Compare', [3, 2], 0, 0.04}; {'Diff', [1, 2], 0, 0.01}]; % C
+targetParams1 = [{'TotalSpikesPenalty', 4, 20, 0.1}; {'TotalSpikesPenalty', 5, 20, 0.1}; {'TotalSpikesPenalty', 6, 10, 0.1}; {'TotalSpikesPenalty', 7, 20, 0.1}; {'TotalSpikesPenalty', 8, 20, 0.1}; {'TotalSpikesPenalty', 9, 10, 0.1}; {'MSE', 1, 30, 0.1}; {'MSE', 2, 15, 0.1}; {'MSE', 3, 15, 0.1}; {'Compare', [1, 2], 0, 0.1}; {'Compare', [1, 3], 0, 0.1}; {'Diff', [2, 3], 0, 0.01}]; % A 
+targetParams2 = [{'TotalSpikesPenalty', 4, 20, 0.1}; {'TotalSpikesPenalty', 5, 20, 0.1}; {'TotalSpikesPenalty', 6, 10, 0.1}; {'TotalSpikesPenalty', 7, 20, 0.1}; {'TotalSpikesPenalty', 8, 20, 0.1}; {'TotalSpikesPenalty', 9, 10, 0.1}; {'MSE', 2, 30, 0.1}; {'MSE', 1, 15, 0.1}; {'MSE', 3, 15, 0.1}; {'Compare', [2, 1], 0, 0.1}; {'Compare', [2, 3], 0, 0.1}; {'Diff', [1, 3], 0, 0.01}]; % B
+targetParams3 = [{'TotalSpikesPenalty', 4, 20, 0.1}; {'TotalSpikesPenalty', 5, 20, 0.1}; {'TotalSpikesPenalty', 6, 10, 0.1}; {'TotalSpikesPenalty', 7, 20, 0.1}; {'TotalSpikesPenalty', 8, 20, 0.1}; {'TotalSpikesPenalty', 9, 10, 0.1}; {'MSE', 3, 30, 0.1}; {'MSE', 2, 15, 0.1}; {'MSE', 1, 15, 0.1}; {'Compare', [3, 2], 0, 0.1}; {'Compare', [3, 1], 0, 0.1}; {'Diff', [2, 1], 0, 0.01}]; % C
 
 dlInputParameters = {trialParams1, trialParams2, trialParams3};
 dlTargetParameters = {targetParams1, targetParams2, targetParams3};
 dlOutputParameters = outputParams;
 
-TBdata = dlTrialBlockGenerator(dlInputParameters, dlTargetParameters, 50, 50);
+TBdata = dlTrialBlockGenerator(dlInputParameters, dlTargetParameters, 200, 200);
 
 dlTrainOptions = containers.Map(); % Train options; MUST be a map data structure
 dlTrainOptions('dlEpochs') = 100; % % Number of epochs (A.K.A total iterations)
@@ -139,7 +139,7 @@ dlTrainOptions('dlBatchs') = 3; % If a scenario requires the training to be base
 dlTrainOptions('dlLambda') = 1e-5; % Higher lambda means more changes based on error, lower may cause model to learn slower or nothing.
     
 dlTrainOptions('dlCheckpoint') = 'true'; % If current step's error is higher based on a threshold, reload last optimal state and continue from that point
-dlTrainOptions('dlCheckpointCoefficient') = 1.74; % A.K.A exploration rate
+dlTrainOptions('dlCheckpointCoefficient') = 2.047; % A.K.A exploration rate
 dlTrainOptions('dlUpdateMode') = 'batch'; % Update on each trial's result or based on batch group results
 
 dlTrainOptions('dlLearningRule') = 'BioDeltaRule'; % Delta rule with a basic change based on biophysical properties 
@@ -149,6 +149,8 @@ dlTrainOptions('dlOfflineOutputGenerator') = 0; % If 1, will generate fake-rando
 
 dlTrainOptions('dlAdaptiveLambda') = 0; % Adaptive lambda parameter; recommended for long simulations.
 dlTrainOptions('dlLambdaCap') = 8e-3; % Only if Adaptive lambda is active, recommended to set a upper-bound (UB) or ignore to use default UB (0.01).
+dlTrainOptions('dlExcludeDiverge') = 1; % Exclude non-optimals from model log
+dlTrainOptions('dlTrainExcludeList') = {'xPFC', 'xV4'}; % Exclude populations from training
 
 % Initial training on the model to reach a plausible local minimia like
 % the task in the paper the model should also learn the basics of the task.
@@ -172,8 +174,8 @@ dlTrainOptions('dlCustomLogArgs') = argsPowSpectRatio; % Arguments of your custo
 
 clc;
 
-dlTrainOptions('dlLambda') = 5e-5;
-dlTrainOptions('dlEpochs') = 5;
+dlTrainOptions('dlLambda') = 1e-5;
+dlTrainOptions('dlEpochs') = 10;
 m.dlOptimalError = 1e7;
 % m.dlResetTraining();
 
@@ -186,16 +188,19 @@ toc;
 
 %% Block-trial phase
 
-% TODO: Remove "far" trials from training by backtrack.
+% TODO: Add average U2B/B2U
+% TODO: 
+
 % TODO: Add raster plotter.
 % TODO: Add live runs (continouos task) option.
 
 clc;
-dlTrainOptions('dlLambda') = 1e-7;
-dlTrainOptions('dlAdaptiveLambda') = 0; % Adaptive lambda parameter; recommended for long simulations.
+
+dlTrainOptions('dlLambda') = 1e-4; % 1e-11(1) -> 1e-4 (4)
+dlTrainOptions('dlAdaptiveLambda') = 1; % Adaptive lambda parameter; recommended for long simulations.
 dlTrainOptions('dlUpdateMode') = 'trial';
 dlTrainOptions('dlEpochs') = 10;
-dlTrainOptions('dlBatchs') = 50;
+dlTrainOptions('dlBatchs') = 10;
 
 m.dlResetTraining();
 argsPSR = struct();
@@ -208,45 +213,49 @@ argsPSR.hf2 = 140;
 dlTrainOptions('dlCustomLog') = "dlPowerSpectrumRatio"; % Name of a function which is in the path
 dlTrainOptions('dlCustomLogArgs') = argsPSR; % Arguments of your custom function
 
-disp("----------A-----------");
-dlTrainOptions('dlCheckpointCoefficient') = 1.7;
-m.dlTrain(TBdata.B1, dlOutputParameters, TBdata.T1, dlTrainOptions);
+for cnt = 1:1
 
-disp("----------U1----------");
-m.dlErrorsLog = [m.dlErrorsLog, -1];  
-m.dlOptimalError = 1e9;
-dlTrainOptions('dlCheckpointCoefficient') = 4.7;
-m.dlTrain(TBdata.TrB, dlOutputParameters, TBdata.TrT, dlTrainOptions);
+    disp("----------A-----------");
+    dlTrainOptions('dlCheckpointCoefficient') = 1.4;
+    m.dlTrain(TBdata.B1, dlOutputParameters, TBdata.T1, dlTrainOptions);
+    
+    disp("----------U1----------");
+    m.dlErrorsLog = [m.dlErrorsLog, -1];  
+    m.dlOptimalError = 1e9;
+    dlTrainOptions('dlCheckpointCoefficient') = 2.1;
+    m.dlTrain(TBdata.TrB, dlOutputParameters, TBdata.TrT, dlTrainOptions);
+    
+    disp("----------B-----------");
+    m.dlErrorsLog = [m.dlErrorsLog, -1]; 
+    m.dlOptimalError = 1e9;
+    dlTrainOptions('dlCheckpointCoefficient') = 1.4; 
+    m.dlTrain(TBdata.B2, dlOutputParameters, TBdata.T2, dlTrainOptions);
+    
+    disp("----------U2----------");
+    m.dlErrorsLog = [m.dlErrorsLog, -1]; 
+    m.dlOptimalError = 1e9;
+    dlTrainOptions('dlCheckpointCoefficient') = 2.1; 
+    m.dlTrain(TBdata.TrB, dlOutputParameters, TBdata.TrT, dlTrainOptions);
+    
+    disp("----------C----------");
+    m.dlErrorsLog = [m.dlErrorsLog, -1]; 
+    m.dlOptimalError = 1e9;
+    dlTrainOptions('dlCheckpointCoefficient') = 1.4;
+    m.dlTrain(TBdata.B3, dlOutputParameters, TBdata.T3, dlTrainOptions);
+    
+    disp("----------U3----------");
+    m.dlErrorsLog = [m.dlErrorsLog, -1]; 
+    m.dlOptimalError = 1e9;
+    dlTrainOptions('dlCheckpointCoefficient') = 2.1;
+    m.dlTrain(TBdata.TrB, dlOutputParameters, TBdata.TrT, dlTrainOptions);
 
-disp("----------B-----------");
-m.dlErrorsLog = [m.dlErrorsLog, -1]; 
-m.dlOptimalError = 1e9;
-dlTrainOptions('dlCheckpointCoefficient') = 1.7; 
-m.dlTrain(TBdata.B2, dlOutputParameters, TBdata.T2, dlTrainOptions);
-
-disp("----------U2----------");
-m.dlErrorsLog = [m.dlErrorsLog, -1]; 
-m.dlOptimalError = 1e9;
-dlTrainOptions('dlCheckpointCoefficient') = 4.7; 
-m.dlTrain(TBdata.TrB, dlOutputParameters, TBdata.TrT, dlTrainOptions);
-
-disp("----------C----------");
-m.dlErrorsLog = [m.dlErrorsLog, -1]; 
-m.dlOptimalError = 1e9;
-dlTrainOptions('dlCheckpointCoefficient') = 1.7;
-m.dlTrain(TBdata.B3, dlOutputParameters, TBdata.T3, dlTrainOptions);
-
-disp("----------U3----------");
-m.dlErrorsLog = [m.dlErrorsLog, -1]; 
-m.dlOptimalError = 1e9;
-dlTrainOptions('dlCheckpointCoefficient') = 4.7;
-m.dlTrain(TBdata.TrB, dlOutputParameters, TBdata.TrT, dlTrainOptions);
+end
 
 %% Errors log plot
 
 % clc;
 
-wk = 2;
+wk = 1;
 figure('position', [0, 0, 1400, 700]);
 n = max(size(m.dlErrorsLog));
 x = zeros(1, ceil(n/wk));
@@ -254,22 +263,25 @@ x = zeros(1, ceil(n/wk));
 for i = 0:wk:n-wk
     x(ceil((i+1)/wk)) = min(m.dlErrorsLog(i+1:i+wk));
 end
-tlab = ["A", "U1", "B", "U2", "C", "U3"];
-w = 100;
+
+tlab = ["A", "U1", "B", "U2", "C", "U3", "A", "U4", "B", "U5", "C", "U6"];
+w = 50;
 errorcap = max(x);
 
 for k = 1:6
     
-    for l = 0:5
-        fill([l*w, l*w, l*w+w, l*w+w], [0, errorcap*1.2, errorcap*1.2, 0], [sin(l*0.2), 1, cos(l*0.2)]);hold('on');
+    for l = 0:11
+
+        fill([l*w, l*w, l*w+w, l*w+w], [0, errorcap*1.2, errorcap*1.2, 0], [sin(l*0.1), 1, cos(l*0.1)]);hold('on');
         text(l*w+10, errorcap*1.1, tlab(l+1));
         ylim([0 errorcap*1.2]);
+
     end
 
 end
 
 xlim([0 600]);
-plot(x);grid("on");
+plot(x(x>0));grid("on");
 title("Errors in trials");
 
 %% Plot Local-field potentials
@@ -281,7 +293,7 @@ m.dlPlotAllPotentials('lfp');
 
 clc;
 tic;
-for i = 1:3
+for i = 1:1
 
     m.dlRunSimulation(dlInputParameters{i}, dlOutputParameters);
 
@@ -292,9 +304,9 @@ toc;
 
 clc;
 
-w = 100;
+w = 50;
 cnt = 1;
-tlab = ["A", "U1", "B", "U2", "C", "U3"];
+tlab = ["A", "U1", "B", "U2", "C", "U3", "A", "U4", "B", "U5", "C", "U6"];
 f = figure("Position", [0 0 1500 1000]);
 
 set1 = [2:5, 16:19];
@@ -302,10 +314,10 @@ set2 = [6:9, 20:23];
 
 for i = 1:4
 
-    for l = 0:5    
+    for l = 0:11
 
         subplot(2, 2, i);
-        fill([l*w, l*w, l*w+w, l*w+w], [5, 40, 40, 5], [sin(l*0.2), 1, cos(l*0.2)], 'HandleVisibility','off');
+        fill([l*w, l*w, l*w+w, l*w+w], [5, 40, 40, 5], [sin(l*0.1), 1, cos(l*0.1)], 'HandleVisibility','off');
         hold('on');
 
     end
@@ -314,10 +326,16 @@ end
 
 for i = set2
 
-    q = m.dlCustomLog(i, 601:1200);  
+    for j = 1:6
+        if j == 1
+            q = m.dlCustomLog(i, 1:100);
+        else
+%             q = q + m.dlCustomLog   
+        end
+    end
     subplot(2, 2, mod(cnt-1, 4)+1);
     plot(q, 'DisplayName', m.dlCustomLogLabel{i});
-    legend("Location", "southwest"); 
+    legend("Location", "southwest");
 
     if i > 15
 
@@ -325,58 +343,7 @@ for i = set2
         qu = max(max(q), max(m.dlCustomLog(i-14, :)));
         ylim([ql-1 qu+1]);
 
-        for l = 0:5
-            text((l+0.5)*w, qu+0.5, tlab(l+1));
-        end
-
-        xlabel(m.dlCustomLogLabel{i} + " and " + m.dlCustomLogLabel{i-14});
-    
-    end
-
-    hold("on");
-    grid("on");
-    cnt = cnt + 1;
-
-end
-
-sgtitle("Relative Beta to Gamma power band ratio.");
-
-%%
-
-clc;
-
-w = 100;
-cnt = 1;
-tlab = ["A", "U1", "B", "U2", "C", "U3"];
-figure("Position", [0 0 1500 1000]);
-% f.Name = "aaaaaaa";
-
-for i = 1:4
-
-    for l = 0:5    
-
-        subplot(2, 2, i);
-        fill([l*w, l*w, l*w+w, l*w+w], [5, 30, 30, 5], [sin(l*0.2), 1, cos(l*0.2)], 'HandleVisibility','off');
-        hold('on');
-
-    end
-
-end
-
-for i = [6:9, 20:23]
-
-    q = m.dlCustomLog(i, :);  
-    subplot(2, 2, mod(cnt-1, 4)+1);
-    plot(q, 'DisplayName', m.dlCustomLogLabel{i});
-    legend("Location", "southwest"); 
-
-    if i > 15
-
-        ql = min(min(q, m.dlCustomLog(i-14, :)));
-        qu = max(max(q, m.dlCustomLog(i-14, :)));
-        ylim([ql-1 qu+1]);
-                
-        for l = 0:5
+        for l = 0:11
             text((l+0.5)*w, qu+0.5, tlab(l+1));
         end
 
