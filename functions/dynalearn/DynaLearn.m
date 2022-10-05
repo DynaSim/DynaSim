@@ -243,8 +243,9 @@ classdef DynaLearn < matlab.mixin.SetGet
 
             if obj.dlExcludeDiverge == 1
 
-                obj.dlErrorsLog = [obj.dlLastErrorsLog, obj.dlOptimalError];
+                obj.dlErrorsLog = [obj.dlLastErrorsLog, obj.dlOptimalError*(1+(rand(1)-0.5)/100)];
                 obj.dlCustomLog = obj.dlLastCustomLog;
+                save([obj.dlStudyDir, dlCheckPointPath, 'object.mat'], 'obj');
 
             else
 
@@ -677,7 +678,11 @@ classdef DynaLearn < matlab.mixin.SetGet
                 elseif strcmpi(dlErrorType, 'MSE')
                     
                     TempError = abs(obj.dlLastOutputs{dlOutputIndices} - dlOutputTargets)^2;
+                
+                elseif strcmpi(dlErrorType, 'MQE')
                     
+                    TempError = abs(obj.dlLastOutputs{dlOutputIndices} - dlOutputTargets)^4;
+                
                 elseif strcmpi(dlErrorType, 'Compare')
                     
                     x = dlOutputIndices;
@@ -711,7 +716,7 @@ classdef DynaLearn < matlab.mixin.SetGet
                     end
 
                     fprintf(" Ep=%d ", TempError);
-                    TempError = abs(TempError - dlOutputTargets)^2;
+                    TempError = abs(TempError - dlOutputTargets)^4;
 
                 else
                     

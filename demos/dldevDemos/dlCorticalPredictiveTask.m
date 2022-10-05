@@ -14,7 +14,7 @@
 
 clear;clc;
 
-model_size_id = 1;
+model_size_id = 2;
 TotalSize = [75, 100, 200];
 Currentsize = TotalSize(model_size_id);
 
@@ -34,7 +34,7 @@ ModelParametersPFC.NPvDeep = ceil(0.01*Currentsize);
 
 ModelParametersPFC.Nin = 6;
 ModelParametersPFC.Nout = 6;
-ModelParametersPFC.NoiseRate = 10.5; % 15%
+ModelParametersPFC.NoiseRate = 14; % 20%
 ModelParametersPFC.Nstim = 3;
 
 %%% Area V4 layer sizes (relative) 
@@ -50,7 +50,7 @@ ModelParametersV4.NPvDeep = ceil(0.02*Currentsize);
 
 ModelParametersV4.Nin = 6;
 ModelParametersV4.Nout = 6;
-ModelParametersV4.NoiseRate = 14; % 20%
+ModelParametersV4.NoiseRate = 17; % 25%
 ModelParametersV4.Nstim = 3;
 
 %%% Call Laminar Cortex Constructor Functions
@@ -65,7 +65,7 @@ connection1.direction = [dsCellV4.populations(1).name, '->', dsCellPFC.populatio
 connection1.source = dsCellV4.populations(1).name;
 connection1.target = dsCellPFC.populations(4).name;
 connection1.mechanism_list={'iAMPActx'};
-connection1.parameters={'gAMPA', .24, 'tauAMPA', 4, 'netcon', connectionWeigth1};
+connection1.parameters={'gAMPA', .3, 'tauAMPA', 1, 'netcon', connectionWeigth1};
 
 % supEV4->midPVPFC
 connectionWeigth2 = 0.21*rand(dsCellV4.populations(1).size, dsCellPFC.populations(5).size) + 0.27;
@@ -74,7 +74,7 @@ connection2.direction = [dsCellV4.populations(1).name, '->', dsCellPFC.populatio
 connection2.source = dsCellV4.populations(1).name;
 connection2.target = dsCellPFC.populations(5).name;
 connection2.mechanism_list={'iAMPActx'};
-connection2.parameters={'gAMPA', .24, 'tauAMPA', 4, 'netcon', connectionWeigth2};
+connection2.parameters={'gAMPA', .3, 'tauAMPA', 1, 'netcon', connectionWeigth2};
 
 % deepEPFC->supSOMV4
 connectionWeigth3 = 0.27*rand(dsCellPFC.populations(6).size, dsCellV4.populations(2).size) + 0.21;
@@ -83,7 +83,7 @@ connection3.direction = [dsCellPFC.populations(6).name, '->', dsCellV4.populatio
 connection3.source = dsCellPFC.populations(6).name;
 connection3.target = dsCellV4.populations(2).name;
 connection3.mechanism_list={'iAMPActx'};
-connection3.parameters={'gAMPA', .27, 'tauAMPA', 4, 'netcon', connectionWeigth3};
+connection3.parameters={'gAMPA', .9, 'tauAMPA', 1, 'netcon', connectionWeigth3};
 
 % deepEPFC->supEV4
 connectionWeigth4 = 0.27*rand(dsCellPFC.populations(6).size, dsCellV4.populations(1).size) + 0.21;
@@ -92,7 +92,7 @@ connection3.direction = [dsCellPFC.populations(6).name, '->', dsCellV4.populatio
 connection3.source = dsCellPFC.populations(6).name;
 connection3.target = dsCellV4.populations(1).name;
 connection3.mechanism_list={'iAMPActx'};
-connection3.parameters={'gAMPA', .27, 'tauAMPA', 4, 'netcon', connectionWeigth4};
+connection3.parameters={'gAMPA', .9, 'tauAMPA', 1, 'netcon', connectionWeigth4};
 
 %%% Finalization
 dsModel = dlConnectModels({dsCellV4, dsCellPFC}, {connection1, connection2, connection3});
@@ -125,9 +125,9 @@ outputParams = [{'deepExPFC_V', 1:floor(ModelParametersPFC.NeDeep/3), [500 750] 
     {'midExV4_V', 1:ModelParametersV4.NeMid, [200 900], 'astd'}; ...
     {'deepExV4_V', 1:ModelParametersV4.NeDeep, [200 900], 'astd'}];
 
-targetParams1 = [{'TotalSpikesPenalty', 4, 20, 0.1}; {'TotalSpikesPenalty', 5, 20, 0.1}; {'TotalSpikesPenalty', 6, 10, 0.1}; {'TotalSpikesPenalty', 7, 20, 0.1}; {'TotalSpikesPenalty', 8, 20, 0.1}; {'TotalSpikesPenalty', 9, 10, 0.1}; {'MSE', 1, 30, 0.1}; {'MSE', 2, 15, 0.1}; {'MSE', 3, 15, 0.1}; {'Compare', [1, 2], 0, 0.1}; {'Compare', [1, 3], 0, 0.1}; {'Diff', [2, 3], 0, 0.01}]; % A 
-targetParams2 = [{'TotalSpikesPenalty', 4, 20, 0.1}; {'TotalSpikesPenalty', 5, 20, 0.1}; {'TotalSpikesPenalty', 6, 10, 0.1}; {'TotalSpikesPenalty', 7, 20, 0.1}; {'TotalSpikesPenalty', 8, 20, 0.1}; {'TotalSpikesPenalty', 9, 10, 0.1}; {'MSE', 2, 30, 0.1}; {'MSE', 1, 15, 0.1}; {'MSE', 3, 15, 0.1}; {'Compare', [2, 1], 0, 0.1}; {'Compare', [2, 3], 0, 0.1}; {'Diff', [1, 3], 0, 0.01}]; % B
-targetParams3 = [{'TotalSpikesPenalty', 4, 20, 0.1}; {'TotalSpikesPenalty', 5, 20, 0.1}; {'TotalSpikesPenalty', 6, 10, 0.1}; {'TotalSpikesPenalty', 7, 20, 0.1}; {'TotalSpikesPenalty', 8, 20, 0.1}; {'TotalSpikesPenalty', 9, 10, 0.1}; {'MSE', 3, 30, 0.1}; {'MSE', 2, 15, 0.1}; {'MSE', 1, 15, 0.1}; {'Compare', [3, 2], 0, 0.1}; {'Compare', [3, 1], 0, 0.1}; {'Diff', [2, 1], 0, 0.01}]; % C
+targetParams1 = [{'TotalSpikesPenalty', 4, 15, 0.1}; {'TotalSpikesPenalty', 5, 15, 0.1}; {'TotalSpikesPenalty', 6, 7, 0.1}; {'TotalSpikesPenalty', 7, 15, 0.1}; {'TotalSpikesPenalty', 8, 15, 0.1}; {'TotalSpikesPenalty', 9, 7, 0.1}; {'MQE', 1, 10, 0.1}; {'MSE', 2, 5, 0.1}; {'MSE', 3, 5, 0.1}; {'Compare', [1, 2], 0, 0.1}; {'Compare', [1, 3], 0, 0.1}; {'Diff', [2, 3], 0, 0.01}]; % A 
+targetParams2 = [{'TotalSpikesPenalty', 4, 15, 0.1}; {'TotalSpikesPenalty', 5, 15, 0.1}; {'TotalSpikesPenalty', 6, 7, 0.1}; {'TotalSpikesPenalty', 7, 15, 0.1}; {'TotalSpikesPenalty', 8, 15, 0.1}; {'TotalSpikesPenalty', 9, 7, 0.1}; {'MQE', 2, 10, 0.1}; {'MSE', 1, 5, 0.1}; {'MSE', 3, 5, 0.1}; {'Compare', [2, 1], 0, 0.1}; {'Compare', [2, 3], 0, 0.1}; {'Diff', [1, 3], 0, 0.01}]; % B
+targetParams3 = [{'TotalSpikesPenalty', 4, 15, 0.1}; {'TotalSpikesPenalty', 5, 15, 0.1}; {'TotalSpikesPenalty', 6, 7, 0.1}; {'TotalSpikesPenalty', 7, 15, 0.1}; {'TotalSpikesPenalty', 8, 15, 0.1}; {'TotalSpikesPenalty', 9, 7, 0.1}; {'MQE', 3, 10, 0.1}; {'MSE', 2, 5, 0.1}; {'MSE', 1, 5, 0.1}; {'Compare', [3, 2], 0, 0.1}; {'Compare', [3, 1], 0, 0.1}; {'Diff', [2, 1], 0, 0.01}]; % C
 
 dlInputParameters = {trialParams1, trialParams2, trialParams3};
 dlTargetParameters = {targetParams1, targetParams2, targetParams3};
@@ -150,8 +150,8 @@ dlTrainOptions('dlSimulationFlag') = 1; % If 0, will not run simulations (only f
 dlTrainOptions('dlOutputLogFlag') = 1; % If 0, will not keep outputs
 dlTrainOptions('dlOfflineOutputGenerator') = 0; % If 1, will generate fake-random outputs (only for debugging purposes)
 
-dlTrainOptions('dlAdaptiveLambda') = 0; % Adaptive lambda parameter; recommended for long simulations.
-dlTrainOptions('dlLambdaCap') = 100; % Only if Adaptive lambda is active, recommended to set a upper-bound (UB) or ignore to use default UB (0.01).
+dlTrainOptions('dlAdaptiveLambda') = 1; % Adaptive lambda parameter; recommended for long simulations.
+dlTrainOptions('dlLambdaCap') = 1.1; % Only if Adaptive lambda is active, recommended to set a upper-bound (UB) or ignore to use default UB (0.01).
 dlTrainOptions('dlExcludeDiverge') = 1; % Exclude non-optimals from model log
 dlTrainOptions('dlTrainExcludeList') = {'xPFC', 'xVf4'}; % Exclude populations from training
 
@@ -175,7 +175,7 @@ dlTrainOptions('dlCustomLogArgs') = [argsPowSpectRatio, argsNull]; % Arguments o
 clc;
 
 dlTrainOptions('dlLambda') = 7e-1;
-dlTrainOptions('dlEpochs') = 100;
+dlTrainOptions('dlEpochs') = 10;
 dlTrainOptions('dlCheckpointCoefficient') = 1.4; 
 dlTrainOptions('dlCheckpointLengthCap') = 14;
 
