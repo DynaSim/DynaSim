@@ -1,4 +1,4 @@
-%% Dual-Area simulation of predictive task implemented on DynaSim/DynaLearn via Reinforcement learning 
+%% Single-Area simulation of predictive task implemented on DynaSim/DynaLearn via Reinforcement learning 
 
 % Based on papers: 
 % [Layer and rhythm specificity for predictive routing, A.M Bastos et. al, 2020]
@@ -10,12 +10,12 @@
 % @Septembre2022
 % @HNXJ
 
-%% Model parameters (Dual-area, V4->PFC)
+%% Model parameters (Single-area, PFC)
 
 clear;clc;
 
 model_size_id = 1;
-TotalSize = [50, 50, 50, 50];
+TotalSize = [50, 50, 50, 50, 50];
 Currentsize = TotalSize(model_size_id);
 
 %%% Create model parameters struct
@@ -37,65 +37,11 @@ ModelParametersPFC.Nout = 6;
 ModelParametersPFC.NoiseRate = 4; % 6%
 ModelParametersPFC.Nstim = 3;
 
-%%% Area V4 layer sizes (relative) 
-ModelParametersV4.NeSuperficial = ceil(0.25*Currentsize);
-ModelParametersV4.NSomSuperficial = ceil(0.03*Currentsize);
-ModelParametersV4.NPvSuperficial = ceil(0.07*Currentsize);
-ModelParametersV4.NeMid = ceil(0.12*Currentsize);
-ModelParametersV4.NSomMid = 0;
-ModelParametersV4.NPvMid = ceil(0.03*Currentsize);
-ModelParametersV4.NeDeep = ceil(0.45*Currentsize);
-ModelParametersV4.NSomDeep = ceil(0.03*Currentsize);
-ModelParametersV4.NPvDeep = ceil(0.02*Currentsize);
-
-ModelParametersV4.Nin = 6;
-ModelParametersV4.Nout = 6;
-ModelParametersV4.NoiseRate = 7; % 10%
-ModelParametersV4.Nstim = 3;
-
 %%% Call Laminar Cortex Constructor Functions
 dsCellPFC = dlLaminarCortexNetLWK(ModelParametersPFC, 'PFC'); % Laminar PFC model with specific parameters
-dsCellV4 = dlLaminarCortexNetLWK(ModelParametersV4, 'V4'); % Laminar V4 model with specific parameters
-
-%%% Connecting two models: Define connections between two areas
-% supEV4->midEPFC
-connectionWeigth1 = 0.21*rand(dsCellV4.populations(1).size, dsCellPFC.populations(4).size) + 0.27;
-connection1.direction = [dsCellV4.populations(1).name, '->', dsCellPFC.populations(4).name];
-
-connection1.source = dsCellV4.populations(1).name;
-connection1.target = dsCellPFC.populations(4).name;
-connection1.mechanism_list={'iAMPActx'};
-connection1.parameters={'gAMPA', .3, 'tauAMPA', 1, 'netcon', connectionWeigth1};
-
-% supEV4->midPVPFC
-connectionWeigth2 = 0.21*rand(dsCellV4.populations(1).size, dsCellPFC.populations(5).size) + 0.27;
-connection2.direction = [dsCellV4.populations(1).name, '->', dsCellPFC.populations(5).name];
-
-connection2.source = dsCellV4.populations(1).name;
-connection2.target = dsCellPFC.populations(5).name;
-connection2.mechanism_list={'iAMPActx'};
-connection2.parameters={'gAMPA', .3, 'tauAMPA', 1, 'netcon', connectionWeigth2};
-
-% deepEPFC->supSOMV4
-connectionWeigth3 = 0.27*rand(dsCellPFC.populations(6).size, dsCellV4.populations(2).size) + 0.21;
-connection3.direction = [dsCellPFC.populations(6).name, '->', dsCellV4.populations(2).name];
-
-connection3.source = dsCellPFC.populations(6).name;
-connection3.target = dsCellV4.populations(2).name;
-connection3.mechanism_list={'iAMPActx'};
-connection3.parameters={'gAMPA', .9, 'tauAMPA', 1, 'netcon', connectionWeigth3};
-
-% deepEPFC->supEV4
-connectionWeigth4 = 0.27*rand(dsCellPFC.populations(6).size, dsCellV4.populations(1).size) + 0.21;
-connection4.direction = [dsCellPFC.populations(6).name, '->', dsCellV4.populations(1).name];
-
-connection4.source = dsCellPFC.populations(6).name;
-connection4.target = dsCellV4.populations(1).name;
-connection4.mechanism_list={'iAMPActx'};
-connection4.parameters={'gAMPA', .9, 'tauAMPA', 1, 'netcon', connectionWeigth4};
 
 %%% Finalization
-dsModel = dlConnectModels({dsCellV4, dsCellPFC}, {connection1, connection2, connection3, connection4});
+dsModel = dsCellPFC;
 
 %% Create DynaLearn Class 
 % Try to use this section only first time or If you have lost your file and
@@ -115,17 +61,14 @@ m = m.dlLoad(char("models/dlPredictiveCorticalCircuitModelLWK" + string(model_si
 
 clc;
 
-[trialParams1, trialParams2, trialParams3] = dlDemoThreePattern();
+[trialParams1, trialParams2, trialParams3] = dlDemoThreePattern('xPFC');
 
 outputParams = [{'deepExPFC_V', 1:floor(ModelParametersPFC.NeDeep/3), [400 750] ...
     , 'afr'}; {'deepExPFC_V',ceil(ModelParametersPFC.NeDeep/3):floor(2*ModelParametersPFC.NeDeep/3), ...
     [400 750], 'afr'}; {'deepExPFC_V', ceil(2*ModelParametersPFC.NeDeep/3):ModelParametersPFC.NeDeep, [400 750], 'afr'}; ...
     {'supExPFC_V', 1:ModelParametersPFC.NeSuperficial, [300 800], 'afr'}; ...
     {'midExPFC_V', 1:ModelParametersPFC.NeMid, [300 800], 'afr'}; ...
-    {'deepExPFC_V', 1:ModelParametersPFC.NeDeep, [300 800], 'afr'}; ...
-    {'supExV4_V', 1:ModelParametersV4.NeSuperficial, [300 800], 'afr'}; ...
-    {'midExV4_V', 1:ModelParametersV4.NeMid, [300 800], 'afr'}; ...
-    {'deepExV4_V', 1:ModelParametersV4.NeDeep, [300 800], 'afr'}];
+    {'deepExPFC_V', 1:ModelParametersPFC.NeDeep, [300 800], 'afr'}];
 
 targetParams1 = [{'TotalSpikesPenalty', 4:7, 100, 0.4}; {'MSE', 1, 50, 0.05}; {'MSE', 2, 25, 0.01}; {'MSE', 3, 25, 0.01}; {'Compare', [1, 2], 0, 0.2}; {'Compare', [1, 3], 0, 0.2}; {'Diff', [2, 3], 0, 0.01}]; % A 
 targetParams2 = [{'TotalSpikesPenalty', 4:7, 100, 0.4}; {'MSE', 2, 50, 0.05}; {'MSE', 1, 25, 0.01}; {'MSE', 3, 25, 0.01}; {'Compare', [2, 1], 0, 0.2}; {'Compare', [2, 3], 0, 0.2}; {'Diff', [1, 3], 0, 0.01}]; % B
