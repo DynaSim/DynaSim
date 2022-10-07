@@ -14,8 +14,8 @@
 
 clear;clc;
 
-model_size_id = 2;
-TotalSize = [75, 100, 200];
+model_size_id = 1;
+TotalSize = [50, 50, 50, 50];
 Currentsize = TotalSize(model_size_id);
 
 %%% Create model parameters struct
@@ -34,7 +34,7 @@ ModelParametersPFC.NPvDeep = ceil(0.01*Currentsize);
 
 ModelParametersPFC.Nin = 6;
 ModelParametersPFC.Nout = 6;
-ModelParametersPFC.NoiseRate = 14; % 20%
+ModelParametersPFC.NoiseRate = 4; % 6%
 ModelParametersPFC.Nstim = 3;
 
 %%% Area V4 layer sizes (relative) 
@@ -50,7 +50,7 @@ ModelParametersV4.NPvDeep = ceil(0.02*Currentsize);
 
 ModelParametersV4.Nin = 6;
 ModelParametersV4.Nout = 6;
-ModelParametersV4.NoiseRate = 17; % 25%
+ModelParametersV4.NoiseRate = 7; % 10%
 ModelParametersV4.Nstim = 3;
 
 %%% Call Laminar Cortex Constructor Functions
@@ -87,15 +87,15 @@ connection3.parameters={'gAMPA', .9, 'tauAMPA', 1, 'netcon', connectionWeigth3};
 
 % deepEPFC->supEV4
 connectionWeigth4 = 0.27*rand(dsCellPFC.populations(6).size, dsCellV4.populations(1).size) + 0.21;
-connection3.direction = [dsCellPFC.populations(6).name, '->', dsCellV4.populations(1).name];
+connection4.direction = [dsCellPFC.populations(6).name, '->', dsCellV4.populations(1).name];
 
-connection3.source = dsCellPFC.populations(6).name;
-connection3.target = dsCellV4.populations(1).name;
-connection3.mechanism_list={'iAMPActx'};
-connection3.parameters={'gAMPA', .9, 'tauAMPA', 1, 'netcon', connectionWeigth4};
+connection4.source = dsCellPFC.populations(6).name;
+connection4.target = dsCellV4.populations(1).name;
+connection4.mechanism_list={'iAMPActx'};
+connection4.parameters={'gAMPA', .9, 'tauAMPA', 1, 'netcon', connectionWeigth4};
 
 %%% Finalization
-dsModel = dlConnectModels({dsCellV4, dsCellPFC}, {connection1, connection2, connection3});
+dsModel = dlConnectModels({dsCellV4, dsCellPFC}, {connection1, connection2, connection3, connection4});
 
 %% Create DynaLearn Class 
 % Try to use this section only first time or If you have lost your file and
@@ -113,27 +113,29 @@ m = m.dlLoad(char("models/dlPredictiveCorticalCircuitModelLWK" + string(model_si
 
 %% Trial: training  script preparation, 50-block and 50-trial
 
+clc;
+
 [trialParams1, trialParams2, trialParams3] = dlDemoThreePattern();
 
-outputParams = [{'deepExPFC_V', 1:floor(ModelParametersPFC.NeDeep/3), [500 750] ...
-    , 'astd'}; {'deepExPFC_V',ceil(ModelParametersPFC.NeDeep/3):floor(2*ModelParametersPFC.NeDeep/3), ...
-    [500 750], 'astd'}; {'deepExPFC_V', ceil(2*ModelParametersPFC.NeDeep/3):ModelParametersPFC.NeDeep, [500 750], 'astd'}; ...
-    {'supExPFC_V', 1:ModelParametersPFC.NeSuperficial, [200 900], 'astd'}; ...
-    {'midExPFC_V', 1:ModelParametersPFC.NeMid, [200 900], 'astd'}; ...
-    {'deepExPFC_V', 1:ModelParametersPFC.NeDeep, [200 900], 'astd'}; ...
-    {'supExV4_V', 1:ModelParametersV4.NeSuperficial, [200 900], 'astd'}; ...
-    {'midExV4_V', 1:ModelParametersV4.NeMid, [200 900], 'astd'}; ...
-    {'deepExV4_V', 1:ModelParametersV4.NeDeep, [200 900], 'astd'}];
+outputParams = [{'deepExPFC_V', 1:floor(ModelParametersPFC.NeDeep/3), [400 750] ...
+    , 'afr'}; {'deepExPFC_V',ceil(ModelParametersPFC.NeDeep/3):floor(2*ModelParametersPFC.NeDeep/3), ...
+    [400 750], 'afr'}; {'deepExPFC_V', ceil(2*ModelParametersPFC.NeDeep/3):ModelParametersPFC.NeDeep, [400 750], 'afr'}; ...
+    {'supExPFC_V', 1:ModelParametersPFC.NeSuperficial, [300 800], 'afr'}; ...
+    {'midExPFC_V', 1:ModelParametersPFC.NeMid, [300 800], 'afr'}; ...
+    {'deepExPFC_V', 1:ModelParametersPFC.NeDeep, [300 800], 'afr'}; ...
+    {'supExV4_V', 1:ModelParametersV4.NeSuperficial, [300 800], 'afr'}; ...
+    {'midExV4_V', 1:ModelParametersV4.NeMid, [300 800], 'afr'}; ...
+    {'deepExV4_V', 1:ModelParametersV4.NeDeep, [300 800], 'afr'}];
 
-targetParams1 = [{'TotalSpikesPenalty', 4, 15, 0.1}; {'TotalSpikesPenalty', 5, 15, 0.1}; {'TotalSpikesPenalty', 6, 7, 0.1}; {'TotalSpikesPenalty', 7, 15, 0.1}; {'TotalSpikesPenalty', 8, 15, 0.1}; {'TotalSpikesPenalty', 9, 7, 0.1}; {'MQE', 1, 10, 0.1}; {'MSE', 2, 5, 0.1}; {'MSE', 3, 5, 0.1}; {'Compare', [1, 2], 0, 0.1}; {'Compare', [1, 3], 0, 0.1}; {'Diff', [2, 3], 0, 0.01}]; % A 
-targetParams2 = [{'TotalSpikesPenalty', 4, 15, 0.1}; {'TotalSpikesPenalty', 5, 15, 0.1}; {'TotalSpikesPenalty', 6, 7, 0.1}; {'TotalSpikesPenalty', 7, 15, 0.1}; {'TotalSpikesPenalty', 8, 15, 0.1}; {'TotalSpikesPenalty', 9, 7, 0.1}; {'MQE', 2, 10, 0.1}; {'MSE', 1, 5, 0.1}; {'MSE', 3, 5, 0.1}; {'Compare', [2, 1], 0, 0.1}; {'Compare', [2, 3], 0, 0.1}; {'Diff', [1, 3], 0, 0.01}]; % B
-targetParams3 = [{'TotalSpikesPenalty', 4, 15, 0.1}; {'TotalSpikesPenalty', 5, 15, 0.1}; {'TotalSpikesPenalty', 6, 7, 0.1}; {'TotalSpikesPenalty', 7, 15, 0.1}; {'TotalSpikesPenalty', 8, 15, 0.1}; {'TotalSpikesPenalty', 9, 7, 0.1}; {'MQE', 3, 10, 0.1}; {'MSE', 2, 5, 0.1}; {'MSE', 1, 5, 0.1}; {'Compare', [3, 2], 0, 0.1}; {'Compare', [3, 1], 0, 0.1}; {'Diff', [2, 1], 0, 0.01}]; % C
+targetParams1 = [{'TotalSpikesPenalty', 4:7, 100, 0.4}; {'MSE', 1, 50, 0.05}; {'MSE', 2, 25, 0.01}; {'MSE', 3, 25, 0.01}; {'Compare', [1, 2], 0, 0.2}; {'Compare', [1, 3], 0, 0.2}; {'Diff', [2, 3], 0, 0.01}]; % A 
+targetParams2 = [{'TotalSpikesPenalty', 4:7, 100, 0.4}; {'MSE', 2, 50, 0.05}; {'MSE', 1, 25, 0.01}; {'MSE', 3, 25, 0.01}; {'Compare', [2, 1], 0, 0.2}; {'Compare', [2, 3], 0, 0.2}; {'Diff', [1, 3], 0, 0.01}]; % B
+targetParams3 = [{'TotalSpikesPenalty', 4:7, 100, 0.4}; {'MSE', 3, 50, 0.05}; {'MSE', 2, 25, 0.01}; {'MSE', 1, 25, 0.01}; {'Compare', [3, 2], 0, 0.2}; {'Compare', [3, 1], 0, 0.2}; {'Diff', [2, 1], 0, 0.01}]; % C
 
 dlInputParameters = {trialParams1, trialParams2, trialParams3};
 dlTargetParameters = {targetParams1, targetParams2, targetParams3};
 dlOutputParameters = outputParams;
 
-TBdata = dlTrialBlockGenerator(dlInputParameters, dlTargetParameters, 20, 20);
+TBdata = dlTrialBlockGenerator(dlInputParameters, dlTargetParameters, 25, 25);
 
 dlTrainOptions = containers.Map(); % Train options; MUST be a map data structure
 dlTrainOptions('dlEpochs') = 100; % % Number of epochs (A.K.A total iterations)
@@ -153,7 +155,7 @@ dlTrainOptions('dlOfflineOutputGenerator') = 0; % If 1, will generate fake-rando
 dlTrainOptions('dlAdaptiveLambda') = 1; % Adaptive lambda parameter; recommended for long simulations.
 dlTrainOptions('dlLambdaCap') = 1.1; % Only if Adaptive lambda is active, recommended to set a upper-bound (UB) or ignore to use default UB (0.01).
 dlTrainOptions('dlExcludeDiverge') = 1; % Exclude non-optimals from model log
-dlTrainOptions('dlTrainExcludeList') = {'xPFC', 'xVf4'}; % Exclude populations from training
+dlTrainOptions('dlTrainExcludeList') = {'Stim'}; % Exclude populations from training
 
 dlTrainOptions('dlLambda') = 7e-4;
 dlTrainOptions('dlEpochs') = 10;
@@ -164,8 +166,8 @@ argsNull = [];
 
 argsPowSpectRatio.lf1 = 7;
 argsPowSpectRatio.hf1 = 28;
-argsPowSpectRatio.lf2 = 35;
-argsPowSpectRatio.hf2 = 140;
+argsPowSpectRatio.lf2 = 42;
+argsPowSpectRatio.hf2 = 84;
 
 dlTrainOptions('dlCustomLog') = ["dlPowerSpectrumRatio", "dlAccuracyBastos2020Task"]; % Name of a function which is in the path
 dlTrainOptions('dlCustomLogArgs') = [argsPowSpectRatio, argsNull]; % Arguments of your custom function
@@ -174,20 +176,18 @@ dlTrainOptions('dlCustomLogArgs') = [argsPowSpectRatio, argsNull]; % Arguments o
 
 clc;
 
-dlTrainOptions('dlLambda') = 7e-1;
-dlTrainOptions('dlEpochs') = 10;
+dlTrainOptions('dlLambda') = 4e-2;
+dlTrainOptions('dlEpochs') = 5;
 dlTrainOptions('dlCheckpointCoefficient') = 1.4; 
 dlTrainOptions('dlCheckpointLengthCap') = 14;
 
 m.dlOptimalError = 1e7;
-% m.dlResetTraining();
+m.dlResetTraining();
 
 tic;
-m.dlTrain(dlInputParameters, dlOutputParameters, dlTargetParameters, dlTrainOptions); % <16 sec per trial
+% m.dlTrain(dlInputParameters, dlOutputParameters, dlTargetParameters, dlTrainOptions); % <16 sec per trial
 toc;
 
-% disp(m.dlCurrentSessionValidTrials);
-% disp(size(m.dlErrorsLog));
 
 %% Block-trial phase
 
@@ -199,11 +199,18 @@ toc;
 
 clc;
 
-dlTrainOptions('dlLambda') = 7e-1; % 1e-11(1) -> 1e-4 (4)
+dlTrainOptions('dlLambda') = 1e-9; % 1e-11(1) -> 1e-4 (4)
 dlTrainOptions('dlAdaptiveLambda') = 0; % Adaptive lambda parameter; recommended for long simulations.
 dlTrainOptions('dlUpdateMode') = 'trial';
-dlTrainOptions('dlEpochs') = 20;
-dlTrainOptions('dlBatchs') = 20;
+dlTrainOptions('dlLearningRule') = 'BioDeltaRule';
+
+dlTrainOptions('dlTrainExcludeList') = {'Stimuli'};
+dlTrainOptions('dlCheckpointLengthCap') = 15;
+dlTrainOptions('dlEpochs') = 2;
+dlTrainOptions('dlBatchs') = 25;
+
+dlTrainOptions('dlExcludeDiverge') = 1;
+CheckCoeff = 1.25;
 
 m.dlResetTraining();
 argsPSR = struct();
@@ -213,43 +220,43 @@ argsPSR.hf1 = 28;
 argsPSR.lf2 = 35;
 argsPSR.hf2 = 140;
 
-dlTrainOptions('dlCustomLog') = "dlPowerSpectrumRatio"; % Name of a function which is in the path
-dlTrainOptions('dlCustomLogArgs') = argsPSR; % Arguments of your custom function
+dlTrainOptions('dlCustomLog') = ["dlPowerSpectrumRatio", "dlAccuracyBastos2020Task"]; % Name of a function which is in the path
+dlTrainOptions('dlCustomLogArgs') = [argsPSR, argsNull]; % Arguments of your custom function
 
 for cnt = 1:1
 
     disp("----------A-----------");
-    dlTrainOptions('dlCheckpointCoefficient') = 1.4;
+    dlTrainOptions('dlCheckpointCoefficient') = CheckCoeff;
     m.dlTrain(TBdata.B1, dlOutputParameters, TBdata.T1, dlTrainOptions);
     
     disp("----------U1----------");
     m.dlErrorsLog = [m.dlErrorsLog, -1];  
     m.dlOptimalError = 1e9;
-    dlTrainOptions('dlCheckpointCoefficient') = 1.7;
+    dlTrainOptions('dlCheckpointCoefficient') = CheckCoeff*1.2;
     m.dlTrain(TBdata.TrB, dlOutputParameters, TBdata.TrT, dlTrainOptions);
     
     disp("----------B-----------");
     m.dlErrorsLog = [m.dlErrorsLog, -1]; 
     m.dlOptimalError = 1e9;
-    dlTrainOptions('dlCheckpointCoefficient') = 1.4; 
+    dlTrainOptions('dlCheckpointCoefficient') = CheckCoeff; 
     m.dlTrain(TBdata.B2, dlOutputParameters, TBdata.T2, dlTrainOptions);
     
     disp("----------U2----------");
     m.dlErrorsLog = [m.dlErrorsLog, -1]; 
     m.dlOptimalError = 1e9;
-    dlTrainOptions('dlCheckpointCoefficient') = 1.7; 
+    dlTrainOptions('dlCheckpointCoefficient') = CheckCoeff*1.2; 
     m.dlTrain(TBdata.TrB, dlOutputParameters, TBdata.TrT, dlTrainOptions);
     
     disp("----------C----------");
     m.dlErrorsLog = [m.dlErrorsLog, -1]; 
     m.dlOptimalError = 1e9;
-    dlTrainOptions('dlCheckpointCoefficient') = 1.4;
+    dlTrainOptions('dlCheckpointCoefficient') = CheckCoeff;
     m.dlTrain(TBdata.B3, dlOutputParameters, TBdata.T3, dlTrainOptions);
     
     disp("----------U3----------");
     m.dlErrorsLog = [m.dlErrorsLog, -1]; 
     m.dlOptimalError = 1e9;
-    dlTrainOptions('dlCheckpointCoefficient') = 1.7;
+    dlTrainOptions('dlCheckpointCoefficient') = CheckCoeff*1.2;
     m.dlTrain(TBdata.TrB, dlOutputParameters, TBdata.TrT, dlTrainOptions);
 
 end
@@ -296,7 +303,7 @@ m.dlPlotAllPotentials('lfp');
 
 clc;
 tic;
-for i = 1:1
+for i = 1:3
 
     m.dlRunSimulation(dlInputParameters{i}, dlOutputParameters);
 
@@ -307,13 +314,16 @@ toc;
 
 clc;
 
-w = 50;
+w = 200;
 cnt = 1;
 tlab = ["A", "U1", "B", "U2", "C", "U3", "A", "U4", "B", "U5", "C", "U6"];
 f = figure("Position", [0 0 1500 1000]);
 
 set1 = [2:5, 16:19];
 set2 = [6:9, 20:23];
+
+ratioLog = {m.dlCustomLog(1, :)};
+ratioLog = cell2mat(ratioLog{1});
 
 for i = 1:4
 
@@ -327,30 +337,28 @@ for i = 1:4
 
 end
 
+dispLabels = m.dlCustomLogLabel{1};
+
 for i = set2
 
-    for j = 1:6
-        if j == 1
-            q = m.dlCustomLog(i, 1:100);
-        else
-%             q = q + m.dlCustomLog   
-        end
-    end
     subplot(2, 2, mod(cnt-1, 4)+1);
-    plot(q, 'DisplayName', m.dlCustomLogLabel{i});
+    plot(ratioLog(i, :), 'DisplayName', dispLabels{i});
     legend("Location", "southwest");
 
     if i > 15
 
-        ql = min(min(q), min(m.dlCustomLog(i-14, :)));
-        qu = max(max(q), max(m.dlCustomLog(i-14, :)));
+        q = ratioLog(i-14, :);
+        q2 = ratioLog(i, :);
+
+        ql = min(min(q), min(q2));
+        qu = max(max(q), max(q2));
         ylim([ql-1 qu+1]);
 
         for l = 0:11
             text((l+0.5)*w, qu+0.5, tlab(l+1));
         end
 
-        xlabel(m.dlCustomLogLabel{i} + " and " + m.dlCustomLogLabel{i-14});
+        xlabel(dispLabels{i} + " and " + dispLabels{i-14});
     
     end
 
@@ -361,5 +369,81 @@ for i = set2
 end
 
 sgtitle("Relative Beta to Gamma power band ratio.");
+
+%% AVG Beta to Gamma ratio (relative) in trials during predictive task training
+
+clc;
+
+w = 100;
+cnt = 1;
+tlab = ["Predictable", "Unpredictable"];
+f = figure("Position", [0 0 1500 1000]);
+
+set1 = [2:5, 16:19];
+set2 = [6:9, 20:23];
+
+ratioLog = {m.dlCustomLog(1, :)};
+ratioLog = cell2mat(ratioLog{1});
+
+for i = 1:4
+
+    for l = 0:1
+
+        subplot(2, 2, i);
+        fill([l*w, l*w, l*w+w, l*w+w], [0, 40, 40, 0], [sin(l*0.9), 0.75, cos(l*0.001)], 'HandleVisibility','off');
+        hold('on');
+
+    end
+
+end
+
+dispLabels = m.dlCustomLogLabel{1};
+ratioLogAvg = zeros(size(ratioLog, 1), 200);
+K = 11;
+
+for j = 1:K
+
+    ratioLogAvg(:, :) = ratioLogAvg + ratioLog(:, (j-1)*200 + 1:j*200)/K;
+
+end
+
+for j = 1:size(ratioLogAvg, 1)
+
+    ratioLogAvg(j, 1:196) = conv(ratioLogAvg(j, :), ones(1, 5)/5, "valid");
+
+end
+
+for i = set2
+
+
+
+    subplot(2, 2, mod(cnt-1, 4)+1);
+    plot(ratioLogAvg(i, :), 'DisplayName', dispLabels{i});
+    legend("Location", "southwest");
+
+    if i > 15
+
+        q = ratioLogAvg(i-14, :);
+        q2 = ratioLogAvg(i, :);
+
+        ql = min(min(q), min(q2));
+        qu = max(max(q), max(q2));
+        ylim([ql-1 qu+1]);
+
+        for l = 0:1
+            text((l+0.5)*w, qu+0.5, tlab(l+1));
+        end
+
+        title(dispLabels{i} + " and " + dispLabels{i-14});
+    
+    end
+
+    hold("on");
+    grid("on");
+    cnt = cnt + 1;
+
+end
+
+sgtitle("Average Beta/Gamma power band ratio across (14) different trial transitions");
 
 %% End
