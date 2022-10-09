@@ -14,8 +14,8 @@
 
 clear;clc;
 
-model_size_id = 1;
-TotalSize = [50, 50, 50, 50, 50];
+model_size_id = 2;
+TotalSize = [40, 40, 40, 40, 40];
 Currentsize = TotalSize(model_size_id);
 
 %%% Create model parameters struct
@@ -23,13 +23,13 @@ ModelParametersPFC = struct();
 
 %%% Area PFC layer sizes (relative)
 ModelParametersPFC.NeSuperficial = ceil(0.3*Currentsize);
-ModelParametersPFC.NSomSuperficial = ceil(0.02*Currentsize);
-ModelParametersPFC.NPvSuperficial = ceil(0.04*Currentsize);
+ModelParametersPFC.NSomSuperficial = ceil(0.04*Currentsize);
+ModelParametersPFC.NPvSuperficial = ceil(0.07*Currentsize);
 ModelParametersPFC.NeMid = ceil(0.14*Currentsize);
 ModelParametersPFC.NSomMid = 0;
-ModelParametersPFC.NPvMid = ceil(0.02*Currentsize);
+ModelParametersPFC.NPvMid = ceil(0.04*Currentsize);
 ModelParametersPFC.NeDeep = ceil(0.45*Currentsize);
-ModelParametersPFC.NSomDeep = ceil(0.02*Currentsize);
+ModelParametersPFC.NSomDeep = ceil(0.04*Currentsize);
 ModelParametersPFC.NPvDeep = ceil(0.01*Currentsize);
 
 ModelParametersPFC.Nin = 6;
@@ -68,11 +68,14 @@ outputParams = [{'deepExPFC_V', 1:floor(ModelParametersPFC.NeDeep/3), [400 750] 
     [400 750], 'afr'}; {'deepExPFC_V', ceil(2*ModelParametersPFC.NeDeep/3):ModelParametersPFC.NeDeep, [400 750], 'afr'}; ...
     {'supExPFC_V', 1:ModelParametersPFC.NeSuperficial, [300 800], 'afr'}; ...
     {'midExPFC_V', 1:ModelParametersPFC.NeMid, [300 800], 'afr'}; ...
-    {'deepExPFC_V', 1:ModelParametersPFC.NeDeep, [300 800], 'afr'}];
+    {'deepExPFC_V', 1:ModelParametersPFC.NeDeep, [300 800], 'afr'}; ...
+    {'supIPVxPFC_V', 1:ModelParametersPFC.NPvSuperficial, [300 800], 'afr'}; ...
+    {'midIPVxPFC_V', 1:ModelParametersPFC.NPvMid, [300 800], 'afr'}; ...
+    {'deepIPVxPFC_V', 1:ModelParametersPFC.NPvDeep, [300 800], 'afr'}];
 
-targetParams1 = [{'TotalSpikesPenalty', 4:7, 100, 0.4}; {'MSE', 1, 50, 0.05}; {'MSE', 2, 25, 0.01}; {'MSE', 3, 25, 0.01}; {'Compare', [1, 2], 0, 0.2}; {'Compare', [1, 3], 0, 0.2}; {'Diff', [2, 3], 0, 0.01}]; % A 
-targetParams2 = [{'TotalSpikesPenalty', 4:7, 100, 0.4}; {'MSE', 2, 50, 0.05}; {'MSE', 1, 25, 0.01}; {'MSE', 3, 25, 0.01}; {'Compare', [2, 1], 0, 0.2}; {'Compare', [2, 3], 0, 0.2}; {'Diff', [1, 3], 0, 0.01}]; % B
-targetParams3 = [{'TotalSpikesPenalty', 4:7, 100, 0.4}; {'MSE', 3, 50, 0.05}; {'MSE', 2, 25, 0.01}; {'MSE', 1, 25, 0.01}; {'Compare', [3, 2], 0, 0.2}; {'Compare', [3, 1], 0, 0.2}; {'Diff', [2, 1], 0, 0.01}]; % C
+targetParams1 = [{'TotalSpikesPenalty', 4:7, 100, 0.1}; {'MSE', 1, 30, 0.1}; {'Compare', [1, 2], 0, 0.1}; {'Compare', [1, 3], 0, 0.1}; {'Diff', [2, 3], 0, 0.01}]; % A 
+targetParams2 = [{'TotalSpikesPenalty', 4:7, 100, 0.1}; {'MSE', 2, 30, 0.1}; {'Compare', [2, 1], 0, 0.1}; {'Compare', [2, 3], 0, 0.1}; {'Diff', [1, 3], 0, 0.01}]; % B
+targetParams3 = [{'TotalSpikesPenalty', 4:7, 100, 0.1}; {'MSE', 3, 30, 0.1}; {'Compare', [3, 2], 0, 0.1}; {'Compare', [3, 1], 0, 0.1}; {'Diff', [2, 1], 0, 0.01}]; % C
 
 dlInputParameters = {trialParams1, trialParams2, trialParams3};
 dlTargetParameters = {targetParams1, targetParams2, targetParams3};
@@ -134,15 +137,15 @@ toc;
 
 %% Block-trial phase
 
-% TODO: Add average U2B/B2U
-% TODO: 
-
-% TODO: Add raster plotter.
 % TODO: Add live runs (continouos task) option.
+
+%
+% TODOOOOO: ADD BACKTRACK STEP OF DELTA
+%
 
 clc;
 
-dlTrainOptions('dlLambda') = 1e-9; % 1e-11(1) -> 1e-4 (4)
+dlTrainOptions('dlLambda') = 1e-8; % 1e-11(1) -> 1e-4 (4)
 dlTrainOptions('dlAdaptiveLambda') = 0; % Adaptive lambda parameter; recommended for long simulations.
 dlTrainOptions('dlUpdateMode') = 'trial';
 dlTrainOptions('dlLearningRule') = 'BioDeltaRule';
@@ -152,16 +155,14 @@ dlTrainOptions('dlCheckpointLengthCap') = 15;
 dlTrainOptions('dlEpochs') = 2;
 dlTrainOptions('dlBatchs') = 25;
 
-dlTrainOptions('dlExcludeDiverge') = 1;
 CheckCoeff = 1.25;
-
 m.dlResetTraining();
 argsPSR = struct();
 
-argsPSR.lf1 = 7;
-argsPSR.hf1 = 28;
-argsPSR.lf2 = 35;
-argsPSR.hf2 = 140;
+argsPSR.lf1 = 12;
+argsPSR.hf1 = 30;
+argsPSR.lf2 = 40;
+argsPSR.hf2 = 100;
 
 dlTrainOptions('dlCustomLog') = ["dlPowerSpectrumRatio", "dlAccuracyBastos2020Task"]; % Name of a function which is in the path
 dlTrainOptions('dlCustomLogArgs') = [argsPSR, argsNull]; % Arguments of your custom function
@@ -169,36 +170,37 @@ dlTrainOptions('dlCustomLogArgs') = [argsPSR, argsNull]; % Arguments of your cus
 for cnt = 1:1
 
     disp("----------A-----------");
+    dlTrainOptions('dlExcludeDiverge') = 1;
     dlTrainOptions('dlCheckpointCoefficient') = CheckCoeff;
     m.dlTrain(TBdata.B1, dlOutputParameters, TBdata.T1, dlTrainOptions);
     
     disp("----------U1----------");
     m.dlErrorsLog = [m.dlErrorsLog, -1];  
-    m.dlOptimalError = 1e9;
+    m.dlOptimalError = 1e9;dlTrainOptions('dlExcludeDiverge') = 0;
     dlTrainOptions('dlCheckpointCoefficient') = CheckCoeff*1.2;
     m.dlTrain(TBdata.TrB, dlOutputParameters, TBdata.TrT, dlTrainOptions);
     
     disp("----------B-----------");
     m.dlErrorsLog = [m.dlErrorsLog, -1]; 
-    m.dlOptimalError = 1e9;
+    m.dlOptimalError = 1e9;dlTrainOptions('dlExcludeDiverge') = 1;
     dlTrainOptions('dlCheckpointCoefficient') = CheckCoeff; 
     m.dlTrain(TBdata.B2, dlOutputParameters, TBdata.T2, dlTrainOptions);
     
     disp("----------U2----------");
     m.dlErrorsLog = [m.dlErrorsLog, -1]; 
-    m.dlOptimalError = 1e9;
+    m.dlOptimalError = 1e9;dlTrainOptions('dlExcludeDiverge') = 0;
     dlTrainOptions('dlCheckpointCoefficient') = CheckCoeff*1.2; 
     m.dlTrain(TBdata.TrB, dlOutputParameters, TBdata.TrT, dlTrainOptions);
     
     disp("----------C----------");
     m.dlErrorsLog = [m.dlErrorsLog, -1]; 
-    m.dlOptimalError = 1e9;
+    m.dlOptimalError = 1e9;dlTrainOptions('dlExcludeDiverge') = 1;
     dlTrainOptions('dlCheckpointCoefficient') = CheckCoeff;
     m.dlTrain(TBdata.B3, dlOutputParameters, TBdata.T3, dlTrainOptions);
     
     disp("----------U3----------");
     m.dlErrorsLog = [m.dlErrorsLog, -1]; 
-    m.dlOptimalError = 1e9;
+    m.dlOptimalError = 1e9;dlTrainOptions('dlExcludeDiverge') = 0;
     dlTrainOptions('dlCheckpointCoefficient') = CheckCoeff*1.2;
     m.dlTrain(TBdata.TrB, dlOutputParameters, TBdata.TrT, dlTrainOptions);
 
@@ -223,7 +225,7 @@ errorcap = max(x);
 
 for k = 1:6
     
-    for l = 0:11
+    for l = 0:5
 
         fill([l*w, l*w, l*w+w, l*w+w], [0, errorcap*1.2, errorcap*1.2, 0], [sin(l*0.1), 1, cos(l*0.1)]);hold('on');
         text(l*w+10, errorcap*1.1, tlab(l+1));
@@ -233,7 +235,7 @@ for k = 1:6
 
 end
 
-xlim([0 600]);
+xlim([0 300]);
 plot(x(x>0));grid("on");
 title("Errors in trials");
 
@@ -257,7 +259,7 @@ toc;
 
 clc;
 
-w = 200;
+w = 50;
 cnt = 1;
 tlab = ["A", "U1", "B", "U2", "C", "U3", "A", "U4", "B", "U5", "C", "U6"];
 f = figure("Position", [0 0 1500 1000]);
@@ -270,10 +272,10 @@ ratioLog = cell2mat(ratioLog{1});
 
 for i = 1:4
 
-    for l = 0:11
+    for l = 0:5
 
         subplot(2, 2, i);
-        fill([l*w, l*w, l*w+w, l*w+w], [5, 40, 40, 5], [sin(l*0.1), 1, cos(l*0.1)], 'HandleVisibility','off');
+        fill([l*w, l*w, l*w+w, l*w+w], [0, 40, 40, 0], [sin(l*0.1), 1, cos(l*0.1)], 'HandleVisibility','off');
         hold('on');
 
     end
@@ -282,29 +284,25 @@ end
 
 dispLabels = m.dlCustomLogLabel{1};
 
-for i = set2
+for i = 2:9
 
     subplot(2, 2, mod(cnt-1, 4)+1);
     plot(ratioLog(i, :), 'DisplayName', dispLabels{i});
     legend("Location", "southwest");
 
-    if i > 15
+    if i > 4
 
-        q = ratioLog(i-14, :);
+        q = ratioLog(i-4, :);
         q2 = ratioLog(i, :);
-
         ql = min(min(q), min(q2));
         qu = max(max(q), max(q2));
-        ylim([ql-1 qu+1]);
-
-        for l = 0:11
-            text((l+0.5)*w, qu+0.5, tlab(l+1));
-        end
-
-        xlabel(dispLabels{i} + " and " + dispLabels{i-14});
     
+        ylim([ql-1 qu+1]);
+        title(dispLabels{i} + " and " + dispLabels{i-4});
+
     end
 
+    
     hold("on");
     grid("on");
     cnt = cnt + 1;
