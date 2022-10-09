@@ -246,13 +246,35 @@ classdef DynaLearn < matlab.mixin.SetGet
             
             if obj.dlExcludeDiverge == 1
 
-%                 k = size(obj.dlLastCustomLog, 2);
-
-%                 obj.dlLastErrorsLog = obj.dlLastErrorsLog;;
-%                 disp(size(obj.dlLastCustomLog(:, k)));
-%                 disp(size(obj.dlLastCustomLog(:, k+1)));
+                obj.dlErrorsLog = obj.dlLastErrorsLog;
+                obj.dlCustomLog = obj.dlLastCustomLog;
                 
-%                 obj.dlLastCustomLog(:, k+1) = obj.dlLastCustomLog(:, k);
+                save([obj.dlStudyDir, dlCheckPointPath, 'object.mat'], 'obj');
+
+            else
+
+                obj.dlErrorsLog = obj.dlErrorsLog;
+                obj.dlCustomLog = obj.dlCustomLog;
+
+            end
+
+            p = load([obj.dlStudyDir, dlCheckPointPath, 'params.mat']);
+            save([obj.dlPath, '/params.mat'], '-struct', 'p');
+            
+        end
+
+        function out = dlLoadCheckPointLX(obj, dlCheckPointPath) % TODO eliminate test*
+            
+            fprintf("\t\tCheckpoint file loaded from %s \n", [obj.dlStudyDir, dlCheckPointPath]);
+            dlObj = load([obj.dlStudyDir, dlCheckPointPath, 'object.mat']);
+            out = dlObj.obj;
+            
+            if obj.dlExcludeDiverge == 1
+
+                k = size(obj.dlLastCustomLog, 2);
+                obj.dlLastErrorsLog = [obj.dlLastErrorsLog, obj.dlLastErrorsLog(k)];
+
+                obj.dlLastCustomLog(:, k+1) = obj.dlLastCustomLog(:, k);
                 obj.dlErrorsLog = obj.dlLastErrorsLog;
                 obj.dlCustomLog = obj.dlLastCustomLog;
                 
@@ -1105,7 +1127,7 @@ classdef DynaLearn < matlab.mixin.SetGet
                             elseif dlCheckpointLengthCap < dlCurrentCheckpointLength
 
                                 disp("LengthCap*");
-                                obj.dlLoadOptimal();
+                                obj.dlLoadOptimalLX();
                                 dlCurrentCheckpointLength = 0;
 
                             else
@@ -1174,7 +1196,7 @@ classdef DynaLearn < matlab.mixin.SetGet
                     elseif dlCheckpointLengthCap < dlCurrentCheckpointLength
 
                         disp("LengthCap*");
-                        obj.dlLoadOptimal();
+                        obj.dlLoadOptimalLX();
                         dlCurrentCheckpointLength = 0;
 
                     else
@@ -1779,6 +1801,20 @@ classdef DynaLearn < matlab.mixin.SetGet
 %           
 %             end
             
+        end
+
+        function dlLoadOptimalLX(obj)
+                    
+        %             try
+        
+                        obj.dlLoadCheckPointLX('/Optimal');
+        
+        %             catch
+        % 
+        %                 fprintf("--->No oprimal file exists. first run a training session with an active checkpoint flag to save an optimal checkpoint.\n");
+        %           
+        %             end
+                    
         end
 
         function dlLoadOptimalLC(obj)
