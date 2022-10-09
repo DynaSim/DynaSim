@@ -27,7 +27,7 @@ classdef DynaLearn < matlab.mixin.SetGet
 
         dlCurrentSessionValidTrials = 0;
         dlEnhancedDeltaRuleState = 1;
-        dlLastWeightChanges = []; % Backtrack compare cache
+        dlLastWeightChanges = []; % To keep track of optimal changes
         dlExcludeDiverge = 0;
 
         dlLastErrorsLog = 1;
@@ -50,6 +50,8 @@ classdef DynaLearn < matlab.mixin.SetGet
         dlLastDelta = -1;
         dlLambdaCap = 1e-2;
 
+        dlOptimalWeightChanges = [];
+        dlOptimalWeightChangesFlag = 0;
 
         % MetaLR
         dlMetaMu = 0.01;
@@ -60,8 +62,6 @@ classdef DynaLearn < matlab.mixin.SetGet
         dlCustomLog = {};
         dlCustomLogLabel = [];
         dlSimulationTool = "mex";
-        
-%         dlXcSTDP = 0;
 
     end
 
@@ -738,6 +738,19 @@ classdef DynaLearn < matlab.mixin.SetGet
                     fprintf(" Ep=%d ", TempError);
                     TempError = abs(TempError - dlOutputTargets)^2;
 
+                elseif strcmpi(dlErrorType, 'BGPenalty')
+                    
+                    argsPSR = struct();
+
+                    argsPSR.lf1 = 10;
+                    argsPSR.hf1 = 30;
+                    argsPSR.lf2 = 40;
+                    argsPSR.hf2 = 100;
+
+                    TempError = 1000/mean(dlPowerSpectrumRatio(obj, argsPSR), 'all');
+                    fprintf(" REp=%d ", TempError);
+                    TempError = abs(TempError - dlOutputTargets)^2;
+
                 else
                     
                     fprintf("Undefined error type ""%s""\n", dlErrorType);
@@ -1071,6 +1084,8 @@ classdef DynaLearn < matlab.mixin.SetGet
                             if obj.dlLastError < obj.dlOptimalError
 
                                 obj.dlOptimalError = obj.dlLastError;
+                                obj.dlOptimalWeightChanges = obj.dlLastWeightChanges;
+                                obj.dlOptimalWeightChangesFlag = 1;
                                 obj.dlSaveOptimal();
 
                                 obj.dlUpdateError = obj.dlLastError;
@@ -1133,7 +1148,10 @@ classdef DynaLearn < matlab.mixin.SetGet
                     if dlAvgError < obj.dlOptimalError
 
                         obj.dlOptimalError = dlAvgError;
+                        obj.dlOptimalWeightChanges = obj.dlLastWeightChanges;
+                        obj.dlOptimalWeightChangesFlag = 1;
                         obj.dlSaveOptimal();
+
                         dlCurrentCheckpointLength = 0;
 
                         if strcmpi(dlUpdateMode, 'batch')
@@ -1204,10 +1222,25 @@ classdef DynaLearn < matlab.mixin.SetGet
             %%% Local plasticity rules
 
             try
+
                 Local_LR_Params = dlTrainOptions('Local_LR_Params');
                 localFlag = true;
+
             catch
+
                 localFlag = false;
+
+            end
+
+            try
+
+                dlEnhancedMomentum = dlTrainOptions('dlEnhancedMomentum');
+
+            catch
+
+                dlEnhancedMomentum = 0.81;
+                disp("----->Deflt. used Momntm. = 0.81");
+
             end
 
             if localFlag
@@ -1457,7 +1490,6 @@ classdef DynaLearn < matlab.mixin.SetGet
                    if ~excludeList(i)
 
                        wn = w - delta;
-%                        disp(lab{i, 1});
 
                        wn(wn < 0) = 0;
                        wn(wn > 1) = 1;
@@ -1469,67 +1501,41 @@ classdef DynaLearn < matlab.mixin.SetGet
                end
            
            elseif strcmpi(dlLearningRule, 'EnhancedDeltaRule')
-            
-               if obj.dlEnhancedDeltaRuleState == 1
-
-                   obj.dlEnhancedDeltaRuleState = -1;
-                   
-               elseif obj.dlEnhancedDeltaRuleState == -1
-
-                   obj.dlEnhancedDeltaRuleState = 1;
-
-               end
-
-               % TODO make a two choce decision problem.
 
                for i = l'
 
                    rng('shuffle');
                    w = val{i, 1};
-                   delta = (1-w*0.9).*(rand(size(w))-0.5)*error*dlLambda;
+                   delta = (1-w*0.5).*(rand(size(w))-0.5)*error*dlLambda;
                    obj.dlLastWeightChanges{i} = delta;
+
+                   if obj.dlOptimalWeightChangesFlag
+
+                       delta = delta*(1-dlEnhancedMomentum) + obj.dlOptimalWeightChanges{i}*dlEnhancedMomentum;
+                       disp("---->Momentum used.");
+
+                   end
 
                    try
 
                         excludeList = contains(lab, dlTrainOptions('dlTrainExcludeList'));
-                        excludeFlag = 1;
 
                    catch
 
-                        excludeFlag = 0;
+                        excludeList = contains(lab, 'x');
+                        excludeList = excludeList * 0;
 
                    end
 
-                   if excludeFlag
+                   if ~excludeList(i)
 
-                       if ~excludeList(i)
+                       wn = w - delta;
 
-                           if ~contains(lab{i, 1}, 'Stim')
-
-                               wn = w - delta;
-                                
-                               wn(wn < 0) = 0;
-                               wn(wn > 1) = 1;
-                               val{i, 1} = wn;
-                               deltaL = deltaL + sum(sum(abs(delta)));
-        
-                           end
-
-                       end
-
-                   else
-
-                       if ~contains(lab{i, 1}, 'Stim')
+                       wn(wn < 0) = 0;
+                       wn(wn > 1) = 1;
+                       val{i, 1} = wn;
+                       deltaL = deltaL + sum(sum(abs(delta)));
     
-                           wn = w - delta;
-                        
-                           wn(wn < 0) = 0;
-                           wn(wn > 1) = 1;
-                           val{i, 1} = wn;
-                           deltaL = deltaL + sum(sum(abs(delta)));
-    
-                       end
-
                    end
 
                end

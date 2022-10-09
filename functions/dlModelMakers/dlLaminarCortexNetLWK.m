@@ -31,8 +31,8 @@ function y = dlLaminarCortexNetLWK(ModelParameters, populationName)
     fprintf("\n-->Overall noise rate = %.4f", NoiseRate); % Randomness / Stochasticity
     fprintf("\n--->Population name is %s", populationName); % Name tag or suffix for all names of this dsModel
 
-    k1 = 0.25; % Diff. for normal weights (uniform random)
-    k2 = 0.25; % Min connectivity weight
+    k1 = 0.15; % Diff. for normal weights (uniform random)
+    k2 = 0.15; % Min connectivity weight
 
     NeAvg = (NeSuperficial + NeMid + NeDeep) / 3;
 
@@ -64,8 +64,10 @@ function y = dlLaminarCortexNetLWK(ModelParameters, populationName)
     KmidEsupE = k1*rand(NeMid, NeSuperficial) + k2;
     % mE->dE
     KmidEdeepE = k1*rand(NeMid, NeDeep) + k2;
+    KmidEdeepE = KmidEdeepE * 4;
     % mE->dIpv
     KmidEdeepPv = k1*rand(NeMid, NPvDeep) + k2;
+    KmidEdeepPv = KmidEdeepPv * 0.4;
 
     % mIpv->sE
     KmidPvsupE = k1*rand(NPvMid, NeSuperficial) + k2;

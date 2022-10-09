@@ -10,11 +10,25 @@
 % @Septembre2022
 % @HNXJ
 
+%% AutoRunSc
+
+
+clear;clc;
+
+TotalSize = ones(1, 10)*40;
+
+for model_size_id = 1:10
+
+    Currentsize = TotalSize(model_size_id);
+    dlThreeCuesTaskPerformer(Currentsize, model_size_id)
+
+end
+
 %% Model parameters (Single-area, PFC)
 
 clear;clc;
 
-model_size_id = 2;
+model_size_id = 1;
 TotalSize = [40, 40, 40, 40, 40];
 Currentsize = TotalSize(model_size_id);
 
@@ -52,8 +66,7 @@ m.dlSave(); % < 1sec
 
 %% Load DynaLearn Class
 
-clc;
-% model_size_id = 1;
+model_size_id = 1;
 m = DynaLearn(); % ~ 1sec
 m = m.dlLoad(char("models/dlPredictiveCorticalCircuitModelLWK" + string(model_size_id))); % ~ 10sec, New larger model; keeping track of its activity in Gamma/Beta **
 
@@ -73,9 +86,9 @@ outputParams = [{'deepExPFC_V', 1:floor(ModelParametersPFC.NeDeep/3), [400 750] 
     {'midIPVxPFC_V', 1:ModelParametersPFC.NPvMid, [300 800], 'afr'}; ...
     {'deepIPVxPFC_V', 1:ModelParametersPFC.NPvDeep, [300 800], 'afr'}];
 
-targetParams1 = [{'TotalSpikesPenalty', 4:7, 100, 0.1}; {'MSE', 1, 30, 0.1}; {'Compare', [1, 2], 0, 0.1}; {'Compare', [1, 3], 0, 0.1}; {'Diff', [2, 3], 0, 0.01}]; % A 
-targetParams2 = [{'TotalSpikesPenalty', 4:7, 100, 0.1}; {'MSE', 2, 30, 0.1}; {'Compare', [2, 1], 0, 0.1}; {'Compare', [2, 3], 0, 0.1}; {'Diff', [1, 3], 0, 0.01}]; % B
-targetParams3 = [{'TotalSpikesPenalty', 4:7, 100, 0.1}; {'MSE', 3, 30, 0.1}; {'Compare', [3, 2], 0, 0.1}; {'Compare', [3, 1], 0, 0.1}; {'Diff', [2, 1], 0, 0.01}]; % C
+targetParams1 = [{'BGPenalty', 4:7, 40, 0.4}; {'TotalSpikesPenalty', 4:7, 40, 0.2}; {'Compare', [1, 2], 0, 0.2}; {'Compare', [1, 3], 0, 0.2}]; % A 
+targetParams2 = [{'BGPenalty', 4:7, 40, 0.4}; {'TotalSpikesPenalty', 4:7, 40, 0.2}; {'Compare', [2, 1], 0, 0.2}; {'Compare', [2, 3], 0, 0.2}]; % B
+targetParams3 = [{'BGPenalty', 4:7, 40, 0.4}; {'TotalSpikesPenalty', 4:7, 40, 0.2}; {'Compare', [3, 1], 0, 0.2}; {'Compare', [3, 2], 0, 0.2}]; % C
 
 dlInputParameters = {trialParams1, trialParams2, trialParams3};
 dlTargetParameters = {targetParams1, targetParams2, targetParams3};
@@ -127,11 +140,13 @@ dlTrainOptions('dlEpochs') = 5;
 dlTrainOptions('dlCheckpointCoefficient') = 1.4; 
 dlTrainOptions('dlCheckpointLengthCap') = 14;
 
+
+dlTrainOptions('dlLearningRule') = 'EnhancedDeltaRule';
 m.dlOptimalError = 1e7;
 m.dlResetTraining();
 
 tic;
-% m.dlTrain(dlInputParameters, dlOutputParameters, dlTargetParameters, dlTrainOptions); % <16 sec per trial
+m.dlTrain(dlInputParameters, dlOutputParameters, dlTargetParameters, dlTrainOptions); % <16 sec per trial
 toc;
 
 
@@ -145,17 +160,18 @@ toc;
 
 clc;
 
-dlTrainOptions('dlLambda') = 1e-8; % 1e-11(1) -> 1e-4 (4)
+dlTrainOptions('dlLambda') = 1e-7; % 1e-11(1) -> 1e-4 (4)
 dlTrainOptions('dlAdaptiveLambda') = 0; % Adaptive lambda parameter; recommended for long simulations.
 dlTrainOptions('dlUpdateMode') = 'trial';
 dlTrainOptions('dlLearningRule') = 'BioDeltaRule';
 
 dlTrainOptions('dlTrainExcludeList') = {'Stimuli'};
 dlTrainOptions('dlCheckpointLengthCap') = 15;
-dlTrainOptions('dlEpochs') = 2;
-dlTrainOptions('dlBatchs') = 25;
+dlTrainOptions('dlEpochs') = 5;
+dlTrainOptions('dlBatchs') = 10;
 
-CheckCoeff = 1.25;
+dlTrainOptions('dlEnhancedMomentum') = 0.7;
+CheckCoeff = 1.5;
 m.dlResetTraining();
 argsPSR = struct();
 
@@ -386,5 +402,24 @@ for i = set2
 end
 
 sgtitle("Average Beta/Gamma power band ratio across (14) different trial transitions");
+
+%% CI plots
+
+
+x = 1:100;                                          % Create Independent Variable
+y = randn(50,100);                                  % Create Dependent Variable ‘Experiments’ Data
+N = size(y,1);                                      % Number of ‘Experiments’ In Data Set
+yMean = mean(y);                                    % Mean Of All Experiments At Each Value Of ‘x’
+ySEM = std(y)/sqrt(N);                              % Compute ‘Standard Error Of The Mean’ Of All Experiments At Each Value Of ‘x’
+CI95 = tinv([0.025 0.975], N-1);                    % Calculate 95% Probability Intervals Of t-Distribution
+yCI95 = bsxfun(@times, ySEM, CI95(:));              % Calculate 95% Confidence Intervals Of All Experiments At Each Value Of ‘x’
+figure
+plot(x, yMean,'p')                                  % Plot Mean Of All Experiments
+hold on
+% plot(x, yCI95+yMean,'-r')                           % Plot 95% Confidence Intervals Of All Experiments
+patch([x, fliplr(x)], [yCI95(1,:) fliplr(yCI95(2,:))], 'b', 'EdgeColor','none', 'FaceAlpha',0.25)
+hold off
+grid
+
 
 %% End
