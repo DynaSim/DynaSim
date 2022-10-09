@@ -155,7 +155,6 @@ toc;
 % TODO: Add live runs (continouos task) option.
 
 %
-% TODOOOOO: ADD BACKTRACK STEP OF DELTA
 %
 
 clc;
@@ -170,7 +169,7 @@ dlTrainOptions('dlCheckpointLengthCap') = 15;
 dlTrainOptions('dlEpochs') = 5;
 dlTrainOptions('dlBatchs') = 10;
 
-dlTrainOptions('dlEnhancedMomentum') = 0.7;
+dlTrainOptions('dlEnhancedMomentum') = 0.5;
 CheckCoeff = 1.5;
 m.dlResetTraining();
 argsPSR = struct();

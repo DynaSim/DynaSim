@@ -272,7 +272,7 @@ classdef DynaLearn < matlab.mixin.SetGet
             if obj.dlExcludeDiverge == 1
 
                 k = size(obj.dlLastCustomLog, 2);
-                obj.dlLastErrorsLog = [obj.dlLastErrorsLog, obj.dlLastErrorsLog(k)];
+                obj.dlLastErrorsLog = [obj.dlLastErrorsLog, obj.dlOptimalError*1.001];
 
                 obj.dlLastCustomLog(:, k+1) = obj.dlLastCustomLog(:, k);
                 obj.dlErrorsLog = obj.dlLastErrorsLog;
