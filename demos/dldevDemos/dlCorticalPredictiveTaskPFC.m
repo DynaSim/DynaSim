@@ -10,8 +10,7 @@
 % @Septembre2022
 % @HNXJ
 
-%% AutoRunSc
-
+%% AutoRunSc (SinglePFC)
 
 clear;clc;
 
@@ -20,7 +19,7 @@ TotalSize = ones(1, 10)*40;
 for model_size_id = 1:10
 
     Currentsize = TotalSize(model_size_id);
-    dlThreeCuesTaskPerformer(Currentsize, model_size_id)
+    dlThreeCuesTaskPerformer(Currentsize, model_size_id);
 
 end
 
@@ -86,15 +85,15 @@ outputParams = [{'deepExPFC_V', 1:floor(ModelParametersPFC.NeDeep/3), [400 750] 
     {'midIPVxPFC_V', 1:ModelParametersPFC.NPvMid, [300 800], 'afr'}; ...
     {'deepIPVxPFC_V', 1:ModelParametersPFC.NPvDeep, [300 800], 'afr'}];
 
-targetParams1 = [{'BGPenalty', 4:7, 40, 0.4}; {'TotalSpikesPenalty', 4:7, 40, 0.2}; {'Compare', [1, 2], 0, 0.2}; {'Compare', [1, 3], 0, 0.2}]; % A 
-targetParams2 = [{'BGPenalty', 4:7, 40, 0.4}; {'TotalSpikesPenalty', 4:7, 40, 0.2}; {'Compare', [2, 1], 0, 0.2}; {'Compare', [2, 3], 0, 0.2}]; % B
-targetParams3 = [{'BGPenalty', 4:7, 40, 0.4}; {'TotalSpikesPenalty', 4:7, 40, 0.2}; {'Compare', [3, 1], 0, 0.2}; {'Compare', [3, 2], 0, 0.2}]; % C
+targetParams1 = [{'EPenalty', 4:6, 240, 0.4}; {'Compare', [1, 2], 0, 0.3}; {'Compare', [1, 3], 0, 0.3}]; % A 
+targetParams2 = [{'EPenalty', 4:6, 240, 0.4}; {'Compare', [2, 1], 0, 0.3}; {'Compare', [2, 3], 0, 0.3}]; % B
+targetParams3 = [{'EPenalty', 4:6, 240, 0.4}; {'Compare', [3, 1], 0, 0.3}; {'Compare', [3, 2], 0, 0.3}]; % C
 
 dlInputParameters = {trialParams1, trialParams2, trialParams3};
 dlTargetParameters = {targetParams1, targetParams2, targetParams3};
 dlOutputParameters = outputParams;
 
-TBdata = dlTrialBlockGenerator(dlInputParameters, dlTargetParameters, 25, 25);
+TBdata = dlTrialBlockGenerator(dlInputParameters, dlTargetParameters, 100, 100);
 
 dlTrainOptions = containers.Map(); % Train options; MUST be a map data structure
 dlTrainOptions('dlEpochs') = 100; % % Number of epochs (A.K.A total iterations)
@@ -108,7 +107,7 @@ dlTrainOptions('dlUpdateMode') = 'batch'; % Update on each trial's result or bas
 
 dlTrainOptions('dlLearningRule') = 'BioDeltaRule'; % Delta rule with a basic change based on biophysical properties 
 dlTrainOptions('dlSimulationFlag') = 1; % If 0, will not run simulations (only for debugging purposes)
-dlTrainOptions('dlOutputLogFlag') = 1; % If 0, will not keep outputs
+dlTrainOptions('dlOutputLogFlag') = 0; % If 0, will not keep outputs
 dlTrainOptions('dlOfflineOutputGenerator') = 0; % If 1, will generate fake-random outputs (only for debugging purposes)
 
 dlTrainOptions('dlAdaptiveLambda') = 1; % Adaptive lambda parameter; recommended for long simulations.
@@ -120,16 +119,23 @@ dlTrainOptions('dlLambda') = 7e-4;
 dlTrainOptions('dlEpochs') = 10;
 dlTrainOptions('dlBatchs') = 3;
 
-argsPowSpectRatio = struct();
-argsNull = [];
+argsPowSpectRatio1 = struct();
+argsPowSpectRatio2 = struct();
+argsPowSpectRatio3 = struct();
+argsPowSpectRatio4 = struct();
 
-argsPowSpectRatio.lf1 = 7;
-argsPowSpectRatio.hf1 = 28;
-argsPowSpectRatio.lf2 = 42;
-argsPowSpectRatio.hf2 = 84;
+argsPowSpectRatio1.lf1 = 2;
+argsPowSpectRatio1.hf1 = 6;
+argsPowSpectRatio2.lf1 = 8;
+argsPowSpectRatio2.hf1 = 14;
 
-dlTrainOptions('dlCustomLog') = ["dlPowerSpectrumRatio", "dlAccuracyBastos2020Task"]; % Name of a function which is in the path
-dlTrainOptions('dlCustomLogArgs') = [argsPowSpectRatio, argsNull]; % Arguments of your custom function
+argsPowSpectRatio3.lf1 = 15;
+argsPowSpectRatio3.hf1 = 30;
+argsPowSpectRatio4.lf1 = 40;
+argsPowSpectRatio4.hf1 = 90;
+
+dlTrainOptions('dlCustomLog') = ["dlEPowerSpectrum", "dlEPowerSpectrum", "dlEPowerSpectrum", "dlEPowerSpectrum", "dlAccuracyBastos2020Task"]; % Name of a function which is in the path
+dlTrainOptions('dlCustomLogArgs') = [argsPowSpectRatio1, argsPowSpectRatio2, argsPowSpectRatio3, argsPowSpectRatio4, argsPowSpectRatio1]; % Arguments of your custom function
 
 %% Pre-training : Train model to a "non-far" point.
 
@@ -159,28 +165,22 @@ toc;
 
 clc;
 
-dlTrainOptions('dlLambda') = 1e-7; % 1e-11(1) -> 1e-4 (4)
+dlTrainOptions('dlLambda') = 1e-4; % 1e-11(1) -> 1e-4 (4)
 dlTrainOptions('dlAdaptiveLambda') = 0; % Adaptive lambda parameter; recommended for long simulations.
 dlTrainOptions('dlUpdateMode') = 'trial';
 dlTrainOptions('dlLearningRule') = 'BioDeltaRule';
 
 dlTrainOptions('dlTrainExcludeList') = {'Stimuli'};
 dlTrainOptions('dlCheckpointLengthCap') = 15;
-dlTrainOptions('dlEpochs') = 5;
-dlTrainOptions('dlBatchs') = 10;
+dlTrainOptions('dlEpochs') = 1;
+dlTrainOptions('dlBatchs') = 100;
 
 dlTrainOptions('dlEnhancedMomentum') = 0.5;
-CheckCoeff = 1.5;
+CheckCoeff = 1.2;
 m.dlResetTraining();
-argsPSR = struct();
 
-argsPSR.lf1 = 12;
-argsPSR.hf1 = 30;
-argsPSR.lf2 = 40;
-argsPSR.hf2 = 100;
-
-dlTrainOptions('dlCustomLog') = ["dlPowerSpectrumRatio", "dlAccuracyBastos2020Task"]; % Name of a function which is in the path
-dlTrainOptions('dlCustomLogArgs') = [argsPSR, argsNull]; % Arguments of your custom function
+dlTrainOptions('dlCustomLog') = ["dlEPowerSpectrum", "dlEPowerSpectrum", "dlEPowerSpectrum", "dlEPowerSpectrum", "dlAccuracyBastos2020Task"]; % Name of a function which is in the path
+dlTrainOptions('dlCustomLogArgs') = [argsPowSpectRatio1, argsPowSpectRatio2, argsPowSpectRatio3, argsPowSpectRatio4, argsPowSpectRatio1]; % Arguments of your custom function
 
 for cnt = 1:1
 

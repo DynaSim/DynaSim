@@ -10,12 +10,25 @@
 % @Septembre2022
 % @HNXJ
 
+%% AutoRunSc
+
+clear;clc;
+
+TotalSize = ones(1, 10)*40;
+
+for model_size_id = 1:10
+
+    Currentsize = TotalSize(model_size_id);
+    dlThreeCuesTaskPerformerDual(Currentsize, model_size_id);
+
+end
+
 %% Model parameters (Dual-area, V4->PFC)
 
 clear;clc;
 
 model_size_id = 1;
-TotalSize = [50, 50, 50, 50];
+TotalSize = [40, 40, 40, 40];
 Currentsize = TotalSize(model_size_id);
 
 %%% Create model parameters struct
@@ -101,7 +114,7 @@ dsModel = dlConnectModels({dsCellV4, dsCellPFC}, {connection1, connection2, conn
 % Try to use this section only first time or If you have lost your file and
 % you want a new model.
 
-m = DynaLearn(dsModel, char("models/dlPredictiveCorticalCircuitModelLWK" + string(model_size_id)), 'mex'); % ~10 min or less, MEXGEN or < 20 sec, RAWGEN.
+m = DynaLearn(dsModel, char("models/dlPredictiveCorticalCircuitDualModelLWK" + string(model_size_id)), 'mex'); % ~10 min or less, MEXGEN or < 20 sec, RAWGEN.
 m.dlSave(); % < 1sec
 
 %% Load DynaLearn Class
@@ -109,13 +122,13 @@ m.dlSave(); % < 1sec
 clc;
 % model_size_id = 1;
 m = DynaLearn(); % ~ 1sec
-m = m.dlLoad(char("models/dlPredictiveCorticalCircuitModelLWK" + string(model_size_id))); % ~ 10sec, New larger model; keeping track of its activity in Gamma/Beta **
+m = m.dlLoad(char("models/dlPredictiveCorticalCircuitDualModelLWK" + string(model_size_id))); % ~ 10sec, New larger model; keeping track of its activity in Gamma/Beta **
 
 %% Trial: training  script preparation, 50-block and 50-trial
 
 clc;
 
-[trialParams1, trialParams2, trialParams3] = dlDemoThreePattern();
+[trialParams1, trialParams2, trialParams3] = dlDemoThreePattern('xV4');
 
 outputParams = [{'deepExPFC_V', 1:floor(ModelParametersPFC.NeDeep/3), [400 750] ...
     , 'afr'}; {'deepExPFC_V',ceil(ModelParametersPFC.NeDeep/3):floor(2*ModelParametersPFC.NeDeep/3), ...

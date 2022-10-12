@@ -1,17 +1,17 @@
-function dlThreeCuesTaskPerformer(Currentsize, model_size_id)
+function dlThreeCuesTaskPerformerDual(Currentsize, model_size_id)
 
     %%% Create model parameters struct
     ModelParametersPFC = struct();
     
     %%% Area PFC layer sizes (relative)
     ModelParametersPFC.NeSuperficial = ceil(0.3*Currentsize);
-    ModelParametersPFC.NSomSuperficial = ceil(0.04*Currentsize);
-    ModelParametersPFC.NPvSuperficial = ceil(0.07*Currentsize);
+    ModelParametersPFC.NSomSuperficial = ceil(0.02*Currentsize);
+    ModelParametersPFC.NPvSuperficial = ceil(0.04*Currentsize);
     ModelParametersPFC.NeMid = ceil(0.14*Currentsize);
     ModelParametersPFC.NSomMid = 0;
-    ModelParametersPFC.NPvMid = ceil(0.04*Currentsize);
+    ModelParametersPFC.NPvMid = ceil(0.02*Currentsize);
     ModelParametersPFC.NeDeep = ceil(0.45*Currentsize);
-    ModelParametersPFC.NSomDeep = ceil(0.04*Currentsize);
+    ModelParametersPFC.NSomDeep = ceil(0.02*Currentsize);
     ModelParametersPFC.NPvDeep = ceil(0.01*Currentsize);
     
     ModelParametersPFC.Nin = 6;
@@ -19,25 +19,79 @@ function dlThreeCuesTaskPerformer(Currentsize, model_size_id)
     ModelParametersPFC.NoiseRate = 4; % 6%
     ModelParametersPFC.Nstim = 3;
     
+    %%% Area V4 layer sizes (relative) 
+    ModelParametersV4.NeSuperficial = ceil(0.25*Currentsize);
+    ModelParametersV4.NSomSuperficial = ceil(0.03*Currentsize);
+    ModelParametersV4.NPvSuperficial = ceil(0.07*Currentsize);
+    ModelParametersV4.NeMid = ceil(0.12*Currentsize);
+    ModelParametersV4.NSomMid = 0;
+    ModelParametersV4.NPvMid = ceil(0.03*Currentsize);
+    ModelParametersV4.NeDeep = ceil(0.45*Currentsize);
+    ModelParametersV4.NSomDeep = ceil(0.03*Currentsize);
+    ModelParametersV4.NPvDeep = ceil(0.02*Currentsize);
+    
+    ModelParametersV4.Nin = 6;
+    ModelParametersV4.Nout = 6;
+    ModelParametersV4.NoiseRate = 7; % 10%
+    ModelParametersV4.Nstim = 3;
+    
     %%% Call Laminar Cortex Constructor Functions
     dsCellPFC = dlLaminarCortexNetLWK(ModelParametersPFC, 'PFC'); % Laminar PFC model with specific parameters
+    dsCellV4 = dlLaminarCortexNetLWK(ModelParametersV4, 'V4'); % Laminar V4 model with specific parameters
+    
+    %%% Connecting two models: Define connections between two areas
+    % supEV4->midEPFC
+    connectionWeigth1 = 0.21*rand(dsCellV4.populations(1).size, dsCellPFC.populations(4).size) + 0.27;
+    connection1.direction = [dsCellV4.populations(1).name, '->', dsCellPFC.populations(4).name];
+    
+    connection1.source = dsCellV4.populations(1).name;
+    connection1.target = dsCellPFC.populations(4).name;
+    connection1.mechanism_list={'iAMPActx'};
+    connection1.parameters={'gAMPA', .3, 'tauAMPA', 1, 'netcon', connectionWeigth1};
+    
+    % supEV4->midPVPFC
+    connectionWeigth2 = 0.21*rand(dsCellV4.populations(1).size, dsCellPFC.populations(5).size) + 0.27;
+    connection2.direction = [dsCellV4.populations(1).name, '->', dsCellPFC.populations(5).name];
+    
+    connection2.source = dsCellV4.populations(1).name;
+    connection2.target = dsCellPFC.populations(5).name;
+    connection2.mechanism_list={'iAMPActx'};
+    connection2.parameters={'gAMPA', .3, 'tauAMPA', 1, 'netcon', connectionWeigth2};
+    
+    % deepEPFC->supSOMV4
+    connectionWeigth3 = 0.27*rand(dsCellPFC.populations(6).size, dsCellV4.populations(2).size) + 0.21;
+    connection3.direction = [dsCellPFC.populations(6).name, '->', dsCellV4.populations(2).name];
+    
+    connection3.source = dsCellPFC.populations(6).name;
+    connection3.target = dsCellV4.populations(2).name;
+    connection3.mechanism_list={'iAMPActx'};
+    connection3.parameters={'gAMPA', .9, 'tauAMPA', 1, 'netcon', connectionWeigth3};
+    
+    % deepEPFC->supEV4
+    connectionWeigth4 = 0.27*rand(dsCellPFC.populations(6).size, dsCellV4.populations(1).size) + 0.21;
+    connection4.direction = [dsCellPFC.populations(6).name, '->', dsCellV4.populations(1).name];
+    
+    connection4.source = dsCellPFC.populations(6).name;
+    connection4.target = dsCellV4.populations(1).name;
+    connection4.mechanism_list={'iAMPActx'};
+    connection4.parameters={'gAMPA', .9, 'tauAMPA', 1, 'netcon', connectionWeigth4};
     
     %%% Finalization
-    dsModel = dsCellPFC;
+    dsModel = dlConnectModels({dsCellV4, dsCellPFC}, {connection1, connection2, connection3, connection4});
     
     % Create DynaLearn Class 
     % Try to use this section only first time or If you have lost your file and
     % you want a new model.
     
-    m = DynaLearn(dsModel, char("models/dlPredictiveCorticalCircuitModelLWK" + string(model_size_id)), 'mex'); % ~10 min or less, MEXGEN or < 20 sec, RAWGEN.
+    m = DynaLearn(dsModel, char("models/dlPredictiveCorticalCircuitDualModelLWK" + string(model_size_id)), 'mex'); % ~10 min or less, MEXGEN or < 20 sec, RAWGEN.
     m.dlSave(); % < 1sec
     
     % Load DynaLearn Class
-
+    
     m = DynaLearn(); % ~ 1sec
-    m = m.dlLoad(char("models/dlPredictiveCorticalCircuitModelLWK" + string(model_size_id))); % ~ 10sec, New larger model; keeping track of its activity in Gamma/Beta **
+    m = m.dlLoad(char("models/dlPredictiveCorticalCircuitDualModelLWK" + string(model_size_id))); % ~ 10sec, New larger model; keeping track of its activity in Gamma/Beta **
 
-    [trialParams1, trialParams2, trialParams3] = dlDemoThreePattern('xPFC');
+    [trialParams1, trialParams2, trialParams3] = dlDemoThreePattern('xV4');
 
     outputParams = [{'deepExPFC_V', 1:floor(ModelParametersPFC.NeDeep/3), [400 750] ...
         , 'afr'}; {'deepExPFC_V',ceil(ModelParametersPFC.NeDeep/3):floor(2*ModelParametersPFC.NeDeep/3), ...
@@ -45,19 +99,19 @@ function dlThreeCuesTaskPerformer(Currentsize, model_size_id)
         {'supExPFC_V', 1:ModelParametersPFC.NeSuperficial, [300 800], 'afr'}; ...
         {'midExPFC_V', 1:ModelParametersPFC.NeMid, [300 800], 'afr'}; ...
         {'deepExPFC_V', 1:ModelParametersPFC.NeDeep, [300 800], 'afr'}; ...
-        {'supIPVxPFC_V', 1:ModelParametersPFC.NPvSuperficial, [300 800], 'afr'}; ...
-        {'midIPVxPFC_V', 1:ModelParametersPFC.NPvMid, [300 800], 'afr'}; ...
-        {'deepIPVxPFC_V', 1:ModelParametersPFC.NPvDeep, [300 800], 'afr'}];
+        {'supExV4_V', 1:ModelParametersPFC.NPvSuperficial, [300 800], 'afr'}; ...
+        {'midExV4_V', 1:ModelParametersPFC.NPvMid, [300 800], 'afr'}; ...
+        {'deepExV4_V', 1:ModelParametersPFC.NPvDeep, [300 800], 'afr'}];
     
-    targetParams1 = [{'EPenalty', 4:6, 240, 0.3}; {'Compare', [1, 2], 0, 0.35}; {'Compare', [1, 3], 0, 0.35}]; % A 
-    targetParams2 = [{'EPenalty', 4:6, 240, 0.3}; {'Compare', [2, 1], 0, 0.35}; {'Compare', [2, 3], 0, 0.35}]; % B
-    targetParams3 = [{'EPenalty', 4:6, 240, 0.3}; {'Compare', [3, 1], 0, 0.35}; {'Compare', [3, 2], 0, 0.35}]; % C
+    targetParams1 = [{'BGPenalty', 4:7, 40, 0.4}; {'TotalSpikesPenalty', 4:7, 40, 0.2}; {'Compare', [1, 2], 0, 0.2}; {'Compare', [1, 3], 0, 0.2}]; % A 
+    targetParams2 = [{'BGPenalty', 4:7, 40, 0.4}; {'TotalSpikesPenalty', 4:7, 40, 0.2}; {'Compare', [2, 1], 0, 0.2}; {'Compare', [2, 3], 0, 0.2}]; % B
+    targetParams3 = [{'BGPenalty', 4:7, 40, 0.4}; {'TotalSpikesPenalty', 4:7, 40, 0.2}; {'Compare', [3, 1], 0, 0.2}; {'Compare', [3, 2], 0, 0.2}]; % C
     
     dlInputParameters = {trialParams1, trialParams2, trialParams3};
     dlTargetParameters = {targetParams1, targetParams2, targetParams3};
     dlOutputParameters = outputParams;
     
-    TBdata = dlTrialBlockGenerator(dlInputParameters, dlTargetParameters, 100, 100);
+    TBdata = dlTrialBlockGenerator(dlInputParameters, dlTargetParameters, 25, 25);
     
     dlTrainOptions = containers.Map(); % Train options; MUST be a map data structure
     dlTrainOptions('dlEpochs') = 100; % % Number of epochs (A.K.A total iterations)
@@ -71,7 +125,7 @@ function dlThreeCuesTaskPerformer(Currentsize, model_size_id)
     
     dlTrainOptions('dlLearningRule') = 'BioDeltaRule'; % Delta rule with a basic change based on biophysical properties 
     dlTrainOptions('dlSimulationFlag') = 1; % If 0, will not run simulations (only for debugging purposes)
-    dlTrainOptions('dlOutputLogFlag') = 0; % If 0, will not keep outputs
+    dlTrainOptions('dlOutputLogFlag') = 1; % If 0, will not keep outputs
     dlTrainOptions('dlOfflineOutputGenerator') = 0; % If 1, will generate fake-random outputs (only for debugging purposes)
     
     dlTrainOptions('dlAdaptiveLambda') = 1; % Adaptive lambda parameter; recommended for long simulations.
@@ -79,43 +133,44 @@ function dlThreeCuesTaskPerformer(Currentsize, model_size_id)
     dlTrainOptions('dlExcludeDiverge') = 1; % Exclude non-optimals from model log
     dlTrainOptions('dlTrainExcludeList') = {'Stim'}; % Exclude populations from training
     
-    argsPowSpectRatio1 = struct();
-    argsPowSpectRatio2 = struct();
-    argsPowSpectRatio3 = struct();
-    argsPowSpectRatio4 = struct();
+    dlTrainOptions('dlLambda') = 7e-4;
+    dlTrainOptions('dlEpochs') = 10;
+    dlTrainOptions('dlBatchs') = 3;
     
-    argsPowSpectRatio1.lf1 = 2;
-    argsPowSpectRatio1.hf1 = 6;
-    argsPowSpectRatio2.lf1 = 8;
-    argsPowSpectRatio2.hf1 = 14;
+    argsPowSpectRatio = struct();
+    argsNull = [];
     
-    argsPowSpectRatio3.lf1 = 15;
-    argsPowSpectRatio3.hf1 = 30;
-    argsPowSpectRatio4.lf1 = 40;
-    argsPowSpectRatio4.hf1 = 90;
+    argsPowSpectRatio.lf1 = 7;
+    argsPowSpectRatio.hf1 = 28;
+    argsPowSpectRatio.lf2 = 42;
+    argsPowSpectRatio.hf2 = 84;
     
-    argn = [];
-
-    dlTrainOptions('dlCustomLog') = ["dlEPowerSpectrum", "dlEPowerSpectrum", "dlEPowerSpectrum", "dlEPowerSpectrum", "dlAccuracyBastos2020Task"]; % Name of a function which is in the path
-    dlTrainOptions('dlCustomLogArgs') = [argsPowSpectRatio1, argsPowSpectRatio2, argsPowSpectRatio3, argsPowSpectRatio4, argn]; % Arguments of your custom function
-      
-    dlTrainOptions('dlLambda') = 1e-5; % 1e-11(1) -> 1e-4 (4)
+    dlTrainOptions('dlCustomLog') = ["dlPowerSpectrumRatio", "dlAccuracyBastos2020Task"]; % Name of a function which is in the path
+    dlTrainOptions('dlCustomLogArgs') = [argsPowSpectRatio, argsNull]; % Arguments of your custom function
+    
+    dlTrainOptions('dlLambda') = 1e-7; % 1e-11(1) -> 1e-4 (4)
     dlTrainOptions('dlAdaptiveLambda') = 0; % Adaptive lambda parameter; recommended for long simulations.
     dlTrainOptions('dlUpdateMode') = 'trial';
     dlTrainOptions('dlLearningRule') = 'BioDeltaRule';
     
     dlTrainOptions('dlTrainExcludeList') = {'Stimuli'};
     dlTrainOptions('dlCheckpointLengthCap') = 15;
-    dlTrainOptions('dlEpochs') = 1;
-    dlTrainOptions('dlBatchs') = 100;
+    dlTrainOptions('dlEpochs') = 5;
+    dlTrainOptions('dlBatchs') = 10;
     
-    dlTrainOptions('dlEnhancedMomentum') = 0.5;
-    CheckCoeff = 1.2;
+    dlTrainOptions('dlEnhancedMomentum') = 0.7;
+    CheckCoeff = 1.5;
     m.dlResetTraining();
+    argsPSR = struct();
     
-    dlTrainOptions('dlCustomLog') = ["dlEPowerSpectrum", "dlEPowerSpectrum", "dlEPowerSpectrum", "dlEPowerSpectrum", "dlAccuracyBastos2020Task"]; % Name of a function which is in the path
-    dlTrainOptions('dlCustomLogArgs') = [argsPowSpectRatio1, argsPowSpectRatio2, argsPowSpectRatio3, argsPowSpectRatio4, argsPowSpectRatio1]; % Arguments of your custom function
-
+    argsPSR.lf1 = 12;
+    argsPSR.hf1 = 30;
+    argsPSR.lf2 = 40;
+    argsPSR.hf2 = 100;
+    
+    dlTrainOptions('dlCustomLog') = ["dlPowerSpectrumRatio", "dlAccuracyBastos2020Task"]; % Name of a function which is in the path
+    dlTrainOptions('dlCustomLogArgs') = [argsPSR, argsNull]; % Arguments of your custom function
+    
     for cnt = 1:1
     
         disp("----------A-----------");

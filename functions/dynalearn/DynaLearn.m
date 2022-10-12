@@ -18,7 +18,7 @@ classdef DynaLearn < matlab.mixin.SetGet
         dlTrialNumber = 0; % Last trial; how many times this model have been trained with stimuli.
         dlLastOutputs = []; % Last output (eg. spike vector) of this model.
         dlLastError = 0; % Last error of this model for target, equivalent to the last value of errors_log property
-        dlOutputLog = []; % Last expected output that this model should've generated.
+        dlOutputLog = {}; % Last expected output that this model should've generated.
         
         dsData = []; % Last simulation outputs
         dlOutputs = []; % Mex outputs
@@ -50,6 +50,7 @@ classdef DynaLearn < matlab.mixin.SetGet
         dlLastDelta = -1;
         dlLambdaCap = 1e-2;
 
+        dlLastOutputLog = {};
         dlOptimalWeightChanges = [];
         dlOptimalWeightChangesFlag = 0;
 
@@ -216,8 +217,8 @@ classdef DynaLearn < matlab.mixin.SetGet
             p = load([obj.dlPath, '/params.mat']);
             save([obj.dlStudyDir, '/params.mat'], '-struct', 'p');
             
-            obj.dlOutputs = [];
-            obj.dlOutputLog = [];
+%             obj.dlOutputs = [];
+%             obj.dlOutputLog = [];
             
             save(dlSaveFileNamePath, 'obj');
             fprintf("\n->Model saved in ""%s"".\n", dlSaveFileNamePath);
@@ -230,11 +231,11 @@ classdef DynaLearn < matlab.mixin.SetGet
             p = load([obj.dlPath, '/params.mat']);
             save([obj.dlStudyDir, dlCheckPointPath, 'params.mat'], '-struct', 'p');
             
-            tempdlO = obj.dlOutputs;
-            obj.dlOutputs = [];
-            obj.dlOutputLog = [];
+%             tempdlO = obj.dlOutputs;
+%             obj.dlOutputs = [];
+%             obj.dlOutputLog = [];
             save([obj.dlStudyDir, dlCheckPointPath, 'object.mat'], 'obj');
-            obj.dlOutputs = tempdlO;
+%             obj.dlOutputs = tempdlO;
             
         end
         
@@ -248,6 +249,7 @@ classdef DynaLearn < matlab.mixin.SetGet
 
                 obj.dlErrorsLog = obj.dlLastErrorsLog;
                 obj.dlCustomLog = obj.dlLastCustomLog;
+%                 obj.dlOutputLog = obj.dlLastOutputLog;
                 
                 save([obj.dlStudyDir, dlCheckPointPath, 'object.mat'], 'obj');
 
@@ -273,10 +275,12 @@ classdef DynaLearn < matlab.mixin.SetGet
 
                 k = size(obj.dlLastCustomLog, 2);
                 obj.dlLastErrorsLog = [obj.dlLastErrorsLog, obj.dlOptimalError*1.001];
-
                 obj.dlLastCustomLog(:, k+1) = obj.dlLastCustomLog(:, k);
+%                 obj.dlLastOutputLog{k+1} = obj.dlLastOutputLog{k};
+
                 obj.dlErrorsLog = obj.dlLastErrorsLog;
                 obj.dlCustomLog = obj.dlLastCustomLog;
+%                 obj.dlOutputLog = obj.dlLastOutputLog;
                 
                 save([obj.dlStudyDir, dlCheckPointPath, 'object.mat'], 'obj');
 
@@ -757,20 +761,18 @@ classdef DynaLearn < matlab.mixin.SetGet
         
                     end
 
-                    fprintf(" Ep=%d ", TempError);
+                    fprintf(" rEp=%d ", TempError);
                     TempError = abs(TempError - dlOutputTargets)^2;
 
-                elseif strcmpi(dlErrorType, 'BGPenalty')
+                elseif strcmpi(dlErrorType, 'EPenalty')
                     
                     argsPSR = struct();
 
-                    argsPSR.lf1 = 10;
-                    argsPSR.hf1 = 30;
-                    argsPSR.lf2 = 40;
-                    argsPSR.hf2 = 100;
+                    argsPSR.lf1 = 40;
+                    argsPSR.hf1 = 90;
 
-                    TempError = 1000/mean(dlPowerSpectrumRatio(obj, argsPSR), 'all');
-                    fprintf(" REp=%d ", TempError);
+                    TempError = mean(dlEPowerSpectrum(obj, argsPSR), 'all');
+                    fprintf(" gEp=%d ", TempError);
                     TempError = abs(TempError - dlOutputTargets)^2;
 
                 else
@@ -1081,7 +1083,7 @@ classdef DynaLearn < matlab.mixin.SetGet
 
                             logfuncname = dlCustomLogFlag(customLogCount);           
                             dlLogFuncBridge(logfuncname);
-                            [cLog, cLabel] = dlLogTempFunc(obj, dlCustomLogArgs);
+                            [cLog, cLabel] = dlLogTempFunc(obj, dlCustomLogArgs(customLogCount));
 
                             obj.dlCustomLog{customLogCount, k+1} = cLog;
                             obj.dlCustomLogLabel{customLogCount} = cLabel;
@@ -1096,7 +1098,8 @@ classdef DynaLearn < matlab.mixin.SetGet
                     end
                     
                     if dlOutputLogFlag
-                        obj.dlOutputLog = [obj.dlOutputLog; obj.dlLastOutputs];
+                        k = max(size(obj.dlOutputLog));
+                        obj.dlOutputLog{k+1} = imresize(cell2mat(obj.dlOutputs), [900, 567]);
                     end
                     
                     if strcmpi(dlUpdateMode, 'trial')
@@ -1778,6 +1781,8 @@ classdef DynaLearn < matlab.mixin.SetGet
             obj.dlCustomLog = [];
             obj.dlCustomLogLabel = [];
             obj.dlCurrentSessionValidTrials = 0;
+
+            obj.dlLastOutputLog = {};
             
         end
         
@@ -1785,6 +1790,7 @@ classdef DynaLearn < matlab.mixin.SetGet
            
             obj.dlLastErrorsLog = obj.dlErrorsLog;
             obj.dlLastCustomLog = obj.dlCustomLog;
+            obj.dlLastOutputLog = obj.dlOutputLog;
             obj.dlSaveCheckPoint('/Optimal');
             
         end
