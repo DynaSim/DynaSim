@@ -99,7 +99,7 @@ function dlThreeCuesTaskPerformer(Currentsize, model_size_id)
     dlTrainOptions('dlCustomLog') = ["dlEPowerSpectrum", "dlEPowerSpectrum", "dlEPowerSpectrum", "dlEPowerSpectrum", "dlAccuracyBastos2020Task"]; % Name of a function which is in the path
     dlTrainOptions('dlCustomLogArgs') = [argsPowSpectRatio1, argsPowSpectRatio2, argsPowSpectRatio3, argsPowSpectRatio4, argn]; % Arguments of your custom function
       
-    dlTrainOptions('dlLambda') = 1e-5; % 1e-11(1) -> 1e-4 (4)
+    dlTrainOptions('dlLambda') = 1e-7; % 1e-11(1) -> 1e-4 (4)
     dlTrainOptions('dlAdaptiveLambda') = 0; % Adaptive lambda parameter; recommended for long simulations.
     dlTrainOptions('dlUpdateMode') = 'trial';
     dlTrainOptions('dlLearningRule') = 'BioDeltaRule';
@@ -110,7 +110,7 @@ function dlThreeCuesTaskPerformer(Currentsize, model_size_id)
     dlTrainOptions('dlBatchs') = 100;
     
     dlTrainOptions('dlEnhancedMomentum') = 0.5;
-    CheckCoeff = 1.2;
+    CheckCoeff = 1.4;
     m.dlResetTraining();
     
     dlTrainOptions('dlCustomLog') = ["dlEPowerSpectrum", "dlEPowerSpectrum", "dlEPowerSpectrum", "dlEPowerSpectrum", "dlAccuracyBastos2020Task"]; % Name of a function which is in the path
