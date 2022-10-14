@@ -5,13 +5,13 @@ function dlThreeCuesTaskPerformer(Currentsize, model_size_id)
     
     %%% Area PFC layer sizes (relative)
     ModelParametersPFC.NeSuperficial = ceil(0.3*Currentsize);
-    ModelParametersPFC.NSomSuperficial = ceil(0.04*Currentsize);
+    ModelParametersPFC.NSomSuperficial = ceil(0.00*Currentsize);
     ModelParametersPFC.NPvSuperficial = ceil(0.07*Currentsize);
     ModelParametersPFC.NeMid = ceil(0.14*Currentsize);
     ModelParametersPFC.NSomMid = 0;
     ModelParametersPFC.NPvMid = ceil(0.04*Currentsize);
     ModelParametersPFC.NeDeep = ceil(0.45*Currentsize);
-    ModelParametersPFC.NSomDeep = ceil(0.04*Currentsize);
+    ModelParametersPFC.NSomDeep = ceil(0.00*Currentsize);
     ModelParametersPFC.NPvDeep = ceil(0.01*Currentsize);
     
     ModelParametersPFC.Nin = 6;
@@ -29,13 +29,13 @@ function dlThreeCuesTaskPerformer(Currentsize, model_size_id)
     % Try to use this section only first time or If you have lost your file and
     % you want a new model.
     
-    m = DynaLearn(dsModel, char("models/dlPredictiveCorticalCircuitModelLWK" + string(model_size_id)), 'mex'); % ~10 min or less, MEXGEN or < 20 sec, RAWGEN.
+    m = DynaLearn(dsModel, char("models/dlPredictiveCorticalCircuitModelNoSomLWK" + string(model_size_id)), 'mex'); % ~10 min or less, MEXGEN or < 20 sec, RAWGEN.
     m.dlSave(); % < 1sec
     
     % Load DynaLearn Class
 
     m = DynaLearn(); % ~ 1sec
-    m = m.dlLoad(char("models/dlPredictiveCorticalCircuitModelLWK" + string(model_size_id))); % ~ 10sec, New larger model; keeping track of its activity in Gamma/Beta **
+    m = m.dlLoad(char("models/dlPredictiveCorticalCircuitModelNoSomLWK" + string(model_size_id))); % ~ 10sec, New larger model; keeping track of its activity in Gamma/Beta **
 
     [trialParams1, trialParams2, trialParams3] = dlDemoThreePattern('xPFC');
 
