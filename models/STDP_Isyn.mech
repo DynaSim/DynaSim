@@ -32,7 +32,48 @@ sNMDA(0) = IC+IC_noise*rand(1,N_pre)
 g_ampa(sAMPA) = gAmpa.*sAMPA
 g_nmda(sNMDA) = gNmda.*sNMDA
 
-IAMPA(X,w,sAMPA) = g_ampa(sAMPA)*(w.*netcon).*(X-EAMPA)
-INMDA(X,sNMDA)   = g_nmda(sNMDA)*netcon.*(X-ENMDA).*MgBlock(X)
+IAMPA(X,W,sAMPA) = g_ampa(sAMPA)*(w.*netcon).*(X-EAMPA)
+INMDA(X,sNMDA)   = g_nmda(sNMDA)*(w_nmda.*netcon).*(X-ENMDA).*MgBlock(X)
 
-@current += -IAMPA(X_post,@weights,sAMPA)-INMDA(X_post,sNMDA)
+% STDP
+taux=10
+tauy=10
+wmax=1
+IC_w=.5
+w_nmda=IC_w
+rx=10
+ry=10
+alpha=.5
+delay_pre=0
+delay_post=0
+
+ax(x)=(1-x).^alpha % incremental increase in presynaptic trace with nearest-neighbor spike-interaction
+ay(y)=(1-y).^alpha % incremental increase in postsynaptic trace
+Ax(w)=(wmax-w)*rx % soft bounds
+Ay(w)=w*ry      % soft bounds
+detection_interval = 1.1*dt
+dx/dt=-x./taux+ax(x).*sum((t-tspike_pre-delay_pre)<detection_interval)
+dy/dt=-y./tauy+ay(y).*sum((t-tspike_post-delay_post)<detection_interval)
+%dw/dt=Ax(w).*x.*sum((t-tspike_post-delay_post)<detection_interval) - Ay(w).*y.*sum((t-tspike_pre-delay_pre)<detection_interval)
+%x(0)=.1; y(0)=.1; w(0)=IC_w+IC_noise.*rand(N_pre,N_post)
+
+dw/dt=Ax(w).*repmat(x,[Npost 1])'.*repmat(sum((t-tspike_post-delay_post)<detection_interval),[Npre 1]) - Ay(w).*repmat(y,[Npre 1]).*repmat(sum((t-tspike_pre-delay_pre)<detection_interval),[Npost 1])'
+x(0)=.1*ones(1,N_pre); 
+y(0)=.1*ones(1,N_post); 
+w(0)=.5*IC_w+IC_noise.*rand(N_pre,N_post)
+
+% Network Connectivity
+netcon = ones(N_pre,N_post) % default connectivity matrix (all-to-all)
+
+monitor ay,Ax,Ay % functions
+@current += -IAMPA(X_post,w,sAMPA)-INMDA(X_post,sNMDA)
+
+
+% synaptic current
+%gSYN=0; ESYN=0; tauD=2; tauR=0.4; delay=0
+%f(X) = 1*(exp(-X/tauD)-exp(-X/tauR)).*(X>0)
+%Isyn(X,w) = gSYN.*sum(f(t-tspike_pre-delay))*(w.*netcon).*(X-ESYN)
+%dx/dt=-x./taux+ax(x).*sum((t-tspike_pre-delay)<dt)
+%dy/dt=-y./tauy+ay(y).*sum((t-tspike_post-delay)<dt)
+%dw/dt=Ax(w).*x.*sum((t-tspike_post-delay)<dt) - Ay(w).*y.*sum((t-tspike_pre-delay)<dt)
+

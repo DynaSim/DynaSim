@@ -4,9 +4,9 @@ function [trialParams1, trialParams2, trialParams3] = dlDemoThreePattern(suffixL
     trialParams2 = containers.Map();
     trialParams3 = containers.Map();
 
-    trialParams1('tspan') = [0 900];
-    trialParams2('tspan') = [0 900];
-    trialParams3('tspan') = [0 900];
+    trialParams1('tspan') = [0 750];
+    trialParams2('tspan') = [0 750];
+    trialParams3('tspan') = [0 750];
 
     trialParams1(['PreStimuliA', suffixLabel, '_t1']) = 100;
     trialParams1(['PreStimuliA', suffixLabel, '_t2']) = 250;    

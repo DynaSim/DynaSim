@@ -1468,9 +1468,9 @@ classdef DynaLearn < matlab.mixin.SetGet
            error = obj.dlUpdateError;
            obj.dlLastLambda = dlLambda;
 
-           l = find(contains(lab, '_netcon'));
-            
+           l = find(contains(lab, '_netcon')); 
            deltaL = 0;
+
            if strcmpi(dlLearningRule, 'DeltaRule')
 
                for i = l'

@@ -361,19 +361,17 @@ end
 % take several seconds to minutes; however, it only compiles the first time
 % it is run and is significantly faster on subsequent runs.
 
-if 0
-  data=dsSimulate(s, 'mex_flag',1, 'study_dir','demo_sPING_3_compile');
-  dsPlot(data);
+data=dsSimulate(s, 'mex_flag',1, 'study_dir','demo_sPING_3_compile');
+dsPlot(data);
 
-  % Now run again:
-  data=dsSimulate(s, 'mex_flag',1, 'study_dir','demo_sPING_3_compile');
-  dsPlot(data);
+% Now run again:
+data=dsSimulate(s, 'mex_flag',1, 'study_dir','demo_sPING_3_compile');
+dsPlot(data);
 
-  % Combine compilation and parallelization to maximize computational speed locally
-  vary={'E','Iapp',[0 10 20]};
-  data=dsSimulate(s, 'mex_flag',1, 'parfor_flag',1, 'vary', vary, 'study_dir','demo_sPING_3_compile_parallel');
-  dsPlot(data);
-end
+% Combine compilation and parallelization to maximize computational speed locally
+vary={'E','Iapp',[0 10 20]};
+data=dsSimulate(s, 'mex_flag',1, 'parfor_flag',1, 'vary', vary, 'study_dir','demo_sPING_3_compile_parallel');
+dsPlot(data);
 
 % %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Script-based modeling using predefined objects without writing equations.
@@ -497,13 +495,8 @@ s.connections(1).mechanism_list='iampa';
 s.mechanisms(1).name='iampa';
 s.mechanisms(1).equations=iampa;
 
-data=dsSimulate(s,'time_limits',[0 200],'solver','rk1','dt',.01,'allow_unused_linkers_flag',1);
+data=dsSimulate(s,'time_limits',[0 200],'solver','rk1','dt',.01);
 dsPlot(data);
-
-% Note: we can use 'allow_unused_linkers_flag' set to 1 to enable a linker
-% to be present in a population (e.g., "E" above) without being used (i.e.,
-% there is no connection from I to E and therefore no Isyn(V) to replace
-% @isyn in the voltage dynamics).
 
 % For more examples, including STDP, see: dynasim/demos/dsLIFnetwork.m
 
@@ -554,8 +547,6 @@ dsPlot(data,'variable',{'V','gPoisson'});
 % tau=2;          % ms, synaptic time constant
 
 %% Tips for efficient simulation
-
-return
 
 downsample_factor=10; % downsampling saves time by recording fewer time points
 mex_flag=1;       % takes longer to compile on 1st run; faster on subsequent runs

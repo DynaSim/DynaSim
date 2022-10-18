@@ -60,8 +60,8 @@ transient = 500    % Transient time
 % step.
 
 eqns = {
-         'dV/dt = @current/cm'             % Ordinary Differential Equation (ODE)
-         'V(0) = -70+2*randn(1,Npop)'  % Initial Conditions (IC)
+         'dV/dt = @current'             % Ordinary Differential Equation (ODE)
+         'V(0) = -70+10*randn(1,Npop)'  % Initial Conditions (IC)
          'monitor @current'             % Monitor of the total current through the @current Linker
        }
 % Cell multiplicity
@@ -70,6 +70,7 @@ eqns = {
 
 nSPNs = 150;     % Number of individual SPN cells
 multiplicity = [nSPNs,nSPNs]     % Total number of SPN cells of each type [D1 SNPs, D2 SPNs] in the model
+
 % Parameters of intrinsic currents
 % Section Population specification sets the list of mechanisms each cell type 
 % possesses. These mechanisms are fully specified in separate files. DynaSim users 
@@ -218,16 +219,14 @@ end
 
 for iSim = 1:numel(pfcInp_DC)
     raster{1} = computeRaster(data_DCcond(iSim).time,data_DCcond(iSim).D1_SPN_V);
-    pool{1} = 1:nSPNs;
     raster{2} = computeRaster(data_DCcond(iSim).time,data_DCcond(iSim).D2_SPN_V);
-    pool{2} = 1:nSPNs;
     tl = tOn + [transient, duration];
-    rate = plotRaster(raster,pool,tl);
+    rate = plotRaster(multiplicity,tl,raster);
     prev_title = get(gca,'title');
     title([pfcInp_DCcond_labels{iSim} ': ' prev_title.String])
 
-    instFR_D1(iSim,:) = 1e3*NWKraster(data_DCcond(iSim).time,raster{1},pool{1},kwidth,Ts,flag_interp);
-    instFR_D2(iSim,:) = 1e3*NWKraster(data_DCcond(iSim).time,raster{2},pool{2},kwidth,Ts,flag_interp);
+    instFR_D1(iSim,:) = 1e3*NWepanechnikovKernelRegrRaster(data_DCcond(iSim).time,raster{1},pool,kwidth,Ts,flag_interp);
+    instFR_D2(iSim,:) = 1e3*NWepanechnikovKernelRegrRaster(data_DCcond(iSim).time,raster{2},pool,kwidth,Ts,flag_interp);
     
     figure
     plot(data_DCcond(iSim).time,instFR_D1(iSim,:),data_DCcond(iSim).time,instFR_D2(iSim,:),'LineWidth',lineWidth)
@@ -261,11 +260,11 @@ end
 % one simulation at a time, selected with the drop-down menu.
 
 %% Parameters for the synchronous input
-AC_ref = 8000; % in spks/s
+AC_ref = 7000; % in spks/s
 pfcInp_AC_ref = AC_ref;               % high sync input
 pfcInp_AC_red = AC_ref/5;             % low sync input
 
-frequency =  25  
+frequency =  18  
 
 if frequency ~= 18
   pfcInp_ACcond_label = 'High Sync Input'
@@ -304,12 +303,13 @@ data_ACcond = dsSimulate(s,'time_limits',tspan,'dt',dt,'solver',solver);
 
 raster{1} = computeRaster(data_ACcond.time,data_ACcond.D1_SPN_V);
 raster{2} = computeRaster(data_ACcond.time,data_ACcond.D2_SPN_V);
-rate = plotRaster(raster,pool,tl);
+tl = tOn + [transient, duration];
+rate = plotRaster(multiplicity,tl,raster);
 prev_title = get(gca,'title');
 title([pfcInp_ACcond_label ': ' prev_title.String])
 
-instFR_D1(iSim,:) = 1e3*NWKraster(data_ACcond.time,raster{1},pool{1},kwidth,Ts,flag_interp);
-instFR_D2(iSim,:) = 1e3*NWKraster(data_ACcond.time,raster{2},pool{2},kwidth,Ts,flag_interp);
+instFR_D1(iSim,:) = 1e3*NWepanechnikovKernelRegrRaster(data_ACcond.time,raster{1},pool,kwidth,Ts,flag_interp);
+instFR_D2(iSim,:) = 1e3*NWepanechnikovKernelRegrRaster(data_ACcond.time,raster{2},pool,kwidth,Ts,flag_interp);
     
 figure
 plot(data_DCcond(iSim).time,instFR_D1(iSim,:),data_DCcond(iSim).time,instFR_D2(iSim,:),'LineWidth',lineWidth)

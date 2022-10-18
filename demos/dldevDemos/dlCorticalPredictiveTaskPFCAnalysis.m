@@ -203,58 +203,61 @@ sgtitle("Theta power band ratio change from (Average across 10 different models/
 
 %%
 
-ychlabels = ["Time"];
-
-for i = 1:ModelParametersPFC.NeSuperficial
-    ychlabels = [ychlabels, "supE"];
-end
-for i = 1:ModelParametersPFC.NSomSuperficial
-    ychlabels = [ychlabels, "supISOM"];
-end
-for i = 1:ModelParametersPFC.NPvSuperficial
-    ychlabels = [ychlabels, "supIPV"];
-end
-
-for i = 1:ModelParametersPFC.NeMid
-    ychlabels = [ychlabels, "midE"];
-end
-for i = 1:ModelParametersPFC.NPvMid
-    ychlabels = [ychlabels, "midIPV"];
-end
-
-for i = 1:ModelParametersPFC.NeDeep
-    ychlabels = [ychlabels, "deepE"];
-end
-for i = 1:ModelParametersPFC.NSomDeep
-    ychlabels = [ychlabels, "deepISOM"];
-end
-for i = 1:ModelParametersPFC.NPvDeep
-    ychlabels = [ychlabels, "deepIPV"];
-end
-
-ychlabels = flip(ychlabels);
-
-%%
-
 clc;
-popsize = 82;
-trial = 2;
+for i = 1
+
+    ychlabels = ["Time"];
+    
+    for i = 1:ModelParametersPFC.NeSuperficial
+        ychlabels = [ychlabels, "supE"];
+    end
+    for i = 1:ModelParametersPFC.NSomSuperficial
+        ychlabels = [ychlabels, "supISOM"];
+    end
+    for i = 1:ModelParametersPFC.NPvSuperficial
+        ychlabels = [ychlabels, "supIPV"];
+    end
+    
+    for i = 1:ModelParametersPFC.NeMid
+        ychlabels = [ychlabels, "midE"];
+    end
+    for i = 1:ModelParametersPFC.NPvMid
+        ychlabels = [ychlabels, "midIPV"];
+    end
+    
+    for i = 1:ModelParametersPFC.NeDeep
+        ychlabels = [ychlabels, "deepE"];
+    end
+    for i = 1:ModelParametersPFC.NSomDeep
+        ychlabels = [ychlabels, "deepISOM"];
+    end
+    for i = 1:ModelParametersPFC.NPvDeep
+        ychlabels = [ychlabels, "deepIPV"];
+    end
+    
+    ychlabels = flip(ychlabels);
+
+end
+
+popsize = size(ychlabels, 2);
+trial = 20;
 k = 5;
 
 lfptemp = {m.dlCustomLog{5, :}};
 lfptemp = cell2mat(lfptemp);
 
 %%
+
 figure("Position", [0 0 1500 1000]);
 subplot(1, 1, 1);
 
-for i = 1:popsize
+for i = 2:popsize
 
 %     y = lfps(k, :, i + popsize*trial);
     y = lfptemp(:, i + popsize*trial);
     y = y - min(y);
     y = y / max(y);
-    offsetLFPplot = (47-i) * 1;
+    offsetLFPplot = (popsize+1-i) * 1;
 
     plot(y + offsetLFPplot);hold("on");
     
@@ -262,7 +265,7 @@ end
 
 % set(gca, 'YDir','reverse');
 yticklabels(ychlabels);
-yticks(1:size(ychlabels, 2));
-ylim([0 47])
+yticks(1:popsize);
+ylim([-1 popsize+1])
 
 %% End
