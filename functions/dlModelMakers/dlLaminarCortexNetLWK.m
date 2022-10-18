@@ -145,10 +145,11 @@ function y = dlLaminarCortexNetLWK(ModelParameters, populationName)
     gGABA_II = .3*(14/NeAvg); % I->I within layer
 
     % neuronal dynamics
-    eqns = 'dV/dt = (Iapp + @current + noise*randn(1, Npop))/C; Iapp=0; noise=0; C=1; V(0) = -rand(1, Npop)*0;';
-    eqns_stimuli = 'dV/dt = (rand(1) + 4.5)*(20*(exp(- (t - t1).^2) - exp(- (t - t2).^2)) + noise*randn(1, Npop))/C; f1=4; t1=10; t2=100; noise=0; C=1; V(0) = -60 - rand(1, Npop)*0;';
-%     eqns_stimuli = 'dV/dt=(stimA*(t>ton&t<toff)+@current+...)/Cm; stimA=4';
-
+    eqns = 'dV/dt = (Iapp + @current + noise*randn(1, Npop))/C; Iapp=0; noise=0; C=1; V(0) = -65 + rand(1, Npop)*0;';
+    %eqns_stimuli = 'dinp/dt = (rand(1) + 4.5)*(20*(exp(- (t - t1).^2) - exp(- (t - t2).^2)) + noise*randn(1, Npop))/C; f1=4; t1=10; t2=100; noise=0; C=1; inp(0) = -60 - rand(1, Npop)*0;';
+    eqns_stimuli = 'dinp/dt = (noise*rand(1) + 1)*(1*(exp(- (t - t1).^2) - exp(- (t - t2).^2)) + noise*randn(1, Npop)); t1=100; t2=200; noise=0; inp(0) = rand(1, Npop)*0;';
+    input_amp = 1; % scales the strength of stimulus
+    
     % cell type
     ctx_cells = {'iNa','iK'};
     cell_type = ctx_cells;
@@ -362,15 +363,15 @@ function y = dlLaminarCortexNetLWK(ModelParameters, populationName)
         s.connections(c).direction = [IOping{k}.populations(1).name, '->', pingM.populations(1).name];
         s.connections(c).source = IOping{k}.populations(1).name;
         s.connections(c).target = pingM.populations(1).name;
-        s.connections(c).mechanism_list={'iAMPActx'};
-        s.connections(c).parameters={'gAMPA',gAMPA_EE*50,'tauAMPA',tauAMPA_E,'netcon',Aconn};
+        s.connections(c).mechanism_list={'input_connection'};
+        s.connections(c).parameters={'input_amp',input_amp,'netcon',Aconn};
     
         c = length(s.connections) + 1;
         s.connections(c).direction = [IOping{k}.populations(2).name, '->', pingM.populations(1).name];
         s.connections(c).source = IOping{k}.populations(2).name;
         s.connections(c).target = pingM.populations(1).name;
-        s.connections(c).mechanism_list={'iAMPActx'};
-        s.connections(c).parameters={'gAMPA',gAMPA_EE*50,'tauAMPA',tauAMPA_E,'netcon',Aconn};
+        s.connections(c).mechanism_list={'input_connection'};
+        s.connections(c).parameters={'input_amp',input_amp,'netcon',Aconn};
 
     end
     

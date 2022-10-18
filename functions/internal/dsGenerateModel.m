@@ -621,6 +621,7 @@ if ~isempty(model.ODEs)
   model.ICs = orderfields(model.ICs,model.state_variables);
 end
 
+
 % 4.2 convert to numeric parameters
 paramCell = struct2cell(model.parameters);
 

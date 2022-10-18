@@ -91,7 +91,6 @@ options=dsCheckOptions(varargin,{...
   'independent_solve_file_flag',0,{0,1},... % solve file makes DS data structure without dsSimulate call
   'benchmark_flag',0,{0,1},...
   'sim_log_flag',0,{0,1},...
-  'allow_unused_linkers_flag',0,{0,1},...
   },false);
 model=dsCheckModel(model, varargin{:});
 separator=','; % ',', '\\t'
@@ -682,7 +681,7 @@ if ~isempty(model.monitors)
       end
 
       % default number of spike times to store for each cell
-      spike_buffer_size=2; % 1; % 5; % 100;
+      spike_buffer_size=2;%5;%100;
 
       % Support: monitor VAR.spikes(thresh,buffer_size)
       % - monitor VAR.spikes(#)
@@ -741,10 +740,10 @@ if ~isempty(model.monitors)
 
         if isnumeric(spike_threshold)
           model.conditionals(end).condition=...
-            sprintf('(%s%s>=%g&%s%s<%g)',var_spikes,index_curr,spike_threshold,var_spikes,index_last,spike_threshold);
+            sprintf('any(%s%s>=%g&%s%s<%g)',var_spikes,index_curr,spike_threshold,var_spikes,index_last,spike_threshold);
         else
           model.conditionals(end).condition=...
-            sprintf('(%s%s>=%s&%s%s<%s)',var_spikes,index_curr,spike_threshold,var_spikes,index_last,spike_threshold);
+            sprintf('any(%s%s>=%s&%s%s<%s)',var_spikes,index_curr,spike_threshold,var_spikes,index_last,spike_threshold);
         end
 
         action1=sprintf('%s(n,conditional_indx)=1',monitor_names{i});
@@ -1029,38 +1028,18 @@ if ~isempty(delayinfo)
   end
 end
 % #####################################################################
-
-if options.allow_unused_linkers_flag
-  % JS: from the perspective of a simulation study, unused linkers do not 
-  % necessarily represent incorrect pointers that need to be removed 
-  % (e.g., varying model composition across simulations). If so, we should
-  % simply remove unused linkers:
-  % remove unused @linkers from ODEs
-  for i=1:length(odes)
-    if any(odes{i}=='@')
-      tmp=regexp(odes{i},'@([\w_]+)','tokens');
-      if ~isempty(tmp)
-        tmp=[tmp{:}];
-        for j=1:length(tmp)
-          odes{i}=strrep(odes{i},['@' tmp{j}],'0');
-        end
+% unused @linkers from ODEs represent incorrect pointers and should trigger a Dynasim error
+for i=1:length(odes)
+  if any(odes{i}=='@')
+    tmp=regexp(odes{i},'@([\w_]+)','tokens');
+    if ~isempty(tmp)
+      tmp=unique([tmp{:}]);
+      wrong_linkers=['@',tmp{1}];
+      for j=2:length(tmp)
+        wrong_linkers=[wrong_linkers, ', @', tmp{j}];
       end
     end
-  end
-else
-  % unused @linkers from ODEs in general represent incorrect pointers and should trigger a Dynasim error
-  for i=1:length(odes)
-    if any(odes{i}=='@')
-      tmp=regexp(odes{i},'@([\w_]+)','tokens');
-      if ~isempty(tmp)
-        tmp=unique([tmp{:}]);
-        wrong_linkers=['@',tmp{1}];
-        for j=2:length(tmp)
-          wrong_linkers=[wrong_linkers, ', @', tmp{j}];
-        end
-      end
-      error('Referencing non-existing linkers: %s. Please fix your Dynasim mechanisms. [If this was the intended behavior, please activate ''allow_unused_linkers_flag''].\n\n', wrong_linkers);
-    end
+    error('Referencing non-existing linkers: %s –. Please fix your Dynasim mechanisms.\n\n', wrong_linkers);
   end
 end
 
@@ -1312,8 +1291,6 @@ end
         print_var_update(fid,index_nexts_,index_lasts,...
           '(dt/6)*(%s_k1 + 2*(%s_k2 + %s_k3) + %s_k4)',state_variables);
     end
-
-    % TODO: add Dirac delta funcions here
   end
 
 end %main
@@ -1427,7 +1404,7 @@ function print_conditional_update(fid,conditionals,index_nexts,state_variables, 
       action = {action};
     end
     for j=1:length(condition)
-      fprintf(fid,['  conditional_test=any(any(%s));\n'],condition{j}); % JSS edit
+      fprintf(fid,['  conditional_test=any(%s);\n'],condition{j}); % JSS edit
       % fprintf(fid,['  conditional_test=(%s);\n'],condition{j});
 %     if ~isempty(strfind(condition{j},'any('))
 %         condition_indx = regexprep(condition{j},'^any\(','','once');
@@ -1449,7 +1426,7 @@ function print_conditional_update(fid,conditionals,index_nexts,state_variables, 
         initialization = [action_j(1:indCondStr-1), ' = []'];
         fprintf(fid,'  if ~exist(''%s'',''var'')\n', condVariableName);
         fprintf(fid,'    %s;\n',initialization);
-        fprintf(fid,'  end\n');
+        fprintf(fid,'  end;\n');
       end
       % ---- JSS begin
       if ~isempty(regexp(condition{j},'(:,:,n)','once'))
