@@ -1033,9 +1033,9 @@ classdef DynaLearn < matlab.mixin.SetGet
             while i < dlEpochs*dlBatchs
                 
                 fprintf("   ->Sel. Total trials %d (Total iterations for this model : %d)\n", max(size(obj.dlLastErrorsLog)), obj.dlTrialNumber);
-                
+
                 for j = 1:dlBatchs
-                
+
                     dlCurrentCheckpointLength = dlCurrentCheckpointLength + 1;
                     
                     if i >= dlEpochs*dlBatchs

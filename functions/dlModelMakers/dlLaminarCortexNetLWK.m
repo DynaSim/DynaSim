@@ -133,20 +133,21 @@ function y = dlLaminarCortexNetLWK(ModelParameters, populationName)
     end
 
     % Time constants
-    tauGABA_Pv = 41.47; % ms, decay time constant of inhibition for gamma (around 50Hz)
-    tauGABA_Som = 147.74; % ms, decay time constant of inhibition for beta (around 25Hz)
-    tauAMPA_E = 47.74; % ms, decay time constant of fast excitation (AMPA)
+    tauGABA_Pv = 35; % ms, decay time constant of inhibition for gamma (around 50Hz)
+    tauGABA_Som = 140; % ms, decay time constant of inhibition for beta (around 25Hz)
+    tauAMPA_E = 40; % ms, decay time constant of fast excitation (AMPA)
 
     % Maximal synaptic strengths
-    gAMPA_EI = .2*(21/NeAvg); % E->I(SOM-PV) 
-    gAMPA_EE = .2*(21/NeAvg); % E->E
-    gGABA_SE = .2*(17/NeAvg); % (SOM)->E
-    gGABA_PE = .2*(17/NeAvg); % (PV)->E
-    gGABA_II = .1*(14/NeAvg); % I->I within layer
+    gAMPA_EI = .5*(21/NeAvg); % E->I(SOM-PV) 
+    gAMPA_EE = .5*(21/NeAvg); % E->E
+    gGABA_SE = .5*(17/NeAvg); % (SOM)->E
+    gGABA_PE = .5*(17/NeAvg); % (PV)->E
+    gGABA_II = .3*(14/NeAvg); % I->I within layer
 
     % neuronal dynamics
-    eqns = 'dV/dt = (Iapp + @current + noise*randn(1, Npop))/C; Iapp=0; noise=0; C=1; V(0) = -rand(1, Npop)*74;';
-    eqns_stimuli = 'dV/dt = (rand(1) + 4.5)*(20*(exp(- (t - t1).^2) - exp(- (t - t2).^2)) + noise*randn(1, Npop))/C; f1=4; t1=10; t2=100; noise=0; C=1; V(0) = -60 - rand(1, Npop)*17;';
+    eqns = 'dV/dt = (Iapp + @current + noise*randn(1, Npop))/C; Iapp=0; noise=0; C=1; V(0) = -rand(1, Npop)*0;';
+    eqns_stimuli = 'dV/dt = (rand(1) + 4.5)*(20*(exp(- (t - t1).^2) - exp(- (t - t2).^2)) + noise*randn(1, Npop))/C; f1=4; t1=10; t2=100; noise=0; C=1; V(0) = -60 - rand(1, Npop)*0;';
+%     eqns_stimuli = 'dV/dt=(stimA*(t>ton&t<toff)+@current+...)/Cm; stimA=4';
 
     % cell type
     ctx_cells = {'iNa','iK'};
@@ -161,21 +162,21 @@ function y = dlLaminarCortexNetLWK(ModelParameters, populationName)
     pingS.populations(1).size = NeSuperficial;
     pingS.populations(1).equations = eqns;
     pingS.populations(1).mechanism_list = cell_type;
-    pingS.populations(1).parameters = {'Iapp', 5,'noise', NoiseRate*2};
+    pingS.populations(1).parameters = {'Iapp', 0,'noise', NoiseRate*2};
 
     % I-cells-SOM
     pingS.populations(2).name = ['supISOM', populationName];
     pingS.populations(2).size = NSomSuperficial;
     pingS.populations(2).equations = eqns;
     pingS.populations(2).mechanism_list = cell_type;
-    pingS.populations(2).parameters = {'Iapp', 1,'noise', NoiseRate};
+    pingS.populations(2).parameters = {'Iapp', 0,'noise', NoiseRate};
 
     % I-cells-PV
     pingS.populations(3).name = ['supIPV', populationName];
     pingS.populations(3).size = NPvSuperficial;
     pingS.populations(3).equations = eqns;
     pingS.populations(3).mechanism_list = cell_type;
-    pingS.populations(3).parameters = {'Iapp', 2,'noise', NoiseRate};
+    pingS.populations(3).parameters = {'Iapp', 0,'noise', NoiseRate};
     
     % Interlayer connections - Superficial
     pingS.connections(1).direction = [pingS.populations(1).name, '->', pingS.populations(2).name];
@@ -234,7 +235,7 @@ function y = dlLaminarCortexNetLWK(ModelParameters, populationName)
     pingM.populations(1).size = NeMid;
     pingM.populations(1).equations = eqns;
     pingM.populations(1).mechanism_list = cell_type;
-    pingM.populations(1).parameters = {'Iapp', 4,'noise', NoiseRate*2};
+    pingM.populations(1).parameters = {'Iapp', 0,'noise', NoiseRate*2};
 
     % I-cells-PV
     pingM.populations(2).name = ['midIPV', populationName];
@@ -264,7 +265,7 @@ function y = dlLaminarCortexNetLWK(ModelParameters, populationName)
     pingD.populations(1).size = NeDeep;
     pingD.populations(1).equations = eqns;
     pingD.populations(1).mechanism_list = cell_type;
-    pingD.populations(1).parameters = {'Iapp', 4,'noise', NoiseRate*2};
+    pingD.populations(1).parameters = {'Iapp', 0,'noise', NoiseRate*2};
 
     % I-cells-SOM
     pingD.populations(2).name = ['deepISOM', populationName];
@@ -327,14 +328,14 @@ function y = dlLaminarCortexNetLWK(ModelParameters, populationName)
         IOping{i}.populations(1).size = Nin;
         IOping{i}.populations(1).equations = eqns_stimuli;
         IOping{i}.populations(1).mechanism_list = cell_type;
-        IOping{i}.populations(1).parameters = {'f1', 1,'noise', 4};
+        IOping{i}.populations(1).parameters = {'f1', 1,'noise', 0};
     
         % I-cells
         IOping{i}.populations(2).name = ['PostStimuli', char(64+i), populationName];
         IOping{i}.populations(2).size = Nin;
         IOping{i}.populations(2).equations = eqns_stimuli;
         IOping{i}.populations(2).mechanism_list = cell_type;
-        IOping{i}.populations(2).parameters = {'f1', 1,'noise', 4};
+        IOping{i}.populations(2).parameters = {'f1', 1,'noise', 0};
 
         IOping{i}.connections(1).direction = [IOping{i}.populations(1).name, '->', IOping{i}.populations(2).name];
         IOping{i}.connections(1).source = IOping{i}.populations(1).name;
@@ -362,14 +363,14 @@ function y = dlLaminarCortexNetLWK(ModelParameters, populationName)
         s.connections(c).source = IOping{k}.populations(1).name;
         s.connections(c).target = pingM.populations(1).name;
         s.connections(c).mechanism_list={'iAMPActx'};
-        s.connections(c).parameters={'gAMPA',gAMPA_EE,'tauAMPA',tauAMPA_E,'netcon',Aconn};
+        s.connections(c).parameters={'gAMPA',gAMPA_EE*50,'tauAMPA',tauAMPA_E,'netcon',Aconn};
     
         c = length(s.connections) + 1;
         s.connections(c).direction = [IOping{k}.populations(2).name, '->', pingM.populations(1).name];
         s.connections(c).source = IOping{k}.populations(2).name;
         s.connections(c).target = pingM.populations(1).name;
         s.connections(c).mechanism_list={'iAMPActx'};
-        s.connections(c).parameters={'gAMPA',gAMPA_EE,'tauAMPA',tauAMPA_E,'netcon',Aconn};
+        s.connections(c).parameters={'gAMPA',gAMPA_EE*50,'tauAMPA',tauAMPA_E,'netcon',Aconn};
 
     end
     

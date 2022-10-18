@@ -1,22 +1,22 @@
-function dlThreeCuesTaskPerformer(Currentsize, model_size_id)
+function m = dlThreeCuesTaskPerformer(Currentsize, model_size_id, noise_rate)
 
     %%% Create model parameters struct
     ModelParametersPFC = struct();
     
     %%% Area PFC layer sizes (relative)
     ModelParametersPFC.NeSuperficial = ceil(0.3*Currentsize);
-    ModelParametersPFC.NSomSuperficial = ceil(0.07*Currentsize);
-    ModelParametersPFC.NPvSuperficial = ceil(0.07*Currentsize);
+    ModelParametersPFC.NSomSuperficial = ceil(0.03*Currentsize);
+    ModelParametersPFC.NPvSuperficial = ceil(0.03*Currentsize);
     ModelParametersPFC.NeMid = ceil(0.14*Currentsize);
     ModelParametersPFC.NSomMid = 0;
-    ModelParametersPFC.NPvMid = ceil(0.04*Currentsize);
+    ModelParametersPFC.NPvMid = ceil(0.03*Currentsize);
     ModelParametersPFC.NeDeep = ceil(0.45*Currentsize);
     ModelParametersPFC.NSomDeep = ceil(0.04*Currentsize);
     ModelParametersPFC.NPvDeep = ceil(0.01*Currentsize);
     
     ModelParametersPFC.Nin = 6;
     ModelParametersPFC.Nout = 6;
-    ModelParametersPFC.NoiseRate = 4; % 6%
+    ModelParametersPFC.NoiseRate = noise_rate; % 10%
     ModelParametersPFC.Nstim = 3;
     
     %%% Call Laminar Cortex Constructor Functions
@@ -39,19 +39,19 @@ function dlThreeCuesTaskPerformer(Currentsize, model_size_id)
 
     [trialParams1, trialParams2, trialParams3] = dlDemoThreePattern('xPFC');
 
-    outputParams = [{'deepExPFC_V', 1:floor(ModelParametersPFC.NeDeep/3), [400 750] ...
+    outputParams = [{'deepExPFC_V', 1:floor(ModelParametersPFC.NeDeep/3), [200 400] ...
         , 'afr'}; {'deepExPFC_V',ceil(ModelParametersPFC.NeDeep/3):floor(2*ModelParametersPFC.NeDeep/3), ...
-        [400 750], 'afr'}; {'deepExPFC_V', ceil(2*ModelParametersPFC.NeDeep/3):ModelParametersPFC.NeDeep, [400 750], 'afr'}; ...
-        {'supExPFC_V', 1:ModelParametersPFC.NeSuperficial, [300 800], 'afr'}; ...
-        {'midExPFC_V', 1:ModelParametersPFC.NeMid, [300 800], 'afr'}; ...
-        {'deepExPFC_V', 1:ModelParametersPFC.NeDeep, [300 800], 'afr'}; ...
-        {'supIPVxPFC_V', 1:ModelParametersPFC.NPvSuperficial, [300 800], 'afr'}; ...
-        {'midIPVxPFC_V', 1:ModelParametersPFC.NPvMid, [300 800], 'afr'}; ...
-        {'deepIPVxPFC_V', 1:ModelParametersPFC.NPvDeep, [300 800], 'afr'}];
+        [200 400], 'afr'}; {'deepExPFC_V', ceil(2*ModelParametersPFC.NeDeep/3):ModelParametersPFC.NeDeep, [200 400], 'afr'}; ...
+        {'supExPFC_V', 1:ModelParametersPFC.NeSuperficial, [200 900], 'afr'}; ...
+        {'midExPFC_V', 1:ModelParametersPFC.NeMid, [200 900], 'afr'}; ...
+        {'deepExPFC_V', 1:ModelParametersPFC.NeDeep, [200 900], 'afr'}; ...
+        {'supIPVxPFC_V', 1:ModelParametersPFC.NPvSuperficial, [200 900], 'afr'}; ...
+        {'midIPVxPFC_V', 1:ModelParametersPFC.NPvMid, [200 900], 'afr'}; ...
+        {'deepIPVxPFC_V', 1:ModelParametersPFC.NPvDeep, [200 900], 'afr'}];
     
-    targetParams1 = [{'EPenalty', 4:6, 240, 0.3}; {'Compare', [1, 2], 0, 0.35}; {'Compare', [1, 3], 0, 0.35}]; % A 
-    targetParams2 = [{'EPenalty', 4:6, 240, 0.3}; {'Compare', [2, 1], 0, 0.35}; {'Compare', [2, 3], 0, 0.35}]; % B
-    targetParams3 = [{'EPenalty', 4:6, 240, 0.3}; {'Compare', [3, 1], 0, 0.35}; {'Compare', [3, 2], 0, 0.35}]; % C
+    targetParams1 = [{'EPenalty', 4:6, 240, 0.4}; {'Compare', [1, 2], 0, 0.3}; {'Compare', [1, 3], 0, 0.3}]; % A 
+    targetParams2 = [{'EPenalty', 4:6, 240, 0.4}; {'Compare', [2, 1], 0, 0.3}; {'Compare', [2, 3], 0, 0.3}]; % B
+    targetParams3 = [{'EPenalty', 4:6, 240, 0.4}; {'Compare', [3, 1], 0, 0.3}; {'Compare', [3, 2], 0, 0.3}]; % C
     
     dlInputParameters = {trialParams1, trialParams2, trialParams3};
     dlTargetParameters = {targetParams1, targetParams2, targetParams3};
@@ -93,28 +93,23 @@ function dlThreeCuesTaskPerformer(Currentsize, model_size_id)
     argsPowSpectRatio3.hf1 = 30;
     argsPowSpectRatio4.lf1 = 40;
     argsPowSpectRatio4.hf1 = 90;
-    
-    argn = [];
-
-    dlTrainOptions('dlCustomLog') = ["dlEPowerSpectrum", "dlEPowerSpectrum", "dlEPowerSpectrum", "dlEPowerSpectrum", "dlAccuracyBastos2020Task"]; % Name of a function which is in the path
-    dlTrainOptions('dlCustomLogArgs') = [argsPowSpectRatio1, argsPowSpectRatio2, argsPowSpectRatio3, argsPowSpectRatio4, argn]; % Arguments of your custom function
-      
+ 
     dlTrainOptions('dlLambda') = 1e-7; % 1e-11(1) -> 1e-4 (4)
     dlTrainOptions('dlAdaptiveLambda') = 0; % Adaptive lambda parameter; recommended for long simulations.
     dlTrainOptions('dlUpdateMode') = 'trial';
     dlTrainOptions('dlLearningRule') = 'BioDeltaRule';
     
     dlTrainOptions('dlTrainExcludeList') = {'Stimuli'};
-    dlTrainOptions('dlCheckpointLengthCap') = 15;
+    dlTrainOptions('dlCheckpointLengthCap') = 20;
     dlTrainOptions('dlEpochs') = 1;
     dlTrainOptions('dlBatchs') = 100;
     
-    dlTrainOptions('dlEnhancedMomentum') = 0.5;
-    CheckCoeff = 1.4;
+    dlTrainOptions('dlEnhancedMomentum') = 0.4;
+    CheckCoeff = 1.28;
     m.dlResetTraining();
     
-    dlTrainOptions('dlCustomLog') = ["dlEPowerSpectrum", "dlEPowerSpectrum", "dlEPowerSpectrum", "dlEPowerSpectrum", "dlAccuracyBastos2020Task"]; % Name of a function which is in the path
-    dlTrainOptions('dlCustomLogArgs') = [argsPowSpectRatio1, argsPowSpectRatio2, argsPowSpectRatio3, argsPowSpectRatio4, argsPowSpectRatio1]; % Arguments of your custom function
+    dlTrainOptions('dlCustomLog') = ["dlEPowerSpectrum", "dlEPowerSpectrum", "dlEPowerSpectrum", "dlEPowerSpectrum", "dlLFPaxLog", "dlAccuracyBastos2020Task"]; % Name of a function which is in the path
+    dlTrainOptions('dlCustomLogArgs') = [argsPowSpectRatio1, argsPowSpectRatio2, argsPowSpectRatio3, argsPowSpectRatio4, argsPowSpectRatio1, argsPowSpectRatio1]; % Arguments of your custom function
 
     for cnt = 1:1
     

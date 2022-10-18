@@ -1,10 +1,11 @@
-%% Load model logs (B/G ratio)
+%% Load model logs
 
-clear;clc;
+% clear;clc;
 
 ratioLogs = cell(10, 1);
+lfps = zeros(10, 900, 48790);
 
-for i = 1:10
+for i = 1:7
 
     m = DynaLearn(); % ~ 1sec
     m = m.dlLoad(char("models/dlPredictiveCorticalCircuitModelLWK" + string(i))); % ~ 10sec, New larger model; keeping track of its activity in Gamma/Beta **
@@ -24,6 +25,9 @@ for i = 1:10
     ratioLog4 = {m.dlCustomLog(4, :)};
     ratioLog4 = cell2mat(ratioLog4{1});
     ratioLogs4{i} = ratioLog4';
+
+    lfpcl = {m.dlCustomLog(5, :)};
+    lfps(i, :, :) = cell2mat(lfpcl{1});
 
 end
 
@@ -197,5 +201,68 @@ end
 
 sgtitle("Theta power band ratio change from (Average across 10 different models/ Predictable block (green) to unpredictable (yellow))");
 
+%%
+
+ychlabels = ["Time"];
+
+for i = 1:ModelParametersPFC.NeSuperficial
+    ychlabels = [ychlabels, "supE"];
+end
+for i = 1:ModelParametersPFC.NSomSuperficial
+    ychlabels = [ychlabels, "supISOM"];
+end
+for i = 1:ModelParametersPFC.NPvSuperficial
+    ychlabels = [ychlabels, "supIPV"];
+end
+
+for i = 1:ModelParametersPFC.NeMid
+    ychlabels = [ychlabels, "midE"];
+end
+for i = 1:ModelParametersPFC.NPvMid
+    ychlabels = [ychlabels, "midIPV"];
+end
+
+for i = 1:ModelParametersPFC.NeDeep
+    ychlabels = [ychlabels, "deepE"];
+end
+for i = 1:ModelParametersPFC.NSomDeep
+    ychlabels = [ychlabels, "deepISOM"];
+end
+for i = 1:ModelParametersPFC.NPvDeep
+    ychlabels = [ychlabels, "deepIPV"];
+end
+
+ychlabels = flip(ychlabels);
+
+%%
+
+clc;
+popsize = 82;
+trial = 2;
+k = 5;
+
+lfptemp = {m.dlCustomLog{5, :}};
+lfptemp = cell2mat(lfptemp);
+
+%%
+figure("Position", [0 0 1500 1000]);
+subplot(1, 1, 1);
+
+for i = 1:popsize
+
+%     y = lfps(k, :, i + popsize*trial);
+    y = lfptemp(:, i + popsize*trial);
+    y = y - min(y);
+    y = y / max(y);
+    offsetLFPplot = (47-i) * 1;
+
+    plot(y + offsetLFPplot);hold("on");
+    
+end
+
+% set(gca, 'YDir','reverse');
+yticklabels(ychlabels);
+yticks(1:size(ychlabels, 2));
+ylim([0 47])
 
 %% End
