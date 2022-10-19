@@ -15,9 +15,9 @@
 clear;clc;
 
 TotalSize = ones(1, 10)*40;
-noise_rate = 1;
+noise_rate = 8;
 
-for model_size_id = 1:10
+for model_size_id = 8:10
 
     Currentsize = TotalSize(model_size_id);
     dlThreeCuesTaskPerformer(Currentsize, model_size_id, noise_rate);
@@ -26,8 +26,8 @@ end
 
 %% Model parameters (Single-area, PFC)
 
-clc;
-noise_rate = 8.5;
+clc;clear;
+noise_rate = 10.0;
 model_size_id = 1;
 Currentsize = 40;
 
@@ -58,11 +58,11 @@ for i = 1 % Make and save model dsStruct&dlModel
     dsCellPFC = dlLaminarCortexNetLWK(ModelParametersPFC, 'PFC'); % Laminar PFC model with specific parameters
     dsModel = dsCellPFC;
         
-    %     if 1 % test the model
-    %       data = dsSimulate(dsCellPFC,'dt',.01,'tspan',[0 300],'verbose_flag',1);
-    %       dsPlot(data,'variable','V');
-    %       return
-    %     end
+%     if 1 % test the model
+%           data = dsSimulate(dsCellPFC,'dt',.01,'tspan',[0 900],'verbose_flag',1, 'solver', 'rk1');
+%           dsPlot(data,'variable','V');
+%           return
+%     end
     
     m = DynaLearn(dsModel, char("models/dlPredictiveCorticalCircuitModelLWK" + string(model_size_id)), 'mex'); % ~10 min or less, MEXGEN or < 20 sec, RAWGEN.
     m.dlSave(); % < 1sec
@@ -91,9 +91,9 @@ for i = 1 % Define training params
         {'midIPVxPFC_V', 1:ModelParametersPFC.NPvMid, [50 700], 'afr'}; ...
         {'deepIPVxPFC_V', 1:ModelParametersPFC.NPvDeep, [50 700], 'afr'}];
     
-    targetParams1 = [{'EPenalty', 4:6, 360, 0.4}; {'Compare', [1, 2], 0, 0.3}; {'Compare', [1, 3], 0, 0.3}]; % A 
-    targetParams2 = [{'EPenalty', 4:6, 360, 0.4}; {'Compare', [2, 1], 0, 0.3}; {'Compare', [2, 3], 0, 0.3}]; % B
-    targetParams3 = [{'EPenalty', 4:6, 360, 0.4}; {'Compare', [3, 1], 0, 0.3}; {'Compare', [3, 2], 0, 0.3}]; % C
+    targetParams1 = [{'EPenalty', 5:6, 500, 0.3}; {'Compare', [1, 2], 0, 0.3}; {'Compare', [1, 3], 0, 0.3}]; % A 
+    targetParams2 = [{'EPenalty', 5:6, 500, 0.3}; {'Compare', [2, 1], 0, 0.3}; {'Compare', [2, 3], 0, 0.3}]; % B
+    targetParams3 = [{'EPenalty', 5:6, 500, 0.3}; {'Compare', [3, 1], 0, 0.3}; {'Compare', [3, 2], 0, 0.3}]; % C
     
     dlInputParameters = {trialParams1, trialParams2, trialParams3};
     dlTargetParameters = {targetParams1, targetParams2, targetParams3};
@@ -157,7 +157,7 @@ end
 
 %%
 
-for cnt = 1:1
+for  cnt = 1:1
 
     disp("----------A-----------");
     dlTrainOptions('dlExcludeDiverge') = 1;

@@ -240,7 +240,7 @@ for i = 1
 end
 
 popsize = size(ychlabels, 2);
-trial = 20;
+trial = 0;
 k = 5;
 
 lfptemp = {m.dlCustomLog{5, :}};
@@ -251,7 +251,7 @@ lfptemp = cell2mat(lfptemp);
 figure("Position", [0 0 1500 1000]);
 subplot(1, 1, 1);
 
-for i = 2:popsize
+for i = 1:popsize
 
 %     y = lfps(k, :, i + popsize*trial);
     y = lfptemp(:, i + popsize*trial);

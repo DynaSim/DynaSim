@@ -138,8 +138,8 @@ function y = dlLaminarCortexNetLWK(ModelParameters, populationName)
     tauAMPA_E = 40; % ms, decay time constant of fast excitation (AMPA)
 
     % Maximal synaptic strengths
-    gAMPA_EI = .05*(21/NeAvg); % E->I(SOM-PV) 
-    gAMPA_EE = .1*(21/NeAvg); % E->E
+    gAMPA_EI = .04*(21/NeAvg); % E->I(SOM-PV) 
+    gAMPA_EE = .03*(21/NeAvg); % E->E
     gGABA_SE = .2*(17/NeAvg); % (SOM)->E
     gGABA_PE = .2*(17/NeAvg); % (PV)->E
     gGABA_II = .1*(14/NeAvg); % I->I within layer
