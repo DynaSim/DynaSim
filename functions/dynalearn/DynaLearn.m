@@ -737,11 +737,13 @@ classdef DynaLearn < matlab.mixin.SetGet
                     for j = dlOutputIndices
                         
                         x(c) = obj.dlLastOutputs{j};
-                        
+                        cmp = dl.dlLastOutputs{x(c)}
                         if c > 1
                             TempError = TempError + dlRampFunc(x(c) - x(c-1)).^2;
                         end
                         
+                        disp(TempError);
+                        disp(x);
                         c = c + 1;
                         
                     end
