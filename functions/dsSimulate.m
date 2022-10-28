@@ -43,15 +43,6 @@ function [data,studyinfo,result] = dsSimulate(model,varargin)
 %   options for cluster computing:
 %     'cluster_flag'  : whether to run simulations on a cluster submitted
 %                     using qsub (see dsCreateBatch) {0 or 1} (default: 0)
-%     'sims_per_job'  : number of simulations to run per batch job (default: 1)
-%     'memory_limit'  : memory to allocate per batch job (default: '8G')
-%     'qsub_mode'     : whether to use SGE -t array for 1 qsub, mode: 'array'; or
-%                         qsub in csh for loop, mode: 'loop'. (default: 'loop').
-%     'email_notify'  : whether to receive email notification about jobs.
-%                       options specified by 1-3 characters as string. 'b' for job
-%                       begins, 'a' for job aborts, 'e' for job ends.
-%     'one_solve_file_flag': only use 1 file of each time when solving (default: 0)
-%     'optimize_big_vary': Select best options for doing many sims {0 or 1} (default: 0)
 %     'cluster_matlab_version': what version of Matlab to use in cluster batch
 %                               submission. Check
 %                               http://sccsvc.bu.edu/software/#/package/matlab/
@@ -59,6 +50,21 @@ function [data,studyinfo,result] = dsSimulate(model,varargin)
 %                               {'2009b', '2013a', '2014a', '2015a', '2016a',
 %                               '2016b', '2017a', '2017b', '2018a'} (default:
 %                               '2014a')
+%     'cpu_architecture': which CPU architecture to use on the cluster, as
+%                         listed on
+%                         https://www.bu.edu/tech/support/research/computing-resources/tech-summary/
+%                         {'sandybridge', 'haswell', 'broadwell', 'cascadelake',
+%                          'nehalem', 'knl','ivybridge', 'skylake', 'icelake'}
+%                         (default: 'no preference')
+%     'email_notify'  : whether to receive email notification about jobs.
+%                       options specified by 1-3 characters as string. 'b' for job
+%                       begins, 'a' for job aborts, 'e' for job ends.
+%     'memory_limit'  : memory to allocate per batch job (default: '8G')
+%     'one_solve_file_flag': only use 1 file of each time when solving (default: 0)
+%     'optimize_big_vary': Select best options for doing many sims {0 or 1} (default: 0)
+%     'qsub_mode'     : whether to use SGE -t array for 1 qsub, mode: 'array'; or
+%                         qsub in csh for loop, mode: 'loop'. (default: 'loop').
+%     'sims_per_job'  : number of simulations to run per batch job (default: 1)
 %
 %   options for parallel computing: (requires Parallel Computing Toolbox)
 %     'parfor_flag' : whether to use parfor to run simulations {0 or 1} (default: 0)
@@ -321,6 +327,9 @@ options=dsCheckOptions(varargin,{...
   'benchmark_flag',0,{0,1},...
   'sim_log_flag',0,{0,1},...
   'allow_unused_linkers_flag',0,{0,1},...
+  'cpu_architecture','no preference',{'sandybridge', 'haswell', 'broadwell',...
+                                      'cascadelake', 'nehalem', 'knl',...
+                                      'ivybridge', 'skylake', 'icelake'},...
   },false);
 % more options: remove_solve_dir, remove_batch_dir, post_downsample_factor
 

@@ -84,7 +84,13 @@ function result = dsAnalyze(src,varargin)
 %                                 {'2009b', '2013a', '2014a', '2015a', '2016a',
 %                                 '2016b', '2017a', '2017b', '2018a'} (default:
 %                                 '2014a')
-
+%       'cpu_architecture': which CPU architecture to use on the cluster, as
+%                           listed on
+%                           https://www.bu.edu/tech/support/research/computing-resources/tech-summary/
+%                           {'sandybridge', 'haswell', 'broadwell', 'cascadelake',
+%                            'nehalem', 'knl','ivybridge', 'skylake', 'icelake'}
+%                           (default: 'no preference')
+%
 % Note: if function_options/plot_options cells exceed num functions, they will
 %       be copied to each fn.
 %
@@ -170,6 +176,9 @@ options=dsCheckOptions(varargin,{...
   'SGE_TASK_STEPSIZE',[],[],...
   'SGE_TASK_LAST',[],[],...
   'local_debug_flag',0,{0,1},...
+  'cpu_architecture','no preference',{'sandybridge', 'haswell', 'broadwell',...
+                                      'cascadelake', 'nehalem', 'knl',...
+                                      'ivybridge', 'skylake', 'icelake'},...
   },false);
 
 %% auto_gen_test_data_flag argin

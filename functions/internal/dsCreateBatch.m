@@ -29,6 +29,12 @@ function [studyinfo, cmd] = dsCreateBatch(base_model,modifications_set,varargin)
 %                                 {'2009b', '2013a', '2014a', '2015a', '2016a',
 %                                 '2016b', '2017a', '2017b', '2018a'} (default:
 %                                 '2013a')
+%       'cpu_architecture': which CPU architecture to use on the cluster, as
+%                           listed on
+%                           https://www.bu.edu/tech/support/research/computing-resources/tech-summary/
+%                           {'sandybridge', 'haswell', 'broadwell', 'cascadelake',
+%                            'nehalem', 'knl','ivybridge', 'skylake', 'icelake'}
+%                           (default: 'no preference')
 %     - options for parallel computing: (requires Parallel Computing Toolbox)
 %       - Note: parallel computing has been DISABLED for debugging...
 %       'parfor_flag' : whether to use parfor to run simulations {0 or 1} (default: 0)
@@ -73,6 +79,9 @@ options=dsCheckOptions(varargin,{...
   'study_dir',[],[],... % for one_solve_file_flag
   'auto_gen_test_data_flag',0,{0,1},...
   'unit_test_flag',0,{0,1},...
+  'cpu_architecture','no preference',{'sandybridge', 'haswell', 'broadwell',...
+                                      'cascadelake', 'nehalem', 'knl',...
+                                      'ivybridge', 'skylake', 'icelake'},...
   },false);
 
 %% auto_gen_test_data_flag argin
@@ -470,15 +479,20 @@ else % on cluster with qsub
     if isMatlab
       if ~options.parfor_flag
         ui_command = 'matlab -nodisplay -nosplash -singleCompThread -r';
+        if strcmp(options.cpu_architecture, 'no preference')
+          l_directives = sprintf('-l mem_total=%s', options.memory_limit);
+        else
+          l_directives = sprintf('-l mem_total=%s -l cpu_arch=%s', options.memory_limit, options.cpu_architecture);
+        end
       else
         ui_command = 'matlab -nodisplay -nosplash -r';
+        if strcmp(options.cpu_architecture, 'no preference')
+          l_directives = sprintf('-l mem_total=%s -pe omp %i', options.memory_limit, options.num_cores);
+        else
+          l_directives = sprintf('-l mem_total=%s -l cpu_arch=%s -pe omp %i', options.memory_limit, options.cpu_architecture, options.num_cores);
+        end
       end
 
-      if ~options.parfor_flag
-        l_directives = sprintf('-l mem_total=%s', options.memory_limit);
-      else
-        l_directives = sprintf('-l mem_total=%s -pe omp %i', options.memory_limit, options.num_cores);
-      end
     else
       ui_command = 'octave-cli --eval';
       l_directives = ['-l centos7=TRUE -l mem_total=', options.memory_limit];
