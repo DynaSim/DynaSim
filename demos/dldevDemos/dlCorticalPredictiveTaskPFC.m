@@ -14,20 +14,20 @@
 
 clear;clc;
 
-TotalSize = ones(1, 10)*40;
-noise_rate = 8;
+TotalSize = ones(1, 50)*40;
+noise_rate = 4.9;
 
-for model_size_id = 8:10
+for model_size_id = 1:30
 
     Currentsize = TotalSize(model_size_id);
-    dlThreeCuesTaskPerformer(Currentsize, model_size_id, noise_rate);
+    m = dlThreeCuesTaskPerformer(Currentsize, model_size_id, noise_rate);
 
 end
 
 %% Model parameters (Single-area, PFC)
 
 clc;clear;
-noise_rate = 10.0;
+noise_rate = 5.0;
 model_size_id = 1;
 Currentsize = 40;
 
@@ -91,9 +91,9 @@ for i = 1 % Define training params
         {'midIPVxPFC_V', 1:ModelParametersPFC.NPvMid, [50 700], 'afr'}; ...
         {'deepIPVxPFC_V', 1:ModelParametersPFC.NPvDeep, [50 700], 'afr'}];
     
-    targetParams1 = [{'EPenalty', 5:6, 500, 0.3}; {'Compare', [1, 2], 0, 0.3}; {'Compare', [1, 3], 0, 0.3}]; % A 
-    targetParams2 = [{'EPenalty', 5:6, 500, 0.3}; {'Compare', [2, 1], 0, 0.3}; {'Compare', [2, 3], 0, 0.3}]; % B
-    targetParams3 = [{'EPenalty', 5:6, 500, 0.3}; {'Compare', [3, 1], 0, 0.3}; {'Compare', [3, 2], 0, 0.3}]; % C
+    targetParams1 = [{'EPenalty', 4:9, 100, 0.01}; {'Compare', [1, 2], 0, 5.5}; {'Compare', [1, 3], 0, 5.5}]; % A 
+    targetParams2 = [{'EPenalty', 4:9, 100, 0.01}; {'Compare', [2, 1], 0, 5.5}; {'Compare', [2, 3], 0, 5.5}]; % B
+    targetParams3 = [{'EPenalty', 4:9, 100, 0.01}; {'Compare', [3, 1], 0, 5.5}; {'Compare', [3, 2], 0, 5.5}]; % C
     
     dlInputParameters = {trialParams1, trialParams2, trialParams3};
     dlTargetParameters = {targetParams1, targetParams2, targetParams3};

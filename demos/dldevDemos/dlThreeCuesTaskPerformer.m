@@ -38,20 +38,20 @@ function m = dlThreeCuesTaskPerformer(Currentsize, model_size_id, noise_rate)
     m = m.dlLoad(char("models/dlPredictiveCorticalCircuitModelLWK" + string(model_size_id))); % ~ 10sec, New larger model; keeping track of its activity in Gamma/Beta **
 
     [trialParams1, trialParams2, trialParams3] = dlDemoThreePattern('xPFC');
-
+    
     outputParams = [{'deepExPFC_V', 1:floor(ModelParametersPFC.NeDeep/3), [200 400] ...
         , 'afr'}; {'deepExPFC_V',ceil(ModelParametersPFC.NeDeep/3):floor(2*ModelParametersPFC.NeDeep/3), ...
         [200 400], 'afr'}; {'deepExPFC_V', ceil(2*ModelParametersPFC.NeDeep/3):ModelParametersPFC.NeDeep, [200 400], 'afr'}; ...
-        {'supExPFC_V', 1:ModelParametersPFC.NeSuperficial, [100 700], 'afr'}; ...
-        {'midExPFC_V', 1:ModelParametersPFC.NeMid, [100 700], 'afr'}; ...
-        {'deepExPFC_V', 1:ModelParametersPFC.NeDeep, [100 700], 'afr'}; ...
-        {'supIPVxPFC_V', 1:ModelParametersPFC.NPvSuperficial, [100 700], 'afr'}; ...
-        {'midIPVxPFC_V', 1:ModelParametersPFC.NPvMid, [100 700], 'afr'}; ...
-        {'deepIPVxPFC_V', 1:ModelParametersPFC.NPvDeep, [100 700], 'afr'}];
+        {'supExPFC_V', 1:ModelParametersPFC.NeSuperficial, [50 700], 'afr'}; ...
+        {'midExPFC_V', 1:ModelParametersPFC.NeMid, [50 700], 'afr'}; ...
+        {'deepExPFC_V', 1:ModelParametersPFC.NeDeep, [50 700], 'afr'}; ...
+        {'supIPVxPFC_V', 1:ModelParametersPFC.NPvSuperficial, [50 700], 'afr'}; ...
+        {'midIPVxPFC_V', 1:ModelParametersPFC.NPvMid, [50 700], 'afr'}; ...
+        {'deepIPVxPFC_V', 1:ModelParametersPFC.NPvDeep, [50 700], 'afr'}];
     
-    targetParams1 = [{'EPenalty', 4:9, 360, 0.3}; {'Compare', [1, 2], 0, 0.3}; {'Compare', [1, 3], 0, 0.3}]; % A 
-    targetParams2 = [{'EPenalty', 4:9, 360, 0.3}; {'Compare', [2, 1], 0, 0.3}; {'Compare', [2, 3], 0, 0.3}]; % B
-    targetParams3 = [{'EPenalty', 4:9, 360, 0.3}; {'Compare', [3, 1], 0, 0.3}; {'Compare', [3, 2], 0, 0.3}]; % C
+    targetParams1 = [{'EPenalty', 4:9, 200, 0.01}; {'Compare', [1, 2], 0, 5.5}; {'Compare', [1, 3], 0, 5.5}]; % A 
+    targetParams2 = [{'EPenalty', 4:9, 200, 0.01}; {'Compare', [2, 1], 0, 5.5}; {'Compare', [2, 3], 0, 5.5}]; % B
+    targetParams3 = [{'EPenalty', 4:9, 200, 0.01}; {'Compare', [3, 1], 0, 5.5}; {'Compare', [3, 2], 0, 5.5}]; % C
     
     dlInputParameters = {trialParams1, trialParams2, trialParams3};
     dlTargetParameters = {targetParams1, targetParams2, targetParams3};
@@ -77,7 +77,7 @@ function m = dlThreeCuesTaskPerformer(Currentsize, model_size_id, noise_rate)
     dlTrainOptions('dlAdaptiveLambda') = 1; % Adaptive lambda parameter; recommended for long simulations.
     dlTrainOptions('dlLambdaCap') = 1.1; % Only if Adaptive lambda is active, recommended to set a upper-bound (UB) or ignore to use default UB (0.01).
     dlTrainOptions('dlExcludeDiverge') = 1; % Exclude non-optimals from model log
-    dlTrainOptions('dlTrainExcludeList') = {'Stim'}; % Exclude populations from training
+    dlTrainOptions('dlTrainExcludeList') = {'Stim', 'deepISOMxPFC->', 'deepIPVxPFC->', 'midIPVxPFC->', 'supIPVxPFC->', 'supISOMxPFC->'}; % Exclude populations from training
     
     argsPowSpectRatio1 = struct();
     argsPowSpectRatio2 = struct();
@@ -94,18 +94,29 @@ function m = dlThreeCuesTaskPerformer(Currentsize, model_size_id, noise_rate)
     argsPowSpectRatio4.lf1 = 40;
     argsPowSpectRatio4.hf1 = 90;
  
-    dlTrainOptions('dlLambda') = 1e-7; % 1e-11(1) -> 1e-4 (4)
-    dlTrainOptions('dlAdaptiveLambda') = 0; % Adaptive lambda parameter; recommended for long simulations.
+    dlTrainOptions('dlLambda') = 1e-9; % 1e-11(1) -> 1e-4 (4)
+    dlTrainOptions('dlAdaptiveLambda') = 1; % Adaptive lambda parameter; recommended for long simulations.
     dlTrainOptions('dlUpdateMode') = 'trial';
     dlTrainOptions('dlLearningRule') = 'BioDeltaRule';
     
-    dlTrainOptions('dlTrainExcludeList') = {'Stimuli'};
-    dlTrainOptions('dlCheckpointLengthCap') = 20;
+    if model_size_id > 20
+        dlTrainOptions('dlTrainExcludeList') = {'Stim', 'deepISOMxPFC->', 'deepIPVxPFC->', 'midIPVxPFC->', 'supIPVxPFC->', 'supISOMxPFC->'}; % Exclude PV+SOM
+%     elseif model_size_id > 30
+%         dlTrainOptions('dlTrainExcludeList') = {'Stim', 'deepIPVxPFC->', 'midIPVxPFC->', 'supIPVxPFC->'}; % Exclude PV
+%     elseif model_size_id > 20
+%         dlTrainOptions('dlTrainExcludeList') = {'Stim', 'deepISOMxPFC->', 'supISOMxPFC->'}; % Exclude SOM
+    elseif model_size_id > 10
+        dlTrainOptions('dlTrainExcludeList') = {'Stim', 'deepExPFC->', 'midExPFC->', 'supExPFC->'}; % Exclude Excitatories
+    else
+        dlTrainOptions('dlTrainExcludeList') = {'Stim'}; % Normal, all included.
+    end
+   
+    dlTrainOptions('dlCheckpointLengthCap') = 14;
     dlTrainOptions('dlEpochs') = 1;
     dlTrainOptions('dlBatchs') = 100;
     
-    dlTrainOptions('dlEnhancedMomentum') = 0.4;
-    CheckCoeff = 1.28;
+    dlTrainOptions('dlEnhancedMomentum') = 0.6;
+    CheckCoeff = 2.01;
     m.dlResetTraining();
     
     dlTrainOptions('dlCustomLog') = ["dlEPowerSpectrum", "dlEPowerSpectrum", "dlEPowerSpectrum", "dlEPowerSpectrum", "dlLFPaxLog", "dlAccuracyBastos2020Task"]; % Name of a function which is in the path
@@ -113,8 +124,14 @@ function m = dlThreeCuesTaskPerformer(Currentsize, model_size_id, noise_rate)
 
     for cnt = 1:1
     
+        disp("----------U0----------");  
+        m.dlOptimalError = 1e9;dlTrainOptions('dlExcludeDiverge') = 0;
+        dlTrainOptions('dlCheckpointCoefficient') = CheckCoeff*1.2;
+        m.dlTrain(TBdata.TrB, dlOutputParameters, TBdata.TrT, dlTrainOptions);
+        
         disp("----------A-----------");
-        dlTrainOptions('dlExcludeDiverge') = 1;
+        m.dlErrorsLog = [m.dlErrorsLog, -1];
+        m.dlOptimalError = 1e9;dlTrainOptions('dlExcludeDiverge') = 1;
         dlTrainOptions('dlCheckpointCoefficient') = CheckCoeff;
         m.dlTrain(TBdata.B1, dlOutputParameters, TBdata.T1, dlTrainOptions);
         
