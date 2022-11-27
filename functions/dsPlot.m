@@ -170,7 +170,7 @@ data=dsCheckData(data, varargin{:});
 % get options
 options=dsCheckOptions(varargin,{...
   'plot_type','waveform',{'waveform','rastergram','raster','power',...
-                          'density','comodulograms'},... % ,'rates'
+                          'density','comodulograms', 'comodulogramsBH'},... % ,'rates'
   'plot_mode','trace',{'trace','image'},...
   'variable',[],[],...
   'time_limits',[-inf inf],[],...
@@ -437,6 +437,15 @@ switch options.plot_type
     % time_data=data(1).([var_fields{1} '_Comodulograms_MUA']).time_axis;
     xdata = 1:size(data(1).([var_fields{1} '_Comodulograms_MUA']).comodulograms,1);
     xlab = 'Time in window lengths';
+  case 'comodulogramsBH'
+    if any(cellfun(@isempty,regexp(var_fields,'.*_ComodulogramsBH_MUA$')))
+      data=dsCalcComodulogramsBH(data,varargin{:});
+      fprintf('ComodulogramsBH analyzed successfully\n')
+    end
+    % phase_bin_data=data(1).([var_fields{1} '_Comodulograms_MUA']).ph_freq_axis;
+    % time_data=data(1).([var_fields{1} '_Comodulograms_MUA']).time_axis;
+    xdata = 1:size(data(1).([var_fields{1} '_ComodulogramsBH_MUA']).comodulogramsBH,1);
+    xlab = 'Time in window lengths';
   otherwise
     error('Unknown plot type.')
 end
@@ -448,7 +457,8 @@ end
 
 % set time_limits
 switch options.plot_type
-  case {'waveform', 'rates', 'rastergram','raster', 'density', 'comodulogram'}
+  % AES: TODO: Bug? wasn't applying to 'comodulgrams' due to missing s in string
+  case {'waveform', 'rates', 'rastergram','raster', 'density', 'comodulogram', 'comodulogramBH'}
     if isempty(options.xlim)
       options.xlim = [min(xdata) max(xdata)];
     elseif options.plot_time_axis_sec_flag
@@ -649,6 +659,9 @@ for iFigset = 1:num_fig_sets
             case 'comodulograms'
               ydata=1:size(data(sim_index).([var '_Comodulograms_MUA']).comodulograms,2);
               zdata=data(sim_index).([var '_Comodulograms_MUA']).comodulograms;
+            case 'comodulogramsBH'
+              ydata=1:size(data(sim_index).([var '_ComodulogramsBH_MUA']).comodulogramsBH,2);
+              zdata=data(sim_index).([var '_ComodulogramsBH_MUA']).comodulogramsBH;
             otherwise
               error('Unknown plot type.')
           end
@@ -677,6 +690,9 @@ for iFigset = 1:num_fig_sets
             case 'comodulograms'
               ydata=1:size(data(sim_index).([var '_Comodulograms_MUA']).comodulograms,2);
               zdata=data(sim_index).([var '_Comodulograms_MUA']).comodulograms;
+            case 'comodulogramsBH'
+              ydata=1:size(data(sim_index).([var '_ComodulogramsBH_MUA']).comodulogramsBH,2);
+              zdata=data(sim_index).([var '_ComodulogramsBH_MUA']).comodulogramsBH;
             otherwise
               error('Unknown plot type.')
           end
@@ -725,6 +741,9 @@ for iFigset = 1:num_fig_sets
             case 'comodulograms'
               ydata=1:size(data(sim_index).([var '_Comodulograms_MUA']).comodulograms,2);
               zdata=data(sim_index).([var '_Comodulograms_MUA']).comodulograms;
+            case 'comodulogramsBH'
+              ydata=1:size(data(sim_index).([var '_ComodulogramsBH_MUA']).comodulogramsBH,2);
+              zdata=data(sim_index).([var '_ComodulogramsBH_MUA']).comodulogramsBH;
             otherwise
               error('Unknown plot type.')
           end
@@ -791,6 +810,9 @@ for iFigset = 1:num_fig_sets
             case 'comodulograms'
               ydata=1:size(data(sim_index).([var '_Comodulograms_MUA']).comodulograms,2);
               zdata=data(sim_index).([var '_Comodulograms_MUA']).comodulograms;
+            case 'comodulogramsBH'
+              ydata=1:size(data(sim_index).([var '_ComodulogramsBH_MUA']).comodulogramsBH,2);
+              zdata=data(sim_index).([var '_ComodulogramsBH_MUA']).comodulogramsBH;
             otherwise
               error('Unknown plot type.')
           end
@@ -1157,6 +1179,22 @@ for iFigset = 1:num_fig_sets
                   end
               end
               break
+          case {'comodulogramsBH'}
+              kk = 0;
+              for ii = 1:length(xdata)
+                  for jj = 1:length(ydata)
+                      kk = kk + 1;
+                      subplot(length(xdata), length(ydata), kk)
+                      % TODO encode time and phasebins for plotting
+                      % imagesc(time_data, phase_bin_data, zdata{ii,jj})
+                      imagesc(zdata{ii,jj})
+                      if kk == 1
+                          ylabel('SWO phase bins')
+                          xlabel('Time in sec')
+                      end
+                  end
+              end
+              break
           otherwise
               error('Unknown plot type.')
         end % end switch options.plot_type
@@ -1252,6 +1290,9 @@ for iFigset = 1:num_fig_sets
     end % end loop over subplot rows
 
     if strcmp(options.plot_type, 'comodulograms')
+      return
+    end
+    if strcmp(options.plot_type, 'comodulogramsBH')
       return
     end
 
