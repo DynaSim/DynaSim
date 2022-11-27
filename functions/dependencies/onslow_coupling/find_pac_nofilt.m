@@ -140,8 +140,10 @@ modulation_indices = zeros(ybins, xbins);
             
             if strcmp(measure, 'mi')
                 % Pacmat full of raw mi values, not yet normalized
+                % [pacmat(i,j), pac_angles(i,j), comodulograms{i,j}, modulation_indices(i,j)] = mi_measure(sig_mod{1,j}, ...
+                %     sig_pac{1,i}, calc_comodulograms);
                 [pacmat(i,j), pac_angles(i,j), comodulograms{i,j}, modulation_indices(i,j)] = mi_measure(sig_mod{1,j}, ...
-                    sig_pac{1,i}, calc_comodulograms);
+                    sig_pac{1,i}, calc_comodulograms, Fs);
             end
             
             % Display current computational step to user

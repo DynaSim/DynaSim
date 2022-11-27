@@ -1,4 +1,4 @@
- function [mival, mi_angle, mi_comodulogram, modulation_index] = mi_measure(phase_sig, amp_sig, calc_comodulograms)
+ function [mival, mi_angle, mi_comodulogram, modulation_index] = mi_measure(phase_sig, amp_sig, calc_comodulograms, Fs)
 % function mival = mi_measure(phase_sig, amp_sig)
 %
 % Returns a value for the MI measure calculated between two signals.
@@ -42,7 +42,10 @@ for count = 1:num_trials
         
         parms.window_overlap = 1.0;
         parms.number_bins = 12;
-        Fs = 1000/0.01 / 10; % don't forget downsampling
+
+        % AES 20221127 MAMA MIA
+        % Fs = 1000/0.01 / 10; % don't forget downsampling
+
         %% Get angle and amplitude from the respective signals via Hilbert Transform
         % Kramer's GLMCFC code is espcially concise/informative. Note the '.Data'
         %     phi = angle(hilbert(slow_data.Data));
