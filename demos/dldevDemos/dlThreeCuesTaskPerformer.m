@@ -1,4 +1,4 @@
-function m = dlThreeCuesTaskPerformer(Currentsize, model_size_id, noise_rate)
+function m = dlThreeCuesTaskPerformer(Currentsize, model_size_idc)
 
     %%% Create model parameters struct
     ModelParametersPFC = struct();
@@ -97,7 +97,7 @@ function m = dlThreeCuesTaskPerformer(Currentsize, model_size_id, noise_rate)
     dlTrainOptions('dlLambda') = 1e-9; % 1e-11(1) -> 1e-4 (4)
     dlTrainOptions('dlAdaptiveLambda') = 1; % Adaptive lambda parameter; recommended for long simulations.
     dlTrainOptions('dlUpdateMode') = 'trial';
-    dlTrainOptions('dlLearningRule') = 'BioDeltaRule';
+    dlTrainOptions('dlLearningRule') = 'EnhancedDeltaRule';
     
     if model_size_id > 20
         dlTrainOptions('dlTrainExcludeList') = {'Stim', 'deepISOMxPFC->', 'deepIPVxPFC->', 'midIPVxPFC->', 'supIPVxPFC->', 'supISOMxPFC->'}; % Exclude PV+SOM

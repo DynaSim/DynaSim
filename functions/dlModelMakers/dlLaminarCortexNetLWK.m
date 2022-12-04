@@ -258,6 +258,7 @@ function y = dlLaminarCortexNetLWK(ModelParameters, populationName)
     pingM.connections(2).mechanism_list = {'iGABActx'};
     pingM.connections(2).parameters = {'gGABAa',gGABA_PE,'tauGABA',tauGABA_Pv,'netcon',KmidPvmidE};
 
+%     pingIM = pingM;
     % Structures: DEEP LAYER (5-6)
     pingD=[];
 

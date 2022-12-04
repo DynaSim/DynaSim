@@ -1,11 +1,13 @@
 classdef DynaLearn < matlab.mixin.SetGet
 
     %
-    % DynaModel; variational version
-    % An integrated class for interactive and trainable DynaSim network models
-    % Current learning methods: Reinforcement learning - Delta rule -
-    % Uncertainty reduction - Plasticities (in tutorials). Consider that
-    % toolbox is under developement.
+
+    % DynaLearn; Version 1.0 Stable
+
+    % Integrated class for interactive and trainable DynaSim network models
+
+    % Toolbox is under developement for the future versions.
+
     %
     
     properties
@@ -216,30 +218,22 @@ classdef DynaLearn < matlab.mixin.SetGet
             dlSaveFileNamePath = [obj.dlStudyDir, '/dlFile.mat'];
             p = load([obj.dlPath, '/params.mat']);
             save([obj.dlStudyDir, '/params.mat'], '-struct', 'p');
-            
-%             obj.dlOutputs = [];
-%             obj.dlOutputLog = [];
-            
             save(dlSaveFileNamePath, 'obj');
+
             fprintf("\n->Model saved in ""%s"".\n", dlSaveFileNamePath);
             
         end
         
-        function dlSaveCheckPoint(obj, dlCheckPointPath) % TODO save object logs in checkpoints test*
+        function dlSaveCheckPoint(obj, dlCheckPointPath)
         
             fprintf("\t\tCheckpoint file saved in %s \n", [obj.dlStudyDir, dlCheckPointPath]);
             p = load([obj.dlPath, '/params.mat']);
             save([obj.dlStudyDir, dlCheckPointPath, 'params.mat'], '-struct', 'p');
-            
-%             tempdlO = obj.dlOutputs;
-%             obj.dlOutputs = [];
-%             obj.dlOutputLog = [];
             save([obj.dlStudyDir, dlCheckPointPath, 'object.mat'], 'obj');
-%             obj.dlOutputs = tempdlO;
             
         end
         
-        function out = dlLoadCheckPoint(obj, dlCheckPointPath) % TODO eliminate test*
+        function out = dlLoadCheckPoint(obj, dlCheckPointPath)
             
             fprintf("\t\tCheckpoint file loaded from %s \n", [obj.dlStudyDir, dlCheckPointPath]);
             dlObj = load([obj.dlStudyDir, dlCheckPointPath, 'object.mat']);
@@ -249,8 +243,6 @@ classdef DynaLearn < matlab.mixin.SetGet
 
                 obj.dlErrorsLog = obj.dlLastErrorsLog;
                 obj.dlCustomLog = obj.dlLastCustomLog;
-%                 obj.dlOutputLog = obj.dlLastOutputLog;
-                
                 save([obj.dlStudyDir, dlCheckPointPath, 'object.mat'], 'obj');
 
             else
@@ -265,7 +257,7 @@ classdef DynaLearn < matlab.mixin.SetGet
             
         end
 
-        function out = dlLoadCheckPointLX(obj, dlCheckPointPath) % TODO eliminate test*
+        function out = dlLoadCheckPointLX(obj, dlCheckPointPath)
             
             fprintf("\t\tCheckpoint file loaded from %s \n", [obj.dlStudyDir, dlCheckPointPath]);
             dlObj = load([obj.dlStudyDir, dlCheckPointPath, 'object.mat']);
@@ -274,13 +266,12 @@ classdef DynaLearn < matlab.mixin.SetGet
             if obj.dlExcludeDiverge == 1
 
                 k = size(obj.dlLastCustomLog, 2);
+
                 obj.dlLastErrorsLog = [obj.dlLastErrorsLog, obj.dlOptimalError*1.001];
                 obj.dlLastCustomLog(:, k+1) = obj.dlLastCustomLog(:, k);
-%                 obj.dlLastOutputLog{k+1} = obj.dlLastOutputLog{k};
 
                 obj.dlErrorsLog = obj.dlLastErrorsLog;
                 obj.dlCustomLog = obj.dlLastCustomLog;
-%                 obj.dlOutputLog = obj.dlLastOutputLog;
                 
                 save([obj.dlStudyDir, dlCheckPointPath, 'object.mat'], 'obj');
 
@@ -411,7 +402,7 @@ classdef DynaLearn < matlab.mixin.SetGet
             
         end
         
-        function dlPlotAllPotentials(obj, mode, opts)
+        function dlPlotAllPotentials(obj, mode, opts) % Deprecated on V0.9
            
             dlPotentialIndices = contains(obj.dlVariables, '_V');
             dlPotentialIndices(1) = 1;
@@ -1128,6 +1119,12 @@ classdef DynaLearn < matlab.mixin.SetGet
                                 obj.dlLoadOptimal();
                                 dlCurrentCheckpointLength = 0;
 
+                            elseif isnan(obj.dlLastError)
+
+                                disp("NaNCap")
+                                obj.dlLoadOptimal();
+                                dlCurrentCheckpointLength = 0;
+
                             elseif dlCheckpointLengthCap < dlCurrentCheckpointLength
 
                                 disp("LengthCap*");
@@ -1202,6 +1199,12 @@ classdef DynaLearn < matlab.mixin.SetGet
                         disp("LengthCap*");
                         obj.dlLoadOptimalLX();
                         dlCurrentCheckpointLength = 0;
+
+                    elseif isnan(obj.dlLastError)
+
+                            disp("NaNCap")
+                            obj.dlLoadOptimal();
+                            dlCurrentCheckpointLength = 0;
 
                     else
 
@@ -1484,8 +1487,8 @@ classdef DynaLearn < matlab.mixin.SetGet
 
                        wn = w + delta;
 
-                       wn(wn < 0) = 0;
-                       wn(wn > 1) = 1;
+                       wn(wn < .1) = .1;
+                       wn(wn > .9) = .9;
                        val{i, 1} = wn;
                        deltaL = deltaL + sum(sum(abs(delta)));
 
@@ -1517,8 +1520,8 @@ classdef DynaLearn < matlab.mixin.SetGet
 
                        wn = w - delta;
 
-                       wn(wn < 0) = 0;
-                       wn(wn > 1) = 1;
+                       wn(wn < 0.1) = 0.1;
+                       wn(wn > .94) = .94;
                        val{i, 1} = wn;
                        deltaL = deltaL + sum(sum(abs(delta)));
     
@@ -1537,8 +1540,13 @@ classdef DynaLearn < matlab.mixin.SetGet
 
                    if obj.dlOptimalWeightChangesFlag
 
-                       delta = delta*(1-dlEnhancedMomentum) + obj.dlOptimalWeightChanges{i}*dlEnhancedMomentum;
-                       disp("---->Momentum used.");
+                       try
+                            delta = delta*(1-dlEnhancedMomentum) + obj.dlOptimalWeightChanges{i}*dlEnhancedMomentum;
+                       catch
+%                             disp("----->Momentum assumed 0 as there is no previous step.");
+                       end
+
+%                        disp("---->Momentum used.");
 
                    end
 
@@ -1557,8 +1565,8 @@ classdef DynaLearn < matlab.mixin.SetGet
 
                        wn = w - delta;
 
-                       wn(wn < 0) = 0;
-                       wn(wn > 1) = 1;
+                       wn(wn < 0.1) = 0.1;
+                       wn(wn > .94) = .94;
                        val{i, 1} = wn;
                        deltaL = deltaL + sum(sum(abs(delta)));
     
@@ -1798,30 +1806,15 @@ classdef DynaLearn < matlab.mixin.SetGet
         
         function dlLoadOptimal(obj)
             
-%             try
-
-                obj.dlLoadCheckPoint('/Optimal');
-
-%             catch
-% 
-%                 fprintf("--->No oprimal file exists. first run a training session with an active checkpoint flag to save an optimal checkpoint.\n");
-%           
-%             end
-            
+            obj.dlLoadCheckPoint('/Optimal');
+ 
         end
 
         function dlLoadOptimalLX(obj)
-                    
-        %             try
+
+    
+            obj.dlLoadCheckPointLX('/Optimal');
         
-                        obj.dlLoadCheckPointLX('/Optimal');
-        
-        %             catch
-        % 
-        %                 fprintf("--->No oprimal file exists. first run a training session with an active checkpoint flag to save an optimal checkpoint.\n");
-        %           
-        %             end
-                    
         end
 
         function dlLoadOptimalLC(obj)

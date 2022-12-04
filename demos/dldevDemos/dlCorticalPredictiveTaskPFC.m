@@ -13,14 +13,14 @@
 %% AutoRunSc (SinglePFC)
 
 clear;clc;
-
-TotalSize = ones(1, 50)*40;
+ 
+TotalSize = ones(1, 30)*40;
 noise_rate = 4.9;
 
 for model_size_id = 1:30
 
     Currentsize = TotalSize(model_size_id);
-    m = dlThreeCuesTaskPerformer(Currentsize, model_size_id, noise_rate);
+    m = dlThreeCuesTaskPerformerDual(Currentsize, model_size_id, noise_rate);
 
 end
 
