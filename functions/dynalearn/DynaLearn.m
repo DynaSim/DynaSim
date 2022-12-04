@@ -536,7 +536,6 @@ classdef DynaLearn < matlab.mixin.SetGet
         
         function dlSimulate(obj)
             
-%             disp("Simulation ...");
             obj.dlOutputs = cell(1,numel(obj.dlVariables));
             try
               set(obj, 'dlOutputs', dlTempFunc(obj.dlOutputs));
