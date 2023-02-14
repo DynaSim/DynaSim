@@ -6,10 +6,10 @@ ratioLogs = cell(50, 1);
 lfps = zeros(50, 750, 24290);
 responses = cell(50, 1);
 
-for i = 1:10
+for i = 1:1
 
     m = DynaLearn(); % ~ 1sec
-    m = m.dlLoad(char("models/dlPredictiveCorticalCircuitModelLWK" + string(i))); % ~ 10sec, New larger model; keeping track of its activity in Gamma/Beta **
+    m = m.dlLoad(char("dlModels/dlTCTModels" + string(i))); % ~ 10sec, New larger model; keeping track of its activity in Gamma/Beta **
    
     ratioLog1 = {m.dlCustomLog(1, :)};
     ratioLog1 = cell2mat(ratioLog1{1});

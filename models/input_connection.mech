@@ -1,4 +1,4 @@
-input_amp = 1
+input_amp = 0
 netcon = ones(N_pre, N_post)
 input(inp_pre) = input_amp.*(inp_pre*netcon)
 @current += input(inp_pre)
