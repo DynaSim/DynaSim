@@ -53,7 +53,7 @@ dsPlot(dsData);
 %% Plot sample response
 
 clear;clc;
-id = 2;
+id = 1;
 m = DynaLearn(); % ~ 1sec
 m = m.dlLoad(char("dlModels/dlTCTModels" + string(id))); % ~ 10sec, New larger model; keeping track of its activity in Gamma/Beta **
 
@@ -62,9 +62,9 @@ trialParamsTemp('tspan') = [0 1500];
 
 m.dlUpdateParams(trialParamsTemp);
 m.dlSimulate();
-% m.dlPlotAllPotentials('raster');
-opts = struct();opts.name = "test1";
-m.dlPlotAllPotentials('lfpsave', opts);   
+m.dlPlotAllPotentials('raster');
+% opts = struct();opts.name = "test1";
+% m.dlPlotAllPotentials('lfpsave', opts);   
 
 %%
 
@@ -87,7 +87,7 @@ clear;clc;
 TotalSize = ones(1, 10)*128;
 noise_rate = 4.7;
 
-for model_size_id = 2:2
+for model_size_id = 1:1
 
     Currentsize = TotalSize(model_size_id);
     m = dlTCTPerformerDynamics(1, Currentsize, model_size_id, noise_rate);
@@ -101,7 +101,7 @@ clc;
 currentSize = 128;
 reGenerate = 0;
 noiseRate = 5;
-modelID = 2;
+modelID = 1;
 
 for i = 1:10
 
