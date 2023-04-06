@@ -235,7 +235,7 @@ if isnumeric(item)
         list=cellfun(@(x) permute(x, [1 3 2]), list, 'UniformOutput', 0);
     end
 elseif ischar(item)
-  elems=regexp(item,'[\w->\.]+','match');
+  elems=regexp(item,'[\w\->\.]+','match');
   operator=regexp(item,'^([\+\-\*/^])','tokens','once');
   if isempty(operator)
     operator='';
