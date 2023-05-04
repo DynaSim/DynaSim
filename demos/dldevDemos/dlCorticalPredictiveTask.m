@@ -1,276 +1,115 @@
-%% Dual-Area simulation of predictive task implemented on DynaSim/DynaLearn via Reinforcement learning 
-
-% Based on papers: 
-% [Layer and rhythm specificity for predictive routing, A.M Bastos et. al, 2020]
-% [Top-Down beta rhythms support selective attention via interlaminar interaction: a model, J.H Lee et. al, 2013]
-% [DynaSim: a MATLAB toolbox for neural modeling and simulation, J.S Sherfey et. al, 2018]
+%% Simulation of predictive task implemented on DynaSim/DynaLearn via Reinforcement learning 
 
 % Requirement: DynaSim/dev_2022 latest version
 % Minimum MatLab version: R2021a
-% @Septembre2022
+% @April2023
 % @HNXJ
 
-%% AutoRunSc
+%% Initiation
+
+clear;clc;
+cd('//Users/hamednejat/Works/Research/Computational');
+addpath(genpath('DynaSim'));
+cd('DynaSim');
+
+%% AutoRunSc: Pre-fitting on a physiological basis to be similar to a real cortical dynamics
 
 clear;clc;
 
-TotalSize = ones(1, 10)*40;
+CurrentSize = 64;
+TotalSize = ones(1, 20)*CurrentSize;
+noise_rate = 4.9;
+performance_coefficient = 0; % Pre-fit
 
-for model_size_id = 1:10
+ResetOptimalError = 'on';
+tune_flag = 1;
 
-    Currentsize = TotalSize(model_size_id);
-    dlThreeCuesTaskPerformerDual(Currentsize, model_size_id);
+%%% Create model parameters struct example
+% ModelName = "V1";
+% ModelName = "MST";
+ModelName = "PFC";
+ModelParameters = struct();
+
+%%% Area PFC layer sizes (relative)
+ModelParameters.NeSuperficial = ceil(0.21*CurrentSize);
+ModelParameters.NPvSuperficial = ceil(0.02*CurrentSize);
+ModelParameters.NSomSuperficial = ceil(0.04*CurrentSize);
+ModelParameters.NVipSuperficial = ceil(0.03*CurrentSize);
+
+ModelParameters.NeMid = ceil(0.15*CurrentSize);
+ModelParameters.NPvMid = ceil(0.03*CurrentSize);
+ModelParameters.NSomMid = ceil(0.01*CurrentSize);
+ModelParameters.NVipMid = ceil(0.01*CurrentSize);
+
+ModelParameters.NeDeep = ceil(0.41*CurrentSize);
+ModelParameters.NPvDeep = ceil(0.03*CurrentSize);
+ModelParameters.NSomDeep = ceil(0.03*CurrentSize);
+ModelParameters.NVipDeep = ceil(0.03*CurrentSize);
+
+ModelParameters.Nin = 6;
+ModelParameters.Nout = 6;
+ModelParameters.NoiseRate = noise_rate; % 10%
+ModelParameters.Nstim = 3;
+
+dsCellLaminar = dlLaminarCortexNetNL(ModelParameters, ModelName);
+
+for model_size_id = 1:1
+
+    CurrentSize = TotalSize(model_size_id);
+    dlThreeCuesTaskPerformer(ResetOptimalError, ModelName, ModelParameters, model_size_id, performance_coefficient, tune_flag);
 
 end
 
-%% Model parameters (Dual-area, V4->PFC)
+%% AutoRunSc: Fitting on the main task
 
 clear;clc;
 
-model_size_id = 1;
-TotalSize = [40, 40, 40, 40];
-Currentsize = TotalSize(model_size_id);
+TotalSize = ones(1, 20)*64;
+noise_rate = 4.9;
+performance_coefficient = 1; % Main task
 
-%%% Create model parameters struct
-ModelParametersPFC = struct();
+ResetOptimalError = 'on';
+tune_flag = 0;
 
-%%% Area PFC layer sizes (relative)
-ModelParametersPFC.NeSuperficial = ceil(0.3*Currentsize);
-ModelParametersPFC.NSomSuperficial = ceil(0.02*Currentsize);
-ModelParametersPFC.NPvSuperficial = ceil(0.04*Currentsize);
-ModelParametersPFC.NeMid = ceil(0.14*Currentsize);
-ModelParametersPFC.NSomMid = 0;
-ModelParametersPFC.NPvMid = ceil(0.02*Currentsize);
-ModelParametersPFC.NeDeep = ceil(0.45*Currentsize);
-ModelParametersPFC.NSomDeep = ceil(0.02*Currentsize);
-ModelParametersPFC.NPvDeep = ceil(0.01*Currentsize);
+for model_size_id = 1:20
 
-ModelParametersPFC.Nin = 6;
-ModelParametersPFC.Nout = 6;
-ModelParametersPFC.NoiseRate = 4; % 6%
-ModelParametersPFC.Nstim = 3;
+    CurrentSize = TotalSize(model_size_id);
+    dlThreeCuesTaskPerformer(ResetOptimalError, CurrentSize, model_size_id, noise_rate, performance_coefficient, tune_flag);
+    ResetOptimalError = 'off';
 
-%%% Area V4 layer sizes (relative) 
-ModelParametersV4.NeSuperficial = ceil(0.25*Currentsize);
-ModelParametersV4.NSomSuperficial = ceil(0.03*Currentsize);
-ModelParametersV4.NPvSuperficial = ceil(0.07*Currentsize);
-ModelParametersV4.NeMid = ceil(0.12*Currentsize);
-ModelParametersV4.NSomMid = 0;
-ModelParametersV4.NPvMid = ceil(0.03*Currentsize);
-ModelParametersV4.NeDeep = ceil(0.45*Currentsize);
-ModelParametersV4.NSomDeep = ceil(0.03*Currentsize);
-ModelParametersV4.NPvDeep = ceil(0.02*Currentsize);
+end
 
-ModelParametersV4.Nin = 6;
-ModelParametersV4.Nout = 6;
-ModelParametersV4.NoiseRate = 7; % 10%
-ModelParametersV4.Nstim = 3;
+%% Plot sample response
 
-%%% Call Laminar Cortex Constructor Functions
-dsCellPFC = dlLaminarCortexNetLWK(ModelParametersPFC, 'PFC'); % Laminar PFC model with specific parameters
-dsCellV4 = dlLaminarCortexNetLWK(ModelParametersV4, 'V4'); % Laminar V4 model with specific parameters
-
-%%% Connecting two models: Define connections between two areas
-% supEV4->midEPFC
-connectionWeigth1 = 0.21*rand(dsCellV4.populations(1).size, dsCellPFC.populations(4).size) + 0.27;
-connection1.direction = [dsCellV4.populations(1).name, '->', dsCellPFC.populations(4).name];
-
-connection1.source = dsCellV4.populations(1).name;
-connection1.target = dsCellPFC.populations(4).name;
-connection1.mechanism_list={'iAMPActx'};
-connection1.parameters={'gAMPA', .3, 'tauAMPA', 1, 'netcon', connectionWeigth1};
-
-% supEV4->midPVPFC
-connectionWeigth2 = 0.21*rand(dsCellV4.populations(1).size, dsCellPFC.populations(5).size) + 0.27;
-connection2.direction = [dsCellV4.populations(1).name, '->', dsCellPFC.populations(5).name];
-
-connection2.source = dsCellV4.populations(1).name;
-connection2.target = dsCellPFC.populations(5).name;
-connection2.mechanism_list={'iAMPActx'};
-connection2.parameters={'gAMPA', .3, 'tauAMPA', 1, 'netcon', connectionWeigth2};
-
-% deepEPFC->supSOMV4
-connectionWeigth3 = 0.27*rand(dsCellPFC.populations(6).size, dsCellV4.populations(2).size) + 0.21;
-connection3.direction = [dsCellPFC.populations(6).name, '->', dsCellV4.populations(2).name];
-
-connection3.source = dsCellPFC.populations(6).name;
-connection3.target = dsCellV4.populations(2).name;
-connection3.mechanism_list={'iAMPActx'};
-connection3.parameters={'gAMPA', .9, 'tauAMPA', 1, 'netcon', connectionWeigth3};
-
-% deepEPFC->supEV4
-connectionWeigth4 = 0.27*rand(dsCellPFC.populations(6).size, dsCellV4.populations(1).size) + 0.21;
-connection4.direction = [dsCellPFC.populations(6).name, '->', dsCellV4.populations(1).name];
-
-connection4.source = dsCellPFC.populations(6).name;
-connection4.target = dsCellV4.populations(1).name;
-connection4.mechanism_list={'iAMPActx'};
-connection4.parameters={'gAMPA', .9, 'tauAMPA', 1, 'netcon', connectionWeigth4};
-
-%%% Finalization
-dsModel = dlConnectModels({dsCellV4, dsCellPFC}, {connection1, connection2, connection3, connection4});
-
-%% Create DynaLearn Class 
-% Try to use this section only first time or If you have lost your file and
-% you want a new model.
-
-m = DynaLearn(dsModel, char("models/dlPredictiveCorticalCircuitDualModelLWK" + string(model_size_id)), 'mex'); % ~10 min or less, MEXGEN or < 20 sec, RAWGEN.
-m.dlSave(); % < 1sec
-
-%% Load DynaLearn Class
-
-clc;
-% model_size_id = 1;
+clear;clc;
+id = 1;
 m = DynaLearn(); % ~ 1sec
-m = m.dlLoad(char("models/dlPredictiveCorticalCircuitDualModelLWK" + string(model_size_id))); % ~ 10sec, New larger model; keeping track of its activity in Gamma/Beta **
+m = m.dlLoad(char("dlModels/dlPredictiveCorticalCircuitModelLWK" + string(id))); % ~ 10sec, New larger model; keeping track of its activity in Gamma/Beta **
 
-%% Trial: training  script preparation, 50-block and 50-trial
+trialParamsTemp = containers.Map();
+trialParamsTemp('tspan') = [0 500];
 
-clc;
+m.dlUpdateParams(trialParamsTemp);
+m.dlSimulate();
+opts = containers.Map();
+opts("lf") = 1;
+opts("hf") = 60;
+m.dlPlotAllPotentials('raster', opts);
+% m.dlPlotAllPotentials('avgfft', opts);
+% opts = struct();opts.name = "test1";
+% m.dlPlotAllPotentials('lfpsave', opts);   
 
-[trialParams1, trialParams2, trialParams3] = dlDemoThreePattern('xV4');
+%%
 
-outputParams = [{'deepExPFC_V', 1:floor(ModelParametersPFC.NeDeep/3), [400 750] ...
-    , 'afr'}; {'deepExPFC_V',ceil(ModelParametersPFC.NeDeep/3):floor(2*ModelParametersPFC.NeDeep/3), ...
-    [400 750], 'afr'}; {'deepExPFC_V', ceil(2*ModelParametersPFC.NeDeep/3):ModelParametersPFC.NeDeep, [400 750], 'afr'}; ...
-    {'supExPFC_V', 1:ModelParametersPFC.NeSuperficial, [300 800], 'afr'}; ...
-    {'midExPFC_V', 1:ModelParametersPFC.NeMid, [300 800], 'afr'}; ...
-    {'deepExPFC_V', 1:ModelParametersPFC.NeDeep, [300 800], 'afr'}; ...
-    {'supExV4_V', 1:ModelParametersV4.NeSuperficial, [300 800], 'afr'}; ...
-    {'midExV4_V', 1:ModelParametersV4.NeMid, [300 800], 'afr'}; ...
-    {'deepExV4_V', 1:ModelParametersV4.NeDeep, [300 800], 'afr'}];
+figure('Position', [0, 0, 1700, 1400]);
 
-targetParams1 = [{'TotalSpikesPenalty', 4:7, 100, 0.4}; {'MSE', 1, 50, 0.05}; {'MSE', 2, 25, 0.01}; {'MSE', 3, 25, 0.01}; {'Compare', [1, 2], 0, 0.2}; {'Compare', [1, 3], 0, 0.2}; {'Diff', [2, 3], 0, 0.01}]; % A 
-targetParams2 = [{'TotalSpikesPenalty', 4:7, 100, 0.4}; {'MSE', 2, 50, 0.05}; {'MSE', 1, 25, 0.01}; {'MSE', 3, 25, 0.01}; {'Compare', [2, 1], 0, 0.2}; {'Compare', [2, 3], 0, 0.2}; {'Diff', [1, 3], 0, 0.01}]; % B
-targetParams3 = [{'TotalSpikesPenalty', 4:7, 100, 0.4}; {'MSE', 3, 50, 0.05}; {'MSE', 2, 25, 0.01}; {'MSE', 1, 25, 0.01}; {'Compare', [3, 2], 0, 0.2}; {'Compare', [3, 1], 0, 0.2}; {'Diff', [2, 1], 0, 0.01}]; % C
+for i = 5
 
-dlInputParameters = {trialParams1, trialParams2, trialParams3};
-dlTargetParameters = {targetParams1, targetParams2, targetParams3};
-dlOutputParameters = outputParams;
+    load("dlModels/dlTCTModels2/solve/signals_test" + num2str(i) + ".mat");
 
-TBdata = dlTrialBlockGenerator(dlInputParameters, dlTargetParameters, 25, 25);
-
-dlTrainOptions = containers.Map(); % Train options; MUST be a map data structure
-dlTrainOptions('dlEpochs') = 100; % % Number of epochs (A.K.A total iterations)
-dlTrainOptions('dlBatchs') = 3; % If a scenario requires the training to be based on a group parameter (e.g mean of errors) use a dlBatch > 1 and set update mode later to batch. 
-dlTrainOptions('dlLambda') = 1e-5; % Higher lambda means more changes based on error, lower may cause model to learn slower or nothing.
-    
-dlTrainOptions('dlCheckpoint') = 'true'; % If current step's error is higher based on a threshold, reload last optimal state and continue from that point
-dlTrainOptions('dlCheckpointCoefficient') = 2.047; % A.K.A exploration rate
-dlTrainOptions('dlCheckpointLengthCap') = 7; % If more than 7 steps with no progress passed, return to last checkpoint.
-dlTrainOptions('dlUpdateMode') = 'batch'; % Update on each trial's result or based on batch group results
-
-dlTrainOptions('dlLearningRule') = 'BioDeltaRule'; % Delta rule with a basic change based on biophysical properties 
-dlTrainOptions('dlSimulationFlag') = 1; % If 0, will not run simulations (only for debugging purposes)
-dlTrainOptions('dlOutputLogFlag') = 1; % If 0, will not keep outputs
-dlTrainOptions('dlOfflineOutputGenerator') = 0; % If 1, will generate fake-random outputs (only for debugging purposes)
-
-dlTrainOptions('dlAdaptiveLambda') = 1; % Adaptive lambda parameter; recommended for long simulations.
-dlTrainOptions('dlLambdaCap') = 1.1; % Only if Adaptive lambda is active, recommended to set a upper-bound (UB) or ignore to use default UB (0.01).
-dlTrainOptions('dlExcludeDiverge') = 1; % Exclude non-optimals from model log
-dlTrainOptions('dlTrainExcludeList') = {'Stim'}; % Exclude populations from training
-
-dlTrainOptions('dlLambda') = 7e-4;
-dlTrainOptions('dlEpochs') = 10;
-dlTrainOptions('dlBatchs') = 3;
-
-argsPowSpectRatio = struct();
-argsNull = [];
-
-argsPowSpectRatio.lf1 = 7;
-argsPowSpectRatio.hf1 = 28;
-argsPowSpectRatio.lf2 = 42;
-argsPowSpectRatio.hf2 = 84;
-
-dlTrainOptions('dlCustomLog') = ["dlPowerSpectrumRatio", "dlAccuracyBastos2020Task"]; % Name of a function which is in the path
-dlTrainOptions('dlCustomLogArgs') = [argsPowSpectRatio, argsNull]; % Arguments of your custom function
-
-%% Pre-training : Train model to a "non-far" point.
-
-clc;
-
-dlTrainOptions('dlLambda') = 4e-2;
-dlTrainOptions('dlEpochs') = 5;
-dlTrainOptions('dlCheckpointCoefficient') = 1.4; 
-dlTrainOptions('dlCheckpointLengthCap') = 14;
-
-m.dlOptimalError = 1e7;
-m.dlResetTraining();
-
-tic;
-% m.dlTrain(dlInputParameters, dlOutputParameters, dlTargetParameters, dlTrainOptions); % <16 sec per trial
-toc;
-
-
-%% Block-trial phase
-
-% TODO: Add average U2B/B2U
-% TODO: 
-
-% TODO: Add raster plotter.
-% TODO: Add live runs (continouos task) option.
-
-clc;
-
-dlTrainOptions('dlLambda') = 1e-9; % 1e-11(1) -> 1e-4 (4)
-dlTrainOptions('dlAdaptiveLambda') = 0; % Adaptive lambda parameter; recommended for long simulations.
-dlTrainOptions('dlUpdateMode') = 'trial';
-dlTrainOptions('dlLearningRule') = 'BioDeltaRule';
-
-dlTrainOptions('dlTrainExcludeList') = {'Stimuli'};
-dlTrainOptions('dlCheckpointLengthCap') = 15;
-dlTrainOptions('dlEpochs') = 2;
-dlTrainOptions('dlBatchs') = 25;
-
-dlTrainOptions('dlExcludeDiverge') = 1;
-CheckCoeff = 1.25;
-
-m.dlResetTraining();
-argsPSR = struct();
-
-argsPSR.lf1 = 7;
-argsPSR.hf1 = 28;
-argsPSR.lf2 = 35;
-argsPSR.hf2 = 140;
-
-dlTrainOptions('dlCustomLog') = ["dlPowerSpectrumRatio", "dlAccuracyBastos2020Task"]; % Name of a function which is in the path
-dlTrainOptions('dlCustomLogArgs') = [argsPSR, argsNull]; % Arguments of your custom function
-
-for cnt = 1:1
-
-    disp("----------A-----------");
-    dlTrainOptions('dlCheckpointCoefficient') = CheckCoeff;
-    m.dlTrain(TBdata.B1, dlOutputParameters, TBdata.T1, dlTrainOptions);
-    
-    disp("----------U1----------");
-    m.dlErrorsLog = [m.dlErrorsLog, -1];  
-    m.dlOptimalError = 1e9;
-    dlTrainOptions('dlCheckpointCoefficient') = CheckCoeff*1.2;
-    m.dlTrain(TBdata.TrB, dlOutputParameters, TBdata.TrT, dlTrainOptions);
-    
-    disp("----------B-----------");
-    m.dlErrorsLog = [m.dlErrorsLog, -1]; 
-    m.dlOptimalError = 1e9;
-    dlTrainOptions('dlCheckpointCoefficient') = CheckCoeff; 
-    m.dlTrain(TBdata.B2, dlOutputParameters, TBdata.T2, dlTrainOptions);
-    
-    disp("----------U2----------");
-    m.dlErrorsLog = [m.dlErrorsLog, -1]; 
-    m.dlOptimalError = 1e9;
-    dlTrainOptions('dlCheckpointCoefficient') = CheckCoeff*1.2; 
-    m.dlTrain(TBdata.TrB, dlOutputParameters, TBdata.TrT, dlTrainOptions);
-    
-    disp("----------C----------");
-    m.dlErrorsLog = [m.dlErrorsLog, -1]; 
-    m.dlOptimalError = 1e9;
-    dlTrainOptions('dlCheckpointCoefficient') = CheckCoeff;
-    m.dlTrain(TBdata.B3, dlOutputParameters, TBdata.T3, dlTrainOptions);
-    
-    disp("----------U3----------");
-    m.dlErrorsLog = [m.dlErrorsLog, -1]; 
-    m.dlOptimalError = 1e9;
-    dlTrainOptions('dlCheckpointCoefficient') = CheckCoeff*1.2;
-    m.dlTrain(TBdata.TrB, dlOutputParameters, TBdata.TrT, dlTrainOptions);
+%     subplot(3, 3, i);
+    imagesc(imgRaster>4);
+    colormap("gray");
 
 end
 

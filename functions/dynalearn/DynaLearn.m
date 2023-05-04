@@ -105,7 +105,8 @@ classdef DynaLearn < matlab.mixin.SetGet
                 set(obj, 'dlModel', model_);
                 set(obj, 'dlStudyDir', data_);
                 set(obj, 'dlSimulationTool', mode_);
-                
+                set(obj, 'dlPath', data_);
+
                 if strcmpi(obj.dlSimulationTool, "mex")
                     obj.dlInit(obj.dlStudyDir);
                 elseif strcmpi(obj.dlSimulationTool, "raw")
@@ -572,12 +573,12 @@ classdef DynaLearn < matlab.mixin.SetGet
         function dlSimulate(obj)
             
             obj.dlOutputs = cell(1,numel(obj.dlVariables));
-            try
-              set(obj, 'dlOutputs', dlTempFunc(obj.dlOutputs));
-            catch
-              fprintf("\n-->Warning! Reinitializing because 'Tempfunc' may not work properly. This may cause a problem later.\n")
-              obj.dlReInit();
-            end
+%             try
+            set(obj, 'dlOutputs', dlTempFunc(obj.dlOutputs));
+%             catch
+%               fprintf("\n-->Warning! Reinitializing because 'Tempfunc' may not work properly. This may cause a problem later.\n")
+%               obj.dlReInit();
+%             end
             disp("Done."); 
       
         end
@@ -749,6 +750,22 @@ classdef DynaLearn < matlab.mixin.SetGet
                     dlUpperFreq = 100;
 
                 end
+
+                try
+
+                    dlLowerFreq1 = dlTargetParams{i, 5};
+                    dlUpperFreq1 = dlTargetParams{i, 6};
+                    dlLowerFreq2 = dlTargetParams{i, 7};
+                    dlUpperFreq2 = dlTargetParams{i, 8};
+
+                catch
+
+                    dlLowerFreq1 = 1;
+                    dlUpperFreq1 = 49;
+                    dlLowerFreq2 = 50;
+                    dlUpperFreq2 = 100;
+
+                end
                 
                 if strcmpi(dlErrorType, 'MAE')
                    
@@ -810,6 +827,20 @@ classdef DynaLearn < matlab.mixin.SetGet
 
                     TempError = mean(dlEPowerSpectrum(obj, argsPSR), 'all');
                     fprintf(" gEp=%d ", TempError);
+                    TempError = abs(TempError - dlOutputTargets)^2;
+                    fprintf(" dlTarg=%d ", dlOutputTargets);
+                
+                elseif strcmpi(dlErrorType, 'RPenalty')
+                    
+                    argsPSR = struct();
+
+                    argsPSR.lf1 = dlLowerFreq1;
+                    argsPSR.hf1 = dlUpperFreq1;
+                    argsPSR.lf2 = dlLowerFreq2;
+                    argsPSR.hf2 = dlUpperFreq2;
+
+                    TempError = mean(dlRPowerSpectrum(obj, argsPSR), 'all');
+                    fprintf(" gRp=%d f:[%d-%d Hz / %d-%d Hz] ", TempError, dlLowerFreq1, dlUpperFreq1, dlLowerFreq2, dlUpperFreq2);
                     TempError = abs(TempError - dlOutputTargets)^2;
                     fprintf(" dlTarg=%d ", dlOutputTargets);
 

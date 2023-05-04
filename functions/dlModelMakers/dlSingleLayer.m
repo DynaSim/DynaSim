@@ -4,11 +4,13 @@ function y = dlSingleLayer(ModelParameters, populationName)
     NSom = ModelParameters.NSom;
     NPv = ModelParameters.NPv;
 
-    Nstim = ModelParameters.Nstim;
+    NStim = ModelParameters.Nstim;
+    Nin = ModelParameters.Nin;
+    Nout = ModelParameters.Nout;
     NoiseRate = ModelParameters.NoiseRate;
 
     fprintf("\n>Initialization of dlSingleLayer Model: ");
-    fprintf("\n--> Excitatory neurons count = %d , SOM inhibitory = %d , PV inhibitory = %d ", Ne, NSom, NPv);
+    fprintf("\n--> Excitatory neurons count = %d , SOM inhibitory = %d , PV inhibitory = %d ", NE, NSom, NPv);
 
     fprintf("\n-->Input connections count (terminal) size = %d ", NStim); % Inputs / Stimuli
     fprintf("\n-->Overall noise rate = %.4f", NoiseRate); % Randomness / Stochasticity
@@ -17,7 +19,25 @@ function y = dlSingleLayer(ModelParameters, populationName)
     k1 = 0.15; % Diff. for normal weights (uniform random)
     k2 = 0.45; % Min connectivity weight
 
-    NeAvg = Ne + NSom + NPv;
+    NTotal = NE + NSom + NPv;
+
+    subLayerIndicesInS = zeros(2, Nin);
+
+    subLayerIndicesOutS = zeros(2, Nout);
+
+    for i = 1:Nin
+
+        subLayerIndicesInS(1, i) = floor((i-1)*NE/Nin) + 1;
+        subLayerIndicesInS(2, i) = floor((i)*NE/Nin);
+
+    end
+
+    for i = 1:Nout
+
+        subLayerIndicesOutS(1, i) = floor((i-1)*NE/Nout) + 1;
+        subLayerIndicesOutS(2, i) = floor((i)*NE/Nout);
+
+    end
 
     populationName = ['x', populationName];
     % Connectivity matrices
@@ -33,64 +53,27 @@ function y = dlSingleLayer(ModelParameters, populationName)
     KsupSomsupPv = k1*rand(NSom, NPv) + k2;
 
     % sIpv->sE
-    KsupPvsupE = k1*rand(NPv, Ne) + 0.7;
+    KsupPvsupE = k1*rand(NPv, NE) + 0.7;
     % sIpv->sIsom
     KsupPvsupSom = k1*rand(NPv, NSom) + k2;
     
-    KnullIO = zeros(Nin, Nin); % Null (zero) matrix for disconnections of Input layer.
-
-    % Sub indices for layer decompostion based in I/O (task specific)
-    subLayerIndicesInS = zeros(2, Nin);
-    subLayerIndicesInM = zeros(2, Nin);
-    subLayerIndicesInD = zeros(2, Nin);
-
-    subLayerIndicesOutS = zeros(2, Nout);
-    subLayerIndicesOutM = zeros(2, Nout);
-    subLayerIndicesOutD = zeros(2, Nout);
-
-    for i = 1:Nin
-
-        subLayerIndicesInS(1, i) = floor((i-1)*NeSuperficial/Nin) + 1;
-        subLayerIndicesInS(2, i) = floor((i)*NeSuperficial/Nin);
-
-        subLayerIndicesInM(1, i) = floor((i-1)*NeMid/Nin) + 1;
-        subLayerIndicesInM(2, i) = floor((i)*NeMid/Nin);
-
-        subLayerIndicesInD(1, i) = floor((i-1)*NeDeep/Nin) + 1;
-        subLayerIndicesInD(2, i) = floor((i)*NeDeep/Nin);
-
-    end
-
-    for i = 1:Nout
-
-        subLayerIndicesOutS(1, i) = floor((i-1)*NeSuperficial/Nout) + 1;
-        subLayerIndicesOutS(2, i) = floor((i)*NeSuperficial/Nout);
-
-        subLayerIndicesOutM(1, i) = floor((i-1)*NeMid/Nout) + 1;
-        subLayerIndicesOutM(2, i) = floor((i)*NeMid/Nout);
-
-        subLayerIndicesOutD(1, i) = floor((i-1)*NeDeep/Nout) + 1;
-        subLayerIndicesOutD(2, i) = floor((i)*NeDeep/Nout);
-
-    end
+%     KnullIO = zeros(Nin, Nin); % Null (zero) matrix for disconnections of Input layer.
 
     % Time constants
-    tauGABA_Som = 151; % ms, decay time constant of inhibition for beta (around 25Hz)
-    tauGABA_PvSup = 57;
-
-    tauAMPA_E = 171;
+    tauGABA_Som = 111; % ms, decay time constant of inhibition for beta (around 25Hz)
+    tauGABA_Pv = 31;
+    tauAMPA_E = 71;
     
-    gBase = 7/(NeAvg^0.5);
+    gBase = 7/(NTotal^0.5);
 
     % Maximal synaptic strengths
     gGABA_SE = .017*gBase; % (SOM)->E
     gGABA_PE = .011*gBase; % (PV)->E
     gGABA_II = .011*gBase; % I->I within layer
-
+    gAMPA_EI_sup = .017*gBase;
 
     % neuronal dynamics
     eqns = 'dV/dt = (Iapp + @current + noise*randn(1, Npop))/C; Iapp=0; noise=0; C=1; V(0) = -65 + rand(1, Npop)*0;';
-    %eqns_stimuli = 'dinp/dt = (rand(1) + 4.5)*(20*(exp(- (t - t1).^2) - exp(- (t - t2).^2)) + noise*randn(1, Npop))/C; f1=4; t1=10; t2=100; noise=0; C=1; inp(0) = -60 - rand(1, Npop)*0;';
     eqns_stimuli = 'dinp/dt = (noise*rand(1) + 1)*(1*(exp(- (t - t1).^2) - exp(- (t - t2).^2)) + noise*randn(1, Npop)); t1=100; t2=200; noise=0; inp(0) = rand(1, Npop)*0;';
     input_amp = 1; % scales the strength of stimulus
     
@@ -103,22 +86,22 @@ function y = dlSingleLayer(ModelParameters, populationName)
     pingS=[];
 
     % E-cells-PYR
-    pingS.populations(1).name = ['supE', populationName];
-    pingS.populations(1).size = NeSuperficial;
+    pingS.populations(1).name = ['E', populationName];
+    pingS.populations(1).size = NE;
     pingS.populations(1).equations = eqns;
     pingS.populations(1).mechanism_list = cell_type;
     pingS.populations(1).parameters = {'Iapp', 0,'noise', NoiseRate*2};
 
     % I-cells-SOM
-    pingS.populations(2).name = ['supISOM', populationName];
-    pingS.populations(2).size = NSomSuperficial;
+    pingS.populations(2).name = ['ISOM', populationName];
+    pingS.populations(2).size = NSom;
     pingS.populations(2).equations = eqns;
     pingS.populations(2).mechanism_list = cell_type;
     pingS.populations(2).parameters = {'Iapp', 0,'noise', NoiseRate};
 
     % I-cells-PV
-    pingS.populations(3).name = ['supIPV', populationName];
-    pingS.populations(3).size = NPvSuperficial;
+    pingS.populations(3).name = ['IPV', populationName];
+    pingS.populations(3).size = NPv;
     pingS.populations(3).equations = eqns;
     pingS.populations(3).mechanism_list = cell_type;
     pingS.populations(3).parameters = {'Iapp', 0,'noise', NoiseRate};
@@ -164,18 +147,18 @@ function y = dlSingleLayer(ModelParameters, populationName)
     pingS.connections(end).source = pingS.populations(3).name;
     pingS.connections(end).target = pingS.populations(1).name;
     pingS.connections(end).mechanism_list = {'iGABActx'};
-    pingS.connections(end).parameters = {'gGABAa',gGABA_PE,'tauGABA',tauGABA_PvSup,'netcon',KsupPvsupE};
+    pingS.connections(end).parameters = {'gGABAa',gGABA_PE,'tauGABA',tauGABA_Pv,'netcon',KsupPvsupE};
 
     pingS.connections(end+1).direction = [pingS.populations(3).name, '->', pingS.populations(2).name];
     pingS.connections(end).source = pingS.populations(3).name;
     pingS.connections(end).target = pingS.populations(2).name;
     pingS.connections(end).mechanism_list = {'iGABActx'};
-    pingS.connections(end).parameters = {'gGABAa',gGABA_II,'tauGABA',tauGABA_PvSup,'netcon',KsupPvsupSom};
+    pingS.connections(end).parameters = {'gGABAa',gGABA_II,'tauGABA',tauGABA_Pv,'netcon',KsupPvsupSom};
 
     % PING template
-    IOping = cell(Nstim, 1);
+    IOping = cell(NStim, 1);
 
-    for i = 1:Nstim
+    for i = 1:NStim
 
         % E-cells
         IOping{i}.populations(1).name = ['PreStimuli', char(64+i), populationName];
@@ -195,7 +178,7 @@ function y = dlSingleLayer(ModelParameters, populationName)
         IOping{i}.connections(1).source = IOping{i}.populations(1).name;
         IOping{i}.connections(1).target = IOping{i}.populations(2).name;
         IOping{i}.connections(1).mechanism_list = {'iAMPActx'};
-        IOping{i}.connections(1).parameters = {'gAMPA', 1e-7,'tauGABA', 1e+4,'netcon', KnullIO};
+        IOping{i}.connections(1).parameters = {'gAMPA', 1e-7,'tauGABA', 1e+4,'netcon', zeros(Nin, Nin)};
         
     end
 
@@ -203,14 +186,14 @@ function y = dlSingleLayer(ModelParameters, populationName)
 
     % connect the layers and inputs
     fprintf("\n--->Connecting separate layers and inputs:");
-    tempconn = zeros(Nin, NeMid);
+    tempconn = zeros(Nin, NE);
 
     % Inputs/stimuli -> E
 
-    for k = 1:Nstim
+    for k = 1:NStim
 
         Aconn = tempconn;
-        Aconn(:, subLayerIndicesInM(1, k):subLayerIndicesInM(2, k)) =  0.74;
+        Aconn(:, subLayerIndicesInS(1, k):subLayerIndicesInS(2, k)) =  0.74;
     
         c = length(s.connections) + 1;
         s.connections(c).direction = [IOping{k}.populations(1).name, '->', pingS.populations(1).name];
@@ -228,7 +211,7 @@ function y = dlSingleLayer(ModelParameters, populationName)
 
     end
     
-    % Outputs: deepE is the recommended output layer.
+    % Outputs
     y = s;
     fprintf("\n->Initialization of dsModel ""%s"" is done. \n", populationName);
 

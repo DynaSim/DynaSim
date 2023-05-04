@@ -1,57 +1,35 @@
-function m = dlThreeCuesTaskPerformer(Currentsize, model_size_idc)
-
-    %%% Create model parameters struct
-    ModelParametersPFC = struct();
-    
-    %%% Area PFC layer sizes (relative)
-    ModelParametersPFC.NeSuperficial = ceil(0.3*Currentsize);
-    ModelParametersPFC.NSomSuperficial = ceil(0.03*Currentsize);
-    ModelParametersPFC.NPvSuperficial = ceil(0.03*Currentsize);
-    ModelParametersPFC.NeMid = ceil(0.14*Currentsize);
-    ModelParametersPFC.NSomMid = 0;
-    ModelParametersPFC.NPvMid = ceil(0.03*Currentsize);
-    ModelParametersPFC.NeDeep = ceil(0.45*Currentsize);
-    ModelParametersPFC.NSomDeep = ceil(0.04*Currentsize);
-    ModelParametersPFC.NPvDeep = ceil(0.01*Currentsize);
-    
-    ModelParametersPFC.Nin = 6;
-    ModelParametersPFC.Nout = 6;
-    ModelParametersPFC.NoiseRate = noise_rate; % 10%
-    ModelParametersPFC.Nstim = 3;
+function m = dlThreeCuesTaskPerformer(ResetOptimalError, ModelName, ModelParameters, model_size_id, performance_coefficient, tune_flag)
     
     %%% Call Laminar Cortex Constructor Functions
-    dsCellPFC = dlLaminarCortexNetLWK(ModelParametersPFC, 'PFC'); % Laminar PFC model with specific parameters
+    dsCellLaminar = dlLaminarCortexNetNL(ModelParameters, ModelName); % Laminar PFC model with specific parameters
     
     %%% Finalization
-    dsModel = dsCellPFC;
+    dsModel = dsCellLaminar;
     
     % Create DynaLearn Class 
-    % Try to use this section only first time or If you have lost your file and
-    % you want a new model.
-    
-    m = DynaLearn(dsModel, char("models/dlPredictiveCorticalCircuitModelLWK" + string(model_size_id)), 'mex'); % ~10 min or less, MEXGEN or < 20 sec, RAWGEN.
+    m = DynaLearn(dsModel, char("dlModels/dlPredictiveCorticalCircuitModelNL" + string(model_size_id)), 'mex'); % ~10 min or less, MEXGEN or < 20 sec, RAWGEN.
     m.dlSave(); % < 1sec
     
     % Load DynaLearn Class
-
     m = DynaLearn(); % ~ 1sec
-    m = m.dlLoad(char("models/dlPredictiveCorticalCircuitModelLWK" + string(model_size_id))); % ~ 10sec, New larger model; keeping track of its activity in Gamma/Beta **
-
-    [trialParams1, trialParams2, trialParams3] = dlDemoThreePattern('xPFC');
+    m = m.dlLoad(char("dlModels/dlPredictiveCorticalCircuitModelNL" + string(model_size_id))); % ~ 10sec, New larger model; keeping track of its activity in Gamma/Beta **
+    ModelName = char("x" + ModelName);
+    [trialParams1, trialParams2, trialParams3] = dlDemoThreePattern(ModelName);
     
-    outputParams = [{'deepExPFC_V', 1:floor(ModelParametersPFC.NeDeep/3), [200 400] ...
-        , 'afr'}; {'deepExPFC_V',ceil(ModelParametersPFC.NeDeep/3):floor(2*ModelParametersPFC.NeDeep/3), ...
-        [200 400], 'afr'}; {'deepExPFC_V', ceil(2*ModelParametersPFC.NeDeep/3):ModelParametersPFC.NeDeep, [200 400], 'afr'}; ...
-        {'supExPFC_V', 1:ModelParametersPFC.NeSuperficial, [50 700], 'afr'}; ...
-        {'midExPFC_V', 1:ModelParametersPFC.NeMid, [50 700], 'afr'}; ...
-        {'deepExPFC_V', 1:ModelParametersPFC.NeDeep, [50 700], 'afr'}; ...
-        {'supIPVxPFC_V', 1:ModelParametersPFC.NPvSuperficial, [50 700], 'afr'}; ...
-        {'midIPVxPFC_V', 1:ModelParametersPFC.NPvMid, [50 700], 'afr'}; ...
-        {'deepIPVxPFC_V', 1:ModelParametersPFC.NPvDeep, [50 700], 'afr'}];
+    outputParams = [{['deepE', ModelName, '_V'], 1:floor(ModelParameters.NeDeep/3), [200 400] ...
+        , 'afr'}; {['deepE', ModelName, '_V'],ceil(ModelParameters.NeDeep/3):floor(2*ModelParameters.NeDeep/3), ...
+        [200 400], 'afr'}; {['deepE', ModelName, '_V'], ceil(2*ModelParameters.NeDeep/3):ModelParameters.NeDeep, [200 400], 'afr'}; ...
+        {['supE', ModelName, '_V'], 1:ModelParameters.NeSuperficial, [50 700], 'afr'}; ...
+        {['midE', ModelName, '_V'], 1:ModelParameters.NeMid, [50 700], 'afr'}; ...
+        {['deepE', ModelName, '_V'], 1:ModelParameters.NeDeep, [50 700], 'afr'}; ...
+        {['supIPV', ModelName, '_V'], 1:ModelParameters.NPvSuperficial, [50 700], 'afr'}; ...
+        {['midIPV', ModelName, '_V'], 1:ModelParameters.NPvMid, [50 700], 'afr'}; ...
+        {['deepIPV', ModelName, '_V'], 1:ModelParameters.NPvDeep, [50 700], 'afr'}];
     
-    targetParams1 = [{'EPenalty', 4:9, 200, 0.01}; {'Compare', [1, 2], 0, 5.5}; {'Compare', [1, 3], 0, 5.5}]; % A 
-    targetParams2 = [{'EPenalty', 4:9, 200, 0.01}; {'Compare', [2, 1], 0, 5.5}; {'Compare', [2, 3], 0, 5.5}]; % B
-    targetParams3 = [{'EPenalty', 4:9, 200, 0.01}; {'Compare', [3, 1], 0, 5.5}; {'Compare', [3, 2], 0, 5.5}]; % C
+    perf_c = performance_coefficient;
+    targetParams1 = [{'RPenalty', 4:9, 10, 1.01, 8, 32, 40, 120}; {'Compare', [1, 2], 0, perf_c, 0, 0, 0, 0}; {'Compare', [1, 3], 0, perf_c, 0, 0, 0, 0}]; % A 
+    targetParams2 = [{'RPenalty', 4:9, 10, 1.01, 8, 32, 40, 120}; {'Compare', [2, 1], 0, perf_c, 0, 0, 0, 0}; {'Compare', [2, 3], 0, perf_c, 0, 0, 0, 0}]; % B
+    targetParams3 = [{'RPenalty', 4:9, 10, 1.01, 8, 32, 40, 120}; {'Compare', [3, 1], 0, perf_c, 0, 0, 0, 0}; {'Compare', [3, 2], 0, perf_c, 0, 0, 0, 0}]; % C
     
     dlInputParameters = {trialParams1, trialParams2, trialParams3};
     dlTargetParameters = {targetParams1, targetParams2, targetParams3};
@@ -77,7 +55,7 @@ function m = dlThreeCuesTaskPerformer(Currentsize, model_size_idc)
     dlTrainOptions('dlAdaptiveLambda') = 1; % Adaptive lambda parameter; recommended for long simulations.
     dlTrainOptions('dlLambdaCap') = 1.1; % Only if Adaptive lambda is active, recommended to set a upper-bound (UB) or ignore to use default UB (0.01).
     dlTrainOptions('dlExcludeDiverge') = 1; % Exclude non-optimals from model log
-    dlTrainOptions('dlTrainExcludeList') = {'Stim', 'deepISOMxPFC->', 'deepIPVxPFC->', 'midIPVxPFC->', 'supIPVxPFC->', 'supISOMxPFC->'}; % Exclude populations from training
+    dlTrainOptions('dlTrainExcludeList') = {'Stim', ['deepISOM', ModelName, '->'], ['deepIPV', ModelName, '->'], ['midIPV', ModelName, '->'], ['supIPV', ModelName, '->'], ['supISOM', ModelName, '->']}; % Exclude populations from training
     
     argsPowSpectRatio1 = struct();
     argsPowSpectRatio2 = struct();
@@ -99,14 +77,14 @@ function m = dlThreeCuesTaskPerformer(Currentsize, model_size_idc)
     dlTrainOptions('dlUpdateMode') = 'trial';
     dlTrainOptions('dlLearningRule') = 'EnhancedDeltaRule';
     
-    if model_size_id > 20
-        dlTrainOptions('dlTrainExcludeList') = {'Stim', 'deepISOMxPFC->', 'deepIPVxPFC->', 'midIPVxPFC->', 'supIPVxPFC->', 'supISOMxPFC->'}; % Exclude PV+SOM
+    if model_size_id > 10
+        dlTrainOptions('dlTrainExcludeList') = {'Stim', ['deepISOM', ModelName, '->'], ['deepIPV', ModelName, '->'], ['midIPV', ModelName, '->'], ['supIPV', ModelName, '->'], ['supISOM', ModelName, '->']}; % Exclude PV+SOM
 %     elseif model_size_id > 30
-%         dlTrainOptions('dlTrainExcludeList') = {'Stim', 'deepIPVxPFC->', 'midIPVxPFC->', 'supIPVxPFC->'}; % Exclude PV
+%         dlTrainOptions('dlTrainExcludeList') = {'Stim', ['deepIPV', ModelName, '->'], ['midIPV', ModelName, '->'], ['supIPV', ModelName, '->']}; % Exclude PV
 %     elseif model_size_id > 20
-%         dlTrainOptions('dlTrainExcludeList') = {'Stim', 'deepISOMxPFC->', 'supISOMxPFC->'}; % Exclude SOM
-    elseif model_size_id > 10
-        dlTrainOptions('dlTrainExcludeList') = {'Stim', 'deepExPFC->', 'midExPFC->', 'supExPFC->'}; % Exclude Excitatories
+%         dlTrainOptions('dlTrainExcludeList') = {'Stim', ['deepISOM', ModelName, '->'], ['supISOM', ModelName, '->']}; % Exclude SOM
+%     elseif model_size_id > 10
+%         dlTrainOptions('dlTrainExcludeList') = {'Stim', ['deepE', ModelName, '->'], ['midE', ModelName, '->'], ['supE', ModelName, '->']}; % Exclude Excitatories
     else
         dlTrainOptions('dlTrainExcludeList') = {'Stim'}; % Normal, all included.
     end
@@ -117,54 +95,79 @@ function m = dlThreeCuesTaskPerformer(Currentsize, model_size_idc)
     
     dlTrainOptions('dlEnhancedMomentum') = 0.6;
     CheckCoeff = 2.01;
-    m.dlResetTraining();
+
+    if strcmpi(ResetOptimalError, 'on')
+        m.dlResetTraining();
+    end
     
     dlTrainOptions('dlCustomLog') = ["dlEPowerSpectrum", "dlEPowerSpectrum", "dlEPowerSpectrum", "dlEPowerSpectrum", "dlLFPaxLog", "dlAccuracyBastos2020Task"]; % Name of a function which is in the path
     dlTrainOptions('dlCustomLogArgs') = [argsPowSpectRatio1, argsPowSpectRatio2, argsPowSpectRatio3, argsPowSpectRatio4, argsPowSpectRatio1, argsPowSpectRatio1]; % Arguments of your custom function
 
-    for cnt = 1:1
-    
-        disp("----------U0----------");  
-        m.dlOptimalError = 1e9;dlTrainOptions('dlExcludeDiverge') = 0;
-        dlTrainOptions('dlCheckpointCoefficient') = CheckCoeff*1.2;
-        m.dlTrain(TBdata.TrB, dlOutputParameters, TBdata.TrT, dlTrainOptions);
+    if tune_flag
+
+        disp("--> Tune mode")
+        for cnt = 1:1
         
-        disp("----------A-----------");
-        m.dlErrorsLog = [m.dlErrorsLog, -1];
-        m.dlOptimalError = 1e9;dlTrainOptions('dlExcludeDiverge') = 1;
-        dlTrainOptions('dlCheckpointCoefficient') = CheckCoeff;
-        m.dlTrain(TBdata.B1, dlOutputParameters, TBdata.T1, dlTrainOptions);
+            disp("----------U0----------");  
+            m.dlOptimalError = 1e9;dlTrainOptions('dlExcludeDiverge') = 0;
+            dlTrainOptions('dlCheckpointCoefficient') = CheckCoeff*1.2;
+            m.dlTrain(TBdata.TrB, dlOutputParameters, TBdata.TrT, dlTrainOptions);
         
-        disp("----------U1----------");
-        m.dlErrorsLog = [m.dlErrorsLog, -1];  
-        m.dlOptimalError = 1e9;dlTrainOptions('dlExcludeDiverge') = 0;
-        dlTrainOptions('dlCheckpointCoefficient') = CheckCoeff*1.2;
-        m.dlTrain(TBdata.TrB, dlOutputParameters, TBdata.TrT, dlTrainOptions);
+            disp("----------U1----------");
+            m.dlErrorsLog = [m.dlErrorsLog, -1];  
+            m.dlOptimalError = 1e9;dlTrainOptions('dlExcludeDiverge') = 0;
+            dlTrainOptions('dlCheckpointCoefficient') = CheckCoeff*1.2;
+            m.dlTrain(TBdata.TrB, dlOutputParameters, TBdata.TrT, dlTrainOptions);
+
+        end
+
+    else
+
+        for cnt = 1:1
         
-        disp("----------B-----------");
-        m.dlErrorsLog = [m.dlErrorsLog, -1]; 
-        m.dlOptimalError = 1e9;dlTrainOptions('dlExcludeDiverge') = 1;
-        dlTrainOptions('dlCheckpointCoefficient') = CheckCoeff; 
-        m.dlTrain(TBdata.B2, dlOutputParameters, TBdata.T2, dlTrainOptions);
+            disp("----------U0----------");  
+            m.dlOptimalError = 1e9;dlTrainOptions('dlExcludeDiverge') = 0;
+            dlTrainOptions('dlCheckpointCoefficient') = CheckCoeff*1.2;
+            m.dlTrain(TBdata.TrB, dlOutputParameters, TBdata.TrT, dlTrainOptions);
+            
+            disp("----------A-----------");
+            m.dlErrorsLog = [m.dlErrorsLog, -1];
+            m.dlOptimalError = 1e9;dlTrainOptions('dlExcludeDiverge') = 1;
+            dlTrainOptions('dlCheckpointCoefficient') = CheckCoeff;
+            m.dlTrain(TBdata.B1, dlOutputParameters, TBdata.T1, dlTrainOptions);
+            
+            disp("----------U1----------");
+            m.dlErrorsLog = [m.dlErrorsLog, -1];  
+            m.dlOptimalError = 1e9;dlTrainOptions('dlExcludeDiverge') = 0;
+            dlTrainOptions('dlCheckpointCoefficient') = CheckCoeff*1.2;
+            m.dlTrain(TBdata.TrB, dlOutputParameters, TBdata.TrT, dlTrainOptions);
+            
+            disp("----------B-----------");
+            m.dlErrorsLog = [m.dlErrorsLog, -1]; 
+            m.dlOptimalError = 1e9;dlTrainOptions('dlExcludeDiverge') = 1;
+            dlTrainOptions('dlCheckpointCoefficient') = CheckCoeff; 
+            m.dlTrain(TBdata.B2, dlOutputParameters, TBdata.T2, dlTrainOptions);
+            
+            disp("----------U2----------");
+            m.dlErrorsLog = [m.dlErrorsLog, -1]; 
+            m.dlOptimalError = 1e9;dlTrainOptions('dlExcludeDiverge') = 0;
+            dlTrainOptions('dlCheckpointCoefficient') = CheckCoeff*1.2; 
+            m.dlTrain(TBdata.TrB, dlOutputParameters, TBdata.TrT, dlTrainOptions);
+            
+            disp("----------C----------");
+            m.dlErrorsLog = [m.dlErrorsLog, -1]; 
+            m.dlOptimalError = 1e9;dlTrainOptions('dlExcludeDiverge') = 1;
+            dlTrainOptions('dlCheckpointCoefficient') = CheckCoeff;
+            m.dlTrain(TBdata.B3, dlOutputParameters, TBdata.T3, dlTrainOptions);
+            
+            disp("----------U3----------");
+            m.dlErrorsLog = [m.dlErrorsLog, -1]; 
+            m.dlOptimalError = 1e9;dlTrainOptions('dlExcludeDiverge') = 0;
+            dlTrainOptions('dlCheckpointCoefficient') = CheckCoeff*1.2;
+            m.dlTrain(TBdata.TrB, dlOutputParameters, TBdata.TrT, dlTrainOptions);
         
-        disp("----------U2----------");
-        m.dlErrorsLog = [m.dlErrorsLog, -1]; 
-        m.dlOptimalError = 1e9;dlTrainOptions('dlExcludeDiverge') = 0;
-        dlTrainOptions('dlCheckpointCoefficient') = CheckCoeff*1.2; 
-        m.dlTrain(TBdata.TrB, dlOutputParameters, TBdata.TrT, dlTrainOptions);
-        
-        disp("----------C----------");
-        m.dlErrorsLog = [m.dlErrorsLog, -1]; 
-        m.dlOptimalError = 1e9;dlTrainOptions('dlExcludeDiverge') = 1;
-        dlTrainOptions('dlCheckpointCoefficient') = CheckCoeff;
-        m.dlTrain(TBdata.B3, dlOutputParameters, TBdata.T3, dlTrainOptions);
-        
-        disp("----------U3----------");
-        m.dlErrorsLog = [m.dlErrorsLog, -1]; 
-        m.dlOptimalError = 1e9;dlTrainOptions('dlExcludeDiverge') = 0;
-        dlTrainOptions('dlCheckpointCoefficient') = CheckCoeff*1.2;
-        m.dlTrain(TBdata.TrB, dlOutputParameters, TBdata.TrT, dlTrainOptions);
-    
+        end
+
     end
 
     m.dlSave();

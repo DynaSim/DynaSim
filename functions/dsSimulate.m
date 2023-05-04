@@ -823,7 +823,8 @@ if options.mex_flag
 
   % Create mex_dir if it does not yet exist
   if ~exist(options.mex_dir,'dir') && ~options.cluster_flag && options.mex_dir_flag
-    mkdir(options.mex_dir);
+      disp(options.mex_dir);
+      mkdir(options.mex_dir);
   end
 end
 
