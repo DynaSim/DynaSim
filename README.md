@@ -1,8 +1,8 @@
-# DynaSim
+# DynaSim/DynaLearn
 
 [![Join the chat at https://gitter.im/DynaSim/DynaSim](https://badges.gitter.im/DynaSim/DynaSim.svg)](https://gitter.im/DynaSim/DynaSim?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
-This is the home of the DynaSim Toolbox for modeling and simulating dynamical
+This is the home of the DynaSim with DynaLearn Toolbox for modeling, simulating and training or fitting dynamical
 systems in MATLAB and GNU Octave!
 
 See the DynaSim Toolbox in action, with [Getting started tutorial](https://github.com/DynaSim/DynaSim/wiki/DynaSim-Getting-Started-Tutorial) and the [UnbiasedCompetition](https://viewer.mathworks.com/?viewer=live_code&url=https%3A%2F%2Fwww.mathworks.com%2Fmatlabcentral%2Fmlc-downloads%2Fdownloads%2Ffe60af44-d049-4d06-ac8e-7a1bb95b32e9%2F3de73bfe-53a6-4cad-9310-9894687c4c65%2Ffiles%2Fdemos%2Fexamples%2FUnbiasedCompetitionPNAS2019_tutorial%2FUnbiasedCompetitionPNAS2019_tutorial.mlx&embed=web) demonstration live script.
@@ -26,6 +26,8 @@ See the DynaSim Toolbox in action, with [Getting started tutorial](https://githu
 If you use DynaSim for your published research, please cite this introductory article:
 
 Sherfey JS, Soplata AE, Ardid S, Roberts EA, Stanley DA, Pittman-Polletta BR and Kopell NJ (2018) [DynaSim: A MATLAB Toolbox for Neural Modeling and Simulation](https://www.frontiersin.org/articles/10.3389/fninf.2018.00010/full). *Front. Neuroinform*. 12:10. doi: 10.3389/fninf.2018.00010
+
+[TBD] DynaLearn *
 
 ### Other References:
 
