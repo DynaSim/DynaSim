@@ -1,4 +1,4 @@
-function m = dlThreeCuesTaskPerformer(ResetOptimalError, ModelName, ModelParameters, model_size_id, performance_coefficient, tune_flag)
+function m = dlPassiveDynamicsPerformer(RemakeFlag, ResetOptimalError, ModelName, ModelParameters, model_size_id, performance_coefficient, tune_flag)
     
     %%% Call Laminar Cortex Constructor Functions
     dsCellLaminar = dlLaminarCortexNetNL(ModelParameters, ModelName); % Laminar PFC model with specific parameters
@@ -6,15 +6,25 @@ function m = dlThreeCuesTaskPerformer(ResetOptimalError, ModelName, ModelParamet
     %%% Finalization
     dsModel = dsCellLaminar;
     
-    % Create DynaLearn Class 
-    m = DynaLearn(dsModel, char("dlModels/dlPredictiveCorticalCircuitModelNL" + string(model_size_id)), 'mex'); % ~10 min or less, MEXGEN or < 20 sec, RAWGEN.
-    m.dlSave(); % < 1sec
-    
+    % Create DynaLearn Class (remake)
+    if RemakeFlag
+        fprintf("\n->Remake flag is on. Generating new model (will replace the previous model if names are same)");
+        m = DynaLearn(dsModel, char("dlModels/dlPredictiveCorticalCircuitModelNL" + string(model_size_id)), 'mex'); % ~10 min or less, MEXGEN or < 20 sec, RAWGEN.
+        m.dlSave(); % < 1sec
+    end
+
     % Load DynaLearn Class
     m = DynaLearn(); % ~ 1sec
-    m = m.dlLoad(char("dlModels/dlPredictiveCorticalCircuitModelNL" + string(model_size_id))); % ~ 10sec, New larger model; keeping track of its activity in Gamma/Beta **
+
+    try
+        m = m.dlLoad(char("dlModels/dlPredictiveCorticalCircuitModelNL" + string(model_size_id))); % ~ 10sec, New larger model; keeping track of its activity in Gamma/Beta **
+    catch
+        fprintf("\n->Failed to load object. If this object does not exist, try RemakeFlag=1.");
+        fprintf("\n-->Otherwise, there is a problem with loading object or access to its repository.");
+    end
+
     ModelName = char("x" + ModelName);
-    [trialParams1, trialParams2, trialParams3] = dlDemoThreePattern(ModelName);
+    [trialParams1, trialParams2, trialParams3] = dlNullPattern(ModelName);
     
     outputParams = [{['DeepE', ModelName, '_V'], 1:floor(ModelParameters.NeDeep/3), [200 400] ...
         , 'afr'}; {['DeepE', ModelName, '_V'],ceil(ModelParameters.NeDeep/3):floor(2*ModelParameters.NeDeep/3), ...
@@ -55,7 +65,7 @@ function m = dlThreeCuesTaskPerformer(ResetOptimalError, ModelName, ModelParamet
     dlTrainOptions('dlAdaptiveLambda') = 1; % Adaptive lambda parameter; recommended for long simulations.
     dlTrainOptions('dlLambdaCap') = 1.1; % Only if Adaptive lambda is active, recommended to set a upper-bound (UB) or ignore to use default UB (0.01).
     dlTrainOptions('dlExcludeDiverge') = 1; % Exclude non-optimals from model log
-    dlTrainOptions('dlTrainExcludeList') = {'Stim', ['deepISOM', ModelName, '->'], ['deepIPV', ModelName, '->'], ['midIPV', ModelName, '->'], ['supIPV', ModelName, '->'], ['supISOM', ModelName, '->']}; % Exclude populations from training
+    dlTrainOptions('dlTrainExcludeList') = {'Stim', ['DeepISOM', ModelName, '->'], ['DeepIPV', ModelName, '->'], ['MidIPV', ModelName, '->'], ['supIPV', ModelName, '->'], ['supISOM', ModelName, '->']}; % Exclude populations from training
     
     argsPowSpectRatio1 = struct();
     argsPowSpectRatio2 = struct();
@@ -78,7 +88,7 @@ function m = dlThreeCuesTaskPerformer(ResetOptimalError, ModelName, ModelParamet
     dlTrainOptions('dlLearningRule') = 'EnhancedDeltaRule';
     
     if model_size_id > 10
-        dlTrainOptions('dlTrainExcludeList') = {'Stim', ['deepISOM', ModelName, '->'], ['deepIPV', ModelName, '->'], ['midIPV', ModelName, '->'], ['supIPV', ModelName, '->'], ['supISOM', ModelName, '->']}; % Exclude PV+SOM
+        dlTrainOptions('dlTrainExcludeList') = {'Stim', ['DeepISOM', ModelName, '->'], ['DeepIPV', ModelName, '->'], ['MidIPV', ModelName, '->'], ['supIPV', ModelName, '->'], ['supISOM', ModelName, '->']}; % Exclude PV+SOM
 %     elseif model_size_id > 30
 %         dlTrainOptions('dlTrainExcludeList') = {'Stim', ['deepIPV', ModelName, '->'], ['midIPV', ModelName, '->'], ['supIPV', ModelName, '->']}; % Exclude PV
 %     elseif model_size_id > 20

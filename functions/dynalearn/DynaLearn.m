@@ -237,8 +237,14 @@ classdef DynaLearn < matlab.mixin.SetGet
         function out = dlLoadCheckPoint(obj, dlCheckPointPath)
             
             fprintf("\t\tCheckpoint file loaded from %s \n", [obj.dlStudyDir, dlCheckPointPath]);
-            dlObj = load([obj.dlStudyDir, dlCheckPointPath, 'object.mat']);
-            out = dlObj.obj;
+
+            try
+                dlObj = load([obj.dlStudyDir, dlCheckPointPath, 'object.mat']);
+                out = dlObj.obj;
+            catch
+                disp("---->Optimal skipped (not loaded)");
+                out = obj;
+            end
             
             if obj.dlExcludeDiverge == 1
 
@@ -253,8 +259,13 @@ classdef DynaLearn < matlab.mixin.SetGet
 
             end
 
-            p = load([obj.dlStudyDir, dlCheckPointPath, 'params.mat']);
-            save([obj.dlPath, '/params.mat'], '-struct', 'p');
+            try
+                p = load([obj.dlStudyDir, dlCheckPointPath, 'params.mat']);
+                save([obj.dlPath, '/params.mat'], '-struct', 'p');
+            catch
+                disp("---->Optimal skipped (not loaded)");  
+                save([obj.dlPath, '/params.mat'], '-struct', 'p');
+            end
             
         end
 
@@ -660,6 +671,11 @@ classdef DynaLearn < matlab.mixin.SetGet
             n = size(dlOutputParameters, 1);
             dlIndices = zeros(1, n);
             
+            % disp(obj.dlVariables);
+            % for i = 1:n
+            %     disp(dlOutputParameters{i, 1});
+            % end
+
             for i = 1:n
                 
                 try

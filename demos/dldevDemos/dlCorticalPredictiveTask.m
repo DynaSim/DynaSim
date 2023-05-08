@@ -8,11 +8,11 @@
 %% Initiation
 
 clear;clc;
-cd('//Users/hamednejat/Works/Research/Computational');
+cd('C:\Works\Computational');
 addpath(genpath('DynaSim'));
 cd('DynaSim');
 
-%% AutoRunSc: Pre-fitting on a physiological basis to be similar to a real cortical dynamics
+%% AutoRunSc: Pre-fitting
 
 clear;clc;
 
@@ -22,6 +22,7 @@ noise_rate = 4.9;
 performance_coefficient = 0; % Pre-fit
 
 ResetOptimalError = 'on';
+RemakeFlag = 1;
 tune_flag = 1;
 
 %%% Create model parameters struct example
@@ -56,11 +57,11 @@ dsCellLaminar = dlLaminarCortexNetNL(ModelParameters, ModelName);
 for model_size_id = 1:1
 
     CurrentSize = TotalSize(model_size_id);
-    dlThreeCuesTaskPerformer(ResetOptimalError, ModelName, ModelParameters, model_size_id, performance_coefficient, tune_flag);
+    dlPassiveDynamicsPerformer(RemakeFlag, ResetOptimalError, ModelName, ModelParameters, model_size_id, performance_coefficient, tune_flag);
 
 end
 
-%% AutoRunSc: Fitting on the main task
+%% AutoRunScript: Main simulation
 
 clear;clc;
 
@@ -69,12 +70,13 @@ noise_rate = 4.9;
 performance_coefficient = 1; % Main task
 
 ResetOptimalError = 'on';
+RemakeFlag = 0;
 tune_flag = 0;
 
 for model_size_id = 1:20
 
     CurrentSize = TotalSize(model_size_id);
-    dlThreeCuesTaskPerformer(ResetOptimalError, CurrentSize, model_size_id, noise_rate, performance_coefficient, tune_flag);
+    dlPassiveDynamicsPerformer(RemakeFlag, ResetOptimalError, CurrentSize, model_size_id, noise_rate, performance_coefficient, tune_flag);
     ResetOptimalError = 'off';
 
 end
@@ -84,7 +86,7 @@ end
 clear;clc;
 id = 1;
 m = DynaLearn(); % ~ 1sec
-m = m.dlLoad(char("dlModels/dlPredictiveCorticalCircuitModelLWK" + string(id))); % ~ 10sec, New larger model; keeping track of its activity in Gamma/Beta **
+m = m.dlLoad(char("dlModels/dlPredictiveCorticalCircuitModelNL" + string(id))); % ~ 10sec, New larger model; keeping track of its activity in Gamma/Beta **
 
 trialParamsTemp = containers.Map();
 trialParamsTemp('tspan') = [0 500];

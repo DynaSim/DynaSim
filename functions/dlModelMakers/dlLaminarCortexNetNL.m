@@ -42,32 +42,32 @@ function y = dlLaminarCortexNetNL(ModelParameters, populationName)
 
     fprintf("\n***> WARNING! CONNECTIVITY MATRICES NEED TO BE RE-DEFINED.");
     % sE->sIsom
-    KsupEsupSom = k1*rand(NeSuperficial, NSomSuperficial) + 0.7;
+    KSupESupSom = k1*rand(NeSuperficial, NSomSuperficial) + 0.7;
 %     % sE->sIvip ?
-%     KsupEsupVip = k1*rand(NeSuperficial, NVipSuperficial) + 0.7;
+%     KSupESupVip = k1*rand(NeSuperficial, NVipSuperficial) + 0.7;
     % sE->sIpv
-    KsupEsupPv = k1*rand(NeSuperficial, NPvSuperficial) + 0.7;
+    KSupESupPv = k1*rand(NeSuperficial, NPvSuperficial) + 0.7;
     % sE->mE
-    KsupEMidE = k1*rand(NeSuperficial, NeMid) + k2;
+    KSupEMidE = k1*rand(NeSuperficial, NeMid) + k2;
 
     % sIsom->sE
-    KsupSomsupE = k1*rand(NSomSuperficial, NeSuperficial) + k2;
+    KSupSomSupE = k1*rand(NSomSuperficial, NeSuperficial) + k2;
     % sIsom->sIpv
-    KsupSomsupPv = k1*rand(NSomSuperficial, NPvSuperficial) + k2;
+    KSupSomSupPv = k1*rand(NSomSuperficial, NPvSuperficial) + k2;
     % sIsom->sIvip
-    KsupSomsupVip = k1*rand(NSomSuperficial, NVipSuperficial) + k2;
+    KSupSomSupVip = k1*rand(NSomSuperficial, NVipSuperficial) + k2;
 
     % sIvip->sIsom
-    KsupVipsupSom = k1*rand(NVipSuperficial, NSomSuperficial) + k2;
+    KSupVipSupSom = k1*rand(NVipSuperficial, NSomSuperficial) + k2;
     % sIvip->sIpv
-    KsupVipsupPv = k1*rand(NVipSuperficial, NPvSuperficial) + k2;
+    KSupVipSupPv = k1*rand(NVipSuperficial, NPvSuperficial) + k2;
 
     % sIpv->sE
-    KsupPvsupE = k1*rand(NPvSuperficial, NeSuperficial) + 0.7;
+    KSupPvSupE = k1*rand(NPvSuperficial, NeSuperficial) + 0.7;
     % sIpv->sIsom
-    KsupPvsupSom = k1*rand(NPvSuperficial, NSomSuperficial) + k2;
+    KSupPvSupSom = k1*rand(NPvSuperficial, NSomSuperficial) + k2;
     % sIpv->sIsom
-    KsupPvsupVip = k1*rand(NPvSuperficial, NVipSuperficial) + k2;
+    KSupPvSupVip = k1*rand(NPvSuperficial, NVipSuperficial) + k2;
 
     % mE->mIsom
     KMidEMidSom = k1*rand(NeMid, NSomMid) + 0.7;
@@ -78,7 +78,7 @@ function y = dlLaminarCortexNetNL(ModelParameters, populationName)
     % mE->dE
     KMidEDeepE = k1*rand(NeMid, NeDeep) + k2;
     % mE->sE
-    KMidEsupE = k1*rand(NeMid, NeSuperficial) + k2;
+    KMidESupE = k1*rand(NeMid, NeSuperficial) + k2;
 
     % mIsom->mE
     KMidSomMidE = k1*rand(NSomMid, NeMid) + k2;
@@ -202,32 +202,32 @@ function y = dlLaminarCortexNetNL(ModelParameters, populationName)
     cell_type = ctx_cells;
 
     % BUILDING
-    % Structures: SUPERFICIAL LAYER (1-2-3)
+    % Structures: SupERFICIAL LAYER (1-2-3)
     SupL=[];
 
     % E-cells-PYR
-    SupL.populations(1).name = ['supE', populationName];
+    SupL.populations(1).name = ['SupE', populationName];
     SupL.populations(1).size = NeSuperficial;
     SupL.populations(1).equations = eqns;
     SupL.populations(1).mechanism_list = cell_type;
     SupL.populations(1).parameters = {'Iapp', 0,'noise', NoiseRate*2};
 
     % I-cells-PV
-    SupL.populations(2).name = ['supIPV', populationName];
+    SupL.populations(2).name = ['SupIPV', populationName];
     SupL.populations(2).size = NPvSuperficial;
     SupL.populations(2).equations = eqns;
     SupL.populations(2).mechanism_list = cell_type;
     SupL.populations(2).parameters = {'Iapp', 0,'noise', NoiseRate};
 
     % I-cells-SOM
-    SupL.populations(3).name = ['supISOM', populationName];
+    SupL.populations(3).name = ['SupISOM', populationName];
     SupL.populations(3).size = NSomSuperficial;
     SupL.populations(3).equations = eqns;
     SupL.populations(3).mechanism_list = cell_type;
     SupL.populations(3).parameters = {'Iapp', 0,'noise', NoiseRate};
 
     % I-cells-VIP
-    SupL.populations(4).name = ['supIVIP', populationName];
+    SupL.populations(4).name = ['SupIVIP', populationName];
     SupL.populations(4).size = NVipSuperficial;
     SupL.populations(4).equations = eqns;
     SupL.populations(4).mechanism_list = cell_type;
@@ -238,79 +238,79 @@ function y = dlLaminarCortexNetNL(ModelParameters, populationName)
     SupL.connections(1).source = SupL.populations(1).name;
     SupL.connections(1).target = SupL.populations(2).name;
     SupL.connections(1).mechanism_list = {'iAMPActx'};
-    SupL.connections(1).parameters = {'gAMPA',gAMPA_EI_Sup,'tauAMPA',tauAMPA_E,'netcon',KsupEsupPv};
+    SupL.connections(1).parameters = {'gAMPA',gAMPA_EI_Sup,'tauAMPA',tauAMPA_E,'netcon',KSupESupPv};
 
     SupL.connections(2).direction = [SupL.populations(1).name, '->', SupL.populations(3).name];
     SupL.connections(2).source = SupL.populations(1).name;
     SupL.connections(2).target = SupL.populations(3).name;
     SupL.connections(2).mechanism_list = {'iAMPActx'};
-    SupL.connections(2).parameters = {'gAMPA',gAMPA_EI_Sup,'tauAMPA',tauAMPA_E,'netcon',KsupEsupSom};
+    SupL.connections(2).parameters = {'gAMPA',gAMPA_EI_Sup,'tauAMPA',tauAMPA_E,'netcon',KSupESupSom};
 
     SupL.connections(3).direction = [SupL.populations(1).name, '->', SupL.populations(2).name];
     SupL.connections(3).source = SupL.populations(1).name;
     SupL.connections(3).target = SupL.populations(2).name;
     SupL.connections(3).mechanism_list = {'iNMDActx'};
-    SupL.connections(3).parameters = {'netcon',KsupEsupPv};
+    SupL.connections(3).parameters = {'netcon',KSupESupPv};
  
     SupL.connections(4).direction = [SupL.populations(1).name, '->', SupL.populations(3).name];
     SupL.connections(4).source = SupL.populations(1).name;
     SupL.connections(4).target = SupL.populations(3).name;
     SupL.connections(4).mechanism_list = {'iNMDActx'};
-    SupL.connections(4).parameters = {'netcon',KsupEsupSom};
+    SupL.connections(4).parameters = {'netcon',KSupESupSom};
 
     SupL.connections(end+1).direction = [SupL.populations(2).name, '->', SupL.populations(1).name];
     SupL.connections(end).source = SupL.populations(2).name;
     SupL.connections(end).target = SupL.populations(1).name;
     SupL.connections(end).mechanism_list = {'iGABActx'};
-    SupL.connections(end).parameters = {'gGABAa',gGABA_SE,'tauGABA',tauGABA_PvSup,'netcon',KsupPvsupE};
+    SupL.connections(end).parameters = {'gGABAa',gGABA_SE,'tauGABA',tauGABA_PvSup,'netcon',KSupPvSupE};
 
     SupL.connections(end+1).direction = [SupL.populations(2).name, '->', SupL.populations(3).name];
     SupL.connections(end).source = SupL.populations(2).name;
     SupL.connections(end).target = SupL.populations(3).name;
     SupL.connections(end).mechanism_list = {'iGABActx'};
-    SupL.connections(end).parameters = {'gGABAa',gGABA_II,'tauGABA',tauGABA_PvDeep,'netcon',KsupPvsupSom};
+    SupL.connections(end).parameters = {'gGABAa',gGABA_II,'tauGABA',tauGABA_PvDeep,'netcon',KSupPvSupSom};
 
     SupL.connections(end+1).direction = [SupL.populations(3).name, '->', SupL.populations(1).name];
     SupL.connections(end).source = SupL.populations(3).name;
     SupL.connections(end).target = SupL.populations(1).name;
     SupL.connections(end).mechanism_list = {'iGABActx'};
-    SupL.connections(end).parameters = {'gGABAa',gGABA_PE,'tauGABA',tauGABA_Som,'netcon',KsupSomsupE};
+    SupL.connections(end).parameters = {'gGABAa',gGABA_PE,'tauGABA',tauGABA_Som,'netcon',KSupSomSupE};
 
     SupL.connections(end+1).direction = [SupL.populations(3).name, '->', SupL.populations(2).name];
     SupL.connections(end).source = SupL.populations(3).name;
     SupL.connections(end).target = SupL.populations(2).name;
     SupL.connections(end).mechanism_list = {'iGABActx'};
-    SupL.connections(end).parameters = {'gGABAa',gGABA_II,'tauGABA',tauGABA_Som,'netcon',KsupSomsupPv};
+    SupL.connections(end).parameters = {'gGABAa',gGABA_II,'tauGABA',tauGABA_Som,'netcon',KSupSomSupPv};
 
     SupL.connections(end+1).direction = [SupL.populations(4).name, '->', SupL.populations(2).name];
     SupL.connections(end).source = SupL.populations(4).name;
     SupL.connections(end).target = SupL.populations(2).name;
     SupL.connections(end).mechanism_list = {'iGABActx'};
-    SupL.connections(end).parameters = {'gGABAa',gGABA_II,'tauGABA',tauGABA_Vip,'netcon',KsupVipsupPv};
+    SupL.connections(end).parameters = {'gGABAa',gGABA_II,'tauGABA',tauGABA_Vip,'netcon',KSupVipSupPv};
 
     SupL.connections(end+1).direction = [SupL.populations(4).name, '->', SupL.populations(3).name];
     SupL.connections(end).source = SupL.populations(4).name;
     SupL.connections(end).target = SupL.populations(3).name;
     SupL.connections(end).mechanism_list = {'iGABActx'};
-    SupL.connections(end).parameters = {'gGABAa',gGABA_II,'tauGABA',tauGABA_Vip,'netcon',KsupVipsupSom};
+    SupL.connections(end).parameters = {'gGABAa',gGABA_II,'tauGABA',tauGABA_Vip,'netcon',KSupVipSupSom};
 
     SupL.connections(end+1).direction = [SupL.populations(2).name, '->', SupL.populations(4).name];
     SupL.connections(end).source = SupL.populations(2).name;
     SupL.connections(end).target = SupL.populations(4).name;
     SupL.connections(end).mechanism_list = {'iGABActx'};
-    SupL.connections(end).parameters = {'gGABAa',gGABA_II,'tauGABA',tauGABA_PvDeep,'netcon',KsupPvsupVip};
+    SupL.connections(end).parameters = {'gGABAa',gGABA_II,'tauGABA',tauGABA_PvDeep,'netcon',KSupPvSupVip};
 
     SupL.connections(end+1).direction = [SupL.populations(3).name, '->', SupL.populations(4).name];
     SupL.connections(end).source = SupL.populations(3).name;
     SupL.connections(end).target = SupL.populations(4).name;
     SupL.connections(end).mechanism_list = {'iGABActx'};
-    SupL.connections(end).parameters = {'gGABAa',gGABA_II,'tauGABA',tauGABA_Som,'netcon',KsupSomsupVip};
+    SupL.connections(end).parameters = {'gGABAa',gGABA_II,'tauGABA',tauGABA_Som,'netcon',KSupSomSupVip};
 
     % Structures: MIDDLE LAYER (4)
     MidL=[];
 
     % E-cells-PYR
-    MidL.populations(1).name = ['MidLE', populationName];
+    MidL.populations(1).name = ['MidE', populationName];
     MidL.populations(1).size = NeMid;
     MidL.populations(1).equations = eqns;
     MidL.populations(1).mechanism_list = cell_type;
@@ -414,7 +414,7 @@ function y = dlLaminarCortexNetNL(ModelParameters, populationName)
     DeepL=[];
 
     % E-cells-PYR
-    DeepL.populations(1).name = ['DeepLE', populationName];
+    DeepL.populations(1).name = ['DeepE', populationName];
     DeepL.populations(1).size = NeDeep;
     DeepL.populations(1).equations = eqns;
     DeepL.populations(1).mechanism_list = cell_type;
@@ -570,21 +570,21 @@ function y = dlLaminarCortexNetNL(ModelParameters, populationName)
 
     end
     
-    % supEmidE
+    % SupEmidE
     c = length(s.connections)+1;
     s.connections(c).direction = [SupL.populations(1).name, '->', MidL.populations(1).name];
     s.connections(c).source = SupL.populations(1).name;
     s.connections(c).target = MidL.populations(1).name;
     s.connections(c).mechanism_list={'iAMPActx'};
-    s.connections(c).parameters={'gAMPA',gAMPA_MS,'tauAMPA',tauAMPA_SM,'netcon',KsupEMidE};
+    s.connections(c).parameters={'gAMPA',gAMPA_MS,'tauAMPA',tauAMPA_SM,'netcon',KSupEMidE};
 
-    % midEsupE
+    % midESupE
     c = length(s.connections)+1;
     s.connections(c).direction = [MidL.populations(1).name, '->', SupL.populations(1).name];
     s.connections(c).source = MidL.populations(1).name;
     s.connections(c).target = SupL.populations(1).name;
     s.connections(c).mechanism_list={'iAMPActx'};
-    s.connections(c).parameters={'gAMPA',gAMPA_MS,'tauAMPA',tauAMPA_MS,'netcon',KMidEsupE};
+    s.connections(c).parameters={'gAMPA',gAMPA_MS,'tauAMPA',tauAMPA_MS,'netcon',KMidESupE};
 
     % midEdeepE
     c = length(s.connections)+1;
