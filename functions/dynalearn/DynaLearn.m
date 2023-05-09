@@ -451,9 +451,14 @@ classdef DynaLearn < matlab.mixin.SetGet
 
         function y = dlPopulationLabelTrim(obj, label)
 
+            if iscell(label)
+                label = label{1};
+            end
+
             indx = strfind(label, "_");
-            indx = indx(end-1);
-            y = label(1:indx);
+            N = length(indx);
+            indx = indx(N - 1);
+            y = label(1:indx-1);
 
         end
         
@@ -466,7 +471,7 @@ classdef DynaLearn < matlab.mixin.SetGet
 
             t = dlPotentials{1, 1};
             n = size(dlPotentials, 2);
-            m = ceil(n/9);
+            m = ceil(n/12);
             title_ = obj.dlModelName;
             
             for k = 1:m
@@ -489,7 +494,7 @@ classdef DynaLearn < matlab.mixin.SetGet
 
                         end
 
-                        ylabel(dlPopulationLabelTrim(dlLabels(i+1)));
+                        ylabel(obj.dlPopulationLabelTrim(dlLabels(i+1)));
                         title(title_);
 
                     end
@@ -507,7 +512,7 @@ classdef DynaLearn < matlab.mixin.SetGet
                         plot(t, x);
                         grid("on");
 
-                        ylabel(dlPopulationLabelTrim(dlLabels(i+1)));
+                        ylabel(obj.dlPopulationLabelTrim(dlLabels(i+1)));
                         title(title_);
 
                     end
@@ -525,7 +530,7 @@ classdef DynaLearn < matlab.mixin.SetGet
                         plot(t, mean(x, 2));
                         grid("on");
 
-                        ylabel(dlPopulationLabelTrim(dlLabels(i+1)));
+                        ylabel(obj.dlPopulationLabelTrim(dlLabels(i+1)));
                         title(title_);
 
                     end
@@ -564,7 +569,7 @@ classdef DynaLearn < matlab.mixin.SetGet
                                 ylim([0, freqCap]);
                             end
 
-                            ylabel(dlPopulationLabelTrim(dlLabels(i+1)));
+                            ylabel(obj.dlPopulationLabelTrim(dlLabels(i+1)));
                             title(title_);
 
                         catch

@@ -96,10 +96,10 @@ m.dlSimulate();
 opts = containers.Map();
 opts("lf") = 1;
 opts("hf") = 60;
-% m.dlPlotAllPotentials('raster', opts);
+m.dlPlotAllPotentials('raster', opts);
 % m.dlPlotAllPotentials('avgfft', opts);
 % opts = struct();opts.name = "test1";
-m.dlPlotAllPotentials('lfp', opts);  
+% m.dlPlotAllPotentials('lfp', opts);  
 % m.dlPlotAllPotentials('lfpsave', opts);   
 
 %%
