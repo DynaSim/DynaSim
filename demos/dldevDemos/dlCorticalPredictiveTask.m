@@ -8,7 +8,7 @@
 %% Initiation
 
 clear;clc;
-cd('C:\Works\Computational');
+cd('D:\Works\Computational');
 addpath(genpath('DynaSim'));
 cd('DynaSim');
 
@@ -18,12 +18,13 @@ clear;clc;
 
 CurrentSize = 64;
 TotalSize = ones(1, 20)*CurrentSize;
-noise_rate = 4.9;
+noise_rate = 7.4;
 performance_coefficient = 0; % Pre-fit
 
 ResetOptimalError = 'on';
 RemakeFlag = 1;
 tune_flag = 1;
+epochs = 100; % Low number for implementation and debugging purposes
 
 %%% Create model parameters struct example
 % ModelName = "V1";
@@ -52,12 +53,12 @@ ModelParameters.Nout = 6;
 ModelParameters.NoiseRate = noise_rate; % 10%
 ModelParameters.Nstim = 3;
 
-dsCellLaminar = dlLaminarCortexNetNL(ModelParameters, ModelName);
+% dsCellLaminar = dlLaminarCortexNetNL(ModelParameters, ModelName);
 
 for model_size_id = 1:1
 
     CurrentSize = TotalSize(model_size_id);
-    dlPassiveDynamicsPerformer(RemakeFlag, ResetOptimalError, ModelName, ModelParameters, model_size_id, performance_coefficient, tune_flag);
+    dlPassiveDynamicsPerformer(RemakeFlag, ResetOptimalError, ModelName, ModelParameters, model_size_id, performance_coefficient, tune_flag, epochs);
 
 end
 
@@ -66,18 +67,17 @@ end
 clear;clc;
 
 TotalSize = ones(1, 20)*64;
-noise_rate = 4.9;
+noise_rate = 7.4;
 performance_coefficient = 1; % Main task
 
 ResetOptimalError = 'on';
 RemakeFlag = 0;
 tune_flag = 0;
 
-for model_size_id = 1:20
+for model_size_id = 1:1
 
     CurrentSize = TotalSize(model_size_id);
-    dlPassiveDynamicsPerformer(RemakeFlag, ResetOptimalError, CurrentSize, model_size_id, noise_rate, performance_coefficient, tune_flag);
-    ResetOptimalError = 'off';
+    dlPassiveDynamicsPerformer(RemakeFlag, ResetOptimalError, ModelName, ModelParameters, model_size_id, performance_coefficient, tune_flag);
 
 end
 
@@ -89,16 +89,17 @@ m = DynaLearn(); % ~ 1sec
 m = m.dlLoad(char("dlModels/dlPredictiveCorticalCircuitModelNL" + string(id))); % ~ 10sec, New larger model; keeping track of its activity in Gamma/Beta **
 
 trialParamsTemp = containers.Map();
-trialParamsTemp('tspan') = [0 500];
+trialParamsTemp('tspan') = [0 1000];
 
 m.dlUpdateParams(trialParamsTemp);
 m.dlSimulate();
 opts = containers.Map();
 opts("lf") = 1;
 opts("hf") = 60;
-m.dlPlotAllPotentials('raster', opts);
+% m.dlPlotAllPotentials('raster', opts);
 % m.dlPlotAllPotentials('avgfft', opts);
 % opts = struct();opts.name = "test1";
+m.dlPlotAllPotentials('lfp', opts);  
 % m.dlPlotAllPotentials('lfpsave', opts);   
 
 %%

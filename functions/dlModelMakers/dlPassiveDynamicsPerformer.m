@@ -1,4 +1,4 @@
-function m = dlPassiveDynamicsPerformer(RemakeFlag, ResetOptimalError, ModelName, ModelParameters, model_size_id, performance_coefficient, tune_flag)
+function m = dlPassiveDynamicsPerformer(RemakeFlag, ResetOptimalError, ModelName, ModelParameters, model_size_id, performance_coefficient, tune_flag, epochs)
     
     %%% Call Laminar Cortex Constructor Functions
     dsCellLaminar = dlLaminarCortexNetNL(ModelParameters, ModelName); % Laminar PFC model with specific parameters
@@ -9,7 +9,7 @@ function m = dlPassiveDynamicsPerformer(RemakeFlag, ResetOptimalError, ModelName
     % Create DynaLearn Class (remake)
     if RemakeFlag
         fprintf("\n->Remake flag is on. Generating new model (will replace the previous model if names are same)");
-        m = DynaLearn(dsModel, char("dlModels/dlPredictiveCorticalCircuitModelNL" + string(model_size_id)), 'mex'); % ~10 min or less, MEXGEN or < 20 sec, RAWGEN.
+        m = DynaLearn(dsModel, char("dlModels/dlPredictiveCorticalCircuitModelNL" + string(model_size_id)), 'mex', ModelName); % ~10 min or less, MEXGEN or < 20 sec, RAWGEN.
         m.dlSave(); % < 1sec
     end
 
@@ -23,7 +23,7 @@ function m = dlPassiveDynamicsPerformer(RemakeFlag, ResetOptimalError, ModelName
         fprintf("\n-->Otherwise, there is a problem with loading object or access to its repository.");
     end
 
-    ModelName = char("x" + ModelName);
+    ModelName = char("_" + ModelName);
     [trialParams1, trialParams2, trialParams3] = dlNullPattern(ModelName);
     
     outputParams = [{['DeepE', ModelName, '_V'], 1:floor(ModelParameters.NeDeep/3), [200 400] ...
@@ -45,7 +45,7 @@ function m = dlPassiveDynamicsPerformer(RemakeFlag, ResetOptimalError, ModelName
     dlTargetParameters = {targetParams1, targetParams2, targetParams3};
     dlOutputParameters = outputParams;
     
-    TBdata = dlTrialBlockGenerator(dlInputParameters, dlTargetParameters, 100, 100);
+    TBdata = dlTrialBlockGenerator(dlInputParameters, dlTargetParameters, epochs, epochs);
     
     dlTrainOptions = containers.Map(); % Train options; MUST be a map data structure
     dlTrainOptions('dlEpochs') = 100; % % Number of epochs (A.K.A total iterations)

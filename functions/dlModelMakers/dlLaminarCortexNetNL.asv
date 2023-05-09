@@ -36,7 +36,7 @@ function y = dlLaminarCortexNetNL(ModelParameters, populationName)
 
     NeAvg = NeSuperficial + NeMid + NeDeep;
     ModelName = populationName;
-    populationName = char("_" + populationName);
+    populationName = char("x" + populationName);
 
     % Connectivity matrices
 
@@ -198,7 +198,7 @@ function y = dlLaminarCortexNetNL(ModelParameters, populationName)
     input_amp = 1; % scales the strength of stimulus
     
     % cell type
-    ctx_cells = {'iNa','iK', 'iCa', 'iL'};
+    ctx_cells = {'iNa','iK'};
     cell_type = ctx_cells;
 
     % BUILDING

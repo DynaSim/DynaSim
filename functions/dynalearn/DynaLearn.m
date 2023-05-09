@@ -55,6 +55,7 @@ classdef DynaLearn < matlab.mixin.SetGet
         dlLastOutputLog = {};
         dlOptimalWeightChanges = [];
         dlOptimalWeightChangesFlag = 0;
+        dlModelName = "dlModelName";
 
         % MetaLR
         dlMetaMu = 0.01;
@@ -72,7 +73,7 @@ classdef DynaLearn < matlab.mixin.SetGet
 
         function obj = DynaLearn(varargin) % Constructors, will be expanded
             
-            fprintf("\n\n@DS.DL:Creating Dyna model object ... \n");
+            fprintf("\n\n@DS.DL:Creating DynaLearn model object ... \n");
             set(obj, 'dlPathToFile', 'models/dlBaseModel');
             
             if nargin == 0
@@ -115,10 +116,35 @@ classdef DynaLearn < matlab.mixin.SetGet
                     fprintf("\n->Simulation tool ""%s"" is not valid. Try ""mex"" or ""raw"".\n ***No model created, try again.\n", mode_);
                     return
                 end
+            
+            elseif nargin == 4
                 
+                model_ = varargin{1};  
+                data_ = varargin{2};
+                mode_ = varargin{3};
+                name_ = varargin{4};
+                
+                set(obj, 'dlModel', model_);
+                set(obj, 'dlStudyDir', data_);
+                set(obj, 'dlSimulationTool', mode_);
+                set(obj, 'dlPath', data_);
+
+                set(obj, 'dlModelName', name_);
+
+                if strcmpi(obj.dlSimulationTool, "mex")
+                    obj.dlInit(obj.dlStudyDir);
+                elseif strcmpi(obj.dlSimulationTool, "raw")
+                    obj.dlRawInit(obj.dlStudyDir);
+                else
+                    fprintf("\n->Simulation tool ""%s"" is not valid. Try ""mex"" or ""raw"".\n ***No model created, try again.\n", mode_);
+                    return
+                end
+
             else
-                fprintf("\n Invalid use of DynaNet; try one of the following ways:\n 1.Call with no inputs <> (for demo or reloading).\n 2.Call with <DynaSim struct>.\n 3.Call with <DynaSim struct, studydir>.\n 4.Call with <DynaSim Struct, studydir, simulation tool mode>.\n");
+
+                fprintf("\n Invalid use of DynaLearn; try one of the following ways:\n 1.Call with no inputs <> (for demo or reloading).\n 2.Call with <DynaSim struct>.\n 3.Call with <DynaSim struct, studydir>.\n 4.Call with <DynaSim Struct, studydir, simulation tool mode>.\n");
                 return
+
             end
           
             [out, vars] = dsGetOutputList(obj.dlModel);
@@ -153,7 +179,16 @@ classdef DynaLearn < matlab.mixin.SetGet
              obj.dlStudyDir = val;
              
         end
-        
+
+        function set.dlModelName(obj, val)
+            
+             if ~strcmpi(class(val), 'string') && ~ischar(val)
+                error('Model name a string');
+             end
+             obj.dlModelName = val;
+             
+        end
+
         function set.dlErrorsLog(obj, val)
             
              if ~strcmpi(class(val), 'double') 
@@ -413,6 +448,14 @@ classdef DynaLearn < matlab.mixin.SetGet
             dsMexBridge('dlTempFunc.m', obj.dlMexFuncName);
             
         end
+
+        function y = dlPopulationLabelTrim(obj, label)
+
+            indx = strfind(label, "_");
+            indx = indx(end-1);
+            y = label(1:indx);
+
+        end
         
         function dlPlotAllPotentials(obj, mode, opts)
            
@@ -424,6 +467,7 @@ classdef DynaLearn < matlab.mixin.SetGet
             t = dlPotentials{1, 1};
             n = size(dlPotentials, 2);
             m = ceil(n/9);
+            title_ = obj.dlModelName;
             
             for k = 1:m
                 
@@ -445,7 +489,8 @@ classdef DynaLearn < matlab.mixin.SetGet
 
                         end
 
-                        ylabel(dlLabels(i+1));
+                        ylabel(dlPopulationLabelTrim(dlLabels(i+1)));
+                        title(title_);
 
                     end
 
@@ -459,8 +504,11 @@ classdef DynaLearn < matlab.mixin.SetGet
 
                         x = dlPotentials{1, i+1};
                         subplot((min(k*9, n-1) - (k-1)*9), 1, mod(i-1, (min(k*9, n-1) - (k-1)*9))+1);
-                        plot(t, x);grid("on");
-                        ylabel(dlLabels(i+1));
+                        plot(t, x);
+                        grid("on");
+
+                        ylabel(dlPopulationLabelTrim(dlLabels(i+1)));
+                        title(title_);
 
                     end
 
@@ -474,8 +522,11 @@ classdef DynaLearn < matlab.mixin.SetGet
 
                         x = dlPotentials{1, i+1};
                         subplot((min(k*6, n-1) - (k-1)*6), 1, mod(i-1, (min(k*6, n-1) - (k-1)*6))+1);
-                        plot(t, mean(x, 2));grid("on");
-                        ylabel(dlLabels(i+1));
+                        plot(t, mean(x, 2));
+                        grid("on");
+
+                        ylabel(dlPopulationLabelTrim(dlLabels(i+1)));
+                        title(title_);
 
                     end
 
@@ -501,8 +552,10 @@ classdef DynaLearn < matlab.mixin.SetGet
                         ffts = abs(fft(mean(x, 2))) * min(size(x)) / 1000;
 
                         try
+
                             yf = smooth(ffts(lf:hf));
-                            area(fqs(lf:hf), yf);grid("on");
+                            area(fqs(lf:hf), yf);
+                            grid("on");
 
                             if freqCap == 0
                                 freqCap = max(ffts(lf:hf))*1.2;
@@ -511,10 +564,15 @@ classdef DynaLearn < matlab.mixin.SetGet
                                 ylim([0, freqCap]);
                             end
 
-                            ylabel(dlLabels(i+1));
+                            ylabel(dlPopulationLabelTrim(dlLabels(i+1)));
+                            title(title_);
+
                         catch
+
                            fprintf(" Error in plotter* "); 
+
                         end
+
                     end
 
                     disp("Temp edit for 6 subplots; average fft");
@@ -535,7 +593,9 @@ classdef DynaLearn < matlab.mixin.SetGet
                     figure('Position', [0, 0, 1700, 1400]);
                     imagesc(imgRaster>4, "XData", t);
                     colormap("gray");
+
                     xlabel(mode + " in time (ms)");
+                    title(title_);
 
                 elseif strcmpi(mode, 'lfpmap')
 
@@ -558,6 +618,7 @@ classdef DynaLearn < matlab.mixin.SetGet
                     end
 
                     xlabel(mode + " in time (ms)");
+                    title(title_);
 
                 elseif strcmpi(mode, 'lfpsave')
 

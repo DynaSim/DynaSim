@@ -1,0 +1,10 @@
+% parameters
+gleak = [0.3]
+Eleak = [-54.4]
+
+% functions
+Ileak(X) = -gleak.*(X-Eleak)
+
+% linkers
+@current += Ileak(X)
+

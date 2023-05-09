@@ -26,7 +26,7 @@ function y = dlTrialBlockGenerator(dlInputParameters, dlTargetParameters, n, m)
         
         k = randi(3);
         y.TrB{i} = dlInputParameters{k};
-        y.TrT{i} = dlTargetParameters{4};
+        y.TrT{i} = dlTargetParameters{k};
         
     end
     
