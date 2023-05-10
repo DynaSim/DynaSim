@@ -89,26 +89,22 @@ function m = dlPassiveDynamicsPerformer(RemakeFlag, ResetOptimalError, ModelName
     
     if model_size_id <= 10
 
-        dlTrainOptions('dlTrainRestrictList') = {['DeepIPV', ModelName, '->'], ['MidIPV', ModelName, '->'], ['supIPV', ModelName, '->']}; % Restrict PV
-        dlTrainOptions('dlTrainRestrictCoef') = {.01, .01, .01}; % Restrict PV coeffs
+        dlTrainOptions('dlTrainRestrictList') = {['DeepIPV', ModelName, '->'], ['MidIPV', ModelName, '->'], ['supIPV', ModelName, '->'], ['DeepISOM', ModelName, '->'], ['MidISOM', ModelName, '->'], ['supISOM', ModelName, '->']}; % Restrict PV
+        dlTrainOptions('dlTrainRestrictCoef') = {.05, .05, .05, .2, .2, .2}; % Restrict custom coeffs
 
     elseif model_size_id <= 20
 
         dlTrainOptions('dlTrainRestrictList') = {['DeepIPV', ModelName, '->'], ['MidIPV', ModelName, '->'], ['supIPV', ModelName, '->']}; % Restrict PV
         dlTrainOptions('dlTrainRestrictCoef') = {.01, .01, .01}; % Restrict PV coeffs
 
-    elseif model_size_id > 20
-        dlTrainOptions('dlTrainExcludeList') = {'Stim', ['deepISOM', ModelName, '->'], ['supISOM', ModelName, '->']}; % Exclude SOM
-    elseif model_size_id > 10
-        dlTrainOptions('dlTrainExcludeList') = {'Stim', ['deepE', ModelName, '->'], ['midE', ModelName, '->'], ['supE', ModelName, '->']}; % Exclude Excitatories
     else
-         % Normal, all included.
+         disp("---> No restriction on model during performance and training.");
     end
    
     dlTrainOptions('dlCheckpointLengthCap') = 14;
     dlTrainOptions('dlTrainExcludeList') = {'Stim'};
     dlTrainOptions('dlEpochs') = 1;
-    dlTrainOptions('dlBatchs') = 100;
+    dlTrainOptions('dlBatchs') = 10;
     
     dlTrainOptions('dlEnhancedMomentum') = 0.6;
     CheckCoeff = 2.01;

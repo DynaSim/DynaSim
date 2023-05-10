@@ -1778,76 +1778,76 @@ classdef DynaLearn < matlab.mixin.SetGet
            
            elseif strcmpi(dlLearningRule, 'EnhancedDeltaRule')
 
-            restrictedCoefCnt = 0;
-            for i = l'
+               restrictCoefCnt = 0;
+               for i = l'
 
-                rng('shuffle');
-                w = val{i, 1};
-                delta = (1-w*0.9).*(rand(size(w))-0.5)*error*dlLambda;
-                obj.dlLastWeightChanges{i} = delta;
-                
-                if obj.dlOptimalWeightChangesFlag
-                
-                   try
-                
-                        delta = delta*(1-dlEnhancedMomentum) + obj.dlOptimalWeightChanges{i}*dlEnhancedMomentum;
-                 
-                   catch
-                
-                       disp("---> Setting initial condition for enhanced delta rule ...");
-                
+                   rng('shuffle');
+                   w = val{i, 1};
+                   delta = (1-w*0.9).*(rand(size(w))-0.5)*error*dlLambda;
+                   obj.dlLastWeightChanges{i} = delta;
+
+                   if obj.dlOptimalWeightChangesFlag
+
+                       try
+
+                            delta = delta*(1-dlEnhancedMomentum) + obj.dlOptimalWeightChanges{i}*dlEnhancedMomentum;
+                     
+                       catch
+
+                           disp("---> Setting initial condition for enhanced delta rule ...");
+                   
+                       end
+
                    end
-                
-                end
-                
-                try
-                
-                    excludeList = contains(lab, dlTrainOptions('dlTrainExcludeList'));
-                
-                catch
-                
-                    excludeList = contains(lab, 'x');
-                    excludeList = excludeList * 0;
-                
-                end
-                
-                try
-                
-                    restrictedList = contains(lab, dlTrainOptions('dlTrainRestrictList'));
-                    restrictedCoef = dlTrainOptions('dlTrainRestrictCoef');
-                
-                catch
-                
-                    restrictedList = contains(lab, 'x');
-                    restrictedList = restrictedList * 0;
-                
-                end
 
-                    if ~excludeList(i)
+                   try
+
+                        excludeList = contains(lab, dlTrainOptions('dlTrainExcludeList'));
+
+                   catch
+
+                        excludeList = contains(lab, 'x');
+                        excludeList = excludeList * 0;
+
+                   end
+
+                   try
+
+                        restrictedList = contains(lab, dlTrainOptions('dlTrainRestrictList'));
+                        restrictedCoef = dlTrainOptions('dlTrainRestrictCoef');
+
+                   catch
+
+                        restrictedList = contains(lab, 'x');
+                        restrictedList = restrictedList * 0;
+
+                   end
+
+                if ~excludeList(i)
+
+                    if restrictedList(i)
                     
-                        if restrictedList(i)
-                        
-                            restrictedCoefCnt = restrictedCoefCnt + 1;
-                            wn = w - delta*restrictedCoef{restrictedCoefCnt};
-                        
-                        else
-                        
-                            wn = w - delta;
-                        
-                        end
-                        
-                           wn(wn < 0.1) = 0.1;
-                           wn(wn > .94) = .94;
-                           val{i, 1} = wn;
-                           deltaL = deltaL + sum(sum(abs(delta)));
-                        
+                        restrictedCoefCnt = restrictedCoefCnt + 1;
+                        wn = w - delta*restrictedCoef{restrictedCoefCnt};
+                    
+                    else
+                    
+                        wn = w - delta;
+                    
                     end
+                    
+                       wn(wn < 0.1) = 0.1;
+                       wn(wn > .94) = .94;
+                       val{i, 1} = wn;
+                       deltaL = deltaL + sum(sum(abs(delta)));
+                    
+                end
 
-             end
+               end
 
            elseif strcmpi(dlLearningRule, 'UncertaintyReduction')
 
-               error = obj.dlLastError; %TODO ask Hamed about the difference wrt obj.dlUpdateError
+               error = obj.dlLastError; %TODO ask Hammed about the difference wrt obj.dlUpdateError
 
                metaLR0 = obj.dlMetaLR;
                if isscalar(metaLR0)

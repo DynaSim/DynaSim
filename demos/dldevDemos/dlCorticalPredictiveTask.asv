@@ -16,7 +16,7 @@ cd('DynaSim');
 
 clear;clc;
 
-CurrentSize = 128;
+CurrentSize = 64;
 TotalSize = ones(1, 20)*CurrentSize;
 noise_rate = 7.4;
 performance_coefficient = 0; % Pre-fit
@@ -24,17 +24,14 @@ performance_coefficient = 0; % Pre-fit
 ResetOptimalError = 'on';
 RemakeFlag = 1;
 tune_flag = 1;
-epochs = 10; % Low number for implementation and debugging purposes
+epochs = 100; % Low number for implementation and debugging purposes
 
 %%% Create model parameters struct example
-
-load('D:\Works\Computational\DynaSim\dlModels\LayerCounts.mat');
 % ModelName = "V1";
 % ModelName = "MST";
 ModelName = "PFC";
 ModelParameters = struct();
 
-%%
 %%% Area PFC layer sizes (relative)
 ModelParameters.NeSuperficial = ceil(0.21*CurrentSize);
 ModelParameters.NPvSuperficial = ceil(0.02*CurrentSize);
