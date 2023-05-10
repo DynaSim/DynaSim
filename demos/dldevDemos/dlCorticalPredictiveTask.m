@@ -12,7 +12,7 @@ cd('D:\Works\Computational');
 addpath(genpath('DynaSim'));
 cd('DynaSim');
 
-%% AutoRunSc: Pre-fitting
+%% Initialization
 
 clear;clc;
 
@@ -29,36 +29,35 @@ epochs = 10; % Low number for implementation and debugging purposes
 %%% Create model parameters struct example
 
 load('D:\Works\Computational\DynaSim\dlModels\LayerCounts.mat');
-% ModelName = "V1";
-% ModelName = "MST";
-ModelName = "PFC";
+ModelName = "V1"; % V1/V4/MT/MST/LIP/x7A/PFC
+LaminarParams = dlLaminarNetworkParserNL(LayerCounts.V1, CurrentSize);
 ModelParameters = struct();
 
-%%
-%%% Area PFC layer sizes (relative)
-ModelParameters.NeSuperficial = ceil(0.21*CurrentSize);
-ModelParameters.NPvSuperficial = ceil(0.02*CurrentSize);
-ModelParameters.NSomSuperficial = ceil(0.04*CurrentSize);
-ModelParameters.NVipSuperficial = ceil(0.03*CurrentSize);
+%% Area layer sizes (relative, From LayerCounts.mat)
 
-ModelParameters.NeMid = ceil(0.15*CurrentSize);
-ModelParameters.NPvMid = ceil(0.03*CurrentSize);
-ModelParameters.NSomMid = ceil(0.01*CurrentSize);
-ModelParameters.NVipMid = ceil(0.01*CurrentSize);
+ModelParameters.NeSuperficial = LaminarParams(1, 1);
+ModelParameters.NPvSuperficial = LaminarParams(3, 1);
+ModelParameters.NSomSuperficial = LaminarParams(2, 1);
+ModelParameters.NVipSuperficial = LaminarParams(4, 1);
 
-ModelParameters.NeDeep = ceil(0.41*CurrentSize);
-ModelParameters.NPvDeep = ceil(0.03*CurrentSize);
-ModelParameters.NSomDeep = ceil(0.03*CurrentSize);
-ModelParameters.NVipDeep = ceil(0.03*CurrentSize);
+ModelParameters.NeMid = LaminarParams(1, 2);
+ModelParameters.NPvMid = LaminarParams(3, 2);
+ModelParameters.NSomMid = LaminarParams(2, 2);
+ModelParameters.NVipMid = LaminarParams(4, 2);
+
+ModelParameters.NeDeep = LaminarParams(1, 3);
+ModelParameters.NPvDeep = LaminarParams(3, 3);
+ModelParameters.NSomDeep = LaminarParams(2, 3);
+ModelParameters.NVipDeep = LaminarParams(4, 3);
 
 ModelParameters.Nin = 6;
 ModelParameters.Nout = 6;
-ModelParameters.NoiseRate = noise_rate; % 10%
+ModelParameters.NoiseRate = noise_rate; % ~10%
 ModelParameters.Nstim = 3;
 
 % dsCellLaminar = dlLaminarCortexNetNL(ModelParameters, ModelName);
 
-for model_size_id = 1:1
+for model_size_id = 1:2
 
     CurrentSize = TotalSize(model_size_id);
     dlPassiveDynamicsPerformer(RemakeFlag, ResetOptimalError, ModelName, ModelParameters, model_size_id, performance_coefficient, tune_flag, epochs);

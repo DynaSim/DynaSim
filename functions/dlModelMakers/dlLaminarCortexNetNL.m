@@ -17,11 +17,12 @@ function y = dlLaminarCortexNetNL(ModelParameters, populationName)
 
     Nin = ModelParameters.Nin;
     Nout = ModelParameters.Nout;
-
     Nstim = ModelParameters.Nstim;
     NoiseRate = ModelParameters.NoiseRate;
 
-    fprintf("\n->Initialization of dlLaminarCortexNL Model: ");
+    totalNeuronCount = NeDeep + NeMid + NeSuperficial + NPvSuperficial + NPvMid + NPvDeep + NSomDeep + NSomMid + NSomSuperficial + NVipSuperficial + NVipMid + NVipDeep;
+
+    fprintf("\n->Initialization of dlLaminarCortexNL Model:\n-->Total neuron count = %d ", totalNeuronCount);
     fprintf("\n-->Superficial (L1-3) Neuron counts: \n--->PYR(E) = %d , PV(I) = %d , SOM(I) = %d , VIP(I) = %d", NeSuperficial, NPvSuperficial, NSomSuperficial, NVipSuperficial);
     fprintf("\n-->Middle (L4) Neuron counts: \n--->PYR(E) = %d , PV(I) = %d , SOM(I) = %d , VIP(I) = %d", NeMid, NPvMid, NSomMid, NVipMid);
     fprintf("\n-->Deep (L5-6) Neuron counts: \n--->PYR(E) = %d , PV(I) = %d , SOM(I) = %d , VIP(I) = %d", NeDeep, NPvDeep, NSomDeep, NVipDeep);

@@ -12,11 +12,11 @@ cd('D:\Works\Computational');
 addpath(genpath('DynaSim'));
 cd('DynaSim');
 
-%% AutoRunSc: Pre-fitting
+%% Initialization
 
 clear;clc;
 
-CurrentSize = 64;
+CurrentSize = 128;
 TotalSize = ones(1, 20)*CurrentSize;
 noise_rate = 7.4;
 performance_coefficient = 0; % Pre-fit
@@ -24,19 +24,21 @@ performance_coefficient = 0; % Pre-fit
 ResetOptimalError = 'on';
 RemakeFlag = 1;
 tune_flag = 1;
-epochs = 100; % Low number for implementation and debugging purposes
+epochs = 10; % Low number for implementation and debugging purposes
 
 %%% Create model parameters struct example
-% ModelName = "V1";
-% ModelName = "MST";
-ModelName = "PFC";
+
+load('D:\Works\Computational\DynaSim\dlModels\LayerCounts.mat');
+ModelName = "V1"; % V1/V4/MT/MST/LIP/x7A/PFC
+LaminarParams = dlLaminarNetworkParserNL(LayerCounts.V1, CurrentSize);
 ModelParameters = struct();
 
-%%% Area PFC layer sizes (relative)
-ModelParameters.NeSuperficial = ceil(0.21*CurrentSize);
-ModelParameters.NPvSuperficial = ceil(0.02*CurrentSize);
-ModelParameters.NSomSuperficial = ceil(0.04*CurrentSize);
-ModelParameters.NVipSuperficial = ceil(0.03*CurrentSize);
+%% Area layer sizes (relative, From LayerCounts.mat)
+
+ModelParameters.NeSuperficial = ceil(LaminarParams(1, 1)*CurrentSize);
+ModelParameters.NPvSuperficial = ceil(LaminarParams(2, 1)*CurrentSize);
+ModelParameters.NSomSuperficial = ceil(LaminarParams(1, 1)*CurrentSize);
+ModelParameters.NVipSuperficial = ceil(LaminarParams(1, 1)*CurrentSize);
 
 ModelParameters.NeMid = ceil(0.15*CurrentSize);
 ModelParameters.NPvMid = ceil(0.03*CurrentSize);
