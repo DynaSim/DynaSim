@@ -81,26 +81,32 @@ for model_size_id = 1:1
 
 end
 
-%% Plot sample response
+%% Plot sample response (loader)
 
 clear;clc;
 id = 1;
 m = DynaLearn(); % ~ 1sec
 m = m.dlLoad(char("dlModels/dlPredictiveCorticalCircuitModelNL" + string(id))); % ~ 10sec, New larger model; keeping track of its activity in Gamma/Beta **
 
+%% Plots
+tic;
 trialParamsTemp = containers.Map();
-trialParamsTemp('tspan') = [0 1000];
-
+trialParamsTemp('tspan') = [0 10000];
 m.dlUpdateParams(trialParamsTemp);
 m.dlSimulate();
+
 opts = containers.Map();
 opts("lf") = 1;
 opts("hf") = 60;
-m.dlPlotAllPotentials('raster', opts);
+m.dlPlotAllPotentials('raster');
+toc;
 % m.dlPlotAllPotentials('avgfft', opts);
 % opts = struct();opts.name = "test1";
 % m.dlPlotAllPotentials('lfp', opts);  
 % m.dlPlotAllPotentials('lfpsave', opts);   
+% m.dlPlotAllPotentials('lfpmap', opts);   
+
+%% TB1
 
 %%
 

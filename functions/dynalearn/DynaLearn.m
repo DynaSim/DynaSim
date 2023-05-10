@@ -449,7 +449,7 @@ classdef DynaLearn < matlab.mixin.SetGet
             
         end
 
-        function y = dlPopulationLabelTrim(obj, label)
+        function y = dlPopulationLabelTrim(~, label)
 
             if iscell(label)
                 label = label{1};
@@ -471,8 +471,10 @@ classdef DynaLearn < matlab.mixin.SetGet
 
             t = dlPotentials{1, 1};
             n = size(dlPotentials, 2);
-            m = ceil(n/12);
-            title_ = obj.dlModelName;
+            q = 13;
+
+            m = ceil(n/q);
+            title_ = "Model: " + obj.dlModelName;
             
             for k = 1:m
                 
@@ -480,11 +482,11 @@ classdef DynaLearn < matlab.mixin.SetGet
 
                     figure('Position', [0, 0, 1700, 700*(min(k*7, n-1) - (k-1)*7)/(7)]);
                 
-                    for i = (k-1)*6+1:min((k*9), n-1)
+                    for i = (k-1)*q+1:min((k*q), n-1)
 
                         x = dlPotentials{1, i+1};
                         raster = computeRaster(t, x);
-                        subplot((min(k*9, n-1) - (k-1)*9), 1, mod(i-1, (min(k*9, n-1) - (k-1)*9))+1);
+                        subplot((min(k*q, n-1) - (k-1)*q), 1, mod(i-1, (min(k*q, n-1) - (k-1)*q))+1);
 
                         if size(raster, 1) > 0
 
@@ -503,12 +505,12 @@ classdef DynaLearn < matlab.mixin.SetGet
 
                 elseif strcmpi(mode, 'lfp')
 
-                    figure('Position', [0, 0, 1700, 700*(min(k*9, n-1) - (k-1)*9)/(9)]);
+                    figure('Position', [0, 0, 1700, 700*(min(k*q, n-1) - (k-1)*q)/(q)]);
                 
-                    for i = (k-1)*9+1:min((k*9), n-1)
+                    for i = (k-1)*q+1:min((k*q), n-1)
 
                         x = dlPotentials{1, i+1};
-                        subplot((min(k*9, n-1) - (k-1)*9), 1, mod(i-1, (min(k*9, n-1) - (k-1)*9))+1);
+                        subplot((min(k*q, n-1) - (k-1)*q), 1, mod(i-1, (min(k*q, n-1) - (k-1)*q))+1);
                         plot(t, x);
                         grid("on");
 
@@ -523,10 +525,10 @@ classdef DynaLearn < matlab.mixin.SetGet
 
                     figure('Position', [0, 0, 1700, 700*(min(k*7, n-1) - (k-1)*7)/(7)]);
                 
-                    for i = (k-1)*6+1:min((k*6), n-1)
+                    for i = (k-1)*q+1:min((k*q), n-1)
 
                         x = dlPotentials{1, i+1};
-                        subplot((min(k*6, n-1) - (k-1)*6), 1, mod(i-1, (min(k*6, n-1) - (k-1)*6))+1);
+                        subplot((min(k*q, n-1) - (k-1)*q), 1, mod(i-1, (min(k*q, n-1) - (k-1)*q))+1);
                         plot(t, mean(x, 2));
                         grid("on");
 
@@ -535,7 +537,7 @@ classdef DynaLearn < matlab.mixin.SetGet
 
                     end
 
-                    disp("Temp edit for 6 subplots");
+                    disp("Temp edit for q subplots");
                     xlabel(mode + " in time (ms)");
                     return
                     
@@ -549,11 +551,11 @@ classdef DynaLearn < matlab.mixin.SetGet
                     hf = opts("hf")*dtf; 
                     freqCap = 0;
                     
-                    for i = (k-1)*6+1:min((k*6), 6)
+                    for i = (k-1)*q+1:min((k*q)-1, n-1)
 
                         x = dlPotentials{1, i+1};
                         fqs = linspace(1, 500, max(size(x)));
-                        subplot((min(k*6, n-1) - (k-1)*6), 1, mod(i-1, (min(k*6, n-1) - (k-1)*6))+1);
+                        subplot((min(k*q, n-1) - (k-1)*q), 1, mod(i-1, (min(k*q, n-1) - (k-1)*q))+1);
                         ffts = abs(fft(mean(x, 2))) * min(size(x)) / 1000;
 
                         try
@@ -580,55 +582,114 @@ classdef DynaLearn < matlab.mixin.SetGet
 
                     end
 
-                    disp("Temp edit for 6 subplots; average fft");
+                    disp("Temp edit for q subplots; average fft");
                     xlabel(mode + " in frequency (Hz)");
                     return
                  
                 elseif strcmpi(mode, 'raster')
 
                     imgRaster = zeros(1, length(t));
-                    for i = (k-1)*9+1:min((k*9), n-1)
+                    yticklabels_ = string(length(dlLabels)-1);
+                    yticks_ = zeros(1, length(dlLabels)-1);
+                    yticks_l = zeros(1, length(dlLabels)-1);
+
+                    for i = (k-1)*q+1:min((k*q)-1, n-1)
 
                         x = dlPotentials{1, i+1};
-                        imgRaster(end+1:end+size(x, 2), :) = x';
-                        imgRaster(end+1, :) = 5;
+
+                        yticks_l(i) = size(imgRaster, 1);
+
+                        if size(imgRaster, 1) == 1
+
+                            imgRaster(1:end+size(x, 2)-1, :) = x';
+
+                        else
+
+                            imgRaster(end+1:end+size(x, 2), :) = x';
+
+                        end
+
+                        yticklabels_(i) = obj.dlPopulationLabelTrim(dlLabels(i+1));
+                        yticks_(i) = size(imgRaster, 1);
 
                     end
 
                     figure('Position', [0, 0, 1700, 1400]);
-                    imagesc(imgRaster>4, "XData", t);
+                    imagesc(1-imgRaster>4, "XData", t);
+                    xn = size(imgRaster, 2);
+                    hold on;
+
+                    for i = (k-1)*q+1:min((k*q), n-1)
+
+                        
+                        line([0, xn], [yticks_(i)+.5, yticks_(i)+.5], 'Color', 'r');
+
+                    end
+
+                    yticks((yticks_+yticks_l)/2);
+                    yticklabels(yticklabels_);
                     colormap("gray");
 
+                    ylim([.5 yticks_(min((k*q), n-1))+.5]);
                     xlabel(mode + " in time (ms)");
                     title(title_);
 
                 elseif strcmpi(mode, 'lfpmap')
 
                     imgRaster = zeros(1, length(t));
-                    for i = (k-1)*9+1:min((k*9), n-1)
+                    yticklabels_ = string(length(dlLabels)-1);
+                    yticks_ = zeros(1, length(dlLabels)-1);
+                    yticks_l = zeros(1, length(dlLabels)-1);
+
+                    for i = (k-1)*q+1:min((k*q)-1, n-1)
 
                         x = dlPotentials{1, i+1};
-                        imgRaster(end+1:end+size(x, 2), :) = x';
-                        imgRaster(end+1, :) = 5;
+
+                        yticks_l(i) = size(imgRaster, 1)*100;
+
+                        if size(imgRaster, 1) == 1
+
+                            imgRaster(1:end+size(x, 2)-1, :) = x';
+
+                        else
+
+                            imgRaster(end+1:end+size(x, 2), :) = x';
+
+                        end
+
+                        yticklabels_(i) = obj.dlPopulationLabelTrim(dlLabels(i+1));
+                        yticks_(i) = (size(imgRaster, 1)+1)*100;
 
                     end
 
                     figure('Position', [0, 0, 1700, 1400]);
+                    xn = max(t);
 
                     for i = 1:size(imgRaster, 1)
 
-                        plot(t, imgRaster(i, :)+(size(imgRaster, 1)-i)*100);
+                        plot(t, -imgRaster(i, :)+i*100);
                         hold("on");
 
                     end
+                                    
+                    for i = (k-1)*q+1:min((k*q), n-1)
 
+                        
+                        line([0, xn], [yticks_(i), yticks_(i)], 'Color', 'black','LineStyle','--');
+
+                    end
+
+                    % ylim([.5 yticks_(min((k*q), n-1))+.5]);
+                    yticks((yticks_+yticks_l)/2);
+                    yticklabels(yticklabels_);
                     xlabel(mode + " in time (ms)");
                     title(title_);
+                    set(gca, 'YDir','reverse');
 
                 elseif strcmpi(mode, 'lfpsave')
 
                     imgRaster = zeros(1, length(t));
-                    for i = (k-1)*9+1:min((k*9), n-1)
+                    for i = (k-1)*q+1:min((k*q), n-1)
 
                         x = dlPotentials{1, i+1};
                         imgRaster(end+1:end+size(x, 2), :) = x';
@@ -1661,11 +1722,13 @@ classdef DynaLearn < matlab.mixin.SetGet
                 
            elseif strcmpi(dlLearningRule, 'BioDeltaRule')
             
+               restrictedCoefCnt = 0;
+
                for i = l'
 
                    rng('shuffle');
                    w = val{i, 1};
-                   delta = (1-w*0.5).*(rand(size(w))-0.5)*error*dlLambda;
+                   delta = (1-w*0.9).*(rand(size(w))-0.5)*error*dlLambda;
                    obj.dlLastWeightChanges{i} = delta;
 
                    try
@@ -1679,26 +1742,48 @@ classdef DynaLearn < matlab.mixin.SetGet
 
                    end
 
+                   try
+
+                        restrictedList = contains(lab, dlTrainOptions('dlTrainRestrictList'));
+                        restrictedCoef = dlTrainOptions('dlTrainRestrictCoef');
+
+                   catch
+
+                        restrictedList = contains(lab, 'x');
+                        restrictedList = restrictedList * 0;
+
+                   end
+
                    if ~excludeList(i)
 
-                       wn = w - delta;
+                    if restrictedList(i)
 
-                       wn(wn < 0.1) = 0.1;
-                       wn(wn > .94) = .94;
-                       val{i, 1} = wn;
-                       deltaL = deltaL + sum(sum(abs(delta)));
-    
+                        restrictedCoefCnt = restrictedCoefCnt + 1;
+                        wn = w - delta*restrictedCoef{restrictedCoefCnt};
+                    
+                    else
+
+                        wn = w - delta;
+
+                    end
+                    
+                    wn(wn < 0.1) = 0.1;
+                    wn(wn > .94) = .94;
+                    val{i, 1} = wn;
+                    deltaL = deltaL + sum(sum(abs(delta)));
+
                    end
 
                end
            
            elseif strcmpi(dlLearningRule, 'EnhancedDeltaRule')
 
+               restrictCoefCnt = 0;
                for i = l'
 
                    rng('shuffle');
                    w = val{i, 1};
-                   delta = (1-w*0.5).*(rand(size(w))-0.5)*error*dlLambda;
+                   delta = (1-w*0.9).*(rand(size(w))-0.5)*error*dlLambda;
                    obj.dlLastWeightChanges{i} = delta;
 
                    if obj.dlOptimalWeightChangesFlag
@@ -1726,9 +1811,30 @@ classdef DynaLearn < matlab.mixin.SetGet
 
                    end
 
+                   try
+
+                        restrictedList = contains(lab, dlTrainOptions('dlTrainRestrictList'));
+                        restrictedCoef = dlTrainOptions('dlTrainRestrictCoef');
+
+                   catch
+
+                        restrictedList = contains(lab, 'x');
+                        restrictedList = restrictedList * 0;
+
+                   end
+
                    if ~excludeList(i)
 
-                       wn = w - delta;
+                    if restrictedList(i)
+
+                        restrictedCoefCnt = restrictedCoefCnt + 1;
+                        wn = w - delta*restrictedCoef{restrictedCoefCnt};
+                    
+                    else
+
+                        wn = w - delta;
+
+                    end
 
                        wn(wn < 0.1) = 0.1;
                        wn(wn > .94) = .94;
