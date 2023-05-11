@@ -1,6 +1,6 @@
 function [y, l] = dlRPowerSpectrum(dlObj, opts)
 
-    dlPotentialIndices = contains(dlObj.dlVariables, '_V');
+    dlPotentialIndices = endsWith(dlObj.dlVariables, '_V');
     dlPotentialIndices(1) = 1;
     dlPotentials = dlObj.dlOutputs(dlPotentialIndices);
     dlLabels = dlObj.dlVariables(dlPotentialIndices);

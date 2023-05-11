@@ -294,12 +294,19 @@ classdef DynaLearn < matlab.mixin.SetGet
 
             end
 
+            disp([obj.dlStudyDir, dlCheckPointPath, 'params.mat']);
+
             try
+
                 p = load([obj.dlStudyDir, dlCheckPointPath, 'params.mat']);
                 save([obj.dlPath, '/params.mat'], '-struct', 'p');
+
             catch
+
                 disp("---->Optimal skipped (not loaded)");  
-                save([obj.dlPath, '/params.mat'], '-struct', 'p');
+                % p = load([obj.dlPath, '/params.mat']);
+                % save([obj.dlPath, '/params.mat'], '-struct', 'p');
+
             end
             
         end
@@ -464,7 +471,7 @@ classdef DynaLearn < matlab.mixin.SetGet
         
         function dlPlotAllPotentials(obj, mode, opts)
            
-            dlPotentialIndices = contains(obj.dlVariables, '_V');
+            dlPotentialIndices = endsWith(obj.dlVariables, '_V');
             dlPotentialIndices(1) = 1;
             dlPotentials = obj.dlOutputs(dlPotentialIndices);
             dlLabels = obj.dlVariables(dlPotentialIndices);
@@ -680,6 +687,7 @@ classdef DynaLearn < matlab.mixin.SetGet
                     end
 
                     % ylim([.5 yticks_(min((k*q), n-1))+.5]);
+                    disp(yticks_);
                     yticks((yticks_+yticks_l)/2);
                     yticklabels(yticklabels_);
                     xlabel(mode + " in time (ms)");
@@ -997,6 +1005,12 @@ classdef DynaLearn < matlab.mixin.SetGet
                 
             end
             
+            if isnan(Error)
+
+                Error = 1e6;
+
+            end
+
             obj.dlLastError = Error;
             obj.dlErrorsLog = [obj.dlErrorsLog, obj.dlLastError];
             
@@ -1794,7 +1808,7 @@ classdef DynaLearn < matlab.mixin.SetGet
                  
                    catch
                 
-                       disp("---> Setting initial condition for enhanced delta rule ...");
+                       fprintf("<q107>");
                 
                    end
                 

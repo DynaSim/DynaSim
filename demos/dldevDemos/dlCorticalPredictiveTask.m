@@ -45,7 +45,7 @@ ModelParameters.NPvMid = LaminarParams(3, 2);
 ModelParameters.NSomMid = LaminarParams(2, 2);
 ModelParameters.NVipMid = LaminarParams(4, 2);
 
-ModelParameters.NeDeep = LaminarParams(1, 3);
+ModelParameters.NeDeep = LaminarParams(1, 3); 
 ModelParameters.NPvDeep = LaminarParams(3, 3);
 ModelParameters.NSomDeep = LaminarParams(2, 3);
 ModelParameters.NVipDeep = LaminarParams(4, 3);
@@ -93,7 +93,7 @@ m = m.dlLoad(char("dlModels/dlPredictiveCorticalCircuitModelNL" + string(id))); 
 %% Plots
 tic;
 trialParamsTemp = containers.Map();
-trialParamsTemp('tspan') = [0 10000];
+trialParamsTemp('tspan') = [0 1000];
 m.dlUpdateParams(trialParamsTemp);
 m.dlSimulate();
 
@@ -104,7 +104,7 @@ m.dlPlotAllPotentials('raster');
 toc;
 % m.dlPlotAllPotentials('avgfft', opts);
 % opts = struct();opts.name = "test1";
-% m.dlPlotAllPotentials('lfp', opts);  
+% m.dlPlotAllPotentials('lfpmap', opts);  
 % m.dlPlotAllPotentials('lfpsave', opts);   
 % m.dlPlotAllPotentials('lfpmap', opts);   
 
