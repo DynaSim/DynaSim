@@ -12,10 +12,10 @@ function y = dlLaminarNetworkParserNL(x, totalSize)
     y(:, 2) = z(:, 4);
     y(:, 3) = sum(z(:, 5:6), 2);
 
+    y(y < 1) = 1;
     y(1, :) = round(y(1, :));
     y(2:4, :) = round(y(2:4, :));
     residueN = totalSize - sum(sum(y));
-    y(y < 1) = 1;
 
     while residueN > 0
 
