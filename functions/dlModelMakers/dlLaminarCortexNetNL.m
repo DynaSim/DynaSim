@@ -188,12 +188,13 @@ function y = dlLaminarCortexNetNL(ModelParameters, populationName)
     gGABA_II = .011*gBase; % I->I within layer
 
     gAMPA_MS = .011*gBase;
-    gAMPA_EI_Sup = .011*gBase;
-    gAMPA_EI_Mid = .014*gBase;
-    gAMPA_EI_Deep = .010*gBase;
+    gAMPA_EI_Sup = .004*gBase;
+    gAMPA_EI_Mid = .004*gBase;
+    gAMPA_EI_Deep = .004*gBase;
 
     % neuronal dynamics
     eqns = 'dV/dt = (Iapp + @current + noise*randn(1, Npop))/C; Iapp=0; noise=0; C=1; V(0) = -65 + rand(1, Npop)*0;';
+    % eqns_apical = 'dV/dt = (Iapp + Icable + @current + noise*randn(1, Npop))/C; Iapp=0; noise=0; C=1; V(0) = -65 + rand(1, Npop)*0;';
     %eqns_stimuli = 'dinp/dt = (rand(1) + 4.5)*(20*(exp(- (t - t1).^2) - exp(- (t - t2).^2)) + noise*randn(1, Npop))/C; f1=4; t1=10; t2=100; noise=0; C=1; inp(0) = -60 - rand(1, Npop)*0;';
     eqns_stimuli = 'dinp/dt = (noise*rand(1) + 1)*(1*(exp(- (t - t1).^2) - exp(- (t - t2).^2)) + noise*randn(1, Npop)); t1=100; t2=200; noise=0; inp(0) = rand(1, Npop)*0;';
     input_amp = 1; % scales the strength of stimulus

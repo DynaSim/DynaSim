@@ -29,8 +29,8 @@ epochs = 10; % Low number for implementation and debugging purposes
 %%% Create model parameters struct example
 
 load('D:\Works\Computational\DynaSim\dlModels\LayerCounts.mat');
-ModelName = "V1"; % V1/V4/MT/MST/LIP/x7A/PFC
-LaminarParams = dlLaminarNetworkParserNL(LayerCounts.V1, CurrentSize);
+ModelName = "PFC"; % V1/V4/MT/MST/LIP/x7A/PFC
+LaminarParams = dlLaminarNetworkParserNL(LayerCounts.PFC, CurrentSize);
 ModelParameters = struct();
 
 %% Area layer sizes (relative, From LayerCounts.mat)
@@ -57,7 +57,7 @@ ModelParameters.Nstim = 3;
 
 % dsCellLaminar = dlLaminarCortexNetNL(ModelParameters, ModelName);
 
-for model_size_id = 1:2
+for model_size_id = 3:4
 
     CurrentSize = TotalSize(model_size_id);
     dlPassiveDynamicsPerformer(RemakeFlag, ResetOptimalError, ModelName, ModelParameters, model_size_id, performance_coefficient, tune_flag, epochs);
@@ -86,7 +86,7 @@ end
 %% Plot sample response (loader)
 
 clear;clc;
-id = 1;
+id = 3;
 m = DynaLearn(); % ~ 1sec
 m = m.dlLoad(char("dlModels/dlPredictiveCorticalCircuitModelNL" + string(id))); % ~ 10sec, New larger model; keeping track of its activity in Gamma/Beta **
 
