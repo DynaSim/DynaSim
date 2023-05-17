@@ -794,24 +794,27 @@ classdef DynaLearn < matlab.mixin.SetGet
             for i = 1:size(x, 2)
 
                 x(:, i) = x(:, i) - min(x(:, i));
-                x(:, i) = x(:, i) / min(max(x(:, i)), 0);
+                x(:, i) = x(:, i) / 40;
                 x(:, i) = x(:, i)*90 - 70;
 
             end
 
             t = linspace(0, size(x, 1), size(x, 1))*obj.dldT*obj.dlDownSampleFactor;
+            tScale = .9;% / (size(x, 1)*obj.dldT*obj.dlDownSampleFactor/1000);
             raster = computeRaster(t, x);
             pool = 1:size(x, 2);
 
             if size(raster, 1) > 0
 
-                out = 1.1e3 * dlNWRasterToIFR(t, raster, pool, 25, 1, 1);
+                out = tScale * 1e3 * dlNWRasterToIFR(t, raster, pool, 25, 1, 1);
                 
             else 
 
                 out = zeros(1, size(x, 1));
                 
             end
+
+            % disp(tScale*out);
             
         end
         
@@ -1083,7 +1086,17 @@ classdef DynaLearn < matlab.mixin.SetGet
         function dlRunSimulation(obj, dlVaryList, dlOutputParameters)
            
             fprintf("\n\t->Single trial running: \n");
-            obj.dlUpdateParams(dlVaryList);
+
+            try
+
+                obj.dlUpdateParams(dlVaryList);
+
+            catch
+
+                fprintf("->Vary list for dsSimulate ignored due to being invalid.\n");
+
+            end
+
             obj.dlSimulate();
             obj.dlCalculateOutputs(dlOutputParameters);
             fprintf("\n\t-->Simulation outputs: ");
@@ -1947,8 +1960,17 @@ classdef DynaLearn < matlab.mixin.SetGet
                         
                         end
             
-                        wn(wn < 0.1) = 0.1;
-                        wn(wn > .94) = .94;
+                        if contains(lab{i, 1}, "_netcon")
+
+                            wn(wn < 0.1) = 0.1;
+                            wn(wn > .94) = .94;
+
+                        else
+
+                            wn(wn < 1e-4) = 1e-4; % Too small or negative elimination for stability
+
+                        end
+
                         val{i, 1} = wn;
                         % fprintf("\n %f - %s ", val{i, 1}, lab{i, 1});
                         deltaL = deltaL + sum(sum(abs(delta)));
