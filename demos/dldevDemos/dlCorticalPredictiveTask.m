@@ -22,7 +22,7 @@ noise_rate = 7.4;
 performance_coefficient = 0; % Pre-fit
 
 ResetOptimalError = 'on';
-RemakeFlag = 1;
+RemakeFlag = 0;
 tune_flag = 1;
 epochs = 10; % Low number for implementation and debugging purposes
 
@@ -57,7 +57,7 @@ ModelParameters.Nstim = 3;
 
 % dsCellLaminar = dlLaminarCortexNetNL(ModelParameters, ModelName);
 
-for model_size_id = 3:4
+for model_size_id = 1
 
     CurrentSize = TotalSize(model_size_id);
     dlPassiveDynamicsPerformer(RemakeFlag, ResetOptimalError, ModelName, ModelParameters, model_size_id, performance_coefficient, tune_flag, epochs);

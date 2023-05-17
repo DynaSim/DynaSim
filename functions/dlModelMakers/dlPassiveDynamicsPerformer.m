@@ -13,14 +13,15 @@ function m = dlPassiveDynamicsPerformer(RemakeFlag, ResetOptimalError, ModelName
         m.dlSave(); % < 1sec
     end
 
-    % Load DynaLearn Class
-    m = DynaLearn(); % ~ 1sec
-
     try
-        m = m.dlLoad(char("dlModels/dlPredictiveCorticalCircuitModelNL" + string(model_size_id))); % ~ 10sec, New larger model; keeping track of its activity in Gamma/Beta **
+
+        m = DynaLearn.dlLoader(char("dlModels/dlPredictiveCorticalCircuitModelNL" + string(model_size_id))); % ~ 10sec, New larger model; keeping track of its activity in Gamma/Beta **
+   
     catch
+
         fprintf("\n->Failed to load object. If this object does not exist, try RemakeFlag=1.");
         fprintf("\n-->Otherwise, there is a problem with loading object or access to its repository.");
+        
     end
 
     ModelName = char("_" + ModelName);
