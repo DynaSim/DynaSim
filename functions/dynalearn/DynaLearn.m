@@ -846,6 +846,10 @@ classdef DynaLearn < matlab.mixin.SetGet
 
                     obj.dlLastOutputs{i} = mean(std(dlTempOutputs), 'all');
 
+                elseif strcmpi(dlOutputType, 'av')
+
+                    obj.dlLastOutputs{i} = mean(mean(dlTempOutputs), 'all');
+                    
                 elseif strcmpi(dlOutputType, 'afr')
 
                     obj.dlLastOutputs{i} = obj.dlApplyAverageFRKernel(dlTempOutputs);
@@ -1709,8 +1713,9 @@ classdef DynaLearn < matlab.mixin.SetGet
 
            error = obj.dlUpdateError;
            obj.dlLastLambda = dlLambda;
-
            l = find(contains(lab, '_netcon')); 
+           lg = find(contains(lab, ["_gAMPA", "_tauAMPA", "_gleak", "_gGABA", "_gNa", "_gK"]));
+
            deltaL = 0;
 
            if strcmpi(dlLearningRule, 'DeltaRule')
@@ -1857,7 +1862,144 @@ classdef DynaLearn < matlab.mixin.SetGet
                         
                     end
 
+              end
+
+            elseif strcmpi(dlLearningRule, 'GeneralEnhancedDeltaRule')
+
+            restrictedCoefCnt = 0;
+
+            for i = lg'
+
+                rng('shuffle');
+                w = val{i, 1};
+                delta = (1-w*0.9).*(rand(size(w))-0.5)*error*dlLambda;
+                % obj.dlLastWeightChanges{i} = delta;
+                
+                if obj.dlOptimalWeightChangesFlag
+                
+                   try
+                
+                        delta = delta*(1-dlEnhancedMomentum) + obj.dlOptimalWeightChanges{i}*dlEnhancedMomentum;
+                 
+                   catch
+                
+                       fprintf("\n<q107:Not enough differential initial values for momentum. \n-> ..." + ...
+                           "Establishing initial values takes several trials; This is not an error.>\n");
+                
+                   end
+                
+                end
+                
+                try
+                
+                    excludeList = contains(lab, dlTrainOptions('dlTrainExcludeList'));
+                
+                catch
+                
+                    excludeList = contains(lab, 'x');
+                    excludeList = excludeList * 0;
+                
+                end
+                
+                try
+                
+                    restrictedList = contains(lab, dlTrainOptions('dlTrainRestrictList'));
+                    restrictedCoef = dlTrainOptions('dlTrainRestrictCoef');
+                
+                catch
+                
+                    restrictedList = contains(lab, 'x');
+                    restrictedList = restrictedList * 0;
+                
+                end
+
+                    if ~excludeList(i)
+                    
+                        if restrictedList(i)
+                        
+                            restrictedCoefCnt = restrictedCoefCnt + 1;
+                            wn = w - delta*restrictedCoef{restrictedCoefCnt};
+                        
+                        else
+                        
+                            wn = w - delta;
+                        
+                        end
+            
+                        wn(wn < 0.1) = 0.1;
+                        wn(wn > .94) = .94;
+                        val{i, 1} = wn;
+                        deltaL = deltaL + sum(sum(abs(delta)));
+                        
+                    end
+
              end
+
+            for i = l'
+
+                rng('shuffle');
+                w = val{i, 1};
+                delta = (1-w*0.9).*(rand(size(w))-0.5)*error*dlLambda;
+                obj.dlLastWeightChanges{i} = delta;
+                
+                if obj.dlOptimalWeightChangesFlag
+                
+                   try
+                
+                        delta = delta*(1-dlEnhancedMomentum) + obj.dlOptimalWeightChanges{i}*dlEnhancedMomentum;
+                 
+                   catch
+                
+                       fprintf("<q107>");
+                
+                   end
+                
+                end
+                
+                try
+                
+                    excludeList = contains(lab, dlTrainOptions('dlTrainExcludeList'));
+                
+                catch
+                
+                    excludeList = contains(lab, 'x');
+                    excludeList = excludeList * 0;
+                
+                end
+                
+                try
+                
+                    restrictedList = contains(lab, dlTrainOptions('dlTrainRestrictList'));
+                    restrictedCoef = dlTrainOptions('dlTrainRestrictCoef');
+                
+                catch
+                
+                    restrictedList = contains(lab, 'x');
+                    restrictedList = restrictedList * 0;
+                
+                end
+
+                    if ~excludeList(i)
+                    
+                        if restrictedList(i)
+                        
+                            restrictedCoefCnt = restrictedCoefCnt + 1;
+                            wn = w - delta*restrictedCoef{restrictedCoefCnt};
+                        
+                        else
+                        
+                            wn = w - delta;
+                        
+                        end
+                        
+                           wn(wn < 0.1) = 0.1;
+                           wn(wn > .94) = .94;
+                           val{i, 1} = wn;
+                           deltaL = deltaL + sum(sum(abs(delta)));
+                        
+                    end
+
+            end
 
            elseif strcmpi(dlLearningRule, 'UncertaintyReduction')
 
