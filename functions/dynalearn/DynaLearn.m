@@ -499,7 +499,7 @@ classdef DynaLearn < matlab.mixin.SetGet
 
             t = dlPotentials{1, 1};
             n = size(dlPotentials, 2);
-            q = 13;
+            q = 16;
 
             m = ceil(n/q);
             title_ = "Model: " + obj.dlModelName;
@@ -644,7 +644,9 @@ classdef DynaLearn < matlab.mixin.SetGet
 
                     figure('Position', [0, 0, 1700, 1400]);
                     imagesc(1-imgRaster>4, "XData", t);
+                    colormap("gray");
                     xn = size(imgRaster, 2);
+
                     hold on;
 
                     for i = (k-1)*q+1:min((k*q), n-1)
