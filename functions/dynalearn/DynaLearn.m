@@ -1321,7 +1321,7 @@ classdef DynaLearn < matlab.mixin.SetGet
                         obj.dlUpdateParams(dlInputParameters{j});
 
                     end
-                    
+
                     if dlSimulationFlag == 1
 
                         obj.dlSimulate();
@@ -1748,7 +1748,7 @@ classdef DynaLearn < matlab.mixin.SetGet
            error = obj.dlUpdateError;
            obj.dlLastLambda = dlLambda;
            l = find(contains(lab, "_netcon")); 
-           lg = find(contains(lab, ["_netcon", "_gAMPA", "_tauAMPA", "_gleak", "_gGABA", "_gNa", "_gK"]));
+           lg = find(contains(lab, ["_netcon", "_gAMPA", "_tau", "_gleak", "_gGABA", "_gNa", "_gK"]));
 
            deltaL = 0;
 
@@ -1847,7 +1847,7 @@ classdef DynaLearn < matlab.mixin.SetGet
                  
                    catch
                 
-                       fprintf("<q107>");
+                        fprintf("<q107>");
                 
                    end
                 
@@ -1916,10 +1916,10 @@ classdef DynaLearn < matlab.mixin.SetGet
                             delta = delta*(1-dlEnhancedMomentum) + obj.dlOptimalWeightChanges{i}*dlEnhancedMomentum;
                      
                        catch
-                    
+
                            fprintf("\n<q107:Not enough differential initial values for momentum. \n-> ..." + ...
                                "Establishing initial values takes several trials; This is not an error.>\n");
-                    
+
                        end
                     
                     end
@@ -2166,13 +2166,20 @@ classdef DynaLearn < matlab.mixin.SetGet
            
             figure('position', [0, 0, 1400, 700]);
             n = max(size(obj.dlErrorsLog));
-            x = zeros(1, ceil(n/dlBatchs));
+            x = zeros(1, n);
+            xm = zeros(1, n);
             
-            for i = 0:dlBatchs:n-dlBatchs
-                x(ceil((i+1)/dlBatchs)) = mean(obj.dlErrorsLog(i+1:i+dlBatchs));
+            for i = 0:n-dlBatchs
+                x(i+1) = mean(obj.dlErrorsLog(i+1:i+dlBatchs));
+                xm(i+1) = min(obj.dlErrorsLog(i+1:i+dlBatchs));
             end
             
-            plot(x);grid("on");
+            plot(log10(x), "DisplayName", "Mean error", "LineStyle", "--");
+            grid("on");hold("on");
+            plot(log10(xm), "DisplayName", "Min error");
+            xlabel("Trials");
+            ylabel("Log10(Loss)");
+            legend;
             title("Errors in batchs");
             
         end

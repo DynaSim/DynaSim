@@ -1,7 +1,7 @@
 function m = dlPassiveDynamicsPerformer(RemakeFlag, ResetOptimalError, ModelName, ModelParameters, model_size_id, performance_coefficient, tune_flag, epochs)
     
     %%% Call Laminar Cortex Constructor Functions
-    dsCellLaminar = dlLaminarCortexNetNL(ModelParameters, ModelName); % Laminar PFC model with specific parameters
+    dsCellLaminar = dlLaminarCortexNetNLS(ModelParameters, ModelName); % Laminar PFC model with specific parameters
     
     %%% Finalization
     dsModel = dsCellLaminar;
@@ -27,13 +27,13 @@ function m = dlPassiveDynamicsPerformer(RemakeFlag, ResetOptimalError, ModelName
     ModelName = char("_" + ModelName);
     [trialParams1, trialParams2, trialParams3] = dlNullPattern(ModelName);
     
-    outputParams = [{['DeepE', ModelName, '_V'], 1:floor(ModelParameters.NeDeep/3), [200 400] ...
-        , 'afr'}; {['DeepE', ModelName, '_V'],ceil(ModelParameters.NeDeep/3):floor(2*ModelParameters.NeDeep/3), ...
-        [200 400], 'afr'}; {['DeepE', ModelName, '_V'], ceil(2*ModelParameters.NeDeep/3):ModelParameters.NeDeep, [200 400], 'afr'}; ...
-        {['supE', ModelName, '_V'], 1:ModelParameters.NeSuperficial, [50 700], 'afr'}; ...
-        {['MidE', ModelName, '_V'], 1:ModelParameters.NeMid, [50 700], 'afr'}; ...
-        {['DeepE', ModelName, '_V'], 1:ModelParameters.NeDeep, [50 700], 'afr'}; ...
-        {['supIPV', ModelName, '_V'], 1:ModelParameters.NPvSuperficial, [50 700], 'afr'}; ...
+    outputParams = [{['DeepES', ModelName, '_V'], 1:floor(ModelParameters.NeDeep/3), [200 400] ...
+        , 'afr'}; {['DeepES', ModelName, '_V'],ceil(ModelParameters.NeDeep/3):floor(2*ModelParameters.NeDeep/3), ...
+        [200 400], 'afr'}; {['DeepES', ModelName, '_V'], ceil(2*ModelParameters.NeDeep/3):ModelParameters.NeDeep, [200 400], 'afr'}; ...
+        {['SupES', ModelName, '_V'], 1:ModelParameters.NeSuperficial, [50 700], 'afr'}; ...
+        {['MidES', ModelName, '_V'], 1:ModelParameters.NeMid, [50 700], 'afr'}; ...
+        {['DeepES', ModelName, '_V'], 1:ModelParameters.NeDeep, [50 700], 'afr'}; ...
+        {['SupIPV', ModelName, '_V'], 1:ModelParameters.NPvSuperficial, [50 700], 'afr'}; ...
         {['MidIPV', ModelName, '_V'], 1:ModelParameters.NPvMid, [50 700], 'afr'}; ...
         {['DeepIPV', ModelName, '_V'], 1:ModelParameters.NPvDeep, [50 700], 'afr'}];
     
@@ -83,19 +83,19 @@ function m = dlPassiveDynamicsPerformer(RemakeFlag, ResetOptimalError, ModelName
     argsPowSpectRatio4.lf1 = 40;
     argsPowSpectRatio4.hf1 = 90;
  
-    dlTrainOptions('dlLambda') = 1e-9; % 1e-11(1) -> 1e-4 (4)
+    dlTrainOptions('dlLambda') = 1e-7; % 1e-11(1) -> 1e-4 (4)
     dlTrainOptions('dlAdaptiveLambda') = 1; % Adaptive lambda parameter; recommended for long simulations.
     dlTrainOptions('dlUpdateMode') = 'trial';
-    dlTrainOptions('dlLearningRule') = 'EnhancedDeltaRule';
+    dlTrainOptions('dlLearningRule') = 'GeneralEnhancedDeltaRule';
     
     if model_size_id <= 10
 
-        dlTrainOptions('dlTrainRestrictList') = {['DeepIPV', ModelName, '->'], ['MidIPV', ModelName, '->'], ['supIPV', ModelName, '->'], ['DeepISOM', ModelName, '->'], ['MidISOM', ModelName, '->'], ['supISOM', ModelName, '->']}; % Restrict PV
+        dlTrainOptions('dlTrainRestrictList') = {['DeepIPV', ModelName, '->'], ['MidIPV', ModelName, '->'], ['SupIPV', ModelName, '->'], ['DeepISOM', ModelName, '->'], ['MidISOM', ModelName, '->'], ['SupISOM', ModelName, '->']}; % Restrict PV
         dlTrainOptions('dlTrainRestrictCoef') = {.05, .05, .05, .2, .2, .2}; % Restrict custom coeffs
 
     elseif model_size_id <= 20
 
-        dlTrainOptions('dlTrainRestrictList') = {['DeepIPV', ModelName, '->'], ['MidIPV', ModelName, '->'], ['supIPV', ModelName, '->']}; % Restrict PV
+        dlTrainOptions('dlTrainRestrictList') = {['DeepIPV', ModelName, '->'], ['MidIPV', ModelName, '->'], ['SupIPV', ModelName, '->']}; % Restrict PV
         dlTrainOptions('dlTrainRestrictCoef') = {.01, .01, .01}; % Restrict PV coeffs
 
     else
@@ -103,11 +103,11 @@ function m = dlPassiveDynamicsPerformer(RemakeFlag, ResetOptimalError, ModelName
     end
    
     dlTrainOptions('dlCheckpointLengthCap') = 14;
-    dlTrainOptions('dlTrainExcludeList') = {'Stim'};
+    dlTrainOptions('dlTrainExcludeList') = {'Stim', ['SupES', ModelName ,'->SupED', ModelName], ['MidES', ModelName ,'->MidED', ModelName], ['DeepES', ModelName ,'->DeepED', ModelName]};
     dlTrainOptions('dlEpochs') = 1;
     dlTrainOptions('dlBatchs') = 10;
     
-    dlTrainOptions('dlEnhancedMomentum') = 0.6;
+    dlTrainOptions('dlEnhancedMomentum') = 0.2;
     CheckCoeff = 2.01;
 
     if strcmpi(ResetOptimalError, 'on')

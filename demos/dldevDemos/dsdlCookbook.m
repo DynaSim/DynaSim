@@ -26,30 +26,34 @@ dsM.connections.direction
 %% Passing to DynaLearn
 % Assign an ID number if you want to avoid conflicts.
 
-id = 0;
+id = 1;
 dlM = DynaLearn(dsM, char("dlModels/dlHHNS" + num2str(id)), 'mex', populationName);
 dlM.dlSave();
 
 %% Load (ONLY IF ALREADY EXISTS)
 
-id = 0;
+id = 1; % 1, 2, ...
 dlM = DynaLearn.dlLoader(char("dlModels/dlHHNS" + num2str(id)));
 
 %% Define optimization parameters
 
 inputParams = dlNullInputs(1000); % Simulation duration for each trial
 
-outputParams = [{['ESOMA_SingleHH', '_V'], 1:1, [10 1000], 'av'}; ...
+outputParams = [{['ESOMA_SingleHH', '_V'], 1:1, [5 1000], 'av'}; ...
     {['EDEND_SingleHH', '_V'], 1:1, [5 1000], 'av'}; ...
     {['ESOMA_SingleHH', '_V'], 1:1, [5 1000], 'afr'}; ...
-    {['EDEND_SingleHH', '_V'], 1:1, [5 1000], 'afr'}];
+    {['EDEND_SingleHH', '_V'], 1:1, [5 1000], 'afr'}; ...
+    {['ESOMA_SingleHH', '_V'], 1:1, [505 1000], 'afr'}; ...
+    {['EDEND_SingleHH', '_V'], 1:1, [505 1000], 'afr'}];
 
-targetParams = [{'MSE', 1, -55, .4, 0, 0, 0, 0}; ...
-    {'MSE', 2, -55, .4, 0, 0, 0, 0}; ...
+targetParams = [{'MSE', 1, -59, .4, 0, 0, 0, 0}; ...
+    {'MSE', 2, -59, .4, 0, 0, 0, 0}; ...
     {'Compare', [1, 2], 0, .2, 0, 0, 0, 0}; ...
     {'MSE', 3, 10, .4, 0, 0, 0, 0}; ...
     {'MSE', 4, 10, .4, 0, 0, 0, 0}; ...
-    {'Compare', [3, 4], 0, .2, 0, 0, 0, 0}];
+    {'Compare', [3, 4], 0, .2, 0, 0, 0, 0}; ...
+    {'MSE', 5, 10, .4, 0, 0, 0, 0}; ...
+    {'MSE', 6, 10, .4, 0, 0, 0, 0}];
 
 dlInputParameters = {inputParams};
 dlTargetParameters = {targetParams};
@@ -113,18 +117,18 @@ dlM.dlSave();
 
 %% Optimization based on all variables (dendrite-soma interaction plus conductance(g), time constant(tau) and ...)
 
-dlTrainOptions('dlLambda') = 1e-9;
-dlTrainOptions('dlAdaptiveLambda') = 1; % Adaptive lambda parameter; recommended for long simulations.
+dlTrainOptions('dlLambda') = 1e-10;
+dlTrainOptions('dlAdaptiveLambda') = 0; % Adaptive lambda parameter; recommended for long simulations.
 dlTrainOptions('dlUpdateMode') = 'trial';
 dlTrainOptions('dlLearningRule') = 'GeneralEnhancedDeltaRule';
 
-dlTrainOptions('dlEpochs') = 10000;
+dlTrainOptions('dlEpochs') = 100;
 dlTrainOptions('dlBatchs') = 1;
 dlTrainOptions('dlEnhancedMomentum') = 0.1;
-dlTrainOptions('dlCheckpointCoefficient') = 1.074;
+dlTrainOptions('dlCheckpointCoefficient') = 1.047;
 
 dlM.dlLoadOptimal();
-dlM.dlOptimalError = 1e9;dlTrainOptions('dlExcludeDiverge') = 0;
+dlTrainOptions('dlExcludeDiverge') = 0;
 dlM.dlTrain(dlInputParameters, dlOutputParameters, dlTargetParameters, dlTrainOptions);
 
 %% END  

@@ -55,7 +55,7 @@ ModelParameters.Nout = 6;
 ModelParameters.NoiseRate = noise_rate; % ~10%
 ModelParameters.Nstim = 3;
 
-% dsCellLaminar = dlLaminarCortexNetNL(ModelParameters, ModelName);
+dsCellLaminar = dlLaminarCortexNetNLS(ModelParameters, ModelName);
 
 for model_size_id = 1
 
@@ -86,9 +86,8 @@ end
 %% Plot sample response (loader)
 
 clear;clc;
-id = 3;
-m = DynaLearn(); % ~ 1sec
-m = m.dlLoad(char("dlModels/dlPredictiveCorticalCircuitModelNL" + string(id))); % ~ 10sec, New larger model; keeping track of its activity in Gamma/Beta **
+id = 1;
+m = DynaLearn.dlLoader(char("dlModels/dlPredictiveCorticalCircuitModelNL" + string(id))); % ~ 10sec, New larger model; keeping track of its activity in Gamma/Beta **
 
 %% Plots
 tic;
