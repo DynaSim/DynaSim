@@ -14,7 +14,7 @@ cd('DynaSim');
 
 %% Initialization
 
-clear;clc;
+% clear;clc;
 
 CurrentSize = 128;
 TotalSize = ones(1, 20)*CurrentSize;

@@ -66,13 +66,13 @@ function y = dlSinglePopulationNS(ModelParameters, populationName)
     dModel.connections(1).source = dModel.populations(1).name;
     dModel.connections(1).target = dModel.populations(2).name;
     dModel.connections(1).mechanism_list = {'iCOM'};
-    dModel.connections(1).parameters = {'gAMPA',gBase,'tauAMPA',tauAMPA_E,'netcon',KEES};
+    dModel.connections(1).parameters = {'gCOM',gBase, 'tauCOM', 5};
 
     dModel.connections(2).direction = [dModel.populations(2).name, '->', dModel.populations(1).name];
     dModel.connections(2).source = dModel.populations(2).name;
     dModel.connections(2).target = dModel.populations(1).name;
     dModel.connections(2).mechanism_list = {'iCOM'};
-    dModel.connections(2).parameters = {'gAMPA',gBase,'tauAMPA',tauAMPA_E,'netcon',KEED};
+    dModel.connections(2).parameters = {'gCOM',gBase, 'tauCOM', 5};
 
     y = dModel;
     fprintf("\n->Initialization of dsModel ""%s"" is done. \n", ModelName);

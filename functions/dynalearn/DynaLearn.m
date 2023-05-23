@@ -1968,14 +1968,18 @@ classdef DynaLearn < matlab.mixin.SetGet
                             wn(wn < 0.1) = 0.1;
                             wn(wn > .94) = .94;
 
+                        elseif contains(lab{i, 1}, "_E")
+
+                            wn(abs(wn) > 1e3) = sign(wn)*9e2; % Too large elimination for stability
+                        
                         else
 
-                            wn(wn < 1e-4) = 1e-4; % Too small or negative elimination for stability
-
+                            wn(wn < 1e-3) = 9e-2; % Too small or negative elimination for stability
+                     
                         end
 
                         val{i, 1} = wn;
-                        fprintf("--->%f - %s \n", val{i, 1}, lab{i, 1});
+                        % fprintf("---> Updated: %s : %f \n", lab{i, 1}, val{i, 1});
                         deltaL = deltaL + sum(sum(abs(delta)));
                         
                     end
