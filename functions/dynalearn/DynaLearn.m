@@ -1146,8 +1146,8 @@ classdef DynaLearn < matlab.mixin.SetGet
                 
             catch
                 
-                dlEpochs = 5;
-                fprintf("-->Number of epochs was not determined in options map. Default dlEpochs = 5\n");
+                dlEpochs = 20;
+                fprintf("-->Number of epochs was not determined in options map. Default dlEpochs = 20\n");
                 
             end
             
@@ -1158,7 +1158,7 @@ classdef DynaLearn < matlab.mixin.SetGet
             catch
                 
                 dlBatchs = size(dlInputParameters, 2);
-                fprintf("-->Batchs was not determined in options map, default dlBatchs = size(dlVaryList, 2)\n");
+                fprintf("-->Batchs was not determined in options map, default dlBatchs = %d\n", size(dlInputParameters, 2));
                 
             end
             
@@ -1168,8 +1168,8 @@ classdef DynaLearn < matlab.mixin.SetGet
                 
             catch
                 
-                dlLambda = 0.001;
-                fprintf("-->Lambda was not determined in options map, default dlLambda = 1e-3\n");
+                dlLambda = 1e-4;
+                fprintf("-->Lambda was not determined in options map, default dlLambda = 1e-4\n");
                 
             end
             
@@ -1179,8 +1179,8 @@ classdef DynaLearn < matlab.mixin.SetGet
                 
             catch
                 
-                dlLearningRule = 'DeltaRule';
-                fprintf("-->Learning rule was not determined in options map, default dlLearningRule = 'DeltaRule'\n");
+                dlLearningRule = 'GeneralEnhancedDeltaRule';
+                fprintf("-->Learning rule was not determined in options map, default dlLearningRule = 'GeneralEnhancedDeltaRule'\n");
                 
             end
             
@@ -1190,8 +1190,8 @@ classdef DynaLearn < matlab.mixin.SetGet
                 
             catch
                 
-                dlUpdateMode = 'batch';
-                fprintf("-->Update mode was not determined in options map, default dlUpdateMode = 'batch'\n");
+                dlUpdateMode = 'trial';
+                fprintf("-->Update mode was not determined in options map, default dlUpdateMode = 'trial'\n");
                 
             end
             
@@ -1214,6 +1214,7 @@ classdef DynaLearn < matlab.mixin.SetGet
             catch
                 
                 dlCustomLogFlag = "n";
+                fprintf("-->No custom logs specified; Ignore this if you did not have custom logs.\n")
                 
             end
             
@@ -1256,8 +1257,8 @@ classdef DynaLearn < matlab.mixin.SetGet
                 
             catch
                 
-                dlCheckpointLengthCap = 1000;
-                fprintf("-->Checkpoint LengthCap for optimal state saving and loading was not determined in options map, default value = 2\n");
+                dlCheckpointLengthCap = 20;
+                fprintf("-->Checkpoint LengthCap for optimal state saving and loading was not determined in options map, default value = 20\n");
                 
             end
             
@@ -1545,8 +1546,8 @@ classdef DynaLearn < matlab.mixin.SetGet
 
             catch
 
-                dlEnhancedMomentum = 0.81;
-                disp("----->Deflt. used Momntm. = 0.81");
+                dlEnhancedMomentum = 0.1;
+                disp("----->Deflt. used Momntm. = 0.1");
 
             end
 
@@ -1750,7 +1751,7 @@ classdef DynaLearn < matlab.mixin.SetGet
            error = obj.dlUpdateError;
            obj.dlLastLambda = dlLambda;
            l = find(contains(lab, "_netcon")); 
-           lg = find(contains(lab, ["_netcon", "_gAMPA", "_tau", "_gleak", "_gGABA", "_gNa", "_gK"]));
+           lg = find(contains(lab, ["_netcon", "_gAMPA", "_tau", "_gleak", "_gGABA", "_gNa", "_gK", "_gCOM", "_Eleak"]));
 
            deltaL = 0;
 
@@ -1974,7 +1975,7 @@ classdef DynaLearn < matlab.mixin.SetGet
                         end
 
                         val{i, 1} = wn;
-                        % fprintf("\n %f - %s ", val{i, 1}, lab{i, 1});
+                        fprintf("--->%f - %s \n", val{i, 1}, lab{i, 1});
                         deltaL = deltaL + sum(sum(abs(delta)));
                         
                     end

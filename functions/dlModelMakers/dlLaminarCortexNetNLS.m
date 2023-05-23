@@ -325,8 +325,8 @@ function y = dlLaminarCortexNetNLS(ModelParameters, populationName)
     SupL.connections(end+1).direction = [SupL.populations(1).name, '->', SupL.populations(2).name];
     SupL.connections(end).source = SupL.populations(1).name;
     SupL.connections(end).target = SupL.populations(2).name;
-    SupL.connections(end).mechanism_list = {'iAMPActx'};
-    SupL.connections(end).parameters = {'gGABAa',gAMPA_MS,'tauGABA',tauAMPA_SM,'netcon',KEESDS};
+    SupL.connections(end).mechanism_list = {'iCOM'};
+    SupL.connections(end).parameters = {'gCOM', gBase};
 
     % Structures: MIDDLE LAYER (4)
     MidL=[];
@@ -442,8 +442,8 @@ function y = dlLaminarCortexNetNLS(ModelParameters, populationName)
     MidL.connections(end+1).direction = [MidL.populations(1).name, '->', MidL.populations(2).name];
     MidL.connections(end).source = MidL.populations(1).name;
     MidL.connections(end).target = MidL.populations(2).name;
-    MidL.connections(end).mechanism_list = {'iAMPActx'};
-    MidL.connections(end).parameters = {'gGABAa',gAMPA_MS,'tauGABA',tauAMPA_SM,'netcon',KEESDM};
+    MidL.connections(end).mechanism_list = {'iCOM'};
+    MidL.connections(end).parameters = {'gCOM', gBase};
 
     % Structures: DEEP LAYER (5-6)
     DeepL=[];
@@ -559,8 +559,8 @@ function y = dlLaminarCortexNetNLS(ModelParameters, populationName)
     DeepL.connections(end+1).direction = [DeepL.populations(1).name, '->', DeepL.populations(2).name];
     DeepL.connections(end).source = DeepL.populations(1).name;
     DeepL.connections(end).target = DeepL.populations(2).name;
-    DeepL.connections(end).mechanism_list = {'iAMPActx'};
-    DeepL.connections(end).parameters = {'gGABAa',gAMPA_MS,'tauGABA',tauAMPA_SM,'netcon',KEESDD};
+    DeepL.connections(end).mechanism_list = {'iCOM'};
+    DeepL.connections(end).parameters = {'gCOM', gBase};
 
     % PING template
     IOping = cell(Nstim, 1);
