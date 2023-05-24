@@ -18,13 +18,6 @@ cd('DynaSim');
 
 CurrentSize = 128;
 TotalSize = ones(1, 20)*CurrentSize;
-noise_rate = 7.9;
-performance_coefficient = 1; % Pre-fit
-
-ResetOptimalError = 'on';
-RemakeFlag = 0;
-tune_flag = 1;
-epochs = 10; % Low number for implementation and debugging purposes
 
 %%% Create model parameters struct example
 
@@ -50,7 +43,11 @@ ModelParameters.NPvDeep = LaminarParams(3, 3);
 ModelParameters.NSomDeep = LaminarParams(2, 3);
 ModelParameters.NVipDeep = LaminarParams(4, 3);
 
+ResetOptimalError = 'on';
+RemakeFlag = 1;
+tune_flag = 1;
 epochs = 100;
+
 noise_rate = 7.4;
 performance_coefficient = .2;
 

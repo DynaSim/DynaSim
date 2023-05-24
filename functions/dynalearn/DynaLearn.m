@@ -2220,6 +2220,8 @@ classdef DynaLearn < matlab.mixin.SetGet
             obj.dlLastErrorsLog = obj.dlErrorsLog;
             obj.dlLastCustomLog = obj.dlCustomLog;
             obj.dlLastOutputLog = obj.dlOutputLog;
+            obj.dlOutputs = [];
+            
             obj.dlSaveCheckPoint('/Optimal');
             
         end
