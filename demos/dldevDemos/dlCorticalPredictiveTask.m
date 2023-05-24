@@ -52,13 +52,14 @@ ModelParameters.NVipDeep = LaminarParams(4, 3);
 
 epochs = 100;
 noise_rate = 7.4;
-performance_coefficient = .1;
-dsCellLaminar = dlLaminarCortexNetNLS(ModelParameters, ModelName);
+performance_coefficient = .2;
 
 ModelParameters.Nin = 6;
 ModelParameters.Nout = 6;
 ModelParameters.Nstim = 3;
-ModelParameters.NoiseRate = noise_rate; % ~10%
+ModelParameters.NoiseRate = noise_rate; % ~10% recommended
+
+dsCellLaminar = dlLaminarCortexNetNLS(ModelParameters, ModelName);
 
 for model_size_id = 1
 
@@ -100,10 +101,6 @@ trialParamsTemp = containers.Map();
 trialParamsTemp('tspan') = [0 1000];
 m.dlUpdateParams(trialParamsTemp);
 m.dlSimulate();
-
-opts = containers.Map();
-opts("lf") = 1;
-opts("hf") = 60;
 m.dlPlotAllPotentials('raster');
 toc;
 % m.dlPlotAllPotentials('avgfft', opts);

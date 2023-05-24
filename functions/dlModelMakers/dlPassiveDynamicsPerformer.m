@@ -27,23 +27,24 @@ function m = dlPassiveDynamicsPerformer(RemakeFlag, ResetOptimalError, ModelName
     ModelName = char("_" + ModelName);
     [trialParams1, trialParams2, trialParams3] = dlNullPattern(ModelName);
     
-    outputParams = [{['DeepES', ModelName, '_V'], 1:floor(ModelParameters.NeDeep/3), [200 400] ...
-        , 'afr'}; {['DeepES', ModelName, '_V'],ceil(ModelParameters.NeDeep/3):floor(2*ModelParameters.NeDeep/3), ...
-        [200 400], 'afr'}; {['DeepES', ModelName, '_V'], ceil(2*ModelParameters.NeDeep/3):ModelParameters.NeDeep, [200 400], 'afr'}; ...
-        {['SupES', ModelName, '_V'], 1:ModelParameters.NeSuperficial, [50 700], 'afr'}; ...
-        {['MidES', ModelName, '_V'], 1:ModelParameters.NeMid, [50 700], 'afr'}; ...
-        {['DeepES', ModelName, '_V'], 1:ModelParameters.NeDeep, [50 700], 'afr'}; ...
-        {['SupIPV', ModelName, '_V'], 1:ModelParameters.NPvSuperficial, [50 700], 'afr'}; ...
-        {['MidIPV', ModelName, '_V'], 1:ModelParameters.NPvMid, [50 700], 'afr'}; ...
-        {['DeepIPV', ModelName, '_V'], 1:ModelParameters.NPvDeep, [50 700], 'afr'}; ...
-        {['SupISOM', ModelName, '_V'], 1:ModelParameters.NSomSuperficial, [50 700], 'afr'}; ...
-        {['MidISOM', ModelName, '_V'], 1:ModelParameters.NSomMid, [50 700], 'afr'}; ...
-        {['DeepISOM', ModelName, '_V'], 1:ModelParameters.NSomDeep, [50 700], 'afr'}];
+    outputParams = [ ...
+        {['SupED', ModelName, '_V'], 1:ModelParameters.NeSuperficial, [200 800], 'afr'}; ...
+        {['MidED', ModelName, '_V'], 1:ModelParameters.NeMid, [200 800], 'afr'}; ...
+        {['DeepED', ModelName, '_V'], 1:ModelParameters.NeDeep, [200 800], 'afr'}; ...
+        {['SupES', ModelName, '_V'], 1:ModelParameters.NeSuperficial, [50 900], 'afr'}; ...
+        {['MidES', ModelName, '_V'], 1:ModelParameters.NeMid, [50 900], 'afr'}; ...
+        {['DeepES', ModelName, '_V'], 1:ModelParameters.NeDeep, [50 900], 'afr'}; ...
+        {['SupIPV', ModelName, '_V'], 1:ModelParameters.NPvSuperficial, [50 900], 'afr'}; ...
+        {['MidIPV', ModelName, '_V'], 1:ModelParameters.NPvMid, [50 900], 'afr'}; ...
+        {['DeepIPV', ModelName, '_V'], 1:ModelParameters.NPvDeep, [50 900], 'afr'}; ...
+        {['SupISOM', ModelName, '_V'], 1:ModelParameters.NSomSuperficial, [50 900], 'afr'}; ...
+        {['MidISOM', ModelName, '_V'], 1:ModelParameters.NSomMid, [50 900], 'afr'}; ...
+        {['DeepISOM', ModelName, '_V'], 1:ModelParameters.NSomDeep, [50 900], 'afr'}];
     
     perf_c = performance_coefficient;
-    targetParams1 = [{'RPenalty', 1:9, 10, perf_c, 8, 30, 40, 90}; {'MSE', 7, 20, perf_c, 0, 0, 0, 0}; {'MSE', 8, 20, perf_c, 0, 0, 0, 0}; {'MSE', 9, 20, perf_c, 0, 0, 0, 0}; {'MSE', 10, 20, perf_c, 0, 0, 0, 0}; {'MSE', 11, 20, perf_c, 0, 0, 0, 0}; {'MSE', 12, 20, perf_c, 0, 0, 0, 0}];
-    targetParams2 = [{'RPenalty', 1:9, 10, perf_c, 8, 30, 40, 90}; {'MSE', 7, 20, perf_c, 0, 0, 0, 0}; {'MSE', 8, 20, perf_c, 0, 0, 0, 0}; {'MSE', 9, 20, perf_c, 0, 0, 0, 0}; {'MSE', 10, 20, perf_c, 0, 0, 0, 0}; {'MSE', 11, 20, perf_c, 0, 0, 0, 0}; {'MSE', 12, 20, perf_c, 0, 0, 0, 0}];
-    targetParams3 = [{'RPenalty', 1:9, 10, perf_c, 8, 30, 40, 90}; {'MSE', 7, 20, perf_c, 0, 0, 0, 0}; {'MSE', 8, 20, perf_c, 0, 0, 0, 0}; {'MSE', 9, 20, perf_c, 0, 0, 0, 0}; {'MSE', 10, 20, perf_c, 0, 0, 0, 0}; {'MSE', 11, 20, perf_c, 0, 0, 0, 0}; {'MSE', 12, 20, perf_c, 0, 0, 0, 0}];
+    targetParams1 = [{'RPenalty', 1:12, 10, perf_c/4, 8, 30, 40, 90}; {'MSE', 1, 25, perf_c, 0, 0, 0, 0}; {'MSE', 2, 25, perf_c, 0, 0, 0, 0}; {'MSE', 3, 15, perf_c, 0, 0, 0, 0}; {'MSE', 4, 25, perf_c, 0, 0, 0, 0}; {'MSE', 5, 25, perf_c, 0, 0, 0, 0}; {'MSE', 6, 15, perf_c, 0, 0, 0, 0}; {'MSE', 7, 20, perf_c, 0, 0, 0, 0}; {'MSE', 8, 25, perf_c, 0, 0, 0, 0}; {'MSE', 9, 20, perf_c, 0, 0, 0, 0}; {'MSE', 10, 20, perf_c, 0, 0, 0, 0}; {'MSE', 11, 25, perf_c, 0, 0, 0, 0}; {'MSE', 12, 20, perf_c, 0, 0, 0, 0}];
+    targetParams2 = [{'RPenalty', 1:12, 10, perf_c/4, 8, 30, 40, 90}; {'MSE', 1, 25, perf_c, 0, 0, 0, 0}; {'MSE', 2, 25, perf_c, 0, 0, 0, 0}; {'MSE', 3, 15, perf_c, 0, 0, 0, 0}; {'MSE', 4, 25, perf_c, 0, 0, 0, 0}; {'MSE', 5, 25, perf_c, 0, 0, 0, 0}; {'MSE', 6, 15, perf_c, 0, 0, 0, 0}; {'MSE', 7, 20, perf_c, 0, 0, 0, 0}; {'MSE', 8, 25, perf_c, 0, 0, 0, 0}; {'MSE', 9, 20, perf_c, 0, 0, 0, 0}; {'MSE', 10, 20, perf_c, 0, 0, 0, 0}; {'MSE', 11, 25, perf_c, 0, 0, 0, 0}; {'MSE', 12, 20, perf_c, 0, 0, 0, 0}];
+    targetParams3 = [{'RPenalty', 1:12, 10, perf_c/4, 8, 30, 40, 90}; {'MSE', 1, 25, perf_c, 0, 0, 0, 0}; {'MSE', 2, 25, perf_c, 0, 0, 0, 0}; {'MSE', 3, 15, perf_c, 0, 0, 0, 0}; {'MSE', 4, 25, perf_c, 0, 0, 0, 0}; {'MSE', 5, 25, perf_c, 0, 0, 0, 0}; {'MSE', 6, 15, perf_c, 0, 0, 0, 0}; {'MSE', 7, 20, perf_c, 0, 0, 0, 0}; {'MSE', 8, 25, perf_c, 0, 0, 0, 0}; {'MSE', 9, 20, perf_c, 0, 0, 0, 0}; {'MSE', 10, 20, perf_c, 0, 0, 0, 0}; {'MSE', 11, 25, perf_c, 0, 0, 0, 0}; {'MSE', 12, 20, perf_c, 0, 0, 0, 0}];
     
     dlInputParameters = {trialParams1, trialParams2, trialParams3};
     dlTargetParameters = {targetParams1, targetParams2, targetParams3};
@@ -54,7 +55,7 @@ function m = dlPassiveDynamicsPerformer(RemakeFlag, ResetOptimalError, ModelName
     dlTrainOptions = containers.Map(); % Train options; MUST be a map data structure
     dlTrainOptions('dlEpochs') = epochs; % % Number of epochs (A.K.A total iterations)
     dlTrainOptions('dlBatchs') = 3; % If a scenario requires the training to be based on a group parameter (e.g mean of errors) use a dlBatch > 1 and set update mode later to batch. 
-    dlTrainOptions('dlLambda') = 5e-2; % Higher lambda means more changes based on error, lower may cause model to learn slower or nothing.
+    dlTrainOptions('dlLambda') = 4e-7; % Higher lambda means more changes based on error, lower may cause model to learn slower or nothing.
         
     dlTrainOptions('dlCheckpoint') = 'true'; % If current step's error is higher based on a threshold, reload last optimal state and continue from that point
     dlTrainOptions('dlCheckpointCoefficient') = 2.047; % A.K.A exploration rate
@@ -106,9 +107,7 @@ function m = dlPassiveDynamicsPerformer(RemakeFlag, ResetOptimalError, ModelName
     end
    
     dlTrainOptions('dlCheckpointLengthCap') = 14;
-    dlTrainOptions('dlTrainExcludeList') = {'Stim', ['SupES', ModelName ,'->SupED', ModelName], ['MidES', ModelName ,'->MidED', ModelName], ['DeepES', ModelName ,'->DeepED', ModelName]};
-    dlTrainOptions('dlEpochs') = 1;
-    dlTrainOptions('dlBatchs') = 10;
+    dlTrainOptions('dlTrainExcludeList') = {'Stim', '_E'};
     
     dlTrainOptions('dlEnhancedMomentum') = 0.2;
     CheckCoeff = 2.01;
@@ -117,8 +116,8 @@ function m = dlPassiveDynamicsPerformer(RemakeFlag, ResetOptimalError, ModelName
         m.dlResetTraining();
     end
     
-    dlTrainOptions('dlCustomLog') = ["dlEPowerSpectrum", "dlEPowerSpectrum", "dlEPowerSpectrum", "dlEPowerSpectrum", "dlLFPaxLog", "dlAccuracyBastos2020Task"]; % Name of a function which is in the path
-    dlTrainOptions('dlCustomLogArgs') = [argsPowSpectRatio1, argsPowSpectRatio2, argsPowSpectRatio3, argsPowSpectRatio4, argsPowSpectRatio1, argsPowSpectRatio1]; % Arguments of your custom function
+    % dlTrainOptions('dlCustomLog') = ["dlEPowerSpectrum", "dlEPowerSpectrum", "dlEPowerSpectrum", "dlEPowerSpectrum", "dlLFPaxLog", "dlAccuracyBastos2020Task"]; % Name of a function which is in the path
+    % dlTrainOptions('dlCustomLogArgs') = [argsPowSpectRatio1, argsPowSpectRatio2, argsPowSpectRatio3, argsPowSpectRatio4, argsPowSpectRatio1, argsPowSpectRatio1]; % Arguments of your custom function
 
     if tune_flag
 
@@ -127,13 +126,13 @@ function m = dlPassiveDynamicsPerformer(RemakeFlag, ResetOptimalError, ModelName
         
             disp("----------U0----------");  
             m.dlOptimalError = 1e9;dlTrainOptions('dlExcludeDiverge') = 0;
-            dlTrainOptions('dlCheckpointCoefficient') = CheckCoeff*1.2;
+            dlTrainOptions('dlCheckpointCoefficient') = 1.07;
             m.dlTrain(TBdata.TrB, dlOutputParameters, TBdata.TrT, dlTrainOptions);
         
             disp("----------U1----------");
             m.dlErrorsLog = [m.dlErrorsLog, -1];  
             m.dlOptimalError = 1e9;dlTrainOptions('dlExcludeDiverge') = 0;
-            dlTrainOptions('dlCheckpointCoefficient') = CheckCoeff*1.2;
+            dlTrainOptions('dlCheckpointCoefficient') = 1.07;
             m.dlTrain(TBdata.TrB, dlOutputParameters, TBdata.TrT, dlTrainOptions);
 
         end
