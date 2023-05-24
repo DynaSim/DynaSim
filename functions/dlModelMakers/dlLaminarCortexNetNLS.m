@@ -32,8 +32,8 @@ function y = dlLaminarCortexNetNLS(ModelParameters, populationName)
     fprintf("\n-->Overall noise rate = %.4f", NoiseRate); % Randomness / Stochasticity
     fprintf("\n->Population name is %s", populationName); % Name tag or suffix for all names of this dsModel
 
-    k1 = 0.15; % Diff. for normal weights (uniform random)
-    k2 = 0.45; % Min connectivity weight
+    k1 = 0.3; % Diff. for normal weights (uniform random)
+    k2 = 0.5; % Min connectivity weight
 
     NeAvg = NeSuperficial + NeMid + NeDeep;
     ModelName = populationName;
@@ -42,10 +42,6 @@ function y = dlLaminarCortexNetNLS(ModelParameters, populationName)
     % Connectivity matrices
 
     fprintf("\n***> WARNING! CONNECTIVITY MATRICES NEED TO BE RE-DEFINED.");
-
-    KEESDS = 0.9*ones(NeSuperficial, NeSuperficial);
-    KEESDM = 0.9*ones(NeMid, NeMid);
-    KEESDD = 0.9*ones(NeDeep, NeDeep);
 
     % sE->sIsom
     KSupESupSom = k1*rand(NeSuperficial, NSomSuperficial) + 0.7;
@@ -189,12 +185,12 @@ function y = dlLaminarCortexNetNLS(ModelParameters, populationName)
     gBase = 7/(NeAvg^0.5);
 
     % Maximal synaptic strengths
-    gAMPA_MD = .009*gBase; % E->E
-    gGABA_SE = .011*gBase; % (SOM)->E
-    gGABA_PE = .011*gBase; % (PV)->E
-    gGABA_II = .011*gBase; % I->I within layer
+    gAMPA_MD = .007*gBase; % E->E
+    gGABA_SE = .019*gBase; % (SOM)->E
+    gGABA_PE = .019*gBase; % (PV)->E
+    gGABA_II = .019*gBase; % I->I within layer
 
-    gAMPA_MS = .011*gBase;
+    gAMPA_MS = .007*gBase;
     gAMPA_EI_Sup = .004*gBase;
     gAMPA_EI_Mid = .004*gBase;
     gAMPA_EI_Deep = .004*gBase;
@@ -233,21 +229,21 @@ function y = dlLaminarCortexNetNLS(ModelParameters, populationName)
     SupL.populations(3).size = NPvSuperficial;
     SupL.populations(3).equations = eqns;
     SupL.populations(3).mechanism_list = cell_type;
-    SupL.populations(3).parameters = {'Iapp', 0,'noise', NoiseRate};
+    SupL.populations(3).parameters = {'Iapp', 0,'noise', NoiseRate*2};
 
     % I-cells-SOM
     SupL.populations(4).name = ['SupISOM', populationName];
     SupL.populations(4).size = NSomSuperficial;
     SupL.populations(4).equations = eqns;
     SupL.populations(4).mechanism_list = cell_type;
-    SupL.populations(4).parameters = {'Iapp', 0,'noise', NoiseRate};
+    SupL.populations(4).parameters = {'Iapp', 0,'noise', NoiseRate*2};
 
     % I-cells-VIP
     SupL.populations(5).name = ['SupIVIP', populationName];
     SupL.populations(5).size = NVipSuperficial;
     SupL.populations(5).equations = eqns;
     SupL.populations(5).mechanism_list = cell_type;
-    SupL.populations(5).parameters = {'Iapp', 0,'noise', NoiseRate};
+    SupL.populations(5).parameters = {'Iapp', 0,'noise', NoiseRate*2};
     
     % Interlayer connections - Superficial
     SupL.connections(1).direction = [SupL.populations(1).name, '->', SupL.populations(3).name];
@@ -350,21 +346,21 @@ function y = dlLaminarCortexNetNLS(ModelParameters, populationName)
     MidL.populations(3).size = NPvMid;
     MidL.populations(3).equations = eqns;
     MidL.populations(3).mechanism_list = cell_type;
-    MidL.populations(3).parameters = {'Iapp', 0,'noise', NoiseRate};
+    MidL.populations(3).parameters = {'Iapp', 0,'noise', NoiseRate*2};
 
     % I-cells-SOM
     MidL.populations(4).name = ['MidISOM', populationName];
     MidL.populations(4).size = NSomMid;
     MidL.populations(4).equations = eqns;
     MidL.populations(4).mechanism_list = cell_type;
-    MidL.populations(4).parameters = {'Iapp', 0,'noise', NoiseRate};
+    MidL.populations(4).parameters = {'Iapp', 0,'noise', NoiseRate*2};
 
     % I-cells-VIP
     MidL.populations(5).name = ['MidIVIP', populationName];
     MidL.populations(5).size = NVipMid;
     MidL.populations(5).equations = eqns;
     MidL.populations(5).mechanism_list = cell_type;
-    MidL.populations(5).parameters = {'Iapp', 0,'noise', NoiseRate};
+    MidL.populations(5).parameters = {'Iapp', 0,'noise', NoiseRate*2};
     
     % Interlayer connections - Middle
     MidL.connections(1).direction = [MidL.populations(1).name, '->', MidL.populations(3).name];
@@ -453,7 +449,7 @@ function y = dlLaminarCortexNetNLS(ModelParameters, populationName)
     DeepL.populations(1).size = NeDeep;
     DeepL.populations(1).equations = eqns;
     DeepL.populations(1).mechanism_list = cell_type;
-    DeepL.populations(1).parameters = {'Iapp', 0,'noise', NoiseRate*2};
+    DeepL.populations(1).parameters = {'Iapp', 0,'noise', NoiseRate};
 
     % E-cells-PYR-Dendrite
     DeepL.populations(2).name = ['DeepED', populationName];
@@ -467,21 +463,21 @@ function y = dlLaminarCortexNetNLS(ModelParameters, populationName)
     DeepL.populations(3).size = NPvDeep;
     DeepL.populations(3).equations = eqns;
     DeepL.populations(3).mechanism_list = cell_type;
-    DeepL.populations(3).parameters = {'Iapp', 0,'noise', NoiseRate};
+    DeepL.populations(3).parameters = {'Iapp', 0,'noise', NoiseRate*2};
 
     % I-cells-SOM
     DeepL.populations(4).name = ['DeepISOM', populationName];
     DeepL.populations(4).size = NSomDeep;
     DeepL.populations(4).equations = eqns;
     DeepL.populations(4).mechanism_list = cell_type;
-    DeepL.populations(4).parameters = {'Iapp', 0,'noise', NoiseRate};
+    DeepL.populations(4).parameters = {'Iapp', 0,'noise', NoiseRate*2};
 
     % I-cells-VIP
     DeepL.populations(5).name = ['DeepIVIP', populationName];
     DeepL.populations(5).size = NVipDeep;
     DeepL.populations(5).equations = eqns;
     DeepL.populations(5).mechanism_list = cell_type;
-    DeepL.populations(5).parameters = {'Iapp', 0,'noise', NoiseRate};
+    DeepL.populations(5).parameters = {'Iapp', 0,'noise', NoiseRate*2};
     
     % Interlayer connections - Deepdle
     DeepL.connections(1).direction = [DeepL.populations(1).name, '->', DeepL.populations(3).name];

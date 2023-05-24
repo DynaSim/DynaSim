@@ -38,12 +38,12 @@ function m = dlPassiveDynamicsPerformer(RemakeFlag, ResetOptimalError, ModelName
         {['DeepIPV', ModelName, '_V'], 1:ModelParameters.NPvDeep, [50 700], 'afr'}; ...
         {['SupISOM', ModelName, '_V'], 1:ModelParameters.NSomSuperficial, [50 700], 'afr'}; ...
         {['MidISOM', ModelName, '_V'], 1:ModelParameters.NSomMid, [50 700], 'afr'}; ...
-        {['DeepISOM', ModelName, '_V'], 1:ModelParameters.NSomDeep, [50 700], 'afr'}];
+        {['DeepISOM', ModelName, '_V'], 1:ModelParameters.NSOM, [50 700], 'afr'}];
     
     perf_c = performance_coefficient;
-    targetParams1 = [{'RPenalty', 1:9, 10, perf_c, 8, 30, 40, 90}; {'MSE', 7, 20, perf_c, 0, 0, 0, 0}; {'MSE', 8, 20, perf_c, 0, 0, 0, 0}; {'MSE', 9, 20, perf_c, 0, 0, 0, 0}; {'MSE', 10, 20, perf_c, 0, 0, 0, 0}; {'MSE', 11, 20, perf_c, 0, 0, 0, 0}; {'MSE', 12, 20, perf_c, 0, 0, 0, 0}];
-    targetParams2 = [{'RPenalty', 1:9, 10, perf_c, 8, 30, 40, 90}; {'MSE', 7, 20, perf_c, 0, 0, 0, 0}; {'MSE', 8, 20, perf_c, 0, 0, 0, 0}; {'MSE', 9, 20, perf_c, 0, 0, 0, 0}; {'MSE', 10, 20, perf_c, 0, 0, 0, 0}; {'MSE', 11, 20, perf_c, 0, 0, 0, 0}; {'MSE', 12, 20, perf_c, 0, 0, 0, 0}];
-    targetParams3 = [{'RPenalty', 1:9, 10, perf_c, 8, 30, 40, 90}; {'MSE', 7, 20, perf_c, 0, 0, 0, 0}; {'MSE', 8, 20, perf_c, 0, 0, 0, 0}; {'MSE', 9, 20, perf_c, 0, 0, 0, 0}; {'MSE', 10, 20, perf_c, 0, 0, 0, 0}; {'MSE', 11, 20, perf_c, 0, 0, 0, 0}; {'MSE', 12, 20, perf_c, 0, 0, 0, 0}];
+    targetParams1 = [{'RPenalty', 1:9, 10, 1.01, 8, 30, 40, 90}; {'MSE', 7, 20, perf_c, 0, 0, 0, 0}; {'MSE', 8, 20, perf_c, 0, 0, 0, 0}; {'MSE', 9, 20, perf_c, 0, 0, 0, 0}; {'MSE', 10, 20, perf_c, 0, 0, 0, 0}; {'MSE', 11, 20, perf_c, 0, 0, 0, 0}; {'MSE', 12, 20, perf_c, 0, 0, 0, 0}];
+    targetParams2 = [{'RPenalty', 1:9, 10, 1.01, 8, 30, 40, 90}; {'MSE', 7, 20, perf_c, 0, 0, 0, 0}; {'MSE', 8, 20, perf_c, 0, 0, 0, 0}; {'MSE', 9, 20, perf_c, 0, 0, 0, 0}; {'MSE', 10, 20, perf_c, 0, 0, 0, 0}; {'MSE', 11, 20, perf_c, 0, 0, 0, 0}; {'MSE', 12, 20, perf_c, 0, 0, 0, 0}];
+    targetParams3 = [{'RPenalty', 1:9, 10, 1.01, 8, 30, 40, 90}; {'MSE', 7, 20, perf_c, 0, 0, 0, 0}; {'MSE', 8, 20, perf_c, 0, 0, 0, 0}; {'MSE', 9, 20, perf_c, 0, 0, 0, 0}; {'MSE', 10, 20, perf_c, 0, 0, 0, 0}; {'MSE', 11, 20, perf_c, 0, 0, 0, 0}; {'MSE', 12, 20, perf_c, 0, 0, 0, 0}];
     
     dlInputParameters = {trialParams1, trialParams2, trialParams3};
     dlTargetParameters = {targetParams1, targetParams2, targetParams3};

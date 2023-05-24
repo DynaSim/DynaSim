@@ -18,8 +18,8 @@ cd('DynaSim');
 
 CurrentSize = 128;
 TotalSize = ones(1, 20)*CurrentSize;
-noise_rate = 7.4;
-performance_coefficient = 0; % Pre-fit
+noise_rate = 7.9;
+performance_coefficient = 1; % Pre-fit
 
 ResetOptimalError = 'on';
 RemakeFlag = 0;
@@ -50,17 +50,22 @@ ModelParameters.NPvDeep = LaminarParams(3, 3);
 ModelParameters.NSomDeep = LaminarParams(2, 3);
 ModelParameters.NVipDeep = LaminarParams(4, 3);
 
+epochs = 100;
+noise_rate = 7.4;
+performance_coefficient = .1;
+dsCellLaminar = dlLaminarCortexNetNLS(ModelParameters, ModelName);
+
 ModelParameters.Nin = 6;
 ModelParameters.Nout = 6;
-ModelParameters.NoiseRate = noise_rate; % ~10%
 ModelParameters.Nstim = 3;
-
-dsCellLaminar = dlLaminarCortexNetNLS(ModelParameters, ModelName);
+ModelParameters.NoiseRate = noise_rate; % ~10%
 
 for model_size_id = 1
 
     CurrentSize = TotalSize(model_size_id);
-    dlPassiveDynamicsPerformer(RemakeFlag, ResetOptimalError, ModelName, ModelParameters, model_size_id, performance_coefficient, tune_flag, epochs);
+    dlPassiveDynamicsPerformer(RemakeFlag, ResetOptimalError, ...
+        ModelName, ModelParameters, model_size_id, ...
+        performance_coefficient, tune_flag, epochs);
 
 end
 
