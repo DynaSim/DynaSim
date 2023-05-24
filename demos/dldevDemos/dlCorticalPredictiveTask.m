@@ -43,8 +43,8 @@ ModelParameters.NPvDeep = LaminarParams(3, 3);
 ModelParameters.NSomDeep = LaminarParams(2, 3);
 ModelParameters.NVipDeep = LaminarParams(4, 3);
 
-ResetOptimalError = 'on';
-RemakeFlag = 1;
+ResetOptimalError = 'off';
+RemakeFlag = 0;
 tune_flag = 1;
 epochs = 100;
 

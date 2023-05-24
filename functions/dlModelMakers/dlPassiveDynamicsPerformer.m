@@ -87,7 +87,7 @@ function m = dlPassiveDynamicsPerformer(RemakeFlag, ResetOptimalError, ModelName
     argsPowSpectRatio4.lf1 = 40;
     argsPowSpectRatio4.hf1 = 90;
  
-    dlTrainOptions('dlLambda') = 1e-7; % 1e-11(1) -> 1e-4 (4)
+    dlTrainOptions('dlLambda') = 1e-6; % 1e-11(1) -> 1e-4 (4)
     dlTrainOptions('dlAdaptiveLambda') = 1; % Adaptive lambda parameter; recommended for long simulations.
     dlTrainOptions('dlUpdateMode') = 'trial';
     dlTrainOptions('dlLearningRule') = 'GeneralEnhancedDeltaRule';

@@ -47,7 +47,7 @@ classdef DynaLearn < matlab.mixin.SetGet
         dlLastOptimalTrial = 1; % The trial witl best results
         dlUpdateError = 0; % The error which is used to update last state
         
-        dlLastLambda = 1e-3; % Last lambda parameter
+        dlLastLambda = 1e-7; % Last lambda parameter
         dlDeltaRatio = 1;
         dlLastDelta = -1;
         dlLambdaCap = 1e-2;
@@ -1165,10 +1165,12 @@ classdef DynaLearn < matlab.mixin.SetGet
             try
                
                 dlLambda = dlTrainOptions('dlLambda');
+                obj.dlLastLambda = dlLambda;        
                 
             catch
                 
                 dlLambda = 1e-4;
+                obj.dlLastLambda = dlLambda;
                 fprintf("-->Lambda was not determined in options map, default dlLambda = 1e-4\n");
                 
             end
@@ -1316,7 +1318,7 @@ classdef DynaLearn < matlab.mixin.SetGet
 
                     fprintf("\t--> Trial %d of Cap. %d\n", i, dlEpochs*dlBatchs);
                     fprintf("\t--> Checkpoint. %d of Cap. %d\n", dlCurrentCheckpointLength, dlCheckpointLengthCap);
-                    fprintf("\t--> Batch no. %d of %d\t", j, dlBatchs);
+                    fprintf("\t--> Batch no. %d of %d\t\n", j, dlBatchs);
                     set(obj, 'dlTrialNumber', obj.dlTrialNumber + 1);
 
                     if ~isempty(dlInputParameters)
@@ -1850,8 +1852,10 @@ classdef DynaLearn < matlab.mixin.SetGet
                  
                    catch
                 
-                        fprintf("<q107>");
-                
+                       if i == l(1)
+                           fprintf("<q107>");
+                       end
+
                    end
                 
                 end
@@ -1920,8 +1924,10 @@ classdef DynaLearn < matlab.mixin.SetGet
                      
                        catch
 
-                           fprintf("\n<q107:Not enough differential initial values for momentum. \n-> ..." + ...
+                           if i == lg(1)
+                               fprintf("\n<q107:Not enough differential initial values for momentum. \n-> ..." + ...
                                "Establishing initial values takes several trials; This is not an error.>\n");
+                           end
 
                        end
                     
@@ -2221,7 +2227,7 @@ classdef DynaLearn < matlab.mixin.SetGet
             obj.dlLastCustomLog = obj.dlCustomLog;
             obj.dlLastOutputLog = obj.dlOutputLog;
             obj.dlOutputs = [];
-            
+
             obj.dlSaveCheckPoint('/Optimal');
             
         end
