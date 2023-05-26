@@ -1753,7 +1753,7 @@ classdef DynaLearn < matlab.mixin.SetGet
            error = obj.dlUpdateError;
            obj.dlLastLambda = dlLambda;
            l = find(contains(lab, "_netcon")); 
-           lg = find(contains(lab, ["_netcon", "_gAMPA", "_tau", "_gleak", "_gGABA", "_gNa", "_gK", "_gCOM", "_Eleak"]));
+           lg = find(contains(lab, ["_netcon", "_gAMPA", "_tau", "_gleak", "_gGABA", "_gNa", "_gK", "_gCOM", "_Eleak", "_noise"]));
 
            deltaL = 0;
 
