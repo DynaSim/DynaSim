@@ -24,14 +24,6 @@ function y = dlSinglePopulationNS(ModelParameters, populationName)
     populationName = char("_" + populationName);
 
     % Connectivity matrices
-
-    % sE->sIsom
-    KEES = k1*rand(Ne, Ne) + 0.8;
-    KEED = k1*rand(Ne, Ne) + 0.8;
-    
-    % KnullIO = zeros(Nin, Nin); % Null (zero) matrix for disconnections of Input layer.
-
-    tauAMPA_E = 33.33;
     gBase = 7/(Ne^0.5);
 
     % neuronal dynamics
@@ -66,13 +58,13 @@ function y = dlSinglePopulationNS(ModelParameters, populationName)
     dModel.connections(1).source = dModel.populations(1).name;
     dModel.connections(1).target = dModel.populations(2).name;
     dModel.connections(1).mechanism_list = {'iCOM'};
-    dModel.connections(1).parameters = {'gCOM',gBase, 'tauCOM', 5};
+    dModel.connections(1).parameters = {'gCOM',gBase};
 
     dModel.connections(2).direction = [dModel.populations(2).name, '->', dModel.populations(1).name];
     dModel.connections(2).source = dModel.populations(2).name;
     dModel.connections(2).target = dModel.populations(1).name;
     dModel.connections(2).mechanism_list = {'iCOM'};
-    dModel.connections(2).parameters = {'gCOM',gBase, 'tauCOM', 5};
+    dModel.connections(2).parameters = {'gCOM',gBase};
 
     y = dModel;
     fprintf("\n->Initialization of dsModel ""%s"" is done. \n", ModelName);

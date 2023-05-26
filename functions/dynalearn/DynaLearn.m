@@ -50,7 +50,7 @@ classdef DynaLearn < matlab.mixin.SetGet
         dlLastLambda = 1e-7; % Last lambda parameter
         dlDeltaRatio = 1;
         dlLastDelta = -1;
-        dlLambdaCap = 1e-2;
+        dlLambdaCap = 1;
 
         dlLastOutputLog = {};
         dlOptimalWeightChanges = [];
@@ -2187,6 +2187,14 @@ classdef DynaLearn < matlab.mixin.SetGet
                 xm(i+1) = min(obj.dlErrorsLog(i+1:i+dlBatchs));
             end
             
+            % plot(x, "DisplayName", "Mean error", "LineStyle", "--");
+            % grid("on");hold("on");
+            % plot(xm, "DisplayName", "Min error");
+            % xlabel("Trials");
+            % ylabel("Log10(Loss)");
+            % legend;
+            % title("Errors in batchs");
+
             plot(log10(x), "DisplayName", "Mean error", "LineStyle", "--");
             grid("on");hold("on");
             plot(log10(xm), "DisplayName", "Min error");
