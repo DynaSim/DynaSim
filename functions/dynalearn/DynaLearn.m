@@ -347,7 +347,12 @@ classdef DynaLearn < matlab.mixin.SetGet
                 k = size(obj.dlLastCustomLog, 2);
 
                 obj.dlLastErrorsLog = [obj.dlLastErrorsLog, obj.dlOptimalError*1.001];
-                obj.dlLastCustomLog(:, k+1) = obj.dlLastCustomLog(:, k);
+               
+                try
+                    obj.dlLastCustomLog(:, k+1) = obj.dlLastCustomLog(:, k);
+                catch
+
+                end
 
                 obj.dlErrorsLog = obj.dlLastErrorsLog;
                 obj.dlCustomLog = obj.dlLastCustomLog;
@@ -1459,7 +1464,7 @@ classdef DynaLearn < matlab.mixin.SetGet
                     else
                         dlAvgError = mean(obj.dlErrorsLog);
                     end
-                    fprintf("\t-->Epoch's Average Error = %f, Last lambda = %f\n", dlAvgError, dlLambda);
+                    fprintf("\t-->Epoch's Average Error = %f, Last lambda = %.14f\n", dlAvgError, dlLambda);
                 end
                 
                 if strcmpi(dlCheckpoint, 'true')
@@ -1935,7 +1940,7 @@ classdef DynaLearn < matlab.mixin.SetGet
 
                     else
 
-                        delta = 10*(rand(size(w))-0.5)*error*dlLambda;
+                        delta = w*(rand(size(w))-0.5)*error*dlLambda;
 
                     end
 
@@ -2011,7 +2016,7 @@ classdef DynaLearn < matlab.mixin.SetGet
                         end
 
                         val{i, 1} = wn;
-                        % fprintf("---> Updated: %s : %f \n", lab{i, 1}, val{i, 1});
+                        fprintf("---> Updated: %s : %f \n", lab{i, 1}, val{i, 1});
                         deltaL = deltaL + sum(sum(abs(delta)));
                         
                     end
@@ -2166,7 +2171,8 @@ classdef DynaLearn < matlab.mixin.SetGet
                     
             else
                 
-                obj.dlDeltaRatio = min((obj.dlLastDelta / deltaL)^0.5, 2);
+                dlErrorChangesPenalty = ((obj.dlLastError - obj.dlOptimalError) / obj.dlOptimalError)^0.5;
+                obj.dlDeltaRatio = max(min((obj.dlLastDelta / deltaL)^0.5, 2), dlErrorChangesPenalty);
                 obj.dlLastDelta = deltaL;
                 
             end

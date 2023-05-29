@@ -84,8 +84,8 @@ data = dsSimulate(spec,'vary',vary,solver_options{:});
 dsPlotFR(data); % ~ 80 spk/s
 % data.model.parameters
 
-% set baseline noise level
-spec = dsApplyModifications(spec,{'HH','amp',999}); 
+%% set baseline noise level
+spec = dsApplyModifications(spec,{'HH','amp', 700}); 
  
 % optimize FR
 target_FR = 20; % Hz
@@ -94,17 +94,21 @@ dl.dlSave();
 
 % Define optimization parameters
 dlInputParameters = {dlNullInputs(RunDuration)}; % Null inputs (no external stimulation).
-dlOutputParameters = [{['HH', '_V'], 1, [100 RunDuration], 'afr'}];
-dlTargetParameters = {[{'MQE', 1, target_FR, 1}]}; % Format: (1)Mode;(2)Output indices;(3)Target value;(4)Weight in loss equation
+dlOutputParameters = [{['HH', '_V'], 1, [100 RunDuration], 'afr'}; {['HH', '_V'], 1, [100 RunDuration], 'av'}];
+dlTargetParameters = {[{'MSE', 1, target_FR, 1}; {'MSE', 2, -55, 1}]}; % Format: (1)Mode;(2)Output indices;(3)Target value;(4)Weight in loss equation
 
 % Define training options
 dlTrainOptions = containers.Map(); % Train options; MUST be a map data structure
-dlTrainOptions('dlLambda') = 1e-1; % Fitting/Learning rate
-dlTrainOptions('dlEpochs') = 10; % Total iterations 
-dlTrainOptions('dlEnhancedMomentum') = 0.4;
+dlTrainOptions('dlLambda') = 1e-6; % Fitting/Learning rate
+dlTrainOptions('dlEpochs') = 100; % Total iterations 
+dlTrainOptions('dlEnhancedMomentum') = 0.5;
+
+dlTrainOptions('dlExcludeDiverge') = 1; % Exclude non-optimals from model log
+dlTrainOptions('dlCheckpointLengthCap') = 11;
+% TODO: !dlTrainIncludeList
 dlTrainOptions('dlTrainExcludeList') = {'_Cm', '_Iapp', '_gNa', '_gK', '_gleak', ...
   '_ENa', '_EK', '_Eleak', '_IC_noise'};
-dlTrainOptions('dlCheckpointCoefficient') = 1.04;
+dlTrainOptions('dlCheckpointCoefficient') = 2.0;
 dl.dlTrain(dlInputParameters, dlOutputParameters, dlTargetParameters, dlTrainOptions);
 
 dl.dlLoadOptimal 
