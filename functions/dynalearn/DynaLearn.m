@@ -1928,7 +1928,17 @@ classdef DynaLearn < matlab.mixin.SetGet
     
                     rng('shuffle');
                     w = val{i, 1};
-                    delta = (1-w*0.9).*(rand(size(w))-0.5)*error*dlLambda;
+
+                    if contains(lab{i, 1}, '_netcon')
+
+                        delta = (1-w*0.9).*(rand(size(w))-0.5)*error*dlLambda;
+
+                    else
+
+                        delta = 10*(rand(size(w))-0.5)*error*dlLambda;
+
+                    end
+
                     obj.dlLastWeightChanges{i} = delta;
                     
                     if obj.dlOptimalWeightChangesFlag

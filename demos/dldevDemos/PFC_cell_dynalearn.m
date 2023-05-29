@@ -95,16 +95,16 @@ dl.dlSave();
 % Define optimization parameters
 dlInputParameters = {dlNullInputs(RunDuration)}; % Null inputs (no external stimulation).
 dlOutputParameters = [{['HH', '_V'], 1, [100 RunDuration], 'afr'}];
-dlTargetParameters = {[{'MSE', 1, target_FR, 1}]}; % Format: (1)Mode;(2)Output indices;(3)Target value;(4)Weight in loss equation
+dlTargetParameters = {[{'MQE', 1, target_FR, 1}]}; % Format: (1)Mode;(2)Output indices;(3)Target value;(4)Weight in loss equation
 
 % Define training options
 dlTrainOptions = containers.Map(); % Train options; MUST be a map data structure
-dlTrainOptions('dlLambda') = 1e-7; % Fitting/Learning rate
-dlTrainOptions('dlEpochs') = 100; % Total iterations 
+dlTrainOptions('dlLambda') = 1e-1; % Fitting/Learning rate
+dlTrainOptions('dlEpochs') = 10; % Total iterations 
 dlTrainOptions('dlEnhancedMomentum') = 0.4;
 dlTrainOptions('dlTrainExcludeList') = {'_Cm', '_Iapp', '_gNa', '_gK', '_gleak', ...
   '_ENa', '_EK', '_Eleak', '_IC_noise'};
-dlTrainOptions('dlCheckpointCoefficient') = 1.4;
+dlTrainOptions('dlCheckpointCoefficient') = 1.04;
 dl.dlTrain(dlInputParameters, dlOutputParameters, dlTargetParameters, dlTrainOptions);
 
 dl.dlLoadOptimal 
