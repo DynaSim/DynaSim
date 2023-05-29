@@ -322,14 +322,14 @@ classdef DynaLearn < matlab.mixin.SetGet
             try
 
                 p = load([obj.dlStudyDir, dlCheckPointPath, 'params.mat']);
-                obj.dlParams = p;
+                obj.dlParams = p.p;
                 save([obj.dlPath, '/params.mat'], '-struct', 'p');
 
             catch
 
                 disp("---->Optimal skipped (not loaded)");  
                 p = load([obj.dlPath, '/params.mat']);
-                obj.dlParams = p;
+                obj.dlParams = p.p;
                 % save([obj.dlPath, '/params.mat'], '-struct', 'p');
 
             end
@@ -362,7 +362,7 @@ classdef DynaLearn < matlab.mixin.SetGet
             end
 
             p = load([obj.dlStudyDir, dlCheckPointPath, 'params.mat']);
-            obj.dlParams = p;
+            obj.dlParams = p.p;
             save([obj.dlPath, '/params.mat'], '-struct', 'p');
             
         end
@@ -382,7 +382,7 @@ classdef DynaLearn < matlab.mixin.SetGet
             save([obj.dlPath, '/params.mat'], '-struct', 'p');
             obj.dlReInit();
 
-            obj.dlParams = p;
+            obj.dlParams = p.p;
             
         end
         
@@ -549,7 +549,16 @@ classdef DynaLearn < matlab.mixin.SetGet
                         plot(t, x);
                         grid("on");
 
-                        ylabel(obj.dlPopulationLabelTrim(dlLabels(i+1)));
+                        try
+
+                            ylabel(obj.dlPopulationLabelTrim(dlLabels(i+1)));
+
+                        catch
+
+                            ylabel(dlLabels(i+1));
+
+                        end
+
                         title(title_);
 
                     end
@@ -749,12 +758,10 @@ classdef DynaLearn < matlab.mixin.SetGet
         function dlSimulate(obj)
             
             obj.dlOutputs = cell(1,numel(obj.dlVariables));
-%             try
             set(obj, 'dlOutputs', dlTempFunc(obj.dlOutputs));
-%             catch
-%               fprintf("\n-->Warning! Reinitializing because 'Tempfunc' may not work properly. This may cause a problem later.\n")
-%               obj.dlReInit();
-%             end
+            p = load([obj.dlStudyDir, '/solve/params.mat']);
+            obj.dlParams = p.p;
+
             disp("Done."); 
       
         end

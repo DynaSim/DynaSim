@@ -82,7 +82,7 @@ spec = dsApplyModifications('HH.pop',{'HH','mechanism_list','+noise'});
 vary = {'HH','amp',[0 100 200 300 400 500 1000]}; % % 20Hz is around amp=250
 data = dsSimulate(spec,'vary',vary,solver_options{:});
 dsPlotFR(data); % ~ 80 spk/s
-data.model.parameters
+% data.model.parameters
 
 % set baseline noise level
 spec = dsApplyModifications(spec,{'HH','amp',999}); 
@@ -99,12 +99,12 @@ dlTargetParameters = {[{'MSE', 1, target_FR, 1}]}; % Format: (1)Mode;(2)Output i
 
 % Define training options
 dlTrainOptions = containers.Map(); % Train options; MUST be a map data structure
-dlTrainOptions('dlLambda') = 1e-3; % Fitting/Learning rate
-dlTrainOptions('dlEpochs') = 200; % Total iterations 
-dlTrainOptions('dlEnhancedMomentum') = 0.1;
+dlTrainOptions('dlLambda') = 1e-7; % Fitting/Learning rate
+dlTrainOptions('dlEpochs') = 100; % Total iterations 
+dlTrainOptions('dlEnhancedMomentum') = 0.4;
 dlTrainOptions('dlTrainExcludeList') = {'_Cm', '_Iapp', '_gNa', '_gK', '_gleak', ...
   '_ENa', '_EK', '_Eleak', '_IC_noise'};
-dlTrainOptions('dlCheckpointCoefficient') = 1.2;
+dlTrainOptions('dlCheckpointCoefficient') = 1.4;
 dl.dlTrain(dlInputParameters, dlOutputParameters, dlTargetParameters, dlTrainOptions);
 
 dl.dlLoadOptimal 
@@ -114,7 +114,7 @@ try dl.dlPlotAllPotentials('lfp'); end
 optimal_spec = load(fullfile(study_dir, 'Optimalobject.mat'));
 optimal_param_file = fullfile(study_dir, 'Optimalparams.mat');
 load(optimal_param_file, 'p'); p
-fprintf('Optimal noise: %g\n', p.HH_noise_amp)
+fprintf('Optimal noise: %g\n', p.HH_noise_noise_amp)
 
 % dl.dlResetTraining
 
