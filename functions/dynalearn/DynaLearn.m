@@ -67,6 +67,8 @@ classdef DynaLearn < matlab.mixin.SetGet
         dlCustomLogLabel = [];
         dlSimulationTool = "mex";
 
+        dlParams = [];
+
     end
 
     methods (Static)
@@ -320,12 +322,14 @@ classdef DynaLearn < matlab.mixin.SetGet
             try
 
                 p = load([obj.dlStudyDir, dlCheckPointPath, 'params.mat']);
+                obj.dlParams = p;
                 save([obj.dlPath, '/params.mat'], '-struct', 'p');
 
             catch
 
                 disp("---->Optimal skipped (not loaded)");  
-                % p = load([obj.dlPath, '/params.mat']);
+                p = load([obj.dlPath, '/params.mat']);
+                obj.dlParams = p;
                 % save([obj.dlPath, '/params.mat'], '-struct', 'p');
 
             end
@@ -358,6 +362,7 @@ classdef DynaLearn < matlab.mixin.SetGet
             end
 
             p = load([obj.dlStudyDir, dlCheckPointPath, 'params.mat']);
+            obj.dlParams = p;
             save([obj.dlPath, '/params.mat'], '-struct', 'p');
             
         end
@@ -376,6 +381,8 @@ classdef DynaLearn < matlab.mixin.SetGet
             p = load([PathToFile, '/solve/params.mat']);
             save([obj.dlPath, '/params.mat'], '-struct', 'p');
             obj.dlReInit();
+
+            obj.dlParams = p;
             
         end
         
@@ -1981,7 +1988,8 @@ classdef DynaLearn < matlab.mixin.SetGet
                         else
 
                             wn(wn < 1e-3) = 9e-2; % Too small or negative elimination for stability
-                     
+                            wn(wn > 1e+4) = 9e+3; % Too high values elimination for stability
+                            
                         end
 
                         val{i, 1} = wn;
