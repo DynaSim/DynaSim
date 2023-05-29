@@ -829,7 +829,8 @@ classdef DynaLearn < matlab.mixin.SetGet
         
         function out = dlApplyAverageFRKernel(obj, dlOutput)
 
-            o1 = obj.dlApplyIFRKernel(dlOutput);
+            % o1 = obj.dlApplyIFRKernel(dlOutput);
+            o1 = obj.dlMeanFR(dlOutput);
             out = mean(o1);
             
         end
@@ -1987,9 +1988,9 @@ classdef DynaLearn < matlab.mixin.SetGet
                         
                         else
 
-                            wn(wn < 1e-3) = 9e-2; % Too small or negative elimination for stability
-                            wn(wn > 1e+4) = 9e+3; % Too high values elimination for stability
-                            
+                            wn(abs(wn) < 1e-3) = 9e-2; % Too small or negative elimination for stability
+                            wn(abs(wn) > 1e+4) = 9e+3*sign(wn); % Too high values elimination for stability
+
                         end
 
                         val{i, 1} = wn;
