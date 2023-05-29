@@ -2,7 +2,7 @@
 
 [![Join the chat at https://gitter.im/DynaSim/DynaSim](https://badges.gitter.im/DynaSim/DynaSim.svg)](https://gitter.im/DynaSim/DynaSim?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
-This is the home of the DynaSim with DynaLearn Toolbox for modeling, simulating and training or fitting dynamical
+This is the home of the DynaSim with DynaLearn Toolbox for modeling, simulating, fitting and training dynamical
 systems in MATLAB and GNU Octave!
 
 See the DynaSim Toolbox in action, with [Getting started tutorial](https://github.com/DynaSim/DynaSim/wiki/DynaSim-Getting-Started-Tutorial) and the [UnbiasedCompetition](https://viewer.mathworks.com/?viewer=live_code&url=https%3A%2F%2Fwww.mathworks.com%2Fmatlabcentral%2Fmlc-downloads%2Fdownloads%2Ffe60af44-d049-4d06-ac8e-7a1bb95b32e9%2F3de73bfe-53a6-4cad-9310-9894687c4c65%2Ffiles%2Fdemos%2Fexamples%2FUnbiasedCompetitionPNAS2019_tutorial%2FUnbiasedCompetitionPNAS2019_tutorial.mlx&embed=web) demonstration live script.
