@@ -2,7 +2,7 @@ classdef DynaLearn < matlab.mixin.SetGet
 
     %
 
-    % DynaLearn; Version 1.0 Stable
+    % DynaLearn on DynaSim; Stable
 
     % Integrated class for interactive and trainable DynaSim network models
 
