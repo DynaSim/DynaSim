@@ -135,7 +135,7 @@ study_dir = 'dlModels/iHH';
 
 % add noise mechanisms
 spec = dsCheckSpecification('HH');
-vary = {'HH','Iapp',[-10 -7 -4 -1 0 1 4 5 6 7 8 9 10 11 12 13 14 15 20]};
+vary = {'HH','Iapp',[0 5 6 7 8 9 10 15 20]};
 data = dsSimulate(spec,'vary',vary,solver_options{:});
 dsPlotFR(data);
 % data.model.parameters
@@ -155,18 +155,18 @@ dlTargetParameters = {[{'MSE', 1, target_FR, 1}; {'MSE', 2, -55, 1}]}; % Format:
 
 % Define training options
 dlTrainOptions = containers.Map(); % Train options; MUST be a map data structure
-dlTrainOptions('dlLambda') = 1e-2; % Fitting/Learning rate
-dlTrainOptions('dlEpochs') = 100; % Total iterations 
-dlTrainOptions('dlEnhancedMomentum') = 0.25;
+dlTrainOptions('dlLambda') = 1e-1; % Fitting/Learning rate
+dlTrainOptions('dlEpochs') = 10; % Total iterations 
+dlTrainOptions('dlEnhancedMomentum') = 0.5;
 
 dlTrainOptions('dlExcludeDiverge') = 0; % Exclude non-optimals from model log
-dlTrainOptions('dlCheckpointLengthCap') = 5;
+dlTrainOptions('dlCheckpointLengthCap') = 11;
 dlTrainOptions('dlUpdateVerbose') = 1;
 dlTrainOptions('dlIncludeList') = ["Iapp"];
 
 dlTrainOptions('dlTrainExcludeList') = {'_Cm', 'noise', '_gNa', '_gK', '_gleak', ...
   '_ENa', '_EK', '_Eleak', '_IC_noise'};
-dlTrainOptions('dlCheckpointCoefficient') = 1.74;
+dlTrainOptions('dlCheckpointCoefficient') = 10;
 dl.dlTrain(dlInputParameters, dlOutputParameters, dlTargetParameters, dlTrainOptions);
 
 %%

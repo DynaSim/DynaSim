@@ -1205,27 +1205,9 @@ classdef DynaLearn < matlab.mixin.SetGet
             end
             
             try
-
-                fprintf("-->Included variable(s) on fitting: \n");
-                fprintf("---> %s\n", dlTrainOptions('dlTrainIncludeList'));
-
+                fprintf("-->Included ", dlTrainOptions('dlIncludeList'));
             catch
-
-                dlTrainOptions('dlTrainIncludeList') = ["_netcon", "_gAMPA", "_tau", "_gleak", "_gGABA", "_gNa", "_gK", "_gCOM", "_Eleak", "noise", "Iapp"];
-                fprintf("-->Warning! No variables were included in the fitting include list.\n--->Some dynasim variables are by default assigned in:\n");
-                fprintf("---> %s\n", dlTrainOptions('dlTrainIncludeList'));
-            end
-
-            try
-
-                fprintf("-->Excluded variable(s) on fitting: \n");
-                fprintf("---> %s\n", dlTrainOptions('dlTrainExcludeList'));
-
-            catch
-
-                dlTrainOptions('dlTrainExcludeList') = [];
-                fprintf("-->No variables were excluded in the fitting exclude list.\n--->No dynasim variables are excluded by default.");
-                
+                dlTrainOptions('dlIncludeList') = ["_netcon", "_gAMPA", "_tau", "_gleak", "_gGABA", "_gNa", "_gK", "_gCOM", "_Eleak", "noise", "Iapp"];
             end
 
             try
