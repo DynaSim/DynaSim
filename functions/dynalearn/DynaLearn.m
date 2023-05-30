@@ -1228,6 +1228,15 @@ classdef DynaLearn < matlab.mixin.SetGet
                 
             end
 
+            [valIX,posIX] = intersect(dlTrainOptions('dlTrainIncludeList'), dlTrainOptions('dlTrainExcludeList'));
+
+            if ~isempty(posIX)
+
+                fprintf("-->Warning! There are %d conflicts between included and excluded lists.\n--->Following variables will be excluded despite being included: \n", length(posIX));
+                fprintf("---> %s\n",valIX);
+                
+            end
+
             try
                
                 dlLambda = dlTrainOptions('dlLambda');
@@ -1839,8 +1848,8 @@ classdef DynaLearn < matlab.mixin.SetGet
 
            error = obj.dlUpdateError;
            obj.dlLastLambda = dlLambda;
-           l = find(contains(lab, dlTrainOptions('dlIncludeList'))); 
-           lg = find(contains(lab, dlTrainOptions('dlIncludeList')));
+           l = find(contains(lab, dlTrainOptions('dlTrainIncludeList'))); 
+           lg = find(contains(lab, dlTrainOptions('dlTrainIncludeList')));
 
            deltaL = 0;
 
@@ -1882,7 +1891,7 @@ classdef DynaLearn < matlab.mixin.SetGet
 
                    catch
 
-                        excludeList = contains(lab, 'x');
+                        excludeList = contains(lab, '');
                         excludeList = excludeList * 0;
 
                    end
@@ -1894,7 +1903,7 @@ classdef DynaLearn < matlab.mixin.SetGet
 
                    catch
 
-                        restrictedList = contains(lab, 'x');
+                        restrictedList = contains(lab, '');
                         restrictedList = restrictedList * 0;
 
                    end
@@ -1953,7 +1962,7 @@ classdef DynaLearn < matlab.mixin.SetGet
                 
                 catch
                 
-                    excludeList = contains(lab, 'x');
+                    excludeList = contains(lab, '');
                     excludeList = excludeList * 0;
                 
                 end
@@ -1965,7 +1974,7 @@ classdef DynaLearn < matlab.mixin.SetGet
                 
                 catch
                 
-                    restrictedList = contains(lab, 'x');
+                    restrictedList = contains(lab, '');
                     restrictedList = restrictedList * 0;
                 
                 end
@@ -2036,7 +2045,7 @@ classdef DynaLearn < matlab.mixin.SetGet
                     
                     catch
                     
-                        excludeList = contains(lab, 'x');
+                        excludeList = contains(lab, '');
                         excludeList = excludeList * 0;
                     
                     end
@@ -2048,7 +2057,7 @@ classdef DynaLearn < matlab.mixin.SetGet
                     
                     catch
                     
-                        restrictedList = contains(lab, 'x');
+                        restrictedList = contains(lab, '');
                         restrictedList = restrictedList * 0;
                     
                     end

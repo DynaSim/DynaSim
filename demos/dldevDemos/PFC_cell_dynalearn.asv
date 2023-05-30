@@ -75,11 +75,13 @@ fprintf('Optimal Eleak: %g\n', p.HH_ileak_Eleak)
 
 %% Optimizing average firing rate (FR) by varying noise level
 
+RunDuration = 500; % In ms (miliseconds)
 study_dir = 'dlModels/noisyHH';
 
 % add noise mechanisms
 spec = dsApplyModifications('HH.pop',{'HH','mechanism_list','+noise'});
 vary = {'HH','amp',[-100 100 200 300 400 500 1000]}; % % 20Hz is around amp=250
+solver_options = {'tspan',[0 RunDuration],'solver','rk1','dt',.01,'compile_flag',0,'verbose_flag',1};
 data = dsSimulate(spec,'vary',vary,solver_options{:});
 dsPlotFR(data); % ~ 80 spk/s
 % data.model.parameters
@@ -131,11 +133,13 @@ fprintf('Optimal noise: %g\n', p.HH_noise_noise_amp)
 
 %% Optimizing average firing rate (FR) by varying Iapp
 
+RunDuration = 500; % In ms (miliseconds)
 study_dir = 'dlModels/iHH';
 
 % add noise mechanisms
 spec = dsCheckSpecification('HH');
-vary = {'HH','Iapp',[0 5 6 7 8 9 10 15 20]};
+vary = {'HH','Iapp',[-10 -4 -1 0 1 4 7 8 8.80720 8.80721 8.80741 9 10 14 17 20]};
+solver_options = {'tspan',[0 RunDuration],'solver','rk1','dt',.01,'compile_flag',0,'verbose_flag',1};
 data = dsSimulate(spec,'vary',vary,solver_options{:});
 dsPlotFR(data);
 % data.model.parameters
@@ -143,7 +147,7 @@ dsPlotFR(data);
 % spec = dsApplyModifications(spec,{'HH','noise_amp', 1000}); 
  
 % optimize FR
-target_FR = 20; % Hz
+target_FR = 80; % Hz
 dl = DynaLearn(spec, study_dir, 'raw', 'HH');
 dl.dlSave();
 
@@ -155,18 +159,18 @@ dlTargetParameters = {[{'MSE', 1, target_FR, 1}; {'MSE', 2, -55, 1}]}; % Format:
 
 % Define training options
 dlTrainOptions = containers.Map(); % Train options; MUST be a map data structure
-dlTrainOptions('dlLambda') = 1e-1; % Fitting/Learning rate
-dlTrainOptions('dlEpochs') = 10; % Total iterations 
-dlTrainOptions('dlEnhancedMomentum') = 0.5;
+dlTrainOptions('dlLambda') = 1e-2; % Fitting/Learning rate
+dlTrainOptions('dlEpochs') = 1; % Total iterations 
+dlTrainOptions('dlEnhancedMomentum') = 0.25;
 
 dlTrainOptions('dlExcludeDiverge') = 0; % Exclude non-optimals from model log
-dlTrainOptions('dlCheckpointLengthCap') = 11;
+dlTrainOptions('dlCheckpointLengthCap') = 5;
 dlTrainOptions('dlUpdateVerbose') = 1;
-dlTrainOptions('dlIncludeList') = ["Iapp"];
+dlTrainOptions('dlTrainIncludeList') = ["Iapp", "_Cm", "noise"];
 
-dlTrainOptions('dlTrainExcludeList') = {'_Cm', 'noise', '_gNa', '_gK', '_gleak', ...
-  '_ENa', '_EK', '_Eleak', '_IC_noise'};
-dlTrainOptions('dlCheckpointCoefficient') = 10;
+dlTrainOptions('dlTrainExcludeList') = ["_Cm", "noise", "_gNa", "_gK", "_gleak", ...
+  "_ENa", "_EK", "_Eleak", "_IC_noise"];
+dlTrainOptions('dlCheckpointCoefficient') = 1.74;
 dl.dlTrain(dlInputParameters, dlOutputParameters, dlTargetParameters, dlTrainOptions);
 
 %%

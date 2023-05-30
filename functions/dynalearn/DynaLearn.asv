@@ -1205,10 +1205,34 @@ classdef DynaLearn < matlab.mixin.SetGet
             end
             
             try
-                fprintf("-->Included ", dlTrainOptions('dlIncludeList'));
+
+                fprintf("-->Included variable(s) on fitting: \n");
+                fprintf("---> %s\n", dlTrainOptions('dlTrainIncludeList'));
+
             catch
-                dlTrainOptions('dlIncludeList') = ["_netcon", "_gAMPA", "_tau", "_gleak", "_gGABA", "_gNa", "_gK", "_gCOM", "_Eleak", "noise", "Iapp"];
+
+                dlTrainOptions('dlTrainIncludeList') = ["_netcon", "_gAMPA", "_tau", "_gleak", "_gGABA", "_gNa", "_gK", "_gCOM", "_Eleak", "noise", "Iapp"];
+                fprintf("-->Warning! No variables were included in the fitting include list.\n--->Some dynasim variables are by default assigned in:\n");
+                fprintf("---> %s\n", dlTrainOptions('dlTrainIncludeList'));
             end
+
+            try
+
+                fprintf("-->Excluded variable(s) on fitting: \n");
+                fprintf("---> %s\n", dlTrainOptions('dlTrainExcludeList'));
+
+            catch
+
+                dlTrainOptions('dlTrainExcludeList') = [];
+                fprintf("-->No variables were excluded in the fitting exclude list.\n--->No dynasim variables are excluded by default.");
+                
+            end
+
+            [valIX,posIX] = intersect(dlTrainOptions('dlTrainIncludeList'), dlTrainOptions('dlTrainExcludeList'));
+
+            if length(posIX) > 0
+                fprintf("-->Warning! There are %d conflicts between included and excluded lists. Following variables will be excluded: %d\n", length(posIX));
+                fprintf("---> %s\n",valIX);
 
             try
                
@@ -1821,8 +1845,8 @@ classdef DynaLearn < matlab.mixin.SetGet
 
            error = obj.dlUpdateError;
            obj.dlLastLambda = dlLambda;
-           l = find(contains(lab, dlTrainOptions('dlIncludeList'))); 
-           lg = find(contains(lab, dlTrainOptions('dlIncludeList')));
+           l = find(contains(lab, dlTrainOptions('dlTrainIncludeList'))); 
+           lg = find(contains(lab, dlTrainOptions('dlTrainIncludeList')));
 
            deltaL = 0;
 
@@ -1864,7 +1888,7 @@ classdef DynaLearn < matlab.mixin.SetGet
 
                    catch
 
-                        excludeList = contains(lab, 'x');
+                        excludeList = contains(lab, '');
                         excludeList = excludeList * 0;
 
                    end
@@ -1876,7 +1900,7 @@ classdef DynaLearn < matlab.mixin.SetGet
 
                    catch
 
-                        restrictedList = contains(lab, 'x');
+                        restrictedList = contains(lab, '');
                         restrictedList = restrictedList * 0;
 
                    end
@@ -1935,7 +1959,7 @@ classdef DynaLearn < matlab.mixin.SetGet
                 
                 catch
                 
-                    excludeList = contains(lab, 'x');
+                    excludeList = contains(lab, '');
                     excludeList = excludeList * 0;
                 
                 end
@@ -1947,7 +1971,7 @@ classdef DynaLearn < matlab.mixin.SetGet
                 
                 catch
                 
-                    restrictedList = contains(lab, 'x');
+                    restrictedList = contains(lab, '');
                     restrictedList = restrictedList * 0;
                 
                 end
@@ -2018,7 +2042,7 @@ classdef DynaLearn < matlab.mixin.SetGet
                     
                     catch
                     
-                        excludeList = contains(lab, 'x');
+                        excludeList = contains(lab, '');
                         excludeList = excludeList * 0;
                     
                     end
@@ -2030,7 +2054,7 @@ classdef DynaLearn < matlab.mixin.SetGet
                     
                     catch
                     
-                        restrictedList = contains(lab, 'x');
+                        restrictedList = contains(lab, '');
                         restrictedList = restrictedList * 0;
                     
                     end
