@@ -181,7 +181,7 @@ try dl.dlPlotAllPotentials('lfp'); end
 optimal_spec = load(fullfile(study_dir, 'Optimalobject.mat'));
 optimal_param_file = fullfile(study_dir, 'Optimalparams.mat');
 load(optimal_param_file, 'p'); p
-fprintf('Optimal noise: %g\n', p.HH_noise_noise_amp)
+fprintf('Optimal Iapp: %g\n', p.HH_Iapp);
 
 % dl.dlResetTraining
 
