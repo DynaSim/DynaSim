@@ -3,6 +3,14 @@
 
 % Optimize RMP by varying Eleak
 
+clear;close all;clc;
+PathToDynaSim = 'D:\Works\Computational'; % Change it based on your local path for dynasim
+cd(PathToDynaSim);
+addpath(genpath('DynaSim'));
+cd('DynaSim');
+
+%%
+
 RunDuration = 500; % In ms (miliseconds)
 study_dir = 'dlModels/HH';
 
@@ -27,7 +35,7 @@ dlTrainOptions = containers.Map(); % Train options; MUST be a map data structure
 dlTrainOptions('dlLambda') = 1e-3; % Fitting/Learning rate
 dlTrainOptions('dlEpochs') = 100; % Total iterations 
 dlTrainOptions('dlEnhancedMomentum') = 0.3;
-dlTrainOptions('dlTrainExcludeList') = {'_Cm', '_Iapp', '_gNa', '_gK', '_gleak', '_ENa', '_EK'};
+dlTrainOptions('dlTrainExcludeList') = {"_Cm", "_Iapp", "_gNa", "_gK", "_gleak", "_ENa", "_EK"};
 dlTrainOptions('dlCheckpointCoefficient') = 1.1;
 dl.dlTrain(dlInputParameters, dlOutputParameters, dlTargetParameters, dlTrainOptions);
 
@@ -35,7 +43,7 @@ dl.dlPlotBatchErrors(1)
 dl.dlLastErrorsLog
 dl.dlLoadOptimal
 dl.dlSimulate
-dl.dlPlotAllPotentials('lfp')
+dl.dlPlotAllPotentials('lfp');
 
 optimal_param_file = fullfile(study_dir, 'Optimalparams.mat');
 load(optimal_param_file, 'p'); p
