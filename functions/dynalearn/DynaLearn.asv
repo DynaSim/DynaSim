@@ -922,9 +922,13 @@ classdef DynaLearn < matlab.mixin.SetGet
 
                     obj.dlLastOutputs{i} = obj.dlApplyAverageFRKernel(dlTempOutputs);
 
-                elseif strcmpi(dlOutputType, '<fr>')
+                elseif strcmpi(dlOutputType, 'fnat')
 
-                    obj.dlLastOutputs{i} = obj.dlMeanFR(dlTempOutputs);
+                    obj.dlLastOutputs{i} = obj.dlApplyNaturalFrequencyKernel(dlTempOutputs);
+
+                % elseif strcmpi(dlOutputType, '<fr>')
+                % 
+                %     obj.dlLastOutputs{i} = obj.dlMeanFR(dlTempOutputs);
 
                 else
 
@@ -1045,7 +1049,7 @@ classdef DynaLearn < matlab.mixin.SetGet
                     
                     argsPSR = struct();
 
-                    argsPSR.lf1 = dlLowerFreq;
+                    argsPSR.lf1 = dlLowerFreq; 
                     argsPSR.hf1 = dlUpperFreq;
 
                     TempError = mean(dlEPowerSpectrum(obj, argsPSR), 'all');
@@ -1219,18 +1223,19 @@ classdef DynaLearn < matlab.mixin.SetGet
             try
 
                 fprintf("-->Excluded variable(s) on fitting: \n");
-                fprintf("---> %s\n", dlTrainOptions('dlTrainExcludeList'));
+                fprintf("---> %s\n", string(dlTrainOptions('dlTrainExcludeList')));
 
             catch
 
                 dlTrainOptions('dlTrainExcludeList') = [];
-                fprintf("-->No variables were excluded in the fitting exclude list.\n--->No dynasim variables are excluded by default.");
+                fprintf("-->No variables were manually excluded in the fitting exclude list.\n--->No dynasim variables are excluded by default.\n");
                 
             end
             
             if ~isempty(dlTrainOptions('dlTrainIncludeList')) && ~isempty(dlTrainOptions('dlTrainExcludeList'))
 
                 [valIX,posIX] = intersect(dlTrainOptions('dlTrainIncludeList'), dlTrainOptions('dlTrainExcludeList'));
+                
                 if ~isempty(posIX)
 
                     fprintf("-->Warning! There are %d conflicts between included and excluded lists.\n--->Following variables will be excluded despite being included: \n", length(posIX));

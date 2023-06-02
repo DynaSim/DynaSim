@@ -67,6 +67,7 @@ classdef DynaLearn < matlab.mixin.SetGet
         dlCustomLogLabel = [];
         dlSimulationTool = "mex";
 
+        dlMaxFrequency = 500; % Can be changed
         dlParams = [];
 
     end
@@ -868,6 +869,12 @@ classdef DynaLearn < matlab.mixin.SetGet
             out = mean(o1);
             
         end
+
+        function out = dlApplyNaturalFrequencyKernel(obj, dlOutput)
+
+            out = dlCalcNaturalFrequency(dlOutput, obj.dldT, obj.dlDownSampleFactor);
+
+        end
         
         function dlCalculateOutputs(obj, dlOutputParameters)
            
@@ -922,9 +929,9 @@ classdef DynaLearn < matlab.mixin.SetGet
 
                     obj.dlLastOutputs{i} = obj.dlApplyAverageFRKernel(dlTempOutputs);
 
-                elseif strcmpi(dlOutputType, '<fr>')
+                elseif strcmpi(dlOutputType, 'fnat')
 
-                    obj.dlLastOutputs{i} = obj.dlMeanFR(dlTempOutputs);
+                    obj.dlLastOutputs{i} = obj.dlApplyNaturalFrequencyKernel(dlTempOutputs);
 
                 else
 
@@ -1052,12 +1059,12 @@ classdef DynaLearn < matlab.mixin.SetGet
                     fprintf(" gEp=%d ", TempError);
                     TempError = abs(TempError - dlOutputTargets)^2;
                     fprintf(" dlTarg=%d ", dlOutputTargets);
-                
+               
                 elseif strcmpi(dlErrorType, 'RPenalty')
                     
                     argsPSR = struct();
 
-                    argsPSR.lf1 = dlLowerFreq1;
+                    argsPSR.lf1 = dlLowerFreq1; 
                     argsPSR.hf1 = dlUpperFreq1;
                     argsPSR.lf2 = dlLowerFreq2;
                     argsPSR.hf2 = dlUpperFreq2;
@@ -1219,12 +1226,12 @@ classdef DynaLearn < matlab.mixin.SetGet
             try
 
                 fprintf("-->Excluded variable(s) on fitting: \n");
-                fprintf("---> %s\n", dlTrainOptions('dlTrainExcludeList'));
+                fprintf("---> %s\n", string(dlTrainOptions('dlTrainExcludeList')));
 
             catch
 
                 dlTrainOptions('dlTrainExcludeList') = [];
-                fprintf("-->No variables were excluded in the fitting exclude list.\n--->No dynasim variables are excluded by default.");
+                fprintf("-->No variables were manually excluded in the fitting exclude list.\n--->No dynasim variables are excluded by default.\n");
                 
             end
             
