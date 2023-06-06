@@ -78,12 +78,12 @@ dl.dlLoader(study_dir);
 %% Define optimization parameters
 
 dlInputParameters = {dlNullInputs(RunDuration)}; % Null inputs (no external stimulation).
-dlOutputParameters = [{['ES', '_V'], 1:80, [10 RunDuration], 'afr'}; {['ES', '_V'], 1:80, [10 RunDuration], 'av'}];
-dlTargetParameters = {[{'MSE', 1, target_FRQ, 1}; {'MSE', 2, -60, 1}]}; % Format: (1)Mode;(2)Output indices;(3)Target value;(4)Weight in loss equation
+dlOutputParameters = [{['ES', '_V'], 1:80, [10 RunDuration], 'afr'}; {['INfast', '_V'], 1:20, [10 RunDuration], 'afr'}];
+dlTargetParameters = {[{'MSE', 1, target_FRQ, 1}; {'MSE', 2, target_FRQ, 1}]}; % Format: (1)Mode;(2)Output indices;(3)Target value;(4)Weight in loss equation
 
 % Define training options
 dlTrainOptions = containers.Map(); % Train options; MUST be a map data structure
-dlTrainOptions('dlLambda') = 7e-4; % Fitting/Learning rate
+dlTrainOptions('dlLambda') = 1e-4; % Fitting/Learning rate
 dlTrainOptions('dlEpochs') = 100; % Total iterations 
 dlTrainOptions('dlEnhancedMomentum') = 0.001;
 
@@ -92,7 +92,7 @@ dlTrainOptions('dlCheckpointLengthCap') = 11;
 dlTrainOptions('dlUpdateVerbose') = 1;
 dlTrainOptions('dlTrainIncludeList') = "ES_INfast_iGABAa_tauD";
 
-dlTrainOptions('dlCheckpointCoefficient') = 1.4;
+dlTrainOptions('dlCheckpointCoefficient') = 3.7;
 dl.dlTrain(dlInputParameters, dlOutputParameters, dlTargetParameters, dlTrainOptions);
 
 dl.dlLoadOptimal 

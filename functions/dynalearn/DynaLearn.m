@@ -178,6 +178,38 @@ classdef DynaLearn < matlab.mixin.SetGet
                     return
                 end
 
+            elseif nargin == 5
+                
+                model_ = varargin{1};  
+                data_ = varargin{2};
+                mode_ = varargin{3};
+                name_ = varargin{4};
+
+                prll_ = varargin{5};
+                
+                set(obj, 'dlModel', model_);
+                set(obj, 'dlStudyDir', data_);
+                set(obj, 'dlSimulationTool', mode_);
+                set(obj, 'dlPath', data_);
+
+                set(obj, 'dlModelName', name_);
+                set(obj, 'dlParallelFlag', prll_);
+
+                if strcmpi(obj.dlSimulationTool, "mex")
+
+                    obj.dlInit(obj.dlStudyDir);
+
+                elseif strcmpi(obj.dlSimulationTool, "raw")
+
+                    obj.dlRawInit(obj.dlStudyDir);
+
+                else
+
+                    fprintf("\n->Simulation tool ""%s"" is not valid. Try ""mex"" or ""raw"".\n ***No model created, try again.\n", mode_);
+                    return
+
+                end
+
             else
 
                 fprintf("\n Invalid use of DynaLearn; try one of the following ways:\n 1.Call with no inputs <> (for demo or reloading).\n 2.Call with <DynaSim struct>.\n 3.Call with <DynaSim struct, studydir>.\n 4.Call with <DynaSim Struct, studydir, simulation tool mode>.\n");
@@ -299,7 +331,7 @@ classdef DynaLearn < matlab.mixin.SetGet
             elseif obj.dlParallelFlag
 
                 p = load([obj.dlPath, '/sim1/params.mat']);
-                save([obj.dlStudyDir, '/sim1/params.mat'], '-struct', 'p');
+                save([obj.dlStudyDir, '/params.mat'], '-struct', 'p');
 
             end
 
@@ -319,7 +351,7 @@ classdef DynaLearn < matlab.mixin.SetGet
             elseif obj.dlParallelFlag
 
                 p = load([obj.dlStudyDir, '/solve/sim1/params.mat']);
-                save([obj.dlStudyDir, dlCheckPointPath, 'sim1/params.mat'], '-struct', 'p');
+                save([obj.dlStudyDir, dlCheckPointPath, 'params.mat'], '-struct', 'p');
 
             end
             
@@ -331,12 +363,17 @@ classdef DynaLearn < matlab.mixin.SetGet
             
             fprintf("\t\tCheckpoint file loaded from %s \n", [obj.dlStudyDir, dlCheckPointPath]);
 
-            try
+            if ~obj.dlParallelFlag
+
                 dlObj = load([obj.dlStudyDir, dlCheckPointPath, 'object.mat']);
                 out = dlObj.obj;
-            catch
-                disp("---->Optimal skipped (not loaded)");
-                out = obj;
+
+            elseif obj.dlParallelFlag
+
+                disp("---->Optimal [Parallel]");
+                dlObj = load([obj.dlStudyDir, dlCheckPointPath, 'object.mat']);
+                out = dlObj.obj;
+
             end
             
             if obj.dlExcludeDiverge == 1
@@ -352,41 +389,50 @@ classdef DynaLearn < matlab.mixin.SetGet
 
             end
 
-            disp([obj.dlStudyDir, dlCheckPointPath, 'params.mat']);
+            if ~obj.dlParallelFlag 
 
-            try
+                p = load([obj.dlStudyDir, dlCheckPointPath, 'params.mat']);
+                save([obj.dlStudyDir, '/solve/params.mat'], '-struct', 'p');
 
-                if ~obj.dlParallelFlag 
-    
-                    p = load([obj.dlStudyDir, '/solve/params.mat']);
-                    save([obj.dlStudyDir, dlCheckPointPath, 'params.mat'], '-struct', 'p');
-    
-                elseif obj.dlParallelFlag
-    
-                    p = load([obj.dlStudyDir, '/solve/sim1/params.mat']);
-                    save([obj.dlStudyDir, dlCheckPointPath, 'sim1/params.mat'], '-struct', 'p');
-    
-                end
+            elseif obj.dlParallelFlag
 
-                obj.dlParams = p.p;
-
-            catch
-
-                disp("---->Optimal skipped (not loaded)");  
-                try 
-    
-                    p = load([obj.dlStudyDir, '/solve/params.mat']);
-    
-                catch
-    
-                    p = load([obj.dlStudyDir, '/solve/sim1/params.mat']);
-    
-                end
-                
-                obj.dlParams = p.p;
-                % save([obj.dlPath, '/params.mat'], '-struct', 'p');
+                p = load([obj.dlStudyDir, dlCheckPointPath, 'params.mat']);
+                save([obj.dlStudyDir, '/solve/sim1/params.mat'], '-struct', 'p');
 
             end
+
+            obj.dlParams = p.p;
+
+            % try
+            % if ~obj.dlParallelFlag 
+            % 
+            %     p = load([obj.dlStudyDir, '/solve/params.mat']);
+            %     save([obj.dlStudyDir, dlCheckPointPath, 'params.mat'], '-struct', 'p');
+            % 
+            % elseif obj.dlParallelFlag
+            % 
+            %     p = load([obj.dlStudyDir, '/solve/sim1/params.mat']);
+            %     save([obj.dlStudyDir, dlCheckPointPath, 'params.mat'], '-struct', 'p');
+            % 
+            % end
+            %
+            % catch
+            % 
+            %     disp("---->Optimal skipped (not loaded)");  
+            %     try 
+            % 
+            %         p = load([obj.dlStudyDir, '/solve/params.mat']);
+            % 
+            %     catch
+            % 
+            %         p = load([obj.dlStudyDir, '/solve/sim1/params.mat']);
+            % 
+            %     end
+            % 
+            %     obj.dlParams = p.p;
+            %     % save([obj.dlPath, '/params.mat'], '-struct', 'p');
+            % 
+            % end
             
         end
 
@@ -423,28 +469,28 @@ classdef DynaLearn < matlab.mixin.SetGet
             if ~obj.dlParallelFlag 
 
                 p = load([obj.dlStudyDir, dlCheckPointPath, 'params.mat']);
-                save([obj.dlStudyDir, dlCheckPointPath, 'params.mat'], '-struct', 'p');
+                save([obj.dlStudyDir, '/solve/params.mat'], '-struct', 'p');
 
             elseif obj.dlParallelFlag
 
-                p = load([obj.dlStudyDir, dlCheckPointPath, 'sim1/params.mat']);
-                save([obj.dlStudyDir, dlCheckPointPath, 'sim1/params.mat'], '-struct', 'p');
+                p = load([obj.dlStudyDir, dlCheckPointPath, 'params.mat']);
+                save([obj.dlStudyDir, '/solve/sim1/params.mat'], '-struct', 'p');
 
             end
 
             obj.dlParams = p.p;
-
-            if ~obj.dlParallelFlag 
-
-                p = load([obj.dlStudyDir, '/solve/params.mat']);
-                save([obj.dlPath, '/params.mat'], '-struct', 'p');
-
-            elseif obj.dlParallelFlag
-
-                p = load([obj.dlStudyDir, '/solve/sim1/params.mat']);
-                save([obj.dlPath, '/sim1/params.mat'], '-struct', 'p');
-
-            end
+            % 
+            % if ~obj.dlParallelFlag 
+            % 
+            %     p = load([obj.dlStudyDir, '/solve/params.mat']);
+            %     save([obj.dlPath, '/params.mat'], '-struct', 'p');
+            % 
+            % elseif obj.dlParallelFlag
+            % 
+            %     p = load([obj.dlStudyDir, '/solve/sim1/params.mat']);
+            %     save([obj.dlPath, '/sim1/params.mat'], '-struct', 'p');
+            % 
+            % end
             
         end
         
@@ -544,7 +590,6 @@ classdef DynaLearn < matlab.mixin.SetGet
 
             end
 
-            disp(s);
             disp("--------");
 
             if strcmpi(s, "")
@@ -596,6 +641,41 @@ classdef DynaLearn < matlab.mixin.SetGet
                     s = d(i).name;
                     s = s(1:end-2);
                 end
+            end
+
+            obj.dlPath = [obj.dlStudyDir, '/solve'];
+            addpath(obj.dlPath);
+            d = dir(obj.dlPath);
+            s = "";
+
+            for i = 1:size(d, 1)
+                if contains(d(i).name, '.m')
+                    s = d(i).name;
+                    s = s(1:end-2);
+                end
+            end
+
+            disp("--------");
+
+            if strcmpi(s, "")
+
+                d = dir([obj.dlStudyDir, '/solve/sim1']);
+                addpath([obj.dlStudyDir, '/solve/sim1']);
+                s = "";
+                
+                for i = 1:size(d, 1)
+                    if contains(d(i).name, '.m')
+                        s = d(i).name;
+                        s = s(1:end-2);
+                    end
+                end
+
+            end
+
+            if isempty(s)
+
+                fprintf("\n->WARNING: No .m (raw) function found for. Make sure the mex function exists or paths are correct.\n");
+
             end
             
         end
@@ -980,14 +1060,16 @@ classdef DynaLearn < matlab.mixin.SetGet
         function out = dlMeanFR(obj, dlOutput)
             
             x = dlOutput;
+            out = 0;
+
             t = linspace(0, size(x, 1), size(x, 1))*obj.dldT*obj.dlDownSampleFactor;
             raster = computeRaster(t, x);
 
             if size(raster, 1) > 0
+
                 nPop = size(x,2);
-                out = size(raster,1)/(1e-3*(t(end)-t(1)))/nPop;
-            else
-                out = 0;
+                out = out + size(raster,1)/(1e-3*(t(end)-t(1)))/nPop;
+
             end
 
         end
@@ -1063,7 +1145,7 @@ classdef DynaLearn < matlab.mixin.SetGet
             end
             
             set(obj, 'dlLastOutputs' , obj.dlOutputs(dlIndices));
-            
+
             for i = 1:n
                 
                 dlTimeKernel = ceil(dlOutputParameters{i, 3}/(obj.dldT*obj.dlDownSampleFactor));
@@ -1120,7 +1202,7 @@ classdef DynaLearn < matlab.mixin.SetGet
            
             n = size(dlTargetParams, 1);
             Error = 0;
-            
+
             for i = 1:n
                
                 TempError = 0;
@@ -1635,7 +1717,7 @@ classdef DynaLearn < matlab.mixin.SetGet
 
                     if ~isempty(dlTargetParameters)
                         obj.dlCalculateError(dlTargetParameters{j});
-                        fprintf("\n\t--->Error of this trial = %f\n", obj.dlLastError);
+                        fprintf("\n\t--->Error of this trial = %f \n", obj.dlLastError);
                     end
                     
                     if dlOutputLogFlag
@@ -1707,12 +1789,18 @@ classdef DynaLearn < matlab.mixin.SetGet
                 end
                 
                 if ~isempty(obj.dlErrorsLog)
-                    if numel(obj.dlErrorsLog) > 2
-                        dlAvgError = mean(obj.dlErrorsLog(end-2:end));
+
+                    if numel(obj.dlErrorsLog) > dlBatchs
+
+                        dlAvgError = mean(obj.dlErrorsLog(end-dlBatchs:end));
+
                     else
+
                         dlAvgError = mean(obj.dlErrorsLog);
+
                     end
-                    fprintf("\t-->Epoch's Average Error = %f, Last lambda = %.14f\n", dlAvgError, dlLambda);
+
+                    fprintf("\t-->Last lambda = %.14f\n", dlLambda);
                 end
                 
                 if strcmpi(dlCheckpoint, 'true')
@@ -2197,7 +2285,7 @@ classdef DynaLearn < matlab.mixin.SetGet
 
                     else
 
-                        delta = w*(rand(size(w))-0.5)*error*dlLambda;
+                        delta = (rand(size(w))-0.5)*error*dlLambda;
 
                     end
 
@@ -2258,12 +2346,22 @@ classdef DynaLearn < matlab.mixin.SetGet
             
                         if contains(lab{i, 1}, "_netcon")
 
-                            wn(wn < 0.1) = 0.1;
-                            wn(wn > .94) = .94;
+                            wn(wn < 0.01) = 0.04;
+                            wn(wn > 1.00) = 0.97;
 
                         elseif contains(lab{i, 1}, "_E")
 
                             wn(abs(wn) > 1e3) = sign(wn)*9e2; % Too large elimination for stability
+                       
+                        elseif contains(lab{i, 1}, "_tau")
+
+                            wn(wn > 1e4) = 1e4; % Too large elimination for stability
+                            wn(wn < 1e-2) = 1e-2;
+
+                        elseif contains(lab{i, 1}, "_g")
+
+                            wn(wn > 1e4) = 1e4; % Too large elimination for stability
+                            wn(wn < 1e-2) = 1e-2;
                         
                         else
 
@@ -2276,7 +2374,7 @@ classdef DynaLearn < matlab.mixin.SetGet
 
                         if dlTrainOptions('dlUpdateVerbose')
 
-                            fprintf("\n -----> Updated: %s : %f \n", lab{i, 1}, val{i, 1});
+                            fprintf("-----> Updated: %s : %f \n", lab{i, 1}, val{i, 1});
 
                         end
 
@@ -2542,11 +2640,11 @@ classdef DynaLearn < matlab.mixin.SetGet
             fprintf("Updating parameters of %s > \n", obj.dlPath);
             dsParamsModifier('dlTempFuncParamsChanger.m', map);
 
-            try
+            if ~obj.dlParallelFlag
 
                 dlTempFuncParamsChanger(obj.dlPath);
 
-            catch
+            elseif obj.dlParallelFlag
 
                 dlTempFuncParamsChanger([obj.dlPath, '/sim1']);
 
