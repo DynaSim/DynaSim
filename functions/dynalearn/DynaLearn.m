@@ -68,6 +68,7 @@ classdef DynaLearn < matlab.mixin.SetGet
         dlSimulationTool = "mex";
 
         dlMaxFrequency = 500; % Can be changed
+        dlParallelFlag = 1;
         dlParams = [];
 
     end
@@ -97,7 +98,9 @@ classdef DynaLearn < matlab.mixin.SetGet
 
         function obj = DynaLearn(varargin) % Constructors, will be expanded
             
-            fprintf("\n\n@DS.DL:Creating DynaLearn model object ... \n");
+            fprintf("\n\n@DS.DL\n>Creating DynaLearn model object \n");
+            fprintf("->NOTE: Parallel flag is 1 by default.\n");
+            fprintf("-->To change parallel flag, set dlParallelFlag = 0 or 1");
             set(obj, 'dlPathToFile', 'models/dlBaseModel');
             
             if nargin == 0
@@ -276,7 +279,17 @@ classdef DynaLearn < matlab.mixin.SetGet
         function dlSave(obj)
         
             dlSaveFileNamePath = [obj.dlStudyDir, '/dlFile.mat'];
-            p = load([obj.dlPath, '/params.mat']);
+
+            try
+
+                p = load([obj.dlPath, '/params.mat']);
+
+            catch
+
+                fprintf("--->Sim1 \n");
+                p = load([obj.dlPath, '/sim1/params.mat']);
+            end
+
             save([obj.dlStudyDir, '/params.mat'], '-struct', 'p');
             save(dlSaveFileNamePath, 'obj');
 
@@ -426,6 +439,8 @@ classdef DynaLearn < matlab.mixin.SetGet
             obj.dlPath = [obj.dlStudyDir, '/solve'];
             addpath(obj.dlPath);
             d = dir(obj.dlPath);
+            foundFlag = 0;
+
             s = "";
             
             for i = 1:size(d, 1)
@@ -434,18 +449,55 @@ classdef DynaLearn < matlab.mixin.SetGet
 
                     s = d(i).name;
                     s = s(1:end-10);
+                    foundFlag = 1;
 
                 elseif contains(d(i).name, 'mexw64')
 
                     s = d(i).name;
                     s = s(1:end-7);
+                    foundFlag = 1;
 
                 elseif contains(d(i).name, 'mexa64')
 
                     s = d(i).name;
                     s = s(1:end-7);
+                    foundFlag = 1;
 
                 end
+
+            end
+
+            if ~foundFlag
+
+                d = dir([obj.dlStudyDir, '/sim1/solve']);
+                s = "";
+                
+                for i = 1:size(d, 1)
+    
+                    if contains(d(i).name, 'mexmaci64')
+    
+                        s = d(i).name;
+                        s = s(1:end-10);
+    
+                    elseif contains(d(i).name, 'mexw64')
+    
+                        s = d(i).name;
+                        s = s(1:end-7);
+    
+                    elseif contains(d(i).name, 'mexa64')
+    
+                        s = d(i).name;
+                        s = s(1:end-7);
+    
+                    end
+    
+                end
+
+            end
+
+            if isempty(s)
+
+                fprintf("\n->WARNING: No mex function found for. Make sure the mex function exists or paths are correct.\n");
 
             end
             
@@ -469,20 +521,29 @@ classdef DynaLearn < matlab.mixin.SetGet
         
         function dlInit(obj, studydir) % Initializer with mex
             
-            tspan = [0 1000]; % Base time span for class construction and initialization.
+            fprintf("\n->Parallel flag is : %d\n", obj.dlParallelFlag);
+            fprintf("\n-->If you encountered an error related to parallel flag, set dlParallelFlag = 0.\n");
+
+            tspan = [0 100]; % Base time span for class construction and initialization.
             simulator_options = {'tspan', tspan, 'solver', 'rk1', 'dt', obj.dldT, ...
                         'downsample_factor', obj.dlDownSampleFactor, 'verbose_flag', 1, ...
-                        'study_dir', studydir, 'mex_flag', 1, 'mex_dir', obj.dlPath};
+                        'study_dir', studydir, 'mex_flag', 1, 'mex_dir', obj.dlPath, ...
+                        'parallel_flag', obj.dlParallelFlag};
+
             obj.dsData = dsSimulate(obj.dlModel, 'vary', [], simulator_options{:});
             
         end
         
         function dlRawInit(obj, studydir) % Initializer without mex
-            
-            tspan = [0 1000]; % Base time span for class construction and initialization.
+                        
+            fprintf("\n->Parallel flag is : %d\n", obj.dlParallelFlag);
+            fprintf("\n-->If you encountered an error related to parallel flag, set dlParallelFlag = 0.\n");
+
+            tspan = [0 100]; % Base time span for class construction and initialization.
             simulator_options = {'tspan', tspan, 'solver', 'rk1', 'dt', obj.dldT, ...
                         'downsample_factor', obj.dlDownSampleFactor, 'verbose_flag', 1, ...
-                        'study_dir', studydir, 'mex_flag', 0, 'mex_dir', obj.dlPath};
+                        'study_dir', studydir, 'mex_flag', 0, 'mex_dir', obj.dlPath, ...
+                        'parallel_flag', obj.dlParallelFlag};
             obj.dsData = dsSimulate(obj.dlModel, 'vary', [], simulator_options{:});
             
             try
@@ -2362,7 +2423,16 @@ classdef DynaLearn < matlab.mixin.SetGet
             
             fprintf("Updating parameters of %s > \n", obj.dlPath);
             dsParamsModifier('dlTempFuncParamsChanger.m', map);
-            dlTempFuncParamsChanger(obj.dlPath);
+
+            try
+
+                dlTempFuncParamsChanger(obj.dlPath);
+
+            catch
+
+                dlTempFuncParamsChanger([obj.dlPath, '/sim1']);
+
+            end
             
         end
         

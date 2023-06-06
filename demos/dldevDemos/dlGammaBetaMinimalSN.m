@@ -1,5 +1,11 @@
 % addpath(genpath('/Users/jason/Documents/me/docs - research/andre/BetaGammaPushPull/DynaSim'));
 
+clear;close all;clc;
+PathToDynaSim = 'D:\Works\Computational'; % Change it based on your local path for dynasim
+cd(PathToDynaSim);
+addpath(genpath('DynaSim'));
+cd('DynaSim');
+
 %% 1. PING/PINB only
 
 % 1. Optimize '(INfast->INfast, INfast->ES)','tauD' to achieve fnat=15,20,25Hz
@@ -8,6 +14,7 @@
 %   This will become our tauGABAfast
 
 % define equations of cell model (same for E and I populations)
+
 eqns={
   'dV/dt=Iapp+@current+noise*randn(1,N_pop); Iapp=0; noise=0'
 };
@@ -20,7 +27,6 @@ gAMPA = .1;
 tauGABAfast = 5;
 tauAMPA = 2;
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 s=[];
 s.populations(1).name='ES';
 s.populations(1).size=80;
@@ -42,17 +48,54 @@ s.connections(3).direction='INfast->INfast';
 s.connections(3).mechanism_list={'iGABAa'};
 s.connections(3).parameters={'tauD',tauGABAfast,'gGABAa',gGABAfast};
 
-vary = {'(INfast->INfast, INfast->ES)','tauD',[1 5 10 20 50]};
-tic
-data = dsSimulate(s, 'tspan', [0 1000], 'downsample_factor', 10, ...
-                     'solver', 'euler', 'dt', .002, ...
-                     'compile_flag', 0, 'parallel_flag', 1, ...
-                     'vary', vary, 'verbose_flag', 1);
-toc
+% vary = {'(INfast->INfast, INfast->ES)','tauD',[1 5 10 20 50]};
+% tic
+% data = dsSimulate(s, 'tspan', [0 1000], 'downsample_factor', 10, ...
+%                      'solver', 'euler', 'dt', .002, ...
+%                      'compile_flag', 0, 'parallel_flag', 1, ...
+%                      'vary', vary, 'verbose_flag', 1);
+% toc
+% 
+% dsPlot(data);
+% dsPlot(data, 'plot_type','raster');
+% tic; dsPlot(data, 'plot_type','power'); toc
 
-dsPlot(data);
-dsPlot(data, 'plot_type','raster');
-tic; dsPlot(data, 'plot_type','power'); toc
+% Optimize natural frequency
+RunDuration = 500;
+study_dir = 'dlModels/EI1';
+target_FRQ = 20; % Hz
+dl = DynaLearn(s, study_dir, 'mex', 'EI');
+dl.dlSave();
+
+%% Define optimization parameters
+
+dlInputParameters = {dlNullInputs(RunDuration)}; % Null inputs (no external stimulation).
+dlOutputParameters = [{['ES', '_V'], 1, [10 RunDuration], 'fnat'}; {['INfast', '_V'], 1, [10 RunDuration], 'fnat'}];
+dlTargetParameters = {[{'MSE', 1, target_FRQ, 1}; {'MSE', 2, target_FRQ, 1}]}; % Format: (1)Mode;(2)Output indices;(3)Target value;(4)Weight in loss equation
+
+% Define training options
+dlTrainOptions = containers.Map(); % Train options; MUST be a map data structure
+dlTrainOptions('dlLambda') = 1e-5; % Fitting/Learning rate
+dlTrainOptions('dlEpochs') = 10; % Total iterations 
+dlTrainOptions('dlEnhancedMomentum') = 0.25;
+
+dlTrainOptions('dlExcludeDiverge') = 0; % Exclude non-optimals from model log
+dlTrainOptions('dlCheckpointLengthCap') = 11;
+dlTrainOptions('dlUpdateVerbose') = 1;
+dlTrainOptions('dlTrainIncludeList') = "tauD";
+
+dlTrainOptions('dlCheckpointCoefficient') = 1.7;
+dl.dlTrain(dlInputParameters, dlOutputParameters, dlTargetParameters, dlTrainOptions);
+
+dl.dlLoadOptimal 
+dl.dlSimulate
+try dl.dlPlotAllPotentials('lfp'); end
+
+optimal_spec = load(fullfile(study_dir, 'Optimalobject.mat'));
+optimal_param_file = fullfile(study_dir, 'Optimalparams.mat');
+load(optimal_param_file, 'p'); p
+fprintf('Optimal noise: %g\n', p.HH_noise_noise_amp)
+
 
 
 %% 2. Optimize contextual input for beta/gamma push-pull
