@@ -2300,33 +2300,61 @@ classdef DynaLearn < matlab.mixin.SetGet
             
         end
         
-        function dlPlotBatchErrors(obj, dlBatchs)
+        function dlPlotBatchErrors(obj, dlBatchs, dlLog)
            
             figure('position', [0, 0, 1400, 700]);
             n = max(size(obj.dlErrorsLog));
             x = zeros(1, n);
             xm = zeros(1, n);
             
-            for i = 0:n-dlBatchs
+            try
+
+                m_ = n-dlBatchs;
+
+            catch
+
+                m_ = n - 5;
+                dlBatchs = 5;
+
+            end
+
+            for i = 0:m_
                 x(i+1) = mean(obj.dlErrorsLog(i+1:i+dlBatchs));
                 xm(i+1) = min(obj.dlErrorsLog(i+1:i+dlBatchs));
             end
-            
-            % plot(x, "DisplayName", "Mean error", "LineStyle", "--");
-            % grid("on");hold("on");
-            % plot(xm, "DisplayName", "Min error");
-            % xlabel("Trials");
-            % ylabel("Log10(Loss)");
-            % legend;
-            % title("Errors in batchs");
 
-            plot(log10(x), "DisplayName", "Mean error", "LineStyle", "--");
-            grid("on");hold("on");
-            plot(log10(xm), "DisplayName", "Min error");
-            xlabel("Trials");
-            ylabel("Log10(Loss)");
-            legend;
-            title("Errors in batchs");
+            try
+
+                logFlag = dlLog;
+
+            catch
+
+                logFlag = 1;
+                fprintf("-->Log flag for loss plot is not specified; default = 1.\n");
+
+            end
+
+            if logFlag
+
+                plot(log10(x), "DisplayName", "Mean error", "LineStyle", "--");
+                grid("on");hold("on");
+                plot(log10(xm), "DisplayName", "Min error");
+                xlabel("Trials");
+                ylabel("Log10(Loss)");
+                legend;
+                title("Errors in batchs");
+
+            else
+
+                plot(x, "DisplayName", "Mean error", "LineStyle", "--");
+                grid("on");hold("on");
+                plot(xm, "DisplayName", "Min error");
+                xlabel("Trials");
+                ylabel("Loss");
+                legend;
+                title("Errors in batchs");
+
+            end
             
         end
         

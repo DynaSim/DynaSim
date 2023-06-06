@@ -151,26 +151,31 @@ vary = {'HH','Iapp',[-10 -4 -1 0 1 4 7 8 8.80720 8.80721 8.80741 9 10 14 17 20]}
 solver_options = {'tspan',[0 RunDuration],'solver','rk1','dt',.01,'compile_flag',0,'verbose_flag',1};
 data = dsSimulate(spec,'vary',vary,solver_options{:});
 dsPlotFR(data);
+
 %% data.model.parameters
 
 % spec = dsApplyModifications(spec,{'HH','noise_amp', 1000}); 
  
 % optimize FR
-target_FR = 80; % Hz
+target_FR = 30; % Hz
 dl = DynaLearn(spec, study_dir, 'raw', 'HH');
 dl.dlSave();
 
+%% Loader
+
+dl = DynaLearn.dlLoader(study_dir);
+
 %%
 % Define optimization parameters
+
 dlInputParameters = {dlNullInputs(RunDuration)}; % Null inputs (no external stimulation).
 dlOutputParameters = [{['HH', '_V'], 1, [100 RunDuration], 'afr'}; {['HH', '_V'], 1, [100 RunDuration], 'av'}];
-dlTargetParameters = {[{'MSE', 1, target_FR, 1}; {'MSE', 2, -55, 1}]}; % Format: (1)Mode;(2)Output indices;(3)Target value;(4)Weight in loss equation
-
+dlTargetParameters = {[{'MSE', 1, target_FR, 1}; {'MSE', 2, -57, 1}]}; % Format: (1)Mode;(2)Output indices;(3)Target value;(4)Weight in loss equation
 % Define training options
 dlTrainOptions = containers.Map(); % Train options; MUST be a map data structure
-dlTrainOptions('dlLambda') = 1e-3; % Fitting/Learning rate
-dlTrainOptions('dlEpochs') = 100; % Total iterations 
-dlTrainOptions('dlEnhancedMomentum') = 0.25;
+dlTrainOptions('dlLambda') = 1e-8; % Fitting/Learning rate
+dlTrainOptions('dlEpochs') = 200; % Total iterations 
+dlTrainOptions('dlEnhancedMomentum') = 0.0;
 
 dlTrainOptions('dlExcludeDiverge') = 0; % Exclude non-optimals from model log
 dlTrainOptions('dlCheckpointLengthCap') = 5;
@@ -200,31 +205,35 @@ RunDuration = 500; % In ms (miliseconds)
 study_dir = 'dlModels/noisyHH';
 
 % add noise mechanisms
-spec = dsApplyModifications('HH.pop',{'HH','mechanism_list','+noise'});
+% spec = dsApplyModifications('HH.pop',{'HH','mechanism_list','+noise'});
 vary = {'HH','noise_amp',[-100 0 100 200 250 272.7491 300 350 400 500 600 700]}; % 20Hz is around amp=250
 solver_options = {'tspan',[0 RunDuration],'solver','rk1','dt',.01,'compile_flag',0,'verbose_flag',1};
 data = dsSimulate(spec,'vary',vary,solver_options{:});
 dsPlotFR(data); % ~ 80 spk/s
-% data.model.parameters
+
+%% Loader
+
+dl = DynaLearn.dlLoader(study_dir);
 
 %% set baseline noise level
-spec = dsApplyModifications(spec,{'HH','Iapp', 5}); 
+
+spec = dsApplyModifications(spec,{'HH','Iapp', 12}); 
  
 % optimize FR
-target_freq = 70; % Hz
+target_freq = 90; % Hz
 dl = DynaLearn(spec, study_dir, 'raw', 'HH');
 dl.dlSave();
 
 % Define optimization parameters
 dlInputParameters = {dlNullInputs(RunDuration)}; % Null inputs (no external stimulation).
 dlOutputParameters = [{['HH', '_V'], 1, [100 RunDuration], 'fnat'}; {['HH', '_V'], 1, [100 RunDuration], 'av'}; {['HH', '_V'], 1, [100 RunDuration], 'afr'}];
-dlTargetParameters = {[{'MSE', 1, target_freq, 1}; {'MSE', 2, -62, 1}]}; % Format: (1)Mode;(2)Output indices;(3)Target value;(4)Weight in loss equation
+dlTargetParameters = {[{'MSE', 1, target_freq, 1}; {'MSE', 2, -57, 1}]};% {'MSE', 3, target_freq, 1}]}; % Format: (1)Mode;(2)Output indices;(3)Target value;(4)Weight in loss equation
 
 % Define training options
 dlTrainOptions = containers.Map(); % Train options; MUST be a map data structure
-dlTrainOptions('dlLambda') = 1e-4; % Fitting/Learning rate
+dlTrainOptions('dlLambda') = 1e-3; % Fitting/Learning rate
 dlTrainOptions('dlEpochs') = 100; % Total iterations 
-dlTrainOptions('dlEnhancedMomentum') = 0.25;
+dlTrainOptions('dlEnhancedMomentum') = 0.2;
 
 dlTrainOptions('dlExcludeDiverge') = 0; % Exclude non-optimals from model log
 dlTrainOptions('dlCheckpointLengthCap') = 11;
@@ -234,15 +243,17 @@ dlTrainOptions('dlTrainIncludeList') = ["Iapp"];
 % dlTrainOptions('dlTrainExcludeList') = ["_IC", "_gNa", "_gK", "_gleak", "_ENa", "_EK", "_noise"];
 dlTrainOptions('dlCheckpointCoefficient') = 1.7;
 dl.dlTrain(dlInputParameters, dlOutputParameters, dlTargetParameters, dlTrainOptions);
+
 %%
 dl.dlLoadOptimal 
 dl.dlSimulate
-try dl.dlPlotAllPotentials('lfp'); end
+dl.dlPlotAllPotentials('lfp');
 
 optimal_spec = load(fullfile(study_dir, 'Optimalobject.mat'));
 optimal_param_file = fullfile(study_dir, 'Optimalparams.mat');
-load(optimal_param_file, 'p'); p
-fprintf('Optimal noise: %g\n', p.HH_noise_noise_amp)
+load(optimal_param_file, 'p');
+disp(p);
+% fprintf('Optimal noise: %g\n', p.HH_noise_noise_amp)
 
 % dl.dlResetTraining
 
