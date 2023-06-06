@@ -66,9 +66,9 @@ s.connections(3).parameters={'tauD',tauGABAfast,'gGABAa',gGABAfast};
 %%
 % Optimize natural frequency
 RunDuration = 500;
-study_dir = 'dlModels/EI2';
+study_dir = 'dlModels/EI3';
 target_FRQ = 70; % Hz
-dl = DynaLearn(s, study_dir, 'raw', 'EI', 1);
+dl = DynaLearn(s, study_dir, 'mex', 'EI', 1);
 dl.dlSave();
 
 %%
@@ -99,7 +99,7 @@ dl.dlLoadOptimal
 dl.dlSimulate
 try dl.dlPlotAllPotentials('lfp'); end
 
-% fprintf('Optimal tauD: %g\n', p.INfast)
+%% 
 
 
 

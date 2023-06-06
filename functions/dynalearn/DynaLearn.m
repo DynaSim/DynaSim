@@ -68,7 +68,7 @@ classdef DynaLearn < matlab.mixin.SetGet
         dlSimulationTool = "mex";
 
         dlMaxFrequency = 500; % Can be changed
-        dlParallelFlag = 1;
+        dlParallelFlag = 0;
         dlParams = [];
 
     end
@@ -110,7 +110,7 @@ classdef DynaLearn < matlab.mixin.SetGet
         function obj = DynaLearn(varargin) % Constructors, will be expanded
             
             fprintf("\n\n@DS.DL\n>Creating DynaLearn model object \n");
-            fprintf("->NOTE: Parallel flag is 1 by default.\n");
+            fprintf("->NOTE: Parallel flag is 0 by default.\n");
             fprintf("-->To change parallel flag, set dlParallelFlag = 0 or 1");
             set(obj, 'dlPathToFile', 'models/dlBaseModel');
             
