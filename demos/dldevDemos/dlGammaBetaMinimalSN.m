@@ -85,14 +85,14 @@ dlTargetParameters = {[{'MSE', 1, target_FRQ, 1}; {'MSE', 2, -60, 1}]}; % Format
 dlTrainOptions = containers.Map(); % Train options; MUST be a map data structure
 dlTrainOptions('dlLambda') = 7e-4; % Fitting/Learning rate
 dlTrainOptions('dlEpochs') = 100; % Total iterations 
-dlTrainOptions('dlEnhancedMomentum') = 0.001;
+dlTrainOptions('dlEnhancedMomentum') = 0.2;
 
 dlTrainOptions('dlExcludeDiverge') = 0; % Exclude non-optimals from model log
 dlTrainOptions('dlCheckpointLengthCap') = 11;
 dlTrainOptions('dlUpdateVerbose') = 1;
-dlTrainOptions('dlTrainIncludeList') = "ES_INfast_iGABAa_tauD";
+dlTrainOptions('dlTrainIncludeList') = ["ES_INfast_iGABAa_tauD", "INfast_INfast_iGABAa_tauD"];
 
-dlTrainOptions('dlCheckpointCoefficient') = 1.4;
+dlTrainOptions('dlCheckpointCoefficient') = 1.1;
 dl.dlTrain(dlInputParameters, dlOutputParameters, dlTargetParameters, dlTrainOptions);
 
 dl.dlLoadOptimal 
