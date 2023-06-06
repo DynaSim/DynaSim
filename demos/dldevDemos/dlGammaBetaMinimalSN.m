@@ -63,7 +63,7 @@ s.connections(3).parameters={'tauD',tauGABAfast,'gGABAa',gGABAfast};
 % Optimize natural frequency
 RunDuration = 500;
 study_dir = 'dlModels/EI1';
-target_FRQ = 20; % Hz
+target_FRQ = 50; % Hz
 dl = DynaLearn(s, study_dir, 'mex', 'EI');
 dl.dlSave();
 
@@ -76,13 +76,13 @@ dlTargetParameters = {[{'MSE', 1, target_FRQ, 1}; {'MSE', 2, target_FRQ, 1}]}; %
 % Define training options
 dlTrainOptions = containers.Map(); % Train options; MUST be a map data structure
 dlTrainOptions('dlLambda') = 1e-5; % Fitting/Learning rate
-dlTrainOptions('dlEpochs') = 10; % Total iterations 
+dlTrainOptions('dlEpochs') = 100; % Total iterations 
 dlTrainOptions('dlEnhancedMomentum') = 0.25;
 
 dlTrainOptions('dlExcludeDiverge') = 0; % Exclude non-optimals from model log
 dlTrainOptions('dlCheckpointLengthCap') = 11;
 dlTrainOptions('dlUpdateVerbose') = 1;
-dlTrainOptions('dlTrainIncludeList') = "tauD";
+dlTrainOptions('dlTrainIncludeList') = "_iGABAa_tauD";
 
 dlTrainOptions('dlCheckpointCoefficient') = 1.7;
 dl.dlTrain(dlInputParameters, dlOutputParameters, dlTargetParameters, dlTrainOptions);
@@ -91,10 +91,7 @@ dl.dlLoadOptimal
 dl.dlSimulate
 try dl.dlPlotAllPotentials('lfp'); end
 
-optimal_spec = load(fullfile(study_dir, 'Optimalobject.mat'));
-optimal_param_file = fullfile(study_dir, 'Optimalparams.mat');
-load(optimal_param_file, 'p'); p
-fprintf('Optimal noise: %g\n', p.HH_noise_noise_amp)
+% fprintf('Optimal tauD: %g\n', p.INfast)
 
 
 

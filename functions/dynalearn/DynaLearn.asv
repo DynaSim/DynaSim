@@ -86,8 +86,7 @@ classdef DynaLearn < matlab.mixin.SetGet
             set(obj, 'dlPath', [PathToFile, '/solve']);
             
             fprintf("Params.mat file loaded from %s \n", PathToFile);
-
-            try
+            try 
 
                 p = load([obj.dlStudyDir, '/solve/params.mat']);
                 save([obj.dlPath, '/params.mat'], '-struct', 'p');
@@ -442,9 +441,11 @@ classdef DynaLearn < matlab.mixin.SetGet
             elseif obj.dlParallelFlag
 
                 p = load([obj.dlStudyDir, '/solve/sim1/params.mat']);
-                save([obj.dlPath, '/sim1/params.mat'], '-struct', 'p');
+                save([obj.dlPath, '/s/params.mat'], '-struct', 'p');
 
             end
+
+            save([obj.dlPath, '/params.mat'], '-struct', 'p');
             
         end
         
@@ -459,19 +460,8 @@ classdef DynaLearn < matlab.mixin.SetGet
             set(obj, 'dlPath', [PathToFile, '/solve']);
             
             fprintf("Params.mat file loaded from %s \n", PathToFile);
-
-            if ~obj.dlParallelFlag
-
-                p = load([PathToFile, '/solve/params.mat']);
-                save([obj.dlPath, '/params.mat'], '-struct', 'p');
-
-            elseif obj.dlParallelFlag
-
-                p = load([PathToFile, '/solve/sim1/params.mat']);
-                save([obj.dlPath, '/sim1/params.mat'], '-struct', 'p');
-
-            end
-
+            p = load([PathToFile, '/solve/params.mat']);
+            save([obj.dlPath, '/params.mat'], '-struct', 'p');
             obj.dlReInit();
 
             obj.dlParams = p.p;
@@ -2443,12 +2433,9 @@ classdef DynaLearn < matlab.mixin.SetGet
             q = cell2struct(val, lab);
             % disp(val);
             p.p = q;
+            save([obj.dlPath, '/params.mat'], '-struct', 'p');
 
-            if ~obj.dlParallelFlag
-
-                save([obj.dlPath, '/params.mat'], '-struct', 'p');
-
-            elseif obj.dlParallelFlag 
+            if obj.dlParallelFlag 
 
                 save([obj.dlPath, '/sim1/params.mat'], '-struct', 'p');
 
