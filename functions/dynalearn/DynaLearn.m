@@ -1450,19 +1450,19 @@ classdef DynaLearn < matlab.mixin.SetGet
             catch
                 
                 dlBatchs = size(dlInputParameters, 2);
-                fprintf("-->Batchs was not determined in options map, default dlBatchs = %d\n", size(dlInputParameters, 2));
+                fprintf("-->dlBatchs (batch size) was not determined in options map, default dlBatchs = %d\n--->Ignore dlBatchs if your update mode is trial or epoch.\n", size(dlInputParameters, 2));
                 
             end
             
             try
 
-                fprintf("-->Included variable(s) on fitting: \n");
+                fprintf("\n-->Included variable(s) on fitting: \n");
                 fprintf("---> %s\n", dlTrainOptions('dlTrainIncludeList'));
 
             catch
 
                 dlTrainOptions('dlTrainIncludeList') = ["_netcon", "_gAMPA", "_tau", "_gleak", "_gGABA", "_gNa", "_gK", "_gCOM", "_Eleak", "noise", "Iapp"];
-                fprintf("-->Warning! No variables were included in the fitting include list.\n--->Some dynasim variables are by default assigned in:\n");
+                fprintf("\n-->Warning! No variables were included in the fitting include list.\n--->Some dynasim variables are by default assigned in:\n");
                 fprintf("---> %s\n", dlTrainOptions('dlTrainIncludeList'));
             end
 
@@ -1475,6 +1475,37 @@ classdef DynaLearn < matlab.mixin.SetGet
 
                 dlTrainOptions('dlTrainExcludeList') = [];
                 fprintf("-->No variables were manually excluded in the fitting exclude list.\n--->No dynasim variables are excluded by default.\n");
+                
+            end
+
+            try
+
+                fprintf("-->Restricted variable(s) on fitting: \n");
+                fprintf("---> %s\n", string(dlTrainOptions('dlTrainRestrictList')));
+
+            catch
+
+                dlTrainOptions('dlTrainRestrictList') = [];
+                fprintf("-->No variables were manually restricted in the fitting restrict list.\n--->No dynasim variables are restricted by default.\n");
+                
+            end
+
+            try
+
+                fprintf("-->Synchronized variable(s) on fitting: \n");
+                synlist = string(dlTrainOptions('dlTrainSyncList'));
+                for syn = 1:size(synlist, 1)
+
+                    fprintf("--->N.%d: ", syn);
+                    disp(synlist(syn, :));
+
+                end
+                fprintf("---->NOTE: SyncList format should be group(row)Xvariables(column).\n---->On each group, All variables will be set to be equal to the first one.\n\n");
+
+            catch
+
+                dlTrainOptions('dlTrainSyncList') = [];
+                fprintf("-->No variables were manually synchronized.\n--->No dynasim variables are synchronized by default.\n");
                 
             end
             
@@ -2108,7 +2139,7 @@ classdef DynaLearn < matlab.mixin.SetGet
                         w(w > w_max) = w_max;
                     end
                     val{ind_w} = w;
-                    i_w = find(strcmpi(string(obj.dlWeightsVariables), lkey));
+                    i_w = strcmpi(string(obj.dlWeightsVariables), lkey);
                     obj.dlWeightsValues{i_w}(:,:,end+1) = w;
                end
            end
@@ -2273,7 +2304,36 @@ classdef DynaLearn < matlab.mixin.SetGet
             elseif strcmpi(dlLearningRule, 'GeneralEnhancedDeltaRule')
 
                 restrictedCoefCnt = 0;
-    
+
+                try
+                
+                    excludeList = contains(lab, dlTrainOptions('dlTrainExcludeList'));
+                
+                catch
+                
+                    excludeList = contains(lab, '');
+                    excludeList = excludeList * 0;
+                        
+                end
+
+                try
+                
+                    restrictedList = contains(lab, dlTrainOptions('dlTrainRestrictList'));
+                    restrictedCoef = dlTrainOptions('dlTrainRestrictCoef');
+                
+                catch
+
+                    restrictedList = contains(lab, '');
+                    restrictedList = restrictedList * 0;
+
+                    if dlTrainOptions('dlUpdateVerbose')
+
+                        fprintf("--->No restricted list found; or format is wrong.\n")
+
+                    end
+
+                end
+
                 for i = lg'
     
                     rng('shuffle');
@@ -2305,29 +2365,6 @@ classdef DynaLearn < matlab.mixin.SetGet
                            end
 
                        end
-                    
-                    end
-                    
-                    try
-                    
-                        excludeList = contains(lab, dlTrainOptions('dlTrainExcludeList'));
-                    
-                    catch
-                    
-                        excludeList = contains(lab, '');
-                        excludeList = excludeList * 0;
-                    
-                    end
-                    
-                    try
-                    
-                        restrictedList = contains(lab, dlTrainOptions('dlTrainRestrictList'));
-                        restrictedCoef = dlTrainOptions('dlTrainRestrictCoef');
-                    
-                    catch
-                    
-                        restrictedList = contains(lab, '');
-                        restrictedList = restrictedList * 0;
                     
                     end
     
@@ -2372,9 +2409,13 @@ classdef DynaLearn < matlab.mixin.SetGet
 
                         val{i, 1} = wn;
 
-                        if dlTrainOptions('dlUpdateVerbose')
+                        if dlTrainOptions('dlUpdateVerbose') && ~restrictedList(i)
 
                             fprintf("-----> Updated: %s : %f \n", lab{i, 1}, val{i, 1});
+
+                        elseif dlTrainOptions('dlUpdateVerbose') && restrictedList(i)
+
+                            fprintf("-----> Updated: %s : %f (Rstrct. C = %f) \n", lab{i, 1}, val{i, 1}, restrictedCoef{restrictedCoefCnt});
 
                         end
 
@@ -2536,6 +2577,39 @@ classdef DynaLearn < matlab.mixin.SetGet
                 obj.dlDeltaRatio = max(min((obj.dlLastDelta / deltaL)^0.5, 2), dlErrorChangesPenalty);
                 obj.dlLastDelta = deltaL;
                 
+            end
+
+            if ~isempty(dlTrainOptions('dlTrainSyncList'))
+
+                if dlTrainOptions('dlUpdateVerbose')
+
+                    fprintf("--->Synchronizing dlSyncList\n")
+
+                end
+
+                dlSyncList = dlTrainOptions('dlTrainSyncList');
+
+                for sl = 1:size(dlSyncList, 1)
+
+                    dlSyncListTemp = dlSyncList(sl, :);
+                    dlSyncMask = find(contains(lab, dlSyncListTemp) == 1);
+                    dlSyncMain = find(contains(lab, dlSyncListTemp(1)) == 1, 1);
+
+                    for slm = dlSyncMask'
+
+                        val{slm, 1} = val{dlSyncMain, 1};
+
+                    end
+
+                    if dlTrainOptions('dlUpdateVerbose')
+
+                        fprintf("--->Sync:");
+                        disp(dlSyncListTemp);
+
+                    end
+
+                end
+
             end
             
             q = cell2struct(val, lab);

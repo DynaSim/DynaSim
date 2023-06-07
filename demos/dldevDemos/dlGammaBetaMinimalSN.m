@@ -84,24 +84,27 @@ dlTargetParameters = {[{'MSE', 1, target_FRQ, 1}; {'MSE', 2, -60, 1}]}; % Format
 % Define training options
 dlTrainOptions = containers.Map(); % Train options; MUST be a map data structure
 dlTrainOptions('dlLambda') = 7e-4; % Fitting/Learning rate
-dlTrainOptions('dlEpochs') = 100; % Total iterations 
+dlTrainOptions('dlEpochs') = 200; % Total iterations 
 dlTrainOptions('dlEnhancedMomentum') = 0.2;
 
 dlTrainOptions('dlExcludeDiverge') = 0; % Exclude non-optimals from model log
 dlTrainOptions('dlCheckpointLengthCap') = 11;
 dlTrainOptions('dlUpdateVerbose') = 1;
-dlTrainOptions('dlTrainIncludeList') = ["ES_INfast_iGABAa_tauD", "INfast_INfast_iGABAa_tauD"];
+dlTrainOptions('dlTrainIncludeList') = ["ES_INfast_iGABAa_tauD", "ES_noise", "INfast_noise"];
 
+dlTrainOptions('dlTrainRestrictList') = ["ES_noise", "INfast_noise"]; % Restrict list
+dlTrainOptions('dlTrainRestrictCoef') = {.04, .04}; % Restrict coeffs
+dlTrainOptions('dlTrainSyncList') = ["ES_INfast_iGABAa_tauD", "INfast_INfast_iGABAa_tauD"]; % Each array row will be overrided by synchronizing to the first element
 dlTrainOptions('dlCheckpointCoefficient') = 1.1;
+
 dl.dlTrain(dlInputParameters, dlOutputParameters, dlTargetParameters, dlTrainOptions);
+
+%%
 
 dl.dlLoadOptimal 
 dl.dlSimulate
-try dl.dlPlotAllPotentials('lfp'); end
-
-%% 
-
-
+dl.dlPlotAllPotentials('lfp');
+dl.dlPlotBatchErrors();
 
 %% 2. Optimize contextual input for beta/gamma push-pull
 
