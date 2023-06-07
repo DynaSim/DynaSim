@@ -1450,7 +1450,7 @@ classdef DynaLearn < matlab.mixin.SetGet
             catch
                 
                 dlBatchs = size(dlInputParameters, 2);
-                fprintf("-->Batchs was not determined in options map, default dlBatchs = %d\n", size(dlInputParameters, 2));
+                fprintf("-->dlBatchs (batch size) was not determined in options map, default dlBatchs = %d\n--->Ignore dlBatchs if your update mode is trial or epoch.\n", size(dlInputParameters, 2));
                 
             end
             
@@ -1500,6 +1500,7 @@ classdef DynaLearn < matlab.mixin.SetGet
                     disp(synlist(syn, :));
 
                 end
+                fprintf("---->NOTE: SyncList format should be group(row)Xvariables(column).\n---->On each group, All variables will be set to be equal to the first one.\n\n");
 
             catch
 
@@ -2593,16 +2594,17 @@ classdef DynaLearn < matlab.mixin.SetGet
                     dlSyncListTemp = dlSyncList(sl, :);
                     dlSyncMask = find(contains(lab, dlSyncListTemp) == 1);
                     dlSyncMain = find(contains(lab, dlSyncListTemp(1)) == 1, 1);
-                    disp(dlSyncMask);
-                    disp(dlSyncMain);
 
-                    for slm = dlSyncMask
-                    val{dlSyncMask, 1} = val{dlSyncMain, 1};
+                    for slm = dlSyncMask'
+
+                        val{slm, 1} = val{dlSyncMain, 1};
+
+                    end
 
                     if dlTrainOptions('dlUpdateVerbose')
 
                         fprintf("--->Sync:");
-                        disp("dlSyncListTemp");
+                        disp(dlSyncListTemp);
 
                     end
 
@@ -2748,6 +2750,7 @@ classdef DynaLearn < matlab.mixin.SetGet
             obj.dlOutputs = [];
 
             obj.dlSaveCheckPoint('/Optimal');
+            pfri
             
         end
         

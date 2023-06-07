@@ -1541,8 +1541,8 @@ classdef DynaLearn < matlab.mixin.SetGet
                 
             catch
                 
-                dlLearningRule = 'GeneralEnhancedDeltaRule';
-                fprintf("-->Learning rule was not determined in options map, default dlLearningRule = 'GeneralEnhancedDeltaRule'\n");
+                dlLearningRule = 'GeneralizedStochasticDeltaRule';
+                fprintf("-->Learning rule was not determined in options map\n--->Default dlLearningRule = 'GeneralizedStochasticDeltaRule'\n");
                 
             end
             
@@ -2301,7 +2301,7 @@ classdef DynaLearn < matlab.mixin.SetGet
 
               end
 
-            elseif strcmpi(dlLearningRule, 'GeneralEnhancedDeltaRule')
+            elseif strcmpi(dlLearningRule, 'GeneralizedStochasticDeltaRule')
 
                 restrictedCoefCnt = 0;
 
@@ -2563,7 +2563,7 @@ classdef DynaLearn < matlab.mixin.SetGet
 
             else
                 
-                disp("TODO train step and learning 'else' part");
+                fprintf(">WARNING! Learning rule ""%s"" is not in the learning list.\n", dlLearningRule);
                 
             end
             
@@ -2750,6 +2750,7 @@ classdef DynaLearn < matlab.mixin.SetGet
             obj.dlOutputs = [];
 
             obj.dlSaveCheckPoint('/Optimal');
+            fprintf("\n>Optimal step\n");
             
         end
         
