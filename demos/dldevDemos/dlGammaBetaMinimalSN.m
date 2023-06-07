@@ -119,7 +119,7 @@ fprintf("Optimal outputs > ES_V_aFR = %f, ES_V_aV = %f\n", dl.dlLastOutputs{1}, 
 fprintf("Target outputs > ES_V_aFR = %f, ES_V_aV = %f\n", target_FRQ, target_AV);
 
 %% 1.1
-% Optimize natural frequency
+% Optimize natural frequency (Gamma)
 RunDuration = 500;
 study_dir = 'dlModels/EI5';
 target_FRQ = 50; % Hz
@@ -141,6 +141,61 @@ dlTargetParameters = {[{'MSE', 1, target_FRQ, 1}; {'MSE', 2, -58, 1}]}; % Format
 dlTrainOptions = containers.Map(); % Train options; MUST be a map data structure
 dlTrainOptions('dlLambda') = 1e-3; % Fitting/Learning rate
 dlTrainOptions('dlEpochs') = 1; % Total iterations 
+dlTrainOptions('dlEnhancedMomentum') = 0.2;
+
+dlTrainOptions('dlExcludeDiverge') = 0; % Exclude non-optimals from model log
+dlTrainOptions('dlCheckpointLengthCap') = 11;
+dlTrainOptions('dlUpdateVerbose') = 1;
+dlTrainOptions('dlTrainIncludeList') = ["ES_INfast_iGABAa_tauD", "ES_noise"];
+
+dlTrainOptions('dlTrainRestrictList') = ["ES_noise", "INfast_noise"]; % Restrict list
+dlTrainOptions('dlTrainRestrictCoef') = {.001, .001}; % Restrict coeffs
+dlTrainOptions('dlTrainSyncList') = [["ES_INfast_iGABAa_tauD", ...
+    "INfast_INfast_iGABAa_tauD"]; ["ES_noise", "INfast_noise"]]; % Each array row will be overrided
+                                  % by synchronizing to the first element
+dlTrainOptions('dlCheckpointCoefficient') = 1.5;
+
+dl.dlTrain(dlInputParameters, dlOutputParameters, dlTargetParameters, dlTrainOptions);
+
+%%
+
+dl.dlLoadOptimal 
+dl.dlSimulate
+dl.dlPlotAllPotentials('lfp');
+dl.dlPlotBatchErrors();
+
+%%
+
+p = load([study_dir, '/Optimalparams.mat']);
+p = p.p;
+fprintf("Starting parameters > ES_noise = %f, INfast_noise = %f \n ->ES_INfast_iGABAa_tauD = %f\n->INfast_INfast_iGABAa_tauD = %f\n", 40.0, 40.0, 5.0, 5.0);
+fprintf("Optimal parameters > ES_noise = %f, INfast_noise = %f \n ->ES_INfast_iGABAa_tauD = %f\n->INfast_INfast_iGABAa_tauD = %f\n", p.ES_noise, p.INfast_noise, p.ES_INfast_iGABAa_tauD, p.INfast_INfast_iGABAa_tauD);
+fprintf("Optimal outputs > ES_V_aFR = %f, ES_V_aV = %f\n", dl.dlLastOutputs{1}, dl.dlLastOutputs{2});
+fprintf("Target outputs > ES_V_aFR = %f, ES_V_aV = %f\n", target_FRQ, target_AV);
+
+%% 1.1
+% Optimize natural frequency (Beta)
+RunDuration = 500;
+study_dir = 'dlModels/EI6';
+target_FRQ = 20; % Hz
+target_AV = -58; % mV
+dl = DynaLearn(s, study_dir, 'mex', 'EI', 1);
+dl.dlSave();
+
+%%
+
+dl.dlLoader(study_dir);
+
+%% Define optimization parameters
+
+dlInputParameters = {dlNullInputs(RunDuration)}; % Null inputs (no external stimulation).
+dlOutputParameters = [{['ES', '_V'], 1:80, [10 RunDuration], 'fnat'}; {['ES', '_V'], 1:80, [10 RunDuration], 'av'}; {['ES', '_V'], 1:80, [10 RunDuration], 'afr'}];
+dlTargetParameters = {[{'MSE', 1, target_FRQ, 1}; {'MSE', 2, -62, 1}]}; % Format: (1)Mode;(2)Output indices;(3)Target value;(4)Weight in loss equation
+
+% Define training options
+dlTrainOptions = containers.Map(); % Train options; MUST be a map data structure
+dlTrainOptions('dlLambda') = 1e-3; % Fitting/Learning rate
+dlTrainOptions('dlEpochs') = 400; % Total iterations 
 dlTrainOptions('dlEnhancedMomentum') = 0.2;
 
 dlTrainOptions('dlExcludeDiverge') = 0; % Exclude non-optimals from model log
