@@ -14,4 +14,6 @@ function y = dlCalcNaturalFrequency(dlOutput, dldt, dlDownSampleFactor)
 
     y = f(find(P1 == max(P1), 1));
 
+    % plot(f, P1);title("FFT");xlabel("Frequency");ylabel("Power amplitude");
+
 end

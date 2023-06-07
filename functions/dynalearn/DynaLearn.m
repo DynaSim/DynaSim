@@ -818,7 +818,7 @@ classdef DynaLearn < matlab.mixin.SetGet
 
                         end
 
-                        title(title_);
+                        title(title_ + " single LFP");
 
                     end
 
@@ -835,8 +835,17 @@ classdef DynaLearn < matlab.mixin.SetGet
                         plot(t, mean(x, 2));
                         grid("on");
 
-                        ylabel(obj.dlPopulationLabelTrim(dlLabels(i+1)));
-                        title(title_);
+                        try
+
+                            ylabel(obj.dlPopulationLabelTrim(dlLabels(i+1)));
+
+                        catch
+
+                            ylabel(dlLabels(i+1));
+
+                        end
+
+                        title(title_ + " Population LFP");
 
                     end
 
@@ -850,36 +859,62 @@ classdef DynaLearn < matlab.mixin.SetGet
                 
                     dtf = ceil(1 / (obj.dldT*obj.dlDownSampleFactor));
                     
-                    lf = opts("lf")*dtf;
-                    hf = opts("hf")*dtf; 
-                    freqCap = 0;
+                    try
+
+                        lf = opts("lf");
+                        hf = opts("hf"); 
+
+                    catch
+
+                        fprintf("\n--->No limit set or bad format:\n---->opts map should have opts.lf and opts.hf as real positive values.\n");
+
+                    end
                     
                     for i = (k-1)*q+1:min((k*q)-1, n-1)
 
-                        x = dlPotentials{1, i+1};
-                        fqs = linspace(1, 500, max(size(x)));
                         subplot((min(k*q, n-1) - (k-1)*q), 1, mod(i-1, (min(k*q, n-1) - (k-1)*q))+1);
-                        ffts = abs(fft(mean(x, 2))) * min(size(x)) / 1000;
+                        x = dlPotentials{1, i+1};
+                        L = size(x, 1);
+                        Fs = (1 / (obj.dldT*obj.dlDownSampleFactor)) * 1000;
+                        
+                        x = mean(x, 2);
+                        x = detrend(x);
+                    
+                        Y = fft(x); 
+                        P2 = abs(Y/L);
+                        P1 = P2(1:floor(L/2)+1);
+                        fq = Fs*(0:floor(L/2))/L;
 
                         try
 
-                            yf = smooth(ffts(lf:hf));
-                            area(fqs(lf:hf), yf);
+                            area(fq, P1);
                             grid("on");
 
-                            if freqCap == 0
-                                freqCap = max(ffts(lf:hf))*1.2;
-                                ylim([0, freqCap]);
-                            else
-                                ylim([0, freqCap]);
+                            try
+
+                                xlim([lf hf]);
+
+                            catch
+
+                                % No lim.
+
                             end
 
-                            ylabel(obj.dlPopulationLabelTrim(dlLabels(i+1)));
+                            try
+    
+                                ylabel(obj.dlPopulationLabelTrim(dlLabels(i+1)));
+    
+                            catch
+    
+                                ylabel(dlLabels(i+1));
+    
+                            end
+
                             title(title_);
 
                         catch
 
-                           fprintf(" Error in plotter* "); 
+                           fprintf("\n-->Error in avgfft plotter, skipping.\n"); 
 
                         end
 
@@ -912,7 +947,17 @@ classdef DynaLearn < matlab.mixin.SetGet
 
                         end
 
-                        yticklabels_(i) = obj.dlPopulationLabelTrim(dlLabels(i+1));
+                        try
+
+                            ylabel(obj.dlPopulationLabelTrim(dlLabels(i+1)));
+
+                        catch
+
+                            ylabel(dlLabels(i+1));
+
+                        end
+
+                        yticklabels_(i) = dlLabels(i+1);
                         yticks_(i) = size(imgRaster, 1);
 
                     end
@@ -937,7 +982,7 @@ classdef DynaLearn < matlab.mixin.SetGet
 
                     ylim([.5 yticks_(min((k*q), n-1))+.5]);
                     xlabel(mode + " in time (ms)");
-                    title(title_);
+                    title(title_ + " raster");
 
                 elseif strcmpi(mode, 'lfpmap')
 
