@@ -173,12 +173,12 @@ fprintf("Optimal parameters > ES_noise = %f, INfast_noise = %f \n ->ES_INfast_iG
 fprintf("Optimal outputs > ES_V_aFR = %f, ES_V_aV = %f\n", dl.dlLastOutputs{1}, dl.dlLastOutputs{2});
 fprintf("Target outputs > ES_V_aFR = %f, ES_V_aV = %f\n", target_FRQ, target_AV);
 
-%% 1.1
+%% 1.2
 % Optimize natural frequency (Beta)
 RunDuration = 500;
 study_dir = 'dlModels/EI6';
 target_FRQ = 20; % Hz
-target_AV = -58; % mV
+target_AV = -70; % mV
 dl = DynaLearn(s, study_dir, 'mex', 'EI', 1);
 dl.dlSave();
 
@@ -190,13 +190,13 @@ dl.dlLoader(study_dir);
 
 dlInputParameters = {dlNullInputs(RunDuration)}; % Null inputs (no external stimulation).
 dlOutputParameters = [{['ES', '_V'], 1:80, [10 RunDuration], 'fnat'}; {['ES', '_V'], 1:80, [10 RunDuration], 'av'}; {['ES', '_V'], 1:80, [10 RunDuration], 'afr'}];
-dlTargetParameters = {[{'MSE', 1, target_FRQ, 1}; {'MSE', 2, -62, 1}]}; % Format: (1)Mode;(2)Output indices;(3)Target value;(4)Weight in loss equation
+dlTargetParameters = {[{'MQE', 1, target_FRQ, 1}; {'MSE', 2, target_AV, 1}]}; % Format: (1)Mode;(2)Output indices;(3)Target value;(4)Weight in loss equation
 
 % Define training options
 dlTrainOptions = containers.Map(); % Train options; MUST be a map data structure
-dlTrainOptions('dlLambda') = 1e-3; % Fitting/Learning rate
+dlTrainOptions('dlLambda') = 1e-2; % Fitting/Learning rate
 dlTrainOptions('dlEpochs') = 400; % Total iterations 
-dlTrainOptions('dlEnhancedMomentum') = 0.2;
+dlTrainOptions('dlEnhancedMomentum') = 0.5;
 
 dlTrainOptions('dlExcludeDiverge') = 0; % Exclude non-optimals from model log
 dlTrainOptions('dlCheckpointLengthCap') = 11;
@@ -225,8 +225,64 @@ p = load([study_dir, '/Optimalparams.mat']);
 p = p.p;
 fprintf("Starting parameters > ES_noise = %f, INfast_noise = %f \n ->ES_INfast_iGABAa_tauD = %f\n->INfast_INfast_iGABAa_tauD = %f\n", 40.0, 40.0, 5.0, 5.0);
 fprintf("Optimal parameters > ES_noise = %f, INfast_noise = %f \n ->ES_INfast_iGABAa_tauD = %f\n->INfast_INfast_iGABAa_tauD = %f\n", p.ES_noise, p.INfast_noise, p.ES_INfast_iGABAa_tauD, p.INfast_INfast_iGABAa_tauD);
-fprintf("Optimal outputs > ES_V_aFR = %f, ES_V_aV = %f\n", dl.dlLastOutputs{1}, dl.dlLastOutputs{2});
-fprintf("Target outputs > ES_V_aFR = %f, ES_V_aV = %f\n", target_FRQ, target_AV);
+fprintf("Optimal outputs > ES_V_fNAT = %f, ES_V_aV = %f\n", dl.dlLastOutputs{1}, dl.dlLastOutputs{2});
+fprintf("Target outputs > ES_V_fNAT = %f, ES_V_aV = %f\n", target_FRQ, target_AV);
+
+%% 1.3
+% Optimize natural frequency (Low-gamma)
+RunDuration = 500;
+study_dir = 'dlModels/EI7';
+target_FRQ = 40; % Hz
+target_AV = -70; % mV
+dl = DynaLearn(s, study_dir, 'mex', 'EI', 1);
+dl.dlSave();
+
+%%
+
+dl.dlLoader(study_dir);
+
+%% Define optimization parameters
+
+dlInputParameters = {dlNullInputs(RunDuration)}; % Null inputs (no external stimulation).
+dlOutputParameters = [{['ES', '_V'], 1:80, [10 RunDuration], 'fnat'}; {['ES', '_V'], 1:80, [10 RunDuration], 'av'}; {['ES', '_V'], 1:80, [10 RunDuration], 'afr'}];
+dlTargetParameters = {[{'MQE', 1, target_FRQ, 1}; {'MSE', 2, target_AV, 1}]}; % Format: (1)Mode;(2)Output indices;(3)Target value;(4)Weight in loss equation
+
+% Define training options
+dlTrainOptions = containers.Map(); % Train options; MUST be a map data structure
+dlTrainOptions('dlLambda') = 1e-4; % Fitting/Learning rate
+dlTrainOptions('dlEpochs') = 400; % Total iterations 
+dlTrainOptions('dlEnhancedMomentum') = 0.25;
+
+dlTrainOptions('dlExcludeDiverge') = 0; % Exclude non-optimals from model log
+dlTrainOptions('dlCheckpointLengthCap') = 11;
+dlTrainOptions('dlUpdateVerbose') = 1;
+dlTrainOptions('dlTrainIncludeList') = ["ES_INfast_iGABAa_tauD", "ES_noise"];
+
+dlTrainOptions('dlTrainRestrictList') = ["ES_noise", "INfast_noise"]; % Restrict list
+dlTrainOptions('dlTrainRestrictCoef') = {.001, .001}; % Restrict coeffs
+dlTrainOptions('dlTrainSyncList') = [["ES_INfast_iGABAa_tauD", ...
+    "INfast_INfast_iGABAa_tauD"]; ["ES_noise", "INfast_noise"]]; % Each array row will be overrided
+                                  % by synchronizing to the first element
+dlTrainOptions('dlCheckpointCoefficient') = 1.5;
+
+dl.dlTrain(dlInputParameters, dlOutputParameters, dlTargetParameters, dlTrainOptions);
+
+%%
+
+dl.dlLoadOptimal 
+dl.dlSimulate
+dl.dlPlotAllPotentials('lfp');
+dl.dlPlotBatchErrors();
+
+%%
+
+p = load([study_dir, '/Optimalparams.mat']);
+p = p.p;
+fprintf("Starting parameters > ES_noise = %f, INfast_noise = %f \n ->ES_INfast_iGABAa_tauD = %f\n->INfast_INfast_iGABAa_tauD = %f\n", 40.0, 40.0, 5.0, 5.0);
+fprintf("Optimal parameters > ES_noise = %f, INfast_noise = %f \n ->ES_INfast_iGABAa_tauD = %f\n->INfast_INfast_iGABAa_tauD = %f\n", p.ES_noise, p.INfast_noise, p.ES_INfast_iGABAa_tauD, p.INfast_INfast_iGABAa_tauD);
+fprintf("Optimal outputs > ES_V_fNAT = %f, ES_V_aV = %f\n", dl.dlLastOutputs{1}, dl.dlLastOutputs{2});
+fprintf("Target outputs > ES_V_fNAT = %f, ES_V_aV = %f\n", target_FRQ, target_AV);
+
 
 %% 2. Optimize contextual input for beta/gamma push-pull
 
