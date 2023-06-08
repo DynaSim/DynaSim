@@ -63,8 +63,8 @@ s.connections(3).parameters={'tauD',tauGABAfast,'gGABAa',gGABAfast};
 % dsPlot(data, 'plot_type','raster');
 % tic; dsPlot(data, 'plot_type','power'); toc;
 
-%% 1.0
-% Optimize firing rate
+%% 1.0 Optimize firing rate
+
 RunDuration = 500;
 study_dir = 'dlModels/EI4';
 target_FRQ = 70; % Hz
@@ -118,8 +118,8 @@ fprintf("Optimal parameters > ES_noise = %f, INfast_noise = %f \n ->ES_INfast_iG
 fprintf("Optimal outputs > ES_V_aFR = %f, ES_V_aV = %f\n", dl.dlLastOutputs{1}, dl.dlLastOutputs{2});
 fprintf("Target outputs > ES_V_aFR = %f, ES_V_aV = %f\n", target_FRQ, target_AV);
 
-%% 1.1
-% Optimize natural frequency (Gamma)
+%% 1.1 Optimize natural frequency (Gamma~50Hz)
+
 RunDuration = 500;
 study_dir = 'dlModels/EI5';
 target_FRQ = 50; % Hz
@@ -173,8 +173,8 @@ fprintf("Optimal parameters > ES_noise = %f, INfast_noise = %f \n ->ES_INfast_iG
 fprintf("Optimal outputs > ES_V_aFR = %f, ES_V_aV = %f\n", dl.dlLastOutputs{1}, dl.dlLastOutputs{2});
 fprintf("Target outputs > ES_V_aFR = %f, ES_V_aV = %f\n", target_FRQ, target_AV);
 
-%% 1.2
-% Optimize natural frequency (Beta)
+%% 1.2 Optimize natural frequency (Beta~20Hz)
+
 RunDuration = 500;
 study_dir = 'dlModels/EI6';
 target_FRQ = 20; % Hz
@@ -228,8 +228,8 @@ fprintf("Optimal parameters > ES_noise = %f, INfast_noise = %f \n ->ES_INfast_iG
 fprintf("Optimal outputs > ES_V_fNAT = %f, ES_V_aV = %f\n", dl.dlLastOutputs{1}, dl.dlLastOutputs{2});
 fprintf("Target outputs > ES_V_fNAT = %f, ES_V_aV = %f\n", target_FRQ, target_AV);
 
-%% 1.3
-% Optimize natural frequency (Low-gamma)
+%% 1.3 Optimize natural frequency (Low-gamma~40Hz)
+
 RunDuration = 500;
 study_dir = 'dlModels/EI7';
 target_FRQ = 40; % Hz
@@ -239,7 +239,7 @@ dl.dlSave();
 
 %%
 
-dl.dlLoader(study_dir);
+dl = DynaLearn.dlLoader(study_dir);
 
 %% Define optimization parameters
 
@@ -250,7 +250,7 @@ dlTargetParameters = {[{'MQE', 1, target_FRQ, 1}; {'MSE', 2, target_AV, 1}]}; % 
 % Define training options
 dlTrainOptions = containers.Map(); % Train options; MUST be a map data structure
 dlTrainOptions('dlLambda') = 1e-4; % Fitting/Learning rate
-dlTrainOptions('dlEpochs') = 400; % Total iterations 
+dlTrainOptions('dlEpochs') = 100; % Total iterations 
 dlTrainOptions('dlEnhancedMomentum') = 0.25;
 
 dlTrainOptions('dlExcludeDiverge') = 0; % Exclude non-optimals from model log
@@ -289,7 +289,6 @@ fprintf("Target outputs > ES_V_fNAT = %f, ES_V_aV = %f\n", target_FRQ, target_AV
 % Optimize Iapp to ES, INfast, INslow 
 % Condition 1 (context=0): gamma>beta
 % Condition 2 (context=1): beta>gamma
-
 
 % define equations of cell model (same for E and I populations)
 eqns={
