@@ -770,6 +770,12 @@ classdef DynaLearn < matlab.mixin.SetGet
             m = ceil(n/q);
             title_ = "Model: " + obj.dlModelName;
             
+            if isempty(obj.dlOutputs{1})
+
+                obj.dlSimulate();
+
+            end
+            
             for k = 1:m
                 
                 if strcmpi(mode, 'ifr')
@@ -1182,8 +1188,16 @@ classdef DynaLearn < matlab.mixin.SetGet
 
                 catch
 
-                    fprintf("\n-->Check your model or output parameters, there is a problem about their name. Session is going to be invalid.\n");
-                    error("\n@ds.dl: Model parameters do not match outputs or its variables.\n");
+                    try
+
+                        dlIndices(i) = find(strcmpi(obj.dlVariables, dlOutputParameters{i, 1}{1}));
+
+                    catch
+
+                        fprintf("\n-->Check your model or output parameters, there is a problem about their name. Session is going to be invalid.\n");
+                        error("\n@ds.dl: Model parameters do not match outputs or its variables.\n");
+
+                    end
 
                 end
                 
@@ -1193,10 +1207,19 @@ classdef DynaLearn < matlab.mixin.SetGet
 
             for i = 1:n
                 
-                dlTimeKernel = ceil(dlOutputParameters{i, 3}/(obj.dldT*obj.dlDownSampleFactor));
-                dlOutputType = dlOutputParameters{i, 4};
-                dlTempOutputs = obj.dlLastOutputs{i}(dlTimeKernel(1):dlTimeKernel(2), dlOutputParameters{i, 2});
-  
+                try
+
+                    dlTimeKernel = ceil(dlOutputParameters{i, 3}/(obj.dldT*obj.dlDownSampleFactor));
+                    dlOutputType = dlOutputParameters{i, 4};
+                    dlTempOutputs = obj.dlLastOutputs{i}(dlTimeKernel(1):dlTimeKernel(2), dlOutputParameters{i, 2});
+
+                catch
+
+                    dlTimeKernel = ceil(dlOutputParameters{i, 1}{3}/(obj.dldT*obj.dlDownSampleFactor));
+                    dlOutputType = dlOutputParameters{i, 1}{4};
+                    dlTempOutputs = obj.dlLastOutputs{i}(dlTimeKernel(1):dlTimeKernel(2), dlOutputParameters{i, 1}{2});
+
+                end
                 if strcmpi(dlOutputType, 'ifr')
 
                     obj.dlLastOutputs{i} = obj.dlApplyIFRKernel(dlTempOutputs);
@@ -1252,15 +1275,35 @@ classdef DynaLearn < matlab.mixin.SetGet
                
                 TempError = 0;
                 
-                dlErrorType = dlTargetParams{i, 1};
-                dlOutputIndices = dlTargetParams{i, 2};
-                dlOutputTargets = dlTargetParams{i, 3};
-                dlErrorWeight = dlTargetParams{i, 4};
+                try
+
+                    dlErrorType = dlTargetParams{i}{1};
+                    dlOutputIndices = dlTargetParams{i}{2};
+                    dlOutputTargets = dlTargetParams{i}{3};
+                    dlErrorWeight = dlTargetParams{i}{4};
+
+                catch
+
+                    dlErrorType = dlTargetParams{i, 1};
+                    dlOutputIndices = dlTargetParams{i, 2};
+                    dlOutputTargets = dlTargetParams{i, 3};
+                    dlErrorWeight = dlTargetParams{i, 4};
+
+                end
 
                 try
 
-                    dlLowerFreq = dlTargetParams{i, 5};
-                    dlUpperFreq = dlTargetParams{i, 6};
+                    try
+
+                        dlLowerFreq = dlTargetParams{i}{5};
+                        dlUpperFreq = dlTargetParams{i}{6};
+
+                    catch
+
+                        dlLowerFreq = dlTargetParams{i}{5};
+                        dlUpperFreq = dlTargetParams{i}{6};
+
+                    end
 
                 catch
 
@@ -1271,10 +1314,21 @@ classdef DynaLearn < matlab.mixin.SetGet
 
                 try
 
-                    dlLowerFreq1 = dlTargetParams{i, 5};
-                    dlUpperFreq1 = dlTargetParams{i, 6};
-                    dlLowerFreq2 = dlTargetParams{i, 7};
-                    dlUpperFreq2 = dlTargetParams{i, 8};
+                    try
+
+                        dlLowerFreq1 = dlTargetParams{i, 5};
+                        dlUpperFreq1 = dlTargetParams{i, 6};
+                        dlLowerFreq2 = dlTargetParams{i, 7};
+                        dlUpperFreq2 = dlTargetParams{i, 8};
+
+                    catch
+
+                        dlLowerFreq1 = dlTargetParams{i}{5};
+                        dlUpperFreq1 = dlTargetParams{i}{6};
+                        dlLowerFreq2 = dlTargetParams{i}{7};
+                        dlUpperFreq2 = dlTargetParams{i}{8};
+
+                    end
 
                 catch
 
@@ -1299,7 +1353,7 @@ classdef DynaLearn < matlab.mixin.SetGet
                 
                 elseif strcmpi(dlErrorType, 'MQE')
                     
-                    TempError = abs(obj.dlLastOutputs{dlOutputIndices} - dlOutputTargets)^4;
+                    TempError = (1 + abs(obj.dlLastOutputs{dlOutputIndices} - dlOutputTargets))^4;
                 
                 elseif strcmpi(dlErrorType, 'Compare')
                     
@@ -1360,6 +1414,20 @@ classdef DynaLearn < matlab.mixin.SetGet
                     TempError = mean(dlRPowerSpectrum(obj, argsPSR), 'all');
                     fprintf(" gRp=%d f:[%d-%d Hz / %d-%d Hz] ", TempError, dlLowerFreq1, dlUpperFreq1, dlLowerFreq2, dlUpperFreq2);
                     TempError = abs(TempError - dlOutputTargets)^2;
+                    fprintf(" dlTarg=%d ", dlOutputTargets);
+
+                elseif strcmpi(dlErrorType, 'QRPenalty')
+                    
+                    argsPSR = struct();
+
+                    argsPSR.lf1 = dlLowerFreq1; 
+                    argsPSR.hf1 = dlUpperFreq1;
+                    argsPSR.lf2 = dlLowerFreq2;
+                    argsPSR.hf2 = dlUpperFreq2;
+
+                    TempError = mean(dlRPowerSpectrum(obj, argsPSR), 'all');
+                    fprintf(" gRp=%d f:[%d-%d Hz / %d-%d Hz] ", TempError, dlLowerFreq1, dlUpperFreq1, dlLowerFreq2, dlUpperFreq2);
+                    TempError = (1 + abs(TempError - dlOutputTargets))^4;
                     fprintf(" dlTarg=%d ", dlOutputTargets);
 
                 else
@@ -1506,9 +1574,21 @@ classdef DynaLearn < matlab.mixin.SetGet
 
             catch
 
-                dlTrainOptions('dlTrainIncludeList') = ["_netcon", "_gAMPA", "_tau", "_gleak", "_gGABA", "_gNa", "_gK", "_gCOM", "_Eleak", "noise", "Iapp"];
-                fprintf("\n-->Warning! No variables were included in the fitting include list.\n--->Some dynasim variables are by default assigned in:\n");
-                fprintf("---> %s\n", dlTrainOptions('dlTrainIncludeList'));
+                dlTrainOptions('dlTrainIncludeList') = "";
+                try 
+
+                    p = load([obj.dlStudyDir, '/solve/params.mat']);
+    
+                catch
+    
+                    p = load([obj.dlStudyDir, '/solve/sim1/params.mat']);
+    
+                end
+            
+                % lab = fieldnames(p.p);
+                % lab = lab(contains(lab, dlTrainOptions('dlTrainIncludeList')));
+                fprintf("\n-->Warning! No variables were included in the fitting include list.\n--->All dynasim variables are by default assigned in.\n");
+                % fprintf("---> %s\n", cell2mat(lab));
             end
 
             try
