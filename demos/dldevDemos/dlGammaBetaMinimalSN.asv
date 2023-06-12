@@ -392,28 +392,28 @@ condition2('INfast_Context') = 1;
 condition2('INslow_Context') = 1;
 condition2('tspan') = [0 RunDuration];
 
-dlInputParameters = {condition1, condition2}; % Context inputs (no external stimulation).
+dlInputParameters = {condition2, condition2}; % Context inputs (no external stimulation).
 dlOutputParameters = {{['ES', '_V'], 1:80, [10 RunDuration], 'av'}; {['INfast', '_V'], 1:20, [10 RunDuration], 'av'}; {['INslow', '_V'], 1:20, [10 RunDuration], 'av'}};
-dlTargetParameters1 = {{'QRPenalty', 1, 3., 1, 20, 40, 55, 75}; {'MAE', 1, -70, 1}; {'MAE', 2, -70, 1}; {'MAE', 3, -70, 1}}; % Format: (1)Mode;(2)Output indices;(3)Target value;(4)Weight in loss equation
-dlTargetParameters2 = {{'QRPenalty', 1, 7., 1, 20, 40, 55, 75}; {'MAE', 1, -70, 1}; {'MAE', 2, -70, 1}; {'MAE', 3, -70, 1}}; % Format: (1)Mode;(2)Output indices;(3)Target value;(4)Weight in loss equation
-dlTargetParameters = {dlTargetParameters1, dlTargetParameters2};
+dlTargetParameters1 = {{'QRPenalty', 1, .1, 1, 20, 40, 55, 75}; {'MAE', 1, -70, 1}; {'MAE', 2, -70, 1}; {'MAE', 3, -70, 1}}; % Format: (1)Mode;(2)Output indices;(3)Target value;(4)Weight in loss equation
+dlTargetParameters2 = {{'QRPenalty', 1, 8., 1, 20, 40, 55, 75}; {'MAE', 1, -70, 1}; {'MAE', 2, -70, 1}; {'MAE', 3, -70, 1}}; % Format: (1)Mode;(2)Output indices;(3)Target value;(4)Weight in loss equation
+dlTargetParameters = {dlTargetParameters2, dlTargetParameters2};
 
 % Define training options
 dlTrainOptions = containers.Map(); % Train options; MUST be a map data structure
-dlTrainOptions('dlLambda') = 1e-5;% Fitting/Learning rate
-dlTrainOptions('dlEpochs') = 1000; % Total iterations 
+dlTrainOptions('dlLambda') = 1e-8;% Fitting/Learning rate
+dlTrainOptions('dlEpochs') = 100; % Total iterations 
 dlTrainOptions('dlEnhancedMomentum') = 0.25;
 
 dlTrainOptions('dlExcludeDiverge') = 0; % Exclude non-optimals from model log
-dlTrainOptions('dlCheckpointLengthCap') = 10;
+dlTrainOptions('dlCheckpointLengthCap') = 100;
 dlTrainOptions('dlUpdateVerbose') = 1;
 dlTrainOptions('dlTrainIncludeList') = "_IappContext";
 
-% dlTrainOptions('dlTrainRestrictList') = ["ES_IappContext"]; % Restrict list
-% dlTrainOptions('dlTrainRestrictCoef') = {0.1}; % Restrict coeffs
+dlTrainOptions('dlTrainRestrictList') = ["ES_noise", "INfast_noise"]; % Restrict list
+dlTrainOptions('dlTrainRestrictCoef') = {.001, .001}; % Restrict coeffs
 % dlTrainOptions('dlTrainSyncList') = [["ES_INfast_iGABAa_tauD", "INfast_INfast_iGABAa_tauD"]; ["ES_noise", "INfast_noise"]]; % Each array row will be overrided by synchronizing to the first element
-dlTrainOptions('dlCheckpointCoefficient') = 2.1;
-dlTrainOptions('dlUpdateMode') = 'batch';
+dlTrainOptions('dlCheckpointCoefficient') = 4.0;
+dlTrainOptions('dlUpdateMode') = 'trial';
 
 dl.dlTrain(dlInputParameters, dlOutputParameters, dlTargetParameters, dlTrainOptions);
 
