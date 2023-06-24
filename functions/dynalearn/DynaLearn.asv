@@ -805,7 +805,7 @@ classdef DynaLearn < matlab.mixin.SetGet
 
                 elseif strcmpi(mode, 'lfp')
 
-                    figure();%'Position'%, [0, 0, 1700, min(1700, 1000*(min(k*q, n-1) - (k-1)*q)/(q))]);
+                    figure('Position', [0, 0, 1700, min1700*(min(k*q, n-1) - (k-1)*q)/(q)]);
                 
                     for i = (k-1)*q+1:min((k*q), n-1)
 
