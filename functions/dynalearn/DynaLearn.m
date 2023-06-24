@@ -2527,6 +2527,8 @@ classdef DynaLearn < matlab.mixin.SetGet
                         
                         else
 
+                            disp(wn);
+                            disp(lab{i, 1});
                             wn(abs(wn) < 1e-3) = 9e-2; % Too small or negative elimination for stability
                             wn(abs(wn) > 1e+4) = 9e+3*sign(wn); % Too high values elimination for stability
 
