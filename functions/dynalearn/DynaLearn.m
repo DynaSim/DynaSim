@@ -953,15 +953,15 @@ classdef DynaLearn < matlab.mixin.SetGet
 
                         end
 
-                        try
-
-                            ylabel(obj.dlPopulationLabelTrim(dlLabels(i+1)));
-
-                        catch
-
-                            ylabel(dlLabels(i+1));
-
-                        end
+                        % try
+                        % 
+                        %     ylabel(obj.dlPopulationLabelTrim(dlLabels(i+1)));
+                        % 
+                        % catch
+                        % 
+                        %     ylabel(dlLabels(i+1));
+                        % 
+                        % end
 
                         yticklabels_(i) = dlLabels(i+1);
                         yticks_(i) = size(imgRaster, 1);
@@ -1220,6 +1220,7 @@ classdef DynaLearn < matlab.mixin.SetGet
                     dlTempOutputs = obj.dlLastOutputs{i}(dlTimeKernel(1):dlTimeKernel(2), dlOutputParameters{i, 1}{2});
 
                 end
+
                 if strcmpi(dlOutputType, 'ifr')
 
                     obj.dlLastOutputs{i} = obj.dlApplyIFRKernel(dlTempOutputs);
@@ -2527,8 +2528,8 @@ classdef DynaLearn < matlab.mixin.SetGet
                         
                         else
 
-                            disp(wn);
-                            disp(lab{i, 1});
+                            % disp(wn);
+                            % disp(lab{i, 1});
                             wn(abs(wn) < 1e-3) = 9e-2; % Too small or negative elimination for stability
                             wn(abs(wn) > 1e+4) = 9e+3*sign(wn); % Too high values elimination for stability
 
