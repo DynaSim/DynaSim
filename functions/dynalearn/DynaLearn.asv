@@ -2463,7 +2463,7 @@ classdef DynaLearn < matlab.mixin.SetGet
 
                     catch
 
-                        fprintf("\n---->No boundary values determined. Ignore if you do not need to restrict boundary of variables.\n")
+                        fprintf("\n---->No boundary values determined. Ignore if you do not need boundary ")
 
                     end
                 
@@ -2538,12 +2538,6 @@ classdef DynaLearn < matlab.mixin.SetGet
 
                             catch
 
-                                if dlTrainOptions('dlUpdateVerbose')
-
-                                    fprintf("\n---->No boundary values/Bad format (ignore this warning if you dont want it)\n");
-                                
-                                end
-
                             end
                         
                         else
@@ -2584,11 +2578,11 @@ classdef DynaLearn < matlab.mixin.SetGet
 
                         if dlTrainOptions('dlUpdateVerbose') && ~restrictedList(i)
 
-                            fprintf("-----> Updated: %s : %f \n", lab{i, 1}, mean(mean(val{i, 1})));
+                            fprintf("-----> Updated: %s : %f \n", lab{i, 1}, val{i, 1});
 
                         elseif dlTrainOptions('dlUpdateVerbose') && restrictedList(i)
 
-                            fprintf("-----> Updated: %s : %f (Rstrct. C = %f) \n", lab{i, 1}, mean(mean(val{i, 1})), restrictedCoef{restrictedCoefCnt});
+                            fprintf("-----> Updated: %s : %f (Rstrct. C = %f) \n", lab{i, 1}, val{i, 1}, restrictedCoef{restrictedCoefCnt});
 
                         end
 
