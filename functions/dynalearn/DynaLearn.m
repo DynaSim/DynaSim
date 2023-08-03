@@ -2830,7 +2830,7 @@ classdef DynaLearn < matlab.mixin.SetGet
             n = max(size(obj.dlErrorsLog));
             x = zeros(1, n);
             xm = zeros(1, n);
-            
+          
             try
 
                 m_ = n-dlBatchs;
@@ -2843,8 +2843,19 @@ classdef DynaLearn < matlab.mixin.SetGet
             end
 
             for i = 0:m_
-                x(i+1) = mean(obj.dlErrorsLog(i+1:i+dlBatchs));
-                xm(i+1) = min(obj.dlErrorsLog(i+1:i+dlBatchs));
+
+                if i < m_- dlBatchs*2
+
+                    x(i+1) = mean(obj.dlErrorsLog(i+1:i+dlBatchs*3));
+
+                else
+                    
+                    x(i+1) = mean(obj.dlErrorsLog(i-dlBatchs*2+1:i+dlBatchs));
+
+                end
+
+                xm(i+1) = mean(obj.dlErrorsLog(i+1:i+dlBatchs));
+
             end
 
             try
