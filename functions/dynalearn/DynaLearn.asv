@@ -2883,9 +2883,9 @@ classdef DynaLearn < matlab.mixin.SetGet
 
             else
 
-                plot(tn, x, "DisplayName", "Mean error", "LineStyle", "--");
+                plot(x, "DisplayName", "Mean error", "LineStyle", "--");
                 grid("on");hold("on");
-                plot(tn,    xm, "DisplayName", "Min error");
+                plot(xm, "DisplayName", "Min error");
                 xlabel("Trials");
                 ylabel("Loss");
                 legend;
