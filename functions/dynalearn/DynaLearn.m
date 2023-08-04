@@ -875,7 +875,7 @@ classdef DynaLearn < matlab.mixin.SetGet
                         fprintf("\n--->No limit set or bad format:\n---->opts map should have opts(""lf"") and opts(""hf"") as real positive values.\n");
                         fprintf("\n--->Default lf/hf = 1.0Hz/150.0Hz");
                         lf = 1.0;
-                        hf = 150.0;
+                        hf = 250.0;
 
                     end
                     
@@ -1432,6 +1432,8 @@ classdef DynaLearn < matlab.mixin.SetGet
                     argsPSR.hf1 = dlUpperFreq1;
                     argsPSR.lf2 = dlLowerFreq2;
                     argsPSR.hf2 = dlUpperFreq2;
+
+                    argsPSR.id = dlOutputIndices;
 
                     TempError = mean(dlRPowerSpectrum(obj, argsPSR), 'all');
                     fprintf(" gRp=%d f:[%d-%d Hz / %d-%d Hz] ", TempError, dlLowerFreq1, dlUpperFreq1, dlLowerFreq2, dlUpperFreq2);
