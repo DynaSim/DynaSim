@@ -1962,7 +1962,7 @@ classdef DynaLearn < matlab.mixin.SetGet
 
                     else
 
-                        dlAvgError = mean(obj.dlErrorsLog);
+                        dlAvgError = obj.dlOptimalError + 1;
 
                     end
 
@@ -1980,7 +1980,7 @@ classdef DynaLearn < matlab.mixin.SetGet
 
                         dlCurrentCheckpointLength = 0;
 
-                        if strcmpi(dlUpdateMode, 'batch') && mod(i, dlBatchs) == 0
+                        if strcmpi(dlUpdateMode, 'batch')
 
                             obj.dlUpdateError = dlAvgError;
 
@@ -2011,7 +2011,7 @@ classdef DynaLearn < matlab.mixin.SetGet
 
                     else
 
-                        if strcmpi(dlUpdateMode, 'batch') && mod(i, dlBatchs) == 0
+                        if strcmpi(dlUpdateMode, 'batch')
 
                             obj.dlUpdateError = dlAvgError;
                             if dlAdaptiveLambda == 1
@@ -2025,7 +2025,7 @@ classdef DynaLearn < matlab.mixin.SetGet
                     
                 else
                    
-                    if strcmpi(dlUpdateMode, 'batch') && mod(i, dlBatchs) == 0
+                    if strcmpi(dlUpdateMode, 'batch')
                         if exist('dlAvgError', 'var')
                             obj.dlUpdateError = dlAvgError;
                             if dlAdaptiveLambda == 1
