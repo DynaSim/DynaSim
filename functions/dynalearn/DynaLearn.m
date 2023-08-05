@@ -1437,7 +1437,7 @@ classdef DynaLearn < matlab.mixin.SetGet
 
                     TempError = mean(dlRPowerSpectrum(obj, argsPSR), 'all');
                     fprintf(" gRp=%d f:[%d-%d Hz / %d-%d Hz] ", TempError, dlLowerFreq1, dlUpperFreq1, dlLowerFreq2, dlUpperFreq2);
-                    TempError = (1 + abs(TempError - dlOutputTargets))^4;
+                    TempError = max((abs(TempError - dlOutputTargets))^4, abs(TempError - dlOutputTargets));
                     fprintf(" dlTarg=%d ", dlOutputTargets);
 
                 else
@@ -1980,7 +1980,7 @@ classdef DynaLearn < matlab.mixin.SetGet
 
                         dlCurrentCheckpointLength = 0;
 
-                        if strcmpi(dlUpdateMode, 'batch')
+                        if strcmpi(dlUpdateMode, 'batch') && mod(i, dlBatchs) == 0
 
                             obj.dlUpdateError = dlAvgError;
 
@@ -2011,7 +2011,7 @@ classdef DynaLearn < matlab.mixin.SetGet
 
                     else
 
-                        if strcmpi(dlUpdateMode, 'batch')
+                        if strcmpi(dlUpdateMode, 'batch') && mod(i, dlBatchs) == 0
 
                             obj.dlUpdateError = dlAvgError;
                             if dlAdaptiveLambda == 1
@@ -2025,7 +2025,7 @@ classdef DynaLearn < matlab.mixin.SetGet
                     
                 else
                    
-                    if strcmpi(dlUpdateMode, 'batch')
+                    if strcmpi(dlUpdateMode, 'batch') && mod(i, dlBatchs) == 0
                         if exist('dlAvgError', 'var')
                             obj.dlUpdateError = dlAvgError;
                             if dlAdaptiveLambda == 1
