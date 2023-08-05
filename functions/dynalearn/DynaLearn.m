@@ -1962,7 +1962,7 @@ classdef DynaLearn < matlab.mixin.SetGet
 
                     else
 
-                        dlAvgError = obj.dlOptimalError + 1;
+                        dlAvgError = obj.dlOptimalError*1000;
 
                     end
 
@@ -2885,8 +2885,10 @@ classdef DynaLearn < matlab.mixin.SetGet
 
             else
 
+                tn = linspace(1, n/dlBatchs, size(x, 1));
                 plot(tn, x, "DisplayName", "Mean error", "LineStyle", "--");
                 grid("on");hold("on");
+                tn = linspace(1, n/dlBatchs, size(xm, 1));
                 plot(tn,    xm, "DisplayName", "Min error");
                 xlabel("Trials");
                 ylabel("Loss");
