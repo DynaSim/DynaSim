@@ -1437,7 +1437,7 @@ classdef DynaLearn < matlab.mixin.SetGet
 
                     TempError = mean(dlRPowerSpectrum(obj, argsPSR), 'all');
                     fprintf(" gRp=%d f:[%d-%d Hz / %d-%d Hz] ", TempError, dlLowerFreq1, dlUpperFreq1, dlLowerFreq2, dlUpperFreq2);
-                    TempError = max((abs(TempError - dlOutputTargets))^4, abs(TempError - dlOutputTargets));
+                    TempError = (10*abs(TempError - dlOutputTargets))^4;
                     fprintf(" dlTarg=%d ", dlOutputTargets);
 
                 else
@@ -1962,7 +1962,7 @@ classdef DynaLearn < matlab.mixin.SetGet
 
                     else
 
-                        dlAvgError = obj.dlOptimalError*1000;
+                        dlAvgError = 1e+9; % Max error; no checkpoint
 
                     end
 
@@ -2562,33 +2562,33 @@ classdef DynaLearn < matlab.mixin.SetGet
                         
                         end
             
-                        if contains(lab{i, 1}, "_netcon")
-
-                            wn(wn < 0.01) = 0.04;
-                            wn(wn > 1.00) = 0.97;
-
-                        elseif contains(lab{i, 1}, "_E")
-
-                            wn(abs(wn) > 1e3) = sign(wn)*9e2; % Too large elimination for stability
-                       
-                        elseif contains(lab{i, 1}, "_tau")
-
-                            wn(wn > 1e4) = 1e4; % Too large elimination for stability
-                            wn(wn < 1e-2) = 1e-2;
-
-                        elseif contains(lab{i, 1}, "_g")
-
-                            wn(wn > 1e4) = 1e4; % Too large elimination for stability
-                            wn(wn < 1e-2) = 1e-2;
-                        
-                        else
-
-                            % disp(wn);
-                            % disp(lab{i, 1});
-                            wn(abs(wn) < 1e-3) = 9e-2; % Too small or negative elimination for stability
-                            wn(abs(wn) > 1e+4) = 9e+3*sign(wn); % Too high values elimination for stability
-
-                        end
+                        % if contains(lab{i, 1}, "_netcon")
+                        % 
+                        %     wn(wn < 0.01) = 0.04;
+                        %     wn(wn > 1.00) = 0.97;
+                        % 
+                        % elseif contains(lab{i, 1}, "_E")
+                        % 
+                        %     wn(abs(wn) > 1e3) = sign(wn)*9e2; % Too large elimination for stability
+                        % 
+                        % elseif contains(lab{i, 1}, "_tau")
+                        % 
+                        %     wn(wn > 1e4) = 1e4; % Too large elimination for stability
+                        %     wn(wn < 1e-5) = 1e-5;
+                        % 
+                        % elseif contains(lab{i, 1}, "_g")
+                        % 
+                        %     wn(wn > 1e4) = 1e4; % Too large elimination for stability
+                        %     wn(wn < 1e-2) = 1e-2;
+                        % 
+                        % else
+                        % 
+                        %     % disp(wn);
+                        %     % disp(lab{i, 1});
+                        %     wn(abs(wn) < 1e-3) = 9e-2; % Too small or negative elimination for stability
+                        %     wn(abs(wn) > 1e+4) = 9e+3*sign(wn); % Too high values elimination for stability
+                        % 
+                        % end
 
                         val{i, 1} = wn;
 
