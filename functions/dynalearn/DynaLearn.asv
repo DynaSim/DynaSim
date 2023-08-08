@@ -2466,13 +2466,7 @@ classdef DynaLearn < matlab.mixin.SetGet
                     catch
 
                         fprintf("\n---->No boundary values determined. Ignore if you do not need to restrict boundary of variables.\n")
-                        restrictedBnds = cell(1, max(size(restrictedCoef)));
-                        
-                        for rbi = 1:max(size(restrictedCoef))
-
-                            restrictedBnds{rbi} = [-1e+9 1e+9];
-
-                        end
+                        restrictedBnds = cell(1, )
 
                     end
                 
