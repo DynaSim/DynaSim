@@ -1958,7 +1958,7 @@ classdef DynaLearn < matlab.mixin.SetGet
 
                     if numel(obj.dlErrorsLog) > dlBatchs
 
-                        dlAvgError = mean(obj.dlErrorsLog(end-dlBatchs:end));
+                        dlAvgError = mean(obj.dlErrorsLog(end-dlBatchs+1:end));
 
                     else
 
@@ -2497,11 +2497,11 @@ classdef DynaLearn < matlab.mixin.SetGet
 
                     if contains(l_, '_netcon')
 
-                        delta = (1-w*0.9).*(rand(size(w))-0.5)*error*dlLambda;
+                        delta = (1-w*0.9).*(randn(size(w)))*error*dlLambda;
 
                     else
 
-                        delta = (rand(size(w))-0.5)*error*dlLambda;
+                        delta = (randn(size(w)))*error*dlLambda;
 
                     end
 
