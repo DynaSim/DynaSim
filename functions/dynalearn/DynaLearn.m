@@ -1434,6 +1434,7 @@ classdef DynaLearn < matlab.mixin.SetGet
                     argsPSR.hf2 = dlUpperFreq2;
 
                     argsPSR.id = dlOutputIndices;
+                    % disp(dlOutputIndices);
 
                     TempError = mean(dlRPowerSpectrum(obj, argsPSR), 'all');
                     fprintf(" gRp=%d f:[%d-%d Hz / %d-%d Hz] ", TempError, dlLowerFreq1, dlUpperFreq1, dlLowerFreq2, dlUpperFreq2);
