@@ -1453,7 +1453,7 @@ classdef DynaLearn < matlab.mixin.SetGet
             
             if isnan(Error)
 
-                Error = 1e6;
+                Error = 1e9;
 
             end
 
