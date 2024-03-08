@@ -402,37 +402,6 @@ classdef DynaLearn < matlab.mixin.SetGet
             end
 
             obj.dlParams = p.p;
-
-            % try
-            % if ~obj.dlParallelFlag 
-            % 
-            %     p = load([obj.dlStudyDir, '/solve/params.mat']);
-            %     save([obj.dlStudyDir, dlCheckPointPath, 'params.mat'], '-struct', 'p');
-            % 
-            % elseif obj.dlParallelFlag
-            % 
-            %     p = load([obj.dlStudyDir, '/solve/sim1/params.mat']);
-            %     save([obj.dlStudyDir, dlCheckPointPath, 'params.mat'], '-struct', 'p');
-            % 
-            % end
-            %
-            % catch
-            % 
-            %     disp("---->Optimal skipped (not loaded)");  
-            %     try 
-            % 
-            %         p = load([obj.dlStudyDir, '/solve/params.mat']);
-            % 
-            %     catch
-            % 
-            %         p = load([obj.dlStudyDir, '/solve/sim1/params.mat']);
-            % 
-            %     end
-            % 
-            %     obj.dlParams = p.p;
-            %     % save([obj.dlPath, '/params.mat'], '-struct', 'p');
-            % 
-            % end
             
         end
 
@@ -479,18 +448,6 @@ classdef DynaLearn < matlab.mixin.SetGet
             end
 
             obj.dlParams = p.p;
-            % 
-            % if ~obj.dlParallelFlag 
-            % 
-            %     p = load([obj.dlStudyDir, '/solve/params.mat']);
-            %     save([obj.dlPath, '/params.mat'], '-struct', 'p');
-            % 
-            % elseif obj.dlParallelFlag
-            % 
-            %     p = load([obj.dlStudyDir, '/solve/sim1/params.mat']);
-            %     save([obj.dlPath, '/sim1/params.mat'], '-struct', 'p');
-            % 
-            % end
             
         end
         
@@ -960,16 +917,6 @@ classdef DynaLearn < matlab.mixin.SetGet
 
                         end
 
-                        % try
-                        % 
-                        %     ylabel(obj.dlPopulationLabelTrim(dlLabels(i+1)));
-                        % 
-                        % catch
-                        % 
-                        %     ylabel(dlLabels(i+1));
-                        % 
-                        % end
-
                         yticklabels_(i) = dlLabels(i+1);
                         yticks_(i) = size(imgRaster, 1);
 
@@ -1182,11 +1129,6 @@ classdef DynaLearn < matlab.mixin.SetGet
             n = size(dlOutputParameters, 1);
             dlIndices = zeros(1, n);
             
-            % disp(obj.dlVariables);
-            % for i = 1:n
-            %     disp(dlOutputParameters{i, 1});
-            % end
-
             for i = 1:n
                 
                 try
@@ -1308,8 +1250,8 @@ classdef DynaLearn < matlab.mixin.SetGet
 
                     catch
 
-                        dlLowerFreq = dlTargetParams{i}{5};
-                        dlUpperFreq = dlTargetParams{i}{6};
+                        dlLowerFreq = dlTargetParams{i, 5};
+                        dlUpperFreq = dlTargetParams{i, 6};
 
                     end
 
@@ -1434,12 +1376,20 @@ classdef DynaLearn < matlab.mixin.SetGet
                     argsPSR.hf2 = dlUpperFreq2;
 
                     argsPSR.id = dlOutputIndices;
-                    % disp(dlOutputIndices);
 
                     TempError = mean(dlRPowerSpectrum(obj, argsPSR), 'all');
                     fprintf(" gRp=%d f:[%d-%d Hz / %d-%d Hz] ", TempError, dlLowerFreq1, dlUpperFreq1, dlLowerFreq2, dlUpperFreq2);
                     TempError = (10*abs(TempError - dlOutputTargets))^4;
                     fprintf(" dlTarg=%d ", dlOutputTargets);
+
+                elseif strcmpi(dlErrorType, 'KLD')
+
+                    argsKLD = struct();
+                    argsKLD.id = "_V";
+                    argsKLD.target = dlOutputTargets;
+
+                    TempError = dlPowerSpectrumKLD(obj, argsKLD)*dlErrorWeight;
+                    fprintf(" dKL = %f ", TempError);
 
                 else
                     
@@ -1471,8 +1421,6 @@ classdef DynaLearn < matlab.mixin.SetGet
             else
                 out = obj.dlLastLambda;
             end
-            
-%             out = obj.dlLastLambda * obj.dlDeltaRatio;
             
             if ~ (out < obj.dlLambdaCap && out > 0)
                 
@@ -1586,6 +1534,7 @@ classdef DynaLearn < matlab.mixin.SetGet
             catch
 
                 dlTrainOptions('dlTrainIncludeList') = "";
+
                 try 
 
                     p = load([obj.dlStudyDir, '/solve/params.mat']);
@@ -1599,7 +1548,7 @@ classdef DynaLearn < matlab.mixin.SetGet
                 % lab = fieldnames(p.p);
                 % lab = lab(contains(lab, dlTrainOptions('dlTrainIncludeList')));
                 fprintf("\n-->Warning! No variables were included in the fitting include list.\n--->All dynasim variables are by default assigned in.\n");
-                % fprintf("---> %s\n", cell2mat(lab));
+
             end
 
             try
