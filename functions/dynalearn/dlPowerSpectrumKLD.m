@@ -30,9 +30,7 @@ function d = dlPowerSpectrumKLD(dlObj, opts)
     dlP = mean(y, 1);
     dlP = dlP / mean(dlP);
     dlQ = dlQ / mean(dlQ);
-    disp(size(dlP));
-    disp(size(dlQ));
-    d = 1;
+    d = sum(dlP .* log(dlP ./ dlQ));
 
 end
 
