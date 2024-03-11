@@ -840,6 +840,9 @@ classdef DynaLearn < matlab.mixin.SetGet
                         x = dlPotentials{1, i+1};
                         Fs = (1 / (obj.dldT*obj.dlDownSampleFactor)) * 1000;
                         
+                        x(isnan(x)) = 0;
+                        x(isinf(x)) = 0;
+
                         x = mean(x, 2);
                         x = detrend(x);
                     
@@ -882,7 +885,7 @@ classdef DynaLearn < matlab.mixin.SetGet
 
                     disp("Temp edit for q subplots; average fft");
                     xlabel("Frequency (Hz)");
-                    sgtitle("Spectral power PDF.");
+                    sgtitle("Spectral power density");
                     return
                  
                 elseif strcmpi(mode, 'raster')

@@ -5,6 +5,13 @@ function d = dlKullbackLeiblerDivergence(p, q)
     N = linspace(0, 1, n);
     M = linspace(0, 1, m);
 
+    if isnan(p)
+
+        d = 1e+6;
+        return;
+
+    end
+
     if n > m
 
         dlQ = interp1(M, q, N);

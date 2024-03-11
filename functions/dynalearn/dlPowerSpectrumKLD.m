@@ -12,7 +12,7 @@ function d = dlPowerSpectrumKLD(dlObj, opts)
 
     dlLf = 1 + floor((opts.lf / dlFs)*L);
     dlHf = floor((opts.hf / dlFs)*L);
-    y = zeros(n, Lnq);
+    y = zeros(n, L);
             
     for k = 1:n
         
@@ -21,13 +21,8 @@ function d = dlPowerSpectrumKLD(dlObj, opts)
         x = mean(x, 2);
 
         x = detrend(x);
-        Y = fft(x);
-
-        P2 = abs(Y/L);
-        P1 = P2(1:Lnq);
-        P1 = smooth(P1, min(N, ceil(L^0.5)));
-
-        y(k, :) = P1*N;
+        [Y, ~] = dlSpectrum(x, dlFs);
+        y(k, :) = Y*N;
         
     end
     
