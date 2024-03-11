@@ -3,15 +3,16 @@ function d = dlPowerSpectrumKLD(dlObj, opts)
     dlPotentialIndices = endsWith(dlObj.dlVariables, opts.id);
     dlPotentials = dlObj.dlOutputs(dlPotentialIndices);
     dlQ = opts.target;
+
     dlFs = floor(1000/(dlObj.dldT * dlObj.dlDownSampleFactor));    
+    dlLf = 1 + (opts.lf / dlFs)*L;
+    dlHf = opts.hf / dlFs
 
     n = size(dlPotentials, 2);
     x = dlPotentials{1, 1};
     L = size(x, 1);
     Lnq = floor(L/2);
 
-    dlLf = 1 + floor((opts.lf / dlFs)*L);
-    dlHf = floor((opts.hf / dlFs)*L);
     y = zeros(n, Lnq);
             
     for k = 1:n
@@ -32,8 +33,12 @@ function d = dlPowerSpectrumKLD(dlObj, opts)
     end
     
     dlP = mean(y, 1);
-    dlP = dlP(dlLf:dlHf);
-    d = dlKullbackLeiblerDivergence(dlP, dlQ);
+    dlP = dlP / sum(dlP);
+    dlQ = dlQ / sum(dlQ);
+
+    d = dlP .* log(dlP ./ dlQ);
+    d(isnan(d) | isinf(d)) = 0;
+    d = mean(d);
 
 end
 

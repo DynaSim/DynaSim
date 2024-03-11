@@ -1,0 +1,30 @@
+function d = dlKullbackLeiblerDivergence(p, q)
+
+    N = linspace(0, 1, length(p));
+    M = linspace(0, 1, length(q));
+    vq = interp1(x,v,xq)
+
+    if N > M
+
+        dlQ = interp1(M, q, N);
+        dlP = p / sum(p);
+        dlQ = dlQ / sum(dlQ);
+
+    elseif M > N
+
+        dlP = interp1(N, q, );
+        dlP = p / sum(p);
+        dlQ = dlQ / sum(dlQ);
+
+    else
+
+        dlP = p / sum(p);
+        dlQ = q / sum(q);
+
+    end
+
+    d = dlP .* log(dlP ./ dlQ);
+    d(isnan(d) | isinf(d)) = 0;
+    d = mean(d);
+
+end

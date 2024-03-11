@@ -819,9 +819,7 @@ classdef DynaLearn < matlab.mixin.SetGet
                 elseif strcmpi(mode, 'avgfft')
 
                     figure('Position', [0, 0, 1700, 700]);
-                
-                    dtf = ceil(1 / (obj.dldT*obj.dlDownSampleFactor));
-                    
+
                     try
 
                         lf = opts("lf");
@@ -840,19 +838,12 @@ classdef DynaLearn < matlab.mixin.SetGet
 
                         subplot((min(k*q, n-1) - (k-1)*q), 1, mod(i-1, (min(k*q, n-1) - (k-1)*q))+1);
                         x = dlPotentials{1, i+1};
-                        L = size(x, 1);
-                        N = size(x, 2);
                         Fs = (1 / (obj.dldT*obj.dlDownSampleFactor)) * 1000;
                         
                         x = mean(x, 2);
                         x = detrend(x);
                     
-                        Y = fft(x); 
-                        P2 = abs(Y/L);
-                        P1 = P2(1:floor(L/2)+1);
-                        fq = Fs*(0:floor(L/2))/L;
-
-                        P1 = smooth(P1, min(N+1, ceil(L^0.2)));
+                        [P1, fq] = dlSpectrum(x, Fs);  
 
                         try
 
@@ -891,7 +882,7 @@ classdef DynaLearn < matlab.mixin.SetGet
 
                     disp("Temp edit for q subplots; average fft");
                     xlabel("Frequency (Hz)");
-                    sgtitle("Spectral powers");
+                    sgtitle("Spectral power PDF.");
                     return
                  
                 elseif strcmpi(mode, 'raster')
@@ -1257,7 +1248,7 @@ classdef DynaLearn < matlab.mixin.SetGet
 
                 catch
 
-                    dlLowerFreq = 1;
+                    dlLowerFreq = 0;
                     dlUpperFreq = 100;
 
                 end
@@ -1385,11 +1376,14 @@ classdef DynaLearn < matlab.mixin.SetGet
                 elseif strcmpi(dlErrorType, 'KLD')
 
                     argsKLD = struct();
+
                     argsKLD.id = "_V";
                     argsKLD.target = dlOutputTargets;
+                    argsKLD.lf = dlLowerFreq;
+                    argsKLD.hf = dlUpperFreq;
 
                     TempError = dlPowerSpectrumKLD(obj, argsKLD)*dlErrorWeight;
-                    fprintf(" dKL = %f ", TempError);
+                    fprintf(" D[KL] = %f ", TempError);
 
                 else
                     
