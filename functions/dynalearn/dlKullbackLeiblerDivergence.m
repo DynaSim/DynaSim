@@ -5,11 +5,16 @@ function d = dlKullbackLeiblerDivergence(p, q)
     N = linspace(0, 1, n);
     M = linspace(0, 1, m);
 
-    if isnan(p) || isinf(p)
+    if isnan(p)
 
         d = 1e+6;
         return;
 
+    elseif isinf(p)
+
+        d = 1e+6;
+        return;
+        
     end
 
     if n > m

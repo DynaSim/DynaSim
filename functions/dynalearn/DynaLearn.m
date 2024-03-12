@@ -1385,7 +1385,7 @@ classdef DynaLearn < matlab.mixin.SetGet
                     argsKLD.lf = dlLowerFreq;
                     argsKLD.hf = dlUpperFreq;
 
-                    TempError = dlPowerSpectrumKLD(obj, argsKLD)*dlErrorWeight;
+                    TempError = dlPowerSpectrumKLD(obj, argsKLD);
                     fprintf(" D[KL] = %f ", TempError);
 
                 else
