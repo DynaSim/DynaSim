@@ -2,13 +2,12 @@ function d = dlPowerSpectrumKLD(dlObj, opts)
 
     dlPotentialIndices = endsWith(dlObj.dlVariables, opts.id);
     dlPotentials = dlObj.dlOutputs(dlPotentialIndices);
+    dlFs = floor(1000/(dlObj.dldT * dlObj.dlDownSampleFactor));  
     dlQ = opts.target;
-    dlFs = floor(1000/(dlObj.dldT * dlObj.dlDownSampleFactor));    
 
     n = size(dlPotentials, 2);
     x = dlPotentials{1, 1};
     L = size(x, 1);
-    Lnq = floor(L/2);
 
     dlLf = 1 + floor((opts.lf / dlFs)*L);
     dlHf = floor((opts.hf / dlFs)*L);
