@@ -2318,9 +2318,9 @@ classdef DynaLearn < matlab.mixin.SetGet
            elseif strcmpi(dlLearningRule, 'EnhancedDeltaRule')
 
             restrictedCoefCnt = 0;
+
             for i = l'
 
-                rng('shuffle');
                 w = val{i, 1};
                 delta = (1-w*0.9).*(rand(size(w))-0.5)*error*dlLambda;
                 obj.dlLastWeightChanges{i} = delta;
@@ -2384,7 +2384,7 @@ classdef DynaLearn < matlab.mixin.SetGet
                         
                     end
 
-              end
+                end
 
             elseif strcmpi(dlLearningRule, 'GeneralizedStochasticDeltaRule')
 
@@ -2436,17 +2436,16 @@ classdef DynaLearn < matlab.mixin.SetGet
 
                 for i = lg'
     
-                    rng('shuffle');
                     w = val{i, 1};
                     l_ = lab{i, 1};
 
                     if contains(l_, '_netcon')
 
-                        delta = (1-w).*(randn(size(w)))*error*dlLambda;
-
-                    else
-
                         delta = (randn(size(w)))*error*dlLambda;
+
+%                     else
+% 
+%                         delta = (randn(size(w)))*error*dlLambda;
 
                     end
 
