@@ -592,24 +592,16 @@ classdef DynaLearn < matlab.mixin.SetGet
             addpath(obj.dlPath);
             d = dir(obj.dlPath);
             s = "";
-            
-            for i = 1:size(d, 1)
-                if contains(d(i).name, '.m')
-                    s = d(i).name;
-                    s = s(1:end-2);
-                end
-            end
-
-            obj.dlPath = [obj.dlStudyDir, '/solve'];
-            addpath(obj.dlPath);
-            d = dir(obj.dlPath);
-            s = "";
 
             for i = 1:size(d, 1)
+
                 if contains(d(i).name, '.m')
+
                     s = d(i).name;
                     s = s(1:end-2);
+
                 end
+
             end
 
             disp("--------");
@@ -621,10 +613,14 @@ classdef DynaLearn < matlab.mixin.SetGet
                 s = "";
                 
                 for i = 1:size(d, 1)
+
                     if contains(d(i).name, '.m')
+
                         s = d(i).name;
                         s = s(1:end-2);
+
                     end
+
                 end
 
             end
@@ -994,11 +990,13 @@ classdef DynaLearn < matlab.mixin.SetGet
                 elseif strcmpi(mode, 'lfpsave')
 
                     imgRaster = zeros(1, length(t));
+
                     for i = (k-1)*q+1:min((k*q), n-1)
 
                         x = dlPotentials{1, i+1};
                         imgRaster(end+1:end+size(x, 2), :) = x';
-                        imgRaster(end+1, :) = 5;
+                        lN = size(imgRaster, 1);
+                        imgRaster(lN+1, :) = 5;
 
                     end
 
@@ -1385,7 +1383,7 @@ classdef DynaLearn < matlab.mixin.SetGet
                     argsKLD.lf = dlLowerFreq;
                     argsKLD.hf = dlUpperFreq;
 
-                    TempError = dlPowerSpectrumKLD(obj, argsKLD)*dlErrorWeight;
+                    TempError = dlPowerSpectrumKLD(obj, argsKLD);
                     fprintf(" D[KL] = %f ", TempError);
 
                 else
@@ -1542,8 +1540,8 @@ classdef DynaLearn < matlab.mixin.SetGet
     
                 end
             
-                % lab = fieldnames(p.p);
-                % lab = lab(contains(lab, dlTrainOptions('dlTrainIncludeList')));
+                lab = fieldnames(p.p);
+                dlTrainOptions('dlTrainIncludeList') = lab(contains(lab, ""));
                 fprintf("\n-->Warning! No variables were included in the fitting include list.\n--->All dynasim variables are by default assigned in.\n");
 
             end
@@ -2040,6 +2038,7 @@ classdef DynaLearn < matlab.mixin.SetGet
                 flag_interp = 1;
 
                 for iLocalParams = 1:numel(Local_LR_Params) % e.g., {E->E, I->E}
+
                     LocalParams = Local_LR_Params{iLocalParams};
 
                     learningRules = LocalParams.learningRules;
@@ -2060,8 +2059,8 @@ classdef DynaLearn < matlab.mixin.SetGet
                     i_post = obj.dlGraph.IndexMap(obj.dlGraph.edges(i_conn).target);
 
                     % Indices to V
-                    i_Vpre = find(strcmpi(string(obj.dlVariables), obj.dlGraph.vertices(i_pre).name + "_" + voltage));
-                    i_Vpost = find(strcmpi(string(obj.dlVariables), obj.dlGraph.vertices(i_post).name + "_" + voltage));
+                    i_Vpre = strcmpi(string(obj.dlVariables), obj.dlGraph.vertices(i_pre).name + "_" + voltage);
+                    i_Vpost = strcmpi(string(obj.dlVariables), obj.dlGraph.vertices(i_post).name + "_" + voltage);
 
                     % Voltages
                     Vpre = obj.dlOutputs{i_Vpre};
@@ -2100,7 +2099,7 @@ classdef DynaLearn < matlab.mixin.SetGet
                     ind_w = find(strcmpi(string(lab), lkey)); % Find index of W in params.mat labels
                     w = val{ind_w}; % previous connectivity matrix
 
-                    if isempty(find(strcmpi(string(obj.dlWeightsVariables), lkey)))
+                    if isempty(find(strcmpi(string(obj.dlWeightsVariables), lkey), 1))
                         obj.dlWeightsVariables{numel(obj.dlWeightsVariables)+1} = lkey;
                         obj.dlWeightsValues{numel(obj.dlWeightsValues)+1}(:,:,1) = w;
                     end
@@ -2130,7 +2129,7 @@ classdef DynaLearn < matlab.mixin.SetGet
                                 continue
                             end
 
-                            rho_ACh = LocalParams.rho_ACh;
+%                             rho_ACh = LocalParams.rho_ACh;
                             alpha_ACh = LocalParams.alpha_ACh;
                             y_ref_ACh = LocalParams.y_ref_ACh;
                             beta_ACh = LocalParams.beta_ACh;
@@ -2138,7 +2137,7 @@ classdef DynaLearn < matlab.mixin.SetGet
 
                             % eta_ACh = rand(1, size(w,2)) <= rho_ACh;
                             eta_ACh_name = LocalParams.eta_ACh;
-                            i_eta_ACh = find(strcmpi(string(obj.dlVariables), obj.dlGraph.vertices(i_post).name + "_" + eta_ACh_name));
+                            i_eta_ACh = strcmpi(string(obj.dlVariables), obj.dlGraph.vertices(i_post).name + "_" + eta_ACh_name);
                             eta_ACh = obj.dlOutputs{i_eta_ACh};
 
                             local_delta = local_delta + alpha_ACh*(X' - beta_ACh*f_ref/(1-f_ref).*(1-X'))*(eta_ACh.*(Y-y_ref_ACh));
@@ -2154,13 +2153,13 @@ classdef DynaLearn < matlab.mixin.SetGet
                             % expression:
                             % delta = eta·alpha·(y-y_ref)*x
 
-                            rho_NE = LocalParams.rho_NE;
+%                             rho_NE = LocalParams.rho_NE;
                             alpha_NE = LocalParams.alpha_NE;
                             y_ref_NE = LocalParams.y_ref_NE;
 
                             % eta_NE = rand(1, size(w,2)) <= rho_NE;
                             eta_NE_name = LocalParams.eta_NE;
-                            i_eta_NE = find(strcmpi(string(obj.dlVariables), obj.dlGraph.vertices(i_post).name + "_" + eta_NE_name));
+                            i_eta_NE = strcmpi(string(obj.dlVariables), obj.dlGraph.vertices(i_post).name + "_" + eta_NE_name);
                             eta_NE = obj.dlOutputs{i_eta_NE};
 
                             local_delta = local_delta + alpha_NE*X'*(eta_NE.*(Y-y_ref_NE));
@@ -2198,8 +2197,8 @@ classdef DynaLearn < matlab.mixin.SetGet
                             iI_name = LocalParams.iI;
 
                             % Indices to postsynaptic iE and iI
-                            i_iE = find(strcmpi(string(obj.dlVariables), [obj.dlGraph.vertices(i_post).name, '_', iE_name]));
-                            i_iI = find(strcmpi(string(obj.dlVariables), [obj.dlGraph.vertices(i_post).name, '_', iI_name]));
+                            i_iE = strcmpi(string(obj.dlVariables), [obj.dlGraph.vertices(i_post).name, '_', iE_name]);
+                            i_iI = strcmpi(string(obj.dlVariables), [obj.dlGraph.vertices(i_post).name, '_', iI_name]);
 
                             % Currents
                             iE = mean(obj.dlOutputs{i_iE},1);
@@ -2207,7 +2206,7 @@ classdef DynaLearn < matlab.mixin.SetGet
 
                             local_delta = local_delta + alpha_Inhibitory*X'*((a_Inhibitory*iE + b_Inhibitory) - iI);
                         else
-                            error('unknown local plasticity rule');
+                            disp('unknown local plasticity rule');
                         end
                     end
                     % Update weights
@@ -2220,149 +2219,154 @@ classdef DynaLearn < matlab.mixin.SetGet
                         warning('weights above upper bound, rectifying')
                         w(w > w_max) = w_max;
                     end
+
                     val{ind_w} = w;
                     i_w = strcmpi(string(obj.dlWeightsVariables), lkey);
                     obj.dlWeightsValues{i_w}(:,:,end+1) = w;
-               end
-           end
 
-           %%% Non-local plasticity rules
+                end
 
-           error = obj.dlUpdateError;
-           obj.dlLastLambda = dlLambda;
-           l = find(contains(lab, dlTrainOptions('dlTrainIncludeList'))); 
-           lg = find(contains(lab, dlTrainOptions('dlTrainIncludeList')));
+            end
 
-           deltaL = 0;
+            %%% Non-local plasticity rules
 
-           if strcmpi(dlLearningRule, 'DeltaRule')
-
-               for i = l'
-
-                   rng('shuffle');
-                   w = val{i, 1};
-                   delta = (randn(size(w)))*error*dlLambda;
-
-                   if ~contains(lab{i, 1}, 'IO')
-
-                       wn = w + delta;
-
-                       wn(wn < .1) = .1;
-                       wn(wn > .9) = .9;
-                       val{i, 1} = wn;
-                       deltaL = deltaL + sum(sum(abs(delta)));
-
-                   end
-
-               end
-                
-           elseif strcmpi(dlLearningRule, 'BioDeltaRule')
+            error = obj.dlUpdateError;
+            obj.dlLastLambda = dlLambda;
+            l = find(contains(lab, dlTrainOptions('dlTrainIncludeList'))); 
+            lg = find(contains(lab, dlTrainOptions('dlTrainIncludeList')));
             
-               restrictedCoefCnt = 0;
+            deltaL = 0;
+            
+            if strcmpi(dlLearningRule, 'DeltaRule')
 
-               for i = l'
+                for i = l'
 
-                   rng('shuffle');
-                   w = val{i, 1};
-                   delta = (1-w*0.9).*(rand(size(w))-0.5)*error*dlLambda;
-                   obj.dlLastWeightChanges{i} = delta;
+                    rng('shuffle');
+                    w = val{i, 1};
+                    delta = (randn(size(w)))*error*dlLambda;
 
-                   try
+                    if ~contains(lab{i, 1}, 'IO')
+                    
+                        wn = w + delta;
+                        
+                        wn(wn < .1) = .1;
+                        wn(wn > .9) = .9;
+                        val{i, 1} = wn;
+                        deltaL = deltaL + sum(sum(abs(delta)));
+                    
+                    end
 
+                end
+                
+            elseif strcmpi(dlLearningRule, 'BioDeltaRule')
+            
+                restrictedCoefCnt = 0;
+
+                for i = l'
+
+                    rng('shuffle');
+                    w = val{i, 1};
+                    delta = (1-w*0.9).*(rand(size(w))-0.5)*error*dlLambda;
+                    obj.dlLastWeightChanges{i} = delta;
+
+                    try
+                    
                         excludeList = contains(lab, dlTrainOptions('dlTrainExcludeList'));
-
-                   catch
-
+                    
+                    catch
+                    
                         excludeList = contains(lab, '');
                         excludeList = excludeList * 0;
+                    
+                    end
 
-                   end
-
-                   try
+                    try
 
                         restrictedList = contains(lab, dlTrainOptions('dlTrainRestrictList'));
                         restrictedCoef = dlTrainOptions('dlTrainRestrictCoef');
                         restrictedBnds = dlTrainOptions('dlTrainRestrictBound');
 
-                   catch
+                    catch
 
                         restrictedList = contains(lab, '');
                         restrictedList = restrictedList * 0;
 
-                   end
+                    end
 
-                   if ~excludeList(i)
+                    if ~excludeList(i)
+   
+                        if restrictedList(i)
 
-                    if restrictedList(i)
-
-                        restrictedCoefCnt = restrictedCoefCnt + 1;
-                        wn = w - delta*restrictedCoef{restrictedCoefCnt};
-                        disp(wn);
-                        disp(restrictedBnds{restrictedCoefCnt});
+                            restrictedCoefCnt = restrictedCoefCnt + 1;
+                            wn = w - delta*restrictedCoef{restrictedCoefCnt};
+                            disp(wn);
+                            disp(restrictedBnds{restrictedCoefCnt});
                     
-                    else
+                        else
 
-                        wn = w - delta;
+                            wn = w - delta;
+
+                        end
+                    
+                        wn(wn < 0.1) = 0.1;
+                        wn(wn > .94) = .94;
+                        val{i, 1} = wn;
+                        deltaL = deltaL + sum(sum(abs(delta)));
 
                     end
-                    
-                    wn(wn < 0.1) = 0.1;
-                    wn(wn > .94) = .94;
-                    val{i, 1} = wn;
-                    deltaL = deltaL + sum(sum(abs(delta)));
 
-                   end
-
-               end
+                end
            
-           elseif strcmpi(dlLearningRule, 'EnhancedDeltaRule')
+            elseif strcmpi(dlLearningRule, 'EnhancedDeltaRule')
 
-            restrictedCoefCnt = 0;
-            for i = l'
+                restrictedCoefCnt = 0;
 
-                rng('shuffle');
-                w = val{i, 1};
-                delta = (1-w*0.9).*(rand(size(w))-0.5)*error*dlLambda;
-                obj.dlLastWeightChanges{i} = delta;
+                for i = l'
+
+                    w = val{i, 1};
+                    delta = (1-w*0.9).*(rand(size(w))-0.5)*error*dlLambda;
+                    obj.dlLastWeightChanges{i} = delta;
+                    
+                    if obj.dlOptimalWeightChangesFlag
                 
-                if obj.dlOptimalWeightChangesFlag
+                        try
                 
-                   try
-                
-                        delta = delta*(1-dlEnhancedMomentum) + obj.dlOptimalWeightChanges{i}*dlEnhancedMomentum;
+                            delta = delta*(1-dlEnhancedMomentum) + obj.dlOptimalWeightChanges{i}*dlEnhancedMomentum;
                  
-                   catch
+                        catch
                 
-                       if i == l(1)
-                           fprintf("<q107>");
-                       end
+                            if i == l(1)
+                            
+                                fprintf("<q107>");
+        
+                            end
 
-                   end
+                        end
                 
-                end
+                    end
                 
-                try
+                    try
                 
-                    excludeList = contains(lab, dlTrainOptions('dlTrainExcludeList'));
+                        excludeList = contains(lab, dlTrainOptions('dlTrainExcludeList'));
                 
-                catch
+                    catch
                 
-                    excludeList = contains(lab, '');
-                    excludeList = excludeList * 0;
+                        excludeList = contains(lab, '');
+                        excludeList = excludeList * 0;
+                    
+                    end
                 
-                end
-                
-                try
-                
-                    restrictedList = contains(lab, dlTrainOptions('dlTrainRestrictList'));
-                    restrictedCoef = dlTrainOptions('dlTrainRestrictCoef');
-                
-                catch
-                
-                    restrictedList = contains(lab, '');
-                    restrictedList = restrictedList * 0;
-                
-                end
+                    try
+                    
+                        restrictedList = contains(lab, dlTrainOptions('dlTrainRestrictList'));
+                        restrictedCoef = dlTrainOptions('dlTrainRestrictCoef');
+                    
+                    catch
+                    
+                        restrictedList = contains(lab, '');
+                        restrictedList = restrictedList * 0;
+                    
+                    end
 
                     if ~excludeList(i)
                     
@@ -2384,7 +2388,7 @@ classdef DynaLearn < matlab.mixin.SetGet
                         
                     end
 
-              end
+                end
 
             elseif strcmpi(dlLearningRule, 'GeneralizedStochasticDeltaRule')
 
@@ -2436,13 +2440,14 @@ classdef DynaLearn < matlab.mixin.SetGet
 
                 for i = lg'
     
-                    rng('shuffle');
                     w = val{i, 1};
                     l_ = lab{i, 1};
 
                     if contains(l_, '_netcon')
 
-                        delta = (1-w).*(randn(size(w)))*error*dlLambda;
+                        delta = (randn(size(w)))*error*dlLambda;
+                        maskd = (rand(size(delta)) > .5)
+                        delta = delta.*
 
                     else
 
@@ -2503,39 +2508,19 @@ classdef DynaLearn < matlab.mixin.SetGet
                         
                         else
                         
-                            wn = w - delta;
-                        
+                            wn = w + delta;
+
+                            if contains(l_, '_netcon')
+
+                                wn(wn > 1) = .999;
+                                wn(wn < 0) = .001;
+
+                            end
+
                         end
             
-                        % if contains(lab{i, 1}, "_netcon")
-                        % 
-                        %     wn(wn < 0.01) = 0.04;
-                        %     wn(wn > 1.00) = 0.97;
-                        % 
-                        % elseif contains(lab{i, 1}, "_E")
-                        % 
-                        %     wn(abs(wn) > 1e3) = sign(wn)*9e2; % Too large elimination for stability
-                        % 
-                        % elseif contains(lab{i, 1}, "_tau")
-                        % 
-                        %     wn(wn > 1e4) = 1e4; % Too large elimination for stability
-                        %     wn(wn < 1e-5) = 1e-5;
-                        % 
-                        % elseif contains(lab{i, 1}, "_g")
-                        % 
-                        %     wn(wn > 1e4) = 1e4; % Too large elimination for stability
-                        %     wn(wn < 1e-2) = 1e-2;
-                        % 
-                        % else
-                        % 
-                        %     % disp(wn);
-                        %     % disp(lab{i, 1});
-                        %     wn(abs(wn) < 1e-3) = 9e-2; % Too small or negative elimination for stability
-                        %     wn(abs(wn) > 1e+4) = 9e+3*sign(wn); % Too high values elimination for stability
-                        % 
-                        % end
-
                         val{i, 1} = wn;
+                        deltaL = deltaL + sum(sum(abs(delta)));
 
                         if dlTrainOptions('dlUpdateVerbose') && ~restrictedList(i)
 
@@ -2546,8 +2531,6 @@ classdef DynaLearn < matlab.mixin.SetGet
                             fprintf("-----> Updated: %s : %f (Rstrct. C = %f, LB = %f, UB = %f) \n", lab{i, 1}, mean(mean(val{i, 1})), restrictedCoef{r_}, restrictedBnds{r_}(1), restrictedBnds{r_}(2));
 
                         end
-
-                        deltaL = deltaL + sum(sum(abs(delta)));
                         
                     end
     
@@ -2558,14 +2541,18 @@ classdef DynaLearn < matlab.mixin.SetGet
                error = obj.dlLastError; %TODO ask Hamed about the difference wrt obj.dlUpdateError
 
                metaLR0 = obj.dlMetaLR;
+
                if isscalar(metaLR0)
                    obj.error0 = error;
                end
+
                uncBaseline = 0.5; % reference value for uncertainty reduction (point of maximum uncertainty)
                scalingFactor = max([uncBaseline, 1-uncBaseline]); % used to keep uncReduct in [0,1]
                stochasticFactor = 0.2; % stochastic modulation
+               metaLR = cell();
 
                for i = l'
+
                    rng('shuffle'); %% TODO we shouldn't shuffle all the time
 
                    w = val{i};
@@ -2649,21 +2636,25 @@ classdef DynaLearn < matlab.mixin.SetGet
                     
                     rng('shuffle');
                     
-                    preSynaptic = obj.dlGraph.vertices(i).PreIndices; % find vertex(i) presynaptic indices in vertices
-                    postSynaptic = obj.dlGraph.vertices(i).PostIndices; % find vertex(i) postsynaptic indices in vertices
-                    preSynapticConnections = obj.dlGraph.vertices(i).PreEdgeIndices; % find vertex(i) presynaptic edge (connection) indices in obj.dlGraph.edges
-                    postSynapticConnections = obj.dlGraph.vertices(i).PostEdgeIndices; % find vertex(i) postsynaptic edge (connection) indices in obj.dlGraph.edges
+%                     preSynaptic = obj.dlGraph.vertices(i).PreIndices; % find vertex(i) presynaptic indices in vertices
+%                     postSynaptic = obj.dlGraph.vertices(i).PostIndices; % find vertex(i) postsynaptic indices in vertices
+%                     preSynapticConnections = obj.dlGraph.vertices(i).PreEdgeIndices; % find vertex(i) presynaptic edge (connection) indices in obj.dlGraph.edges
+%                     postSynapticConnections = obj.dlGraph.vertices(i).PostEdgeIndices; % find vertex(i) postsynaptic edge (connection) indices in obj.dlGraph.edges
                     
                     PreIndexInOutputs = [];
                     PostIndexInOutputs = [];
                     
-                    for j = preSynaptic
-                        PreIndexInOutputs = [PreIndexInOutputs, find(strcmpi(string(obj.dlVariables), obj.dlGraph.vertices(j).name + "_V"))]; % find presynaptic voltages' indices in the current outputs
-                    end
-                    
-                    for j = postSynaptic
-                        PostIndexInOutputs = [PostIndexInOutputs, find(strcmpi(string(obj.dlVariables), obj.dlGraph.vertices(j).name + "_V"))]; % find postsynaptic voltages' indices in the current outputs
-                    end
+%                     for j = preSynaptic
+% 
+%                         PreIndexInOutputs = [PreIndexInOutputs, find(strcmpi(string(obj.dlVariables), obj.dlGraph.vertices(j).name + "_V"))]; % find presynaptic voltages' indices in the current outputs
+%                     
+%                     end
+%                     
+%                     for j = postSynaptic
+% 
+%                         PostIndexInOutputs = [PostIndexInOutputs, find(strcmpi(string(obj.dlVariables), obj.dlGraph.vertices(j).name + "_V"))]; % find postsynaptic voltages' indices in the current outputs
+%                     
+%                     end
                     
                     w = 0;
                     for j = PreIndexInOutputs
@@ -2764,9 +2755,14 @@ classdef DynaLearn < matlab.mixin.SetGet
             c = [];
             
             for i = 1:size(cl, 1)
+
                 if contains(cl(i), '_netcon')
-                    c = [c; cl(i)];
+
+                    d = [c; cl(i)];
+                    c = d;
+
                 end
+
             end
             
         end
@@ -2992,4 +2988,5 @@ classdef DynaLearn < matlab.mixin.SetGet
         end
         
     end
+
 end
