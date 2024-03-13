@@ -825,8 +825,8 @@ classdef DynaLearn < matlab.mixin.SetGet
 
                         fprintf("\n--->No limit set or bad format:\n---->opts map should have opts(""lf"") and opts(""hf"") as real positive values.\n");
                         fprintf("\n--->Default lf/hf = 1.0Hz/150.0Hz");
-                        lf = 1.0;
-                        hf = 250.0;
+                        lf = 0.0;
+                        hf = 100.0;
 
                     end
                     
@@ -843,6 +843,7 @@ classdef DynaLearn < matlab.mixin.SetGet
                         x = detrend(x);
                     
                         [P1, fq] = dlSpectrum(x, Fs);  
+                        P1 = P1 / max(P1);
 
                         try
 
@@ -2382,7 +2383,7 @@ classdef DynaLearn < matlab.mixin.SetGet
                         end
                         
                            wn(wn < 0.1) = 0.1;
-                           wn(wn > .94) = .94;
+                           wn(wn > .94) = .9;
                            val{i, 1} = wn;
                            deltaL = deltaL + sum(sum(abs(delta)));
                         
@@ -2445,7 +2446,7 @@ classdef DynaLearn < matlab.mixin.SetGet
 
                     if contains(l_, '_netcon')
 
-                        delta = (randn(size(w)))*error*dlLambda;
+                        delta = (rand(size(w)))*error*dlLambda;
                         maskd = (rand(size(delta)) > .5);
                         masks = (rand(size(delta)) > .5)*2 - 1;
                         delta = delta.*(maskd.*masks);
@@ -2513,8 +2514,8 @@ classdef DynaLearn < matlab.mixin.SetGet
 
                             if contains(l_, '_netcon')
 
-                                wn(wn > 1) = .999;
-                                wn(wn < 0) = .001;
+                                wn(wn > 1) = .9;
+                                wn(wn < 0) = .1;
 
                             end
 
