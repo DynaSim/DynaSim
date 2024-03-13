@@ -2030,6 +2030,17 @@ classdef DynaLearn < matlab.mixin.SetGet
 
             end
 
+            try
+
+                dlMIDP = dlTrainOptions('dlMIDP');
+
+            catch
+
+                dlMIDP = 1;
+                disp("----->Mutual-information dependent plasticity it On.");
+
+            end
+
             if localFlag
 
                 kernel = 'L'; % 'E'; % 'G'; % Laplacian, Epanechnikov or Gaussian
@@ -2450,6 +2461,13 @@ classdef DynaLearn < matlab.mixin.SetGet
                         delta = (rand(size(w)) - .5)*error*dlLambda;
                         masks = (rand(size(delta)) > .9);
                         delta = delta.*masks;
+
+                        if dlMIDP == 1
+
+                            disp("TODO:MIDP");
+                            deltaMIDP = zeros(size(delta));
+
+                        end
 
                     else
 
