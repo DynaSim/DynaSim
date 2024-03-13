@@ -2465,7 +2465,7 @@ classdef DynaLearn < matlab.mixin.SetGet
                         if dlMIDP == 1
 
                             disp("TODO:MIDP");
-                            deltaMIDP = zeros(size(delta));
+%                             deltaMIDP = dlGetMIDP(Ain, Aout);
 
                         end
 
