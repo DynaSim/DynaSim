@@ -2535,7 +2535,7 @@ classdef DynaLearn < matlab.mixin.SetGet
                                 masks = (rand(size(wn)) > .1);
                                 wn = wn .* masks;
                                 wn = wn + masks/2;
-                                wn = 1 ./ (1 + exp(-10*(wn - .5)));
+                                wn = 1 ./ (1 + exp(-2*(wn - .5)));
 
                             end
 
