@@ -233,7 +233,7 @@ classdef DynaLearn < matlab.mixin.SetGet
             
         end
 
-        function set.dlModel(obj, val)
+        function set.dlModel(obj, val) % Getter/setters
             
              if ~isstruct(val) 
                 error('Model must be a struct');
@@ -1029,7 +1029,8 @@ classdef DynaLearn < matlab.mixin.SetGet
             end
 
             obj.dlParams = p.p;
-            obj.dlSetSignals();
+
+            disp("Done."); 
       
         end
         
@@ -1098,6 +1099,8 @@ classdef DynaLearn < matlab.mixin.SetGet
                 out = zeros(1, size(x, 1));
                 
             end
+
+            % disp(tScale*out);
             
         end
         
@@ -2016,6 +2019,8 @@ classdef DynaLearn < matlab.mixin.SetGet
             lab = fieldnames(p.p);
             val = struct2cell(p.p);
 
+            %%% Local plasticity rules
+
             try
 
                 Local_LR_Params = dlTrainOptions('Local_LR_Params');
@@ -2468,11 +2473,15 @@ classdef DynaLearn < matlab.mixin.SetGet
                     if contains(l_, '_netcon')
 
                         rng('shuffle');
-                        delta = rand(size(w))*error*dlLambda;
+                        delta = (rand(size(w)) - .5)*error*dlLambda;
+                        masks = (rand(size(delta)) > .2);
+                        delta = delta.*masks;
 
                         if dlMIDP == 1
 
+                            disp(l_);
                             [dlV, dlU] = obj.dlGetConnectionID(l_);
+                            disp([dlV, dlU]);
                             r = obj.dlGetMIDP(dlV, dlU);
                             delta = delta.*r;
 
@@ -2494,10 +2503,10 @@ classdef DynaLearn < matlab.mixin.SetGet
                      
                        catch
 
-                           % if i == lg(1)
-                           %     fprintf("\n<q107:Not enough differential initial values for momentum. \n-> ..." + ...
-                           %     "Establishing initial values takes several trials; This is not an error.>\n");
-                           % end
+                           if i == lg(1)
+                               fprintf("\n<q107:Not enough differential initial values for momentum. \n-> ..." + ...
+                               "Establishing initial values takes several trials; This is not an error.>\n");
+                           end
 
                        end
                     
@@ -2541,7 +2550,10 @@ classdef DynaLearn < matlab.mixin.SetGet
 
                             if contains(l_, '_netcon')
 
-                                wn = 1 ./ (1 + exp(-2*(wn - .5)));
+                                masks = (rand(size(wn)) > .2);
+                                wn = wn .* masks;
+                                wn = wn + (1 - masks);
+                                wn = 1 ./ (1 + exp(-5*(wn - .5)));
 
                             end
 
@@ -3057,14 +3069,13 @@ classdef DynaLearn < matlab.mixin.SetGet
             y = obj.dlSignals(u, :);
 
             r = corr(x', y');
-            r(isnan(r)) = 0;
-            r = r - mean(r, "all");
 
         end
 
-        function [v, u] = dlGetConnectionID(obj, dlS)
+        function y = dlGetConnectionID(obj, dlS)
 
             dlS = split(dlS, "_");
+            disp(dlS);
             v = obj.dlGraph.IndexMap(dlS{2});
             u = obj.dlGraph.IndexMap(dlS{1});
 
