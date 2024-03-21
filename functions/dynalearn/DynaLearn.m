@@ -2541,7 +2541,9 @@ classdef DynaLearn < matlab.mixin.SetGet
 
                             if contains(l_, '_netcon')
 
-                                wn = 1 ./ (1 + exp(-2*(wn - .5)));
+                                % wn = 1 ./ (1 + exp(-2*(wn - .5)));
+                                wn(wn > 1) = .999;
+                                wn(wn < 0) = .001;
 
                             end
 
@@ -3049,6 +3051,96 @@ classdef DynaLearn < matlab.mixin.SetGet
 
         end
 
+        function dlRaster(obj)
+
+            n = max(obj.dlChannels);
+            figure('Position', [0, 0, 1700, 1400]);
+            t = linspace(0, obj.dlParams.tspan(2), size(obj.dlSignals, 2));
+
+            for i = 1:n
+
+                a = find(obj.dlChannels == i);
+                x = obj.dlSignals(a, :);
+
+                subplot(n, 1, i);
+                imagesc(1-x>4, "XData", t);
+                xlabel("Time (ms)");ylabel("Neuron no.");title(obj.dlModel.populations(i).name);
+                colormap("gray");
+
+            end
+
+        end
+
+        function dlSpectrogram(obj, timeW, freqW, overlap, fmax)
+
+            if ~exist('timeW', 'var')
+
+                timeW = 100;
+
+            end
+
+            if ~exist('freqW', 'var')
+
+                freqW = 1;
+
+            end
+
+            if ~exist('overlap', 'var')
+
+                overlap = 50;
+
+            end
+
+            if ~exist('fmax', 'var')
+
+                fmax = 100;
+
+            end
+
+            n = max(obj.dlChannels);
+            m = length(obj.dlChannels);
+            fs = floor(1000 / (obj.dldT*obj.dlDownSampleFactor));
+            tmax = size(obj.dlSignals, 2);
+
+            tW = (timeW - overlap)/(obj.dldT*obj.dlDownSampleFactor);
+            tWx = (timeW) / (obj.dldT*obj.dlDownSampleFactor);
+            tB = floor(tmax / tW)-1;
+            fB = floor(fmax / freqW);
+
+            y = zeros(m, tB, fB);
+
+            for i = 1:m
+
+                for j = 1:tB
+
+                    tK = (j-1)*tW + 1:min((j-1)*tW + tWx, tmax);
+                    tempX = obj.dlSignals(i, tK);
+                    tempF = dlSpectrum(tempX, fs, fmax, fB);
+                    y(i, j, :) = tempF;
+
+                end
+
+            end
+
+            t = linspace(0, obj.dlParams.tspan(2), tB);
+            f = linspace(0, fmax, fB);
+            figure('Position', [0, 0, 1700, 1400]);
+
+            for i = 1:n
+
+                a = obj.dlChannels == i;
+                sG = squeeze(mean(y(a, :, :), 1));
+                subplot(n, 1, i);
+                imagesc(sG', "XData", t, "YData", f);
+                xlabel("Time (ms)");ylabel("Freq (Hz)");title(obj.dlModel.populations(i).name);
+                colormap("jet");
+
+            end
+
+            sgtitle("Spectrogram");
+
+        end
+
         function r = dlGetMIDP(obj, dlV, dlU)
 
             v = find(obj.dlChannels == dlV);
@@ -3059,6 +3151,7 @@ classdef DynaLearn < matlab.mixin.SetGet
             r = corr(x', y');
             r(isnan(r)) = 0;
             r = r - mean(r, "all");
+            r = r / max(max(abs(r)));
 
         end
 
