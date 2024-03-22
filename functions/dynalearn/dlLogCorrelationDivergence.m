@@ -10,11 +10,6 @@ function d = dlLogCorrelationDivergence(p, q)
         d = 1e+6;
         return;
 
-    elseif isinf(p)
-
-        d = 1e+6;
-        return;
-        
     end
 
     if n > m

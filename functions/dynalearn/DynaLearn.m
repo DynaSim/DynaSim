@@ -50,7 +50,7 @@ classdef DynaLearn < matlab.mixin.SetGet
         dlLastLambda = 1e-7; % Last lambda parameter
         dlDeltaRatio = 1;
         dlLastDelta = -1;
-        dlLambdaCap = 1;
+        dlLambdaCap = 1e+2;
 
         dlLastOutputLog = {};
         dlOptimalWeightChanges = [];
@@ -2494,10 +2494,7 @@ classdef DynaLearn < matlab.mixin.SetGet
                      
                        catch
 
-                           % if i == lg(1)
-                           %     fprintf("\n<q107:Not enough differential initial values for momentum. \n-> ..." + ...
-                           %     "Establishing initial values takes several trials; This is not an error.>\n");
-                           % end
+                           % delta = delta;
 
                        end
                     
@@ -2541,7 +2538,7 @@ classdef DynaLearn < matlab.mixin.SetGet
 
                             if contains(l_, '_netcon')
 
-                                % wn = 1 ./ (1 + exp(-2*(wn - .5)));
+                                wn(isnan(wn)) = .5;
                                 wn(wn > 1) = .999;
                                 wn(wn < 0) = .001;
 
@@ -2554,7 +2551,7 @@ classdef DynaLearn < matlab.mixin.SetGet
 
                         if dlTrainOptions('dlUpdateVerbose') && ~restrictedList(i)
 
-                            fprintf("-----> Updated: %s : %f \n", lab{i, 1}, mean(mean(val{i, 1})));
+                            fprintf("-----> Updated: %s : %f, delta ~ %f \n", lab{i, 1}, mean(mean(val{i, 1})), mean(abs(delta), "all"));
 
                         elseif dlTrainOptions('dlUpdateVerbose') && restrictedList(i)
 

@@ -6,7 +6,7 @@ function [trialParams1, trialParams2] = dlOnOffInputs(duration, t0, t1, Iapp)
     trialParams1('tspan') = [0 duration];
     trialParams2('tspan') = [0 duration];
 
-    trialParams1('ES_Iapp') = 0;
+    trialParams1('ES_Iapp') = 0.1;
     trialParams2('ES_Iapp') = Iapp;
     
     trialParams1('ES_t0') = t0;
