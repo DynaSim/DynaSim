@@ -2035,6 +2035,7 @@ classdef DynaLearn < matlab.mixin.SetGet
             catch
 
                 dlEnhancedMomentum = 0.1;
+                disp("----->Deflt. used Momntm. = 0.1");
 
             end
 
@@ -2477,7 +2478,12 @@ classdef DynaLearn < matlab.mixin.SetGet
 
                         end
 
-                        delta = (2 ./ (1 + exp(-delta))) - 1;
+                        if mean(abs(delta, "all")) > 1
+
+                            delta = delta / mean(abs(delta, "all"));
+                            fprintf("--->Delta scaled due to exceeding ");
+
+                        end
 
                     else
 
@@ -2486,6 +2492,20 @@ classdef DynaLearn < matlab.mixin.SetGet
                     end
 
                     obj.dlLastWeightChanges{i} = delta;
+                    
+                    if obj.dlOptimalWeightChangesFlag
+                    
+                       try
+                    
+                            delta = delta*(1-dlEnhancedMomentum) + obj.dlOptimalWeightChanges{i}*dlEnhancedMomentum;
+                     
+                       catch
+
+                           
+
+                       end
+                    
+                    end
     
                     if ~excludeList(i)
                     
