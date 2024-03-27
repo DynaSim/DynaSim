@@ -2468,10 +2468,10 @@ classdef DynaLearn < matlab.mixin.SetGet
 
                         rng('shuffle');
                         delta = rand(size(w))*error*dlLambda;
+                        [dlV, dlU] = obj.dlGetConnectionID(l_);
 
                         if dlMIDP == 1
 
-                            [dlV, dlU] = obj.dlGetConnectionID(l_);
                             r = obj.dlGetMIDP(dlV, dlU);
                             delta = delta.*r;
 
@@ -2538,7 +2538,7 @@ classdef DynaLearn < matlab.mixin.SetGet
 
                         if dlTrainOptions('dlUpdateVerbose') && ~restrictedList(i)
 
-                            fprintf("-----> Updated: %s : %f, delta ~ %f \n", lab{i, 1}, mean(mean(val{i, 1})), mean(abs(delta), "all"));
+                            fprintf("-----> Updated: %s : %f, delta ~ %f, mx ~ %f \n", lab{i, 1}, mean(mean(val{i, 1})), mean(abs(delta), "all"), max(abs(delta), [], "all"));
 
                         elseif dlTrainOptions('dlUpdateVerbose') && restrictedList(i)
 
@@ -3038,18 +3038,32 @@ classdef DynaLearn < matlab.mixin.SetGet
         function dlRaster(obj)
 
             n = max(obj.dlChannels);
-            figure('Position', [0, 0, 1700, 1400]);
+            m = length(obj.dlChannels);
+            r = zeros(m, size(obj.dlSignals, 2));
             t = linspace(0, obj.dlParams.tspan(2), size(obj.dlSignals, 2));
 
             for i = 1:n
 
                 a = find(obj.dlChannels == i);
                 x = obj.dlSignals(a, :);
+                r(a, :) = (1-x>4);
 
-                subplot(n, 1, i);
-                imagesc(1-x>4, "XData", t);
-                xlabel("Time (ms)");ylabel("Neuron no.");title(obj.dlModel.populations(i).name);
-                colormap("gray");
+            end
+
+            b = 0;
+            xa = max(t);
+
+            figure('Position', [0, 0, 1700, 1400]);
+            imagesc(r, "XData", t);
+            xlabel("Time (ms)");ylabel("Neuron no.");title("Raster (all neurons)");
+            colormap("gray");
+
+            for i = 1:n
+
+                a = find(obj.dlChannels == i, 1, 'last');
+                yline(a + .5);
+                text(xa, (b + a)/2, obj.dlModel.populations(i).name, "Color", "red", "FontSize", 14, "HorizontalAlignment", "left");
+                b = a;
 
             end
 
@@ -3071,7 +3085,7 @@ classdef DynaLearn < matlab.mixin.SetGet
 
             if ~exist('overlap', 'var')
 
-                overlap = 50;
+                overlap = 90;
 
             end
 
@@ -3097,7 +3111,7 @@ classdef DynaLearn < matlab.mixin.SetGet
 
                 for j = 1:tB
 
-                    tK = (j-1)*tW + 1:min((j-1)*tW + tWx, tmax);
+                    tK = max(j*tW - tWx, 1):min(j*tW, tmax);
                     tempX = obj.dlSignals(i, tK);
                     tempF = dlSpectrum(tempX, fs, fmax, fB);
                     y(i, j, :) = tempF;

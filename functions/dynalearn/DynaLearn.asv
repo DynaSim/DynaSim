@@ -2035,7 +2035,6 @@ classdef DynaLearn < matlab.mixin.SetGet
             catch
 
                 dlEnhancedMomentum = 0.1;
-                disp("----->Deflt. used Momntm. = 0.1");
 
             end
 
@@ -2478,12 +2477,7 @@ classdef DynaLearn < matlab.mixin.SetGet
 
                         end
 
-                        if mean(abs(delta, "all")) > 1
-
-                            delta = delta / mean(abs(delta, "all"));
-                            fprintf("--->Delta scaled due to exceeding ");
-
-                        end
+                        delta = (2 ./ (1 + exp(-delta))) - 1;
 
                     else
 
@@ -2492,20 +2486,6 @@ classdef DynaLearn < matlab.mixin.SetGet
                     end
 
                     obj.dlLastWeightChanges{i} = delta;
-                    
-                    if obj.dlOptimalWeightChangesFlag
-                    
-                       try
-                    
-                            delta = delta*(1-dlEnhancedMomentum) + obj.dlOptimalWeightChanges{i}*dlEnhancedMomentum;
-                     
-                       catch
-
-                           
-
-                       end
-                    
-                    end
     
                     if ~excludeList(i)
                     
@@ -2558,7 +2538,7 @@ classdef DynaLearn < matlab.mixin.SetGet
 
                         if dlTrainOptions('dlUpdateVerbose') && ~restrictedList(i)
 
-                            fprintf("-----> Updated: %s : %f, delta ~ %f \n", lab{i, 1}, mean(mean(val{i, 1})), mean(abs(delta), "all"));
+                            fprintf("-----> Updated: %s : %f, delta ~ %f, mx ~ %f \n", lab{i, 1}, mean(mean(val{i, 1})), mean(abs(delta), "all"), max(abs(delta), [], "all"));
 
                         elseif dlTrainOptions('dlUpdateVerbose') && restrictedList(i)
 
@@ -3058,18 +3038,32 @@ classdef DynaLearn < matlab.mixin.SetGet
         function dlRaster(obj)
 
             n = max(obj.dlChannels);
-            figure('Position', [0, 0, 1700, 1400]);
+            m = length(obj.dlChannels);
+            r = zeros(m, size(obj.dlSignals, 2));
             t = linspace(0, obj.dlParams.tspan(2), size(obj.dlSignals, 2));
 
             for i = 1:n
 
                 a = find(obj.dlChannels == i);
                 x = obj.dlSignals(a, :);
+                r(a, :) = (1-x>4);
+                yline(max(a));
 
-                subplot(n, 1, i);
-                imagesc(1-x>4, "XData", t);
-                xlabel("Time (ms)");ylabel("Neuron no.");title(obj.dlModel.populations(i).name);
-                colormap("gray");
+            end
+
+            figure('Position', [0, 0, 1700, 1400]);
+            imagesc(r, "XData", t);
+            xlabel("Time (ms)");ylabel("Neuron no.");title("Raster (all neurons)");
+            colormap("gray");
+
+            b = 0;
+
+            for i = 1:n
+
+                a = find(obj.dlChannels == i, 1, 'last');
+                yline(a + .5);
+                text(0, (b + a)/2, obj.dlModel.populations(i).name, "Color", "red", "FontSize", 14, "HorizontalAlignment", "right");
+                b = a;
 
             end
 
