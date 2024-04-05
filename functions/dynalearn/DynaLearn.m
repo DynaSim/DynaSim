@@ -3130,7 +3130,7 @@ classdef DynaLearn < matlab.mixin.SetGet
                 sG = squeeze(mean(y(a, :, :), 1));
                 subplot(n, 1, i);
                 imagesc(sG', "XData", t, "YData", f);
-                xlabel("Time (ms)");ylabel("Freq (Hz)");title(obj.dlModel.populations(i).name);
+                xlabel("Time (ms)");ylabel("Freq (Hz)");
                 colormap("jet");
 
             end
@@ -3150,6 +3150,9 @@ classdef DynaLearn < matlab.mixin.SetGet
             r(isnan(r)) = 0;
             r = r - mean(r, "all");
             r = r / max(max(abs(r)));
+
+            sD = std(std(r))/size(r, 1);
+            r(abs(r) < max(sD, .1)) = 0;
 
         end
 
