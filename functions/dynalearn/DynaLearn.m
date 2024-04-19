@@ -3105,7 +3105,7 @@ classdef DynaLearn < matlab.mixin.SetGet
             tB = floor(tmax / tW) - 1;
             fB = floor(fmax / freqW);
 
-            kernelSize = ceil(fs / 1000)*7;
+            kernelSize = ceil(fs / 1000)*10;
             disp(kernelSize)
             y = zeros(m, tB, fB);
 
@@ -3114,9 +3114,10 @@ classdef DynaLearn < matlab.mixin.SetGet
                 for j = 1:tB
 
                     tK = max(j*tW - tWx, 1):min(j*tW, tmax);
-                    tempX = (obj.dlSignals(i, tK) > 4)*1.00;
-                    tempT = exp(-(linspace(-1, 2, kernelSize).^2));
-                    tempX = conv(tempX, tempT/sum(tempT), "same");
+                    % tempX = (obj.dlSignals(i, tK) > 4)*1.00;
+                    tempX = smooth(obj.dlSignals(i, tK), 100);
+                    % tempT = exp(-(linspace(-1, 2, kernelSize).^2));
+                    % tempX = conv(tempX, tempT/sum(tempT), "same");
 
                     tempF = dlSpectrum(tempX, fs, fmax, fB);
                     y(i, j, :) = tempF;
