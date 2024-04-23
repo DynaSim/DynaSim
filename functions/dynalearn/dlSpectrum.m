@@ -23,11 +23,12 @@ function [y, f] = dlSpectrum(x, fs, fmax, fcnt)
 
     t1 = linspace(0, fs/2, ceil(N/2)-1);
     t2 = linspace(0, fmax, fcnt);
+    x = smooth(x, ceil(fs / (fmax)));
 
     p1 = fft(x);
     p2 = abs(p1(2:ceil(N/2)));
     y = interp1(t1, p2, t2);
 
-    f = linspace(0, fmax, fcnt);
+    f = t2;
 
 end

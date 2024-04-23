@@ -35,7 +35,7 @@ function y = dlSpectrogramPlot(X, timeW, freqW, overlap, fmax, fs)
 
             tW = (timeW - overlap)*(fs/1000);
             tWx = (timeW)*(fs/1000);
-            tB = floor(tmax / tW)-1;
+            tB = floor(tmax / tW);
             fB = floor(fmax / freqW);
 
             kernelSize = ceil(fs / 1000)*5;
@@ -46,7 +46,7 @@ function y = dlSpectrogramPlot(X, timeW, freqW, overlap, fmax, fs)
                 for j = 1:tB
 
                     tK = max(j*tW - tWx, 1):min(j*tW, tmax);
-                    tempT = exp(-(linspace(-1, 2, kernelSize).^2));
+                    tempT = exp(-(linspace(-.5, 4.5, kernelSize).^2));
                     tempX = conv(X(i, tK), tempT/sum(tempT), "same");
                     tempF = dlSpectrum(tempX, fs, fmax, fB);
                     y(i, j, :) = tempF;

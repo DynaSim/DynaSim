@@ -3102,11 +3102,10 @@ classdef DynaLearn < matlab.mixin.SetGet
 
             tW = (timeW - overlap)/(obj.dldT*obj.dlDownSampleFactor);
             tWx = (timeW) / (obj.dldT*obj.dlDownSampleFactor);
-            tB = floor(tmax / tW) - 1;
+            tB = floor(tmax / tW);
             fB = floor(fmax / freqW);
 
-            kernelSize = ceil(fs / 1000)*10;
-            disp(kernelSize)
+            kernelSize = ceil(fs / 1000)*5;
             y = zeros(m, tB, fB);
 
             for i = 1:m
@@ -3114,10 +3113,9 @@ classdef DynaLearn < matlab.mixin.SetGet
                 for j = 1:tB
 
                     tK = max(j*tW - tWx, 1):min(j*tW, tmax);
-                    % tempX = (obj.dlSignals(i, tK) > 4)*1.00;
-                    tempX = smooth(obj.dlSignals(i, tK), 100);
-                    % tempT = exp(-(linspace(-1, 2, kernelSize).^2));
-                    % tempX = conv(tempX, tempT/sum(tempT), "same");
+                    tempX = (obj.dlSignals(i, tK) > 0)*1.00;
+                    tempT = exp(-(linspace(-.5, 4.5, kernelSize).^2));
+                    tempX = conv(tempX, tempT/sum(tempT), "same");
 
                     tempF = dlSpectrum(tempX, fs, fmax, fB);
                     y(i, j, :) = tempF;
@@ -3127,19 +3125,13 @@ classdef DynaLearn < matlab.mixin.SetGet
             end
 
             t = linspace(0, obj.dlParams.tspan(2), tB);
-            f = linspace(0, fmax, fB);
+            f = linspace(1, fmax, fB);
             figure('Position', [0, 0, 1700, 1400]);
 
-            for i = 1:n
-
-                a = obj.dlChannels == i;
-                sG = squeeze(mean(y(a, :, :), 1));
-                subplot(n, 1, i);
-                imagesc(sG', "XData", t, "YData", f);
-                xlabel("Time (ms)");ylabel("Freq (Hz)");
-                colormap("jet");
-
-            end
+            sG = squeeze(mean(y(:, :, :), 1));
+            imagesc(sG', "XData", t, "YData", f);
+            xlabel("Time (ms)");ylabel("Freq (Hz)");
+            colormap("jet");
 
             sgtitle("Spectrogram");
 
