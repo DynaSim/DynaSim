@@ -42,7 +42,7 @@ classdef DynaLearn < matlab.mixin.SetGet
         dlBaseVoltage = -77.4;
         dldT = .01; % Time step in ODEs (dt)
         
-        dlDownSampleFactor = 10; % dS parameter for downsampling computations
+        dlDownSampleFactor = 100; % dS parameter for downsampling computations
         dlOptimalError = 1e9; % dL optimal error of training, initially it is just an irrelevant high number
         dlLastOptimalTrial = 1; % The trial witl best results
         dlUpdateError = 0; % The error which is used to update last state
@@ -2463,10 +2463,10 @@ classdef DynaLearn < matlab.mixin.SetGet
     
                     w = val{i, 1};
                     l_ = lab{i, 1};
+                    rng('shuffle');
 
                     if contains(l_, '_netcon')
 
-                        rng('shuffle');
                         delta = rand(size(w))*error*dlLambda;
                         [dlV, dlU] = obj.dlGetConnectionID(l_);
 
@@ -3148,9 +3148,6 @@ classdef DynaLearn < matlab.mixin.SetGet
             r(isnan(r)) = 0;
             r = r - mean(r, "all");
             r = r / max(max(abs(r)));
-
-            sD = std(std(r))/size(r, 1);
-            r(abs(r) < max(sD, .1)) = 0;
 
         end
 
