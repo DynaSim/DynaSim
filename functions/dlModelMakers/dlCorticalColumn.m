@@ -1,59 +1,55 @@
-function neuralNetworkCircuit = dlCorticalColumn(name, Specs)
-
+function neuralNetworkCircuit = dlCorticalColumn(specs)
+    
     eqns={
       'dV/dt = (Iapp)*(cos(2*pi*omega*t))*(t > t0 & t < t1) + @current + noise*(rand(1, N_pop)); noise = 0; t0 = 1000; t1 = 1500; Iapp = 0; omega = 0; V(0) = -70*rand(1, N_pop);'
     };
-    
-    nES = 70;
-    nIF = 10;
-    nIS = 10;
-    nIV = 10;
-    
-    gGABAslow = 0.25; % Receptor conductances, will be modulated by synaptic conn.
-    gGABAfast = 0.2;
-    gAMPA = 0.1;
-    
-    tauGABAslow = 100*(1 + .1*randn(1)); % Receptor synaptic time constants; SST->~10Hz ~(1/2t = 1/100)
-    tauGABAfast = 10*(1 + .1*randn(1)); % PV->~100Hz (1/10)
-    tauAMPAnear = 20*(1 + .1*randn(1)); % PY->~50.0Hz (1/20)
-    tauAMPAfar = 50*(1 + .1*randn(1)); % PY->~25.0Hz (1/40)
-    
-    eNoise = 25;
-    fNoise = 25;
-    sNoise = 25;
-    
-    cCoeff = .01;
-    
-    kEE = ones(nES, nES) * cCoeff;
-    kEIf = ones(nES, nIF) * cCoeff;
-    kEIs = ones(nES, nIS) * cCoeff;
-    
-    kIfE = ones(nIF, nES) * cCoeff;
-    kIfIf = ones(nIF, nIF) * cCoeff;
-    kIfIs = ones(nIF, nIS) * cCoeff;
-    
-    kIsE = ones(nIS, nES) * cCoeff;
-    kIsIf = ones(nIS, nIF) * cCoeff;
-    kIsIs = ones(nIS, nIS) * cCoeff;
-    
+
     s=[];
-    s.populations(1).name='ES';
-    s.populations(1).size=nES;
-    s.populations(1).equations=eqns;
-    s.populations(1).mechanism_list={'iNa','iK', 'ileak'};
-    s.populations(1).parameters={'gNa',120,'gK',36, 'gleak', .6,'noise',eNoise};
+    pcnt = 0;
+
+    for i = 1:specs.layers
+
+        for j = 1:specs.celltypesCount
+
+            pcnt = pcnt + 1;
+            pname = specs.celltypes(j);
+            pnoise = specs.noises(j);
+            psize = sepcs.counts(i, j);
+
+            s.populations(pcnt).name = pname + num2str(i);
+            s.populations(pcnt).size = psize;
+            s.populations(pcnt).equations = eqns;
+            s.populations(pcnt).mechanism_list = {'iNa', 'iK', 'ileak'};
+            s.populations(pcnt).parameters = {'gNa', 120, 'gK', 36, 'gleak', .6, 'noise', pnoise};
+        
+        end
+
+    end
+
+    for i = 1:pcnt
+
+        for j = 1:pcnt
+
+            psource = s.populations(i).name;
+            psync = s.populations(j).name;
+            
+            if contains(psource, "PV")
+
+                s.connections(1).direction='INfast->ES';
+                s.connections(1).mechanism_list={'iGABAa'};
+                s.connections(1).parameters={'tauD', 11,'gGABAa', 0.2, 'netcon', 'zeros(n_pre, n_post)'};
     
-    s.populations(2).name='INfast';
-    s.populations(2).size=nIF;
-    s.populations(2).equations=eqns;
-    s.populations(2).mechanism_list={'iNa','iK', 'ileak'};
-    s.populations(2).parameters={'gNa',120,'gK',36, 'gleak', .5,'noise',fNoise};
-    
-    s.populations(3).name='INslow';
-    s.populations(3).size=nIS;
-    s.populations(3).equations=eqns;
-    s.populations(3).mechanism_list={'iNa','iK', 'ileak'};
-    s.populations(3).parameters={'gNa',120,'gK',36, 'gleak', .5,'noise',sNoise};
+            elseif contains(psource, "CB")
+
+            elseif contains(psource, "CR")
+
+            else
+
+            end
+
+        end
+
+    end
     
     s.connections(1).direction='INfast->ES';
     s.connections(1).mechanism_list={'iGABAa'};
