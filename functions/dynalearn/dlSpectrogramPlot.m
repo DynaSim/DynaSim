@@ -1,4 +1,4 @@
-function y = dlSpectrogramPlot(X, timeW, freqW, overlap, fmax, fs, Skernel)
+function [y, t, f] = dlSpectrogramPlot(X, timeW, freqW, overlap, fmax, fs, Skernel, plotFlag)
 
     if ~exist('timeW', 'var')
 
@@ -36,6 +36,12 @@ function y = dlSpectrogramPlot(X, timeW, freqW, overlap, fmax, fs, Skernel)
 
     end
 
+    if ~exist('plotFlag', 'var')
+
+        plotFlag = 1;
+
+    end
+
     m = size(X, 1);
     tmax = size(X, 2);
 
@@ -63,16 +69,20 @@ function y = dlSpectrogramPlot(X, timeW, freqW, overlap, fmax, fs, Skernel)
 
     t = linspace(0, tmax, tB);
     f = linspace(0, fmax, fB);
-    figure('Position', [0, 0, 1700, 1400]);
-
     sG = squeeze(mean(y, 1));
     y = sG';
-    subplot(1, 1, 1);
-    imagesc(y, "XData", t, "YData", f);
-    
-    xlabel("Time (ms)");
-    ylabel("Freq (Hz)");
-    colormap("jet");
-    sgtitle("Spectrogram");
+
+    if plotFlag
+
+        figure('Position', [0, 0, 1700, 1400]);
+        subplot(1, 1, 1);
+        imagesc(y, "XData", t, "YData", f);
+        
+        xlabel("Time (ms)");
+        ylabel("Freq (Hz)");
+        colormap("jet");
+        sgtitle("Spectrogram");
+
+    end
 
 end

@@ -3117,7 +3117,7 @@ classdef DynaLearn < matlab.mixin.SetGet
                     tempT = exp(-(linspace(-.5, 4.5, kernelSize).^2));
                     tempX = conv(tempX, tempT/sum(tempT), "same");
 
-                    tempF = dlSpectrum(tempX, fs, fmax, fB);
+                    tempF = dlSpectrum(tempX, fs, fmax, fB, 5);
                     y(i, j, :) = tempF;
 
                 end

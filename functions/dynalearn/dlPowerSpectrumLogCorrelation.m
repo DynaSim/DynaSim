@@ -12,7 +12,7 @@ function d = dlPowerSpectrumLogCorrelation(dlObj, opts)
             
     for k = 1:n
         
-        Y = dlSpectrum(x(k, :), dlFs, opts.hf, L);
+        Y = dlSpectrum(x(k, :), dlFs, opts.hf, L, 5);
         y(k, :) = Y;
         
     end
