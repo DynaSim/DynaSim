@@ -3105,7 +3105,7 @@ classdef DynaLearn < matlab.mixin.SetGet
             tB = floor(tmax / tW);
             fB = floor(fmax / freqW);
 
-            kernelSize = ceil(fs / 1000)*5;
+            kernelSize = ceil(fs / 1000)*10;
             y = zeros(m, tB, fB);
 
             for i = 1:m
@@ -3146,7 +3146,7 @@ classdef DynaLearn < matlab.mixin.SetGet
 
             r = corr(x', y');
             r(isnan(r)) = 0;
-            % r = r - mean(r, "all");
+            r = r - mean(r, "all");
             % r = r / max(max(abs(r)));
 
         end
