@@ -640,7 +640,7 @@ classdef DynaLearn < matlab.mixin.SetGet
             fprintf("\n-->If you encountered an error related to parallel flag, set dlParallelFlag = 0.\n");
 
             tspan = [0 100]; % Base time span for class construction and initialization.
-            simulator_options = {'tspan', tspan, 'solver', 'rk1', 'dt', obj.dldT, ...
+            simulator_options = {'tspan', tspan, 'solver', 'euler', 'dt', obj.dldT, ...
                         'downsample_factor', obj.dlDownSampleFactor, 'verbose_flag', 1, ...
                         'study_dir', studydir, 'mex_flag', 1, 'mex_dir', obj.dlPath, ...
                         'parallel_flag', obj.dlParallelFlag};
@@ -2525,7 +2525,7 @@ classdef DynaLearn < matlab.mixin.SetGet
 
                             if contains(l_, '_netcon')
 
-                                wn(isnan(wn)) = .5;
+                                wn(isnan(wn)) = .001;
                                 wn(wn > 1) = .999;
                                 wn(wn < 0) = .001;
 
@@ -3046,7 +3046,7 @@ classdef DynaLearn < matlab.mixin.SetGet
 
                 a = find(obj.dlChannels == i);
                 x = obj.dlSignals(a, :);
-                r(a, :) = (1-x>4);
+                r(a, :) = (1 - (x > -10));
 
             end
 
@@ -3147,7 +3147,7 @@ classdef DynaLearn < matlab.mixin.SetGet
             r = corr(x', y');
             r(isnan(r)) = 0;
             r = r - mean(r, "all");
-            % r = r / max(max(abs(r)));
+            r = r / max(max(abs(r)));
 
         end
 
