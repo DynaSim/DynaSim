@@ -27,12 +27,18 @@ function [y, f] = dlSpectrum(x, fs, fmax, fcnt, smoothing)
 
     end
 
+    if fmax*2 > fs
+
+        fmax = fs/2;
+
+    end
+
     t1 = linspace(0, fs/2, ceil(N/2)-1);
     t2 = linspace(0, fmax, fcnt);
 
     if smoothing
 
-        x = smooth(x, ceil(fs / (fmax)));
+        x = smooth(x, ceil((fs / (2*fmax)).^0.5));
 
     end
 

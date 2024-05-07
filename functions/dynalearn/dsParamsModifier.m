@@ -3,10 +3,10 @@ function dsParamsModifier(tempfuncname, map)
     fileID = fopen(tempfuncname, 'w');
     fprintf(fileID, 'function dlTempFuncParamsChanger(dlPath)\n\n');
     fprintf(fileID, '\tp = load([dlPath, ''/params.mat'']);\n\n');
-    n = size(map);
     
     labels = map.keys();
     values = map.values();
+    n = length(labels);
     
     for i = 1:n
     

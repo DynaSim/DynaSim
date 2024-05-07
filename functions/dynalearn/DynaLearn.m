@@ -39,7 +39,7 @@ classdef DynaLearn < matlab.mixin.SetGet
         
         dlPath = []; % Path which contains params.mat, mexfuncs, solver ...
         dlPathToFile = 'models/dlBaseModel';
-        dlBaseVoltage = -77.4;
+        dlBaseVoltage = -70.0;
         dldT = .01; % Time step in ODEs (dt)
         
         dlDownSampleFactor = 100; % dS parameter for downsampling computations
@@ -3117,7 +3117,7 @@ classdef DynaLearn < matlab.mixin.SetGet
                     tempT = exp(-(linspace(-.5, 4.5, kernelSize).^2));
                     tempX = conv(tempX, tempT/sum(tempT), "same");
 
-                    tempF = dlSpectrum(tempX, fs, fmax, fB, 5);
+                    tempF = dlSpectrum(tempX, fs, fmax, fB, 0);
                     y(i, j, :) = tempF;
 
                 end
@@ -3146,8 +3146,8 @@ classdef DynaLearn < matlab.mixin.SetGet
 
             r = corr(x', y');
             r(isnan(r)) = 0;
-            r = r - mean(r, "all");
-            r = r / max(max(abs(r)));
+            % r = r - mean(r, "all");
+            % r = r / max(max(abs(r)));
 
         end
 
