@@ -2477,7 +2477,7 @@ classdef DynaLearn < matlab.mixin.SetGet
 
                         end
 
-                        delta = (2 ./ (1 + exp(-delta))) - 1;
+                        % delta = (2 ./ (1 + exp(-delta))) - 1;
 
                     else
 
