@@ -72,6 +72,8 @@ classdef DynaLearn < matlab.mixin.SetGet
         dlSignals = 0;
         dlChannels = 0;
 
+        dlMIDPX = [];
+
     end
 
     methods (Static)
@@ -2526,7 +2528,7 @@ classdef DynaLearn < matlab.mixin.SetGet
                             if contains(l_, '_netcon')
 
                                 wn(isnan(wn)) = .001;
-                                wn(wn > 1) = .999;
+                                % wn(wn > 1) = .999;
                                 wn(wn < 0) = .001;
 
                             end
@@ -3146,8 +3148,24 @@ classdef DynaLearn < matlab.mixin.SetGet
 
             r = corr(x', y');
             r(isnan(r)) = 0;
-            r = r - mean(r, "all");
-            r = r / max(max(abs(r)));
+            % r = r - mean(r, "all");
+            % r = r / max(max(abs(r)));
+
+            if dlV == dlU
+
+                for ii = 1:size(r, 1)
+    
+                    for jj = 1:size(r, 2)
+    
+                        r(ii, jj) = sign(ii-jj) * r(ii, jj) / (abs(ii - jj) + 1);
+    
+                    end
+    
+                end
+
+            end
+
+            obj.dlMIDPX = r;
 
         end
 
