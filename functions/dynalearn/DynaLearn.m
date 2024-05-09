@@ -1396,7 +1396,7 @@ classdef DynaLearn < matlab.mixin.SetGet
                     argsCOR.lf = dlLowerFreq;
                     argsCOR.hf = dlUpperFreq;
 
-                    TempError = dlPowerSpectrumLogCorrelation(obj, argsCOR);
+                    TempError = dlPowerSpectrumLogCorrelation(obj, argsCOR).^2;
                     fprintf(" D[LogCor] = %f ", TempError);
 
                 else
@@ -2528,7 +2528,7 @@ classdef DynaLearn < matlab.mixin.SetGet
                             if contains(l_, '_netcon')
 
                                 wn(isnan(wn)) = .001;
-                                % wn(wn > 1) = .999;
+                                wn(wn > 10) = 9.999;
                                 wn(wn < 0) = .001;
 
                             end
@@ -3146,7 +3146,7 @@ classdef DynaLearn < matlab.mixin.SetGet
             x = obj.dlSignals(v, :);
             y = obj.dlSignals(u, :);
 
-            r = corr(x', y');
+            r = corr(x', y', "Type", "Spearman");
             r(isnan(r)) = 0;
             % r = r - mean(r, "all");
             % r = r / max(max(abs(r)));
