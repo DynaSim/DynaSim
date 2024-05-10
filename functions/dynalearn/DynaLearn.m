@@ -2528,7 +2528,7 @@ classdef DynaLearn < matlab.mixin.SetGet
                             if contains(l_, '_netcon')
 
                                 wn(isnan(wn)) = .001;
-                                wn(wn > 10) = 9.999;
+                                wn(wn > 2) = 1.999;
                                 wn(wn < 0) = .001;
 
                             end
@@ -3097,7 +3097,7 @@ classdef DynaLearn < matlab.mixin.SetGet
 
             end
 
-            n = max(obj.dlChannels);
+            % n = max(obj.dlChannels);
             m = length(obj.dlChannels);
             fs = floor(1000 / (obj.dldT*obj.dlDownSampleFactor));
             tmax = size(obj.dlSignals, 2);
@@ -3139,12 +3139,18 @@ classdef DynaLearn < matlab.mixin.SetGet
 
         end
 
-        function r = dlGetMIDP(obj, dlV, dlU)
+        function r = dlGetMIDP(obj, dlV, dlU, td)
+
+            if ~exist('td', 'var')
+
+                td = 10;
+
+            end
 
             v = find(obj.dlChannels == dlV);
             u = find(obj.dlChannels == dlU);
-            x = obj.dlSignals(v, :);
-            y = obj.dlSignals(u, :);
+            x = obj.dlSignals(v, 1:end-td);
+            y = obj.dlSignals(u, td+1:end);
 
             r = corr(x', y', "Type", "Spearman");
             r(isnan(r)) = 0;
