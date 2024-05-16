@@ -3114,8 +3114,10 @@ classdef DynaLearn < matlab.mixin.SetGet
 
                 for j = 1:tB
 
-                    tK = max(j*tW - tWx, 1):min(j*tW, tmax);
-                    tempX = (obj.dlSignals(i, tK) > 0)*1.00;
+                    lt = max(j*tW - tWx, 1);
+                    rt = max(j*tW, 1);
+                    tK = lt:rt;
+                    tempX = (obj.dlSignals(i, tK) > 0)*sqrt(tWx/(rt - lt));
                     tempT = exp(-(linspace(-.5, 4.5, kernelSize).^2));
                     tempX = conv(tempX, tempT/sum(tempT), "same");
 
@@ -3157,19 +3159,19 @@ classdef DynaLearn < matlab.mixin.SetGet
             % r = r - mean(r, "all");
             % r = r / max(max(abs(r)));
 
-            if dlV == dlU
-
-                for ii = 1:size(r, 1)
-    
-                    for jj = 1:size(r, 2)
-    
-                        r(ii, jj) = sign(ii-jj) * r(ii, jj) / (abs(ii - jj) + 1);
-    
-                    end
-    
-                end
-
-            end
+            % if dlV == dlU
+            % 
+            %     for ii = 1:size(r, 1)
+            % 
+            %         for jj = 1:size(r, 2)
+            % 
+            %             r(ii, jj) = sign(ii-jj) * r(ii, jj) / (abs(ii - jj) + 1);
+            % 
+            %         end
+            % 
+            %     end
+            % 
+            % end
 
             obj.dlMIDPX = r;
 
