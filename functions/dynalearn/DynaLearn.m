@@ -1399,6 +1399,18 @@ classdef DynaLearn < matlab.mixin.SetGet
                     TempError = dlPowerSpectrumLogCorrelation(obj, argsCOR).^2;
                     fprintf(" D[LogCor] = %f ", TempError);
 
+                elseif strcmpi(dlErrorType, 'LogCor2')
+
+                    argsCOR = struct();
+
+                    argsCOR.id = "_V";
+                    argsCOR.target = dlOutputTargets;
+                    argsCOR.lf = dlLowerFreq;
+                    argsCOR.hf = dlUpperFreq;
+
+                    TempError = dlPowerSpectrumLogCorrelation2(obj, argsCOR).^2;
+                    fprintf(" D[LogCor2] = %f ", TempError);
+
                 else
                     
                     fprintf("Undefined error type ""%s""\n", dlErrorType);
@@ -2475,11 +2487,14 @@ classdef DynaLearn < matlab.mixin.SetGet
                         if dlMIDP == 1
 
                             r = obj.dlGetMIDP(dlV, dlU);
-                            delta = delta.*r;
+                            delta = (delta + r);
+
+                        else
+
+                            r = 2 * rand(size(w)) - 1;
+                            delta = delta.*r*dlLambda;
 
                         end
-
-                        % delta = (2 ./ (1 + exp(-delta))) - 1;
 
                     else
 
@@ -2528,7 +2543,7 @@ classdef DynaLearn < matlab.mixin.SetGet
                             if contains(l_, '_netcon')
 
                                 wn(isnan(wn)) = .001;
-                                wn(wn > 2) = 1.999;
+                                wn(wn > 2) = .001;
                                 wn(wn < 0) = .001;
 
                             end
@@ -3156,22 +3171,10 @@ classdef DynaLearn < matlab.mixin.SetGet
 
             r = corr(x', y', "Type", "Spearman");
             r(isnan(r)) = 0;
-            % r = r - mean(r, "all");
-            % r = r / max(max(abs(r)));
 
-            % if dlV == dlU
-            % 
-            %     for ii = 1:size(r, 1)
-            % 
-            %         for jj = 1:size(r, 2)
-            % 
-            %             r(ii, jj) = sign(ii-jj) * r(ii, jj) / (abs(ii - jj) + 1);
-            % 
-            %         end
-            % 
-            %     end
-            % 
-            % end
+            r = r - mean(r, "all");
+            rs = std(r, 0, "all");
+            r(abs(r) < rs) = 0;
 
             obj.dlMIDPX = r;
 

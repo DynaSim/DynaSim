@@ -1,7 +1,7 @@
-function d = dlLogCorrelationDivergence(p, q)
+function d = dlLogCorrelationDivergence2(p, q)
 
-    n = length(p);
-    m = length(q);
+    n = size(p);
+    m = size(q);
     N = linspace(0, 1, n);
     M = linspace(0, 1, m);
 
