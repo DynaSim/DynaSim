@@ -38,7 +38,7 @@ function [y, f] = dlSpectrum(x, fs, fmax, fcnt, smoothing)
 
     if smoothing
 
-        x = smooth(x, ceil((fs / (2*fmax)).^0.5));
+        x = smooth(x, 2*ceil((N / (fmax)).^0.5));
 
     end
 

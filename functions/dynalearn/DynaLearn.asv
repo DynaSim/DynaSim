@@ -1407,7 +1407,7 @@ classdef DynaLearn < matlab.mixin.SetGet
                     argsCOR.lf = dlLowerFreq;
                     argsCOR.hf = dlUpperFreq;
 
-                    TempError = (dlErrorWeight*dlPowerSpectrumLogCorrelation2(obj, argsCOR)).^4;
+                    TempError = (dlErrorWeight*dlPowerSpectrumLogCorrelation2(obj, argsCOR)).^2;
                     fprintf(" D[LogCor2] = %f ", TempError);
 
                 else
@@ -2551,8 +2551,8 @@ classdef DynaLearn < matlab.mixin.SetGet
                             if contains(l_, '_netcon')
 
                                 wn(isnan(wn)) = 0.0;
-                                wn(wn < 0.0) = 0.0;
-                                wn(wn > 0.8) = 0.7*(rand(1) < 0.7);
+                                wn(wn < 0) = 0.0;
+                                wn(wn > 1) = 1.0;
                                 ks = size(wn, 2);
 
                                 for k = 1:size(wn, 1)
@@ -2876,9 +2876,9 @@ classdef DynaLearn < matlab.mixin.SetGet
 
             if logFlag
 
-                plot(tn, log10(x), "DisplayName", "Mean loss", "LineStyle", "--");
+                plot(tn, log10(x), "DisplayName", "Mean error", "LineStyle", "--");
                 grid("on");hold("on");
-                plot(tn, log10(xm), "DisplayName", "Min loss");
+                plot(tn, log10(xm), "DisplayName", "Min error");
                 xlabel("Trials");
                 ylabel("Log10(Loss)");
                 legend;
@@ -3150,7 +3150,7 @@ classdef DynaLearn < matlab.mixin.SetGet
             tB = floor(tmax / tW);
             fB = floor(fmax / freqW);
 
-            kernelSize = ceil(fs / 1000)*10;
+            kernelSize = ceil(fs / 1000)*5;
             y = zeros(m, tB, fB);
 
             for i = 1:m
@@ -3181,11 +3181,8 @@ classdef DynaLearn < matlab.mixin.SetGet
             xlabel("Time (ms)");ylabel("Freq (Hz)");
             colormap("jet");
 
-            if exist('clims', 'var')
-            
-                clim(clims);
-
-            end
+            if ~
+            clim([0 max(2, max(sG, [], "all"))]);
                         
             if exist('xlims', 'var')
 
@@ -3221,7 +3218,7 @@ classdef DynaLearn < matlab.mixin.SetGet
 
             for i = 1:size(r, 1)
 
-                r(i, :) = r(i, :) .* rKernel(rN + 1:2*rN);
+                r(i, :) = r(i, :) .* rKernel(rN - i + 1:rN - i + rN);
                 rKernel = circshift(rKernel, 1);
 
             end

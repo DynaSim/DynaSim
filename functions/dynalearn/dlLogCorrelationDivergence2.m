@@ -1,39 +1,32 @@
 function d = dlLogCorrelationDivergence2(p, q)
 
-    n = size(p);
-    m = size(q);
-    N = linspace(0, 1, n);
-    M = linspace(0, 1, m);
+    n = size(p, 1);
+    m = size(p, 2);
 
     if isnan(p)
 
         d = 1e+2;
         return;
 
-    end
-
-    if n > m
-
-        dlQ = interp1(M, q, N);
-        dlP = p / sum(p);
-        dlQ = dlQ / sum(dlQ);
-
-    elseif m > n
-
-        dlP = interp1(N, p, M);
-        dlP = dlP / sum(dlP);
-        dlQ = q / sum(q);
-
     else
 
-        dlP = p / sum(p);
-        dlQ = q / sum(q);
+        q = imresize(q, size(p));
+        dlP = p / max(mean(p, 2));
+        dlQ = q / max(mean(q, 2));
 
     end
 
-    d = abs(log(dlP ./ dlQ));
+    figure();
+
+    subplot(1, 2, 1);
+    imagesc(dlP);
+
+    subplot(1, 2, 2);
+    imagesc(dlQ);
+
+    d = abs(dlQ .* log(dlP ./ dlQ));
     d(isnan(d)) = 0;
     d(isinf(d)) = max(n, m);
-    d = mean(d);
+    d = sum(d, "all");
 
 end

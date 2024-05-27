@@ -39,6 +39,6 @@ function d = dlKullbackLeiblerDivergence(p, q)
     d = dlP .* log(dlP ./ dlQ);
     d(isnan(d)) = 0;
     d(isinf(d)) = max(n, m);
-    d = mean(d);
+    d = sum(d);
 
 end
