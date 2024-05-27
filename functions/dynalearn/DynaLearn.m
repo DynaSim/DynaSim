@@ -1407,7 +1407,7 @@ classdef DynaLearn < matlab.mixin.SetGet
                     argsCOR.lf = dlLowerFreq;
                     argsCOR.hf = dlUpperFreq;
 
-                    TempError = (dlErrorWeight*dlPowerSpectrumLogCorrelation2(obj, argsCOR)).^4;
+                    TempError = (dlErrorWeight*dlPowerSpectrumLogCorrelation2(obj, argsCOR)).^2;
                     fprintf(" D[LogCor2] = %f ", TempError);
 
                 else
@@ -2493,9 +2493,9 @@ classdef DynaLearn < matlab.mixin.SetGet
 
                         if dlMIDP == 1
 
-                            dlRandC = rand(1);
+                            dlRandC = (rand(1) - 0.5)^2;
                             r = obj.dlGetMIDP(dlV, dlU);
-                            delta = (delta.*r + dlRandC*dlLambda*r);
+                            delta = (delta.*r + dlRandC*r);
 
                         else
 
@@ -2552,8 +2552,8 @@ classdef DynaLearn < matlab.mixin.SetGet
 
                                 wn(isnan(wn)) = 0.0;
                                 wn(wn < 0.0) = 0.0;
-                                wn(wn > 0.8) = 0.7*(rand(1) < 0.7);
-                                ks = size(wn, 2);
+                                wn(wn > 0.5) = 0.5*(rand(1) < 0.5);
+                                ks = size(wn, 1) + size(wn, 2);
 
                                 for k = 1:size(wn, 1)
 

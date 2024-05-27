@@ -11,22 +11,26 @@ function d = dlLogCorrelationDivergence2(p, q)
     else
 
         q = imresize(q, size(p));
-        dlP = p / max(mean(p, 2));
-        dlQ = q / max(mean(q, 2));
+        dlP = p / sum(mean(p, 2));
+        dlQ = q / sum(mean(q, 2));
+
+        th = max(min(dlP, [], "all"), min(dlQ, [], "all"));
+        dlP(dlP < th) = th;
+        dlQ(dlQ < th) = th;
 
     end
 
-    figure();
+    % figure();
+    % 
+    % subplot(1, 2, 1);
+    % imagesc(dlP);
+    % 
+    % subplot(1, 2, 2);
+    % imagesc(dlQ);
 
-    subplot(1, 2, 1);
-    imagesc(dlP);
-
-    subplot(1, 2, 2);
-    imagesc(dlQ);
-
-    d = abs(dlQ .* log(dlP ./ dlQ));
+    d = (dlQ .* log(dlP ./ dlQ));
     d(isnan(d)) = 0;
     d(isinf(d)) = max(n, m);
-    d = sum(d, "all");
+    d = sum(d, "all")^2;
 
 end
