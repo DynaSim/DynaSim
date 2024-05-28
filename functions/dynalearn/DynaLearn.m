@@ -2511,9 +2511,9 @@ classdef DynaLearn < matlab.mixin.SetGet
 
                         if dlMIDP == 1
 
-                            dlRandC = randn(1);
+                            % dlRandC = randn(1);
                             r = obj.dlGetMIDP(dlV, dlU);
-                            delta = ((1 - dlAlpha)*delta.*r + dlAlpha*dlRandC*r);
+                            delta = ((1 - dlAlpha)*delta + dlAlpha*r);
 
                         else
 
@@ -2534,7 +2534,7 @@ classdef DynaLearn < matlab.mixin.SetGet
                     
                         if restrictedList(i)
                         
-                            r_ = find(strcmpi(l_, dlTrainOptions('dlTrainRestrictList')));
+                            r_ = find(contains(l_, dlTrainOptions('dlTrainRestrictList')));
                             wn = w - delta*restrictedCoef{r_};
 
                             try
@@ -2570,7 +2570,7 @@ classdef DynaLearn < matlab.mixin.SetGet
 
                                 wn(isnan(wn)) = 0.2;
                                 wn(wn < 0.0) = 0.0;
-                                wn(wn > 5.0) = 5*rand(1);
+                                wn(wn > 1.0) = 1.0;
                                 ks = max(mean(wn, "all"), 0.5);
 
                                 for k = 1:size(wn, 1)
@@ -3168,7 +3168,7 @@ classdef DynaLearn < matlab.mixin.SetGet
             tB = floor(tmax / tW);
             fB = floor(fmax / freqW);
 
-            kernelSize = ceil(fs / 1000)*14;
+            kernelSize = ceil(fs / 1000)*10;
             y = zeros(m, tB, fB);
 
             for i = 1:m
@@ -3219,15 +3219,7 @@ classdef DynaLearn < matlab.mixin.SetGet
 
             if ~exist('td', 'var')
 
-                if dlV == 1
-
-                    td = 10;
-
-                else
-
-                    td = 10 + randi(1)*20;
-
-                end
+                td = 15;
 
             end
 
@@ -3240,7 +3232,7 @@ classdef DynaLearn < matlab.mixin.SetGet
             r(isnan(r)) = 0;
             rN = size(r, 2);
 
-            rs = std(r, 0, "all")/2;
+            rs = std(r, [], "all")/2;
             r(abs(r) < rs) = 0;
             r = r / max(max(abs(r)));
             rKernel = exp(-abs(linspace(-2, 2, rN*2)));
