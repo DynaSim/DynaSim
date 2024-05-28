@@ -1395,7 +1395,7 @@ classdef DynaLearn < matlab.mixin.SetGet
                     argsCOR.lf = dlLowerFreq;
                     argsCOR.hf = dlUpperFreq;
 
-                    TempError = dlPowerSpectrumLogCorrelation(obj, argsCOR).^2;
+                    TempError = dlPowerSpectrumLogCorrelation(obj, argsCOR);
                     fprintf(" D[LogCor] = %f ", TempError);
 
                 elseif strcmpi(dlErrorType, 'LogCor2')
@@ -1407,7 +1407,7 @@ classdef DynaLearn < matlab.mixin.SetGet
                     argsCOR.lf = dlLowerFreq;
                     argsCOR.hf = dlUpperFreq;
 
-                    TempError = (dlErrorWeight*dlPowerSpectrumLogCorrelation2(obj, argsCOR)).^2;
+                    TempError = dlPowerSpectrumLogCorrelation2(obj, argsCOR);
                     fprintf(" D[LogCor2] = %f ", TempError);
 
                 else
@@ -2024,6 +2024,8 @@ classdef DynaLearn < matlab.mixin.SetGet
         
         function dlTrainStep(obj, dlLearningRule, dlLambda, dlTrainOptions)
 
+            disp("-->Loss = " + num2str(obj.dlUpdateError));
+
             try 
 
                 p = load([obj.dlStudyDir, '/solve/params.mat']);
@@ -2068,6 +2070,22 @@ classdef DynaLearn < matlab.mixin.SetGet
 
                 dlMIDP = 0;
                 disp("----->Mutual-information dependent plasticity it off.");
+
+            end
+
+            if dlMIDP
+
+                try
+
+                    dlAlpha = dlTrainOptions('dlAlpha');
+                    disp("----->Alpha(MIDP) = " + num2str(dlAlpha));
+
+                catch
+
+                    dlAlpha = 0.5;
+                    disp("----->Alpha(MIDP) not set. Default = " + num2str(dlAlpha));
+
+                end
 
             end
 
@@ -2493,9 +2511,9 @@ classdef DynaLearn < matlab.mixin.SetGet
 
                         if dlMIDP == 1
 
-                            dlRandC = (rand(1) - 0.5)^2;
+                            dlRandC = randn(1);
                             r = obj.dlGetMIDP(dlV, dlU);
-                            delta = (delta.*r + dlRandC*r);
+                            delta = ((1 - dlAlpha)*delta.*r + dlAlpha*dlRandC*r);
 
                         else
 
@@ -2550,18 +2568,18 @@ classdef DynaLearn < matlab.mixin.SetGet
 
                             if contains(l_, '_netcon')
 
-                                wn(isnan(wn)) = 0.0;
+                                wn(isnan(wn)) = 0.2;
                                 wn(wn < 0.0) = 0.0;
-                                wn(wn > 0.5) = 0.5*(rand(1) < 0.5);
-                                ks = size(wn, 1) + size(wn, 2);
+                                wn(wn > 5.0) = 5*rand(1);
+                                ks = max(mean(wn, "all"), 0.5);
 
                                 for k = 1:size(wn, 1)
 
-                                    kv = sum(wn(k, :));
+                                    kv = mean(wn(k, :));
 
-                                    if kv > (ks^0.5)
+                                    if kv > ks
 
-                                        wn(k, :) = (wn(k, :) * (ks^0.5)) / kv;
+                                        wn(k, :) = (wn(k, :) * ks) / kv;
 
                                     end
 
@@ -3150,7 +3168,7 @@ classdef DynaLearn < matlab.mixin.SetGet
             tB = floor(tmax / tW);
             fB = floor(fmax / freqW);
 
-            kernelSize = ceil(fs / 1000)*10;
+            kernelSize = ceil(fs / 1000)*14;
             y = zeros(m, tB, fB);
 
             for i = 1:m
@@ -3162,7 +3180,7 @@ classdef DynaLearn < matlab.mixin.SetGet
                     tK = lt:rt;
                     % tempX = obj.dlSignals(i, tK);
                     tempX = (obj.dlSignals(i, tK) > -10);
-                    tempT = exp(-(linspace(-.5, 2.5, kernelSize).^2));
+                    tempT = exp(-(linspace(-.5, 2.5, kernelSize)));
                     tempX = conv(tempX, tempT/sum(tempT), "same");
 
                     tempF = dlSpectrum(tempX, fs, fmax, fB, 0);
@@ -3201,7 +3219,15 @@ classdef DynaLearn < matlab.mixin.SetGet
 
             if ~exist('td', 'var')
 
-                td = 10;
+                if dlV == 1
+
+                    td = 10;
+
+                else
+
+                    td = 10 + randi(1)*20;
+
+                end
 
             end
 
@@ -3226,6 +3252,7 @@ classdef DynaLearn < matlab.mixin.SetGet
 
             end
 
+            r(isnan(r)) = 0;
             obj.dlMIDPX = r;
 
         end
