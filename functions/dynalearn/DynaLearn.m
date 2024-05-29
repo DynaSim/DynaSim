@@ -40,9 +40,9 @@ classdef DynaLearn < matlab.mixin.SetGet
         dlPath = []; % Path which contains params.mat, mexfuncs, solver ...
         dlPathToFile = 'models/dlBaseModel';
         dlBaseVoltage = -70.0;
-        dldT = .1; % Time step in ODEs (dt)
+        dldT = .01; % Time step in ODEs (dt)
         
-        dlDownSampleFactor = 10; % dS parameter for downsampling computations
+        dlDownSampleFactor = 100; % dS parameter for downsampling computations
         dlOptimalError = 1e9; % dL optimal error of training, initially it is just an irrelevant high number
         dlLastOptimalTrial = 1; % The trial witl best results
         dlUpdateError = 0; % The error which is used to update last state
