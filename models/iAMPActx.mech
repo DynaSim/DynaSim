@@ -17,8 +17,8 @@ IAMPA(X,s) = (gAMPA.*(s*netcon).*(X-EAMPA))
 s' = -s./tauAMPA + ((1-s)/tauAMPAr).*(1+tanh(X_pre/10))
 s(0) = IC+IC_noise.*rand(1,N_pre)
 
-%monitor functions % always record the synaptic current
- 
+% monitor functions % always record the synaptic current
+
 % linkers
 @current += -IAMPA(X_post,s)
  

@@ -1,14 +1,12 @@
 %% Simulation of predictive task implemented on DynaSim/DynaLearn via Reinforcement learning 
 
-% Requirement: DynaSim/dev_2022 latest version
-% Minimum MatLab version: R2021a
-% @April2023
+% Requirement: DynaSim/devdl latest version with R2024a
 % @HNXJ
 
 %% Initiation
 
 clear;clc;
-cd('D:\Works\Computational');
+cd('D:\Modeling');
 addpath(genpath('DynaSim'));
 cd('DynaSim');
 

@@ -2511,7 +2511,7 @@ classdef DynaLearn < matlab.mixin.SetGet
 
                         if dlMIDP == 1
 
-                            % dlRandC = randn(1);
+                            dlAlpha = rand(1)*dlAlpha;
                             r = obj.dlGetMIDP(dlV, dlU);
                             delta = ((1 - dlAlpha)*delta + dlAlpha*r);
 
@@ -2568,22 +2568,40 @@ classdef DynaLearn < matlab.mixin.SetGet
 
                             if contains(l_, '_netcon')
 
-                                wn(isnan(wn)) = 0.2;
-                                wn(wn < 0.0) = 0.0;
-                                wn(wn > 1.0) = 1.0;
+                                wn(isnan(wn)) = 0.1;
                                 ks = max(mean(wn, "all"), 0.5);
 
-                                for k = 1:size(wn, 1)
+                                if contains(l_, 'INfast_iGABAa_netcon')
 
-                                    kv = mean(wn(k, :));
+                                    lengthTemp = size(wn, 1);
+                                    widthTemp = size(wn, 2);
+                                    ratioTemp = floor(widthTemp/lengthTemp);
+                                    kernelWtemp = exp(-abs(linspace(-5, 5, widthTemp*2)))/ks;
 
-                                    if kv > ks
+                                    for ik = 1:lengthTemp
 
-                                        wn(k, :) = (wn(k, :) * ks) / kv;
+                                        shiftTemp = ik*ratioTemp;
+                                        wn(ik, :) = wn(ik, :) .* kernelWtemp(widthTemp-shiftTemp+2:widthTemp*2-shiftTemp+1);
 
                                     end
 
                                 end
+
+                                wn(wn < 0.0) = 0.1;
+                                wn(wn > 10.0) = 0.1;
+                                % ks = max(mean(wn, "all"), 0.5);
+                                % 
+                                % for k = 1:size(wn, 1)
+                                % 
+                                %     kv = mean(wn(k, :));
+                                % 
+                                %     if kv > ks
+                                % 
+                                %         wn(k, :) = (wn(k, :) * ks) / kv;
+                                % 
+                                %     end
+                                % 
+                                % end
 
                             end
 
@@ -3219,7 +3237,7 @@ classdef DynaLearn < matlab.mixin.SetGet
 
             if ~exist('td', 'var')
 
-                td = 15;
+                td = 10 + floor(rand(1)*30);
 
             end
 
@@ -3235,14 +3253,14 @@ classdef DynaLearn < matlab.mixin.SetGet
             rs = std(r, [], "all")/2;
             r(abs(r) < rs) = 0;
             r = r / max(max(abs(r)));
-            rKernel = exp(-abs(linspace(-2, 2, rN*2)));
-
-            for i = 1:size(r, 1)
-
-                r(i, :) = r(i, :) .* rKernel(rN + 1:2*rN);
-                rKernel = circshift(rKernel, 1);
-
-            end
+            % rKernel = exp(-abs(linspace(-2, 2, rN*2)));
+            % 
+            % for i = 1:size(r, 1)
+            % 
+            %     r(i, :) = r(i, :) .* rKernel(rN + 1:2*rN);
+            %     rKernel = circshift(rKernel, 1);
+            % 
+            % end
 
             r(isnan(r)) = 0;
             obj.dlMIDPX = r;
