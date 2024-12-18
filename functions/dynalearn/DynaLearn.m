@@ -466,21 +466,30 @@ classdef DynaLearn < matlab.mixin.SetGet
             
             fprintf("Params.mat file loaded from %s \n", PathToFile);
 
-            if ~obj.dlParallelFlag
+            try
 
-                p = load([PathToFile, '/solve/params.mat']);
+                if ~obj.dlParallelFlag
+    
+                    p = load([PathToFile, '/solve/params.mat']);
+                    save([obj.dlPath, '/params.mat'], '-struct', 'p');
+    
+                elseif obj.dlParallelFlag
+    
+                    p = load([PathToFile, '/solve/sim1/params.mat']);
+                    save([obj.dlPath, '/sim1/params.mat'], '-struct', 'p');
+    
+                end
+    
+                obj.dlReInit();
+    
+                obj.dlParams = p.p;
+
+            catch
+
+                p = load([PathToFile, '/params.mat']);
                 save([obj.dlPath, '/params.mat'], '-struct', 'p');
 
-            elseif obj.dlParallelFlag
-
-                p = load([PathToFile, '/solve/sim1/params.mat']);
-                save([obj.dlPath, '/sim1/params.mat'], '-struct', 'p');
-
             end
-
-            obj.dlReInit();
-
-            obj.dlParams = p.p;
             
         end
         
@@ -3270,6 +3279,7 @@ classdef DynaLearn < matlab.mixin.SetGet
         function [v, u] = dlGetConnectionID(obj, dlS)
 
             dlS = split(dlS, "_");
+            disp(dlS);
             v = obj.dlGraph.IndexMap(dlS{2});
             u = obj.dlGraph.IndexMap(dlS{1});
 

@@ -46,6 +46,8 @@ ry=10
 alpha=.5
 delay_pre=0
 delay_post=0
+tspike_pre = 10
+tspike_post = 10
 
 ax(x)=(1-x).^alpha % incremental increase in presynaptic trace with nearest-neighbor spike-interaction
 ay(y)=(1-y).^alpha % incremental increase in postsynaptic trace
