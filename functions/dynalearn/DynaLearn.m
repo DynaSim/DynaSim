@@ -2518,6 +2518,12 @@ classdef DynaLearn < matlab.mixin.SetGet
                         delta = randn(size(w))*error*dlLambda;
                         [dlV, dlU] = obj.dlGetConnectionID(l_);
 
+                        if dlV == dlU
+
+                            delta = 0;
+
+                        end
+
                         if dlMIDP == 1
 
                             dlAlpha = rand(1)*dlAlpha;
@@ -2577,8 +2583,8 @@ classdef DynaLearn < matlab.mixin.SetGet
 
                             if contains(l_, '_netcon')
 
-                                wn(isnan(wn)) = 0.1;
-                                ks = max(mean(wn, "all"), 0.5);
+                                wn(isnan(wn)) = 0.2;
+                                ks = max(mean(wn, "all"), 1.0);
 
                                 if contains(l_, 'INfast_iGABAa_netcon')
 
@@ -2596,8 +2602,8 @@ classdef DynaLearn < matlab.mixin.SetGet
 
                                 end
 
-                                wn(wn < 0.0) = 0.1;
-                                wn(wn > 10.0) = 0.1;
+                                wn(wn < 0.0) = 0.01; % synpatic genesis
+                                wn(wn > 10.0) = 0.1; % synaptic vanish
                                 % ks = max(mean(wn, "all"), 0.5);
                                 % 
                                 % for k = 1:size(wn, 1)
