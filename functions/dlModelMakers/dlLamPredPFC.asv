@@ -145,12 +145,12 @@ function y = dlLamPredPFC(Ne, Ni, Nio, NoiseRate)
     pino.connections(2).parameters = {'gAMPA',gAMPA_ee,'tauAMPA',tauAMPA,'netcon',Kee};
 
     pino.connections(3).direction = 'I->E';
-    pino.connections(3).mechanism_list = {'iGABAa'};
-    pino.connections(3).parameters = {'gGABAa',gGABAa_ie,'tauGABAa',tauGABA_gamma,'netcon',Kie};
+    ping.connections(3).mechanism_list = {'iGABAa'};
+    ping.connections(3).parameters = {'gGABAa',gGABAa_ie,'tauGABAa',tauGABA_gamma,'netcon',Kie};
 
-    pino.connections(4).direction = 'I->I';
-    pino.connections(4).mechanism_list = {'iGABAa'};
-    pino.connections(4).parameters = {'gGABAa',gGABAa_ii,'tauGABAa',tauGABA_gamma,'netcon',Kii};
+    ping.connections(4).direction = 'I->I';
+    ping.connections(4).mechanism_list = {'iGABAa'};
+    ping.connections(4).parameters = {'gGABAa',gGABAa_ii,'tauGABAa',tauGABA_gamma,'netcon',Kii};
 
     % PING template
     IOping=[];
@@ -187,7 +187,7 @@ function y = dlLamPredPFC(Ne, Ni, Nio, NoiseRate)
     IOping.connections(4).parameters = {'netcon',kzio};
 
     % create independent layers
-    sup = dsApplyModifications(pino,{'E','name','supE'; 'I','name','supI'}); % superficial layer (~gamma)
+    sup = dsApplyModifications(ping,{'E','name','supE'; 'I','name','supI'}); % superficial layer (~gamma)
     mid = dsApplyModifications(ping,{'E','name','midE'; 'I','name','midI'}); % middle layer (~gamma)
     deep = dsApplyModifications(ping,{'E','name','deepE'; 'I','name','deepI'}); % deep layer (~beta)
     stimuli1 = dsApplyModifications(IOping,{'E','name','IOSA1'; 'I','name','IOSB1'}); % I/O layer (stimuli)

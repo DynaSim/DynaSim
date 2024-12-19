@@ -3279,7 +3279,7 @@ classdef DynaLearn < matlab.mixin.SetGet
         function [v, u] = dlGetConnectionID(obj, dlS)
 
             dlS = split(dlS, "_");
-            disp(dlS);
+            % disp(dlS);
             v = obj.dlGraph.IndexMap(dlS{2});
             u = obj.dlGraph.IndexMap(dlS{1});
 
