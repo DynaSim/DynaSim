@@ -487,7 +487,7 @@ classdef DynaLearn < matlab.mixin.SetGet
             catch
 
                 p = load([PathToFile, '/params.mat']);
-                save([obj.dlPath, '/params.mat'], '-struct', 'p');
+                save([PathToFile, '/params.mat'], '-struct', 'p');
 
             end
             
