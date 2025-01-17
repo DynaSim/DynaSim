@@ -18,7 +18,7 @@ function d = dlPowerSpectrumLogCorrelation(dlObj, opts)
     end
     
     dlP = mean(y, 1);
-    d = dlLogCorrelationDivergence(dlP, dlQ)^2;
+    d = dlLogCorrelationDivergence(dlP, dlQ);
 
 end
 

@@ -33,7 +33,6 @@ function [y, f] = dlSpectrum(x, fs, fmax, fcnt, smoothing)
 
     end
 
-    t1 = linspace(0, fs/2, ceil(N/2)-1);
     t2 = linspace(0, fmax, fcnt);
 
     if smoothing
@@ -42,8 +41,9 @@ function [y, f] = dlSpectrum(x, fs, fmax, fcnt, smoothing)
 
     end
 
-    p1 = fft(x);
-    p2 = abs(p1(2:ceil(N/2)));
+
+    [p1, t1, ~] = pspectrum(x, fs, "spectrogram", "FrequencyLimits", [0 fmax], "TimeResolution", 0.4, "OverlapPercent", 95);
+    p2 = mean(p1, 2);
     y = interp1(t1, p2, t2);
     f = t2;
 

@@ -25,18 +25,18 @@ function y = dlLamPredPFC(Ne, Ni, Nio, NoiseRate)
     kzio = zeros(Nio, Nio); % Null (zero) matrix for disconnections
     KdeepEI = Kie * 4;
 
-    a1 = 1;a2 = ceil(1*Ne/6);
-    b1 = ceil(1 + 1*Ne/6);b2 = ceil(2*Ne/6);
-    c1 = ceil(1 + 2*Ne/6);c2 = ceil(3*Ne/6);
-    cx1_1 = ceil(1 + 3*Ne/6);cx1_2 = ceil(4*Ne/6);
-    cx2_1 = ceil(1 + 4*Ne/6);cx2_2 = ceil(5*Ne/6);
+    a1 = 1;a2 = ceil(1*Ne/10);
+    b1 = ceil(1 + 1*Ne/10);b2 = ceil(2*Ne/10);
+    c1 = ceil(1 + 2*Ne/10);c2 = ceil(3*Ne/10);
+    cx1_1 = ceil(1 + 3*Ne/10);cx1_2 = ceil(4*Ne/10);
+    cx2_1 = ceil(1 + 4*Ne/10);cx2_2 = ceil(5*Ne/10);
 
-    cnx1_1 = 1;cnx1_2 = ceil(1*Ne/6);
-    cnx2_1 = ceil(1 + 1*Ne/6);cnx2_2 = ceil(2*Ne/6);
-    cnx3_1 = ceil(1 + 2*Ne/6);cnx3_2 = ceil(3*Ne/6);
-    cny1_1 = ceil(1 + 3*Ne/6);cny1_2 = ceil(4*Ne/6);
-    cny2_1 = ceil(1 + 4*Ne/6);cny2_2 = ceil(5*Ne/6);
-    cny3_1 = ceil(1 + 5*Ne/6);cny3_2 = ceil(6*Ne/6);
+    cnx1_1 = 1;cnx1_2 = ceil(1*Ne/10);
+    cnx2_1 = ceil(1 + 1*Ne/10);cnx2_2 = ceil(2*Ne/10);
+    cnx3_1 = ceil(1 + 2*Ne/10);cnx3_2 = ceil(3*Ne/10);
+    cny1_1 = ceil(1 + 3*Ne/10);cny1_2 = ceil(4*Ne/10);
+    cny2_1 = ceil(1 + 4*Ne/10);cny2_2 = ceil(5*Ne/10);
+    cny3_1 = ceil(1 + 5*Ne/10);cny3_2 = ceil(6*Ne/10);
 
     KmidEsupE = Kee * 0.3;
     KmidEsupE(a1:a2, [cnx1_1:cnx1_2, cny1_1:cny1_2]) = k3*rand((a2-a1+1), (cnx1_2 - cnx1_1 + cny1_2 - cny1_1 + 2)) + k4; % A -> X1, Y1

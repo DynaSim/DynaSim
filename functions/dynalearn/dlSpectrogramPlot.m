@@ -32,7 +32,7 @@ function [y, t, f] = dlSpectrogramPlot(X, timeW, freqW, overlap, fmax, fs, Skern
 
     if ~exist('Skernel', 'var')
 
-        Skernel = 5;
+        Skernel = 10;
 
     end
 
@@ -42,40 +42,25 @@ function [y, t, f] = dlSpectrogramPlot(X, timeW, freqW, overlap, fmax, fs, Skern
 
     end
 
-    m = size(X, 1);
-    tmax = size(X, 2);
-
-    tW = (timeW - overlap)*(fs/1000);
-    tWx = (timeW)*(fs/1000);
-    tB = floor(tmax / tW);
-    fB = floor(fmax / freqW);
-
     kernelSize = ceil(fs / 1000)*Skernel;
-    y = zeros(m, tB, fB);
+    tempT = exp(-abs(linspace(-.5, 2.5, kernelSize).^2));
+    X = conv2(X, tempT, "same");
+    X = mean(X, 1);
 
-    for i = 1:m
+    [sG, ~, ~] = pspectrum(X, fs, "spectrogram", "FrequencyLimits", [0 fmax], "TimeResolution", 0.4, "OverlapPercent", 95);
 
-        for j = 1:tB
-
-            lt = max(j*tW - tWx, 1);
-            rt = max(j*tW, 1);
-            tK = lt:rt;
-            tempX = X(i, tK);
-            tempT = exp(-abs(linspace(-.5, 2.5, kernelSize).^2));
-            tempX = conv(tempX, tempT/sum(tempT), "same");
-            tempF = dlSpectrum(tempX, fs, fmax, fB, 0);
-            y(i, j, :) = tempF;
-
-        end
-
-    end
-
-    t = linspace(0, tmax, tB);
-    f = linspace(0, fmax, fB);
-    sG = squeeze(mean(y, 1));
+    sG = sG / max(max(sG));
     y = sG';
 
     if plotFlag
+
+        tmax = size(X, 2);
+        tW = (timeW - overlap)*(fs/1000);
+        tB = floor(tmax / tW);
+        fB = floor(fmax / freqW);
+
+        t = linspace(0, tmax, tB);
+        f = linspace(0, fmax, fB);
 
         figure('Position', [0, 0, 1700, 1400]);
         subplot(1, 1, 1);

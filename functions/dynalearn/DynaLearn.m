@@ -73,6 +73,7 @@ classdef DynaLearn < matlab.mixin.SetGet
         dlChannels = 0;
 
         dlMIDPX = [];
+        dlALPHX = 0.5;
 
     end
 
@@ -651,7 +652,7 @@ classdef DynaLearn < matlab.mixin.SetGet
             fprintf("\n-->If you encountered an error related to parallel flag, set dlParallelFlag = 0.\n");
 
             tspan = [0 100]; % Base time span for class construction and initialization.
-            simulator_options = {'tspan', tspan, 'solver', 'euler', 'dt', obj.dldT, ...
+            simulator_options = {'tspan', tspan, 'dt', obj.dldT, ...
                         'downsample_factor', obj.dlDownSampleFactor, 'verbose_flag', 1, ...
                         'study_dir', studydir, 'mex_flag', 1, 'mex_dir', obj.dlPath, ...
                         'parallel_flag', obj.dlParallelFlag};
@@ -2084,17 +2085,18 @@ classdef DynaLearn < matlab.mixin.SetGet
 
             if dlMIDP
 
-                try
-
-                    dlAlpha = dlTrainOptions('dlAlpha');
-                    disp("----->Alpha(MIDP) = " + num2str(dlAlpha));
-
-                catch
-
-                    dlAlpha = 0.5;
-                    disp("----->Alpha(MIDP) not set. Default = " + num2str(dlAlpha));
-
-                end
+                dlAlpha = obj.dlALPHX;
+                % try
+                % 
+                %     dlAlpha = dlTrainOptions('dlAlpha');
+                %     disp("----->Alpha(MIDP) = " + num2str(dlAlpha));
+                % 
+                % catch
+                % 
+                %     dlAlpha = 0.5;
+                %     disp("----->Alpha(MIDP) not set. Default = " + num2str(dlAlpha));
+                % 
+                % end
 
             end
 
@@ -2515,7 +2517,7 @@ classdef DynaLearn < matlab.mixin.SetGet
 
                     if contains(l_, '_netcon')
 
-                        delta = randn(size(w))*error*dlLambda;
+                        delta = (w.*randn(size(w)))*error*dlLambda;
                         [dlV, dlU] = obj.dlGetConnectionID(l_);
 
                         if dlV == dlU
@@ -2526,20 +2528,14 @@ classdef DynaLearn < matlab.mixin.SetGet
 
                         if dlMIDP == 1
 
-                            dlAlpha = rand(1)*dlAlpha;
-                            r = obj.dlGetMIDP(dlV, dlU);
+                            r = obj.dlGetMIDP(dlV, dlU)*dlLambda;
                             delta = ((1 - dlAlpha)*delta + dlAlpha*r);
-
-                        else
-
-                            r = 2 * rand(size(w)) - 1;
-                            delta = delta.*r;
 
                         end
 
                     else
 
-                        delta = (randn(size(w)))*error*dlLambda;
+                        delta = (w.*randn(size(w)))*error*dlLambda;
 
                     end
 
@@ -2550,7 +2546,7 @@ classdef DynaLearn < matlab.mixin.SetGet
                         if restrictedList(i)
                         
                             r_ = find(contains(l_, dlTrainOptions('dlTrainRestrictList')));
-                            wn = w - delta*restrictedCoef{r_};
+                            wn = w + delta*restrictedCoef{r_};
 
                             try
 
@@ -2583,15 +2579,15 @@ classdef DynaLearn < matlab.mixin.SetGet
 
                             if contains(l_, '_netcon')
 
-                                wn(isnan(wn)) = 0.2;
-                                ks = max(mean(wn, "all"), 1.0);
+                                wn(isnan(wn)) = 0.001;
+                                % ks = mean(wn, "all");
 
                                 if contains(l_, 'INfast_iGABAa_netcon')
 
                                     lengthTemp = size(wn, 1);
                                     widthTemp = size(wn, 2);
                                     ratioTemp = floor(widthTemp/lengthTemp);
-                                    kernelWtemp = exp(-abs(linspace(-5, 5, widthTemp*2)))/ks;
+                                    kernelWtemp = exp(-abs(linspace(-2, 2, widthTemp*2)))/widthTemp;
 
                                     for ik = 1:lengthTemp
 
@@ -2604,19 +2600,6 @@ classdef DynaLearn < matlab.mixin.SetGet
 
                                 wn(wn < 0.0) = 0.01; % synpatic genesis
                                 wn(wn > 10.0) = 0.1; % synaptic vanish
-                                % ks = max(mean(wn, "all"), 0.5);
-                                % 
-                                % for k = 1:size(wn, 1)
-                                % 
-                                %     kv = mean(wn(k, :));
-                                % 
-                                %     if kv > ks
-                                % 
-                                %         wn(k, :) = (wn(k, :) * ks) / kv;
-                                % 
-                                %     end
-                                % 
-                                % end
 
                             end
 
@@ -2834,6 +2817,18 @@ classdef DynaLearn < matlab.mixin.SetGet
 
             end
             
+            obj.dlALPHX = obj.dlALPHX + randn(1);
+
+            if obj.dlALPHX < 0.01
+
+                obj.dlALPHX = 0.01;
+
+            elseif obj.dlALPHX > 0.99
+
+                obj.dlALPHX = 0.99;
+
+            end
+
             q = cell2struct(val, lab);
             % disp(val);
             p.p = q;
@@ -2929,7 +2924,7 @@ classdef DynaLearn < matlab.mixin.SetGet
 
                 plot(tn, log10(x), "DisplayName", "Mean loss", "LineStyle", "--");
                 grid("on");hold("on");
-                plot(tn, log10(xm), "DisplayName", "Min loss");
+                % plot(tn, log10(xm), "DisplayName", "Min loss");
                 xlabel("Trials");
                 ylabel("Log10(Loss)");
                 legend;
@@ -2941,7 +2936,7 @@ classdef DynaLearn < matlab.mixin.SetGet
                 plot(tn, x, "DisplayName", "Mean error", "LineStyle", "--");
                 grid("on");hold("on");
                 tn = linspace(1, n/dlBatchs, size(xm, 1));
-                plot(tn,    xm, "DisplayName", "Min error");
+                % plot(tn,    xm, "DisplayName", "Min error");
                 xlabel("Trials");
                 ylabel("Loss");
                 legend;
@@ -3190,44 +3185,26 @@ classdef DynaLearn < matlab.mixin.SetGet
 
             end
 
-            % n = max(obj.dlChannels);
-            m = length(obj.dlChannels);
             fs = floor(1000 / (obj.dldT*obj.dlDownSampleFactor));
             fsK = floor(fs / 1000);
             tmax = size(obj.dlSignals, 2);
 
             tW = (fsK * timeW - overlap)/(obj.dldT*obj.dlDownSampleFactor);
-            tWx = (fsK * timeW) / (obj.dldT*obj.dlDownSampleFactor);
             tB = floor(tmax / tW);
             fB = floor(fmax / freqW);
 
             kernelSize = ceil(fs / 1000)*10;
-            y = zeros(m, tB, fB);
+            tempT = exp(-abs(linspace(-.5, 2.5, kernelSize).^2));    
+            X = conv2(obj.dlSignals, tempT, "same");
+            X = mean(X, 1);
 
-            for i = 1:m
-
-                for j = 1:tB
-
-                    lt = max(j*tW - tWx, 1);
-                    rt = max(j*tW, 1);
-                    tK = lt:rt;
-                    % tempX = obj.dlSignals(i, tK);
-                    tempX = (obj.dlSignals(i, tK) > -10);
-                    tempT = exp(-(linspace(-.5, 2.5, kernelSize)));
-                    tempX = conv(tempX, tempT/sum(tempT), "same");
-
-                    tempF = dlSpectrum(tempX, fs, fmax, fB, 0);
-                    y(i, j, :) = tempF;
-
-                end
-
-            end
-
+            [sG, ~, ~] = pspectrum(X, fs, "spectrogram", "FrequencyLimits", [0 fmax], "TimeResolution", 0.4, "OverlapPercent", 95);
+    
             t = linspace(0, obj.dlParams.tspan(2), tB);
             f = linspace(1, fmax, fB);
             figure('Position', [0, 0, 1700, 1400]);
 
-            sG = squeeze(mean(y(:, :, :), 1));
+            sG = sG / max(max(sG));
             imagesc(sG', "XData", t, "YData", f);
             xlabel("Time (ms)");ylabel("Freq (Hz)");
             colormap("jet");
@@ -3252,7 +3229,7 @@ classdef DynaLearn < matlab.mixin.SetGet
 
             if ~exist('td', 'var')
 
-                td = 10 + floor(rand(1)*30);
+                td = 20 + floor(rand(1)*5);
 
             end
 
@@ -3263,20 +3240,7 @@ classdef DynaLearn < matlab.mixin.SetGet
 
             r = corr(x', y', "Type", "Spearman");
             r(isnan(r)) = 0;
-            rN = size(r, 2);
-
-            rs = std(r, [], "all")/2;
-            r(abs(r) < rs) = 0;
             r = r / max(max(abs(r)));
-            % rKernel = exp(-abs(linspace(-2, 2, rN*2)));
-            % 
-            % for i = 1:size(r, 1)
-            % 
-            %     r(i, :) = r(i, :) .* rKernel(rN + 1:2*rN);
-            %     rKernel = circshift(rKernel, 1);
-            % 
-            % end
-
             r(isnan(r)) = 0;
             obj.dlMIDPX = r;
 
