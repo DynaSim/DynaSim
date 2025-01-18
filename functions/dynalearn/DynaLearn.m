@@ -2302,6 +2302,13 @@ classdef DynaLearn < matlab.mixin.SetGet
             %%% Non-local plasticity rules
 
             error = obj.dlUpdateError;
+
+            if error > 1e+4
+
+                error = 1; % temp vanish* to be fixed
+
+            end
+
             obj.dlLastLambda = dlLambda;
             l = find(contains(lab, dlTrainOptions('dlTrainIncludeList'))); 
             lg = find(contains(lab, dlTrainOptions('dlTrainIncludeList')));
@@ -2517,7 +2524,7 @@ classdef DynaLearn < matlab.mixin.SetGet
 
                     if contains(l_, '_netcon')
 
-                        delta = (w.*randn(size(w)))*error*dlLambda;
+                        delta = 1 + (w.*randn(size(w)))*error*dlLambda;
                         [dlV, dlU] = obj.dlGetConnectionID(l_);
 
                         if dlV == dlU
