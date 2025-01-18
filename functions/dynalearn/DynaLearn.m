@@ -2035,6 +2035,7 @@ classdef DynaLearn < matlab.mixin.SetGet
         function dlTrainStep(obj, dlLearningRule, dlLambda, dlTrainOptions)
 
             disp("-->Loss = " + num2str(obj.dlUpdateError));
+            disp("-->Alph = " + num2str(obj.dlALPHX));
 
             try 
 
@@ -2606,7 +2607,7 @@ classdef DynaLearn < matlab.mixin.SetGet
                                 end
 
                                 wn(wn < 0.0) = 0.01; % synpatic genesis
-                                wn(wn > 10.0) = 0.1; % synaptic vanish
+                                wn(wn > 1.0) = 0.99; % synaptic vanish
 
                             end
 
