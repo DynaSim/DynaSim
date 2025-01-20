@@ -2595,7 +2595,7 @@ classdef DynaLearn < matlab.mixin.SetGet
                                     lengthTemp = size(wn, 1);
                                     widthTemp = size(wn, 2);
                                     ratioTemp = floor(widthTemp/lengthTemp);
-                                    kernelWtemp = exp(-abs(linspace(-2, 2, widthTemp*2)))/widthTemp;
+                                    kernelWtemp = exp(-abs(linspace(-2, 2, widthTemp*2)));
 
                                     for ik = 1:lengthTemp
 
@@ -2607,19 +2607,19 @@ classdef DynaLearn < matlab.mixin.SetGet
                                 end
 
                                 lbw = 0.01;
-                                ubw = 1.99;
+                                ubw = 1.00;
                                 wn(wn < lbw) = lbw; % synpatic genesis
                                 wn(wn > ubw) = ubw; % synaptic vanish
 
-                                wnsq = ceil(sqrt(size(wn, 1))); % lpf-sqrt-dcmp
-                                wn = conv2(wn, ones(wnsq));
+                                wnsq = ceil(sqrt(size(wn, 1))/2); % lpf-sqrt-dcmp
+                                wn = conv2(wn, ones(wnsq)/(wnsq^2), "same");
 
                             else
 
-                                lbw = 16.0;
-                                ubw = 19.99;
-                                wn(wn < lbw) = lbw; % synpatic genesis
-                                wn(wn > ubw) = ubw; % synaptic vanish    
+                                lbw = 0.01;
+                                ubw = 99.99;
+                                wn(wn < lbw) = lbw; % stablize parameters
+                                wn(wn > ubw) = ubw; % upb   
 
                             end
 
@@ -2839,13 +2839,13 @@ classdef DynaLearn < matlab.mixin.SetGet
             
             obj.dlALPHX = obj.dlALPHX + randn(1);
 
-            if obj.dlALPHX < 0.01
+            if obj.dlALPHX < 0.2
 
-                obj.dlALPHX = 0.01;
+                obj.dlALPHX = 0.0;
 
-            elseif obj.dlALPHX > 0.99
+            elseif obj.dlALPHX > 0.8
 
-                obj.dlALPHX = 0.99;
+                obj.dlALPHX = 1.0;
 
             end
 
@@ -2942,7 +2942,7 @@ classdef DynaLearn < matlab.mixin.SetGet
 
             if logFlag
 
-                plot(tn, log10(x), "DisplayName", "Mean loss", "LineStyle", "--");
+                plot(tn, log10(x), "DisplayName", "Mean loss", "LineStyle", "-");
                 grid("on");hold("on");
                 % plot(tn, log10(xm), "DisplayName", "Min loss");
                 xlabel("Trials");
@@ -2953,7 +2953,7 @@ classdef DynaLearn < matlab.mixin.SetGet
             else
 
                 tn = linspace(1, n/dlBatchs, size(x, 1));
-                plot(tn, x, "DisplayName", "Mean error", "LineStyle", "--");
+                plot(tn, x, "DisplayName", "Mean error", "LineStyle", "-");
                 grid("on");hold("on");
                 tn = linspace(1, n/dlBatchs, size(xm, 1));
                 % plot(tn,    xm, "DisplayName", "Min error");
@@ -3216,16 +3216,16 @@ classdef DynaLearn < matlab.mixin.SetGet
             kernelSize = ceil(fs / 1000)*10;
             tempT = exp(-abs(linspace(-.5, 2.5, kernelSize).^2));    
             X = conv2(obj.dlSignals, tempT, "same");
-            X = mean(X, 1);
+            X = detrend(mean(X, 1));
 
-            [sG, ~, ~] = pspectrum(X, fs, "spectrogram", "FrequencyLimits", [0 fmax], "TimeResolution", 0.4, "OverlapPercent", 95);
+            [sG, ~, ~] = pspectrum(X, 1000, "spectrogram", "FrequencyLimits", [0 fmax], "TimeResolution", 0.4, "OverlapPercent", 95);
     
             t = linspace(0, obj.dlParams.tspan(2), tB);
             f = linspace(1, fmax, fB);
             figure('Position', [0, 0, 1700, 1400]);
 
             sG = sG / max(max(sG));
-            imagesc(sG', "XData", t, "YData", f);
+            imagesc(sG, "XData", t, "YData", f);
             xlabel("Time (ms)");ylabel("Freq (Hz)");
             colormap("jet");
 

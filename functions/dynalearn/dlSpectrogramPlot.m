@@ -45,12 +45,12 @@ function [y, t, f] = dlSpectrogramPlot(X, timeW, freqW, overlap, fmax, fs, Skern
     kernelSize = ceil(fs / 1000)*Skernel;
     tempT = exp(-abs(linspace(-.5, 2.5, kernelSize).^2));
     X = conv2(X, tempT, "same");
-    X = mean(X, 1);
+    X = detrend(mean(X, 1));
 
     [sG, ~, ~] = pspectrum(X, fs, "spectrogram", "FrequencyLimits", [0 fmax], "TimeResolution", 0.4, "OverlapPercent", 95);
 
     sG = sG / max(max(sG));
-    y = sG';
+    y = sG;
 
     if plotFlag
 
