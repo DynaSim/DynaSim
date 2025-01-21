@@ -2075,11 +2075,20 @@ classdef DynaLearn < matlab.mixin.SetGet
             try
 
                 dlMIDP = dlTrainOptions('dlMIDP');
-                disp("----->Mutual-information dependent plasticity it on.");
 
             catch
 
                 dlMIDP = 0;
+
+            end
+
+
+            if dlMIDP > 0
+            
+                disp("----->Mutual-information dependent plasticity it on.");
+
+            else
+
                 disp("----->Mutual-information dependent plasticity it off.");
 
             end
@@ -2544,6 +2553,7 @@ classdef DynaLearn < matlab.mixin.SetGet
                     else
 
                         delta = (w.*randn(size(w)))*error*dlLambda;
+                        % delta = (1.*randn(size(w)))*dlLambda;
 
                     end
 
@@ -2583,6 +2593,8 @@ classdef DynaLearn < matlab.mixin.SetGet
                         
                         else
                         
+                            wnsq = ceil(sqrt(size(w, 1))/2); % lpf-sqrt-dcmp
+                            delta = smoothdata2(delta, "gaussian", wnsq);
                             wn = w + delta;
 
                             if contains(l_, '_netcon')
@@ -2606,18 +2618,15 @@ classdef DynaLearn < matlab.mixin.SetGet
 
                                 end
 
-                                lbw = 0.21;
-                                ubw = 10.00;
+                                lbw = 0.01;
+                                ubw = 1.00;
                                 wn(wn < lbw) = lbw; % synpatic genesis
                                 wn(wn > ubw) = ubw; % synaptic vanish
 
-                                wnsq = ceil(sqrt(size(wn, 1))/2); % lpf-sqrt-dcmp
-                                wn = conv2(wn, ones(wnsq)/(wnsq^2), "same");
-
                             else
 
-                                lbw = 0.01;
-                                ubw = 99.99;
+                                lbw = 90.0;
+                                ubw = 110.0;
                                 wn(wn < lbw) = lbw; % stablize parameters
                                 wn(wn > ubw) = ubw; % upb   
 
@@ -2841,11 +2850,11 @@ classdef DynaLearn < matlab.mixin.SetGet
 
             if obj.dlALPHX < 0.2
 
-                obj.dlALPHX = ;
+                obj.dlALPHX = 0.0;
 
-            elseif obj.dlALPHX > 1.0
+            elseif obj.dlALPHX > 0.8
 
-                obj.dlALPHX = 0.99;
+                obj.dlALPHX = 1.0;
 
             end
 

@@ -2075,11 +2075,20 @@ classdef DynaLearn < matlab.mixin.SetGet
             try
 
                 dlMIDP = dlTrainOptions('dlMIDP');
-                disp("----->Mutual-information dependent plasticity it on.");
 
             catch
 
                 dlMIDP = 0;
+
+            end
+
+
+            if dlMIDP > 0
+            
+                disp("----->Mutual-information dependent plasticity it on.");
+
+            else
+
                 disp("----->Mutual-information dependent plasticity it off.");
 
             end
@@ -2526,6 +2535,7 @@ classdef DynaLearn < matlab.mixin.SetGet
                     if contains(l_, '_netcon')
 
                         delta = (w.*randn(size(w)))*error*dlLambda;
+                        % delta = ((w + .1).*randn(size(w)))*dlLambda;
                         [dlV, dlU] = obj.dlGetConnectionID(l_);
 
                         % if dlV == dlU
@@ -2544,6 +2554,7 @@ classdef DynaLearn < matlab.mixin.SetGet
                     else
 
                         delta = (w.*randn(size(w)))*error*dlLambda;
+                        % delta = ((w + 1).*randn(size(w)))*dlLambda;
 
                     end
 
@@ -2583,6 +2594,8 @@ classdef DynaLearn < matlab.mixin.SetGet
                         
                         else
                         
+                            wnsq = ceil(sqrt(size(w, 1))/2); % lpf-sqrt-dcmp
+                            delta = smoothdata2(delta, "gaussian", wnsq);
                             wn = w + delta;
 
                             if contains(l_, '_netcon')
@@ -2595,7 +2608,7 @@ classdef DynaLearn < matlab.mixin.SetGet
                                     lengthTemp = size(wn, 1);
                                     widthTemp = size(wn, 2);
                                     ratioTemp = floor(widthTemp/lengthTemp);
-                                    kernelWtemp = exp(-abs(linspace(-2, 2, widthTemp*2)));
+                                    kernelWtemp = 2*exp(-abs(linspace(-2, 2, widthTemp*2)));
 
                                     for ik = 1:lengthTemp
 
@@ -2604,20 +2617,19 @@ classdef DynaLearn < matlab.mixin.SetGet
 
                                     end
 
+                                    % wn = wn / mean(2*wn, "all");
+
                                 end
 
-                                lbw = 0.21;
-                                ubw = 1.00;
+                                lbw = 0.51;
+                                ubw = 0.60;
                                 wn(wn < lbw) = lbw; % synpatic genesis
                                 wn(wn > ubw) = ubw; % synaptic vanish
 
-                                wnsq = ceil(sqrt(size(wn, 1))/2); % lpf-sqrt-dcmp
-                                wn = conv2(wn, ones(wnsq)/(wnsq^2), "same");
-
                             else
 
-                                lbw = 5.01;
-                                ubw = 19.99;
+                                lbw = 0.2;
+                                ubw = 1.0;
                                 wn(wn < lbw) = lbw; % stablize parameters
                                 wn(wn > ubw) = ubw; % upb   
 
@@ -3150,7 +3162,7 @@ classdef DynaLearn < matlab.mixin.SetGet
 
                 a = find(obj.dlChannels == i);
                 x = obj.dlSignals(a, :);
-                r(a, :) = (1 - (x > -10));
+                r(a, :) = (1 - (x > -11));
 
             end
 
@@ -3218,7 +3230,7 @@ classdef DynaLearn < matlab.mixin.SetGet
             X = conv2(obj.dlSignals, tempT, "same");
             X = detrend(mean(X, 1));
 
-            [sG, ~, ~] = pspectrum(X, 1000, "spectrogram", "FrequencyLimits", [0 fmax], "TimeResolution", 0.4, "OverlapPercent", 95);
+            [sG, ~, ~] = pspectrum(X, 1000, "spectrogram", "FrequencyLimits", [0 fmax], "TimeResolution", 0.2, "OverlapPercent", 96);
     
             t = linspace(0, obj.dlParams.tspan(2), tB);
             f = linspace(1, fmax, fB);
