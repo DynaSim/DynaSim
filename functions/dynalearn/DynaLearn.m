@@ -2558,6 +2558,7 @@ classdef DynaLearn < matlab.mixin.SetGet
 
                     end
 
+                    delta(isnan(delta)) = 0;
                     obj.dlLastWeightChanges{i} = delta;
     
                     if ~excludeList(i)
@@ -2593,22 +2594,19 @@ classdef DynaLearn < matlab.mixin.SetGet
                             end
                         
                         else
-                        
-                            wnsq = ceil(sqrt(size(w, 1))/2); % lpf-sqrt-dcmp
-                            delta = smoothdata2(delta, "gaussian", wnsq);
-                            wn = w + delta;
 
                             if contains(l_, '_netcon')
 
-                                wn(isnan(wn)) = 0.001;
-                                % ks = mean(wn, "all");
+                                wnsq = max(5, ceil(sqrt(size(w, 1)))); % lpf-sqrt-dcmp
+                                delta = smoothdata2(delta, "gaussian", wnsq);
+                                wn = w + delta;
 
                                 if contains(l_, 'INfast_iGABAa_netcon')
 
                                     lengthTemp = size(wn, 1);
                                     widthTemp = size(wn, 2);
                                     ratioTemp = floor(widthTemp/lengthTemp);
-                                    kernelWtemp = 2*exp(-abs(linspace(-2, 2, widthTemp*2)));
+                                    kernelWtemp = (exp(-abs(linspace(-3, 3, widthTemp*2))) > 0.7);
 
                                     for ik = 1:lengthTemp
 
@@ -2621,15 +2619,17 @@ classdef DynaLearn < matlab.mixin.SetGet
 
                                 end
 
-                                lbw = 0.51;
-                                ubw = 0.60;
+                                lbw = 0.01;
+                                ubw = 10.00;
                                 wn(wn < lbw) = lbw; % synpatic genesis
                                 wn(wn > ubw) = ubw; % synaptic vanish
 
                             else
-
-                                lbw = 0.2;
-                                ubw = 1.0;
+                                
+                                wn = w + delta;
+                                
+                                lbw = 90.001;
+                                ubw = 110.0;
                                 wn(wn < lbw) = lbw; % stablize parameters
                                 wn(wn > ubw) = ubw; % upb   
 
@@ -3225,9 +3225,10 @@ classdef DynaLearn < matlab.mixin.SetGet
             tB = floor(tmax / tW);
             fB = floor(fmax / freqW);
 
-            kernelSize = ceil(fs / 1000)*10;
-            tempT = exp(-abs(linspace(-.5, 2.5, kernelSize).^2));    
-            X = conv2(obj.dlSignals, tempT, "same");
+            % kernelSize = ceil(fs / 1000)*10;
+            % tempT = exp(-abs(linspace(-.5, 2.5, kernelSize).^2));    
+            % X = conv2(obj.dlSignals, tempT, "same");
+            X = obj.dlSignals;
             X = detrend(mean(X, 1));
 
             [sG, ~, ~] = pspectrum(X, 1000, "spectrogram", "FrequencyLimits", [0 fmax], "TimeResolution", 0.2, "OverlapPercent", 96);
