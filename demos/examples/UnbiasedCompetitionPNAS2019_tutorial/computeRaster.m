@@ -1,7 +1,14 @@
-function [raster,rndRaster]  = computeRaster(t,V)
+function [raster,rndRaster]  = computeRaster(t, V, th)
+
+  if ~exist("th", "var")
+
+      th = 0;
+
+  end
+
   dt = t(2)-t(1);
   raster = [];
-  [indTimes,neuronSpikes] = find (V > 0);
+  [indTimes,neuronSpikes] = find (V > th);
   if ~isempty(neuronSpikes)
     tSpikes = t(indTimes); % in s
     raster(:,1) = tSpikes;

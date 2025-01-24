@@ -47,7 +47,7 @@ function [y, t, f] = dlSpectrogramPlot(X, timeW, freqW, overlap, fmax, fs, Skern
     X = conv2(X, tempT, "same");
     X = detrend(mean(X, 1));
 
-    [sG, ~, ~] = pspectrum(X, fs, "spectrogram", "FrequencyLimits", [0 fmax], "TimeResolution", 0.4, "OverlapPercent", 95);
+    [sG, ~, ~] = pspectrum(X, fs, "spectrogram", "FrequencyLimits", [0 fmax], "TimeResolution", 0.4, "OverlapPercent", 98);
 
     sG = sG / max(max(sG));
     y = sG;

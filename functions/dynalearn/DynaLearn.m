@@ -1072,7 +1072,7 @@ classdef DynaLearn < matlab.mixin.SetGet
             out = 0;
 
             t = linspace(0, size(x, 1), size(x, 1))*obj.dldT*obj.dlDownSampleFactor;
-            raster = computeRaster(t, x);
+            raster = computeRaster(t, x, -10);
 
             if size(raster, 1) > 0
 
@@ -1537,7 +1537,7 @@ classdef DynaLearn < matlab.mixin.SetGet
                 
             catch
                 
-                dlAdaptiveLambda = 1;
+                dlAdaptiveLambda = 0;
                 
             end
             
@@ -2538,16 +2538,16 @@ classdef DynaLearn < matlab.mixin.SetGet
                         % delta = ((w + .1).*randn(size(w)))*dlLambda;
                         [dlV, dlU] = obj.dlGetConnectionID(l_);
 
-                        % if dlV == dlU
-                        % 
-                        %     delta = 0;
-                        % 
-                        % end
-
                         if dlMIDP == 1
 
                             r = obj.dlGetMIDP(dlV, dlU)*dlLambda;
                             delta = ((1 - dlAlpha)*delta + dlAlpha*r);
+
+                        end
+
+                        if dlV == dlU
+
+                            delta = ones(size(w))*-1;
 
                         end
 
@@ -2598,7 +2598,7 @@ classdef DynaLearn < matlab.mixin.SetGet
                             if contains(l_, '_netcon')
 
                                 wnsq = max(5, ceil(sqrt(size(w, 1)))); % lpf-sqrt-dcmp
-                                delta = smoothdata2(delta, "gaussian", wnsq);
+                                delta = smoothdata2(delta, "movmedian", wnsq);
                                 wn = w + delta;
 
                                 if contains(l_, 'INfast_iGABAa_netcon')
@@ -2606,7 +2606,7 @@ classdef DynaLearn < matlab.mixin.SetGet
                                     lengthTemp = size(wn, 1);
                                     widthTemp = size(wn, 2);
                                     ratioTemp = floor(widthTemp/lengthTemp);
-                                    kernelWtemp = (exp(-abs(linspace(-3, 3, widthTemp*2))) > 0.7);
+                                    kernelWtemp = (exp(-abs(linspace(-3, 3, widthTemp*2).^2)) > 0.5);
 
                                     for ik = 1:lengthTemp
 
@@ -2619,8 +2619,8 @@ classdef DynaLearn < matlab.mixin.SetGet
 
                                 end
 
-                                lbw = 0.00;
-                                ubw = 1.00;
+                                lbw = 0.1;
+                                ubw = 1.0;
                                 wn(wn < lbw) = lbw; % synpatic genesis
                                 wn(wn > ubw) = ubw; % synaptic vanish
 
@@ -2629,7 +2629,7 @@ classdef DynaLearn < matlab.mixin.SetGet
                                 wn = w + delta;
                                 
                                 lbw = 0.001;
-                                ubw = 100.0;
+                                ubw = 100.001;
                                 wn(wn < lbw) = lbw; % stablize parameters
                                 wn(wn > ubw) = ubw; % upb   
 
@@ -3151,7 +3151,13 @@ classdef DynaLearn < matlab.mixin.SetGet
 
         end
 
-        function dlRaster(obj, xlims)
+        function dlRaster(obj, xlims, ths)
+
+            if ~exist("ths", "var")
+
+                ths = 0;
+
+            end
 
             n = max(obj.dlChannels);
             m = length(obj.dlChannels);
@@ -3162,7 +3168,7 @@ classdef DynaLearn < matlab.mixin.SetGet
 
                 a = find(obj.dlChannels == i);
                 x = obj.dlSignals(a, :);
-                r(a, :) = (1 - (x > -11));
+                r(a, :) = (1 - (x > ths));
 
             end
 
@@ -3231,11 +3237,17 @@ classdef DynaLearn < matlab.mixin.SetGet
             X = obj.dlSignals;
             X = detrend(mean(X, 1));
 
-            [sG, ~, ~] = pspectrum(X, 1000, "spectrogram", "FrequencyLimits", [0 fmax], "TimeResolution", 0.2, "OverlapPercent", 96);
+            [sG, ~, ~] = pspectrum(X, 1000, "spectrogram", "FrequencyLimits", [0 fmax], "TimeResolution", 0.4, "OverlapPercent", 98);
     
             t = linspace(0, obj.dlParams.tspan(2), tB);
             f = linspace(1, fmax, fB);
             figure('Position', [0, 0, 1700, 1400]);
+
+            for i = 1:size(sG, 1)
+
+                sG(i, :) = sG(i, :) * i;
+
+            end
 
             sG = sG / max(max(sG));
             imagesc(sG, "XData", t, "YData", f);
@@ -3262,7 +3274,7 @@ classdef DynaLearn < matlab.mixin.SetGet
 
             if ~exist('td', 'var')
 
-                td = 20 + floor(rand(1)*5);
+                td = 10 + floor(rand(1)*10);
 
             end
 
