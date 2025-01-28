@@ -15,19 +15,19 @@ function d = dlLogCorrelationDivergence(p, q)
     if n > m
 
         dlQ = interp1(M, q, N);
-        dlP = p / sum(p);
-        dlQ = dlQ / sum(dlQ);
+        dlP = p / max(max(p));
+        dlQ = dlQ / max(max(dlQ));
 
     elseif m > n
 
         dlP = interp1(N, p, M);
-        dlP = dlP / sum(dlP);
-        dlQ = q / sum(q);
+        dlP = dlP / max(max(dlP));
+        dlQ = q / max(max(q));
 
     else
 
-        dlP = p / sum(p);
-        dlQ = q / sum(q);
+        dlP = p / max(max(p));
+        dlQ = q / max(max(q));
 
     end
 

@@ -1306,7 +1306,12 @@ classdef DynaLearn < matlab.mixin.SetGet
                 elseif strcmpi(dlErrorType, 'MQE')
                     
                     TempError = (1 + abs(obj.dlLastOutputs{dlOutputIndices} - dlOutputTargets))^4;
-                
+
+                elseif strcmpi(dlErrorType, 'MXE')
+                    
+                    TempError = exp(-2*(obj.dlLastOutputs{dlOutputIndices} - dlOutputTargets));
+                    fprintf(" D[MXE] = %f ", TempError);
+                    
                 elseif strcmpi(dlErrorType, 'Compare')
                     
                     x = dlOutputIndices;
@@ -2547,7 +2552,15 @@ classdef DynaLearn < matlab.mixin.SetGet
 
                         if dlV == dlU
 
-                            delta = ones(size(w))*-1;
+                            eyeKernel = ones(size(w)) - eye(size(w));
+                            delta = delta.*eyeKernel;
+                            randX = rand(1);
+
+                            if randX > 0.5
+                            
+                                delta = delta * -1;
+
+                            end
 
                         end
 
@@ -2601,17 +2614,27 @@ classdef DynaLearn < matlab.mixin.SetGet
                                 delta = smoothdata2(delta, "movmedian", wnsq);
                                 wn = w + delta;
 
-                                if contains(l_, 'INfast_iGABAa_netcon')
+                                if contains(l_, 'INl_iGABAa_netcon')
 
                                     lengthTemp = size(wn, 1);
                                     widthTemp = size(wn, 2);
                                     ratioTemp = floor(widthTemp/lengthTemp);
-                                    kernelWtemp = (exp(-abs(linspace(-3, 3, widthTemp*2).^2)) > 0.5);
+                                    kernelWtemp = (exp(-abs(linspace(-3, 3, widthTemp*2).^2)));
 
-                                    for ik = 1:lengthTemp
+                                    [dlV, dlU] = obj.dlGetConnectionID(l_);
 
-                                        shiftTemp = ik*ratioTemp;
-                                        wn(ik, :) = wn(ik, :) .* kernelWtemp(widthTemp-shiftTemp+2:widthTemp*2-shiftTemp+1);
+                                    if dlV == dlU
+
+                                        wn = (rand(size(wn)) > 0.5)*0.5;
+
+                                    else
+
+                                        for ik = 1:lengthTemp
+    
+                                            shiftTemp = ik*ratioTemp;
+                                            wn(ik, :) = wn(ik, :) .* kernelWtemp(widthTemp-shiftTemp+2:widthTemp*2-shiftTemp+1);
+    
+                                        end
 
                                     end
 
@@ -2628,8 +2651,8 @@ classdef DynaLearn < matlab.mixin.SetGet
                                 
                                 wn = w + delta;
                                 
-                                lbw = 0.001;
-                                ubw = 100.001;
+                                lbw = 30.001;
+                                ubw = 40.00;
                                 wn(wn < lbw) = lbw; % stablize parameters
                                 wn(wn > ubw) = ubw; % upb   
 
@@ -3234,10 +3257,11 @@ classdef DynaLearn < matlab.mixin.SetGet
             % kernelSize = ceil(fs / 1000)*10;
             % tempT = exp(-abs(linspace(-.5, 2.5, kernelSize).^2));    
             % X = conv2(obj.dlSignals, tempT, "same");
-            X = obj.dlSignals;
+            X = (obj.dlSignals >  -10);
             X = detrend(mean(X, 1));
+            X = smooth(X, 10);
 
-            [sG, ~, ~] = pspectrum(X, 1000, "spectrogram", "FrequencyLimits", [0 fmax], "TimeResolution", 0.4, "OverlapPercent", 98);
+            [sG, ~, ~] = pspectrum(X, 1000, "spectrogram", "FrequencyLimits", [0 fmax], "TimeResolution", 0.6, "OverlapPercent", 98);
     
             t = linspace(0, obj.dlParams.tspan(2), tB);
             f = linspace(1, fmax, fB);
@@ -3245,11 +3269,12 @@ classdef DynaLearn < matlab.mixin.SetGet
 
             for i = 1:size(sG, 1)
 
-                sG(i, :) = sG(i, :) * i;
+                sG(i, :) = sG(i, :) * sqrt(i);
 
             end
 
             sG = sG / max(max(sG));
+            % sG = sqrt(sG);
             imagesc(sG, "XData", t, "YData", f);
             xlabel("Time (ms)");ylabel("Freq (Hz)");
             colormap("jet");
