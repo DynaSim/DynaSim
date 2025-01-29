@@ -2651,7 +2651,7 @@ classdef DynaLearn < matlab.mixin.SetGet
                                 
                                 wn = w + delta;
                                 
-                                lbw = 0.001;
+                                lbw = 80.001;
                                 ubw = 100.00;
                                 wn(wn < lbw) = lbw; % stablize parameters
                                 wn(wn > ubw) = ubw; % upb   
@@ -3265,8 +3265,7 @@ classdef DynaLearn < matlab.mixin.SetGet
 
             for ik = 1:size(X, 1)
 
-                Xt = squeeze(X(ik, :))*1.0;
-                Xt = detrend(Xt);
+                Xt = squeeze(X(ik, :));
                 Xt = smooth(Xt, 10);
                 [sGt, ~, ~] = pspectrum(Xt, 1000, "spectrogram", "FrequencyLimits", [0 fmax], "TimeResolution", 0.5, "OverlapPercent", 98);
                 sG = sG + sGt;
@@ -3292,7 +3291,7 @@ classdef DynaLearn < matlab.mixin.SetGet
 
             colormap("jet");
             set(gca, 'YDir','reverse');
-            title("TFR-scaled to [0-1]");
+            title("TFR");
 
             if exist('clims', 'var')
             
