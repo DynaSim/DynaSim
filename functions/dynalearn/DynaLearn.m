@@ -2643,7 +2643,7 @@ classdef DynaLearn < matlab.mixin.SetGet
                                 end
 
                                 lbw = 0.0;
-                                ubw = 0.8;
+                                ubw = 1.0;
                                 wn(wn < lbw) = lbw; % synpatic genesis
                                 wn(wn > ubw) = ubw; % synaptic vanish
 
