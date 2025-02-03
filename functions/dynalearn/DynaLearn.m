@@ -3199,6 +3199,7 @@ classdef DynaLearn < matlab.mixin.SetGet
             xa = max(t);
 
             figure('Position', [0, 0, 1700, 1400]);
+            subplot(2, 1, 1);
             imagesc(r, "XData", t);
             xlabel("Time (ms)");ylabel("Neuron no.");title("Raster (all neurons)");
             colormap("gray");
@@ -3215,6 +3216,15 @@ classdef DynaLearn < matlab.mixin.SetGet
                 yline(a + .5);
                 text(xa, (b + a)/2, obj.dlModel.populations(i).name, "Color", "red", "FontSize", 14, "HorizontalAlignment", "left");
                 b = a;
+
+            end
+
+            subplot(2, 1, 2);
+            plot(smooth(mean((1 - r), 1), 5), "XData", t);
+
+            if exist('xlims', 'var')
+
+                xlim(xlims);
 
             end
 
@@ -3257,7 +3267,7 @@ classdef DynaLearn < matlab.mixin.SetGet
             % kernelSize = ceil(fs / 1000)*10;
             % tempT = exp(-abs(linspace(-.5, 2.5, kernelSize).^2));    
             % X = conv2(obj.dlSignals, tempT, "same");
-            X = (obj.dlSignals >  -20);
+            X = (obj.dlSignals >  -15);
             Xt = detrend(mean(X, 1));
             Xt = smooth(Xt, 10);
             [sG, ~, ~] = pspectrum(Xt, 1000, "spectrogram", "FrequencyLimits", [0 fmax], "TimeResolution", 0.5, "OverlapPercent", 98);
